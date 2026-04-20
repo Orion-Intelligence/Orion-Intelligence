@@ -1,10 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { LicenseService } from '../../services/licenses/licenses.service';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
+import { ProxyController } from './proxy-controller';
 @Injectable({
   providedIn: 'root'
 })
 export class ScrollService {
+  private readonly proxied_resource = inject(ProxyController);
   private readonly resultWindowScrollPositionKey = 'resultWindowScrollPosition';
   private readonly resultContainerScrollPositionKey = 'resultContainerScrollPosition';
   private readonly resultDocumentScrollPositionKey = 'resultDocumentScrollPosition';
@@ -15,15 +17,19 @@ export class ScrollService {
     this.resetOnReload();
   }
 
+  public clearSavedPosition(): void {
+    sessionStorage.removeItem(this.resultWindowScrollPositionKey);
+    sessionStorage.removeItem(this.resultContainerScrollPositionKey);
+    sessionStorage.removeItem(this.resultDocumentScrollPositionKey);
+    sessionStorage.removeItem(this.resultBodyScrollPositionKey);
+    sessionStorage.removeItem(this.resultDashboardBodyScrollPositionKey);
+  }
+
   public resetOnReload(ingore = false): void {
     const navEntries = performance.getEntriesByType?.('navigation') as PerformanceNavigationTiming[];
     const isHardReload = navEntries?.[0]?.type === 'reload';
     if (isHardReload || ingore) {
-      sessionStorage.removeItem(this.resultWindowScrollPositionKey);
-      sessionStorage.removeItem(this.resultContainerScrollPositionKey);
-      sessionStorage.removeItem(this.resultDocumentScrollPositionKey);
-      sessionStorage.removeItem(this.resultBodyScrollPositionKey);
-      sessionStorage.removeItem(this.resultDashboardBodyScrollPositionKey);
+      this.clearSavedPosition();
       window.scrollTo(0, 0);
     }
   }
@@ -40,12 +46,12 @@ export class ScrollService {
         selectedType: 'document', singleInput: itemId
       });
       const fullUrl = `${baseUrl}?${params.toString()}`;
-      window.open(fullUrl, '_blank');
+      this.proxied_resource.open(fullUrl);
     }
   }
 
   scrollReportToTop(): void {
-    const dashboardBody = document.querySelector('[data-testid="dashboard-body"]') as HTMLElement | null;
+    const dashboardBody = document.querySelector('[data-testid="dashboard-body"]');
     const dashboardContainer = document.getElementById('dashboard-container');
     const documentElement = document.documentElement;
     const body = document.body;
@@ -67,14 +73,20 @@ export class ScrollService {
     };
 
     resetTop();
-    requestAnimationFrame(() => resetTop());
-    setTimeout(() => resetTop(), 50);
-    setTimeout(() => resetTop(), 150);
+    requestAnimationFrame(() => {
+      resetTop();
+    });
+    setTimeout(() => {
+      resetTop();
+    }, 50);
+    setTimeout(() => {
+      resetTop();
+    }, 150);
   }
 
   saveCurrentPosition(_itemId = ''): void {
     const dashboardContainer = document.getElementById('dashboard-container');
-    const dashboardBody = document.querySelector('[data-testid="dashboard-body"]') as HTMLElement | null;
+    const dashboardBody = document.querySelector('[data-testid="dashboard-body"]');
     const documentElement = document.documentElement;
     const body = document.body;
     const windowPosition = window.scrollY;
@@ -97,10 +109,10 @@ export class ScrollService {
     const savedDashboardBodyPosition = sessionStorage.getItem(this.resultDashboardBodyScrollPositionKey);
     if (
       savedWindowPosition === null &&
-      savedContainerPosition === null &&
-      savedDocumentPosition === null &&
-      savedBodyPosition === null &&
-      savedDashboardBodyPosition === null
+        savedContainerPosition === null &&
+        savedDocumentPosition === null &&
+        savedBodyPosition === null &&
+        savedDashboardBodyPosition === null
     ) {
       return;
     }
@@ -112,14 +124,14 @@ export class ScrollService {
     const dashboardBodyPosition = parseInt(savedDashboardBodyPosition ?? '0', 10);
     const applyScroll = () => {
       const dashboardContainer = document.getElementById('dashboard-container');
-      const dashboardBody = document.querySelector('[data-testid="dashboard-body"]') as HTMLElement | null;
+      const dashboardBodyElement = document.querySelector<HTMLElement>('[data-testid="dashboard-body"]');
       const documentElement = document.documentElement;
       const body = document.body;
       if (dashboardContainer) {
         dashboardContainer.scrollTop = containerPosition;
       }
-      if (dashboardBody) {
-        dashboardBody.scrollTop = dashboardBodyPosition;
+      if (dashboardBodyElement) {
+        dashboardBodyElement.scrollTop = dashboardBodyPosition;
       }
       if (documentElement) {
         documentElement.scrollTop = documentPosition;
@@ -131,6 +143,8 @@ export class ScrollService {
     };
 
     applyScroll();
-    requestAnimationFrame(() => applyScroll());
+    requestAnimationFrame(() => {
+      applyScroll();
+    });
   }
 }

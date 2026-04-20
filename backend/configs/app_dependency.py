@@ -2,7 +2,9 @@ from typing import Optional
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+import jwt
 
+from orion.constants.constant import CONSTANTS
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
 from orion.services.session_manager.session_manager import session_manager
@@ -45,6 +47,27 @@ def role_required(required_roles: list[user_role]):
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     session_mgr = session_manager.get_instance()
     return await session_mgr.get_current_user(token)
+
+
+async def get_is_free_token(token: str = Depends(oauth2_scheme)) -> bool:
+    if not token:
+        return False
+
+    token = token.strip()
+    if token.startswith("Bearer "):
+        token = token[len("Bearer ") :].strip()
+
+    try:
+        payload = jwt.decode(
+            token,
+            CONSTANTS.S_AUTH_SECRET_KEY,
+            algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
+            options={"verify_exp": True},
+        )
+    except jwt.InvalidTokenError:
+        return False
+
+    return payload.get("free") is True
 
 
 def status_required(status_required: list[UserStatus], bypass_roles: Optional[list[user_role]] = None):

@@ -3,6 +3,7 @@ import { Component, ChangeDetectionStrategy, input, output, computed, signal, in
 import { Job, CustomEntity } from '../../../../shared/model/social/social-scan.models';
 import { FetchingStateService } from '../services/fetching-state.service';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
+import { SocialEntityUiService } from '../services/social-entity-ui.service';
 import { SidebarShellComponent } from '../../shared/sidebar-shell/sidebar-shell.component';
 @Component({
   selector: 'app-home-menu',
@@ -15,6 +16,7 @@ export class HomeMenuComponent implements OnDestroy {
   private fetchingState = inject(FetchingStateService);
   private animationFrameId: number | null = null;
 
+  readonly socialEntityUiService = inject(SocialEntityUiService);
   isCollapsed = input.required<boolean>();
   activeTab = input.required<'history' | 'entities'>();
   searchTerm = input.required<string>();
@@ -23,7 +25,7 @@ export class HomeMenuComponent implements OnDestroy {
   activeUsernames = input.required<Set<string>>();
   viewMode = input.required<'graph' | 'list'>();
   isSmallScreen = input.required<boolean>();
-  toggle = output<void>();
+  toggle = output<undefined>();
   tabSelected = output<'history' | 'entities'>();
   searchChanged = output<string>();
   jobClicked = output<Job>();
@@ -87,7 +89,8 @@ export class HomeMenuComponent implements OnDestroy {
   }
 
   onSearchInput(event: Event) {
-    this.searchChanged.emit((event.target as HTMLInputElement).value);
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.searchChanged.emit(nextValue);
   }
 
   getJobClasses(job: Job): string {
@@ -95,7 +98,7 @@ export class HomeMenuComponent implements OnDestroy {
     if (job.status === 'completed') {
       return `${baseClasses} border-slate-700 cursor-pointer hover:border-indigo-500 hover:bg-slate-800`;
     }
-    if (job.status === 'in_progress') {
+    if (job.status === 'in_progress' || job.status === 'queued') {
       return `${baseClasses} border-indigo-500/50`;
     }
     if (job.status === 'failed') {
@@ -132,29 +135,6 @@ export class HomeMenuComponent implements OnDestroy {
     return entity.status === 'in_progress' || entity.status === 'pending' || entity.status === 'failed' || this.getAnimatedEntityProgress(entity) > 0;
   }
 
-  getIconForEntityType(type: CustomEntity['type']): string {
-    switch (type) {
-      case 'wallet': return 'bi bi-wallet2 text-green-400';
-      case 'email': return 'bi bi-envelope-at text-yellow-400';
-      case 'domain': return 'bi bi-globe text-sky-400';
-      case 'domain-scan': return 'bi bi-globe2 text-sky-400';
-      case 'subdomains-scan': return 'bi bi-diagram-3 text-sky-400';
-      case 'dns-scan': return 'bi bi-broadcast text-sky-400';
-      case 'wayback-scan': return 'bi bi-clock-history text-sky-400';
-      case 'email-breach': return 'bi bi-person-badge text-indigo-400';
-      case 'social-scanner': return 'bi bi-people text-indigo-400';
-      case 'wanted-list': return 'bi bi-person-exclamation text-indigo-400';
-      case 'national-identity': return 'bi bi-card-text text-indigo-400';
-      case 'playstore-scanner': return 'bi bi-google-play text-indigo-400';
-      case 'software-scanner': return 'bi bi-window text-indigo-400';
-      case 'phone': return 'bi bi-telephone text-indigo-400';
-      case 'ioc-extract': return 'bi bi-file-earmark-code text-indigo-400';
-      case 'apk-scan': return 'bi bi-android2 text-indigo-400';
-      case 'crypto-scanner': return 'bi bi-currency-bitcoin text-green-400';
-      default: return 'bi bi-circle text-slate-400';
-    }
-  }
-
   trackByJobId(_index: number, job: Job): string {
     return job.id;
   }
@@ -186,37 +166,15 @@ export class HomeMenuComponent implements OnDestroy {
   }
 
   private pruneAnimatedProgress(jobs: Job[]) {
-    const activeIds = new Set(jobs.map(job => job.id));
-    const current = this.animatedProgressByJobId();
-    const next: Record<string, number> = {};
-    let changed = false;
-    for (const key of Object.keys(current)) {
-      if (activeIds.has(key)) {
-        next[key] = current[key];
-      }
-      else {
-        changed = true;
-      }
-    }
-    if (changed) {
+    const next = this.socialEntityUiService.pruneAnimatedProgressMap(jobs, this.animatedProgressByJobId());
+    if (next) {
       this.animatedProgressByJobId.set(next);
     }
   }
 
   private pruneAnimatedEntityProgress(entities: CustomEntity[]) {
-    const activeIds = new Set(entities.map(entity => entity.id));
-    const current = this.animatedProgressByEntityId();
-    const next: Record<string, number> = {};
-    let changed = false;
-    for (const key of Object.keys(current)) {
-      if (activeIds.has(key)) {
-        next[key] = current[key];
-      }
-      else {
-        changed = true;
-      }
-    }
-    if (changed) {
+    const next = this.socialEntityUiService.pruneAnimatedProgressMap(entities, this.animatedProgressByEntityId());
+    if (next) {
       this.animatedProgressByEntityId.set(next);
     }
   }
@@ -235,7 +193,7 @@ export class HomeMenuComponent implements OnDestroy {
       let hasChanges = false;
       for (const job of jobs) {
         let target = -1;
-        if (job.status === 'in_progress') {
+        if (job.status === 'in_progress' || job.status === 'queued') {
           target = Math.max(0, Math.min(100, job.progress));
         }
         else if (job.status === 'completed') {

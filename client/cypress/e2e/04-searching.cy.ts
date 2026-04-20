@@ -132,39 +132,40 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     typeExploitSearch('exploit');
     clickOpenReport();
 
-    cy.go('back');
+    cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     openExploitSubmenu('CVE');
     typeExploitSearch('cve');
     cy.get('[data-testid="open-report"]').filter(':visible').filter(':has(img[src*="redirect.svg"])').first().scrollIntoView().should('be.visible').click();
 
-    cy.go('back');
+
+    cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     openExploitSubmenu('Tools');
     typeExploitSearch('tool');
     clickOpenReport();
 
-    cy.go('back');
+    cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     openExploitSubmenu('ZeroDay');
     typeExploitSearch('exploit');
     clickOpenReport();
 
-    cy.go('back');
+    cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     waitForSearchReady();
-    cy.get('input[data-cy="dashboard-general-input"][name="q"]').first().should('exist');
+    cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().should('exist');
   });
 
   it('runs Feed search flow and opens a report', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Feed');
     waitForSearchReady();
-    cy.get('input[data-cy="dashboard-general-input"][name="q"]').first().as('q');
+    cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().as('q');
     cy.get('@q').should('be.visible').and('not.be.disabled');
     cy.get('@q').clear();
 
@@ -190,20 +191,19 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Web Scans');
     clickSidebarSubItem('Web Scans', 'Basic Scan');
-    cy.get('input[name="username"][placeholder="Domain"]').first().as('scanInput');
+    cy.get('[data-testid="network-intel-tab-host-recon"]').should('be.visible');
+    cy.get('[data-testid="network-intel-search-input"][placeholder="Search domain..."]').first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    cy.get('@scanInput').type('bbc.com');
-    cy.contains('button', /^Search$/).should('be.visible').and('not.be.disabled').click();
+    cy.get('@scanInput').type('bbc.com{enter}');
 
-    clickSidebarSubItem('Web Scans', 'Port Scan');
-    cy.get('input[name="username"][placeholder="Domain"]').first().as('scanInput');
+    cy.get('[data-testid="network-intel-tab-ip-scan"]').should('be.visible').click();
+    cy.get('[data-testid="network-intel-search-input"][placeholder="Search IP..."]').first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    cy.get('@scanInput').type('bbc.com');
-    cy.contains('button', /^Search$/).should('be.visible').and('not.be.disabled').click();
+    cy.get('@scanInput').type('8.8.8.8{enter}');
 
     clickSidebarSubItem('Web Scans', 'Repository Scan');
     cy.get('input[name="username"][placeholder="Repository"]').first().as('scanInput');

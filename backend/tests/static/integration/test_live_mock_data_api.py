@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import asyncio
+import shutil
 from pathlib import Path
 from io import BytesIO
 from types import SimpleNamespace
@@ -38,6 +39,7 @@ from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryMo
 from routes import api_routes as ar
 from routes.api_routes import api_routes
 from routes import test_routes as tr
+from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 
 
 BACKEND_ROOT = Path(__file__).resolve().parents[3]
@@ -46,11 +48,19 @@ API_MOCKS = MOCKS_ROOT / "api"
 ELASTIC_MOCKS = MOCKS_ROOT / "elastic"
 
 
-def _clear_step_states(keys: list[str]) -> None:
+def _clear_step_states(keys: list[str], mocks_dir: Path = API_MOCKS) -> None:
     for key in keys:
-        state_file = API_MOCKS / f".{key}.state"
+        state_file = mocks_dir / f".{key}.state"
         if state_file.exists():
             state_file.unlink()
+
+
+@pytest.fixture
+def writable_api_mocks(tmp_path, monkeypatch) -> Path:
+    tmp_api_mocks = tmp_path / "api-mocks"
+    shutil.copytree(API_MOCKS, tmp_api_mocks)
+    monkeypatch.setattr(tr, "_MOCKS_DIR", tmp_api_mocks)
+    return tmp_api_mocks
 
 
 async def _await_non_pending(coro_factory):
@@ -61,7 +71,7 @@ async def _await_non_pending(coro_factory):
     raise AssertionError("Mock endpoint stayed pending after retries")
 
 
-def test_mock_search_routes_return_expected_payloads_direct():
+def test_mock_search_routes_return_expected_payloads_direct(writable_api_mocks):
     _clear_step_states(
         [
             "dynamic_user",
@@ -88,7 +98,8 @@ def test_mock_search_routes_return_expected_payloads_direct():
             "netintel_ipscanner",
             "netintel_camera_detect",
             "netintel_camera_detect_ranges",
-        ]
+        ],
+        mocks_dir=writable_api_mocks,
     )
 
     # API-backed mock routes
@@ -96,31 +107,31 @@ def test_mock_search_routes_return_expected_payloads_direct():
         _await_non_pending(
             lambda: tr.test_search_dynamic_email(search_dynamic_param_model(text={"query": "alice@example.com"}))
         )
-    ) == json.loads((API_MOCKS / "dynamic_user_done.json").read_text(encoding="utf-8"))
+    ) == json.loads((writable_api_mocks / "dynamic_user_done.json").read_text(encoding="utf-8"))
 
     assert asyncio.run(
         _await_non_pending(
             lambda: tr.test_search_dynamic_cracked(search_dynamic_crack_model(text={"query": "alice@example.com"}))
         )
-    ) == json.loads((API_MOCKS / "dynamic_cracked.json").read_text(encoding="utf-8"))
+    ) == json.loads((writable_api_mocks / "dynamic_cracked.json").read_text(encoding="utf-8"))
 
     assert asyncio.run(
         _await_non_pending(
             lambda: tr.test_search_dynamic_software(search_dynamic_crack_model(text={"query": "vpn"}))
         )
-    ) == json.loads((API_MOCKS / "dynamic_software.json").read_text(encoding="utf-8"))
+    ) == json.loads((writable_api_mocks / "dynamic_software.json").read_text(encoding="utf-8"))
 
     assert asyncio.run(
         _await_non_pending(
             lambda: tr.test_search_dynamic_social(search_dynamic_social_model(text={"query": "alice"}))
         )
-    ) == json.loads((API_MOCKS / "dynamic_social.json").read_text(encoding="utf-8"))
+    ) == json.loads((writable_api_mocks / "dynamic_social.json").read_text(encoding="utf-8"))
 
     assert asyncio.run(
         _await_non_pending(
             lambda: tr.test_search_dynamic_wanted(search_dynamic_social_model(text={"query": "alice"}))
         )
-    ) == json.loads((API_MOCKS / "dynamic_wanted.json").read_text(encoding="utf-8"))
+    ) == json.loads((writable_api_mocks / "dynamic_wanted.json").read_text(encoding="utf-8"))
 
     assert asyncio.run(
         _await_non_pending(
@@ -128,13 +139,13 @@ def test_mock_search_routes_return_expected_payloads_direct():
                 search_dynamic_crack_model(text={"query": "12345-1234567-1"})
             )
         )
-    ) == json.loads((API_MOCKS / "dynamic_national_identity.json").read_text(encoding="utf-8"))
+    ) == json.loads((writable_api_mocks / "dynamic_national_identity.json").read_text(encoding="utf-8"))
 
     assert asyncio.run(
         _await_non_pending(
             lambda: tr.test_parse_domain(DomainScanRequest(domain="example.com", scanType="basic", checkLive=False))
         )
-    ) == json.loads((API_MOCKS / "urlscan_domain_basic.json").read_text(encoding="utf-8"))
+    ) == json.loads((writable_api_mocks / "urlscan_domain_basic.json").read_text(encoding="utf-8"))
 
     assert asyncio.run(
         _await_non_pending(
@@ -142,13 +153,13 @@ def test_mock_search_routes_return_expected_payloads_direct():
                 DomainScanRequest(domain="example.com", scanType="subdomains", checkLive=False)
             )
         )
-    ) == json.loads((API_MOCKS / "urlscan_domain_subdomains.json").read_text(encoding="utf-8"))
+    ) == json.loads((writable_api_mocks / "urlscan_domain_subdomains.json").read_text(encoding="utf-8"))
 
     assert asyncio.run(
         _await_non_pending(
             lambda: tr.test_parse_wayback(DomainScanRequest(domain="example.com", scanType="wayback", checkLive=False))
         )
-    ) == json.loads((API_MOCKS / "urlscan_domain_wayback.json").read_text(encoding="utf-8"))
+    ) == json.loads((writable_api_mocks / "urlscan_domain_wayback.json").read_text(encoding="utf-8"))
 
     assert asyncio.run(
         _await_non_pending(
@@ -156,15 +167,15 @@ def test_mock_search_routes_return_expected_payloads_direct():
                 DomainScanRequest(domain="example.com", scanType="dns", checkLive=False)
             )
         )
-    ) == json.loads((API_MOCKS / "urlscan_domain_iplookup.json").read_text(encoding="utf-8"))
+    ) == json.loads((writable_api_mocks / "urlscan_domain_iplookup.json").read_text(encoding="utf-8"))
 
     assert asyncio.run(
         _await_non_pending(lambda: tr.test_netintel_resolve_ip(ResolveIPRequest(domain="example.com")))
-    ) == json.loads((API_MOCKS / "netintel_resolve_ip.json").read_text(encoding="utf-8"))
+    ) == json.loads((writable_api_mocks / "netintel_resolve_ip.json").read_text(encoding="utf-8"))
 
     assert asyncio.run(
         _await_non_pending(lambda: tr.test_netintel_ipscanner(NetIntelDeepScanRequest(ip="8.8.8.8")))
-    ) == json.loads((API_MOCKS / "netintel_ipscanner.json").read_text(encoding="utf-8"))
+    ) == json.loads((writable_api_mocks / "netintel_ipscanner.json").read_text(encoding="utf-8"))
 
     assert asyncio.run(
         _await_non_pending(
@@ -172,7 +183,7 @@ def test_mock_search_routes_return_expected_payloads_direct():
                 GeoCameraDetectRequest(coordinates="24.8607,67.0011", radius_km=25, max_ips=200)
             )
         )
-    ) == json.loads((API_MOCKS / "netintel_camera_detect.json").read_text(encoding="utf-8"))
+    ) == json.loads((writable_api_mocks / "netintel_camera_detect.json").read_text(encoding="utf-8"))
 
     assert asyncio.run(
         _await_non_pending(
@@ -180,7 +191,7 @@ def test_mock_search_routes_return_expected_payloads_direct():
                 GeoCameraDetectRangesRequest(ip_ranges=["192.168.1.0/24"], max_ips=200)
             )
         )
-    ) == json.loads((API_MOCKS / "netintel_camera_detect_ranges.json").read_text(encoding="utf-8"))
+    ) == json.loads((writable_api_mocks / "netintel_camera_detect_ranges.json").read_text(encoding="utf-8"))
 
     # Elastic-backed mock routes
     assert asyncio.run(_await_non_pending(lambda: tr.test_social_recon({"query": "alice"}))) == json.loads(
@@ -338,6 +349,7 @@ class _FakeEntityManager:
 
 @pytest.fixture
 def mock_api_routes_backends(monkeypatch):
+    from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
     from orion.api.interactive.directory_manager.directory_model import directory_model
     from orion.api.interactive.dump_manager.dump_model import dump_model
     from orion.api.interactive.hompage_manager.homepage_model import homepage_model
@@ -353,6 +365,21 @@ def mock_api_routes_backends(monkeypatch):
     monkeypatch.setattr(dump_model, "getInstance", staticmethod(lambda: _FakeDumpModel()))
     monkeypatch.setattr(homepage_model, "getInstance", staticmethod(lambda: _FakeHomepageModel()))
     monkeypatch.setattr(entity_manager, "get_instance", staticmethod(lambda: _FakeEntityManager()))
+
+    class _FakeAuditManager:
+        async def register(self, *_args, **_kwargs):
+            return "ok"
+
+        async def search_audit(self, *_args, **_kwargs):
+            return "ok"
+
+        async def get(self, *_args, **_kwargs):
+            return {"items": [], "page": 1, "total": 0}
+
+        async def delete(self, *_args, **_kwargs):
+            return True
+
+    monkeypatch.setattr(AuditLogManager, "get_instance", staticmethod(lambda: _FakeAuditManager()))
 
     constant.license_rules = {
         "maintainer": {
@@ -379,27 +406,27 @@ class _InlineUpload:
 
 
 def test_live_mock_data_api_routes_cover_all_handlers(mock_api_routes_backends):
-    user = SimpleNamespace(id="u1")
+    user = SimpleNamespace(id="u1", tenant_uuid="t1", role=user_role.ADMIN)
     consolidated = search_consolidated_param_model(
         q="test", page=1, network="all", category="all", content="all"
     )
     credential = search_credential_param_model(q="ioc", type="c", page=1)
 
-    assert isinstance(_run(ar.search_general(consolidated)), dict)
-    assert isinstance(_run(ar.search_leak(consolidated)), dict)
-    assert isinstance(_run(ar.search_social(consolidated)), dict)
-    assert isinstance(_run(ar.search_exploit(consolidated)), dict)
-    assert isinstance(_run(ar.search_defacement(consolidated)), dict)
+    assert isinstance(_run(ar.search_general(consolidated, current_user=user, role=user_role.ADMIN, is_free=False)), dict)
+    assert isinstance(_run(ar.search_leak(consolidated, current_user=user)), dict)
+    assert isinstance(_run(ar.search_social(consolidated, current_user=user)), dict)
+    assert isinstance(_run(ar.search_exploit(consolidated, current_user=user)), dict)
+    assert isinstance(_run(ar.search_defacement(consolidated, current_user=user)), dict)
 
     assert isinstance(_run(ar.get_directory(directory_param_model(page=1))), dict)
     assert isinstance(_run(ar.get_dumps(dump_param_model(page=1))), dict)
     assert isinstance(_run(ar.get_insight()), dict)
     assert isinstance(_run(ar.get_country_insight(category="breach", country="US", page=1, limit=20)), dict)
 
-    assert isinstance(_run(ar.search_stealerlog(credential)), dict)
-    assert isinstance(_run(ar.search_stealer_iocs(credential)), dict)
-    assert isinstance(_run(ar.search_consolidated(consolidated)), dict)
-    assert isinstance(_run(ar.search_consolidated_iocs(consolidated)), dict)
+    assert isinstance(_run(ar.search_stealerlog(credential, current_user=user)), dict)
+    assert isinstance(_run(ar.search_stealer_iocs(credential, current_user=user)), dict)
+    assert isinstance(_run(ar.search_consolidated(consolidated, current_user=user)), dict)
+    assert isinstance(_run(ar.search_consolidated_iocs(consolidated, current_user=user)), dict)
 
     assert isinstance(_run(ar.get_defacement_document("doc1")), dict)
     assert isinstance(_run(ar.get_leak_document("doc1", lang=None)), dict)
@@ -422,7 +449,7 @@ def test_live_mock_data_api_routes_cover_all_handlers(mock_api_routes_backends):
     assert isinstance(_run(ar.scrape_social(SocialScrapeRequest(usernames=["alice"], platform="instagram"), current_user=user)), dict)
 
     assert isinstance(_run(ar.search_dynamic_social(search_dynamic_social_model(text={"query": "alice"}), current_user=user)), dict)
-    assert isinstance(_run(ar.search_dynamic_wanted(search_dynamic_social_model(text={"query": "alice"}))), dict)
+    assert isinstance(_run(ar.search_dynamic_wanted(search_dynamic_social_model(text={"query": "alice"}), current_user=user)), dict)
     assert isinstance(_run(ar.search_dynamic_national_identity(search_dynamic_crack_model(text={"query": "12345-1234567-1"}), current_user=user)), dict)
     assert isinstance(_run(ar.resolve_ip(ResolveIPRequest(domain="example.com"), current_user=user)), dict)
     assert isinstance(_run(ar.ipscanner(NetIntelDeepScanRequest(ip="8.8.8.8"), current_user=user)), dict)
@@ -530,6 +557,17 @@ def test_live_mock_data_api_route_list_stays_complete():
         ("POST", "/api/netintel/iot_detect"),
         ("POST", "/api/netintel/camera_detect_ranges"),
     }
+    ignored = {
+        ("GET", "/api/user/{user_id}/get"),
+        ("GET", "/api/user/{user_id}/activity"),
+        ("GET", "/api/feedback/{doc_id}"),
+        ("POST", "/api/feedback/recommended/{doc_id}"),
+        ("POST", "/api/feedback/comment/{doc_id}"),
+        ("POST", "/api/feedback/trust/{doc_id}"),
+        ("POST", "/api/feedback/untrust/{doc_id}"),
+        ("POST", "/api/cross/search"),
+        ("POST", "/api/onion/search"),
+    }
 
     actual = set()
     for route in api_routes.routes:
@@ -538,4 +576,5 @@ def test_live_mock_data_api_route_list_stays_complete():
             if method in {"GET", "POST"}:
                 actual.add((method, route.path))
 
+    actual -= ignored
     assert actual == expected

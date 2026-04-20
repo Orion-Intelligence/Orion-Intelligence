@@ -1,7 +1,7 @@
-<div [ngClass]="isConsolidatedView ? 'w-full min-w-0' : 'w-full max-w-[910px] min-w-0 px-2 sm:px-0'">
-  @for (item of (isExpandAble && isCollapsed ? searchResults.slice(0, 2) : searchResults.slice(0, 30)); track item.m_message_id || item.m_hash || item.m_message_sharable_link || $index) {
+<div [ngClass]="isConsolidatedView ? 'w-full min-w-0' : 'w-full max-w-[910px] min-w-0 px-2 sm:px-0 max-[640px]:px-0'">
+  @for (item of (isExpandAble() && isCollapsed ? searchResults().slice(0, 2) : searchResults().slice(0, 30)); track item.m_message_id || item.m_hash || item.m_message_sharable_link || $index) {
     <div class="mb-[20px]" [@fadeInDashboardItem]>
-      <div data-testid="result-card" [id]="'item-' + item.m_message_id" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''" class="mb-5 w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-white ui-result-card ui-result-card-hover bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] px-[20px] pb-[20px] pt-[15px] transition-all duration-300 ease-in-out hover:bg-[var(--color-blue-810)] dark:bg-[var(--color-consolidated-secondary)] max-[640px]:px-[12px] max-[640px]:pt-[12px] max-[640px]:pb-[14px]">
+      <div data-testid="result-card" [id]="'item-' + item.m_message_id" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''" class="mb-5 w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] ui-result-card ui-result-card-hover bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] px-[20px] pb-[20px] pt-[15px] transition-all duration-300 ease-in-out hover:bg-[var(--color-blue-810)] dark:bg-[var(--color-consolidated-secondary)] max-[640px]:px-[12px] max-[640px]:pt-[12px] max-[640px]:pb-[14px]" (click)="openExternalUrl(item?.m_message_sharable_link)">
         <div class="mb-[10px] flex flex-wrap justify-start gap-[10px]">
           <div class="flex max-w-[80%] flex-wrap gap-[10px]">
             @if (item.m_content_type?.length) {
@@ -13,18 +13,20 @@
               <span class="inline-flex h-[31px] items-center rounded-full bg-[var(--color-tags)] px-[13px] text-[12px] font-normal text-[var(--color-text3)]">unknown</span>
             }
           </div>
-          <div class="ml-auto flex gap-[20px]">
-            <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center" data-cy="open-report" data-testid="open-cti-graph">
+          @if (!authService.getIsMobileDemo()) {
+            <div class="ml-auto flex gap-[20px]">
+            <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-cti-graph">
               <div class="p-[0_0_10px_10px]">
                 <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
               </div>
             </div>
-            <div (click)="scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [queryParams]="queryParams" appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center" data-cy="open-report" data-testid="open-report">
+            <a (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [queryParams]="queryParams" appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-report">
               <div class="p-[0_0_10px_10px]">
                 <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" class="ui-action-icon" />
               </div>
+            </a>
             </div>
-          </div>
+          }
         </div>
         <div class="flex items-center gap-2 overflow-hidden whitespace-nowrap">
           <img alt="Channel" height="20" src="/assets/images/shared/theme/channel.svg" width="20" class="shrink-0 ui-action-icon" />
@@ -39,14 +41,16 @@
         </div>
         @if (item.m_message_sharable_link) {
           <div class="mt-[5px] mb-[20px] block overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[12px] font-[500] text-[var(--color-text8)]">
-            {{ item.m_message_sharable_link }}
+            <a [href]="item.m_message_sharable_link" target="_blank" rel="noopener noreferrer" class="hover:underline" (click)="$event.stopPropagation()">
+              {{ item.m_message_sharable_link }}
+            </a>
           </div>
         }
         @if (item.m_platform !== 'forum') {
           @if (hasCodeType(item)) {
             <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text">
             Code snippet - content not available</p>
-            <div class="mb-[12px] mt-[10px] rounded-[8px] border border-[var(--color-border)] bg-[rgb(0,0,0,0.161)] p-[12px]">
+            <div class="mb-[12px] mt-[10px] max-h-[300px] overflow-y-auto rounded-[8px] border border-[var(--color-border)] bg-[rgb(0,0,0,0.161)] p-[12px]">
               <code [innerText]="getContentWithoutEmptyLines(item.m_content)" class="text-[14px] text-[var(--color-text1)]"></code>
             </div>
           } @else {
@@ -80,7 +84,9 @@
         <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">Embedded URL</h5>
         @for (link of item.m_weblink | slice:0:3; track $index) {
           <div class="block truncate text-[12px] font-medium text-[var(--color-text8)]">
-            {{ link }}
+            <a [href]="link" target="_blank" rel="noopener noreferrer" class="hover:underline" (click)="$event.stopPropagation()">
+              {{ link }}
+            </a>
           </div>
         }
       }
@@ -95,7 +101,7 @@
   </div>
 }
 
-@if (isExpandAble && searchResults.length > 2) {
+@if (isExpandAble() && searchResults().length > 2) {
   <div class="flex justify-center">
     <span class="ui-see-more-btn cursor-pointer" (click)="isCollapsed = !isCollapsed" data-testid="consolidated-section-see-more">
       {{ isCollapsed ? 'See More' : 'See Less' }}

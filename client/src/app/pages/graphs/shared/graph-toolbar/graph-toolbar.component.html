@@ -1,22 +1,22 @@
-<div data-cy="graph-toolbar-root" data-testid="graph-toolbar-root" class="z-10 flex flex-shrink-0 flex-col items-start justify-start gap-2 lg:flex-row lg:items-center" [ngClass]="{ 'p-2 sm:p-4': applyOuterPadding() }">
+<div data-testid="graph-toolbar-root" class="z-10 flex flex-shrink-0 flex-col items-start justify-start gap-2 lg:flex-row lg:items-center" [ngClass]="{ 'p-2 sm:p-4': applyOuterPadding() }">
   <div class="relative w-full lg:w-full lg:max-w-md">
     <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
       <i class="bi bi-search h-5 w-5 leading-none text-[var(--color-text4)]"></i>
     </div>
-    <input data-cy="graph-toolbar-search-input" data-testid="graph-toolbar-search-input" type="text" [placeholder]="searchPlaceholder()" [value]="searchTerm()" (input)="onSearchInput($event)" (keyup.enter)="searchSubmitted.emit()" (keydown.arrowleft)="$event.stopPropagation()" (keydown.arrowright)="$event.stopPropagation()" (keydown.home)="$event.stopPropagation()" (keydown.end)="$event.stopPropagation()" class="ui-graph-toolbar-input relative z-0 block h-10 w-full rounded-full border-0 bg-[var(--color-blue-800)]/90 pl-11 pr-44 text-[var(--color-text2)] shadow-lg ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6" />
+    <input data-testid="graph-toolbar-search-input" type="text" [placeholder]="searchPlaceholder()" [value]="searchTerm()" (input)="onSearchInput($event)" (keyup.enter)="searchSubmitted.emit(undefined)" (keydown.arrowleft)="$event.stopPropagation()" (keydown.arrowright)="$event.stopPropagation()" (keydown.home)="$event.stopPropagation()" (keydown.end)="$event.stopPropagation()" class="ui-graph-toolbar-input relative z-0 block h-10 w-full rounded-full border-0 bg-[var(--color-blue-800)]/90 pl-11 pr-44 text-[var(--color-text2)] shadow-lg ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6" />
     <div class="ui-graph-toolbar-action-shell absolute inset-y-1 right-1 flex items-center rounded-full bg-[var(--color-blue-720)]/80 py-1 pl-1 pr-0">
       @if (showImageButton()) {
-        <button data-cy="graph-toolbar-image-search" data-testid="graph-toolbar-image-search" type="button" title="Search by image" (click)="imageSearchClicked.emit()" class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]">
+        <button data-testid="graph-toolbar-image-search" type="button" title="Search by image" (click)="imageSearchClicked.emit(undefined)" class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]">
           <i class="bi bi-image"></i>
         </button>
       }
       @if (showClearButton()) {
-        <button data-cy="graph-toolbar-clear-search" data-testid="graph-toolbar-clear-search" type="button" title="Clear search" (click)="clearSearchClicked.emit()" class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]" [class.ml-1]="showImageButton()">
+        <button data-testid="graph-toolbar-clear-search" type="button" title="Clear search" (click)="clearSearchClicked.emit(undefined)" class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]" [class.ml-1]="showImageButton()">
           <i class="bi bi-x"></i>
         </button>
       }
       @if (showSearchActionButton()) {
-        <button data-cy="graph-toolbar-search-button" data-testid="graph-toolbar-search-button" type="button" (click)="searchSubmitted.emit()" [disabled]="isSearchDisabled()" [class.has-value]="!!searchTerm().trim()" class="ui-graph-toolbar-search-btn ml-1 flex h-8 items-center rounded-full bg-indigo-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-[var(--color-blue-710)] disabled:text-[var(--color-text4)]">
+        <button data-testid="graph-toolbar-search-button" type="button" (click)="searchSubmitted.emit(undefined)" [disabled]="isSearchDisabled()" [class.has-value]="!!searchTerm().trim()" class="ui-graph-toolbar-search-btn ml-1 flex h-8 items-center rounded-full bg-indigo-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-[var(--color-blue-710)] disabled:text-[var(--color-text4)]">
           {{ searchActionLabel() }}
         </button>
       }
@@ -25,12 +25,12 @@
 
   <div class="flex w-full items-center justify-start gap-2 lg:w-full lg:max-w-md">
     @if (showViewModeToggle()) {
-      <div data-cy="graph-toolbar-view-toggle" (click)="toggleViewMode()" class="ui-graph-toolbar-view-shell relative hidden h-10 items-center rounded-full bg-[var(--color-blue-800)]/90 p-1 ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm lg:flex">
+      <div data-testid="graph-toolbar-view-toggle" (click)="toggleViewMode()" class="ui-graph-toolbar-view-shell relative hidden h-10 items-center rounded-full bg-[var(--color-blue-800)]/90 p-1 ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm lg:flex">
         <div class="absolute top-1 left-1 h-[calc(100%-0.5rem)] w-24 rounded-full bg-indigo-600 transition-transform duration-300 ease-in-out" [class.translate-x-full]="viewMode() === 'list'"></div>
-        <button data-cy="graph-toolbar-view-graph" data-testid="graph-toolbar-view-graph" type="button" title="Graph View" [class]="'relative z-10 flex h-8 w-24 items-center justify-center gap-1.5 px-3 text-sm font-semibold transition-colors ' + (viewMode() === 'graph' ? 'text-white' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]')">
+        <button data-testid="graph-toolbar-view-graph" type="button" title="Graph View" [class]="'relative z-10 flex h-8 w-24 items-center justify-center gap-1.5 px-3 text-sm font-semibold transition-colors ' + (viewMode() === 'graph' ? 'text-white' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]')">
           <i class="bi bi-share-fill"></i> Graph
         </button>
-        <button data-cy="graph-toolbar-view-list" data-testid="graph-toolbar-view-list" type="button" title="List View" [class]="'relative z-10 flex h-8 w-24 items-center justify-center gap-1.5 px-3 text-sm font-semibold transition-colors ' + (viewMode() === 'list' ? 'text-white' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]')">
+        <button data-testid="graph-toolbar-view-list" type="button" title="List View" [class]="'relative z-10 flex h-8 w-24 items-center justify-center gap-1.5 px-3 text-sm font-semibold transition-colors ' + (viewMode() === 'list' ? 'text-white' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]')">
           <i class="bi bi-list-ul"></i> List
         </button>
       </div>
@@ -38,13 +38,13 @@
 
     @if (viewMode() === 'graph') {
       @if (showPhysicsToggle()) {
-        <button data-cy="graph-toolbar-physics-toggle" data-testid="graph-toolbar-physics-toggle" type="button" (click)="physicsToggled.emit()" [class]="'flex h-10 flex-shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm transition-all duration-300 ' + (isPhysicsEnabled() ? 'bg-teal-600 text-white hover:bg-teal-500' : 'bg-[var(--color-blue-800)]/90 text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]')" [title]="isPhysicsEnabled() ? 'Disable Physics Simulation' : 'Enable Physics Simulation'">
+        <button data-testid="graph-toolbar-physics-toggle" type="button" (click)="physicsToggled.emit(undefined)" [class]="'flex h-10 flex-shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm transition-all duration-300 ' + (isPhysicsEnabled() ? 'bg-teal-600 text-white hover:bg-teal-500' : 'bg-[var(--color-blue-800)]/90 text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]')" [title]="isPhysicsEnabled() ? 'Disable Physics Simulation' : 'Enable Physics Simulation'">
           <i [class]="'bi ' + (isPhysicsEnabled() ? 'bi-pause-fill' : 'bi-play-fill')"></i>
           <span>Physics</span>
         </button>
       }
       @if (showEditToggle() && canEditConnections()) {
-        <button data-cy="graph-toolbar-edit-toggle" type="button" (click)="editModeToggled.emit()" [class]="'flex h-10 flex-shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm transition-all duration-300 ' + (isEditMode() ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-[var(--color-blue-800)]/90 text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]')">
+        <button data-testid="graph-toolbar-edit-toggle" type="button" (click)="editModeToggled.emit(undefined)" [class]="'flex h-10 flex-shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm transition-all duration-300 ' + (isEditMode() ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-[var(--color-blue-800)]/90 text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]')">
           <i [class]="'bi ' + (isEditMode() ? 'bi-check-circle-fill' : 'bi-pencil-fill')"></i>
           <span>{{ isEditMode() ? 'Done Editing' : 'Edit Connections' }}</span>
         </button>

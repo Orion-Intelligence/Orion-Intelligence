@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subscription, concat } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
@@ -7,11 +7,11 @@ import { ConsolidatedScanResults, ConsolidatedLiveApiResults, ConsolidatedLiveAp
 import { RouterLink } from '@angular/router';
 import { scanAnimation } from '../../../../shared/animations/scan.animations';
 type ScanKey = 'basic' | 'seo' | 'repo' | 'liveapi';
-type PendingMsg = {
+interface PendingMsg {
     status: 'pending';
     progress?: number;
     step?: string;
-};
+}
 @Component({
   selector: 'app-consolidated-scan',
   standalone: true,
@@ -31,8 +31,7 @@ export class ConsolidatedScanComponent {
   targetLabel = '';
   expectedTypes: ScanKey[] = [];
   liveApiResults: ConsolidatedLiveApiResults[] = [];
-
-  @Input() isLoading!: boolean;
+  readonly isLoading = input.required<boolean>();
 
   constructor(private api: ConsolidatedApiService) { }
 
@@ -83,10 +82,10 @@ export class ConsolidatedScanComponent {
     }
     this.isProcessing = true;
     this.liveApiEntities = this.extractLiveApiEntities(input);
-    const scans: Array<{
+    const scans: {
           t: ScanKey;
           o: Observable<any>;
-      }> = isRepo
+      }[] = isRepo
         ? [{ t: 'repo', o: this.api.scanForRepo(input, 'repo') as any }]
         : [
           { t: 'basic', o: this.api.scanDomain(input, 'basic') as any },
@@ -111,9 +110,9 @@ export class ConsolidatedScanComponent {
             this.liveApiResults = Array.isArray(v) ? v : [];
             return;
           }
-          this.resultsByType[t as Exclude<ScanKey, 'liveapi'>] = {
+          this.resultsByType[t] = {
             ...(v as ConsolidatedScanResults),
-            scanType: (v as any)?.scanType || t
+            scanType: (v)?.scanType || t
           } as ConsolidatedScanResults;
         },
         error: () => {
@@ -188,7 +187,7 @@ export class ConsolidatedScanComponent {
       if (t === 'liveapi') {
         return (this.progressByType.liveapi ?? 0) < 100;
       }
-      return !this.resultsByType[t as Exclude<ScanKey, 'liveapi'>];
+      return !this.resultsByType[t];
     });
   }
 

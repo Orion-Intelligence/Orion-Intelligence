@@ -1,18 +1,22 @@
-<div class="pb-[200px]">
+<div class="min-h-full pb-[200px] pr-2">
   <div [ngClass]="isEmbeddedInConsolidated ? 'pt-4' : 'px-4 pt-4 md:px-6'">
     <div class="flex w-full flex-wrap items-center gap-3 bg-[var(--color-blue-760)] py-[15px] max-[640px]:gap-2">
       <div class="flex max-w-full flex-nowrap gap-2 overflow-x-auto whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]">
-        <button data-testid="network-intel-tab-host-recon" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="(activeTab === 'dns' || (activeTab === 'geo' && lastPrimaryTab === 'dns')) ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('dns')">Host Recon</button>
-        <button data-testid="network-intel-tab-ip-scan" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="(activeTab === 'shodan' || (activeTab === 'geo' && lastPrimaryTab === 'shodan')) ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('shodan')">IP Scan</button>
-        <button data-testid="network-intel-tab-vulnerability-scan" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="(activeTab === 'vuln' || (activeTab === 'geo' && lastPrimaryTab === 'vuln')) ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('vuln')">Vulnerability Scan</button>
+        <button data-testid="network-intel-tab-host-recon" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'dns' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('dns')">Host Recon</button>
+        <button data-testid="network-intel-tab-ip-scan" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'shodan' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('shodan')">IP Scan</button>
+        <button data-testid="network-intel-tab-vulnerability-scan" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'vuln' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('vuln')">Vulnerability Scan</button>
+        <button data-testid="network-intel-tab-geo-fencing" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'geo' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setGeoTab()">Geo Fencing</button>
       </div>
     </div>
 
     <div class="mt-4">
       <div class="w-full">
-        <form (submit)="$event.preventDefault(); runToolbarSearch()" class="relative flex w-full items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-white px-3 py-2" [ngClass]="formError ? 'ring-1 ring-[var(--color-border-red)]' : ''">
+        <form (submit)="$event.preventDefault(); runToolbarSearch()" class="relative flex w-full items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-white px-3 py-2" [ngClass]="[formError ? 'ring-1 ring-[var(--color-border-red)]' : '', activeTab === 'geo' ? 'opacity-70' : '']">
           <i class="bi bi-search text-[14px] text-[#0e1626]/70"></i>
-          <input data-testid="network-intel-search-input" [value]="getToolbarQuery()" (input)="setToolbarQuery($any($event.target).value)" (keyup.enter)="runToolbarSearch()" type="text" [placeholder]="getToolbarPlaceholder()" class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/45" [ngClass]="formError ? 'pr-[250px] max-[900px]:pr-[170px] max-[640px]:pr-[36px]' : ''" />
+          <input data-testid="network-intel-search-input" [value]="getToolbarQuery()" (input)="setToolbarQuery($any($event.target).value)" (keyup.enter)="runToolbarSearch()" type="text" [placeholder]="getToolbarPlaceholder()" class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/45 disabled:cursor-pointer disabled:text-[#0e1626]/75" [ngClass]="formError ? 'pr-[250px] max-[900px]:pr-[170px] max-[640px]:pr-[36px]' : ''" [disabled]="activeTab === 'geo'" [readonly]="activeTab === 'geo'" />
+          @if (activeTab === 'geo') {
+            <button type="button" class="absolute inset-0 z-[1] cursor-pointer rounded-[10px]" aria-label="Open geo coordinates picker" data-testid="network-intel-geo-search-trigger" (click)="openGeoCoordinatesModalFromStatus()"></button>
+          }
           @if (formError) {
             <div class="pointer-events-none absolute right-2 top-1/2 inline-flex max-w-[240px] -translate-y-1/2 items-center gap-1 rounded-md bg-red-500/85 px-2 py-[3px] text-[12px] font-semibold text-white max-[900px]:max-w-[160px] max-[640px]:max-w-[28px]">
               <i class="bi bi-exclamation-triangle-fill text-[12px] text-white"></i>
@@ -49,12 +53,6 @@
       }
 
       <div class="ml-auto flex items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
-        @if (activeTab !== 'shodan' && activeTab !== 'vuln') {
-          <button data-testid="network-intel-open-geo" class="inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[13px] font-medium text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" type="button" (click)="openGeoCoordinatesModalFromStatus()">
-            <i class="bi bi-crosshair text-[15px] leading-none"></i>
-            <span>Geo</span>
-          </button>
-        }
         <button data-testid="network-intel-download-report" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-40" (click)="downloadReport()" [disabled]="!canDownloadReport()">
           @if (isExportingReport) {
             <span class="h-4 w-4 rounded-full border-2 border-sky-400/25 border-t-sky-400 animate-spin"></span>
@@ -127,7 +125,11 @@
       [currentStep]="currentStep"
       [errorMessage]="scanHelper.onError()?.message || null"
       [hasSearched]="hasSearched"
+      [targets]="vulnerabilityTargets"
+      [activeTarget]="vulnerabilityActiveTarget"
+      [searchDomain]="vulnForm.ip"
       [vulnerabilityResult]="vulnerabilityResult"
+      (selectTarget)="startVulnerabilityScanForTarget($event)"
       @fadeInDashboardItem>
     </app-network-intel-vulnerability-section>
   }
@@ -139,7 +141,7 @@
     [radiusKm]="geoForm.radius_km"
     [maxIps]="geoForm.max_ips"
     (close)="showGeoCoordinatesModal = false"
-    (coordinatesChange)="geoForm.coordinates = $event; validateGeo()"
+    (coordinatesChange)="onGeoCoordinatesChange($event)"
     (radiusKmChange)="geoForm.radius_km = $event"
     (maxIpsChange)="geoForm.max_ips = $event"
     (search)="showGeoCoordinatesModal = false; geoMode = 'coords'; startGeoScan()">

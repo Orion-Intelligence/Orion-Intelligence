@@ -2,8 +2,11 @@ import motor.motor_asyncio
 from odmantic import AIOEngine
 
 from orion.api.interactive.tenant_manager.tenant_bootstrap import tenant_boostrap
+from orion.helper_manager.env_handler import env_handler
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
+from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, LicenseName
+from orion.services.mongo_manager.shared_model.db_document_feedback_model import db_document_feedback_model
 from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
 from orion.services.mongo_manager import *
 
@@ -55,9 +58,34 @@ class mongo_controller:
             name="unique_maintainer_per_company", )
 
         await self.__engine.get_collection(db_system_model).create_index("key", unique=True)
+        await self.__engine.get_collection(db_document_feedback_model).create_index("doc_id", unique=True)
 
     def get_engine(self) -> AIOEngine:
         return self.__engine
+
+    async def ensure_demo_user(self):
+        demo_username = env_handler.get_instance().env("DEMO_USERNAME")
+        demo_password = env_handler.get_instance().env("DEMO_PASSWORD")
+
+        if not demo_username or not demo_password:
+            return
+
+        demo_user = await self.__engine.find_one(db_user_account, db_user_account.username == demo_username)
+        if demo_user:
+            return
+
+        default_tenant = await self.__engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
+        if not default_tenant:
+            return
+
+        await self.__engine.save(db_user_account(
+            username=demo_username,
+            password=demo_password,
+            role=user_role.DEMO,
+            status=UserStatus.ACTIVE,
+            subscription=True,
+            licenses=[LicenseName.OSINT_BASIC],
+            tenant_uuid=str(default_tenant.id), ))
 
     async def initialize(self):
         await self.ensure_indexes()
@@ -65,6 +93,7 @@ class mongo_controller:
         default_tenant = await self.__engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
         if not default_tenant:
             await tenant_boostrap(self.__engine)
+        await self.ensure_demo_user()
 
     def get_admin(self):
         from starlette_admin.contrib.odmantic import Admin, ModelView
@@ -76,4 +105,5 @@ class mongo_controller:
         admin.add_view(ModelView(db_system_model, icon="fa fa-building"))
         admin.add_view(ModelView(db_url_data_model, icon="fa fa-link"))
         admin.add_view(ModelView(db_dump_record_model, icon="fa fa-link"))
+        admin.add_view(ModelView(db_document_feedback_model, icon="fa fa-comments"))
         return admin

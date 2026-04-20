@@ -1,5 +1,5 @@
 import { FormsModule } from '@angular/forms';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit, input } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
 import { UniqueLinkItem } from '../../../shared/model/homepage/consolidation_insights';
@@ -21,26 +21,28 @@ export class ResultInsightsComponent implements OnInit {
   uniqueUrls: UniqueLinkItem[] = [];
   keywordData: { value: number; label: string; }[] = [];
   coverageData: { value: number; label: string; color: string; }[] = [];
-
-  @Input() consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
-  @Input() results: any;
-  @Input() rankedResults: any;
-  @Input() isGrouped!: boolean;
-  @Input() result_count!: number;
+  readonly consolidatedCallbackModel = input<ConsolidatedCallbackModel>(new ConsolidatedCallbackModel());
+  readonly results = input<any>();
+  readonly rankedResults = input<any>();
+  readonly isGrouped = input.required<boolean>();
+  readonly result_count = input.required<number>();
 
   ngOnInit(): void {
-    this.uniqueUrls = this.getUniqueLinks(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped);
-    const { emails, names } = this.extractNamesAndEmails(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped);
+    this.uniqueUrls = this.getUniqueLinks(this.consolidatedCallbackModel(), this.rankedResults(), this.isGrouped());
+    const { emails, names } = this.extractNamesAndEmails(this.consolidatedCallbackModel(), this.rankedResults(), this.isGrouped());
     this.emails = emails;
     this.names = names;
     this.keywordData = [
-      { value: this.getTotalResultCount(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped), label: 'Total Found' },
+      { value: this.getTotalResultCount(this.consolidatedCallbackModel(), this.rankedResults(), this.isGrouped()), label: 'Total Found' },
       { value: this.emails.length + this.names.length, label: 'Documents' },
-      { value: this.getSingleUrlPerResultCount(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped), label: 'Links' },
-      { value: this.getActiveModelCount(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped), label: 'Pages' }
+      { value: this.getSingleUrlPerResultCount(this.consolidatedCallbackModel(), this.rankedResults(), this.isGrouped()), label: 'Links' },
+      { value: this.getActiveModelCount(this.consolidatedCallbackModel(), this.rankedResults(), this.isGrouped()), label: 'Pages' }
     ];
-    this.getCoverageSummaryFromModels(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped);
-    const extractedData = this.extractMultipleFieldsFromResults(this.consolidatedCallbackModel, this.rankedResults, this.isGrouped);
+    const consolidatedCallbackModel = this.consolidatedCallbackModel();
+    const rankedResults = this.rankedResults();
+    const isGrouped = this.isGrouped();
+    this.getCoverageSummaryFromModels(consolidatedCallbackModel, rankedResults, isGrouped);
+    const extractedData = this.extractMultipleFieldsFromResults(consolidatedCallbackModel, rankedResults, isGrouped);
     this.dataSections = Object.entries(search_filter_labels).map(([key, title]) => {
       const variants = new Set<string>([
         key,
@@ -170,7 +172,9 @@ export class ResultInsightsComponent implements OnInit {
       ['m_clearnet_links', 'm_weblink', 'm_dumplink', 'm_source_url'].forEach(field => {
         const links = item[field];
         if (Array.isArray(links)) {
-          links.forEach(link => addToMap(link, item.m_title, item.m_creation_date));
+          links.forEach(link => {
+            addToMap(link, item.m_title, item.m_creation_date);
+          });
         }
       });
     });
@@ -294,16 +298,14 @@ export class ResultInsightsComponent implements OnInit {
       });
       return urls.size;
     }
-    const fieldMap: {
-          [key: string]: string[];
-      } = {
-        generic_model: ['m_url', 'm_clearnet_links', 'm_weblink', 'm_dumplink'],
-        leak_model: ['m_url'],
-        defacement_model: ['m_url', 'm_source_url'],
-        social_model: ['m_channel_url', 'm_weblink'],
-        chat_model: ['m_weblink'],
-        exploit_model: ['m_url']
-      };
+    const fieldMap: Record<string, string[]> = {
+      generic_model: ['m_url', 'm_clearnet_links', 'm_weblink', 'm_dumplink'],
+      leak_model: ['m_url'],
+      defacement_model: ['m_url', 'm_source_url'],
+      social_model: ['m_channel_url', 'm_weblink'],
+      chat_model: ['m_weblink'],
+      exploit_model: ['m_url']
+    };
     Object.entries(fieldMap).forEach(([modelKey, fields]) => {
       const results = (consolidated as any)[modelKey]?.Result || [];
       results.forEach((item: any) => {

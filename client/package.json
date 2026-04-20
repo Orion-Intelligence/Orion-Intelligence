@@ -15,17 +15,17 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "21.2.5",
-    "@angular/cdk": "21.2.3",
-    "@angular/common": "21.2.5",
-    "@angular/compiler": "21.2.5",
-    "@angular/core": "21.2.5",
-    "@angular/forms": "21.2.5",
-    "@angular/localize": "21.2.5",
-    "@angular/platform-browser": "21.2.5",
-    "@angular/platform-browser-dynamic": "21.2.5",
-    "@angular/router": "21.2.5",
-    "@cypress/code-coverage": "4.0.2",
+    "@angular/animations": "21.2.6",
+    "@angular/cdk": "21.2.4",
+    "@angular/common": "21.2.6",
+    "@angular/compiler": "21.2.6",
+    "@angular/core": "21.2.6",
+    "@angular/forms": "21.2.6",
+    "@angular/localize": "21.2.6",
+    "@angular/platform-browser": "21.2.6",
+    "@angular/platform-browser-dynamic": "21.2.6",
+    "@angular/router": "21.2.6",
+    "@cypress/code-coverage": "4.0.3",
     "@popperjs/core": "2.11.8",
     "bootstrap-icons": "1.13.1",
     "cypress-axe": "1.7.0",
@@ -37,7 +37,7 @@
     "ngx-print": "21.2.0",
     "qrcode": "1.5.4",
     "rxjs": "7.8.2",
-    "simple-icons": "16.12.0",
+    "simple-icons": "16.13.0",
     "tldts": "7.0.27",
     "topojson-client": "3.1.0",
     "vis-network": "10.0.2",
@@ -45,12 +45,12 @@
   },
   "devDependencies": {
     "@angular-builders/custom-webpack": "21.0.3",
-    "@angular-devkit/build-angular": "21.2.3",
+    "@angular-devkit/build-angular": "21.2.5",
     "@angular-eslint/eslint-plugin": "21.3.1",
     "@angular-eslint/eslint-plugin-template": "21.3.1",
     "@angular-eslint/template-parser": "21.3.1",
-    "@angular/cli": "21.2.3",
-    "@angular/compiler-cli": "21.2.5",
+    "@angular/cli": "21.2.5",
+    "@angular/compiler-cli": "21.2.6",
     "@babel/core": "7.29.0",
     "@babel/preset-env": "7.29.2",
     "@babel/preset-typescript": "7.28.5",
@@ -59,26 +59,50 @@
     "@types/jasmine": "6.0.0",
     "@types/qrcode": "1.5.6",
     "@types/topojson-client": "3.1.5",
-    "@typescript-eslint/eslint-plugin": "8.57.1",
-    "@typescript-eslint/parser": "8.57.1",
+    "@typescript-eslint/eslint-plugin": "8.57.2",
+    "@typescript-eslint/parser": "8.57.2",
     "autoprefixer": "10.4.27",
     "babel-loader": "10.1.1",
     "babel-plugin-istanbul": "7.0.1",
-    "cypress": "15.12.0",
+    "cypress": "15.13.0",
     "eslint": "10.1.0",
+    "lighthouse": "^13.0.3",
     "postcss": "8.5.8",
-    "stylelint": "17.5.0",
+    "stylelint": "17.6.0",
     "stylelint-config-standard": "40.0.0",
     "stylelint-scss": "7.0.0",
-    "tailwindcss": "3.4.17",
+    "tailwindcss": "3.4.19",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.57.1"
+    "typescript-eslint": "8.57.2"
   },
   "overrides": {
+    "@angular-devkit/build-angular": {
+      "picomatch": "4.0.4"
+    },
+    "@angular-devkit/core": {
+      "picomatch": "4.0.4"
+    },
+    "@angular/build": {
+      "picomatch": "4.0.4"
+    },
+    "anymatch": {
+      "picomatch": "2.3.2"
+    },
+    "micromatch": {
+      "picomatch": "2.3.2"
+    },
+    "readdirp": {
+      "picomatch": "2.3.2"
+    },
+    "test-exclude": {
+      "brace-expansion": "1.1.13"
+    },
     "tar": "7.5.12",
     "webpack": "5.105.4",
     "js-yaml": "4.1.1",
     "undici": "7.24.0",
+    "yaml": "2.8.3",
+    "brace-expansion": "5.0.5",
     "pacote": {
       "tar": "7.5.12"
     },

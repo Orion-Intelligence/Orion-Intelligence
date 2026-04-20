@@ -22,7 +22,11 @@ export class HomepageComponent implements OnInit, AfterViewInit {
     }
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => this.router.url.includes('#') && this.scrollToElement());
+      .subscribe(() => {
+        if (this.router.url.includes('#')) {
+          this.scrollToElement();
+        }
+      });
   }
 
   ngAfterViewInit() {

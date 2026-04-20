@@ -175,6 +175,18 @@ async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=
     return await AuditLogManager.get_instance().get(param, current_user)
 
 
+@tenant_routes.delete(
+    "/api/audit/{log_id}/delete",
+    summary="Delete audit log",
+    tags=["Audit Logs"],
+    operation_id="deleteAuditLog",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def delete_audit_log(log_id: str, current_user=Depends(get_current_user)):
+    return {"success": await AuditLogManager.get_instance().delete(log_id)}
+
+
 @tenant_routes.get(
     "/api/get/tenant/alert/summary",
     status_code=200,

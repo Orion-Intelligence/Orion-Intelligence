@@ -44,7 +44,7 @@
     }
   </div>
 
-  @if (result_count>0) {
+  @if (result_count()>0) {
     <div class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4" data-testid="insights-section-threat-actor">
       <div class="flex cursor-pointer items-center justify-between" (click)="toggleSection('isThreatExpanded')" data-testid="insights-toggle-threat-actor">
         <span class="text-sm font-semibold text-[var(--color-text1)]">Search in Threat Actor</span>
@@ -83,7 +83,7 @@
     </div>
   }
 
-  @if (result_count>0) {
+  @if (result_count()>0) {
     <div class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4" data-testid="insights-section-unique-urls">
       <div class="flex cursor-pointer items-center justify-between" (click)="toggleSection('isUrlsExpanded')" data-testid="insights-toggle-unique-urls">
         <span class="text-sm font-semibold text-[var(--color-text1)]">Unique URLs</span>

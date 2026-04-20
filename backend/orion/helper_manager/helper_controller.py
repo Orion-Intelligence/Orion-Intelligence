@@ -267,7 +267,7 @@ class helper_controller:
 
         result_parts = ['"{}"'.format(p) for p in quoted_phrases] + filtered_tokens
         return ' '.join(result_parts)
-    
+
     @staticmethod
     def parse_tagged_logic_query_for_iocs(query: str):
         query = query.replace("&&", " AND ").replace("||", " OR ")
@@ -307,7 +307,7 @@ class helper_controller:
         if output:
             return {"OR": [item for sub in output for item in sub] + current}
         return current[0] if len(current) == 1 else current
-    
+
     @staticmethod
     def password_matches_schema(password: str, schema) -> bool:
         if not password:

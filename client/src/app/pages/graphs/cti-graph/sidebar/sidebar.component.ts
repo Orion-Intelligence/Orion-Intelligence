@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, HostListener, OnChanges, OnInit, SimpleChanges, input, output } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { GraphClusterType, GraphType, search_filter_labels } from '../../../../shared/constants/shared-enums';
@@ -24,13 +24,32 @@ export class SidebarComponent implements OnInit, OnChanges {
     label,
     key
   }));
-
-  @Input() filters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null = null;
-  @Input() collapsed = false;
-
-  @Output() filtersApplied = new EventEmitter<{ selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; }>();
-  @Output() filtersChanged = new EventEmitter<{ selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; }>();
-  @Output() collapsedChange = new EventEmitter<boolean>();
+  readonly filters = input<{
+      selectedType: string;
+      singleInput: string;
+      propertyType: string;
+      propertyValue: string;
+      maxEdge: number;
+      maxDepth: number;
+  } | null>(null);
+  readonly collapsed = input(false);
+  readonly filtersApplied = output<{
+      selectedType: string;
+      singleInput: string;
+      propertyType: string;
+      propertyValue: string;
+      maxEdge: number;
+      maxDepth: number;
+  }>();
+  readonly filtersChanged = output<{
+      selectedType: string;
+      singleInput: string;
+      propertyType: string;
+      propertyValue: string;
+      maxEdge: number;
+      maxDepth: number;
+  }>();
+  readonly collapsedChange = output<boolean>();
 
   private buildFilterPayload() {
     return {

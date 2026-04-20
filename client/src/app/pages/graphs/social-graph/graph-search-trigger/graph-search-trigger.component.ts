@@ -9,5 +9,5 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 })
 export class GraphSearchTriggerComponent {
   isExpanded = input(false);
-  triggered = output<void>();
+  triggered = output<undefined>();
 }

@@ -1,7 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
-from pydantic.v1 import Extra
+from pydantic import BaseModel, ConfigDict
 
 
 class suggestion(BaseModel):
@@ -18,8 +17,7 @@ class stealerlog_result_item(BaseModel):
     channel: Optional[str] = None
     file: Optional[str] = None
 
-    class Config:
-        extra = Extra.allow
+    model_config = ConfigDict(extra="allow")
 
 
 class search_stealerlog_callback_model(BaseModel):
@@ -27,5 +25,4 @@ class search_stealerlog_callback_model(BaseModel):
     Suggestions: Optional[List[suggestion]] = None
     Page_Count: Optional[float] = None
 
-    class Config:
-        extra = Extra.allow
+    model_config = ConfigDict(extra="allow")

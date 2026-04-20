@@ -1,6 +1,6 @@
 export interface AuthModel {
     token: string | null;
     isAuthenticated: boolean;
-    isValidated: boolean | true;
+    isValidated: boolean;
     error: string | null;
 }

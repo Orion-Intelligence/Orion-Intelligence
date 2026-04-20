@@ -115,10 +115,12 @@ services:
       - "80:80"
       - "443:443"
     depends_on:
-      - web
+      web:
+        condition: service_started
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./backend/static:/app/static:cached
+      - ./client/build:/client_build:ro
       - letsencrypt-webroot:/var/www/letsencrypt
       - /etc/letsencrypt:/etc/letsencrypt:ro
     networks:

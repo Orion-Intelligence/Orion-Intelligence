@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit, effect, input } from '@angular/core';
 import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
 import { map, Observable, tap } from 'rxjs';
 import { DumpService } from '../../../services/dump/dump.service';
@@ -13,12 +13,15 @@ import { ActivatedRoute, Router } from '@angular/router';
   imports: [AsyncPipe, DatePipe, NgClass]
 })
 export class DumpListComponent implements OnInit {
+  readonly isLoadingInput = input(true, { alias: 'isLoading' });
   dumpData$: Observable<DumpCallbackModel | null>;
-
-  @Input() isLoading = true;
+  isLoading = true;
 
   constructor(public dumpService: DumpService, private router: Router, private route: ActivatedRoute) {
     this.dumpData$ = this.dumpService.dumpData$;
+    effect(() => {
+      this.isLoading = this.isLoadingInput();
+    });
   }
 
   get currentPage$() {
@@ -55,6 +58,6 @@ export class DumpListComponent implements OnInit {
   }
 
   copyRowData(item: any): void {
-    navigator.clipboard.writeText(item).then();
+    void navigator.clipboard.writeText(item);
   }
 }

@@ -1,0 +1,17 @@
+{
+  "extends": "../../client/tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "cypress"
+    ],
+    "typeRoots": [
+      "../../client/node_modules/@types",
+      "../../client/node_modules"
+    ]
+  },
+  "include": [
+    "./**/*.ts",
+    "../../client/cypress/support/index.d.ts",
+    "../../client/cypress/**/*.ts"
+  ]
+}

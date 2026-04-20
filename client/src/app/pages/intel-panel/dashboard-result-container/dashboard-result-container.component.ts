@@ -18,6 +18,7 @@ import { SortType } from '../../../shared/constants/shared-enums';
 import { HelperService } from '../../../shared/services/helper.service';
 import { DashboardResultDefacementComponent } from '../dashboard-results/dashboard-result-defacement/dashboard-result-defacement.component';
 import { ScrollService } from '../../../shared/services/scroll.service';
+import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
 
 @Component({
   selector: 'app-dashboard-result-container',
@@ -25,6 +26,7 @@ import { ScrollService } from '../../../shared/services/scroll.service';
     PaginationComponent,
     DashboardResultsGeneralComponent,
     ResultComponent,
+    CrossSearchCardComponent,
     DashboardResultExploitComponent,
     DashboardResultSocialComponent,
     DashboardResultChatComponent,
@@ -60,6 +62,15 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
     return this.currentParamModel?.q ?? '';
   }
 
+  get shouldShowCrossSearch(): boolean {
+    return !this.isResponseLoading()
+      && !this.appService.isMobileMode()
+      && !!this.currentQuery.trim()
+      && this.apiEndpoint !== 'search/defacement'
+      && this.apiEndpoint !== 'search/dump'
+      && !this.router.url.toLowerCase().includes('/defacement');
+  }
+
   ngAfterViewInit(): void {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page);
   }
@@ -70,7 +81,9 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
     }
     this.pendingScrollRestore = false;
     this.scrollService.scrollToSavedPosition();
-    requestAnimationFrame(() => this.scrollService.scrollToSavedPosition());
+    requestAnimationFrame(() => {
+      this.scrollService.scrollToSavedPosition(); 
+    });
   }
 
   ngOnInit(): void {

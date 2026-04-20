@@ -4,23 +4,32 @@ import { AppSettingsModel, ConfigSettings, LocalSettingsModel } from '../../../s
 import { AppStorageService } from './app-storage.service';
 import { ApiService } from '../../../shared/services/api.service';
 import { HttpClient } from '@angular/common/http';
-import { tap } from 'rxjs/operators';
+import { catchError, finalize, mapTo, shareReplay, tap } from 'rxjs/operators';
 import { license_rules, search_filter_labels } from '../../../shared/constants/shared-enums';
 import { userSessionData } from '../../../shared/model/company-profile/node.model';
 import { TenantModel } from '../../../shared/model/tenant/tenant.model';
 import { Title } from '@angular/platform-browser';
+import { Observable, of } from 'rxjs';
+import entitiesData from '../../../../assets/data/entities_data/entities.json';
+import licenseRulesData from '../../../../assets/data/licenses/license_rules.json';
 import { firstValueFrom } from 'rxjs';
+import { DemoTourConfig } from '../../../shared/model/demo-tour/demo.tour.model';
+
 @Injectable({
   providedIn: 'root'
 })
 export class AppService {
+  private sessionLoad$: Observable<void> | null = null;
+  private configLoad$: Observable<void> | null = null;
   private entitiesCache: any[] | null = null;
   private sessionLoadPromise: Promise<void> | null = null;
+  private demoTourLoadPromise: Promise<void> | null = null;
 
   public configData = signal<ConfigSettings>(new ConfigSettings());
   public page = signal<number>(1);
   public entities = signal<any[]>([]);
   public worldJson = signal<any>(null);
+  public demoTourConfig = signal<DemoTourConfig>({});
   public userSessionData = signal<userSessionData>(this.createEmptyUserSessionData());
   public tenantData = signal<TenantModel>({
     name: '',
@@ -38,7 +47,8 @@ export class AppService {
         status: '',
         subscription: false,
         verificationDate: '',
-        license: []
+        license: [],
+        demo_tour:false,
       },
       tenant: {
         id: '',
@@ -70,9 +80,12 @@ export class AppService {
   }
 
   constructor(private title: Title, private apiService: ApiService, private activatedRoute: ActivatedRoute, private router: Router, private appStorageService: AppStorageService, private http: HttpClient) {
+    this.initializeEntities();
+    this.initializeLicenseRules();
     this.loadEntities();
     this.loadLicenseRules();
     this.loadWorldJson();
+    this.loadDemoTourConfig();
     this.activatedRoute.queryParams.subscribe(params => {
       const pageParam = +params['page'];
       if (!isNaN(pageParam)) {
@@ -83,38 +96,48 @@ export class AppService {
     this.appStorageService.setupWatcher(this.configData);
   }
 
-  async loadSession(forced = false): Promise<void> {
-    if (this.sessionLoadPromise) {
-      return this.sessionLoadPromise;
+  loadSession(forced = false): Observable<void> {
+    if (this.sessionLoad$) {
+      return this.sessionLoad$;
     }
 
-    let token = localStorage.getItem('token');
-    if (token || forced) {
-      this.sessionLoadPromise = (async () => {
-        try {
-          const session = await firstValueFrom(this.apiService.post<userSessionData>('get/tenant/node', {}));
-          if (session) {
-            this.userSessionData.set(session);
-          }
-        }
-        catch {
-          this.userSessionData.set(this.createEmptyUserSessionData());
-        }
-        finally {
-          this.sessionLoadPromise = null;
-        }
-      })();
-      return this.sessionLoadPromise;
+    const token = localStorage.getItem('token');
+    if (!token && !forced) {
+      return of(void 0);
     }
+
+    this.sessionLoad$ = this.apiService.post<userSessionData>('get/tenant/node', {}).pipe(tap((session) => {
+      if (session) {
+        this.userSessionData.set(session);
+      }
+    }), catchError(() => {
+      this.userSessionData.set(this.createEmptyUserSessionData());
+      return of(null);
+    }), mapTo(void 0), finalize(() => {
+      this.sessionLoad$ = null;
+    }), shareReplay(1));
+
+    return this.sessionLoad$;
   }
 
-  loadConfig(): void {
-    this.apiService.get<any>('public').subscribe(response => {
+  loadConfig(): Observable<void> {
+    if (this.configLoad$) {
+      return this.configLoad$;
+    }
+
+    this.configLoad$ = this.apiService.get<any>('public').pipe(tap((response) => {
       if (response?.settings) {
         const current = this.configData();
         this.configData.set(new ConfigSettings(response.settings, current.localSettings));
+        this.updateFavicon(this.configData().appSettings.logo_url);
+        this.preloadImage(this.configData().appSettings.logo_wide_dark);
+        this.title.setTitle(this.configData().appSettings.app_name || 'Orion Intelligence');
       }
-    });
+    }), catchError(() => of(null)), mapTo(void 0), finalize(() => {
+      this.configLoad$ = null;
+    }), shareReplay(1));
+
+    return this.configLoad$;
   }
 
   loadStaticConfig(): void {
@@ -142,6 +165,17 @@ export class AppService {
             document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'icon' }))).href = url;
   }
 
+  private preloadImage(url?: string): void {
+    if (!url || document.head.querySelector(`link[rel="preload"][as="image"][href="${url}"]`)) {
+      return;
+    }
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = url;
+    document.head.appendChild(link);
+  }
+
   updatePage(newPage: number): void {
     this.page.set(newPage);
     this.router
@@ -153,33 +187,29 @@ export class AppService {
       .then();
   }
 
-  loadEntities(): void {
-    if (this.entitiesCache) {
-      this.entities.set(this.entitiesCache);
-      return;
+  private initializeEntities(): void {
+    this.entities.set(entitiesData);
+    for (const e of entitiesData) {
+      const key = `${e.key.replace(/[A-Z]/g, (c: string) => `_${c.toLowerCase()}`)}`;
+      search_filter_labels[key] = e.title;
     }
-    this.http
-      .get<any[]>('assets/data/entities_data/entities.json')
-      .pipe(tap(data => {
-        this.entitiesCache = data;
-        this.entities.set(data);
-        for (const e of data) {
-          const key = `${e.key.replace(/[A-Z]/g, (c: string) => `_${c.toLowerCase()}`)}`;
-          search_filter_labels[key] = e.title;
-        }
-      }))
-      .subscribe();
   }
 
-  loadLicenseRules(): void {
-    this.http
-      .get<any>('assets/data/licenses/license_rules.json')
-      .pipe(tap(data => {
-        for (const key in data) {
-          license_rules[key] = data[key];
-        }
-      }))
-      .subscribe();
+  loadEntities(): Observable<void> {
+    this.initializeEntities();
+    return of(void 0);
+  }
+
+  private initializeLicenseRules(): void {
+    const bundledRules = licenseRulesData as Record<string, any>;
+    for (const key in bundledRules) {
+      license_rules[key] = bundledRules[key];
+    }
+  }
+
+  loadLicenseRules(): Observable<void> {
+    this.initializeLicenseRules();
+    return of(void 0);
   }
 
   loadWorldJson(): void {
@@ -191,6 +221,25 @@ export class AppService {
       .subscribe();
   }
 
+  loadDemoTourConfig(): Promise<void> {
+    if (this.demoTourLoadPromise) {
+      return this.demoTourLoadPromise;
+    }
+
+    this.demoTourLoadPromise = firstValueFrom(this.http.get<DemoTourConfig>('assets/data/demo_tour/demo_tour.json'))
+      .then(data => {
+        this.demoTourConfig.set(data || {});
+      })
+      .catch(() => {
+        this.demoTourConfig.set({});
+      })
+      .finally(() => {
+        this.demoTourLoadPromise = null;
+      });
+
+    return this.demoTourLoadPromise;
+  }
+
   clearAll(): void {
     this.appStorageService.clearStorage();
     this.configData.set(new ConfigSettings());
@@ -199,7 +248,7 @@ export class AppService {
   }
 
   isMobileMode(): boolean {
-    return this.activatedRoute.snapshot.queryParamMap.get('mode') === 'free';
+    return localStorage.getItem('mobileDemo') === 'true';
   }
 
   setOnboardingStatus(value: boolean) {

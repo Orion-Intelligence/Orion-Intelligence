@@ -1,20 +1,28 @@
-import {addUser, completeSubscriptionPopupFlow, deleteFirstUser, loginAndClickSidebar, loginAsUser, ManagedUser, openSidebarGroup, openSidebarSubItem, openUsersList} from './controllers/05-user-management.controller';
+import {addUser, completeSubscriptionPopupFlow, deleteUsersByUsername, loginAndClickSidebar, loginAsUser, ManagedUser, openFirstStrategicReportFromSearch, openSidebarGroup, openSidebarSubItem} from './controllers/05-user-management.controller';
 
 let testUsers: any = {};
 let testData: any = {};
-const CREATE_USERS: ManagedUser[] = [
-  {username: 'testing1', email: 'a@hotmail.com', password: '1qaz!QAZ', role: 'Member', licenses: ['Free']},
-  {username: 'testing2', email: 'b@hotmail.com', password: '1qaz!QAZ', role: 'Analyst', licenses: ['Free', 'OSINT Basic']},
-  {username: 'testing3', email: 'c@hotmail.com', password: '1qaz!QAZ', role: 'Member', licenses: ['Free', 'OSINT Advanced']},
-  {username: 'testing4', email: 'd@hotmail.com', password: '1qaz!QAZ', role: 'Member', licenses: ['Free', 'Pentester']},
-  {username: 'testing5', email: 'e@hotmail.com', password: '1qaz!QAZ', role: 'Demo', licenses: ['Free']}
-];
+let createUsers: ManagedUser[] = [];
+let profileUserId = '';
 
 describe('Orion Intelligence - User Management Creation Flow', () => {
   before(() => {
     cy.env(['TEST_USERS', 'TEST_DATA']).then(({TEST_USERS, TEST_DATA}) => {
       testUsers = TEST_USERS || {};
       testData = TEST_DATA || {};
+      createUsers = Object.keys(testUsers)
+        .filter((key) => /^testing\d+$/.test(key))
+        .map((key) => testUsers[key] as ManagedUser);
+    });
+  });
+
+  before(() => {
+    cy.env(['TEST_USERS', 'TEST_DATA']).then(({TEST_USERS, TEST_DATA}) => {
+      testUsers = TEST_USERS || {};
+      testData = TEST_DATA || {};
+      createUsers = Object.keys(testUsers)
+        .filter((key) => /^testing\d+$/.test(key))
+        .map((key) => testUsers[key] as ManagedUser);
     });
   });
 
@@ -31,7 +39,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.url().should('include', '/dashboard/profile/users');
     cy.wait('@usersApi');
 
-    CREATE_USERS.forEach((u) => addUser(u));
+    createUsers.forEach((u) => addUser(u));
     cy.logout();
   });
 
@@ -92,11 +100,181 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.contains('[data-testid="trial-subscription-banner"]', 'Your subscription is about to expire in 10 days.').should('be.visible');
     cy.logout();
   });
+
+  it('covers report feedback and public profile activity flow', () => {
+    cy.visit('/');
+    cy.get('[data-testid="login-page"]').should('be.visible');
+
+    const currentUsername = testUsers.testing3.username;
+    const commentText = `Follow up on this thread ${Date.now()}`;
+    const blockedCommentText = `Blocked follow up ${Date.now()}`;
+
+    loginAsUser(testUsers.testing3.username, testUsers.testing3.password);
+
+    openFirstStrategicReportFromSearch();
+
+    cy.scrollDashboardToTop();
+    cy.get('[data-testid="report-feedback-recommended"]').filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="report-feedback-recommended"]').filter(':visible').first().should('contain.text', 'Selected');
+
+    cy.get('[data-testid="report-feedback-trust"]').filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="report-feedback-trust"]').filter(':visible').first().should('contain.text', 'Selected');
+
+    cy.scrollDashboardToBottom()
+    cy.get('[data-testid="report-feedback-comment-input"]').filter(':visible').first().scrollIntoView().should('be.visible').type(commentText);
+    cy.get('[data-testid="report-feedback-comment-save"]').filter(':visible').first().click();
+    cy.contains('p', commentText).should('be.visible');
+
+    cy.contains('[data-testid="report-feedback-comment-user-name"]', currentUsername).first().click();
+    cy.contains('div', 'Profile').should('be.visible');
+    cy.get('[data-testid="report-user-sidebar-open-profile"]').filter(':visible').first().click();
+    cy.url().should('match', /\/dashboard\/profile\/user\/[^/]+$/);
+    cy.location('pathname').then((pathname) => {
+      profileUserId = pathname.split('/').pop() || '';
+      expect(profileUserId).to.not.equal('');
+    });
+    cy.contains('h1', currentUsername).should('be.visible');
+    cy.contains('span', 'Recommended').should('exist');
+    cy.contains('span', 'Trust').should('exist');
+    cy.contains('span', /comment/i).should('exist');
+
+    cy.window().then((win) => {
+      cy.stub(win, 'open').as('profileWindowOpen');
+    });
+    cy.get('[data-testid="user-profile-open-thread"]').filter(':visible').first().click();
+    cy.get('@profileWindowOpen').should('have.been.calledOnce');
+    cy.get('@profileWindowOpen').its('firstCall.args.0').should('include', '/dashboard/');
+
+    openFirstStrategicReportFromSearch();
+    cy.wait(1000)
+    cy.scrollDashboardToBottom()
+    cy.get('[data-testid="report-feedback-comment-input"]').filter(':visible').first().scrollIntoView().should('be.visible').type(blockedCommentText);
+    cy.get('[data-testid="report-feedback-comment-save"]').filter(':visible').first().click();
+    cy.contains('p', 'Only one comment per hour is allowed.').should('be.visible');
+    cy.contains('p', blockedCommentText).should('not.exist');
+
+    cy.visit('/dashboard/profile/account');
+    cy.get('[data-testid="account-settings-profile-visibility-toggle"]').should('be.visible').then(($toggle) => {
+      const label = $toggle.text();
+      if (label.includes('Visible to other users')) {
+        cy.wrap($toggle).scrollIntoView().click();
+      }
+    });
+    cy.contains('[data-testid="account-settings-profile-visibility-toggle"] p', 'Hidden from other users').should('be.visible');
+    cy.reload();
+    cy.get('[data-testid="account-settings-profile-visibility-toggle"]').scrollIntoView().should('be.visible');
+    cy.contains('[data-testid="account-settings-profile-visibility-toggle"] p', 'Hidden from other users').should('be.visible');
+    cy.logout();
+
+    loginAsUser(testUsers.testing5.username, testUsers.testing5.password);
+    openFirstStrategicReportFromSearch();
+    cy.scrollDashboardToBottom()
+    cy.contains('[data-testid="report-feedback-comment-user-name"]', currentUsername).first().click();
+    cy.get('[data-testid="report-user-sidebar-hidden-profile"]').should('exist');
+    cy.get('[data-testid="report-user-sidebar-open-profile"]').should('not.exist');
+    cy.logout();
+  });
+});
+
+describe('Orion Intelligence - Enterprise Demo Tour', () => {
+  const enterpriseUser: ManagedUser = {
+    username: 'enterprise_tour1',
+    email: 'enterprise_tour@example.com',
+    password: '1qaz!QAZ',
+    role: 'Analyst',
+    licenses: ['Enterprise']
+  };
+
+  const waitForTourStep = (stepNumber: number, totalSteps = 6) => {
+    cy.get('[data-testid="demo-tour-tooltip"]').should('be.visible');
+    cy.get('[data-testid="demo-tour-step"]').should('contain', `Step ${stepNumber} / ${totalSteps}`);
+  };
+
+  before(() => {
+    cy.loginAsAdmin();
+    cy.intercept('POST', '**/api/users').as('usersApi');
+    cy.visit('/dashboard/profile/homepage');
+    cy.get('[data-testid="sidebar-group-profile"]').should('be.visible').scrollIntoView().click();
+    cy.get('[data-testid="sidebar-subitem-profile-users"]').should('be.visible').scrollIntoView().click();
+    cy.url().should('include', '/dashboard/profile/users');
+    cy.wait('@usersApi');
+    addUser(enterpriseUser);
+    cy.logout();
+  });
+
+  beforeEach(() => {
+    cy.intercept('POST', '**/api/get/tenant/node', (req) => {
+      req.continue((res) => {
+        if (res.body?.user) {
+          res.body.user.demo_tour = false;
+          res.body.user.license = ['enterprise'];
+          res.body.user.role = 'Analyst';
+        }
+      });
+    }).as('enterpriseTenantNode');
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('blocks page interaction during the tour and only allows next and skip', () => {
+    cy.intercept('POST', '**/api/update/current/user', (req) => {
+      req.reply({ statusCode: 200, body: { message: 'updated' } });
+    }).as('updateCurrentUser');
+
+    loginAsUser(enterpriseUser.username, enterpriseUser.password);
+    cy.wait('@enterpriseTenantNode');
+    waitForTourStep(1);
+
+    cy.get('html').should('have.class', 'no-scroll');
+    cy.get('body').should('have.class', 'no-scroll');
+
+    cy.window().then((win) => {
+      const overlay = win.document.querySelector('[data-testid="demo-tour-overlay"]') as SVGElement | null;
+      const profileButton = win.document.querySelector('[data-testid="sidebar-group-profile"]') as HTMLElement | null;
+
+      expect(overlay, 'demo tour overlay').to.not.be.null;
+      expect(profileButton, 'profile sidebar button').to.not.be.null;
+
+      const clickEvent = new win.MouseEvent('click', { bubbles: true, cancelable: true });
+      const clickResult = profileButton!.dispatchEvent(clickEvent);
+      expect(clickResult).to.eq(false);
+      expect(clickEvent.defaultPrevented).to.eq(true);
+    });
+
+    cy.get('[data-testid="demo-tour-next"]').should('be.visible').click();
+    waitForTourStep(2);
+
+    cy.get('[data-testid="demo-tour-tooltip"]').should('be.visible');
+  });
+
+  it('marks demo_tour true after the enterprise tour completes', () => {
+    cy.intercept('POST', '**/api/update/current/user', (req) => {
+      req.reply({ statusCode: 200, body: { message: 'updated' } });
+    }).as('updateCurrentUser');
+
+    loginAsUser(enterpriseUser.username, enterpriseUser.password);
+    cy.wait('@enterpriseTenantNode');
+    waitForTourStep(1);
+
+    for (let stepNumber = 1; stepNumber <= 6; stepNumber += 1) {
+      cy.get('[data-testid="demo-tour-next"]').should('be.visible').click();
+
+      if (stepNumber < 6) {
+        waitForTourStep(stepNumber + 1);
+      }
+    }
+
+    cy.wait('@updateCurrentUser').then(({ request }) => {
+      expect(request.body.demo_tour).to.eq(true);
+      expect(request.body.username).to.eq(enterpriseUser.username);
+    });
+    cy.get('[data-testid="demo-tour-tooltip"]').should('not.exist');
+  });
 });
 
 describe('Orion Intelligence - User Management Deletion Flow', () => {
-  const USERS_URL = '/dashboard/profile/users?page=1';
-
   beforeEach(() => {
     cy.loginAsAdmin();
   });
@@ -105,9 +283,15 @@ describe('Orion Intelligence - User Management Deletion Flow', () => {
     cy.logout();
   });
 
-  it('deletes users sequentially until only system users remain', () => {
-    openUsersList(USERS_URL);
-    deleteFirstUser(USERS_URL);
+  it('deletes configured test users', () => {
+    cy.env(['TEST_USERS']).then(({TEST_USERS}) => {
+      const usernames = Object.keys(TEST_USERS || {})
+        .filter((key) => /^testing\d+$/.test(key) && key !== 'testing3' && key !== 'testing4' && key !== 'testing5')
+        .map((key) => TEST_USERS[key]?.username)
+        .filter(Boolean);
+
+      deleteUsersByUsername(usernames);
+    });
     cy.logout();
   });
 });

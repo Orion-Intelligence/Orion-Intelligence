@@ -40,8 +40,8 @@ class config_controller:
         try:
             records = await self._engine.find(db_system_model)
             self._config = {record.key.value: record.value for record in records}
-        except Exception:
-            pass
+        except Exception as ex:
+            log.g().e(f"Error loading config: {ex}")
 
     def get(self, key: str, default=None):
         return self._config.get(key, default)
@@ -49,31 +49,34 @@ class config_controller:
     async def refresh_config(self):
         await self.load_config()
 
+    def _build_system_info_from_cache(self) -> config_data:
+        fresh_config = dict(self._config)
+
+        def asset(base: str) -> str:
+            custom = self.SYSTEM_DIR / f"{base}_custom.png"
+            if custom.is_file():
+                return f"/api/s/static/system/{base}_custom.png"
+            return f"/api/s/static/system/{base}_default.png"
+
+        fresh_config["ai_endpoint"] = "1"
+        fresh_config["logo_url"] = asset("logo_url")
+        fresh_config["logo_wide_light"] = asset("logo_wide_light")
+        fresh_config["logo_wide_dark"] = asset("logo_wide_dark")
+        fresh_config["auth_dashboard_icon"] = asset("auth_dashboard_icon")
+        fresh_config["meta_info"] = fresh_config.get("meta_info") or json.dumps({
+            "S_HOME_HEADER_DATA_SOURCES": "https://www.orionintelligence.org/sources",
+            "S_HOME_HEADER_ADVERSARIES": "https://www.orionintelligence.org/adversaries",
+            "S_HOME_HEADER_PRICING": "https://www.orionintelligence.org/pricing",
+            "S_HOME_HEADER_PRICING_ALLOWED": True
+        })
+        return config_data(settings=fresh_config)
+
     async def get_system_info(self) -> config_data:
         try:
             self.SYSTEM_DIR = self.BASE_DIR / "static" / "resource" / "system"
-            records = await self._engine.find(db_system_model)
-            fresh_config = {record.key.value: record.value for record in records}
-
-            def asset(base: str) -> str:
-                custom = self.SYSTEM_DIR / f"{base}_custom.png"
-                if custom.is_file():
-                    return f"/api/s/static/system/{base}_custom.png"
-                return f"/api/s/static/system/{base}_default.png"
-
-            fresh_config["ai_endpoint"] = "1"
-            fresh_config["logo_url"] = asset("logo_url")
-            fresh_config["logo_wide_light"] = asset("logo_wide_light")
-            fresh_config["logo_wide_dark"] = asset("logo_wide_dark")
-            fresh_config["auth_dashboard_icon"] = asset("auth_dashboard_icon")
-            fresh_config["meta_info"] = fresh_config.get("meta_info") or json.dumps({
-                "S_HOME_HEADER_DATA_SOURCES": "https://www.orionintelligence.org/sources",
-                "S_HOME_HEADER_ADVERSARIES": "https://www.orionintelligence.org/adversaries",
-                "S_HOME_HEADER_PRICING": "https://www.orionintelligence.org/pricing",
-                "S_HOME_HEADER_PRICING_ALLOWED": True
-            })
-
-            return config_data(settings=fresh_config)
+            if not self._config:
+                await self.load_config()
+            return self._build_system_info_from_cache()
 
         except Exception as ex:
             log.g().e(f"Error fetching config: {ex}")
@@ -81,8 +84,8 @@ class config_controller:
                 "ai_endpoint": "1",
                 "s_onion": "",
                 "logo_url": "/api/s/static/system/logo_url_default.png",
-                "logo_wide_light": "/api/s/static/system/logo_wide_dark_default.png",
-                "logo_wide_dark": "/api/s/static/system/logo_wide_light_default.png",
+                "logo_wide_light": "/api/s/static/system/logo_wide_light_default.png",
+                "logo_wide_dark": "/api/s/static/system/logo_wide_dark_default.png",
                 "meta_info": json.dumps({
                     "S_HOME_HEADER_DATA_SOURCES": "https://www.orionintelligence.org/sources",
                     "S_HOME_HEADER_ADVERSARIES": "https://www.orionintelligence.org/adversaries",
@@ -121,6 +124,7 @@ class config_controller:
                 await self._engine.save(
                     db_system_model(key=key, value=value))
 
+        await self.refresh_config()
         return await self.get_system_info()
 
     async def getSystemResource(self, name: str):
@@ -156,6 +160,8 @@ class config_controller:
         else:
             record = db_system_model(key=key, value=file_name)
             await self._engine.save(record)
+
+        await self.refresh_config()
 
         await AuditLogManager.get_instance().register(
             str(current_user.tenant_uuid),

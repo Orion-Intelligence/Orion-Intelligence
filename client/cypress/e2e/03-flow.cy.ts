@@ -1,5 +1,31 @@
 import {FLOW_ADMIN_SECTIONS, FLOW_DATA_BREACH_SECTIONS, FLOW_DEFACEMENT_SECTIONS, FLOW_ENTITY_API_SECTIONS, FLOW_EXPLOIT_SECTIONS, FLOW_GENERAL_INTELLIGENCE_SECTIONS, FLOW_SOCIAL_SECTIONS, FLOW_WEB_SCANS_SECTIONS} from '../support/constants';
-import {applyDateRange, applyDirectoryDropdown, assertDirectoryContentVisible, clickSidebarSubItem, DIRECTORY_CONTENT_OPTION, DIRECTORY_INDEX_OPTION, DIRECTORY_NETWORK_OPTION, getHeatmapComponent, openCountryReportFromMap, openSidebarGroup, resetDirectoryFilters, waitForDirectoryRequest} from './controllers/03-flow.controller';
+import {applyDateRange, applyDirectoryDropdown, assertDirectoryContentVisible, assertFreeModeDashboardChrome, clickSidebarSubItem, DIRECTORY_CONTENT_OPTION, DIRECTORY_INDEX_OPTION, DIRECTORY_NETWORK_OPTION, getHeatmapComponent, openCountryReportFromMap, openSidebarGroup, resetDirectoryFilters, waitForDirectoryRequest} from './controllers/03-flow.controller';
+
+describe('Orion Intelligence - Free Mode Flow', () => {
+  after(() => {
+    cy.logout();
+  });
+
+  beforeEach(() => {
+    cy.clearCookies();
+    cy.clearLocalStorage();
+    cy.window().then((win) => {
+      win.sessionStorage.clear();
+    });
+  });
+
+  it('verifies free mode opens the simplified mobile dashboard chrome', () => {
+    cy.viewport(430, 932);
+    cy.intercept('POST', '**/api/token/demo').as('demoLogin');
+    cy.visit('/login?mode=free');
+
+    cy.wait('@demoLogin').then((interception) => {
+      expect(interception.response?.statusCode).to.eq(200);
+    });
+    cy.get('[data-testid="dashboard-main"]', {timeout: 30000}).should('be.visible');
+    assertFreeModeDashboardChrome();
+  });
+});
 
 describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
   let testData: any = {};
@@ -46,7 +72,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
 
     cy.get('button[aria-label="Expand row"]').each(($btn, index) => {
       if (index < 5) {
-        cy.wrap($btn).scrollIntoView().click();
+        cy.wrap($btn).click();
       }
     });
 
@@ -98,11 +124,11 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     openCountryReportFromMap();
     cy.contains('[data-testid="heatmap-report"] h3', 'Reports').should('be.visible');
     cy.get('[data-testid="heatmap-report"] .overflow-y-auto').should('exist');
-    cy.get('[data-testid="heatmap-report-close"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="heatmap-report-close"]').should('be.visible').click();
     cy.get('[data-testid="heatmap-report"]').should('not.exist');
 
     openCountryReportFromMap();
-    cy.get('[data-testid="heatmap-report-overlay"]').scrollIntoView().click('topLeft');
+    cy.get('[data-testid="heatmap-report-overlay"]').click('topLeft');
     cy.get('[data-testid="heatmap-report"]').should('not.exist');
   });
 
@@ -194,18 +220,17 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
         return;
       }
 
-      cy.get('#bottom').scrollIntoView();
-      cy.wait(1000);
+      cy.get('#bottom');
       cy.scrollDashboardToTop()
       cy.get('app-directory-list tbody tr').its('length').should('be.greaterThan', initialCount);
     });
 
-    cy.get('[data-testid="pagination-next"]').should('exist').scrollIntoView().click();
+    cy.get('[data-testid="pagination-next"]').should('exist').click();
     waitForDirectoryRequest();
     cy.get('[data-testid="pagination-page-2"]').should('exist');
     cy.location('search').should('include', 'page=2');
 
-    cy.get('[data-testid="pagination-page-1"]').scrollIntoView().click();
+    cy.get('[data-testid="pagination-page-1"]').click();
     waitForDirectoryRequest();
 
     applyDirectoryDropdown('network', DIRECTORY_NETWORK_OPTION, 'network');
@@ -221,5 +246,8 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.contains('No links found!').should('be.visible');
 
     resetDirectoryFilters();
+    cy.get('app-directory .ui-page-title').should('contain.text', 'Directory');
+    cy.get('app-directory .ui-page-description').should('contain.text', 'Live onion services and monitoring status.');
+    cy.logout();
   });
 });

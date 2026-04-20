@@ -30,22 +30,22 @@ export class ConsolidatedCallbackModel {
     this.news_model = init?.news_model ? new LeakCallbackModel(init.news_model) : undefined;
   }
 }
-export type ConsolidatedLiveApis = {
+export interface ConsolidatedLiveApis {
     type: 'user' | 'social' | 'cracked';
     q1: string;
     q2?: string;
-};
-export type ConsolidatedLiveApiResults = {
+}
+export interface ConsolidatedLiveApiResults {
     input: ConsolidatedLiveApis;
     status: 'pending' | 'success' | 'error';
     resultData: SearchDynamicEmailCallbackModel | null;
     errorMessage: string | null;
-};
-export type ConsolidatedScanResults = {
+}
+export interface ConsolidatedScanResults {
     domain: string;
     scanType: 'basic' | 'seo' | 'repo';
     meta: UrlScanMeta | null;
     grade: string;
     hasError: boolean;
     errorMessage: string;
-};
+}

@@ -1,10 +1,10 @@
 <div class="w-full h-full relative">
   @if (networkData().nodes.length === 0) {
-    <div class="absolute left-1/2 top-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 px-4 text-center select-none">
-      <div class="rounded-lg border border-dashed border-slate-700/80 bg-slate-900/30 px-6 py-10">
-        <i class="bi bi-list-ul mx-auto text-5xl text-slate-600"></i>
-        <p class="mt-3 text-2xl font-semibold text-slate-300">List is Waiting for Data</p>
-        <p class="text-slate-500">Complete a scan or add an entity to see results here.</p>
+    <div class="pointer-events-none absolute left-1/2 top-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 px-4 text-center select-none text-[var(--color-text4)]">
+      <div class="text-center opacity-[0.3]">
+        <i class="bi bi-list-ul mx-auto text-5xl text-[var(--color-text4)]"></i>
+        <p class="mt-3 text-2xl font-semibold text-[var(--color-text2)]">List is Waiting for Data</p>
+        <p class="text-[var(--color-text4)]">Complete a scan or add an entity to begin visualization.</p>
       </div>
     </div>
   } @else {
@@ -50,7 +50,7 @@
                                       <a data-testid="social-list-platform-open-link" [href]="platformData.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="w-7 h-7 rounded-full flex items-center justify-center text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors" title="Open account in new tab">
                                         <i class="bi bi-link-45deg text-sm leading-none"></i>
                                       </a>
-                                      <button data-testid="social-list-followers-following" data-cy="list-view-followers-following" (click)="$event.stopPropagation(); state.openFollowerScanPopup(platformNode.id.toString())" class="w-7 h-7 rounded-full flex items-center justify-center text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Followers and Following">
+                                      <button data-testid="social-list-followers-following" (click)="$event.stopPropagation(); state.openFollowerScanPopup(platformNode.id.toString())" class="w-7 h-7 rounded-full flex items-center justify-center text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Followers and Following">
                                         <i class="bi bi-people-fill text-[11px] leading-none"></i>
                                       </button>
                                     </div>
@@ -168,7 +168,7 @@
                   <div class="overflow-hidden rounded-lg border border-slate-700 bg-slate-800/50 animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
                     @if (getEntityData(entityNode.id.toString()); as entity) {
                       <div class="p-4 flex items-start gap-4 cursor-pointer hover:bg-slate-800/70 transition-colors" (click)="toggleEntity(entity.id)">
-                        <i [class]="getIconForEntityType(entity.type) + ' text-3xl mt-1'"></i>
+                        <i [class]="socialEntityUiService.getIconForEntityType(entity.type) + ' text-3xl mt-1'"></i>
                         <div class="flex-grow">
                           <h3 class="text-md font-bold text-slate-300">{{entity.label}}</h3>
                           <p class="text-sm text-slate-400 capitalize">{{entity.type}}</p>

@@ -1,29 +1,32 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, effect, input, output } from '@angular/core';
 import { CommonModule, NgClass, NgOptimizedImage } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
 import { max } from 'rxjs';
 @Component({
   selector: 'app-pagination', templateUrl: './pagination.component.html', imports: [CommonModule, NgClass, NgOptimizedImage]
 })
-export class PaginationComponent implements OnInit {
+export class PaginationComponent {
   protected readonly max = max;
 
-  @Input() maxPages = 1;
-  @Input() currentPage = 1;
-  @Input() align: 'left' | 'center' = 'center';
+  readonly maxPagesInput = input<number | string | undefined>(1, { alias: 'maxPages' });
+  readonly currentPageInput = input<number | string | undefined>(undefined, { alias: 'currentPage' });
+  maxPages = 1;
+  currentPage = 1;
+  readonly align = input<'left' | 'center'>('center');
+  readonly pageChange = output<number>();
 
-  @Output() pageChange = new EventEmitter<number>();
+  constructor(private appService: AppService) {
+    effect(() => {
+      const normalizedMaxPages = Math.max(1, Number(this.maxPagesInput() ?? 1) || 1);
+      const rawCurrentPage = this.currentPageInput() ?? this.appService.page();
+      const normalizedCurrentPage = Math.max(1, Number(rawCurrentPage ?? 1) || 1);
 
-  constructor(private appService: AppService, private cdr: ChangeDetectorRef) {
-  }
-
-  ngOnInit(): void {
-    this.currentPage = this.appService.page();
-    this.cdr.detectChanges();
+      this.maxPages = normalizedMaxPages;
+      this.currentPage = Math.min(normalizedCurrentPage, normalizedMaxPages);
+    });
   }
 
   getPageRange(): number[] {
-    this.currentPage = Number(this.currentPage);
     const leftBound = Math.max(1, this.currentPage - 2);
     const rightBound = Math.min(this.maxPages, this.currentPage + 2);
     const pageNumbers: number[] = [];

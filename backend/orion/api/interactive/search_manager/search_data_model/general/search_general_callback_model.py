@@ -1,7 +1,6 @@
 from typing import List, Optional, Union
 
-from pydantic import BaseModel
-from pydantic.v1 import Extra
+from pydantic import BaseModel, ConfigDict
 
 from orion.api.interactive.graph_manager.graph_models.search_social_callback_model import suggestion
 
@@ -34,8 +33,7 @@ class result_item(BaseModel):
     m_contact_link: Optional[str] = None
     m_highlighted: Optional[str] = None
 
-    class Config:
-        extra = Extra.allow
+    model_config = ConfigDict(extra="allow")
 
 
 class search_general_callback_model(BaseModel):

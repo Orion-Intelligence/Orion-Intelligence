@@ -9,6 +9,7 @@ declare global {
             closeSideFilter(): Chainable<void>;
             applySideFilter(): Chainable<void>;
             scrollDashboardToTop(): Chainable<void>;
+            scrollDashboardToBottom(): Chainable<void>;
             openLastMailAndGetUrl(): Chainable<string>;
             clearAllEmails(): Chainable<void>;
         }
@@ -21,7 +22,7 @@ Cypress.Commands.add("loginAsAdmin", () => {
         cy.get('[data-testid="login-user"]').type(ADMIN_USERNAME);
         cy.get('[data-testid="login-pass"]').type(ADMIN_PASSWORD, { log: false });
         cy.get('[data-testid="login-button"], input.login-button').first().click();
-        cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-cy="dashboard-container"], .dashboard_container')
+        cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
             .filter(':visible')
             .should('have.length.greaterThan', 0);
     });
@@ -35,10 +36,10 @@ Cypress.Commands.add("loginAsTest1", () => {
             throw new Error(`Missing test user credentials for key: ${key}`);
         }
         cy.visit("/login");
-        cy.get('input[name="username"]').type(user.username);
-        cy.get('input[name="password"]').type(user.password, { log: false });
-        cy.get('[data-cy="login-button"], input.login-button').first().click();
-        cy.get('[data-testid="profile-menu"], [data-cy="dashboard-main"], [data-cy="dashboard-container"], .dashboard_container')
+        cy.get('[data-testid="login-user"]').type(user.username);
+        cy.get('[data-testid="login-pass"]').type(user.password, { log: false });
+        cy.get('[data-testid="login-button"], input.login-button').first().click();
+        cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
             .filter(':visible')
             .should('have.length.greaterThan', 0);
     });
@@ -70,6 +71,18 @@ Cypress.Commands.add("scrollDashboardToTop", () => {
 
         containers.forEach((el) => {
             el.scrollTop = 0;
+        });
+    });
+});
+
+Cypress.Commands.add("scrollDashboardToBottom", () => {
+    cy.window({ log: false }).then((win) => {
+        const containers = Array.from(
+            win.document.querySelectorAll<HTMLElement>('#dashboard-container, [data-testid="dashboard-container"], [data-testid="dashboard-body"]')
+        );
+
+        containers.forEach((el) => {
+            el.scrollTop = el.scrollHeight;
         });
     });
 });

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnChanges, SimpleChanges, ViewChild, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
@@ -35,21 +35,19 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   mapCanvasWidth = 0;
   mapCanvasHeight = 0;
   isDraggingMap = false;
-
-  @Input() isOpen = false;
-  @Input() isScanning = false;
-  @Input() coordinates = '';
-  @Input() radiusKm = 25;
-  @Input() maxIps = 200;
-
-  @Output() close = new EventEmitter<void>();
-  @Output() coordinatesChange = new EventEmitter<string>();
-  @Output() radiusKmChange = new EventEmitter<number>();
-  @Output() maxIpsChange = new EventEmitter<number>();
-  @Output() search = new EventEmitter<void>();
+  readonly isOpen = input(false);
+  readonly isScanning = input(false);
+  readonly coordinates = input('');
+  readonly radiusKm = input(25);
+  readonly maxIps = input(200);
+  readonly close = output<undefined>();
+  readonly coordinatesChange = output<string>();
+  readonly radiusKmChange = output<number>();
+  readonly maxIpsChange = output<number>();
+  readonly search = output<undefined>();
 
   get parsedCoordinates(): { lat: number; lon: number } | null {
-    return this.parseCoordinates(this.coordinates);
+    return this.parseCoordinates(this.coordinates());
   }
 
   constructor(private appService: AppService) {
@@ -80,25 +78,27 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   }
 
   onClose(): void {
-    this.close.emit();
+    // TODO: The 'emit' function requires a mandatory void argument
+    this.close.emit(undefined);
   }
 
   onSearch(): void {
-    this.search.emit();
+    // TODO: The 'emit' function requires a mandatory void argument
+    this.search.emit(undefined);
   }
 
   onRadiusKmChange(value: number | string | null | undefined): void {
-    this.radiusKmChange.emit(this.clampWholeNumber(value, this.minRadiusKm, this.maxRadiusKm, this.radiusKm));
+    this.radiusKmChange.emit(this.clampWholeNumber(value, this.minRadiusKm, this.maxRadiusKm, this.radiusKm()));
   }
 
   onMaxIpsChange(value: number | string | null | undefined): void {
-    this.maxIpsChange.emit(this.clampWholeNumber(value, this.minMaxIps, this.maxMaxIps, this.maxIps));
+    this.maxIpsChange.emit(this.clampWholeNumber(value, this.minMaxIps, this.maxMaxIps, this.maxIps()));
   }
 
   setCoordinateInputMode(mode: 'map' | 'manual'): void {
     this.coordinateInputMode = mode;
 
-    if (mode === 'map' && this.isOpen) {
+    if (mode === 'map' && this.isOpen()) {
       this.queueRenderMap();
     }
   }
@@ -158,7 +158,7 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
 
   @HostListener('window:resize')
   onResize(): void {
-    if (this.isOpen) {
+    if (this.isOpen()) {
       this.queueRenderMap();
     }
   }
@@ -223,13 +223,16 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    if (this.isOpen) {
-      this.close.emit();
+    if (this.isOpen()) {
+      // TODO: The 'emit' function requires a mandatory void argument
+      this.close.emit(undefined);
     }
   }
 
   private queueRenderMap(): void {
-    setTimeout(() => this.renderMap(), 0);
+    setTimeout(() => {
+      this.renderMap(); 
+    }, 0);
   }
 
   private applyZoom(nextZoomLevel: number, anchor: ZoomAnchor | null): void {
@@ -281,13 +284,15 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   }
 
   private renderMap(anchor: ZoomAnchor | null = null): void {
-    if (!this.isOpen || !this.mapContainer?.nativeElement) {
+    if (!this.isOpen() || !this.mapContainer?.nativeElement) {
       return;
     }
 
     const worldData = this.appService.worldJson();
     if (!worldData) {
-      setTimeout(() => this.renderMap(), 100);
+      setTimeout(() => {
+        this.renderMap(); 
+      }, 100);
       return;
     }
 

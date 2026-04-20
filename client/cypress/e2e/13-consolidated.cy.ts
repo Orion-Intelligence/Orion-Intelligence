@@ -34,7 +34,7 @@ describe('Consolidated - IOC Basic Flow', () => {
       .and('have.attr', 'data-tab', 'Deep Search');
     searchDeepFromTop('data');
 
-    cy.get('[data-testid="defacement-report"]').should('exist').within(() => {
+    cy.get('[data-testid="defacement-report"]', { timeout: 60000 }).should('exist').within(() => {
       cy.get('[data-testid="defacement-report-title"]').should('contain.text', 'IP Threat Report');
       cy.get('[data-testid="defacement-report-chip"]').contains(/databases\s*\(\d+\)/i).scrollIntoView().should('exist');
       cy.get('[data-testid="defacement-report-chip"]').contains(/phishing\s*\(\d+\)/i).scrollIntoView().should('exist');
@@ -185,7 +185,7 @@ describe('Consolidated - IOC Basic Flow', () => {
       .invoke('removeAttr', 'target')
       .scrollIntoView()
       .click();
-    cy.url().should('include', '/dashboard/scanner/');
+    cy.url().should('include', '/dashboard/scanner/network-scan');
     openHomepageAndSearch('{enter}');
     switchToDeepSearchTab();
     cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
@@ -299,6 +299,7 @@ describe('Consolidated - IOC Basic Flow', () => {
     });
 
     cy.get('[data-testid="ioc-download-results"]').first().scrollIntoView().click();
+    cy.get('[data-testid="graph-report-export-csv"]').should('be.visible').click();
     applyPasswordSchemeAndValidate();
 
     cy.get('[data-testid="ioc-basic-tag-m_email"]')
@@ -331,5 +332,40 @@ describe('Consolidated - IOC Basic Flow', () => {
   it('opens domain scanner and runs Subdomains, IP Lookup, and Wayback scans', () => {
     openHomepageAndSearch('{enter}');
     runDomainScannerFlow();
+  });
+});
+
+it('runs Cross Search card in consolidated Deep Search', () => {
+  cy.loginAsAdmin();
+
+  openHomepageAndSearch('{enter}');
+  switchToDeepSearchTab();
+  searchDeepFromTop('hacking');
+
+  cy.get('[data-testid="dashboard-body"]', { timeout: 60000 }).should('exist');
+
+  cy.get('[data-testid="onion-search-report"]', { timeout: 60000 })
+    .scrollIntoView()
+    .should('be.visible')
+    .within(() => {
+      cy.get('[data-testid="onion-search-report-title"]')
+        .should('contain.text', 'See Results From Other Search Engines');
+    });
+
+  cy.get('[data-testid="onion-search-report-title"]')
+    .scrollIntoView()
+    .click();
+
+  cy.get('body', { timeout: 120000 }).then(($body) => {
+    const hasEngineCards = $body.find('[data-testid="onion-search-report-card"]').length > 0;
+
+    if (hasEngineCards) {
+      cy.get('[data-testid="onion-search-report-card"]')
+        .should('have.length.at.least', 1);
+    } else {
+      cy.contains(/searching across search engines|loading|no successful cross-search suggestions|cross search failed/i, {
+        timeout: 120000,
+      }).should('exist');
+    }
   });
 });

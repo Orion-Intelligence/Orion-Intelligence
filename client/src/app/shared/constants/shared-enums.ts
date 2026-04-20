@@ -85,13 +85,9 @@ export const sidebarItemTooltips: Record<string, string> = {
   'Crypto-Scanner': 'Crypto Scanner',
   'IOCS': 'IOCs',
 };
-export const ALLOWED_CONSOLIDATED_RANKED_SINGLETON: Set<string> = new Set([
+export const ALLOWED_CONSOLIDATED_RANKED_SINGLETON: Set<string> = new Set<string>([
   "tools",
   "zeroday"
 ]);
-export const search_filter_labels: {
-    [key: string]: string;
-} = {};
-export const license_rules: {
-    [key: string]: any;
-} = {};
+export const search_filter_labels: Record<string, string> = {};
+export const license_rules: Record<string, any> = {};

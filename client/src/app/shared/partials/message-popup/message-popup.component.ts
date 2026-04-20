@@ -1,13 +1,12 @@
-import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
+import { Component, HostListener, input, output } from '@angular/core';
 @Component({
   selector: 'app-message-popup',
   imports: [],
   templateUrl: './message-popup.component.html'
 })
 export class MessagePopupComponent {
-  @Input() message = 'Are you sure you want to perform this action?';
-
-  @Output() confirmed = new EventEmitter<boolean>();
+  readonly message = input('Are you sure you want to perform this action?');
+  readonly confirmed = output<boolean>();
 
   @HostListener('click', ['$event'])
   onBackdropClick(event: MouseEvent) {

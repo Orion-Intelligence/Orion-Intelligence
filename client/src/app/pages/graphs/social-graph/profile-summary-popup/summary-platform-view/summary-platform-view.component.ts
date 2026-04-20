@@ -19,8 +19,6 @@ import { finalize } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
-  private static readonly CONNECTION_PLATFORMS = new Set(['instagram', 'facebook', 'youtube', 'twitter']);
-  private static readonly FOLLOW_PLATFORMS = new Set(['instagram', 'twitter', 'behance', 'behnace', 'facebook']);
   private socialScanService = inject(SocialScanService);
   private destroyRef = inject(DestroyRef);
 
@@ -99,22 +97,6 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
     return index;
   }
 
-  scanConnections(usernames: string[] | null | undefined): void {
-    const normalized = this.normalizeUsernames(usernames);
-    if (normalized.length === 0) {
-      return;
-    }
-    this.scanUsernames.emit(normalized);
-  }
-
-  supportsPostConnections(platformName: string | null | undefined): boolean {
-    return SummaryPlatformViewComponent.CONNECTION_PLATFORMS.has(this.normalizePlatformName(platformName));
-  }
-
-  supportsFollowersFollowing(platformName: string | null | undefined): boolean {
-    return SummaryPlatformViewComponent.FOLLOW_PLATFORMS.has(this.normalizePlatformName(platformName));
-  }
-
   fetchPlatformMetadata(): void {
     const p = this.platform();
     if (!p) {
@@ -145,63 +127,11 @@ export class SummaryPlatformViewComponent extends PlatformFeedViewBase {
     });
   }
 
-  onMetadataTokenKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      this.addTokensFromInput();
-    }
-  }
-
-  addTokensFromInput(): void {
-    const input = this.metadataTokenInput();
-    const tokens = this.parseTokens(input);
-    if (!tokens.length) {
-      return;
-    }
-    const next = [...this.metadataTokens()];
-    for (const token of tokens) {
-      if (!next.includes(token)) {
-        next.push(token);
-      }
-    }
-    this.metadataTokens.set(next);
-    this.metadataTokenInput.set('');
+  override addTokensFromInput(): void {
+    this.addTokensFromInputSignal(this.metadataTokenInput, this.metadataTokens);
   }
 
   removeMetadataToken(token: string): void {
     this.metadataTokens.set(this.metadataTokens().filter(t => t !== token));
-  }
-
-  private parseTokens(input: string): string[] {
-    return String(input || '')
-      .split(/[,\n\r\t]+|\s+/)
-      .map(token => token.trim())
-      .filter(Boolean);
-  }
-
-  private normalizeUsernames(usernames: string[] | null | undefined): string[] {
-    const seen = new Set<string>();
-    const result: string[] = [];
-    for (const name of usernames || []) {
-      const trimmed = String(name || '').trim();
-      if (!trimmed) {
-        continue;
-      }
-      const normalized = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
-      if (!normalized) {
-        continue;
-      }
-      const key = normalized.toLowerCase();
-      if (seen.has(key)) {
-        continue;
-      }
-      seen.add(key);
-      result.push(normalized);
-    }
-    return result;
-  }
-
-  private normalizePlatformName(platformName: string | null | undefined): string {
-    return String(platformName || '').trim().toLowerCase();
   }
 }

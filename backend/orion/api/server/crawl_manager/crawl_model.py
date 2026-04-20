@@ -1,13 +1,20 @@
 import base64
 import hashlib
 import os
+import asyncio
+import json
+import secrets
 from datetime import datetime, timezone
+from urllib.parse import urlparse, urlunparse
+from bloom_filter2 import BloomFilter
 import httpx
 import requests
+from fastapi import Request
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
 from orion.api.server.crawl_manager.class_model import *
 from orion.helper_manager.helper_controller import helper_controller
+from orion.helper_manager.env_handler import env_handler
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
@@ -21,6 +28,7 @@ from orion.api.server.crawl_manager.class_model.CTITextRequest import CTITextReq
 
 class crawl_model:
     __instance = None
+    __swarm_bloom = None
 
     @staticmethod
     def getInstance():
@@ -34,6 +42,49 @@ class crawl_model:
             pass
         else:
             crawl_model.__instance = self
+
+    @staticmethod
+    def _normalize_swarm_route_url(raw_url: str | None) -> str | None:
+        if not raw_url or not isinstance(raw_url, str):
+            return None
+
+        text: str = raw_url.strip()
+        if not text:
+            return None
+
+        parsed = urlparse(text)
+        if parsed.scheme not in ("http", "https") or not parsed.netloc:
+            return None
+
+        normalized = parsed._replace(
+            scheme=parsed.scheme.lower(),
+            netloc=parsed.netloc.lower(),
+            params="",
+            query="",
+            fragment="",
+        )
+        normalized_url = str(urlunparse(normalized))
+        return normalized_url.rstrip("/")
+
+    @staticmethod
+    def _extract_swarm_route_url(payload: dict) -> str | None:
+        for key in ("m_url", "m_base_url", "url"):
+            value = payload.get(key)
+            if isinstance(value, str) and value.strip():
+                return value
+        return None
+
+    @classmethod
+    def _get_swarm_bloom(cls) -> BloomFilter:
+        if cls.__swarm_bloom is None:
+            bloom_dir = env_handler.get_instance().env("BLOOM_DIR") or "/tmp"
+            os.makedirs(bloom_dir, exist_ok=True)
+            cls.__swarm_bloom = BloomFilter(
+                max_elements=10_000_000,
+                error_rate=0.01,
+                filename=os.path.join(bloom_dir, "swarm_routes.bloom"),
+            )
+        return cls.__swarm_bloom
 
     async def _update_or_create_model(self,
             base_url: str,
@@ -389,3 +440,48 @@ class crawl_model:
         response.raise_for_status()
 
         return response.json()["result"]
+
+    @staticmethod
+    def _get_swarm_proxy_url(request: Request) -> str:
+        swarm_url = env_handler.get_instance().env("SWARM_URL")
+        swarm_urls = [swarm_url]
+
+        if isinstance(swarm_url, str):
+            stripped_value = swarm_url.strip()
+            if stripped_value.startswith("["):
+                try:
+                    parsed_value = json.loads(stripped_value)
+                    if isinstance(parsed_value, list):
+                        swarm_urls = parsed_value
+                except json.JSONDecodeError:
+                    swarm_urls = [item.strip() for item in stripped_value.split(",") if item.strip()]
+            elif "," in stripped_value:
+                swarm_urls = [item.strip() for item in stripped_value.split(",") if item.strip()]
+            else:
+                swarm_urls = [stripped_value]
+
+        available_swarm_urls = [url.rstrip("/") for url in swarm_urls if url]
+        if not available_swarm_urls:
+            raise ValueError("SWARM_URL is not configured")
+
+        target_base_url = secrets.choice(available_swarm_urls)
+        return f"{target_base_url}/user-dumps"
+
+    @staticmethod
+    async def _post_swarm_payload(target_url: str, payload: dict):
+        async with httpx.AsyncClient(timeout=120) as client:
+            await client.post(target_url, json=payload)
+
+    async def proxy_swarm_index(self, request: Request):
+        payload = await request.json()
+        normalized_url = self._normalize_swarm_route_url(self._extract_swarm_route_url(payload))
+
+        if normalized_url:
+            bloom = self._get_swarm_bloom()
+            if normalized_url in bloom:
+                return JSONResponse(content={"status": "duplicate_ignored"}, status_code=200)
+            bloom.add(normalized_url)
+
+        target_url = self._get_swarm_proxy_url(request)
+        asyncio.create_task(self._post_swarm_payload(target_url, payload))
+        return JSONResponse(content={"status": "accepted"}, status_code=202)

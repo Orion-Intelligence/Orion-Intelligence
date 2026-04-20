@@ -30,10 +30,11 @@ import { scanAnimation } from '../../../shared/animations/scan.animations';
 import { DefacementCallbackModel } from '../../../shared/model/results/defacement/defacement.callback.model';
 import { applyQueryAndPageFromParams, isRouteChanged } from '../dashboard-manager.utils';
 import { NetworkIntel } from '../../network-intel/network-intel';
+import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel],
+  imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel, CrossSearchCardComponent],
   templateUrl: './dashboard-consolidated.component.html',
   animations: [scanAnimation, fadeInDashboardItem],
 })
@@ -45,9 +46,9 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   @ViewChild('domainScan') domainScanComponent!: ConsolidatedScanComponent;
   public consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
   public stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
-  public groupedResults: { [index: string]: any[]; } = {};
+  public groupedResults: Record<string, any[]> = {};
   public response: any;
-  public pageCounts: { [key: string]: number; } = {};
+  public pageCounts: Record<string, number> = {};
   isGrouped = false;
   isIOC = true;
   isNetworkIntel = false;
@@ -209,7 +210,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
   }
 
-  resetFilters(_: void) {
+  resetFilters(_: undefined) {
     this.fetchSearchResults(true);
   }
 
@@ -264,6 +265,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   onUpdateQuery(query: string) {
     this.dashboardService.consolidatedParamModel.q = query;
+    this.query = query;
   }
 
   getTotalResultCount(): number {
@@ -342,7 +344,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   onToggleMenu(tab: string): void {
     this.dashboardService.consolidatedParamModel.tab = tab;
-    this.query='';
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { tab },

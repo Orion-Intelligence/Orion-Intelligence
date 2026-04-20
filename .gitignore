@@ -56,3 +56,5 @@ swagconfig/swaggerconfigv1.js.gz
 backend/static/resource/**
 !backend/static/resource/**/
 !backend/static/resource/**/*default*
+
+nginx/nginx-prod.conf

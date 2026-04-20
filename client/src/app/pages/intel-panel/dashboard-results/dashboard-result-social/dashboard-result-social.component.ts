@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, inject, input } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe, SlicePipe, CommonModule } from '@angular/common';
 import { ScrollService } from '../../../../shared/services/scroll.service';
@@ -7,6 +7,8 @@ import { SocialResultItem } from '../../../../shared/model/results/social/social
 import { fadeInDashboardItem } from "../../../../shared/animations/dashboard.item.animation";
 import { RemoveEmojisPipe } from '../../../../shared/pipes/remove-emojis-pipe.pipe';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
+import { AuthService } from '../../../../services/authetication/auth.service';
+import { ProxyController } from '../../../../shared/services/proxy-controller';
 @Component({
   selector: 'app-dashboard-result-social',
   standalone: true,
@@ -22,15 +24,16 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
   animations: [fadeInDashboardItem]
 })
 export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
+  private readonly proxied_resource = inject(ProxyController);
+
   currentUrl = '';
   queryParams: any = {};
   isCollapsed = true;
   isConsolidatedView = false;
+  readonly searchResults = input<SocialResultItem[]>([]);
+  readonly isExpandAble = input<boolean>(false);
 
-  @Input() searchResults: SocialResultItem[] = [];
-  @Input() isExpandAble: boolean = false;
-
-  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
+  constructor(protected authService: AuthService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
   }
 
   ngAfterViewInit() {
@@ -76,5 +79,13 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
         ci: 'social'
       };
     });
+  }
+
+  openExternalUrl(url?: string | null) {
+    if (!this.authService.getIsMobileDemo() || !url) {
+      return;
+    }
+
+    this.proxied_resource.open(url);
   }
 }

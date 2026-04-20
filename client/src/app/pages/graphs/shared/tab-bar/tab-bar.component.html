@@ -1,17 +1,17 @@
 <div (click)="closeMenus()">
-  <header class="h-12 flex-shrink-0 border-b border-[var(--color-border)] bg-[var(--color-blue-730)]">
+  <header class="relative z-50 h-12 flex-shrink-0 border-b border-[var(--color-border)] bg-[var(--color-blue-730)]">
     <div class="flex h-full items-center justify-between pl-4">
       <nav class="flex h-full items-center gap-1.5">
         @for (tab of visibleTabs(); track trackById($index, tab)) {
-          <div (click)="selectTab(tab.id)" [class]="'group relative flex cursor-pointer items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ' + (isActiveTab(tab.id) ? 'bg-[#0f172a] text-[var(--color-text1)] shadow-[0_1px_0_0_#0f172a]' : 'text-[var(--color-text4)] hover:bg-[var(--color-blue-720)]/80 hover:text-[var(--color-text2)]')">
+          <div (click)="selectTab(tab.id)" [class]="'group relative flex cursor-pointer items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ' + (isPinnedPlaygroundTab($index) ? (isActiveTab(tab.id) ? 'bg-emerald-900/80 text-emerald-100 ring-1 ring-inset ring-emerald-500/50 shadow-[0_1px_0_0_rgba(16,185,129,0.35)]' : 'bg-emerald-950/40 text-emerald-200 hover:bg-emerald-900/60 hover:text-emerald-100 ring-1 ring-inset ring-emerald-500/30') : (isActiveTab(tab.id) ? 'bg-[#0f172a] text-[var(--color-text1)] shadow-[0_1px_0_0_#0f172a]' : 'text-[var(--color-text4)] hover:bg-[var(--color-blue-720)]/80 hover:text-[var(--color-text2)]'))">
             @if (isEditingTab(tab.id)) {
               <div>
                 <input #renameInput [attr.data-testid]="testId('tab-rename-input')" appAutofocus type="text" [value]="tab.name" [attr.data-tab-id]="tab.id" (blur)="handleRename(tab.id, renameInput)" (keydown.enter)="handleRename(tab.id, renameInput)" (keydown.escape)="cancelRename()" (keydown.arrowleft)="$event.stopPropagation()" (keydown.arrowright)="$event.stopPropagation()" (keydown.home)="$event.stopPropagation()" (keydown.end)="$event.stopPropagation()" (click)="$event.stopPropagation()" class="w-32 rounded-md bg-[var(--color-blue-700)] p-1 text-[var(--color-text1)] outline-none ring-2 ring-indigo-500" />
               </div>
             } @else {
-              <span [attr.data-testid]="testId('tab-name')" (dblclick)="$event.stopPropagation(); startEditing(tab.id)" class="py-1 pr-1" title="Double-click to rename">{{ tab.name }}</span>
+              <span [attr.data-testid]="testId('tab-name')" (dblclick)="onTabNameDblClick($event, $index, tab.id)" class="py-1 pr-1" title="Double-click to rename">{{ displayTabName($index, tab.name) }}</span>
             }
-            @if (visibleTabs().length > 1) {
+            @if (visibleTabs().length > 1 && !isPinnedPlaygroundTab($index)) {
               <button [attr.data-testid]="testId('tab-close')" (click)="$event.stopPropagation(); closeTab(tab.id)" class="ml-1 flex h-6 w-6 items-center justify-center rounded-full text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-white">
                 <i class="bi bi-x-lg text-xs"></i>
               </button>
@@ -23,7 +23,7 @@
           <div class="mr-2 h-7 w-px bg-white/5"></div>
           <div class="relative">
             <input [attr.data-testid]="testId('tab-file-input')" type="file" class="hidden" [id]="fileInputIdValue()" (change)="onFileSelected($event)" accept=".json">
-            <button [attr.data-cy]="testCy('tab-add-menu')" [attr.data-testid]="testId('tab-add-menu')" (click)="toggleAddMenu($event)" [disabled]="visibleTabs().length >= 4" [class]="isAddMenuVisible() ? 'flex h-8 w-8 items-center justify-center rounded-md bg-[#0f172a] text-white shadow-sm' : 'flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white disabled:cursor-not-allowed disabled:opacity-50'" title="New Session">
+            <button [attr.data-testid]="testId('tab-add-menu')" (click)="toggleAddMenu($event)" [disabled]="visibleTabs().length >= 4" [class]="isAddMenuVisible() ? 'flex h-8 w-8 items-center justify-center rounded-md bg-[#0f172a] text-white shadow-sm' : 'flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white disabled:cursor-not-allowed disabled:opacity-50'" title="New Session">
               <i class="bi bi-plus-lg text-base leading-none"></i>
             </button>
 
@@ -45,7 +45,7 @@
       </nav>
       <div class="self-center flex items-center gap-1 pr-0">
         <div class="relative">
-          <button [attr.data-cy]="testCy('tab-session-menu')" [attr.data-testid]="testId('tab-session-menu')" (click)="toggleHeaderMenu($event)" class="ui-cti-session-menu-btn flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="Session Menu">
+          <button [attr.data-testid]="testId('tab-session-menu')" (click)="toggleHeaderMenu($event)" class="ui-cti-session-menu-btn flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="Session Menu">
             <i class="bi bi-three-dots-vertical text-lg"></i>
           </button>
           @if (isHeaderMenuVisible()) {

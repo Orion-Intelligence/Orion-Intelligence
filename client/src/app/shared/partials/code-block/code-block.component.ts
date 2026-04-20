@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 @Component({
@@ -12,8 +12,7 @@ import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 })
 export class CodeBlockComponent {
   isExpanded = false;
-
-  @Input() code: string | undefined = '';
+  readonly code = input<string | undefined>('');
 
   toggle(): void {
     this.isExpanded = !this.isExpanded;

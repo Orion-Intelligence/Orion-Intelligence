@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -15,16 +15,15 @@ export class ProSubscriptionComponent {
   userPhone: string = '';
   userEmail: string = '';
   submitted = false;
-
-  @Input() permanent = false;
-
-  @Output() close = new EventEmitter<void>();
+  readonly permanent = input(false);
+  readonly close = output<undefined>();
 
   constructor(private api: ApiService, private router: Router) {
   }
 
   closePopup() {
-    this.close.emit();
+    // TODO: The 'emit' function requires a mandatory void argument
+    this.close.emit(undefined);
   }
 
   submitForm() {

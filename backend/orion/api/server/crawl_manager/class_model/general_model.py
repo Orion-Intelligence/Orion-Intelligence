@@ -1,7 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
-from pydantic.v1 import Extra
+from pydantic import BaseModel, ConfigDict
 
 
 class GeneralDataModel(BaseModel):
@@ -23,5 +22,4 @@ class GeneralDataModel(BaseModel):
     m_clearnet_links: List[str]
     m_embedding: List[float] = []
 
-    class Config:
-        extra = Extra.allow
+    model_config = ConfigDict(extra="allow")

@@ -1,4 +1,4 @@
-<div data-testid="social-follower-scan-overlay" class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-[30px]" (click)="close.emit()">
+<div data-testid="social-follower-scan-overlay" class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-[30px]" (click)="close.emit(undefined)">
   <div data-testid="social-follower-scan-popup" class="ui-graph-popup-panel flex h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-2xl" (click)="$event.stopPropagation()">
     <div class="p-3 flex items-start justify-between gap-3 border-b border-[var(--color-border)] bg-slate-850/90 flex-shrink-0 rounded-t-lg">
       <div class="flex items-center gap-3 min-w-0">
@@ -12,7 +12,7 @@
       </div>
       <div class="flex items-center gap-2">
         <a [href]="getCurrentAccountUrl()" target="_blank" rel="noopener noreferrer" class="inline-flex h-8 items-center justify-center gap-1 rounded-lg bg-slate-700 px-2.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-600" title="Open account in new tab"><i class="bi bi-link-45deg text-sm"></i><span>Account</span></a>
-        <button type="button" (click)="close.emit()" class="ui-social-popup-icon-btn" title="Close"><i class="bi bi-x-lg text-[15px] leading-none"></i></button>
+        <button type="button" (click)="close.emit(undefined)" class="ui-social-popup-icon-btn" title="Close"><i class="bi bi-x-lg text-[15px] leading-none"></i></button>
       </div>
     </div>
 
@@ -59,7 +59,7 @@
                           <i class="bi bi-check-circle-fill text-indigo-400"></i>
                         }
                       </button>
-                      <button data-cy="follower-scan-single" type="button" (click)="scanSingle(username)" class="h-8 w-8 flex items-center justify-center rounded-full text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors" title="Scan this username"><i class="bi bi-search text-xs leading-none"></i></button>
+                      <button data-testid="follower-scan-single" type="button" (click)="scanSingle(username)" class="h-8 w-8 flex items-center justify-center rounded-full text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors" title="Scan this username"><i class="bi bi-search text-xs leading-none"></i></button>
                       <a [href]="getProfileUrl(username)" target="_blank" rel="noopener noreferrer" class="h-8 w-8 flex items-center justify-center rounded-full text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Open account in new tab"><i class="bi bi-link-45deg text-sm leading-none"></i></a>
                     </div>
                   </div>
@@ -71,7 +71,7 @@
             </div>
           } @else {
             <div class="h-full flex items-center justify-center">
-              <button type="button" (click)="fetchFollowers.emit()" [disabled]="isFetchingFollowers()" class="inline-flex items-center justify-center gap-2 rounded-lg bg-sky-700 px-4 py-2 text-sm text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-60">{{ isFetchingFollowers() ? 'Fetching followers...' : 'Fetch Followers' }}</button>
+              <button type="button" (click)="fetchFollowers.emit(undefined)" [disabled]="isFetchingFollowers()" class="inline-flex items-center justify-center gap-2 rounded-lg bg-sky-700 px-4 py-2 text-sm text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-60">{{ isFetchingFollowers() ? 'Fetching followers...' : 'Fetch Followers' }}</button>
             </div>
           }
         </div>
@@ -89,7 +89,7 @@
                           <i class="bi bi-check-circle-fill text-indigo-400"></i>
                         }
                       </button>
-                      <button data-cy="follower-scan-single" type="button" (click)="scanSingle(username)" class="h-8 w-8 flex items-center justify-center rounded-full text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors" title="Scan this username"><i class="bi bi-search text-xs leading-none"></i></button>
+                      <button data-testid="follower-scan-single" type="button" (click)="scanSingle(username)" class="h-8 w-8 flex items-center justify-center rounded-full text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors" title="Scan this username"><i class="bi bi-search text-xs leading-none"></i></button>
                       <a [href]="getProfileUrl(username)" target="_blank" rel="noopener noreferrer" class="h-8 w-8 flex items-center justify-center rounded-full text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" title="Open account in new tab"><i class="bi bi-link-45deg text-sm leading-none"></i></a>
                     </div>
                   </div>
@@ -101,7 +101,7 @@
             </div>
           } @else {
             <div class="h-full flex items-center justify-center">
-              <button type="button" (click)="fetchFollowing.emit()" [disabled]="isFetchingFollowing()" class="inline-flex items-center justify-center gap-2 rounded-lg bg-sky-700 px-4 py-2 text-sm text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-60">{{ isFetchingFollowing() ? 'Fetching following...' : 'Fetch Following' }}</button>
+              <button type="button" (click)="fetchFollowing.emit(undefined)" [disabled]="isFetchingFollowing()" class="inline-flex items-center justify-center gap-2 rounded-lg bg-sky-700 px-4 py-2 text-sm text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-60">{{ isFetchingFollowing() ? 'Fetching following...' : 'Fetch Following' }}</button>
             </div>
           }
         </div>
@@ -146,7 +146,7 @@
     <div class="p-3 border-t border-[var(--color-border)] bg-[var(--color-blue-850)] flex items-center justify-between gap-3">
       <div class="text-sm text-[var(--color-text2)]">Selected: <span class="text-indigo-400 font-semibold">{{ selectedUsernames().size }}</span> / {{ MAX_SELECTION }}</div>
       <div class="flex items-center gap-2">
-        <button data-testid="social-follower-scan-cancel" type="button" (click)="close.emit()" class="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]">Cancel</button>
+        <button data-testid="social-follower-scan-cancel" type="button" (click)="close.emit(undefined)" class="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]">Cancel</button>
         <button data-testid="social-follower-scan-confirm" type="button" (click)="confirmScan()" [disabled]="selectedUsernames().size === 0" class="rounded-lg bg-sky-700 px-3 py-1.5 text-sm text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50">Scan Selected</button>
       </div>
     </div>

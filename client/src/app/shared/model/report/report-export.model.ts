@@ -39,7 +39,7 @@ export interface UnifiedReportPayloadInput {
   langDetected: string;
 }
 
-export type GraphReportMeta = {
+export interface GraphReportMeta {
   generatedAt: string;
   kindLabel: string;
-};
+}

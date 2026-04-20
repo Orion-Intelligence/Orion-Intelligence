@@ -47,9 +47,9 @@ export class HomeSearchService {
   }
 
   handleDocumentClick(event: MouseEvent, filtersWrapper?: ElementRef, searchInput?: ElementRef) {
-    const target = event.target as HTMLElement;
-    const clickedInsideFilter = filtersWrapper?.nativeElement.contains(target);
-    const clickedInput = searchInput?.nativeElement.contains(target);
+    const eventTargetElement = event.target as HTMLElement;
+    const clickedInsideFilter = filtersWrapper?.nativeElement.contains(eventTargetElement);
+    const clickedInput = searchInput?.nativeElement.contains(eventTargetElement);
     if (!clickedInsideFilter && !clickedInput) {
       this.closeOverlay();
     }

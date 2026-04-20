@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, AfterViewInit, OnChanges, SimpleChanges, HostListener, OnInit, OnDestroy } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit, OnChanges, SimpleChanges, HostListener, OnInit, OnDestroy, input } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
@@ -8,13 +8,16 @@ import { ActivatedRoute } from '@angular/router';
 import { HeatmapReportComponent } from './heatmap-report/heatmap-report.component';
 import { AppService } from '../../../services/core/app/app.service';
 import { ApiService } from '../../../shared/services/api.service';
+import { InsightCacheService } from '../../../shared/services/insight-cache.service';
 import { CountryData, CountryInsightPageResponse } from '../../../shared/model/homepage/country-insight.model';
+import { overlayFadeAnimation } from '../../../shared/animations/chat.overlay.animation';
 @Component({
   selector: 'app-world-heatmap',
   imports: [HeatmapReportComponent],
   standalone: true,
   host: { class: 'block w-full' },
-  templateUrl: './world-heatmap.component.html'
+  templateUrl: './world-heatmap.component.html',
+  animations: [overlayFadeAnimation]
 })
 export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, OnDestroy {
   @ViewChild('mapContainer') private chartContainer!: ElementRef;
@@ -33,11 +36,12 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   private readonly tooltipBaseClass = 'heatmap-tooltip pointer-events-none absolute z-[5] max-w-[240px] rounded-[8px] border border-[rgb(239_68_68_/18%)] bg-[#0b1a2e] px-[10px] py-[6px] text-[12px] leading-[1.25] text-[#fecaca] shadow-[0_18px_46px_rgb(0_0_0_/45%)] [backdrop-filter:blur(6px)] [body.light-theme_&]:border-[#d7e2ee] [body.light-theme_&]:bg-[rgb(255_255_255_/95%)] [body.light-theme_&]:text-[#172235] [body.light-theme_&]:shadow-[0_8px_20px_rgb(16_24_40_/12%)] [body.light-theme_&]:[backdrop-filter:none]';
   private readonly tooltipHiddenClass = `${this.tooltipBaseClass} opacity-0`;
   private readonly tooltipVisibleClass = `${this.tooltipBaseClass} heatmap-tooltip-visible opacity-100`;
-  private readonly countryClass = 'country cursor-pointer [stroke:rgb(255_255_255_/14%)] [stroke-width:0.7px] transition-[opacity] duration-200 ease-in-out hover:opacity-90 hover:[stroke:rgb(255_255_255_/50%)] [&.hovered]:opacity-90 [&.hovered]:[stroke:rgb(255_255_255_/50%)] [body.light-theme_&]:[stroke:rgb(23_34_53_/18%)] [body.light-theme_&:hover]:[stroke:rgb(23_34_53_/38%)] [body.light-theme_&.hovered]:[stroke:rgb(23_34_53_/38%)]';
+  private readonly countryClass = 'country [stroke:rgb(255_255_255_/14%)] [stroke-width:0.7px] transition-[opacity] duration-200 ease-in-out hover:opacity-90 hover:[stroke:rgb(255_255_255_/50%)] [&.hovered]:opacity-90 [&.hovered]:[stroke:rgb(255_255_255_/50%)] [body.light-theme_&]:[stroke:rgb(23_34_53_/18%)] [body.light-theme_&:hover]:[stroke:rgb(23_34_53_/38%)] [body.light-theme_&.hovered]:[stroke:rgb(23_34_53_/38%)]';
   private readonly pixelGridLineClass = 'pointer-events-none [stroke:rgb(255_255_255_/4%)] [stroke-width:0.5px] [body.light-theme_&]:[stroke:rgb(23_34_53_/7%)]';
   private selectedCountryPage = 1;
   private readonly countryReportLimit = 20;
 
+  readonly canOpenReports = input<boolean>(true);
   public activeCountryReports: any;
   public activeCategoryKey: string | null = null;
   public selectedCountryReports: any[] = [];
@@ -46,6 +50,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   public isCountryReportLoading = false;
   public isCountryReportLoadingMore = false;
   public hasMoreCountryReports = false;
+  public isMapLoading = true;
 
   private isLightTheme(): boolean {
     if (typeof document === 'undefined') {
@@ -72,45 +77,74 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     };
   }
 
-  constructor(private route: ActivatedRoute, private appService: AppService, private apiService: ApiService) {
+  constructor(private route: ActivatedRoute, private appService: AppService, private apiService: ApiService, private insightCacheService: InsightCacheService) {
   }
 
   ngOnInit(): void {
     const data = this.route.snapshot.data['insights'];
-    this.allCategoryReports = data.country_insight;
-    this.activeCategoryKey = null;
-    this.buildIndex();
+    if (data) {
+      this.applyInsightData(data);
+      return;
+    }
+    this.insightCacheService.getInsight().subscribe(data => {
+      this.applyInsightData(data); 
+    });
   }
 
   ngAfterViewInit(): void {
-    this.createChart();
-    this.startCategoryRotation();
+    window.requestAnimationFrame(() => {
+      this.appService.loadWorldJson();
+      this.waitForWorldJsonAndRender();
+    });
   }
 
   ngOnDestroy(): void {
     this.tooltip?.remove();
-    if (this.rotationTimer) {
-      clearInterval(this.rotationTimer);
-    }
+    this.stopCategoryRotation();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && !changes['data'].firstChange) {
       this.buildIndex();
-      this.updateColors();
-      this.updateLegend();
-      this.updateActiveCategoryLabel();
+      if (!this.mapG || !this.svg) {
+        return;
+      }
+      this.refreshMapPresentation(false);
     }
   }
 
   @HostListener('window:resize')
   onResize(): void {
+    if (!this.appService.worldJson()) {
+      return;
+    }
     this.createChart();
+  }
+
+  private waitForWorldJsonAndRender(): void {
+    if (this.appService.worldJson()) {
+      this.createChart();
+      this.startCategoryRotation();
+      this.isMapLoading = false;
+      return;
+    }
+    window.setTimeout(() => {
+      this.waitForWorldJsonAndRender(); 
+    }, 50);
   }
 
   private getAvailableCategories(): string[] {
     return this.categoryOrder.filter(cat => this.allCategoryReports?.[cat] &&
           this.allCategoryReports[cat].length > 0);
+  }
+
+  private applyInsightData(data: any): void {
+    this.allCategoryReports = data.country_insight;
+    this.activeCategoryKey = null;
+    this.buildIndex();
+    if (this.mapG && this.svg) {
+      this.startCategoryRotation();
+    }
   }
 
   private buildIndex(): void {
@@ -128,15 +162,14 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     if (!available.length) {
       return;
     }
+    this.stopCategoryRotation();
     let index = 0;
     const switchCategory = () => {
       this.activeCategoryKey = available[index];
       this.activeCountryReports = this.allCategoryReports[this.activeCategoryKey];
       this.mapData = this.gettingUniqueCountrys();
       this.buildIndex();
-      this.animateMapTransition();
-      this.updateLegend();
-      this.updateActiveCategoryLabel();
+      this.refreshMapPresentation(true);
       index = (index + 1) % available.length;
     };
     switchCategory();
@@ -146,6 +179,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   }
 
   private ensureLegendDefs(): void {
+    if (!this.svg) {
+      return;
+    }
     const defs = this.svg.select('defs').empty()
       ? this.svg.append('defs')
       : this.svg.select('defs');
@@ -171,8 +207,11 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   }
 
   private updateLegend(): void {
-    const el = this.chartContainer.nativeElement as HTMLElement;
-    const width = el.offsetWidth || 800;
+    if (!this.svg || !this.chartContainer) {
+      return;
+    }
+    const chartContainerElement = this.chartContainer.nativeElement as HTMLElement;
+    const width = chartContainerElement.offsetWidth || 800;
     const isMobile = width <= 768;
     this.ensureLegendDefs();
     const legendColors = this.getLegendColors();
@@ -266,8 +305,11 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   }
 
   private updateActiveCategoryLabel(): void {
-    const el = this.chartContainer.nativeElement as HTMLElement;
-    const width = el.offsetWidth || 800;
+    if (!this.svg || !this.chartContainer) {
+      return;
+    }
+    const chartContainerElement = this.chartContainer.nativeElement as HTMLElement;
+    const width = chartContainerElement.offsetWidth || 800;
     const isMobile = width <= 768;
     const labelX = isMobile ? 35 : 33;
     const labelY = isMobile ? 22 : 28;
@@ -294,16 +336,16 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     if (!this.worldData) {
       return;
     }
-    const el = this.chartContainer.nativeElement as HTMLElement;
-    const width = el.offsetWidth || 800;
-    const height = Math.max(Math.round(width * 0.52), 400);
-    d3.select(el).selectAll('*').remove();
+    const chartContainerElement = this.chartContainer.nativeElement as HTMLElement;
+    const width = chartContainerElement.offsetWidth || 800;
+    const height = chartContainerElement.offsetHeight || Math.min(Math.max(Math.round(width * 0.52), 400), Math.round(window.innerHeight * 0.8));
+    d3.select(chartContainerElement).selectAll('*').remove();
     this.tooltip = d3
-      .select(el)
+      .select(chartContainerElement)
       .append<HTMLDivElement>('div')
       .attr('class', this.tooltipHiddenClass);
     this.svg = d3
-      .select(el)
+      .select(chartContainerElement)
       .append('svg')
       .attr('viewBox', `0 0 ${width} ${height}`);
     this.mapG = this.svg.append('g');
@@ -320,9 +362,14 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       .append('path')
       .attr('d', this.path as any)
       .attr('class', this.countryClass)
+      .classed('can-open-reports', this.canOpenReports())
       .classed('has-data', (d: any) => this.getValueForFeature(d) != null)
-      .on('mousemove', (event: MouseEvent, d: any) => this.onHoverMove(event, d))
-      .on('mouseleave', (event: MouseEvent) => this.onHoverOut(event))
+      .on('mousemove', (event: MouseEvent, d: any) => {
+        this.onHoverMove(event, d); 
+      })
+      .on('mouseleave', (event: MouseEvent) => {
+        this.onHoverOut(event); 
+      })
       .on('click', (_: MouseEvent, d: any) => {
         if (this.getValueForFeature(d) == null) {
           return;
@@ -347,9 +394,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
         .attr('x2', width)
         .attr('y2', y);
     }
-    this.updateColors();
-    this.updateLegend();
-    this.updateActiveCategoryLabel();
+    this.refreshMapPresentation(false);
   }
 
   private getValueForFeature(d: any): number | null {
@@ -372,8 +417,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   private updateColors(): void {
     const color = this.getColorScale();
     this.mapG.selectAll<SVGPathElement, any>('path.country')
+      .classed('can-open-reports', this.canOpenReports())
       .classed('has-data', (d: any) => this.getValueForFeature(d) != null)
-      .classed('is-clickable', (d: any) => this.getValueForFeature(d) != null)
+      .classed('is-clickable', (d: any) => this.canOpenReports() && this.getValueForFeature(d) != null)
       .attr('fill', (d: any) => {
         const v = this.getValueForFeature(d);
         return v == null ? this.neutralFill : color(v);
@@ -388,11 +434,11 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     this.tooltip.selectAll('*').remove();
     this.tooltip.append('div').text(name);
     this.tooltip.append('div').text(`Leaks: ${v ?? 'N/A'}`);
-    const container = this.chartContainer.nativeElement as HTMLElement;
-    const rect = container.getBoundingClientRect();
-    const tipEl = this.tooltip.node() as HTMLDivElement | null;
-    const tipW = tipEl?.offsetWidth ?? 160;
-    const tipH = tipEl?.offsetHeight ?? 44;
+    const chartContainerElement = this.chartContainer.nativeElement as HTMLElement;
+    const rect = chartContainerElement.getBoundingClientRect();
+    const tooltipElement = this.tooltip.node() as HTMLDivElement | null;
+    const tipW = tooltipElement?.offsetWidth ?? 160;
+    const tipH = tooltipElement?.offsetHeight ?? 44;
     let x = event.clientX - rect.left + 12;
     let y = event.clientY - rect.top + 12;
     if (x + tipW > rect.width - 8) {
@@ -422,6 +468,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   }
 
   private onCountryClick(d: any): void {
+    if (!this.canOpenReports()) {
+      return;
+    }
     const name = d?.properties?.name;
     if (!name) {
       return;
@@ -463,20 +512,15 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
 
   private openCountryReport(): void {
     this.isOpenCountryReport = true;
-    this.selectedCountryReports = [];
-    this.selectedCountryPage = 1;
-    this.hasMoreCountryReports = false;
-    this.fetchCountryReportsPage(1, false);
+    this.resetCountryReportState();
+    void this.fetchCountryReportsPage(1, false);
   }
 
   closeCountryReport(): void {
     this.isOpenCountryReport = false;
     this.selectedName = null;
-    this.selectedCountryReports = [];
-    this.hasMoreCountryReports = false;
-    this.isCountryReportLoading = false;
-    this.isCountryReportLoadingMore = false;
-    this.selectedCountryPage = 1;
+    this.resetCountryReportState();
+    this.setCountryReportLoadingState(false, false);
   }
 
   async loadMoreCountryReports(): Promise<void> {
@@ -490,12 +534,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     if (!this.selectedName || !this.activeCategoryKey) {
       return;
     }
-    if (append) {
-      this.isCountryReportLoadingMore = true;
-    }
-    else {
-      this.isCountryReportLoading = true;
-    }
+    this.setCountryReportLoadingState(append, true);
 
     try {
       const params = new HttpParams()
@@ -516,8 +555,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       this.hasMoreCountryReports = false;
     }
     finally {
-      this.isCountryReportLoading = false;
-      this.isCountryReportLoadingMore = false;
+      this.setCountryReportLoadingState(append, false);
     }
   }
 
@@ -530,8 +568,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     const neutralFill = this.neutralFill;
     const countries = this.mapG.selectAll<SVGPathElement, any>('path.country');
     countries
+      .classed('can-open-reports', this.canOpenReports())
       .classed('has-data', (d: any) => getValueForFeature(d) != null)
-      .classed('is-clickable', (d: any) => getValueForFeature(d) != null)
+      .classed('is-clickable', (d: any) => this.canOpenReports() && getValueForFeature(d) != null)
       .transition()
       .duration(1100)
       .ease(d3.easeCubicInOut)
@@ -542,6 +581,38 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
         const interpolateFill = d3.interpolateRgb(currentFill, nextFill);
         return (t: number) => interpolateFill(t);
       });
+  }
+
+  private stopCategoryRotation(): void {
+    if (this.rotationTimer) {
+      clearInterval(this.rotationTimer);
+      this.rotationTimer = null;
+    }
+  }
+
+  private refreshMapPresentation(animate: boolean): void {
+    if (animate) {
+      this.animateMapTransition();
+    }
+    else {
+      this.updateColors();
+    }
+    this.updateLegend();
+    this.updateActiveCategoryLabel();
+  }
+
+  private resetCountryReportState(): void {
+    this.selectedCountryReports = [];
+    this.selectedCountryPage = 1;
+    this.hasMoreCountryReports = false;
+  }
+
+  private setCountryReportLoadingState(append: boolean, isLoading: boolean): void {
+    if (append) {
+      this.isCountryReportLoadingMore = isLoading;
+      return;
+    }
+    this.isCountryReportLoading = isLoading;
   }
 
   private normalizePositionValue(rawValue: number): number {

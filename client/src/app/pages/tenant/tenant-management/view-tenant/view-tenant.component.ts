@@ -82,8 +82,8 @@ export class ViewTenantComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   handleClickOutside(event: MouseEvent): void {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.action-menu')) {
+    const eventTargetElement = event.target as HTMLElement;
+    if (!eventTargetElement.closest('.action-menu')) {
       this.selectedTenantId = null;
     }
   }

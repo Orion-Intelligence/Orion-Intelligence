@@ -32,12 +32,12 @@ class SignupManager:
             db_user_account, (db_user_account.username == username))
         if existing_user:
             raise HTTPException(status_code=400, detail="Username or email already exists")
-        
+
         existing_mail = await engine.find_one(
             db_user_account, (db_user_account.email == email))
         if existing_mail:
             raise HTTPException(status_code=400, detail="Username or email already exists")
-        
+
         new_email_domain = TenantManager.get_email_domain(email)
         maintainers = await engine.find(
             db_user_account, db_user_account.licenses == LicenseName.MAINTAINER)
@@ -47,7 +47,6 @@ class SignupManager:
         )
         if domain_exists:
             raise HTTPException(status_code=400, detail="This domain tenant already exists")
-            
 
         TenantManager.validate_company_email(email)
 
@@ -143,13 +142,13 @@ class SignupManager:
             raise e
         except Exception:
             raise HTTPException(status_code=422, detail="Invalid data")
-        
+
     @staticmethod
     async def send_support_mail(data: SupportRequest):
         email=data.email or ""
         subject=data.subject or ""
         message=data.message or ""
-            
+
 
         TenantManager.validate_company_email(email)
 

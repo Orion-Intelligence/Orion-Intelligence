@@ -1,4 +1,4 @@
-import { Component, effect, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, effect, OnInit, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgOptimizedImage } from '@angular/common';
 import { FilterModel } from '../../model/filter/filter.model';
@@ -7,6 +7,7 @@ import { filterAnimation } from '../../animations/filter.animation';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { DatePickerComponent } from './date-picker/date-picker.component';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { ScrollService } from '../../services/scroll.service';
 @Component({
   selector: 'app-filters',
   templateUrl: './filters.component.html',
@@ -18,26 +19,34 @@ export class FiltersComponent implements OnInit {
   protected readonly Object = Object;
   protected readonly last = last;
 
+  readonly filterModelInput = input<FilterModel | undefined>(undefined, { alias: 'filterModel' });
   selectedFilters: Record<string, string | null> = {};
   initialModel!: FilterModel;
+  filterModel!: FilterModel;
+  readonly isFilterOpen = input.required<boolean | null>();
+  readonly filterChanged = output<Record<string, string | null>>();
+  readonly filterReset = output<undefined>();
+  readonly filterClose = output<undefined>();
 
-  @Input() filterModel!: FilterModel;
-  @Input() isFilterOpen!: boolean | null;
-
-  @Output() filterChanged = new EventEmitter<Record<string, string | null>>();
-  @Output() filterReset = new EventEmitter<void>();
-  @Output() filterClose = new EventEmitter<void>();
-
-  constructor(protected dashboard: DashboardService) {
-    this.initialModel = structuredClone(this.filterModel);
+  constructor(protected dashboard: DashboardService, private scrollService: ScrollService) {
     effect(() => {
       const currentFilters = this.dashboard.selectedFilters();
       this.selectedFilters = { ...currentFilters };
     });
+    effect(() => {
+      const filterModel = this.filterModelInput();
+      if (filterModel === undefined) {
+        return;
+      }
+      this.filterModel = filterModel;
+      this.initialModel = structuredClone(filterModel);
+    });
   }
 
   ngOnInit() {
-    this.initialModel = structuredClone(this.filterModel);
+    if (this.filterModel) {
+      this.initialModel = structuredClone(this.filterModel);
+    }
   }
 
   updateFilter( event: { key: string; value: string; } ) {
@@ -55,19 +64,23 @@ export class FiltersComponent implements OnInit {
   }
 
   applyFilters() {
+    this.scrollService.clearSavedPosition();
     this.dashboard.selectedFilters.set(this.selectedFilters);
     this.filterChanged.emit({ ...this.selectedFilters });
     this.closeFilter();
   }
 
   closeFilter() {
-    this.filterClose.emit();
+    // TODO: The 'emit' function requires a mandatory void argument
+    this.filterClose.emit(undefined);
   }
 
   resetFilters() {
+    this.scrollService.clearSavedPosition();
     this.dashboard.selectedFilters.set({});
     this.filterChanged.emit({ ...this.selectedFilters });
-    this.filterReset.emit();
+    // TODO: The 'emit' function requires a mandatory void argument
+    this.filterReset.emit(undefined);
     this.closeFilter();
   }
 

@@ -1,7 +1,7 @@
 from typing import List, Optional
 from datetime import date
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 
 class social_model(BaseModel):
@@ -17,7 +17,11 @@ class social_model(BaseModel):
     m_platform: str
     m_network: str
 
-    model_config = {"extra": "allow", "json_encoders": {date: lambda v: v.strftime("%Y-%m-%d") if v else None}}
+    model_config = ConfigDict(extra="allow")
+
+    @field_serializer("m_message_date")
+    def serialize_message_date(self, value: Optional[date]):
+        return value.strftime("%Y-%m-%d") if value else None
 
 
 class social_data_model(BaseModel):

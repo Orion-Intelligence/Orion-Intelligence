@@ -10,6 +10,13 @@ const SIDEBAR_GROUP_ROUTE_PREFIX: Record<string, string> = {
   Dump: 'dump',
 };
 
+const SIDEBAR_SUBITEM_TEST_ID_ALIAS: Record<string, Record<string, string>> = {
+  'Web Scans': {
+    'Basic Scan': 'network-scan',
+    'Port Scan': 'network-scan',
+  },
+};
+
 function getSidebarGroupTestId(title: string): string {
   const routePrefix = SIDEBAR_GROUP_ROUTE_PREFIX[title];
   expect(routePrefix, `routePrefix mapping for "${title}"`).to.exist;
@@ -19,7 +26,7 @@ function getSidebarGroupTestId(title: string): string {
 export function openSidebarGroup(title: string) {
   const groupTestId = getSidebarGroupTestId(title);
   cy.get(`[data-testid="${groupTestId}"]`).should('be.visible').click();
-  cy.get(`[data-testid="${groupTestId}"]`).closest('li').find('> ul').should(($ul) => {
+  cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
     expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
   });
 }
@@ -27,9 +34,24 @@ export function openSidebarGroup(title: string) {
 export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
   const routePrefix = SIDEBAR_GROUP_ROUTE_PREFIX[groupTitle];
   const groupTestId = getSidebarGroupTestId(groupTitle);
-  cy.get(`[data-testid="${groupTestId}"]`).closest('li').find('> ul').should(($ul) => {
+  const aliasedTestId = SIDEBAR_SUBITEM_TEST_ID_ALIAS[groupTitle]?.[itemTitle];
+
+  cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
     expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
-  }).find(`[data-testid^="sidebar-subitem-${routePrefix}-"]`).contains('div', new RegExp(`^\\s*${itemTitle}\\s*$`)).click();
+  });
+
+  if (aliasedTestId) {
+    cy.get(`[data-testid="sidebar-subitem-${routePrefix}-${aliasedTestId}"]`)
+      .scrollIntoView()
+      .should('be.visible')
+      .click({ force: true });
+    return;
+  }
+
+  cy.contains(`[data-testid^="sidebar-subitem-${routePrefix}-"] div`, new RegExp(`^\\s*${itemTitle}\\s*$`))
+    .scrollIntoView()
+    .should('be.visible')
+    .click({ force: true });
 }
 
 export function waitForSearchReady() {
@@ -40,7 +62,7 @@ export function typeDashboardSearch(value: string) {
   cy.scrollDashboardToTop();
   waitForSearchReady();
   cy.scrollDashboardToTop();
-  cy.get('input[data-cy="dashboard-general-input"][name="q"]').first().should('be.visible').and('be.enabled').then(($input) => {
+  cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().should('be.visible').and('be.enabled').then(($input) => {
     const currentValue = String($input.val() ?? '').trim();
     if (currentValue.length > 0) {
       cy.wrap($input).clear();

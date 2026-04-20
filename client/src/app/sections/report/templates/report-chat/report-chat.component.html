@@ -1,0 +1,199 @@
+<app-report-header [csv_object]="resultItem" [url]="resultItem?.m_channel_url" [content]="resultItem?.m_content"></app-report-header>
+
+@if (resultItem) {
+  <app-report-interaction-host [docId]="reportDocId">
+  <div>
+    <div class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4">
+      <div class="border-b border-[var(--color-divider)] pb-3">
+        <p class="text-[20px] font-semibold leading-tight text-[var(--color-text1)]">
+          {{ getDisplayChannelTitle(resultItem.m_channel_name, resultItem.m_channel_url) | slice:0:550 }}{{ getDisplayChannelTitle(resultItem.m_channel_name, resultItem.m_channel_url).length > 550 ? '...' : '' }}
+        </p>
+        @if (resultItem.m_channel_url) {
+          <p class="mt-1 truncate text-[14px]">
+            <a [href]="resultItem.m_channel_url" target="_blank" rel="noopener noreferrer" class="text-[var(--color-blue-640)] hover:underline">
+              {{ normalizeDisplayUrl(resultItem.m_channel_url) }}
+            </a>
+          </p>
+        }
+      </div>
+      @if (hasCodeType(resultItem)) {
+        <div class="report-surface-soft mt-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft p-3 text-sm text-[var(--color-text3)]">
+          <p class="font-semibold">Code snippet - content not available</p>
+          <div class="mt-2 rounded-md bg-[var(--color-blue-810)] p-3 font-mono text-xs text-[var(--color-text1)]">
+            <code [innerText]="getContentWithoutEmptyLines(resultItem.m_content)"></code>
+          </div>
+        </div>
+      } @else {
+        @if (getContentLines(resultItem).length > 0) {
+          <div class="mt-4 space-y-4">
+            @for (section of getContentLines(resultItem).slice(0, 12); track $index; let i = $index) {
+              <div class="report-surface-soft rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft p-3">
+                <h3 class="text-[11px] font-medium uppercase tracking-[0.05em] text-[var(--color-text4)]">Section {{ i + 1 }}</h3>
+                <p class="mt-2 text-sm text-[var(--color-text3)]">{{ section.length > 550 ? (section | slice:0:550) + '...' : section }}</p>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="mt-3 text-sm text-[var(--color-text4)]">No content available</p>
+        }
+      }
+      <h5 class="mt-6 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)]">Report Sharable Link</h5>
+      @if (resultItem.m_message_sharable_link) {
+        <p class="mt-2 truncate text-[14px]">
+          <a [href]="resultItem.m_message_sharable_link" class="text-[var(--color-blue-640)] hover:underline" target="_blank">
+            {{ normalizeDisplayUrl(resultItem.m_message_sharable_link) }}
+          </a>
+        </p>
+      }
+      <div class="mt-5 grid gap-x-6 border-t border-[var(--color-divider)] pt-2 text-sm md:grid-cols-2 xl:grid-cols-3">
+        <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Message Date</p>
+          <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_message_date }}</span>
+        </div>
+        @if (hasValue(resultItem.m_views)) {
+          <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Views</p>
+            <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_views }}</span>
+          </div>
+        }
+        @if (hasValue(resultItem.m_sender_username)) {
+          <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Sender Username</p>
+            <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_sender_username }}</span>
+          </div>
+        }
+        @if (hasValue(resultItem.m_sender_name)) {
+          <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Sender</p>
+            <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_sender_name }}</span>
+          </div>
+        }
+        @if (hasValue(resultItem.m_message_id)) {
+          <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Message ID</p>
+            <span class="max-w-[65%] break-all text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_message_id }}</span>
+          </div>
+        }
+        @if (hasValue(resultItem.m_platform)) {
+          <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Platform</p>
+            <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_platform }}</span>
+          </div>
+        }
+        @if (hasValue(resultItem.m_network)) {
+          <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Network</p>
+            <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_network }}</span>
+          </div>
+        }
+        @if (hasValue(resultItem.m_post_likes)) {
+          <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Post Likes</p>
+            <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_post_likes }}</span>
+          </div>
+        }
+        @if (hasValue(resultItem.m_post_shares)) {
+          <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Post Shares</p>
+            <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_post_shares }}</span>
+          </div>
+        }
+        @if (hasValue(resultItem.m_post_comments_count)) {
+          <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Post Comments</p>
+            <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_post_comments_count }}</span>
+          </div>
+        }
+        @if (hasValue(resultItem.m_post_tags?.length ? resultItem.m_post_tags : null)) {
+          <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Post Tags</p>
+            <span class="max-w-[65%] break-all text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_post_tags.join(', ') }}</span>
+          </div>
+        }
+        @if (hasValue(resultItem.m_post_views)) {
+          <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Post Views</p>
+            <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_post_views }}</span>
+          </div>
+        }
+        @if (hasValue(resultItem.m_post_expiry)) {
+          <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Post Expiry</p>
+            <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_post_expiry }}</span>
+          </div>
+        }
+        @if (hasValue(resultItem.m_comment_count)) {
+          <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Comment Count</p>
+            <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_comment_count }}</span>
+          </div>
+        }
+        @if (hasValue(resultItem.m_likes)) {
+          <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Likes</p>
+            <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_likes }}</span>
+          </div>
+        }
+        @if (hasValue(resultItem.m_retweets)) {
+          <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Retweets</p>
+            <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_retweets }}</span>
+          </div>
+        }
+        @if (hasValue(resultItem.m_commenters?.length ? resultItem.m_commenters : null)) {
+          <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Commenters</p>
+            <span class="max-w-[65%] break-all text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_commenters.join(', ') }}</span>
+          </div>
+        }
+      </div>
+    </div>
+    @if (arrayKeys.length) {
+      <div class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4">
+        <div (click)="metaadataToggleContent()" class="flex cursor-pointer items-start justify-between gap-3">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 text-[16px] font-semibold leading-tight text-[var(--color-text1)]">
+              <img src="/assets/images/shared/theme/info.svg" alt="Icon" class="h-5 w-5 shrink-0 ui-action-icon" appTooltip="Metadata">
+              <span class="truncate">Metadata</span>
+            </div>
+            <p class="mt-1 text-[12px] text-[var(--color-text4)]">Detected entities, extracted sections, and structured attributes.</p>
+          </div>
+          <div [attr.aria-label]="isExpandedMetadata ? 'Collapse' : 'Expand'" class="mt-[2px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
+            <img [ngClass]="{ 'rotate-180': !isExpandedMetadata }" alt="toggle icon" class="h-[18px] w-[18px] transition ui-action-icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+          </div>
+        </div>
+        @if (isExpandedMetadata) {
+          <div class="mt-4 flex flex-wrap items-center gap-2.5">
+            @for (key of arrayKeys; track key; let last = $last) {
+              <button (click)="setActiveTab(key)" [ngClass]="activeTab === key ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[0_2px_8px_rgba(87,165,235,0.35)]' : 'border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft text-[var(--color-text3)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)]'" appTooltip="Info about {{ key === 'm_person' ? 'entity' : key.replace('m_', '').replace('_', ' ') }}" class="rounded-full border px-3 py-1 text-[12px] font-semibold tracking-[0.01em] transition-all duration-150">
+                {{ key === 'm_person' ? 'Entity' : formatKeyLabel(key) }}
+              </button>
+              @if (!last) {
+                <div class="h-4 w-px bg-[var(--color-divider)]/70"></div>
+              }
+            }
+          </div>
+          <div class="mt-3 h-px w-full bg-[var(--color-divider)]"></div>
+          @if (activeTab === 'm_content' || activeTab === 'm_summary') {
+            <app-result-section @fadeInDashboardItem
+            [listItems]="[activeTab === 'm_content' ? content : summary]"></app-result-section>
+          }
+          @if (activeTab === 'm_org' || activeTab === 'm_person') {
+            <div class="report-surface-soft mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft p-3 text-xs text-[var(--color-text4)]">
+              Names of people, organizations, and entities are handled separately, but may overlap in the results.
+            </div>
+          }
+          @if (activeTab !== 'm_content' && activeTab !== 'm_summary') {
+            <app-result-list @fadeInDashboardItem
+            [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
+          }
+        }
+      </div>
+    }
+    <app-json-api-viewer [jsonData]="resultItem"></app-json-api-viewer>
+  </div>
+  </app-report-interaction-host>
+}
+@if (appService.getConfig().appSettings.ai_endpoint) {
+  <app-chat-widget [reportText]="resultItem?.m_content"></app-chat-widget>
+}

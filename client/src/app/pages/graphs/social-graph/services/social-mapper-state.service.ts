@@ -4,6 +4,7 @@ import { FetchingStateService } from './fetching-state.service';
 import { PlatformResult, ManageProfilesModalData } from '../../../../shared/model/social/social-scan.models';
 import { ContextMenuData } from '../network-graph/context-menu/context-menu.component';
 import { NotificationData, NotificationType } from '../notification-bar/notification-bar.component';
+import { parsePlatformNodeId } from '../utils/social-graph-view.util';
 interface DeleteConfirmationData {
     message: string;
 }
@@ -143,7 +144,7 @@ export class SocialMapperStateService {
   }
 
   private findPlatformDataByNodeId(nodeId: string): PlatformResult | null {
-    const parsed = this.parsePlatformNodeId(nodeId);
+    const parsed = parsePlatformNodeId(nodeId);
     if (!parsed) {
       return null;
     }
@@ -172,32 +173,6 @@ export class SocialMapperStateService {
     return null;
   }
 
-  private parsePlatformNodeId(nodeId: string): {
-        keyUsername: string;
-        platformName: string;
-        platformUsername: string;
-    } | null {
-    if (!nodeId.startsWith('platform-')) {
-      return null;
-    }
-    const raw = nodeId.substring('platform-'.length);
-    const firstSep = raw.indexOf('|');
-    if (firstSep < 0) {
-      return null;
-    }
-    const secondSep = raw.indexOf('|', firstSep + 1);
-    if (secondSep < 0) {
-      return null;
-    }
-    const keyUsername = raw.slice(0, firstSep);
-    const platformName = raw.slice(firstSep + 1, secondSep);
-    const platformUsername = raw.slice(secondSep + 1);
-    if (!keyUsername || !platformName || !platformUsername) {
-      return null;
-    }
-    return { keyUsername, platformName, platformUsername };
-  }
-
   closeFollowerScanPopup() {
     this.followerScanPopupData.set(null); this.isFollowerScanPopupVisible.set(false); 
   }
@@ -211,7 +186,11 @@ export class SocialMapperStateService {
   }
 
   focusOnUser(username: string): void {
-    this.nodeToFocus.set(`user-${username}`);
+    this.focusOnNode(`user-${username}`);
+  }
+
+  focusOnNode(nodeId: string): void {
+    this.nodeToFocus.set(nodeId);
     setTimeout(() => this.nodeToFocus.set(null), 100);
   }
 

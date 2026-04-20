@@ -1,5 +1,5 @@
 import { CommonModule, NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnChanges, SimpleChanges, input } from '@angular/core';
 import { UrlScanMeta, UrlScanThreatItem } from '../../../shared/model/security-scan/security.scan.results.model';
 import { FindingRow } from '../../../shared/model/security-scan/finding-row.model';
 import { HelperService } from '../../../shared/services/helper.service';
@@ -12,9 +12,12 @@ import { HelperService } from '../../../shared/services/helper.service';
 })
 export class SecurityScanExportComponentComponent implements OnChanges {
   viewFindings: FindingRow[] = [];
-
-  @Input() meta!: UrlScanMeta;
-  @Input() categories!: { name: string; total: number; items: UrlScanThreatItem[]; }[];
+  readonly meta = input.required<UrlScanMeta>();
+  readonly categories = input.required<{
+      name: string;
+      total: number;
+      items: UrlScanThreatItem[];
+  }[]>();
 
   constructor(private helperService: HelperService) {
   }
@@ -42,7 +45,7 @@ export class SecurityScanExportComponentComponent implements OnChanges {
 
   private buildRows(): FindingRow[] {
     const rows: FindingRow[] = [];
-    const cats = this.categories || [];
+    const cats = this.categories() || [];
     for (const cat of cats) {
       const items = cat.items || [];
       for (let i = 0; i < items.length; i++) {

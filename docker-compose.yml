@@ -62,19 +62,21 @@ services:
     image: fholzer/nginx-brotli:latest
     ports:
       - "8080:8080"
-      - "443:443"
+      - "8443:8443"
     depends_on:
       - web
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./backend/.ssl:/etc/nginx/local-certs:ro
       - ./backend/static:/app/static:cached
+      - ./client/build:/client_build:ro
       - /var/www/certbot:/var/www/certbot
       - /etc/letsencrypt:/etc/letsencrypt:ro
     networks:
       backend:
         ipv4_address: 172.20.1.13
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:8080 >/dev/null 2>&1 || exit 1" ]
+      test: [ "CMD-SHELL", "curl -fk https://localhost:8443 >/dev/null 2>&1 || exit 1" ]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -95,6 +97,7 @@ services:
       - xpack.security.transport.ssl.enabled=false
       - indices.memory.index_buffer_size=5%
       - node.store.allow_mmap=false
+      - ES_JAVA_OPTS=-Djdk.internal.platform.disableContainerSupport=true -Xms512m -Xmx512m
     env_file:
       - .env
     ports:
@@ -107,12 +110,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
-    command:
-      - bash
-      - -c
-      - |
-        export JAVA_OPTS="-Djdk.internal.platform.disableContainerSupport=true -Xms512m -Xmx512m"
-        exec /usr/local/bin/docker-entrypoint.sh eswrapper
     networks:
       backend:
         ipv4_address: 172.20.1.11
@@ -224,4 +221,3 @@ volumes:
   static_volume:
   media_volume:
   arangodb:
-
