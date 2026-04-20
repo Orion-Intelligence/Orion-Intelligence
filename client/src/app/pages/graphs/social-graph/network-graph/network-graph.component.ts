@@ -527,7 +527,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         hideEdgesOnDrag: false,
         hover: true,
         navigationButtons: false,
-        keyboard: true,
+        keyboard: false,
         zoomView: true,
         dragView: true
       },
