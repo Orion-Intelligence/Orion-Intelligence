@@ -13,6 +13,7 @@ export class ConsolidatedParamModel {
   ioc = "";
   fullsearch = false;
   tab = "";
+  entity_filter?: Record<string, string[]>;
 
   reset(): void {
     this.q = "";
@@ -27,5 +28,6 @@ export class ConsolidatedParamModel {
     this.ioc = "";
     this.fullsearch = false;
     this.tab = "";
+    this.entity_filter = undefined;
   }
 }

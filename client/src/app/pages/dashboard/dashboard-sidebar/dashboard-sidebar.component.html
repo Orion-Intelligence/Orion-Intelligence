@@ -19,7 +19,6 @@
         [routePrefix]="'profile'"
         [title]="this.appService.userSessionData().user.username">
       </app-dashboard-sidebar-items>
-      <!-- </div> -->
       </div>
       @if (licenseService.canUseModule('free') || licenseService.canUseModule('osint_basic') || licenseService.canUseModule('osint_advanced') || licenseService.canUseModule('enterprise')) {
         <div class="mt-[20px] text-[13px] font-bold text-white">Search API's</div>
@@ -159,11 +158,18 @@
           </div>
         </div>
       }
+      @if (canAccessStandaloneDataCollection()) {
+        <div class="my-[6px] rounded-[8px] select-none">
+          <div (click)="requestStandaloneSubscription($event, canAccessNetworkIntel()); canAccessNetworkIntel() && onSectionSelected(category.THREAT_LENS)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.THREAT_LENS, 'opacity-20': !canAccessNetworkIntel() }" [routerLink]="canAccessNetworkIntel() ? 'threat-lens' : null" class="flex h-[46px] items-center gap-[8px] rounded-[8px] border border-transparent px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
+            <img alt="Threat Lens" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/theme/graph.svg" width="20">
+            Threat Lens
+          </div>
+        </div>
+      }
       @if (isAdmin() || licenseService.canUseCtiGraph() || isDemo()) {
         <div id="sidebar-cti-graph" class="my-[6px] rounded-[8px] select-none">
           <a (click)="requestStandaloneSubscription($event, isAdmin() || licenseService.canUseCtiGraph())" [ngClass]="{ 'opacity-20': isDemo() && !(isAdmin() || licenseService.canUseCtiGraph()) }" class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" [attr.href]="isAdmin() || licenseService.canUseCtiGraph() ? '/dashboard/ctigraph' : null" target="_blank">
             <img alt="Links" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/graph.svg" width="20">
-
             CTI Graph
           </a>
         </div>
@@ -369,6 +375,13 @@
         <li class="my-[6px] rounded-[8px] select-none">
           <div (click)="requestStandaloneSubscription($event, canAccessSatelliteIntel()); canAccessSatelliteIntel() && onSectionSelected(category.SatelliteINTEL)" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.SatelliteINTEL, 'opacity-20': isDemo() && !canAccessSatelliteIntel() }" [routerLink]="canAccessSatelliteIntel() ? 'satelliteint' : null" appTooltip="Satellite Intel" class="flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-white focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]" queryParamsHandling="merge">
             <img alt="Satellite Intel" class="h-[20px] w-[20px] shrink-0 opacity-100" height="20" ngSrc="assets/images/sidebar/dump.svg" width="20">
+          </div>
+        </li>
+      }
+      @if (canAccessStandaloneDataCollection()) {
+        <li class="my-[6px] rounded-[8px] select-none">
+          <div (click)="requestStandaloneSubscription($event, canAccessNetworkIntel()); canAccessNetworkIntel() && onSectionSelected(category.THREAT_LENS)" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.THREAT_LENS, 'opacity-20': !canAccessNetworkIntel() }" [routerLink]="canAccessNetworkIntel() ? 'threat-lens' : null" appTooltip="Threat Lens" class="flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-white focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]" queryParamsHandling="merge">
+            <img alt="Threat Lens" class="h-[20px] w-[20px] shrink-0 opacity-100" height="20" ngSrc="/assets/images/sidebar/theme/graph.svg" width="20">
           </div>
         </li>
       }

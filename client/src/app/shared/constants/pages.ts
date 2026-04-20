@@ -15,7 +15,8 @@ export enum Category {
     TENANT = 'Tenant',
     PROFILE = 'Profile',
     NETINT = 'NETINT',
-    SatelliteINTEL = 'SatelliteINTEL'
+    SatelliteINTEL = 'SatelliteINTEL',
+    THREAT_LENS = 'THREAT_LENS'
 }
 export enum GeneralSubCategory {
     ALL = 'All',

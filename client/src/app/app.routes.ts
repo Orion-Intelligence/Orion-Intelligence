@@ -10,7 +10,7 @@ import { IocResolver } from './shared/resolvers/ioc.resolver';
 import { ConfigResolver } from './shared/resolvers/config.resolver';
 import { OnboardingGuard } from './shared/guards/onboarding-guar';
 import { NotificationGuard } from './shared/guards/notification.guard';
-
+import { ThreatLensComponent } from './pages/threat-lens/threat-lens';
 const loadLoginComponent = () => import('./pages/login/login.component').then(m => m.LoginComponent);
 const loadSignupComponent = () => import('./pages/signup/signup.component').then(m => m.SignupComponent);
 const loadDashboardComponent = () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent);
@@ -688,7 +688,12 @@ export const routes: Routes = [
       {
         path: 'satelliteint',
         canActivate: [subscriptionGuard],
-        loadComponent: loadSatelliteIntelComponent,
+        loadComponent: loadSatelliteIntelComponent
+      },
+      {
+        path: 'threat-lens',
+        canActivate: [subscriptionGuard],
+        component: ThreatLensComponent,
         data: { animation: 'CategoryPage' }
       },
       {
