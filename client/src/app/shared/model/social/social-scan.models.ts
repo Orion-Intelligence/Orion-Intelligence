@@ -51,7 +51,7 @@ export interface Job {
     id: string;
     username: string;
     displayName?: string;
-    status: 'in_progress' | 'completed' | 'failed';
+    status: 'queued' | 'in_progress' | 'completed' | 'failed';
     progress: number;
     step: string;
 }

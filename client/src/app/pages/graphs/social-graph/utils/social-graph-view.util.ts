@@ -90,8 +90,8 @@ function toFieldLabel(key: string): string {
 function toDisplayValues(value: unknown): string[] {
   if (Array.isArray(value)) {
     const values = value
-      .filter(item => item !== null && item !== undefined && `${item}`.trim() !== '')
-      .map(item => `${item}`);
+      .filter(item => item !== null && item !== undefined && toDisplayValue(item).trim() !== '')
+      .map(item => toDisplayValue(item));
     return values.length > 0 ? values : ['-'];
   }
   return [toDisplayValue(value)];

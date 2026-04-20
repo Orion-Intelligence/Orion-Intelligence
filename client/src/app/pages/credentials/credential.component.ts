@@ -45,28 +45,13 @@ export class CredentialComponent implements OnInit {
   private pendingRequests = 0;
   private isSearchLoading = false;
   private isRankedLoading = false;
-  private readonly exportCsvColumns = [
-    'recordType',
-    'recordIndex',
-    'searchQuery',
-    'email',
-    'username',
-    'domain',
-    'source',
-    'hash',
-    'title',
-    'url',
-    'rank',
-    'date',
-    'team',
-    'summary'
-  ] as const;
+  private readonly exportCsvColumns = [ 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
 
   protected readonly Math = Math;
   protected readonly filters = stealer_filters;
   protected readonly length = length;
-  readonly reportExportOptions = REPORT_EXPORT_OPTIONS;
 
+  readonly reportExportOptions = REPORT_EXPORT_OPTIONS;
   searchQuery: string = '';
   isLoading: boolean = false;
   firstTrigger: boolean = true;
@@ -380,16 +365,14 @@ export class CredentialComponent implements OnInit {
   private buildPdfSection(title: string, rows: Record<string, string>[]): GraphReportTableRow {
     return {
       title,
-      values: Object.fromEntries(
-        rows.map((row) => [
-          `Record ${row['recordIndex']}`,
-          Object.entries(row)
-            .filter(([key]) => key !== 'recordType' && key !== 'recordIndex' && key !== 'searchQuery')
-            .filter(([_, value]) => value && value !== '-')
-            .map(([key, value]) => `${this.toTitleCase(key)}: ${value}`)
-            .join(' | ')
-        ])
-      )
+      values: Object.fromEntries(rows.map((row) => [
+        `Record ${row['recordIndex']}`,
+        Object.entries(row)
+          .filter(([key]) => key !== 'recordType' && key !== 'recordIndex' && key !== 'searchQuery')
+          .filter(([_, value]) => value && value !== '-')
+          .map(([key, value]) => `${this.toTitleCase(key)}: ${value}`)
+          .join(' | ')
+      ]))
     };
   }
 
