@@ -185,7 +185,7 @@ describe('Consolidated - IOC Basic Flow', () => {
       .invoke('removeAttr', 'target')
       .scrollIntoView()
       .click();
-    cy.url().should('include', '/dashboard/scanner/');
+    cy.url().should('include', '/dashboard/scanner/network-scan');
     openHomepageAndSearch('{enter}');
     switchToDeepSearchTab();
     cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
