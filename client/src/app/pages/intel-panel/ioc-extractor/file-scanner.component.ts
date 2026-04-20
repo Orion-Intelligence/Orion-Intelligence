@@ -252,6 +252,9 @@ export class FileScannerComponent {
   }
 
   private appendCategorizedItem( categorized: Map<string, { key: string; items: any[] }>, key: string, value: any, fallbackDescription: string ): void {
+    if (!this.hasRenderableValue(value)) {
+      return;
+    }
     if (!categorized.has(key)) {
       categorized.set(key, { key, items: [] });
     }
@@ -266,7 +269,8 @@ export class FileScannerComponent {
   private buildGroupedIocs( categorized: Map<string, { key: string; items: any[]; }> ): GroupedIoc[] {
     return Array.from(categorized.entries())
       .map(([_, meta]) => {
-        const uniqueItems = meta.items.filter((item, index, self) => index === self.findIndex(t => t.value === item.value));
+        const validItems = meta.items.filter(item => this.hasRenderableValue(item?.value));
+        const uniqueItems = validItems.filter((item, index, self) => index === self.findIndex(t => t.value === item.value));
         return {
           name: IOC_LABELS[meta.key]?.label || this.formatIocType(meta.key),
           total: uniqueItems.length,
@@ -373,23 +377,37 @@ export class FileScannerComponent {
   }
 
   getSummaryStats(): SummaryItem[] {
-    const fileName = this.extractionResult?.original_filename || this.apkResult?.original_filename || this.fileName || '-';
-    const fileType = this.apkResult ? 'APK' : (this.extractionResult?.file_type || 'Unknown').toUpperCase();
-    const status = this.extractionResult?.status || this.apkResult?.status || 'completed';
+    const fileName = this.extractionResult?.original_filename || this.apkResult?.original_filename || this.fileName || '';
+    const fileType = this.apkResult ? 'APK' : (this.extractionResult?.file_type || '');
+    const status = this.extractionResult?.status || this.apkResult?.status || '';
     const textLength = this.extractionResult?.extracted_text_length || 0;
     const stats: SummaryItem[] = [
       { label: 'Filename', value: fileName },
-      { label: 'File Type', value: fileType },
-      { label: 'Total Findings', value: this.getTotalIocCount().toString() },
+      { label: 'File Type', value: fileType ? fileType.toUpperCase() : '' },
+      { label: 'Total Findings', value: this.getTotalIocCount() > 0 ? this.getTotalIocCount().toString() : '' },
       { label: 'Status', value: status }
     ];
-    if (this.extractionResult && !this.apkResult) {
+    if (this.extractionResult && !this.apkResult && textLength > 0) {
       stats.splice(2, 0, {
         label: 'Extracted Text',
         value: `${this.formatNumber(textLength)} chars`
       });
     }
-    return stats;
+    return stats.filter(stat => this.hasRenderableValue(stat.value));
+  }
+
+  private hasRenderableValue(value: unknown): boolean {
+    if (value == null) {
+      return false;
+    }
+    if (typeof value === 'string') {
+      const normalized = value.trim();
+      return normalized !== '' && normalized.toLowerCase() !== 'null' && normalized.toLowerCase() !== 'undefined';
+    }
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    return true;
   }
 
   copyValue(value: string): void {

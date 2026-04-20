@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, input, output } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, input, output } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { HelperService } from '../../services/helper.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
@@ -15,6 +15,7 @@ import { ReportExportService } from '../../services/report-export.service';
 import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice-modal.component';
 import { REPORT_EXPORT_OPTIONS } from '../../model/report/export-choice.model';
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { ProxyController } from '../../services/proxy-controller';
 @Component({
   selector: 'app-report-header',
   standalone: true,
@@ -23,6 +24,8 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
   animations: [fadeInDashboardItem]
 })
 export class ReportHeaderComponent {
+  private readonly proxied_resource = inject(ProxyController);
+
   aiSuggestStatus = false;
   aiSuggestSummary = '';
   isExportChoiceOpen = false;
@@ -98,7 +101,7 @@ export class ReportHeaderComponent {
       if (!/^https?:\/\//i.test(url)) {
         url = 'https://' + url;
       }
-      window.open(url, '_blank');
+      this.proxied_resource.open(url);
     }
   }
 
@@ -115,7 +118,7 @@ export class ReportHeaderComponent {
       singleInput
     });
     const fullUrl = `${baseUrl}?${params.toString()}`;
-    window.open(fullUrl, '_blank');
+    this.proxied_resource.open(fullUrl);
   }
 
   aiSuggest() {

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, input } from '@angular/core';
+import { AfterViewInit, Component, OnInit, inject, input } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ChatResultItem } from '../../../../shared/model/results/chat/chat.callback.model';
 import { DatePipe, SlicePipe, CommonModule } from '@angular/common';
@@ -7,6 +7,7 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import { NormalizeUnicodePipe } from '../../../../shared/pipes/normalize-unicode.pipe';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
+import { ProxyController } from '../../../../shared/services/proxy-controller';
 @Component({
   selector: 'app-dashboard-result-chat',
   imports: [
@@ -20,6 +21,8 @@ import { AuthService } from '../../../../services/authetication/auth.service';
   templateUrl: './dashboard-result-chat.component.html'
 })
 export class DashboardResultChatComponent implements OnInit, AfterViewInit {
+  private readonly proxied_resource = inject(ProxyController);
+
   currentUrl = '';
   queryParams: any = {};
   isCollapsed = true;
@@ -62,6 +65,6 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    window.open(url, '_blank');
+    this.proxied_resource.open(url);
   }
 }

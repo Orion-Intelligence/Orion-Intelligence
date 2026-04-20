@@ -24,6 +24,7 @@ export interface TenantModel {
     licenses?: string[];
     quotaExceeded?: boolean;
     email?: string;
+    profile_visibility_enabled?: boolean;
 }
 export interface User {
     username: string;

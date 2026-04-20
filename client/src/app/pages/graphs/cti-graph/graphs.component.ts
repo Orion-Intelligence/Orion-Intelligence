@@ -1,4 +1,4 @@
-import { Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, inject } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { Color, Edge, Network } from 'vis-network';
 import { DataSet } from 'vis-data';
@@ -19,6 +19,7 @@ import { ReportExportService } from '../../../shared/services/report-export.serv
 import { GraphReportExportType, GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 import { ensureStylesheet } from '../../../shared/utils/ensure-stylesheet.util';
+import { ProxyController } from '../../../shared/services/proxy-controller';
 
 type GraphNodeColor = string | Color;
 @Component({
@@ -29,6 +30,8 @@ type GraphNodeColor = string | Color;
   imports: [CtiSidebarComponent, GraphContextMenuComponent, ProfileComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, NgClass, TabBarComponent, GraphLoadingComponent]
 })
 export class GraphComponent implements OnInit, OnDestroy {
+  private readonly playgroundTabName = 'Playground';
+  private readonly proxied_resource = inject(ProxyController);
   private readonly maxNodeLabelLength = 28;
   private readonly edgeBaseColor = 'rgba(75, 85, 99, 0.8)';
   private readonly edgeHighlightColor = '#a78bfa';
@@ -234,6 +237,13 @@ export class GraphComponent implements OnInit, OnDestroy {
     };
   }
 
+  private normalizePlaygroundTab(): void {
+    if (this.tabs.length === 0) {
+      return;
+    }
+    this.tabs = this.tabs.map((tab, index) => index === 0 ? { ...tab, name: this.playgroundTabName } : tab);
+  }
+
   private generateId(): string {
     if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
       return crypto.randomUUID();
@@ -318,6 +328,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId) || !this.hasLoadedSessions) {
       return;
     }
+    this.normalizePlaygroundTab();
     const payload = {
       tab_counter: GraphComponent.sessionCounter,
       active_tab_id: this.activeTabId,
@@ -354,6 +365,7 @@ export class GraphComponent implements OnInit, OnDestroy {
           name: typeof savedTab?.name === 'string' && savedTab.name.trim().length > 0 ? savedTab.name : `Session ${index + 1}`,
           state: { ...this.createDefaultSessionState(), ...(savedTab?.state || {}) }
         } as GraphSessionTab));
+        this.normalizePlaygroundTab();
         GraphComponent.sessionCounter = Number(savedState?.tab_counter ?? savedState?.counter) || (this.tabs.length + 1);
         this.activeTabId = savedState?.active_tab_id ?? savedState?.activeTabId ?? this.tabs[0].id;
         if (!this.tabs.some(t => t.id === this.activeTabId)) {
@@ -378,10 +390,11 @@ export class GraphComponent implements OnInit, OnDestroy {
   addSession(): void {
     const newTab: GraphSessionTab = {
       id: this.generateId(),
-      name: `Session ${GraphComponent.sessionCounter++}`,
+      name: this.tabs.length === 0 ? this.playgroundTabName : `Session ${GraphComponent.sessionCounter++}`,
       state: this.createDefaultSessionState()
     };
     this.tabs = [...this.tabs, newTab];
+    this.normalizePlaygroundTab();
     this.activeTabId = newTab.id;
     this.applySession(newTab.id);
     this.applyActiveTabState();
@@ -402,6 +415,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (this.tabs.length <= 1) {
       return;
     }
+    if (this.tabs[0]?.id === id) {
+      return;
+    }
     const idx = this.tabs.findIndex(t => t.id === id);
     this.tabs = this.tabs.filter(t => t.id !== id);
     if (this.activeTabId === id) {
@@ -413,6 +429,9 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   startEditing(id: string): void {
+    if (this.tabs[0]?.id === id) {
+      return;
+    }
     this.editingTabId = id;
   }
 
@@ -421,6 +440,10 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   renameSession(id: string, newName: string): void {
+    if (this.tabs[0]?.id === id) {
+      this.stopEditing();
+      return;
+    }
     const trimmed = newName.trim();
     if (!trimmed) {
       this.stopEditing();
@@ -533,7 +556,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
     });
     groupsToExpand.forEach(item => {
-      this.expandGroupFromNodeId(item.id, item.subNodes, 200); 
+      this.expandGroupFromNodeId(item.id, item.subNodes, 200);
     });
     this.network.redraw();
     this.network.fit({ animation: false });
@@ -577,7 +600,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
     }
     groupsToExpand.forEach(item => {
-      this.collapseGroupFromNodeId(item.id, item.subNodes, true); 
+      this.collapseGroupFromNodeId(item.id, item.subNodes, true);
     });
     this.network.moveTo({
       position: originalPosition,
@@ -607,6 +630,7 @@ export class GraphComponent implements OnInit, OnDestroy {
           state: { ...this.createDefaultSessionState(), ...parsed.state }
         };
         this.tabs = [...this.tabs, imported];
+        this.normalizePlaygroundTab();
         this.activeTabId = imported.id;
         this.applySession(imported.id);
         this.saveSessions();
@@ -1178,7 +1202,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       singleInput: singleInput
     });
     const fullUrl = `${baseUrl}?${params.toString()}`;
-    window.open(fullUrl, '_blank');
+    this.proxied_resource.open(fullUrl);
     this.hideContextMenu();
   }
 
@@ -1221,7 +1245,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     const parts = nodeId.split('/');
     const singleInput = parts[parts.length - 1];
     const category = this.getReportCategory(nodeId);
-    const open = (path: string) => window.open(`${window.location.origin}${path}/${singleInput}`, '_blank');
+    const open = (path: string) => this.proxied_resource.open(`${window.location.origin}${path}/${singleInput}`);
     if (category === 'leak') {
       open('/dashboard/breach/all');
     }
@@ -1519,7 +1543,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     data.forEach(item => {
       put(item.vertex, this.nodePrimaryBorder);
       (item.path?.vertices ?? []).forEach(pv => {
-        put(pv, this.nodeSecondaryBorder); 
+        put(pv, this.nodeSecondaryBorder);
       });
     });
     return rawNodeMap;
@@ -1786,13 +1810,13 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   private attachNetworkHandlers(): void {
     this.network.on('oncontext', params => {
-      this.handleContextMenu(params); 
+      this.handleContextMenu(params);
     });
     this.network.on('click', params => {
-      this.handleClick(params); 
+      this.handleClick(params);
     });
     this.network.on('doubleClick', params => {
-      this.handleDoubleClick(params); 
+      this.handleDoubleClick(params);
     });
     this.network.on('zoom', (properties: any) => {
       const currentScale = this.network.getScale();

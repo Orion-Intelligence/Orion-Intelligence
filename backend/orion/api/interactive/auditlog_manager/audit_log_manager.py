@@ -1,14 +1,16 @@
 import threading
+import json
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
 
+from bson import ObjectId
 from odmantic import AIOEngine
-from odmantic.query import desc
+from odmantic.query import desc, in_
 
 from orion.api.interactive.auditlog_manager.models.audit_log_param_model import audit_log_param_model
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_audit_log import db_audit_log
-from orion.services.mongo_manager.shared_model.db_auth_models import user_role, LicenseName
+from orion.services.mongo_manager.shared_model.db_auth_models import user_role, LicenseName, db_user_account
 
 
 class AuditLogManager:
@@ -33,6 +35,20 @@ class AuditLogManager:
         log = db_audit_log(tenant_id=tenant_id, actor_id=actor_id, event=event)
         await self._engine.save(log)
         return str(log.id)
+
+    async def search_audit(self, current_user, search_type: str, q: str) -> str:
+        return await self.register(
+            str(current_user.tenant_uuid),
+            str(current_user.id),
+            json.dumps({"search_type": search_type, "q": q})
+        )
+
+    async def delete(self, log_id: str) -> bool:
+        log = await self._engine.find_one(db_audit_log, db_audit_log.id == ObjectId(log_id))
+        if not log:
+            return False
+        await self._engine.delete(log)
+        return True
 
     @staticmethod
     def _parse_iso(s: Optional[str]) -> Optional[datetime]:
@@ -68,7 +84,18 @@ class AuditLogManager:
         elif LicenseName.MAINTAINER in (current_user.licenses or []):
             filters.append(db_audit_log.tenant_id == str(current_user.tenant_uuid))
 
-        query = filters[0] if filters else {}
+        if getattr(param, "actor_id", None):
+            actor = await self._engine.find_one(
+                db_user_account,
+                (db_user_account.tenant_uuid == str(current_user.tenant_uuid)) & (db_user_account.username == param.actor_id),
+            )
+            if not actor:
+                return {"items": [], "page": page}
+            filters.append(db_audit_log.actor_id == str(actor.id))
+
+        query = {}
+        for item in filters:
+            query = item if query == {} else (query & item)
 
         sort_by = desc(db_audit_log.ts)
 
@@ -77,4 +104,29 @@ class AuditLogManager:
         else:
             items = await self._engine.find(db_audit_log, query, sort=sort_by, skip=skip, limit=page_size)
 
-        return {"items": [{**i.model_dump(), "id": str(i.id)} for i in items], "page": page}
+        actor_ids = list({ObjectId(item.actor_id) for item in items})
+        tenant_ids = list({item.tenant_id for item in items})
+
+        users = await self._engine.find(db_user_account, in_(db_user_account.id, actor_ids))
+        tenant_users = await self._engine.find(db_user_account, in_(db_user_account.tenant_uuid, tenant_ids))
+
+        users_by_id = {str(user.id): user.username for user in users}
+        tenants_by_id = {}
+        for user in tenant_users:
+            if LicenseName.MAINTAINER in (user.licenses or []):
+                tenants_by_id[user.tenant_uuid] = (user.email or user.username or "").strip()
+
+        resolved_items = []
+        for item in items:
+            actor_name = users_by_id.get(item.actor_id)
+            tenant_name = tenants_by_id.get(item.tenant_id)
+            if actor_name is None or tenant_name is None:
+                continue
+            resolved_items.append({
+                **item.model_dump(),
+                "id": str(item.id),
+                "actor_id": actor_name,
+                "tenant_id": tenant_name,
+            })
+
+        return {"items": resolved_items, "page": page}

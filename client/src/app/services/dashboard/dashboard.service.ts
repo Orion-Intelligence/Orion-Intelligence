@@ -16,6 +16,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AppService } from '../core/app/app.service';
 import { RankedCallbackModel } from '../../shared/model/results/consolidated/ranked.callback.model';
 import { PasswordSchemaFilter } from '../../shared/model/stealerlogs-filter/stealerlogs-filters';
+import { ReportFeedbackModel } from '../../sections/report/templates/report_general/models/report-feedback.model';
+
+type FeedbackAction = 'recommended' | 'trust' | 'untrust';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -140,42 +144,60 @@ export class DashboardService {
     }), catchError(() => of({ success: false, isEmpty: false, data: null })));
   }
 
-  generateAnalytics<T extends {
-        m_update_date: string;
-    }>(resultItems: T[]): any {
-    if (!resultItems) {
-      return null;
+  loadDocumentFeedback(docId: string, feedbackModel: ReportFeedbackModel): void {
+    if (!docId) {
+      this.patchReportFeedbackModel(feedbackModel, new ReportFeedbackModel());
+      return;
     }
-    return {
-      unique_urls: resultItems.length,
-      total_p_document_list_length: resultItems.length,
-      m_documents_length: resultItems.length,
-      m_clearnet_links_count: resultItems.reduce((sum, item) => sum + ((item as any).m_clearnet_links?.length || 0), 0),
-      active_links: resultItems.filter(item => (new Date().getTime() - new Date(item.m_update_date).getTime()) / (1000 * 60 * 60 * 24) <= 5).length,
-      seldom_active_links: resultItems.filter(item => {
-        const daysOld = (new Date().getTime() - new Date(item.m_update_date).getTime()) / (1000 * 60 * 60 * 24);
-        return daysOld > 5 && daysOld <= 10;
-      }).length,
-      inactive_links: resultItems.filter(item => (new Date().getTime() - new Date(item.m_update_date).getTime()) / (1000 * 60 * 60 * 24) > 10).length,
-      consolidated_lists: (() => {
-        const consolidated: Record<string, string[]> = {};
-        resultItems.forEach(item => {
-          const typedItem = item as any;
-          Object.entries(typedItem).forEach(([key, value]) => {
-            if (Array.isArray(value) && value.every(v => typeof v === 'string') && value.length > 0) {
-              const filteredValue = value.filter(v => v !== "");
-              if (filteredValue.length > 0) {
-                consolidated[key] = Array.from(new Set([...(consolidated[key] ?? []), ...filteredValue]));
-              }
-            }
-            else if (typeof value === 'string' && key !== 'm_update_date' && value !== "") {
-              consolidated[key] = Array.from(new Set([...(consolidated[key] ?? []), value]));
-            }
-          });
-        });
-        return consolidated;
-      })()
-    };
+    this.apiService.get<ReportFeedbackModel>(`feedback/${docId}`).subscribe({
+      next: (response) => {
+        this.patchReportFeedbackModel(feedbackModel, new ReportFeedbackModel(response));
+      },
+      error: () => {
+        this.patchReportFeedbackModel(feedbackModel, new ReportFeedbackModel({ doc_id: docId }));
+      },
+    });
+  }
+
+  submitFeedbackAction(action: FeedbackAction, docId: string, feedbackModel: ReportFeedbackModel, setLoadingKey?: (value: 'recommended_count' | 'trust_count' | 'untrust_count' | '') => void): void {
+    if (!docId) {
+      return;
+    }
+    const loadingMap = {
+      recommended: 'recommended_count',
+      trust: 'trust_count',
+      untrust: 'untrust_count',
+    } as const;
+    const previousState = new ReportFeedbackModel(feedbackModel);
+    setLoadingKey?.(loadingMap[action]);
+    this.apiService.post<ReportFeedbackModel>(`feedback/${action}/${docId}`, {}).subscribe({
+      next: (response) => {
+        this.patchReportFeedbackModel(feedbackModel, new ReportFeedbackModel(response));
+        setLoadingKey?.('');
+      },
+      error: () => {
+        this.patchReportFeedbackModel(feedbackModel, previousState);
+        setLoadingKey?.('');
+      },
+    });
+  }
+
+  saveDocumentFeedbackComment(docId: string, comment: string, feedbackModel: ReportFeedbackModel, handlers?: { setSaving?: (value: boolean) => void; setError?: (value: string) => void }): void {
+    if (!docId || !comment.trim()) {
+      return;
+    }
+    handlers?.setError?.('');
+    handlers?.setSaving?.(true);
+    this.apiService.post<ReportFeedbackModel>(`feedback/comment/${docId}`, { comment }).subscribe({
+      next: (response) => {
+        this.patchReportFeedbackModel(feedbackModel, new ReportFeedbackModel(response));
+        handlers?.setSaving?.(false);
+      },
+      error: (error) => {
+        handlers?.setError?.(error?.error?.detail || error?.error?.message || 'Unable to save comment.');
+        handlers?.setSaving?.(false);
+      },
+    });
   }
 
   private initializeSideFilters() {
@@ -215,12 +237,12 @@ export class DashboardService {
       }
     }
     keysToRemove.forEach(key => {
-      sessionStorage.removeItem(key); 
+      sessionStorage.removeItem(key);
     });
   }
 
   private cancelOngoingRequest() {
-    return; 
+    return;
   }
 
   private beginRequestWithMergedParams(paramModel: any): {
@@ -240,6 +262,19 @@ export class DashboardService {
       params['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, v]) => (Array.isArray(v) ? v.length > 0 : true)));
     }
     return params;
+  }
+
+  private patchReportFeedbackModel(target: ReportFeedbackModel, source: ReportFeedbackModel): void {
+    target.doc_id = source.doc_id;
+    target.recommended_count = source.recommended_count;
+    target.trust_count = source.trust_count;
+    target.untrust_count = source.untrust_count;
+    target.comments = source.comments;
+    target.reactions = source.reactions;
+    target.current_user_reaction = source.current_user_reaction;
+    target.can_react = source.can_react;
+    target.created_at = source.created_at;
+    target.updated_at = source.updated_at;
   }
 
   private syncQueryParamsToUrl(params: any): void {

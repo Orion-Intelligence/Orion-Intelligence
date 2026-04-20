@@ -18,9 +18,9 @@ const loadHomepageComponent = () => import('./pages/homepage/homepage.component'
 const loadDirectoryComponent = () => import('./pages/directory/directory.component').then(m => m.DirectoryComponent);
 const loadDashboardApiComponent = () => import('./pages/intel-panel/dashboard-api/dashboard-api.component').then(m => m.DashboardApiComponent);
 const loadDashboardResultContainer = () => import('./pages/intel-panel/dashboard-result-container/dashboard-result-container.component').then(m => m.DashboardResultContainer);
-const loadReportComponent = () => import('./shared/partials/report/report_general/report.component').then(m => m.ReportComponent);
-const loadReportDefacementComponent = () => import('./shared/partials/report/report-defacement/report-defacement.component').then(m => m.ReportDefacementComponent);
-const loadReportChatComponent = () => import('./shared/partials/report/report-chat/report-chat.component').then(m => m.ReportChatComponent);
+const loadReportComponent = () => import('./sections/report/templates/report_general/report.component').then(m => m.ReportComponent);
+const loadReportDefacementComponent = () => import('./sections/report/templates/report-defacement/report-defacement.component').then(m => m.ReportDefacementComponent);
+const loadReportChatComponent = () => import('./sections/report/templates/report-chat/report-chat.component').then(m => m.ReportChatComponent);
 const loadDumpComponent = () => import('./pages/dump/dump.component').then(m => m.DumpComponent);
 const loadCredentialComponent = () => import('./pages/credentials/credential.component').then(m => m.CredentialComponent);
 const loadErrorHandlerComponent = () => import('./shared/partials/error-handler/error-handler.component').then(m => m.ErrorHandlerComponent);
@@ -46,6 +46,8 @@ const loadFileScannerComponent = () => import('./pages/intel-panel/ioc-extractor
 const loadSocialMapperComponent = () => import('./pages/graphs/social-graph/social-mapper.component').then(m => m.SocialMapperComponent);
 const loadNetworkIntelComponent = () => import('./pages/network-intel/network-intel').then(m => m.NetworkIntel);
 const loadSatelliteIntelComponent =()=>import('./pages/satellite-intel/satellite-intel').then(m=>m.SatelliteIntel);
+const loadUserProfileActivityComponent = () => import('./pages/profile/user-profile-activity/user-profile-activity.component').then(m => m.UserProfileActivityComponent);
+
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
   data: { type: 'consolidated', animation: 'HashPage' }
@@ -581,18 +583,13 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'basic-scan',
+            redirectTo: 'network-scan',
             pathMatch: 'full'
           },
           {
-            path: 'basic-scan',
-            loadComponent: loadSecurityScanComponent,
-            data: { type: 'basic', animation: 'CategoryPage' }
-          },
-          {
-            path: 'port-scan',
-            loadComponent: loadSecurityScanComponent,
-            data: { type: 'advanced', animation: 'CategoryPage' }
+            path: 'network-scan',
+            loadComponent: loadNetworkIntelComponent,
+            data: { animation: 'CategoryPage' }
           },
           {
             path: 'repository-scan',
@@ -755,6 +752,11 @@ export const routes: Routes = [
           {
             path: 'account',
             loadComponent: loadAccountSettingsComponent,
+            data: { type: 'account', animation: 'CategoryPage' }
+          },
+          {
+            path: 'user/:user_id',
+            loadComponent: loadUserProfileActivityComponent,
             data: { type: 'account', animation: 'CategoryPage' }
           },
           {

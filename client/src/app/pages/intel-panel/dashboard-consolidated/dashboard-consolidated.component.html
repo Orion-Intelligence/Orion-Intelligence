@@ -33,12 +33,16 @@
                   </div>
                 </div>
               } @else {
-                @if ((((consolidatedCallbackModel.defacement_model?.Result?.length ?? 0) || (stealerlogCallbackModel?.Result?.length ?? 0))) > 0) {
-                  <app-defacement-results [isExpandable]="false" @scanAnimation
+                @if ((consolidatedCallbackModel.defacement_model?.Result?.length ?? 0 || stealerlogCallbackModel?.Result?.length ?? 0) > 0) {
+                  <app-defacement-results
+                    @scanAnimation
+                    [isExpandable]="false"
                     [results_defacement]="consolidatedCallbackModel.defacement_model"
-                    [results_stealerlog]="stealerlogCallbackModel"
-                    >
+                    [results_stealerlog]="stealerlogCallbackModel">
                   </app-defacement-results>
+                }
+                @if ((((consolidatedCallbackModel.defacement_model?.Result?.length ?? 0) || (stealerlogCallbackModel?.Result?.length ?? 0))) >= 0) {
+                  <app-cross-search-card [query]="query" [consolidated]="true"></app-cross-search-card>
                 }
               }
               @for (index of groupedResults | sortGroupedResults; track index.key) {

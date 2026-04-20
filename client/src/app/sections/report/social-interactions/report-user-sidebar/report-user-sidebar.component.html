@@ -1,0 +1,119 @@
+@if (isMounted) {
+<div class="fixed inset-0 z-[1190] bg-black/25 transition-opacity duration-300 ease-out" [class.opacity-100]="isVisible" [class.opacity-0]="!isVisible" [class.pointer-events-auto]="isVisible" [class.pointer-events-none]="!isVisible" (click)="closeSidebar()"></div>
+
+<div class="fixed top-0 right-0 z-[1200] h-screen w-[360px] overflow-hidden border-l border-l-[#ffffff15] bg-[var(--color-blue-820-light)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full" [class.translate-x-0]="isVisible" [class.translate-x-[102%]]="!isVisible" (transitionend)="onPanelTransitionEnd()">
+  <div class="flex h-full flex-col">
+    <div class="border-b border-[var(--color-divider)] bg-[var(--color-blue-820-light)] px-4 pb-3 pt-3">
+      <div class="flex items-center justify-between gap-3">
+        <div class="text-[14px] font-semibold text-[var(--color-text1)]">Profile</div>
+        <button type="button" (click)="closeSidebar()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-720)]" aria-label="Close sidebar">
+          <img alt="close" src="assets/images/shared/theme/nav-next.svg" class="ui-action-icon h-[20px] w-[20px]">
+        </button>
+      </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto bg-[var(--color-blue-820-light)] p-3">
+      @if (isLoading) {
+        <div class="w-full animate-pulse">
+          <div class="mb-4 flex items-start gap-3">
+            <div class="h-[72px] w-[72px] shrink-0 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[0.2rem]"></div>
+            <div class="pt-1">
+              <div class="h-5 w-28 rounded-full bg-[var(--color-blue-720)]"></div>
+              <div class="mt-2 h-3 w-40 rounded-full bg-[var(--color-blue-720)]"></div>
+              <div class="mt-2 h-3 w-24 rounded-full bg-[var(--color-blue-720)]"></div>
+            </div>
+          </div>
+
+          <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+            <div class="h-4 w-16 rounded-full bg-[var(--color-blue-700)]"></div>
+            <div class="mt-2 h-3 w-44 rounded-full bg-[var(--color-blue-700)]"></div>
+            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+              <div class="h-10 rounded-[8px] bg-[var(--color-blue-720)]"></div>
+              <div class="h-10 rounded-[8px] bg-[var(--color-blue-720)]"></div>
+              <div class="h-10 rounded-[8px] bg-[var(--color-blue-720)]"></div>
+              <div class="h-10 rounded-[8px] bg-[var(--color-blue-720)]"></div>
+            </div>
+          </div>
+        </div>
+      } @else if (errorMessage) {
+        <div class="rounded-[20px] border border-rose-400/25 bg-rose-500/10 p-4">
+          <div class="text-[14px] font-medium text-rose-200">Unable to load profile</div>
+          <p class="mt-1 text-[12px] text-rose-200/80">{{ errorMessage }}</p>
+        </div>
+      } @else if (userData?.hidden) {
+        <div data-testid="report-user-sidebar-hidden-profile" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+          <div class="ui-section-title">Profile</div>
+          <div class="ui-section-description">{{ userData?.message || 'Profile hidden by user' }}</div>
+        </div>
+      } @else if (userData) {
+        <div class="w-full">
+          <div class="mb-4 flex items-start gap-3">
+            <div class="h-[88px] w-[88px] shrink-0 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[0.2rem]">
+              <img [src]="profileImageUrl" (error)="onImageError($event)" alt="User avatar" class="h-full w-full rounded-full object-cover" />
+            </div>
+            <div class="pt-1">
+              <div class="ui-page-title">Profile</div>
+              <p class="ui-page-description">Account details and shared access information.</p>
+              <p class="mt-1 text-xs font-medium text-[var(--color-text4)]">
+                User <span class="font-semibold text-[var(--color-text2)]">{{ userData.username || '-' }}</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+            <div class="ui-section-title">Profile</div>
+            <div class="ui-section-description">Manage profile identity and assigned access.</div>
+
+            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+              <div>
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Username</label>
+                <div class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm leading-10 text-[var(--color-text1)]">{{ userData.username || '-' }}</div>
+              </div>
+
+              <div>
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Role</label>
+                <div class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm leading-10 text-[var(--color-text1)]">{{ userData.role || '-' }}</div>
+              </div>
+
+              <div>
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Tenant / Location</label>
+                <div class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm leading-10 text-[var(--color-text1)]">{{ userData.tenant_name || '-' }}</div>
+              </div>
+
+              <div>
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Email</label>
+                <div class="h-10 w-full truncate rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm leading-10 text-[var(--color-text1)]">{{ userData.email || '-' }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+            <div class="ui-section-title">Licenses</div>
+            <div class="ui-section-description">Assigned access levels for this user.</div>
+            <div class="mt-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3">
+              <div class="flex flex-wrap gap-2">
+                @for (license of userData.licenses; track license) {
+                  <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text3)]">{{ license }}</span>
+                } @empty {
+                  <span class="text-[13px] text-[var(--color-text4)]">No licenses listed.</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <button data-testid="report-user-sidebar-open-profile" type="button" (click)="openDetails()" class="inline-flex w-full items-center justify-center rounded-[8px] border border-[var(--color-blue-630)] bg-[var(--color-blue-640)] px-3 py-2 text-[12px] font-semibold text-white transition hover:brightness-105">
+              View Profile Detail
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="rounded-[20px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+          <div class="text-[14px] font-medium text-[var(--color-text1)]">No profile selected</div>
+          <p class="mt-1 text-[12px] text-[var(--color-text4)]">Choose a user from the comments panel to view details.</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+}

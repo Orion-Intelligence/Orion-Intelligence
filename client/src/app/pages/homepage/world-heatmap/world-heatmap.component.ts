@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, AfterViewInit, OnChanges, SimpleChanges, HostListener, OnInit, OnDestroy } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit, OnChanges, SimpleChanges, HostListener, OnInit, OnDestroy, input } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
@@ -36,11 +36,12 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   private readonly tooltipBaseClass = 'heatmap-tooltip pointer-events-none absolute z-[5] max-w-[240px] rounded-[8px] border border-[rgb(239_68_68_/18%)] bg-[#0b1a2e] px-[10px] py-[6px] text-[12px] leading-[1.25] text-[#fecaca] shadow-[0_18px_46px_rgb(0_0_0_/45%)] [backdrop-filter:blur(6px)] [body.light-theme_&]:border-[#d7e2ee] [body.light-theme_&]:bg-[rgb(255_255_255_/95%)] [body.light-theme_&]:text-[#172235] [body.light-theme_&]:shadow-[0_8px_20px_rgb(16_24_40_/12%)] [body.light-theme_&]:[backdrop-filter:none]';
   private readonly tooltipHiddenClass = `${this.tooltipBaseClass} opacity-0`;
   private readonly tooltipVisibleClass = `${this.tooltipBaseClass} heatmap-tooltip-visible opacity-100`;
-  private readonly countryClass = 'country cursor-pointer [stroke:rgb(255_255_255_/14%)] [stroke-width:0.7px] transition-[opacity] duration-200 ease-in-out hover:opacity-90 hover:[stroke:rgb(255_255_255_/50%)] [&.hovered]:opacity-90 [&.hovered]:[stroke:rgb(255_255_255_/50%)] [body.light-theme_&]:[stroke:rgb(23_34_53_/18%)] [body.light-theme_&:hover]:[stroke:rgb(23_34_53_/38%)] [body.light-theme_&.hovered]:[stroke:rgb(23_34_53_/38%)]';
+  private readonly countryClass = 'country [stroke:rgb(255_255_255_/14%)] [stroke-width:0.7px] transition-[opacity] duration-200 ease-in-out hover:opacity-90 hover:[stroke:rgb(255_255_255_/50%)] [&.hovered]:opacity-90 [&.hovered]:[stroke:rgb(255_255_255_/50%)] [body.light-theme_&]:[stroke:rgb(23_34_53_/18%)] [body.light-theme_&:hover]:[stroke:rgb(23_34_53_/38%)] [body.light-theme_&.hovered]:[stroke:rgb(23_34_53_/38%)]';
   private readonly pixelGridLineClass = 'pointer-events-none [stroke:rgb(255_255_255_/4%)] [stroke-width:0.5px] [body.light-theme_&]:[stroke:rgb(23_34_53_/7%)]';
   private selectedCountryPage = 1;
   private readonly countryReportLimit = 20;
 
+  readonly canOpenReports = input<boolean>(true);
   public activeCountryReports: any;
   public activeCategoryKey: string | null = null;
   public selectedCountryReports: any[] = [];
@@ -361,6 +362,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       .append('path')
       .attr('d', this.path as any)
       .attr('class', this.countryClass)
+      .classed('can-open-reports', this.canOpenReports())
       .classed('has-data', (d: any) => this.getValueForFeature(d) != null)
       .on('mousemove', (event: MouseEvent, d: any) => {
         this.onHoverMove(event, d); 
@@ -415,8 +417,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   private updateColors(): void {
     const color = this.getColorScale();
     this.mapG.selectAll<SVGPathElement, any>('path.country')
+      .classed('can-open-reports', this.canOpenReports())
       .classed('has-data', (d: any) => this.getValueForFeature(d) != null)
-      .classed('is-clickable', (d: any) => this.getValueForFeature(d) != null)
+      .classed('is-clickable', (d: any) => this.canOpenReports() && this.getValueForFeature(d) != null)
       .attr('fill', (d: any) => {
         const v = this.getValueForFeature(d);
         return v == null ? this.neutralFill : color(v);
@@ -465,6 +468,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   }
 
   private onCountryClick(d: any): void {
+    if (!this.canOpenReports()) {
+      return;
+    }
     const name = d?.properties?.name;
     if (!name) {
       return;
@@ -562,8 +568,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     const neutralFill = this.neutralFill;
     const countries = this.mapG.selectAll<SVGPathElement, any>('path.country');
     countries
+      .classed('can-open-reports', this.canOpenReports())
       .classed('has-data', (d: any) => getValueForFeature(d) != null)
-      .classed('is-clickable', (d: any) => getValueForFeature(d) != null)
+      .classed('is-clickable', (d: any) => this.canOpenReports() && getValueForFeature(d) != null)
       .transition()
       .duration(1100)
       .ease(d3.easeCubicInOut)

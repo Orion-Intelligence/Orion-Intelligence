@@ -206,7 +206,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       return false;
     }
     const userJob = this.jobs().find(j => j.username.toLowerCase() === username.toLowerCase());
-    return userJob?.status === 'in_progress';
+    return userJob?.status === 'in_progress' || userJob?.status === 'queued';
   }
 
   private updateState(updater: (state: TabState) => void, shouldScheduleSave: boolean = true) {
@@ -399,7 +399,14 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   cancelScan(jobId: string) {
-    this.scanJobService.cancelScan(jobId, this.updateState.bind(this), this.cancelScanSubjects);
+    this.scanJobService.cancelScan(jobId, {
+      jobs: () => this.jobs(),
+      updateState: this.updateState.bind(this),
+      state: this.state,
+      scanService: this.scanService,
+      destroyRef: this.destroyRef,
+      cancelScanSubjects: this.cancelScanSubjects
+    });
   }
 
   private resumeIncompleteScans() {
@@ -408,6 +415,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
 
   private buildScanJobOptions() {
     return {
+      jobs: () => this.jobs(),
       updateState: this.updateState.bind(this),
       state: this.state,
       scanService: this.scanService,
@@ -690,6 +698,11 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   addEntityToGraph(entityId: string) {
+    const entity = this.customEntities().find(current => current.id === entityId);
+    if (entity?.onGraph) {
+      this.state.focusOnNode(entityId);
+      return;
+    }
     this.entityManager()?.addEntityToGraph(entityId);
   }
 

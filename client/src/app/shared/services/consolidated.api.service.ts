@@ -81,6 +81,26 @@ export class ConsolidatedApiService {
         else if (res?.success && res?.data) {
           data = res.data;
         }
+        else if (Array.isArray(res?.cards_data)) {
+          data = new SearchDynamicEmailCallbackModel({
+            cards_data: res.cards_data
+          });
+        }
+        else if (Array.isArray(res?.data?.cards_data)) {
+          data = new SearchDynamicEmailCallbackModel({
+            cards_data: res.data.cards_data
+          });
+        }
+        else if (Array.isArray(res?.result?.cards_data)) {
+          data = new SearchDynamicEmailCallbackModel({
+            cards_data: res.result.cards_data
+          });
+        }
+        else if (Array.isArray(res?.data?.result)) {
+          data = new SearchDynamicEmailCallbackModel({
+            cards_data: res.data.result
+          });
+        }
         else if ((res as SearchDynamicEmailCallbackModel)?.cards_data) {
           data = res as SearchDynamicEmailCallbackModel;
         }

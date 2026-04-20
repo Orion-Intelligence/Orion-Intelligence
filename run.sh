@@ -78,9 +78,9 @@ wait_for_server() {
 }
 
 wait_for_test_service() {
-    local url="http://127.0.0.1:8080/api/public"
+    local url="https://127.0.0.1:8443/api/public"
     echo "Waiting for test service to become ready..."
-    until curl -fsS -o /dev/null "$url" >/dev/null 2>&1; do
+    until curl -fksS -o /dev/null "$url" >/dev/null 2>&1; do
         sleep 2
     done
 }
@@ -240,16 +240,19 @@ if [ "$COMMAND" = "build" ]; then
 
     case "$FLAG" in
         -t)
+            ensure_local_ssl_cert
             client_build "-t"
-            cp nginx/nginx-dev.conf nginx/nginx.conf
+            cp nginx/nginx-testing.conf nginx/nginx.conf
             use_compose_file "-t"
             ;;
         -tb)
+            ensure_local_ssl_cert
             client_build "-t"
-            cp nginx/nginx-dev.conf nginx/nginx.conf
+            cp nginx/nginx-testing.conf nginx/nginx.conf
             use_compose_file "-tb"
             ;;
         -c)
+            ensure_local_ssl_cert
             client_build "$FLAG"
             cp nginx/nginx-dev.conf nginx/nginx.conf
             use_compose_file "default"
@@ -257,14 +260,14 @@ if [ "$COMMAND" = "build" ]; then
         -b)
             set_swarm_url_to_local_ip
             ensure_local_ssl_cert
-            cp nginx/nginx-dev-ssl.conf nginx/nginx.conf
+            cp nginx/nginx-dev.conf nginx/nginx.conf
             use_compose_file "default"
             ;;
         -d)
             set_swarm_url_to_local_ip
             ensure_local_ssl_cert
             client_build "$FLAG"
-            cp nginx/nginx-dev-ssl.conf nginx/nginx.conf
+            cp nginx/nginx-dev.conf nginx/nginx.conf
             use_compose_file "default"
             ;;
         -p)

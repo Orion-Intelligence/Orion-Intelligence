@@ -1,10 +1,10 @@
 <div class="w-full h-full relative">
   @if (networkData().nodes.length === 0) {
-    <div class="absolute left-1/2 top-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 px-4 text-center select-none">
-      <div class="rounded-lg border border-dashed border-slate-700/80 bg-slate-900/30 px-6 py-10">
-        <i class="bi bi-list-ul mx-auto text-5xl text-slate-600"></i>
-        <p class="mt-3 text-2xl font-semibold text-slate-300">List is Waiting for Data</p>
-        <p class="text-slate-500">Complete a scan or add an entity to see results here.</p>
+    <div class="pointer-events-none absolute left-1/2 top-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 px-4 text-center select-none text-[var(--color-text4)]">
+      <div class="text-center opacity-[0.3]">
+        <i class="bi bi-list-ul mx-auto text-5xl text-[var(--color-text4)]"></i>
+        <p class="mt-3 text-2xl font-semibold text-[var(--color-text2)]">List is Waiting for Data</p>
+        <p class="text-[var(--color-text4)]">Complete a scan or add an entity to begin visualization.</p>
       </div>
     </div>
   } @else {

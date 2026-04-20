@@ -20,6 +20,7 @@ import { DemoTourComponent } from "../../demo-tour/demo-tour/demo-tour.component
   templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent implements OnInit {
+  private readonly allowedTabs = ['IOCs', 'Deep Search', 'Network Intelligence'];
   private insightPointerId: number | null = null;
   private insightStartY = 0;
   private insightStartOffset = 0;
@@ -37,8 +38,11 @@ export class HomeSearchComponent implements OnInit {
   public insightDragging = false;
   public insightDragY: number | null = null;
   insightTranslateY = 0;
+  selectedTab='IOCs';
   readonly isRoleAdmin = input<boolean>(true);
   readonly hideToolsSection = input<boolean>(false);
+  readonly hideHeatmapAndAnalytics = input<boolean>(false);
+  readonly compactLayout = input<boolean>(false);
 
   constructor( public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService, protected authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService ) {}
 
@@ -47,6 +51,15 @@ export class HomeSearchComponent implements OnInit {
     const matchtype = cfg.localSettings.matchType;
     this.onSetMatchType(matchtype);
     this.computeInsightMax();
+    this.route.queryParams.subscribe(params => {
+      const tab = params['tab'];
+      if (typeof tab === 'string' && this.allowedTabs.includes(tab)) {
+        this.selectTab(tab);
+      }
+      else{
+        this.selectTab("IOCs");
+      }
+    });
   }
 
   @HostListener('window:resize')
@@ -281,6 +294,15 @@ export class HomeSearchComponent implements OnInit {
     this.refreshInsightTransformClass();
 
     this.detachWindowPointerListeners();
+  }
+
+  selectTab(tab:string){
+    this.selectedTab=tab;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab },
+      queryParamsHandling: 'merge',
+    });
   }
 
   @HostListener('document:click', ['$event'])

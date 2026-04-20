@@ -163,6 +163,22 @@ export class TabBarComponent {
     return tab.id;
   }
 
+  isPinnedPlaygroundTab(index: number): boolean {
+    return this.mode() === 'cti' && index === 0;
+  }
+
+  displayTabName(index: number, name: string): string {
+    return this.isPinnedPlaygroundTab(index) ? 'Playground' : name;
+  }
+
+  onTabNameDblClick(event: MouseEvent, index: number, tabId: string): void {
+    event.stopPropagation();
+    if (this.isPinnedPlaygroundTab(index)) {
+      return;
+    }
+    this.startEditing(tabId);
+  }
+
   isActiveTab(tabId: string): boolean {
     return this.currentActiveTabId() === tabId;
   }

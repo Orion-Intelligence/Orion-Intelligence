@@ -1,6 +1,6 @@
 <div class="mt-4 space-y-4">
   @for (section of filteredListItems; track section; let i = $index) {
-    <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] p-3">
+    <div class="report-section-surface rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] p-3">
       <h3 class="text-base font-semibold text-[var(--color-text1)]">Section {{ i + 1 }}</h3>
       <p class="mt-2 text-sm text-[var(--color-text3)]">{{ section }}</p>
     </div>

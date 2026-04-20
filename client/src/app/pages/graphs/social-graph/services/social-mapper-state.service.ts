@@ -186,7 +186,11 @@ export class SocialMapperStateService {
   }
 
   focusOnUser(username: string): void {
-    this.nodeToFocus.set(`user-${username}`);
+    this.focusOnNode(`user-${username}`);
+  }
+
+  focusOnNode(nodeId: string): void {
+    this.nodeToFocus.set(nodeId);
     setTimeout(() => this.nodeToFocus.set(null), 100);
   }
 

@@ -133,19 +133,44 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.loginAsAdmin();
     openAuditLogPage();
 
-    cy.get('app-auditlog-list table tbody tr, app-auditlog-list .rounded-xl').should('have.length.greaterThan', 0);
-    cy.contains('button', 'Export')
+    cy.get('[data-testid="auditlog-row"]').should('have.length.greaterThan', 0);
+    cy.get('[data-testid="auditlog-actor"]').first().invoke('text').then((actorText) => {
+      const actor = actorText.trim();
+      cy.get('[data-testid="auditlog-user-search"]')
+        .should('be.visible')
+        .clear()
+        .type(`${actor}{enter}`);
+      cy.location('search').should('contain', `actor_id=${actor}`);
+      cy.get('[data-testid="auditlog-actor"]', {timeout: 10000}).should(($actors) => {
+        expect($actors.length).to.be.greaterThan(0);
+        $actors.each((_, el) => {
+          expect(el.innerText.trim()).to.eq(actor);
+        });
+      });
+    });
+
+    cy.get('[data-testid="auditlog-user-search"]').clear().type('{enter}');
+    cy.get('[data-testid="auditlog-row"]').should('have.length.greaterThan', 0);
+
+    cy.get('[data-testid="auditlog-delete-button"]')
       .filter(':visible')
       .first()
       .scrollIntoView()
       .should('be.visible')
       .click({waitForAnimations: false, animationDistanceThreshold: 0});
+    cy.contains('Are you sure you want to delete this audit log record?').should('be.visible');
+    cy.contains('button', 'Cancel').click({waitForAnimations: false, animationDistanceThreshold: 0});
+
+    cy.get('[data-testid="auditlog-export-button"]')
+      .scrollIntoView()
+      .should('be.visible')
+      .click({waitForAnimations: false, animationDistanceThreshold: 0});
 
     applyAuditLogDateRange(14);
-    cy.contains('No audit logs found for the selected filters.').should('be.visible');
+    cy.get('[data-testid="auditlog-empty-state"]').should('be.visible');
 
     resetAuditLogFilters();
-    cy.get('app-auditlog-list table tbody tr, app-auditlog-list .rounded-xl').should('have.length.greaterThan', 0);
+    cy.get('[data-testid="auditlog-row"]').should('have.length.greaterThan', 0);
     cy.logout();
   });
 
@@ -157,6 +182,55 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.get('[data-testid="dashboard-main"]').should('be.visible');
     cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
     cy.location('pathname').should('include', '/dashboard/profile/homepage');
+  });
+
+  it('goes through tenant settings and disables profile visibility', () => {
+    const phoneValue = `0300${Date.now().toString().slice(-7)}`;
+    const countryValue = 'Pakistan';
+    const cityValue = 'Karachi';
+
+    cy.visit('/login');
+    cy.get('[data-testid="login-user"]').type(tenant.username);
+    cy.get('[data-testid="login-pass"]').type(tenant.password, {log: false});
+    cy.get('[data-testid="login-button"]').click();
+    cy.get('[data-testid="dashboard-main"]').should('be.visible');
+
+    cy.visit('/dashboard/profile/tenant-settings');
+    cy.contains('h1', 'Tenant Data').should('be.visible');
+    cy.contains('div', 'Profile').should('be.visible');
+    cy.contains('div', 'Contacts').should('be.visible');
+    cy.contains('div', 'Users').should('be.visible');
+    cy.contains('div', 'Privacy').should('be.visible');
+    cy.contains('div', 'Address').should('be.visible');
+
+    cy.contains('button', 'Edit').scrollIntoView().should('be.visible').click();
+    cy.get('input[name="tenant_phone"]').scrollIntoView().should('be.visible').clear().type(phoneValue);
+    cy.get('input[name="tenant_country"]').scrollIntoView().should('be.visible').clear().type(countryValue);
+    cy.get('input[name="tenant_city"]').scrollIntoView().should('be.visible').clear().type(cityValue);
+
+    cy.contains('label', 'Allow User Profile Visibility')
+      .scrollIntoView()
+      .parents('div.cursor-pointer')
+      .first()
+      .then(($toggle) => {
+        if (($toggle.text() || '').includes('Users can manage their profile visibility')) {
+          cy.wrap($toggle).click();
+        }
+      });
+
+    cy.contains('button', 'Save').scrollIntoView().should('be.visible').click();
+    cy.reload();
+
+    cy.location('pathname').should('include', '/dashboard/profile/tenant-settings');
+    cy.get('input[name="tenant_phone"]').should('have.value', phoneValue);
+    cy.get('input[name="tenant_country"]').should('have.value', countryValue);
+    cy.get('input[name="tenant_city"]').should('have.value', cityValue);
+    cy.contains('label', 'Allow User Profile Visibility')
+      .scrollIntoView()
+      .parents('div.cursor-pointer')
+      .first()
+      .should('contain.text', 'User profile visibility is disabled for this tenant');
+    cy.logout();
   });
 
   it('handles tenant alerts and notifications end-to-end', () => {

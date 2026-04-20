@@ -1,10 +1,21 @@
-import {addUser, completeSubscriptionPopupFlow, deleteUsersByUsername, loginAndClickSidebar, loginAsUser, ManagedUser, openSidebarGroup, openSidebarSubItem} from './controllers/05-user-management.controller';
+import {addUser, completeSubscriptionPopupFlow, deleteUsersByUsername, loginAndClickSidebar, loginAsUser, ManagedUser, openFirstStrategicReportFromSearch, openSidebarGroup, openSidebarSubItem} from './controllers/05-user-management.controller';
 
 let testUsers: any = {};
 let testData: any = {};
 let createUsers: ManagedUser[] = [];
+let profileUserId = '';
 
 describe('Orion Intelligence - User Management Creation Flow', () => {
+  before(() => {
+    cy.env(['TEST_USERS', 'TEST_DATA']).then(({TEST_USERS, TEST_DATA}) => {
+      testUsers = TEST_USERS || {};
+      testData = TEST_DATA || {};
+      createUsers = Object.keys(testUsers)
+        .filter((key) => /^testing\d+$/.test(key))
+        .map((key) => testUsers[key] as ManagedUser);
+    });
+  });
+
   before(() => {
     cy.env(['TEST_USERS', 'TEST_DATA']).then(({TEST_USERS, TEST_DATA}) => {
       testUsers = TEST_USERS || {};
@@ -87,6 +98,80 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.wait('@trialSession');
     cy.get('[data-testid="trial-subscription-banner"]').should('be.visible');
     cy.contains('[data-testid="trial-subscription-banner"]', 'Your subscription is about to expire in 10 days.').should('be.visible');
+    cy.logout();
+  });
+
+  it('covers report feedback and public profile activity flow', () => {
+    cy.visit('/');
+    cy.get('[data-testid="login-page"]').should('be.visible');
+
+    const currentUsername = testUsers.testing3.username;
+    const commentText = `Follow up on this thread ${Date.now()}`;
+    const blockedCommentText = `Blocked follow up ${Date.now()}`;
+
+    loginAsUser(testUsers.testing3.username, testUsers.testing3.password);
+
+    openFirstStrategicReportFromSearch();
+
+    cy.scrollDashboardToTop();
+    cy.get('[data-testid="report-feedback-recommended"]').filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="report-feedback-recommended"]').filter(':visible').first().should('contain.text', 'Selected');
+
+    cy.get('[data-testid="report-feedback-trust"]').filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="report-feedback-trust"]').filter(':visible').first().should('contain.text', 'Selected');
+
+    cy.scrollDashboardToBottom()
+    cy.get('[data-testid="report-feedback-comment-input"]').filter(':visible').first().scrollIntoView().should('be.visible').type(commentText);
+    cy.get('[data-testid="report-feedback-comment-save"]').filter(':visible').first().click();
+    cy.contains('p', commentText).should('be.visible');
+
+    cy.contains('[data-testid="report-feedback-comment-user-name"]', currentUsername).first().click();
+    cy.contains('div', 'Profile').should('be.visible');
+    cy.get('[data-testid="report-user-sidebar-open-profile"]').filter(':visible').first().click();
+    cy.url().should('match', /\/dashboard\/profile\/user\/[^/]+$/);
+    cy.location('pathname').then((pathname) => {
+      profileUserId = pathname.split('/').pop() || '';
+      expect(profileUserId).to.not.equal('');
+    });
+    cy.contains('h1', currentUsername).should('be.visible');
+    cy.contains('span', 'Recommended').should('exist');
+    cy.contains('span', 'Trust').should('exist');
+    cy.contains('span', /comment/i).should('exist');
+
+    cy.window().then((win) => {
+      cy.stub(win, 'open').as('profileWindowOpen');
+    });
+    cy.get('[data-testid="user-profile-open-thread"]').filter(':visible').first().click();
+    cy.get('@profileWindowOpen').should('have.been.calledOnce');
+    cy.get('@profileWindowOpen').its('firstCall.args.0').should('include', '/dashboard/');
+
+    openFirstStrategicReportFromSearch();
+    cy.wait(1000)
+    cy.scrollDashboardToBottom()
+    cy.get('[data-testid="report-feedback-comment-input"]').filter(':visible').first().scrollIntoView().should('be.visible').type(blockedCommentText);
+    cy.get('[data-testid="report-feedback-comment-save"]').filter(':visible').first().click();
+    cy.contains('p', 'Only one comment per hour is allowed.').should('be.visible');
+    cy.contains('p', blockedCommentText).should('not.exist');
+
+    cy.visit('/dashboard/profile/account');
+    cy.get('[data-testid="account-settings-profile-visibility-toggle"]').should('be.visible').then(($toggle) => {
+      const label = $toggle.text();
+      if (label.includes('Visible to other users')) {
+        cy.wrap($toggle).scrollIntoView().click();
+      }
+    });
+    cy.contains('[data-testid="account-settings-profile-visibility-toggle"] p', 'Hidden from other users').should('be.visible');
+    cy.reload();
+    cy.get('[data-testid="account-settings-profile-visibility-toggle"]').scrollIntoView().should('be.visible');
+    cy.contains('[data-testid="account-settings-profile-visibility-toggle"] p', 'Hidden from other users').should('be.visible');
+    cy.logout();
+
+    loginAsUser(testUsers.testing5.username, testUsers.testing5.password);
+    openFirstStrategicReportFromSearch();
+    cy.scrollDashboardToBottom()
+    cy.contains('[data-testid="report-feedback-comment-user-name"]', currentUsername).first().click();
+    cy.get('[data-testid="report-user-sidebar-hidden-profile"]').should('exist');
+    cy.get('[data-testid="report-user-sidebar-open-profile"]').should('not.exist');
     cy.logout();
   });
 });

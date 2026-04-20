@@ -20,11 +20,11 @@
                 <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
               </div>
             </div>
-            <div (click)="scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [queryParams]="queryParams" appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-report">
+            <a (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [queryParams]="queryParams" appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-report">
               <div class="p-[0_0_10px_10px]">
                 <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" class="ui-action-icon" />
               </div>
-            </div>
+            </a>
             </div>
           }
         </div>
@@ -41,14 +41,16 @@
         </div>
         @if (item.m_message_sharable_link) {
           <div class="mt-[5px] mb-[20px] block overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[12px] font-[500] text-[var(--color-text8)]">
-            {{ item.m_message_sharable_link }}
+            <a [href]="item.m_message_sharable_link" target="_blank" rel="noopener noreferrer" class="hover:underline" (click)="$event.stopPropagation()">
+              {{ item.m_message_sharable_link }}
+            </a>
           </div>
         }
         @if (item.m_platform !== 'forum') {
           @if (hasCodeType(item)) {
             <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text">
             Code snippet - content not available</p>
-            <div class="mb-[12px] mt-[10px] rounded-[8px] border border-[var(--color-border)] bg-[rgb(0,0,0,0.161)] p-[12px]">
+            <div class="mb-[12px] mt-[10px] max-h-[300px] overflow-y-auto rounded-[8px] border border-[var(--color-border)] bg-[rgb(0,0,0,0.161)] p-[12px]">
               <code [innerText]="getContentWithoutEmptyLines(item.m_content)" class="text-[14px] text-[var(--color-text1)]"></code>
             </div>
           } @else {
@@ -82,7 +84,9 @@
         <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">Embedded URL</h5>
         @for (link of item.m_weblink | slice:0:3; track $index) {
           <div class="block truncate text-[12px] font-medium text-[var(--color-text8)]">
-            {{ link }}
+            <a [href]="link" target="_blank" rel="noopener noreferrer" class="hover:underline" (click)="$event.stopPropagation()">
+              {{ link }}
+            </a>
           </div>
         }
       }

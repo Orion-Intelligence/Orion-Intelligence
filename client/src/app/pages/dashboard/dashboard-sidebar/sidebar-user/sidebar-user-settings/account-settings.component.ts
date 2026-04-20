@@ -21,6 +21,7 @@ export class AccountSettingsComponent implements OnInit {
   userSessionData: userSessionData;
   twoFactorEnabled = true;
   isDarkMode = true;
+  isProfileVisible = true;
   editableUsername = '';
 
   constructor(protected apiService: ApiService, protected appService: AppService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService) {
@@ -40,6 +41,11 @@ export class AccountSettingsComponent implements OnInit {
     const preferenceTheme = this.userSessionData?.user?.preferences?.["theme"];
     const theme = userTheme || preferenceTheme || 'dark-theme';
     this.isDarkMode = theme === 'dark-theme';
+    this.isProfileVisible = this.userSessionData?.user?.preferences?.["profile_visible"] !== false;
+  }
+
+  isTenantProfileVisibilityEnabled(): boolean {
+    return this.userSessionData?.tenant?.profileVisibilityEnabled !== false;
   }
 
   isAdmin(): boolean {
@@ -83,6 +89,18 @@ export class AccountSettingsComponent implements OnInit {
     this.updateUser();
   }
 
+  toggleProfileVisibility() {
+    if (!this.isTenantProfileVisibilityEnabled()) {
+      return;
+    }
+    const preferences = {
+      ...(this.userSessionData.user.preferences || {}),
+      profile_visible: this.isProfileVisible
+    };
+    this.userSessionData.user.preferences = preferences;
+    this.updateUser();
+  }
+
   getLocationDisplay(): string {
     return getTenantLocationDisplay(this.userSessionData.tenant);
   }
@@ -93,7 +111,8 @@ export class AccountSettingsComponent implements OnInit {
     const theme = this.getCurrentTheme();
     const preferences = {
       ...(this.userSessionData.user.preferences || {}),
-      theme
+      theme,
+      profile_visible: this.isProfileVisible
     };
     this.userSessionData.user.theme = theme;
     this.userSessionData.user.preferences = preferences;

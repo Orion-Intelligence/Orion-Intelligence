@@ -44,6 +44,7 @@ export interface TenantDataModel {
     assignedQuota: string;
     quotaExceeded: boolean;
     image?: string;
+    profileVisibilityEnabled?: boolean;
 }
 export interface userMetaData {
     username: string;
@@ -51,6 +52,7 @@ export interface userMetaData {
     theme?: 'dark-theme' | 'light-theme';
     preferences?: Record<string, any> & {
         theme?: 'dark-theme' | 'light-theme';
+        profile_visible?: boolean;
     };
     demo_tour:boolean|undefined;
 }

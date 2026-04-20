@@ -50,7 +50,7 @@
       } @else if (dnsResult() && pagedRows.length) {
         <div @fadeInDashboardItem>
         @for (row of pagedRows; track trackByIp($index, row); let last = $last) {
-          <div [attr.data-testid]="'network-intel-dns-row-' + row.ip" class="ui-ioc-table-row flex cursor-pointer items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 text-sm transition-[filter] hover:brightness-105" [class.ui-ioc-row-even]="$index % 2 === 0" [class.ui-ioc-row-odd]="$index % 2 !== 0" [ngClass]="{ 'credential_row_expand border-b-transparent': row.expanded, 'border-b-0': last && !row.expanded }" (click)="toggleRow.emit(row)">
+          <div [attr.data-testid]="'network-intel-dns-row-' + row.ip" class="ui-ioc-table-row flex cursor-pointer items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 text-sm transition-colors" [class.ui-ioc-row-even]="$index % 2 === 0" [class.ui-ioc-row-odd]="$index % 2 !== 0" [ngClass]="{ 'credential_row_expand border-b-transparent': row.expanded, 'border-b-0': last && !row.expanded }" (click)="toggleRow.emit(row)">
             <span class="font-mono text-[14px] font-semibold tracking-wide text-[var(--color-text1)]">{{ row.ip }}</span>
             <div class="flex items-center gap-2">
               @if (row.loading) {
