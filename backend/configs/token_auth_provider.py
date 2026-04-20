@@ -41,7 +41,7 @@ class TokenAuthProvider(AuthProvider):
                 secure=not IS_DEBUG,
                 samesite="lax" if IS_DEBUG else "strict",
                 max_age=1800,
-                path="/", )
+                path="/admin", )
             return redirect
         except Exception:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
@@ -80,7 +80,7 @@ class TokenAuthProvider(AuthProvider):
 
     async def logout(self, request: Request, response: Response) -> Response:
         redirect = RedirectResponse(url="/admin/login", status_code=HTTP_303_SEE_OTHER)
-        redirect.delete_cookie("access_token", path="/")
+        redirect.delete_cookie("access_token", path="/admin")
         return redirect
 
 

@@ -1,241 +1,380 @@
 # Introduction To Modules
 
-## Introduction
-
-This documentation provides an extensive overview of our Data Intelligence Platform, a comprehensive suite of tools and
-services designed to streamline the process of discovering, collecting, indexing, and analyzing data from various open,
-deep, and dark web sources. The platform is divided into two major sections:
-
-- **Active Intelligence:** Focused on proactive data collection, indexing, and visualization using automated crawlers,
-  search infrastructure, and integrated browser technology.
-- **Passive Intelligence:** Geared towards whistle-blowing and anonymous data submission capabilities, leveraging
-  established open-source frameworks for secure and anonymous reporting.
-
-Each component within these sections plays a unique role, contributing to the platform’s overarching goal: enabling
-researchers, OSINT (Open Source Intelligence) analysts, investigative journalists, and developers to efficiently gather
-actionable intelligence from difficult-to-access sources.
-
----
-
-## Active Intelligence
-
-### Overview
-
-Active Intelligence encompasses a set of tools that actively reach out to hidden, multilayered web services, crawl their
-content, and present that data for indexing, analysis, and visualization. These tools are designed to operate in tandem,
-forming an integrated pipeline where data flows from initial discovery, through processing and indexing, to final
-visualization.
-
-```{admonition} Key Highlights
+:::{admonition} Scope
 :class: tip
 
-- Automated, intelligent crawling of hidden services (Onion, I2P, etc.)
-- Machine learning-driven data extraction and classification
-- High-performance indexing and search capabilities
-- Seamless integration for custom data collection scripts
-- Browser-based exploration with built-in anonymity features
+This page introduces the major Orion product modules and explains how they fit together. It is written as a product map, not a step-by-step user manual and not a low-level developer reference.
+:::
+
+## About This Guide
+
+Orion Intelligence is organized as a group of connected investigation modules rather than one single search page. Some modules are search-first, some are scan-first, some are graph-oriented, and some are administrative. Together they support the full investigation lifecycle:
+
+1. discover a signal
+2. narrow and enrich it
+3. inspect a report
+4. pivot into related data
+5. manage tenants, alerts, and system settings
+
+This document explains what each module is for and when to use it.
+
+```{contents}
+:local:
+:depth: 2
 ```
 
-The Active Intelligence suite is composed of four main submodules:
+## How To Read The Platform
 
-1. **Orion Crawler**
-2. **Orion Search**
-3. **Orion Browser**
-4. **Orion Collector**
+The Orion module set is easiest to understand in six groups:
 
----
+| Group | What it does | Typical modules |
+| --- | --- | --- |
+| Entry and overview | search-first landing and high-level summaries | Homepage, Statistics |
+| Indexed investigation | query indexed intelligence sources | General Intelligence, Data Breach, Defacement, Social, Exploit, Dump |
+| Combined investigation | merge multiple result channels around one query | Consolidated |
+| Live lookup and scan | run direct, targeted checks | Entity API, Web Scans, Network Intel |
+| Relationship analysis | map entities and pivots visually | CTI Graph, Social Intel |
+| Tenant and administration | manage users, alerts, quotas, branding, settings | Users, Tenants, Audit Logs, Account Settings, Tenant Settings, System Settings |
 
-### Orion Crawler
+## Entry And Overview Modules
 
-```{admonition} Purpose
-:class: note
+### Homepage
 
-**Purpose:**  
-The Orion Crawler is the starting point of the active intelligence pipeline. Its primary role is to automatically
-navigate through various hidden and anonymous networks (like Onion and I2P), scraping raw data from websites and forums
-that are not easily accessible by conventional search engines.
-```
+Homepage is the primary landing area for many users. It acts as a search-first overview rather than a static welcome page.
 
-```{admonition} Key Features
-:class: important
+Depending on role, tenant state, and license assignment, Homepage can function as:
 
-**Key Features:**
+- a direct search starting point
+- an insight dashboard with counts and summaries
+- a tenant alert overview
+- a simplified landing experience for restricted users
 
-- **Multithreading:** Implements Python’s concurrency capabilities and Celery distributed task queue to handle multiple
-  crawl tasks in parallel, improving efficiency and throughput.
-- **Machine Learning Integration:** Utilizes ML-based classification models to filter relevant content, prioritize
-  high-value targets, and adaptively refine crawl strategies over time.
-- **Scalable Architecture:** Easily add more workers to the Celery queue to handle increased crawling demands.
-- **Modular Design:** Pluggable components allow for integration with different data sources and protocols beyond Onion
-  and I2P (e.g., ZeroNet, Freenet).
-```
+Use Homepage when you want to start broad and decide which module to enter next.
 
-```{admonition} Technology Stack
-:class: tip
+### Statistics
 
-**Technology Stack:**
+Statistics is the summary-oriented view for users who want visual coverage information without starting with an immediate query. It is useful for high-level monitoring, trend review, and quick triage.
 
-- **Language & Framework:** Python + Celery
-- **Data Storage:** Initial raw data dumps to local or distributed storage (e.g., AWS S3, MinIO, or local filesystem)
-- **ML Models:** Python-based (TensorFlow/PyTorch/Scikit-learn) classification and entity extraction models
-```
+## Indexed Investigation Modules
 
-```{admonition} Workflow
-:class: info
+Indexed modules are the core analyst-facing search surfaces. They operate on collected and processed data that has already been ingested into the platform.
 
-**Workflow:**
+### General Intelligence
 
-1. **Target Seed Input:** Provide a list of seed URLs or services.
-2. **Distributed Task Queue:** Orion Crawler workers fetch tasks from the Celery queue.
-3. **Content Extraction:** The crawler retrieves HTML, images, documents, or other file types.
-4. **ML-driven Filtering:** Extracted content runs through ML models for classification, relevance scoring, and entity
-   extraction.
-5. **Storage & Indexing Prep:** Cleaned, structured data is stored for indexing by Orion Search.
-```
+General Intelligence is the broadest indexed search module. It is used when the analyst wants to search for a topic, keyword, organization, product, actor, or event across mixed source types.
 
----
+Typical subviews include:
 
-### Orion Search
+- `All`
+- `General`
+- `Forums`
+- `News`
+- `Stolen`
+- `Drugs`
+- `Hacking`
+- `Marketplaces`
+- `Cryptocurrency`
+- `Leaks`
 
-```{admonition} Purpose
-:class: note
+This is usually the best starting point when the user only has a broad concept and needs initial coverage.
 
-**Purpose:**  
-Orion Search provides a powerful, fast, and scalable search interface on top of the collected and processed data. By
-leveraging the indexing capabilities of Elasticsearch, it allows users to quickly query, filter, and visualize insights
-from massive datasets.
-```
+### Data Breach
 
-```{admonition} Key Features
-:class: important
+Data Breach focuses on breach records, exposed credentials, and identity exposure checks.
 
-**Key Features:**
+Typical subviews include:
 
-- **High-Performance Indexing:** Swift ingestion of data from Orion Crawler’s output into Elasticsearch indices.
-- **Advanced Querying:** Support for full-text search, keyword queries, fuzzy matches, and complex Boolean queries.
-- **Faceted Navigation:** Drill down through content by tags, categories, timeframes, or any metadata field.
-- **Data Visualization:** Integration with Kibana or custom dashboards for charts, graphs, and timeline views.
-```
+- `All`
+- `Databases`
+- `Tracking`
 
-```{admonition} Technology Stack
-:class: tip
+Use this module when starting from:
 
-**Technology Stack:**
+- an email address
+- a known breached identity
+- a need to verify whether a person or account appears in breach datasets
 
-- **Search Engine:** Elasticsearch
-- **Indexing Connectors:** Python-based indexing scripts that batch-process crawler output.
-- **Visualization:** Kibana or custom front-end interfaces.
-```
+### Defacement
 
-```{admonition} Workflow
-:class: info
+Defacement tracks hacked, altered, cloned, or phishing-related website incidents. It is more operationally focused than General Intelligence because it emphasizes target and attacker context.
 
-**Workflow:**
+Typical subviews include:
 
-1. **Ingestion:** Processed data from Orion Crawler is fed into Elasticsearch.
-2. **Index Refresh:** Automated index refresh intervals ensure newly ingested data is queryable with minimal delay.
-3. **Query & Analysis:** Users or downstream systems query Elasticsearch for specific intelligence needs.
-4. **Visualization:** Results can be displayed in interactive dashboards or integrated into analytical workflows.
-```
+- `All`
+- `Hacked`
+- `Phishing`
+- `Databases`
 
----
+Use Defacement when you are investigating compromised websites, defacer identity, or site-level incident evidence.
 
-### Orion Browser
+### Social
 
-```{admonition} Purpose
-:class: note
+Social aggregates intelligence from community and social-style sources. It is useful for chatter discovery, leak references, early warning, and platform-specific narrative tracking.
 
-**Purpose:**  
-The Orion Browser is a specialized Android-based browser designed to function as a data harvester. While Orion Crawler
-proactively fetches data programmatically, Orion Browser complements this by allowing human-driven navigation. As an
-analyst browses through target websites, Orion Browser automatically indexes and scrapes encountered data, creating a
-feedback loop for more in-depth exploration.
-```
+Typical subviews include:
 
-```{admonition} Key Features
-:class: important
+- `All`
+- `Telegram`
+- `Twitter`
+- `Mastodon`
+- `Pastebin`
+- `Forum`
+- `Reddit`
 
-**Key Features:**
+Use Social when timing, conversation context, or platform origin matters as much as the content itself.
 
-- **Android-Native Integration:** Built with Kotlin and Java, utilizing Orbot libraries for Tor network integration to
-  maintain anonymity.
-- **Automated Harvesting:** As the analyst navigates the site, Orion Browser extracts content, metadata, and structural
-  information behind the scenes.
-- **Seamless Indexing:** Harvested data is sent back to the indexing pipeline for subsequent searching and analysis.
-- **Customizable Plugins:** Extend functionality through custom plugins for additional data extraction techniques or
-  browser automation.
-```
+### Exploit
 
-```{admonition} Technology Stack
-:class: tip
+Exploit covers vulnerability and exploit-related material. It is intended for users starting from a vulnerability identifier, exploit reference, tooling name, or active exploit discussion.
 
-**Technology Stack:**
+Typical subviews include:
 
-- **Platform:** Android
-- **Languages:** Kotlin, Java
-- **Privacy & Anonymity:** Orbot integration to route traffic through Tor
-- **Data Extraction:** Local scraping tools integrated into the browser’s rendering engine
-```
+- `All`
+- `CVE`
+- `Tools`
+- `ZeroDay`
 
-```{admonition} Workflow
-:class: info
+This module is useful for vulnerability intelligence and exploit monitoring workflows.
 
-**Workflow:**
+### Feed
 
-1. **Analyst Browsing:** User navigates dark web marketplaces, forums, or hidden services using the Orion Browser.
-2. **Real-Time Extraction:** Each visited page is scraped, text and metadata are extracted.
-3. **Metadata Packaging:** Structured content is packaged and securely sent to the indexing pipeline.
-4. **Index Integration:** The newly harvested data appears in Orion Search after re-indexing, allowing quick retrieval
-   and analysis.
-```
+Feed is a stream-style reading surface for current reporting and intelligence-style news. It is less about constructing a precise query and more about scanning active reporting and recent coverage.
 
----
+### Dump
 
-### Orion Collector
+Dump focuses on dump and listing material gathered from monitored sources. It differs from General Intelligence because it emphasizes dump listings and leak references directly, including dedicated leak-URL searching.
 
-```{admonition} Purpose
-:class: note
+Use Dump when the key artifact is:
 
-**Purpose:**  
-The Orion Collector streamlines the integration of custom collection scripts and scraping configurations. Instead of
-requiring extensive setup for each new target site, developers and OSINT engineers can simply modify or submit new
-scripts tailored to specific sources. The Orion Collector automates the rest, handling ingestion, extraction, and
-indexing without manual reconfiguration.
-```
+- a leak URL
+- a dump listing
+- a dump-related source reference
 
-```{admonition} Key Features
-:class: important
+## Combined Investigation Module
 
-**Key Features:**
+### Consolidated
 
-- **Script-Based Customization:** Developers create or modify scraper scripts in a standardized format.
-- **Pull Request Integration:** Submit a pull request with new or updated scripts; once merged, the platform
-  automatically incorporates the changes.
-- **Auto-Configuration:** No additional manual configuration required. The Collector dynamically loads and applies new
-  scripts, ensuring smooth scaling to multiple, specialized data sources.
-- **Developer-Friendly:** Clear documentation, code templates, and examples help reduce the learning curve for
-  contributing engineers.
-```
+Consolidated is the cross-module triage workspace. Instead of forcing the user to choose one indexed module first, it lets a single query drive multiple result channels in parallel.
 
-```{admonition} Technology Stack
-:class: tip
+Typical views include:
 
-**Technology Stack:**
+- `IOCs`
+- `Deep Search`
+- `Network Intel`
 
-- **Core Language:** Python (for ingestion and script execution)
-- **Version Control:** Git-based workflow to track and merge changes to scraper scripts
-- **Continuous Integration (CI):** Automated testing of new scripts before deploying them into production
-- **Script Templates:** YAML/JSON configurations plus Python-based scraping logic
-```
+Use Consolidated when:
 
-```{admonition} Workflow
-:class: info
+- you want breadth before precision
+- you are still deciding which pivot matters most
+- you need both indexed results and supporting enrichment around the same query
 
-**Workflow:**
+Consolidated is especially useful early in an investigation because it can combine search, insight panels, and pivot opportunities in one place.
 
-1. **Script Creation:** Developer creates a new scraper script targeting a specific site or data type.
-2. **Pull Request & Review:** Developer submits a PR. Code reviewers ensure script quality and compatibility.
-3. **Merge & Deploy:** Once approved, changes are merged, and the Collector automatically loads the new script.
-4. **Data Pipeline Update:** The newly configured script runs within the existing pipeline, adding its data to Orion
-   Search.
-```
+## Live Lookup And Scan Modules
+
+These modules do not rely only on previously indexed content. They run targeted checks or live workflows against supplied input.
+
+### Entity API
+
+Entity API is the lookup-oriented module for direct checks against a supplied entity.
+
+Typical lookup types include:
+
+- `Email Breach`
+- `Social Scanner`
+- `Wanted List`
+- `National Identity`
+- `Playstore Scanner`
+- `Software Scanner`
+- `File Scanner`
+- `Crypto Scanner`
+
+Use Entity API when the user already has a concrete entity and wants direct enrichment rather than broad indexed discovery.
+
+### Web Scans
+
+Web Scans is the live scanning surface for web-facing targets. It is used for target inspection, posture review, and evidence-driven reporting.
+
+Typical scan types include:
+
+- `Basic Scan`
+- `Port Scan`
+- `Repository Scan`
+- `SEO Scan`
+- `APK Scan`
+
+Use Web Scans when starting from:
+
+- a domain
+- a website
+- a repository
+- a mobile application package
+
+### Network Intel
+
+Network Intel is the infrastructure-focused live recon module.
+
+Typical tabs include:
+
+- `Host Recon`
+- `IP Scan`
+- `Vulnerability Scan`
+
+Use Network Intel when the user needs:
+
+- domain-to-IP resolution
+- service and port context
+- infrastructure review
+- vulnerability findings
+- geo-assisted pivots
+
+## Relationship And Graph Modules
+
+### CTI Graph
+
+CTI Graph is the cyber relationship-mapping module. It is intended for cases where the investigation is no longer about a single search result and instead becomes a network of documents, properties, entities, and associations.
+
+Use CTI Graph when you need to:
+
+- connect records together
+- inspect clusters
+- pivot from one property to another
+- export or explain a relationship model
+
+This module is especially valuable after the user has already identified promising records elsewhere in the platform.
+
+### Social Intel
+
+Social Intel is the graph-oriented social-identity mapping module. It focuses on usernames, profiles, platforms, and relationships across social ecosystems.
+
+Use Social Intel when the investigation centers on:
+
+- username reuse
+- profile correlation
+- follower or connection review
+- graph-based social mapping
+
+It complements the Social search module: Social finds content, while Social Intel maps identities and relationships.
+
+## Support And External Modules
+
+### Directory
+
+Directory is a browsing-oriented view for monitored and crawled service references. It is less query-centric than the main search modules and more useful for reviewing monitored services as a catalog.
+
+### Links
+
+Links is the navigation entry into the directory-style workflow. It acts as the user-facing path to monitored service browsing.
+
+### Onion Link
+
+Onion Link opens the deployment’s onion endpoint when that capability is enabled. It is an external-access bridge rather than an analytical module.
+
+### Whistle Blowing
+
+Whistle Blowing opens the secure reporting path used for direct or anonymous submissions where that feature is enabled. It is adjacent to the investigation platform but distinct from the analyst workflow itself.
+
+### Documentation
+
+Documentation links to the published docs set so users can move between the application and written guidance without leaving the platform context entirely.
+
+## Profile, Tenant, And Administration Modules
+
+These modules govern user identity, tenant operations, quotas, and platform configuration.
+
+### Account Settings
+
+Account Settings is the current-user profile area. It is used for the personal account surface rather than tenant-wide administration.
+
+Common concerns here include:
+
+- user identity details
+- image and profile information
+- assigned licenses
+- two-factor settings
+- theme and preference choices
+
+### Tenant Homepage
+
+Tenant Homepage is the tenant-scoped monitoring and alert overview. Depending on role and licensing, it can act as a dashboard for alert counts, monitored IOC coverage, and tenant summary actions.
+
+### Manage IOCs
+
+Manage IOCs is the tenant-maintained list of monitored values used in alerting and related search workflows. This module matters because tenant monitoring quality depends directly on the IOC set being maintained correctly.
+
+### Tenant Settings
+
+Tenant Settings stores tenant-level information such as identity, contact, quota, and assigned licenses. It is the central administrative page for tenant configuration.
+
+### Users
+
+Users is the tenant user-management page. It is used to add, review, update, and remove tenant users while respecting quota and role constraints.
+
+### Tenants
+
+Tenants is the higher-privilege administration surface for multi-tenant oversight across the platform. It is used to manage tenant state, licensing, verification, and quotas.
+
+### Audit Logs
+
+Audit Logs provides a trace of platform activity across user and tenant actions. It is the main administrative history view for reviewing who performed what action and when.
+
+### System Settings
+
+System Settings is the platform-wide configuration page. It is used for branding, feature visibility, application identity, and selected runtime status indicators.
+
+This is the administrative module that affects the product globally rather than one user or one tenant.
+
+## How Modules Work Together
+
+A useful way to think about Orion is as a layered investigation flow:
+
+1. start broad in `Homepage`, `General Intelligence`, or `Consolidated`
+2. move into a specialist indexed module such as `Data Breach`, `Defacement`, `Social`, `Exploit`, or `Dump`
+3. open a report for detailed review
+4. pivot into `Entity API`, `Web Scans`, `Network Intel`, `CTI Graph`, or `Social Intel`
+5. finish in tenant or administrative modules if action, alerting, or governance is needed
+
+This means the modules are not isolated products. They are connected stages of one investigation system.
+
+## Choosing The Right Module
+
+### Start Here If You Have A Broad Topic
+
+Use:
+
+- `Homepage`
+- `General Intelligence`
+- `Consolidated`
+
+### Start Here If You Have A Specific Artifact
+
+Use:
+
+- `Data Breach` for exposed identities or emails
+- `Dump` for leak URLs and dump references
+- `Entity API` for direct entity checks
+- `Network Intel` for infrastructure targets
+- `Web Scans` for target scanning
+
+### Start Here If You Need Relationships
+
+Use:
+
+- `CTI Graph` for cyber relationship mapping
+- `Social Intel` for identity and profile mapping
+
+### Start Here If You Need Governance Or Administration
+
+Use:
+
+- `Users`
+- `Tenants`
+- `Audit Logs`
+- `Tenant Settings`
+- `System Settings`
+
+## Related Documents
+
+- [Introduction To Platform](./introduction_to_platform.md)
+- [User Manual](./user_manual.md)
+- [Developer Documentation](./developer_documentation.md)

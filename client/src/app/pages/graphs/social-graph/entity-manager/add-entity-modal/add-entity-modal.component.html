@@ -1,15 +1,15 @@
-<div data-testid="add-entity-modal-overlay" class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center" (click)="close.emit()">
+<div data-testid="add-entity-modal-overlay" class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center" (click)="close.emit(undefined)">
   <div data-testid="add-entity-modal" class="ui-graph-popup-panel w-full max-w-sm overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-2xl" (click)="$event.stopPropagation()">
     <div>
       <div class="flex items-start justify-between rounded-t-lg border-b border-[var(--color-border)] bg-slate-850/90 p-3">
         <div class="flex items-start gap-3">
-          <i [class]="getIconForEntityType(data()!.type) + ' text-2xl w-8 text-center'"></i>
+          <i [class]="socialEntityUiService.getIconForEntityType(data()!.type) + ' text-2xl w-8 text-center'"></i>
           <div>
             <h3 class="text-lg font-semibold leading-6 text-[var(--color-text1)]">{{ getModalTitle() }}</h3>
             <p class="mt-1 text-sm text-[var(--color-text4)]">{{ data()?.mode === 'edit' ? 'Update existing entity details.' : 'Enter the details for the new entity.' }}</p>
           </div>
         </div>
-        <button (click)="close.emit()" type="button" class="ui-social-popup-icon-btn" title="Close">
+        <button (click)="close.emit(undefined)" type="button" class="ui-social-popup-icon-btn" title="Close">
           <i class="bi bi-x-lg text-[15px] leading-none"></i>
         </button>
       </div>
@@ -26,13 +26,13 @@
           <div>
             <label for="entityValue" class="block text-sm font-medium leading-6 text-[var(--color-text2)]">{{ data()?.type | titlecase }} Value</label>
             <div class="mt-2">
-              <input data-cy="add-entity-value-input" data-testid="add-entity-value-input" type="text" id="entityValue" name="entityValue" autocomplete="off" [placeholder]="'Enter ' + (data()?.type | titlecase)" [value]="entityValue()" (input)="onEntityValueChange($event)" (keyup.enter)="confirm()" [class]="'block w-full rounded-lg border py-1.5 px-3 text-[var(--color-text1)] shadow-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6 ' + ((isTouched() && validationError()) ? 'bg-red-950/30 border-red-500/60' : 'bg-[var(--color-blue-700)] border-[var(--color-border)]')">
+              <input data-testid="add-entity-value-input" type="text" id="entityValue" name="entityValue" autocomplete="off" [placeholder]="'Enter ' + (data()?.type | titlecase)" [value]="entityValue()" (input)="onEntityValueChange($event)" (keyup.enter)="confirm()" [class]="'block w-full rounded-lg border py-1.5 px-3 text-[var(--color-text1)] shadow-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6 ' + ((isTouched() && validationError()) ? 'bg-red-950/30 border-red-500/60' : 'bg-[var(--color-blue-700)] border-[var(--color-border)]')">
             </div>
           </div>
         } @else {
           <label for="apiQuery" class="block text-sm font-medium leading-6 text-[var(--color-text2)]">{{ data()?.type | titlecase }} Value</label>
           <div class="mt-2">
-            <input data-cy="add-entity-api-query-input" data-testid="add-entity-api-query-input" type="text" id="apiQuery" name="apiQuery" autocomplete="off" [placeholder]="'Enter ' + (data()?.type | titlecase)" [value]="apiQuery()" (input)="onApiQueryChange($event)" (keyup.enter)="confirm()" [class]="'block w-full rounded-lg border py-1.5 px-3 text-[var(--color-text1)] shadow-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6 ' + ((isTouched() && validationError()) ? 'bg-red-950/30 border-red-500/60' : 'bg-[var(--color-blue-700)] border-[var(--color-border)]')">
+            <input data-testid="add-entity-api-query-input" type="text" id="apiQuery" name="apiQuery" autocomplete="off" [placeholder]="'Enter ' + (data()?.type | titlecase)" [value]="apiQuery()" (input)="onApiQueryChange($event)" (keyup.enter)="confirm()" [class]="'block w-full rounded-lg border py-1.5 px-3 text-[var(--color-text1)] shadow-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6 ' + ((isTouched() && validationError()) ? 'bg-red-950/30 border-red-500/60' : 'bg-[var(--color-blue-700)] border-[var(--color-border)]')">
           </div>
         }
 
@@ -43,15 +43,15 @@
 
         <label for="entityLabel" class="mt-4 block text-sm font-medium leading-6 text-[var(--color-text2)]">Label (Optional)</label>
         <div class="mt-2">
-          <input data-cy="add-entity-label-input" type="text" id="entityLabel" name="entityLabel" autocomplete="off" placeholder="Shown on graph and lists" [value]="entityLabel()" (input)="onEntityLabelChange($event)" (keyup.enter)="confirm()" class="block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-1.5 text-[var(--color-text1)] shadow-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6">
+          <input data-testid="add-entity-label-input" type="text" id="entityLabel" name="entityLabel" autocomplete="off" placeholder="Shown on graph and lists" [value]="entityLabel()" (input)="onEntityLabelChange($event)" (keyup.enter)="confirm()" class="block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-1.5 text-[var(--color-text1)] shadow-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6">
         </div>
       </div>
 
       <div class="flex justify-end gap-3 rounded-b-lg border-t border-[var(--color-border)] bg-slate-850/80 p-4">
-        <button (click)="close.emit()" type="button" class="rounded-lg bg-[var(--color-blue-720)] px-4 py-2 text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]">
+        <button (click)="close.emit(undefined)" type="button" class="rounded-lg bg-[var(--color-blue-720)] px-4 py-2 text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]">
           Cancel
         </button>
-        <button data-cy="add-entity-submit" data-testid="add-entity-submit" type="button" (click)="confirm()" [disabled]="!isValidInput()" class="rounded-lg bg-sky-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-[var(--color-blue-710)] disabled:text-[var(--color-text4)]">
+        <button data-testid="add-entity-submit" type="button" (click)="confirm()" [disabled]="!isValidInput()" class="rounded-lg bg-sky-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-[var(--color-blue-710)] disabled:text-[var(--color-text4)]">
           {{ getSubmitLabel() }}
         </button>
       </div>

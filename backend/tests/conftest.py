@@ -399,6 +399,20 @@ def main_app_client(_main_app_client_session):
         async def register(self, tenant_id: str, user_id: str, action: str):
             audit_entries.append({"tenant_id": tenant_id, "user_id": user_id, "action": action})
 
+        async def search_audit(self, current_user, search_type: str, q: str):
+            await self.register(
+                str(current_user.tenant_uuid),
+                str(current_user.id),
+                json.dumps({"search_type": search_type, "q": q}),
+            )
+
+        async def delete(self, log_id: str):
+            for index, entry in enumerate(audit_entries):
+                if entry.get("id") == log_id:
+                    audit_entries.pop(index)
+                    return True
+            return False
+
         async def get(self, param, current_user):
             page = getattr(param, "page", 1)
             return {"items": list(audit_entries), "page": page, "total": len(audit_entries)}

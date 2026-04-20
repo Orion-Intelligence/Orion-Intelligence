@@ -1,4 +1,4 @@
-import { Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, inject } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { Color, Edge, Network } from 'vis-network';
 import { DataSet } from 'vis-data';
@@ -18,6 +18,10 @@ import { ExtendedNode, GraphResultItem, GraphSessionState, GraphSessionTab, Node
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportExportType, GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
+import { ensureStylesheet } from '../../../shared/utils/ensure-stylesheet.util';
+import { ProxyController } from '../../../shared/services/proxy-controller';
+
+type GraphNodeColor = string | Color;
 @Component({
   selector: 'app-graphs',
   standalone: true,
@@ -26,6 +30,8 @@ import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export
   imports: [CtiSidebarComponent, GraphContextMenuComponent, ProfileComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, NgClass, TabBarComponent, GraphLoadingComponent]
 })
 export class GraphComponent implements OnInit, OnDestroy {
+  private readonly playgroundTabName = 'Playground';
+  private readonly proxied_resource = inject(ProxyController);
   private readonly maxNodeLabelLength = 28;
   private readonly edgeBaseColor = 'rgba(75, 85, 99, 0.8)';
   private readonly edgeHighlightColor = '#a78bfa';
@@ -62,9 +68,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (!this.network || !this.isGraphView) {
       return;
     }
-    const target = event.target as HTMLElement | null;
-    const tag = target?.tagName?.toLowerCase() || '';
-    const isEditable = !!target?.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select';
+    const eventTargetElement = event.target as HTMLElement | null;
+    const tag = eventTargetElement?.tagName?.toLowerCase() || '';
+    const isEditable = !!eventTargetElement?.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select';
     if (isEditable) {
       return;
     }
@@ -125,7 +131,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   copied = false;
   copiedX = 0;
   copiedY = 0;
-  orignalColor: string | Color = '';
+  orignalColor: GraphNodeColor = '';
   currentCategory = '';
   isSidebarCollapsed = false;
   isTailwindReady = true;
@@ -133,7 +139,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   isGraphView = true;
   isListingsCollapsed = true;
   searchMatchedCount = 0;
-  listRows: Array<{ id: string; label: string; cluster: string; }> = [];
+  listRows: { id: string; label: string; cluster: string; }[] = [];
   showMaxEdgeNotice = false;
   tabs: GraphSessionTab[] = [];
   activeTabId = '';
@@ -161,7 +167,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   @ViewChild('networkContainer')
-  set networkContainerRef(ref: ElementRef | undefined) {
+  set networkContainerRef(ref: ElementRef) {
     if (ref) {
       this.networkContainer = ref;
       this.tryRestorePendingSessionState();
@@ -173,6 +179,7 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
+      ensureStylesheet('/assets/libs/vis-network.css', 'vis-network-styles');
       document.addEventListener('pointerdown', this.globalPointerDownListener, true);
       document.addEventListener('keydown', this.globalKeyDownListener, true);
     }
@@ -228,6 +235,13 @@ export class GraphComponent implements OnInit, OnDestroy {
       isListingsCollapsed: true,
       expandEnabled: false
     };
+  }
+
+  private normalizePlaygroundTab(): void {
+    if (this.tabs.length === 0) {
+      return;
+    }
+    this.tabs = this.tabs.map((tab, index) => index === 0 ? { ...tab, name: this.playgroundTabName } : tab);
   }
 
   private generateId(): string {
@@ -314,6 +328,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId) || !this.hasLoadedSessions) {
       return;
     }
+    this.normalizePlaygroundTab();
     const payload = {
       tab_counter: GraphComponent.sessionCounter,
       active_tab_id: this.activeTabId,
@@ -327,7 +342,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       next: () => {
         this.lastSavedSessionSignature = nextSignature;
       },
-      error: () => { }
+      error: () => void 0
     });
   }
 
@@ -350,6 +365,7 @@ export class GraphComponent implements OnInit, OnDestroy {
           name: typeof savedTab?.name === 'string' && savedTab.name.trim().length > 0 ? savedTab.name : `Session ${index + 1}`,
           state: { ...this.createDefaultSessionState(), ...(savedTab?.state || {}) }
         } as GraphSessionTab));
+        this.normalizePlaygroundTab();
         GraphComponent.sessionCounter = Number(savedState?.tab_counter ?? savedState?.counter) || (this.tabs.length + 1);
         this.activeTabId = savedState?.active_tab_id ?? savedState?.activeTabId ?? this.tabs[0].id;
         if (!this.tabs.some(t => t.id === this.activeTabId)) {
@@ -374,10 +390,11 @@ export class GraphComponent implements OnInit, OnDestroy {
   addSession(): void {
     const newTab: GraphSessionTab = {
       id: this.generateId(),
-      name: `Session ${GraphComponent.sessionCounter++}`,
+      name: this.tabs.length === 0 ? this.playgroundTabName : `Session ${GraphComponent.sessionCounter++}`,
       state: this.createDefaultSessionState()
     };
     this.tabs = [...this.tabs, newTab];
+    this.normalizePlaygroundTab();
     this.activeTabId = newTab.id;
     this.applySession(newTab.id);
     this.applyActiveTabState();
@@ -398,6 +415,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (this.tabs.length <= 1) {
       return;
     }
+    if (this.tabs[0]?.id === id) {
+      return;
+    }
     const idx = this.tabs.findIndex(t => t.id === id);
     this.tabs = this.tabs.filter(t => t.id !== id);
     if (this.activeTabId === id) {
@@ -409,6 +429,9 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   startEditing(id: string): void {
+    if (this.tabs[0]?.id === id) {
+      return;
+    }
     this.editingTabId = id;
   }
 
@@ -417,6 +440,10 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   renameSession(id: string, newName: string): void {
+    if (this.tabs[0]?.id === id) {
+      this.stopEditing();
+      return;
+    }
     const trimmed = newName.trim();
     if (!trimmed) {
       this.stopEditing();
@@ -514,10 +541,10 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     const originalScale = this.network.getScale();
     const originalPosition = this.network.getViewPosition();
-    const groupsToExpand: Array<{
-      id: string;
-      subNodes: string[];
-  }> = [];
+    const groupsToExpand: {
+        id: string;
+        subNodes: string[];
+    }[] = [];
     this.nodeSet.get().forEach(node => {
       const ext = node as ExtendedNode;
       const nodeId = String(ext.id ?? '');
@@ -528,7 +555,9 @@ export class GraphComponent implements OnInit, OnDestroy {
         groupsToExpand.push({ id: nodeId, subNodes: ext.subNodes ?? [] });
       }
     });
-    groupsToExpand.forEach(item => this.expandGroupFromNodeId(item.id, item.subNodes, 200));
+    groupsToExpand.forEach(item => {
+      this.expandGroupFromNodeId(item.id, item.subNodes, 200);
+    });
     this.network.redraw();
     this.network.fit({ animation: false });
     const fittedPosition = this.network.getViewPosition();
@@ -539,19 +568,19 @@ export class GraphComponent implements OnInit, OnDestroy {
       animation: false
     });
     this.network.redraw();
-    const canvases = this.networkContainer.nativeElement.querySelectorAll('canvas') as NodeListOf<HTMLCanvasElement>;
+    const canvasElements = this.networkContainer.nativeElement.querySelectorAll('canvas') as NodeListOf<HTMLCanvasElement>;
     let snapshot: string | undefined;
-    if (canvases.length > 0) {
-      const width = canvases[0].width;
-      const height = canvases[0].height;
+    if (canvasElements.length > 0) {
+      const width = canvasElements[0].width;
+      const height = canvasElements[0].height;
       const merged = document.createElement('canvas');
       merged.width = width;
       merged.height = height;
       const ctx = merged.getContext('2d');
       if (ctx) {
-        canvases.forEach(c => {
-          if (c.width === width && c.height === height) {
-            ctx.drawImage(c, 0, 0);
+        canvasElements.forEach(canvasElement => {
+          if (canvasElement.width === width && canvasElement.height === height) {
+            ctx.drawImage(canvasElement, 0, 0);
           }
         });
         const pad = Math.round(Math.max(width, height) * 0.06);
@@ -570,7 +599,9 @@ export class GraphComponent implements OnInit, OnDestroy {
         }
       }
     }
-    groupsToExpand.forEach(item => this.collapseGroupFromNodeId(item.id, item.subNodes, true));
+    groupsToExpand.forEach(item => {
+      this.collapseGroupFromNodeId(item.id, item.subNodes, true);
+    });
     this.network.moveTo({
       position: originalPosition,
       scale: originalScale,
@@ -581,8 +612,8 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   importSessionFile(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files?.length) {
+    const inputElement = event.target as HTMLInputElement;
+    if (!inputElement.files?.length) {
       return;
     }
     const reader = new FileReader();
@@ -599,15 +630,17 @@ export class GraphComponent implements OnInit, OnDestroy {
           state: { ...this.createDefaultSessionState(), ...parsed.state }
         };
         this.tabs = [...this.tabs, imported];
+        this.normalizePlaygroundTab();
         this.activeTabId = imported.id;
         this.applySession(imported.id);
         this.saveSessions();
       }
       catch {
+        // Ignore invalid imported session files.
       }
     };
-    reader.readAsText(input.files[0]);
-    input.value = '';
+    reader.readAsText(inputElement.files[0]);
+    inputElement.value = '';
   }
 
   toggleAddMenu(event: MouseEvent): void {
@@ -820,7 +853,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (!menu) {
       return;
     }
-    if (node && node.color) {
+    if (node?.color) {
       this.orignalColor = node.color;
     }
     if (node && typeof node.id === 'string') {
@@ -1169,7 +1202,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       singleInput: singleInput
     });
     const fullUrl = `${baseUrl}?${params.toString()}`;
-    window.open(fullUrl, '_blank');
+    this.proxied_resource.open(fullUrl);
     this.hideContextMenu();
   }
 
@@ -1188,10 +1221,10 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private getReportCategory(nodeId: string): string {
-    const checks: Array<[
+    const checks: [
       string,
       string
-  ]> = [
+  ][] = [
     ['general', 'cti_vertices/general'],
     ['leak', 'cti_vertices/leak'],
     ['defacement', 'cti_vertices/defacement'],
@@ -1212,7 +1245,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     const parts = nodeId.split('/');
     const singleInput = parts[parts.length - 1];
     const category = this.getReportCategory(nodeId);
-    const open = (path: string) => window.open(`${window.location.origin}${path}/${singleInput}`, '_blank');
+    const open = (path: string) => this.proxied_resource.open(`${window.location.origin}${path}/${singleInput}`);
     if (category === 'leak') {
       open('/dashboard/breach/all');
     }
@@ -1369,7 +1402,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     const edgeMap: Record<string, number> = {};
     data.forEach(item => {
       const e = item.edge;
-      if (!e || !e._from || !e._to) {
+      if (!e?._from || !e._to) {
         return;
       }
       this.rawEdges.push({
@@ -1509,7 +1542,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     };
     data.forEach(item => {
       put(item.vertex, this.nodePrimaryBorder);
-      (item.path?.vertices ?? []).forEach(pv => put(pv, this.nodeSecondaryBorder));
+      (item.path?.vertices ?? []).forEach(pv => {
+        put(pv, this.nodeSecondaryBorder);
+      });
     });
     return rawNodeMap;
   }
@@ -1774,9 +1809,15 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private attachNetworkHandlers(): void {
-    this.network.on('oncontext', params => this.handleContextMenu(params));
-    this.network.on('click', params => this.handleClick(params));
-    this.network.on('doubleClick', params => this.handleDoubleClick(params));
+    this.network.on('oncontext', params => {
+      this.handleContextMenu(params);
+    });
+    this.network.on('click', params => {
+      this.handleClick(params);
+    });
+    this.network.on('doubleClick', params => {
+      this.handleDoubleClick(params);
+    });
     this.network.on('zoom', (properties: any) => {
       const currentScale = this.network.getScale();
       const currentPosition = this.network.getViewPosition();
@@ -1970,7 +2011,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       const radius = 200;
       const newEdges = this.rawEdges
         .filter(e => e.from === nodeId && subNodes.includes(e.to as string))
-        .filter(e => !this.edgeSet.get(e.id!));
+        .filter(e => e.id == null || !this.edgeSet.get(e.id));
       const newNodes = this.buildCircularSubNodes(subNodes, centerPos, radius);
       this.nodeSet.add(newNodes);
       this.edgeSet.add(newEdges);
@@ -2094,8 +2135,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     const updates = this.nodeSet.get().map(node => ({
       id: node.id!,
       color: this.originalNodeState.get(String(node.id))?.color ?? node.color,
-      borderWidth: this.originalNodeState.get(String(node.id))?.borderWidth ?? (node as any).borderWidth,
-      image: this.originalNodeState.get(String(node.id))?.image ?? (node as any).image
+      borderWidth: this.originalNodeState.get(String(node.id))?.borderWidth ?? (node).borderWidth,
+      image: this.originalNodeState.get(String(node.id))?.image ?? (node).image
     }));
     if (updates.length > 0) {
       this.nodeSet.update(updates);
@@ -2135,8 +2176,8 @@ export class GraphComponent implements OnInit, OnDestroy {
             highlight: { border: '#facc15', background: '#facc15' },
             hover: { border: '#facc15', background: '#facc15' }
           };
-        const baseBorderWidth = nodeState?.borderWidth ?? ((node as any).borderWidth ?? 2);
-        const selectedBorderWidth = nodeState?.borderWidthSelected ?? ((node as any).borderWidthSelected ?? (baseBorderWidth + 2));
+        const baseBorderWidth = nodeState?.borderWidth ?? ((node).borderWidth ?? 2);
+        const selectedBorderWidth = nodeState?.borderWidthSelected ?? ((node).borderWidthSelected ?? (baseBorderWidth + 2));
         const extNode = node as ExtendedNode;
         const iconName = this.getIconNameForNode(extNode, extNode.nodeType || '');
         const yellowIcon = this.buildIconSvg(iconName, '#facc15');
@@ -2144,7 +2185,7 @@ export class GraphComponent implements OnInit, OnDestroy {
           id: node.id!,
           color: highlightedColor,
           borderWidth: selectedBorderWidth,
-          image: yellowIcon ?? (node as any).image
+          image: yellowIcon ?? (node).image
         };
       });
     this.searchMatchedCount = updates.length;
@@ -2152,7 +2193,6 @@ export class GraphComponent implements OnInit, OnDestroy {
       this.nodeSet.update(updates);
     }
   }
-
 }
 const BOOTSTRAP_ICON_PATHS: Record<string, {
   viewBox: string;

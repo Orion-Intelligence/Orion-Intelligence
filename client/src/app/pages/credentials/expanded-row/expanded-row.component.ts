@@ -1,12 +1,12 @@
-import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import { Component, OnChanges, OnDestroy, SimpleChanges, input } from '@angular/core';
 import { NgClass, TitleCasePipe } from '@angular/common';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ResultRowHelperService } from '../../../shared/services/result-row-helper.service';
-type TelemetryGroup = {
+interface TelemetryGroup {
     key: string;
     label: string;
     values: string[];
-};
+}
 @Component({
   selector: 'app-expanded-row',
   standalone: true,
@@ -20,12 +20,11 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   activeTelemetryKey: string | null = null;
   matchedValues: string[] = [];
   copiedKey: string | null = null;
-
-  @Input() mode: 'stealer' | 'threat' = 'stealer';
-  @Input() item: any = null;
-  @Input() result: any = null;
-  @Input() index: number = 0;
-  @Input() searchQuery: string = '';
+  readonly mode = input<'stealer' | 'threat'>('stealer');
+  readonly item = input<any>(null);
+  readonly result = input<any>(null);
+  readonly index = input<number>(0);
+  readonly searchQuery = input<string>('');
 
   constructor(private rowHelper: ResultRowHelperService) {
   }
@@ -54,10 +53,11 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
 
   parseSearchQuery() {
     this.matchedValues = [];
-    if (!this.searchQuery) {
+    const searchQuery = this.searchQuery();
+    if (!searchQuery) {
       return;
     }
-    const parts = this.searchQuery
+    const parts = searchQuery
       .split(/\s*(\|\||\||&&|&)\s*/)
       .filter(p => p && !['||', '|', '&&', '&'].includes(p));
     for (let part of parts) {
@@ -83,29 +83,32 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   get indexValue(): string {
-    const n = Number.isFinite(this.index) ? this.index + 1 : 1;
+    const index = this.index();
+    const n = Number.isFinite(index) ? index + 1 : 1;
     return String(n);
   }
 
   get rowTypeLabel(): string {
-    return this.mode === 'stealer' ? 'Stealer Log' : 'Threats';
+    return this.mode() === 'stealer' ? 'Stealer Log' : 'Threats';
   }
 
   get channelValue(): string {
-    const v = this.item?.['channel'] ??
-          this.item?.['m_channel'] ??
-          this.item?.['source_channel'] ??
-          this.item?.['m_source_channel'] ??
-          this.result?.['channel'] ??
-          this.result?.['m_channel'] ??
-          this.result?.['source_channel'] ??
-          this.result?.['m_source_channel'];
+    const item = this.item();
+    const result = this.result();
+    const v = item?.['channel'] ??
+          item?.['m_channel'] ??
+          item?.['source_channel'] ??
+          item?.['m_source_channel'] ??
+          result?.['channel'] ??
+          result?.['m_channel'] ??
+          result?.['source_channel'] ??
+          result?.['m_source_channel'];
     const arr = this.rowHelper.normalizeToArray(v);
     return arr[0] || '-';
   }
 
   get yearValue(): string {
-    const d = this.item?.date || this.result?.m_update_date;
+    const d = this.item()?.date || this.result()?.m_update_date;
     if (!d) {
       return '-';
     }
@@ -114,18 +117,20 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   get fileTypeValue(): string {
-    const v = this.item?.['type'] ??
-          this.item?.['file_type'] ??
-          this.item?.['fileType'] ??
-          this.result?.['type'] ??
-          this.result?.['file_type'] ??
-          this.result?.['fileType'];
+    const item = this.item();
+    const result = this.result();
+    const v = item?.['type'] ??
+          item?.['file_type'] ??
+          item?.['fileType'] ??
+          result?.['type'] ??
+          result?.['file_type'] ??
+          result?.['fileType'];
     const arr = this.rowHelper.normalizeToArray(v);
     return arr[0] || '-';
   }
 
   get passwordValue(): string {
-    const arr = this.rowHelper.normalizeToArray(this.item?.['password']);
+    const arr = this.rowHelper.normalizeToArray(this.item()?.['password']);
     return arr[0] || '-';
   }
 
@@ -213,42 +218,32 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return 'bi-tag-fill';
   }
 
-  async copyText(text: any, key: string, e?: MouseEvent) {
-    if (e) {
-      e.stopPropagation();
-    }
-    const value = text == null ? '' : String(text);
-    if (!value || value === '-') {
-      return;
-    }
-    const ok = await this.rowHelper.copyToClipboard(value);
-    if (!ok) {
-      return;
-    }
-    this.setCopied(key);
+  copyText(text: any, key: string, e?: MouseEvent) {
+    this.rowHelper.copyText(text, key, (copiedKey) => {
+      this.copiedTimer = this.rowHelper.setCopiedState(copiedKey, this.copiedTimer, (value) => {
+        this.copiedKey = value;
+      });
+    }, e);
   }
 
-  async copyAll(e?: MouseEvent) {
-    if (e) {
-      e.stopPropagation();
-    }
-    const payload = this.buildReportText();
-    if (!payload.trim()) {
+  copyAll(e?: MouseEvent) {
+    const payload = this.getReportPayload(e);
+    if (!payload) {
       return;
     }
-    const ok = await this.rowHelper.copyToClipboard(payload);
-    if (!ok) {
-      return;
-    }
-    this.setCopied('copy-all');
+    this.rowHelper.copyToClipboard(payload).subscribe((ok) => {
+      if (!ok) {
+        return;
+      }
+      this.copiedTimer = this.rowHelper.setCopiedState('copy-all', this.copiedTimer, (value) => {
+        this.copiedKey = value;
+      });
+    });
   }
 
   downloadReport(e?: MouseEvent) {
-    if (e) {
-      e.stopPropagation();
-    }
-    const payload = this.buildReportText();
-    if (!payload.trim()) {
+    const payload = this.getReportPayload(e);
+    if (!payload) {
       return;
     }
     const blob = new Blob([payload], { type: 'text/plain;charset=utf-8' });
@@ -261,26 +256,30 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 1500);
-    this.setCopied('download');
+    setTimeout(() => {
+      URL.revokeObjectURL(url); 
+    }, 1500);
+    this.copiedTimer = this.rowHelper.setCopiedState('download', this.copiedTimer, (value) => {
+      this.copiedKey = value;
+    });
   }
 
   isCopied(key: string): boolean {
-    return this.copiedKey === key;
-  }
-
-  private setCopied(key: string) {
-    this.copiedKey = key;
-    if (this.copiedTimer) {
-      clearTimeout(this.copiedTimer);
-    }
-    this.copiedTimer = setTimeout(() => (this.copiedKey = null), 1200);
+    return this.rowHelper.isCopied(this.copiedKey, key);
   }
 
   private rebuildTelemetryGroups() {
-    this.telemetryGroupsCache = this.mode === 'stealer'
-      ? this.buildStealerGroups(this.item)
-      : this.buildThreatGroups(this.result);
+    this.telemetryGroupsCache = this.mode() === 'stealer'
+      ? this.buildStealerGroups(this.item())
+      : this.buildThreatGroups(this.result());
+  }
+
+  private getReportPayload(e?: MouseEvent): string | null {
+    if (e) {
+      e.stopPropagation();
+    }
+    const payload = this.buildReportText();
+    return payload.trim() ? payload : null;
   }
 
   private buildReportText(): string {
@@ -291,10 +290,12 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     lines.push(`Year: ${this.yearValue}`);
     lines.push(`File Type: ${this.fileTypeValue}`);
     lines.push('');
-    if (this.mode === 'stealer') {
-      const email = this.item?.['email']?.[0] || '-';
-      const domain = this.item?.['domain']?.[0] || '-';
-      const ip = this.item?.['ip']?.[0] || '-';
+    const mode = this.mode();
+    const result = this.result();
+    if (mode === 'stealer') {
+      const email = this.item()?.['email']?.[0] || '-';
+      const domain = this.item()?.['domain']?.[0] || '-';
+      const ip = this.item()?.['ip']?.[0] || '-';
       const password = this.passwordValue;
       lines.push('Identity Intelligence');
       lines.push(`Email: ${email}`);
@@ -306,9 +307,9 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     else {
       lines.push('Indicator Details');
       lines.push(`ID: RANK-${this.indexValue}`);
-      lines.push(`Credential: ${this.result?.rank_index || '-'}`);
-      lines.push(`IOC: ${this.result?.m_url || '-'}`);
-      lines.push(`Description: ${this.result?.m_important_content || '-'}`);
+      lines.push(`Credential: ${result?.rank_index || '-'}`);
+      lines.push(`IOC: ${result?.m_url || '-'}`);
+      lines.push(`Description: ${result?.m_important_content || '-'}`);
       lines.push('');
     }
     lines.push(`Metadata Telemetry Array (${this.telemetryCount})`);
@@ -322,7 +323,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       }
     }
     lines.push('');
-    const raw = this.mode === 'stealer' ? this.item?.['raw'] : this.result?.['raw'];
+    const raw = mode === 'stealer' ? this.item()?.['raw'] : result?.['raw'];
     if (raw != null) {
       lines.push('Raw Trace Buffer');
       lines.push(String(raw));

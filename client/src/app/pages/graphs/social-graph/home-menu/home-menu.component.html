@@ -1,5 +1,5 @@
 <div class="h-full flex flex-col transition-all duration-300 ease-in-out" [class.w-80]="!isCollapsed()" [class.w-20]="isCollapsed()">
-  <app-graph-sidebar-shell [isCollapsed]="isCollapsed()" (toggleClicked)="toggle.emit()">
+  <app-graph-sidebar-shell [isCollapsed]="isCollapsed()" (toggleClicked)="toggle.emit(undefined)">
     <div sidebar-expanded class="h-full flex flex-col">
       <div class="p-3 border-b border-slate-800 shrink-0">
         <div class="relative">
@@ -13,9 +13,9 @@
       <div class="flex-grow p-3 flex flex-col overflow-y-auto">
         <div class="border-b border-slate-700 shrink-0">
           <nav class="-mb-px flex space-x-4" aria-label="Tabs">
-            <button data-cy="home-menu-tab-history" (click)="tabSelected.emit('history')" [class]="'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'history' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">Scan History</button>
+            <button data-testid="home-menu-tab-history" (click)="tabSelected.emit('history')" [class]="'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'history' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">Scan History</button>
             @if (!isSmallScreen()) {
-              <button data-cy="home-menu-tab-entities" (click)="tabSelected.emit('entities')" [class]="'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'entities' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">Entities</button>
+              <button data-testid="home-menu-tab-entities" (click)="tabSelected.emit('entities')" [class]="'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'entities' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">Entities</button>
             }
           </nav>
         </div>
@@ -32,6 +32,9 @@
                           <div class="flex items-center gap-3 min-w-0 flex-1">
                             <div>
                               @switch (job.status) {
+                                @case ('queued') {
+                                  <i class="bi bi-hourglass-split w-4 h-4 text-orange-400"></i>
+                                }
                                 @case ('in_progress') {
                                   <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-400" role="status"></div>
                                 }
@@ -45,7 +48,7 @@
                             </div>
                             <p class="font-bold mb-0 truncate text-indigo-300">{{ job.displayName || job.username }}</p>
                           </div>
-                          @if (job.status === 'in_progress') {
+                          @if (job.status === 'in_progress' || job.status === 'queued') {
                             <div class="flex items-center gap-2 shrink-0">
                               <div class="font-mono text-xs text-slate-400">{{ getAnimatedProgress(job) }}%</div>
                               <button (click)="$event.stopPropagation(); cancelScan.emit(job.id)" title="Cancel Scan" class="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors">
@@ -53,7 +56,7 @@
                               </button>
                             </div>
                           }
-                          @if (job.status !== 'in_progress' && isUserBusy(job.username)) {
+                          @if (job.status !== 'in_progress' && job.status !== 'queued' && isUserBusy(job.username)) {
                             <div class="flex items-center gap-2 shrink-0">
                               <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
                               <button (click)="$event.stopPropagation(); cancelAllFetches.emit(job.username)" title="Cancel active fetches" class="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors">
@@ -62,7 +65,7 @@
                             </div>
                           }
                         </div>
-                        @if (job.status === 'in_progress' || shouldShowCompletionProgress(job)) {
+                        @if (job.status === 'queued' || job.status === 'in_progress' || shouldShowCompletionProgress(job)) {
                           <progress class="home-menu-progress-track mt-2" max="100" [value]="getAnimatedProgress(job)"></progress>
                         }
                         <p class="text-sm text-slate-400 truncate mb-0 mt-1">{{ job.step }}</p>
@@ -212,11 +215,11 @@
 
     <div sidebar-collapsed class="h-full flex flex-col items-center">
       <div class="py-4 flex flex-col items-center gap-4">
-        <button data-cy="home-menu-tab-history-collapsed" (click)="tabSelected.emit('history')" [class]="'w-9 h-9 flex items-center justify-center rounded-lg transition-colors ' + (activeTab() === 'history' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" title="Scan History">
+        <button data-testid="home-menu-tab-history-collapsed" (click)="tabSelected.emit('history')" [class]="'w-9 h-9 flex items-center justify-center rounded-lg transition-colors ' + (activeTab() === 'history' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" title="Scan History">
           <i class="bi bi-clock-history text-lg leading-none"></i>
         </button>
         @if (!isSmallScreen()) {
-          <button data-cy="home-menu-tab-entities-collapsed" (click)="tabSelected.emit('entities')" [class]="'w-9 h-9 flex items-center justify-center rounded-lg transition-colors ' + (activeTab() === 'entities' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" title="Entities">
+          <button data-testid="home-menu-tab-entities-collapsed" (click)="tabSelected.emit('entities')" [class]="'w-9 h-9 flex items-center justify-center rounded-lg transition-colors ' + (activeTab() === 'entities' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" title="Entities">
             <i class="bi bi-diagram-3 text-lg leading-none"></i>
           </button>
         }

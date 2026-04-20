@@ -1,13 +1,13 @@
-export type CountryData = {
+export interface CountryData {
   id: string;
   name: string;
   value: number;
-};
+}
 
-export type CountryInsightPageResponse = {
+export interface CountryInsightPageResponse {
   items: any[];
   total: number;
   page: number;
   limit: number;
   has_more: boolean;
-};
+}

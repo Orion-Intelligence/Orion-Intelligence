@@ -41,17 +41,17 @@ async def lifespan(p_app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
+app = FastAPI(title="API Access", lifespan=lifespan, docs_url=None, redoc_url=None)
 setup_middlewares(app)
 
 app.mount("/assets", StaticFiles(directory=ANGULAR_BUILD_DIR / "assets"), name="assets")
-app.mount("/static", StaticFiles(directory=SWAGGER_STATIC_DIR), name="static")
+app.mount("/swagger-static", StaticFiles(directory=SWAGGER_STATIC_DIR), name="swagger-static")
 
 
 @app.get("/docs", include_in_schema=False)
 def custom_swagger_ui():
     return get_swagger_ui_html(
-        openapi_url=app.openapi_url, title="API Docs", swagger_css_url="/static/swagger-code.css")
+        openapi_url=app.openapi_url, title="API Access", swagger_css_url="/swagger-static/swagger-code.css")
 
 
 configure_swagger(app)
@@ -60,9 +60,9 @@ app.include_router(crawl_routes, include_in_schema=False)
 app.include_router(admin_routes, include_in_schema=False)
 app.include_router(public_routes, include_in_schema=False)
 app.include_router(micro_routes, include_in_schema=False)
-app.include_router(tenant_routes, include_in_schema=False)
 if env_handler.get_instance().env("TESTING_ENABLED", "0") == "1":
     app.include_router(test_routes, include_in_schema=False)
+app.include_router(tenant_routes, include_in_schema=False)
 app.include_router(api_routes)
 app.include_router(social_routes)
 

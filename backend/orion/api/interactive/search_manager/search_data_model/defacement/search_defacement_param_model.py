@@ -1,6 +1,6 @@
 from typing import Optional, Dict, List, Annotated
 
-from pydantic import BaseModel, Field, StringConstraints
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 from orion.helper_manager.helper_controller import helper_controller
 
@@ -19,5 +19,4 @@ class search_defacement_param_model(BaseModel, helper_controller):
     entity_filter: Optional[Dict[str, List[str]]] = Field(
         default=None, examples=[{"m_country": ["pakistan"]}])
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)

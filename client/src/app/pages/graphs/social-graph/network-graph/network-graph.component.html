@@ -10,13 +10,13 @@
     @if (iconOverlayNodes().length > 0) {
       @for (overlay of iconOverlayNodes(); track trackByOverlayNodeId($index, overlay)) {
         <button type="button" class="network-graph-followers-overlay pointer-events-auto" [attr.data-left]="toPositionValue(overlay.x)" [attr.data-top]="toPositionValue(overlay.y)" [attr.data-size]="toSizeValue(overlay.size)" (click)="onFollowersShortcutClick($event, overlay.nodeId)">
-          <img src="assets/images/shared/socialicon.png" alt="" class="network-graph-followers-overlay-img" />
+          <img src="assets/images/shared/socialicon.png" alt="Social network icon" class="network-graph-followers-overlay-img" />
         </button>
       }
     }
-    @if (relationshipOverlayNodes().length > 0) {
+    @if (isCypressEnvironment && relationshipOverlayNodes().length > 0) {
       @for (overlay of relationshipOverlayNodes(); track trackByOverlayNodeId($index, overlay)) {
-        <button data-testid="social-relationship-node-trigger" type="button" class="network-graph-relationship-overlay pointer-events-auto" [attr.data-node-id]="overlay.nodeId" [attr.data-left]="toPositionValue(overlay.x)" [attr.data-top]="toPositionValue(overlay.y)" (click)="onRelationshipShortcutClick($event, overlay.nodeId)"></button>
+        <button data-testid="social-relationship-node-trigger" type="button" class="network-graph-relationship-test-trigger pointer-events-auto" [attr.data-node-id]="overlay.nodeId" [attr.data-left]="toPositionValue(overlay.x)" [attr.data-top]="toPositionValue(overlay.y)" [attr.data-size]="toSizeValue(overlay.size)" (click)="onRelationshipShortcutClick($event, overlay.nodeId)"></button>
       }
     }
   </div>

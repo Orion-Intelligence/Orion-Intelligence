@@ -4,15 +4,15 @@
   <table class="mt-[12px] w-full border-collapse text-[13px]">
     <tbody>
       <tr>
-        <th class="border px-[8px] py-[6px] text-left font-semibold">URL</th><td class="border px-[8px] py-[6px]">{{ meta.URL }}</td>
-        <th class="border px-[8px] py-[6px] text-left font-semibold">Host</th><td class="border px-[8px] py-[6px]">{{ meta.Host || '' }}</td>
+        <th class="border px-[8px] py-[6px] text-left font-semibold">URL</th><td class="border px-[8px] py-[6px]">{{ meta().URL }}</td>
+        <th class="border px-[8px] py-[6px] text-left font-semibold">Host</th><td class="border px-[8px] py-[6px]">{{ meta().Host || '' }}</td>
       </tr>
       <tr>
-        <th class="border px-[8px] py-[6px] text-left font-semibold">Port</th><td class="border px-[8px] py-[6px]">{{ meta.Port || '' }}</td>
-        <th class="border px-[8px] py-[6px] text-left font-semibold">Scanned on</th><td class="border px-[8px] py-[6px]">{{ meta.Scanned_on_date || '' }}</td>
+        <th class="border px-[8px] py-[6px] text-left font-semibold">Port</th><td class="border px-[8px] py-[6px]">{{ meta().Port || '' }}</td>
+        <th class="border px-[8px] py-[6px] text-left font-semibold">Scanned on</th><td class="border px-[8px] py-[6px]">{{ meta().Scanned_on_date || '' }}</td>
       </tr>
       <tr>
-        <th class="border px-[8px] py-[6px] text-left font-semibold">Scanned by</th><td class="border px-[8px] py-[6px]">{{ meta.Scanned_by || '' }}</td>
+        <th class="border px-[8px] py-[6px] text-left font-semibold">Scanned by</th><td class="border px-[8px] py-[6px]">{{ meta().Scanned_by || '' }}</td>
         <th class="border px-[8px] py-[6px] text-left font-semibold">Printed</th><td class="border px-[8px] py-[6px]">{{ printedNow }}</td>
       </tr>
     </tbody>

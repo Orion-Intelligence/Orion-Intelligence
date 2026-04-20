@@ -51,7 +51,7 @@ export interface Job {
     id: string;
     username: string;
     displayName?: string;
-    status: 'in_progress' | 'completed' | 'failed';
+    status: 'queued' | 'in_progress' | 'completed' | 'failed';
     progress: number;
     step: string;
 }
@@ -176,9 +176,7 @@ export interface TabState {
     activeHomeMenuTab: WritableSignal<'history' | 'entities'>;
     isPhysicsEnabled: WritableSignal<boolean>;
     viewMode: WritableSignal<'graph' | 'list'>;
-    expandedGroupDataByUser: WritableSignal<{
-        [username: string]: NetworkNode | null;
-    }>;
+    expandedGroupDataByUser: WritableSignal<Record<string, NetworkNode | null>>;
     graphPlatformBatches: WritableSignal<Map<string, GraphPlatformBatch>>;
     profileLeakIntelligenceByUser: WritableSignal<Record<string, ProfileLeakSessionData>>;
     profileMetadataByUser: WritableSignal<Record<string, ProfileMetadataSessionData>>;

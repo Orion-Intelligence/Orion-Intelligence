@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { siAboutdotme, siArtstation, siBehance, siBitbucket, siCrowdin, siDeviantart, siDiscord, siDocker, siDribbble, siEnvato, siFacebook, siFlickr, siFoursquare, siGithub, siGitlab, siGravatar, siInstagram, siLastdotfm, siMedium, siNodedotjs, siPatreon, siPinterest, siReddit, siReplit, siSnapchat, siSoundcloud, siSpotify, siSteam, siTelegram, siTiktok, siTumblr, siTwitch, siVimeo, siVk, siWhatsapp, siWordpress, siX, siYoutube, siDevdotto } from 'simple-icons';
-const iconMap: {
-    [key: string]: string;
-} = {
+const iconMap: Record<string, string> = {
   'x': 'x',
   'twitter': 'x',
   'hub': 'docker',
@@ -57,9 +55,7 @@ const iconMap: {
   'whatsapp': 'whatsapp',
   'wordpress': 'wordpress',
 };
-const simpleIconPathMap: {
-    [slug: string]: string;
-} = {
+const simpleIconPathMap: Record<string, string> = {
   x: siX.path,
   docker: siDocker.path,
   gravatar: siGravatar.path,
@@ -100,9 +96,7 @@ const simpleIconPathMap: {
   whatsapp: siWhatsapp.path,
   wordpress: siWordpress.path,
 };
-const simpleIconColorMap: {
-    [slug: string]: string;
-} = {
+const simpleIconColorMap: Record<string, string> = {
   x: `#${siX.hex}`,
   docker: `#${siDocker.hex}`,
   gravatar: `#${siGravatar.hex}`,
@@ -143,9 +137,7 @@ const simpleIconColorMap: {
   whatsapp: `#${siWhatsapp.hex}`,
   wordpress: `#${siWordpress.hex}`,
 };
-const fallbackPlatformColorMap: {
-    [slug: string]: string;
-} = {
+const fallbackPlatformColorMap: Record<string, string> = {
   allmylinks: '#ef4444',
   cgtrader: '#22c55e',
   codepen: '#111827',

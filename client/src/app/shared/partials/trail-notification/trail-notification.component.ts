@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 import { SubscriptionService } from '../../../services/dashboard/subscription.service';
 @Component({
@@ -8,8 +8,8 @@ import { SubscriptionService } from '../../../services/dashboard/subscription.se
   templateUrl: './trail-notification.component.html'
 })
 export class TrailNotificationComponent {
-    @Input() trialNotificationCheck: boolean = false;
+  readonly trialNotificationCheck = input<boolean>(false);
 
-    constructor(public subscriptionService: SubscriptionService) {
-    }
+  constructor(public subscriptionService: SubscriptionService) {
+  }
 }

@@ -1,20 +1,18 @@
 import { Injectable, signal } from '@angular/core';
-import { EMPTY, lastValueFrom, Observable, Subject, Subscription, timer } from 'rxjs';
-import { expand, finalize, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
+import { lastValueFrom, Observable, Subscription } from 'rxjs';
+import { finalize, map } from 'rxjs/operators';
 import { ApiService } from '../../shared/services/api.service';
 import { ResolveIpResponse, NetworkIntelScanResponse, GeoCameraResponse } from '../../shared/model/network-intel/network-intel-api.models';
 import { IpPortData } from '../../shared/model/network-intel/network-intel.model';
+import { ScanHelperMethodsService as SharedScanHelperMethodsService } from '../../shared/partials/scan-helper-methods/scan-helper-methods-service.service';
 
 @Injectable({ providedIn: 'root' })
-export class ScanHelperMethodsService {
-  private currentCancel$?: Subject<boolean> = undefined;
-
-  progress = signal(0);
+export class ScanHelperMethodsService extends SharedScanHelperMethodsService {
   isRunning = signal(false);
-  onDone   = signal<any>(null);
-  onError  = signal<any>(null);
 
-  constructor(private api: ApiService) {}
+  constructor(api: ApiService) {
+    super(api);
+  }
 
   resetState(): void {
     this.currentCancel$ = undefined;
@@ -24,175 +22,89 @@ export class ScanHelperMethodsService {
     this.onError.set(null);
   }
 
-  cancelCurrentScan(): void {
-    if (this.currentCancel$) {
-      this.currentCancel$.next(true);
-      this.currentCancel$.complete();
-      this.resetState();
-      this.onError.set({ message: 'Cancelled by user' });
-    }
+  protected override beforeTaskStart(): void {
+    this.isRunning.set(true);
   }
 
-  private isPendingOrBusy(status: string | undefined): boolean {
-    return status === 'pending' || status === 'busy';
-  }
-
-  private getResponseStatus(value: any): string | undefined {
-    return value?.result?.status || value?.status;
+  protected override afterTaskStop(): void {
+    this.isRunning.set(false);
   }
 
   private getResponseError(value: any): { message: string } | null {
-    const status = this.getResponseStatus(value);
+    const status = this.getPendingStatus(value);
     if (status !== 'error') {
       return null;
     }
     return { message: value?.result?.message || value?.message || 'Request failed' };
   }
 
-  private poll<T>( call: () => Observable<T>, getStatus: (v: T) => string | undefined, onEach: (v: T) => void, cancel$: Subject<boolean>, delayMs: number ): Observable<T> {
-    const request$ = call().pipe(tap(onEach));
-    return request$.pipe(expand((v: T) => {
-      const status = getStatus(v);
-      if (this.isPendingOrBusy(status)) {
-        return timer(delayMs).pipe(switchMap(() => call().pipe(tap(onEach))));
-      }
-      return EMPTY;
-    }),
-    takeWhile((v: T) => this.isPendingOrBusy(getStatus(v)), true),
-    takeUntil(cancel$));
+  protected override handleTaskValue<T>(value: T): void {
+    const responseError = this.getResponseError(value);
+    if (responseError) {
+      this.onDone.set(null);
+      this.onError.set(responseError);
+      return;
+    }
+    super.handleTaskValue(value);
   }
 
-  private runTask<T>(build: (cancel$: Subject<boolean>) => Observable<T>): Subscription {
-    this.progress.set(0);
-    this.isRunning.set(true);
-    this.onDone.set(null);
-    this.onError.set(null);
+  private runPolledTask<T extends { result?: { status?: string; progress?: number } | null; status?: string; progress?: number | null }>(call: () => Observable<T>): Subscription {
+    return this.runTask<T>((cancel$) => this.poll<T>(call, (response) => this.getPendingStatus(response), (response) => this.updateProgress(response?.result?.progress ?? response?.progress), cancel$, this.pollDelayMs));
+  }
 
-    const cancel$ = new Subject<boolean>();
-    this.currentCancel$ = cancel$;
+  private async fetchPolledResult<T extends { result?: { status?: string } | null; status?: string }>(call: () => Observable<T>, onEach?: (response: T) => void): Promise<any> {
+    const cancel$ = this.createCancelSubject();
+    try {
+      const response = await lastValueFrom(this.poll<T>(call, (value) => this.getPendingStatus(value), (value) => onEach?.(value), cancel$, this.pollDelayMs));
+      return this.unwrapPolledResult(response);
+    }
+    finally {
+      this.completeCancelSubject(cancel$);
+    }
+  }
 
-    const obs$ = build(cancel$).pipe(finalize(() => {
-      this.progress.set(100);
-      this.isRunning.set(false);
-      this.currentCancel$ = undefined;
-    }));
+  private fetchPolledResult$<T extends { result?: { status?: string } | null; status?: string }>(call: () => Observable<T>, onEach?: (response: T) => void): Observable<any> {
+    const cancel$ = this.createCancelSubject();
+    return this.poll<T>(call, (value) => this.getPendingStatus(value), (value) => onEach?.(value), cancel$, this.pollDelayMs)
+      .pipe(map((response) => this.unwrapPolledResult(response)), finalize(() => {
+        this.completeCancelSubject(cancel$);
+      }));
+  }
 
-    const sub = new Subscription();
-    sub.add(obs$.subscribe({
-      next:     (value) => {
-        const responseError = this.getResponseError(value);
-        if (responseError) {
-          this.onDone.set(null);
-          this.onError.set(responseError);
-          return;
-        }
-        this.onDone.set(value);
-      },
-      error:    (err)   => {
-        this.onError.set(err); 
-      },
-      complete: ()      => {
-        this.isRunning.set(false);
-        this.currentCancel$ = undefined; 
-      }
-    }));
-    sub.add(() => {
-      cancel$.next(true);
-      cancel$.complete();
-      this.isRunning.set(false);
-      this.currentCancel$ = undefined;
-    });
-
-    return sub;
+  private unwrapPolledResult<T>(response: T): any {
+    const responseError = this.getResponseError(response);
+    if (responseError) {
+      throw new Error(responseError.message);
+    }
+    return (response as any)?.result ?? response;
   }
 
   scanResolveIp(domain: string): Subscription {
-    const call      = () => this.api.post<ResolveIpResponse>('netintel/resolve_ip', { domain });
-    const getStatus = (res: ResolveIpResponse) => (res?.result?.status || res?.status) as any;
-    const enhanced  = (res: ResolveIpResponse) => {
-      const p = (res as any)?.progress;
-      if (p != null && typeof p === 'number') {
-        this.progress.set(Math.min(99, p));
-      }
-    };
-    const build = (cancel$: Subject<boolean>) =>
-      this.poll<ResolveIpResponse>(call, getStatus, enhanced, cancel$, 4000);
-    return this.runTask<ResolveIpResponse>(build);
+    return this.runPolledTask<ResolveIpResponse>(() => this.api.post<ResolveIpResponse>('netintel/resolve_ip', { domain }));
   }
 
   scanShodanIp(ip: string): Subscription {
-    const call      = () => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip });
-    const getStatus = (res: NetworkIntelScanResponse) => (res?.result?.status || res?.status) as any;
-    const enhanced  = (res: NetworkIntelScanResponse) => {
-      const p = (res as any)?.progress;
-      if (p != null && typeof p === 'number') {
-        this.progress.set(Math.min(99, p));
-      }
-    };
-    const build = (cancel$: Subject<boolean>) =>
-      this.poll<NetworkIntelScanResponse>(call, getStatus, enhanced, cancel$, 4000);
-    return this.runTask<NetworkIntelScanResponse>(build);
+    return this.runPolledTask<NetworkIntelScanResponse>(() => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip }));
   }
 
   scanUrlVulnerability(domain: string): Subscription {
-    const call = () => this.api.post<any>('netintel/url_vulnerability_scan', { domain });
-    const getStatus = (res: any) => (res?.result?.status || res?.status) as any;
-    const enhanced = (res: any) => {
-      const p = res?.result?.progress ?? res?.progress;
-      if (typeof p === 'number') {
-        this.progress.set(Math.min(99, p));
-      }
-    };
-    const build = (cancel$: Subject<boolean>) =>
-      this.poll<any>(call, getStatus, enhanced, cancel$, 4000);
-    return this.runTask<any>(build);
+    return this.runPolledTask<any>(() => this.api.post<any>('netintel/url_vulnerability_scan', { domain }));
   }
 
   async fetchShodanIpDetail(ip: string, onEach?: (response: NetworkIntelScanResponse) => void): Promise<any> {
-    const cancel$ = new Subject<boolean>();
-    const call = () => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip });
-    const getStatus = (res: NetworkIntelScanResponse) => (res?.result?.status || res?.status) as any;
+    return this.fetchPolledResult<NetworkIntelScanResponse>(() => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip }), onEach);
+  }
 
-    try {
-      const response = await lastValueFrom(this.poll<NetworkIntelScanResponse>(call, getStatus, value => onEach?.(value), cancel$, 4000));
-      const responseError = this.getResponseError(response);
-      if (responseError) {
-        throw new Error(responseError.message);
-      }
-      return response?.result ?? response;
-    }
-    finally {
-      cancel$.next(true);
-      cancel$.complete();
-    }
+  fetchShodanIpDetail$(ip: string, onEach?: (response: NetworkIntelScanResponse) => void): Observable<any> {
+    return this.fetchPolledResult$<NetworkIntelScanResponse>(() => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip }), onEach);
   }
 
   scanGeoCamera(coordinates: string, radius_km = 25, max_ips = 200): Subscription {
-    const call      = () => this.api.post<GeoCameraResponse>('netintel/iot_detect', { coordinates, radius_km, max_ips });
-    const getStatus = (res: GeoCameraResponse) => (res?.result?.status || res?.status) as any;
-    const enhanced  = (res: GeoCameraResponse) => {
-      const p = (res as any)?.progress;
-      if (p != null && typeof p === 'number') {
-        this.progress.set(Math.min(99, p));
-      }
-    };
-    const build = (cancel$: Subject<boolean>) =>
-      this.poll<GeoCameraResponse>(call, getStatus, enhanced, cancel$, 4000);
-    return this.runTask<GeoCameraResponse>(build);
+    return this.runPolledTask<GeoCameraResponse>(() => this.api.post<GeoCameraResponse>('netintel/iot_detect', { coordinates, radius_km, max_ips }));
   }
 
   scanGeoCameraByRanges(ip_ranges: string[], max_ips = 200): Subscription {
-    const call      = () => this.api.post<GeoCameraResponse>('netintel/camera_detect_ranges', { ip_ranges, max_ips });
-    const getStatus = (res: GeoCameraResponse) => (res?.result?.status || res?.status) as any;
-    const enhanced  = (res: GeoCameraResponse) => {
-      const p = (res as any)?.progress;
-      if (p != null && typeof p === 'number') {
-        this.progress.set(Math.min(99, p));
-      }
-    };
-    const build = (cancel$: Subject<boolean>) =>
-      this.poll<GeoCameraResponse>(call, getStatus, enhanced, cancel$, 4000);
-    return this.runTask<GeoCameraResponse>(build);
+    return this.runPolledTask<GeoCameraResponse>(() => this.api.post<GeoCameraResponse>('netintel/camera_detect_ranges', { ip_ranges, max_ips }));
   }
 
   isValidDomain(value: string): boolean {
@@ -222,12 +134,70 @@ export class ScanHelperMethodsService {
     return !isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
   }
 
-  validateDnsInput(value: string): string | null {
+  hasRenderableValue(value: unknown): boolean {
+    if (value === null || value === undefined) {
+      return false;
+    }
+    if (typeof value === 'string') {
+      return value.trim().length > 0;
+    }
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    if (typeof value === 'object') {
+      return Object.keys(value).length > 0;
+    }
+    return true;
+  }
+
+  isEmbeddedInConsolidated(url: string): boolean {
+    return url.includes('/consolidated');
+  }
+
+  getProgressValue(progress: number | null | undefined): number {
+    return Math.max(6, Math.min(100, Math.round(progress || 0)));
+  }
+
+  getLoadingStepLabel(step: string | null | undefined): string {
+    const raw = (step || '').trim();
+    if (!raw) {
+      return 'Scanning in progress...';
+    }
+    const normalized = raw.toLowerCase();
+    if (normalized === 'queued' || normalized.includes('queue')) {
+      return 'Queued: waiting for scanner availability...';
+    }
+    return raw;
+  }
+
+  shouldShowLoadingSkeleton(hasSearched: boolean, result: unknown, errorMessage: string | null | undefined, isScanning: boolean, progress: number | null | undefined): boolean {
+    return hasSearched && !result && !errorMessage && (isScanning || (progress || 0) > 0);
+  }
+
+  private getTrimmedInputOrNull(value: string): string | null {
     const trimmed = value.trim();
+    return trimmed || null;
+  }
+
+  private getInputKind(value: string): 'ip' | 'domain' | 'coordinates' | 'other' {
+    if (this.isValidIp(value)) {
+      return 'ip';
+    }
+    if (this.isValidDomain(value)) {
+      return 'domain';
+    }
+    if (this.isValidCoordinates(value) || value.includes(',')) {
+      return 'coordinates';
+    }
+    return 'other';
+  }
+
+  validateDnsInput(value: string): string | null {
+    const trimmed = this.getTrimmedInputOrNull(value);
     if (!trimmed) {
       return null;
     }
-    if (this.isValidIp(trimmed)) {
+    if (this.getInputKind(trimmed) === 'ip') {
       return `"${trimmed}" is an IP address — enter a domain like netflix.com`;
     }
     if (!this.isValidDomain(trimmed)) {
@@ -237,12 +207,13 @@ export class ScanHelperMethodsService {
   }
 
   validateShodanInput(value: string): string | null {
-    const trimmed = value.trim();
+    const trimmed = this.getTrimmedInputOrNull(value);
     if (!trimmed) {
       return null;
     }
-    if (!this.isValidIp(trimmed)) {
-      if (this.isValidDomain(trimmed)) {
+    const inputKind = this.getInputKind(trimmed);
+    if (inputKind !== 'ip') {
+      if (inputKind === 'domain') {
         return `"${trimmed}" is a domain — use Host Recon to resolve it first, then scan an IP`;
       }
       return 'Enter a valid IPv4 address e.g. 52.18.185.222';
@@ -251,31 +222,33 @@ export class ScanHelperMethodsService {
   }
 
   validateVulnerabilityInput(value: string): string | null {
-    const trimmed = value.trim();
+    const trimmed = this.getTrimmedInputOrNull(value);
     if (!trimmed) {
       return null;
     }
-    if (this.isValidDomain(trimmed)) {
+    const inputKind = this.getInputKind(trimmed);
+    if (inputKind === 'domain') {
       return null;
     }
-    if (this.isValidIp(trimmed)) {
+    if (inputKind === 'ip') {
       return `"${trimmed}" is an IP address. Enter a domain like bbc.com`;
     }
-    if (trimmed.includes(',')) {
+    if (inputKind === 'coordinates') {
       return `"${trimmed}" looks like coordinates. Enter a domain like bbc.com`;
     }
     return 'Enter a valid domain e.g. bbc.com';
   }
 
   validateGeoCoordinatesInput(value: string): string | null {
-    const trimmed = value.trim();
+    const trimmed = this.getTrimmedInputOrNull(value);
     if (!trimmed) {
       return null;
     }
-    if (this.isValidIp(trimmed)) {
+    const inputKind = this.getInputKind(trimmed);
+    if (inputKind === 'ip') {
       return `"${trimmed}" is an IP address — enter coordinates like 31.48, 74.17`;
     }
-    if (this.isValidDomain(trimmed)) {
+    if (inputKind === 'domain') {
       return `"${trimmed}" is a domain — enter coordinates like 31.48, 74.17`;
     }
     if (!this.isValidCoordinates(trimmed)) {

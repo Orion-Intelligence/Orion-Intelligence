@@ -72,14 +72,14 @@ export function openSidebarGroup15(title: string) {
   const testId = SIDEBAR_GROUP_TESTID[title];
   expect(testId, `sidebar testid mapping for "${title}"`).to.exist;
 
-  cy.get(`[data-testid="${testId}"]`, {timeout: 30000})
+  cy.get(`[data-testid="${testId}"]`)
     .scrollIntoView()
     .should('be.visible')
     .click();
 
-  cy.get(`[data-testid="${testId}"]`, {timeout: 30000})
-    .closest('li')
-    .find('> ul', {timeout: 30000})
+  cy.get(`[data-testid="${testId}"]`)
+    .parent()
+    .find('> ul')
     .should(($ul) => {
       expect(
         getComputedStyle($ul[0] as HTMLElement).pointerEvents
@@ -92,9 +92,9 @@ export function clickSidebarSubItem15(groupTitle: string, itemTitle: string) {
   const testId = SIDEBAR_GROUP_TESTID[groupTitle];
   expect(prefix, `subitem prefix mapping for "${groupTitle}"`).to.exist;
 
-  cy.get(`[data-testid="${testId}"]`, {timeout: 30000})
-    .closest('li')
-    .find('> ul', {timeout: 30000})
+  cy.get(`[data-testid="${testId}"]`)
+    .parent()
+    .find('> ul')
     .should(($ul) => {
       expect(
         getComputedStyle($ul[0] as HTMLElement).pointerEvents
@@ -107,7 +107,7 @@ export function clickSidebarSubItem15(groupTitle: string, itemTitle: string) {
 }
 
 export function waitForSearchReady15() {
-  cy.get('app-loading-form', {timeout: 30000}).should('not.exist');
+  cy.get('app-loading-form').should('not.exist');
 
   cy.get('body').then(($body) => {
     if ($body.find('app-filters:visible, app-search-filters:visible').length) {
@@ -119,7 +119,7 @@ export function waitForSearchReady15() {
 export function typeDashboardSearch15(value: string) {
   waitForSearchReady15();
 
-  cy.get('input[data-cy="dashboard-general-input"][name="q"]', {timeout: 30000})
+  cy.get('input[data-testid="dashboard-general-input"][name="q"]')
     .first()
     .scrollIntoView()
     .should('be.visible')
@@ -134,7 +134,7 @@ export function typeDashboardSearch15(value: string) {
 }
 
 export function assertFirstResultCard(data: SearchResultData) {
-  cy.wait(2000)
+  cy.wait(1000)
   cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
     .should('have.length.at.least', 1)
     .then(($cards) => {

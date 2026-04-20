@@ -16,14 +16,14 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     openFirstReportAndValidateNavigationOrModal();
 
     cy.go('back');
-    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('General Intelligence', 'General');
     typeDashboardSearch('bitcoin');
     openFirstReportAndValidateNavigationOrModal();
 
     cy.go('back');
-    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('General Intelligence', 'Forums');
     typeDashboardSearch('bitcoin');
@@ -36,34 +36,34 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     clickSidebarSubItem('Defacement', 'All');
     typeDashboardSearch('mthcht');
     cy.get('tbody tr.cursor-pointer[id^="item-"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
-    cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
+    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
 
     cy.go('back');
-    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Defacement', 'Hacked');
     typeDashboardSearch('ASTAR');
     cy.get('tbody tr.cursor-pointer[id^="item-"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
-    cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
+    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
 
     cy.go('back');
-    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Defacement', 'Phishing');
     typeDashboardSearch('mthcht');
     cy.get('tbody tr.cursor-pointer[id^="item-"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
-    cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
+    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
 
     cy.go('back');
-    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Defacement', 'Databases');
     typeDashboardSearch('urldna_bot');
     cy.get('tbody tr.cursor-pointer[id^="item-"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
-    cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
+    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
   });
 
@@ -73,56 +73,55 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     clickSidebarSubItem('Social', 'All');
     typeDashboardSearch('a');
     clickOpenReport();
-    cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
+    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
 
     cy.go('back');
-    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
 
     cy.scrollDashboardToTop()
-    cy.get('[data-cy="top"]', { timeout: 20000 }).should('be.visible');
 
     clickSidebarSubItem('Social', 'Twitter');
     typeDashboardSearch('a');
     clickOpenReport();
-    cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
+    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
 
     cy.go('back');
-    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Mastodon');
     typeDashboardSearch('a');
     clickOpenReport();
-    cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
+    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
 
     cy.go('back');
-    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Pastebin');
     typeDashboardSearch('a');
     clickOpenReport();
-    cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
+    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
 
     cy.go('back');
-    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Forum');
     typeDashboardSearch('a');
     clickOpenReport();
-    cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
+    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
 
     cy.go('back');
-    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Reddit');
     typeDashboardSearch('a');
     clickOpenReport();
-    cy.get('app-json-api-viewer', {timeout: 30000}).should('exist').scrollIntoView().and('be.visible');
+    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
   });
 
@@ -133,39 +132,40 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     typeExploitSearch('exploit');
     clickOpenReport();
 
-    cy.go('back');
-    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.get('[data-testid="dashboard-header-back"]').click();
+    cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     openExploitSubmenu('CVE');
     typeExploitSearch('cve');
-    cy.get('[data-testid="open-report"]', {timeout: 30000}).filter(':visible').filter(':has(img[src*="redirect.svg"])').first().scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="open-report"]').filter(':visible').filter(':has(img[src*="redirect.svg"])').first().scrollIntoView().should('be.visible').click();
 
-    cy.go('back');
-    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+
+    cy.get('[data-testid="dashboard-header-back"]').click();
+    cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     openExploitSubmenu('Tools');
     typeExploitSearch('tool');
     clickOpenReport();
 
-    cy.go('back');
-    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.get('[data-testid="dashboard-header-back"]').click();
+    cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     openExploitSubmenu('ZeroDay');
     typeExploitSearch('exploit');
     clickOpenReport();
 
-    cy.go('back');
-    cy.location('pathname', {timeout: 30000}).should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
+    cy.get('[data-testid="dashboard-header-back"]').click();
+    cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     waitForSearchReady();
-    cy.get('input[data-cy="dashboard-general-input"][name="q"]', {timeout: 30000}).first().should('exist');
+    cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().should('exist');
   });
 
   it('runs Feed search flow and opens a report', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Feed');
     waitForSearchReady();
-    cy.get('input[data-cy="dashboard-general-input"][name="q"]', {timeout: 30000}).first().as('q');
+    cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().as('q');
     cy.get('@q').should('be.visible').and('not.be.disabled');
     cy.get('@q').clear();
 
@@ -179,35 +179,34 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Stealer logs');
     clickSidebarSubItem('Stealer logs', 'IOCS');
-    cy.get('input[name="searchQuery"][placeholder="Search..."]', {timeout: 30000}).first().as('q');
+    cy.get('input[name="searchQuery"][placeholder="Search..."]').first().as('q');
     cy.get('@q').should('be.visible').and('not.be.disabled');
 
     waitForSearchReady();
     cy.get('@q').type('uwe.dippold@web.de{enter}');
-    cy.get('button[aria-label="Expand row"]', {timeout: 30000}).should('have.length.greaterThan', 0).first().scrollIntoView().click();
+    cy.get('button[aria-label="Expand row"]').should('have.length.greaterThan', 0).first().scrollIntoView().click();
   });
 
   it('runs Web Scans flow for Basic, Port, Repository, and SEO', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Web Scans');
     clickSidebarSubItem('Web Scans', 'Basic Scan');
-    cy.get('input[name="username"][placeholder="Domain"]', {timeout: 30000}).first().as('scanInput');
+    cy.get('[data-testid="network-intel-tab-host-recon"]').should('be.visible');
+    cy.get('[data-testid="network-intel-search-input"][placeholder="Search domain..."]').first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    cy.get('@scanInput').type('bbc.com');
-    cy.contains('button', /^Search$/).should('be.visible').and('not.be.disabled').click();
+    cy.get('@scanInput').type('bbc.com{enter}');
 
-    clickSidebarSubItem('Web Scans', 'Port Scan');
-    cy.get('input[name="username"][placeholder="Domain"]', {timeout: 30000}).first().as('scanInput');
+    cy.get('[data-testid="network-intel-tab-ip-scan"]').should('be.visible').click();
+    cy.get('[data-testid="network-intel-search-input"][placeholder="Search IP..."]').first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    cy.get('@scanInput').type('bbc.com');
-    cy.contains('button', /^Search$/).should('be.visible').and('not.be.disabled').click();
+    cy.get('@scanInput').type('8.8.8.8{enter}');
 
     clickSidebarSubItem('Web Scans', 'Repository Scan');
-    cy.get('input[name="username"][placeholder="Repository"]', {timeout: 30000}).first().as('scanInput');
+    cy.get('input[name="username"][placeholder="Repository"]').first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
@@ -215,7 +214,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.contains('button', /^Search$/).should('be.visible').and('not.be.disabled').click();
 
     clickSidebarSubItem('Web Scans', 'SEO Scan');
-    cy.get('input[name="username"][placeholder="Domain"]', {timeout: 30000}).first().as('scanInput');
+    cy.get('input[name="username"][placeholder="Domain"]').first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
@@ -233,7 +232,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Dump');
     clickSidebarSubItem('Dump', 'Listing');
-    cy.get('input[name="username"][placeholder="Search leak URL"]', {timeout: 30000}).first().as('leak');
+    cy.get('input[name="username"][placeholder="Search leak URL"]').first().as('leak');
     cy.get('@leak').should('be.visible');
     waitForSearchReady();
     cy.get('@leak').type('leak');

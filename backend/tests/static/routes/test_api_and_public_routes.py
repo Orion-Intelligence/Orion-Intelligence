@@ -61,6 +61,15 @@ class _FakeSearchModel:
     async def dynamic_search(self, *args, **kwargs):
         return {"ok": True, "route": "dynamic"}
 
+    async def onion_search(self, *args, **kwargs):
+        return {
+            "status": "success",
+            "result": {
+                "status": "success",
+                "results": [],
+            },
+        }
+
     async def search_wanted_list(self, *args, **kwargs):
         return {"cards_data": [], "total": 0}
 
@@ -188,6 +197,7 @@ class _FakeResourceManager:
 
 @pytest.fixture
 def api_public_client(monkeypatch):
+    from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
     from orion.api.interactive.directory_manager.directory_model import directory_model
     from orion.api.interactive.dump_manager.dump_model import dump_model
     from orion.api.interactive.hompage_manager.homepage_model import homepage_model
@@ -198,6 +208,19 @@ def api_public_client(monkeypatch):
     from orion.api.server.entity_manager.entity_manager import entity_manager
     from orion.services.stix_manager.stix_manager import stix_manager
 
+    class _FakeAuditManager:
+        async def register(self, *_args, **_kwargs):
+            return "ok"
+
+        async def search_audit(self, *_args, **_kwargs):
+            return "ok"
+
+        async def get(self, *_args, **_kwargs):
+            return {"items": [], "page": 1, "total": 0}
+
+        async def delete(self, *_args, **_kwargs):
+            return True
+
     monkeypatch.setattr(search_model, "getInstance", staticmethod(lambda: _FakeSearchModel()))
     monkeypatch.setattr(crawl_model, "getInstance", staticmethod(lambda: _FakeCrawlModel()))
     monkeypatch.setattr(stix_manager, "get_instance", staticmethod(lambda: _FakeStixManager()))
@@ -207,6 +230,7 @@ def api_public_client(monkeypatch):
     monkeypatch.setattr(entity_manager, "get_instance", staticmethod(lambda: _FakeEntityManager()))
     monkeypatch.setattr(config_controller, "getInstance", staticmethod(lambda: _FakeConfigController()))
     monkeypatch.setattr(ResourceManager, "get_instance", staticmethod(lambda: _FakeResourceManager()))
+    monkeypatch.setattr(AuditLogManager, "get_instance", staticmethod(lambda: _FakeAuditManager()))
 
     constant.license_rules = {
         "maintainer": {
@@ -332,6 +356,11 @@ def test_crypto_scan_route(api_public_client):
     assert resp.status_code == 200
 
 
+def test_cross_search_route(api_public_client):
+    payload = {"text": {"query": "hacking"}}
+    resp = api_public_client.post("/api/cross/search", json=payload)
+    assert resp.status_code == 200
+
 def test_network_intel_routes(api_public_client):
     assert api_public_client.post("/api/netintel/resolve_ip", json={"domain": "example.com"}).status_code == 200
     assert api_public_client.post("/api/netintel/ipscanner", json={"ip": "8.8.8.8"}).status_code == 200
@@ -370,6 +399,7 @@ def test_stix_news_and_screenshot_endpoints(api_public_client):
 
 @pytest.fixture
 def api_journey_client(monkeypatch):
+    from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
     from orion.api.interactive.directory_manager.directory_model import directory_model
     from orion.api.interactive.dump_manager.dump_model import dump_model
     from orion.api.interactive.hompage_manager.homepage_model import homepage_model
@@ -390,6 +420,19 @@ def api_journey_client(monkeypatch):
         "extract_ioc": [],
         "scan_apk": [],
     }
+
+    class _FakeAuditManager:
+        async def register(self, *_args, **_kwargs):
+            return "ok"
+
+        async def search_audit(self, *_args, **_kwargs):
+            return "ok"
+
+        async def get(self, *_args, **_kwargs):
+            return {"items": [], "page": 1, "total": 0}
+
+        async def delete(self, *_args, **_kwargs):
+            return True
 
     class _JourneySearchModel(_FakeSearchModel):
         async def search_consolidated_ranked_result(self, param, base_index, excluded, categories):
@@ -465,6 +508,7 @@ def api_journey_client(monkeypatch):
     monkeypatch.setattr(entity_manager, "get_instance", staticmethod(lambda: _FakeEntityManager()))
     monkeypatch.setattr(config_controller, "getInstance", staticmethod(lambda: _FakeConfigController()))
     monkeypatch.setattr(ResourceManager, "get_instance", staticmethod(lambda: _FakeResourceManager()))
+    monkeypatch.setattr(AuditLogManager, "get_instance", staticmethod(lambda: _FakeAuditManager()))
 
     constant.license_rules = {
         "maintainer": {
@@ -575,19 +619,16 @@ def test_user_journey_network_intel_routes(api_journey_client):
     client, calls = api_journey_client
 
     resolve_ip = client.post("/api/netintel/resolve_ip", json={"domain": "example.com"})
-    ipscanner = client.post("/api/netintel/ipscanner", json={"ip": "8.8.8.8"})
     vuln = client.post("/api/netintel/url_vulnerability_scan", json={"domain": "example.com"})
     geo = client.post("/api/netintel/iot_detect", json={"coordinates": "24.8607,67.0011", "radius_km": 25, "max_ips": 200})
     geo_ranges = client.post("/api/netintel/camera_detect_ranges", json={"ip_ranges": ["192.168.1.0/24"], "max_ips": 200})
 
     assert resolve_ip.status_code == 200
-    assert ipscanner.status_code == 200
     assert vuln.status_code == 200
     assert geo.status_code == 200
     assert geo_ranges.status_code == 200
     assert [call["route"] for call in calls["network_intel"]] == [
         "resolve_ip",
-        "ipscanner",
         "url_vulnerability_scan",
         "iot_detect",
         "camera_detect_ranges",

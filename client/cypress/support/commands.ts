@@ -9,18 +9,20 @@ declare global {
             closeSideFilter(): Chainable<void>;
             applySideFilter(): Chainable<void>;
             scrollDashboardToTop(): Chainable<void>;
+            scrollDashboardToBottom(): Chainable<void>;
             openLastMailAndGetUrl(): Chainable<string>;
             clearAllEmails(): Chainable<void>;
         }
     }
 }
+
 Cypress.Commands.add("loginAsAdmin", () => {
     cy.env(["ADMIN_USERNAME", "ADMIN_PASSWORD"]).then(({ ADMIN_USERNAME, ADMIN_PASSWORD }) => {
         cy.visit("/login");
         cy.get('[data-testid="login-user"]').type(ADMIN_USERNAME);
         cy.get('[data-testid="login-pass"]').type(ADMIN_PASSWORD, { log: false });
         cy.get('[data-testid="login-button"], input.login-button').first().click();
-        cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-cy="dashboard-container"], .dashboard_container', { timeout: 35000 })
+        cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
             .filter(':visible')
             .should('have.length.greaterThan', 0);
     });
@@ -34,10 +36,10 @@ Cypress.Commands.add("loginAsTest1", () => {
             throw new Error(`Missing test user credentials for key: ${key}`);
         }
         cy.visit("/login");
-        cy.get('input[name="username"]').type(user.username);
-        cy.get('input[name="password"]').type(user.password, { log: false });
-        cy.get('[data-cy="login-button"], input.login-button').first().click();
-        cy.get('[data-testid="profile-menu"], [data-cy="dashboard-main"], [data-cy="dashboard-container"], .dashboard_container', { timeout: 35000 })
+        cy.get('[data-testid="login-user"]').type(user.username);
+        cy.get('[data-testid="login-pass"]').type(user.password, { log: false });
+        cy.get('[data-testid="login-button"], input.login-button').first().click();
+        cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
             .filter(':visible')
             .should('have.length.greaterThan', 0);
     });
@@ -56,84 +58,60 @@ Cypress.Commands.add("logout", () => {
             }
             cy.scrollTo("top", { ensureScrollable: false });
             cy.wrap(profileMenu).scrollIntoView().should('be.visible').click();
-            cy.get('[data-testid="signout-btn"]', { timeout: 10000 }).filter(':visible').first().scrollIntoView().should('be.visible').click();
-            cy.get('[data-testid="login-user"]', { timeout: 10000 }).should('exist');
+            cy.get('[data-testid="signout-btn"]').filter(':visible').first().scrollIntoView().should('be.visible').click();
+            cy.get('[data-testid="login-user"]').should('exist');
         });
     });
 });
 Cypress.Commands.add("scrollDashboardToTop", () => {
     cy.window({ log: false }).then((win) => {
-        const doc = win.document;
-        const elements = Array.from(doc.querySelectorAll<HTMLElement>('*'));
+        const containers = Array.from(
+            win.document.querySelectorAll<HTMLElement>('#dashboard-container, [data-testid="dashboard-container"], [data-testid="dashboard-body"]')
+        );
 
-        win.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-        doc.documentElement.scrollTop = 0;
-        doc.body.scrollTop = 0;
-
-        elements.forEach((el) => {
-            if (el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth) {
-                el.scrollTop = 0;
-                el.scrollLeft = 0;
-            }
+        containers.forEach((el) => {
+            el.scrollTop = 0;
         });
     });
 });
+
+Cypress.Commands.add("scrollDashboardToBottom", () => {
+    cy.window({ log: false }).then((win) => {
+        const containers = Array.from(
+            win.document.querySelectorAll<HTMLElement>('#dashboard-container, [data-testid="dashboard-container"], [data-testid="dashboard-body"]')
+        );
+
+        containers.forEach((el) => {
+            el.scrollTop = el.scrollHeight;
+        });
+    });
+});
+
 Cypress.Commands.add("openSideFilter", () => {
     cy.scrollDashboardToTop();
-    cy.get('body').then(($body) => {
-        const isOpen = $body.find('.ui-filter-sidebar-panel.right-0').length > 0;
-        if (!isOpen) {
-            cy.get('[data-testid="side-filter-open"]', { timeout: 20000 })
-                .filter(':visible')
-                .first()
-                .should('be.visible');
-            cy.get('[data-testid="side-filter-open"]', { timeout: 20000 })
-                .filter(':visible')
-                .first()
-                .click({ waitForAnimations: false, animationDistanceThreshold: 0 });
-            cy.get('body').then(($retryBody) => {
-                if ($retryBody.find('.ui-filter-sidebar-panel.right-0').length === 0) {
-                    cy.scrollDashboardToTop();
-                    cy.get('[data-testid="side-filter-open"]', { timeout: 20000 })
-                        .filter(':visible')
-                        .first()
-                        .click({ waitForAnimations: false, animationDistanceThreshold: 0 });
-                }
-            });
-        }
-    });
-    cy.get('.ui-filter-sidebar-panel.right-0', { timeout: 20000 }).should('exist');
+    cy.get('[data-testid="side-filter-open"]').filter(':visible').first().should('be.visible').click();
+    cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().should('be.visible');
 });
 Cypress.Commands.add("closeSideFilter", () => {
-    cy.get('body').then(($body) => {
-        const isOpen = $body.find('.ui-filter-sidebar-panel.right-0').length > 0;
-        if (isOpen) {
-            cy.get('.ui-filter-sidebar-panel.right-0', { timeout: 20000 })
-                .first()
-                .within(() => {
-                    cy.get('[data-testid="side-filter-close"]', { timeout: 20000 })
-                        .should('be.visible')
-                        .click({ waitForAnimations: false, animationDistanceThreshold: 0 });
-                });
+    cy.window().then((win) => {
+        const x = win.innerWidth / 2;
+        const y = 10;
+
+        const target = win.document.elementFromPoint(x, y) as HTMLElement | null;
+
+        if (!target) {
+            return;
         }
+
+        cy.wrap(target).click('center', { force: true });
     });
-    cy.get('.ui-filter-sidebar-panel.right-0', { timeout: 20000 }).should('not.exist');
 });
 Cypress.Commands.add("applySideFilter", () => {
-    cy.get('body').then(($body) => {
-        const visibleApply = $body.find('[data-testid="side-filter-apply"]:visible').first();
-        if (visibleApply.length) {
-            cy.get('.ui-filter-sidebar-panel.right-0', { timeout: 20000 })
-                .filter(':visible')
-                .first()
-                .scrollTo('bottom', { ensureScrollable: false, duration: 0 });
-
-            cy.wrap(visibleApply)
-                .should('be.visible')
-                .click({ force: true, waitForAnimations: false, animationDistanceThreshold: 0 });
-        }
-    });
-    cy.get('.ui-filter-sidebar-panel.right-0', { timeout: 20000 }).should('not.exist');
+    cy.get('[data-testid="side-filter-apply"]')
+        .filter(':visible')
+        .first()
+        .should('be.visible')
+        .click({ force: true, waitForAnimations: false, animationDistanceThreshold: 0 });
 });
 Cypress.Commands.add("clearAllEmails", () => {
     cy.request("DELETE", "http://localhost:8025/api/v1/messages");

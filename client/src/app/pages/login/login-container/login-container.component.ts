@@ -14,6 +14,8 @@ import { HeaderComponent } from '../../../shared/partials/header/login-header/he
   templateUrl: './login-container.component.html',
 })
 export class LoginContainerComponent implements OnInit, OnDestroy {
+  private static readonly DEFAULT_LOGO_SRC = '/assets/images/shared/logo-wide-light.svg';
+  private static readonly DEFAULT_AUTH_DASHBOARD_SRC = '/assets/images/shared/auth_dashboard_icon.svg';
   private authSubscription!: Subscription;
   private tempToken: string | null = null;
   private pendingUsername: string | null = null;
@@ -28,13 +30,18 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   otpDataUrl: string | null = null;
   otpSecret: string | null = null;
   isMobile = false;
+  autoDemoLogin = false;
+  brandingResolved = false;
 
   constructor(public authService: AuthService, private router: Router, protected appService: AppService, private route: ActivatedRoute) { }
 
   ngOnInit() {
+    this.appService.loadConfig().subscribe(() => {
+      this.brandingResolved = true;
+    });
     this.authSubscription = this.authService.authState$.subscribe(authState => {
       if (authState.isAuthenticated) {
-        this.appService.loadSession(true).then(() => {
+        this.appService.loadSession(true).subscribe(() => {
           this.router.navigate(['dashboard'], { replaceUrl: true }).then();
         });
       }
@@ -51,13 +58,31 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
         mode = tree.queryParams['mode'];
       }
       if (mode === 'free') {
+        localStorage.setItem('mobileDemo', 'true');
+        this.autoDemoLogin = true;
         this.demoLogin();
       }
     });
   }
 
+  getLoginLogoSrc(): string {
+    const logo = this.appService.getConfig().appSettings.logo_wide_light;
+    if (!logo || logo === '/api/s/static/system/logo_wide_light_default.png') {
+      return LoginContainerComponent.DEFAULT_LOGO_SRC;
+    }
+    return logo;
+  }
+
+  getDashboardPreviewSrc(): string {
+    const authDashboardIcon = this.appService.getConfig().appSettings.auth_dashboard_icon;
+    if (!authDashboardIcon || authDashboardIcon === '/api/s/static/system/auth_dashboard_icon_default.png') {
+      return LoginContainerComponent.DEFAULT_AUTH_DASHBOARD_SRC;
+    }
+    return authDashboardIcon;
+  }
+
   copyToClipboard(text: string): void {
-    navigator.clipboard.writeText(text).then(() => {
+    void navigator.clipboard.writeText(text).then(() => {
       this.copied = true;
     });
   }

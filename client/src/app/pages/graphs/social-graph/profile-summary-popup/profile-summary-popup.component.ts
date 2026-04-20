@@ -20,7 +20,7 @@ export class ProfileSummaryPopupComponent {
   platforms = input.required<PlatformResult[]>();
   email = input<string | undefined>();
   isScanInProgress = input<boolean>(false);
-  close = output<void>();
+  close = output<undefined>();
   fetchProfile = output<PlatformResult>();
   fetchPosts = output<PlatformResult>();
   fetchFollowers = output<PlatformResult>();
@@ -37,7 +37,14 @@ export class ProfileSummaryPopupComponent {
   selectedPlatform = signal<PlatformResult | 'all' | null>('all');
   selectedPlatformDetails = computed((): PlatformResult | null => {
     const selection = this.selectedPlatform();
-    return (selection && selection !== 'all') ? selection : null;
+    if (!selection || selection === 'all') {
+      return null;
+    }
+
+    return this.platforms().find(platform =>
+      platform.platform === selection.platform
+      && platform.username === selection.username
+      && platform.keyUsername === selection.keyUsername) ?? selection;
   });
   isAllPlatformsSelected = computed((): boolean => {
     return this.selectedPlatform() === 'all';
@@ -73,15 +80,16 @@ export class ProfileSummaryPopupComponent {
   }
 
   onSearchTermChange(event: Event) {
-    this.platformSearchTerm.set((event.target as HTMLInputElement).value); 
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.platformSearchTerm.set(nextValue);
   }
 
   clearSearch() {
-    this.platformSearchTerm.set(''); 
+    this.platformSearchTerm.set('');
   }
 
   onClose() {
-    this.close.emit();
+    this.close.emit(undefined);
   }
 
   onAllPlatformsClick(): void {

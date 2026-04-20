@@ -1,1053 +1,2170 @@
 (user-manual)=
 
-# User Documentation
+# User Manual
 
-:::{admonition} At a glance
+:::{admonition} Scope
 :class: tip
 
-This guide walks through the Orion UI end-to-end (navigation, search, modules, reports, analytics, and supporting tools).
-It is formatted for **Sphinx + MyST + Shibuya** (right-side “On this page” enabled).
+This manual is written for the Orion web application as implemented in this repository. It covers the main user experience, search and investigation workflows, live lookup tools, graph views, tenant workflows, and administrative screens. Some features appear only for specific licenses, tenants, or roles.
 :::
 
-## Introduction
+## About This Guide
 
-let's take a look at the admin panel, designed exclusively for administrative users. This section is purpose-built to
-allow administrators to configure settings, monitor system performance, and oversee user activities. The diagram below
-illustrates the secure and straightforward login process for the admin panel, which is restricted solely to authorized
-personnel. Unlike user-facing components of the platform, the admin panel offers advanced tools and features that
-provide full control over the system's functionality, ensuring smooth and efficient management of operations.
+Orion is an investigation and monitoring platform that combines indexed intelligence, live lookups, graph exploration, tenant workflows, and platform administration in one interface. Users typically work in one of four ways:
 
-<img width="1916" height="905" alt="adminlogin" src="https://github.com/user-attachments/assets/ac750d71-a920-4d35-a545-341731e856e6" />
+1. Search indexed data from the main dashboard.
+2. Run a targeted lookup or scan against a domain, file, email, IP, username, or other entity.
+3. Open a report view to inspect metadata, evidence, and relationships.
+4. Manage tenant, user, alert, and platform settings based on role permissions.
 
+This document is organized around those tasks.
 
+```{contents}
+:local:
+:depth: 2
+```
 
-## Homepage Page
+## Access and Entry Points
 
-The Orion Platform's main interface is designed with user-friendliness in mind, offering intuitive and streamlinedaccess to its wide range of features. When we  log in to Orion, we are presented with a highly attractive dashboard that contains numerous features, which we will explain one by one in the following sections. It seamlessly integrates with advanced machine learning models, significantly enhancing search accuracy and enabling deeper, more intelligent content analysis. Users can efficiently search, filter, and visualize data across multiple categories, making data exploration both effective and insightful. With its robust capabilities, Orion empowers users to uncover patterns, trends, and correlations within vast datasets. This makes it an ideal solution for professionals seeking actionable insights and informed decision-making. The platform's versatility and performance ensure it meets the needs of various industries and use cases.
+### Login
 
-<img width="1919" height="1079" alt="homepage" src="https://github.com/user-attachments/assets/022963ba-4c8e-41df-85aa-d719ca881edb" />
+The standard entry point is the login screen. Depending on deployment settings, users may also encounter:
 
-## Directory Page
+- account onboarding
+- welcome or notification screens
+- password reset flows
 
-Here’s an overview of the interface components
+```{figure} ../screenshots/login-page-20260326.png
+:alt: Orion login page
+:width: 100%
 
-### Navbar
+Login screen used for standard account access.
+```
 
-The navigation bar has been moved to the left side of the page. This adjustment enhances accessibility for users. It also creates a cleaner and more efficient workflow.
+```{admonition} Role-aware experience
+:class: note
 
-<img width="568" height="700" alt="menu" src="https://github.com/user-attachments/assets/a5e649d3-dd30-47e2-9fd7-45c842ba3a54" />
+The sidebar, available modules, and some actions are controlled by role, tenant state, and license assignment. Two users in the same deployment may not see the same menu.
+```
 
+### Password Reset
 
-It consists of the following main menu items:
+The reset flow supports two stages:
 
-1. **Homepage:** Navigates back to the platform’s main page, serving as a central hub for all primary operations.
-   It allows users to quickly restart their workflow or re-access key features without losing progress or context.
+- requesting a reset link by email
+- submitting a new password using a tokenized reset link
 
-2. **General Intelligence:** Provides comprehensive access to aggregated intelligence data from various sources.
-   This feature enables users to conduct broad, high-level analysis to better understand emerging threats and trends.
+The new-password form includes password-strength guidance and confirmation validation.
 
-3. **Data Breach:** Displays detailed reports of identified data breaches affecting different platforms and sectors.
-   Users can view information on compromised credentials, leaked sensitive data, and impacted entities.
+```{figure} ../screenshots/password-reset-20260326.png
+:alt: Password reset request page
+:width: 100%
 
-4. **Defacement:** Presents findings related to website defacement incidents detected by the monitoring system.
-   It includes insights into affected domains, attacker signatures, and the nature of the defacement.
+Password reset workflow entry point.
+```
 
-5. **Social:**  Monitors threat intelligence shared across social platforms, particularly Telegram.
-   The system integrates with Telegram channels to automatically fetch and display relevant threat data.
-   This feature helps identify early indicators of cyber threats, ongoing attacks, or planned activities by malicious
-   actors.
+### Tenant Onboarding
 
-6. **Live APIs:** Offers real-time data streams through APIs, facilitating integration with external systems and tools.
-   This feature supports continuous monitoring and enables timely responses to evolving cybersecurity events.
+New tenant users may be routed through a multi-step onboarding flow before using the main dashboard. The onboarding wizard includes:
 
-7. **Exploit:** The Exploit module in Orion Intelligence enables users to identify, analyze, and simulate known vulnerabilities using CVE data and integrated exploit tools. With AI-powered suggestions, Orion assists in selecting relevant exploits based on system context, helping security teams assess real-world risk faster and more efficiently.
-8.  **Feed:** The Feed module delivers real-time updates on cybersecurity threats, CVEs, breaches, and industry trends from trusted global sources. Orion curates and prioritizes the most relevant news, keeping your team informed about emerging risks and developments that could impact your infrastructure or applications.
-9.  **Dumps:**  Provides access to large collections of compromised data gathered from various underground and open sources.
-These data dumps often include leaked databases, user credentials, email lists, financial records, or other sensitive information.
+1. company information
+2. IOC setup
+3. confirmation
 
-   In this module, the system actively collects data from:
+During onboarding, users can define monitored IOC values by category before entering the main application.
 
- **Telegram channels:** Extracts downloadable files and shared dump links related to breaches or leaks.
+The tested tenant flow confirms that onboarding is part of a larger tenant lifecycle rather than a standalone form. Covered user-visible behavior includes:
 
-**Websites and forums:** Scrapes or downloads publicly available or dark web-hosted data dumps posted by malicious
-      actors.
+- tenant signup and verification email delivery
+- admin-side tenant review and verification changes
+- enterprise-license assignment before first tenant login
+- onboarding wizard completion
+- IOC seeding during onboarding
+- tenant sub-user creation immediately after onboarding
 
-**Other open-source intelligence (OSINT) platforms:** Tracks and organizes dump-related information for quick
-      analysis.
-10. **Stealerlogs:**   In the Stealer Log, we can view leaked credentials. These credentials may be associated with any domain, and their records appear under the ‘Fast Search’ and ‘Full Search’ options. Both of these search methods allow efficient retrieval of compromised data. The detailed functionality of these features will be explained in the following sections.
+## Main Application Layout
 
-11. **CTI Graph:** The CTI (Cyber Threat Intelligence) module offers a graph-based view that visualizes complex relationships between key cyber threat entities such as threat actors, malware families, TTPs (tactics, techniques, and procedures), IP addresses, domains, file hashes, and affected organizations. By mapping these connections visually, the module enables users to understand how threats are interlinked, attribute attacks to known groups, and correlate indicators of compromise (IOCs) with previous incidents. This enhances threat hunting, improves situational awareness, and accelerates investigations. The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark web monitoring, and internal alerts to provide contextual, actionable insights.
+After authentication, Orion opens inside the `dashboard` workspace.
 
-12. **Onion Link:** The Onion Link feature allows secure access to Orion Intelligence through the Tor browser. By clicking the Orion Link, users can operate the tool anonymously over the dark web, ensuring privacy and resilience in restricted or high-risk environments. Ideal for sensitive investigations and secure threat intelligence operations.
+```{figure} ../screenshots/homepage-overview-20260326.png
+:alt: Orion homepage
+:width: 100%
 
-13. **Links:** This module displays links associated with recent data dumps collected from platforms monitored sources. These links typically point to external locations where leaked or compromised data is hosted. By centralizing these dump-related URLs, the platform allows users to quickly access and analyze the raw data or files being circulated in the threat landscape. This feature supports ongoing monitoring of dump activity and helps identify the nature and scope of leaked content.
+Orion dashboard landing view.
+```
 
-14. **Documentation:** This section provides comprehensive documentation for all users of the platform. It includes a detailed user manual, explanations about the platform’s features and modules, and developer documentation to guide technical users through integration, API usage, and system architecture. This module ensures that both end-users and developers can easily understand and utilize the platform's full capabilities.
+The main UI is centered around four areas:
+
+- the left sidebar for navigation
+- the global search and module toolbar
+- the result or report workspace
+- slide-out or inline filter panels
+
+### Left Sidebar
+
+The left sidebar is the primary navigation system. It groups features by investigation area and by operational purpose.
+
+```{figure} ../screenshots/homepage-overview-20260326.png
+:alt: Orion sidebar
+:width: 100%
+
+Expanded sidebar with major modules and support links.
+```
+
+The sidebar can include:
+
+- user profile and account pages
+- indexed search modules
+- live scan and API modules
+- graph tools
+- support links such as `Onion Link`, `Links`, and `Documentation`
+
+### Global Search Area
+
+Most data-driven modules share the same search pattern:
+
+- a search box
+- optional advanced filtering
+- optional search tools
+- an optional right-side filter drawer
+
+```{figure} ../screenshots/homepage-searchbar-20260326.png
+:alt: Global search bar
+:width: 100%
+
+Search bar with search, advanced mode, and tools controls.
+```
+
+### Result Workspace
+
+The result area changes by module, but commonly includes:
+
+- a result count
+- cards or row-based entries
+- analytics summaries
+- filters
+- pagination
+- empty, loading, and no-result states
+
+## Global Search Workflow
+
+The search bar is the main entry point for indexed investigation.
+
+### Basic Search
+
+In standard mode, users can enter a free-text query and submit it immediately. Orion then loads results for the current module or route context.
+
+### Advanced Search Toggle
+
+The `Advance` toggle enables the filter overlay below the search bar. When enabled, Orion exposes indexed filter controls that let users narrow the query more precisely.
+
+### Tools Menu
+
+The `Tools` section provides search behavior controls and, in some contexts, sorting options.
+
+```{figure} ../screenshots/homepage-searchbar-20260326.png
+:alt: Search type controls
+:width: 100%
+
+Search entry area with search mode and tools controls.
+```
+
+Available search modes in the main result workflow include:
+
+- `Match Semantic`
+- `Match any term (OR)`
+- `Match individual terms (AND)`
+- `Match full query`
+
+These modes affect how broadly or narrowly Orion interprets the query.
+
+### Search Filters
+
+When advanced mode is enabled, users can add indexed filters to refine the result set.
+
+```{figure} ../screenshots/search-filters-20260326.png
+:alt: Search filters
+:width: 100%
+
+Filter controls for refining indexed search.
+```
+
+Across the application, filter panels typically support:
+
+- dropdown selection
+- text input
+- date range input
+- apply
+- reset
+
+### Selected Filter Bar
+
+When entity filters, sidebar filters, or non-default search tools are active, Orion can display a selected-filter bar showing what is currently affecting the result set.
 
 ## Homepage
 
-The home page acts as the central hub of the platform, providing users with easy access to the core functionalities. On
-the left, there is a sidebar designed for users to quickly navigate to specific sections, streamlining the process of
-data retrieval. Below the sidebar, the page is divided into two main sections: the General Index and the Leaked Index.
-The Generic Index offers a broad overview of the collected data, summarizing standard findings for users. In contrast,
-the Leaked Index focuses on sensitive or critical information, enabling users to easily identify and prioritize
-high-priority data. This well-organized structure ensures that users have an intuitive and efficient experience.
+The homepage is the default overview for many users and acts as a search-first dashboard.
 
-### Key Features
+The homepage typically includes:
 
-- The **search bar** at the top of the interface allows users to quickly and efficiently find specific pieces of
-  information. It supports keyword-based queries, making the process of locating data fast and straightforward. This
-  feature enhances productivity by reducing the time spent on manual searching.
+- the global search entry point
+- high-level summaries
+- statistics or insight cards
+- general and leaked index summaries
 
-<img width="981" height="408" alt="searchbar" src="https://github.com/user-attachments/assets/3c2970f3-a0f7-406b-98f6-6bb87f8785ad" />
+For some privileged roles, the homepage also includes a draggable insight panel layered over the main search experience. Other users may instead see a simplified search-first landing view or a tenant-home style alert summary, depending on license assignment and whether the account belongs to a default tenant.
 
+### Homepage Summary Areas
 
-In this **search bar**, a dropdown appears where we can select and apply different filters. There are two ways to use these filters: At the top, a "List of filters" is displayed, from which we can select the desired ones. Additionally, we can type directly into the search filter input field to find and apply a specific filter. Below this, there is another input field labeled “Enter Entity”, where an additional filter can be applied. When both the upper filter and the lower entity filter are applied together, they provide the most accurate and refined results. And below, in the IOs section, it will display the filter that was selected above, indicating which filter has been applied. In the search bar, we have different types of filters. On the top right side of the search bar, there is a button labeled “Advance”, which can be enabled or disabled. When enabled, a dropdown box appears, displaying the complete list of available filters.
+- `General Index`: broad indexed content gathered across supported sources.
+- `Leaked Index`: sensitive, exposed, or higher-priority findings.
+- `Recent or featured results`: direct pivots into current records.
+- `Insight blocks`: charts and counts used for quick triage.
 
-Next to the **Advance button**, there is also a Tools option. When we click on Tools, an additional option appears below titled “Search by (match individual terms)”. Within this, three categories of search modes are available:
+```{figure} ../screenshots/homepage-overview-20260326.png
+:alt: Homepage dashboard
+:width: 100%
 
-- Match Any Term (OR):
-This option shows results containing any of the search terms. The results are broader and may include more generic or loosely related data.
+Homepage overview with summary panels and search-first layout.
+```
 
-- Match All Terms (AND):
-This option shows results that contain all of the search terms, but not necessarily in the same order or exact phrasing. The data here is usually more relevant and closely related to the query.
+```{figure} ../screenshots/heatmap-report-20260326.png
+:alt: Homepage heatmap country report
+:width: 100%
 
-- Match Full Query (Exact Match):
-This option only shows results that exactly match the full query entered. If such results exist, they will be displayed; otherwise, no results will appear.
+Country-level heatmap report opened directly from the homepage world map.
+```
 
-<img width="821" height="167" alt="filterbar" src="https://github.com/user-attachments/assets/d1974392-7a61-4e98-b98d-e16aa2ddd32b" />
+The tested homepage workflow also includes:
 
+- hovering countries to reveal tooltip state
+- opening country-level report panels from the heatmap
+- closing the report by close control and by overlay
+- keeping homepage search and heatmap pivots available in the same workspace
 
-Here, we can see the filters that have been applied. There is also a Clear button available, which allows us to remove all the applied filters at once.
+## Analytics and Result Insights
 
-#### Statistics
+Orion exposes analytics alongside search results to help analysts understand the composition of the returned dataset.
 
-In the statistics section, when we view the chart bars, several results are displayed. The first statistic highlights the top teams that are most frequently involved in leak incidents. The next chart shows the teams associated with website defacement activities. The third statistic presents the top geographic regions with the highest number of defacement incidents. Finally, another chart displays the most frequently used hashtags, reflecting their use in social media activities and related incidents.
+```{figure} ../screenshots/consolidated-insights-20260326.png
+:alt: Keyword insights
+:width: 100%
 
-<img width="1587" height="300" alt="satistics" src="https://github.com/user-attachments/assets/cb089b53-bd31-4fce-8e27-04491939a7c5" />
+Keyword-level insight and result analysis.
+```
 
+```{figure} ../screenshots/consolidated-results-20260326.png
+:alt: General result analytics
+:width: 100%
 
-#### To Data Leaks
+Expanded result insight and breakdown panels.
+```
 
-The data is displayed in two rows. The top row contains leak-related results, fetched from Onion, Clearnet, and I2P. Each block includes a “View Detail” option at the bottom, which opens the specific result page with complete information such as related URLs, metadata, JSON report, and other reports linked to the same leak.
+Depending on module and query, analytics can summarize:
 
-The second row presents results related to defacements. Similar to the leaks section, selecting “View Detail” redirects to a detailed result page, where comprehensive insights are available, including the associated network, JSON report, and other relevant information.
+- keyword frequency
+- category distribution
+- result volume
+- network or source distribution
+- URL and title breakdowns
 
-<img width="1591" height="523" alt="topleakdata" src="https://github.com/user-attachments/assets/31c25b76-e1e0-4de7-87d2-e757d7483101" />
+## Navigation Reference
 
+The exact menu depends on license and permissions, but the Orion UI commonly exposes the following modules.
 
-- The **Generic Index** offers a summarized view of the broad data collected from various sources. It presents standard
-  findings in an organized format, giving users a quick understanding of general trends. This helps in forming a base
-  for more detailed analysis and decision-making.
+| Module | Primary purpose | Typical views |
+| --- | --- | --- |
+| Homepage | Entry point and overview | search, summaries, statistics |
+| General Intelligence | Broad indexed intelligence search | All, General, Forums, News, Stolen, Drugs, Hacking, Marketplaces, Cryptocurrency, Leaks |
+| Data Breach | Breach records and exposure checks | All, Databases, Tracking |
+| Defacement | Website compromise monitoring | All, Hacked, Phishing, Databases |
+| Social | Social and community-source intelligence | All, Telegram, Twitter, Mastodon, Pastebin, Forum, Reddit |
+| Exploit | Vulnerability and exploit intelligence | All, CVE, Tools, ZeroDay |
+| Consolidated | Combined multi-source investigation | IOCs, Deep Search, Network Intel |
+| Feed | News-style intelligence stream | News |
+| Dump | Dump and listing sources | Listing |
+| Stealer Logs | Credential and IOC investigation | IOCs |
+| Web Scans | Live web-target scanning | Basic Scan, Port Scan, Repository Scan, SEO Scan, APK Scan |
+| Entity API | Entity-based live lookups | Email Breach, Social Scanner, Wanted List, National Identity, Playstore Scanner, Software Scanner, File Scanner, Crypto Scanner |
+| Network Intel | Domain, IP, and vulnerability recon | Host Recon, IP Scan, Vulnerability Scan |
+| Social Intel | Username and profile mapping | graph and list views |
+| CTI Graph | Cyber relationship mapping | cluster, document, property pivots |
+| Links | Link directory and monitored references | directory listing |
+| Onion Link | External onion access | external link |
+| Whistle Blowing | External reporting portal | external link |
+| Documentation | Published documentation | external docs |
 
-- The **Leaked Index** highlights data that is sensitive, confidential, or potentially compromised. It brings attention
-  to high-priority information such as leaked credentials, making it easier for users to act quickly. This ensures
-  critical threats are addressed before they escalate.
+## Indexed Investigation Modules
 
-- The **structured layout** of the platform breaks the interface into clear, logical sections for better usability. This
-  design allows users to navigate smoothly through different features without confusion. It creates a more intuitive and
-  efficient experience for both new and experienced users.
+### Consolidated
 
-<img width="1657" height="877" alt="indexing" src="https://github.com/user-attachments/assets/dac910ad-bb35-4079-9c74-f4341296c7fb" />
+The consolidated view is Orion's combined investigation workspace. It is designed for users who want one query to drive multiple result channels instead of searching each module separately.
 
+The consolidated route can expose three major tabs:
 
-The home page features a prominent search bar positioned at the top, designed to let users quickly input data for either
-viewing or initiating a crawl process. This search bar acts as the central entry point for user interaction,
-streamlining access to the platform’s core functions. Just below the search bar, the page is neatly divided into two
-primary categories, each representing a key area of focus within the system. These categories help organize the data in
-a clear and logical manner, allowing users to easily navigate and analyze the content. This structured layout ensures an
-efficient and user-friendly experience right from the start.
+- `IOCs`
+- `Deep Search`
+- `Network Intel`
 
-### Categories Filter
+Depending on the query and license state, this view can combine:
 
-Selecting "Analytics" from the navigation bar takes users to a detailed view that mirrors the two main categories
-already shown on the home page. This section is designed to provide a focused look at the platform’s collected data and
-analytical results. It presents information in a structured format, allowing users to explore key insights efficiently.
-The clear layout supports streamlined analysis and quick interpretation of complex data.
+- grouped indexed results
+- stealer-log matches for qualifying queries such as emails or URLs
+- embedded network or scan-style pivots
 
-1. #### Generic Index
+Use consolidated search for first-pass triage when you want breadth before moving into a dedicated module.
 
-The "Generic Index" category displays information related to the crawling process, providing users with insights into
-various states of the fetched data. These states represent different aspects of the crawling operation, each offering
-valuable details. By reviewing the data systematically, one state at a time, users can gain a comprehensive
-understanding of the progress and status of the crawl. This structure ensures users can focus on specific areas of
-interest without being overwhelmed by unnecessary information.
+```{figure} ../screenshots/consolidated-results-20260326.png
+:alt: Consolidated investigation results
+:width: 100%
 
-<img width="1638" height="415" alt="generic index" src="https://github.com/user-attachments/assets/e4e62891-3cb5-4ffe-a353-20c0fc11d93c" />
+Combined result workflow used for broad first-pass triage.
+```
 
+### General Intelligence
 
-- **Document Count:** This section provides detailed information about the results obtained after the data is fetched,
-  focusing on the total document count. It displays the total number of documents retrieved from the crawl, presented as
-  a single count value for clarity. This summary helps users quickly understand the volume of data collected and gauge
-  the breadth of the crawl. It offers a snapshot of how extensive the data collection process has been.
+General Intelligence is the primary broad-spectrum indexed search area. Use it when you want to search topics, entities, or keywords across multiple kinds of sources.
 
-- **Most Recent Date:** This state informs users about the most recent updates to the crawled data, ensuring they are
-  kept up-to-date with the latest information available. It displays the most recent entries in the dataset, helping
-  users quickly identify any new data that has been fetched. This is especially useful for tracking changes and
-  monitoring updates in near real-time.
+Subcategories:
 
-- **Oldes Update:** This section displays information about the oldest updates in the data, indicating when the data was
-  last fetched in the past. By showing the oldest updates, users can track long-term changes and identify any outdated
-  or irrelevant data. This is useful for distinguishing between fresh data and data that may no longer be applicable or
-  valid.
+- `All`
+- `General`
+- `Forums`
+- `News`
+- `Stolen`
+- `Drugs`
+- `Hacking`
+- `Marketplaces`
+- `Cryptocurrency`
+- `Leaks`
 
-- **Update five days:**   This section provides information about the updates from the last five days, allowing users to
-  focus on recent changes that are highly relevant. By highlighting data updates within the past five days, this feature
-  helps users quickly analyze recent changes without sifting through older, less relevant data. It ensures the focus
-  remains on the most up-to-date information.
+```{figure} ../screenshots/general-intelligence-results-20260326.png
+:alt: General intelligence results
+:width: 100%
 
-- **Update Nine days:**  This section provides insights into the updates from the last nine days, offering users a view
-  of changes over a slightly longer period. It helps users monitor data for any significant changes or trends that may
-  have developed in the past week or so. This feature is useful for tracking medium-term updates that may not be as
-  immediate but are still important for ongoing analysis.
+General Intelligence result workflow.
+```
 
-- **Average Score:**  This section displays the average score count of the results, providing users with an overall
-  assessment of the data quality. The average score metric is important for evaluating how well the crawling process
-  performed in terms of the relevance and quality of the data fetched. It allows users to assess the overall
-  effectiveness of the crawling process and decide whether further adjustments are needed.
+Typical use cases:
 
-- **URL/Documents:** This section shows the count of URLs being extracted from the sites during the crawl, offering a
-  clear view of the total number of URLs found. By displaying the URL count, users can gauge how many web pages were
-  captured during the crawl, helping them understand the extent of the data sourced. This metric is particularly useful
-  for analyzing the scale of the crawling operation.
+- surveying discussions around a topic
+- reviewing leak mentions
+- exploring dark-web marketplace activity
+- scanning mixed-source intelligence for a keyword
 
-- **Archive/Documents:**  This refers to the number of archived URLs found on each website, allowing users to assess the
-  historical relevance of the crawled data. The archived URLs give insight into the longevity and preservation of online
-  content, helping users understand how much of the data being crawled has been preserved over time. This is valuable
-  for monitoring the ongoing availability of older content.
+### Data Breach
 
-- **Email/Documents:**  This section will show the number of email addresses found within the crawled data, helping
-  users identify key communication points. By tracking the emails found during the crawl, users can extract important
-  contact details for analysis. This is crucial for identifying potential communication channels and understanding the
-  nature of the content within the dataset.
+The Data Breach module is used for known breach data and identity exposure checks.
 
-- **Phone/Documents:** This section indicates how many phone numbers were fetched from each site during the crawl,
-  providing users with detailed contact information. By tracking phone numbers, users can understand the level of
-  personal or business contact data within the dataset. This feature allows for a deeper analysis of how connected or
-  widespread the data is across different platforms.
+Subcategories:
 
-- **Clearnet/Document:** This section informs users about the clearnet-type URLs that were captured during the crawl. On
-  average, each clearnet link provides around four URLs, which belong to the standard public internet network. This
-  section helps users understand the volume of accessible, non-hidden data collected, which is essential for
-  distinguishing between regular web content and more obscure or private data.
+- `All`
+- `Databases`
+- `Tracking`
 
-- **Common Type:** These are the general types of data supported by the network, helping users categorize the different
-  types of content collected. This section ensures that users can easily understand the variety and scope of data being
-  gathered from diverse sources. It also helps in organizing the data into recognizable categories, making analysis more
-  straightforward and manageable.
+Use `Databases` when you want structured breach records. Use `Tracking` when checking whether a specific email or identity appears in known breach data.
 
-<img width="1638" height="415" alt="generic index" src="https://github.com/user-attachments/assets/dacc2f16-7e5f-4204-9384-093ae371a921" />
+```{figure} ../screenshots/data-breach-tracking-20260326.png
+:alt: Email breach tracking
+:width: 100%
 
+Example of a breach tracking workflow.
+```
 
-In this diagram, the values displayed within the boxes represent the crawling data, which is updated daily. Each box
-contains two sets of numbers: the top numbers indicate the results of daily data updates, while the bottom numbers
-represent updates on a weekly basis.
+### Defacement
 
-2. #### Leaked Index
+Defacement tracks websites that were altered, hijacked, cloned, or otherwise compromised.
 
-<img width="1641" height="297" alt="leak index" src="https://github.com/user-attachments/assets/cb4ab8a8-a8b2-490d-a671-bd7730d91814" />
+Subcategories:
 
+- `All`
+- `Hacked`
+- `Phishing`
+- `Databases`
 
-The Leaked Index offers detailed insights into the various states of leaked data within the dataset, specifically
-targeting sensitive or confidential information. It helps users identify critical data that has been exposed, making it
-easier to track potential risks or security breaches. By providing a clear overview of the leaked data, this index
-allows for more focused analysis and prioritization of high-risk information. This feature is essential for ensuring
-that important threats are detected and addressed promptly.
+The detail view commonly exposes:
 
-3. #### Defacement
+- target URL
+- date saved
+- attacker or defacer
+- team name
+- server or IOC context
+- breach or source reference
+- IP and location
 
-The Defacement category allows users to deeply analyze data related to websites that have been compromised or visually
-altered by attackers. Within this section, users can:
+```{figure} ../screenshots/defacement-report-20260326.png
+:alt: Defacement report view
+:width: 100%
 
-- View the total number of websites that have been hacked or defaced, giving a comprehensive overview of the scale of
-  such incidents. This helps to quantify the number of attacks and monitor the impact on the web ecosystem.
+Defacement result detail with target and attacker context.
+```
 
-- Identify and filter fake or fraudulent websites among the defaced entries, ensuring that users can focus on legitimate
-  threats and exclude irrelevant or misleading data.
+### Social
 
-- Review technical metrics, such as the server response speed at the time the defacement was detected, offering insights
-  into how server performance may have been affected by the attack.
+The Social module aggregates intelligence from social and community platforms.
 
-This category provides essential insights into the nature and scale of web defacement incidents, enabling users to track
-emerging threats in real time. By understanding the specific vulnerabilities that led to these attacks, users can assess
-the overall security posture of affected web servers. Furthermore, this information helps in improving website defense
-strategies and mitigating future risks associated with web defacements.
+Supported views:
 
-<img width="1647" height="203" alt="defacement" src="https://github.com/user-attachments/assets/9b4ce4c0-9bfd-46e8-b68a-15405d3fd0aa" />
+- `All`
+- `Telegram`
+- `Twitter`
+- `Mastodon`
+- `Pastebin`
+- `Forum`
+- `Reddit`
 
+Use this module for:
 
+- early warning and chatter monitoring
+- leak discovery
+- discussion tracking
+- platform-specific searches
 
-### Homepage Menu
-![hompagemenu](https://github.com/user-attachments/assets/c1da6427-81d7-478d-9e1e-03e08214df40)
+```{figure} ../screenshots/social-report-20260326.png
+:alt: Social or feed-style intelligence results
+:width: 100%
 
+Example of a stream-oriented social intelligence view.
+```
 
-**Account**
+### Exploit
 
-The Account Settings module allows users to manage and customize their personal account preferences. Within this section, users are provided with several configuration options related to security and appearance.
+Exploit focuses on vulnerability and exploit-related intelligence.
 
-Firstly, users can manage their login and security settings, including the ability to enable or disable Two-Factor Authentication (2FA) to enhance account security. This allows users to choose the level of protection they require for their accounts.
+Key views:
 
-Secondly, users can customize the application interface according to their preferences. The system provides an option to change the theme, allowing users to switch between Light Mode and Dark Mode for better usability and visual comfort.
+- `CVE`
+- `Tools`
+- `ZeroDay`
 
-These settings are designed to give users greater control over their account security and user experience, ensuring flexibility and convenience while using the system.
+This module is useful when starting from:
 
-<img width="1918" height="652" alt="account" src="https://github.com/user-attachments/assets/7915872b-5c3d-4f65-bcd7-a4b8727ee743" />
+- a known vulnerability ID
+- a product or platform with public exploit coverage
+- a threat report mentioning exploit tooling
 
-**Users**
+The E2E workflow covers all tested exploit entry points:
 
-  The Users module provides functionality to view and manage all users who have been added to the system. In this section, authorized personnel (such as an administrator or tenant manager) can see detailed information about each user.
+- `All`
+- `CVE`
+- `Tools`
+- `ZeroDay`
 
-The displayed information includes:
+```{figure} ../screenshots/exploit-results-20260326.png
+:alt: Exploit module results
+:width: 100%
 
-- User Email Address
+Exploit search workflow across the tested vulnerability and tooling views.
+```
 
-- Assigned Role within the system
+### Feed
 
-- Account Status (Active or Inactive)
+Feed is the stream-oriented intelligence area for news-style content and current reporting. It is useful for users who want a curated readout without first building a structured query.
 
-- Subscription Plan associated with the user
+The tested feed workflow covers:
 
-- In addition to viewing user details, the module also provides View and Edit options.
+- opening the `News` feed view
+- submitting a live query
+- opening a report
+- reviewing JSON-backed detail inside the report
 
-The View option allows administrators to open and review complete user information without making changes. The Edit option allows administrators to modify user details, such as role, status, or other relevant information, as permitted by system policies. This feature helps administrators efficiently monitor, manage, and update user accounts while ensuring proper access control and subscription management.
-   ![users](https://github.com/user-attachments/assets/c2ba3864-7d71-4b13-8cf9-36bc9375f1f3)
+```{figure} ../screenshots/feed-report-20260326.png
+:alt: Feed report view
+:width: 100%
 
- 
+Feed report workflow with structured detail and raw response inspection.
+```
 
-   **Adduser**
-The Add User feature allows an administrator to manually create and register a new user in the system. When the administrator clicks on the “Add User” option, a user registration form is displayed.
+### Help and Support
 
-This form requires the administrator to enter the necessary details, including:
+The profile menu exposes a support workflow that is part of the tested navigation model.
 
-- Username
+Covered user-visible behavior includes:
 
-- Email Address
+- opening help and support from the profile menu
+- filling email, subject, and message fields
+- submitting the support request
 
-- Password
+```{figure} ../screenshots/support-modal-20260326.png
+:alt: Help and support modal
+:width: 100%
 
-- Role (as defined in the system)
+Support modal used for direct in-app support requests.
+```
 
-- Licensing or Subscription Options (to assign the appropriate plan or permissions)
+### Dump
 
-After filling in the required information and submitting the form, the system creates the new user account and assigns the selected role and licensing configuration. This feature ensures that administrators can efficiently onboard new users and configure their access and subscription settings according to organizational requirements.
+Dump exposes indexed dump and listing material gathered from monitored sources such as channels, leak-sharing locations, and relevant websites. Use filters to narrow by source, type, or origin.
 
-   
-   <img width="1918" height="803" alt="add" src="https://github.com/user-attachments/assets/364b9515-25fa-4f66-83ae-de08162bcb33" />
+The dump page also provides a dedicated search field for leak URLs, making it more direct than the broader keyword-first search used in other modules.
 
+Common usage patterns include:
 
-   **Viewuser**
+- browsing leak or dump listings with page-level filters
+- pivoting directly from a known leak URL
+- reviewing channel-style or site-style dump references without opening a broader module first
 
-In this section, we can view all information related to a user. This includes details such as the username, email address, account status (active or inactive), and subscription or license information. It provides a complete overview of each user’s account and access details.
-   
-   ![viewuser](https://github.com/user-attachments/assets/f18b94d8-83d5-4d86-be90-5d4a082222bb)
+```{figure} ../screenshots/dump-listing-20260326.png
+:alt: Dump listing workflow
+:width: 100%
 
+Dump listing view with direct leak URL search.
+```
 
+## Stealer Logs
 
-   **Edituser**
+Stealer Logs is a dedicated credential and IOC investigation workflow for infostealer-derived data.
 
-In this section, user details can be modified as needed. The admin has the option to edit, delete, or manage all users displayed in the list. User accounts can be activated or disabled, and their license category or subscription type can also be updated according to requirements. This allows the administrator to fully manage user accounts and their access.
-   
-   <img width="807" height="891" alt="edituser" src="https://github.com/user-attachments/assets/030168b9-7ad4-4d82-9129-6170460f46c3" />
+### Search Modes
 
+The stealer-log search bar supports two operating modes:
 
+- `Basic`
+- `Advanced`
 
-   **Auditlog**
+### Basic Mode
 
-   In this section, we can view all users who have logged into the system. It maintains a complete record of login activity, including the details of each user, the date of login, and the exact time they accessed the system.The audit log serves as a comprehensive history of user access, allowing administrators to monitor system usage, track user activity, and review when and by whom the system was accessed. This log is automatically maintained to ensure transparency, security, and accountability.
-   
-   ![auditlog](https://github.com/user-attachments/assets/9ddff11b-6189-430b-8a04-abec2854983e)
+Basic mode lets users search by a selected tag. Available tags include:
 
-  
-   
+- `All`
+- `Domain`
+- `Email`
+- `Credit Card`
+- `IP`
 
-   **Tenant**
+Validation is applied to tag-specific inputs where needed.
 
-In this system, the concept of a tenant refers to an independent company or organization that is provided with its own isolated environment. Each company (tenant) will have the ability to create, manage, and maintain its own users internally.
-Under this feature, the company will be fully responsible for adding, updating, or removing its users according to its operational requirements. These activities will be performed within the company’s tenant environment, and no involvement from the system’s central administrator will be required. Furthermore, the administrator will not have visibility into or control over the internal user management of each tenant. This functionality is specifically designed to give companies flexibility and autonomy, allowing them to customize the system usage according to their internal structure, workflows, and policies. The tenant-based approach ensures that each company can configure and utilize the platform independently, without interference, while maintaining proper isolation and data privacy between different tenants.
+### Advanced Filter Builder
 
-   <img width="1918" height="892" alt="terrnet" src="https://github.com/user-attachments/assets/e649cb49-3bd2-47dd-8ddc-e229331370d9" />
+Advanced mode exposes a row-based query builder that supports:
 
- 
-   
+- `WHERE`
+- `AND`
+- `OR`
 
-**System Settings**
+Each row combines:
 
-In the System Settings section, users can modify the default configuration of the system according to their requirements. This includes options such as changing the theme, updating the system logo, renaming the application, and selecting or changing the system language. This feature is particularly useful for organizations or clients who want to customize and integrate the system in their own way, such as implementing white labeling, branding the platform with their identity, and adjusting the interface to match their preferences.
+- an operator
+- a data tag
+- a value
 
-![systemsetting](https://github.com/user-attachments/assets/aad4a8de-b8bf-4a78-85df-dcc60c4265b7)
+This is the preferred mode for precise hunting across large stealer datasets.
 
+### Result Metrics
 
+The Stealer Logs results page surfaces quick metrics such as:
 
+- search elapsed time
+- total results
+- asset count
+- aggregated count
 
-## General Intellignece
+### Supporting Actions
 
-This is the second option in the navigation bar, designed to give users easy access to a wide range of data categories.
-When a user performs a search using the search bar, the results are automatically displayed based on the query,
-providing tailored information for efficient exploration. Within the "General Intelligence" dropdown menu, accessible
-through the second navigation option, several subcategories become available, allowing users to delve deeper into
-specific areas of interest. These subcategories include General, Forums, News, Stolen Data, Drugs, Hacking,
-Marketplaces, Cryptocurrencies, and Leaks, each containing relevant data for the user to explore. Depending on the
-search query, users can view data associated with any of these categories, providing them with focused and detailed
-information. In the following sections, we will explore each of these subcategories individually to offer a better
-understanding of their contents and how users can leverage them effectively.
+The toolbar can include:
 
-<img width="1913" height="567" alt="general_intelligence_all" src="https://github.com/user-attachments/assets/5cc296ec-59d6-4e26-9c22-d880ec462269" />
+- password scheme view
+- domain or subdomain helper
+- result download
 
+The password-scheme helper is useful when you want to inspect likely password formats or schema patterns. The domain helper provides a fast pivot into related host or subdomain exploration without leaving the stealer-log workflow.
 
-### All
+### Result Review
 
-The "All" category offers a comprehensive and unified view of intelligence data, consolidating information from every subcategory under the General Intelligence section. This enables users to access a broad range of data in one place, making it easier to analyze and compare information across various categories. The "All" category serves as a centralized hub for quickly reviewing the full spectrum of collected intelligence.
+The results area is designed for:
 
-1. ### General
+- large record volumes
+- structured credential review
+- pagination
+- ranked result handling
 
-This section houses a diverse collection of uncategorized intelligence data, encompassing various findings that don’t fit neatly into the more specific categories outlined elsewhere. It includes miscellaneous insights and discoveries gathered from different sources, providing users with a broader scope of information. This section ensures that no valuable data goes overlooked, even if it doesn't fall under a specific category.
+:::{admonition} Common use case
+:class: note
 
-<img width="1366" height="424" alt="general feature-modified" src="https://github.com/user-attachments/assets/c55048a7-ae0c-4e9a-870b-97863c4c1660" />
+Use Stealer Logs when you already have a domain, email, or IP and need to confirm whether it appears in infostealer-derived material.
+:::
 
+```{figure} ../screenshots/stealer-logs-results-20260326.png
+:alt: Credential and stealer-log results
+:width: 100%
 
-2. ### Forums
+Structured result review for credential-focused investigations.
+```
 
-In a forum, various platforms can be utilized, such as blogs, websites, or media channels, to facilitate discussions around the data. These platforms provide spaces for users to share insights, ask questions, and engage in conversations about the relevant information. The forum serves as an interactive space where individuals can contribute their knowledge and collaborate on the topic.
+## Live Lookup and Scan Modules
 
-<img width="1912" height="563" alt="forums" src="https://github.com/user-attachments/assets/4fae3549-7431-4779-983a-5a0a9c560468" />
+### Entity API
 
+Entity API is used for targeted live lookups rather than passive indexed browsing.
 
-3. ### News
+Available lookup types:
 
-The news section allows users to view any news related to the data, provided there is relevant coverage available. It keeps users updated with the latest  developments and trends related to the searched data. This section ensures users stay informed about any significant news that may impact their analysis or understanding.
+- `Email Breach`
+- `Social Scanner`
+- `Wanted List`
+- `National Identity`
+- `Playstore Scanner`
+- `Software Scanner`
+- `File Scanner`
+- `Crypto Scanner`
 
-<img width="1362" height="396" alt="news-modified" src="https://github.com/user-attachments/assets/42410658-8aae-4b97-881c-d01ce42081e2" />
+```{figure} ../screenshots/entity-api-email-breach-20260326.png
+:alt: Entity API view
+:width: 100%
 
+Entity API interface for live lookup workflows.
+```
 
-4. ### Stolen
+#### Common Entity API Use Cases
 
-This section lists data breaches that involve the theft of sensitive personal, financial, or business information. It
-includes incidents where credentials, credit card dumps, and other confidential data have been exposed, often being sold
-or shared on underground platforms. Users can explore the extent of these breaches and gain insights into the
-compromised data to assess potential risks.
+- breach validation for a single email
+- identity enrichment
+- app and software lookups
+- file analysis
+- crypto-address context
 
-<img width="1365" height="411" alt="stolen-modified" src="https://github.com/user-attachments/assets/fff50b0f-c738-442c-ac67-6e4227668abc" />
+### File Scanner
 
+File Scanner is the upload-based analysis area inside `Entity API`.
 
-5. ### Drugs
+#### Main Modes
 
-This section monitors and displays listings related to the sale or trade of illegal drugs across dark web marketplaces,
-providing a comprehensive overview of illicit activity in this area. By tracking these listings, it helps law
-enforcement and monitoring teams stay informed about emerging drug trends, enabling more effective intervention. The
-data serves as a valuable resource for identifying new patterns and taking action against illegal drug distribution.
+The workflow supports two related use cases:
 
-<img width="1266" height="629" alt="drugs-modified" src="https://github.com/user-attachments/assets/e1fff168-0acf-4157-90f4-b1ccc4311a2b" />
+- file IOC extraction
+- APK analysis
 
+#### Supported Behavior
 
-6. ### Hacking
+The File Scanner workflow includes:
 
-Provides valuable insights into hacking-related content, including tutorials on website exploits, malware development,
-and discussions or sales of vulnerabilities within hacker communities. It offers a closer look at the tools and
-techniques being shared, helping security teams stay informed about potential threats. Monitoring this data is crucial
-for understanding evolving hacking methods and strengthening cybersecurity defenses.
+- file-type validation
+- size validation
+- upload and processing progress
+- grouped IOC output
+- export and print for supported scan types
 
-<img width="1364" height="426" alt="hacking-modified" src="https://github.com/user-attachments/assets/ca9a4718-1b74-4f10-b5a7-4404b1bc72f4" />
+#### IOC Extraction Output
 
+For file IOC extraction, Orion groups indicators into categories such as URLs, packages, permissions, tampering markers, and other extracted values based on the uploaded content.
 
-7. ### Marketplaces
+```{figure} ../screenshots/file-scanner-report-20260326.png
+:alt: File scanner result
+:width: 100%
 
-Tracks online marketplaces (especially on the dark web) where illicit goods and services are traded. This includes
-weapons, fake documents, stolen data, malware, etc.
+File-scanner workflow after upload and successful analysis.
+```
 
-<img width="1352" height="425" alt="marketplace-modified" src="https://github.com/user-attachments/assets/b0661028-3dbd-4ef2-92db-be86c6885244" />
+### Web Scans
 
+Web Scans is the live scanning area for web-facing targets.
 
-8. ### Cryptocurrency
+#### Available Scan Types
 
-Analyzes cryptocurrency-related intelligence including illicit transactions, wallets linked to cybercrime, and usage of
-crypto for money laundering or ransom payments.
+- `Basic Scan`
+- `Port Scan`
+- `Repository Scan`
+- `SEO Scan`
+- `APK Scan`
 
-<img width="1366" height="577" alt="cryptocurrency-modified" src="https://github.com/user-attachments/assets/aef8b237-bf19-4ca3-9606-0fd5c25c9084" />
+#### Standard Workflow
 
+The standard web-scan flow is:
 
-9. ### Leaks
+1. enter a target domain or repository-style URL
+2. run the scan
+3. wait for loading-step progress
+4. review the generated report
 
-Focuses on leaked documents, databases, or credentials published online. These could include government files, internal
-company data, or proprietary tools that have been exposed.
+#### Report Structure
 
-<img width="1364" height="636" alt="leaks-modified" src="https://github.com/user-attachments/assets/7dfd43c9-f67a-4145-ba51-20c8c1b7fbf3" />
+The resulting report commonly includes:
 
+- a security grade
+- host and port
+- TLS status
+- scan metadata such as `Scanned On` and `Scanned By`
+- categorized findings
+- evidence or proof blocks
+- download and print actions
 
-## Data Breach
-The Data Breach section in the navigation bar includes six categories:
+#### Findings and Error States
 
-<img width="1916" height="746" alt="databreach" src="https://github.com/user-attachments/assets/864f5b1c-7f61-433f-9824-0fe23fabff97" />
+Finding sections also show severity and confidence labels, so the report can be used for quick triage as well as export.
 
- **Databases**
+Scan failures are handled with retry guidance and error messaging.
 
-This section contains detailed records of actual data breaches, offering in-depth information about compromised credentials, personal details, and other sensitive content. It compiles data gathered from multiple sources, providing a clear picture of the extent and nature of each breach. This helps users assess the impact of these breaches and understand the type of sensitive information that was exposed.
+```{figure} ../screenshots/web-scan-report-20260326.png
+:alt: Web scan report
+:width: 100%
 
-<img width="1917" height="891" alt="database" src="https://github.com/user-attachments/assets/234263fe-87c8-44f9-b62b-14c31ac1632e" />
+Web scan report with security posture, findings, and metadata.
+```
 
- **Tracking**
+```{figure} ../screenshots/apk-scan-report-20260326.png
+:alt: APK scan result
+:width: 100%
 
- This module enables users to verify whether specific email addresses have been exposed in public or underground data breaches. Orion scans and compares the provided email addresses against known leak databases and identifies any matches. If a breach is detected, the system provides detailed information, including the source of the breach, the date of exposure, and the type of data that may have been leaked. This helps users and administrators assess potential risks, take necessary security measures, and protect sensitive information.
- 
- ![tracking](https://github.com/user-attachments/assets/b7719919-c665-4068-b382-bd4f73b959cc)
+APK scan workflow after file upload, analysis, and report generation.
+```
 
+### Network Intel
 
-## Discussion
+Network Intel provides live recon workflows for domains and IPs.
 
-In discussion, we often receive general results that may appear in various places, such as forums or similar platforms. These outcomes are not always specific and can be found across different sources.
+Tabs:
 
-<img width="1913" height="650" alt="discussion" src="https://github.com/user-attachments/assets/f69db8d6-2305-488a-9eb5-46e6d93c2b16" />
+- `Host Recon`
+- `IP Scan`
+- `Vulnerability Scan`
 
-4. ### Warfare
-This section provides curated intelligence on cyber warfare activities, including attacks on critical infrastructure, state-sponsored campaigns, and geopolitical cyber threats. Orion continuously monitors sources for warfare-related incidents, offering organizations timely insights into high-level threats with global implications.
+```{figure} ../screenshots/network-intel-host-recon-20260326.png
+:alt: Network intelligence view
+:width: 100%
 
-5. ### Cloud
-The Cloud module focuses on identifying misconfigurations, leaked credentials, and potential vulnerabilities in cloud environments. Orion scans for exposed cloud assets, such as open buckets, API keys, or improperly secured services, helping teams secure their cloud infrastructure proactively.
+Network Intel module for recon and vulnerability review.
+```
 
-2. ### Tracking
-This module allows users to check if specific email addresses have been compromised in public or underground data breaches. Orion scans and matches email addresses against known leak databases and provides detailed breach context, including the breach source, exposure date, and type of leaked data.
+#### Host Recon
 
-3. ### Logs
-The Logs module offers access to various leaked logs, such as login credentials, FTP details, RDP data, or access tokens. These logs are sourced from underground forums and marketplaces. Orion filters and organizes the data to help security analysts identify unauthorized exposures and potential system risks.
+Host Recon is used to resolve a domain into infrastructure and network information. It commonly surfaces DNS-style and IP-related context for the queried host.
 
+#### IP Scan
 
-## Defacement
+IP Scan focuses on a specific IP and can expose service or infrastructure context derived from the target address.
 
-The Defacement section provides access to an archive list of websites that have been compromised or defaced. 
+```{figure} ../screenshots/network-intel-ip-scan-20260326.png
+:alt: Network Intel IP scan
+:width: 100%
 
-<img width="1907" height="411" alt="defacementmenu" src="https://github.com/user-attachments/assets/422d3ece-3e5f-47d4-a9cb-d7c429946ef8" />
+IP-scan result view with service and infrastructure context for a resolved address.
+```
 
+#### Vulnerability Scan
 
-In the Defacement menu, there are three main categories:
+Vulnerability Scan reviews security issues for a supplied target and includes:
 
-**1- Hacked (Website Defacement / Unauthorized Access)**
+- progress feedback
+- elapsed time
+- downloadable report output
+- cancel support during scanning
 
-When an attacker changes the content of a website, such as text, images, or replaces the homepage.
+```{figure} ../screenshots/network-intel-vulnerability-scan-20260326.png
+:alt: Network Intel vulnerability scan
+:width: 100%
 
-Example: Displaying messages like “Hacked by XYZ.”
+Vulnerability-scan result view with severity summary and findings.
+```
 
-**2- Phishing**
+#### Common Toolbar Features
 
-When a website is cloned or modified to trick users into providing sensitive information.
+The Network Intel toolbar can include:
 
-Example: Fake login pages used to steal credentials.
+- query input
+- status indicators
+- result count
+- elapsed time
+- download report
+- cancel current run
+- optional geo search support for relevant views
 
-**3- Database (Data Breach / Data Dumping)**
+Geo support is especially relevant when working from host-oriented results and wanting to pivot from a location or coordinates into nearby IP discovery.
 
-When an attacker gains access to the database and leaks, modifies, or deletes its data.
+```{figure} ../screenshots/network-intel-geo-modal-20260326.png
+:alt: Network Intel geo modal
+:width: 100%
 
-Example: Leaking user emails, passwords, or personal information.
+Geo-assisted pivot modal used from network results.
+```
 
-These three categories together make up the major classifications under “Defacement.” When you click on any of these three categories, you get an internal list with certain parameters, which are as follows:
-- Serial Number – Unique identifier for each record.
+## Graph Investigation Modules
 
-- Base URL – The domain or main address associated with the defaced site.
+### CTI Graph
 
-- IP Address – Link to where the defaced content or evidence is archived.
+CTI Graph is the relationship-mapping module for cyber threat intelligence pivots.
 
-- Attacker(s) Name – The individual or group responsible for the defacement.
+It opens in its own tabbed workspace and supports multiple sessions.
 
-- Team Name (if applicable) – Name of the hacker team involved, if any.
+Key concepts:
 
-- Web Server Information – Type of web server that was running on the affected site (e.g., Apache, Nginx, etc.).
+- `Cluster` nodes
+- `Document` nodes
+- `Property` nodes
+- grouped nodes
+- directional connections
 
-- Date of Defacement – The date when the defacement occurred.
+#### Core CTI Features
 
-- Defaced Web URL – Direct link to the defaced website or the affected page.
+- session tabs
+- sidebar filters
+- graph and list views
+- node search and highlighting
+- physics toggle
+- expand or collapse controls
+- right-side listings panel
+- import and export support
+- report export
 
-This module is designed to provide a centralized and searchable database of defaced websites, enabling security teams
-and analysts to monitor and investigate web-based attacks efficiently.
+The listings panel provides a document-oriented summary of the current graph state, while the legend explains node and edge types.
 
+```{figure} ../screenshots/cti-graph-20260326.png
+:alt: CTI graph workspace
+:width: 100%
 
-## Social
+CTI graph workspace with filter controls, graph canvas, listings, and session actions.
+```
 
-The Social module is designed to monitor and analyze threat intelligence shared across social media and messaging
-platforms, with a primary focus on Telegram—a widely used channel among cybercriminal groups for sharing illicit
-information. This module integrates directly with selected Telegram channels, groups, and bots that are known to
-circulate cyber threat data, including leaked credentials, data dumps, malware samples, and discussions of planned
-cyberattacks. In addition, under the social category, there are three more platforms from which Orion Intelligence collects data. These include Twitter, various discussion forums, and Reddit.
+The tested CTI workflow also confirms the following operator-visible actions:
 
-**Twitter (now called X)**
-A social media platform where people post short messages, news, updates, and opinions.
-Orion can collect data from here to monitor trending topics, public opinions, and potential threats being discussed in real-time.
+- switching filter type to `Cluster`
+- applying graph filters
+- searching and highlighting matching nodes
+- switching between graph and list views
+- collapsing and reopening the listings panel
+- toggling physics simulation
+- creating, renaming, importing, exporting, and closing sessions
+- exporting report options such as JSON and graph PDF
+- opening canvas context-menu actions
 
-**Forums**
-Online discussion boards where people talk about specific topics (e.g., hacking, technology, politics, etc.).
-Orion can gather data from forums to track detailed conversations, underground discussions, and community insights that may not appear on mainstream platforms.
+```{figure} ../screenshots/cti-list-view-20260326.png
+:alt: CTI list view
+:width: 100%
 
-**Reddit**
-A large online platform made up of “subreddits,” which are communities focused on different topics (like cybersecurity, news, technology, etc.).
-Orion can use Reddit to collect data on user discussions, emerging issues, and niche community insights that might highlight potential risks or trends.
+CTI list-view mode used when investigators want structured row-based review instead of the graph canvas.
+```
 
-<img width="1912" height="855" alt="social" src="https://github.com/user-attachments/assets/230e62db-50e4-4b09-baf7-cd274edee76b" />
+```{figure} ../screenshots/cti-export-modal-20260326.png
+:alt: CTI export modal
+:width: 100%
 
+CTI export modal with tested report-export options such as JSON and graph PDF.
+```
 
+```{figure} ../screenshots/cti-context-menu-20260326.png
+:alt: CTI context menu
+:width: 100%
 
+CTI graph context-menu actions opened directly from the graph canvas.
+```
 
-## Exploit
+### Social Intel
 
-An exploit is a piece of software, code, or technique that takes advantage of a vulnerability or weakness in a system, application, or network. If a program has a flaw (like improper input validation or weak authentication), an exploit can be used to trigger that flaw.
-Short answer: they are different kinds of exploit-related information, not all the same thing.
+Social Intel is a graph-based username and profile mapping workspace.
 
-- CVE — a vulnerability identifier (public record of a known flaw).
-- Tools — references to exploit modules / PoC code / attacker tools (methods someone could use to exploit a CVE).
-- Zero-day — an unpatched, actively exploited vulnerability (high-risk because no vendor patch exists yet).
+It is designed for operators who need to move from a single username, image, or related profile into a richer relationship map of platforms, related accounts, and extracted profile evidence.
 
-<img width="1918" height="715" alt="exploit" src="https://github.com/user-attachments/assets/a5683c65-8165-4843-aecd-5b04454168d3" />
+#### Social Intel Layout
 
+The workspace includes:
 
-**1- CVE:** 
-In Orion, CVE (Common Vulnerabilities and Exposures) provides a standardized identifier for publicly known software vulnerabilities (e.g., CVE-2024-xxxx). Each entry includes a stable ID, a brief description, and references to help teams track and remediate issues. Within Orion, the results may include both actual vulnerability records as well as discussion-based references related to those vulnerabilities.
+- a tab bar for multiple social-analysis sessions
+- a collapsible left home menu for created scans and saved jobs
+- a graph toolbar for search, mode switching, export, and scan actions
+- a central graph canvas or list view
+- modal workflows for profile management, metadata, aliases, and follower scans
 
-<img width="1908" height="535" alt="cve" src="https://github.com/user-attachments/assets/902e0533-fec6-4e28-8280-e7dd54bfdd71" />
+This is not a single-screen graph. It is a multi-state workspace where the user can move among:
 
+- graph view
+- list view
+- summary popups
+- profile-management modals
+- follower/following import popups
+- metadata search results
 
-**2- Tools:**
-Orion Intelligence includes a tool-discovery feature that identifies which tools are in use (for example, WordPress). It scans those tools for issues and alerts you if it finds bugs or vulnerabilities. The feature provides clear, actionable information about the problem and where it appears. This helps developers quickly prioritize fixes and maintain safer, more reliable systems.
+#### Core Entry Points
 
-<img width="1905" height="908" alt="tools" src="https://github.com/user-attachments/assets/e1cf46ca-de11-4355-ac74-3b2be4353dee" />
+Social Intel supports several starting paths:
 
+- direct username scanning
+- image-based profile discovery
+- manual custom-entity entry
+- API-backed entity submission from the add-entity modal
+- reopening previously created scan jobs from the left home menu
 
-**3- Zeroday:**
-A zero-day vulnerability is a previously unknown flaw in a software or system that has not yet been identified or patched by the vendor. Because no fix exists at the time of discovery, it can be exploited immediately by attackers. Orion Intelligence identifies and reports these vulnerabilities in real time, enabling organizations to respond quickly and reduce potential risks.
+This makes Social Intel useful for both:
 
-<img width="1908" height="900" alt="zeroday" src="https://github.com/user-attachments/assets/ee37db76-1753-4f7c-9d7b-00d881d33c9a" />
+- known-profile investigations
+- unknown-profile discovery from an uploaded image
 
+```{figure} ../screenshots/social-intel-20260326.png
+:alt: Social Intel workspace
+:width: 100%
 
-## Feed
+Social Intel graph workspace used for username and relationship mapping.
+```
 
-Feed mainly contains news items that may cover any topic or be related to a specific search. Each general feed result can be opened and viewed individually.
-You can also plot any result on the CTI graph to see its relationships and context. This lets analysts examine single items and explore their connections visually.
+#### Graph and List Views
 
-<img width="1913" height="907" alt="feed" src="https://github.com/user-attachments/assets/28ed9fa1-df82-4f31-97ad-3de95c1b26dc" />
+The graph view is intended for structural relationship analysis. The list view is intended for profile-by-profile inspection and management.
 
-## Live APIs
+Common view actions include:
 
-The Live APIs section provides users with real-time investigative tools. In this, the actual data is searched rather than being pre-fed.
-It can also include many other features and possibilities. Within this section:
+- switching between graph and list views
+- searching within the graph toolbar
+- clearing graph search input
+- enabling or disabling graph physics where available
+- opening relationship popups directly from graph nodes
+- opening list rows to review platform-specific detail
 
-### Email Lookup:
+Use graph view when you want to understand how entities connect. Use list view when you want a more structured review of profiles, links, summaries, and platform records.
 
-By selecting the email option, users can input any email address to retrieve related breach information. This tool helps
-identify where and how the data associated with the entered email may have been leaked or exposed, offering valuable
-insights into potential security incidents or data breaches.
+#### Session Management
 
-### Breach Records:
+Social Intel supports multiple sessions in the same way the CTI workspace supports multiple investigative tabs.
 
-Below the lookup interface, a list of data breach records is displayed. These records offer additional context and
-reference points, allowing users to explore known breaches and validate the exposure of specific information.
+Covered session actions include:
 
-<img width="1908" height="826" alt="liveapi" src="https://github.com/user-attachments/assets/054f30cc-25b1-417f-9f02-f3ad350e7312" />
+- creating a new session
+- renaming a session
+- exporting a social report from the current session
 
+Sessions are useful when you want to separate different investigations, keep one graph focused on one target, or compare multiple usernames without overwriting the previous workspace.
 
-## Data Dump
+#### Add-Entity Workflow
 
-Provides access to large collections of compromised data gathered from various underground and open sources.
-These data dumps often include leaked databases, user credentials, email lists, financial records, or other sensitive
-information.
+The add-entity modal supports more than one submission mode.
 
-- Data is collected from:
+Available tested behavior includes:
 
-- Telegram channels (shared files or links)
+- opening an entity type such as `Phone`
+- using an API query mode
+- validating that the submit button stays disabled until a valid input is present
+- switching from API mode to manual mode
+- entering a manual value
+- submitting the new entity into the social workspace
 
-- Dark web forums and sites
+This matters because Social Intel is not limited to scraped social accounts. It can also be used to place analyst-defined entities into the investigative graph.
 
-- Open-source leak platforms
+#### Image-Based Profile Discovery
 
-The platform categorizes and indexes this information for further analysis and correlation with threat activity. In the
-Data Dumps module, a **filtering option** is available on the right-hand side of the interface. This feature allows
-users to selectively view data dumps based on their preferred source. Users can filter dumps originating from specific
-websites, Telegram channels, or other monitored resources, enabling more efficient navigation and targeted analysis of
-the collected data.
+The image-based workflow is one of the more advanced Social Intel paths.
 
-<img width="1903" height="886" alt="dump" src="https://github.com/user-attachments/assets/0b69b04d-4b84-4ddd-898b-b5727a9a9f3f" />
+It supports:
 
+- uploading an image
+- waiting for image-recon processing
+- opening the manage-profiles modal
+- filtering candidate platforms
+- reviewing discovered usernames
+- opening direct profile links for discovered accounts
+- fetching the selected profile into the workspace
+- reopening completed profile jobs from the left home menu
+- selecting multiple discovered profiles and updating the graph with them
 
-## Stealerlogs
+Use this workflow when a screenshot, avatar, or reused profile image is the starting point instead of a known handle.
 
-Stealer logs are collections of data harvested by “info-stealer” malware. Credentials in these stealer logs typically consist of usernames, passwords, and sometimes session tokens taken from an infected device.
-When viewing credentials, you can often filter or group by domain to see which credentials are associated with a particular service. The typical record layout is: (1) a URL or domain in the first column, (2) the username or email in the second column, (3) the password in the third column — usually stored as a hash rather than the plaintext password — and (4) a timestamp indicating the date and time the credential was leaked.
+#### Manage Profiles Modal
 
-<img width="1915" height="907" alt="stealerlogs" src="https://github.com/user-attachments/assets/11fba8d7-bfe3-4344-baf7-ec10f2a1a89c" />
+The manage-profiles modal is the main control surface for discovered or queued profile candidates.
 
+From this modal, users can:
 
-## CTI Graph
+- filter platforms
+- search usernames
+- review discovered profile links
+- fetch profile data
+- select all fetched profiles
+- update the graph with the selected profiles
+- cancel without applying changes
 
-The CTI (Cyber Threat Intelligence) module offers a graph-based view that visualizes complex relationships between key
-cyber threat entities such as threat actors, malware families, TTPs (tactics, techniques, and procedures), IP addresses,
-domains, file hashes, and affected organizations. By mapping these connections visually, the module enables users to
-understand how threats are interlinked, attribute attacks to known groups, and correlate indicators of compromise (IOCs)
-with previous incidents. This enhances threat hunting, improves situational awareness, and accelerates investigations.
-The CTI graph integrates intelligence from sources like MITRE ATT&CK, dark web monitoring, and internal alerts to
-provide contextual, actionable insights.
+This modal is central to the Social Intel workflow and should be treated as part of the main graph system, not as a secondary helper.
 
-<img width="1917" height="911" alt="image" src="https://github.com/user-attachments/assets/2510cf42-0cd7-4c30-825b-e9ca00f9b5b0" />
+```{figure} ../screenshots/social-manage-profiles-20260326.png
+:alt: Social Intel manage profiles modal
+:width: 100%
 
+Manage-profiles modal used to filter, inspect, fetch, and push discovered accounts into the graph.
+```
 
-When the CTI Graph module is clicked, it automatically opens in a new tab. This module displays a connection graph
-composed of various nodes, visually representing complex relationships between different cyber threat entities.
+```{figure} ../screenshots/social-intel-list-view-20260326.png
+:alt: Social Intel list view
+:width: 100%
 
-On the leftmost side of the interface, there are two levels of filters. In the first-level filter, users can choose from
-three categories: Cluster, Document, and Property. Based on the selected category, the second-level filter below
-dynamically updates to show options relevant to the chosen category, allowing users to refine and customize the graph
-view for more focused analysis.
+Social Intel list-view mode for profile-by-profile review after graph ingestion.
+```
 
-**Cluster** If the Cluster filter is selected in the first-level filter, the second-level filter presents four options:
-General, Leak, Defacement, and Chat.
+#### Summary Popup and Metadata Search
 
-**Document** If the Document filter is selected, the second-level filter prompts the user to enter a Document ID.
+The summary popup provides deeper profile inspection beyond the main graph or list node.
 
-**Property** Similarly, if the Property filter is selected, the second-level filter asks the user to choose a property
-type—such as email, hashes, etc.—and then specify the property value for a more targeted query.
+Supported summary actions include:
 
-<img width="757" height="658" alt="ctifilters" src="https://github.com/user-attachments/assets/6b46a285-8d27-4e27-ba19-41a8848f2686" />
+- opening the summary popup from a list entry
+- reviewing all detected platforms for the selected subject
+- opening `Profile Metadata Results`
+- entering metadata search tokens
+- validating no-token error states
+- running metadata searches with terms such as leaked email or other keywords
+- reviewing returned external links
+- pivoting into a selected platform from within the popup
+- reopening external profile links
 
+This popup is where profile-level enrichment becomes operationally useful. It combines raw profile context with searchable metadata and quick pivots.
 
-On the rightmost side of the CTI Graph interface, there are several additional options:
+```{figure} ../screenshots/social-summary-popup-20260326.png
+:alt: Social Intel summary popup
+:width: 100%
 
-- The first option is a toggle to enable or disable physics, which controls the animation and movement behavior of the
-  graph nodes.
+Summary popup used for platform review, enrichment actions, and detailed subject inspection.
+```
 
-- The second option allows users to expand the CTI graph for a broader and more detailed view.
+```{figure} ../screenshots/social-metadata-results-20260326.png
+:alt: Social Intel metadata results
+:width: 100%
 
-- Below that, the Details section displays information related to the filters selected on the left side of the graph,
-  providing context about the current view.
+Metadata-search results inside the Social Intel summary workflow.
+```
 
-- Finally, there is a Color Indicators section, which explains the meaning of different node colors used within the
-  graph for easier interpretation.
+#### Followers, Following, and Connections
 
-<img width="257" height="888" alt="togglebar" src="https://github.com/user-attachments/assets/5cf73e5a-6d3e-4da0-9695-ef9b13c412ee" />
+The followers/following workflow is more than a read-only count view.
 
+Covered actions include:
 
-## Fillter and Analytics
+- opening the followers-and-following popup
+- switching among `Followers`, `Following`, and `Connections`
+- filtering discovered related accounts
+- fetching more followers from inside the popup
+- selecting discovered related accounts
+- confirming selection to import those accounts back into the main workflow
+- reopening created follow-based jobs from the left home menu
+- selecting all imported results and updating the graph
 
-On the left side of the page, there are two options: Analytics and Filter.
+In practice, this means Social Intel can expand an investigation outward from one profile into a broader relationship set rather than staying limited to the original target.
 
-<img width="1918" height="552" alt="filters" src="https://github.com/user-attachments/assets/29b31e54-3d46-4067-8c1a-e4d66df596e8" />
+```{figure} ../screenshots/social-followers-popup-20260326.png
+:alt: Social Intel followers and following popup
+:width: 100%
 
+Followers/following popup used to filter, inspect, and import related accounts.
+```
 
-### Analytics:
+#### Images, Followers, and Re-Scan Controls
 
-This section provides insights related to any search performed using the navigation bar. It displays the count of
-results corresponding to the selected navigation options.
+Within the summary popup, the suite covers several enrichment actions:
 
-The first two tables in the Analytics section are:
+- `Fetch Followers`
+- `Fetch Following`
+- `Fetch Images`
+- `Re-scan profile`
 
-Keyword Insights Table – This table presents data based on the keywords used during the search.
+These actions make the popup a live enrichment console rather than only a static summary.
 
-General Coverage of Results Table – This table provides an overview of the general distribution of the search results.
+#### Aliases and Context Menus
 
-### Search Results Insights:
+The graph canvas supports right-click or context-menu style interaction paths.
 
-This section presents a comprehensive overview of the fetched results based on the entered search word. It provides:
+Covered behavior includes:
 
-- The number of keywords identified during the crawl.
+- triggering a context menu from the canvas
+- opening the `Set Alias` action
+- editing an alias value
+- saving the alias
+- seeing the alias reflected in later list or summary views
 
-- The total documents fetched containing those keywords.
+Aliases are useful when the analyst wants a cleaner investigation label than the raw discovered username.
 
-- The number of links or pages associated with the keywords.
+#### Relationship Popups
 
-These insights offer a clear understanding of how data is gathered and processed, enabling users to analyze results efficiently and make informed decisions. Additionally, the General Coverage summary displays the total number of items found during the search, with a breakdown of active, inactive, and seldom active items, ensuring a structured and clear representation of the data.
+Social Intel also supports relationship-specific popups from graph nodes.
 
-<img width="492" height="748" alt="keywords" src="https://github.com/user-attachments/assets/aa97e9db-38ef-4fbd-b391-cc325f3f3bb5" />
+These popups can expose:
 
+- related-account information
+- external account links
+- quick-close controls
 
-Below the two tables mentioned above, we have detailed data associated with each category, such as URLs, titles, and
-networks. For instance, if the data includes URLs, it displays which specific URLs are available; if it includes titles,
-it shows the corresponding records; and if networks are present, it indicates the different types of networks appearing
-in the search results.
+This makes it possible to inspect a connection without leaving the graph canvas.
 
-Each variable can be expanded through a dropdown menu, which reveals separate and specific results related to that
-particular variable from the entire search dataset.
+#### What the Legend Represents
 
-<img width="801" height="961" alt="resultparameters" src="https://github.com/user-attachments/assets/08463d80-87d5-4f75-b0a8-af8ebe0fceb6" />
+The legend distinguishes visual object types such as:
 
+- user profiles
+- platforms
+- platform groups
+- custom entities
+- relationship or connection types
 
-### Filters
+Understanding the legend is important when the graph becomes dense. It tells the user whether they are looking at:
 
-The second option alongside Analytics is the Filter menu. When we click on it, an extended submenu appears. This submenu
-contains two additional options.
-Clicking on this icon applies a standard filter to the data, helping users narrow down their search. It streamlines the
-process of refining results for more targeted insights.
+- a discovered profile
+- a platform wrapper
+- a manually added entity
+- or a relationship generated by enrichment
 
-<img width="281" height="887" alt="filters2" src="https://github.com/user-attachments/assets/e7f62291-b4e9-4a2d-a223-6a781e875429" />
+#### Recommended Social Intel Workflow
 
+1. Start with a known username or an uploaded image.
+2. Fetch the initial profile set into the workspace.
+3. Review the manage-profiles modal and push selected profiles into the graph.
+4. Switch between graph and list views as needed.
+5. Open the summary popup for metadata and platform review.
+6. Fetch followers, following, or images where useful.
+7. Rename aliases or add custom entities if the graph needs cleanup.
+8. Export the session when the relationship picture is complete.
 
-### Network Types
+## Result and Report Workflows
 
-Onion: Dark web links.
+Most indexed modules eventually lead into a report page. Report pages are one of the most important parts of the product because they consolidate the searchable record, its metadata, and pivot actions.
 
-I2P: Invisible Internet Project links.
+### Report Toolbar
 
-Clearnet: Surface web links.
+The shared report header can expose:
 
-<img width="295" height="307" alt="networktype" src="https://github.com/user-attachments/assets/f1351e9e-c3db-4954-87d6-a818f2217645" />
+- download
+- export report
+- translation
+- AI summary
+- share
+- open source URL
+- open CTI graph
 
+The exact buttons depend on the record and deployment configuration.
 
-### Enable Safe Search Button
+When available, this toolbar is the fastest way to export, translate, summarize, share, or pivot the current record into graph analysis.
 
-The Safe Search feature enhances user safety by filtering out inappropriate or explicit content. To enable this feature:
+### Result Insights Side Panel
 
-1.
-    - Locate the Safe Search button.
-2.
-    - Click the button to activate safe browsing.
+In consolidated workflows, Orion also provides a dedicated insights panel beside the main result stream. This side panel can expose:
 
-<img width="293" height="192" alt="safesearch" src="https://github.com/user-attachments/assets/b205a4ef-e4de-4324-bf80-e1f90d358633" />
+- keyword insights
+- general coverage summaries
+- threat-actor search helpers
+- unique URL lists
+- expandable extracted-data sections
 
+This panel is intended for quick triage and narrowing before opening individual reports.
 
-### Creation Date
+In practice, it helps answer three questions quickly:
 
-In this, you can select a custom date and view the updated results or sites specific to that date.
+- what themes dominate this result set
+- whether actor- or URL-based pivots are available
+- which extracted sections are worth opening in full reports
 
-<img width="258" height="356" alt="datefilter" src="https://github.com/user-attachments/assets/57f8ab96-faea-4233-919b-d53a027bf053" />
+```{figure} ../screenshots/consolidated-insights-20260326.png
+:alt: Result insights side panel
+:width: 100%
 
+Result insights side panel with URL and extracted-data pivots.
+```
 
-### Mitre TTP
+### General Report Page
 
-It means that if we select something from the MITRE type, we will see comments or pages related to that attack type,
-content that corresponds to the selected attack type.
+The general report view commonly includes:
 
-<img width="257" height="585" alt="mitretype" src="https://github.com/user-attachments/assets/8f85ede7-a823-4ffe-89b3-a1dfedffe1ba" />
+- title
+- description or important content
+- web reference
+- source URL
+- published date
+- network
+- last-checked date
+- content-type tags
+- freshness status
 
+Some report layouts also expose quick links, downloadable record output, or direct pivot actions to graph and sharing tools from the same header.
 
-### Search Results
-In Orion Intelligence there are two types of searches: keyword-based searches and URL-based searches.
-If you enter a URL (which may be any website) and click the Run Scan button next to the search bar, Orion immediately begins scanning that site.
-Within a few seconds the platform returns all findings related to the URL and presents them as a set of strong and weak parameters for that site.
-This allows analysts to quickly see an overall assessment and the specific strengths and weaknesses associated with the scanned website.
+```{figure} ../screenshots/social-report-20260326.png
+:alt: Report content view
+:width: 100%
 
-<img width="1906" height="911" alt="urlsearch" src="https://github.com/user-attachments/assets/2b321636-ebea-40e2-a728-19ec52a46c42" />
+Typical report layout with content and structured context.
+```
 
+### Metadata Panel
 
-When you enter any keywords into the search bar and press enter, the system processes the input and retrieves relevant
-data. It then displays the search results that match the specified keywords. This allows users to efficiently find
-information based on their search criteria. The results are presented in an organized format for easy analysis.
+The metadata panel is expandable and lets users browse extracted values by category. Common tabs include:
 
-<img width="1906" height="911" alt="urlsearch" src="https://github.com/user-attachments/assets/47861a0d-2f8e-4bf9-bd6b-6173057e4f41" />
+- content
+- section
+- organization
+- entity or person
+- other extracted attributes
 
+This is the main place to inspect structured extraction results from the record.
 
-As shown in the image below, the security scan report displays findings related to that site’s security.
-It highlights identified vulnerabilities and weaknesses and provides details needed to assess and remediate each issue.
+```{figure} ../screenshots/report-json-viewer-20260326.png
+:alt: Report metadata sections
+:width: 100%
 
-<img width="1906" height="911" alt="urlsearch" src="https://github.com/user-attachments/assets/58f5cd44-dc0c-43b4-908f-d0fac92638b9" />
+Expandable metadata and extracted-section review.
+```
 
+### Screenshot and JSON Sections
 
-In the search results we have two actions: Explore and Open Report.
-Clicking Explore takes the specific result into the relevant tool menu—e.g., a social-related result opens the Social menu for deeper inspection.
-Open Report opens the full report for that result so you can review all findings and details.
+For relevant breach records, the report may also include:
 
-<img width="1156" height="620" alt="searchdetail" src="https://github.com/user-attachments/assets/62fffea6-049e-4d76-bc35-78fcf3d3381f" />
+- screenshot preview
+- JSON record viewer
+- report mapping
 
+The JSON viewer is useful for raw structured inspection, while report mapping helps users navigate relationships and related record context.
 
-Clicking Open Report redirects to a separate page where detailed information about the selected result is displayed. This allows you to examine that specific result more thoroughly, with all related findings and insights presented in one place.
+```{figure} ../screenshots/report-json-viewer-20260326.png
+:alt: Report JSON viewer
+:width: 100%
 
-<img width="1667" height="677" alt="openreport" src="https://github.com/user-attachments/assets/2368921f-d991-4189-bfc3-77e85a6dbc08" />
+JSON inspection view for raw structured report data.
+```
 
+### AI Chat and Summary
 
-When performing a search, the results are shown in a split view, helping organize the information more effectively. This
-layout separates different data sets, making it easier for users to focus on specific results. By displaying the data
-side by side, it allows for quick comparison and detailed analysis. The split view enhances the user experience by
-simplifying the navigation of search results. Below the search bar overall fetch results related to the keyword.
+If an AI endpoint is configured, users may also see:
 
-<img width="1916" height="897" alt="image" src="https://github.com/user-attachments/assets/5611d6a7-a126-4013-b5d2-3c5798cd56af" />
+- AI summary generation
+- chat over the report content
 
+For chat-style and social-style records, report pages can also include:
 
-The detailed view of a search result provides essential information to help users assess the nature of a website before
-accessing it. This is followed by the website topic, which typically reflects the site's purpose—such as a forum, leak
-site, or cryptocurrency platform.
-**Open Report**
-When a user clicks on a specific section of the result, a separate menu appears, offering various features related to
-the selected site. 
+- channel or source title
+- source URL
+- report sharable link
+- sender details
+- message identifiers
+- views, likes, shares, comments, tags, or retweets
+- expandable metadata blocks
+- JSON inspection
 
-<img width="1917" height="598" alt="image" src="https://github.com/user-attachments/assets/10827be3-337d-48e2-a85b-df9a6d0e64db" />
+This makes the report page suitable for both analyst review and downstream sharing.
 
+The tested chatbot flow specifically confirms:
 
-This menu is designed for quick access to useful tools, including:
+- opening the chat widget from a report
+- entering a prompt
+- sending a message
+- rendering a visible message thread in the chat area
 
-**Download:** Allows the user to download available site content
-**Print:** Enables printing of the current view or content
-**AI Summary:** Search results we receive are in another language, the AI Summary will generate a summary for us in our
-preferred language.
-**Share Link:** Copies the site’s URL for easy sharing
-**Open in New Tab:** Loads the site in a separate browser tab for convenience.
-**Open CTI Graph:** This option redirects the user from the search results to the corresponding page on the CTI Graph,
-displaying relevant visual relationships based on the selected search item.
+### Defacement Report Page
 
-In addition to the mentioned details, this section also displays the publish date, network type, last update date,
-relevant tags, and the status of the link. The status indicates whether the link is currently active or inactive,
-helping users quickly determine if the site is accessible.
+The defacement report is a streamlined variant focused on target and attacker context. It includes:
 
-#### Search Insight:
+- target URL
+- saved date
+- defacer or IOC type
+- team
+- source breach reference
+- IP
+- location
+- metadata panel
+- JSON viewer
 
-In this, if we open any result obtained from the search, the bottom section—referred to as Search Insight—displays
-additional parameters related to that site or search result. These may include the section, context, location type, IP
-address, and any web links or URLs found within it.
+## Links, Support, and External Navigation
 
-Towards the end, there is a complete menu table available, where several additional elements can be viewed, such as:
+### Directory
 
-#### Section Tab
-The "Section" tab provides a detailed view of the various sections of the website, highlighting the specific parts being
-extracted during the data crawling process. This feature helps users identify and understand the structure of the
-website within the fetched data.
+The `Directory` page presents monitored live services and related records in a browsing-oriented layout. It differs from the normal search-result workflow by focusing on monitored entries and operational visibility rather than keyword-first investigation.
 
-#### Content Tab
-Next to it is the content tab, which provides access to all the raw content crawled from the respective site. Clicking
-on it displays the extracted data in its unprocessed form, allowing for a deeper analysis of the information gathered.
+Common behaviors include:
 
-#### Images
-In the Images menu, it displays the number of images related to that particular result.
+- page-level filtering
+- paginated or progressively loaded directory entries
+- monitoring-status style browsing
+- service and reference review across monitored live entries
 
-#### Content Type
-Next, we have the Content Type section, which shows the types of content associated with that particular result.
+```{figure} ../screenshots/directory-monitoring-20260326.png
+:alt: Directory and monitoring view
+:width: 100%
 
-#### Clear Net
-After that, there is the Clearnet option, which displays all the links related to the Clearnet that are associated with
-the selected result.
+Monitoring-oriented directory workflow.
+```
 
-#### Person
-Then we have the Person option, which displays the names of individuals associated with the selected search result.
+### Links
 
-<img width="1715" height="822" alt="reports" src="https://github.com/user-attachments/assets/d1bdea60-b148-4f46-94b1-6b24ff9afdb9" />
+The `Links` sidebar item acts as the user-facing entry into the directory-style workflow above.
 
+### Onion Link
 
-#### Metadata
-Metadata contains different types of information such as website URL, IP address, images, content, telephone numbers, content type, and file paths. It provides a complete overview of all available details related to a given source.
+If configured, `Onion Link` opens the deployment’s onion address in a separate tab.
 
-<img width="1627" height="867" alt="metadata" src="https://github.com/user-attachments/assets/dfd00989-4a8d-4eca-86c6-a473a8d2345c" />
+### Whistle Blowing
 
+If enabled, `Whistle Blowing` opens an external anonymous reporting portal. This is outside the main indexed investigation workflow.
 
-#### JSON Response
-The JSON response presents information from the same link in a structured format. Each piece of data can be viewed separately and more clearly, making it easier to analyze individual elements.
+### Documentation
 
-<img width="1598" height="866" alt="jsonresponse" src="https://github.com/user-attachments/assets/aa4a439d-803a-4347-9d60-ad47aaacbee2" />
+The `Documentation` entry opens the published documentation site in a new tab.
 
+## Profile, Tenant, and Alert Workflows
 
-#### Related Reports
-Related reports display all additional reports connected to the same link being analyzed. This helps identify what other findings or references are linked to that particular source.
+The user profile area at the top of the sidebar contains user-specific and tenant-specific pages.
 
-<img width="1613" height="627" alt="relatedreports" src="https://github.com/user-attachments/assets/bcea17d6-f1aa-4b3a-bdfe-56df77de3456" />
+```{figure} ../screenshots/account-settings-20260326.png
+:alt: Account settings page
+:width: 100%
 
+Profile, settings, and administrative workspace.
+```
 
-#### AI Powered Chatbot
+### Account Settings
 
-Finally, one of the most important features of our tool is the AI-powered chatbot. This intelligent assistant allows users to ask questions about any related report, URL, or dataset and instantly receive clear answers. The chatbot is designed to simplify complex information by providing summaries, highlighting key details, and guiding users toward deeper insights. It also supports interactive queries, enabling users to explore data in a conversational manner rather than searching manually. This feature makes the overall experience more efficient, user-friendly, and highly effective for decision-making.
+The account page allows the current user to review and manage:
 
-<img width="387" height="588" alt="chatbot" src="https://github.com/user-attachments/assets/b2f847eb-9981-48d7-9df2-c2f561baa406" />
+- profile image
+- username
+- role
+- tenant or location display
+- assigned licenses
+- two-factor authentication
+- theme preference
 
+The page also shows the currently running platform version. It is focused on the current user rather than the tenant as a whole.
 
-## Overview and Additional Features
+The tested account workflow also includes:
 
-This provides an overview of the original scope of our project. Moving forward, we would like to highlight some
-additional features and elements that we have specifically developed for our client. Along with Orion, which serves as
-our core platform, we have integrated three other platforms to address various needs. The first is Dozzel, which caters
-to a particular set of functionalities; the second is Swagger, a tool that helps us manage and test APIs; and the third
-is Flower, a platform designed for monitoring and managing tasks. Each of these platforms serves a unique purpose,
-enhancing the overall system and offering greater flexibility and efficiency for the client.
+- avatar upload
+- theme toggle and persistence
+- enabling `2FA`
+- logging out and reaching the two-factor challenge screen on next login
+- viewing the QR image and OTP input state for 2FA setup/verification
 
-### Dozzel
+```{figure} ../screenshots/account-settings-20260326.png
+:alt: Account settings form
+:width: 100%
 
-We have added an extra API to the server to provide insights into server usage. This API tracks the processing
-activities within the system or software, particularly where machine learning algorithms are running.
+Current-user profile and account settings form.
+```
 
-- Additionally, it provides detailed logs, monitors system stability, and highlights areas where bugs or issues have
-  occurred.
+### Tenant Homepage
 
-- It also offers real-time updates on system performance, helps identify potential bottlenecks, and ensures a proactive
-  approach to system optimization and troubleshooting.
-- It is providing us data without a server.
+For tenant users, the profile homepage may function as a tenant intelligence and alert workspace instead of a simple profile landing page.
 
-![WhatsApp Image 2025-01-14 at 11 24 32 PM](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/dozzle.png)
+Depending on license and role, this page can include:
 
+- homepage search
+- alert export
+- scan-all or flush-all actions
+- risk summary cards
+- category alert cards
+- monitored IOC counts
 
-### Swagger.org
+In some deployments, this page behaves differently by role:
 
-After this, we move on to Swagger, which plays a critical role by essentially handling the actual backend operations.
-Earlier, we discussed Orion, a comprehensive front-side software that provided us with the ability to view and analyze
-all the data effectively. Orion serves as the interface for interacting with the data, making it user-friendly and
-accessible. On the other hand, Swagger allows us to dive deeper into the backend processes, giving insights into how the
-data is being handled and processed behind the scenes. This distinction between front-end visualization and backend
-operation highlights the complementary roles of Orion and Swagger in managing and understanding the system's
-functionality.
+- maintainers or higher-license users may receive the full alert-and-action workspace
+- analysts may see a simpler search-first homepage variant
+- some users may see an insights-only fallback instead of tenant alert controls
 
-![WhatsApp Image 2025-01-14 at 11 26 16 PM (1)](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/swegger.png)
+The summary area commonly displays:
 
+- critical alerts
+- high-risk alerts
+- medium-risk alerts
+- low-risk alerts
 
-In Swagger, we have several APIs that we can directly use for testing. The biggest advantage of Swagger's APIs is that
-if you don't want to use our system, you can still run Swagger's APIs on your own system and utilize them.
+Category cards provide quick access to alert-specific drill-down reports.
 
-Swagger operates on our HTTP scheme and provides three main APIs:
+The profile area also supports alert-focused routes such as:
 
-**GET/api/directory:** This API allows us to view a list of all available APIs.
-**GET /api/insight:** This API provides key insights, which are the results we saw on Orion's front page.
-**GET /api/search:** This API enables us to view the search results, showing what we find in response to our search
-queries.
+- `alerts/<type>` for category-specific alert reports
+- `addcustomalert` for creating custom alert definitions where enabled
 
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/swegger1.png)
+### Manage IOCs
 
+The IOC management page allows tenants to maintain the set of monitored values used in searches and alerting.
 
-### Models
+Capabilities include:
 
-After this, on the same page, we have several models that are active, including DirectoryResponse, Directory,
-InsightResponse, GenericModel, LeakModel, SearchResponse, SearchResult, and ErrorResponse.
+- IOC category search
+- horizontal category browsing
+- adding IOC values
+- removing IOC values
+- clearing all IOC values
 
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/models.png)
+This page is especially important for tenant-driven monitoring workflows.
 
+The tested tenant IOC workflow includes:
 
-To run Swagger, we have been provided with its link. Below, the keys for it are mentioned.
+- opening the IOC page from the tenant profile area
+- switching across IOC category tabs
+- adding values in multiple categories
+- adding monitored email values for downstream alerting
+- returning to the tenant homepage and triggering follow-up scanning actions
 
-https://swagger.try.orionintelligence.org:9443/
+### Statistics
 
-### Flower
+The `Statistics` page in the profile area reuses the insight-oriented summary experience for users who want a visual overview without returning to the main homepage.
 
-Next, we have the third tool, called Flowers. This tool helps in situations where we are running multiple crawlers, such
-as 40 at a time, and some of them either break down or get stuck. It allows us to monitor and debug the crawlers
-effectively.
+### Profile Consolidated View
 
-Key features of the tool
+The profile area also contains a consolidated-search route. Functionally, it behaves like the main consolidated workspace but sits within profile and tenant-oriented workflows.
 
-- Identify which crawler is hitting how many sites simultaneously.
-- Monitor how many links each crawler is extracting and bringing back.
-- Debug issues such as broken or stuck crawlers during operation.
+### Tenant Settings
 
-![image](https://raw.githubusercontent.com/msmannan00/Orion-Search/refs/heads/trusted-main/docs/screenshots/flowers.png)
+Tenant Settings stores tenant-level identity and contact information.
 
+Depending on permissions, users can:
 
-In this way, if we need to access a system, a key is required for that system. With the help of this key, we can access
-its features or resources. These keys related to open sources, specifically TRAEFIK KEYS, DEMO KEYS, and PRODUCTION
-MODE. These three concepts help us manage demo server access and control features in production.
+- upload a tenant image
+- review assigned licenses
+- review license count
+- review assigned user quota
+- edit phone
+- edit country
+- edit city or state
 
-### Keys
+Some fields remain read-only depending on role. The page also acts as a tenant overview by summarizing the tenant name, status-style badges, location, assigned quota, and current license list.
 
-**TRAEFIK KEYS**
+```{figure} ../screenshots/tenant-settings-20260326.png
+:alt: Tenant settings page
+:width: 100%
 
-1. TRAEFIK_USERNAME=admin
-2. TRAEFIK_PASSWORD=
-('SHnTUYTIaz7ahQrVeMHVzK4y7PUGXb9VCp3bTYtaLPrUuE8am2ahVjk2dKYzw3C8')
+Tenant settings and tenant-level license summary.
+```
 
-**Description:** These keys are used for both Flower and Dozzle. They allow access to the demo server, enabling users to
-use it for demonstration purposes.
+## User and Tenant Administration
 
-**DEMO KEYS**
+### Tenant Users
 
-1. DEMO_USERNAME=demo
-2. DEMO_PASSWORD=
-('contact out agent')
+The `Users` view is the main tenant user-management page.
 
-**Description:** Demo keys are used to provide users with a demo version of the service. By using these keys, users can
-access a limited, demo server environment to explore features.
+It supports:
 
-**PRODUCTION MODE**
+- viewing users in a table or mobile card layout
+- adding a user
+- expanding a user row for details
+- changing status
+- editing assigned licenses
+- deleting a user
 
-1. DEMO="0"
-2. API_SWAGGER="1"
-3. PRODUCTION="0"
-4. MAINTAINANCE="0"
+Displayed information commonly includes:
 
-**Description:** In production mode, we use environmental variables to control and manage the system. This setup is
-crucial for optimizing performance and making production decisions.
+- username
+- email
+- role
+- status
+- subscription
+- licenses
 
-### Control Management System
+The page also respects quota-based restrictions.
 
-All these configurations fall under a centralized control management system, which helps in controlling both demo and
-production environments.
-You can use these keys and configurations for demo purposes or to manage a live, production environment.
+The broader tested user-management lifecycle also covers:
+
+- creating multiple users with different roles and license mixes
+- verifying role- and license-based sidebar visibility after login
+- triggering subscription or paywall behavior for limited-license users
+- showing near-expiry trial state messaging where applicable
+
+```{figure} ../screenshots/tenant-users-20260326.png
+:alt: Tenant users page
+:width: 100%
+
+Tenant user-management view with quotas, roles, and licenses.
+```
+
+### Tenant Administration
+
+The `Tenants` view is used by higher-privilege roles to manage tenant records across the platform.
+
+It supports:
+
+- reviewing tenant information
+- expanding a tenant for detail and editing
+- changing verification state
+- changing quota
+- changing status
+- updating tenant licenses
+
+Displayed fields include:
+
+- company name
+- country
+- subscription
+- verification state
+- user quota
+- status
+- license assignments
+
+```{figure} ../screenshots/tenant-administration-20260326.png
+:alt: Tenant administration page
+:width: 100%
+
+Administrative tenant-management table used for verification, licensing, and quota updates.
+```
+
+### Audit Logs
+
+Audit Logs provide a searchable activity trail across user and tenant actions.
+
+```{admonition} Audit data shown
+:class: note
+
+The audit log list typically shows a timestamp, actor, tenant, and event description for each recorded entry.
+```
+
+The audit-log page supports:
+
+- export
+- filtering
+- pagination
+- desktop and mobile layouts
+
+```{figure} ../screenshots/audit-logs-20260326.png
+:alt: Audit log page
+:width: 100%
+
+Audit log workspace with filters and export actions.
+```
+
+## System Administration
+
+### System Settings
+
+System Settings is the primary platform-level configuration page.
+
+It includes two main groups:
+
+- asset and branding configuration
+- application and service configuration
+
+#### Asset Management
+
+Administrators can manage brand and UI images such as:
+
+- primary logo
+- wide light logo
+- wide dark logo
+- authentication dashboard icon
+
+#### Configuration
+
+Editable platform settings can include:
+
+- application name
+- language
+- onion address
+- data-source URL
+- adversaries URL
+- pricing URL
+- documentation visibility
+- whistle-blowing visibility
+
+#### Service Status
+
+The page also shows read-only runtime flags such as:
+
+- API allowed
+- AI endpoint enabled
+
+Depending on deployment data, this area may also function as a quick verification point for platform version, enabled services, and branding visibility choices.
+
+```{figure} ../screenshots/system-settings-20260326.png
+:alt: Administrative and system settings workspace
+:width: 100%
+
+Administrative settings and platform-management view.
+```
+
+## Detailed UI Coverage Appendix
+
+This appendix documents the exact user-visible behaviors covered by the automated Cypress suite. It is intended to close the gap between a feature overview and the concrete interactions that an operator, tenant user, or administrator can perform in the current product.
+
+### Authentication and Session Lifecycle
+
+The tested authentication lifecycle includes:
+
+- loading the login page from the root route
+- signing in as an administrator
+- opening the profile menu and signing out
+- requesting a password-reset email
+- opening a tokenized reset-password route
+- validating that the new password cannot match the old password
+- applying a new password successfully
+- signing in again with the updated password
+- encountering a two-factor prompt after enabling `2FA`
+- viewing the 2FA QR image and OTP input state
+
+### Sidebar and Global Navigation States
+
+The automation covers both content navigation and structural sidebar behavior.
+
+Supported navigation behaviors include:
+
+- expanding and collapsing sidebar groups
+- collapsing the whole sidebar
+- re-expanding the whole sidebar
+- visiting all major search, scan, graph, tenant, and admin groups that are available to the current role
+- opening external or support-oriented entries from the main navigation where configured
+
+For user documentation purposes, that means the sidebar is not only a static menu. It is expected to support:
+
+- nested group expansion
+- condensed and expanded display modes
+- role-based visibility
+- license-based visibility
+
+The profile menu is also part of this navigation model. Tested behavior includes:
+
+- opening the profile menu
+- reaching help and support from the profile menu
+- signing out from the profile menu
+
+### Homepage, Heatmap, and Support Interactions
+
+The homepage is validated as more than a search landing page. The automated flow covers:
+
+- world heatmap rendering
+- tooltip visibility on country hover
+- tooltip hide behavior on pointer leave
+- opening a country-level report from the map
+- closing the country report with the close button
+- closing the same report by clicking the overlay
+- internal branch behavior when heatmap data or world data changes
+
+The support workflow is also covered directly from the profile menu:
+
+- opening the help and support modal
+- filling email, subject, and message fields
+- submitting the support request
+
+### Search Behavior and Result Expectations
+
+The test suite validates that indexed modules are not only searchable but also return stable, inspectable result structures.
+
+Covered search behavior includes:
+
+- general keyword searching
+- module-specific searching
+- result opening from cards and table rows
+- returning from a report to the original listing
+- opening reports in both modal-style and page-style layouts
+- validating first-result content against fixtures in key modules
+
+The search-result verification suite explicitly checks stable first-result expectations for:
+
+- `General Intelligence`
+- `Data Breach`
+- `Defacement`
+- `Social`
+- `Exploit`
+- `Feed`
+
+This means the manual should treat these modules as search-first experiences with expected, stable result-card or row-based layouts, not as experimental views.
+
+### Indexed Module and Tab Coverage
+
+The suite covers more module variations than the earlier manual described explicitly.
+
+`General Intelligence` coverage includes:
+
+- `All`
+- `General`
+- `Forums`
+- `News`
+- `Stolen`
+- `Drugs`
+- `Hacking`
+- `Marketplaces`
+- `Cryptocurrency`
+- `Leaks`
+
+`Data Breach` coverage includes:
+
+- `All`
+- `Databases`
+- `Tracking`
+
+`Defacement` coverage includes:
+
+- `All`
+- `Hacked`
+- `Phishing`
+- `Databases`
+
+`Social` coverage includes:
+
+- `All`
+- `Telegram`
+- `Twitter`
+- `Mastodon`
+- `Pastebin`
+- `Forum`
+- `Reddit`
+
+`Exploit` coverage includes:
+
+- `All`
+- `CVE`
+- `Tools`
+- `ZeroDay`
+
+`Feed` coverage includes:
+
+- `News`
+
+`Stealer Logs` coverage includes:
+
+- `IOCS`
+
+`Dump` coverage includes:
+
+- `Listing`
+
+### Report Opening, JSON Review, and Chat Workflows
+
+Report handling is one of the most deeply exercised areas of the suite.
+
+Covered behaviors include:
+
+- opening the first available report from multiple modules
+- verifying that a report can open as a route or modal, depending on module layout
+- opening JSON-backed report viewers
+- closing modal reports with escape
+- opening chat from a report
+- sending a chat message
+- verifying that a chat response area renders messages
+
+The manual should therefore treat chat and JSON review as first-class report features, not optional side notes.
+
+### Search Tools and Advanced Filters
+
+The suite covers two layers of filtering:
+
+- toolbar-level search tools
+- sidebar filter drawers
+
+Toolbar-level coverage includes:
+
+- toggling `Advance`
+- opening `Tools`
+- changing result sort order
+- switching search behavior between semantic, OR, AND, and full-query modes
+- clearing entity-filter selections
+
+Sidebar-filter coverage includes:
+
+- network filtering
+- safe-search filtering
+- content-type filtering
+- date-range filtering
+- reset
+- apply
+- auto-apply and manual-apply variations
+
+The tests also verify these filters across multiple modules, including:
+
+- `General Intelligence`
+- `Data Breach`
+- `Defacement`
+- `Social`
+- `Exploit`
+- `Feed`
+
+Advanced resilient filter validation also scans report detail and metadata after filtering, which means filtering is expected to affect downstream report inspection, not just the list page.
+
+For users, that means the filtering model should be understood as end-to-end rather than cosmetic. The tested behavior confirms:
+
+- search-tool mode changes affect the actual returned result set
+- sort order changes are preserved into refreshed searches
+- side filters can be applied repeatedly across different modules
+- date filters support both matching and intentionally empty result windows
+- filtered state is expected to remain meaningful when opening report detail and metadata panels
+
+### Pagination, Load More, and Result Expansion
+
+The suite validates navigation through large result sets rather than assuming a single-page result view.
+
+Covered pagination and expansion behaviors include:
+
+- next-page navigation in `General Intelligence`
+- next-page navigation in `Data Breach`
+- next-page navigation in `Defacement`
+- next-page navigation in `Social`
+- next-page navigation in `Exploit`
+- next-page navigation in `Feed`
+- directory pagination
+- directory page-number navigation
+- directory lazy expansion by scrolling to the bottom
+- stealer-log row expansion
+- IOC row expansion in consolidated tables
+- consolidated `See More` and `See Less` toggles where present
+
+This matters operationally because the interface is tested as a browsing workspace, not only a single-query landing page. Users should expect:
+
+- multi-page navigation in indexed modules
+- progressive loading where directory-style surfaces support it
+- expandable rows and cards in result-heavy modules
+- persistence of the browsing context while moving in and out of details
+
+### Stealer Logs: Full Tested Behaviors
+
+In addition to the broader description above, the stealer-log suite covers:
+
+- tag-based basic searching
+- advanced row-based condition building
+- validation of empty or invalid search states
+- result download initiation
+- password-scheme modal opening
+- password-length and character-class filtering
+- helper-driven pivots from results
+- expansion of matched credential rows
+- review of email and telemetry fields inside expanded rows
+
+This means Stealer Logs should be understood as a full hunting workspace with both simple and compound-query modes.
+
+### Consolidated: Full Tested Behaviors
+
+The consolidated area is one of the deepest tested surfaces in the application.
+
+Covered behaviors include:
+
+- opening `Deep Search`
+- opening `IOCs`
+- using the profile-scoped consolidated route
+- searching from the homepage into consolidated
+- reviewing defacement-style threat cards inside deep search
+- expanding and collapsing grouped threat cards
+- inspecting keyword and coverage insight sections
+- expanding all insight sections
+- searching inside the threat-actor insight panel
+- testing no-match behavior inside insight search
+- opening report details from consolidated results and returning
+- filtering consolidated results by network
+- validating that filtered result cards reflect the chosen network
+- opening the domain-scanner modal
+- running subdomain scans
+- running IP lookup when available
+- running wayback-style scans when available
+- closing the domain-scanner modal
+- opening IOC tables for stealer and threat entries
+- expanding the first several IOC rows
+- switching IOC search terms and validating both non-empty and empty states
+- downloading IOC results
+- applying password-scheme filters from the consolidated IOC context
+- applying date filters that produce both non-empty and empty results
+
+The consolidated right-side insight panel should therefore be considered part of the documented workflow, not an ancillary convenience.
+
+### CTI Graph: Full Tested Behaviors
+
+The CTI suite covers substantially more than opening the graph.
+
+Covered CTI behaviors include:
+
+- switching graph filter type to `Cluster`
+- applying CTI filters
+- searching the graph toolbar
+- validating highlighted results
+- opening export-report modals
+- switching between graph and list views
+- collapsing and expanding the listings panel
+- toggling physics simulation
+- creating a new CTI session
+- renaming a CTI session
+- exporting the current session through the `Export Current Session` action
+- importing a session from JSON
+- closing a session tab
+- selecting export format options such as JSON and graph PDF
+- opening a context menu from the graph canvas
+
+There is also component-level branch coverage for:
+
+- graph-change handling
+- empty category handling
+- rotated category sets
+- report retrieval by country
+
+Those internal branches are not a normal operator workflow, but they confirm the presence of fallback and re-render logic in the current UI.
+
+### Social Intel: Full Tested Behaviors
+
+The social graph area is also extensively exercised.
+
+Covered behaviors include:
+
+- scanning a username
+- switching between graph and list views
+- clearing graph search
+- creating and renaming a social session
+- exporting a social report
+- opening the add-entity modal
+- validating disabled and enabled submit states
+- submitting both API-backed and manual entity entries
+- triggering a graph context-menu path
+- opening image-based profile search
+- uploading an image for recon
+- reviewing the manage-profiles modal
+- filtering discovered platforms
+- fetching profiles
+- selecting all discovered profiles and pushing them into the graph
+- opening summary popups
+- searching profile metadata with tokens
+- opening external profile links
+- fetching followers
+- fetching following
+- fetching images
+- rescanning a profile
+- reopening manage-profiles and cancelling
+- opening follower/following scan popups
+- switching among followers, following, and connections tabs
+- selecting discovered related accounts
+- confirming follower/following imports
+- opening relationship popups from graph nodes
+- opening related account links
+- setting an alias through the context menu
+
+This is one of the richest modules in the product and should be documented as a multi-step graph, list, and modal workflow rather than only as a graph view.
+
+### Entity API and Scan Modules: Full Tested Behaviors
+
+The test suite covers every documented live lookup route currently present in the main product:
+
+- `Email Breach`
+- `Social Scanner`
+- `Wanted List`
+- `National Identity`
+- `Playstore Scanner`
+- `Software Scanner`
+- `File Scanner`
+- `Crypto Scanner`
+
+It also covers the web-scan routes:
+
+- `Basic Scan`
+- `Port Scan`
+- `Repository Scan`
+- `SEO Scan`
+- `APK Scan`
+
+Specific validated actions include:
+
+- submitting text lookups
+- submitting file uploads
+- showing success badges
+- downloading reports
+- printing reports
+- resetting file-upload flows with `Analyze Another File`
+- re-uploading and re-running the same scanner after reset
+
+The tested scan and lookup journeys are therefore more specific than a single generic “scan” action. They include:
+
+- email-driven breach validation
+- social handle lookups
+- wanted-person lookups
+- national identity checks
+- Playstore package lookups
+- software-name searches
+- file-upload IOC extraction
+- cryptocurrency address or hash lookups
+- web-target scans for basic, port, repository, SEO, and APK workflows
+
+### Network Intel: Full Tested Behaviors
+
+The Network Intel suite covers:
+
+- host recon search
+- IP scan search
+- vulnerability scan search
+- detail row expansion and collapse
+- downloading reports from each main network-intel tab
+- export-trigger validation
+
+The Geo IoT modal is also covered end to end, including:
+
+- opening the modal
+- closing with the close control
+- closing with the cancel control
+- switching between map mode and manual mode
+- zooming in and out on the map
+- editing coordinates manually
+- editing radius
+- editing max-IP count
+- switching back to map mode
+- starting a geo scan
+- reusing the selected coordinates as the active network-intel query
+
+### Directory: Full Tested Behaviors
+
+The directory workflow is covered as an operational browsing surface rather than a search-first module.
+
+Covered behaviors include:
+
+- initial page load
+- table and empty-state validation
+- progressive loading by scrolling
+- pagination to page two and back to page one
+- filtering by network
+- filtering by index
+- filtering by content type
+- applying and clearing date ranges
+- full filter reset
+
+### Account Settings, Preferences, and Reset Journey
+
+The suite covers more account behavior than the current summary described.
+
+Covered account behaviors include:
+
+- avatar upload
+- theme toggle
+- two-factor toggle
+- post-update persistence
+- returning to login after logout
+- viewing the 2FA challenge screen
+- requesting password reset from login
+- reading the reset email flow
+- submitting an invalid reused password
+- submitting a valid new password
+- logging in again with the updated password
+
+### User Management, License Visibility, and Subscription States
+
+The user-management suite covers both admin and non-admin behavior.
+
+Covered behaviors include:
+
+- creating multiple users with different roles
+- assigning licenses during creation
+- logging in as those users
+- verifying sidebar visibility based on assigned licenses
+- verifying that some users see only indexed modules
+- verifying that some users also see breach, social, exploit, feed, dump, or scanner modules
+- updating account preferences as a non-admin user
+- triggering the stealer-logs subscription or paywall flow for a demo user
+- showing a near-expiry trial banner for a member user
+- deleting managed users until only protected system users remain
+
+This means license-aware UI visibility and paywall/subscription behavior are part of the documented product behavior.
+
+In practical terms, the tested product states include:
+
+- users whose sidebar is limited to core indexed modules only
+- users who gain additional breach, social, exploit, feed, dump, or stealer visibility through license assignment
+- users whose role grants scanner and entity-API access
+- demo or limited users who are redirected into subscription/paywall flows instead of full module access
+- expiring users who receive warning banners before access changes
+
+### Tenant Provisioning and Tenant Operations
+
+The tenant suite covers the full tenant lifecycle, including both admin-side and tenant-side workflows.
+
+Covered provisioning and onboarding behaviors include:
+
+- tenant signup
+- email verification
+- admin review of tenants
+- tenant verification state changes
+- enterprise-license assignment
+- tenant onboarding wizard completion
+- tenant IOC initialization during onboarding
+- creating a tenant sub-user
+- editing tenant user quota
+
+Covered tenant-home behaviors include:
+
+- tenant homepage navigation
+- alert export
+- notification sidebar opening
+- opening alert details from notifications
+- exporting alert reports from multiple alert contexts
+- opening category alert cards
+- creating a custom alert
+- date filtering for tenant alerts
+- flushing all alerts after confirmation through the `Flush All` workflow
+
+The tenant-alert workflow therefore includes both content review and alert-maintenance controls, not only passive monitoring.
+
+### Audit Logs and Administrative Operations
+
+Administrative audit coverage includes:
+
+- opening the audit-log page
+- exporting audit records
+- applying a date range that intentionally yields no rows
+- resetting filters to return to populated records
+- using the audit-log page in both tenant-management and standalone admin contexts
+
+### System Settings and Error States
+
+System Settings coverage includes both successful edits and validation failures.
+
+Covered behaviors include:
+
+- opening the system settings page
+- entering edit mode
+- changing the application name
+- editing external URLs such as data sources, adversaries, and pricing
+- saving the updated configuration
+- attempting to upload an oversized authentication-dashboard icon
+- showing the `File too large` validation error for files above `1 MB`
+
+This should be documented explicitly because it is one of the tested administrative guardrails in the platform.
+
+### Chatbot and Report Conversation Flow
+
+The report workspace also includes a tested conversational path when the chat widget is enabled.
+
+Covered user-visible behavior includes:
+
+- opening the chat widget from a report
+- typing a prompt into the report chat input
+- sending the message
+- seeing the chat thread render inside the report workspace
+
+```{figure} ../screenshots/report-chatbot-20260326.png
+:alt: Report chatbot widget
+:width: 100%
+
+Report-level chatbot workflow used for conversational follow-up on an opened record.
+```
+
+## Practical Workflows
+
+### Workflow 1: Broad Investigation
+
+1. Start in `Homepage` or `General Intelligence`.
+2. Enter a keyword or topic.
+3. Use `Advance` and sidebar filters to narrow the results.
+4. Switch search mode if the results are too broad or too narrow.
+5. Open a report for the most relevant record.
+6. Review metadata and open CTI Graph if a relationship pivot is needed.
+
+### Workflow 2: Identity Exposure Check
+
+1. Open `Data Breach` or `Entity API`.
+2. Search for an email or identity value.
+3. Review breach details or live lookup results.
+4. Use Stealer Logs if deeper credential evidence is required.
+
+### Workflow 3: Infrastructure Review
+
+1. Open `Network Intel` or `Web Scans`.
+2. Enter a domain or IP.
+3. Run the appropriate recon or scan view.
+4. Review the report, severity, and evidence.
+5. Export the report if it needs to be shared externally.
+
+### Workflow 4: Profile Mapping
+
+1. Open `Social Intel`.
+2. Scan a username.
+3. Review the graph or list view.
+4. Open profile summaries and metadata popups.
+5. Add custom entities or manage connections if needed.
+
+### Workflow 5: Tenant Monitoring
+
+1. Configure IOC values in `Profile > IOC`.
+2. Review alert summaries from the tenant homepage.
+3. Open category alert reports for the highest-risk items.
+4. Export alerts when sharing findings internally.
+
+## Notes and Limitations
+
+:::{admonition} Feature availability
+:class: important
+
+If a module described in this manual is not visible in your sidebar, the most common reasons are role restrictions, license restrictions, or deployment-level configuration toggles.
+:::
+
+:::{admonition} External modules
+:class: note
+
+Some sidebar items open new tabs or external services rather than rendering inside the main Orion workspace. `CTI Graph`, `Social Intel`, `Onion Link`, `Whistle Blowing`, and `Documentation` may behave this way depending on route and deployment setup.
+:::
+
+:::{admonition} Recommended starting point
+:class: tip
+
+New users should begin with `Homepage`, `General Intelligence`, `Data Breach`, and `Stealer Logs` before moving into graph tools, tenant administration, or system administration.
+:::

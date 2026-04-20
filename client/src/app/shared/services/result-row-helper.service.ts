@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ResultRowHelperService {
+  isCopied(copiedKey: string | null, key: string): boolean {
+    return copiedKey === key;
+  }
+
   normalizeToArray(value: any): string[] {
     if (value == null) {
       return [];
@@ -49,15 +54,46 @@ export class ResultRowHelperService {
     return text;
   }
 
-  async copyToClipboard(value: string): Promise<boolean> {
-    try {
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(value);
-        return true;
+  copyToClipboard(value: string): Observable<boolean> {
+    if (navigator?.clipboard?.writeText) {
+      return new Observable<boolean>((observer) => {
+        navigator.clipboard.writeText(value).then(() => {
+          observer.next(true);
+          observer.complete();
+        }).catch(() => {
+          observer.next(this.copyWithExecCommand(value));
+          observer.complete();
+        });
+      });
+    }
+    return of(this.copyWithExecCommand(value));
+  }
+
+  copyText(text: any, key: string, setCopied: (key: string) => void, e?: MouseEvent): void {
+    if (e) {
+      e.stopPropagation();
+    }
+    const value = text == null ? '' : String(text);
+    if (!value || value === '-') {
+      return;
+    }
+    this.copyToClipboard(value).subscribe((ok) => {
+      if (!ok) {
+        return;
       }
+      setCopied(key);
+    });
+  }
+
+  setCopiedState(key: string, copiedTimer: any, setCopiedKey: (value: string | null) => void): any {
+    setCopiedKey(key);
+    if (copiedTimer) {
+      clearTimeout(copiedTimer);
     }
-    catch {
-    }
+    return setTimeout(() => setCopiedKey(null), 1200);
+  }
+
+  private copyWithExecCommand(value: string): boolean {
     try {
       const ta = document.createElement('textarea');
       ta.value = value;

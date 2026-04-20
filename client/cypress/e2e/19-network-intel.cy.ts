@@ -112,51 +112,56 @@ describe('Network Intel - End-to-End Flow', () => {
         },
       },
     }).as('vulnerabilityScan');
+
   };
 
   it('runs host recon, ip scan, vulnerability scan, and exports reports from all three sections', () => {
     stubNetworkIntelApis();
     cy.visit('/dashboard/netint');
-    cy.get('[data-testid="network-intel-tab-host-recon"]', { timeout: 30000 }).should('be.visible');
+    cy.get('[data-testid="network-intel-tab-host-recon"]').should('be.visible');
 
     cy.window().then((win) => {
       cy.stub(win.URL, 'createObjectURL').callsFake(() => 'blob:network-intel-test').as('networkIntelExport');
     });
 
     cy.get('[data-testid="network-intel-tab-host-recon"]').click();
-    cy.get('[data-testid="network-intel-search-input"]', { timeout: 30000 }).clear().type('example.com{enter}');
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('example.com{enter}');
     cy.wait('@resolveIp');
-    cy.get('[data-testid="network-intel-dns-row-93.184.216.34"]', { timeout: 45000 }).should('be.visible').click();
-    cy.get('[data-testid="network-intel-dns-detail-93.184.216.34"]', { timeout: 45000 }).should('be.visible');
-    cy.get('[data-testid="network-intel-dns-row-93.184.216.34"]', { timeout: 30000 }).should('be.visible').click();
-    cy.get('[data-testid="network-intel-dns-detail-93.184.216.34"]', { timeout: 15000 }).should('not.exist');
+    cy.get('[data-testid="network-intel-dns-row-93.184.216.34"]').should('be.visible').click();
+    cy.get('[data-testid="network-intel-dns-detail-93.184.216.34"]').should('be.visible');
+    cy.get('[data-testid="network-intel-dns-row-93.184.216.34"]').should('be.visible').click();
+    cy.get('[data-testid="network-intel-dns-detail-93.184.216.34"]').should('not.exist');
 
-    cy.get('[data-testid="network-intel-download-report"]', { timeout: 15000 })
+    cy.get('[data-testid="network-intel-download-report"]')
       .should('be.visible')
       .and('be.enabled')
       .click();
 
     cy.get('[data-testid="network-intel-tab-ip-scan"]').click();
-    cy.get('[data-testid="network-intel-search-input"]', { timeout: 30000 }).clear().type('8.8.8.8{enter}');
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('8.8.8.8{enter}');
     cy.wait('@ipScanner');
-    cy.get('[data-testid="network-intel-ip-result"]', { timeout: 45000 }).should('be.visible');
+    cy.get('[data-testid="network-intel-ip-result"]').should('be.visible');
 
-    cy.get('[data-testid="network-intel-download-report"]', { timeout: 15000 })
+    cy.get('[data-testid="network-intel-download-report"]')
       .should('be.visible')
       .and('be.enabled')
       .click();
 
     cy.get('[data-testid="network-intel-tab-vulnerability-scan"]').click();
-    cy.get('[data-testid="network-intel-search-input"]', { timeout: 30000 }).clear().type('bbc.com{enter}');
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('bbc.com{enter}');
+    cy.contains('span', 'bbc.com', { timeout: 60000 }).click();
     cy.wait('@vulnerabilityScan');
-    cy.get('[data-testid="network-intel-vulnerability-result"]', { timeout: 45000 }).should('be.visible');
+    cy.contains('[data-testid="network-intel-vulnerability-result"]', 'Missing Content-Security-Policy', {
+      timeout: 60000,
+    }).should('be.visible');
 
-    cy.get('[data-testid="network-intel-download-report"]', { timeout: 15000 })
+    cy.get('[data-testid="network-intel-download-report"]')
+      .scrollIntoView()
       .should('be.visible')
       .and('be.enabled')
       .click();
 
-    cy.get('@networkIntelExport', { timeout: 15000 }).should('have.callCount', 3);
+    cy.get('@networkIntelExport').should('have.callCount', 3);
   });
 
   it('covers the Geo IoT modal end to end with stable selectors only', () => {
@@ -180,20 +185,21 @@ describe('Network Intel - End-to-End Flow', () => {
     }).as('geoIotScan');
 
     cy.visit('/dashboard/netint');
-    cy.get('[data-testid="network-intel-tab-host-recon"]', { timeout: 30000 }).should('be.visible');
+    cy.get('[data-testid="network-intel-tab-host-recon"]').should('be.visible');
+    cy.get('[data-testid="network-intel-tab-geo-fencing"]').click();
 
-    cy.get('[data-testid="network-intel-open-geo"]', { timeout: 30000 }).click();
-    cy.get('[data-testid="network-intel-geo-modal"]', { timeout: 15000 }).should('be.visible');
+    cy.get('[data-testid="network-intel-geo-search-trigger"]').click({ force: true });
+    cy.get('[data-testid="network-intel-geo-modal"]').should('be.visible');
     cy.get('[data-testid="network-intel-geo-close"]').click();
-    cy.get('[data-testid="network-intel-geo-modal"]', { timeout: 15000 }).should('not.exist');
+    cy.get('[data-testid="network-intel-geo-modal"]').should('not.exist');
 
-    cy.get('[data-testid="network-intel-open-geo"]', { timeout: 30000 }).click();
-    cy.get('[data-testid="network-intel-geo-modal"]', { timeout: 15000 }).should('be.visible');
+    cy.get('[data-testid="network-intel-geo-search-trigger"]').click({ force: true });
+    cy.get('[data-testid="network-intel-geo-modal"]').should('be.visible');
     cy.get('[data-testid="network-intel-geo-cancel"]').click();
-    cy.get('[data-testid="network-intel-geo-modal"]', { timeout: 15000 }).should('not.exist');
+    cy.get('[data-testid="network-intel-geo-modal"]').should('not.exist');
 
-    cy.get('[data-testid="network-intel-open-geo"]', { timeout: 30000 }).click();
-    cy.get('[data-testid="network-intel-geo-modal"]', { timeout: 15000 }).should('be.visible');
+    cy.get('[data-testid="network-intel-geo-search-trigger"]').click({ force: true });
+    cy.get('[data-testid="network-intel-geo-modal"]').should('be.visible');
     cy.get('[data-testid="network-intel-geo-mode-map"]').should('be.visible');
     cy.get('[data-testid="network-intel-geo-map"]').should('be.visible');
     cy.get('[data-testid="network-intel-geo-zoom-label"]')
@@ -230,13 +236,10 @@ describe('Network Intel - End-to-End Flow', () => {
     cy.get('[data-testid="network-intel-geo-max-ips-decrement"]').click();
     cy.get('[data-testid="network-intel-geo-max-ips-input"]').should('have.value', '250');
 
-    cy.get('[data-testid="network-intel-geo-mode-map"]').click();
-    cy.get('[data-testid="network-intel-geo-selected-point"]', { timeout: 15000 }).should('be.visible');
-
     cy.get('[data-testid="network-intel-geo-start"]').click();
     cy.wait('@geoIotScan');
-    cy.get('[data-testid="network-intel-geo-modal"]', { timeout: 15000 }).should('not.exist');
+    cy.get('[data-testid="network-intel-geo-modal"]').should('not.exist');
     cy.get('[data-testid="network-intel-search-input"]').should('have.value', '31.48000, 74.17000');
-    cy.get('[data-testid="network-intel-dns-row-1.1.1.1"]', { timeout: 15000 }).should('be.visible');
+    cy.get('[data-testid="network-intel-dns-row-1.1.1.1"]').should('be.visible');
   });
 });

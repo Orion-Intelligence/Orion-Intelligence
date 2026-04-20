@@ -1,8 +1,9 @@
 import { signal } from '@angular/core';
 import { SocialImage, SocialPost } from '../../../../shared/model/social/social-scan.models';
 import { loadMoreIncrementally } from './summary-view.util';
+import { SocialSummaryBase } from './social-summary.base';
 
-export abstract class PlatformFeedViewBase {
+export abstract class PlatformFeedViewBase extends SocialSummaryBase {
   protected readonly initialPosts = 3;
   protected readonly initialImages = 8;
   protected readonly initialFollowers = 10;

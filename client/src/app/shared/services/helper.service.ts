@@ -5,6 +5,7 @@ import { LANGUAGE_MAP } from '../constants/shared-enums';
 import { ConsolidatedParamModel } from '../model/results/consolidated/consolidated.param.model';
 import { AppService } from '../../services/core/app/app.service';
 import { MessageNotificationService } from '../../services/message_notification/message-notification.service';
+import { PublicUserActivityItem } from '../../sections/report/social-interactions/models/public-user-data.model';
 type RiskClass = 'risk-high' | 'risk-medium' | 'risk-low' | 'risk-info';
 @Injectable({
   providedIn: 'root'
@@ -131,21 +132,28 @@ export class HelperService {
     if (!text) {
       return '';
     }
-    let highlighted: string;
-    if (text.includes('<em>') && text.includes('</em>')) {
+    const escapeHtml = (value: string) => value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+    let renderedHtml: string;
+    const hasHighlightMarkup = text.includes('<em>') && text.includes('</em>');
+    if (hasHighlightMarkup) {
       const regex = /<em>(.*?)<\/em>/g;
       const matches = [...text.matchAll(regex)];
-      let result = '';
+      let highlightedText = '';
       let lastIndex = 0;
       let i = 0;
       while (i < matches.length) {
         let merged = matches[i][1];
-        const start = matches[i].index!;
+        const start = matches[i].index;
         let end = start + matches[i][0].length;
         let j = i + 1;
         while (j < matches.length) {
           const prevEnd = end;
-          const nextStart = matches[j].index!;
+          const nextStart = matches[j].index;
           const betweenText = text.slice(prevEnd, nextStart);
           const wordGap = betweenText
             .replace(/<[^>]+>/g, '')
@@ -155,28 +163,24 @@ export class HelperService {
           if (wordGap <= 2) {
             const cleanBetween = betweenText.replace(/<[^>]+>/g, '').trim();
             merged += ` ${cleanBetween} ${matches[j][1]}`;
-            end = matches[j].index! + matches[j][0].length;
+            end = matches[j].index + matches[j][0].length;
             j++;
           }
           else {
             break;
           }
         }
-        result += text.slice(lastIndex, start);
-        result += `<em>${merged}</em>`;
+        highlightedText += escapeHtml(text.slice(lastIndex, start));
+        highlightedText += `<span class="bg-[var(--color-tags)] text-[var(--color-text1)] rounded-sm px-1">${escapeHtml(merged.trim())}</span>`;
         lastIndex = end;
         i = j;
       }
-      result += text.slice(lastIndex);
-      highlighted = result
-        .replace(/<em>/g,
-          '<span class="bg-[var(--color-tags)] text-[var(--color-text1)] rounded-sm px-1">')
-        .replace(/<\/em>/g, '</span>');
+      renderedHtml = highlightedText + escapeHtml(text.slice(lastIndex));
     }
     else {
-      highlighted = text.length > 500 ? text.substring(0, 500) : text;
+      renderedHtml = escapeHtml(text.length > 500 ? text.substring(0, 500) : text);
     }
-    return this.sanitizer.bypassSecurityTrustHtml(highlighted);
+    return this.sanitizer.bypassSecurityTrustHtml(renderedHtml);
   }
 
   private convertToCSV(data: any): string {
@@ -211,6 +215,36 @@ export class HelperService {
       const comparison = strA.localeCompare(strB, undefined, { sensitivity: 'base' });
       return order === 'asc' ? comparison : -comparison;
     });
+  }
+
+  getActivityThreadTarget(item: PublicUserActivityItem): { path: string[]; queryParams: Record<string, string> } | null {
+    const docId = item.doc_id?.trim();
+    if (!docId) {
+      return null;
+    }
+
+    switch (item.index_name) {
+      case 'generic_model':
+        return { path: ['/dashboard', 'strategic', 'all', docId], queryParams: { ci: 'strategic' } };
+      case 'leak_model':
+        return { path: ['/dashboard', 'breach', 'all', docId], queryParams: { ci: 'leak' } };
+      case 'exploit_model':
+        return { path: ['/dashboard', 'exploit', 'all', docId], queryParams: { ci: 'exploit' } };
+      case 'defacement_model':
+        return { path: ['/dashboard', 'defacement', 'all', docId], queryParams: { ci: 'defacement' } };
+      case 'social_model':
+        return { path: ['/dashboard', 'social', 'all', docId], queryParams: { ci: 'social' } };
+      case 'chat_model':
+        return { path: ['/dashboard', 'social', 'chat', 'all', docId], queryParams: { ci: 'chat' } };
+      default:
+        if (!item.route_path) {
+          return null;
+        }
+        return {
+          path: ['/', ...item.route_path.split('/').filter(Boolean)],
+          queryParams: item.route_query,
+        };
+    }
   }
 
   private normalizeShareUrl(url: string): string {

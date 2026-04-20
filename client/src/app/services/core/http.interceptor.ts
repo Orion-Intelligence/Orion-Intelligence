@@ -10,9 +10,7 @@ let activeRequests = 0;
 let hideTimeout: any = null;
 const inFlightCancels = new Map<string, Subject<void>>();
 const GLOBAL_TIMEOUT = 150000;
-const STATUS_MEANINGS: {
-    [key: number]: string;
-} = {
+const STATUS_MEANINGS: Record<number, string> = {
   400: 'Bad Request',
   401: 'Unauthorized',
   402: 'Payment Required',
@@ -93,7 +91,7 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
         'Logged out due to multiple active sessions',
       ]);
       const isSilentLogout = silentLogoutMessages.has(message);
-      if (error instanceof HttpErrorResponse && error.status !== 400) {
+      if (error instanceof HttpErrorResponse && error.status !== 400 && error.status !== 429) {
         localStorage.clear();
         sessionStorage.clear();
         router.navigate(['/login']).then();

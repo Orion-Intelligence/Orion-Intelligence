@@ -1,6 +1,6 @@
 <ng-container>
   <span id="top"></span>
-  <div class="w-full p-3 md:p-4">
+  <div class="w-full p-3 pb-[100px] md:p-4 md:pb-[100px]">
     <div class="ui-page-container w-full max-w-[2400px]">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -8,7 +8,11 @@
           <p class="ui-page-description">Track user and tenant activity across the platform.</p>
         </div>
         <div class="flex items-center gap-2">
-          <button type="button" class="ui-btn ui-btn-primary" (click)="exportAuditLogs()">
+          <div class="relative">
+            <i class="bi bi-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[14px] text-[var(--color-text4)]"></i>
+            <input data-testid="auditlog-user-search" type="text" [(ngModel)]="selectedActor" (keyup.enter)="onActorChange()" placeholder="Search username" class="h-10 w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[var(--color-text1)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-sky-400/35 focus:bg-[var(--color-blue-720)] focus:ring-2 focus:ring-sky-400/20 max-[1024px]:w-[220px] max-[760px]:w-full placeholder:text-[var(--color-text4)]" />
+          </div>
+          <button data-testid="auditlog-export-button" type="button" class="ui-btn ui-btn-primary" (click)="exportAuditLogs()">
             <i class="bi bi-download me-2"></i>
             Export
           </button>
@@ -16,14 +20,16 @@
             <img alt="Filter Icon" height="16" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="16" class="ui-filter-icon">
             <span class="ml-2">Filter</span>
           </button>
-          @if (isFilterOpen$ | async) {
+          @if (sidebarReady && (isFilterOpen$ | async)) {
             <div class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="closeSidebar()"></div>
           }
-          <div class="ui-filter-sidebar-panel fixed top-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transition-[right] duration-200 max-[450px]:w-full" [ngClass]="{ 'right-[-300px] max-[450px]:right-[-100vw]': !(isFilterOpen$ | async), 'right-0': (isFilterOpen$ | async) }">
-            <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"
-              (filterReset)="resetFilters()" [filterModel]="filterModel"
-            [isFilterOpen]="isFilterOpen$ | async"></app-filters>
-          </div>
+          @if (sidebarReady) {
+            <div class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !(isFilterOpen$ | async), 'translate-x-0 pointer-events-auto': (isFilterOpen$ | async) }">
+              <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"
+                (filterReset)="resetFilters()" [filterModel]="filterModel"
+              [isFilterOpen]="isFilterOpen$ | async"></app-filters>
+            </div>
+          }
         </div>
       </div>
       <app-auditlog-list [isLoading]="isLoading()"></app-auditlog-list>

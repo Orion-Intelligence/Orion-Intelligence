@@ -58,17 +58,15 @@ export class ManageProfileComponent implements OnInit {
     }
     this.isLoading = true;
     this.apiService.post('update/user', user).pipe(switchMap(() => this.nodeResolver.resolve()), finalize(() => (this.isLoading = false))).subscribe({
-      next: (_) => {
-      },
-      error: () => {
-      }
+      next: (_) => void 0,
+      error: () => void 0
     });
   }
 
   @HostListener('document:click', ['$event'])
   handleClickOutside(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.action-menu')) {
+    const eventTargetElement = event.target as HTMLElement;
+    if (!eventTargetElement.closest('.action-menu')) {
       this.selectedUserId = null;
     }
   }

@@ -1,0 +1,31 @@
+{
+  "job_id": "5486279598248634122",
+  "status": "done",
+  "result": {
+    "status": "success",
+    "query": "hacking",
+    "results": [
+      {
+        "engine": "example_engine.onion",
+        "status": "success",
+        "search_url": "http://example_engine.onion/search?q=hacking",
+        "first_result": {
+          "url": "http://example_result.onion",
+          "title": "Example Title",
+          "description": "Example description..."
+        }
+      },
+      {
+        "engine": "searchmirror.onion",
+        "status": "success",
+        "search_url": "http://searchmirror.onion/search?q=hacking",
+        "first_result": {
+          "url": "http://searchmirror.onion/result/1",
+          "title": "Mirror Result",
+          "description": "Alternate engine result used for UI tests."
+        }
+      }
+    ],
+    "query_type": "search_text"
+  }
+}

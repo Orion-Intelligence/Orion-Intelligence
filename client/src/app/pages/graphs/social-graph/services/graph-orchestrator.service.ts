@@ -22,7 +22,9 @@ export class GraphOrchestratorService {
 
   private wait(milliseconds: number): Promise<void> {
     return new Promise(resolve => {
-      setTimeout(() => resolve(), milliseconds);
+      setTimeout(() => {
+        resolve(); 
+      }, milliseconds);
     });
   }
 
@@ -134,12 +136,14 @@ export class GraphOrchestratorService {
     state.activeUsernames.update(s => new Set(s).add(username));
     const addNodeSequentially = (index: number) => {
       if (index >= platformNodes.length) {
-        this.updateUserConnections(state).then();
+        void this.updateUserConnections(state);
         return;
       }
       const node = platformNodes[index], edge = { id: `${centralNodeId}->${node.id}`, from: centralNodeId, to: node.id };
       state.networkData.update(d => ({ nodes: [...d.nodes, node], edges: [...d.edges, edge] }));
-      setTimeout(() => addNodeSequentially(index + 1), 75);
+      setTimeout(() => {
+        addNodeSequentially(index + 1); 
+      }, 75);
     };
     addNodeSequentially(0);
   }
@@ -277,7 +281,7 @@ export class GraphOrchestratorService {
     const isCollapsing = expandedGroupForUser?.id === nodeId;
     const collapseGroupAnimated = async (currentState: TabState) => {
       const groupToCollapse = currentState.expandedGroupDataByUser()[username];
-      if (!groupToCollapse || !groupToCollapse.groupedPlatforms) {
+      if (!groupToCollapse?.groupedPlatforms) {
         return;
       }
       const platformIdsToRemove = groupToCollapse.groupedPlatforms.map(p => this.fetchingState.getPlatformUniqueKey(p));
@@ -348,8 +352,10 @@ export class GraphOrchestratorService {
       for (let j = i + 1; j < activeUsers.length; j++) {
         const userA = activeUsers[i];
         const userB = activeUsers[j];
-        const userANodeId = `user-${userA}`;
-        const userBNodeId = `user-${userB}`;
+        const userAName = String(userA);
+        const userBName = String(userB);
+        const userANodeId = `user-${userAName}`;
+        const userBNodeId = `user-${userBName}`;
         if (!allNodeIdsOnGraph.has(userANodeId) || !allNodeIdsOnGraph.has(userBNodeId)) {
           continue;
         }
@@ -369,13 +375,13 @@ export class GraphOrchestratorService {
           if (aToBDetected) {
             followsAtoB = true;
             matchedPlatforms.add(platformA.platform);
-            detectorProfiles.add(`${userA}|${platformA.platform}|${platformA.username}`);
+            detectorProfiles.add([userAName, platformA.platform, platformA.username].join('|'));
           }
           const aMentionDetected = this.relationshipResolver.containsAnyHandle(platformA.post_connections, userBHandles);
           if (aMentionDetected) {
             mentionsAtoB = true;
             matchedPlatforms.add(platformA.platform);
-            detectorProfiles.add(`${userA}|${platformA.platform}|${platformA.username}`);
+            detectorProfiles.add([userAName, platformA.platform, platformA.username].join('|'));
           }
         }
         for (const platformB of userBPlatforms) {
@@ -384,13 +390,13 @@ export class GraphOrchestratorService {
           if (bToADetected) {
             followsBtoA = true;
             matchedPlatforms.add(platformB.platform);
-            detectorProfiles.add(`${userB}|${platformB.platform}|${platformB.username}`);
+            detectorProfiles.add([userBName, platformB.platform, platformB.username].join('|'));
           }
           const bMentionDetected = this.relationshipResolver.containsAnyHandle(platformB.post_connections, userAHandles);
           if (bMentionDetected) {
             mentionsBtoA = true;
             matchedPlatforms.add(platformB.platform);
-            detectorProfiles.add(`${userB}|${platformB.platform}|${platformB.username}`);
+            detectorProfiles.add([userBName, platformB.platform, platformB.username].join('|'));
           }
         }
         if (!followsAtoB && !followsBtoA && !mentionsAtoB && !mentionsBtoA) {
@@ -403,32 +409,19 @@ export class GraphOrchestratorService {
         const isMutualFollow = followsAtoB && followsBtoA;
         const isMutualMention = mentionsAtoB && mentionsBtoA;
         const directionTitle = isMutualFollow
-          ? `${userA} and ${userB} follow each other`
+          ? `${userAName} and ${userBName} follow each other`
           : isMutualMention
-            ? `${userA} and ${userB} mention each other`
+            ? `${userAName} and ${userBName} mention each other`
             : followsAtoB
-              ? `${userA} follows ${userB}`
+              ? `${userAName} follows ${userBName}`
               : followsBtoA
-                ? `${userB} follows ${userA}`
+                ? `${userBName} follows ${userAName}`
                 : mentionsAtoB
-                  ? `${userA} mentioned ${userB}`
-                  : `${userB} mentioned ${userA}`;
+                  ? `${userAName} mentioned ${userBName}`
+                  : `${userBName} mentioned ${userAName}`;
+        const relationshipTitle = `${directionTitle}\nDetected by ${detectorProfileCount} social profile(s)\nPlatforms: ${matchedPlatformsText}`;
         newRelationshipNodes.push({
-          id: relationshipNodeId,
-          label: '',
-          relationshipCount: detectorProfileCount,
-          shape: 'dot',
-          size: 2,
-          font: { color: this.getGraphLabelColor(), size: 1 },
-          color: {
-            border: 'rgba(0,0,0,0)',
-            background: 'rgba(0,0,0,0)',
-            highlight: { border: 'rgba(0,0,0,0)', background: 'rgba(0,0,0,0)' },
-            hover: { border: 'rgba(0,0,0,0)', background: 'rgba(0,0,0,0)' }
-          },
-          borderWidth: 0,
-          borderWidthSelected: 0,
-          title: `${directionTitle}\nDetected by ${detectorProfileCount} social profile(s)\nPlatforms: ${matchedPlatformsText}`
+          ...this.graphManager.createRelationshipNode(relationshipNodeId, detectorProfileCount, relationshipTitle)
         });
         const edgeStyle = {
           color: { color: '#f59e0b', highlight: '#fbbf24', hover: '#f59e0b' },

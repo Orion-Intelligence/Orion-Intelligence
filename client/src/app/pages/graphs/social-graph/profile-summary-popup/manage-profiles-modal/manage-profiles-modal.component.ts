@@ -16,7 +16,7 @@ type ManagedPlatformRow = ManagedPlatform & {
 })
 export class ManageProfilesModalComponent {
   data = input.required<ManageProfilesModalData | null>();
-  close = output<void>();
+  close = output<undefined>();
   updateGraph = output<PlatformResult[]>();
   searchUsername = output<string>();
   platforms = signal<ManagedPlatformRow[]>([]);
@@ -95,7 +95,8 @@ export class ManageProfilesModalComponent {
   }
 
   onSearchChanged(event: Event) {
-    this.searchTerm.set((event.target as HTMLInputElement).value);
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.searchTerm.set(nextValue);
   }
 
   clearSearch() {
@@ -197,12 +198,12 @@ export class ManageProfilesModalComponent {
     if (!this.isImageExtractedFlow()) {
       return;
     }
-    const value = (event.target as HTMLInputElement).value;
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
     this.platforms.update(current => current.map(p => {
       if (p.stableKey !== platformToUpdate.stableKey) {
         return p;
       }
-      return { ...p, draftUsername: value };
+      return { ...p, draftUsername: nextValue };
     }));
   }
 

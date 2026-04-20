@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit, input } from '@angular/core';
 import { Category } from '../../constants/pages';
 @Component({
   selector: 'app-empty-result',
@@ -10,10 +10,9 @@ export class EmptyResultComponent implements OnInit {
   protected readonly category = Category;
 
   query = '';
-
-  @Input() searchQuery!: string;
+  readonly searchQuery = input('');
 
   ngOnInit(): void {
-    this.query = this.searchQuery;
+    this.query = this.searchQuery();
   }
 }

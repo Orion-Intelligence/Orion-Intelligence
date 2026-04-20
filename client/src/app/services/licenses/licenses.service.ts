@@ -6,21 +6,42 @@ import { SubscriptionService } from '../dashboard/subscription.service';
 import { Router } from '@angular/router';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { AppService } from '../core/app/app.service';
-type CombinedRule = {
+import { AuthService } from '../authetication/auth.service';
+interface CombinedRule {
     modules: Set<string> | 'all';
     cti_graph: boolean;
     mapping: boolean;
     scanning: boolean;
     maintainer: boolean;
-};
+}
 @Injectable({
   providedIn: 'root'
 })
 export class LicenseService {
-  constructor(protected dashboardService: DashboardService, private appService: AppService, private subscriptionService: SubscriptionService, private router: Router) { }
+  constructor(protected dashboardService: DashboardService, private appService: AppService, private subscriptionService: SubscriptionService, private router: Router, private authService: AuthService) { }
+
+  private getUserRole(): string {
+    return this.appService.userSessionData().user.role;
+  }
 
   getLicenses(): string[] {
     return this.appService.userSessionData().user.license ?? [];
+  }
+
+  isAdmin(): boolean {
+    return this.getUserRole() === 'admin';
+  }
+
+  isAnalyst(): boolean {
+    return this.getUserRole() === 'analyst';
+  }
+
+  isDemo(): boolean {
+    return this.getUserRole() === 'demo';
+  }
+
+  isMember(): boolean {
+    return this.getUserRole() === 'member';
   }
 
   loadLicenses(): Observable<string[]> {
@@ -60,6 +81,10 @@ export class LicenseService {
   demoSubscription(moduleName: string) {
     if (!this.canAccess(moduleName)) {
       this.dashboardService.showSubscription.set(true);
+      if (this.authService.getIsMobileDemo()) {
+        this.router.navigate(['/dashboard/strategic/all'], { queryParams: { page: 1 } }).then();
+        return;
+      }
       this.router.navigate(['/']).then();
     }
   }

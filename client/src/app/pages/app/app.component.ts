@@ -5,14 +5,13 @@ import { filter, map, Observable } from 'rxjs';
 
 import { AppService } from '../../services/core/app/app.service';
 import { appAnimation, quotaBannerAnimation } from '../../shared/animations/app.animations';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MessageNotificationComponent } from '../../shared/partials/message-notification/message-notification.component';
 import { LoaderComponent } from '../../shared/partials/loader/loader.component';
 import { TrailNotificationComponent } from '../../shared/partials/trail-notification/trail-notification.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, FormsModule, ReactiveFormsModule, MessageNotificationComponent, LoaderComponent, TrailNotificationComponent],
+  imports: [RouterOutlet, MessageNotificationComponent, LoaderComponent, TrailNotificationComponent],
   templateUrl: './app.component.html',
   animations: [appAnimation, quotaBannerAnimation],
 })
@@ -38,7 +37,15 @@ export class AppComponent {
   }
 
   shouldAnimate(): boolean {
-    return !this.currentRoute().startsWith('/dashboard');
+    const route = this.currentRoute();
+    return ![
+      '/login',
+      '/signup',
+      '/reset',
+      '/welcome',
+      '/notification',
+      '/paymentGateway'
+    ].some(path => route.startsWith(path));
   }
 
   private applyTheme(theme: 'light-theme' | 'dark-theme'): void {

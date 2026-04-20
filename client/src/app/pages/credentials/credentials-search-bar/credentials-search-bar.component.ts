@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, OnInit, output } from '@angular/core';
 import { KeyValuePipe, NgClass } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -26,8 +26,7 @@ export class CredentialsSearchBarComponent implements OnInit{
   selectedTag = StealerlogsSearchFilters.ALL;
   basicQuery = '';
   advancedFilters: StealerlogsAdvancedFilter[] = [ { id: this.generateId(), tag: StealerlogsSearchFilters.DOMAIN, value: '', operator: '&&' } ];
-
-  @Output() searchTriggered = new EventEmitter<string>();
+  readonly searchTriggered = output<string>();
 
   constructor(protected sidebarService: SidebarService,private route: ActivatedRoute) { }
 
@@ -253,9 +252,9 @@ export class CredentialsSearchBarComponent implements OnInit{
   }
 
   filterBasicInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
+    const inputElement = event.target as HTMLInputElement;
     if (this.selectedTag === StealerlogsSearchFilters.ALL) {
-      this.basicQuery = input.value;
+      this.basicQuery = inputElement.value;
       return;
     }
     let regex: RegExp;
@@ -275,12 +274,12 @@ export class CredentialsSearchBarComponent implements OnInit{
       default:
         regex = /[^a-zA-Z0-9&|@.\s]/g;
     }
-    const sanitized = input.value.replace(regex, '');
-    if (sanitized !== input.value) {
-      const cursor = input.selectionStart ?? sanitized.length;
-      input.value = sanitized;
+    const sanitized = inputElement.value.replace(regex, '');
+    if (sanitized !== inputElement.value) {
+      const cursor = inputElement.selectionStart ?? sanitized.length;
+      inputElement.value = sanitized;
       this.basicQuery = sanitized;
-      input.setSelectionRange(cursor - 1, cursor - 1);
+      inputElement.setSelectionRange(cursor - 1, cursor - 1);
     }
   }
 

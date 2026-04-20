@@ -1,0 +1,252 @@
+:host {
+  --tour-overlay-clip: none;
+  --tour-spotlight-top: 0px;
+  --tour-spotlight-left: 0px;
+  --tour-spotlight-width: 0px;
+  --tour-spotlight-height: 0px;
+  --tour-tooltip-top: 0px;
+  --tour-tooltip-left: 0px;
+  --tour-tooltip-bottom: auto;
+  --tour-tooltip-width: 320px;
+  --tour-progress-width: 0%;
+  --tour-accent: var(--color-blue-640);
+  --tour-accent-strong: var(--color-blue-630);
+  --tour-tooltip-accent: var(--color-blue-640);
+  --tour-surface: color-mix(in srgb, var(--color-blue-700) 30%, transparent);
+  --tour-surface-edge: color-mix(in srgb, var(--tour-tooltip-accent) 24%, var(--color-border));
+  --tour-shadow: 0 16px 40px color-mix(in srgb, var(--color-text1) 28%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-border) 32%, transparent);
+  --tour-tooltip-radius: 0.78rem;
+  --tour-spotlight-radius: 10px;
+}
+
+.tour-spotlight-svg {
+  stroke: color-mix(in srgb, var(--tour-accent) 34%, transparent);
+  stroke-width: 1px;
+  opacity: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.tour-spotlight-fill-stop-start {
+  stop-color: color-mix(in srgb, var(--tour-accent) 10%, transparent);
+}
+
+.tour-spotlight-glow-shadow {
+  flood-color: var(--tour-accent);
+  flood-opacity: 0.18;
+}
+
+.tour-spotlight-reveal-a,
+.tour-spotlight-reveal-b {
+  animation: tour-spotlight-reveal 140ms ease-out;
+}
+
+.tour-tooltip {
+  top: var(--tour-tooltip-top);
+  left: var(--tour-tooltip-left);
+  bottom: var(--tour-tooltip-bottom, auto);
+  width: var(--tour-tooltip-width, 320px);
+  max-width: calc(100vw - 24px);
+  opacity: 0;
+  border-radius: var(--tour-tooltip-radius);
+  border-width: 2px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-blue-710) 28%, transparent), color-mix(in srgb, var(--color-blue-700) 34%, transparent)),
+    var(--tour-surface);
+  border-color: var(--tour-surface-edge);
+  box-shadow: var(--tour-shadow);
+  transform: translate3d(0, 0, 0);
+  transform-origin: top left;
+  transition:
+    top 180ms ease-out,
+    left 180ms ease-out,
+    opacity 160ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease,
+    background-color 120ms ease;
+  contain: layout paint style;
+}
+
+:host(.tour-tooltip-positioned) .tour-tooltip {
+  opacity: 1;
+}
+
+.tour-tooltip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--tour-accent) 12%, transparent), transparent 34%),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-text1) 4.5%, transparent), transparent 28%);
+}
+
+.tour-tooltip::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  pointer-events: none;
+  border-radius: calc(var(--tour-tooltip-radius) - 0.18rem);
+  border: 1px solid color-mix(in srgb, var(--color-text1) 3.5%, transparent);
+}
+
+.tour-progress-bar {
+  width: var(--tour-progress-width);
+  background: linear-gradient(90deg, var(--tour-accent), color-mix(in srgb, var(--tour-accent) 58%, white 42%));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--tour-accent) 22%, transparent);
+  transition: width 180ms ease-out;
+}
+
+.tour-primary-button {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 9999px;
+  padding: 0.65rem 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border: 1px solid color-mix(in srgb, var(--tour-accent) 34%, var(--color-border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--tour-accent-strong) 90%, transparent), color-mix(in srgb, var(--tour-accent) 82%, var(--color-text1) 18%));
+  color: var(--color-text1);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--tour-accent) 16%, transparent);
+}
+
+.tour-primary-button:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--tour-accent) 48%, var(--color-text1) 12%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--tour-accent-strong) 96%, var(--color-text1) 4%), color-mix(in srgb, var(--tour-accent) 88%, var(--color-text1) 12%));
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--tour-accent) 20%, transparent);
+}
+
+.tour-primary-button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--tour-accent) 62%, var(--color-text1) 38%);
+  outline-offset: 2px;
+}
+
+.tour-overlay {
+  opacity: 1;
+  will-change: opacity;
+}
+
+.tour-loader-spinner {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex: 0 0 auto;
+  border-radius: 9999px;
+  border: 2px solid color-mix(in srgb, var(--tour-accent) 20%, var(--color-text1) 10%);
+  border-top-color: color-mix(in srgb, var(--tour-accent) 88%, var(--color-text1) 12%);
+  animation: tour-loader-spin 0.8s linear infinite;
+}
+
+.tour-state-layer {
+  opacity: 0;
+  transform: translate3d(0, 6px, 0);
+  pointer-events: none;
+  transition:
+    opacity 220ms ease-out,
+    transform 220ms ease-out,
+    filter 220ms ease-out;
+  will-change: opacity, transform;
+}
+
+.tour-state-layer.is-active {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  pointer-events: auto;
+}
+
+.tour-state-layer-ready {
+  transition-delay: 70ms;
+}
+
+.tour-state-layer-ready:not(.is-active) {
+  transition-delay: 0ms;
+}
+
+.tour-state-layer-loading {
+  transition-duration: 160ms;
+}
+
+.tour-primary-button[disabled] {
+  cursor: default;
+  opacity: 0.65;
+  transform: none;
+  box-shadow: none;
+}
+
+:host(.tour-loading) .tour-spotlight-svg,
+:host(.tour-loading) .tour-progress-bar {
+  transition: none !important;
+}
+
+:host(.tour-loading) .tour-spotlight-reveal-a,
+:host(.tour-loading) .tour-spotlight-reveal-b {
+  animation-duration: 110ms;
+}
+
+.demo-tour-active {
+  position: relative !important;
+  z-index: 1004 !important;
+  pointer-events: auto !important;
+  isolation: isolate;
+  transition: none;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--tour-accent) 18%, transparent),
+    0 0 0 5px color-mix(in srgb, var(--tour-accent) 6%, transparent),
+    0 0 18px color-mix(in srgb, var(--tour-accent) 12%, transparent) !important;
+}
+
+@keyframes tour-spotlight-reveal {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tour-loader-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+:host-context(.light-theme) .tour-tooltip {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-white) 98%, transparent), color-mix(in srgb, var(--color-blue-730) 98%, transparent)),
+    var(--color-white);
+  color: var(--color-text1);
+  box-shadow: 0 18px 42px var(--color-shadow-medium), 0 0 0 1px color-mix(in srgb, var(--color-border) 70%, transparent);
+}
+
+:host-context(.light-theme) .tour-tooltip::before {
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--color-blue-640) 10%, transparent), transparent 36%),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-white) 92%, transparent), transparent 26%);
+}
+
+:host-context(.light-theme) .tour-overlay {
+  opacity: 0.96;
+}
+
+@media (width <= 640px) {
+  .tour-tooltip {
+    max-width: calc(100vw - 20px);
+  }
+
+  .tour-primary-button {
+    width: 100%;
+    justify-content: center;
+  }
+}

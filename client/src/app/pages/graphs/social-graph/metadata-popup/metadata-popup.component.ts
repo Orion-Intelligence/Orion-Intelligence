@@ -16,12 +16,9 @@ import { PlatformFeedViewBase } from '../utils/platform-feed-view.base';
   imports: [SocialIconComponent, PlatformIconBgDirective],
 })
 export class MetadataPopupComponent extends PlatformFeedViewBase {
-  private static readonly CONNECTION_PLATFORMS = new Set(['instagram', 'facebook', 'youtube', 'twitter']);
-  private static readonly FOLLOW_PLATFORMS = new Set(['instagram', 'twitter', 'behance', 'behnace', 'facebook']);
-
   data = input.required<PlatformResult>();
   isScanInProgress = input<boolean>(false);
-  close = output<void>();
+  close = output<undefined>();
   fetchProfile = output<PlatformResult>();
   fetchPosts = output<PlatformResult>();
   fetchImages = output<PlatformResult>();
@@ -77,20 +74,14 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
   }
 
   onClose() {
-    this.close.emit();
+    this.close.emit(undefined);
   }
 
-  getMetadataEntries(): {
-        key: string;
-        value: any;
-    }[] {
+  getMetadataEntries(): { key: string; value: any; }[] {
     return getMetadataEntries(this.data().allMetadata);
   }
 
-  getProfileDetailEntries(): {
-        key: string;
-        value: any;
-    }[] {
+  getProfileDetailEntries(): { key: string; value: any; }[] {
     return getProfileDetailEntries(this.data());
   }
 
@@ -117,47 +108,5 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
   getAccountUrl(): string {
     const platformData = this.data();
     return buildSocialProfileUrl(platformData.platform, platformData.username, platformData.url);
-  }
-
-  scanConnections(usernames: string[] | null | undefined): void {
-    const normalized = this.normalizeUsernames(usernames);
-    if (normalized.length === 0) {
-      return;
-    }
-    this.scanUsernames.emit(normalized);
-  }
-
-  supportsPostConnections(platformName: string | null | undefined): boolean {
-    return MetadataPopupComponent.CONNECTION_PLATFORMS.has(this.normalizePlatformName(platformName));
-  }
-
-  supportsFollowersFollowing(platformName: string | null | undefined): boolean {
-    return MetadataPopupComponent.FOLLOW_PLATFORMS.has(this.normalizePlatformName(platformName));
-  }
-
-  private normalizeUsernames(usernames: string[] | null | undefined): string[] {
-    const seen = new Set<string>();
-    const result: string[] = [];
-    for (const name of usernames || []) {
-      const trimmed = String(name || '').trim();
-      if (!trimmed) {
-        continue;
-      }
-      const normalized = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
-      if (!normalized) {
-        continue;
-      }
-      const key = normalized.toLowerCase();
-      if (seen.has(key)) {
-        continue;
-      }
-      seen.add(key);
-      result.push(normalized);
-    }
-    return result;
-  }
-
-  private normalizePlatformName(platformName: string | null | undefined): string {
-    return String(platformName || '').trim().toLowerCase();
   }
 }

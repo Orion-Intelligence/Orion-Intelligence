@@ -1,16 +1,16 @@
 export function openAndAssertReportModal(title: string) {
-  cy.get('[data-testid="cti-tab-session-menu"], [data-testid="social-tab-session-menu"]', {timeout: 15000}).filter(':visible').first().click();
-  cy.contains('button', 'Export Report', {timeout: 15000}).then(($button) => {
+  cy.get('[data-testid="cti-tab-session-menu"], [data-testid="social-tab-session-menu"]').filter(':visible').first().click();
+  cy.contains('button', 'Export Report').then(($button) => {
     ($button[0] as HTMLButtonElement).click();
   });
-  cy.contains(title, {timeout: 10000}).should('be.visible');
-  cy.get('[data-testid="graph-report-export-modal"]', {timeout: 10000}).filter(':visible').first().should('be.visible');
+  cy.contains(title).should('be.visible');
+  cy.get('[data-testid="graph-report-export-modal"]').filter(':visible').first().should('be.visible');
   cy.get('[data-testid="graph-report-export-json"]').filter(':visible').first().should('exist');
   cy.get('[data-testid="graph-report-export-graph-pdf"]').filter(':visible').first().should('exist');
 }
 
 export function invokeVisibleTabBarMethod(methodName: 'createNewTab' | 'exportCurrentSession') {
-  cy.get('app-tab-bar', {timeout: 15000})
+  cy.get('app-tab-bar')
     .filter(':visible')
     .first()
     .then(($host) => {
@@ -22,26 +22,26 @@ export function invokeVisibleTabBarMethod(methodName: 'createNewTab' | 'exportCu
 }
 
 export function waitForToolbarSearchReady() {
-  cy.get('[data-testid="graph-toolbar-search-input"]', {timeout: 30000}).should('be.visible').and('not.be.disabled');
+  cy.get('[data-testid="graph-toolbar-search-input"]').should('be.visible').and('not.be.disabled');
 }
 
 export function waitForCtiGraphReady() {
-  cy.get('[data-testid="cti-network-container"]', {timeout: 30000}).should('be.visible');
-  cy.get('[data-testid="cti-network-container"] canvas', {timeout: 30000}).should('exist');
+  cy.get('[data-testid="cti-network-container"]').should('be.visible');
+  cy.get('[data-testid="cti-network-container"] canvas').should('exist');
 }
 
 export function visitCtiGraph() {
   cy.viewport(1440, 900);
   cy.visit('/dashboard/ctigraph');
-  cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/ctigraph');
-  cy.get('[data-testid="graph-toolbar-root"]', {timeout: 30000}).should('be.visible');
+  cy.location('pathname').should('include', '/dashboard/ctigraph');
+  cy.get('[data-testid="graph-toolbar-root"]').should('be.visible');
 }
 
 export function visitSocialGraph() {
   cy.viewport(1440, 900);
   cy.visit('/dashboard/social-intel');
-  cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/social-intel');
-  cy.get('[data-testid="social-graph-root"]', {timeout: 30000}).should('be.visible');
+  cy.location('pathname').should('include', '/dashboard/social-intel');
+  cy.get('[data-testid="social-graph-root"]').should('be.visible');
 }
 
 export function setupSocialGraphInterceptors() {

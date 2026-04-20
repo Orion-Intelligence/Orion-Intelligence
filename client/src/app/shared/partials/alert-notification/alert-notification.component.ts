@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, input, output } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
 import { AlertNotification } from '../../model/alert-notification/alert.notification.model';
@@ -32,10 +32,8 @@ export class AlertNotificationComponent implements OnChanges {
   alertToShowReport: AlertModel | null = null;
   isExportChoiceOpen: boolean = false;
   readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.', testId: 'notification-alert-export-option-report' }];
-
-  @Input() isNotificationOpen!: boolean | null;
-
-  @Output() closeNotification = new EventEmitter<void>();
+  readonly isNotificationOpen = input.required<boolean | null>();
+  readonly closeNotification = output<undefined>();
 
   constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService, private alertExportService: AlertExportService) {
   }
@@ -81,7 +79,9 @@ export class AlertNotificationComponent implements OnChanges {
         if (reset && nextPage === 1 && items.length === 0 && attempt < 3) {
           this.isLoadingMore = false;
           this.isLoadMoreTriggered = false;
-          setTimeout(() => this.fetchNotifications(true, attempt + 1), 800);
+          setTimeout(() => {
+            this.fetchNotifications(true, attempt + 1);
+          }, 800);
           return;
         }
         this.totalCount = response?.total || 0;
@@ -221,7 +221,8 @@ export class AlertNotificationComponent implements OnChanges {
   }
 
   close() {
-    this.closeNotification.emit();
+    // TODO: The 'emit' function requires a mandatory void argument
+    this.closeNotification.emit(undefined);
   }
 
   clearAll() {

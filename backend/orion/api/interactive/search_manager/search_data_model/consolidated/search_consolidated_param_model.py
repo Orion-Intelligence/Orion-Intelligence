@@ -1,7 +1,7 @@
 from typing import Optional, List, Dict, Annotated
 import json
 
-from pydantic import BaseModel, root_validator, StringConstraints, Field
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
 
 class search_consolidated_param_model(BaseModel):
@@ -24,11 +24,13 @@ class search_consolidated_param_model(BaseModel):
     entity_filter: Optional[Dict[str, List[str]]] = Field(
         default=None, examples=[{"m_country": ["pakistan"]}])
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
+    @classmethod
     def parse_entity_filter(cls, values):
+        if not isinstance(values, dict):
+            return values
         raw = values.get("entity_filter")
         if isinstance(raw, str):
             try:

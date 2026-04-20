@@ -5,7 +5,7 @@ export interface UrlScanMeta {
     Scanned_on_date: string;
     Scanned_by: string;
 }
-export type RiskLevel = 'Low' | 'Medium' | 'High' | 'Informational' | string;
+export type RiskLevel = string;
 export interface UrlScanThreatItem {
     header: string;
     description: string;

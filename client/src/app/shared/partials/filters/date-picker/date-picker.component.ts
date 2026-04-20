@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, HostListener, Input, OnChanges, Output } from '@angular/core';
+import { Component, HostListener, OnChanges, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CalendarCell } from '../../../model/filter/calendar-cell.model';
 
@@ -17,13 +17,17 @@ export class DatePickerComponent implements OnChanges {
   cells: CalendarCell[] = [];
   fromDate: Date | null = null;
   toDate: Date | null = null;
-
-  @Input() key = '';
-  @Input() filterModel: any;
-  @Input() mSelectedFilters: any;
-
-  @Output() selectedFiltersChange = new EventEmitter<{ key: string; value: string }>();
-  @Output() dateSelected = new EventEmitter<{ key: string; value: string }>();
+  readonly key = input('');
+  readonly filterModel = input<any>();
+  readonly mSelectedFilters = input<any>();
+  readonly selectedFiltersChange = output<{
+      key: string;
+      value: string;
+  }>();
+  readonly dateSelected = output<{
+      key: string;
+      value: string;
+  }>();
 
   get displayValue(): string {
     if (this.fromDate && this.toDate) {
@@ -43,7 +47,7 @@ export class DatePickerComponent implements OnChanges {
   }
 
   ngOnChanges(): void {
-    const raw = this.mSelectedFilters?.[this.key];
+    const raw = this.mSelectedFilters()?.[this.key()];
     if (!raw) {
       this.fromDate = null;
       this.toDate = null;
@@ -105,9 +109,10 @@ export class DatePickerComponent implements OnChanges {
     if (picked.getTime() >= this.fromDate.getTime()) {
       this.toDate = picked;
       const value = `${this.toIso(this.fromDate)},${this.toIso(this.toDate)}`;
-      this.mSelectedFilters[this.key] = value;
-      this.selectedFiltersChange.emit({ key: this.key, value });
-      this.dateSelected.emit({ key: this.key, value });
+      this.mSelectedFilters()[this.key()] = value;
+      const key = this.key();
+      this.selectedFiltersChange.emit({ key: key, value });
+      this.dateSelected.emit({ key: key, value });
       this.closePicker();
       return;
     }

@@ -27,15 +27,15 @@ function getSidebarGroupTestId(itemName: string): string {
 
 export function openSidebarGroup(itemName: string) {
   const sidebarGroupTestId = getSidebarGroupTestId(itemName);
-  cy.get(`[data-testid="${sidebarGroupTestId}"]`, {timeout: 30000}).first().scrollIntoView().should('be.visible').click();
+  cy.get(`[data-testid="${sidebarGroupTestId}"]`).first().scrollIntoView().should('be.visible').click();
 }
 
 export function openSidebarSubItem(routePrefix: string, itemSlug: string) {
-  cy.get(`[data-testid="sidebar-subitem-${routePrefix}-${itemSlug}"]`, {timeout: 30000}).first().scrollIntoView().should('be.visible').click();
+  cy.get(`[data-testid="sidebar-subitem-${routePrefix}-${itemSlug}"]`).first().scrollIntoView().should('be.visible').click();
 }
 
 export function setSelect(name: 'role' | 'status', optionText: string) {
-  cy.get('@addUserModal').find(`select[name="${name}"]`, {timeout: 30000}).should('exist').then(($select) => {
+  cy.get('@addUserModal').find(`select[name="${name}"]`).should('exist').then(($select) => {
     const optionLabels = [...$select.find('option')].map((opt) => (opt.textContent || '').replace(/\s+/g, ' ').trim()).filter(Boolean);
     const normalized = optionLabels.map((x) => x.toLowerCase());
     const wanted = optionText.trim().toLowerCase();
@@ -52,18 +52,18 @@ export function setSelect(name: 'role' | 'status', optionText: string) {
 }
 
 export function addUser(user: ManagedUser) {
-  cy.url({timeout: 30000}).should('include', '/dashboard/profile/users');
-  cy.get('[data-testid="tenant-add-user-button"]', {timeout: 30000}).should('be.visible').scrollIntoView().click();
-  cy.get('[data-testid="tenant-add-user-modal"]', {timeout: 30000}).should('be.visible').as('addUserModal');
-  cy.get('@addUserModal').find('input[name="username"]', {timeout: 30000}).should('be.visible').clear().type(user.username);
-  cy.get('@addUserModal').find('input[name="email"]', {timeout: 30000}).should('be.visible').clear().type(user.email);
-  cy.get('@addUserModal').find('input[name="password"]', {timeout: 30000}).should('be.visible').clear().type(user.password);
-  cy.get('@addUserModal').find('[data-testid="tenant-add-user-confirm-password"]', {timeout: 30000}).should('be.visible').clear().type(user.password);
+  cy.url().should('include', '/dashboard/profile/users');
+  cy.get('[data-testid="tenant-add-user-button"]').should('be.visible').scrollIntoView().click();
+  cy.get('[data-testid="tenant-add-user-modal"]').should('be.visible').as('addUserModal');
+  cy.get('@addUserModal').find('input[name="username"]').should('be.visible').clear().type(user.username);
+  cy.get('@addUserModal').find('input[name="email"]').should('be.visible').clear().type(user.email);
+  cy.get('@addUserModal').find('input[name="password"]').should('be.visible').clear().type(user.password);
+  cy.get('@addUserModal').find('[data-testid="tenant-add-user-confirm-password"]').should('be.visible').clear().type(user.password);
   setSelect('role', user.role);
   setSelect('status', 'Active');
   const wanted = user.licenses.map((x) => x.trim().toLowerCase());
 
-  cy.get('@addUserModal').find('.license-grid .license-card, .license-card, .license-btn', {timeout: 30000}).should('exist').each(($card) => {
+  cy.get('@addUserModal').find('.license-grid .license-card, .license-card, .license-btn').should('exist').each(($card) => {
     const label = $card.find('.license-label').text().replace(/\s+/g, ' ').trim().toLowerCase();
     const $checkbox = $card.find('input[type="checkbox"]');
     const shouldBeChecked = wanted.includes(label);
@@ -71,19 +71,34 @@ export function addUser(user: ManagedUser) {
     if (shouldBeChecked && !isChecked) cy.wrap($card).click();
     if (!shouldBeChecked && isChecked) cy.wrap($card).click();
   });
-  cy.get('@addUserModal').find('[data-testid="tenant-add-user-submit"]', {timeout: 30000}).should('be.visible').click();
-  cy.get('[data-testid="tenant-add-user-modal"]', {timeout: 30000}).should('not.exist');
-  cy.contains(user.username, {timeout: 30000}).should('exist');
+  cy.get('@addUserModal').find('[data-testid="tenant-add-user-submit"]').should('be.visible').click();
+  cy.get('[data-testid="tenant-add-user-modal"]').should('not.exist');
+  cy.contains(user.username).should('exist');
 }
 
 export function loginAsUser(username: string, password: string) {
-  cy.clearCookies();
-  cy.clearLocalStorage();
+  cy.intercept('POST', '**/api/token').as('loginRequest');
   cy.visit('/login');
-  cy.get('[data-testid="login-user"]', {timeout: 30000}).should('be.visible').clear().type(username);
-  cy.get('[data-testid="login-pass"]', {timeout: 30000}).should('be.visible').clear().type(password, {log: false});
-  cy.get('[data-testid="login-button"]', {timeout: 30000}).should('be.visible').click();
-  cy.url({timeout: 30000}).should('include', '/dashboard/profile');
+  cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
+  cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
+  cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+  cy.get('[data-testid="dashboard-main"]').should('be.visible');
+
+  cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
+    .filter(':visible')
+    .should('have.length.greaterThan', 0);
+}
+
+export function openFirstStrategicReportFromSearch(searchTerm = 'data') {
+  cy.visit('/dashboard/strategic/all?page=1');
+  cy.wait(1000);
+  cy.scrollDashboardToTop();
+  cy.get('[data-testid="dashboard-general-input"]').should('be.visible').clear().type(searchTerm);
+  cy.get('[data-testid="dashboard-search-submit"]').click();
+  cy.get('[data-testid="result-card"]').should('have.length.greaterThan', 0);
+  cy.get('[data-testid="open-report"]').filter(':visible').first().click();
+  cy.url().should('match', /\/dashboard\/strategic\/all\/[^/?]+/);
+  cy.get('#report-detail').should('be.visible');
 }
 
 export function loginAndClickSidebar(username: string, sidebarItems: string[], testUsers: any, testData: any) {
@@ -104,7 +119,7 @@ export function loginAndClickSidebar(username: string, sidebarItems: string[], t
           cy.get('input#phone').clear().type('03001234567');
           cy.get('input#email').clear().type(testData.stealer_upgrade_email);
           cy.get('form.pro-subscription_payment-form').submit();
-          cy.get('button.pro-subscription_btn-close', {timeout: 30000}).should('be.visible').click();
+          cy.get('button.pro-subscription_btn-close').should('be.visible').click();
         }
       });
     }
@@ -121,35 +136,35 @@ export function completeSubscriptionPopupFlow(testData: any, reopenPopup: () => 
   }).as('subscriptionRequest');
   const subscriptionPopupSelector = '.ui-graph-popup-overlay';
 
-  cy.get(subscriptionPopupSelector, {timeout: 30000}).should('be.visible');
-  cy.contains('h2', 'Upgrade to Dark Web Shield Pro', {timeout: 30000}).should('be.visible');
-  cy.contains('button', 'Proceed to Payment', {timeout: 30000}).should('be.disabled');
+  cy.get(subscriptionPopupSelector).should('be.visible');
+  cy.contains('h2', 'Upgrade to Dark Web Shield Pro').should('be.visible');
+  cy.contains('button', 'Proceed to Payment').should('be.disabled');
 
-  cy.get('input#name', {timeout: 30000}).focus().blur().should('have.attr', 'aria-invalid', 'true');
-  cy.get('input#phone', {timeout: 30000}).focus().blur().should('have.attr', 'aria-invalid', 'true');
-  cy.get('input#email', {timeout: 30000}).focus().blur().should('have.attr', 'aria-invalid', 'true');
-  cy.get('span', {timeout: 30000})
+  cy.get('input#name').focus().blur().should('have.attr', 'aria-invalid', 'true');
+  cy.get('input#phone').focus().blur().should('have.attr', 'aria-invalid', 'true');
+  cy.get('input#email').focus().blur().should('have.attr', 'aria-invalid', 'true');
+  cy.get('span')
     .filter((_, el) => (el.textContent || '').trim() === 'Required')
     .should('have.length.at.least', 3);
 
-  cy.get('input#name', {timeout: 30000}).clear().type('A').blur();
-  cy.contains('span', 'Too short', {timeout: 30000}).should('be.visible');
+  cy.get('input#name').clear().type('A').blur();
+  cy.contains('span', 'Too short').should('be.visible');
 
-  cy.get('input#phone', {timeout: 30000}).clear().type('abc').blur();
-  cy.contains('span', 'Invalid', {timeout: 30000}).should('exist');
+  cy.get('input#phone').clear().type('abc').blur();
+  cy.contains('span', 'Invalid').should('exist');
 
-  cy.get('input#email', {timeout: 30000}).clear().type('invalid-email').blur();
-  cy.contains('span', 'Invalid', {timeout: 30000}).should('exist');
+  cy.get('input#email').clear().type('invalid-email').blur();
+  cy.contains('span', 'Invalid').should('exist');
 
-  cy.get('input[type="radio"][name="subscription"][value="monthly"]', {timeout: 30000}).check({force: true}).should('be.checked');
-  cy.get('input[type="radio"][name="subscription"][value="annual"]', {timeout: 30000}).check({force: true}).should('be.checked');
+  cy.get('input[type="radio"][name="subscription"][value="monthly"]').check().should('be.checked');
+  cy.get('input[type="radio"][name="subscription"][value="annual"]').check().should('be.checked');
 
-  cy.get('input#name', {timeout: 30000}).should('be.visible').clear().type(testData.stealer_upgrade_name);
-  cy.get('input#phone', {timeout: 30000}).should('be.visible').clear().type('03001234567');
-  cy.get('input#email', {timeout: 30000}).should('be.visible').clear().type(testData.stealer_upgrade_email);
-  cy.contains('button', 'Proceed to Payment', {timeout: 30000}).should('not.be.disabled').click();
+  cy.get('input#name').should('be.visible').clear().type(testData.stealer_upgrade_name);
+  cy.get('input#phone').should('be.visible').clear().type('03001234567');
+  cy.get('input#email').should('be.visible').clear().type(testData.stealer_upgrade_email);
+  cy.contains('button', 'Proceed to Payment').should('not.be.disabled').click();
 
-  cy.wait('@subscriptionRequest', {timeout: 30000}).then(({request, response}) => {
+  cy.wait('@subscriptionRequest').then(({request, response}) => {
     expect(request.body).to.include({
       plan: 'annual',
       name: testData.stealer_upgrade_name,
@@ -159,37 +174,58 @@ export function completeSubscriptionPopupFlow(testData: any, reopenPopup: () => 
     expect(response?.statusCode).to.be.oneOf([200, 201]);
   });
 
-  cy.url({timeout: 30000}).should('include', '/notification');
-  cy.contains('div', 'Subscription Request Sent', {timeout: 30000}).should('be.visible');
-  cy.contains('p', 'Our team has received your subscription request', {timeout: 30000}).should('be.visible');
-  cy.contains('button', 'Homepage', {timeout: 30000}).should('be.visible').click();
+  cy.url().should('include', '/notification');
+  cy.contains('div', 'Subscription Request Sent').should('be.visible');
+  cy.contains('p', 'Our team has received your subscription request').should('be.visible');
+  cy.contains('button', 'Homepage').should('be.visible').click();
 
-  cy.contains('button[type="button"]', 'Close', {timeout: 30000}).should('be.visible').click();
-  cy.get(subscriptionPopupSelector, {timeout: 30000}).should('not.exist');
+  cy.contains('button[type="button"]', 'Close').should('be.visible').click();
+  cy.get(subscriptionPopupSelector).should('not.exist');
 }
 
 export function openUsersList(usersUrl: string) {
   cy.intercept('POST', '**/api/users').as('usersApi');
   cy.visit(usersUrl);
-  cy.wait('@usersApi', {timeout: 30000});
+  cy.wait('@usersApi');
 }
 
-export function deleteFirstUser(usersUrl: string) {
-  cy.get('#dashboard-container', {timeout: 30000}).scrollTo('bottom', {duration: 300, ensureScrollable: false});
-
-  cy.get('[data-testid="tenant-edit-user-button"]', {timeout: 30000}).then(($btns) => {
-    if ($btns.length <= 2) {
-      cy.log('Only system users left. Stop.');
+export function deleteUsersByUsername(usernames: string[], usersUrl = '/dashboard/profile/users?page=1') {
+  const deleteNext = (remaining: string[]) => {
+    if (!remaining.length) {
       return;
     }
-    cy.wrap($btns[0]).scrollIntoView().click();
-    cy.get('[data-testid="tenant-delete-user-button"]', {timeout: 30000}).first().should('be.visible').click();
 
-    cy.get('.ui-graph-popup-panel', {timeout: 30000}).should('be.visible').within(() => {
-      cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click();
-    });
-    cy.get('.ui-graph-popup-panel').should('not.exist');
+    const [username, ...rest] = remaining;
+
     openUsersList(usersUrl);
-    deleteFirstUser(usersUrl);
-  });
+    cy.contains('tbody tr', username).then(($row) => {
+      if (!$row.length) {
+        cy.log(`User ${username} not found. Skip.`);
+        deleteNext(rest);
+        return;
+      }
+
+      cy.wrap($row)
+        .find('[data-testid="tenant-edit-user-button"]')
+        .first()
+        .scrollIntoView()
+        .should('be.visible')
+        .click();
+
+      cy.contains('tbody tr', username)
+        .next()
+        .within(() => {
+          cy.get('[data-testid="tenant-delete-user-button"]').filter(':visible').first().should('be.visible').click();
+        });
+
+      cy.get('.ui-graph-popup-panel').should('be.visible').within(() => {
+        cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click();
+      });
+      cy.get('.ui-graph-popup-panel').should('not.exist');
+
+      deleteNext(rest);
+    });
+  };
+
+  deleteNext(usernames);
 }

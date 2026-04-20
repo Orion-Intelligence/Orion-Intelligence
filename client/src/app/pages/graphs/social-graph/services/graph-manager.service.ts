@@ -4,6 +4,9 @@ import { getPlatformColor } from '../../../../shared/utils/formatters';
 import { getSocialGraphLabelColor } from './theme-color.util';
 @Injectable({ providedIn: 'root' })
 export class GraphManagerService {
+  private readonly relationshipLinkIconPath = '<path fill="#f8fafc" d="M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6v1H14a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 2 7h5.5V6A1.5 1.5 0 0 1 6 4.5zm-6 8A1.5 1.5 0 0 1 1.5 10h1A1.5 1.5 0 0 1 4 11.5v1A1.5 1.5 0 0 1 2.5 14h-1A1.5 1.5 0 0 1 0 12.5zm6 0A1.5 1.5 0 0 1 7.5 10h1a1.5 1.5 0 0 1 1.5 1.5v1A1.5 1.5 0 0 1 8.5 14h-1A1.5 1.5 0 0 1 6 12.5zm6 0a1.5 1.5 0 0 1 1.5-1.5h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5z"/>';
+  private readonly userNodeIconPath = '<path fill="#f8fafc" d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/><path fill="#f8fafc" d="M14 14s-1-4-6-4-6 4-6 4 1 1 6 1 6-1 6-1"/>';
+
   public getGraphLabelColor(): string {
     return getSocialGraphLabelColor();
   }
@@ -48,14 +51,36 @@ export class GraphManagerService {
     return {
       id: `user-${username}`,
       label: username,
-      shape: 'icon',
-      icon: { face: 'bootstrap-icons', code: '\uf4d7', size: 60, color: '#a5b4fc' },
-      size: 40,
+      shape: 'circularImage',
+      image: this.createUserNodeSvg(),
+      size: 28,
       font: { color: this.getGraphLabelColor() },
       color: { border: '#818cf8', background: '#3730a3', highlight: { border: '#facc15', background: '#4f46e5' }, hover: { border: '#a5b4fc', background: '#4338ca' } },
       shadow: { enabled: true, color: 'rgba(99, 102, 241, 0.6)', size: 25, x: 0, y: 0 },
       borderWidth: 3,
       borderWidthSelected: 6
+    };
+  }
+
+  public createRelationshipNode(relationshipNodeId: string, relationshipCount: number, title: string): NetworkNode {
+    return {
+      id: relationshipNodeId,
+      label: '',
+      relationshipCount,
+      shape: 'circularImage',
+      image: this.createRelationshipNodeSvg(),
+      size: 28,
+      font: { color: this.getGraphLabelColor(), size: 1 },
+      color: {
+        border: '#f59e0b',
+        background: '#3b2a12',
+        highlight: { border: '#fbbf24', background: '#4a3516' },
+        hover: { border: '#fbbf24', background: '#4a3516' }
+      },
+      title,
+      borderWidth: 2,
+      borderWidthSelected: 3,
+      shadow: { enabled: true, color: 'rgba(245, 158, 11, 0.28)', size: 10, x: 2, y: 2 }
     };
   }
 
@@ -77,6 +102,40 @@ export class GraphManagerService {
             <circle cx="80" cy="80" r="66" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2"/>
             <g transform="translate(80 80) scale(3.2) translate(-8 -8)">
                 ${iconPath}
+            </g>
+        </svg>`;
+    return `data:image/svg+xml;base64,${btoa(svg)}`;
+  }
+
+  private createRelationshipNodeSvg(): string {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+            <defs>
+                <linearGradient id="relationship-node-fill" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#7c2d12" />
+                    <stop offset="100%" stop-color="#1f2937" />
+                </linearGradient>
+            </defs>
+            <circle cx="80" cy="80" r="74" fill="url(#relationship-node-fill)" stroke="#f59e0b" stroke-width="6"/>
+            <circle cx="80" cy="80" r="66" fill="none" stroke="rgba(255, 255, 255, 0.12)" stroke-width="2"/>
+            <g transform="translate(80 80) scale(3.3) translate(-8 -8)">
+                ${this.relationshipLinkIconPath}
+            </g>
+        </svg>`;
+    return `data:image/svg+xml;base64,${btoa(svg)}`;
+  }
+
+  private createUserNodeSvg(): string {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+            <defs>
+                <linearGradient id="user-node-fill" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#4f46e5" />
+                    <stop offset="100%" stop-color="#312e81" />
+                </linearGradient>
+            </defs>
+            <circle cx="80" cy="80" r="74" fill="url(#user-node-fill)" stroke="#818cf8" stroke-width="6"/>
+            <circle cx="80" cy="80" r="66" fill="none" stroke="rgba(255, 255, 255, 0.14)" stroke-width="2"/>
+            <g transform="translate(80 80) scale(3.2) translate(-8 -8)">
+                ${this.userNodeIconPath}
             </g>
         </svg>`;
     return `data:image/svg+xml;base64,${btoa(svg)}`;

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, effect, input } from '@angular/core';
 
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 @Component({
@@ -9,18 +9,19 @@ import { fadeInDashboardItem } from '../../../animations/dashboard.item.animatio
   animations: [fadeInDashboardItem]
 })
 export class ResultListComponent {
+  readonly listItemsInput = input<string[]>([], { alias: 'listItems' });
   filteredItems: string[] = [];
   copiedIndex: number | null = null;
+  readonly activeTab = input('');
 
-  @Input() activeTab = '';
-
-  @Input()
-  set listItems(items: string[]) {
-    this.filteredItems = items.filter(item => item.length >= 2);
+  constructor() {
+    effect(() => {
+      this.filteredItems = this.listItemsInput().filter(item => item.length >= 2);
+    });
   }
 
   copyText(text: string, index: number): void {
-    navigator.clipboard.writeText(text).then(() => {
+    void navigator.clipboard.writeText(text).then(() => {
       this.copiedIndex = index;
       setTimeout(() => {
         this.copiedIndex = null;

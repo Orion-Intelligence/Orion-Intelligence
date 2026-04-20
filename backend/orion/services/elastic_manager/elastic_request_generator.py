@@ -482,7 +482,8 @@ class elastic_request_generator:
         if m_ctype != "all":
             allowed_categories = [m_ctype]
             must_clauses.append(
-                {"bool": {"should": [{"bool": {"must_not": {"exists": {"field": "m_content_type"}}}},
+                {"bool": {"should": [
+                    *([] if m_ctype == "swarm" else [{"bool": {"must_not": {"exists": {"field": "m_content_type"}}}}]),
                     {"bool": {"filter": [{"exists": {"field": "m_content_type"}},
                         {"terms": {"m_content_type": allowed_categories}}]}}], "minimum_should_match": 1}})
 
@@ -497,9 +498,6 @@ class elastic_request_generator:
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
-        if m_platform and m_platform not in ("", "all"):
-            must_clauses.append({"term": {"m_platform": {"value": m_platform}}})
-
         if m_safe_search and m_safe_search == True:
             must_not_clause.append({"term": {"m_content_type": "adult"}})
 
@@ -511,11 +509,19 @@ class elastic_request_generator:
             must_not_clause.append({"terms": {"m_ioc_type": ["phishing", "hacked"]}})
 
         if m_content_type and m_content_type.lower() not in ("", "all"):
-            must_clauses.append(
-                {"bool": {"should": [
-                    {"bool": {"filter": [{"exists": {"field": "content_type"}}, {"term": {"content_type": m_content_type.lower()}}]}},
-                    {"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": [m_content_type.lower()]}}]}}
-                ], "minimum_should_match": 1}})
+            if m_content_type.lower() == "swarm":
+                must_clauses.append(
+                    {"bool": {"should": [
+                        {"term": {"m_content_type": "swarm"}},
+                        {"bool": {"filter": [{"exists": {"field": "content_type"}}, {"term": {"content_type": "swarm"}}]}},
+                        {"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": ["swarm"]}}]}}
+                    ], "minimum_should_match": 1}})
+            else:
+                must_clauses.append(
+                    {"bool": {"should": [
+                        {"bool": {"filter": [{"exists": {"field": "content_type"}}, {"term": {"content_type": m_content_type.lower()}}]}},
+                        {"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": [m_content_type.lower()]}}]}}
+                    ], "minimum_should_match": 1}})
 
         phrases = re.findall(r'"([^"]+)"', p_query_model.q or "")
         quoted_value = bool(phrases) and (p_query_model.q or "").strip().startswith('"') and (
@@ -680,7 +686,7 @@ class elastic_request_generator:
                 frm = 0
 
             query = {"query": {"bool": {"must": must_should if must_should else [
-                {"match_all": {}}]}}, "from": frm, "size": size, "track_total_hits": False, "track_scores": False, "terminate_after": 3000, "sort": [
+                {"match_all": {}}]}}, "from": frm, "size": size, "track_total_hits": False, "track_scores": False, "sort": [
                 {"_shard_doc": "asc"}], "_source": ["url", "username", "domain", "email", "password", "ip", "channel",
                 "type", "raw", "file"]}
 

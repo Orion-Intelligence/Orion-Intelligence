@@ -3,6 +3,7 @@ from orion.services.mongo_manager.shared_model.db_system_settings import db_syst
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
+from orion.services.mongo_manager.shared_model.db_document_feedback_model import db_document_feedback_model
 from orion.services.mongo_manager.shared_views.tenant_admin_view import TenantAdminView
 from orion.services.mongo_manager.shared_views.tenant_key_admin_view import TenantKeyAdminView
 from orion.services.mongo_manager.shared_views.user_admin_view import UserAdminView

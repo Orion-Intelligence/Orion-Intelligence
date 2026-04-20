@@ -10,19 +10,20 @@ import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
+import { ValuePresentationBase } from '../../../shared/utils/value-presentation.base';
 @Component({
   selector: 'app-dashboard-api',
   imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass],
   animations: [fadeInDashboardItem],
   templateUrl: './dashboard-api.component.html'
 })
-export class DashboardApiComponent implements OnInit {
+export class DashboardApiComponent extends ValuePresentationBase implements OnInit {
   q1 = '';
   q2 = '';
   displayQ1 = '';
   displayQ2 = '';
   loading = false;
-  breachData: any | null = null;
+  breachData: any = null;
   query_triggered = false;
   apiType: string | null = null;
   progress = 0;
@@ -34,11 +35,13 @@ export class DashboardApiComponent implements OnInit {
   prevQ2 = '';
   prevDisplayQ1 = '';
   prevDisplayQ2 = '';
-  prevBreachData: any | null = null;
+  prevBreachData: any = null;
   expandedResultIndex: number | null = null;
   trackByIndex = (index: number) => index;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: ReportExportService) { }
+  constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: ReportExportService) {
+    super();
+  }
 
   get cardsData(): any[] {
     const r = this.responseData;
@@ -63,7 +66,7 @@ export class DashboardApiComponent implements OnInit {
     return [];
   }
 
-  get cryptoResult(): any | null {
+  get cryptoResult(): any {
     const r = this.responseData;
     if (!r) {
       return null;
@@ -100,10 +103,10 @@ export class DashboardApiComponent implements OnInit {
       this.responseData &&
       typeof this.responseData === 'object' &&
       (
-        Array.isArray((this.responseData as any).cards_data) ||
-        Array.isArray((this.responseData as any).result) ||
-        Array.isArray((this.responseData as any).data?.cards_data) ||
-        Array.isArray((this.responseData as any).result?.cards_data)
+        Array.isArray(this.responseData.cards_data) ||
+        Array.isArray(this.responseData.result) ||
+        Array.isArray(this.responseData.data?.cards_data) ||
+        Array.isArray(this.responseData.result?.cards_data)
       )
     ) {
       return this.cardsData;
@@ -117,25 +120,11 @@ export class DashboardApiComponent implements OnInit {
     return [];
   }
 
-  getObjectEntries(item: any): Array<{ key: string; value: any }> {
-    if (!item || typeof item !== 'object' || Array.isArray(item)) {
-      return [];
-    }
-    return Object.entries(item).map(([key, value]) => ({ key, value }));
-  }
-
-  displayFieldLabel(key: string): string {
-    return key
-      .replace(/^m_/, '')
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, c => c.toUpperCase());
-  }
-
   isArrayValue(value: any): boolean {
     return Array.isArray(value);
   }
 
-  deduplicateWithCount(arr: any[]): Array<{ value: any; count: number }> {
+  deduplicateWithCount(arr: any[]): { value: any; count: number }[] {
     if (!Array.isArray(arr)) {
       return [];
     }
@@ -145,27 +134,6 @@ export class DashboardApiComponent implements OnInit {
       map.set(key, (map.get(key) || 0) + 1);
     });
     return Array.from(map.entries()).map(([value, count]) => ({ value, count }));
-  }
-
-  isObjectValue(value: any): boolean {
-    return !!value && typeof value === 'object' && !Array.isArray(value);
-  }
-
-  isUrlValue(value: any): boolean {
-    if (typeof value !== 'string') {
-      return false;
-    }
-    return /^https?:\/\//i.test(value.trim());
-  }
-
-  stringifyPrimitive(value: any): string {
-    if (value === null || value === undefined || value === '') {
-      return 'not available';
-    }
-    if (typeof value === 'boolean') {
-      return value ? 'true' : 'false';
-    }
-    return String(value);
   }
 
   stringifyJson(value: any): string {
@@ -178,9 +146,9 @@ export class DashboardApiComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.apiType = this.route.snapshot.data && this.route.snapshot.data['type'] ? String(this.route.snapshot.data['type']) : null;
+    this.apiType = this.route.snapshot.data?.['type'] ? String(this.route.snapshot.data['type']) : null;
     this.route.data.subscribe(d => {
-      this.apiType = d && d['type'] ? String(d['type']) : this.apiType;
+      this.apiType = d?.['type'] ? String(d['type']) : this.apiType;
     });
     this.route.queryParams.subscribe(params => {
       if (this.apiType === 'user') {
@@ -381,7 +349,7 @@ export class DashboardApiComponent implements OnInit {
           }
           else {
             const normalized = (res && typeof res === 'object')
-              ? ((res as any).data ?? (res as any).result ?? res)
+              ? (res.data ?? res.result ?? res)
               : res;
             this.responseData = normalized;
             this.breachData = (this.cardsData && this.cardsData.length > 0) ? this.cardsData[0] : null;

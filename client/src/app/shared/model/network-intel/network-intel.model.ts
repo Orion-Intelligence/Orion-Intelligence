@@ -53,7 +53,7 @@ export interface CameraInfo {
   stream_url?:      string;
   camera_path?:     string;
   camera_paths?:    string[];
-  cameras?:         Array<{
+  cameras?:         {
     port?: number;
     service?: string;
     brand?: string;
@@ -62,8 +62,8 @@ export interface CameraInfo {
     path_status?: number;
     is_camera?: boolean;
     [key: string]: any;
-  }>;
-  ports?:           Array<number | IpPortData>;
+  }[];
+  ports?:           (number | IpPortData)[];
   vulnerabilities?: string[];
 }
 
@@ -74,6 +74,8 @@ export interface DnsResult {
 
 export interface IpDetail {
   ip:                 string;
+  status?:            string | null;
+  ip_info?:           Record<string, any> | null;
   hostnames?:         string[];
   country?:           string | null;
   city?:              string | null;
@@ -107,6 +109,7 @@ export interface IpDetail {
   is_camera?:         boolean;
   ports?:             IpPortData[];
   open_ports?:        number[];
+  [key: string]:      any;
 }
 
 export interface IpRowState {

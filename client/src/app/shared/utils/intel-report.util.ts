@@ -1,20 +1,31 @@
-export function isWithinDays(dateString = '', days: number): boolean {
+function getDiffInDays(dateString?: string): number | null {
   if (!dateString) {
-    return false;
+    return null;
   }
+
   const createdDate = new Date(dateString);
   const today = new Date();
-  const diffInDays = Math.floor((today.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+
+  return Math.floor((today.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+export function isWithinDays(dateString = '', days: number): boolean {
+  const diffInDays = getDiffInDays(dateString);
+
+  if (diffInDays === null) {
+    return false;
+  }
+
   return diffInDays <= days;
 }
 
 export function getStatusText(dateString?: string): 'Active' | 'Idle' | 'Inactive' {
-  if (!dateString) {
+  const diffInDays = getDiffInDays(dateString);
+
+  if (diffInDays === null) {
     return 'Inactive';
   }
-  const createdDate = new Date(dateString);
-  const today = new Date();
-  const diffInDays = Math.floor((today.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+
   if (diffInDays <= 5) {
     return 'Active';
   }
@@ -25,15 +36,12 @@ export function getStatusText(dateString?: string): 'Active' | 'Idle' | 'Inactiv
 }
 
 export function getStatusFlag(dateString?: string): boolean {
-  if (!dateString) {
+  const diffInDays = getDiffInDays(dateString);
+
+  if (diffInDays === null) {
     return false;
   }
-  const createdDate = new Date(dateString);
-  const today = new Date();
-  const diffInDays = Math.floor((today.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffInDays <= 5) {
-    return true;
-  }
+
   return diffInDays <= 10;
 }
 
