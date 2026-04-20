@@ -698,6 +698,11 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   addEntityToGraph(entityId: string) {
+    const entity = this.customEntities().find(current => current.id === entityId);
+    if (entity?.onGraph) {
+      this.state.focusOnNode(entityId);
+      return;
+    }
     this.entityManager()?.addEntityToGraph(entityId);
   }
 
