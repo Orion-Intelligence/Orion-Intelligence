@@ -299,6 +299,7 @@ describe('Consolidated - IOC Basic Flow', () => {
     });
 
     cy.get('[data-testid="ioc-download-results"]').first().scrollIntoView().click();
+    cy.get('[data-testid="graph-report-export-csv"]').should('be.visible').click();
     applyPasswordSchemeAndValidate();
 
     cy.get('[data-testid="ioc-basic-tag-m_email"]')

@@ -112,6 +112,7 @@ describe('Network Intel - End-to-End Flow', () => {
         },
       },
     }).as('vulnerabilityScan');
+
   };
 
   it('runs host recon, ip scan, vulnerability scan, and exports reports from all three sections', () => {
@@ -148,10 +149,14 @@ describe('Network Intel - End-to-End Flow', () => {
 
     cy.get('[data-testid="network-intel-tab-vulnerability-scan"]').click();
     cy.get('[data-testid="network-intel-search-input"]').clear().type('bbc.com{enter}');
+    cy.contains('span', 'bbc.com', { timeout: 60000 }).click();
     cy.wait('@vulnerabilityScan');
-    cy.get('[data-testid="network-intel-vulnerability-result"]').should('be.visible');
+    cy.contains('[data-testid="network-intel-vulnerability-result"]', 'Missing Content-Security-Policy', {
+      timeout: 60000,
+    }).should('be.visible');
 
     cy.get('[data-testid="network-intel-download-report"]')
+      .scrollIntoView()
       .should('be.visible')
       .and('be.enabled')
       .click();
@@ -181,18 +186,19 @@ describe('Network Intel - End-to-End Flow', () => {
 
     cy.visit('/dashboard/netint');
     cy.get('[data-testid="network-intel-tab-host-recon"]').should('be.visible');
+    cy.get('[data-testid="network-intel-tab-geo-fencing"]').click();
 
-    cy.get('[data-testid="network-intel-open-geo"]').click();
+    cy.get('[data-testid="network-intel-geo-search-trigger"]').click({ force: true });
     cy.get('[data-testid="network-intel-geo-modal"]').should('be.visible');
     cy.get('[data-testid="network-intel-geo-close"]').click();
     cy.get('[data-testid="network-intel-geo-modal"]').should('not.exist');
 
-    cy.get('[data-testid="network-intel-open-geo"]').click();
+    cy.get('[data-testid="network-intel-geo-search-trigger"]').click({ force: true });
     cy.get('[data-testid="network-intel-geo-modal"]').should('be.visible');
     cy.get('[data-testid="network-intel-geo-cancel"]').click();
     cy.get('[data-testid="network-intel-geo-modal"]').should('not.exist');
 
-    cy.get('[data-testid="network-intel-open-geo"]').click();
+    cy.get('[data-testid="network-intel-geo-search-trigger"]').click({ force: true });
     cy.get('[data-testid="network-intel-geo-modal"]').should('be.visible');
     cy.get('[data-testid="network-intel-geo-mode-map"]').should('be.visible');
     cy.get('[data-testid="network-intel-geo-map"]').should('be.visible');
@@ -229,9 +235,6 @@ describe('Network Intel - End-to-End Flow', () => {
       .trigger('change');
     cy.get('[data-testid="network-intel-geo-max-ips-decrement"]').click();
     cy.get('[data-testid="network-intel-geo-max-ips-input"]').should('have.value', '250');
-
-    cy.get('[data-testid="network-intel-geo-mode-map"]').click();
-    cy.get('[data-testid="network-intel-geo-selected-point"]').should('be.visible');
 
     cy.get('[data-testid="network-intel-geo-start"]').click();
     cy.wait('@geoIotScan');

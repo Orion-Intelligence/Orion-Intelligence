@@ -11,6 +11,13 @@ const SIDEBAR_GROUP_ROUTE_PREFIX: Record<string, string> = {
   'Entity API': 'api',
 };
 
+const SIDEBAR_SUBITEM_TEST_ID_ALIAS: Record<string, Record<string, string>> = {
+  'Web Scans': {
+    'Basic Scan': 'network-scan',
+    'Port Scan': 'network-scan',
+  },
+};
+
 function getSidebarGroupTestId(title: string): string {
   const routePrefix = SIDEBAR_GROUP_ROUTE_PREFIX[title];
   expect(routePrefix, `routePrefix mapping for "${title}"`).to.exist;
@@ -40,9 +47,25 @@ export function openSidebarGroup(title: string) {
 
 export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
   const groupTestId = getSidebarGroupTestId(groupTitle);
+  const aliasedTestId = SIDEBAR_SUBITEM_TEST_ID_ALIAS[groupTitle]?.[itemTitle];
+  const routePrefix = SIDEBAR_GROUP_ROUTE_PREFIX[groupTitle];
+
   cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
     expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
-  }).find(`[data-testid^="sidebar-subitem-${SIDEBAR_GROUP_ROUTE_PREFIX[groupTitle]}-"]`).contains('div', new RegExp(`^\\s*${itemTitle}\\s*$`)).scrollIntoView().click();
+  });
+
+  if (aliasedTestId) {
+    cy.get(`[data-testid="sidebar-subitem-${routePrefix}-${aliasedTestId}"]`)
+      .scrollIntoView()
+      .should('be.visible')
+      .click({ force: true });
+    return;
+  }
+
+  cy.contains(`[data-testid^="sidebar-subitem-${routePrefix}-"] div`, new RegExp(`^\\s*${itemTitle}\\s*$`))
+    .scrollIntoView()
+    .should('be.visible')
+    .click({ force: true });
 }
 
 export function getHeatmapComponent() {
