@@ -193,6 +193,294 @@ class crawl_model:
             )
 
     @staticmethod
+    async def geocode(model, user_id: str = "system"):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"http://trusted-micros-api:8010/satellite/geocode/{user_id}",
+                    json=model.model_dump(),
+                    timeout=120
+                )
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling satellite/geocode"}
+                    )
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling satellite/geocode"}
+            )
+
+    @staticmethod
+    async def facilities(model, user_id: str = "system"):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"http://trusted-micros-api:8010/satellite/facilities/{user_id}",
+                    json=model.model_dump(),
+                    timeout=120
+                )
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling satellite/facilities"}
+                    )
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling satellite/facilities"}
+            )
+
+    @staticmethod
+    async def sentinel_search(model, user_id: str = "system"):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"http://trusted-micros-api:8010/satellite/sentinel/search/{user_id}",
+                    json=model.model_dump(),
+                    timeout=120
+                )
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling satellite/sentinel/search"}
+                    )
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling satellite/sentinel/search"}
+            )
+
+    @staticmethod
+    async def sentinel_image(model, user_id: str = "system"):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"http://trusted-micros-api:8010/satellite/sentinel/image/{user_id}",
+                    json=model.model_dump(),
+                    timeout=120
+                )
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling satellite/sentinel/image"}
+                    )
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling satellite/sentinel/image"}
+            )
+
+    @staticmethod
+    async def anomaly(model, user_id: str = "system"):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"http://trusted-micros-api:8010/satellite/anomaly/{user_id}",
+                    json=model.model_dump(),
+                    timeout=120
+                )
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling satellite/anomaly"}
+                    )
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling satellite/anomaly"}
+            )
+
+    @staticmethod
+    async def compare(model, user_id: str = "system"):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"http://trusted-micros-api:8010/satellite/compare/{user_id}",
+                    json=model.model_dump(),
+                    timeout=120
+                )
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling satellite/compare"}
+                    )
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling satellite/compare"}
+            )
+
+    @staticmethod
+    async def livetrack_aircraft_bbox(model, user_id: str = "system"):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"http://trusted-micros-api:8010/livetrack/aircraft/bbox/{user_id}",
+                    json=model.model_dump(),
+                    timeout=120
+                )
+                if response.status_code in (404, 405):
+                    response = await client.post(
+                        "http://trusted-micros-api:8010/livetrack/aircraft/bbox",
+                        json=model.model_dump(),
+                        timeout=120
+                    )
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling livetrack/aircraft/bbox"}
+                    )
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling livetrack/aircraft/bbox"}
+            )
+
+    @staticmethod
+    async def livetrack_aircraft_icao(model, user_id: str = "system"):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"http://trusted-micros-api:8010/livetrack/aircraft/icao/{user_id}",
+                    json=model.model_dump(),
+                    timeout=120
+                )
+                if response.status_code in (404, 405):
+                    response = await client.post(
+                        "http://trusted-micros-api:8010/livetrack/aircraft/icao",
+                        json=model.model_dump(),
+                        timeout=120
+                    )
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling livetrack/aircraft/icao"}
+                    )
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling livetrack/aircraft/icao"}
+            )
+
+    @staticmethod
+    async def livetrack_aircraft_track(model, user_id: str = "system"):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"http://trusted-micros-api:8010/livetrack/aircraft/track/{user_id}",
+                    json=model.model_dump(),
+                    timeout=120
+                )
+                if response.status_code in (404, 405):
+                    response = await client.post(
+                        "http://trusted-micros-api:8010/livetrack/aircraft/track",
+                        json=model.model_dump(),
+                        timeout=120
+                    )
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling livetrack/aircraft/track"}
+                    )
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling livetrack/aircraft/track"}
+            )
+
+    @staticmethod
+    async def livetrack_ships_bbox(model, user_id: str = "system"):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"http://trusted-micros-api:8010/livetrack/ships/bbox/{user_id}",
+                    json=model.model_dump(),
+                    timeout=120
+                )
+                if response.status_code in (404, 405):
+                    response = await client.post(
+                        "http://trusted-micros-api:8010/livetrack/ships/bbox",
+                        json=model.model_dump(),
+                        timeout=120
+                    )
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling livetrack/ships/bbox"}
+                    )
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling livetrack/ships/bbox"}
+            )
+
+    @staticmethod
+    async def livetrack_ships_mmsi(model, user_id: str = "system"):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"http://trusted-micros-api:8010/livetrack/ships/mmsi/{user_id}",
+                    json=model.model_dump(),
+                    timeout=120
+                )
+                if response.status_code in (404, 405):
+                    response = await client.post(
+                        "http://trusted-micros-api:8010/livetrack/ships/mmsi",
+                        json=model.model_dump(),
+                        timeout=120
+                    )
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling livetrack/ships/mmsi"}
+                    )
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling livetrack/ships/mmsi"}
+            )
+
+    @staticmethod
+    async def livetrack_status(model, user_id: str = "system"):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"http://trusted-micros-api:8010/livetrack/status/{user_id}",
+                    json=model.model_dump(),
+                    timeout=120
+                )
+                if response.status_code in (404, 405):
+                    response = await client.post(
+                        "http://trusted-micros-api:8010/livetrack/status",
+                        json=model.model_dump(),
+                        timeout=120
+                    )
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling livetrack/status"}
+                    )
+                return response.json()
+        except Exception:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Something happened while calling livetrack/status"}
+            )
+
+    @staticmethod
     async def scrape_social(model, user_id: str = "system"):
         try:
             async with httpx.AsyncClient() as client:

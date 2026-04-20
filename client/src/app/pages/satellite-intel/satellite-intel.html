@@ -1,0 +1,195 @@
+<div class="flex h-full min-h-0 w-full flex-col overflow-hidden">
+  <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div class="z-20 flex flex-nowrap items-center gap-2 overflow-x-auto border-b border-[#1e2a40] bg-[#0d1220] px-[14px] py-2">
+      <span class="mr-[2px] shrink-0 whitespace-nowrap text-[13px] font-medium text-[#7eb8f7]">Satellite Intel</span>
+
+<!--      <div class="relative min-w-[160px] max-w-[280px] flex-[1_1_180px]">-->
+<!--        <input type="text" class="w-full rounded-[5px] border border-[#1e2a40] bg-[#111827] px-[9px] py-[5px] pr-[26px] text-[12px] text-[#c8d4e8] outline-none focus:border-[#3a7bd5]" placeholder="Search city, country…" autocomplete="off" [(ngModel)]="searchQuery" (input)="onSearchInput()" (keydown.escape)="closeSearchDrop()" />-->
+<!--        @if (searchQuery) {-->
+<!--          <button class="absolute right-[7px] top-1/2 p-0 text-[13px] leading-none text-[#4a6a8a] -translate-y-1/2" (click)="clearSearch()">✕</button>-->
+<!--        }-->
+
+<!--        @if (searchResults.length > 0) {-->
+<!--          <div class="absolute left-0 right-0 top-[calc(100%+4px)] z-[3000] overflow-hidden rounded-md border border-[#1e2a40] bg-[#0d1220] shadow-[0_8px_20px_rgba(0,0,0,.5)]">-->
+<!--            @for (r of searchResults; track r.lat + r.lon) {-->
+<!--              <div class="cursor-pointer border-b border-[#1a2236] px-3 py-2 text-[12px] text-[#a0bcd8] transition-colors last:border-b-0 hover:bg-[#111827]" (click)="selectSearchResult(r)">-->
+<!--                <div class="font-medium">{{ r.name }}</div>-->
+<!--                <div class="mt-[2px] truncate whitespace-nowrap text-[10px] text-[#4a6a8a]">{{ r.display_name }}</div>-->
+<!--              </div>-->
+<!--            }-->
+<!--          </div>-->
+<!--        }-->
+<!--      </div>-->
+
+<!--      <div class="flex shrink-0 items-center gap-[5px] rounded-[5px] border border-[#1e2a40] bg-[#111827] px-2 py-[3px]">-->
+<!--        <label class="whitespace-nowrap text-[10px] text-[#4a6a8a]">Lat</label>-->
+<!--        <input type="number" [(ngModel)]="inputLat" step="0.0001" class="w-20 border-none bg-transparent px-[3px] py-[2px] font-mono text-[12px] text-[#c8d4e8] outline-none"/>-->
+<!--        <span class="h-[14px] w-px shrink-0 bg-[#1e2a40]"></span>-->
+<!--        <label class="whitespace-nowrap text-[10px] text-[#4a6a8a]">Lon</label>-->
+<!--        <input type="number" [(ngModel)]="inputLon" step="0.0001" class="w-20 border-none bg-transparent px-[3px] py-[2px] font-mono text-[12px] text-[#c8d4e8] outline-none"/>-->
+<!--        <button class="px-[2px] text-[12px] text-[#4a6a8a] transition-colors hover:text-[#a0bcd8]" title="Copy" (click)="copyCoords()">⧉</button>-->
+<!--      </div>-->
+
+<!--      <div class="flex shrink-0 items-center gap-[5px] rounded-[5px] border border-[#1e2a40] bg-[#0a1020] px-2 py-[3px]">-->
+<!--        <label class="whitespace-nowrap text-[10px] text-[#3a7bd5]">Delta°</label>-->
+<!--        <input type="number" [(ngModel)]="inputDelta" step="0.005" min="0.001" max="2" class="w-[60px] border-none bg-transparent px-[3px] py-[2px] font-mono text-[12px] text-[#7eb8f7] outline-none" (change)="onDeltaChange()"/>-->
+<!--      </div>-->
+
+      <select class="shrink-0 rounded-[5px] border border-[#1e2a40] bg-[#111827] px-[7px] py-[5px] text-[12px] text-[#c8d4e8] outline-none" [(ngModel)]="selectedLayer" (change)="onLayerChange()">
+        <option value="esri">ESRI Satellite</option>
+        <option value="osm">OpenStreetMap</option>
+      </select>
+
+      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border border-[#3a7bd5] bg-[#1a4a7a] px-3 py-1.5 text-[12px] font-medium text-[#7eb8f7] transition-colors hover:bg-[#1e5a94]" (click)="openGeocodeModal()">
+        <i class="bi bi-globe2 text-[13px]"></i>
+        Location
+      </button>
+      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border border-[#3a7bd5] bg-[#1a4a7a] px-3 py-1.5 text-[12px] font-medium text-[#7eb8f7] transition-colors hover:bg-[#1e5a94]" (click)="goToCoords()">Go</button>
+      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors" [ngClass]="facilitiesVisible ? ['border-[#1d9e75]','bg-[#0f6e56]','text-[#9fe1cb]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleFacilities()">
+        {{ facilitiesVisible ? 'Facilities on' : 'Facilities off' }}
+      </button>
+      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border border-[rgba(245,158,11,.35)] bg-[rgba(245,158,11,.1)] px-3 py-1.5 text-[12px] font-medium text-[#f59e0b] transition-colors hover:bg-[rgba(245,158,11,.18)]" (click)="runAnomalyScan()">Anomaly scan</button>
+      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors" [ngClass]="aircraftTrackingEnabled ? ['border-[#8b5cf6]','bg-[rgba(139,92,246,.2)]','text-[#c4b5fd]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleAircraftTracking()">
+        {{ aircraftTrackingEnabled ? 'Aircraft tracking on' : 'Track aircraft' }}
+      </button>
+      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors" [ngClass]="shipsTrackingEnabled ? ['border-[#06b6d4]','bg-[rgba(6,182,212,.2)]','text-[#67e8f9]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleShipsTracking()">
+        {{ shipsTrackingEnabled ? 'Ship tracking on' : 'Track ships' }}
+      </button>
+      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors" [ngClass]="globalAircraftTrackingEnabled ? ['border-[#a855f7]','bg-[rgba(168,85,247,.25)]','text-[#e9d5ff]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleGlobalAircraftTracking()" title="Track aircraft worldwide">
+        {{ globalAircraftTrackingEnabled ? '🌍 Aircraft (global)' : 'Global aircraft' }}
+      </button>
+      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors" [ngClass]="globalShipsTrackingEnabled ? ['border-[#06d6d4]','bg-[rgba(6,214,212,.25)]','text-[#cffafe]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleGlobalShipsTracking()" title="Track ships worldwide">
+        {{ globalShipsTrackingEnabled ? '🌍 Ships (global)' : 'Global ships' }}
+      </button>
+    </div>
+
+    @if (trackingError) {
+      <div class="border-b border-[rgba(239,68,68,.25)] bg-[rgba(239,68,68,.08)] px-[14px] py-[7px] text-[12px] text-[#fca5a5]">
+        <i class="bi bi-exclamation-triangle"></i> {{ trackingError }}
+      </div>
+    }
+
+    <div class="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_300px] grid-rows-[minmax(0,1fr)] overflow-hidden max-[1100px]:grid-cols-1 max-[1100px]:grid-rows-[minmax(0,1fr)_auto]">
+      <app-satellite-map-section class="block h-full min-h-0 min-w-0 overflow-hidden max-[1100px]:min-h-[380px]"
+        [lat]="lat"
+        [lon]="lon"
+        [delta]="delta"
+        [selectedLayer]="selectedLayer"
+        [facilitiesVisible]="facilitiesVisible"
+        [facilitiesData]="facilitiesData"
+        [anomalyData]="anomalyResult"
+        [aircraftData]="aircraftData"
+        [shipsData]="shipsData"
+        [isScanning]="isScanning()"
+        [progress]="satelliteService.progress()"
+        [currentStep]="currentStep"
+        [progressSegments]="progressSegments"
+        [errorMessage]="satelliteService.onError()?.message || null"
+        [hasSearched]="hasSearched"
+        (mapClick)="onMapClick($event)"
+        (mapMoved)="onMapMoved($event)">
+      </app-satellite-map-section>
+
+      <div class="flex flex-col overflow-hidden border-l border-[#1e2a40] bg-[#0d1220] max-[1100px]:max-h-[40vh] max-[1100px]:border-l-0 max-[1100px]:border-t">
+        <div class="flex shrink-0 overflow-x-auto border-b border-[#1e2a40]">
+          @for (tab of panelTabs; track tab.id) {
+            <button class="flex-1 whitespace-nowrap border-b-2 border-transparent bg-transparent px-1 py-[9px] text-center text-[10px] font-semibold uppercase tracking-[0.06em] transition-colors hover:text-[#a0bcd8]" [ngClass]="activePanel === tab.id ? ['border-b-[#3a7bd5]','text-[#7eb8f7]'] : ['text-[#4a6a8a]']" (click)="setPanel(tab.id)">
+              {{ tab.label }}
+            </button>
+          }
+        </div>
+
+        <div class="min-h-0 flex-1 overflow-y-auto">
+          @if (activePanel === 'compare') {
+            <app-satellite-month-compare
+              [isScanning]="isScanning()"
+              [progress]="satelliteService.progress()"
+              [currentStep]="currentStep"
+              [progressSegments]="progressSegments"
+              [errorMessage]="satelliteService.onError()?.message || null"
+              [hasSearched]="hasSearched"
+              [compareResult]="compareResult"
+              (runCompare)="onRunCompare($event)">
+            </app-satellite-month-compare>
+          }
+
+          @if (activePanel === 'anomaly') {
+            <app-satellite-anomaly-section
+              [isScanning]="isScanning()"
+              [progress]="satelliteService.progress()"
+              [currentStep]="currentStep"
+              [progressSegments]="progressSegments"
+              [errorMessage]="satelliteService.onError()?.message || null"
+              [hasSearched]="hasSearched"
+              [anomalyResult]="anomalyResult">
+            </app-satellite-anomaly-section>
+          }
+
+          @if (activePanel === 'sentinel') {
+            <app-satellite-sentinel-search
+              [isScanning]="isScanning()"
+              [progress]="satelliteService.progress()"
+              [currentStep]="currentStep"
+              [progressSegments]="progressSegments"
+              [errorMessage]="satelliteService.onError()?.message || null"
+              [hasSearched]="hasSearched"
+              [sentinelResults]="sentinelResults?.results || null"
+              (runSearch)="onRunSentinelSearch()">
+            </app-satellite-sentinel-search>
+          }
+
+          @if (activePanel === 'image') {
+            <app-satellite-sentinel-image
+              [isScanning]="isScanning()"
+              [progress]="satelliteService.progress()"
+              [currentStep]="currentStep"
+              [progressSegments]="progressSegments"
+              [errorMessage]="satelliteService.onError()?.message || null"
+              [hasSearched]="hasSearched"
+              [imageResult]="sentinelImageResult"
+              (runFetch)="onRunSentinelImage($event)">
+            </app-satellite-sentinel-image>
+          }
+
+          @if (activePanel === 'facilities') {
+            <div class="py-[10px]">
+              @if (!facilitiesData || !facilitiesData.total) {
+                <div class="px-[14px] py-7 text-center text-[12px] leading-[1.7] text-[#3d5a80]">
+                  @if (!hasSearched) { Zoom in and Go to load facilities }
+                  @else if (isScanning()) { Loading… }
+                  @else { No facilities found in this area }
+                </div>
+              }
+              @if (facilitiesData?.warning) {
+                <div class="mx-3 mb-[10px] mt-[6px] rounded-md border border-[rgba(245,158,11,.25)] bg-[rgba(245,158,11,.08)] px-[10px] py-[7px] text-[11px] text-[#f59e0b]">
+                  <i class="bi bi-exclamation-triangle"></i> {{ facilitiesData.warning }}
+                </div>
+              }
+              @if (facilitiesData?.total) {
+                <div class="border-b border-[#1e2a40] px-[14px] pb-2 pt-[6px] text-[12px] font-semibold text-[#e8f0fc]">{{ facilitiesData.total }} facilities</div>
+                @for (entry of facEntries(); track entry[0]) {
+                  <div class="flex justify-between border-b border-[#1a2236] px-[14px] py-[7px] text-[12px] last:border-b-0">
+                    <span class="text-[#6a8aaa]">{{ entry[0] }}</span>
+                    <span class="font-mono font-semibold text-[#e8f0fc]">{{ entry[1] }}</span>
+                  </div>
+                }
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<app-satellite-geocode-modal
+  [isOpen]="showGeocodeModal"
+  [isScanning]="isScanning()"
+  [coordinates]="coordsForm.value"
+  [delta]="coordsForm.delta"
+  (close)="showGeocodeModal = false"
+  (coordinatesChange)="onCoordinatesChange($event)"
+  (deltaChange)="onDeltaChangeModal($event)"
+  (search)="onGeoSearch()">
+</app-satellite-geocode-modal>

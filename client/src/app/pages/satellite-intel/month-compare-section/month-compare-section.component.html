@@ -1,0 +1,92 @@
+<div class="px-4 py-4 md:px-6">
+  @if (isScanning) {
+    <div class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] p-4">
+      <div class="mb-[6px] flex items-center justify-between gap-3">
+        <span class="text-[12px] font-medium text-[var(--color-text1)]">{{ loadingStepLabel }}</span>
+        <span class="text-[12px] font-semibold text-sky-400">{{ progressValue }}%</span>
+      </div>
+      <div class="ui-progress-track h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+        <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + progressValue"></div>
+      </div>
+    </div>
+  }
+
+  @if (errorMessage && !isScanning) {
+    <div class="mb-4 rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px]">
+      <div class="text-[17px] font-semibold leading-tight text-[var(--color-text1)]">Request Failed</div>
+      <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)]">{{ errorMessage }}</div>
+    </div>
+  }
+
+  <div class="mb-4 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+    <div class="border-b border-[var(--color-divider)] px-4 py-3">
+      <div class="mb-2 text-[11px] font-bold uppercase tracking-widest text-[var(--color-text4)]">Image type</div>
+      <div class="flex flex-wrap gap-2">
+        @for (type of imageTypes; track type.key) {
+          <button type="button" class="rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors" [ngClass]="selectedType === type.key ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-640)]','text-white'] : ['border-[var(--color-border)]','bg-[var(--color-blue-720)]','text-[var(--color-text3)]','hover:bg-[var(--color-blue-710)]','hover:text-[var(--color-text1)]']" (click)="selectType(type.key)">
+            {{ type.label }}
+          </button>
+        }
+      </div>
+    </div>
+    <div class="px-4 py-3">
+      <button type="button" class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40" [disabled]="isScanning" (click)="onRunCompare()">
+        @if (isScanning) {
+          <span class="h-4 w-4 rounded-full border-2 border-white/25 border-t-white animate-spin"></span>
+        } @else {
+          <i class="bi bi-images text-[14px]"></i>
+        }
+        Load 3-month comparison
+      </button>
+    </div>
+  </div>
+
+  @if (showLoadingSkeleton) {
+    <div class="grid grid-cols-3 gap-3">
+      @for (_ of [1,2,3]; track $index) {
+        <div class="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+          <div class="ui-shimmer aspect-square w-full rounded-none bg-[var(--color-blue-720)]"></div>
+          <div class="px-3 py-2">
+            <div class="ui-shimmer h-2.5 w-20 rounded bg-[var(--color-blue-720)]"></div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (compareResult && !isScanning && compareResult.months?.length) {
+    <div class="mb-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] px-4 py-3 text-[12px] text-[var(--color-text2)]" @fadeInDashboardItem>
+      {{ compareResult.months.length }} comparison {{ compareResult.months.length === 1 ? 'image' : 'images' }} loaded
+    </div>
+
+    <div class="grid grid-cols-1 gap-3" @fadeInDashboardItem>
+      @for (month of compareResult.months; track month.month_key) {
+        <div class="group cursor-zoom-in overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] transition-[border-color] hover:border-[var(--color-blue-640)]" (click)="openLightbox(imageApiUrl(month.image_url), month.label)">
+          <div class="relative aspect-square w-full overflow-hidden bg-[#060a12]">
+            @if (canRenderImage(imageApiUrl(month.image_url))) {
+              <img [src]="imageApiUrl(month.image_url)" [alt]="month.label" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy" (error)="markImageBroken(imageApiUrl(month.image_url))"/>
+            } @else {
+              <div class="flex h-full w-full items-center justify-center px-4 text-center text-[12px] font-medium text-[var(--color-text3)]">
+                Image could not be loaded
+              </div>
+            }
+          </div>
+          <div class="px-3 py-2 text-center text-[11px] font-semibold text-[var(--color-text3)]">{{ month.label }}</div>
+        </div>
+      }
+    </div>
+  }
+  @if (compareResult && !isScanning && !compareResult.months?.length) {
+    <div class="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] px-4 py-6 text-center">
+      <div class="text-sm font-semibold text-[var(--color-text2)]">No images available</div>
+      <div class="mt-1 text-[12px] text-[var(--color-text4)]">No Sentinel imagery found for this location and period.</div>
+    </div>
+  }
+</div>
+
+@if (lightboxSrc) {
+  <div class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90" (click)="closeLightbox()">
+    <img [src]="lightboxSrc" [alt]="lightboxLabel" class="max-h-[82vh] max-w-[92vw] rounded-lg object-contain"/>
+    <div class="mt-3 text-[13px] text-white/60">{{ lightboxLabel }}</div>
+  </div>
+}

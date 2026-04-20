@@ -1,0 +1,106 @@
+<div class="px-4 py-4 md:px-6">
+  <div class="mb-4 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+    <div class="border-b border-[var(--color-divider)] px-4 py-3">
+      <div class="mb-2 text-[11px] font-bold uppercase tracking-widest text-[var(--color-text4)]">Image type</div>
+      <div class="flex flex-wrap gap-2">
+        @for (type of imageTypes; track type.key) {
+          <button type="button" class="rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors" [ngClass]="selectedType === type.key ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-640)]','text-white'] : ['border-[var(--color-border)]','bg-[var(--color-blue-720)]','text-[var(--color-text3)]','hover:bg-[var(--color-blue-710)]','hover:text-[var(--color-text1)]']" (click)="selectType(type.key)">
+            {{ type.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-3 px-4 py-3">
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_110px]">
+        <div>
+          <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">Month <span class="normal-case tracking-normal text-[var(--color-text3)]">(optional, YYYY-MM)</span></label>
+          <input type="text" [(ngModel)]="selectedMonth" placeholder="2026-03" class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-[var(--color-blue-640)]"/>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">Size</label>
+          <input type="number" [(ngModel)]="imageSize" min="128" max="2048" step="64" class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 font-mono text-sm text-[var(--color-text1)] outline-none focus:border-[var(--color-blue-640)]"/>
+        </div>
+      </div>
+
+      <button type="button" class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40" [disabled]="isScanning" (click)="onRunFetch()">
+        @if (isScanning) {
+          <span class="h-4 w-4 rounded-full border-2 border-white/25 border-t-white animate-spin"></span>
+        } @else {
+          <i class="bi bi-image text-[14px]"></i>
+        }
+        Fetch Sentinel image
+      </button>
+    </div>
+  </div>
+
+  @if (isScanning) {
+    <div class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] p-4">
+      <div class="mb-[6px] flex items-center justify-between gap-3">
+        <span class="text-[12px] font-medium text-[var(--color-text1)]">{{ loadingStepLabel }}</span>
+        <span class="text-[12px] font-semibold text-sky-400">{{ progressValue }}%</span>
+      </div>
+      <div class="ui-progress-track h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+        <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + progressValue"></div>
+      </div>
+    </div>
+  }
+
+  @if (errorMessage && !isScanning) {
+    <div class="mb-4 rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px]">
+      <div class="text-[17px] font-semibold leading-tight text-[var(--color-text1)]">Request Failed</div>
+      <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)]">{{ errorMessage }}</div>
+    </div>
+  }
+
+  @if (showLoadingSkeleton) {
+    <div class="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+      <div class="ui-shimmer aspect-[4/3] w-full bg-[var(--color-blue-720)]"></div>
+      <div class="space-y-2 px-4 py-3">
+        <div class="ui-shimmer h-3 w-32 rounded bg-[var(--color-blue-720)]"></div>
+        <div class="ui-shimmer h-3 w-24 rounded bg-[var(--color-blue-720)]"></div>
+      </div>
+    </div>
+  }
+
+  @if (imageResult && !isScanning) {
+    <div class="space-y-4" @fadeInDashboardItem>
+      @if (imageSrc) {
+        <div class="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+          <button type="button" class="block w-full cursor-zoom-in bg-[#060a12]" (click)="openLightbox()">
+            <img [src]="imageSrc" alt="Sentinel satellite image" class="max-h-[420px] w-full object-contain"/>
+          </button>
+          <div class="border-t border-[var(--color-divider)] px-4 py-3 text-[12px] text-[var(--color-text3)]">
+            Click image to enlarge
+          </div>
+        </div>
+      } @else {
+        <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] px-4 py-6 text-center">
+          <div class="text-sm font-semibold text-[var(--color-text2)]">Image not available</div>
+          <div class="mt-1 text-[12px] text-[var(--color-text4)]">The backend returned metadata but no displayable image payload.</div>
+        </div>
+      }
+
+      @if (detailEntries.length) {
+        <div class="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+          <div class="border-b border-[var(--color-divider)] px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text4)]">
+            Image details
+          </div>
+          @for (entry of detailEntries; track entry.label; let last = $last) {
+            <div class="flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 text-[13px]" [class.border-b-0]="last">
+              <span class="text-[var(--color-text3)]">{{ entry.label }}</span>
+              <span class="font-mono text-[var(--color-text1)]">{{ entry.value }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (lightboxSrc) {
+  <div class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90" (click)="closeLightbox()">
+    <img [src]="lightboxSrc" alt="Sentinel satellite image" class="max-h-[88vh] max-w-[95vw] rounded-lg object-contain"/>
+  </div>
+}

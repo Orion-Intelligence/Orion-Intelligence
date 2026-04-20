@@ -1,0 +1,647 @@
+import { Component, OnDestroy, OnInit, computed, effect } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { SatelliteIntelService } from './satellite-intel-service.service';
+import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
+import { GeocodeModalComponent } from './modal/geocode-modal/geocode-modal.component';
+import { MapSectionComponent } from './map-section/map-section.component';
+import { MonthCompareSectionComponent } from './month-compare-section/month-compare-section.component';
+import { AnomalySectionComponent } from './anomaly-section/anomaly-section.component';
+import { SentinelSearchSectionComponent } from './sentinel-search-section/sentinel-search-section.component';
+import { SentinelImageSectionComponent } from './sentinel-image-section/sentinel-image-section.component';
+import { SatelliteFacilitiesResponse, SatelliteAnomalyResponse, SatelliteCompareResponse, SatelliteSentinelImageResult, SatelliteSentinelSearchResponse, SatelliteGeocodeResult, SatelliteLiveAircraft, SatelliteLiveShip, } from '../../shared/model/satellite-intel/satellite-intel-api.models';
+
+@Component({
+  selector:    'app-satellite-intel',
+  templateUrl: './satellite-intel.html',
+  standalone:  true,
+  host:        {
+    'class': 'flex h-full min-h-0 w-full flex-1',
+  },
+  imports:     [
+    CommonModule,
+    FormsModule,
+    GeocodeModalComponent,
+    MapSectionComponent,
+    MonthCompareSectionComponent,
+    AnomalySectionComponent,
+    SentinelSearchSectionComponent,
+    SentinelImageSectionComponent,
+  ],
+  animations: [fadeInDashboardItem],
+})
+export class SatelliteIntel implements OnInit, OnDestroy {
+  private sub?: Subscription;
+  private aircraftTrackSub?: Subscription;
+  private shipTrackSub?: Subscription;
+  private aircraftTimer?: ReturnType<typeof setInterval>;
+  private shipsTimer?: ReturnType<typeof setInterval>;
+  private searchTimer?: ReturnType<typeof setTimeout>;
+  private pendingRequest: 'facilities' | 'anomaly' | 'compare' | 'sentinel' | 'sentinel-image' | null = null;
+
+  readonly progressSegments = Array.from({ length: 20 }, (_, i) => i);
+  readonly panelTabs = [ { id: 'compare', label: 'Compare' }, { id: 'anomaly', label: 'Anomaly' }, { id: 'sentinel', label: 'Sentinel' }, { id: 'image', label: 'Image' }, { id: 'facilities', label: 'Facilities' }, ] as const;
+  activePanel: 'compare' | 'anomaly' | 'sentinel' | 'image' | 'facilities' = 'compare';
+  activeTab: 'map' | 'compare' | 'anomaly' | 'sentinel' | 'facilities' = 'map';
+  coordsForm = { value: '', delta: 0.05 };
+  formError:  string | null = null;
+  inputLat   = 50.0;      // Frankfurt area (Major aviation hub)
+  inputLon   = 8.5;       // Germany/Europe
+  inputDelta = 2.5;       // ~280km x 280km (large coverage for aircraft data)
+  selectedLayer: 'esri' | 'osm' = 'esri';
+  facilitiesVisible = true;
+  aircraftTrackingEnabled = false;
+  shipsTrackingEnabled = false;
+  globalAircraftTrackingEnabled = false;
+  globalShipsTrackingEnabled = false;
+  trackingError: string | null = null;
+  aircraftData: SatelliteLiveAircraft[] = [];
+  shipsData: SatelliteLiveShip[] = [];
+  private skipNextMapMovedEvent = false;
+  searchQuery = '';
+  searchResults: SatelliteGeocodeResult[] = [];
+  lat:   number | null = null;
+  lon:   number | null = null;
+  delta                = 0.05;
+  facilitiesData:  SatelliteFacilitiesResponse['result'] | null = null;
+  anomalyResult:   SatelliteAnomalyResponse['result']    | null = null;
+  compareResult:   SatelliteCompareResponse['result']    | null = null;
+  sentinelImageResult: SatelliteSentinelImageResult | null = null;
+  sentinelResults: SatelliteSentinelSearchResponse['result'] | null = null;
+  hasSearched  = false;
+  currentStep  = '';
+  showGeocodeModal = false;
+  isScanning = computed(() =>
+    this.satelliteService.isRunning() && !this.satelliteService.onError(),);
+
+  constructor( public satelliteService: SatelliteIntelService, private route: ActivatedRoute, private router: Router, ) {
+    effect(() => {
+      const done = this.satelliteService.onDone();
+      if (!done) {
+        return; 
+      }
+      // Service may emit `{ result: ... }` (wrapped) or the result directly (flat).
+      // Prefer the inner `.result` when it has the shape we expect, else use done itself.
+      const result = (done?.result !== null && done?.result !== undefined) ? done.result : done;
+      if (!result) {
+        return; 
+      }
+
+      const pending = this.pendingRequest;
+
+      if (pending === 'facilities' || (!pending && this.looksLikeFacilitiesResult(result))) {
+        const facData = (result?.features !== undefined) ? result : (result?.result?.features !== undefined ? result.result : result);
+        this.facilitiesData = facData;
+      }
+      else if (pending === 'anomaly' || (!pending && this.looksLikeAnomalyResult(result))) {
+        const anomalyData = (result?.months !== undefined) ? result : (result?.result?.months !== undefined ? result.result : result);
+        this.anomalyResult = anomalyData;
+      }
+      else if (pending === 'sentinel' || (!pending && this.looksLikeSentinelResult(result))) {
+        const sentinelData = (result?.results !== undefined) ? result : (result?.result?.results !== undefined ? result.result : result);
+        this.sentinelResults = sentinelData;
+      }
+      else if (pending === 'sentinel-image' || (!pending && this.looksLikeSentinelImageResult(result))) {
+        const imageData = (result?.image_url !== undefined || result?.data_url !== undefined) ? result : (result?.result ? result.result : result);
+        this.sentinelImageResult = imageData;
+      }
+      else if (pending === 'compare' || (!pending && this.looksLikeCompareResult(result))) {
+        console.log('Received compare result:', result);
+        // Ensure we extract the actual result if it's wrapped
+        const compareData = (result?.months !== undefined) ? result : (result?.result?.months !== undefined ? result.result : result);
+        console.log('After unwrap, compare data:', compareData);
+        this.compareResult = compareData;
+      }
+
+      this.pendingRequest = null;
+      this.currentStep = '';
+    });
+  }
+
+  ngOnInit(): void {
+    this.satelliteService.resetState();
+    const section = this.route.snapshot.queryParamMap.get('section');
+    const q = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
+    if (section) {
+      this.activePanel = section as any; 
+    }
+    if (q) {
+      this.coordsForm.value = q;
+      const parsed = this.satelliteService.parseCoordinates(q);
+      if (parsed) {
+        this.inputLat = parsed.lat;
+        this.inputLon = parsed.lon;
+      }
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+    this.aircraftTrackSub?.unsubscribe();
+    this.shipTrackSub?.unsubscribe();
+    clearInterval(this.aircraftTimer);
+    clearInterval(this.shipsTimer);
+    this.satelliteService.cancelCurrentScan();
+  }
+
+  setPanel(id: typeof this.activePanel): void {
+    this.activePanel = id;
+  }
+
+  goToCoords(): void {
+    this.syncAppliedViewport();
+    this.hasSearched = true;
+    this.loadFacilities();
+    this.refreshTracking();
+  }
+
+  onDeltaChange(): void {
+    this.delta = this.inputDelta;
+  }
+
+  onLayerChange(): void { /* handled by map-section input */ }
+
+  toggleFacilities(): void {
+    this.facilitiesVisible = !this.facilitiesVisible;
+    if (this.facilitiesVisible) {
+      this.syncAppliedViewport();
+      this.loadFacilities();
+    }
+  }
+
+  toggleAircraftTracking(): void {
+    this.aircraftTrackingEnabled = !this.aircraftTrackingEnabled;
+    this.trackingError = null;
+
+    if (!this.aircraftTrackingEnabled) {
+      this.aircraftData = [];
+      this.aircraftTrackSub?.unsubscribe();
+      clearInterval(this.aircraftTimer);
+      return;
+    }
+
+    this.refreshAircraftTracking();
+    clearInterval(this.aircraftTimer);
+    this.aircraftTimer = setInterval(() => this.refreshAircraftTracking(), 15000);
+  }
+
+  toggleShipsTracking(): void {
+    this.shipsTrackingEnabled = !this.shipsTrackingEnabled;
+    this.trackingError = null;
+
+    if (!this.shipsTrackingEnabled) {
+      this.shipsData = [];
+      this.shipTrackSub?.unsubscribe();
+      clearInterval(this.shipsTimer);
+      return;
+    }
+
+    this.refreshShipsTracking();
+    clearInterval(this.shipsTimer);
+    this.shipsTimer = setInterval(() => this.refreshShipsTracking(), 8000);
+  }
+
+  toggleGlobalAircraftTracking(): void {
+    this.globalAircraftTrackingEnabled = !this.globalAircraftTrackingEnabled;
+    if (this.aircraftTrackingEnabled) {
+      this.toggleAircraftTracking(); // Disable local tracking if global is enabled
+    }
+    this.trackingError = null;
+
+    if (!this.globalAircraftTrackingEnabled) {
+      this.aircraftData = [];
+      this.aircraftTrackSub?.unsubscribe();
+      clearInterval(this.aircraftTimer);
+      return;
+    }
+
+    this.refreshAircraftTracking();
+    clearInterval(this.aircraftTimer);
+    this.aircraftTimer = setInterval(() => this.refreshAircraftTracking(), 15000);
+  }
+
+  toggleGlobalShipsTracking(): void {
+    this.globalShipsTrackingEnabled = !this.globalShipsTrackingEnabled;
+    if (this.shipsTrackingEnabled) {
+      this.toggleShipsTracking(); // Disable local tracking if global is enabled
+    }
+    this.trackingError = null;
+
+    if (!this.globalShipsTrackingEnabled) {
+      this.shipsData = [];
+      this.shipTrackSub?.unsubscribe();
+      clearInterval(this.shipsTimer);
+      return;
+    }
+
+    this.refreshShipsTracking();
+    clearInterval(this.shipsTimer);
+    this.shipsTimer = setInterval(() => this.refreshShipsTracking(), 8000);
+  }
+
+  runAnomalyScan(): void {
+    this.syncAppliedViewport();
+    // After syncAppliedViewport, lat/lon are set from inputLat/inputLon.
+    // Fall back to inputLat/inputLon directly so a missing prior "Go" click
+    // never silently blocks the scan.
+    const lat = this.lat ?? this.inputLat;
+    const lon = this.lon ?? this.inputLon;
+    if (!lat || !lon) {
+      return; 
+    }
+    this.lat = lat;
+    this.lon = lon;
+    this.setPanel('anomaly');
+    this.anomalyResult = null;
+    this.hasSearched = true;
+    this.pendingRequest = 'anomaly';
+    this.satelliteService.resetState();
+    this.sub?.unsubscribe();
+    this.sub = this.satelliteService.runAnomalyScan(this.lat, this.lon, this.delta);
+  }
+
+  copyCoords(): void {
+    navigator.clipboard?.writeText(`${this.inputLat.toFixed(5)}, ${this.inputLon.toFixed(5)}`).catch(() => {});
+  }
+
+  openGeocodeModal(): void {
+    this.showGeocodeModal = true;
+  }
+
+  onSearchInput(): void {
+    clearTimeout(this.searchTimer);
+    if (this.searchQuery.trim().length < 2) {
+      this.searchResults = []; return; 
+    }
+    this.searchTimer = setTimeout(() => this.doSearch(), 400);
+  }
+
+  async doSearch(): Promise<void> {
+    const query = this.searchQuery.trim();
+    if (!query) {
+      return; 
+    }
+    try {
+      const res = await this.satelliteService.fetchGeocodeOnce(query);
+      this.searchResults = res?.results || [];
+    }
+    catch {
+      this.searchResults = [];
+    }
+  }
+
+  selectSearchResult(r: SatelliteGeocodeResult): void {
+    this.inputLat   = r.lat;
+    this.inputLon   = r.lon;
+    this.inputDelta = r.delta;
+    this.searchQuery = r.name;
+    this.searchResults = [];
+    this.lat   = r.lat;
+    this.lon   = r.lon;
+    this.delta = r.delta;
+    this.coordsForm.value = `${r.lat}, ${r.lon}`;
+    this.coordsForm.delta = r.delta;
+    this.hasSearched = true;
+    this.loadFacilities();
+  }
+
+  closeSearchDrop(): void {
+    this.searchResults = []; 
+  }
+
+  clearSearch(): void {
+    this.searchQuery = '';
+    this.searchResults = [];
+  }
+
+  onMapClick(coords: { lat: number; lon: number }): void {
+    this.inputLat = coords.lat;
+    this.inputLon = coords.lon;
+    this.lat = coords.lat;
+    this.lon = coords.lon;
+    this.delta = this.inputDelta;
+    this.coordsForm.value = `${coords.lat.toFixed(5)}, ${coords.lon.toFixed(5)}`;
+    this.hasSearched = true;
+    this.setPanel('anomaly');
+    this.anomalyResult = null;
+    this.pendingRequest = 'anomaly';
+    this.satelliteService.resetState();
+    this.sub?.unsubscribe();
+    this.sub = this.satelliteService.runAnomalyScan(this.lat, this.lon, this.delta);
+    this.refreshTracking();
+  }
+
+  onMapMoved(center: { lat: number; lon: number; zoom: number }): void {
+    // Skip if this is the aftermath of rendering tracking data
+    if (this.skipNextMapMovedEvent) {
+      this.skipNextMapMovedEvent = false;
+      return;
+    }
+    
+    this.inputLat = center.lat;
+    this.inputLon = center.lon;
+    this.inputDelta = this.zoomToDelta(center.zoom);
+    this.coordsForm.value = `${center.lat.toFixed(5)}, ${center.lon.toFixed(5)}`;
+    this.coordsForm.delta = this.inputDelta;
+    
+    // Don't refetch tracking data on map moves when tracking is active
+    // Tracking will be updated by its own interval timers
+    if (!this.aircraftTrackingEnabled && !this.shipsTrackingEnabled) {
+      this.refreshTracking();
+    }
+  }
+
+  onRunCompare(event: { imageType: string }): void {
+    this.syncAppliedViewport();
+    const lat = this.lat ?? this.inputLat;
+    const lon = this.lon ?? this.inputLon;
+    if (!lat || !lon) {
+      return; 
+    }
+    this.lat = lat;
+    this.lon = lon;
+    this.compareResult = null;
+    this.hasSearched = true;
+    this.pendingRequest = 'compare';
+    this.satelliteService.resetState();
+    this.sub?.unsubscribe();
+    this.sub = this.satelliteService.runCompare(this.lat, this.lon, this.delta, event.imageType);
+  }
+
+  onRunSentinelSearch(): void {
+    this.syncAppliedViewport();
+    const lat = this.lat ?? this.inputLat;
+    const lon = this.lon ?? this.inputLon;
+    if (!lat || !lon) {
+      return; 
+    }
+    this.lat = lat;
+    this.lon = lon;
+    this.sentinelResults = null;
+    this.hasSearched = true;
+    this.pendingRequest = 'sentinel';
+    this.satelliteService.resetState();
+    this.sub?.unsubscribe();
+    this.sub = this.satelliteService.searchSentinel(this.lat, this.lon, this.delta);
+  }
+
+  onRunSentinelImage(event: { imageType: string; month: string; size: number }): void {
+    this.syncAppliedViewport();
+    const lat = this.lat ?? this.inputLat;
+    const lon = this.lon ?? this.inputLon;
+    if (!lat || !lon) {
+      return; 
+    }
+    this.lat = lat;
+    this.lon = lon;
+    this.sentinelImageResult = null;
+    this.hasSearched = true;
+    this.pendingRequest = 'sentinel-image';
+    this.satelliteService.resetState();
+    this.sub?.unsubscribe();
+    this.sub = this.satelliteService.fetchSentinelImage(this.lat, this.lon, this.delta, event.imageType, event.month, event.size);
+  }
+
+  onCoordinatesChange(coords: string): void {
+    this.coordsForm.value = coords;
+    const parsed = this.satelliteService.parseCoordinates(coords);
+    if (parsed) {
+      this.inputLat = parsed.lat; this.inputLon = parsed.lon; 
+    }
+  }
+
+  onDeltaChangeModal(delta: number): void {
+    this.coordsForm.delta = delta;
+    this.inputDelta = delta;
+    this.delta = delta;
+  }
+
+  onGeoSearch(): void {
+    this.showGeocodeModal = false;
+    const parsed = this.satelliteService.parseCoordinates(this.coordsForm.value);
+    if (!parsed) {
+      return; 
+    }
+    this.inputLat  = parsed.lat;
+    this.inputLon  = parsed.lon;
+    this.lat       = parsed.lat;
+    this.lon       = parsed.lon;
+    this.delta     = this.coordsForm.delta;
+    this.inputDelta = this.coordsForm.delta;
+    this.hasSearched = true;
+    this.loadFacilities();
+  }
+
+  cancel(): void {
+    this.satelliteService.cancelCurrentScan(); 
+  }
+
+  facEntries(): [string, number][] {
+    return Object.entries(this.facilitiesData?.type_counts || {}).sort((a, b) => b[1] - a[1]) as [string, number][];
+  }
+
+  get lastResultCount(): number {
+    if (this.activePanel === 'facilities') {
+      return this.facilitiesData?.total ?? 0; 
+    }
+    if (this.activePanel === 'sentinel')   {
+      return this.sentinelResults?.results?.length ?? 0; 
+    }
+    if (this.activePanel === 'anomaly')    {
+      return this.anomalyResult?.months?.filter((m: any) => m?.has_data).length ?? 0; 
+    }
+    if (this.activePanel === 'compare')    {
+      return this.compareResult?.months?.length ?? 0; 
+    }
+    return 0;
+  }
+
+  private loadFacilities(): void {
+    if (!this.lat || !this.lon || !this.facilitiesVisible) {
+      return; 
+    }
+    this.facilitiesData = null;
+    this.pendingRequest = 'facilities';
+    this.satelliteService.resetState();
+    this.sub?.unsubscribe();
+    this.sub = this.satelliteService.fetchFacilities(this.lat, this.lon, 5);
+  }
+
+  private syncAppliedViewport(): void {
+    this.lat = this.inputLat;
+    this.lon = this.inputLon;
+    this.delta = this.inputDelta;
+    this.coordsForm.value = `${this.inputLat}, ${this.inputLon}`;
+    this.coordsForm.delta = this.inputDelta;
+  }
+
+  private refreshTracking(): void {
+    if (this.aircraftTrackingEnabled) {
+      this.refreshAircraftTracking();
+    }
+    if (this.shipsTrackingEnabled) {
+      this.refreshShipsTracking();
+    }
+  }
+
+  private refreshAircraftTracking(): void {
+    if (this.globalAircraftTrackingEnabled) {
+      this.refreshGlobalAircraftTracking();
+      return;
+    }
+
+    const lat = this.inputLat;
+    const lon = this.inputLon;
+    const delta = this.inputDelta;
+
+    this.aircraftTrackSub?.unsubscribe();
+    this.aircraftTrackSub = this.satelliteService.fetchAircraftInBounds(lat, lon, delta).subscribe({
+      next: (res) => {
+        console.log('[AIRCRAFT] Full response:', res);
+        const payload = (res?.result ?? res) as any;
+        console.log('[AIRCRAFT] Extracted payload:', payload);
+        console.log('[AIRCRAFT] Is aircraft array?', Array.isArray(payload?.aircraft));
+        console.log('[AIRCRAFT] Aircraft count:', payload?.aircraft?.length ?? 0);
+        this.aircraftData = Array.isArray(payload?.aircraft) ? payload.aircraft : [];
+        console.log('[AIRCRAFT] Set aircraftData with', this.aircraftData.length, 'items');
+        if (payload?.error) {
+          this.trackingError = `Aircraft tracking: ${payload.error}`;
+        }
+      },
+      error: (err) => {
+        console.error('[AIRCRAFT] Error:', err);
+        this.trackingError = err?.error?.detail || err?.message || 'Aircraft tracking failed';
+      },
+    });
+  }
+
+  private refreshGlobalAircraftTracking(): void {
+    this.aircraftTrackSub?.unsubscribe();
+    this.aircraftTrackSub = this.satelliteService.fetchAircraftGlobal().subscribe({
+      next: (res) => {
+        console.log('[AIRCRAFT-GLOBAL] Full response:', res);
+        const payload = (res?.result ?? res) as any;
+        console.log('[AIRCRAFT-GLOBAL] Extracted payload:', payload);
+        console.log('[AIRCRAFT-GLOBAL] Is aircraft array?', Array.isArray(payload?.aircraft));
+        console.log('[AIRCRAFT-GLOBAL] Aircraft count:', payload?.aircraft?.length ?? 0);
+        this.aircraftData = Array.isArray(payload?.aircraft) ? payload.aircraft : [];
+        console.log('[AIRCRAFT-GLOBAL] Set aircraftData with', this.aircraftData.length, 'items');
+        if (payload?.error) {
+          this.trackingError = `Global aircraft tracking: ${payload.error}`;
+        }
+      },
+      error: (err) => {
+        console.error('[AIRCRAFT-GLOBAL] Error:', err);
+        this.trackingError = err?.error?.detail || err?.message || 'Global aircraft tracking failed';
+      },
+    });
+  }
+
+  private refreshShipsTracking(): void {
+    if (this.globalShipsTrackingEnabled) {
+      this.refreshGlobalShipsTracking();
+      return;
+    }
+
+    const lat = this.inputLat;
+    const lon = this.inputLon;
+    const delta = this.inputDelta;
+
+    this.shipTrackSub?.unsubscribe();
+    this.shipTrackSub = this.satelliteService.fetchShipsInBounds(lat, lon, delta).subscribe({
+      next: (res) => {
+        console.log('[SHIPS] Full response:', res);
+        const payload = (res?.result ?? res) as any;
+        console.log('[SHIPS] Extracted payload:', payload);
+        console.log('[SHIPS] Is ships array?', Array.isArray(payload?.ships));
+        console.log('[SHIPS] Ships count:', payload?.ships?.length ?? 0);
+        this.shipsData = Array.isArray(payload?.ships) ? payload.ships : [];
+        console.log('[SHIPS] Set shipsData with', this.shipsData.length, 'items');
+        if (payload?.error) {
+          this.trackingError = `Ship tracking: ${payload.error}`;
+        }
+      },
+      error: (err) => {
+        console.error('[SHIPS] Error:', err);
+        this.trackingError = err?.error?.detail || err?.message || 'Ship tracking failed';
+      },
+    });
+  }
+
+  private refreshGlobalShipsTracking(): void {
+    this.shipTrackSub?.unsubscribe();
+    this.shipTrackSub = this.satelliteService.fetchShipsGlobal().subscribe({
+      next: (res) => {
+        console.log('[SHIPS-GLOBAL] Full response:', res);
+        const payload = (res?.result ?? res) as any;
+        console.log('[SHIPS-GLOBAL] Extracted payload:', payload);
+        console.log('[SHIPS-GLOBAL] Is ships array?', Array.isArray(payload?.ships));
+        console.log('[SHIPS-GLOBAL] Ships count:', payload?.ships?.length ?? 0);
+        this.shipsData = Array.isArray(payload?.ships) ? payload.ships : [];
+        console.log('[SHIPS-GLOBAL] Set shipsData with', this.shipsData.length, 'items');
+        if (payload?.error) {
+          this.trackingError = `Global ship tracking: ${payload.error}`;
+        }
+      },
+      error: (err) => {
+        console.error('[SHIPS-GLOBAL] Error:', err);
+        this.trackingError = err?.error?.detail || err?.message || 'Global ship tracking failed';
+      },
+    });
+  }
+
+  private zoomToDelta(zoom: number): number {
+    if (zoom >= 17) {
+      return 0.005; 
+    }
+    if (zoom >= 16) {
+      return 0.01; 
+    }
+    if (zoom >= 15) {
+      return 0.02; 
+    }
+    if (zoom >= 14) {
+      return 0.04; 
+    }
+    if (zoom >= 13) {
+      return 0.08; 
+    }
+    if (zoom >= 12) {
+      return 0.15; 
+    }
+    if (zoom >= 11) {
+      return 0.3; 
+    }
+    if (zoom >= 10) {
+      return 0.6; 
+    }
+    return 1.2;
+  }
+
+  private looksLikeFacilitiesResult(result: any): boolean {
+    return !!result && Array.isArray(result.features) && typeof result.total === 'number';
+  }
+
+  private looksLikeAnomalyResult(result: any): boolean {
+    return !!result && Array.isArray(result.months) && typeof result.alert_level === 'string';
+  }
+
+  private looksLikeCompareResult(result: any): boolean {
+    return !!result && Array.isArray(result.months) && typeof result.image_type === 'string';
+  }
+
+  private looksLikeSentinelResult(result: any): boolean {
+    return !!result && Array.isArray(result.results) && Array.isArray(result.bbox);
+  }
+
+  private looksLikeSentinelImageResult(result: any): boolean {
+    return !!result && (
+      typeof result.image_url === 'string' ||
+      typeof result.data_url === 'string' ||
+      typeof result.image_base64 === 'string' ||
+      typeof result.image_type === 'string'
+    );
+  }
+}

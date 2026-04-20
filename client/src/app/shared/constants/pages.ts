@@ -14,7 +14,8 @@ export enum Category {
     SCANNER = 'Scanner',
     TENANT = 'Tenant',
     PROFILE = 'Profile',
-    NETINT = 'NETINT'
+    NETINT = 'NETINT',
+    SatelliteINTEL = 'SatelliteINTEL'
 }
 export enum GeneralSubCategory {
     ALL = 'All',
@@ -87,6 +88,11 @@ export enum TenantSubCategory {
     AUDITLOG = 'Auditlog'
 }
 export enum NETINTSubCategory {
+    VIEW_PROFILE = 'View-Profiles',
+    VIEW_TENANT = 'View-Tenants',
+    AUDITLOG = 'Auditlog'
+}
+export enum SatelliteIntelSubCategory {
     VIEW_PROFILE = 'View-Profiles',
     VIEW_TENANT = 'View-Tenants',
     AUDITLOG = 'Auditlog'

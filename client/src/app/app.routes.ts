@@ -45,6 +45,7 @@ const loadTenantSettingsComponent = () => import('./pages/dashboard/dashboard-si
 const loadFileScannerComponent = () => import('./pages/intel-panel/ioc-extractor/file-scanner.component').then(m => m.FileScannerComponent);
 const loadSocialMapperComponent = () => import('./pages/graphs/social-graph/social-mapper.component').then(m => m.SocialMapperComponent);
 const loadNetworkIntelComponent = () => import('./pages/network-intel/network-intel').then(m => m.NetworkIntel);
+const loadSatelliteIntelComponent =()=>import('./pages/satellite-intel/satellite-intel').then(m=>m.SatelliteIntel);
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
   data: { type: 'consolidated', animation: 'HashPage' }
@@ -685,6 +686,12 @@ export const routes: Routes = [
         path: 'netint',
         canActivate: [subscriptionGuard],
         loadComponent: loadNetworkIntelComponent,
+        data: { animation: 'CategoryPage' }
+      },
+      {
+        path: 'satelliteint',
+        canActivate: [subscriptionGuard],
+        loadComponent: loadSatelliteIntelComponent,
         data: { animation: 'CategoryPage' }
       },
       {

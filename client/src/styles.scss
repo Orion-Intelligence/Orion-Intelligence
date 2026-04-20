@@ -7,6 +7,8 @@
 @use "./app/shared/styles/alert-stagger-animations.scss";
 @use "./app/pages/demo-tour/demo-tour/demo-tour.component.css";
 
+@import "leaflet/dist/leaflet.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

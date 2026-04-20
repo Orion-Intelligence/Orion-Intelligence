@@ -23,6 +23,19 @@ from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (
     NetIntelDeepScanRequest,
     ResolveIPRequest,
 )
+from orion.api.server.crawl_manager.class_model.satellite_request_models import (
+    SatelliteImageRequest,
+    SatelliteAnomalyRequest,
+    SatelliteCompareRequest,
+    SatelliteGeocodeRequest,
+    SatelliteFacilitiesRequest,
+    SatelliteSentinelSearchRequest,
+    SatelliteLiveTrackerBBoxRequest,
+    SatelliteLiveTrackerAircraftIcaoRequest,
+    SatelliteLiveTrackerAircraftTrackRequest,
+    SatelliteLiveTrackerShipMmsiRequest,
+    SatelliteLiveTrackerStatusRequest,
+)
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import (SocialScrapeRequest, )
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
@@ -40,6 +53,7 @@ STEALER_LOG_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_requ
 STIX_MEMBER_DEPS = [Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER]))]
 GENERAL_MODULE_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:general"))]
 SCANNING_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("scanning"))]
+SATELLITE_INTEL_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("scanning", bypass_licenses=["osint_advanced"]))]
 STIX_KIND_VALUES = {"general", "leak", "defacement", "exploit", "chat", "social"}
 
 
@@ -784,6 +798,136 @@ async def geo_camera_detect(param: GeoCameraDetectRequest = Body(...), current_u
 async def geo_camera_detect_ranges(param: GeoCameraDetectRangesRequest = Body(...), current_user=Depends(get_current_user)):
     return await search_model.getInstance().network_intel(param, "camera_detect_ranges", user_id=str(current_user.id))
 
+@api_routes.post(
+    "/api/satellite/geocode",
+    summary="Convert address to coordinates",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_geocode(payload: SatelliteGeocodeRequest = Body(...), current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().geocode(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/facilities",
+    summary="Detect facilities (ports, airports, military zones)",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_facilities(payload: SatelliteFacilitiesRequest = Body(...), current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().facilities(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/sentinel/search",
+    summary="Search Sentinel satellite data",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_sentinel_search(payload: SatelliteSentinelSearchRequest = Body(...), current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().sentinel_search(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/sentinel/image",
+    summary="Fetch Sentinel satellite image",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_sentinel_image(payload: SatelliteImageRequest = Body(...), current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().sentinel_image(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/anomaly",
+    summary="Detect anomalies in satellite imagery",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_anomaly(payload: SatelliteAnomalyRequest = Body(...), current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().anomaly(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/compare",
+    summary="Compare two satellite images",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_compare(payload: SatelliteCompareRequest = Body(...), current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().compare(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/livetrack/aircraft/bbox",
+    summary="Track aircraft in map bounds",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_livetrack_aircraft_bbox(payload: SatelliteLiveTrackerBBoxRequest = Body(...), current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().livetrack_aircraft_bbox(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/livetrack/aircraft/icao",
+    summary="Fetch aircraft by ICAO24",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_livetrack_aircraft_icao(payload: SatelliteLiveTrackerAircraftIcaoRequest = Body(...), current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().livetrack_aircraft_icao(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/livetrack/aircraft/track",
+    summary="Fetch aircraft track history",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_livetrack_aircraft_track(payload: SatelliteLiveTrackerAircraftTrackRequest = Body(...), current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().livetrack_aircraft_track(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/livetrack/ships/bbox",
+    summary="Track ships in map bounds",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_livetrack_ships_bbox(payload: SatelliteLiveTrackerBBoxRequest = Body(...), current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().livetrack_ships_bbox(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/livetrack/ships/mmsi",
+    summary="Fetch ship by MMSI",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_livetrack_ships_mmsi(payload: SatelliteLiveTrackerShipMmsiRequest = Body(...), current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().livetrack_ships_mmsi(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/livetrack/status",
+    summary="Live tracker health status",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_livetrack_status(payload: SatelliteLiveTrackerStatusRequest = Body(...), current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().livetrack_status(payload, user_id=str(current_user.id))
 
 @api_routes.post(
     "/api/stix/convert/{kind}",
