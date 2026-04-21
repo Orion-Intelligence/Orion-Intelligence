@@ -220,48 +220,48 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   onSearchChanged(term: string) {
-    this.updateState(state => state.searchTerm.set(term), false); 
+    this.updateState(state => state.searchTerm.set(term), false);
   }
 
   onViewModeChanged(mode: 'graph' | 'list') {
-    this.updateState(state => state.viewMode.set(mode), false); 
+    this.updateState(state => state.viewMode.set(mode), false);
   }
 
   onPhysicsToggled() {
-    this.updateState(state => state.isPhysicsEnabled.update(v => !v), false); 
+    this.updateState(state => state.isPhysicsEnabled.update(v => !v), false);
   }
 
   onEditModeToggled() {
-    this.updateState(state => state.isEditMode.update(v => !v), false); 
+    this.updateState(state => state.isEditMode.update(v => !v), false);
   }
 
   onHomeMenuSearchChanged(term: string) {
-    this.updateState(state => state.homeMenuSearchTerm.set(term), false); 
+    this.updateState(state => state.homeMenuSearchTerm.set(term), false);
   }
 
   onHomeMenuToggled() {
-    this.updateState(state => state.isHomeMenuCollapsed.update(v => !v), false); 
+    this.updateState(state => state.isHomeMenuCollapsed.update(v => !v), false);
   }
 
   onEntityMenuToggled() {
-    this.updateState(state => state.isEntityMenuCollapsed.update(v => !v), false); 
+    this.updateState(state => state.isEntityMenuCollapsed.update(v => !v), false);
   }
 
   onHomeMenuTabSelected(tab: 'history' | 'entities') {
-    this.updateState(state => state.activeHomeMenuTab.set(tab), false); 
+    this.updateState(state => state.activeHomeMenuTab.set(tab), false);
   }
 
   onGraphSearchChanged(event: Event) {
     const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
-    this.graphSearchTerm.set(nextValue); 
+    this.graphSearchTerm.set(nextValue);
   }
 
   toggleGraphSearch() {
-    this.isGraphSearchExpanded.update(v => !v); 
+    this.isGraphSearchExpanded.update(v => !v);
   }
 
   expandGraphSearch() {
-    this.isGraphSearchExpanded.set(true); 
+    this.isGraphSearchExpanded.set(true);
   }
 
   collapseGraphSearch() {
@@ -316,7 +316,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   triggerImageUpload() {
-    this.imageInput()?.nativeElement.click(); 
+    this.imageInput()?.nativeElement.click();
   }
 
   onImageSelected(event: Event) {
@@ -333,7 +333,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         }
       })
       .finally(() => {
-        input.value = ''; 
+        input.value = '';
       });
   }
 
@@ -371,8 +371,8 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
 
   handleFollowerScan(usernames: string[]) {
     usernames.forEach(username => {
-      this.initiateScan(username); 
-    }); 
+      this.initiateScan(username);
+    });
   }
 
   openFollowerScanFromNode(nodeId: string) {
@@ -380,7 +380,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   handleRescan(username: string) {
-    this.initiateScan(username); this.state.closeSummaryPopup(); 
+    this.initiateScan(username); this.state.closeSummaryPopup();
   }
 
   private initiateScan(username: string) {
@@ -429,30 +429,30 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.updateState(state => {
       state.jobs.update(currentJobs => currentJobs.filter(job => job.username.toLowerCase() !== normalizedUsername));
       state.scanResults.update(currentMap => {
-        const newMap = new Map(currentMap); newMap.delete(username); return newMap; 
+        const newMap = new Map(currentMap); newMap.delete(username); return newMap;
       });
     });
     this.graphOrchestrator.removeUserFromGraph(this.requireActiveTabState(), username);
   }
 
   fetchProfileDetails(p: PlatformResult) {
-    this.fetchData(p, 'profile', this.scanService.fetchProfileInfo(p.platform, p.username), this.cancelProfileFetchSubjects); 
+    this.fetchData(p, 'profile', this.scanService.fetchProfileInfo(p.platform, p.username), this.cancelProfileFetchSubjects);
   }
 
   handleFetchSocialPosts(p: PlatformResult) {
-    this.fetchData(p, 'posts', this.scanService.fetchSocialPosts(p.platform, p.username), this.cancelPostFetchSubjects); 
+    this.fetchData(p, 'posts', this.scanService.fetchSocialPosts(p.platform, p.username), this.cancelPostFetchSubjects);
   }
 
   handleFetchImagesForPlatform(p: PlatformResult) {
-    this.fetchData(p, 'platformImages', this.scanService.fetchPlatformImages(p.platform, p.username), this.cancelPlatformImageFetchSubjects); 
+    this.fetchData(p, 'platformImages', this.scanService.fetchPlatformImages(p.platform, p.username), this.cancelPlatformImageFetchSubjects);
   }
 
   handleFetchFollowers(p: PlatformResult) {
-    this.fetchData(p, 'followers', this.scanService.fetchFollowers(p.platform, p.username), this.cancelFollowersFetchSubjects); 
+    this.fetchData(p, 'followers', this.scanService.fetchFollowers(p.platform, p.username), this.cancelFollowersFetchSubjects);
   }
 
   handleFetchFollowing(p: PlatformResult) {
-    this.fetchData(p, 'following', this.scanService.fetchFollowing(p.platform, p.username), this.cancelFollowingFetchSubjects); 
+    this.fetchData(p, 'following', this.scanService.fetchFollowing(p.platform, p.username), this.cancelFollowingFetchSubjects);
   }
 
   private fetchData(platformResult: PlatformResult, stateKey: 'profile' | 'posts' | 'platformImages' | 'followers' | 'following', request$: any, cancelMap: Map<string, Subject<void>>) {
@@ -471,23 +471,23 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   cancelFetchProfileDetails(p: PlatformResult) {
-    this.cancelFetch(p, 'profile', this.cancelProfileFetchSubjects); 
+    this.cancelFetch(p, 'profile', this.cancelProfileFetchSubjects);
   }
 
   handleCancelFetchSocialPosts(p: PlatformResult) {
-    this.cancelFetch(p, 'posts', this.cancelPostFetchSubjects); 
+    this.cancelFetch(p, 'posts', this.cancelPostFetchSubjects);
   }
 
   handleCancelFetchImagesForPlatform(p: PlatformResult) {
-    this.cancelFetch(p, 'platformImages', this.cancelPlatformImageFetchSubjects); 
+    this.cancelFetch(p, 'platformImages', this.cancelPlatformImageFetchSubjects);
   }
 
   handleCancelFetchFollowers(p: PlatformResult) {
-    this.cancelFetch(p, 'followers', this.cancelFollowersFetchSubjects); 
+    this.cancelFetch(p, 'followers', this.cancelFollowersFetchSubjects);
   }
 
   handleCancelFetchFollowing(p: PlatformResult) {
-    this.cancelFetch(p, 'following', this.cancelFollowingFetchSubjects); 
+    this.cancelFetch(p, 'following', this.cancelFollowingFetchSubjects);
   }
 
   private cancelFetch(p: PlatformResult, stateKey: 'profile' | 'posts' | 'platformImages' | 'followers' | 'following', cancelMap: Map<string, Subject<void>>) {
@@ -497,19 +497,19 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   cancelAllFetchesForUser(username: string) {
     this.platformFetchService.cancelAllFetchesForUser(username, this.scanResults(), {
       profile: (p: PlatformResult) => {
-        this.cancelFetchProfileDetails(p); 
+        this.cancelFetchProfileDetails(p);
       },
       posts: (p: PlatformResult) => {
-        this.handleCancelFetchSocialPosts(p); 
+        this.handleCancelFetchSocialPosts(p);
       },
       images: (p: PlatformResult) => {
-        this.handleCancelFetchImagesForPlatform(p); 
+        this.handleCancelFetchImagesForPlatform(p);
       },
       followers: (p: PlatformResult) => {
-        this.handleCancelFetchFollowers(p); 
+        this.handleCancelFetchFollowers(p);
       },
       following: (p: PlatformResult) => {
-        this.handleCancelFetchFollowing(p); 
+        this.handleCancelFetchFollowing(p);
       }
     });
   }
@@ -687,10 +687,10 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         this.tabManager.scheduleSave();
       },
       deleteEntity: () => {
-        this.deleteCustomEntity(nodeId); 
+        this.deleteCustomEntity(nodeId);
       },
       openRelationship: () => {
-        this.onRelationshipNodeClicked(nodeId); 
+        this.onRelationshipNodeClicked(nodeId);
       },
     };
     handlers[action]();
@@ -731,7 +731,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.tabManager.scheduleSave();
     if (!wasPhysicsEnabled) {
       setTimeout(() => {
-        this.updateState(state => state.isPhysicsEnabled.set(false), false); 
+        this.updateState(state => state.isPhysicsEnabled.set(false), false);
       }, 2500);
     }
   }

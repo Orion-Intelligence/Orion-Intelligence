@@ -9,17 +9,14 @@ describe('Scans Management - Web Scans Flow', () => {
     cy.logout();
   });
 
-  it('runs Basic, Port, Repository, SEO, and APK scans', () => {
-    cy.visit('/dashboard/scanner/basic-scan');
-    fillPrimaryScanInput('https://ucp.edu.pk/');
-    clickSearch();
-    cy.get('[data-testid="scan-security-posture"]').should('exist');
-    cy.get('[data-testid="scan-findings-title"]').first().click();
+  it('runs Basic, Vulnerability, Repository, SEO, and APK scans', () => {
+    cy.visit('/dashboard/scanner/network-scan');
+    cy.get('[data-testid="network-intel-tab-host-recon"]').should('be.visible');
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('ucp.edu.pk{enter}');
 
-    cy.visit('/dashboard/scanner/port-scan');
-    fillPrimaryScanInput('https://ucp.edu.pk/');
-    clickSearch();
-    cy.get('[data-testid="scan-security-posture"]').should('exist');
+    cy.visit('/dashboard/scanner/network-scan');
+    cy.get('[data-testid="network-intel-tab-vulnerability-scan"]').should('be.visible').click();
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('ucp.edu.pk{enter}');
 
     cy.visit('/dashboard/scanner/repository-scan');
     fillPrimaryScanInput('https://github.com/juice-shop/juice-shop');
