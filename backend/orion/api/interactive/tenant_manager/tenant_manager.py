@@ -178,6 +178,8 @@ class TenantManager:
             tenant.status = data.status
 
         if data.licenses is not None and len(data.licenses) > 0:
+            if LicenseName.FEEDER.value in data.licenses:
+                raise HTTPException(status_code=400, detail="Feeder license cannot be assigned to tenant")
             tenant.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
 
         if data.profile_visibility_enabled is not None:
