@@ -1,7 +1,7 @@
 <div class="mb-[200px] w-full px-[32px] pt-[24px] max-[1200px]:px-[15px] max-[1200px]:pt-[18px] max-[943px]:px-[10px] max-[943px]:pt-[14px]" @fadeInDashboardItem>
   <div class="mb-5">
     <div>
-      <h1 class="ui-page-title">Feeder Scripts</h1>
+      <h1 data-testid="feeder-page-title" class="ui-page-title">Feeder Scripts</h1>
       <p class="ui-page-description">Manage parser uploads for your OSINT feeder workspace.</p>
     </div>
   </div>
@@ -17,25 +17,25 @@
     @if (isCatalogLoading) {
       <div class="ui-shimmer h-[40px] w-full rounded-[10px] bg-[var(--color-divider)]"></div>
     } @else {
-      <select [(ngModel)]="selectedRuleKey" (ngModelChange)="onRuleChange()" name="ruleKey" class="h-11 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 text-sm text-[var(--color-text1)] outline-none">
+      <select data-testid="feeder-rule-select" [(ngModel)]="selectedRuleKey" (ngModelChange)="onRuleChange()" name="ruleKey" class="h-11 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 text-sm text-[var(--color-text1)] outline-none">
         @for (rule of rules; track rule.key) {
-          <option [ngValue]="rule.key">{{ getRuleLabel(rule.key) }}</option>
+          <option [attr.data-testid]="'feeder-rule-option-' + rule.key" [ngValue]="rule.key">{{ getRuleLabel(rule.key) }}</option>
         }
       </select>
     }
   </div>
 
   <div class="mt-6 flex max-w-full flex-nowrap gap-2 overflow-x-auto whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]">
-    <button type="button" (click)="setActiveTab('add')" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'add' ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]'">
+    <button data-testid="feeder-tab-add" type="button" (click)="setActiveTab('add')" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'add' ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]'">
       Add
     </button>
     @if (hasScriptTab()) {
-      <button type="button" (click)="setActiveTab('view')" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'view' ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]'">
+      <button data-testid="feeder-tab-script" type="button" (click)="setActiveTab('view')" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'view' ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]'">
         Script
       </button>
     }
     @if (hasValuesTab()) {
-      <button type="button" (click)="setActiveTab('values')" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'values' ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]'">
+      <button data-testid="feeder-tab-values" type="button" (click)="setActiveTab('values')" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'values' ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]'">
         Values
       </button>
     }

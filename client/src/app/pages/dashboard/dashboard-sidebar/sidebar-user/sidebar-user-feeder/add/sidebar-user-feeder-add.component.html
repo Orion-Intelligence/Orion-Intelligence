@@ -4,7 +4,7 @@
 
 <div class="mt-6">
   @if (formError) {
-    <div class="mb-4 rounded-[10px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.28)] px-4 py-3 text-sm text-[var(--color-text1)]">
+    <div data-testid="feeder-form-error" class="mb-4 rounded-[10px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.28)] px-4 py-3 text-sm text-[var(--color-text1)]">
       {{ formError }}
     </div>
   }
@@ -35,7 +35,7 @@
   } @else {
     <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-5 [body.light-theme_&]:bg-white">
       <div class="ui-section-title">{{ panelTitle }}</div>
-      <input #fileInput hidden type="file" accept=".py" multiple (change)="onFileSelected($event)" />
+      <input data-testid="feeder-file-input" #fileInput hidden type="file" accept=".py" multiple (change)="onFileSelected($event)" />
       @if (panelDescription) {
         <div class="ui-section-description">{{ panelDescription }}</div>
       }
@@ -57,7 +57,7 @@
               }
             </div>
             <div class="flex flex-wrap gap-2">
-              <button type="button" class="inline-flex h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 text-sm font-semibold text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="fileInput.click()">
+              <button data-testid="feeder-select-file-button" type="button" class="inline-flex h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 text-sm font-semibold text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="fileInput.click()">
                 Select File
               </button>
               @if (selectedFiles.length) {
@@ -79,7 +79,7 @@
 
           @if (selectedFiles.length) {
             <div class="mt-5 flex justify-end">
-              <button type="button" class="inline-flex h-10 items-center rounded-[8px] bg-[var(--color-blue-640)] px-4 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isSubmitting || !selectedFiles.length" (click)="uploadSharedFile(fileInput)">
+              <button data-testid="feeder-upload-script-button" type="button" class="inline-flex h-10 items-center rounded-[8px] bg-[var(--color-blue-640)] px-4 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isSubmitting || !selectedFiles.length" (click)="uploadSharedFile(fileInput)">
                 {{ isSubmitting && uploadMode === 'file' ? 'Uploading...' : 'Upload Script' }}
               </button>
             </div>
@@ -109,11 +109,11 @@
               <div class="mt-1 text-xs text-[var(--color-text4)]">Upload the parser file first to unlock value entry.</div>
             </div>
           } @else {
-            <textarea [(ngModel)]="valuesText" name="valuesText" rows="8" placeholder="One URL per line" class="w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-3 text-sm text-[var(--color-text1)] outline-none [body.light-theme_&]:bg-white"></textarea>
+            <textarea data-testid="feeder-values-input" [(ngModel)]="valuesText" name="valuesText" rows="8" placeholder="One URL per line" class="w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-3 text-sm text-[var(--color-text1)] outline-none [body.light-theme_&]:bg-white"></textarea>
             <div class="mt-2 text-xs text-[var(--color-text4)]">Paste one strict URL per line. New values are appended and duplicates are skipped.</div>
 
             <div class="mt-5 flex justify-end">
-              <button type="button" class="inline-flex h-9 items-center rounded-[8px] bg-[var(--color-blue-640)] px-3 text-xs font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isSubmitting" (click)="uploadSharedValues(fileInput)">
+              <button data-testid="feeder-upload-values-button" type="button" class="inline-flex h-9 items-center rounded-[8px] bg-[var(--color-blue-640)] px-3 text-xs font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isSubmitting" (click)="uploadSharedValues(fileInput)">
                 {{ isSubmitting && uploadMode === 'values' ? 'Uploading...' : 'Upload Values' }}
               </button>
             </div>
@@ -127,7 +127,7 @@
               <div class="mt-1 text-sm text-[var(--color-text4)]">{{ selectedFiles.length ? (selectedFiles.length === 1 ? selectedFiles[0].name : selectedFiles.length + ' Python files selected') : 'No Python file selected yet' }}</div>
             </div>
             <div class="flex flex-wrap gap-2">
-              <button type="button" class="inline-flex h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 text-sm font-semibold text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="fileInput.click()">
+              <button data-testid="feeder-select-file-button" type="button" class="inline-flex h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 text-sm font-semibold text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="fileInput.click()">
                 Select File
               </button>
               @if (selectedFiles.length) {
@@ -160,14 +160,14 @@
               </div>
             </div>
           } @else {
-            <textarea [(ngModel)]="valuesText" name="valuesText" rows="8" placeholder="One URL per line" class="w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 pt-3 pb-1 text-sm text-[var(--color-text1)] outline-none [body.light-theme_&]:bg-[#f8fbff]"></textarea>
+            <textarea data-testid="feeder-values-input" [(ngModel)]="valuesText" name="valuesText" rows="8" placeholder="One URL per line" class="w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 pt-3 pb-1 text-sm text-[var(--color-text1)] outline-none [body.light-theme_&]:bg-[#f8fbff]"></textarea>
           }
         </div>
       }
 
       @if (selectedRuleType !== 'shared') {
       <div class="mt-5 flex justify-end">
-        <button type="button" class="inline-flex h-9 items-center rounded-[8px] bg-[var(--color-blue-640)] px-3 text-xs font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isSubmitting || isValuesLoading" (click)="uploadScript(fileInput)">
+        <button [attr.data-testid]="uploadMode === 'values' ? 'feeder-upload-values-button' : 'feeder-upload-script-button'" type="button" class="inline-flex h-9 items-center rounded-[8px] bg-[var(--color-blue-640)] px-3 text-xs font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isSubmitting || isValuesLoading" (click)="uploadScript(fileInput)">
           {{ isSubmitting ? 'Uploading...' : (uploadMode === 'values' ? 'Upload Values' : 'Upload Script') }}
         </button>
       </div>

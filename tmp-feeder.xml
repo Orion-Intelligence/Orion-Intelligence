@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="63.069" tests="1" failures="1">
+  <testsuite name="Root Suite" timestamp="2026-04-21T17:55:38" tests="0" file="cypress/e2e/17-feeder-management.cy.ts" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="Orion Intelligence - Feeder Management" timestamp="2026-04-21T17:55:38" tests="1" time="63.066" failures="1">
+    <testcase name="Orion Intelligence - Feeder Management uploads valid feeder sample for defacement" time="0.000" classname="uploads valid feeder sample for defacement">
+      <failure message="Timed out retrying after 60000ms: `cy.wait()` timed out waiting `60000ms` for the 1st request to the route: `feederUpload`. No request ever occurred.
+
+https://on.cypress.io/wait" type="CypressError"><![CDATA[CypressError: Timed out retrying after 60000ms: `cy.wait()` timed out waiting `60000ms` for the 1st request to the route: `feederUpload`. No request ever occurred.
+
+https://on.cypress.io/wait
+    at cypressErr (http://127.0.0.1:4200/__cypress/runner/cypress_runner.js:78379:18)
+    at Object.errByPath (http://127.0.0.1:4200/__cypress/runner/cypress_runner.js:78437:10)
+    at checkForXhr (http://127.0.0.1:4200/__cypress/runner/cypress_runner.js:138915:84)
+    at <unknown> (http://127.0.0.1:4200/__cypress/runner/cypress_runner.js:138940:28)
+    at tryCatcher (http://127.0.0.1:4200/__cypress/runner/cypress_runner.js:1777:23)
+    at Promise.attempt.Promise.try (http://127.0.0.1:4200/__cypress/runner/cypress_runner.js:4285:29)
+    at whenStable (http://127.0.0.1:4200/__cypress/runner/cypress_runner.js:152009:70)
+    at <unknown> (http://127.0.0.1:4200/__cypress/runner/cypress_runner.js:151924:14)
+    at tryCatcher (http://127.0.0.1:4200/__cypress/runner/cypress_runner.js:1777:23)
+    at Promise._settlePromiseFromHandler (http://127.0.0.1:4200/__cypress/runner/cypress_runner.js:1489:31)
+    at Promise._settlePromise (http://127.0.0.1:4200/__cypress/runner/cypress_runner.js:1546:18)
+    at Promise._settlePromise0 (http://127.0.0.1:4200/__cypress/runner/cypress_runner.js:1591:10)
+    at Promise._settlePromises (http://127.0.0.1:4200/__cypress/runner/cypress_runner.js:1671:18)
+    at Promise._fulfill (http://127.0.0.1:4200/__cypress/runner/cypress_runner.js:1615:18)
+    at <unknown> (http://127.0.0.1:4200/__cypress/runner/cypress_runner.js:5420:46)]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

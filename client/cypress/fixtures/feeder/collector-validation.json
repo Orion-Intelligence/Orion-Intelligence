@@ -1,0 +1,85 @@
+{
+  "ruleKeys": ["defacement", "exploit", "forum", "generic", "leak", "mastodon", "news", "pastebin", "reddit", "tracking", "twitter"],
+  "categories": {
+    "defacement": {
+      "ruleKey": "defacement",
+      "ruleType": "unique",
+      "fileName": "cypress_defacement_sample.py",
+      "fileFixture": "feeder/unique/_defacement_sample.py",
+      "seedHostsFixture": "feeder/crawl_data_defacement.txt"
+    },
+    "exploit": {
+      "ruleKey": "exploit",
+      "ruleType": "unique",
+      "fileName": "cypress_exploit_sample.py",
+      "fileFixture": "feeder/unique/_exploit_sample.py",
+      "seedHostsFixture": "feeder/crawl_data_exploit.txt"
+    },
+    "forum": {
+      "ruleKey": "forum",
+      "ruleType": "unique",
+      "fileName": "cypress_forum_sample.py",
+      "fileFixture": "feeder/unique/_forum_sample.py",
+      "seedHostsFixture": "feeder/crawl_data_forum.txt"
+    },
+    "generic": {
+      "ruleKey": "generic",
+      "ruleType": "generic",
+      "valuesFixture": "feeder/crawl_data_generic.txt",
+      "invalidValuesFixture": "feeder/crawl_data_twitter.txt"
+    },
+    "leak": {
+      "ruleKey": "leak",
+      "ruleType": "unique",
+      "fileName": "cypress_ransomfeed.py",
+      "fileFixture": "feeder/leak/_ransomfeed.py",
+      "seedHostsFixture": "feeder/crawl_data_leak.txt"
+    },
+    "mastodon": {
+      "ruleKey": "mastodon",
+      "ruleType": "shared",
+      "fileName": "cypress_mastodon_sample.py",
+      "fileFixture": "feeder/shared/_mastodon_sample.py",
+      "valuesFixture": "feeder/crawl_data_mastodon.txt",
+      "invalidValuesFixture": "feeder/crawl_data_twitter.txt"
+    },
+    "news": {
+      "ruleKey": "news",
+      "ruleType": "unique",
+      "fileName": "cypress_hackread.py",
+      "fileFixture": "feeder/news/_hackread.py",
+      "seedHostsFixture": "feeder/crawl_data_news.txt"
+    },
+    "pastebin": {
+      "ruleKey": "pastebin",
+      "ruleType": "shared",
+      "fileName": "cypress_pastebin_sample.py",
+      "fileFixture": "feeder/shared/_pastebin_sample.py",
+      "valuesFixture": "feeder/crawl_data_pastebin.txt",
+      "invalidValuesFixture": "feeder/crawl_data_mastodon.txt"
+    },
+    "reddit": {
+      "ruleKey": "reddit",
+      "ruleType": "shared",
+      "fileName": "cypress_reddit_sample.py",
+      "fileFixture": "feeder/shared/_reddit_sample.py",
+      "valuesFixture": "feeder/crawl_data_reddit.txt",
+      "invalidValuesFixture": "feeder/crawl_data_pastebin.txt"
+    },
+    "tracking": {
+      "ruleKey": "tracking",
+      "ruleType": "unique",
+      "fileName": "cypress_tracking_sample.py",
+      "fileFixture": "feeder/unique/_tracking_sample.py",
+      "seedHostsFixture": "feeder/crawl_data_tracking.txt"
+    },
+    "twitter": {
+      "ruleKey": "twitter",
+      "ruleType": "shared",
+      "fileName": "cypress_twitter.py",
+      "fileFixture": "feeder/social/_twitter.py",
+      "valuesFixture": "feeder/crawl_data_twitter.txt",
+      "invalidValuesFixture": "feeder/crawl_data_pastebin.txt"
+    }
+  }
+}

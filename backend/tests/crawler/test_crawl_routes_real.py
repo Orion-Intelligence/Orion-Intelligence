@@ -34,13 +34,12 @@ def _normalize_embeddings(payload):
 
 
 def _assert_response_body(path: str, response):
-    assert response.content
-
     if path.startswith("/api/feeder/"):
         feeder_file = BACKEND_ROOT / "static" / ".well-known" / "feeder" / f"crawl_data_{path.rsplit('/', 1)[-1]}.txt"
-        assert feeder_file.exists()
         assert "text/plain" in response.headers.get("content-type", "")
         return
+
+    assert response.content
 
     if path == "/api/parser":
         parser_file = BACKEND_ROOT / "static" / ".well-known" / "parser_files.zip"

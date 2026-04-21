@@ -429,10 +429,14 @@ def test_crawl_model_file_and_error_branches(monkeypatch, tmp_path: Path):
     feeder_dir.mkdir()
     (parser_dir / "parser_files.zip").write_bytes(b"zip")
     (feeder_dir / "crawl_data_leak.txt").write_text("x", encoding="utf-8")
+    (parser_dir / "parser_files").mkdir()
+    (parser_dir / "parser_files" / "sample.py").write_text("print('ok')", encoding="utf-8")
 
     cm.CRAWL_PATHS.M_SCREENSHOT = str(screenshot_dir)
     cm.CRAWL_PATHS.M_PARSER_FILE_PATH = str(parser_dir / "parser_files.zip")
     cm.CRAWL_PATHS.M_FEEDER_FILE_PATH = str(feeder_dir) + "/"
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(cm.crawl_model, "_build_feeder_file_content", lambda *_args, **_kwargs: asyncio.sleep(0, result=b""))
 
     payload = SimpleNamespace(filename="one.webp", data=base64.b64encode(b"img").decode())
     saved = _run(crawl_model.invoke_file_upload(payload))
@@ -740,6 +744,7 @@ def test_search_model_extract_and_apk_raise_on_non_200(monkeypatch):
 
 def test_crawl_model_misc_empty_and_missing_paths(monkeypatch, tmp_path: Path):
     import orion.api.server.crawl_manager.crawl_model as cm
+    from orion.constants import constant
     from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
     from orion.services.elastic_manager.elastic_controller import elastic_controller
 
@@ -762,6 +767,7 @@ def test_crawl_model_misc_empty_and_missing_paths(monkeypatch, tmp_path: Path):
     cm.CRAWL_PATHS.M_PARSER_FILE_PATH = str(tmp_path / "missing.zip")
     cm.CRAWL_PATHS.M_FEEDER_FILE_PATH = str(tmp_path / "missing_dir") + "/"
     assert _run(crawl_model.invoke_fetch_parser()).status_code == 404
+    constant.url_rules = {}
     assert _run(crawl_model.invoke_fetch_feeder("leak")).status_code == 404
 
 

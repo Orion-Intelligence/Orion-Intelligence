@@ -363,7 +363,7 @@ class crawl_model:
 
     @staticmethod
     async def invoke_fetch_parser():
-        parser_root = Path("static/.well-known/parser_files")
+        parser_root = Path(CRAWL_PATHS.M_PARSER_FILE_PATH).with_name("parser_files")
         if not parser_root.exists():
             return JSONResponse(content={"detail": "File not found"}, status_code=404)
         payload = await crawl_model.getInstance()._build_parser_payload(parser_root)
@@ -419,9 +419,10 @@ class crawl_model:
         return decrypted
 
     async def _build_feeder_file_content(self, rule_key: str, rule_type: str) -> bytes:
+        engine = mongo_controller.get_instance().get_engine()
         entries: list[dict] = []
         if rule_type in {"shared", "generic"}:
-            records = await self._engine.find(
+            records = await engine.find(
                 db_feeder_script_model,
                 {
                     "rule_key": rule_key,
@@ -438,7 +439,7 @@ class crawl_model:
                         "file": f"_{rule_key}" if rule_type == "shared" else None,
                     })
         else:
-            records = await self._engine.find(
+            records = await engine.find(
                 db_feeder_script_model,
                 {
                     "rule_key": rule_key,

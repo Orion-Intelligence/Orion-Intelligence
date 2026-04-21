@@ -59,3 +59,4 @@ backend/static/resource/**
 !backend/static/resource/**/*default*
 
 nginx/nginx-prod.conf
+nginx/nginx.conf
