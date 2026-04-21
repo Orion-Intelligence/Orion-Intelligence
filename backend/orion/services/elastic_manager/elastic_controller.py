@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from string import capwords
 
 from elasticsearch import AsyncElasticsearch
