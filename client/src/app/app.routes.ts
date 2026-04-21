@@ -35,7 +35,6 @@ const loadAuditlogComponent = () => import('./pages/admin/auditlog/auditlog.comp
 const loadNotificationComponent = () => import('./shared/partials/notification/notification.component').then(m => m.NotificationComponent);
 const loadTrailNotificationComponent = () => import('./shared/partials/trail-notification/trail-notification.component').then(m => m.TrailNotificationComponent);
 const loadAccountSettingsComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-settings/account-settings.component').then(m => m.AccountSettingsComponent);
-const loadSidebarUserFeederComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-feeder/sidebar-user-feeder.component').then(m => m.SidebarUserFeederComponent);
 const loadSidebarUserHomepageComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-homepage/sidebar-user-homepage.component').then(m => m.SidebarUserHomepageComponent);
 const loadCategoryAlertReportComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component').then(m => m.CategoryAlertReportComponent);
 const loadAddCustomAlertComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-homepage/add-custom-alert/add-custom-alert.component').then(m => m.AddCustomAlertComponent);
@@ -749,8 +748,8 @@ export const routes: Routes = [
           },
           {
             path: 'feeder',
-            loadComponent: loadSidebarUserFeederComponent,
-            data: { type: 'feeder', animation: 'CategoryPage' }
+            redirectTo: 'homepage',
+            pathMatch: 'full'
           },
           {
             path: 'user/:user_id',
