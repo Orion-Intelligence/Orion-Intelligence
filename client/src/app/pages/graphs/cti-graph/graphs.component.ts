@@ -1,5 +1,6 @@
 import { Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, inject } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
+import { ActivatedRoute, Params } from '@angular/router';
 import { Color, Edge, Network } from 'vis-network';
 import { DataSet } from 'vis-data';
 import { ApiService } from '../../../shared/services/api.service';
@@ -30,6 +31,7 @@ type GraphNodeColor = string | Color;
   imports: [CtiSidebarComponent, GraphContextMenuComponent, ProfileComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, NgClass, TabBarComponent, GraphLoadingComponent]
 })
 export class GraphComponent implements OnInit, OnDestroy {
+  private readonly playgroundTabName = 'Playground';
   private readonly proxied_resource = inject(ProxyController);
   private readonly maxNodeLabelLength = 28;
   private readonly edgeBaseColor = 'rgba(75, 85, 99, 0.8)';
@@ -101,6 +103,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   private static sessionCounter = 1;
   private pendingFilters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null = null;
   private pendingSessionState: GraphSessionState | null = null;
+  private routeFilterOverride: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null = null;
 
   networkContainer?: ElementRef;
   public rawNodes: ExtendedNode[] = [];
@@ -174,7 +177,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor( private api: ApiService, private clipboard: Clipboard, private graphReportExport: ReportExportService, @Inject(PLATFORM_ID) private platformId: object ) { }
+  constructor( private api: ApiService, private clipboard: Clipboard, private route: ActivatedRoute, private graphReportExport: ReportExportService, @Inject(PLATFORM_ID) private platformId: object ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -182,6 +185,12 @@ export class GraphComponent implements OnInit, OnDestroy {
       document.addEventListener('pointerdown', this.globalPointerDownListener, true);
       document.addEventListener('keydown', this.globalKeyDownListener, true);
     }
+    this.route.queryParams.subscribe(params => {
+      this.routeFilterOverride = this.buildRouteFilterOverride(params);
+      if (this.hasLoadedSessions) {
+        this.applyRouteFilterOverride();
+      }
+    });
     this.tryApplyPendingFilters();
     this.loadSessions();
   }
@@ -216,6 +225,50 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.restoreGraphSessionState(pending);
   }
 
+  private buildRouteFilterOverride(params: Params): { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null {
+    const selectedType = String(params['selectedType'] ?? '').trim();
+    const singleInput = String(params['singleInput'] ?? '').trim();
+    const propertyType = String(params['propertyType'] ?? '').trim();
+    const propertyValue = String(params['propertyValue'] ?? '').trim();
+    const hasExplicitRouteFilters = selectedType.length > 0 || singleInput.length > 0 || propertyValue.length > 0;
+
+    if (!hasExplicitRouteFilters) {
+      return null;
+    }
+
+    const parsedMaxEdge = Number(params['maxEdge']);
+    const parsedMaxDepth = Number(params['maxDepth']);
+
+    return {
+      selectedType: selectedType || 'cluster',
+      singleInput: singleInput || 'all',
+      propertyType: propertyType || 'all',
+      propertyValue: propertyValue || '',
+      maxEdge: Number.isFinite(parsedMaxEdge) && parsedMaxEdge >= 0 && parsedMaxEdge <= 800 ? parsedMaxEdge : 25,
+      maxDepth: Number.isFinite(parsedMaxDepth) && parsedMaxDepth >= 0 && parsedMaxDepth <= 5 ? parsedMaxDepth : 1
+    };
+  }
+
+  private applyRouteFilterOverride(): void {
+    if (!this.routeFilterOverride || this.tabs.length === 0) {
+      return;
+    }
+
+    const playgroundTab = this.tabs[0];
+    const nextState: GraphSessionState = {
+      ...this.createDefaultSessionState(),
+      isSidebarCollapsed: playgroundTab.state.isSidebarCollapsed,
+      ...this.routeFilterOverride
+    };
+
+    this.tabs = this.tabs.map((tab, index) => index === 0 ? { ...tab, state: nextState } : tab);
+    this.normalizePlaygroundTab();
+    this.activeTabId = playgroundTab.id;
+    this.applySession(playgroundTab.id);
+    this.applyActiveTabState();
+    this.saveSessions();
+  }
+
   private createDefaultSessionState(): GraphSessionState {
     return {
       selectedType: 'cluster',
@@ -234,6 +287,13 @@ export class GraphComponent implements OnInit, OnDestroy {
       isListingsCollapsed: true,
       expandEnabled: false
     };
+  }
+
+  private normalizePlaygroundTab(): void {
+    if (this.tabs.length === 0) {
+      return;
+    }
+    this.tabs = this.tabs.map((tab, index) => index === 0 ? { ...tab, name: this.playgroundTabName } : tab);
   }
 
   private generateId(): string {
@@ -320,6 +380,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId) || !this.hasLoadedSessions) {
       return;
     }
+    this.normalizePlaygroundTab();
     const payload = {
       tab_counter: GraphComponent.sessionCounter,
       active_tab_id: this.activeTabId,
@@ -356,6 +417,7 @@ export class GraphComponent implements OnInit, OnDestroy {
           name: typeof savedTab?.name === 'string' && savedTab.name.trim().length > 0 ? savedTab.name : `Session ${index + 1}`,
           state: { ...this.createDefaultSessionState(), ...(savedTab?.state || {}) }
         } as GraphSessionTab));
+        this.normalizePlaygroundTab();
         GraphComponent.sessionCounter = Number(savedState?.tab_counter ?? savedState?.counter) || (this.tabs.length + 1);
         this.activeTabId = savedState?.active_tab_id ?? savedState?.activeTabId ?? this.tabs[0].id;
         if (!this.tabs.some(t => t.id === this.activeTabId)) {
@@ -369,10 +431,12 @@ export class GraphComponent implements OnInit, OnDestroy {
         });
         this.applySession(this.activeTabId);
         this.applyActiveTabState();
+        this.applyRouteFilterOverride();
       },
       error: () => {
         this.hasLoadedSessions = true;
         this.addSession();
+        this.applyRouteFilterOverride();
       }
     });
   }
@@ -380,10 +444,11 @@ export class GraphComponent implements OnInit, OnDestroy {
   addSession(): void {
     const newTab: GraphSessionTab = {
       id: this.generateId(),
-      name: `Session ${GraphComponent.sessionCounter++}`,
+      name: this.tabs.length === 0 ? this.playgroundTabName : `Session ${GraphComponent.sessionCounter++}`,
       state: this.createDefaultSessionState()
     };
     this.tabs = [...this.tabs, newTab];
+    this.normalizePlaygroundTab();
     this.activeTabId = newTab.id;
     this.applySession(newTab.id);
     this.applyActiveTabState();
@@ -404,6 +469,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (this.tabs.length <= 1) {
       return;
     }
+    if (this.tabs[0]?.id === id) {
+      return;
+    }
     const idx = this.tabs.findIndex(t => t.id === id);
     this.tabs = this.tabs.filter(t => t.id !== id);
     if (this.activeTabId === id) {
@@ -415,6 +483,9 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   startEditing(id: string): void {
+    if (this.tabs[0]?.id === id) {
+      return;
+    }
     this.editingTabId = id;
   }
 
@@ -423,6 +494,10 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   renameSession(id: string, newName: string): void {
+    if (this.tabs[0]?.id === id) {
+      this.stopEditing();
+      return;
+    }
     const trimmed = newName.trim();
     if (!trimmed) {
       this.stopEditing();
@@ -609,6 +684,7 @@ export class GraphComponent implements OnInit, OnDestroy {
           state: { ...this.createDefaultSessionState(), ...parsed.state }
         };
         this.tabs = [...this.tabs, imported];
+        this.normalizePlaygroundTab();
         this.activeTabId = imported.id;
         this.applySession(imported.id);
         this.saveSessions();

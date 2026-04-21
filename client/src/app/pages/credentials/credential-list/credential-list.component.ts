@@ -1,5 +1,6 @@
 import { Component, effect, input } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { Router } from '@angular/router';
 import { StealerLogCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
 import { expandFadeRow } from '../../../shared/animations/row.animations';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
@@ -24,10 +25,14 @@ export class CredentialListComponent {
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
   readonly searchQuery = input<string>('');
 
-  constructor() {
+  constructor(private router: Router) {
     effect(() => {
       this.rankedResult = this.rankedResultInput();
     });
+  }
+
+  isStealerlogsRoute(): boolean {
+    return this.router.url.includes('/stealerlog');
   }
 
   trackByIndex(index: number): number {

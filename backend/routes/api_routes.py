@@ -1,43 +1,32 @@
 import asyncio
 from typing import Optional
 from fastapi import APIRouter, Body, Depends, Query, UploadFile, File
+from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from configs.app_dependency import license_required, role_required, status_required, get_current_role, get_current_user, get_is_free_token
 from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.feedback_manager.feedback_manager import FeedbackManager
 from orion.api.interactive.feedback_manager.models.feedback_param_model import feedback_comment_param_model
 from orion.api.interactive.directory_manager.directory_model import directory_model
-from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import (directory_param_model, )
+from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
 from orion.api.interactive.dump_manager.dump_model import dump_model
 from orion.api.interactive.dump_manager.dump_shared_model.dump_param_model import dump_param_model
 from orion.api.interactive.hompage_manager.homepage_model import homepage_model
-from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import (search_consolidated_param_model, )
-from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import (search_credential_param_model, )
-from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import (
-    search_dynamic_crack_model, search_dynamic_param_model, search_dynamic_social_model, search_dynamic_crypto_model,
-    search_dynamic_onion_search, )
+from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
+from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
+from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_crack_model, search_dynamic_crypto_model, search_dynamic_onion_search, search_dynamic_param_model, search_dynamic_social_model
 from orion.api.interactive.search_manager.search_model import search_model
-from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (
-    DomainScanRequest,
-    UrlVulnerabilityScanRequest,
-)
-from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (
-    GeoCameraDetectRangesRequest,
-    GeoCameraDetectRequest,
-    IPScanRequest,
-    NetIntelDeepScanRequest,
-    ResolveIPRequest,
-)
-from orion.api.server.crawl_manager.class_model.social_scrape_request_model import (SocialScrapeRequest, )
+from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest, UrlVulnerabilityScanRequest
+from orion.api.server.crawl_manager.class_model.ip_scan_request_model import GeoCameraDetectRangesRequest, GeoCameraDetectRequest, IPScanRequest, NetIntelDeepScanRequest, ResolveIPRequest
+from orion.api.server.crawl_manager.class_model.social_scrape_request_model import SocialScrapeRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
-from orion.services.mongo_manager.shared_model.db_auth_models import (UserStatus, user_role, )
+from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
 from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
 from orion.services.stix_manager.stix_manager import stix_manager
-from routes.docs.docs import (CRYPTO_DOCS, DYNAMIC_DOCS, REPORT_DOCS, SEARCH_DOCS, SUPPORT_METHOD_DOCS,
-                              SYSTEM_INFO_DOCS, CROSS_SEARCH_DOCS)
+from routes.docs.docs import CRYPTO_DOCS, CROSS_SEARCH_DOCS, DYNAMIC_DOCS, REPORT_DOCS, SEARCH_DOCS, SUPPORT_METHOD_DOCS, SYSTEM_INFO_DOCS
 
 api_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 SCAN_ROLE_DEPS = [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
@@ -70,6 +59,7 @@ def _enforce_demo_safe_search(param: search_consolidated_param_model, current_us
     status_code=200,
     dependencies=GENERAL_MODULE_DEPS, )
 async def search_general(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user), role: user_role = Depends(get_current_role), is_free: bool = Depends(get_is_free_token)):
+    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user, is_free)
     if role == user_role.DEMO or is_free:
         param.network = "onion"
@@ -96,6 +86,7 @@ async def search_general(param: search_consolidated_param_model = Body(...), cur
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:breach"))])
 async def search_leak(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
     if param.category in ["all"]:
         base_index = [ELASTIC_INDEX.S_LEAK_INDEX]
@@ -117,6 +108,7 @@ async def search_leak(param: search_consolidated_param_model = Body(...), curren
     status_code=200,
     dependencies=GENERAL_MODULE_DEPS, )
 async def search_social(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
     if param.category == "all":
         base_index = [ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX]
@@ -144,6 +136,7 @@ async def search_social(param: search_consolidated_param_model = Body(...), curr
     status_code=200,
     dependencies=GENERAL_MODULE_DEPS, )
 async def search_exploit(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
     base_index = [ELASTIC_INDEX.S_EXPLOIT_INDEX]
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
@@ -159,6 +152,7 @@ async def search_exploit(param: search_consolidated_param_model = Body(...), cur
     status_code=200,
     dependencies=GENERAL_MODULE_DEPS, )
 async def search_defacement(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
     param.content = param.category
     base_index = [ELASTIC_INDEX.S_DEFACEMENT_INDEX]
@@ -243,7 +237,7 @@ async def get_public_user_activity(user_id: str, current_user=Depends(get_curren
     operation_id="getSystemDirectory",
     response_description=SYSTEM_INFO_DOCS["directory"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER]))])
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))])
 async def get_directory(param: directory_param_model = Depends()):
     return await directory_model.getInstance().invoke_directory(param)
 
@@ -309,7 +303,8 @@ async def get_country_insight(
     include_in_schema=False,
     status_code=200,
     dependencies=STEALER_LOG_DEPS)
-async def search_stealerlog(param: search_credential_param_model = Body(...)):
+async def search_stealerlog(param: search_credential_param_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     param.q = ""
     return await search_model.getInstance().search_stealerlogs_result(param)
 
@@ -323,7 +318,8 @@ async def search_stealerlog(param: search_credential_param_model = Body(...)):
     response_description=SEARCH_DOCS["stealerlogs"]["response_description"],
     status_code=200,
     dependencies=STEALER_LOG_DEPS)
-async def search_stealer_iocs(param: search_credential_param_model = Body(...)):
+async def search_stealer_iocs(param: search_credential_param_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     return await search_model.getInstance().search_stealer_iocs(param)
 
 
@@ -339,6 +335,7 @@ async def search_stealer_iocs(param: search_credential_param_model = Body(...)):
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), ], )
 async def search_consolidated(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
     return await search_model.getInstance().search_consolidated_result(param)
 
@@ -356,7 +353,8 @@ async def search_consolidated(param: search_consolidated_param_model = Body(...)
         )
     )],
 )
-async def search_consolidated_iocs( param: search_consolidated_param_model = Body(...)):
+async def search_consolidated_iocs( param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     base_index = [
         ELASTIC_INDEX.S_LEAK_INDEX,
         ELASTIC_INDEX.S_GENERIC_INDEX,
@@ -488,6 +486,7 @@ async def get_screenshot(filename: str):
     status_code=200,
     dependencies=SCANNING_DEPS, )
 async def search_dynamic_email(param: search_dynamic_param_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "dynamic_user", next((str(v) for v in (param.text or {}).values() if v), ""))
     return await search_model.getInstance().dynamic_search(param, "user", user_id=str(current_user.id))
 
 
@@ -501,6 +500,7 @@ async def search_dynamic_email(param: search_dynamic_param_model = Body(...), cu
     status_code=200,
     dependencies=SCANNING_DEPS, )
 async def search_dynamic_cracked(param: search_dynamic_crack_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "dynamic_cracked", next((str(v) for v in (param.text or {}).values() if v), ""))
     return await search_model.getInstance().dynamic_search(param, "cracked", user_id=str(current_user.id))
 
 
@@ -514,6 +514,7 @@ async def search_dynamic_cracked(param: search_dynamic_crack_model = Body(...), 
     status_code=200,
     dependencies=SCANNING_DEPS, )
 async def search_dynamic_software(param: search_dynamic_crack_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "dynamic_software", next((str(v) for v in (param.text or {}).values() if v), ""))
     return await search_model.getInstance().dynamic_search(param, "software", user_id=str(current_user.id))
 
 
@@ -527,6 +528,7 @@ async def search_dynamic_software(param: search_dynamic_crack_model = Body(...),
     status_code=200,
     dependencies=SCAN_WITH_LIMITER_DEPS, )
 async def parse_domain_scan(payload: DomainScanRequest, current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "domain_scan", payload.domain)
     return await _scan_domain_with_type(payload, user_id=str(current_user.id))
 
 
@@ -540,6 +542,7 @@ async def parse_domain_scan(payload: DomainScanRequest, current_user=Depends(get
     status_code=200,
     dependencies=SCAN_WITH_LIMITER_DEPS, )
 async def parse_subdomain_scan(payload: DomainScanRequest, current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "subdomain_scan", payload.domain)
     return await _scan_domain_with_type(payload, user_id=str(current_user.id), scan_type='subdomains')
 
 
@@ -553,6 +556,7 @@ async def parse_subdomain_scan(payload: DomainScanRequest, current_user=Depends(
     status_code=200,
     dependencies=SCAN_WITH_LIMITER_DEPS, )
 async def parse_dns_scan(payload: DomainScanRequest, current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "dns_scan", payload.domain)
     return await _scan_domain_with_type(payload, user_id=str(current_user.id), scan_type='dns')
 
 
@@ -566,6 +570,7 @@ async def parse_dns_scan(payload: DomainScanRequest, current_user=Depends(get_cu
     status_code=200,
     dependencies=SCAN_WITH_LIMITER_DEPS, )
 async def parse_wayback_scan(payload: DomainScanRequest, current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "wayback_scan", payload.domain)
     return await _scan_domain_with_type(payload, user_id=str(current_user.id), scan_type='wayback')
 
 
@@ -575,6 +580,7 @@ async def parse_wayback_scan(payload: DomainScanRequest, current_user=Depends(ge
     dependencies=SCAN_WITH_LIMITER_DEPS,
 )
 async def parse_ip(payload: IPScanRequest, current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "ip_scan", payload.ip)
     return await crawl_model.getInstance().scan_ip(payload, user_id=str(current_user.id))
 
 
@@ -583,6 +589,7 @@ async def parse_ip(payload: IPScanRequest, current_user=Depends(get_current_user
     include_in_schema=False,
     dependencies=SCAN_WITH_LIMITER_DEPS, )
 async def scrape_social(payload: SocialScrapeRequest, current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "social_scrape", ",".join(payload.usernames or []))
     return await crawl_model.getInstance().scrape_social(payload, user_id=str(current_user.id))
 
 
@@ -596,6 +603,7 @@ async def scrape_social(payload: SocialScrapeRequest, current_user=Depends(get_c
     status_code=200,
     dependencies=SCANNING_DEPS, )
 async def search_dynamic_social(param: search_dynamic_social_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "dynamic_social", next((str(v) for v in (param.text or {}).values() if v), ""))
     return await search_model.getInstance().dynamic_search(param, "social", user_id=str(current_user.id))
 
 @api_routes.post(
@@ -607,7 +615,8 @@ async def search_dynamic_social(param: search_dynamic_social_model = Body(...), 
     response_description=DYNAMIC_DOCS["wanted_scanner"]["response_description"],
     status_code=200,
     dependencies=SCANNING_DEPS, )
-async def search_dynamic_wanted(param: search_dynamic_social_model = Body(...)):
+async def search_dynamic_wanted(param: search_dynamic_social_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "dynamic_wanted", next((str(v) for v in (param.text or {}).values() if v), ""))
     return await search_model.getInstance().search_wanted_list(param)
 
 @api_routes.post(
@@ -620,6 +629,7 @@ async def search_dynamic_wanted(param: search_dynamic_social_model = Body(...)):
     status_code=200,
     dependencies=SCANNING_DEPS, )
 async def search_dynamic_national_identity(param: search_dynamic_crack_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "dynamic_national_identity", next((str(v) for v in (param.text or {}).values() if v), ""))
     return await search_model.getInstance().dynamic_search(param, "pak_database", user_id=str(current_user.id))
 
 @api_routes.get(
@@ -794,6 +804,7 @@ async def scan_apk(file: UploadFile = File(...), current_user=Depends(get_curren
     ],
 )
 async def crypto_scan(param: search_dynamic_crypto_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "crypto_scan", next((str(v) for v in (param.text or {}).values() if v), ""))
     return await search_model.getInstance().dynamic_search(param, "crypto", user_id=str(current_user.id))
 
 @api_routes.post(
@@ -810,6 +821,7 @@ async def crypto_scan(param: search_dynamic_crypto_model = Body(...), current_us
     ],
 )
 async def cross_search(param: search_dynamic_onion_search = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "cross_search", next((str(v) for v in (param.text or {}).values() if v), ""))
     return await search_model.getInstance().onion_search(param, user_id=str(current_user.id))
 
 @api_routes.post(
@@ -823,6 +835,7 @@ async def cross_search(param: search_dynamic_onion_search = Body(...), current_u
     dependencies=SCANNING_DEPS,
 )
 async def resolve_ip(param: ResolveIPRequest = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "resolve_ip", param.domain)
     return await search_model.getInstance().network_intel(param, "resolve_ip", user_id=str(current_user.id))
 
 @api_routes.post(
@@ -836,6 +849,7 @@ async def resolve_ip(param: ResolveIPRequest = Body(...), current_user=Depends(g
     dependencies=SCANNING_DEPS,
 )
 async def ipscanner(param: NetIntelDeepScanRequest = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "ipscanner", param.ip)
     return await search_model.getInstance().network_intel(param, "netintel_scanner", user_id=str(current_user.id))
 
 @api_routes.post(
@@ -849,6 +863,7 @@ async def ipscanner(param: NetIntelDeepScanRequest = Body(...), current_user=Dep
     dependencies=SCAN_WITH_LIMITER_DEPS,
 )
 async def url_vulnerability_scan(param: UrlVulnerabilityScanRequest = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "url_vulnerability_scan", param.domain)
     return await search_model.getInstance().network_intel(param, "url_vulnerability_scan", user_id=str(current_user.id))
 
 @api_routes.post(
@@ -862,6 +877,7 @@ async def url_vulnerability_scan(param: UrlVulnerabilityScanRequest = Body(...),
     dependencies=SCANNING_DEPS,
 )
 async def geo_camera_detect(param: GeoCameraDetectRequest = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "iot_detect", param.coordinates)
     return await search_model.getInstance().network_intel(param, "iot_detect", user_id=str(current_user.id))
 
 
@@ -876,6 +892,7 @@ async def geo_camera_detect(param: GeoCameraDetectRequest = Body(...), current_u
     dependencies=SCANNING_DEPS,
 )
 async def geo_camera_detect_ranges(param: GeoCameraDetectRangesRequest = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().search_audit(current_user, "camera_detect_ranges", ",".join(param.ip_ranges))
     return await search_model.getInstance().network_intel(param, "camera_detect_ranges", user_id=str(current_user.id))
 
 

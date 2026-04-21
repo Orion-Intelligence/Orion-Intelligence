@@ -5,11 +5,16 @@ import { Component } from '@angular/core';
 })
 export class ScrollTopComponent {
   scrollToTop(): void {
-    const container =
-      (document.querySelector('[data-testid="dashboard-body"]') as HTMLElement | null) ||
-      document.getElementById('dashboard-container');
-    if (container) {
-      container.scrollTo({ top: 0, behavior: 'smooth' });
+    const candidates = [
+      document.querySelector('app-network-intel'),
+      document.getElementById('dashboard-container'),
+      document.scrollingElement,
+    ].filter((element): element is Element => !!element);
+
+    for (const element of candidates) {
+      if ('scrollTo' in element) {
+        (element as HTMLElement).scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
   }
 }

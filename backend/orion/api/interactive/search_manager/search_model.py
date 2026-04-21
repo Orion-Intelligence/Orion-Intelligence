@@ -252,6 +252,15 @@ class search_model:
             "tracking_model",
             "news_model"
         ]
+        if(param.platform):
+            if(param.platform == 'leak_model'):
+                SEARCH_TYPES = [
+                    "leak_model",
+                    "tracking_model",
+                    "news_model"
+                ]
+            else:
+                SEARCH_TYPES=[param.platform]
 
         results = {}
 

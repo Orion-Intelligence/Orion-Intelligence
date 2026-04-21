@@ -10,6 +10,7 @@ import { ensureStylesheet } from '../../../../shared/utils/ensure-stylesheet.uti
 interface GraphPosition { x: number; y: number; }
 interface NetworkInstance {
   focus(nodeId: string, options?: unknown): void;
+  selectNodes(nodeIds: Array<string | number>): void;
   addEdgeMode(): void;
   disableEditMode(): void;
   unselectAll(): void;
@@ -151,6 +152,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
       const nodeId = this.focusNodeId();
       const network = this.networkInstance();
       if (nodeId && network) {
+        network.selectNodes([nodeId]);
         network.focus(nodeId, {
           scale: 1.2,
           animation: {
@@ -525,7 +527,7 @@ export class NetworkGraphComponent implements OnInit, OnDestroy {
         hideEdgesOnDrag: false,
         hover: true,
         navigationButtons: false,
-        keyboard: true,
+        keyboard: false,
         zoomView: true,
         dragView: true
       },

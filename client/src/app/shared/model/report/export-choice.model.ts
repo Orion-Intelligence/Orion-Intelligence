@@ -24,11 +24,13 @@ export const REPORT_EXPORT_OPTIONS: ExportChoiceOption[] = [
   {
     value: 'csv',
     title: '1. Export CSV',
-    description: 'Download STIX/CSV style export for this report.'
+    description: 'Download STIX/CSV style export for this report.',
+    testId: 'graph-report-export-csv'
   },
   {
     value: 'report',
     title: '2. Export Report (PDF)',
-    description: 'Generate consistent graph-model report PDF export.'
+    description: 'Generate consistent graph-model report PDF export.',
+    testId: 'graph-report-export-report'
   }
 ];

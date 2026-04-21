@@ -69,7 +69,7 @@ export class ScanHelperMethods implements OnDestroy {
       }
       this.isLoading = false;
       if (this.activeTab === 'subdomains') {
-        if (status === 'success') {
+        if (this.isCompletedStatus(status)) {
           if (this.checkLive) {
             this.subdomains = res?.result?.live_subdomains || res?.live_subdomains || [];
             this.subdomainCount = this.subdomains.length;
@@ -88,7 +88,7 @@ export class ScanHelperMethods implements OnDestroy {
         }
       }
       else if (this.activeTab === 'dns') {
-        if (res.result.hostname) {
+        if (res.result.result.hostname) {
           this.dnsRecords = [res.result];
           this.statusMessage = `Resolved: ${res.result.hostname}`;
         }
@@ -101,7 +101,7 @@ export class ScanHelperMethods implements OnDestroy {
         }
       }
       else if (this.activeTab === 'wayback') {
-        if (status === 'success') {
+        if (this.isCompletedStatus(status)) {
           this.waybackSnapshots = res?.result?.snapshots || res?.snapshots || [];
           this.statusMessage = this.waybackSnapshots.length > 0
             ? `Found ${this.waybackSnapshots.length} snapshot${this.waybackSnapshots.length !== 1 ? 's' : ''}`
@@ -127,6 +127,10 @@ export class ScanHelperMethods implements OnDestroy {
         this.statusMessage = 'No records found';
       }
     });
+  }
+
+  private isCompletedStatus(status: string | undefined): boolean {
+    return status === 'success' || status === 'done';
   }
 
   ngOnDestroy(): void {

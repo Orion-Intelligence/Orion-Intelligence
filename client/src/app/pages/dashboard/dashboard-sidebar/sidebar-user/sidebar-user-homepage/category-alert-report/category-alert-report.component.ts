@@ -386,12 +386,12 @@ export class CategoryAlertReportComponent implements OnInit {
         if (_alert?.type) {
           const value = _alert.ioc_value || '-';
           let scanType: string;
-          let route: string = '/dashboard/scanner/basic-scan';
+          let route: string = '/dashboard/scanner/network-scan';
 
           switch (_alert.type.toLowerCase()) {
             case "advance scanning":
               scanType = "advance";
-              route = "/dashboard/scanner/port-scan";
+              route = "/dashboard/scanner/network-scan";
               this.router.navigate([route], {
                 queryParams: { page: 1, domain: encodeURIComponent(value), canType: scanType }
               });

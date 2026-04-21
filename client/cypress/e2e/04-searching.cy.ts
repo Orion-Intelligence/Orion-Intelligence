@@ -191,20 +191,20 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Web Scans');
     clickSidebarSubItem('Web Scans', 'Basic Scan');
-    cy.get('input[name="username"][placeholder="Domain"]').first().as('scanInput');
+    cy.get('[data-testid="network-intel-tab-host-recon"]').should('be.visible');
+    cy.get('[data-testid="network-intel-search-input"][placeholder="Search domain..."]').first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    cy.get('@scanInput').type('bbc.com');
-    cy.contains('button', /^Search$/).should('be.visible').and('not.be.disabled').click();
+    cy.get('@scanInput').type('bbc.com{enter}');
 
-    clickSidebarSubItem('Web Scans', 'Port Scan');
-    cy.get('input[name="username"][placeholder="Domain"]').first().as('scanInput');
+    cy.get('button.ui-cred-toolbar-btn', { timeout: 60000 }).should('be.disabled');
+    cy.get('[data-testid="network-intel-tab-ip-scan"]').should('be.visible').click();
+    cy.get('[data-testid="network-intel-search-input"][placeholder="Search IP..."]').first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    cy.get('@scanInput').type('bbc.com');
-    cy.contains('button', /^Search$/).should('be.visible').and('not.be.disabled').click();
+    cy.get('@scanInput').type('8.8.8.8{enter}');
 
     clickSidebarSubItem('Web Scans', 'Repository Scan');
     cy.get('input[name="username"][placeholder="Repository"]').first().as('scanInput');

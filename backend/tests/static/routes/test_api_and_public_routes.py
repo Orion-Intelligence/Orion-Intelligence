@@ -197,6 +197,7 @@ class _FakeResourceManager:
 
 @pytest.fixture
 def api_public_client(monkeypatch):
+    from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
     from orion.api.interactive.directory_manager.directory_model import directory_model
     from orion.api.interactive.dump_manager.dump_model import dump_model
     from orion.api.interactive.hompage_manager.homepage_model import homepage_model
@@ -207,6 +208,19 @@ def api_public_client(monkeypatch):
     from orion.api.server.entity_manager.entity_manager import entity_manager
     from orion.services.stix_manager.stix_manager import stix_manager
 
+    class _FakeAuditManager:
+        async def register(self, *_args, **_kwargs):
+            return "ok"
+
+        async def search_audit(self, *_args, **_kwargs):
+            return "ok"
+
+        async def get(self, *_args, **_kwargs):
+            return {"items": [], "page": 1, "total": 0}
+
+        async def delete(self, *_args, **_kwargs):
+            return True
+
     monkeypatch.setattr(search_model, "getInstance", staticmethod(lambda: _FakeSearchModel()))
     monkeypatch.setattr(crawl_model, "getInstance", staticmethod(lambda: _FakeCrawlModel()))
     monkeypatch.setattr(stix_manager, "get_instance", staticmethod(lambda: _FakeStixManager()))
@@ -216,6 +230,7 @@ def api_public_client(monkeypatch):
     monkeypatch.setattr(entity_manager, "get_instance", staticmethod(lambda: _FakeEntityManager()))
     monkeypatch.setattr(config_controller, "getInstance", staticmethod(lambda: _FakeConfigController()))
     monkeypatch.setattr(ResourceManager, "get_instance", staticmethod(lambda: _FakeResourceManager()))
+    monkeypatch.setattr(AuditLogManager, "get_instance", staticmethod(lambda: _FakeAuditManager()))
 
     constant.license_rules = {
         "maintainer": {
@@ -384,6 +399,7 @@ def test_stix_news_and_screenshot_endpoints(api_public_client):
 
 @pytest.fixture
 def api_journey_client(monkeypatch):
+    from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
     from orion.api.interactive.directory_manager.directory_model import directory_model
     from orion.api.interactive.dump_manager.dump_model import dump_model
     from orion.api.interactive.hompage_manager.homepage_model import homepage_model
@@ -404,6 +420,19 @@ def api_journey_client(monkeypatch):
         "extract_ioc": [],
         "scan_apk": [],
     }
+
+    class _FakeAuditManager:
+        async def register(self, *_args, **_kwargs):
+            return "ok"
+
+        async def search_audit(self, *_args, **_kwargs):
+            return "ok"
+
+        async def get(self, *_args, **_kwargs):
+            return {"items": [], "page": 1, "total": 0}
+
+        async def delete(self, *_args, **_kwargs):
+            return True
 
     class _JourneySearchModel(_FakeSearchModel):
         async def search_consolidated_ranked_result(self, param, base_index, excluded, categories):
@@ -479,6 +508,7 @@ def api_journey_client(monkeypatch):
     monkeypatch.setattr(entity_manager, "get_instance", staticmethod(lambda: _FakeEntityManager()))
     monkeypatch.setattr(config_controller, "getInstance", staticmethod(lambda: _FakeConfigController()))
     monkeypatch.setattr(ResourceManager, "get_instance", staticmethod(lambda: _FakeResourceManager()))
+    monkeypatch.setattr(AuditLogManager, "get_instance", staticmethod(lambda: _FakeAuditManager()))
 
     constant.license_rules = {
         "maintainer": {

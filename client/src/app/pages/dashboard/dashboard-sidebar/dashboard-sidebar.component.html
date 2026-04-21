@@ -1,8 +1,8 @@
 @if (this.sidebar_default) {
   <nav @sidebarMode [@.disabled]="animationsDisabled" class="w-full">
     <div class="mt-[10px] flex w-full items-center justify-between px-[20px] py-[10px] text-[24px] font-medium">
-      <a href="" aria-label="Go to homepage" class="inline-flex min-h-[48px] items-center pr-[8px]">
-        <img alt="Logo" decoding="async" fetchpriority="high" height="44" loading="eager" [src]="appService.getConfig().appSettings.logo_wide_dark || '/api/s/static/system/logo_wide_dark_default.png'" width="246" />
+      <a href="" aria-label="Go to homepage" class="inline-flex min-h-[48px] max-w-full items-center pr-[8px]">
+        <img alt="Logo" decoding="async" fetchpriority="high" height="44" loading="eager" class="block max-h-[36px] w-auto max-w-full object-contain" [src]="appService.getConfig().appSettings.logo_wide_dark || '/api/s/static/system/logo_wide_dark_default.png'" width="246" />
       </a>
       <button (click)="onToggleSidebar(false)" appTooltip="Collapse sidebar" aria-label="Collapse sidebar" data-testid="sidebar-collapse-button" class="inline-flex h-[48px] w-[48px] shrink-0 cursor-pointer items-center justify-center rounded-[8px] border-0 bg-transparent p-0">
         <img alt="Collapse sidebar" height="28" src="assets/images/sidebar/nav_menu.svg" width="24" />
@@ -55,7 +55,7 @@
           [icon]="'assets/images/sidebar/defacement.svg'"
           [items]="defacementCategories"
           [routePrefix]="'defacement'"
-        [title]="'Defacement'"></app-dashboard-sidebar-items>
+        [title]="'Compromise Monitoring'"></app-dashboard-sidebar-items>
       }
       @if (isAdmin() || licenseService.canUseModule('social')) {
         <div id="sidebar-social">

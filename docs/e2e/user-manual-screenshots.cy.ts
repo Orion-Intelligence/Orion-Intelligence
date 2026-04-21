@@ -365,11 +365,11 @@ describe('User Manual Screenshot Flow', () => {
     cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
     capture('entity-api-email-breach');
 
-    cy.visit('/dashboard/scanner/basic-scan');
+    cy.visit('/dashboard/scanner/network-scan');
     ensureDashboardReady();
-    fillPrimaryScanInput('https://ucp.edu.pk/');
-    clickSearch();
-    cy.get('[data-testid="scan-security-posture"]').should('exist');
+    cy.get('[data-testid="network-intel-tab-host-recon"]').should('be.visible');
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('ucp.edu.pk{enter}');
+    cy.get('[data-testid^="network-intel-dns-row-"]').filter(':visible').should('have.length.greaterThan', 0);
     capture('web-scan-report');
 
     cy.visit('/dashboard/scanner/apk-scan');
@@ -399,7 +399,8 @@ describe('User Manual Screenshot Flow', () => {
     cy.get('[data-testid="network-intel-dns-row-93.184.216.34"]').should('be.visible');
     capture('network-intel-host-recon');
 
-    cy.get('[data-testid="network-intel-open-geo"]').click();
+    cy.get('[data-testid="network-intel-tab-geo-fencing"]').click();
+    cy.get('[data-testid="network-intel-geo-search-trigger"]').click({ force: true });
     cy.get('[data-testid="network-intel-geo-modal"]').should('be.visible');
     capture('network-intel-geo-modal');
     cy.get('[data-testid="network-intel-geo-close"]').click();
@@ -412,8 +413,11 @@ describe('User Manual Screenshot Flow', () => {
 
     cy.get('[data-testid="network-intel-tab-vulnerability-scan"]').click();
     cy.get('[data-testid="network-intel-search-input"]').clear().type('bbc.com{enter}');
+    cy.contains('span', 'bbc.com', { timeout: 60000 }).click();
     cy.wait('@vulnerabilityScan');
-    cy.get('[data-testid="network-intel-vulnerability-result"]').should('be.visible');
+    cy.contains('[data-testid="network-intel-vulnerability-result"]', 'Missing Content-Security-Policy', {
+      timeout: 60000,
+    }).should('be.visible');
     capture('network-intel-vulnerability-scan');
 
     cy.intercept('GET', '**/api/directory*').as('getDirectory');
@@ -473,7 +477,7 @@ describe('User Manual Screenshot Flow', () => {
       .invoke('css', 'width', '1px')
       .invoke('css', 'height', '1px')
       .invoke('css', 'opacity', '1')
-      .selectFile('cypress/fixtures/profile.png');
+      .selectFile('cypress/fixtures/profile.png', { force: true });
     cy.wait('@imageRecon');
     cy.get('[data-testid="social-manage-profiles-modal"]').should('be.visible');
     capture('social-manage-profiles');

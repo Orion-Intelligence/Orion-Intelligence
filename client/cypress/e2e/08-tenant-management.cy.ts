@@ -133,19 +133,44 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.loginAsAdmin();
     openAuditLogPage();
 
-    cy.get('app-auditlog-list table tbody tr, app-auditlog-list .rounded-xl').should('have.length.greaterThan', 0);
-    cy.contains('button', 'Export')
+    cy.get('[data-testid="auditlog-row"]').should('have.length.greaterThan', 0);
+    cy.get('[data-testid="auditlog-actor"]').first().invoke('text').then((actorText) => {
+      const actor = actorText.trim();
+      cy.get('[data-testid="auditlog-user-search"]')
+        .should('be.visible')
+        .clear()
+        .type(`${actor}{enter}`);
+      cy.location('search').should('contain', `actor_id=${actor}`);
+      cy.get('[data-testid="auditlog-actor"]', {timeout: 10000}).should(($actors) => {
+        expect($actors.length).to.be.greaterThan(0);
+        $actors.each((_, el) => {
+          expect(el.innerText.trim()).to.eq(actor);
+        });
+      });
+    });
+
+    cy.get('[data-testid="auditlog-user-search"]').clear().type('{enter}');
+    cy.get('[data-testid="auditlog-row"]').should('have.length.greaterThan', 0);
+
+    cy.get('[data-testid="auditlog-delete-button"]')
       .filter(':visible')
       .first()
       .scrollIntoView()
       .should('be.visible')
       .click({waitForAnimations: false, animationDistanceThreshold: 0});
+    cy.contains('Are you sure you want to delete this audit log record?').should('be.visible');
+    cy.contains('button', 'Cancel').click({waitForAnimations: false, animationDistanceThreshold: 0});
+
+    cy.get('[data-testid="auditlog-export-button"]')
+      .scrollIntoView()
+      .should('be.visible')
+      .click({waitForAnimations: false, animationDistanceThreshold: 0});
 
     applyAuditLogDateRange(14);
-    cy.contains('No audit logs found for the selected filters.').should('be.visible');
+    cy.get('[data-testid="auditlog-empty-state"]').should('be.visible');
 
     resetAuditLogFilters();
-    cy.get('app-auditlog-list table tbody tr, app-auditlog-list .rounded-xl').should('have.length.greaterThan', 0);
+    cy.get('[data-testid="auditlog-row"]').should('have.length.greaterThan', 0);
     cy.logout();
   });
 

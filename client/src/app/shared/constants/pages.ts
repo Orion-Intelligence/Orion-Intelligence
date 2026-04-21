@@ -69,8 +69,9 @@ export enum FeedSubCategory {
     NEWS = 'News'
 }
 export enum ScannerSubCategory {
-    BASIC = 'Basic-Scan',
-    FULL = 'Port-Scan',
+    // BASIC = 'Basic-Scan',
+    // FULL = 'Port-Scan',
+    NETWORK = 'Network-Scan',
     REPOSITORY = 'Repository-Scan',
     SEO = 'SEO-Scan',
     APK = 'APK-Scan'
