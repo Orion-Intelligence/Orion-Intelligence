@@ -1,11 +1,13 @@
-import { Component, OnChanges, OnInit, SimpleChanges, effect, input, output } from '@angular/core';
+import { Component, effect, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
 @Component({
   selector: 'app-user-image-picker',
   imports: [NgClass],
   templateUrl: './user-image-picker.component.html'
 })
-export class UserImagePickerComponent implements OnInit, OnChanges {
+export class UserImagePickerComponent {
+  private previewObjectUrl?: string;
+
   readonly imageUrlInput = input<string | undefined>(undefined, { alias: 'imageUrl' });
   selectedFile?: File;
   selectedImage?: string;
@@ -21,18 +23,9 @@ export class UserImagePickerComponent implements OnInit, OnChanges {
       const imageUrl = this.imageUrlInput();
       if (imageUrl !== undefined) {
         this.imageUrl = imageUrl;
+        this.selectedImage = imageUrl || this.defaultImage();
       }
     });
-  }
-
-  ngOnInit(): void {
-    this.selectedImage = this.imageUrl || this.defaultImage();
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['imageUrl'] || changes['defaultImage']) {
-      this.selectedImage = this.imageUrl || this.defaultImage();
-    }
   }
 
   onFileSelected(event: any) {
@@ -40,13 +33,22 @@ export class UserImagePickerComponent implements OnInit, OnChanges {
     if (!file) {
       return;
     }
+    if (this.previewObjectUrl) {
+      URL.revokeObjectURL(this.previewObjectUrl);
+    }
+    this.previewObjectUrl = URL.createObjectURL(file);
     this.selectedFile = file;
+    this.selectedImage = this.previewObjectUrl;
     this.onImageSelected.emit(file);
   }
 
   deleteImage(event?: Event) {
     event?.stopPropagation();
     this.onClear.emit(this.id());
+    if (this.previewObjectUrl) {
+      URL.revokeObjectURL(this.previewObjectUrl);
+      this.previewObjectUrl = undefined;
+    }
     this.selectedFile = undefined;
     this.selectedImage = this.defaultImage();
     this.imageUrl = this.defaultImage();

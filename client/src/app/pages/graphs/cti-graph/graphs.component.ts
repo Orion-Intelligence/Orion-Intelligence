@@ -1,5 +1,6 @@
 import { Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, inject } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
+import { ActivatedRoute, Params } from '@angular/router';
 import { Color, Edge, Network } from 'vis-network';
 import { DataSet } from 'vis-data';
 import { ApiService } from '../../../shared/services/api.service';
@@ -102,6 +103,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   private static sessionCounter = 1;
   private pendingFilters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null = null;
   private pendingSessionState: GraphSessionState | null = null;
+  private routeFilterOverride: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null = null;
 
   networkContainer?: ElementRef;
   public rawNodes: ExtendedNode[] = [];
@@ -175,7 +177,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor( private api: ApiService, private clipboard: Clipboard, private graphReportExport: ReportExportService, @Inject(PLATFORM_ID) private platformId: object ) { }
+  constructor( private api: ApiService, private clipboard: Clipboard, private route: ActivatedRoute, private graphReportExport: ReportExportService, @Inject(PLATFORM_ID) private platformId: object ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -183,6 +185,12 @@ export class GraphComponent implements OnInit, OnDestroy {
       document.addEventListener('pointerdown', this.globalPointerDownListener, true);
       document.addEventListener('keydown', this.globalKeyDownListener, true);
     }
+    this.route.queryParams.subscribe(params => {
+      this.routeFilterOverride = this.buildRouteFilterOverride(params);
+      if (this.hasLoadedSessions) {
+        this.applyRouteFilterOverride();
+      }
+    });
     this.tryApplyPendingFilters();
     this.loadSessions();
   }
@@ -215,6 +223,50 @@ export class GraphComponent implements OnInit, OnDestroy {
     const pending = this.pendingSessionState;
     this.pendingSessionState = null;
     this.restoreGraphSessionState(pending);
+  }
+
+  private buildRouteFilterOverride(params: Params): { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null {
+    const selectedType = String(params['selectedType'] ?? '').trim();
+    const singleInput = String(params['singleInput'] ?? '').trim();
+    const propertyType = String(params['propertyType'] ?? '').trim();
+    const propertyValue = String(params['propertyValue'] ?? '').trim();
+    const hasExplicitRouteFilters = selectedType.length > 0 || singleInput.length > 0 || propertyValue.length > 0;
+
+    if (!hasExplicitRouteFilters) {
+      return null;
+    }
+
+    const parsedMaxEdge = Number(params['maxEdge']);
+    const parsedMaxDepth = Number(params['maxDepth']);
+
+    return {
+      selectedType: selectedType || 'cluster',
+      singleInput: singleInput || 'all',
+      propertyType: propertyType || 'all',
+      propertyValue: propertyValue || '',
+      maxEdge: Number.isFinite(parsedMaxEdge) && parsedMaxEdge >= 0 && parsedMaxEdge <= 800 ? parsedMaxEdge : 25,
+      maxDepth: Number.isFinite(parsedMaxDepth) && parsedMaxDepth >= 0 && parsedMaxDepth <= 5 ? parsedMaxDepth : 1
+    };
+  }
+
+  private applyRouteFilterOverride(): void {
+    if (!this.routeFilterOverride || this.tabs.length === 0) {
+      return;
+    }
+
+    const playgroundTab = this.tabs[0];
+    const nextState: GraphSessionState = {
+      ...this.createDefaultSessionState(),
+      isSidebarCollapsed: playgroundTab.state.isSidebarCollapsed,
+      ...this.routeFilterOverride
+    };
+
+    this.tabs = this.tabs.map((tab, index) => index === 0 ? { ...tab, state: nextState } : tab);
+    this.normalizePlaygroundTab();
+    this.activeTabId = playgroundTab.id;
+    this.applySession(playgroundTab.id);
+    this.applyActiveTabState();
+    this.saveSessions();
   }
 
   private createDefaultSessionState(): GraphSessionState {
@@ -379,10 +431,12 @@ export class GraphComponent implements OnInit, OnDestroy {
         });
         this.applySession(this.activeTabId);
         this.applyActiveTabState();
+        this.applyRouteFilterOverride();
       },
       error: () => {
         this.hasLoadedSessions = true;
         this.addSession();
+        this.applyRouteFilterOverride();
       }
     });
   }
