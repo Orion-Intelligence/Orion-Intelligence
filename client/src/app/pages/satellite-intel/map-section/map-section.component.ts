@@ -13,7 +13,6 @@ import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../shared/model/
 })
 export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy {
   private static readonly WORLD_BOUNDS = [[-85.05112878, -180], [85.05112878, 180]] as const;
-
   @ViewChild('mapContainer') private mapContainer?: ElementRef<HTMLDivElement>;
   private leafletMap: any   = null;
   private esriLayer: any    = null;

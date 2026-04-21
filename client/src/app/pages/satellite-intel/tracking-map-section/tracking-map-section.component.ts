@@ -57,6 +57,18 @@ interface TrackedEntityState {
 })
 export class TrackingMapSectionComponent implements AfterViewInit, OnChanges, OnDestroy {
   @ViewChild('mapContainer') private mapContainer?: ElementRef<HTMLDivElement>;
+  private map: MapLibreMap | null = null;
+  private resizeObserver: ResizeObserver | null = null;
+  private aircraftStates = new Map<string, TrackedEntityState>();
+  private shipStates = new Map<string, TrackedEntityState>();
+  private animationFrameId: number | null = null;
+  private animationStartedAt = 0;
+  private readonly animationDurationMs = 1200;
+  private mapReady = false;
+
+  zoomLabel = 'zoom 5';
+  lastAircraftUpdateLabel = 'idle';
+  lastShipsUpdateLabel = 'idle';
 
   @Input() lat: number | null = null;
   @Input() lon: number | null = null;
@@ -69,19 +81,6 @@ export class TrackingMapSectionComponent implements AfterViewInit, OnChanges, On
   @Input() globalShipsTrackingEnabled = false;
 
   @Output() mapMoved = new EventEmitter<{ lat: number; lon: number; zoom: number }>();
-
-  zoomLabel = 'zoom 5';
-  lastAircraftUpdateLabel = 'idle';
-  lastShipsUpdateLabel = 'idle';
-
-  private map: MapLibreMap | null = null;
-  private resizeObserver: ResizeObserver | null = null;
-  private aircraftStates = new Map<string, TrackedEntityState>();
-  private shipStates = new Map<string, TrackedEntityState>();
-  private animationFrameId: number | null = null;
-  private animationStartedAt = 0;
-  private readonly animationDurationMs = 1200;
-  private mapReady = false;
 
   ngAfterViewInit(): void {
     this.initMap();
