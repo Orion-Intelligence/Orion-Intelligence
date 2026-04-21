@@ -28,7 +28,6 @@ class UserStatus(str, Enum):
 
 class LicenseName(str, Enum):
     FREE = "free"
-    FEEDER = "feeder"
     OSINT_BASIC = "osint_basic"
     OSINT_ADVANCED = "osint_advanced"
     SOCIAL_MAPPER = 'social_mapper'

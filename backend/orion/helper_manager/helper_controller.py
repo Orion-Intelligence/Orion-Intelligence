@@ -198,10 +198,6 @@ class helper_controller:
         license_rules_template = license_rules_env.get_template("license_rules.json")
         license_rules_json_str = license_rules_template.render()
         constant.license_rules = json.loads(license_rules_json_str)
-        url_rules_env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "url_rules"))
-        url_rules_template = url_rules_env.get_template("url_rules.json")
-        url_rules_json_str = url_rules_template.render()
-        constant.url_rules = json.loads(url_rules_json_str)
 
     @staticmethod
     def clone_model(model):

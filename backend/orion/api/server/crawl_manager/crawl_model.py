@@ -5,16 +5,12 @@ import asyncio
 import json
 import secrets
 from datetime import datetime, timezone
-from io import BytesIO
-from pathlib import Path
 from urllib.parse import urlparse, urlunparse
-from zipfile import ZIP_DEFLATED, ZipFile
 from bloom_filter2 import BloomFilter
 import httpx
 import requests
-from cryptography.fernet import Fernet
-from fastapi import Request, HTTPException
-from fastapi.responses import FileResponse, Response
+from fastapi import Request
+from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
 from orion.api.server.crawl_manager.class_model import *
 from orion.helper_manager.helper_controller import helper_controller
@@ -24,11 +20,8 @@ from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_I
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
-from orion.services.mongo_manager.shared_model.db_feeder_script_model import db_feeder_script_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 from orion.api.server.crawl_manager.class_model.CTITextRequest import CTITextRequest
-from orion.constants.constant import CONSTANTS
-from orion.constants import constant
 
 
 
@@ -52,7 +45,7 @@ class crawl_model:
 
     @staticmethod
     def _normalize_swarm_route_url(raw_url: str | None) -> str | None:
-        if raw_url is None:
+        if not raw_url or not isinstance(raw_url, str):
             return None
 
         text: str = raw_url.strip()
@@ -76,8 +69,8 @@ class crawl_model:
     @staticmethod
     def _extract_swarm_route_url(payload: dict) -> str | None:
         for key in ("m_url", "m_base_url", "url"):
-            value = payload.get(key) or ""
-            if value.strip():
+            value = payload.get(key)
+            if isinstance(value, str) and value.strip():
                 return value
         return None
 
@@ -267,7 +260,9 @@ class crawl_model:
             is_leak_update=False)
 
     async def invoke_sanctions_index(self, sanctions_index):
-        if hasattr(sanctions_index, "model_dump"):
+        if isinstance(sanctions_index, list):
+            payload = sanctions_index
+        elif hasattr(sanctions_index, "model_dump"):
             payload = sanctions_index.model_dump(by_alias=True)
         else:
             payload = sanctions_index
@@ -363,27 +358,21 @@ class crawl_model:
 
     @staticmethod
     async def invoke_fetch_parser():
-        parser_root = Path(CRAWL_PATHS.M_PARSER_FILE_PATH).with_name("parser_files")
-        if not parser_root.exists():
+        if os.path.exists(CRAWL_PATHS.M_PARSER_FILE_PATH):
+            return FileResponse(
+                CRAWL_PATHS.M_PARSER_FILE_PATH, media_type="application/zip", filename="parser_files.zip")
+        else:
             return JSONResponse(content={"detail": "File not found"}, status_code=404)
-        payload = await crawl_model.getInstance()._build_parser_payload(parser_root)
-        return Response(
-            content=payload,
-            media_type="application/zip",
-            headers={"Content-Disposition": 'attachment; filename="parser_files.zip"'},
-        )
 
     @staticmethod
     async def invoke_fetch_feeder(index_type):
-        rule = constant.url_rules.get(index_type)
-        if not rule:
+        if os.path.exists(CRAWL_PATHS.M_FEEDER_FILE_PATH):
+            return FileResponse(
+                CRAWL_PATHS.M_FEEDER_FILE_PATH + f"crawl_data_{index_type}.txt",
+                media_type="text/plain",
+                filename="crawl_data_leak.txt")
+        else:
             return JSONResponse(content={"detail": "File not found"}, status_code=404)
-        payload = await crawl_model.getInstance()._build_feeder_file_content(index_type, str(rule.get("rule_type") or ""))
-        return Response(
-            content=payload,
-            media_type="text/plain",
-            headers={"Content-Disposition": f'attachment; filename="crawl_data_{index_type}.txt"'},
-        )
 
     @staticmethod
     async def get_screenshot_file(filename: str):
@@ -405,70 +394,6 @@ class crawl_model:
             return {"message": f"Screenshot saved successfully at {file_path}", "filename": payload.filename}
         except Exception:
             return {"error": "Failed to save screenshot"}
-
-    def _decrypt_parser_file(self, parser_root: Path, source_path: Path, raw: bytes) -> bytes:
-        if not raw.startswith(b"gAAAAA"):
-            return raw
-
-        try:
-            decrypted = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode()).decrypt(raw)
-        except Exception as exc:
-            relative_path = source_path.relative_to(parser_root).as_posix()
-            raise HTTPException(status_code=500, detail=f"Unable to decrypt parser file: {relative_path}") from exc
-
-        return decrypted
-
-    async def _build_feeder_file_content(self, rule_key: str, rule_type: str) -> bytes:
-        engine = mongo_controller.get_instance().get_engine()
-        entries: list[dict] = []
-        if rule_type in {"shared", "generic"}:
-            records = await engine.find(
-                db_feeder_script_model,
-                {
-                    "rule_key": rule_key,
-                    "feeder.index_status": True,
-                },
-            )
-            for record in records:
-                for value in (record.values or []):
-                    url = value.get("url")
-                    if not url:
-                        continue
-                    entries.append({
-                        "url": url,
-                        "file": f"_{rule_key}" if rule_type == "shared" else None,
-                    })
-        else:
-            records = await engine.find(
-                db_feeder_script_model,
-                {
-                    "rule_key": rule_key,
-                    "url": {"$ne": None},
-                    "feeder.index_status": True,
-                },
-            )
-            for record in records:
-                if not record.url:
-                    continue
-                entries.append({"url": record.url, "file": Path(record.name).stem})
-
-        payload = "\n".join(json.dumps(entry, ensure_ascii=True) for entry in entries)
-        return (f"{payload}\n" if payload else "").encode("utf-8")
-
-    async def _build_parser_payload(self, parser_root: Path) -> bytes:
-        zip_buffer = BytesIO()
-        with ZipFile(zip_buffer, "w", compression=ZIP_DEFLATED) as archive:
-            for source_path in sorted(path for path in parser_root.rglob("*") if path.is_file()):
-                archive.writestr(
-                    source_path.relative_to(parser_root).as_posix(),
-                    self._decrypt_parser_file(parser_root, source_path, source_path.read_bytes()),
-                )
-            for rule_key, rule_value in sorted(constant.url_rules.items()):
-                archive.writestr(
-                    f"feeder/crawl_data_{rule_key}.txt",
-                    await self._build_feeder_file_content(rule_key, str(rule_value.get("rule_type") or "")),
-                )
-        return zip_buffer.getvalue()
 
     async def index_log_record(self, log_model: LogModel):
         timestamp = datetime.now(timezone.utc).isoformat()
@@ -517,15 +442,17 @@ class crawl_model:
         return response.json()["result"]
 
     @staticmethod
-    def _get_swarm_proxy_url(_request: Request) -> str:
+    def _get_swarm_proxy_url(request: Request) -> str:
         swarm_url = env_handler.get_instance().env("SWARM_URL")
         swarm_urls = [swarm_url]
 
-        if swarm_url:
+        if isinstance(swarm_url, str):
             stripped_value = swarm_url.strip()
             if stripped_value.startswith("["):
                 try:
-                    swarm_urls = json.loads(stripped_value)
+                    parsed_value = json.loads(stripped_value)
+                    if isinstance(parsed_value, list):
+                        swarm_urls = parsed_value
                 except json.JSONDecodeError:
                     swarm_urls = [item.strip() for item in stripped_value.split(",") if item.strip()]
             elif "," in stripped_value:
