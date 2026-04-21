@@ -12,6 +12,8 @@ import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../shared/model/
   },
 })
 export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy {
+  private static readonly WORLD_BOUNDS = [[-85.05112878, -180], [85.05112878, 180]] as const;
+
   @ViewChild('mapContainer') private mapContainer?: ElementRef<HTMLDivElement>;
   private leafletMap: any   = null;
   private esriLayer: any    = null;
@@ -25,7 +27,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private moveTimer: any    = null;
   private resizeObserver: ResizeObserver | null = null;
 
-  zoomLabel = 'zoom 13';
+  zoomLabel = 'zoom 2.5';
 
   @Input() isScanning       = false;
   @Input() progress         = 0;
@@ -117,16 +119,22 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
 
       this.leafletMap = this.L.map(this.mapContainer.nativeElement, {
         center:   [this.lat ?? 24.78, this.lon ?? 67.35],
-        zoom:     13,
+        zoom:     2.5,
+        minZoom:  2,
         zoomSnap: 0.5,
         zoomControl: true,
+        maxBounds: this.L.latLngBounds(MapSectionComponent.WORLD_BOUNDS),
+        maxBoundsViscosity: 1,
+        worldCopyJump: false,
       });
 
       this.esriLayer = this.L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        { attribution: 'Tiles © Esri', maxZoom: 20, maxNativeZoom: 19 },).addTo(this.leafletMap);
+        { attribution: 'Tiles © Esri', maxZoom: 20, maxNativeZoom: 19, noWrap: true, bounds: MapSectionComponent.WORLD_BOUNDS },).addTo(this.leafletMap);
 
       this.osmLayer = this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        { attribution: '© OpenStreetMap', maxZoom: 19 },);
+        { attribution: '© OpenStreetMap', maxZoom: 19, noWrap: true, bounds: MapSectionComponent.WORLD_BOUNDS },);
+
+      this.updateMinZoomToFitContainer();
 
       this.facLayer = this.L.geoJSON(null, {
         style:        (f: any) => {
@@ -183,9 +191,13 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       }
       this.resizeObserver = new ResizeObserver(() => {
         this.leafletMap?.invalidateSize();
+        this.updateMinZoomToFitContainer();
       });
       this.resizeObserver.observe(this.mapContainer.nativeElement);
-      setTimeout(() => this.leafletMap?.invalidateSize(), 0);
+      setTimeout(() => {
+        this.leafletMap?.invalidateSize();
+        this.updateMinZoomToFitContainer();
+      }, 0);
     }
     catch { }
   }
@@ -202,6 +214,20 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     this.clickMarker = this.L.circleMarker([this.lat, this.lon], {
       radius: 8, color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.25, weight: 2,
     }).addTo(this.leafletMap);
+  }
+
+  private updateMinZoomToFitContainer(): void {
+    if (!this.leafletMap || !this.L) {
+      return;
+    }
+
+    const worldBounds = this.L.latLngBounds(MapSectionComponent.WORLD_BOUNDS);
+    const minZoom = Math.max(1, this.leafletMap.getBoundsZoom(worldBounds, true));
+    this.leafletMap.setMinZoom(minZoom);
+
+    if (this.leafletMap.getZoom() < minZoom) {
+      this.leafletMap.setZoom(minZoom);
+    }
   }
 
   private switchLayer(): void {
@@ -251,12 +277,12 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
 
     console.log('[MAP.renderAircraft] Clearing old markers');
     this.aircraftLayer.clearLayers();
-    
+
     const aircraftArray = this.aircraftData || [];
     console.log('[MAP.renderAircraft] Processing', aircraftArray.length, 'aircraft');
-    
+
     const bounds: any[] = [];
-    
+
     for (const aircraft of aircraftArray) {
       const lat = aircraft.latitude;
       const lon = aircraft.longitude;
@@ -269,7 +295,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       const rotation = aircraft.true_track ?? 0;
       const callsign = aircraft.callsign || aircraft.icao24;
       console.log('[MAP.renderAircraft] Adding', callsign, 'at', lat, lon, 'rotation', rotation);
-      
+
       // Create airplane icon SVG (yellow like in your screenshot)
       const airplaneIcon = this.L.divIcon({
         html: `<svg width="28" height="28" viewBox="0 0 28 28" style="transform: rotate(${rotation}deg); filter: drop-shadow(0 0 2px rgba(0,0,0,0.3));" xmlns="http://www.w3.org/2000/svg">
@@ -289,7 +315,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
 
       this.aircraftLayer.addLayer(marker);
     }
-    
+
     console.log('[MAP.renderAircraft] Complete - added', aircraftArray.length, 'markers');
   }
 
@@ -302,12 +328,12 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
 
     console.log('[MAP.renderShips] Clearing old markers');
     this.shipsLayer.clearLayers();
-    
+
     const shipsArray = this.shipsData || [];
     console.log('[MAP.renderShips] Processing', shipsArray.length, 'ships');
-    
+
     const bounds: any[] = [];
-    
+
     for (const ship of shipsArray) {
       const lat = ship.latitude;
       const lon = ship.longitude;
@@ -320,7 +346,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       const rotation = ship.course ?? 0;
       const name = ship.name || ship.mmsi;
       console.log('[MAP.renderShips] Adding', name, 'at', lat, lon, 'rotation', rotation);
-      
+
       // Create ship icon SVG
       const shipIcon = this.L.divIcon({
         html: `<svg width="24" height="24" viewBox="0 0 24 24" style="transform: rotate(${rotation}deg); filter: drop-shadow(0 0 2px rgba(0,0,0,0.3));" xmlns="http://www.w3.org/2000/svg">
@@ -339,7 +365,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
 
       this.shipsLayer.addLayer(marker);
     }
-    
+
     console.log('[MAP.renderShips] Complete - added', shipsArray.length, 'markers');
   }
 

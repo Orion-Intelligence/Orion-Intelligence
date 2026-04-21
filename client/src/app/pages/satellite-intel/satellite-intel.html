@@ -162,11 +162,11 @@
               }
               @if (facilitiesData?.warning) {
                 <div class="mx-3 mb-[10px] mt-[6px] rounded-md border border-[rgba(245,158,11,.25)] bg-[rgba(245,158,11,.08)] px-[10px] py-[7px] text-[11px] text-[#f59e0b]">
-                  <i class="bi bi-exclamation-triangle"></i> {{ facilitiesData.warning }}
+                  <i class="bi bi-exclamation-triangle"></i> {{ facilitiesData?.warning }}
                 </div>
               }
               @if (facilitiesData?.total) {
-                <div class="border-b border-[#1e2a40] px-[14px] pb-2 pt-[6px] text-[12px] font-semibold text-[#e8f0fc]">{{ facilitiesData.total }} facilities</div>
+                <div class="border-b border-[#1e2a40] px-[14px] pb-2 pt-[6px] text-[12px] font-semibold text-[#e8f0fc]">{{ facilitiesData?.total }} facilities</div>
                 @for (entry of facEntries(); track entry[0]) {
                   <div class="flex justify-between border-b border-[#1a2236] px-[14px] py-[7px] text-[12px] last:border-b-0">
                     <span class="text-[#6a8aaa]">{{ entry[0] }}</span>

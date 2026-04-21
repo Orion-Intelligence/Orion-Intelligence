@@ -40,6 +40,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private shipsTimer?: ReturnType<typeof setInterval>;
   private searchTimer?: ReturnType<typeof setTimeout>;
   private pendingRequest: 'facilities' | 'anomaly' | 'compare' | 'sentinel' | 'sentinel-image' | null = null;
+  private skipNextMapMovedEvent = false;
 
   readonly progressSegments = Array.from({ length: 20 }, (_, i) => i);
   readonly panelTabs = [ { id: 'compare', label: 'Compare' }, { id: 'anomaly', label: 'Anomaly' }, { id: 'sentinel', label: 'Sentinel' }, { id: 'image', label: 'Image' }, { id: 'facilities', label: 'Facilities' }, ] as const;
@@ -47,9 +48,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   activeTab: 'map' | 'compare' | 'anomaly' | 'sentinel' | 'facilities' = 'map';
   coordsForm = { value: '', delta: 0.05 };
   formError:  string | null = null;
-  inputLat   = 50.0;      // Frankfurt area (Major aviation hub)
-  inputLon   = 8.5;       // Germany/Europe
-  inputDelta = 2.5;       // ~280km x 280km (large coverage for aircraft data)
+  inputLat   = 50.0;
+  inputLon   = 8.5;
+  inputDelta = 2.5;
   selectedLayer: 'esri' | 'osm' = 'esri';
   facilitiesVisible = true;
   aircraftTrackingEnabled = false;
@@ -59,7 +60,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   trackingError: string | null = null;
   aircraftData: SatelliteLiveAircraft[] = [];
   shipsData: SatelliteLiveShip[] = [];
-  private skipNextMapMovedEvent = false;
   searchQuery = '';
   searchResults: SatelliteGeocodeResult[] = [];
   lat:   number | null = null;
@@ -339,13 +339,13 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       this.skipNextMapMovedEvent = false;
       return;
     }
-    
+
     this.inputLat = center.lat;
     this.inputLon = center.lon;
     this.inputDelta = this.zoomToDelta(center.zoom);
     this.coordsForm.value = `${center.lat.toFixed(5)}, ${center.lon.toFixed(5)}`;
     this.coordsForm.delta = this.inputDelta;
-    
+
     // Don't refetch tracking data on map moves when tracking is active
     // Tracking will be updated by its own interval timers
     if (!this.aircraftTrackingEnabled && !this.shipsTrackingEnabled) {
