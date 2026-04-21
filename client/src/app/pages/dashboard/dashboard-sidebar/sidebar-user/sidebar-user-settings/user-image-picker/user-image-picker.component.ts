@@ -6,10 +6,11 @@ import { NgClass } from '@angular/common';
   templateUrl: './user-image-picker.component.html'
 })
 export class UserImagePickerComponent {
+  private previewObjectUrl?: string;
+
   readonly imageUrlInput = input<string | undefined>(undefined, { alias: 'imageUrl' });
   selectedFile?: File;
   selectedImage?: string;
-  private previewObjectUrl?: string;
   readonly id = input('');
   imageUrl!: string;
   readonly defaultImage = input<string>('assets/images/tenant/logo_url_default.png');
