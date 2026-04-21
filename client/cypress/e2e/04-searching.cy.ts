@@ -198,6 +198,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     waitForSearchReady();
     cy.get('@scanInput').type('bbc.com{enter}');
 
+    cy.get('button.ui-cred-toolbar-btn', { timeout: 60000 }).should('be.disabled');
     cy.get('[data-testid="network-intel-tab-ip-scan"]').should('be.visible').click();
     cy.get('[data-testid="network-intel-search-input"][placeholder="Search IP..."]').first().as('scanInput');
     cy.get('@scanInput').should('be.visible');

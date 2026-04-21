@@ -1,9 +1,9 @@
 export function fillPrimaryScanInput(value: string) {
-  cy.get('[data-testid="scan-primary-input"]').filter(':visible').first().should('be.visible').clear().type(value);
+  cy.get('[data-testid="scan-primary-input"]').filter(':visible').first().should('be.visible').type('{selectall}{backspace}').type(value);
 }
 
 export function fillSecondaryScanInput(value: string) {
-  cy.get('[data-testid="scan-secondary-input"]').filter(':visible').first().should('be.visible').clear().type(value);
+  cy.get('[data-testid="scan-secondary-input"]').filter(':visible').first().should('be.visible').type('{selectall}{backspace}').type(value);
 }
 
 export function clickSearch() {
