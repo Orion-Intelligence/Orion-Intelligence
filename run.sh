@@ -192,11 +192,20 @@ set_testing_enabled() {
         echo 'TESTING_ENABLED="0"' >> "$ENV_FILE"
     fi
 }
-
 set_swarm_url_to_local_ip() {
     local local_ip
-    local_ip="$(hostname -I | awk '{print $1}')"
-    sed -i '/^SWARM_URL=/d' "$ENV_FILE" 2>/dev/null || true
+
+    if [[ "$(uname)" == "Darwin" ]]; then
+        local_ip="$(ipconfig getifaddr en0 || ipconfig getifaddr en1)"
+    else
+        local_ip="$(hostname -I | awk '{print $1}')"
+    fi
+    
+    if [[ -z "$local_ip" ]]; then
+        local_ip="$(ifconfig | awk '/inet / && $2 != "127.0.0.1" {print $2; exit}')"
+    fi
+
+    sed -i.bak '/^SWARM_URL=/d' "$ENV_FILE" 2>/dev/null || true
     echo "SWARM_URL=http://$local_ip:5132" >> "$ENV_FILE"
 }
 
