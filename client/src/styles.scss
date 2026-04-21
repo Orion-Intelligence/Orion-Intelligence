@@ -8,6 +8,7 @@
 @use "./app/pages/demo-tour/demo-tour/demo-tour.component.css";
 
 @import "leaflet/dist/leaflet.css";
+@import "maplibre-gl/dist/maplibre-gl.css";
 
 @tailwind base;
 @tailwind components;

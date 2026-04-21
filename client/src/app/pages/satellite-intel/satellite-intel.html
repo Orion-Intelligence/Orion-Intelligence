@@ -44,6 +44,14 @@
         <i class="bi bi-globe2 text-[13px]"></i>
         Location
       </button>
+      <div class="flex shrink-0 overflow-hidden rounded-[6px] border border-[#1e2a40] bg-[#0a1020]">
+        <button class="px-3 py-1.5 text-[12px] font-medium transition-colors" [ngClass]="activeTab === 'map' ? ['bg-[#17304d]','text-[#e2ecff]'] : ['text-[#7eb8f7]','hover:bg-[#10192a]']" (click)="setActiveView('map')">
+          Satellite map
+        </button>
+        <button class="border-l border-[#1e2a40] px-3 py-1.5 text-[12px] font-medium transition-colors" [ngClass]="activeTab === 'tracking' ? ['bg-[#17304d]','text-[#e2ecff]'] : ['text-[#7eb8f7]','hover:bg-[#10192a]']" (click)="setActiveView('tracking')">
+          Live tracking
+        </button>
+      </div>
       <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border border-[#3a7bd5] bg-[#1a4a7a] px-3 py-1.5 text-[12px] font-medium text-[#7eb8f7] transition-colors hover:bg-[#1e5a94]" (click)="goToCoords()">Go</button>
       <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors" [ngClass]="facilitiesVisible ? ['border-[#1d9e75]','bg-[#0f6e56]','text-[#9fe1cb]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleFacilities()">
         {{ facilitiesVisible ? 'Facilities on' : 'Facilities off' }}
@@ -70,25 +78,42 @@
     }
 
     <div class="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_300px] grid-rows-[minmax(0,1fr)] overflow-hidden max-[1100px]:grid-cols-1 max-[1100px]:grid-rows-[minmax(0,1fr)_auto]">
-      <app-satellite-map-section class="block h-full min-h-0 min-w-0 overflow-hidden max-[1100px]:min-h-[380px]"
-        [lat]="lat"
-        [lon]="lon"
-        [delta]="delta"
-        [selectedLayer]="selectedLayer"
-        [facilitiesVisible]="facilitiesVisible"
-        [facilitiesData]="facilitiesData"
-        [anomalyData]="anomalyResult"
-        [aircraftData]="aircraftData"
-        [shipsData]="shipsData"
-        [isScanning]="isScanning()"
-        [progress]="satelliteService.progress()"
-        [currentStep]="currentStep"
-        [progressSegments]="progressSegments"
-        [errorMessage]="satelliteService.onError()?.message || null"
-        [hasSearched]="hasSearched"
-        (mapClick)="onMapClick($event)"
-        (mapMoved)="onMapMoved($event)">
-      </app-satellite-map-section>
+      <div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:min-h-[380px]">
+        @if (activeTab === 'tracking') {
+          <app-satellite-tracking-map-section class="block h-full min-h-0 min-w-0 overflow-hidden"
+            [lat]="lat"
+            [lon]="lon"
+            [delta]="delta"
+            [aircraftData]="aircraftData"
+            [shipsData]="shipsData"
+            [aircraftTrackingEnabled]="aircraftTrackingEnabled"
+            [shipsTrackingEnabled]="shipsTrackingEnabled"
+            [globalAircraftTrackingEnabled]="globalAircraftTrackingEnabled"
+            [globalShipsTrackingEnabled]="globalShipsTrackingEnabled"
+            (mapMoved)="onMapMoved($event)">
+          </app-satellite-tracking-map-section>
+        } @else {
+          <app-satellite-map-section class="block h-full min-h-0 min-w-0 overflow-hidden"
+            [lat]="lat"
+            [lon]="lon"
+            [delta]="delta"
+            [selectedLayer]="selectedLayer"
+            [facilitiesVisible]="facilitiesVisible"
+            [facilitiesData]="facilitiesData"
+            [anomalyData]="anomalyResult"
+            [aircraftData]="[]"
+            [shipsData]="[]"
+            [isScanning]="isScanning()"
+            [progress]="satelliteService.progress()"
+            [currentStep]="currentStep"
+            [progressSegments]="progressSegments"
+            [errorMessage]="satelliteService.onError()?.message || null"
+            [hasSearched]="hasSearched"
+            (mapClick)="onMapClick($event)"
+            (mapMoved)="onMapMoved($event)">
+          </app-satellite-map-section>
+        }
+      </div>
 
       <div class="flex flex-col overflow-hidden border-l border-[#1e2a40] bg-[#0d1220] max-[1100px]:max-h-[40vh] max-[1100px]:border-l-0 max-[1100px]:border-t">
         <div class="flex shrink-0 overflow-x-auto border-b border-[#1e2a40]">

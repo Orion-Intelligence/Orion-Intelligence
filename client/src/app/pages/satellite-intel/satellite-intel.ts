@@ -7,6 +7,7 @@ import { SatelliteIntelService } from './satellite-intel-service.service';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { GeocodeModalComponent } from './modal/geocode-modal/geocode-modal.component';
 import { MapSectionComponent } from './map-section/map-section.component';
+import { TrackingMapSectionComponent } from './tracking-map-section/tracking-map-section.component';
 import { MonthCompareSectionComponent } from './month-compare-section/month-compare-section.component';
 import { AnomalySectionComponent } from './anomaly-section/anomaly-section.component';
 import { SentinelSearchSectionComponent } from './sentinel-search-section/sentinel-search-section.component';
@@ -25,6 +26,7 @@ import { SatelliteFacilitiesResponse, SatelliteAnomalyResponse, SatelliteCompare
     FormsModule,
     GeocodeModalComponent,
     MapSectionComponent,
+    TrackingMapSectionComponent,
     MonthCompareSectionComponent,
     AnomalySectionComponent,
     SentinelSearchSectionComponent,
@@ -45,7 +47,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   readonly progressSegments = Array.from({ length: 20 }, (_, i) => i);
   readonly panelTabs = [ { id: 'compare', label: 'Compare' }, { id: 'anomaly', label: 'Anomaly' }, { id: 'sentinel', label: 'Sentinel' }, { id: 'image', label: 'Image' }, { id: 'facilities', label: 'Facilities' }, ] as const;
   activePanel: 'compare' | 'anomaly' | 'sentinel' | 'image' | 'facilities' = 'compare';
-  activeTab: 'map' | 'compare' | 'anomaly' | 'sentinel' | 'facilities' = 'map';
+  activeTab: 'map' | 'tracking' | 'compare' | 'anomaly' | 'sentinel' | 'facilities' = 'map';
   coordsForm = { value: '', delta: 0.05 };
   formError:  string | null = null;
   inputLat   = 50.0;
@@ -163,6 +165,10 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   onLayerChange(): void { /* handled by map-section input */ }
 
+  setActiveView(view: 'map' | 'tracking'): void {
+    this.activeTab = view;
+  }
+
   toggleFacilities(): void {
     this.facilitiesVisible = !this.facilitiesVisible;
     if (this.facilitiesVisible) {
@@ -182,9 +188,10 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       return;
     }
 
+    this.activeTab = 'tracking';
     this.refreshAircraftTracking();
     clearInterval(this.aircraftTimer);
-    this.aircraftTimer = setInterval(() => this.refreshAircraftTracking(), 15000);
+    this.aircraftTimer = setInterval(() => this.refreshAircraftTracking(), 25000);
   }
 
   toggleShipsTracking(): void {
@@ -198,6 +205,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       return;
     }
 
+    this.activeTab = 'tracking';
     this.refreshShipsTracking();
     clearInterval(this.shipsTimer);
     this.shipsTimer = setInterval(() => this.refreshShipsTracking(), 8000);
@@ -217,9 +225,10 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       return;
     }
 
+    this.activeTab = 'tracking';
     this.refreshAircraftTracking();
     clearInterval(this.aircraftTimer);
-    this.aircraftTimer = setInterval(() => this.refreshAircraftTracking(), 15000);
+    this.aircraftTimer = setInterval(() => this.refreshAircraftTracking(), 25000);
   }
 
   toggleGlobalShipsTracking(): void {
@@ -236,6 +245,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       return;
     }
 
+    this.activeTab = 'tracking';
     this.refreshShipsTracking();
     clearInterval(this.shipsTimer);
     this.shipsTimer = setInterval(() => this.refreshShipsTracking(), 8000);
@@ -499,19 +509,13 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.aircraftTrackSub?.unsubscribe();
     this.aircraftTrackSub = this.satelliteService.fetchAircraftInBounds(lat, lon, delta).subscribe({
       next: (res) => {
-        console.log('[AIRCRAFT] Full response:', res);
         const payload = (res?.result ?? res) as any;
-        console.log('[AIRCRAFT] Extracted payload:', payload);
-        console.log('[AIRCRAFT] Is aircraft array?', Array.isArray(payload?.aircraft));
-        console.log('[AIRCRAFT] Aircraft count:', payload?.aircraft?.length ?? 0);
         this.aircraftData = Array.isArray(payload?.aircraft) ? payload.aircraft : [];
-        console.log('[AIRCRAFT] Set aircraftData with', this.aircraftData.length, 'items');
         if (payload?.error) {
           this.trackingError = `Aircraft tracking: ${payload.error}`;
         }
       },
       error: (err) => {
-        console.error('[AIRCRAFT] Error:', err);
         this.trackingError = err?.error?.detail || err?.message || 'Aircraft tracking failed';
       },
     });
@@ -521,19 +525,13 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.aircraftTrackSub?.unsubscribe();
     this.aircraftTrackSub = this.satelliteService.fetchAircraftGlobal().subscribe({
       next: (res) => {
-        console.log('[AIRCRAFT-GLOBAL] Full response:', res);
         const payload = (res?.result ?? res) as any;
-        console.log('[AIRCRAFT-GLOBAL] Extracted payload:', payload);
-        console.log('[AIRCRAFT-GLOBAL] Is aircraft array?', Array.isArray(payload?.aircraft));
-        console.log('[AIRCRAFT-GLOBAL] Aircraft count:', payload?.aircraft?.length ?? 0);
         this.aircraftData = Array.isArray(payload?.aircraft) ? payload.aircraft : [];
-        console.log('[AIRCRAFT-GLOBAL] Set aircraftData with', this.aircraftData.length, 'items');
         if (payload?.error) {
           this.trackingError = `Global aircraft tracking: ${payload.error}`;
         }
       },
       error: (err) => {
-        console.error('[AIRCRAFT-GLOBAL] Error:', err);
         this.trackingError = err?.error?.detail || err?.message || 'Global aircraft tracking failed';
       },
     });
@@ -552,19 +550,13 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.shipTrackSub?.unsubscribe();
     this.shipTrackSub = this.satelliteService.fetchShipsInBounds(lat, lon, delta).subscribe({
       next: (res) => {
-        console.log('[SHIPS] Full response:', res);
         const payload = (res?.result ?? res) as any;
-        console.log('[SHIPS] Extracted payload:', payload);
-        console.log('[SHIPS] Is ships array?', Array.isArray(payload?.ships));
-        console.log('[SHIPS] Ships count:', payload?.ships?.length ?? 0);
         this.shipsData = Array.isArray(payload?.ships) ? payload.ships : [];
-        console.log('[SHIPS] Set shipsData with', this.shipsData.length, 'items');
         if (payload?.error) {
           this.trackingError = `Ship tracking: ${payload.error}`;
         }
       },
       error: (err) => {
-        console.error('[SHIPS] Error:', err);
         this.trackingError = err?.error?.detail || err?.message || 'Ship tracking failed';
       },
     });
@@ -574,19 +566,13 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.shipTrackSub?.unsubscribe();
     this.shipTrackSub = this.satelliteService.fetchShipsGlobal().subscribe({
       next: (res) => {
-        console.log('[SHIPS-GLOBAL] Full response:', res);
         const payload = (res?.result ?? res) as any;
-        console.log('[SHIPS-GLOBAL] Extracted payload:', payload);
-        console.log('[SHIPS-GLOBAL] Is ships array?', Array.isArray(payload?.ships));
-        console.log('[SHIPS-GLOBAL] Ships count:', payload?.ships?.length ?? 0);
         this.shipsData = Array.isArray(payload?.ships) ? payload.ships : [];
-        console.log('[SHIPS-GLOBAL] Set shipsData with', this.shipsData.length, 'items');
         if (payload?.error) {
           this.trackingError = `Global ship tracking: ${payload.error}`;
         }
       },
       error: (err) => {
-        console.error('[SHIPS-GLOBAL] Error:', err);
         this.trackingError = err?.error?.detail || err?.message || 'Global ship tracking failed';
       },
     });
