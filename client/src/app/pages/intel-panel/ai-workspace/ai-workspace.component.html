@@ -87,7 +87,7 @@
                   <div class="flex min-h-[20px] items-center gap-2 px-1">
                     <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
                   </div>
-                  <div class="rounded-[22px] rounded-tl-[10px] border border-[var(--color-border-red)] bg-[var(--color-red-100)] px-4 py-3 text-sm shadow-[0_10px_24px_var(--color-shadow-medium)] max-[640px]:w-full">
+                  <div class="ui-ai-chat-bubble-cancel rounded-[22px] rounded-tl-[10px] border px-4 py-3 text-sm shadow-[0_10px_24px_var(--color-shadow-medium)] max-[640px]:w-full">
                     <p class="whitespace-pre-wrap leading-7 text-[var(--color-text7)]">{{ message.text }}</p>
                   </div>
                   @if (message.retryPayload) {
@@ -136,7 +136,7 @@
         <form novalidate class="rounded-full border border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-800)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
           <div class="flex items-center gap-2">
             <input [(ngModel)]="messageDraft" (keydown)="onComposerKeydown($event)" data-testid="chat-widget-input" type="text" name="message" placeholder="Write a message" class="flex-1 rounded-full bg-[var(--color-blue-800)] px-3 py-1.5 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" />
-            <button data-testid="chat-widget-send" type="button" (click)="isSending() ? stopMessageGeneration() : sendMessage()" [disabled]="!isSending() && !messageDraft.trim()" class="flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] transition hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50">
+            <button data-testid="chat-widget-send" type="button" (click)="isSending() ? stopMessageGeneration() : sendMessage()" [disabled]="!isSending() && !messageDraft.trim()" [class]="isSending() ? 'flex h-8 w-8 items-center justify-center rounded-full bg-[#6a4b4b] transition hover:bg-[#755555] disabled:cursor-not-allowed disabled:opacity-50' : 'flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] transition hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50'">
               @if (isSending()) {
                 <img src="assets/images/shared/cross.svg" alt="stop" class="h-3.5 w-3.5 [filter:brightness(0)_invert(1)]">
               } @else {

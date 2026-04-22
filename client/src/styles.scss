@@ -3774,6 +3774,11 @@ app-demo-tour .demo-tour-active {
   background-size: 28px 28px;
 }
 
+.ui-ai-chat-bubble-cancel {
+  border-color: color-mix(in srgb, var(--color-border) 86%, var(--color-border-red));
+  background: #6a4b4b;
+}
+
 @keyframes ui-ai-chat-row-in {
   from {
     opacity: 0;
