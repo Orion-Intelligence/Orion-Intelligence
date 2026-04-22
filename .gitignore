@@ -60,3 +60,4 @@ backend/static/resource/**
 
 nginx/nginx-prod.conf
 nginx/nginx.conf
+nginx/nginx.conf

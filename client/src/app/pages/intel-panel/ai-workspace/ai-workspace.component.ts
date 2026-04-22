@@ -57,7 +57,7 @@ export class AiWorkspaceComponent {
     this.api.post<ChatApiResponse>('nlp/chat/report', {
       session_id: this.sessionId,
       message: text,
-      report: this.contextQuery() || undefined,
+      report: this.contextQuery() || '',
     }).subscribe({
       next: (response) => {
         const reply = (response?.result ?? response?.reply ?? response?.message ?? response?.text ?? '').toString().trim();
