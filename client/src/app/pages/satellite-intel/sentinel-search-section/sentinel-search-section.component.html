@@ -1,6 +1,6 @@
 <div class="px-4 py-4 md:px-6">
   <button type="button" class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 mb-4" [disabled]="isScanning" (click)="runSearch.emit()">
-    @if (isScanning) {
+    @if (isScanning && !useMainLoading) {
       <span class="h-4 w-4 rounded-full border-2 border-white/25 border-t-white animate-spin"></span>
     } @else {
       <i class="bi bi-satellite text-[14px]"></i>
@@ -8,7 +8,7 @@
     Check available passes
   </button>
 
-  @if (isScanning) {
+  @if (isScanning && !useMainLoading) {
     <div class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] p-4">
       <div class="mb-[6px] flex items-center justify-between gap-3">
         <span class="text-[12px] font-medium text-[var(--color-text1)]">{{ loadingStepLabel }}</span>

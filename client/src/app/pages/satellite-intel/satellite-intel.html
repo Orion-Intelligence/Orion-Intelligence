@@ -1,4 +1,16 @@
-<div class="flex h-full min-h-0 w-full flex-col overflow-hidden">
+<div class="relative flex h-full min-h-0 w-full flex-col overflow-hidden">
+  @if (isMainLoading) {
+    <div class="absolute inset-0 z-30 flex items-center justify-center bg-[rgba(2,6,23,0.86)] backdrop-blur-[2px]">
+      <div class="mx-4 flex min-w-[220px] max-w-[360px] flex-col items-center gap-3 rounded-[16px] border border-sky-400/20 bg-[#0d1220]/95 px-6 py-5 text-center shadow-[0_0_30px_rgba(56,189,248,0.12)]">
+        <div class="h-11 w-11 animate-spin rounded-full border-4 border-sky-400/20 border-t-sky-300"></div>
+        <div>
+          <p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-sky-200">{{ mainLoadingTitle }}</p>
+          <p class="mt-1 text-[12px] text-[#c8d4e8]">{{ mainLoadingMessage }}</p>
+        </div>
+      </div>
+    </div>
+  }
+
   <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
     <div class="z-20 flex flex-nowrap items-center gap-2 overflow-x-auto border-b border-[#1e2a40] bg-[#0d1220] px-[14px] py-2">
       <span class="mr-[2px] shrink-0 whitespace-nowrap text-[13px] font-medium text-[#7eb8f7]">Satellite Intel</span>
@@ -35,38 +47,38 @@
 <!--        <input type="number" [(ngModel)]="inputDelta" step="0.005" min="0.001" max="2" class="w-[60px] border-none bg-transparent px-[3px] py-[2px] font-mono text-[12px] text-[#7eb8f7] outline-none" (change)="onDeltaChange()"/>-->
 <!--      </div>-->
 
-      <select class="shrink-0 rounded-[5px] border border-[#1e2a40] bg-[#111827] px-[7px] py-[5px] text-[12px] text-[#c8d4e8] outline-none" [(ngModel)]="selectedLayer" (change)="onLayerChange()">
+      <select class="shrink-0 rounded-[5px] border border-[#1e2a40] bg-[#111827] px-[7px] py-[5px] text-[12px] text-[#c8d4e8] outline-none disabled:cursor-not-allowed disabled:opacity-60" [(ngModel)]="selectedLayer" [disabled]="isMainLoading" (change)="onLayerChange()">
         <option value="esri">ESRI Satellite</option>
         <option value="osm">OpenStreetMap</option>
       </select>
 
-      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border border-[#3a7bd5] bg-[#1a4a7a] px-3 py-1.5 text-[12px] font-medium text-[#7eb8f7] transition-colors hover:bg-[#1e5a94]" (click)="openGeocodeModal()">
+      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border border-[#3a7bd5] bg-[#1a4a7a] px-3 py-1.5 text-[12px] font-medium text-[#7eb8f7] transition-colors hover:bg-[#1e5a94] disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" (click)="openGeocodeModal()">
         <i class="bi bi-globe2 text-[13px]"></i>
         Location
       </button>
       <div class="flex shrink-0 overflow-hidden rounded-[6px] border border-[#1e2a40] bg-[#0a1020]">
-        <button class="px-3 py-1.5 text-[12px] font-medium transition-colors" [ngClass]="activeTab === 'map' ? ['bg-[#17304d]','text-[#e2ecff]'] : ['text-[#7eb8f7]','hover:bg-[#10192a]']" (click)="setActiveView('map')">
+        <button class="px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" [ngClass]="activeTab === 'map' ? ['bg-[#17304d]','text-[#e2ecff]'] : ['text-[#7eb8f7]','hover:bg-[#10192a]']" (click)="setActiveView('map')">
           Satellite map
         </button>
-        <button class="border-l border-[#1e2a40] px-3 py-1.5 text-[12px] font-medium transition-colors" [ngClass]="activeTab === 'tracking' ? ['bg-[#17304d]','text-[#e2ecff]'] : ['text-[#7eb8f7]','hover:bg-[#10192a]']" (click)="setActiveView('tracking')">
+        <button class="border-l border-[#1e2a40] px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" [ngClass]="activeTab === 'tracking' ? ['bg-[#17304d]','text-[#e2ecff]'] : ['text-[#7eb8f7]','hover:bg-[#10192a]']" (click)="setActiveView('tracking')">
           Live tracking
         </button>
       </div>
-      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border border-[#3a7bd5] bg-[#1a4a7a] px-3 py-1.5 text-[12px] font-medium text-[#7eb8f7] transition-colors hover:bg-[#1e5a94]" (click)="goToCoords()">Go</button>
-      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors" [ngClass]="facilitiesVisible ? ['border-[#1d9e75]','bg-[#0f6e56]','text-[#9fe1cb]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleFacilities()">
+      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border border-[#3a7bd5] bg-[#1a4a7a] px-3 py-1.5 text-[12px] font-medium text-[#7eb8f7] transition-colors hover:bg-[#1e5a94] disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" (click)="goToCoords()">Go</button>
+      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" [ngClass]="facilitiesVisible ? ['border-[#1d9e75]','bg-[#0f6e56]','text-[#9fe1cb]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleFacilities()">
         {{ facilitiesVisible ? 'Facilities on' : 'Facilities off' }}
       </button>
-      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border border-[rgba(245,158,11,.35)] bg-[rgba(245,158,11,.1)] px-3 py-1.5 text-[12px] font-medium text-[#f59e0b] transition-colors hover:bg-[rgba(245,158,11,.18)]" (click)="runAnomalyScan()">Anomaly scan</button>
-      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors" [ngClass]="aircraftTrackingEnabled ? ['border-[#8b5cf6]','bg-[rgba(139,92,246,.2)]','text-[#c4b5fd]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleAircraftTracking()">
+      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border border-[rgba(245,158,11,.35)] bg-[rgba(245,158,11,.1)] px-3 py-1.5 text-[12px] font-medium text-[#f59e0b] transition-colors hover:bg-[rgba(245,158,11,.18)] disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" (click)="runAnomalyScan()">Anomaly scan</button>
+      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" [ngClass]="aircraftTrackingEnabled ? ['border-[#8b5cf6]','bg-[rgba(139,92,246,.2)]','text-[#c4b5fd]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleAircraftTracking()">
         {{ aircraftTrackingEnabled ? 'Aircraft tracking on' : 'Track aircraft' }}
       </button>
-      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors" [ngClass]="shipsTrackingEnabled ? ['border-[#06b6d4]','bg-[rgba(6,182,212,.2)]','text-[#67e8f9]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleShipsTracking()">
+      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" [ngClass]="shipsTrackingEnabled ? ['border-[#06b6d4]','bg-[rgba(6,182,212,.2)]','text-[#67e8f9]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleShipsTracking()">
         {{ shipsTrackingEnabled ? 'Ship tracking on' : 'Track ships' }}
       </button>
-      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors" [ngClass]="globalAircraftTrackingEnabled ? ['border-[#a855f7]','bg-[rgba(168,85,247,.25)]','text-[#e9d5ff]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleGlobalAircraftTracking()" title="Track aircraft worldwide">
+      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" [ngClass]="globalAircraftTrackingEnabled ? ['border-[#a855f7]','bg-[rgba(168,85,247,.25)]','text-[#e9d5ff]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleGlobalAircraftTracking()" title="Track aircraft worldwide">
         {{ globalAircraftTrackingEnabled ? '🌍 Aircraft (global)' : 'Global aircraft' }}
       </button>
-      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors" [ngClass]="globalShipsTrackingEnabled ? ['border-[#06d6d4]','bg-[rgba(6,214,212,.25)]','text-[#cffafe]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleGlobalShipsTracking()" title="Track ships worldwide">
+      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" [ngClass]="globalShipsTrackingEnabled ? ['border-[#06d6d4]','bg-[rgba(6,214,212,.25)]','text-[#cffafe]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleGlobalShipsTracking()" title="Track ships worldwide">
         {{ globalShipsTrackingEnabled ? '🌍 Ships (global)' : 'Global ships' }}
       </button>
     </div>
@@ -104,6 +116,7 @@
             [aircraftData]="[]"
             [shipsData]="[]"
             [isScanning]="isScanning()"
+            [useMainLoading]="true"
             [progress]="satelliteService.progress()"
             [currentStep]="currentStep"
             [progressSegments]="progressSegments"
@@ -128,6 +141,7 @@
           @if (activePanel === 'compare') {
             <app-satellite-month-compare
               [isScanning]="isScanning()"
+              [useMainLoading]="true"
               [progress]="satelliteService.progress()"
               [currentStep]="currentStep"
               [progressSegments]="progressSegments"
@@ -141,6 +155,7 @@
           @if (activePanel === 'anomaly') {
             <app-satellite-anomaly-section
               [isScanning]="isScanning()"
+              [useMainLoading]="true"
               [progress]="satelliteService.progress()"
               [currentStep]="currentStep"
               [progressSegments]="progressSegments"
@@ -153,6 +168,7 @@
           @if (activePanel === 'sentinel') {
             <app-satellite-sentinel-search
               [isScanning]="isScanning()"
+              [useMainLoading]="true"
               [progress]="satelliteService.progress()"
               [currentStep]="currentStep"
               [progressSegments]="progressSegments"
@@ -166,6 +182,7 @@
           @if (activePanel === 'image') {
             <app-satellite-sentinel-image
               [isScanning]="isScanning()"
+              [useMainLoading]="true"
               [progress]="satelliteService.progress()"
               [currentStep]="currentStep"
               [progressSegments]="progressSegments"

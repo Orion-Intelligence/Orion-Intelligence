@@ -1,5 +1,5 @@
 <div class="px-4 py-4 md:px-6">
-  @if (isScanning) {
+  @if (isScanning && !useMainLoading) {
     <div class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] p-4">
       <div class="mb-[6px] flex items-center justify-between gap-3">
         <span class="text-[12px] font-medium text-[var(--color-text1)]">{{ loadingStepLabel }}</span>

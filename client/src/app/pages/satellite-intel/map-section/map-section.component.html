@@ -5,7 +5,7 @@
     {{ zoomLabel }}
   </div>
 
-  @if (isScanning) {
+  @if (isScanning && !useMainLoading) {
     <div class="absolute left-3 right-3 top-3 z-[900] max-w-[min(520px,calc(100%-24px))] rounded-lg border border-white/10 bg-[rgba(13,21,37,.9)] px-3 py-[10px]">
       <div class="mb-[6px] flex justify-between">
         <span class="text-[12px] font-medium text-[#f0f4ff]">{{ loadingStepLabel }}</span>

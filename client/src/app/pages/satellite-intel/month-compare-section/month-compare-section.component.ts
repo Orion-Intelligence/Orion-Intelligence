@@ -20,6 +20,7 @@ export class MonthCompareSectionComponent {
   brokenImages = new Set<string>();
 
   @Input() isScanning       = false;
+  @Input() useMainLoading   = false;
   @Input() progress         = 0;
   @Input() currentStep      = '';
   @Input() progressSegments: number[] = [];

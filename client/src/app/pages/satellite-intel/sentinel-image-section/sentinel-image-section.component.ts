@@ -20,6 +20,7 @@ export class SentinelImageSectionComponent {
   lightboxSrc: string | null = null;
 
   @Input() isScanning      = false;
+  @Input() useMainLoading  = false;
   @Input() progress        = 0;
   @Input() currentStep     = '';
   @Input() progressSegments: number[] = [];

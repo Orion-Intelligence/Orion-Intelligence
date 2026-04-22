@@ -12,6 +12,7 @@ import { SatelliteSentinelPass } from '../../../shared/model/satellite-intel/sat
 })
 export class SentinelSearchSectionComponent {
   @Input() isScanning      = false;
+  @Input() useMainLoading  = false;
   @Input() progress        = 0;
   @Input() currentStep     = '';
   @Input() progressSegments: number[] = [];

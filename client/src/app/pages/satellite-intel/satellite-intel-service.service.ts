@@ -69,6 +69,21 @@ export class SatelliteIntelService {
     takeUntil(cancel$),);
   }
 
+  private createPolledRequest<T>(call: () => Observable<T>, getStatus: (v: T) => string | undefined, delayMs: number): Observable<T> {
+    return new Observable<T>((observer) => {
+      const cancel$ = new Subject<boolean>();
+      const sub = this.poll<T>(call, getStatus, () => {}, cancel$, delayMs).subscribe(observer);
+
+      return () => {
+        if (!cancel$.closed) {
+          cancel$.next(true);
+          cancel$.complete();
+        }
+        sub.unsubscribe();
+      };
+    });
+  }
+
   private runTask<T>(build: (cancel$: Subject<boolean>) => Observable<T>): Subscription {
     console.log("Ali bhai 01")
     this.progress.set(0);
@@ -313,6 +328,10 @@ export class SatelliteIntelService {
     return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft/bbox', payload);
   }
 
+  pollAircraftInBounds(lat: number, lon: number, delta = 0.05, openskyClientId?: string, openskyClientSecret?: string): Observable<SatelliteLiveAircraftBBoxResponse> {
+    return this.createPolledRequest(() => this.fetchAircraftInBounds(lat, lon, delta, openskyClientId, openskyClientSecret), (res) => (res?.result?.status || res?.status) as any, 3000);
+  }
+
   fetchShipsInBounds( lat: number, lon: number, delta = 0.05, aisstreamApiKey?: string, ): Observable<SatelliteLiveShipsBBoxResponse> {
     const payload: Record<string, any> = {
       lat_min: lat - delta,
@@ -326,6 +345,10 @@ export class SatelliteIntelService {
     }
 
     return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships/bbox', payload);
+  }
+
+  pollShipsInBounds(lat: number, lon: number, delta = 0.05, aisstreamApiKey?: string): Observable<SatelliteLiveShipsBBoxResponse> {
+    return this.createPolledRequest(() => this.fetchShipsInBounds(lat, lon, delta, aisstreamApiKey), (res) => (res?.result?.status || res?.status) as any, 3000);
   }
 
   fetchAircraftGlobal( openskyClientId?: string, openskyClientSecret?: string, ): Observable<SatelliteLiveAircraftBBoxResponse> {
@@ -347,6 +370,10 @@ export class SatelliteIntelService {
     return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft/bbox', payload);
   }
 
+  pollAircraftGlobal(openskyClientId?: string, openskyClientSecret?: string): Observable<SatelliteLiveAircraftBBoxResponse> {
+    return this.createPolledRequest(() => this.fetchAircraftGlobal(openskyClientId, openskyClientSecret), (res) => (res?.result?.status || res?.status) as any, 3000);
+  }
+
   fetchShipsGlobal( aisstreamApiKey?: string, ): Observable<SatelliteLiveShipsBBoxResponse> {
     // Query entire world: lat range [-90, 90], lon range [-180, 180]
     const payload: Record<string, any> = {
@@ -361,5 +388,9 @@ export class SatelliteIntelService {
     }
 
     return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships/bbox', payload);
+  }
+
+  pollShipsGlobal(aisstreamApiKey?: string): Observable<SatelliteLiveShipsBBoxResponse> {
+    return this.createPolledRequest(() => this.fetchShipsGlobal(aisstreamApiKey), (res) => (res?.result?.status || res?.status) as any, 3000);
   }
 }

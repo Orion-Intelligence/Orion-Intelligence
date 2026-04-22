@@ -29,6 +29,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   zoomLabel = 'zoom 2.5';
 
   @Input() isScanning       = false;
+  @Input() useMainLoading   = false;
   @Input() progress         = 0;
   @Input() currentStep      = '';
   @Input() progressSegments: number[] = [];
@@ -78,11 +79,9 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     }
     if (changes['aircraftData']) {
       console.log('[MAP] aircraftData changed:', this.aircraftData?.length ?? 0, 'items');
-      this.renderAircraft();
     }
     if (changes['shipsData']) {
       console.log('[MAP] shipsData changed:', this.shipsData?.length ?? 0, 'items');
-      this.renderShips();
     }
     if (changes['selectedLayer'])   {
       this.switchLayer(); 
@@ -182,12 +181,6 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       if (this.anomalyData)     {
         this.renderAnomaly(); 
       }
-      if (this.aircraftData?.length) {
-        this.renderAircraft();
-      }
-      if (this.shipsData?.length) {
-        this.renderShips();
-      }
       this.resizeObserver = new ResizeObserver(() => {
         this.leafletMap?.invalidateSize();
         this.updateMinZoomToFitContainer();
@@ -265,107 +258,6 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       .addTo(this.anomalyLayer)
       .bindPopup(`<b>Anomaly zone</b><br>Alert: <b>${this.anomalyData.alert_level}</b><br>NDVI delta: <b>${this.anomalyData.delta_score}%</b>`);
     this.leafletMap?.fitBounds([[mnLa, mnLo], [mxLa, mxLo]], { padding: [40, 40] });
-  }
-
-  private renderAircraft(): void {
-    console.log('[MAP.renderAircraft] Start - aircraftLayer exists:', !!this.aircraftLayer, 'L exists:', !!this.L);
-    if (!this.aircraftLayer || !this.L) {
-      console.warn('[MAP.renderAircraft] Missing aircraftLayer or L');
-      return;
-    }
-
-    console.log('[MAP.renderAircraft] Clearing old markers');
-    this.aircraftLayer.clearLayers();
-
-    const aircraftArray = this.aircraftData || [];
-    console.log('[MAP.renderAircraft] Processing', aircraftArray.length, 'aircraft');
-
-    const bounds: any[] = [];
-
-    for (const aircraft of aircraftArray) {
-      const lat = aircraft.latitude;
-      const lon = aircraft.longitude;
-      if (typeof lat !== 'number' || typeof lon !== 'number') {
-        console.warn('[MAP.renderAircraft] Skip invalid coords:', lat, lon);
-        continue;
-      }
-
-      bounds.push([lat, lon]);
-      const rotation = aircraft.true_track ?? 0;
-      const callsign = aircraft.callsign || aircraft.icao24;
-      console.log('[MAP.renderAircraft] Adding', callsign, 'at', lat, lon, 'rotation', rotation);
-
-      // Create airplane icon SVG (yellow like in your screenshot)
-      const airplaneIcon = this.L.divIcon({
-        html: `<svg width="28" height="28" viewBox="0 0 28 28" style="transform: rotate(${rotation}deg); filter: drop-shadow(0 0 2px rgba(0,0,0,0.3));" xmlns="http://www.w3.org/2000/svg">
-          <path d="M14 2 L20 12 L26 14 L20 16 L14 26 L12 16 L2 14 L12 12 Z" fill="#fbbf24" stroke="#f59e0b" stroke-width="0.5"/>
-        </svg>`,
-        className: 'aircraft-icon',
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
-      });
-
-      const marker = this.L.marker([lat, lon], { icon: airplaneIcon })
-        .bindPopup(`<div style="font-size:13px;font-weight:600;margin-bottom:3px">${callsign}</div>` +
-          `<div style="font-size:12px;color:#888">ICAO24: ${aircraft.icao24}</div>` +
-          `<div style="font-size:12px;color:#888">Alt: ${aircraft.baro_altitude ?? 'n/a'} m</div>` +
-          `<div style="font-size:12px;color:#888">Speed: ${aircraft.velocity ?? 'n/a'} m/s</div>` +
-          `<div style="font-size:12px;color:#888">Track: ${aircraft.true_track ?? 'n/a'}°</div>`);
-
-      this.aircraftLayer.addLayer(marker);
-    }
-
-    console.log('[MAP.renderAircraft] Complete - added', aircraftArray.length, 'markers');
-  }
-
-  private renderShips(): void {
-    console.log('[MAP.renderShips] Start - shipsLayer exists:', !!this.shipsLayer, 'L exists:', !!this.L);
-    if (!this.shipsLayer || !this.L) {
-      console.warn('[MAP.renderShips] Missing shipsLayer or L');
-      return;
-    }
-
-    console.log('[MAP.renderShips] Clearing old markers');
-    this.shipsLayer.clearLayers();
-
-    const shipsArray = this.shipsData || [];
-    console.log('[MAP.renderShips] Processing', shipsArray.length, 'ships');
-
-    const bounds: any[] = [];
-
-    for (const ship of shipsArray) {
-      const lat = ship.latitude;
-      const lon = ship.longitude;
-      if (typeof lat !== 'number' || typeof lon !== 'number') {
-        console.warn('[MAP.renderShips] Skip invalid coords:', lat, lon);
-        continue;
-      }
-
-      bounds.push([lat, lon]);
-      const rotation = ship.course ?? 0;
-      const name = ship.name || ship.mmsi;
-      console.log('[MAP.renderShips] Adding', name, 'at', lat, lon, 'rotation', rotation);
-
-      // Create ship icon SVG
-      const shipIcon = this.L.divIcon({
-        html: `<svg width="24" height="24" viewBox="0 0 24 24" style="transform: rotate(${rotation}deg); filter: drop-shadow(0 0 2px rgba(0,0,0,0.3));" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2 L18 10 L16 22 L8 22 L6 10 Z M12 2 L12 10 M8 22 L16 22 L15 18 L9 18" fill="#10b981" stroke="#059669" stroke-width="0.5"/>
-        </svg>`,
-        className: 'ship-icon',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
-      });
-
-      const marker = this.L.marker([lat, lon], { icon: shipIcon })
-        .bindPopup(`<div style="font-size:13px;font-weight:600;margin-bottom:3px">${name}</div>` +
-          `<div style="font-size:12px;color:#888">MMSI: ${ship.mmsi}</div>` +
-          `<div style="font-size:12px;color:#888">Speed: ${ship.speed ?? 'n/a'} kn</div>` +
-          `<div style="font-size:12px;color:#888">Course: ${ship.course ?? 'n/a'}°</div>`);
-
-      this.shipsLayer.addLayer(marker);
-    }
-
-    console.log('[MAP.renderShips] Complete - added', shipsArray.length, 'markers');
   }
 
   private deltaToZoom(d: number): number {

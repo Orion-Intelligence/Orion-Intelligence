@@ -43,6 +43,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private searchTimer?: ReturnType<typeof setTimeout>;
   private pendingRequest: 'facilities' | 'anomaly' | 'compare' | 'sentinel' | 'sentinel-image' | null = null;
   private skipNextMapMovedEvent = false;
+  private mainLoadingSequence = 0;
+  private mainLoadingRequests = new Map<number, { title: string; message: string }>();
 
   readonly progressSegments = Array.from({ length: 20 }, (_, i) => i);
   readonly panelTabs = [ { id: 'compare', label: 'Compare' }, { id: 'anomaly', label: 'Anomaly' }, { id: 'sentinel', label: 'Sentinel' }, { id: 'image', label: 'Image' }, { id: 'facilities', label: 'Facilities' }, ] as const;
@@ -75,6 +77,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   hasSearched  = false;
   currentStep  = '';
   showGeocodeModal = false;
+  isMainLoading = false;
+  mainLoadingTitle = 'Loading Satellite Intel';
+  mainLoadingMessage = 'Please wait while the request completes...';
   isScanning = computed(() =>
     this.satelliteService.isRunning() && !this.satelliteService.onError(),);
 
@@ -189,9 +194,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     }
 
     this.activeTab = 'tracking';
-    this.refreshAircraftTracking();
+    this.refreshAircraftTracking(true);
     clearInterval(this.aircraftTimer);
-    this.aircraftTimer = setInterval(() => this.refreshAircraftTracking(), 25000);
+    this.aircraftTimer = setInterval(() => this.refreshAircraftTracking(false), 25000);
   }
 
   toggleShipsTracking(): void {
@@ -206,15 +211,15 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     }
 
     this.activeTab = 'tracking';
-    this.refreshShipsTracking();
+    this.refreshShipsTracking(true);
     clearInterval(this.shipsTimer);
-    this.shipsTimer = setInterval(() => this.refreshShipsTracking(), 8000);
+    this.shipsTimer = setInterval(() => this.refreshShipsTracking(false), 8000);
   }
 
   toggleGlobalAircraftTracking(): void {
     this.globalAircraftTrackingEnabled = !this.globalAircraftTrackingEnabled;
     if (this.aircraftTrackingEnabled) {
-      this.toggleAircraftTracking(); // Disable local tracking if global is enabled
+      this.toggleAircraftTracking();
     }
     this.trackingError = null;
 
@@ -226,9 +231,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     }
 
     this.activeTab = 'tracking';
-    this.refreshAircraftTracking();
+    this.refreshAircraftTracking(true);
     clearInterval(this.aircraftTimer);
-    this.aircraftTimer = setInterval(() => this.refreshAircraftTracking(), 25000);
+    this.aircraftTimer = setInterval(() => this.refreshAircraftTracking(false), 25000);
   }
 
   toggleGlobalShipsTracking(): void {
@@ -246,9 +251,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     }
 
     this.activeTab = 'tracking';
-    this.refreshShipsTracking();
+    this.refreshShipsTracking(true);
     clearInterval(this.shipsTimer);
-    this.shipsTimer = setInterval(() => this.refreshShipsTracking(), 8000);
+    this.shipsTimer = setInterval(() => this.refreshShipsTracking(false), 8000);
   }
 
   runAnomalyScan(): void {
@@ -269,7 +274,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.pendingRequest = 'anomaly';
     this.satelliteService.resetState();
     this.sub?.unsubscribe();
+    const loadingId = this.beginMainLoading('Loading Satellite Intel', 'Running anomaly scan...');
     this.sub = this.satelliteService.runAnomalyScan(this.lat, this.lon, this.delta);
+    this.sub.add(() => this.endMainLoading(loadingId));
   }
 
   copyCoords(): void {
@@ -339,8 +346,10 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.pendingRequest = 'anomaly';
     this.satelliteService.resetState();
     this.sub?.unsubscribe();
+    const loadingId = this.beginMainLoading('Loading Satellite Intel', 'Running anomaly scan...');
     this.sub = this.satelliteService.runAnomalyScan(this.lat, this.lon, this.delta);
-    this.refreshTracking();
+    this.sub.add(() => this.endMainLoading(loadingId));
+    this.refreshTracking(false);
   }
 
   onMapMoved(center: { lat: number; lon: number; zoom: number }): void {
@@ -377,7 +386,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.pendingRequest = 'compare';
     this.satelliteService.resetState();
     this.sub?.unsubscribe();
+    const loadingId = this.beginMainLoading('Loading Satellite Intel', 'Loading 3-month comparison...');
     this.sub = this.satelliteService.runCompare(this.lat, this.lon, this.delta, event.imageType);
+    this.sub.add(() => this.endMainLoading(loadingId));
   }
 
   onRunSentinelSearch(): void {
@@ -394,7 +405,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.pendingRequest = 'sentinel';
     this.satelliteService.resetState();
     this.sub?.unsubscribe();
+    const loadingId = this.beginMainLoading('Loading Satellite Intel', 'Checking available Sentinel passes...');
     this.sub = this.satelliteService.searchSentinel(this.lat, this.lon, this.delta);
+    this.sub.add(() => this.endMainLoading(loadingId));
   }
 
   onRunSentinelImage(event: { imageType: string; month: string; size: number }): void {
@@ -411,7 +424,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.pendingRequest = 'sentinel-image';
     this.satelliteService.resetState();
     this.sub?.unsubscribe();
+    const loadingId = this.beginMainLoading('Loading Satellite Intel', 'Fetching Sentinel image...');
     this.sub = this.satelliteService.fetchSentinelImage(this.lat, this.lon, this.delta, event.imageType, event.month, event.size);
+    this.sub.add(() => this.endMainLoading(loadingId));
   }
 
   onCoordinatesChange(coords: string): void {
@@ -445,7 +460,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   cancel(): void {
-    this.satelliteService.cancelCurrentScan(); 
+    this.satelliteService.cancelCurrentScan();
+    this.mainLoadingRequests.clear();
+    this.syncMainLoadingState();
   }
 
   facEntries(): [string, number][] {
@@ -476,7 +493,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.pendingRequest = 'facilities';
     this.satelliteService.resetState();
     this.sub?.unsubscribe();
+    const loadingId = this.beginMainLoading('Loading Satellite Intel', 'Loading nearby facilities...');
     this.sub = this.satelliteService.fetchFacilities(this.lat, this.lon, 5);
+    this.sub.add(() => this.endMainLoading(loadingId));
   }
 
   private syncAppliedViewport(): void {
@@ -487,27 +506,28 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.coordsForm.delta = this.inputDelta;
   }
 
-  private refreshTracking(): void {
+  private refreshTracking(showLoading = false): void {
     if (this.aircraftTrackingEnabled) {
-      this.refreshAircraftTracking();
+      this.refreshAircraftTracking(showLoading);
     }
     if (this.shipsTrackingEnabled) {
-      this.refreshShipsTracking();
+      this.refreshShipsTracking(showLoading);
     }
   }
 
-  private refreshAircraftTracking(): void {
+  private refreshAircraftTracking(showLoading = false): void {
     if (this.globalAircraftTrackingEnabled) {
-      this.refreshGlobalAircraftTracking();
+      this.refreshGlobalAircraftTracking(showLoading);
       return;
     }
 
     const lat = this.inputLat;
     const lon = this.inputLon;
     const delta = this.inputDelta;
+    const loadingId = showLoading ? this.beginMainLoading('Loading Satellite Intel', 'Loading aircraft tracking data...') : null;
 
     this.aircraftTrackSub?.unsubscribe();
-    this.aircraftTrackSub = this.satelliteService.fetchAircraftInBounds(lat, lon, delta).subscribe({
+    this.aircraftTrackSub = this.satelliteService.pollAircraftInBounds(lat, lon, delta).subscribe({
       next: (res) => {
         const payload = (res?.result ?? res) as any;
         this.aircraftData = Array.isArray(payload?.aircraft) ? payload.aircraft : [];
@@ -519,11 +539,17 @@ export class SatelliteIntel implements OnInit, OnDestroy {
         this.trackingError = err?.error?.detail || err?.message || 'Aircraft tracking failed';
       },
     });
+    this.aircraftTrackSub.add(() => {
+      if (loadingId !== null) {
+        this.endMainLoading(loadingId);
+      }
+    });
   }
 
-  private refreshGlobalAircraftTracking(): void {
+  private refreshGlobalAircraftTracking(showLoading = false): void {
+    const loadingId = showLoading ? this.beginMainLoading('Loading Satellite Intel', 'Loading global aircraft tracking data...') : null;
     this.aircraftTrackSub?.unsubscribe();
-    this.aircraftTrackSub = this.satelliteService.fetchAircraftGlobal().subscribe({
+    this.aircraftTrackSub = this.satelliteService.pollAircraftGlobal().subscribe({
       next: (res) => {
         const payload = (res?.result ?? res) as any;
         this.aircraftData = Array.isArray(payload?.aircraft) ? payload.aircraft : [];
@@ -535,20 +561,26 @@ export class SatelliteIntel implements OnInit, OnDestroy {
         this.trackingError = err?.error?.detail || err?.message || 'Global aircraft tracking failed';
       },
     });
+    this.aircraftTrackSub.add(() => {
+      if (loadingId !== null) {
+        this.endMainLoading(loadingId);
+      }
+    });
   }
 
-  private refreshShipsTracking(): void {
+  private refreshShipsTracking(showLoading = false): void {
     if (this.globalShipsTrackingEnabled) {
-      this.refreshGlobalShipsTracking();
+      this.refreshGlobalShipsTracking(showLoading);
       return;
     }
 
     const lat = this.inputLat;
     const lon = this.inputLon;
     const delta = this.inputDelta;
+    const loadingId = showLoading ? this.beginMainLoading('Loading Satellite Intel', 'Loading ship tracking data...') : null;
 
     this.shipTrackSub?.unsubscribe();
-    this.shipTrackSub = this.satelliteService.fetchShipsInBounds(lat, lon, delta).subscribe({
+    this.shipTrackSub = this.satelliteService.pollShipsInBounds(lat, lon, delta).subscribe({
       next: (res) => {
         const payload = (res?.result ?? res) as any;
         this.shipsData = Array.isArray(payload?.ships) ? payload.ships : [];
@@ -560,11 +592,17 @@ export class SatelliteIntel implements OnInit, OnDestroy {
         this.trackingError = err?.error?.detail || err?.message || 'Ship tracking failed';
       },
     });
+    this.shipTrackSub.add(() => {
+      if (loadingId !== null) {
+        this.endMainLoading(loadingId);
+      }
+    });
   }
 
-  private refreshGlobalShipsTracking(): void {
+  private refreshGlobalShipsTracking(showLoading = false): void {
+    const loadingId = showLoading ? this.beginMainLoading('Loading Satellite Intel', 'Loading global ship tracking data...') : null;
     this.shipTrackSub?.unsubscribe();
-    this.shipTrackSub = this.satelliteService.fetchShipsGlobal().subscribe({
+    this.shipTrackSub = this.satelliteService.pollShipsGlobal().subscribe({
       next: (res) => {
         const payload = (res?.result ?? res) as any;
         this.shipsData = Array.isArray(payload?.ships) ? payload.ships : [];
@@ -576,6 +614,39 @@ export class SatelliteIntel implements OnInit, OnDestroy {
         this.trackingError = err?.error?.detail || err?.message || 'Global ship tracking failed';
       },
     });
+    this.shipTrackSub.add(() => {
+      if (loadingId !== null) {
+        this.endMainLoading(loadingId);
+      }
+    });
+  }
+
+  private beginMainLoading(title: string, message: string): number {
+    const id = ++this.mainLoadingSequence;
+    this.mainLoadingRequests.set(id, { title, message });
+    this.syncMainLoadingState();
+    return id;
+  }
+
+  private endMainLoading(id: number): void {
+    if (!this.mainLoadingRequests.has(id)) {
+      return;
+    }
+    this.mainLoadingRequests.delete(id);
+    this.syncMainLoadingState();
+  }
+
+  private syncMainLoadingState(): void {
+    const requests = Array.from(this.mainLoadingRequests.values());
+    const latestRequest = requests.length ? requests[requests.length - 1] : null;
+    this.isMainLoading = this.mainLoadingRequests.size > 0;
+    if (!latestRequest) {
+      this.mainLoadingTitle = 'Loading Satellite Intel';
+      this.mainLoadingMessage = 'Please wait while the request completes...';
+      return;
+    }
+    this.mainLoadingTitle = latestRequest.title;
+    this.mainLoadingMessage = latestRequest.message;
   }
 
   private zoomToDelta(zoom: number): number {

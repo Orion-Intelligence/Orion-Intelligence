@@ -12,6 +12,7 @@ import { SatelliteAnomalyResponse } from '../../../shared/model/satellite-intel/
 })
 export class AnomalySectionComponent {
   @Input() isScanning      = false;
+  @Input() useMainLoading  = false;
   @Input() progress        = 0;
   @Input() currentStep     = '';
   @Input() progressSegments: number[] = [];
