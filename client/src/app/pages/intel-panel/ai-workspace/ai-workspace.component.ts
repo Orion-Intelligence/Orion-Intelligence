@@ -27,7 +27,7 @@ export class AiWorkspaceComponent {
   messageDraft = '';
   messages: AiWorkspaceMessage[] = [];
 
-  constructor(private readonly api: ApiService, appService: AppService, private readonly route: ActivatedRoute, private readonly subscriptionService: SubscriptionService) {
+  constructor(private readonly api: ApiService, protected readonly appService: AppService, private readonly route: ActivatedRoute, private readonly subscriptionService: SubscriptionService) {
     this.sessionId = (appService.userSessionData()?.user.username || '').trim() || crypto.randomUUID();
     this.queryContext = (this.route.snapshot.queryParamMap.get('q') || '').trim();
   }

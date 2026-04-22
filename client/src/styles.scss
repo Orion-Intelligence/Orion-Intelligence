@@ -3767,6 +3767,21 @@ app-demo-tour .demo-tour-active {
   background: color-mix(in srgb, var(--color-text1) 4%, transparent);
 }
 
+@keyframes ui-ai-chat-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ui-ai-chat-row {
+  animation: ui-ai-chat-row-in 180ms ease-out;
+}
+
 .light-theme .ui-ai-chat-bubble-bot {
   background: color-mix(in srgb, var(--color-blue-640) 10%, var(--color-blue-720));
 }

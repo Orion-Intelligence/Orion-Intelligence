@@ -33,7 +33,7 @@
         } @else {
           @for (message of messages; track trackMessage($index, message)) {
             @if (message.sender === 'bot') {
-              <div class="flex items-start gap-3.5 max-[640px]:gap-0">
+              <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
                 <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
                   <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
                 </div>
@@ -48,7 +48,7 @@
                 </div>
               </div>
             } @else if (message.sender === 'user') {
-              <div class="flex justify-end">
+              <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] justify-end">
                 <div class="max-w-[72%] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
                   <div class="flex min-h-[20px] items-center justify-end gap-2 px-1">
                     <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
@@ -58,9 +58,12 @@
                     <p class="whitespace-pre-wrap leading-7 text-[var(--color-text1)]">{{ message.text }}</p>
                   </div>
                 </div>
+                <div class="mt-1 ml-3.5 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
+                  <img alt="user avatar" [src]="appService.userSessionData().user.image || '/api/s/static/user/default.png'" class="block h-full w-full rounded-full object-cover">
+                </div>
               </div>
             } @else {
-              <div class="flex items-start gap-3.5 max-[640px]:gap-0">
+              <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
                 <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border-red)] bg-[var(--color-red-100)] box-border max-[640px]:hidden">
                   <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
                 </div>
@@ -83,7 +86,7 @@
         }
 
         @if (isSending()) {
-          <div class="flex items-start gap-3.5 max-[640px]:gap-0">
+          <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
             <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
               <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
             </div>
