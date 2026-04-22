@@ -372,13 +372,14 @@ export class SidebarUserFeederViewComponent implements OnChanges {
     const failureTime = lastFailureDate ? Date.parse(lastFailureDate) : NaN;
     const successTime = lastSuccessDate ? Date.parse(lastSuccessDate) : NaN;
 
-    if (!Number.isNaN(successTime)) {
-      if (Number.isNaN(failureTime) || failureTime <= successTime - this.oneDayMs || successTime >= failureTime) {
-        return 'success';
-      }
-    }
     if (!Number.isNaN(failureTime)) {
-      return 'failed';
+      if (Number.isNaN(successTime) || successTime < failureTime - this.oneDayMs) {
+        return 'failed';
+      }
+      return 'success';
+    }
+    if (!Number.isNaN(successTime)) {
+      return 'success';
     }
     return 'unknown';
   }
