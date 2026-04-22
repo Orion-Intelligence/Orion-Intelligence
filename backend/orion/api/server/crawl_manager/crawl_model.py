@@ -241,6 +241,72 @@ class crawl_model:
             return {"error": "Failed to generate chat report"}
 
     @staticmethod
+    async def parse_nexus_chat_ai(model: ReportChatRequest):
+        try:
+            configured_base_url = (env_handler.get_instance().env("DARKNEXUS_API_BASE") or "").strip().rstrip("/")
+            base_urls = [url for url in (
+                configured_base_url,
+                "http://172.18.0.1:8030",
+                "http://host.docker.internal:8030",
+                "http://localhost:8030",
+            ) if url]
+
+            async with httpx.AsyncClient() as client:
+                for base_url in base_urls:
+                    try:
+                        response = await client.post(
+                            f"{base_url}/nlp/chat/report", json=model.model_dump(), timeout=30)
+                        response.raise_for_status()
+                        submit_payload = response.json()
+
+                        submit_status = str((submit_payload or {}).get("status", "")).strip().lower() if isinstance(submit_payload, dict) else ""
+                        if submit_status in {"done", "completed", "complete", "success", "succeeded"}:
+                            result = submit_payload.get("result") if isinstance(submit_payload, dict) else None
+                            if isinstance(result, dict):
+                                text = (result.get("response") or result.get("result") or result.get("text") or "").strip()
+                                if text:
+                                    return {"result": text}
+                            return {"error": "Failed to generate nexus chat report"}
+
+                        if submit_status in {"error", "failed", "cancelled", "canceled"}:
+                            return {"error": "Failed to generate nexus chat report"}
+
+                        job_id = ""
+                        if isinstance(submit_payload, dict):
+                            job_id = str(submit_payload.get("job_id") or "").strip()
+
+                        if not job_id:
+                            continue
+
+                        for _ in range(180):
+                            status_response = await client.get(
+                                f"{base_url}/v1/jobs/{job_id}",
+                                timeout=30,
+                            )
+                            status_response.raise_for_status()
+                            status_payload = status_response.json()
+                            status_value = str((status_payload or {}).get("status", "")).strip().lower()
+
+                            if status_value in {"done", "completed", "complete", "success", "succeeded"}:
+                                result = status_payload.get("result") if isinstance(status_payload, dict) else None
+                                if isinstance(result, dict):
+                                    text = (result.get("response") or result.get("result") or result.get("text") or "").strip()
+                                    if text:
+                                        return {"result": text}
+                                return {"error": "Failed to generate nexus chat report"}
+
+                            if status_value in {"failed", "error", "cancelled", "canceled"}:
+                                return {"error": "Failed to generate nexus chat report"}
+
+                            await asyncio.sleep(1)
+                    except Exception:
+                        continue
+
+                return {"error": "Failed to generate nexus chat report"}
+        except Exception:
+            return {"error": "Failed to generate nexus chat report"}
+
+    @staticmethod
     async def invoke_stealerlog_index(credential_index: LogBatchModel):
         m_data = elastic_request_generator().index_query_stealerlog(credential_index.model_dump())
 

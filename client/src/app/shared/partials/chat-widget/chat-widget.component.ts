@@ -83,7 +83,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
       message: userMessage,
       report: this.reportText()
     };
-    this.api.post<ChatApiResponse>('nlp/chat/report', payload).subscribe({
+    this.api.post<ChatApiResponse>('nexus/chat', payload).subscribe({
       next: (response) => {
         const reply = (response?.result ?? response?.reply ?? response?.message ?? response?.text ?? '').toString().trim();
         if (!reply || (typeof response.message === 'string' && response.message.includes('went wrong'))) {

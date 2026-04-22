@@ -30,3 +30,18 @@ async def fetch_cti_label(payload: CTITextRequest, _=Depends(role_required([user
 async def chat_report(payload: ReportChatRequest):
     response = await crawl_model.getInstance().parse_chat_ai(payload)
     return response
+
+
+@micro_routes.post(
+    "/api/nexus/chat",
+    summary="Process chat report with Nexus",
+    description="Use the Nexus chat pipeline to process and respond to chat-based report content.",
+    tags=["NLP", "Chat"],
+    operation_id="nexusChat",
+    response_description="Processed Nexus chat response.",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN])), Depends(limiter_dependency)], )
+async def nexus_chat(payload: ReportChatRequest):
+    response = await crawl_model.getInstance().parse_nexus_chat_ai(payload)
+    return response

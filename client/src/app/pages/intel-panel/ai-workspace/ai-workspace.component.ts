@@ -54,7 +54,7 @@ export class AiWorkspaceComponent {
       return;
     }
 
-    this.api.post<ChatApiResponse>('nlp/chat/report', {
+    this.api.post<ChatApiResponse>('nexus/chat', {
       session_id: this.sessionId,
       message: text,
       report: this.contextQuery() || '',
