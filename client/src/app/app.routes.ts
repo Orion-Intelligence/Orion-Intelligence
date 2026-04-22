@@ -25,6 +25,7 @@ const loadDumpComponent = () => import('./pages/dump/dump.component').then(m => 
 const loadCredentialComponent = () => import('./pages/credentials/credential.component').then(m => m.CredentialComponent);
 const loadErrorHandlerComponent = () => import('./shared/partials/error-handler/error-handler.component').then(m => m.ErrorHandlerComponent);
 const loadDashboardConsolidatedComponent = () => import('./pages/intel-panel/dashboard-consolidated/dashboard-consolidated.component').then(m => m.DashboardConsolidatedComponent);
+const loadAiWorkspaceComponent = () => import('./pages/intel-panel/ai-workspace/ai-workspace.component').then(m => m.AiWorkspaceComponent);
 const loadSecurityScanComponent = () => import('./pages/security-scan/security-scan.component').then(m => m.SecurityScanComponent);
 const loadTenantComponent = () => import('./pages/tenant/tenant.component').then(m => m.TenantComponent);
 const loadWelcomeComponent = () => import('./pages/welcome/welcome.component').then(m => m.WelcomeComponent);
@@ -694,6 +695,11 @@ export const routes: Routes = [
             path: '',
             redirectTo: 'homepage',
             pathMatch: 'full'
+          },
+          {
+            path: 'ai',
+            loadComponent: loadAiWorkspaceComponent,
+            data: { type: 'ai', animation: 'CategoryPage' }
           },
           {
             canActivate: [subscriptionGuard],

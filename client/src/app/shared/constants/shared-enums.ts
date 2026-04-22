@@ -39,6 +39,12 @@ export enum GraphClusterType {
     Chat = 'chat',
     Exploit = 'exploit'
 }
+export enum AiWorkspacePrompt {
+    SUMMARY_BRIEF = 'Summarize current findings into a short analyst brief.',
+    PRIORITY_INDICATORS = 'List the highest priority indicators to review next.',
+    COLLECTION_PLAN = 'Turn this query into a focused collection plan.',
+    TRIAGE_NOTE = 'Draft a triage note for suspicious activity.'
+}
 export const sidebarItemTooltips: Record<string, string> = {
   'All': 'Comprehensive Overview',
   'General': 'Broad Data Pool',
