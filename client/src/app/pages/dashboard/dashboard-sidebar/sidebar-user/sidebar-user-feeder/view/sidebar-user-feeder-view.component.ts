@@ -18,6 +18,7 @@ import { SidebarUserFeederOwnerDialogComponent } from '../owner-dialog/sidebar-u
   templateUrl: './sidebar-user-feeder-view.component.html',
 })
 export class SidebarUserFeederViewComponent implements OnChanges {
+  private readonly oneDayMs = 24 * 60 * 60 * 1000;
   private readonly pageSize = 1000;
   private consumedHighlightedScriptId: string | null = null;
   private scriptTotal = 0;
@@ -175,6 +176,13 @@ export class SidebarUserFeederViewComponent implements OnChanges {
   }
 
   getValueStatus(value: FeederValueItem): 'success' | 'failure' | 'pending' {
+    const runtimeStatus = this.getDateDerivedStatus(value.last_failure_date, value.last_success_date);
+    if (runtimeStatus === 'success') {
+      return 'success';
+    }
+    if (runtimeStatus === 'failed') {
+      return 'failure';
+    }
     if (value.status === 'success' || value.status === 'failure') {
       return value.status;
     }
@@ -357,14 +365,20 @@ export class SidebarUserFeederViewComponent implements OnChanges {
   }
 
   getRuntimeStatus(script: FeederScriptItem): 'failed' | 'success' | 'unknown' {
-    const failureTime = script.last_failure_date ? Date.parse(script.last_failure_date) : NaN;
-    const successTime = script.last_success_date ? Date.parse(script.last_success_date) : NaN;
+    return this.getDateDerivedStatus(script.last_failure_date, script.last_success_date);
+  }
 
-    if (!Number.isNaN(failureTime) && (Number.isNaN(successTime) || failureTime > successTime)) {
-      return 'failed';
-    }
+  private getDateDerivedStatus(lastFailureDate?: string | null, lastSuccessDate?: string | null): 'failed' | 'success' | 'unknown' {
+    const failureTime = lastFailureDate ? Date.parse(lastFailureDate) : NaN;
+    const successTime = lastSuccessDate ? Date.parse(lastSuccessDate) : NaN;
+
     if (!Number.isNaN(successTime)) {
-      return 'success';
+      if (Number.isNaN(failureTime) || failureTime <= successTime - this.oneDayMs || successTime >= failureTime) {
+        return 'success';
+      }
+    }
+    if (!Number.isNaN(failureTime)) {
+      return 'failed';
     }
     return 'unknown';
   }
