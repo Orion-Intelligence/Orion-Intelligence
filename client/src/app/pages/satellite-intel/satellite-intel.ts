@@ -87,13 +87,13 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     effect(() => {
       const done = this.satelliteService.onDone();
       if (!done) {
-        return; 
+        return;
       }
       // Service may emit `{ result: ... }` (wrapped) or the result directly (flat).
       // Prefer the inner `.result` when it has the shape we expect, else use done itself.
       const result = (done?.result !== null && done?.result !== undefined) ? done.result : done;
       if (!result) {
-        return; 
+        return;
       }
 
       const pending = this.pendingRequest;
@@ -132,7 +132,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     const section = this.route.snapshot.queryParamMap.get('section');
     const q = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
     if (section) {
-      this.activePanel = section as any; 
+      this.activePanel = section as any;
     }
     if (q) {
       this.coordsForm.value = q;
@@ -182,45 +182,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     }
   }
 
-  toggleAircraftTracking(): void {
-    this.aircraftTrackingEnabled = !this.aircraftTrackingEnabled;
-    this.trackingError = null;
-
-    if (!this.aircraftTrackingEnabled) {
-      this.aircraftData = [];
-      this.aircraftTrackSub?.unsubscribe();
-      clearInterval(this.aircraftTimer);
-      return;
-    }
-
-    this.activeTab = 'tracking';
-    this.refreshAircraftTracking(true);
-    clearInterval(this.aircraftTimer);
-    this.aircraftTimer = setInterval(() => this.refreshAircraftTracking(false), 25000);
-  }
-
-  toggleShipsTracking(): void {
-    this.shipsTrackingEnabled = !this.shipsTrackingEnabled;
-    this.trackingError = null;
-
-    if (!this.shipsTrackingEnabled) {
-      this.shipsData = [];
-      this.shipTrackSub?.unsubscribe();
-      clearInterval(this.shipsTimer);
-      return;
-    }
-
-    this.activeTab = 'tracking';
-    this.refreshShipsTracking(true);
-    clearInterval(this.shipsTimer);
-    this.shipsTimer = setInterval(() => this.refreshShipsTracking(false), 8000);
-  }
-
   toggleGlobalAircraftTracking(): void {
     this.globalAircraftTrackingEnabled = !this.globalAircraftTrackingEnabled;
-    if (this.aircraftTrackingEnabled) {
-      this.toggleAircraftTracking();
-    }
     this.trackingError = null;
 
     if (!this.globalAircraftTrackingEnabled) {
@@ -238,9 +201,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   toggleGlobalShipsTracking(): void {
     this.globalShipsTrackingEnabled = !this.globalShipsTrackingEnabled;
-    if (this.shipsTrackingEnabled) {
-      this.toggleShipsTracking(); // Disable local tracking if global is enabled
-    }
     this.trackingError = null;
 
     if (!this.globalShipsTrackingEnabled) {
@@ -264,7 +224,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     const lat = this.lat ?? this.inputLat;
     const lon = this.lon ?? this.inputLon;
     if (!lat || !lon) {
-      return; 
+      return;
     }
     this.lat = lat;
     this.lon = lon;
@@ -290,7 +250,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   onSearchInput(): void {
     clearTimeout(this.searchTimer);
     if (this.searchQuery.trim().length < 2) {
-      this.searchResults = []; return; 
+      this.searchResults = []; return;
     }
     this.searchTimer = setTimeout(() => this.doSearch(), 400);
   }
@@ -298,7 +258,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   async doSearch(): Promise<void> {
     const query = this.searchQuery.trim();
     if (!query) {
-      return; 
+      return;
     }
     try {
       const res = await this.satelliteService.fetchGeocodeOnce(query);
@@ -325,31 +285,12 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   closeSearchDrop(): void {
-    this.searchResults = []; 
+    this.searchResults = [];
   }
 
   clearSearch(): void {
     this.searchQuery = '';
     this.searchResults = [];
-  }
-
-  onMapClick(coords: { lat: number; lon: number }): void {
-    this.inputLat = coords.lat;
-    this.inputLon = coords.lon;
-    this.lat = coords.lat;
-    this.lon = coords.lon;
-    this.delta = this.inputDelta;
-    this.coordsForm.value = `${coords.lat.toFixed(5)}, ${coords.lon.toFixed(5)}`;
-    this.hasSearched = true;
-    this.setPanel('anomaly');
-    this.anomalyResult = null;
-    this.pendingRequest = 'anomaly';
-    this.satelliteService.resetState();
-    this.sub?.unsubscribe();
-    const loadingId = this.beginMainLoading('Loading Satellite Intel', 'Running anomaly scan...');
-    this.sub = this.satelliteService.runAnomalyScan(this.lat, this.lon, this.delta);
-    this.sub.add(() => this.endMainLoading(loadingId));
-    this.refreshTracking(false);
   }
 
   onMapMoved(center: { lat: number; lon: number; zoom: number }): void {
@@ -377,7 +318,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     const lat = this.lat ?? this.inputLat;
     const lon = this.lon ?? this.inputLon;
     if (!lat || !lon) {
-      return; 
+      return;
     }
     this.lat = lat;
     this.lon = lon;
@@ -396,7 +337,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     const lat = this.lat ?? this.inputLat;
     const lon = this.lon ?? this.inputLon;
     if (!lat || !lon) {
-      return; 
+      return;
     }
     this.lat = lat;
     this.lon = lon;
@@ -415,7 +356,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     const lat = this.lat ?? this.inputLat;
     const lon = this.lon ?? this.inputLon;
     if (!lat || !lon) {
-      return; 
+      return;
     }
     this.lat = lat;
     this.lon = lon;
@@ -433,7 +374,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.coordsForm.value = coords;
     const parsed = this.satelliteService.parseCoordinates(coords);
     if (parsed) {
-      this.inputLat = parsed.lat; this.inputLon = parsed.lon; 
+      this.inputLat = parsed.lat; this.inputLon = parsed.lon;
     }
   }
 
@@ -447,7 +388,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.showGeocodeModal = false;
     const parsed = this.satelliteService.parseCoordinates(this.coordsForm.value);
     if (!parsed) {
-      return; 
+      return;
     }
     this.inputLat  = parsed.lat;
     this.inputLon  = parsed.lon;
@@ -471,23 +412,23 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   get lastResultCount(): number {
     if (this.activePanel === 'facilities') {
-      return this.facilitiesData?.total ?? 0; 
+      return this.facilitiesData?.total ?? 0;
     }
     if (this.activePanel === 'sentinel')   {
-      return this.sentinelResults?.results?.length ?? 0; 
+      return this.sentinelResults?.results?.length ?? 0;
     }
     if (this.activePanel === 'anomaly')    {
-      return this.anomalyResult?.months?.filter((m: any) => m?.has_data).length ?? 0; 
+      return this.anomalyResult?.months?.filter((m: any) => m?.has_data).length ?? 0;
     }
     if (this.activePanel === 'compare')    {
-      return this.compareResult?.months?.length ?? 0; 
+      return this.compareResult?.months?.length ?? 0;
     }
     return 0;
   }
 
   private loadFacilities(): void {
     if (!this.lat || !this.lon || !this.facilitiesVisible) {
-      return; 
+      return;
     }
     this.facilitiesData = null;
     this.pendingRequest = 'facilities';
@@ -651,28 +592,28 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   private zoomToDelta(zoom: number): number {
     if (zoom >= 17) {
-      return 0.005; 
+      return 0.005;
     }
     if (zoom >= 16) {
-      return 0.01; 
+      return 0.01;
     }
     if (zoom >= 15) {
-      return 0.02; 
+      return 0.02;
     }
     if (zoom >= 14) {
-      return 0.04; 
+      return 0.04;
     }
     if (zoom >= 13) {
-      return 0.08; 
+      return 0.08;
     }
     if (zoom >= 12) {
-      return 0.15; 
+      return 0.15;
     }
     if (zoom >= 11) {
-      return 0.3; 
+      return 0.3;
     }
     if (zoom >= 10) {
-      return 0.6; 
+      return 0.6;
     }
     return 1.2;
   }

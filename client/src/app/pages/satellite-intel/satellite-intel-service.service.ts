@@ -325,7 +325,7 @@ export class SatelliteIntelService {
       payload['opensky_client_secret'] = openskyClientSecret.trim();
     }
 
-    return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft/bbox', payload);
+    return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft/', payload);
   }
 
   pollAircraftInBounds(lat: number, lon: number, delta = 0.05, openskyClientId?: string, openskyClientSecret?: string): Observable<SatelliteLiveAircraftBBoxResponse> {
@@ -344,7 +344,7 @@ export class SatelliteIntelService {
       payload['aisstream_api_key'] = aisstreamApiKey.trim();
     }
 
-    return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships/bbox', payload);
+    return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships/', payload);
   }
 
   pollShipsInBounds(lat: number, lon: number, delta = 0.05, aisstreamApiKey?: string): Observable<SatelliteLiveShipsBBoxResponse> {
@@ -367,7 +367,7 @@ export class SatelliteIntelService {
       payload['opensky_client_secret'] = openskyClientSecret.trim();
     }
 
-    return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft/bbox', payload);
+    return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft/', payload);
   }
 
   pollAircraftGlobal(openskyClientId?: string, openskyClientSecret?: string): Observable<SatelliteLiveAircraftBBoxResponse> {
@@ -387,7 +387,7 @@ export class SatelliteIntelService {
       payload['aisstream_api_key'] = aisstreamApiKey.trim();
     }
 
-    return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships/bbox', payload);
+    return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships/', payload);
   }
 
   pollShipsGlobal(aisstreamApiKey?: string): Observable<SatelliteLiveShipsBBoxResponse> {

@@ -323,26 +323,26 @@ class crawl_model:
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    f"http://trusted-micros-api:8010/livetrack/aircraft/bbox/{user_id}",
+                    f"http://trusted-micros-api:8010/livetrack/aircraft/{user_id}",
                     json=model.model_dump(),
                     timeout=120
                 )
                 if response.status_code in (404, 405):
                     response = await client.post(
-                        "http://trusted-micros-api:8010/livetrack/aircraft/bbox",
+                        "http://trusted-micros-api:8010/livetrack/aircraft/",
                         json=model.model_dump(),
                         timeout=120
                     )
                 if response.status_code != 200:
                     return JSONResponse(
                         status_code=response.status_code,
-                        content={"detail": "Something happened while calling livetrack/aircraft/bbox"}
+                        content={"detail": "Something happened while calling livetrack/aircraft/"}
                     )
                 return response.json()
         except Exception:
             return JSONResponse(
                 status_code=500,
-                content={"detail": "Something happened while calling livetrack/aircraft/bbox"}
+                content={"detail": "Something happened while calling livetrack/aircraft/"}
             )
 
     @staticmethod
@@ -356,20 +356,20 @@ class crawl_model:
                 )
                 if response.status_code in (404, 405):
                     response = await client.post(
-                        "http://trusted-micros-api:8010/livetrack/aircraft/icao",
+                        "http://trusted-micros-api:8010/livetrack/aircraft/icao/",
                         json=model.model_dump(),
                         timeout=120
                     )
                 if response.status_code != 200:
                     return JSONResponse(
                         status_code=response.status_code,
-                        content={"detail": "Something happened while calling livetrack/aircraft/icao"}
+                        content={"detail": "Something happened while calling livetrack/aircraft/icao/"}
                     )
                 return response.json()
         except Exception:
             return JSONResponse(
                 status_code=500,
-                content={"detail": "Something happened while calling livetrack/aircraft/icao"}
+                content={"detail": "Something happened while calling livetrack/aircraft/icao/"}
             )
 
     @staticmethod
@@ -383,20 +383,20 @@ class crawl_model:
                 )
                 if response.status_code in (404, 405):
                     response = await client.post(
-                        "http://trusted-micros-api:8010/livetrack/aircraft/track",
+                        "http://trusted-micros-api:8010/livetrack/aircraft/track/",
                         json=model.model_dump(),
                         timeout=120
                     )
                 if response.status_code != 200:
                     return JSONResponse(
                         status_code=response.status_code,
-                        content={"detail": "Something happened while calling livetrack/aircraft/track"}
+                        content={"detail": "Something happened while calling livetrack/aircraft/track/"}
                     )
                 return response.json()
         except Exception:
             return JSONResponse(
                 status_code=500,
-                content={"detail": "Something happened while calling livetrack/aircraft/track"}
+                content={"detail": "Something happened while calling livetrack/aircraft/track/"}
             )
 
     @staticmethod
@@ -404,26 +404,26 @@ class crawl_model:
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    f"http://trusted-micros-api:8010/livetrack/ships/bbox/{user_id}",
+                    f"http://trusted-micros-api:8010/livetrack/ships/{user_id}",
                     json=model.model_dump(),
                     timeout=120
                 )
                 if response.status_code in (404, 405):
                     response = await client.post(
-                        "http://trusted-micros-api:8010/livetrack/ships/bbox",
+                        "http://trusted-micros-api:8010/livetrack/ships/",
                         json=model.model_dump(),
                         timeout=120
                     )
                 if response.status_code != 200:
                     return JSONResponse(
                         status_code=response.status_code,
-                        content={"detail": "Something happened while calling livetrack/ships/bbox"}
+                        content={"detail": "Something happened while calling livetrack/ships/bbox/"}
                     )
                 return response.json()
         except Exception:
             return JSONResponse(
                 status_code=500,
-                content={"detail": "Something happened while calling livetrack/ships/bbox"}
+                content={"detail": "Something happened while calling livetrack/ships/bbox/"}
             )
 
     @staticmethod
@@ -437,20 +437,20 @@ class crawl_model:
                 )
                 if response.status_code in (404, 405):
                     response = await client.post(
-                        "http://trusted-micros-api:8010/livetrack/ships/mmsi",
+                        "http://trusted-micros-api:8010/livetrack/ships/mmsi/",
                         json=model.model_dump(),
                         timeout=120
                     )
                 if response.status_code != 200:
                     return JSONResponse(
                         status_code=response.status_code,
-                        content={"detail": "Something happened while calling livetrack/ships/mmsi"}
+                        content={"detail": "Something happened while calling livetrack/ships/mmsi/"}
                     )
                 return response.json()
         except Exception:
             return JSONResponse(
                 status_code=500,
-                content={"detail": "Something happened while calling livetrack/ships/mmsi"}
+                content={"detail": "Something happened while calling livetrack/ships/mmsi/"}
             )
 
     @staticmethod
@@ -464,20 +464,20 @@ class crawl_model:
                 )
                 if response.status_code in (404, 405):
                     response = await client.post(
-                        "http://trusted-micros-api:8010/livetrack/status",
+                        "http://trusted-micros-api:8010/livetrack/status/",
                         json=model.model_dump(),
                         timeout=120
                     )
                 if response.status_code != 200:
                     return JSONResponse(
                         status_code=response.status_code,
-                        content={"detail": "Something happened while calling livetrack/status"}
+                        content={"detail": "Something happened while calling livetrack/status/"}
                     )
                 return response.json()
         except Exception:
             return JSONResponse(
                 status_code=500,
-                content={"detail": "Something happened while calling livetrack/status"}
+                content={"detail": "Something happened while calling livetrack/status/"}
             )
 
     @staticmethod

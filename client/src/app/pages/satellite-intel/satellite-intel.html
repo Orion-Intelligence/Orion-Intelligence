@@ -82,7 +82,6 @@
             [progressSegments]="progressSegments"
             [errorMessage]="satelliteService.onError()?.message || null"
             [hasSearched]="hasSearched"
-            (mapClick)="onMapClick($event)"
             (mapMoved)="onMapMoved($event)">
           </app-satellite-map-section>
         }

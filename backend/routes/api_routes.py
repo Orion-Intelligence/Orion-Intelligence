@@ -999,7 +999,7 @@ async def satellite_compare(payload: SatelliteCompareRequest = Body(...), curren
 
 
 @api_routes.post(
-    "/api/satellite/livetrack/aircraft/bbox",
+    "/api/satellite/livetrack/aircraft/",
     summary="Track aircraft in map bounds",
     tags=["Satellite Intelligence"],
     status_code=200,
@@ -1032,7 +1032,7 @@ async def satellite_livetrack_aircraft_track(payload: SatelliteLiveTrackerAircra
 
 
 @api_routes.post(
-    "/api/satellite/livetrack/ships/bbox",
+    "/api/satellite/livetrack/ships/",
     summary="Track ships in map bounds",
     tags=["Satellite Intelligence"],
     status_code=200,
