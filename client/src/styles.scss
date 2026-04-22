@@ -3762,3 +3762,26 @@ app-demo-tour .demo-tour-active {
     justify-content: center;
   }
 }
+
+.ui-ai-chat-bubble {
+  background: color-mix(in srgb, var(--color-text1) 4%, transparent);
+}
+
+.light-theme .ui-ai-chat-bubble-bot {
+  background: color-mix(in srgb, var(--color-blue-640) 10%, var(--color-blue-720));
+}
+
+.light-theme .ui-ai-chat-bubble-user {
+  background: color-mix(in srgb, var(--color-blue-640) 14%, var(--color-consolidated-primary));
+}
+
+.light-theme .ui-home-ai-button {
+  border-color: var(--color-border) !important;
+  background: var(--color-blue-720) !important;
+  box-shadow: none !important;
+}
+
+.light-theme .ui-home-ai-button:hover {
+  border-color: color-mix(in srgb, var(--color-blue-640) 18%, var(--color-border)) !important;
+  background: color-mix(in srgb, var(--color-blue-640) 8%, var(--color-blue-720)) !important;
+}

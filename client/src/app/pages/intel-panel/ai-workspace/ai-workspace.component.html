@@ -12,11 +12,11 @@
 <div class="ui-consolidated-theme w-auto space-y-4 m-0 h-[calc(100vh-120px)] overflow-hidden p-[32px] max-[1100px]:p-[20px] max-[640px]:p-[10px]">
   <div class="flex h-full min-h-0 items-stretch overflow-hidden">
     <div class="chat-support__window flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl bg-[var(--color-blue-700)] shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
-      <div #messagesContainer data-testid="chat-widget-messages" class="min-h-0 flex-1 space-y-4 overflow-y-auto scroll-smooth px-5 pt-4 pb-[40vh] max-[640px]:px-4">
+      <div #messagesContainer data-testid="chat-widget-messages" class="min-h-0 flex-1 space-y-5 overflow-y-auto scroll-smooth px-5 pt-5 pb-[40vh] [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-4 max-[640px]:px-4">
         @if (!messages.length) {
           <div class="flex min-h-full items-center justify-center">
             <div class="w-full max-w-[620px] text-center">
-              <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] shadow-[0_18px_36px_rgba(0,0,0,0.18)]">
+              <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] shadow-[0_6px_14px_rgba(0,0,0,0.08)]">
                 <img alt="chat" src="assets/images/shared/chat-icon.svg" class="h-9 w-9 rounded-full object-cover">
               </div>
               <h3 class="mt-5 text-[32px] font-semibold tracking-[-0.03em] text-[var(--color-text1)] max-[640px]:text-[26px]">How can Nexus help?</h3>
@@ -34,41 +34,45 @@
           @for (message of messages; track trackMessage($index, message)) {
             @if (message.sender === 'bot') {
               <div class="flex items-start gap-3.5">
-                <div class="inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[#EBF0F4] bg-[var(--color-blue-720)] box-border">
+                <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)]">
                   <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
                 </div>
-                <div class="max-w-[78%] space-y-0 -mt-1">
-                  <div class="flex min-h-[20px] items-center gap-2">
-                    <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text5)]">Nexus</span>
-                    <span class="text-[11px] text-[var(--color-text6)]">{{ message.time | date : 'h:mm a' }}</span>
+                <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-[84%]">
+                  <div class="flex min-h-[20px] items-center gap-2 px-1">
+                    <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
                   </div>
-                  <p class="whitespace-pre-wrap text-sm leading-7 text-[var(--color-text1)]">{{ message.text }}</p>
+                  <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3.5 shadow-[0_10px_28px_var(--color-shadow-medium)]">
+                    <p class="whitespace-pre-wrap text-[14px] leading-7 text-[var(--color-text1)]">{{ message.text }}</p>
+                  </div>
                 </div>
               </div>
             } @else if (message.sender === 'user') {
               <div class="flex justify-end">
-                <div class="max-w-[72%] space-y-1">
-                  <div class="flex min-h-[20px] items-center justify-end gap-2">
-                    <span class="text-[11px] text-[var(--color-text6)]">{{ message.time | date : 'h:mm a' }}</span>
-                    <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text1)]">Analyst</span>
+                <div class="max-w-[72%] space-y-1.5 max-[640px]:max-w-[84%]">
+                  <div class="flex min-h-[20px] items-center justify-end gap-2 px-1">
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
+                    <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text1)]">Analyst</span>
                   </div>
-                  <div class="rounded-2xl border border-[rgba(255,255,255,0.10)] !bg-[#0d152599] px-4 py-3.5 text-sm text-[var(--color-text1)]">
+                  <div class="ui-ai-chat-bubble ui-ai-chat-bubble-user rounded-[22px] rounded-tr-[10px] border border-[var(--color-border)] px-4 py-3.5 text-sm text-[var(--color-text1)] shadow-[0_10px_28px_var(--color-shadow-medium)]">
                     <p class="whitespace-pre-wrap leading-7 text-[var(--color-text1)]">{{ message.text }}</p>
                   </div>
                 </div>
               </div>
             } @else {
               <div class="flex items-start gap-3.5">
-                <div class="inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[#EBF0F4] bg-[var(--color-blue-720)] box-border">
+                <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border-red)] bg-[var(--color-red-100)] box-border">
                   <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
                 </div>
-                <div class="max-w-[78%] space-y-0 -mt-1">
-                  <div class="flex min-h-[20px] items-center gap-2">
-                    <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text5)]">Nexus</span>
+                <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-[84%]">
+                  <div class="flex min-h-[20px] items-center gap-2 px-1">
+                    <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
                   </div>
-                  <p class="whitespace-pre-wrap text-sm leading-7 text-[#ff6b6b]">{{ message.text }}</p>
+                  <div class="rounded-[22px] rounded-tl-[10px] border border-[var(--color-border-red)] bg-[var(--color-red-100)] px-4 py-3 text-sm shadow-[0_10px_24px_var(--color-shadow-medium)]">
+                    <p class="whitespace-pre-wrap leading-7 text-[var(--color-text7)]">{{ message.text }}</p>
+                  </div>
                   @if (message.retryPayload) {
-                    <button type="button" (click)="retryMessage(message.retryPayload)" class="mt-3 inline-flex items-center rounded-full border border-[var(--color-border)] bg-white/10 px-3 py-1.5 text-[12px] font-medium text-[var(--color-text1)]">
+                    <button type="button" (click)="retryMessage(message.retryPayload)" class="mt-1 inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text1)] transition hover:opacity-90">
                       Retry
                     </button>
                   }
@@ -80,18 +84,20 @@
 
         @if (isSending()) {
           <div class="flex items-start gap-3.5">
-            <div class="inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[#EBF0F4] bg-[var(--color-blue-720)] box-border">
+            <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)]">
               <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
             </div>
-            <div class="space-y-2 -mt-0.5">
-              <div class="flex min-h-[20px] items-center gap-2">
-                <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text5)]">Nexus</span>
+            <div class="max-w-[240px] space-y-1.5 max-[640px]:max-w-[84%]">
+              <div class="flex min-h-[20px] items-center gap-2 px-1">
+                <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
+                <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">Thinking</span>
               </div>
-              <div>
-                <div class="flex items-center gap-2.5">
-                  <span class="h-2 w-2 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
-                  <span class="h-2 w-2 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:150ms]"></span>
-                  <span class="h-2 w-2 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:300ms]"></span>
+              <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3 shadow-[0_10px_28px_var(--color-shadow-medium)]">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
+                  <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:140ms]"></span>
+                  <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:280ms]"></span>
+                  <span class="ml-1 text-[12px] text-[var(--color-text4)]">Building response</span>
                 </div>
               </div>
             </div>
