@@ -2,7 +2,7 @@ import { CommonModule, DOCUMENT } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, Output, Renderer2, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SatelliteIntelService } from '../../satellite-intel-service.service';
-import { SatelliteGeocodeResult } from '../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteGeocodeResult } from '../../model/satellite-intel.model';
 
 @Component({
   selector:    'app-satellite-geocode-modal',

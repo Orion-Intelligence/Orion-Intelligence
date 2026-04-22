@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SatelliteIntelService } from './satellite-intel-service.service';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
-import { GeocodeModalComponent } from './modal/geocode-modal/geocode-modal.component';
+import { GeocodeModalComponent } from './components/geocode-modal/geocode-modal.component';
 import { MapSectionComponent } from './map-section/map-section.component';
 import { TrackingMapSectionComponent } from './tracking-map-section/tracking-map-section.component';
 import { MonthCompareSectionComponent } from './month-compare-section/month-compare-section.component';
