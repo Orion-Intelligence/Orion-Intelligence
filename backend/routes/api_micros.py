@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from configs.app_dependency import role_required
+from configs.app_dependency import license_required, role_required
 from configs.limiter_dependency import limiter_dependency
 from orion.api.server.crawl_manager.class_model.report_chat_data_model import ReportChatRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
@@ -41,7 +41,7 @@ async def chat_report(payload: ReportChatRequest):
     response_description="Processed Nexus chat response.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN])), Depends(limiter_dependency)], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:ai", bypass_roles=[user_role.ADMIN])), Depends(limiter_dependency)], )
 async def nexus_chat(payload: ReportChatRequest):
     response = await crawl_model.getInstance().parse_nexus_chat_ai(payload)
     return response
