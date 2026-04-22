@@ -97,6 +97,7 @@ export class DashboardHeaderComponent implements OnInit {
     }
   }
 
+
   supportOpenPopup() {
     this.supportPopup = true; // open popup
   }

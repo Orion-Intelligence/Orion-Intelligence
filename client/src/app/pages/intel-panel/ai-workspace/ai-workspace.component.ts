@@ -121,6 +121,18 @@ export class AiWorkspaceComponent {
       if (!container) {
         return;
       }
+      const lastMessage = container.lastElementChild as HTMLElement | null;
+      if (!lastMessage) {
+        return;
+      }
+
+      const shouldAnchorToTop = lastMessage.offsetHeight > container.clientHeight * 0.45;
+      if (shouldAnchorToTop) {
+        const targetTop = Math.max(0, lastMessage.offsetTop - 56);
+        container.scrollTo({ top: targetTop, behavior: 'smooth' });
+        return;
+      }
+
       container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
     });
   }
