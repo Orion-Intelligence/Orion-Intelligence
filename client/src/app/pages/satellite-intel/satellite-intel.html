@@ -15,38 +15,6 @@
     <div class="z-20 flex flex-nowrap items-center gap-2 overflow-x-auto border-b border-[#1e2a40] bg-[#0d1220] px-[14px] py-2">
       <span class="mr-[2px] shrink-0 whitespace-nowrap text-[13px] font-medium text-[#7eb8f7]">Satellite Intel</span>
 
-<!--      <div class="relative min-w-[160px] max-w-[280px] flex-[1_1_180px]">-->
-<!--        <input type="text" class="w-full rounded-[5px] border border-[#1e2a40] bg-[#111827] px-[9px] py-[5px] pr-[26px] text-[12px] text-[#c8d4e8] outline-none focus:border-[#3a7bd5]" placeholder="Search city, country…" autocomplete="off" [(ngModel)]="searchQuery" (input)="onSearchInput()" (keydown.escape)="closeSearchDrop()" />-->
-<!--        @if (searchQuery) {-->
-<!--          <button class="absolute right-[7px] top-1/2 p-0 text-[13px] leading-none text-[#4a6a8a] -translate-y-1/2" (click)="clearSearch()">✕</button>-->
-<!--        }-->
-
-<!--        @if (searchResults.length > 0) {-->
-<!--          <div class="absolute left-0 right-0 top-[calc(100%+4px)] z-[3000] overflow-hidden rounded-md border border-[#1e2a40] bg-[#0d1220] shadow-[0_8px_20px_rgba(0,0,0,.5)]">-->
-<!--            @for (r of searchResults; track r.lat + r.lon) {-->
-<!--              <div class="cursor-pointer border-b border-[#1a2236] px-3 py-2 text-[12px] text-[#a0bcd8] transition-colors last:border-b-0 hover:bg-[#111827]" (click)="selectSearchResult(r)">-->
-<!--                <div class="font-medium">{{ r.name }}</div>-->
-<!--                <div class="mt-[2px] truncate whitespace-nowrap text-[10px] text-[#4a6a8a]">{{ r.display_name }}</div>-->
-<!--              </div>-->
-<!--            }-->
-<!--          </div>-->
-<!--        }-->
-<!--      </div>-->
-
-<!--      <div class="flex shrink-0 items-center gap-[5px] rounded-[5px] border border-[#1e2a40] bg-[#111827] px-2 py-[3px]">-->
-<!--        <label class="whitespace-nowrap text-[10px] text-[#4a6a8a]">Lat</label>-->
-<!--        <input type="number" [(ngModel)]="inputLat" step="0.0001" class="w-20 border-none bg-transparent px-[3px] py-[2px] font-mono text-[12px] text-[#c8d4e8] outline-none"/>-->
-<!--        <span class="h-[14px] w-px shrink-0 bg-[#1e2a40]"></span>-->
-<!--        <label class="whitespace-nowrap text-[10px] text-[#4a6a8a]">Lon</label>-->
-<!--        <input type="number" [(ngModel)]="inputLon" step="0.0001" class="w-20 border-none bg-transparent px-[3px] py-[2px] font-mono text-[12px] text-[#c8d4e8] outline-none"/>-->
-<!--        <button class="px-[2px] text-[12px] text-[#4a6a8a] transition-colors hover:text-[#a0bcd8]" title="Copy" (click)="copyCoords()">⧉</button>-->
-<!--      </div>-->
-
-<!--      <div class="flex shrink-0 items-center gap-[5px] rounded-[5px] border border-[#1e2a40] bg-[#0a1020] px-2 py-[3px]">-->
-<!--        <label class="whitespace-nowrap text-[10px] text-[#3a7bd5]">Delta°</label>-->
-<!--        <input type="number" [(ngModel)]="inputDelta" step="0.005" min="0.001" max="2" class="w-[60px] border-none bg-transparent px-[3px] py-[2px] font-mono text-[12px] text-[#7eb8f7] outline-none" (change)="onDeltaChange()"/>-->
-<!--      </div>-->
-
       <select class="shrink-0 rounded-[5px] border border-[#1e2a40] bg-[#111827] px-[7px] py-[5px] text-[12px] text-[#c8d4e8] outline-none disabled:cursor-not-allowed disabled:opacity-60" [(ngModel)]="selectedLayer" [disabled]="isMainLoading" (change)="onLayerChange()">
         <option value="esri">ESRI Satellite</option>
         <option value="osm">OpenStreetMap</option>
@@ -92,8 +60,6 @@
             [delta]="delta"
             [aircraftData]="aircraftData"
             [shipsData]="shipsData"
-            [aircraftTrackingEnabled]="aircraftTrackingEnabled"
-            [shipsTrackingEnabled]="shipsTrackingEnabled"
             [globalAircraftTrackingEnabled]="globalAircraftTrackingEnabled"
             [globalShipsTrackingEnabled]="globalShipsTrackingEnabled"
             (mapMoved)="onMapMoved($event)">

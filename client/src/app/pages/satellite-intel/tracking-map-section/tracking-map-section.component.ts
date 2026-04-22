@@ -35,8 +35,6 @@ export class TrackingMapSectionComponent implements AfterViewInit, OnChanges, On
   @Input() delta = 1.5;
   @Input() aircraftData: SatelliteLiveAircraft[] = [];
   @Input() shipsData: SatelliteLiveShip[] = [];
-  @Input() aircraftTrackingEnabled = false;
-  @Input() shipsTrackingEnabled = false;
   @Input() globalAircraftTrackingEnabled = false;
   @Input() globalShipsTrackingEnabled = false;
 
@@ -81,14 +79,14 @@ export class TrackingMapSectionComponent implements AfterViewInit, OnChanges, On
   }
 
   get aircraftModeLabel(): string {
-    if (!this.aircraftTrackingEnabled && !this.globalAircraftTrackingEnabled) {
+    if (!this.globalAircraftTrackingEnabled) {
       return 'aircraft idle';
     }
     return this.globalAircraftTrackingEnabled ? 'aircraft global' : 'aircraft local';
   }
 
   get shipsModeLabel(): string {
-    if (!this.shipsTrackingEnabled && !this.globalShipsTrackingEnabled) {
+    if (!this.globalShipsTrackingEnabled) {
       return 'ships idle';
     }
     return this.globalShipsTrackingEnabled ? 'ships global' : 'ships local';
