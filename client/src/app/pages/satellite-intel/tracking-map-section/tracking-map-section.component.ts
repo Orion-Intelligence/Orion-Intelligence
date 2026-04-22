@@ -2,49 +2,7 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
 import maplibregl, { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl';
 import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
-
-type TrackKind = 'aircraft' | 'ship';
-
-interface TrackingProperties {
-  id: string;
-  kind: TrackKind;
-  label: string;
-  heading: number;
-  speed: number | null;
-  altitude?: number | null;
-  destination?: string | null;
-}
-
-interface TrackingFeature {
-  type: 'Feature';
-  id: string;
-  geometry: {
-    type: 'Point';
-    coordinates: [number, number];
-  };
-  properties: TrackingProperties;
-}
-
-interface TrackingFeatureCollection {
-  type: 'FeatureCollection';
-  features: TrackingFeature[];
-}
-
-interface TrackedEntityState {
-  id: string;
-  kind: TrackKind;
-  label: string;
-  heading: number;
-  speed: number | null;
-  altitude?: number | null;
-  destination?: string | null;
-  fromLon: number;
-  fromLat: number;
-  toLon: number;
-  toLat: number;
-  renderedLon: number;
-  renderedLat: number;
-}
+import { TrackKind, TrackedEntityState, TrackingFeature, TrackingFeatureCollection } from '../model/satellite-intel.model';
 
 @Component({
   selector: 'app-satellite-tracking-map-section',
@@ -56,6 +14,7 @@ interface TrackedEntityState {
   },
 })
 export class TrackingMapSectionComponent implements AfterViewInit, OnChanges, OnDestroy {
+  private static readonly WORLD_OVERVIEW_ZOOM = 1;
   @ViewChild('mapContainer') private mapContainer?: ElementRef<HTMLDivElement>;
   private map: MapLibreMap | null = null;
   private resizeObserver: ResizeObserver | null = null;
@@ -65,14 +24,15 @@ export class TrackingMapSectionComponent implements AfterViewInit, OnChanges, On
   private animationStartedAt = 0;
   private readonly animationDurationMs = 1200;
   private mapReady = false;
+  private suppressMapMovedEvent = false;
 
   zoomLabel = 'zoom 5';
   lastAircraftUpdateLabel = 'idle';
   lastShipsUpdateLabel = 'idle';
 
-  @Input() lat: number | null = null;
-  @Input() lon: number | null = null;
-  @Input() delta = 0.05;
+  @Input() lat: number | null = 0;
+  @Input() lon: number | null = 0;
+  @Input() delta = 1.5;
   @Input() aircraftData: SatelliteLiveAircraft[] = [];
   @Input() shipsData: SatelliteLiveShip[] = [];
   @Input() aircraftTrackingEnabled = false;
@@ -142,11 +102,12 @@ export class TrackingMapSectionComponent implements AfterViewInit, OnChanges, On
     this.map = new maplibregl.Map({
       container: this.mapContainer.nativeElement,
       style: this.buildTrackingStyle(),
-      center: [this.lon ?? 67.35, this.lat ?? 24.78],
-      zoom: this.deltaToZoom(this.delta),
-      minZoom: 2,
+      center: [this.clampLon(this.lon ?? 67.35), this.clampLat(this.lat ?? 24.78)],
+      zoom: TrackingMapSectionComponent.WORLD_OVERVIEW_ZOOM,
+      minZoom: TrackingMapSectionComponent.WORLD_OVERVIEW_ZOOM,
       maxZoom: 14,
       attributionControl: false,
+      renderWorldCopies: false,
     });
 
     this.map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
@@ -160,13 +121,21 @@ export class TrackingMapSectionComponent implements AfterViewInit, OnChanges, On
       this.installSources(this.map);
       this.installLayers(this.map);
       this.mapReady = true;
-      this.syncViewport();
+      this.syncViewport(true);
       this.pushSourceData();
       this.updateZoomLabel();
     });
 
     this.map.on('moveend', () => {
+      const clampedCenter = this.clampCenter();
+      if (clampedCenter) {
+        return;
+      }
       this.updateZoomLabel();
+      if (this.suppressMapMovedEvent) {
+        this.suppressMapMovedEvent = false;
+        return;
+      }
       const center = this.map?.getCenter();
       const zoom = this.map?.getZoom();
       if (!center || zoom === undefined) {
@@ -480,25 +449,28 @@ export class TrackingMapSectionComponent implements AfterViewInit, OnChanges, On
     return { type: 'FeatureCollection', features };
   }
 
-  private syncViewport(): void {
+  private syncViewport(forceOverviewZoom = false): void {
     if (!this.map || this.lat === null || this.lon === null) {
       return;
     }
 
-    const nextZoom = this.deltaToZoom(this.delta);
+    const nextZoom = forceOverviewZoom ? TrackingMapSectionComponent.WORLD_OVERVIEW_ZOOM : this.map.getZoom();
     const currentCenter = this.map.getCenter();
     const currentZoom = this.map.getZoom();
-    const centerChanged = Math.abs(currentCenter.lat - this.lat) > 0.0001 || Math.abs(currentCenter.lng - this.lon) > 0.0001;
+    const nextLat = this.clampLat(this.lat);
+    const nextLon = this.clampLon(this.lon);
+    const centerChanged = Math.abs(currentCenter.lat - nextLat) > 0.0001 || Math.abs(currentCenter.lng - nextLon) > 0.0001;
     const zoomChanged = Math.abs(currentZoom - nextZoom) > 0.1;
 
     if (!centerChanged && !zoomChanged) {
       return;
     }
 
+    this.suppressMapMovedEvent = true;
     this.map.easeTo({
-      center: [this.lon, this.lat],
+      center: [nextLon, nextLat],
       zoom: nextZoom,
-      duration: 800,
+      duration: forceOverviewZoom ? 0 : 500,
       essential: true,
     });
   }
@@ -509,6 +481,30 @@ export class TrackingMapSectionComponent implements AfterViewInit, OnChanges, On
     }
     const center = this.map.getCenter();
     this.zoomLabel = `zoom ${this.map.getZoom().toFixed(1)}  ·  ${center.lat.toFixed(3)}°  ${center.lng.toFixed(3)}°`;
+  }
+
+  private clampCenter(): boolean {
+    if (!this.map) {
+      return false;
+    }
+
+    const center = this.map.getCenter();
+    const nextLat = this.clampLat(center.lat);
+    const nextLon = this.clampLon(center.lng);
+    const changed = Math.abs(center.lat - nextLat) > 0.0001 || Math.abs(center.lng - nextLon) > 0.0001;
+
+    if (!changed) {
+      return false;
+    }
+
+    this.suppressMapMovedEvent = true;
+    this.map.easeTo({
+      center: [nextLon, nextLat],
+      zoom: this.map.getZoom(),
+      duration: 0,
+      essential: true,
+    });
+    return true;
   }
 
   private buildTrackingStyle(): maplibregl.StyleSpecification {
@@ -542,32 +538,12 @@ export class TrackingMapSectionComponent implements AfterViewInit, OnChanges, On
     return { type: 'FeatureCollection', features: [] };
   }
 
-  private deltaToZoom(delta: number): number {
-    if (delta <= 0.005) {
-      return 12.8;
-    }
-    if (delta <= 0.01) {
-      return 12.1;
-    }
-    if (delta <= 0.02) {
-      return 11.4;
-    }
-    if (delta <= 0.04) {
-      return 10.8;
-    }
-    if (delta <= 0.08) {
-      return 10.2;
-    }
-    if (delta <= 0.15) {
-      return 9.4;
-    }
-    if (delta <= 0.3) {
-      return 8.4;
-    }
-    if (delta <= 0.6) {
-      return 7.4;
-    }
-    return 5.4;
+  private clampLat(lat: number): number {
+    return Math.max(-85.05112878, Math.min(85.05112878, lat));
+  }
+
+  private clampLon(lon: number): number {
+    return Math.max(-180, Math.min(180, lon));
   }
 
   private interpolate(start: number, end: number, progress: number): number {

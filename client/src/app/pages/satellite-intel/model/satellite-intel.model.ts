@@ -14,6 +14,49 @@ export interface SatelliteGeocodeResponse {
   error_message?: string;
 }
 
+export type TrackKind = 'aircraft' | 'ship';
+
+export interface TrackingProperties {
+  id: string;
+  kind: TrackKind;
+  label: string;
+  heading: number;
+  speed: number | null;
+  altitude?: number | null;
+  destination?: string | null;
+}
+
+export interface TrackingFeature {
+  type: 'Feature';
+  id: string;
+  geometry: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+  properties: TrackingProperties;
+}
+
+export interface TrackingFeatureCollection {
+  type: 'FeatureCollection';
+  features: TrackingFeature[];
+}
+
+export interface TrackedEntityState {
+  id: string;
+  kind: TrackKind;
+  label: string;
+  heading: number;
+  speed: number | null;
+  altitude?: number | null;
+  destination?: string | null;
+  fromLon: number;
+  fromLat: number;
+  toLon: number;
+  toLat: number;
+  renderedLon: number;
+  renderedLat: number;
+}
+
 export interface FacilityFeature {
   type: 'Feature';
   geometry: {
