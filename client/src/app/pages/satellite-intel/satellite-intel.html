@@ -69,12 +69,6 @@
         {{ facilitiesVisible ? 'Facilities on' : 'Facilities off' }}
       </button>
       <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border border-[rgba(245,158,11,.35)] bg-[rgba(245,158,11,.1)] px-3 py-1.5 text-[12px] font-medium text-[#f59e0b] transition-colors hover:bg-[rgba(245,158,11,.18)] disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" (click)="runAnomalyScan()">Anomaly scan</button>
-      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" [ngClass]="aircraftTrackingEnabled ? ['border-[#8b5cf6]','bg-[rgba(139,92,246,.2)]','text-[#c4b5fd]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleAircraftTracking()">
-        {{ aircraftTrackingEnabled ? 'Aircraft tracking on' : 'Track aircraft' }}
-      </button>
-      <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" [ngClass]="shipsTrackingEnabled ? ['border-[#06b6d4]','bg-[rgba(6,182,212,.2)]','text-[#67e8f9]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleShipsTracking()">
-        {{ shipsTrackingEnabled ? 'Ship tracking on' : 'Track ships' }}
-      </button>
       <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" [ngClass]="globalAircraftTrackingEnabled ? ['border-[#a855f7]','bg-[rgba(168,85,247,.25)]','text-[#e9d5ff]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleGlobalAircraftTracking()" title="Track aircraft worldwide">
         {{ globalAircraftTrackingEnabled ? '🌍 Aircraft (global)' : 'Global aircraft' }}
       </button>
