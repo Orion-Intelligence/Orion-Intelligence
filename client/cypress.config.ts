@@ -31,6 +31,8 @@ export default defineConfig({
             testing3: { username: "testing3", email: "c@hotmail.com", password: "1qaz!QAZ", role: "Member", licenses: ["Free", "OSINT Advanced"] },
             testing4: { username: "testing4", email: "d@gmail.com", password: "1qaz!QAZ", role: "Member", licenses: ["Free", "Pentester"] },
             testing5: { username: 'testing5', email: 'e@hotmail.com', password: '1qaz!QAZ', role: 'Demo', licenses: ['Free']},
+            testing6: { username: "testing6", email: "feeder1@samplemail.test", password: "1qaz!QAZ", role: "Member", licenses: ["Feeder"] },
+            testing7: { username: "testing7", email: "feeder2@samplemail.test", password: "1qaz!QAZ", role: "Analyst", licenses: ["Feeder"] },
         },
         DEFAULT_TEST_USER_KEY: "testing5",
         RESET_PASSWORD_EMAIL: "d@hotmail.com",

@@ -1,14 +1,15 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Body
-from fastapi import Request
+from fastapi import APIRouter, Body, Depends, File, Form, Request, UploadFile
 
-from configs.app_dependency import role_required
+from configs.app_dependency import role_required, license_required, get_current_user
 from configs.limiter_dependency import limiter_dependency
+from orion.api.interactive.feeder_manager.feeder_manager import FeederManager
+from orion.api.interactive.feeder_manager.models.feeder_models import FeederOwnerTransferRequest, FeederScriptStatusUpdateRequest, FeederValueDeleteRequest
 from orion.api.server.crawl_manager.class_model.__init__ import *
 from orion.api.server.crawl_manager.class_model.entity_model import entity_model
-from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.crawl_manager.crawl_model import crawl_model
+from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 
 crawl_routes = APIRouter()
@@ -26,10 +27,114 @@ async def feeder(index_type: str):
 
 
 @crawl_routes.get(
-    "/api/parser",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
+    "/api/parser")
 async def parser():
     return await crawl_model.getInstance().invoke_fetch_parser()
+
+
+@crawl_routes.get(
+    "/api/profile/feeder/catalog",
+    include_in_schema=False,
+    dependencies=[Depends(license_required("module:feeder"))], )
+async def get_feeder_catalog(current_user=Depends(get_current_user)):
+    return await FeederManager.get_instance().get_catalog(current_user)
+
+
+@crawl_routes.get(
+    "/api/profile/feeder/scripts",
+    include_in_schema=False,
+    dependencies=[Depends(license_required("module:feeder"))], )
+async def get_feeder_scripts(
+        rule_key: str | None = None,
+        entry_type: str | None = None,
+        page: int = 1,
+        limit: int = 1000,
+        current_user=Depends(get_current_user)):
+    return await FeederManager.get_instance().list_scripts(current_user, rule_key=rule_key, page=page, limit=limit, entry_type=entry_type)
+
+
+@crawl_routes.get(
+    "/api/profile/feeder/users",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN])), Depends(license_required("module:feeder"))], )
+async def get_feeder_owner_users(_current_user=Depends(get_current_user)):
+    return await FeederManager.get_instance().list_owner_users()
+
+
+@crawl_routes.post(
+    "/api/profile/feeder/scripts/clear-all",
+    include_in_schema=False,
+    dependencies=[Depends(license_required("module:feeder"))], )
+async def clear_feeder_scripts(rule_key: str, current_user=Depends(get_current_user)):
+    return await FeederManager.get_instance().clear_scripts(rule_key, current_user)
+
+
+@crawl_routes.post(
+    "/api/profile/feeder/scripts/enable-all",
+    include_in_schema=False,
+    dependencies=[Depends(license_required("module:feeder"))], )
+async def enable_feeder_scripts(rule_key: str, current_user=Depends(get_current_user)):
+    return await FeederManager.get_instance().set_rule_enabled(rule_key, True, current_user)
+
+
+@crawl_routes.post(
+    "/api/profile/feeder/scripts/disable-all",
+    include_in_schema=False,
+    dependencies=[Depends(license_required("module:feeder"))], )
+async def disable_feeder_scripts(rule_key: str, current_user=Depends(get_current_user)):
+    return await FeederManager.get_instance().set_rule_enabled(rule_key, False, current_user)
+
+
+@crawl_routes.post(
+    "/api/profile/feeder/scripts/{script_id}/delete",
+    include_in_schema=False,
+    dependencies=[Depends(license_required("module:feeder"))], )
+async def delete_feeder_script(script_id: str, current_user=Depends(get_current_user)):
+    return await FeederManager.get_instance().delete_script(script_id, current_user)
+
+
+@crawl_routes.post(
+    "/api/profile/feeder/scripts/{script_id}/delete-value",
+    include_in_schema=False,
+    dependencies=[Depends(license_required("module:feeder"))], )
+async def delete_feeder_value(script_id: str, data: FeederValueDeleteRequest, current_user=Depends(get_current_user)):
+    return await FeederManager.get_instance().delete_value(script_id, data, current_user)
+
+
+@crawl_routes.post(
+    "/api/profile/feeder/scripts/{script_id}/toggle",
+    include_in_schema=False,
+    dependencies=[Depends(license_required("module:feeder"))], )
+async def toggle_feeder_script(script_id: str, current_user=Depends(get_current_user)):
+    return await FeederManager.get_instance().toggle_script_enabled(script_id, current_user)
+
+
+@crawl_routes.post(
+    "/api/profile/feeder/scripts/{script_id}/owner",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN])), Depends(license_required("module:feeder"))], )
+async def transfer_feeder_script_owner(script_id: str, data: FeederOwnerTransferRequest, current_user=Depends(get_current_user)):
+    return await FeederManager.get_instance().transfer_script_owner(script_id, data, current_user)
+
+
+@crawl_routes.post(
+    "/api/profile/feeder/upload",
+    include_in_schema=False,
+    dependencies=[Depends(license_required("module:feeder"))], )
+async def upload_feeder_script(
+        rule_key: str = Form(...),
+        mode: str = Form(...),
+        values_text: str | None = Form(None),
+        file: UploadFile | None = File(None),
+        current_user=Depends(get_current_user)):
+    return await FeederManager.get_instance().upload_script(rule_key, mode, file, values_text, current_user)
+
+
+@crawl_routes.post(
+    "/api/feeder/status",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
+async def update_feeder_script_status(data: FeederScriptStatusUpdateRequest):
+    return await FeederManager.get_instance().update_script_status_by_name(data)
 
 
 async def _index(request: Request, model_cls, invoke_fn):

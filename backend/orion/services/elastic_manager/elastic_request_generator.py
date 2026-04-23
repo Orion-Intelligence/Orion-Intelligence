@@ -145,7 +145,7 @@ class elastic_request_generator:
         return must_filters
 
     @staticmethod
-    def _build_query_block(p_query_model, pfilter, raw_query, quoted_value, exact_phrases, loose_terms, phrase_fields, must_clauses, must_not_clause, m_page_number, date_field):
+    def _build_query_block(p_query_model, pfilter, raw_query, quoted_value, exact_phrases, loose_terms, phrase_fields, must_clauses, must_not_clause, m_page_number, date_boost_fields):
         multi_fields = [f"{field}^{boost}" for field, boost in phrase_fields]
 
         if raw_query == "*":
@@ -258,16 +258,17 @@ class elastic_request_generator:
         functions_block = []
         if p_query_model.matchtype != "semantic":
             functions_block = [{
+                "filter": {"exists": {"field": field}},
                 "gauss": {
-                    date_field: {
+                    field: {
                         "origin": "now",
                         "scale": "45d",
                         "offset": "7d",
                         "decay": 0.7
                     }
                 },
-                "weight": 0.1
-            }]
+                "weight": weight
+            } for field, weight in date_boost_fields]
 
         query_statement = {
             "min_score": 0,
@@ -433,6 +434,43 @@ class elastic_request_generator:
             }
         }
 
+    @staticmethod
+    def build_date_priority_filter(from_date, to_date, priority_field_names):
+        formatted_ranges = {
+            "m_leak_date": (from_date[:10], to_date[:10]),
+            "m_message_date": (from_date, to_date),
+            "m_update_date": (from_date, to_date),
+            "m_creation_date": (from_date, to_date),
+        }
+        priority_fields = [
+            (field, *formatted_ranges[field])
+            for field in priority_field_names
+        ]
+        should_clauses = []
+
+        for index, (field, gte_value, lte_value) in enumerate(priority_fields):
+            clause = {
+                "bool": {
+                    "filter": [
+                        {"exists": {"field": field}},
+                        {"range": {field: {"gte": gte_value, "lte": lte_value}}}
+                    ]
+                }
+            }
+            if index > 0:
+                clause["bool"]["must_not"] = [
+                    {"exists": {"field": previous_field}}
+                    for previous_field, _, _ in priority_fields[:index]
+                ]
+            should_clauses.append(clause)
+
+        return {
+            "bool": {
+                "should": should_clauses,
+                "minimum_should_match": 1
+            }
+        }
+
     def on_search_consolidated_ranked_data(self, p_query_model: search_consolidated_param_model, pfilter, base_index, blocked_categories, allowed_categories,search_type=""):
         if p_query_model.matchtype:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
@@ -451,10 +489,20 @@ class elastic_request_generator:
         result_size = p_query_model.platform_result_count
         must_clauses = []
         must_not_clause = []
+        index_set = set(base_index or [])
 
-        date_fields = ["m_message_date", "m_leak_date", "m_creation_date"]
-        if base_index and any(idx in ["chat_model", "social_model"] for idx in base_index):
-            date_fields = ["m_message_date"]
+        if index_set and index_set.issubset({ELASTIC_INDEX.S_EXPLOIT_INDEX, ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_INDEX.S_LEAK_INDEX}):
+            date_priority_fields = ["m_leak_date", "m_update_date", "m_creation_date"]
+            date_boost_fields = [("m_leak_date", 0.4), ("m_update_date", 0.15), ("m_creation_date", 0.05)]
+        elif index_set and index_set.issubset({ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX}):
+            date_priority_fields = ["m_message_date"]
+            date_boost_fields = [("m_message_date", 0.25)]
+        elif index_set and index_set.issubset({ELASTIC_INDEX.S_GENERIC_INDEX}):
+            date_priority_fields = ["m_update_date", "m_creation_date"]
+            date_boost_fields = [("m_update_date", 0.15), ("m_creation_date", 0.05)]
+        else:
+            date_priority_fields = ["m_creation_date"]
+            date_boost_fields = [("m_creation_date", 0.1)]
 
         if m_date_range:
             try:
@@ -462,13 +510,13 @@ class elastic_request_generator:
                 if len(parts) == 2:
                     from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT00:00:00+00:00")
                     to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT23:59:59+00:00")
-                    must_clauses.append(elastic_request_generator.build_date_filter(from_date, to_date, date_fields))
+                    must_clauses.append(elastic_request_generator.build_date_priority_filter(from_date, to_date, date_priority_fields))
             except ValueError:
                 pass
         elif m_date_range != "":
             to_date = datetime.now(timezone.utc).strftime("%Y-%m-%dT23:59:59+00:00")
             from_date = (datetime.now(timezone.utc) - timedelta(days=150)).strftime("%Y-%m-%dT00:00:00+00:00")
-            must_clauses.append(elastic_request_generator.build_date_filter(from_date, to_date, date_fields))
+            must_clauses.append(elastic_request_generator.build_date_priority_filter(from_date, to_date, date_priority_fields))
 
         if p_query_model.category:
             m_ctype = p_query_model.category
@@ -533,8 +581,6 @@ class elastic_request_generator:
             loose_terms = [] if raw_query in ("*", "") else [t for t in re.findall(r'\w+', raw_query) if t and t.strip('"')]
         phrase_fields = [("m_title", 5), ("m_content", 3), ("m_url", 2), ("m_sender_name", 2), ("m_base_url", 1),
             ("m_team", 1), ("m_attacker", 1), ("m_users", 1), ("m_network", 1), ("m_channel_name", 4)]
-        date_field = "m_creation_date"
-
         unified_query = self._build_query_block(
             p_query_model=p_query_model,
             pfilter=pfilter,
@@ -546,7 +592,7 @@ class elastic_request_generator:
             must_clauses=must_clauses,
             must_not_clause=must_not_clause,
             m_page_number=m_page_number,
-            date_field=date_field)
+            date_boost_fields=date_boost_fields)
 
         unified_query["size"] = result_size
         unified_query["from"] = max(0, (m_page_number - 1) * result_size)
@@ -602,7 +648,7 @@ class elastic_request_generator:
             must_clauses=must_clauses,
             must_not_clause=must_not_clause,
             m_page_number=getattr(p_query_model, "page", 1),
-            date_field="m_creation_date",
+            date_boost_fields=[("m_creation_date", 0.1)],
         )
 
         unified_query["size"] = 15

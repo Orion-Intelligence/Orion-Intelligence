@@ -101,6 +101,7 @@ export enum SatelliteIntelSubCategory {
 }
 export enum ProfileSubCategory {
     HOMEPAGE = 'Homepage',
+    FEEDER = 'Feeder',
     IOC = 'IOC',
     TENANT_SETTINGS = 'Tenant-Settings',
     ACCOUNT = 'Account',

@@ -53,6 +53,7 @@ export class SidebarSectionComponent {
       iocs: 'ioc',
       'file-scanner': 'archive',
       'crypto-scanner': 'cryptocurrency',
+      feeder: 'account',
     }[normalized] || normalized;
     return `/assets/images/sidebar/sub_${mapped}.svg`;
   }

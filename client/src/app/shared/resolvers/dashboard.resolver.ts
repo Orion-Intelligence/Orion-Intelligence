@@ -17,7 +17,7 @@ export class DashboardResolver implements Resolve<boolean> {
     if (isAuthenticated) {
       return of(true);
     }
-    if (isAuthenticated && !hasSession) {
+    if (!isAuthenticated && !hasSession) {
       return this.authService.refreshToken().pipe(map(() => true));
     }
     return of(true);

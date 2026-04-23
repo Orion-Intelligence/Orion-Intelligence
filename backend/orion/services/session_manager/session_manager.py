@@ -63,7 +63,7 @@ class session_manager:
                 raise HTTPException(status_code=401, detail="Missing or invalid token")
 
             session_id = payload.get("sid")
-            if user.role in user_role.CRAWLER:
+            if user.role == user_role.CRAWLER:
                 return user
 
             if not session_id:
@@ -126,13 +126,13 @@ class session_manager:
         if username:
             user = await self._engine.find_one(db_user_account, db_user_account.username == username)
 
-        if not free and user and user.role not in user_role.CRAWLER and expires_delta > timedelta(minutes=30):
+        if not free and user and user.role != user_role.CRAWLER and expires_delta > timedelta(minutes=30):
             expires_delta = timedelta(minutes=30)
 
         expire = datetime.now(timezone.utc) + expires_delta if not free else None
 
         session_id = None
-        if user and user.role not in user_role.CRAWLER and not free:
+        if user and user.role != user_role.CRAWLER and not free:
             session_id = secrets.token_urlsafe(32)
             user.current_session_id = session_id
             await self._engine.save(user)
@@ -190,7 +190,7 @@ class session_manager:
                 await self._engine.save(user)
 
             access_ttl = timedelta(weeks=92) if user.role == user_role.CRAWLER else timedelta(minutes=30)
-            if user.role not in user_role.CRAWLER and access_ttl > timedelta(minutes=30):
+            if user.role != user_role.CRAWLER and access_ttl > timedelta(minutes=30):
                 access_ttl = timedelta(minutes=30)
 
             access_token, _role = await self.create_access_token({"sub": username}, access_ttl)
@@ -237,7 +237,7 @@ class session_manager:
             if not maintainer_user:
                 raise HTTPException(status_code=401, detail="Maintainer user not found")
             session_id = payload.get("sid")
-            if user.role not in user_role.CRAWLER:
+            if user.role != user_role.CRAWLER:
                 if not session_id:
                     raise HTTPException(status_code=401, detail="Invalid token")
 
@@ -268,8 +268,8 @@ class session_manager:
             onboarding_exists = await self.has_onboarding(str(user.tenant_uuid))
 
             base_expiry = time.time() + CONSTANTS.S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES * 60 * 60 * 24
-            if user.role not in user_role.CRAWLER:
-                base_expiry = time.time() + 3 * 60
+            if user.role != user_role.CRAWLER:
+                base_expiry = time.time() + 15 * 60
 
             if user.role in user_role.CRAWLER:
                 new_token_payload = {"sub": username, "exp": base_expiry}

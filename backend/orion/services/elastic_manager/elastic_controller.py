@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from string import capwords
 
 from elasticsearch import AsyncElasticsearch
@@ -163,8 +163,7 @@ class elastic_controller:
             #     request_timeout=220
             # )
 
-            days_15_seconds = int(timedelta(days=15).total_seconds())
-            m_request_defacement = {"query": {"range": {"m_leak_date": {"lt": f"now-{days_15_seconds}s"}}}}
+            m_request_defacement = {"query": {"range": {"m_leak_date": {"lt": "now-6M"}}}}
             await self.__m_core_connection.delete_by_query(
                 index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body=m_request_defacement, ignore=[404], request_timeout=220)
 
