@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
-import { EMPTY, Observable, Subject, Subscription, throwError, timer } from 'rxjs';
-import { catchError, expand, finalize, map, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
+import { EMPTY, lastValueFrom, Observable, Subject, Subscription, timer } from 'rxjs';
+import { expand, finalize, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { ApiService } from '../../shared/services/api.service';
 import { SatelliteGeocodeResponse, SatelliteFacilitiesResponse, SatelliteSentinelSearchResponse, SatelliteSentinelImageResponse, SatelliteAnomalyResponse, SatelliteCompareResponse, SatelliteLiveAircraftBBoxResponse, SatelliteLiveShipsBBoxResponse, } from '../../shared/model/satellite-intel/satellite-intel-api.models';
 
@@ -139,20 +139,6 @@ export class SatelliteIntelService {
     return sub;
   }
 
-  geocode(query: string): Subscription {
-    const call      = () => this.api.post<SatelliteGeocodeResponse>('satellite/geocode', { query });
-    const getStatus = (res: SatelliteGeocodeResponse) => (res?.result?.status || res?.status) as any;
-    const enhanced  = (res: SatelliteGeocodeResponse) => {
-      const p = (res as any)?.progress;
-      if (p != null && typeof p === 'number') {
-        this.progress.set(Math.min(99, p));
-      }
-    };
-    const build = (cancel$: Subject<boolean>) =>
-      this.poll<SatelliteGeocodeResponse>(call, getStatus, enhanced, cancel$, 2000);
-    return this.runTask<SatelliteGeocodeResponse>(build);
-  }
-
   fetchFacilities(lat: number, lon: number, radius_km = 5): Subscription {
     const call      = () => this.api.post<SatelliteFacilitiesResponse>('satellite/facilities', { lat, lon, radius_km });
     const getStatus = (res: SatelliteFacilitiesResponse) => (res?.result?.status || res?.status) as any;
@@ -234,18 +220,25 @@ export class SatelliteIntelService {
     return this.runTask<SatelliteCompareResponse>(build);
   }
 
-  fetchGeocodeOnce(query: string): Observable<any> {
-    const normalizedQuery = query.trim();
-    const call      = () => this.api.post<SatelliteGeocodeResponse>('satellite/geocode', { query: normalizedQuery });
+  async fetchGeocodeOnce(query: string): Promise<any> {
+        console.log("once geocode");
+    const cancel$ = new Subject<boolean>();
+    const call      = () => this.api.post<SatelliteGeocodeResponse>('satellite/geocode', { query });
     const getStatus = (res: SatelliteGeocodeResponse) => (res?.result?.status || res?.status) as any;
-
-    return this.createPolledRequest<SatelliteGeocodeResponse>(call, getStatus, 2000).pipe(map((response) => {
+    try {
+      const response = await lastValueFrom(this.poll<SatelliteGeocodeResponse>(call, getStatus, () => {}, cancel$, 2000),);
       const responseError = this.getResponseError(response);
       if (responseError) {
         throw new Error(responseError.message);
       }
+      // Backend wraps as { result: { status, results: [...] } }
+      // Return the inner result object so callers can access .results
       return response?.result ?? response;
-    }), catchError((err) => throwError(() => new Error(this.normalizeClientError(err).message))),);
+    }
+    finally {
+      cancel$.next(true);
+      cancel$.complete();
+    }
   }
 
   isValidCoordinates(value: string): boolean {
@@ -319,7 +312,7 @@ export class SatelliteIntelService {
       payload['opensky_client_secret'] = openskyClientSecret.trim();
     }
 
-    return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft/', payload);
+    return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft/bbox', payload);
   }
 
   pollAircraftInBounds(lat: number, lon: number, delta = 0.05, openskyClientId?: string, openskyClientSecret?: string): Observable<SatelliteLiveAircraftBBoxResponse> {
@@ -338,7 +331,7 @@ export class SatelliteIntelService {
       payload['aisstream_api_key'] = aisstreamApiKey.trim();
     }
 
-    return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships/', payload);
+    return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships/bbox', payload);
   }
 
   pollShipsInBounds(lat: number, lon: number, delta = 0.05, aisstreamApiKey?: string): Observable<SatelliteLiveShipsBBoxResponse> {
@@ -361,7 +354,7 @@ export class SatelliteIntelService {
       payload['opensky_client_secret'] = openskyClientSecret.trim();
     }
 
-    return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft/', payload);
+    return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft/bbox', payload);
   }
 
   pollAircraftGlobal(openskyClientId?: string, openskyClientSecret?: string): Observable<SatelliteLiveAircraftBBoxResponse> {
@@ -381,7 +374,7 @@ export class SatelliteIntelService {
       payload['aisstream_api_key'] = aisstreamApiKey.trim();
     }
 
-    return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships/', payload);
+    return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships/bbox', payload);
   }
 
   pollShipsGlobal(aisstreamApiKey?: string): Observable<SatelliteLiveShipsBBoxResponse> {

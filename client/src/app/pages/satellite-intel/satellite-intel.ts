@@ -49,7 +49,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   readonly progressSegments = Array.from({ length: 20 }, (_, i) => i);
   readonly panelTabs = [ { id: 'compare', label: 'Compare' }, { id: 'anomaly', label: 'Anomaly' }, { id: 'sentinel', label: 'Sentinel' }, { id: 'image', label: 'Image' }, { id: 'facilities', label: 'Facilities' }, ] as const;
   activePanel: 'compare' | 'anomaly' | 'sentinel' | 'image' | 'facilities' = 'compare';
-  activeTab: 'map' | 'tracking' | 'compare' | 'anomaly' | 'sentinel' | 'facilities' = 'map';
+  activeTab: 'map' | 'tracking' = 'map';
   coordsForm = { value: '', delta: 0.05 };
   formError:  string | null = null;
   inputLat   = 50.0;
@@ -153,6 +153,14 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.satelliteService.cancelCurrentScan();
   }
 
+  get isMapView(): boolean {
+    return this.activeTab === 'map';
+  }
+
+  get isTrackingView(): boolean {
+    return this.activeTab === 'tracking';
+  }
+
   setPanel(id: typeof this.activePanel): void {
     this.activePanel = id;
   }
@@ -247,27 +255,29 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.showGeocodeModal = true;
   }
 
-  onSearchInput(): void {
-    clearTimeout(this.searchTimer);
-    if (this.searchQuery.trim().length < 2) {
-      this.searchResults = []; return;
-    }
-    this.searchTimer = setTimeout(() => this.doSearch(), 400);
-  }
 
-  async doSearch(): Promise<void> {
-    const query = this.searchQuery.trim();
-    if (!query) {
-      return;
-    }
-    try {
-      const res = await firstValueFrom(this.satelliteService.fetchGeocodeOnce(query));
-      this.searchResults = res?.results || [];
-    }
-    catch {
-      this.searchResults = [];
-    }
-  }
+  // onSearchInput(): void {
+  //   clearTimeout(this.searchTimer);
+  //   if (this.searchQuery.trim().length < 2) {
+  //     this.searchResults = []; return;
+  //   }
+  //   this.searchTimer = setTimeout(() => this.doSearch(), 400);
+  // }
+
+  // async doSearch(): Promise<void> {
+  //   const query = this.searchQuery.trim();
+  //   if (!query) {
+  //     return;
+  //   }
+  //   try {
+  //     const res = await firstValueFrom(this.satelliteService.fetchGeocodeOnce(query));
+  //     this.searchResults = res?.results || [];
+  //   }
+  //   catch {
+  //     this.searchResults = [];
+  //   }
+  // }
+
 
   selectSearchResult(r: SatelliteGeocodeResult): void {
     this.inputLat   = r.lat;
