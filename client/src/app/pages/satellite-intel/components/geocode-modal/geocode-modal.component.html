@@ -30,7 +30,7 @@
               } @else {
                 <i class="bi bi-search text-[13px] text-[#0e1626]/50 flex-shrink-0"></i>
               }
-              <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchInput($event)" placeholder="City, country, region…" class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/40" autocomplete="off"/>
+              <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchInput()" placeholder="City, country, region…" class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/40" autocomplete="off"/>
             </div>
             @if (searchResults.length > 0) {
               <div class="mt-1 max-h-60 overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-790)] shadow-xl">
