@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { EMPTY, lastValueFrom, Observable, Subject, Subscription, timer } from 'rxjs';
+import { EMPTY, lastValueFrom, Observable, Subject, timer } from 'rxjs';
 import { expand, finalize, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { ApiService } from '../../shared/services/api.service';
 import { SatelliteGeocodeResponse, SatelliteFacilitiesResponse, SatelliteSentinelSearchResponse, SatelliteSentinelImageResponse, SatelliteAnomalyResponse, SatelliteCompareResponse, SatelliteLiveAircraftBBoxResponse, SatelliteLiveShipsBBoxResponse, } from '../../shared/model/satellite-intel/satellite-intel-api.models';
@@ -83,60 +83,60 @@ export class SatelliteIntelService {
     });
   }
 
-  private runTask<T>(build: (cancel$: Subject<boolean>) => Observable<T>): Subscription {
+  private runTask<T>(build: (cancel$: Subject<boolean>) => Observable<T>): Observable<T> {
+    return new Observable<T>((observer) => {
 
-    this.progress.set(0);
-    this.isRunning.set(true);
-    this.onDone.set(null);
-    this.onError.set(null);
+      this.progress.set(0);
+      this.isRunning.set(true);
+      this.onDone.set(null);
+      this.onError.set(null);
 
-    const cancel$ = new Subject<boolean>();
-    this.currentCancel$ = cancel$;
+      const cancel$ = new Subject<boolean>();
+      this.currentCancel$ = cancel$;
 
-    const obs$ = build(cancel$).pipe(finalize(() => {
+      const sub = build(cancel$)
+        .pipe(finalize(() => {
+          this.progress.set(100);
+          this.isRunning.set(false);
+          this.currentCancel$ = undefined;
+        }))
+        .subscribe({
+          next: (value) => {
+            const responseError = this.getResponseError(value);
+            if (responseError) {
+              this.onError.set(responseError);
+              observer.error(responseError); // 🔥 important
+              return;
+            }
 
-      this.progress.set(100);
-      this.isRunning.set(false);
-      this.currentCancel$ = undefined;
-    }),);
+            this.onDone.set(value);
+            observer.next(value); // 🔥 pass to component
+          },
+          error: (err) => {
+            const normalized = this.normalizeClientError(err);
+            this.onError.set(normalized);
+            observer.error(normalized);
+          },
+          complete: () => {
+            observer.complete(); // 🔥 now component knows it's done
+          },
+        });
 
-    const sub = new Subscription();
-    sub.add(obs$.subscribe({
-      next: (value) => {
-        const responseError = this.getResponseError(value);
-        if (responseError) {
-          this.onDone.set(null);
-          this.onError.set(responseError);
-          return;
+      return () => {
+        if (!cancel$.closed) {
+          cancel$.next(true);
+          cancel$.complete();
         }
-        this.onDone.set(value);
-      },
-      error: (err) => {
-        this.onDone.set(null);
-        this.onError.set(this.normalizeClientError(err));
-      },
-      complete: () => {
+        sub.unsubscribe();
         this.isRunning.set(false);
         if (this.currentCancel$ === cancel$) {
           this.currentCancel$ = undefined;
         }
-      },
-    }));
-    sub.add(() => {
-      if (!cancel$.closed) {
-        cancel$.next(true);
-        cancel$.complete();
-      }
-      this.isRunning.set(false);
-      if (this.currentCancel$ === cancel$) {
-        this.currentCancel$ = undefined;
-      }
+      };
     });
-
-    return sub;
   }
 
-  fetchFacilities(lat: number, lon: number, radius_km = 5): Subscription {
+  fetchFacilities(lat: number, lon: number, radius_km = 5): Observable<SatelliteFacilitiesResponse> {
     const call      = () => this.api.post<SatelliteFacilitiesResponse>('satellite/facilities', { lat, lon, radius_km });
     const getStatus = (res: SatelliteFacilitiesResponse) => (res?.result?.status || res?.status) as any;
     const enhanced  = (res: SatelliteFacilitiesResponse) => {
@@ -147,10 +147,11 @@ export class SatelliteIntelService {
     };
     const build = (cancel$: Subject<boolean>) =>
       this.poll<SatelliteFacilitiesResponse>(call, getStatus, enhanced, cancel$, 3000);
+    // return this.runTask<SatelliteFacilitiesResponse>(build);
     return this.runTask<SatelliteFacilitiesResponse>(build);
   }
 
-  searchSentinel(lat: number, lon: number, delta = 0.05): Subscription {
+  searchSentinel(lat: number, lon: number, delta = 0.05): Observable<SatelliteSentinelSearchResponse> {
     const call      = () => this.api.post<SatelliteSentinelSearchResponse>('satellite/sentinel/search', { lat, lon, delta });
     const getStatus = (res: SatelliteSentinelSearchResponse) => (res?.result?.status || res?.status) as any;
     const enhanced  = (res: SatelliteSentinelSearchResponse) => {
@@ -164,7 +165,7 @@ export class SatelliteIntelService {
     return this.runTask<SatelliteSentinelSearchResponse>(build);
   }
 
-  fetchSentinelImage(lat: number, lon: number, delta = 0.05, image_type = 'true_colour', month?: string, size = 512): Subscription {
+  fetchSentinelImage(lat: number, lon: number, delta = 0.05, image_type = 'true_colour', month?: string, size = 512): Observable<SatelliteSentinelImageResponse> {
     const payload: Record<string, any> = { lat, lon, delta, image_type, size };
     if (month?.trim()) {
       payload['month'] = month.trim();
@@ -182,7 +183,7 @@ export class SatelliteIntelService {
     return this.runTask<SatelliteSentinelImageResponse>(build);
   }
 
-  runAnomalyScan(lat: number, lon: number, delta = 0.05, sh_client_id?: string, sh_client_secret?: string): Subscription {
+  runAnomalyScan(lat: number, lon: number, delta = 0.05, sh_client_id?: string, sh_client_secret?: string): Observable<SatelliteAnomalyResponse> {
     const payload: Record<string, any> = { lat, lon, delta };
     if (sh_client_id)     {
       payload['sh_client_id']     = sh_client_id;
@@ -203,7 +204,7 @@ export class SatelliteIntelService {
     return this.runTask<SatelliteAnomalyResponse>(build);
   }
 
-  runCompare(lat: number, lon: number, delta = 0.05, image_type = 'true_colour'): Subscription {
+  runCompare(lat: number, lon: number, delta = 0.05, image_type = 'true_colour'): Observable<SatelliteCompareResponse> {
     const call      = () => this.api.post<SatelliteCompareResponse>('satellite/compare', { lat, lon, delta, image_type });
     const getStatus = (res: SatelliteCompareResponse) => (res?.result?.status || res?.status) as any;
     const enhanced  = (res: SatelliteCompareResponse) => {
@@ -212,8 +213,7 @@ export class SatelliteIntelService {
         this.progress.set(Math.min(99, p));
       }
     };
-    const build = (cancel$: Subject<boolean>) =>
-      this.poll<SatelliteCompareResponse>(call, getStatus, enhanced, cancel$, 3000);
+    const build = (cancel$: Subject<boolean>) => this.poll<SatelliteCompareResponse>(call, getStatus, enhanced, cancel$, 3000);
     return this.runTask<SatelliteCompareResponse>(build);
   }
 
@@ -308,7 +308,7 @@ export class SatelliteIntelService {
       payload['opensky_client_secret'] = openskyClientSecret.trim();
     }
 
-    return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft/bbox', payload);
+    return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft', payload);
   }
 
   pollAircraftInBounds(lat: number, lon: number, delta = 0.05, openskyClientId?: string, openskyClientSecret?: string): Observable<SatelliteLiveAircraftBBoxResponse> {
@@ -327,7 +327,7 @@ export class SatelliteIntelService {
       payload['aisstream_api_key'] = aisstreamApiKey.trim();
     }
 
-    return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships/bbox', payload);
+    return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships', payload);
   }
 
   pollShipsInBounds(lat: number, lon: number, delta = 0.05, aisstreamApiKey?: string): Observable<SatelliteLiveShipsBBoxResponse> {
@@ -350,7 +350,7 @@ export class SatelliteIntelService {
       payload['opensky_client_secret'] = openskyClientSecret.trim();
     }
 
-    return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft/bbox', payload);
+    return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft', payload);
   }
 
   pollAircraftGlobal(openskyClientId?: string, openskyClientSecret?: string): Observable<SatelliteLiveAircraftBBoxResponse> {
@@ -370,7 +370,7 @@ export class SatelliteIntelService {
       payload['aisstream_api_key'] = aisstreamApiKey.trim();
     }
 
-    return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships/bbox', payload);
+    return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships', payload);
   }
 
   pollShipsGlobal(aisstreamApiKey?: string): Observable<SatelliteLiveShipsBBoxResponse> {

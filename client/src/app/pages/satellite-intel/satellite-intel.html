@@ -1,6 +1,6 @@
 <div class="relative flex h-full min-h-0 w-full flex-col overflow-hidden">
   @if (isMainLoading) {
-    <div class="absolute inset-0 z-30 flex items-center justify-center bg-[rgba(2,6,23,0.86)] backdrop-blur-[2px]">
+    <div class="absolute inset-0 z-[1000] flex items-center justify-center bg-[rgba(2,6,23,0.86)] backdrop-blur-[2px]">
       <div class="mx-4 flex min-w-[220px] max-w-[360px] flex-col items-center gap-3 rounded-[16px] border border-sky-400/20 bg-[#0d1220]/95 px-6 py-5 text-center shadow-[0_0_30px_rgba(56,189,248,0.12)]">
         <div class="h-11 w-11 animate-spin rounded-full border-4 border-sky-400/20 border-t-sky-300"></div>
         <div>
@@ -16,36 +16,31 @@
       <span class="mr-[2px] shrink-0 whitespace-nowrap text-[13px] font-medium text-[#7eb8f7]">Satellite Intel</span>
 
       <div class="flex shrink-0 overflow-hidden rounded-[6px] border border-[#1e2a40] bg-[#0a1020]">
-        <button class="px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" [ngClass]="activeTab === 'map' ? ['bg-[#17304d]','text-[#e2ecff]'] : ['text-[#7eb8f7]','hover:bg-[#10192a]']" (click)="setActiveView('map')">
+        <button class="px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="activeTab === 'map' ? ['bg-[#17304d]','text-[#e2ecff]'] : ['text-[#7eb8f7]','hover:bg-[#10192a]']" (click)="setActiveView('map')">
           Satellite map
         </button>
-        <button class="border-l border-[#1e2a40] px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" [ngClass]="activeTab === 'tracking' ? ['bg-[#17304d]','text-[#e2ecff]'] : ['text-[#7eb8f7]','hover:bg-[#10192a]']" (click)="setActiveView('tracking')">
+        <button class="border-l border-[#1e2a40] px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="activeTab === 'tracking' ? ['bg-[#17304d]','text-[#e2ecff]'] : ['text-[#7eb8f7]','hover:bg-[#10192a]']" (click)="setActiveView('tracking')">
           Live tracking
         </button>
       </div>
 
       @if (isMapView) {
-        <select class="shrink-0 rounded-[5px] border border-[#1e2a40] bg-[#111827] px-[7px] py-[5px] text-[12px] text-[#c8d4e8] outline-none disabled:cursor-not-allowed disabled:opacity-60" [(ngModel)]="selectedLayer" [disabled]="isMainLoading" (change)="onLayerChange()">
+        <select class="shrink-0 rounded-[5px] border border-[#1e2a40] bg-[#111827] px-[7px] py-[5px] text-[12px] text-[#c8d4e8] outline-none disabled:cursor-not-allowed disabled:opacity-60" [(ngModel)]="selectedLayer"  (change)="onLayerChange()">
           <option value="esri">ESRI Satellite</option>
           <option value="osm">OpenStreetMap</option>
         </select>
 
-        <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border border-[#3a7bd5] bg-[#1a4a7a] px-3 py-1.5 text-[12px] font-medium text-[#7eb8f7] transition-colors hover:bg-[#1e5a94] disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" (click)="openGeocodeModal()">
+        <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border border-[#3a7bd5] bg-[#1a4a7a] px-3 py-1.5 text-[12px] font-medium text-[#7eb8f7] transition-colors hover:bg-[#1e5a94] disabled:cursor-not-allowed disabled:opacity-60"  (click)="openGeocodeModal()">
           <i class="bi bi-globe2 text-[13px]"></i>
           Location
         </button>
 
-        <!-- <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" [ngClass]="facilitiesVisible ? ['border-[#1d9e75]','bg-[#0f6e56]','text-[#9fe1cb]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleFacilities()">
-          {{ facilitiesVisible ? 'Facilities on' : 'Facilities off' }}
-        </button> -->
-
-        <!-- <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border border-[rgba(245,158,11,.35)] bg-[rgba(245,158,11,.1)] px-3 py-1.5 text-[12px] font-medium text-[#f59e0b] transition-colors hover:bg-[rgba(245,158,11,.18)] disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" (click)="runAnomalyScan()">Anomaly scan</button> -->
-      } @else {
-        <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" [ngClass]="globalAircraftTrackingEnabled ? ['border-[#a855f7]','bg-[rgba(168,85,247,.25)]','text-[#e9d5ff]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleGlobalAircraftTracking()" title="Track aircraft worldwide">
+        } @else {
+        <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60"  [ngClass]="globalAircraftTrackingEnabled ? ['border-[#a855f7]','bg-[rgba(168,85,247,.25)]','text-[#e9d5ff]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleGlobalAircraftTracking()" title="Track aircraft worldwide">
           {{ globalAircraftTrackingEnabled ? '🌍 Aircraft (global)' : 'Global aircraft' }}
         </button>
 
-        <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isMainLoading" [ngClass]="globalShipsTrackingEnabled ? ['border-[#06d6d4]','bg-[rgba(6,214,212,.25)]','text-[#cffafe]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleGlobalShipsTracking()" title="Track ships worldwide">
+        <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60"  [ngClass]="globalShipsTrackingEnabled ? ['border-[#06d6d4]','bg-[rgba(6,214,212,.25)]','text-[#cffafe]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleGlobalShipsTracking()" title="Track ships worldwide">
           {{ globalShipsTrackingEnabled ? '🌍 Ships (global)' : 'Global ships' }}
         </button>
       }
@@ -120,7 +115,7 @@
             @if (activePanel === 'anomaly') {
               <div class="flex flex-col h-full">
 
-  <!-- Header -->
+
   <div class="flex items-center justify-between px-[14px] py-2 border-b border-[#1e2a40]">
     <span class="text-[12px] font-semibold text-[#e8f0fc]">Anomaly Detection</span>
 
@@ -129,7 +124,7 @@
     </button>
   </div>
 
-  <!-- Content -->
+
   <div class="flex-1 overflow-auto">
               <app-satellite-anomaly-section
                 [isScanning]="isScanning()"

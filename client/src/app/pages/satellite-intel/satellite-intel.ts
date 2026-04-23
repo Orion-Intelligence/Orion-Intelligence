@@ -89,8 +89,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       if (!done) {
         return;
       }
-      // Service may emit `{ result: ... }` (wrapped) or the result directly (flat).
-      // Prefer the inner `.result` when it has the shape we expect, else use done itself.
       const result = (done?.result !== null && done?.result !== undefined) ? done.result : done;
       if (!result) {
         return;
@@ -224,9 +222,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   runAnomalyScan(): void {
     this.syncAppliedViewport();
-    // After syncAppliedViewport, lat/lon are set from inputLat/inputLon.
-    // Fall back to inputLat/inputLon directly so a missing prior "Go" click
-    // never silently blocks the scan.
     const lat = this.lat ?? this.inputLat;
     const lon = this.lon ?? this.inputLon;
     if (!lat || !lon) {
@@ -241,8 +236,17 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.satelliteService.resetState();
     this.sub?.unsubscribe();
     const loadingId = this.beginMainLoading('Loading Satellite Intel', 'Running anomaly scan...');
-    this.sub = this.satelliteService.runAnomalyScan(this.lat, this.lon, this.delta);
-    this.sub.add(() => this.endMainLoading(loadingId));
+    this.sub = this.satelliteService.runAnomalyScan(this.lat, this.lon, this.delta).subscribe({
+      next: (res) => {
+        this.anomalyResult = res.result;
+        if(res.result){  
+          this.endMainLoading(loadingId);
+        }
+      },
+      error: () => {
+        this.endMainLoading(loadingId);
+      }
+    });
   }
 
   copyCoords(): void {
@@ -278,7 +282,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   onMapMoved(center: { lat: number; lon: number; zoom: number }): void {
-    // Skip if this is the aftermath of rendering tracking data
     if (this.skipNextMapMovedEvent) {
       this.skipNextMapMovedEvent = false;
       return;
@@ -290,8 +293,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.coordsForm.value = `${center.lat.toFixed(5)}, ${center.lon.toFixed(5)}`;
     this.coordsForm.delta = this.inputDelta;
 
-    // Don't refetch tracking data on map moves when tracking is active
-    // Tracking will be updated by its own interval timers
     if (!this.aircraftTrackingEnabled && !this.shipsTrackingEnabled) {
       this.refreshTracking();
     }
@@ -312,8 +313,19 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.satelliteService.resetState();
     this.sub?.unsubscribe();
     const loadingId = this.beginMainLoading('Loading Satellite Intel', 'Loading 3-month comparison...');
-    this.sub = this.satelliteService.runCompare(this.lat, this.lon, this.delta, event.imageType);
-    this.sub.add(() => this.endMainLoading(loadingId));
+    this.sub = this.satelliteService.runCompare(this.lat, this.lon, this.delta, event.imageType).subscribe({
+      next: (res) => {
+        console.log("1")
+        this.compareResult = res.result;
+        if(res.result){  
+          this.endMainLoading(loadingId);
+        }
+      },
+      error: () => {
+        console.log("2")
+        this.endMainLoading(loadingId);
+      }
+    });
   }
 
   onRunSentinelSearch(): void {
@@ -331,8 +343,17 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.satelliteService.resetState();
     this.sub?.unsubscribe();
     const loadingId = this.beginMainLoading('Loading Satellite Intel', 'Checking available Sentinel passes...');
-    this.sub = this.satelliteService.searchSentinel(this.lat, this.lon, this.delta);
-    this.sub.add(() => this.endMainLoading(loadingId));
+    this.sub = this.satelliteService.searchSentinel(this.lat, this.lon, this.delta).subscribe({
+      next: (res) => {
+        this.sentinelResults = res.result;
+        if(res.result){  
+          this.endMainLoading(loadingId);
+        }
+      },
+      error: () => {
+        this.endMainLoading(loadingId);
+      }
+    });;
   }
 
   onRunSentinelImage(event: { imageType: string; month: string; size: number }): void {
@@ -350,7 +371,17 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.satelliteService.resetState();
     this.sub?.unsubscribe();
     const loadingId = this.beginMainLoading('Loading Satellite Intel', 'Fetching Sentinel image...');
-    this.sub = this.satelliteService.fetchSentinelImage(this.lat, this.lon, this.delta, event.imageType, event.month, event.size);
+    this.sub = this.satelliteService.fetchSentinelImage(this.lat, this.lon, this.delta, event.imageType, event.month, event.size).subscribe({
+      next: (res) => {
+        this.sentinelImageResult = res.result || null;
+        if(res.result){  
+          this.endMainLoading(loadingId);
+        }
+      },
+      error: () => {
+        this.endMainLoading(loadingId);
+      }
+    });
     this.sub.add(() => this.endMainLoading(loadingId));
   }
 
@@ -419,8 +450,17 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.satelliteService.resetState();
     this.sub?.unsubscribe();
     const loadingId = this.beginMainLoading('Loading Satellite Intel', 'Loading nearby facilities...');
-    this.sub = this.satelliteService.fetchFacilities(this.lat, this.lon, 5);
-    this.sub.add(() => this.endMainLoading(loadingId));
+    this.sub = this.satelliteService.fetchFacilities(this.lat, this.lon, 5).subscribe({
+      next: (res) => {
+        this.facilitiesData = res.result;
+        if(res.result){  
+          this.endMainLoading(loadingId);
+        }
+      },
+      error: () => {
+        this.endMainLoading(loadingId);
+      }
+    });
   }
 
   private syncAppliedViewport(): void {
@@ -554,9 +594,11 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   private endMainLoading(id: number): void {
+    console.log("end1")
     if (!this.mainLoadingRequests.has(id)) {
       return;
     }
+    console.log("end2")
     this.mainLoadingRequests.delete(id);
     this.syncMainLoadingState();
   }

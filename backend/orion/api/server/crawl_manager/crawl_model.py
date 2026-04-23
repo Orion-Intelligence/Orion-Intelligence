@@ -329,20 +329,20 @@ class crawl_model:
                 )
                 if response.status_code in (404, 405):
                     response = await client.post(
-                        "http://trusted-micros-api:8010/livetrack/aircraft/bbox",
+                        "http://trusted-micros-api:8010/livetrack/aircraft",
                         json=model.model_dump(),
                         timeout=120
                     )
                 if response.status_code != 200:
                     return JSONResponse(
                         status_code=response.status_code,
-                        content={"detail": "Something happened while calling livetrack/aircraft/bbox"}
+                        content={"detail": "Something happened while calling livetrack/aircraft"}
                     )
                 return response.json()
         except Exception:
             return JSONResponse(
                 status_code=500,
-                content={"detail": "Something happened while calling livetrack/aircraft/bbox"}
+                content={"detail": "Something happened while calling livetrack/aircraft"}
             )
 
     @staticmethod
@@ -410,20 +410,20 @@ class crawl_model:
                 )
                 if response.status_code in (404, 405):
                     response = await client.post(
-                        "http://trusted-micros-api:8010/livetrack/ships/bbox",
+                        "http://trusted-micros-api:8010/livetrack/ships",
                         json=model.model_dump(),
                         timeout=120
                     )
                 if response.status_code != 200:
                     return JSONResponse(
                         status_code=response.status_code,
-                        content={"detail": "Something happened while calling livetrack/ships/bbox/"}
+                        content={"detail": "Something happened while calling livetrack/ships"}
                     )
                 return response.json()
         except Exception:
             return JSONResponse(
                 status_code=500,
-                content={"detail": "Something happened while calling livetrack/ships/bbox/"}
+                content={"detail": "Something happened while calling livetrack/ships"}
             )
 
     @staticmethod

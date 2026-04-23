@@ -5,17 +5,6 @@
     {{ zoomLabel }}
   </div>
 
-  @if (isScanning ) {
-    <div class="absolute left-3 right-3 top-3 z-[900] max-w-[min(520px,calc(100%-24px))] rounded-lg border border-white/10 bg-[rgba(13,21,37,.9)] px-3 py-[10px]">
-      <div class="mb-[6px] flex justify-between">
-        <span class="text-[12px] font-medium text-[#f0f4ff]">{{ loadingStepLabel }}</span>
-        <span class="text-[12px] font-semibold text-sky-400">{{ progressValue }}%</span>
-      </div>
-      <div class="h-[6px] overflow-hidden rounded-full bg-white/5">
-        <div class="h-full rounded-full bg-[#3b82f6] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + progressValue"></div>
-      </div>
-    </div>
-  }
 
   @if (errorMessage && !isScanning) {
     <div class="absolute left-3 right-3 top-3 z-[900] max-w-[min(520px,calc(100%-24px))] rounded-lg border border-red-500/30 bg-red-500/12 px-[14px] py-[10px] text-[12px] text-red-300">
