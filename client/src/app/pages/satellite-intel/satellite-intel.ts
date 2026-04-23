@@ -115,10 +115,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
         this.sentinelImageResult = imageData;
       }
       else if (pending === 'compare' || (!pending && this.looksLikeCompareResult(result))) {
-        console.log('Received compare result:', result);
-        // Ensure we extract the actual result if it's wrapped
         const compareData = (result?.months !== undefined) ? result : (result?.result?.months !== undefined ? result.result : result);
-        console.log('After unwrap, compare data:', compareData);
+
         this.compareResult = compareData;
       }
 

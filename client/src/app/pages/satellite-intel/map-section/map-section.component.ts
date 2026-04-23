@@ -76,11 +76,9 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       this.renderAnomaly();
     }
     if (changes['aircraftData']) {
-      console.log('[MAP] aircraftData changed:', this.aircraftData?.length ?? 0, 'items');
       this.renderAircraft();
     }
     if (changes['shipsData']) {
-      console.log('[MAP] shipsData changed:', this.shipsData?.length ?? 0, 'items');
       this.renderShips();
     }
     if (changes['selectedLayer'])   {
@@ -256,17 +254,13 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   }
 
   private renderAircraft(): void {
-    console.log('[MAP.renderAircraft] Start - aircraftLayer exists:', !!this.aircraftLayer, 'L exists:', !!this.L);
     if (!this.aircraftLayer || !this.L) {
-      console.warn('[MAP.renderAircraft] Missing aircraftLayer or L');
       return;
     }
 
-    console.log('[MAP.renderAircraft] Clearing old markers');
     this.aircraftLayer.clearLayers();
 
     const aircraftArray = this.aircraftData || [];
-    console.log('[MAP.renderAircraft] Processing', aircraftArray.length, 'aircraft');
 
     const bounds: any[] = [];
 
@@ -274,14 +268,12 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       const lat = aircraft.latitude;
       const lon = aircraft.longitude;
       if (typeof lat !== 'number' || typeof lon !== 'number') {
-        console.warn('[MAP.renderAircraft] Skip invalid coords:', lat, lon);
         continue;
       }
 
       bounds.push([lat, lon]);
       const rotation = aircraft.true_track ?? 0;
       const callsign = aircraft.callsign || aircraft.icao24;
-      console.log('[MAP.renderAircraft] Adding', callsign, 'at', lat, lon, 'rotation', rotation);
 
       // Create airplane icon SVG (yellow like in your screenshot)
       const airplaneIcon = this.L.divIcon({
@@ -302,22 +294,16 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
 
       this.aircraftLayer.addLayer(marker);
     }
-
-    console.log('[MAP.renderAircraft] Complete - added', aircraftArray.length, 'markers');
   }
 
   private renderShips(): void {
-    console.log('[MAP.renderShips] Start - shipsLayer exists:', !!this.shipsLayer, 'L exists:', !!this.L);
     if (!this.shipsLayer || !this.L) {
-      console.warn('[MAP.renderShips] Missing shipsLayer or L');
       return;
     }
 
-    console.log('[MAP.renderShips] Clearing old markers');
     this.shipsLayer.clearLayers();
 
     const shipsArray = this.shipsData || [];
-    console.log('[MAP.renderShips] Processing', shipsArray.length, 'ships');
 
     const bounds: any[] = [];
 
@@ -325,14 +311,12 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       const lat = ship.latitude;
       const lon = ship.longitude;
       if (typeof lat !== 'number' || typeof lon !== 'number') {
-        console.warn('[MAP.renderShips] Skip invalid coords:', lat, lon);
         continue;
       }
 
       bounds.push([lat, lon]);
       const rotation = ship.course ?? 0;
       const name = ship.name || ship.mmsi;
-      console.log('[MAP.renderShips] Adding', name, 'at', lat, lon, 'rotation', rotation);
 
       // Create ship icon SVG
       const shipIcon = this.L.divIcon({
@@ -353,7 +337,6 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       this.shipsLayer.addLayer(marker);
     }
 
-    console.log('[MAP.renderShips] Complete - added', shipsArray.length, 'markers');
   }
 
   private deltaToZoom(d: number): number {

@@ -16,7 +16,6 @@ export class SatelliteIntelService {
   constructor(private api: ApiService) {}
 
   resetState(): void {
-    console.log("Ali bhai 00")
     this.currentCancel$ = undefined;
     this.progress.set(0);
     this.isRunning.set(false);
@@ -85,7 +84,7 @@ export class SatelliteIntelService {
   }
 
   private runTask<T>(build: (cancel$: Subject<boolean>) => Observable<T>): Subscription {
-    console.log("Ali bhai 01")
+
     this.progress.set(0);
     this.isRunning.set(true);
     this.onDone.set(null);
@@ -95,7 +94,7 @@ export class SatelliteIntelService {
     this.currentCancel$ = cancel$;
 
     const obs$ = build(cancel$).pipe(finalize(() => {
-      console.log("Ali bhai 02")
+
       this.progress.set(100);
       this.isRunning.set(false);
       this.currentCancel$ = undefined;
@@ -117,7 +116,6 @@ export class SatelliteIntelService {
         this.onError.set(this.normalizeClientError(err));
       },
       complete: () => {
-        console.log("Ali bhai 03")
         this.isRunning.set(false);
         if (this.currentCancel$ === cancel$) {
           this.currentCancel$ = undefined;
@@ -129,7 +127,6 @@ export class SatelliteIntelService {
         cancel$.next(true);
         cancel$.complete();
       }
-      console.log("Ali bhai 04")
       this.isRunning.set(false);
       if (this.currentCancel$ === cancel$) {
         this.currentCancel$ = undefined;
@@ -221,7 +218,6 @@ export class SatelliteIntelService {
   }
 
   async fetchGeocodeOnce(query: string): Promise<any> {
-    console.log("once geocode");
     const cancel$ = new Subject<boolean>();
     const call      = () => this.api.post<SatelliteGeocodeResponse>('satellite/geocode', { query });
     const getStatus = (res: SatelliteGeocodeResponse) => (res?.result?.status || res?.status) as any;
