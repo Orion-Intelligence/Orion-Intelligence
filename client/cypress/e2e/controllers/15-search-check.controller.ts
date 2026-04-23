@@ -15,12 +15,13 @@ export const SEARCH_FIXTURES = {
   },
   defacement_by_team: {
     search_query: 'CarlyGriggs13',
-    base_url: ['joindarkside.pro', 'fitcoin-events.com'],
+    base_url: ['eng-victory-hub.com', 'joindarkside.pro', 'fitcoin-events.com'],
     team: 'CarlyGriggs13',
     date: 'Jan 24, 2026',
     web_url: [
       'https://x.com/CarlyGriggs13/status/2014897534108319933',
       'https://x.com/CarlyGriggs13/status/2014897336539844898',
+      'https://x.com/CarlyGriggs13/status/2015050781804875946',
     ],
   },
   defacement_by_base_url: {
@@ -149,7 +150,6 @@ export function assertFirstResultCard(data: SearchResultData) {
 
         return matchesLink && matchesDescription && matchesDate;
       });
-
       expect(matchingCard, `result card matching ${data.link_address}`).to.exist;
       cy.wrap(matchingCard as HTMLElement)
         .scrollIntoView()

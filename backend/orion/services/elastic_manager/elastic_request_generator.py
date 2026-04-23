@@ -277,7 +277,7 @@ class elastic_request_generator:
                     "query": {"bool": base_bool_query},
                     **({"functions": functions_block} if functions_block else {}),
                     "score_mode": "sum",
-                    "boost_mode": "multiply"
+                    "boost_mode": "sum"
                 }
             },
             "from": max(0, (m_page_number - 1) * CONSTANTS.S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC),
@@ -493,16 +493,16 @@ class elastic_request_generator:
 
         if index_set and index_set.issubset({ELASTIC_INDEX.S_EXPLOIT_INDEX, ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_INDEX.S_LEAK_INDEX}):
             date_priority_fields = ["m_leak_date", "m_update_date", "m_creation_date"]
-            date_boost_fields = [("m_leak_date", 0.4), ("m_update_date", 0.15), ("m_creation_date", 0.05)]
+            date_boost_fields = [("m_leak_date", 0), ("m_update_date", 0), ("m_creation_date", 0)]
         elif index_set and index_set.issubset({ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX}):
             date_priority_fields = ["m_message_date"]
-            date_boost_fields = [("m_message_date", 0.25)]
+            date_boost_fields = [("m_message_date", 0)]
         elif index_set and index_set.issubset({ELASTIC_INDEX.S_GENERIC_INDEX}):
             date_priority_fields = ["m_update_date", "m_creation_date"]
-            date_boost_fields = [("m_update_date", 0.15), ("m_creation_date", 0.05)]
+            date_boost_fields = [("m_update_date", 0), ("m_creation_date", 0)]
         else:
             date_priority_fields = ["m_creation_date"]
-            date_boost_fields = [("m_creation_date", 0.1)]
+            date_boost_fields = [("m_creation_date", 0)]
 
         if m_date_range:
             try:
