@@ -76,15 +76,17 @@ class FakeMongoEngine:
 
 
 class FakeElastic:
-    def __init__(self):
+    def __init__(self, responses=None):
         self.index_calls = []
         self.dump_index_calls = []
         self.search_calls = []
         self.search_query_calls = []
         self.search_consolidated_calls = []
+        self.search_consolidated_queries_calls = []
         self.get_calls = []
         self.get_doc_calls = []
         self.delete_calls = []
+        self.responses = list(responses or [])
         self.search_result = {}
         self.search_query_result = (True, {})
         self.search_consolidated_result = {}
@@ -111,6 +113,10 @@ class FakeElastic:
         self.search_consolidated_calls.append((indices, query, indices_boost))
         return self.search_consolidated_result
 
+    async def search_consolidated_queries(self, indices, queries):
+        self.search_consolidated_queries_calls.append((indices, queries))
+        return self.responses
+
     async def get_data(self, *args, **kwargs):
         self.get_calls.append((args, kwargs))
         return self.get_result
@@ -128,9 +134,9 @@ FakeEngine = FakeMongoEngine
 
 
 class FakeRedis:
-    def __init__(self):
+    def __init__(self, values=None):
         self.calls = []
-        self.values = {}
+        self.values = dict(values or {})
 
     async def invoke_trigger(self, command, payload):
         self.calls.append((command, payload))
@@ -143,3 +149,48 @@ class FakeRedis:
             return True
 
         return None
+
+
+class FakeResponse:
+    def __init__(self, *, status_code=200, json_data=None, raises=False):
+        self.status_code = status_code
+        self._json_data = json_data or {}
+        self._raises = raises
+
+    def json(self):
+        return self._json_data
+
+    def raise_for_status(self):
+        if self._raises:
+            raise RuntimeError("boom")
+
+
+class FakeAsyncClient:
+    def __init__(self, response=None, exc: Exception | None = None, calls: list | None = None):
+        self._response = response or FakeResponse()
+        self._exc = exc
+        self._calls = calls if calls is not None else []
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        return False
+
+    async def post(self, url, json_body=None, timeout=None, **kwargs):
+        payload = kwargs.get("json", json_body)
+        self._calls.append({"url": url, "json": payload, "timeout": timeout})
+        if self._exc is not None:
+            raise self._exc
+        return self._response
+
+
+class FakeBloom:
+    def __init__(self):
+        self.values = set()
+
+    def __contains__(self, item):
+        return item in self.values
+
+    def add(self, item):
+        self.values.add(item)

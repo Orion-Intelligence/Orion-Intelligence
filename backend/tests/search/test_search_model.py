@@ -4,6 +4,7 @@ import asyncio
 from datetime import datetime, timezone
 from types import SimpleNamespace
 
+import httpx
 import pytest
 
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import (
@@ -225,3 +226,111 @@ def test_search_stealer_iocs_applies_password_schema_after_real_query_build(fake
     document, query = fake_elastic.search_query_calls[0]
     assert document == ELASTIC_INDEX.S_STEALERLOGS_INDEX
     assert "m_emails" in str(query) or "email" in str(query)
+
+
+def test_dynamic_search_returns_json_payload(monkeypatch):
+    class _Response:
+        status_code = 200
+
+        @staticmethod
+        def json():
+            return {"ok": True}
+
+    class _Client:
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return False
+
+        async def post(self, url, json, timeout):
+            assert "runtime/parse/example/user-1" in url
+            assert json == {"hello": "world"}
+            assert timeout == 120
+            return _Response()
+
+    monkeypatch.setattr(httpx, "AsyncClient", lambda: _Client())
+
+    result = _run(search_model.dynamic_search(SimpleNamespace(model_dump=lambda: {"hello": "world"}), "example", "user-1"))
+
+    assert result == {"ok": True}
+
+
+def test_social_search_handles_transport_failure(monkeypatch):
+    class _Client:
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return False
+
+        async def post(self, *args, **kwargs):
+            raise RuntimeError("boom")
+
+    monkeypatch.setattr(httpx, "AsyncClient", lambda: _Client())
+
+    result = _run(search_model.social_search({"query": "x"}, "lookup"))
+
+    assert result.status_code == 500
+    assert result.body == b'{"detail":"Failed to process social search"}'
+
+
+def test_search_consolidated_result_groups_platform_results(fake_elastic):
+    fake_elastic.search_consolidated_result = _search_response(
+        _hit({"m_title": "Leak", "m_content": "body", "m_content_type": ["leaks"]}, index=ELASTIC_INDEX.S_LEAK_INDEX),
+        total=1,
+    )
+    param = search_consolidated_param_model(q="alpha", platform="leak_model")
+
+    result = _run(search_model.search_consolidated_result(param))
+
+    assert len(result.leak_model.Result) == 1
+    assert result.leak_model.Result[0].m_title == "Leak"
+    assert len(fake_elastic.search_consolidated_calls) == 3
+    assert all(indices == [ELASTIC_INDEX.S_LEAK_INDEX] for indices, _query, _boost in fake_elastic.search_consolidated_calls)
+
+
+def test_search_stealerlogs_persona_breach_summarizes_aggregations(fake_elastic):
+    fake_elastic.search_query_result = (
+        True,
+        {
+            "aggregations": {
+                "channels": {"buckets": [{"key": "telegram", "doc_count": 3}]},
+                "types": {"buckets": [{"key": "credential", "doc_count": 2}]},
+            }
+        },
+    )
+
+    result = _run(search_model().search_stealerlogs_persona_breach(search_credential_param_model(q="alice@example.com")))
+
+    assert result["breach_found"] is True
+    assert result["primary_channel"] == "telegram"
+    assert result["severity"] == "HIGH"
+
+
+def test_extract_ioc_from_file_raises_http_exception_on_failed_service(monkeypatch):
+    class _Response:
+        status_code = 500
+        text = "bad upstream"
+
+    class _Client:
+        def __init__(self, timeout):
+            assert timeout == 120
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return False
+
+        async def post(self, url, files):
+            assert "ioc/extract/user-1" in url
+            assert files["file"][0] == "ioc.txt"
+            return _Response()
+
+    monkeypatch.setattr(httpx, "AsyncClient", _Client)
+
+    with pytest.raises(Exception) as exc:
+        _run(search_model().extract_ioc_from_file(b"ioc-data", "ioc.txt", "user-1"))
+
+    assert "bad upstream" in str(exc.value.detail)

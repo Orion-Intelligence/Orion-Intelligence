@@ -84,6 +84,26 @@ def test_get_current_user_rejects_invalid_token():
     assert exc.value.detail == "Invalid token"
 
 
+def test_get_current_user_rejects_missing_token():
+    manager = _make_manager()
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.get_current_user(""))
+
+    assert exc.value.status_code == 401
+    assert exc.value.detail == "Missing or invalid token"
+
+
+def test_get_current_user_allows_crawler_without_session_checks():
+    user = _make_user(role=user_role.CRAWLER, current_session_id=None)
+    manager = _make_manager(user=user)
+
+    current_user = _run(manager.get_current_user(_token({"sub": "alice"})))
+
+    assert current_user is user
+    assert manager._redis.calls == []
+
+
 def test_get_current_role_and_status_return_enum_values():
     user = _make_user()
     manager = _make_manager(user=user)
@@ -102,6 +122,21 @@ def test_get_current_role_rejects_json_response_user(monkeypatch):
 
     assert exc.value.status_code == 403
     assert exc.value.detail == "Access forbidden"
+
+
+def test_get_current_status_rejects_invalid_status_value(monkeypatch):
+    manager = _make_manager()
+    monkeypatch.setattr(
+        manager,
+        "get_current_user",
+        lambda _token: asyncio.sleep(0, result=SimpleNamespace(status="broken")),
+    )
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.get_current_status("token"))
+
+    assert exc.value.status_code == 403
+    assert exc.value.detail == "User access not found"
 
 
 def test_create_access_token_sets_session_for_non_crawler(monkeypatch):
@@ -143,6 +178,23 @@ def test_create_access_token_marks_free_tokens_without_redis(monkeypatch):
     assert manager._redis.calls == []
 
 
+def test_create_access_token_for_crawler_skips_redis_and_extends_expiry():
+    user = _make_user(role=user_role.CRAWLER)
+    manager = _make_manager(user=user)
+
+    token, role = _run(manager.create_access_token({"sub": "alice"}, timedelta(days=10)))
+    payload = jwt.decode(
+        token,
+        CONSTANTS.S_AUTH_SECRET_KEY,
+        algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
+    )
+
+    assert role == user_role.CRAWLER
+    assert "sid" not in payload
+    assert manager._redis.calls == []
+    assert manager._engine.saved == []
+
+
 def test_create_temp_token_embeds_twofa_and_extra_fields():
     token = _run(session_manager.create_temp_token("alice", ttl_minutes=10, extra={"tfa_secret": "secret"}))
     payload = jwt.decode(
@@ -182,6 +234,19 @@ def test_verify_2fa_and_issue_enables_twofa_and_returns_session(monkeypatch):
     assert manager._engine.saved == [user]
 
 
+def test_verify_2fa_and_issue_rejects_invalid_code():
+    secret = pyotp.random_base32()
+    user = _make_user(twofa_secret=secret)
+    manager = _make_manager(user=user)
+    temp_token = _run(session_manager.create_temp_token("alice"))
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.verify_2fa_and_issue(temp_token, "000000"))
+
+    assert exc.value.status_code == 401
+    assert exc.value.detail == "Invalid 2FA code"
+
+
 def test_refresh_token_returns_existing_free_token():
     manager = _make_manager()
     token = _token({"sub": "guest", "free": True})
@@ -191,11 +256,67 @@ def test_refresh_token_returns_existing_free_token():
     assert result == {"access_token": token, "token_type": "bearer"}
 
 
+def test_refresh_token_rejects_when_maintainer_missing():
+    user = _make_user()
+    manager = _make_manager(find_one_results=[user, None])
+    token = _token({"sub": "alice", "sid": "sid-123"})
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.refresh_token(token))
+
+    assert exc.value.status_code == 401
+    assert exc.value.detail == "Maintainer user not found"
+
+
+def test_refresh_token_rejects_expired_member_trial():
+    maintainer = _make_user(
+        role=user_role.MEMBER,
+        account_verify_at=datetime.now(timezone.utc) - timedelta(days=31),
+    )
+    user = _make_user(role=user_role.MEMBER, subscription=False)
+    manager = _make_manager(find_one_results=[user, maintainer])
+    manager._redis.values["session:507f1f77bcf86cd799439011"] = "sid-123"
+    token = _token({"sub": "alice", "sid": "sid-123"})
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.refresh_token(token))
+
+    assert exc.value.status_code == 402
+    assert "Trial expired" in exc.value.detail
+
+
+def test_refresh_token_returns_new_session_payload_for_crawler(monkeypatch):
+    user = _make_user(role=user_role.CRAWLER, current_session_id=None)
+    maintainer = _make_user(account_verify_at=datetime.now(timezone.utc))
+    manager = _make_manager(find_one_results=[user, maintainer])
+    monkeypatch.setattr(manager, "has_onboarding", lambda _company_id: asyncio.sleep(0, result=False))
+    token = _token({"sub": "alice"})
+
+    result = _run(manager.refresh_token(token))
+
+    payload = jwt.decode(
+        result["access_token"],
+        CONSTANTS.S_AUTH_SECRET_KEY,
+        algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
+        options={"verify_exp": False},
+    )
+    assert result["token_type"] == "bearer"
+    assert payload["sub"] == "alice"
+    assert "sid" not in payload
+    assert result["session"]["hasOnboarding"] is False
+
+
 def test_has_onboarding_true_when_tenant_status_matches():
     onboarding = SimpleNamespace(status=TenantStatus.ONBOARDING)
     manager = _make_manager(find_one_results=[onboarding])
 
     assert _run(manager.has_onboarding("507f1f77bcf86cd799439012")) is True
+
+
+def test_has_onboarding_false_for_empty_company_id():
+    manager = _make_manager()
+
+    assert _run(manager.has_onboarding("")) is False
 
 
 def test_generate_verification_token_returns_non_empty_string():

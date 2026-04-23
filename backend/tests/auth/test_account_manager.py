@@ -104,6 +104,16 @@ def test_create_tenant_user_rejects_duplicate_username_or_email(tmp_path):
     assert exc.value.detail == "Username or email already exists"
 
 
+def test_create_tenant_user_rejects_overlong_password(tmp_path):
+    manager = _make_manager(tmp_path, FakeMongoEngine())
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.create_tenant_user(None, None, "x" * 257))
+
+    assert exc.value.status_code == 400
+    assert exc.value.detail == "Password too long"
+
+
 def test_create_user_saves_new_user_when_inputs_are_valid(tmp_path, monkeypatch):
     engine = FakeMongoEngine(find_one_results=[None, None])
     manager = _make_manager(tmp_path, engine)
@@ -140,6 +150,34 @@ def test_create_user_saves_new_user_when_inputs_are_valid(tmp_path, monkeypatch)
     assert engine.saved[0].username == "valid_user"
 
 
+def test_create_user_rejects_invalid_username_before_save(tmp_path, monkeypatch):
+    engine = FakeMongoEngine()
+    manager = _make_manager(tmp_path, engine)
+    current_user = SimpleNamespace(role=user_role.ADMIN, tenant_uuid="tenant-1")
+    data = user_model(
+        username="bad name",
+        email="user@example.com",
+        password="Password1!",
+        role=user_role.ANALYST,
+        status=UserStatus.ACTIVE,
+        subscription=True,
+        licenses=[LicenseName.FREE],
+    )
+
+    monkeypatch.setattr(account_module.helper_controller, "extract_user_mail_fields", lambda payload: (payload.username, payload.email, payload.password))
+    monkeypatch.setattr(
+        "orion.services.mongo_manager.mongo_controller.mongo_controller.get_instance",
+        staticmethod(lambda: SimpleNamespace(get_engine=lambda: engine)),
+    )
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.create_user(data, current_user))
+
+    assert exc.value.status_code == 400
+    assert exc.value.detail == "Error creating user"
+    assert engine.saved == []
+
+
 def test_delete_user_removes_db_records_image_and_registers_audit(tmp_path, monkeypatch):
     user = _make_user(id="delete-me", tenant_uuid="tenant-1")
     engine = FakeMongoEngine(find_one_results=[user])
@@ -160,6 +198,19 @@ def test_delete_user_removes_db_records_image_and_registers_audit(tmp_path, monk
     assert engine.deleted == [user]
     assert not (manager.IMAGE_DIR / "delete-me.enc").exists()
     assert audit.calls == [("tenant-1", "admin-1", "User deleted")]
+
+
+def test_delete_user_rejects_maintainer_from_other_tenant(tmp_path):
+    user = _make_user(id="delete-me", tenant_uuid="tenant-1")
+    engine = FakeMongoEngine(find_one_results=[user])
+    manager = _make_manager(tmp_path, engine)
+    current_user = SimpleNamespace(id="admin-1", tenant_uuid="tenant-2", licenses=[LicenseName.MAINTAINER])
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.delete_user(SimpleNamespace(username="alice"), current_user))
+
+    assert exc.value.status_code == 401
+    assert "same tenant" in exc.value.detail
 
 
 def test_update_user_reactivates_disabled_user_and_updates_licenses(tmp_path, monkeypatch):
@@ -184,6 +235,22 @@ def test_update_user_reactivates_disabled_user_and_updates_licenses(tmp_path, mo
     assert user.licenses == [LicenseName.OSINT_BASIC]
     assert engine.saved == [user]
     assert audit.calls[-1] == ("507f1f77bcf86cd799439012", "maint-1", "User updated")
+
+
+def test_update_user_rejects_when_quota_exceeded(tmp_path):
+    user = _make_user(status=UserStatus.DISABLE, tenant_uuid="507f1f77bcf86cd799439012")
+    tenant = _make_tenant(id="507f1f77bcf86cd799439012", user_quota=1, is_default=False)
+    engine = FakeMongoEngine(find_one_results=[user, tenant])
+    engine.count_result = 1
+    manager = _make_manager(tmp_path, engine)
+    current_user = SimpleNamespace(id="maint-1", tenant_uuid="507f1f77bcf86cd799439012", licenses=[LicenseName.MAINTAINER], role=user_role.MEMBER)
+    request = tenant_param_model(username="alice", status=UserStatus.ACTIVE, licenses=[LicenseName.OSINT_BASIC])
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.update_user(request, current_user))
+
+    assert exc.value.status_code == 400
+    assert exc.value.detail == "User quota exceeded1"
 
 
 def test_update_current_user_updates_fields_and_clears_twofa_secret(tmp_path, monkeypatch):
@@ -216,6 +283,16 @@ def test_update_current_user_updates_fields_and_clears_twofa_secret(tmp_path, mo
     assert audit.calls == [("507f1f77bcf86cd799439012", "507f1f77bcf86cd799439011", "Self profile updated")]
 
 
+def test_get_profile_image_returns_user_image_when_present(tmp_path):
+    manager = _make_manager(tmp_path, FakeMongoEngine())
+    (manager.TENANT_DIR / "tenant-1.png").write_bytes(b"user-image")
+
+    response = _run(manager.getProfileImage("tenant-1"))
+
+    assert response.headers["X-Default-Image"] == "false"
+    assert response.body == b"user-image"
+
+
 def test_get_profile_image_returns_default_flag_for_missing_user_image(tmp_path):
     manager = _make_manager(tmp_path, FakeMongoEngine())
     default_logo = manager.TENANT_DIR / "logo_url_default.png"
@@ -225,6 +302,13 @@ def test_get_profile_image_returns_default_flag_for_missing_user_image(tmp_path)
 
     assert response.headers["X-Default-Image"] == "true"
     assert response.body == b"png-data"
+
+
+def test_safe_decrypt_returns_empty_string_for_missing_value(tmp_path):
+    manager = _make_manager(tmp_path, FakeMongoEngine())
+    enc = Fernet(Fernet.generate_key())
+
+    assert manager.safe_decrypt(enc, None) == ""
 
 
 def test_safe_decrypt_returns_empty_string_for_invalid_ciphertext(tmp_path):
@@ -274,6 +358,18 @@ def test_get_node_builds_response_with_decrypted_tenant_data(tmp_path, monkeypat
     assert node.alert_summary["unseen_total"] == 3
 
 
+def test_get_public_user_hides_profile_when_tenant_visibility_disabled(tmp_path):
+    user = _make_user()
+    tenant = _make_tenant(profile_visibility_enabled=False)
+    engine = FakeMongoEngine(find_one_results=[user, tenant])
+    manager = _make_manager(tmp_path, engine)
+    current_user = SimpleNamespace(id="someone-else", role=user_role.MEMBER, tenant_uuid=user.tenant_uuid)
+
+    result = _run(manager.get_public_user("507f1f77bcf86cd799439011", current_user))
+
+    assert result == {"hidden": True, "message": "Profile hidden by tenant"}
+
+
 def test_get_public_user_hides_profile_when_user_pref_disables_visibility(tmp_path):
     user = _make_user(preferences={"profile_visible": False})
     engine = FakeMongoEngine(find_one_results=[user])
@@ -283,3 +379,24 @@ def test_get_public_user_hides_profile_when_user_pref_disables_visibility(tmp_pa
     result = _run(manager.get_public_user("507f1f77bcf86cd799439011", current_user))
 
     assert result == {"hidden": True, "message": "Profile hidden by user"}
+
+
+def test_get_public_user_returns_visible_profile_payload(tmp_path, monkeypatch):
+    tenant_key = Fernet.generate_key()
+    enc = Fernet(tenant_key)
+    user = _make_user(preferences={"profile_visible": True})
+    tenant = _make_tenant(name=enc.encrypt(b"Acme").decode(), profile_visibility_enabled=True)
+    engine = FakeMongoEngine(find_one_results=[user, tenant])
+    manager = _make_manager(tmp_path, engine)
+    current_user = SimpleNamespace(id="admin-1", role=user_role.ADMIN, tenant_uuid=user.tenant_uuid)
+
+    monkeypatch.setattr(
+        "orion.services.encryption_manager.key_manager.KeyManager.get_instance",
+        staticmethod(lambda: SimpleNamespace(get_or_create_dek=lambda _tenant_id: asyncio.sleep(0, result=tenant_key))),
+    )
+
+    result = _run(manager.get_public_user("507f1f77bcf86cd799439011", current_user))
+
+    assert result["hidden"] is False
+    assert result["tenant_name"] == "Acme"
+    assert result["licenses"] == ["free"]

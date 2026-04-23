@@ -100,12 +100,13 @@ class crawl_model:
             network_type: str,
             is_leak_update: bool,
             name: str = None):
-        normalized_url = base_url
+        raw_base_url = base_url or ""
+        normalized_url = raw_base_url
         if network_type != "telegram":
-            normalized_url = helper_controller.get_base_url(base_url).rstrip('/')
+            normalized_url = helper_controller.get_base_url(raw_base_url).rstrip('/')
 
-        if base_url.__contains__("twitter") or base_url.__contains__("reddit") or base_url.__contains__("forum"):
-            normalized_url = base_url
+        if any(token in raw_base_url for token in ("twitter", "reddit", "forum")):
+            normalized_url = raw_base_url
 
         general_model = await self._engine.find_one(db_url_data_model, db_url_data_model.url == normalized_url)
         if not new_content_type:
