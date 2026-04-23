@@ -456,9 +456,21 @@ class crawl_model:
         return (f"{payload}\n" if payload else "").encode("utf-8")
 
     async def _build_parser_payload(self, parser_root: Path) -> bytes:
+        disabled_script_names = {
+            record.name
+            for record in await self._engine.find(
+                db_feeder_script_model,
+                {
+                    "entry_kind": "script",
+                    "feeder.index_status": False,
+                },
+            )
+        }
         zip_buffer = BytesIO()
         with ZipFile(zip_buffer, "w", compression=ZIP_DEFLATED) as archive:
             for source_path in sorted(path for path in parser_root.rglob("*") if path.is_file()):
+                if source_path.name in disabled_script_names:
+                    continue
                 archive.writestr(
                     source_path.relative_to(parser_root).as_posix(),
                     self._decrypt_parser_file(parser_root, source_path, source_path.read_bytes()),
