@@ -11,15 +11,8 @@ import { SatelliteGeocodeResult } from '../../model/satellite-intel.model';
   templateUrl: './geocode-modal.component.html',
 })
 export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestroy {
-  @Input()  isOpen      = false;
-  @Input()  isScanning  = false;
-  @Input()  coordinates = '';
-  @Input()  delta       = 0.05;
-  @Output() close              = new EventEmitter<void>();
-  @Output() coordinatesChange  = new EventEmitter<string>();
-  @Output() deltaChange        = new EventEmitter<number>();
-  @Output() search             = new EventEmitter<void>();
   private searchTimer?: ReturnType<typeof setTimeout>;
+
   searchQuery      = '';
   searchResults:   SatelliteGeocodeResult[] = [];
   isSearching      = false;
@@ -29,6 +22,16 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
   coordsError:     string | null = null;
   deltaError:      string | null = null;
   activeInputMode: 'search' | 'manual' = 'search';
+
+  @Input()  isOpen      = false;
+  @Input()  isScanning  = false;
+  @Input()  coordinates = '';
+  @Input()  delta       = 0.05;
+
+  @Output() close              = new EventEmitter<void>();
+  @Output() coordinatesChange  = new EventEmitter<string>();
+  @Output() deltaChange        = new EventEmitter<number>();
+  @Output() search             = new EventEmitter<void>();
 
   constructor(private satelliteService: SatelliteIntelService, private elementRef: ElementRef<HTMLElement>, private renderer: Renderer2, @Inject(DOCUMENT) private document: Document) {}
 
@@ -80,7 +83,7 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
     this.isSearching = true;
     this.searchError = null;
     try {
-            console.log("runsearch")
+      console.log("runsearch")
 
       const res = await this.satelliteService.fetchGeocodeOnce(this.searchQuery.trim());
       const results = res?.results ?? [];

@@ -125,12 +125,7 @@
   <div class="flex items-center justify-between px-[14px] py-2 border-b border-[#1e2a40]">
     <span class="text-[12px] font-semibold text-[#e8f0fc]">Anomaly Detection</span>
 
-    <button
-      class="rounded-[5px] border border-[rgba(245,158,11,.35)] 
-             bg-[rgba(245,158,11,.1)] px-2 py-1 text-[11px] 
-             font-medium text-[#f59e0b] hover:bg-[rgba(245,158,11,.18)]"
-      (click)="runAnomalyScan()"
-      [disabled]="isScanning()">
+    <button class="rounded-[5px] border border-[rgba(245,158,11,.35)] bg-[rgba(245,158,11,.1)] px-2 py-1 text-[11px] font-medium text-[#f59e0b] hover:bg-[rgba(245,158,11,.18)]" (click)="runAnomalyScan()" [disabled]="isScanning()">
       Run Scan
     </button>
   </div>
@@ -182,12 +177,7 @@
               <div class="flex items-center justify-between px-[14px] py-2 border-b border-[#1e2a40]">
   <span class="text-[12px] font-semibold text-[#e8f0fc]">Facilities</span>
 
-  <button
-    class="inline-flex items-center gap-[5px] rounded-[5px] border px-2 py-1 text-[11px] font-medium transition-colors"
-    [ngClass]="facilitiesVisible 
-      ? ['border-[#1d9e75]','bg-[#0f6e56]','text-[#9fe1cb]'] 
-      : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]']"
-    (click)="toggleFacilities()">
+  <button class="inline-flex items-center gap-[5px] rounded-[5px] border px-2 py-1 text-[11px] font-medium transition-colors" [ngClass]="facilitiesVisible ? ['border-[#1d9e75]','bg-[#0f6e56]','text-[#9fe1cb]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]']" (click)="toggleFacilities()">
     {{ facilitiesVisible ? 'On' : 'Off' }}
   </button>
 </div>

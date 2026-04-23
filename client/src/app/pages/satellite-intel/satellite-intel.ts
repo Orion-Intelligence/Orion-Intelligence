@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SatelliteIntelService } from './satellite-intel-service.service';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
@@ -21,7 +21,7 @@ import { SatelliteFacilitiesResponse, SatelliteAnomalyResponse, SatelliteCompare
   host:        {
     'class': 'flex h-full min-h-0 w-full flex-1',
   },
-  imports:     [
+  imports:    [
     CommonModule,
     FormsModule,
     GeocodeModalComponent,
@@ -254,30 +254,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   openGeocodeModal(): void {
     this.showGeocodeModal = true;
   }
-
-
-  // onSearchInput(): void {
-  //   clearTimeout(this.searchTimer);
-  //   if (this.searchQuery.trim().length < 2) {
-  //     this.searchResults = []; return;
-  //   }
-  //   this.searchTimer = setTimeout(() => this.doSearch(), 400);
-  // }
-
-  // async doSearch(): Promise<void> {
-  //   const query = this.searchQuery.trim();
-  //   if (!query) {
-  //     return;
-  //   }
-  //   try {
-  //     const res = await firstValueFrom(this.satelliteService.fetchGeocodeOnce(query));
-  //     this.searchResults = res?.results || [];
-  //   }
-  //   catch {
-  //     this.searchResults = [];
-  //   }
-  // }
-
 
   selectSearchResult(r: SatelliteGeocodeResult): void {
     this.inputLat   = r.lat;

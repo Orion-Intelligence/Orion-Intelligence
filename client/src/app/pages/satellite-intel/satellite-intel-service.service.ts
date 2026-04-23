@@ -221,7 +221,7 @@ export class SatelliteIntelService {
   }
 
   async fetchGeocodeOnce(query: string): Promise<any> {
-        console.log("once geocode");
+    console.log("once geocode");
     const cancel$ = new Subject<boolean>();
     const call      = () => this.api.post<SatelliteGeocodeResponse>('satellite/geocode', { query });
     const getStatus = (res: SatelliteGeocodeResponse) => (res?.result?.status || res?.status) as any;
