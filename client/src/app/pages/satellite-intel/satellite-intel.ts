@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SatelliteIntelService } from './satellite-intel-service.service';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
@@ -261,7 +261,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       return;
     }
     try {
-      const res = await this.satelliteService.fetchGeocodeOnce(query);
+      const res = await firstValueFrom(this.satelliteService.fetchGeocodeOnce(query));
       this.searchResults = res?.results || [];
     }
     catch {

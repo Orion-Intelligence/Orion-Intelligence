@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
-import { EMPTY, lastValueFrom, Observable, Subject, Subscription, timer } from 'rxjs';
-import { expand, finalize, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
+import { EMPTY, Observable, Subject, Subscription, throwError, timer } from 'rxjs';
+import { catchError, expand, finalize, map, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { ApiService } from '../../shared/services/api.service';
 import { SatelliteGeocodeResponse, SatelliteFacilitiesResponse, SatelliteSentinelSearchResponse, SatelliteSentinelImageResponse, SatelliteAnomalyResponse, SatelliteCompareResponse, SatelliteLiveAircraftBBoxResponse, SatelliteLiveShipsBBoxResponse, } from '../../shared/model/satellite-intel/satellite-intel-api.models';
 
@@ -234,24 +234,18 @@ export class SatelliteIntelService {
     return this.runTask<SatelliteCompareResponse>(build);
   }
 
-  async fetchGeocodeOnce(query: string): Promise<any> {
-    const cancel$ = new Subject<boolean>();
-    const call      = () => this.api.post<SatelliteGeocodeResponse>('satellite/geocode', { query });
+  fetchGeocodeOnce(query: string): Observable<any> {
+    const normalizedQuery = query.trim();
+    const call      = () => this.api.post<SatelliteGeocodeResponse>('satellite/geocode', { query: normalizedQuery });
     const getStatus = (res: SatelliteGeocodeResponse) => (res?.result?.status || res?.status) as any;
-    try {
-      const response = await lastValueFrom(this.poll<SatelliteGeocodeResponse>(call, getStatus, () => {}, cancel$, 2000),);
+
+    return this.createPolledRequest<SatelliteGeocodeResponse>(call, getStatus, 2000).pipe(map((response) => {
       const responseError = this.getResponseError(response);
       if (responseError) {
         throw new Error(responseError.message);
       }
-      // Backend wraps as { result: { status, results: [...] } }
-      // Return the inner result object so callers can access .results
       return response?.result ?? response;
-    }
-    finally {
-      cancel$.next(true);
-      cancel$.complete();
-    }
+    }), catchError((err) => throwError(() => new Error(this.normalizeClientError(err).message))),);
   }
 
   isValidCoordinates(value: string): boolean {

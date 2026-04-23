@@ -1,6 +1,8 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, Output, Renderer2, SimpleChanges } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { EMPTY, Subject, Subscription } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, finalize, map, switchMap, tap } from 'rxjs/operators';
 import { SatelliteIntelService } from '../../satellite-intel-service.service';
 import { SatelliteGeocodeResult } from '../../model/satellite-intel.model';
 
@@ -11,7 +13,7 @@ import { SatelliteGeocodeResult } from '../../model/satellite-intel.model';
   templateUrl: './geocode-modal.component.html',
 })
 // eslint-disable-next-line local/class-field-group-spacing
-export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestroy {
+export class GeocodeModalComponent implements AfterViewInit, OnInit, OnChanges, OnDestroy {
   @Input()  isOpen      = false;
   @Input()  isScanning  = false;
   @Input()  coordinates = '';
@@ -20,7 +22,9 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
   @Output() coordinatesChange  = new EventEmitter<string>();
   @Output() deltaChange        = new EventEmitter<number>();
   @Output() search             = new EventEmitter<void>();
-  private searchTimer?: ReturnType<typeof setTimeout>;
+  private readonly searchInput$ = new Subject<string>();
+  private searchSub?: Subscription;
+  private latestSearchRequestId = 0;
   searchQuery      = '';
   searchResults:   SatelliteGeocodeResult[] = [];
   isSearching      = false;
@@ -33,12 +37,45 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
 
   constructor(private satelliteService: SatelliteIntelService, private elementRef: ElementRef<HTMLElement>, private renderer: Renderer2, @Inject(DOCUMENT) private document: Document) {}
 
+  ngOnInit(): void {
+    this.searchSub = this.searchInput$.pipe(map((query) => query.trim()), debounceTime(400), distinctUntilChanged(), tap((query) => {
+      this.searchError = null;
+      if (query.length < 2) {
+        this.isSearching = false;
+        this.searchResults = [];
+      }
+    }), switchMap((query) => {
+      if (query.length < 2) {
+        return EMPTY;
+      }
+
+      const requestId = ++this.latestSearchRequestId;
+      this.isSearching = true;
+
+      return this.satelliteService.fetchGeocodeOnce(query).pipe(tap((res) => {
+        const results = res?.results ?? [];
+        this.searchResults = results;
+        this.searchError = results.length ? null : `No results for "${query}"`;
+      }),
+      catchError((err: Error) => {
+        this.searchResults = [];
+        this.searchError = err?.message || 'Search failed';
+        return EMPTY;
+      }),
+      finalize(() => {
+        if (requestId === this.latestSearchRequestId) {
+          this.isSearching = false;
+        }
+      }),);
+    }),).subscribe();
+  }
+
   ngAfterViewInit(): void {
     this.renderer.appendChild(this.document.body, this.elementRef.nativeElement);
   }
 
   ngOnDestroy(): void {
-    clearTimeout(this.searchTimer);
+    this.searchSub?.unsubscribe();
     if (this.document.body.contains(this.elementRef.nativeElement)) {
       this.renderer.removeChild(this.document.body, this.elementRef.nativeElement);
     }
@@ -46,13 +83,16 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen']?.currentValue) {
+      this.latestSearchRequestId++;
       this.manualCoords = this.coordinates;
       this.manualDelta  = this.delta;
       this.searchQuery  = '';
       this.searchResults = [];
       this.searchError   = null;
+      this.isSearching   = false;
       this.coordsError   = null;
       this.deltaError    = null;
+      this.searchInput$.next('');
     }
   }
 
@@ -63,37 +103,9 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
     }
   }
 
-  onSearchInput(): void {
-    clearTimeout(this.searchTimer);
-    this.searchError   = null;
-    this.searchResults = [];
-    if (this.searchQuery.trim().length < 2) {
-      return;
-    }
-    this.isSearching = true;
-    this.searchTimer = setTimeout(() => this.runSearch(), 400);
-  }
-
-  async runSearch(): Promise<void> {
-    if (!this.searchQuery.trim()) {
-      return;
-    }
-    this.isSearching = true;
-    this.searchError = null;
-    try {
-      const res = await this.satelliteService.fetchGeocodeOnce(this.searchQuery.trim());
-      const results = res?.results ?? [];
-      this.searchResults = results;
-      if (!results.length) {
-        this.searchError = `No results for "${this.searchQuery}"`;
-      }
-    }
-    catch (err: any) {
-      this.searchError = err?.message || 'Search failed';
-    }
-    finally {
-      this.isSearching = false;
-    }
+  onSearchInput(query: string): void {
+    this.searchQuery = query;
+    this.searchInput$.next(query);
   }
 
   selectResult(result: SatelliteGeocodeResult): void {
