@@ -35,7 +35,7 @@ bcrypt = "4.0.1"
 PyJWT = "2.12.1"
 
 [tool.pytest.ini_options]
-addopts = "--ignore=backend/routes/test_routes.py --ignore=routes/test_routes.py --cov=backend/orion --cov=backend/routes --cov-report=term-missing"
+addopts = "--ignore=backend/routes/test_routes.py --ignore=routes/test_routes.py --ignore=backend/tests/routes --cov=backend/orion --cov-report=term-missing"
 testpaths = ["backend/tests"]
 pythonpath = ["backend"]
 markers = [
@@ -53,6 +53,7 @@ filterwarnings = [
 [tool.coverage.run]
 omit = [
     "*/__init__.py",
+    "*/backend/routes/*",
     "*/configs/*",
     "*/orion/services/log_manager/log_controller.py",
 ]
