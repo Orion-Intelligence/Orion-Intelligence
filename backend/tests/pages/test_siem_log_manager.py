@@ -31,7 +31,7 @@ def test_siem_manager_can_inject_and_search_same_logs(monkeypatch):
 
     manager = SiemLogManager.get_instance()
     manager._engine = FakeMongoEngine(SimpleNamespace(event_management_enabled=True))
-    current_user = SimpleNamespace(tenant_uuid="tenant-1")
+    current_user = SimpleNamespace(tenant_uuid="000000000000000000000001")
 
     inject_payload = InjectionBatchRequestModel(
         logs=[
@@ -56,7 +56,7 @@ def test_siem_manager_can_inject_and_search_same_logs(monkeypatch):
     stored_doc = fake_elastic.docs[inject_result["ids"][0]]["_source"]
     assert stored_doc["raw"].startswith("Dummy SIEM log record 0009")
     assert stored_doc["m_ip"] == ["10.10.0.9"]
-    assert stored_doc["tenant_id"] == "tenant-1"
+    assert stored_doc["tenant_id"] == "000000000000000000000001"
 
     search_payload = SiemSearchRequestModel(q="", **{"from": 0}, size=100, date_range=None)
     search_result = _run(manager.search_logs(search_payload, current_user))
