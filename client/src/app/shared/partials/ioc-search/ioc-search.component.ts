@@ -1,60 +1,75 @@
-import { Component, OnInit, output } from '@angular/core';
+import { Component, OnInit, input, output } from '@angular/core';
 import { KeyValuePipe, NgClass } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { advancedRowMotionAnimation } from '../../../shared/animations/advanced.row.motion.animation';
-import { StealerlogsAdvancedFilter, StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
+import { StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
+
+type SharedSearchAdvancedFilter = { id: string; tag: string; value: string; operator: '&&' | '||' };
+
 @Component({
-  selector: 'app-credentials-search-bar',
+  selector: 'app-ioc-search',
   imports: [KeyValuePipe, FormsModule, TooltipDirective, NgClass],
-  templateUrl: './credentials-search-bar.component.html',
+  templateUrl: './ioc-search.component.html',
   animations: [fadeInDashboardItem, advancedRowMotionAnimation],
 })
-export class CredentialsSearchBarComponent implements OnInit{
-  private VALUE_VALIDATORS: RegExp[] = [ /^[^\s@]+@[^\s@]+\.[^\s@]+$/, /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/, /^(?:\d{6}|\d{13,19})$/ ];
-  private TAG_VALIDATORS: Record<string, RegExp> = { [StealerlogsSearchFilters.EMAIL]: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, [StealerlogsSearchFilters.DOMAIN]: /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, [StealerlogsSearchFilters.IP]: /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/, [StealerlogsSearchFilters.CREDITCARD]: /^(?:\d{6}|\d{13,19})$/, [StealerlogsSearchFilters.CHANNEL]: /^.*$/ };
+export class IocSearchComponent implements OnInit {
+  private readonly DEFAULT_VALUE_VALIDATORS: RegExp[] = [ /^[^\s@]+@[^\s@]+\.[^\s@]+$/, /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/, /^(?:\d{6}|\d{13,19})$/ ];
+  private readonly DEFAULT_TAG_VALIDATORS: Record<string, RegExp> = { [StealerlogsSearchFilters.EMAIL]: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, [StealerlogsSearchFilters.DOMAIN]: /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, [StealerlogsSearchFilters.IP]: /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/, [StealerlogsSearchFilters.CREDITCARD]: /^(?:\d{6}|\d{13,19})$/, [StealerlogsSearchFilters.CHANNEL]: /^.*$/ };
 
-  readonly MAX_ADVANCED_FILTERS = 8;
-  SearchTag = StealerlogsSearchFilters;
-  FILTER_LABELS = StealerlogsSearchFilterLabels;
+  readonly basicTags = input<string[]>([StealerlogsSearchFilters.ALL, StealerlogsSearchFilters.DOMAIN, StealerlogsSearchFilters.EMAIL, StealerlogsSearchFilters.CREDITCARD, StealerlogsSearchFilters.IP]);
+  readonly filterLabels = input<Record<string, string>>(StealerlogsSearchFilterLabels);
+  readonly allTag = input<string>(StealerlogsSearchFilters.ALL);
+  readonly defaultBasicTag = input<string>(StealerlogsSearchFilters.ALL);
+  readonly defaultAdvancedTag = input<string>(StealerlogsSearchFilters.DOMAIN);
+  readonly maxAdvancedFilters = input<number>(8);
+  readonly valueValidators = input<RegExp[]>(this.DEFAULT_VALUE_VALIDATORS);
+  readonly tagValidators = input<Record<string, RegExp>>(this.DEFAULT_TAG_VALIDATORS);
+  readonly useRouteQuery = input<boolean>(true);
+  readonly advancedTitle = input<string>('Advanced Filter Builder');
+  readonly advancedSubtitle = input<string>('Combine multiple filters with AND/OR for precise results');
   isAdvanced = false;
   basicSubmitted = false;
   basicTouched = false;
-  selectedTag = StealerlogsSearchFilters.ALL;
+  selectedTag = this.defaultBasicTag();
   basicQuery = '';
-  advancedFilters: StealerlogsAdvancedFilter[] = [ { id: this.generateId(), tag: StealerlogsSearchFilters.DOMAIN, value: '', operator: '&&' } ];
+  advancedFilters: SharedSearchAdvancedFilter[] = [{ id: this.generateId(), tag: this.defaultAdvancedTag(), value: '', operator: '&&' }];
   readonly searchTriggered = output<string>();
 
-  constructor(protected sidebarService: SidebarService,private route: ActivatedRoute) { }
+  constructor(protected sidebarService: SidebarService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      const q = params['q'];
-      if (q) {
-        this.basicQuery = q;
-      }
-    });
+    this.selectedTag = this.defaultBasicTag();
+    this.advancedFilters = [{ id: this.generateId(), tag: this.defaultAdvancedTag(), value: '', operator: '&&' }];
+    if (this.useRouteQuery()) {
+      this.route.queryParams.subscribe(params => {
+        const q = params['q'];
+        if (q) {
+          this.basicQuery = q;
+        }
+      });
+    }
   }
 
   toggleAdvanced(): void {
     this.isAdvanced = !this.isAdvanced;
   }
 
-  selectBasicTag(tag: StealerlogsSearchFilters): void {
+  selectBasicTag(tag: string): void {
     this.selectedTag = tag;
     this.basicSubmitted = false;
   }
 
   addFilter(): void {
-    if (this.advancedFilters.length >= this.MAX_ADVANCED_FILTERS) {
+    if (this.advancedFilters.length >= this.maxAdvancedFilters()) {
       return;
     }
     this.advancedFilters.push({
       id: this.generateId(),
-      tag: StealerlogsSearchFilters.DOMAIN,
+      tag: this.defaultAdvancedTag(),
       value: '',
       operator: '&&'
     });
@@ -99,7 +114,7 @@ export class CredentialsSearchBarComponent implements OnInit{
       return false;
     }
     const value = this.basicQuery?.trim();
-    if (this.selectedTag !== StealerlogsSearchFilters.ALL && !value) {
+    if (this.selectedTag !== this.allTag() && !value) {
       return true;
     }
     if (!value) {
@@ -108,7 +123,7 @@ export class CredentialsSearchBarComponent implements OnInit{
     return !this.validateComplexQuery(value);
   }
 
-  isAdvancedInvalid(filter: StealerlogsAdvancedFilter): boolean {
+  isAdvancedInvalid(filter: SharedSearchAdvancedFilter): boolean {
     return !!filter.value && !this.validateValue(filter.tag, filter.value);
   }
 
@@ -116,7 +131,7 @@ export class CredentialsSearchBarComponent implements OnInit{
     if (!input.trim()) {
       return false;
     }
-    if (this.selectedTag === StealerlogsSearchFilters.ALL) {
+    if (this.selectedTag === this.allTag()) {
       return true;
     }
     if (this.hasInvalidOperators(input)) {
@@ -133,7 +148,7 @@ export class CredentialsSearchBarComponent implements OnInit{
   }
 
   private isValidToken(value: string): boolean {
-    return this.VALUE_VALIDATORS.some(regex => regex.test(value));
+    return this.valueValidators().some(regex => regex.test(value));
   }
 
   private hasInvalidOperators(input: string): boolean {
@@ -159,7 +174,7 @@ export class CredentialsSearchBarComponent implements OnInit{
       .trim();
   }
 
-  validateValue(tag: StealerlogsSearchFilters, value: string): boolean {
+  validateValue(tag: string, value: string): boolean {
     if (tag == StealerlogsSearchFilters.CHANNEL) {
       return true;
     }
@@ -169,7 +184,7 @@ export class CredentialsSearchBarComponent implements OnInit{
     if (/\s+/.test(value) && !/&&|\|\|/.test(value)) {
       return false;
     }
-    const validator = this.TAG_VALIDATORS[tag];
+    const validator = this.tagValidators()[tag];
     if (!validator) {
       return true;
     }
@@ -208,7 +223,7 @@ export class CredentialsSearchBarComponent implements OnInit{
 
   getBasicErrorMessage(): string {
     const value = this.basicQuery?.trim();
-    if (!value && this.selectedTag !== StealerlogsSearchFilters.ALL) {
+    if (!value && this.selectedTag !== this.allTag()) {
       return `Please enter a valid ${this.selectedTag}`;
     }
     if (this.hasInvalidOperators(value)) {
@@ -217,9 +232,10 @@ export class CredentialsSearchBarComponent implements OnInit{
     if (/\s+/.test(value) && !/&&|\|\|/.test(value)) {
       return 'Use && or || between multiple values';
     }
-    if (this.selectedTag === StealerlogsSearchFilters.ALL) {
+    if (this.selectedTag === this.allTag()) {
       return '';
     }
+    const fallbackLabel = this.filterLabels()[this.selectedTag] || this.selectedTag;
     switch (this.selectedTag) {
       case StealerlogsSearchFilters.EMAIL:
         return 'Invalid email format';
@@ -230,7 +246,7 @@ export class CredentialsSearchBarComponent implements OnInit{
       case StealerlogsSearchFilters.CREDITCARD:
         return 'Invalid crediticard format';
       default:
-        return 'Invalid value';
+        return `Invalid ${fallbackLabel.toLowerCase()} format`;
     }
   }
 
@@ -253,7 +269,7 @@ export class CredentialsSearchBarComponent implements OnInit{
 
   filterBasicInput(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
-    if (this.selectedTag === StealerlogsSearchFilters.ALL) {
+    if (this.selectedTag === this.allTag()) {
       this.basicQuery = inputElement.value;
       return;
     }
@@ -285,9 +301,5 @@ export class CredentialsSearchBarComponent implements OnInit{
 
   private generateId(): string {
     return Math.random().toString(36).substring(2, 9);
-  }
-
-  trackByFilterId(_: number, filter: StealerlogsAdvancedFilter): string {
-    return filter.id;
   }
 }

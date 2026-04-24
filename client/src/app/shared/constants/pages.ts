@@ -94,6 +94,7 @@ export enum NETINTSubCategory {
 }
 export enum ProfileSubCategory {
     HOMEPAGE = 'Homepage',
+    EVENT_MANAGEMENT = 'Event-Management',
     FEEDER = 'Feeder',
     IOC = 'IOC',
     TENANT_SETTINGS = 'Tenant-Settings',

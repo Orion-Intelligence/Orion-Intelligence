@@ -16,8 +16,10 @@ from orion.api.interactive.search_manager.search_data_model.consolidated.search_
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_crack_model, search_dynamic_crypto_model, search_dynamic_onion_search, search_dynamic_param_model, search_dynamic_social_model
 from orion.api.interactive.search_manager.search_model import search_model
+from orion.api.interactive.siemlog_manager.siem_log_manager import SiemLogManager
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest, UrlVulnerabilityScanRequest
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import GeoCameraDetectRangesRequest, GeoCameraDetectRequest, IPScanRequest, NetIntelDeepScanRequest, ResolveIPRequest
+from orion.api.server.crawl_manager.class_model.log_model import InjectionBatchRequestModel, InjectionBatchResponseModel, SiemSearchRequestModel, SiemSearchResponseModel
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import SocialScrapeRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
@@ -47,6 +49,34 @@ async def _scan_domain_with_type(payload: DomainScanRequest, user_id: str, scan_
 def _enforce_demo_safe_search(param: search_consolidated_param_model, current_user, is_free: bool = False) -> None:
     if current_user and getattr(current_user, "role", None) == user_role.DEMO and is_free:
         param.safe = True
+
+
+@api_routes.post(
+    "/api/index/injection",
+    summary="Batch inject SIEM logs",
+    description="Ingest multiple SIEM/raw log records into the SIEM index in a single request. Each item in `logs` becomes one upserted SIEM document keyed from the authenticated user's tenant and the raw log text. `tenant_id` is injected from the current user and is not accepted from the request body.",
+    tags=["Crawler"],
+    operation_id="batchInjectSiemLogs",
+    status_code=200,
+    response_model=InjectionBatchResponseModel,
+    response_description="Batch injection result with indexed record count, target index name, and generated document ids.",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
+async def index_injection(payload: InjectionBatchRequestModel = Body(...), current_user=Depends(get_current_user)):
+    return await SiemLogManager.get_instance().inject_logs(payload, current_user)
+
+
+@api_routes.post(
+    "/api/profile/event-management/siem/search",
+    summary="Search SIEM logs",
+    description="Search SIEM log records for the authenticated user tenant. Admin and maintainer users can search events only within their own tenant scope.",
+    tags=["Profile"],
+    operation_id="searchProfileSiemLogs",
+    status_code=200,
+    response_model=SiemSearchResponseModel,
+    response_description="Matched SIEM log records, total hit count, page count, and active batch size.",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])), Depends(license_required("maintainer", bypass_roles=[user_role.ADMIN])), Depends(limiter_dependency)])
+async def search_siem_logs(payload: SiemSearchRequestModel = Body(...), current_user=Depends(get_current_user)):
+    return await SiemLogManager.get_instance().search_logs(payload, current_user)
 
 
 @api_routes.post(

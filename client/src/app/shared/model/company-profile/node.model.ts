@@ -45,6 +45,7 @@ export interface TenantDataModel {
     quotaExceeded: boolean;
     image?: string;
     profileVisibilityEnabled?: boolean;
+    eventManagementEnabled?: boolean;
 }
 export interface userMetaData {
     username: string;

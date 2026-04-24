@@ -41,7 +41,7 @@ class elastic_request_generator:
         value = parsed.get("value")
         fields = mapping.get(tag)
 
-        if tag in ("m_domain", "domain", "m_search_all"):
+        if tag in ("m_domain", "domain", "m_search_all", "all"):
             def _as_list(x):
                 if not x:
                     return []
@@ -53,7 +53,7 @@ class elastic_request_generator:
             merged += ["source_domain", "source_domain"]
             fields = list(dict.fromkeys([f for f in merged if f]))
 
-            if tag == "m_search_all" and allowed_keys:
+            if tag in ("m_search_all", "all") and allowed_keys:
                 fields = list(dict.fromkeys(fields + list(allowed_keys)))
 
         if not fields:
@@ -898,6 +898,118 @@ class elastic_request_generator:
             post["m_hash"] = helper_controller.generate_data_hash(m_hash)
             index_entries.append({ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_SOCIAL_INDEX, ELASTIC_KEYS.S_VALUE: post})
         return index_entries
+
+    @staticmethod
+    def index_query_siem_logs(logs, tenant_id: str):
+        index_entries = []
+
+        for index, item in enumerate(logs, start=1):
+            now = datetime.now(timezone.utc).isoformat()
+            raw = item["raw"].strip()
+            timestamp = item.get("timestamp") or now
+            ingested_at = item.get("ingested_at") or now
+            doc_id = hashlib.sha256(f"{tenant_id}:{raw}".encode("utf-8")).hexdigest()
+
+            document = dict(item)
+            document["tenant_id"] = tenant_id
+            document["raw"] = raw
+            document["timestamp"] = timestamp
+            document["ingested_at"] = ingested_at
+            document["hash"] = document.get("hash") or doc_id
+            document["event_id"] = document.get("event_id") or f"siem-event-{index:04d}"
+
+            index_entries.append({
+                "doc_id": doc_id,
+                ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_SIEM_INDEX,
+                ELASTIC_KEYS.S_VALUE: document,
+            })
+
+        return index_entries
+
+    @staticmethod
+    def search_query_siem_logs(query_text: str, tenant_id: str, from_: int = 0, size: int = 500, date_range: str | None = None):
+        must_clauses = [{"term": {"tenant_id": tenant_id}}]
+        normalized_query = (query_text or "").strip()
+
+        if not normalized_query:
+            must_clauses.append({"match_all": {}})
+        elif ":" in normalized_query and ("&&" in normalized_query or "||" in normalized_query or re.search(r"\b(?:all|domain|email|ip|event_type|source|host|user|severity):", normalized_query)) is not None:
+            parsed = helper_controller.parse_tagged_logic_query_for_iocs(normalized_query)
+            logic_query = elastic_request_generator.build_es_from_tagged(parsed, ELASTIC_ENUMS.mapping_siem_iocs)
+            must_clauses.append(logic_query)
+        else:
+            should_clauses = [{
+                "simple_query_string": {
+                    "query": normalized_query,
+                    "fields": [
+                        "raw^5",
+                        "event_type^4",
+                        "source^3",
+                        "severity^2",
+                        "host^3",
+                        "user^3",
+                        "tags^2",
+                        "hash^3",
+                        "event_id^3",
+                        "m_*^4",
+                        "m_domain^4",
+                        "m_email^4",
+                        "m_ip^4",
+                        "*"
+                    ],
+                    "default_operator": "and",
+                    "lenient": True
+                }
+            }]
+
+            exact_value = normalized_query
+            if exact_value:
+                escaped_exact_value = exact_value.replace("\\", "\\\\").replace('"', '\\"')
+                should_clauses.extend([
+                    {"term": {"m_ip": exact_value}},
+                    {"term": {"m_domain": exact_value}},
+                    {"term": {"m_email": exact_value}},
+                    {
+                        "query_string": {
+                            "query": f"\"{escaped_exact_value}\"",
+                            "fields": ["m_*"],
+                            "lenient": True
+                        }
+                    }
+                ])
+
+            must_clauses.append({
+                "bool": {
+                    "should": should_clauses,
+                    "minimum_should_match": 1
+                }
+            })
+
+        if date_range:
+            start_date, end_date = [part.strip() for part in date_range.split(",", 1)]
+            must_clauses.append({
+                "range": {
+                    "timestamp": {
+                        "gte": start_date,
+                        "lte": end_date
+                    }
+                }
+            })
+
+        query_body = {
+            "query": {
+                "bool": {
+                    "must": must_clauses
+                }
+            },
+            "from": from_,
+            "size": size,
+            "sort": [
+                {"timestamp": {"order": "desc", "missing": "_last"}},
+                {"ingested_at": {"order": "desc", "missing": "_last"}}
+            ]
+        }
+        return ELASTIC_INDEX.S_SIEM_INDEX, query_body
 
     @staticmethod
     def index_query_sanctions(p_index_data):

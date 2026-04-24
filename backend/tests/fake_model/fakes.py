@@ -92,6 +92,7 @@ class FakeElastic:
         self.search_consolidated_result = {}
         self.get_result = {}
         self.get_doc_result = []
+        self.docs: dict[str, dict] = {}
 
     async def index_data(self, payload, bypass_empty_embedding=False):
         self.index_calls.append((payload, bypass_empty_embedding))
@@ -107,6 +108,26 @@ class FakeElastic:
 
     async def search_query(self, document, data_filter):
         self.search_query_calls.append((document, data_filter))
+        if self.docs and self.search_query_result == (True, {}):
+            must_clauses = data_filter["query"]["bool"]["must"]
+            tenant_id = next(
+                clause["term"]["tenant_id"]
+                for clause in must_clauses
+                if "term" in clause and "tenant_id" in clause["term"]
+            )
+            matching_hits = []
+            for stored in self.docs.values():
+                source = stored["_source"]
+                if source.get("tenant_id") != tenant_id:
+                    continue
+                matching_hits.append(stored)
+
+            return True, {
+                "hits": {
+                    "hits": matching_hits[: data_filter["size"]],
+                    "total": {"value": len(matching_hits)},
+                }
+            }
         return self.search_query_result
 
     async def search_consolidated_ranked_query(self, indices, query, indices_boost=None):
@@ -128,6 +149,17 @@ class FakeElastic:
     async def delete_data(self, *args, **kwargs):
         self.delete_calls.append((args, kwargs))
         return True
+
+    def get_connection(self):
+        return self
+
+    async def update(self, index, id, body, request_timeout=220):
+        self.docs[id] = {
+            "_index": index,
+            "_id": id,
+            "_source": dict(body["doc"]),
+        }
+        return {"result": "updated"}
 
 
 FakeEngine = FakeMongoEngine
