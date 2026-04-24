@@ -13,6 +13,7 @@ import { AnomalySectionComponent } from './anomaly-section/anomaly-section.compo
 import { SentinelSearchSectionComponent } from './sentinel-search-section/sentinel-search-section.component';
 import { SentinelImageSectionComponent } from './sentinel-image-section/sentinel-image-section.component';
 import { SatelliteFacilitiesResponse, SatelliteAnomalyResponse, SatelliteCompareResponse, SatelliteSentinelImageResult, SatelliteSentinelSearchResponse, SatelliteGeocodeResult, SatelliteLiveAircraft, SatelliteLiveShip, } from '../../shared/model/satellite-intel/satellite-intel-api.models';
+import { ThreatLensComponent } from "../threat-lens/threat-lens";
 
 @Component({
   selector:    'app-satellite-intel',
@@ -21,7 +22,7 @@ import { SatelliteFacilitiesResponse, SatelliteAnomalyResponse, SatelliteCompare
   host:        {
     'class': 'flex h-full min-h-0 w-full flex-1',
   },
-  imports:    [
+  imports: [
     CommonModule,
     FormsModule,
     GeocodeModalComponent,
@@ -31,7 +32,8 @@ import { SatelliteFacilitiesResponse, SatelliteAnomalyResponse, SatelliteCompare
     AnomalySectionComponent,
     SentinelSearchSectionComponent,
     SentinelImageSectionComponent,
-  ],
+    ThreatLensComponent
+],
   animations: [fadeInDashboardItem],
 })
 export class SatelliteIntel implements OnInit, OnDestroy {
@@ -41,7 +43,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private aircraftTimer?: ReturnType<typeof setInterval>;
   private shipsTimer?: ReturnType<typeof setInterval>;
   private searchTimer?: ReturnType<typeof setTimeout>;
-  private pendingRequest: 'facilities' | 'anomaly' | 'compare' | 'sentinel' | 'sentinel-image' = 'compare';
+  private pendingRequest: 'facilities' | 'anomaly' | 'compare' | 'sentinel' | 'sentinel-image' | null = null;
   private skipNextMapMovedEvent = false;
   private mainLoadingSequence = 0;
   private mainLoadingRequests = new Map<number, { title: string; message: string }>();
@@ -49,7 +51,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   readonly progressSegments = Array.from({ length: 20 }, (_, i) => i);
   readonly panelTabs = [ { id: 'compare', label: 'Compare' }, { id: 'anomaly', label: 'Anomaly' }, { id: 'sentinel', label: 'Sentinel' }, { id: 'image', label: 'Image' }, { id: 'facilities', label: 'Facilities' }, ] as const;
   activePanel: 'compare' | 'anomaly' | 'sentinel' | 'image' | 'facilities' = 'compare';
-  activeTab: 'map' | 'tracking' = 'map';
+  activeTab: 'map' | 'tracking' | 'threat' = 'map';
   coordsForm = { value: '', delta: 0.05 };
   formError:  string | null = null;
   inputLat   = 50.0;
@@ -83,7 +85,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   selectedTrackingTypes: ('aircraft' | 'ship')[] = ['aircraft'];
   isTrackingDropdownOpen = false;
   isScanning = computed(() =>
-    this.satelliteService.isRunning() && !this.satelliteService.onError(),);
+    !!this.pendingRequest && !this.satelliteService.onError(),);
 
   constructor( public satelliteService: SatelliteIntelService, private route: ActivatedRoute, private router: Router, ) {
     effect(() => {
@@ -127,6 +129,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.satelliteService.resetState();
+    this.setPanel('compare');
     const section = this.route.snapshot.queryParamMap.get('section');
     const q = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
     if (section) {
@@ -159,8 +162,18 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     return this.activeTab === 'tracking';
   }
 
+  get isThreatView(): boolean {
+    return this.activeTab === 'threat';
+  }
+
+  
+
   setPanel(id: typeof this.activePanel): void {
     this.activePanel = id;
+
+    this.satelliteService.resetState();
+  this.pendingRequest = null;
+  this.currentStep = '';
   }
 
   goToCoords(): void {
@@ -176,7 +189,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   onLayerChange(): void { /* handled by map-section input */ }
 
-  setActiveView(view: 'map' | 'tracking'): void {
+  setActiveView(view: 'map' | 'tracking' | 'threat'): void {
     this.activeTab = view;
     if (view === 'tracking') {
     this.selectedTrackingTypes = ['aircraft'];
@@ -374,6 +387,7 @@ onClickOutside(event: Event): void {
     const lat = this.lat ?? this.inputLat;
     const lon = this.lon ?? this.inputLon;
     if (!lat || !lon) {
+      this.pendingRequest = null;
       return;
     }
     this.lat = lat;
@@ -512,7 +526,7 @@ onClickOutside(event: Event): void {
     return 0;
   }
 
-  private loadFacilities(): void {
+  public loadFacilities(): void {
     if (!this.lat || !this.lon || !this.facilitiesVisible) {
       return;
     }

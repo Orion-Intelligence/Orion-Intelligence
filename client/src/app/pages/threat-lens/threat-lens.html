@@ -1,16 +1,16 @@
-<section class="relative h-[calc(100vh)] min-h-[560px] overflow-hidden rounded-[14px] border border-cyan-500/20 bg-slate-900">
+<section class="relative h-[calc(100vh)] min-h-[560px] overflow-hidden rounded-[14px] bg-slate-900">
 
 	<div #mapViewNode class="h-full w-full"></div>
 
 	<div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(56,189,248,0.16),transparent_44%),radial-gradient(circle_at_82%_76%,rgba(34,197,94,0.16),transparent_40%)]"></div>
 
 	@if (isLoading) {
-		<div class="absolute inset-0 z-30 flex items-center justify-center bg-slate-950">
-			<div class="flex min-w-[220px] flex-col items-center gap-3 rounded-[16px] border border-cyan-400/20 bg-slate-900/85 px-6 py-5 text-center shadow-[0_0_30px_rgba(34,211,238,0.12)]">
-				<div class="h-11 w-11 animate-spin rounded-full border-4 border-cyan-400/20 border-t-cyan-300"></div>
+		<div class="absolute inset-0 z-30 flex items-center justify-center bg-[var(--color-blue-850)]">
+			<div class="mx-4 flex min-w-[220px] max-w-[360px] flex-col items-center gap-3 rounded-[16px] bg-[var(--color-blue-790)] px-6 py-5 text-center shadow-[0_12px_30px_rgba(0,0,0,0.2)] [body.light-theme_&]:shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+				<div class="h-11 w-11 animate-spin rounded-full border-4 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></div>
 				<div>
-					<p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-cyan-200">Loading Threat Lens</p>
-					<p class="mt-1 text-[12px] text-slate-300">{{ statusMessage }}</p>
+					<p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">Loading Threat Lens</p>
+					<p class="mt-1 text-[12px] text-[var(--color-text3)]">{{ statusMessage }}</p>
 				</div>
 			</div>
 		</div>
