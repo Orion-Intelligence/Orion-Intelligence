@@ -167,7 +167,7 @@ export function assertFirstDefacementRow(data: {search_query: string; base_url: 
       const matchingRow = Array.from($rows).find((row) => {
         const cells = row.querySelectorAll('td');
         const rowText = Array.from(cells).map((cell) => cell.textContent?.trim() || '').join(' ');
-        return allowedBaseUrls.some((baseUrl) => rowText.includes(baseUrl.trim())) || rowText.includes(data.team.trim());
+        return allowedBaseUrls.some((baseUrl) => rowText.includes(baseUrl.trim())) && rowText.includes(data.team.trim());
       });
 
       expect(matchingRow, `defacement row for ${allowedBaseUrls.join(' or ')}`).to.exist;
