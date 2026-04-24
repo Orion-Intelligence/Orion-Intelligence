@@ -134,58 +134,15 @@ jobs:
           set -euo pipefail
           test -s client/coverage/lcov.info
 
-      - name: Run backend static tests with coverage
+      - name: Run backend tests with coverage
         run: |
           set -euo pipefail
           docker exec trusted-web-main sh -lc '
             set -e
             cd /app
             python -m pip install --quiet pytest pytest-cov
-            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests/static \
-              -m static --maxfail=1 --disable-warnings
-          '
-
-      - name: Run backend journey tests with coverage append
-        run: |
-          set -euo pipefail
-          docker exec trusted-web-main sh -lc '
-            set -e
-            cd /app
-            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests/journey \
-              -m journey --cov-append --maxfail=1 --disable-warnings \
-              --cov-report=xml:/tmp/backend-coverage.xml
-          '
-
-      - name: Run backend service tests with coverage append
-        run: |
-          set -euo pipefail
-          docker exec trusted-web-main sh -lc '
-            set -e
-            cd /app
-            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests/service \
-              --cov-append --maxfail=1 --disable-warnings \
-              --cov-report=xml:/tmp/backend-coverage.xml
-          '
-
-      - name: Run backend tenant tests with coverage append
-        run: |
-          set -euo pipefail
-          docker exec trusted-web-main sh -lc '
-            set -e
-            cd /app
-            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests/tenant \
-              --cov-append --maxfail=1 --disable-warnings \
-              --cov-report=xml:/tmp/backend-coverage.xml
-          '
-
-      - name: Run backend crawler tests with coverage append
-        run: |
-          set -euo pipefail
-          docker exec trusted-web-main sh -lc '
-            set -e
-            cd /app
-            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests/crawler \
-              --cov-append --maxfail=1 --disable-warnings \
+            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests \
+              --maxfail=1 --disable-warnings \
               --cov-report=xml:/tmp/backend-coverage.xml
           '
 
