@@ -187,6 +187,26 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('button[aria-label="Expand row"]').should('have.length.greaterThan', 0).first().scrollIntoView().click();
   });
 
+  it('runs Event Management search flow and reads the first record', () => {
+    cy.loginAsAdmin();
+    openSidebarGroup('Profile');
+    clickSidebarSubItem('Profile', 'Event Management');
+    cy.get('app-loading-form', { timeout: 60000 }).should('not.exist');
+
+    cy.get('[data-testid="ioc-basic-search-input"]').filter(':visible').first().should('be.visible').clear().type('10.10.0.9{enter}');
+
+    cy.get('app-loading-form', { timeout: 60000 }).should('not.exist');
+
+    cy.get('[data-testid="siem-log-row"]', { timeout: 60000 }).filter(':visible').should('have.length.at.least', 1).first().as('firstSiemRow');
+
+    cy.get('@firstSiemRow').should('contain.text', '10.10.0.9');
+
+    cy.get('[data-testid="siem-log-row-toggle"]').filter(':visible').first().scrollIntoView().click();
+
+    cy.contains('Dummy SIEM log record', { timeout: 60000 }).should('be.visible');
+    cy.contains('10.10.0.9', { timeout: 60000 }).should('be.visible');
+  });
+
   it('runs Web Scans flow for Basic, Port, Repository, and SEO', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Web Scans');
