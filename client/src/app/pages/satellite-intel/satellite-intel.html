@@ -14,22 +14,13 @@
   <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
     <div class="z-20 flex w-full flex-wrap items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-760)] px-[14px] py-[15px] max-[640px]:gap-2">
       <div class="flex max-w-full flex-nowrap gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        <button
-          class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-          [ngClass]="activeTab === 'map' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']"
-          (click)="setActiveView('map')">
+        <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="activeTab === 'map' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setActiveView('map')">
           Satellite Map
         </button>
-        <button
-          class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-          [ngClass]="activeTab === 'tracking' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']"
-          (click)="setActiveView('tracking')">
+        <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="activeTab === 'tracking' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setActiveView('tracking')">
           World Tracking
         </button>
-        <button
-          class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-          [ngClass]="activeTab === 'threat' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']"
-          (click)="setActiveView('threat')">
+        <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="activeTab === 'threat' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setActiveView('threat')">
           Threat Lens
         </button>
       </div>
@@ -38,18 +29,12 @@
     @if(!isThreatView){
     <div class="z-10 flex min-h-[56px] flex-wrap items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-blur-760)] px-[14px] py-2 max-[640px]:gap-2">
       @if (isMapView) {
-        <select
-          class="ui-select h-10 min-w-[180px] max-w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none transition focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-70"
-          [(ngModel)]="selectedLayer"
-          (change)="onLayerChange()">
+        <select class="ui-select h-10 min-w-[180px] max-w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none transition focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-70" [(ngModel)]="selectedLayer" (change)="onLayerChange()">
           <option value="esri">ESRI Satellite</option>
           <option value="osm">OpenStreetMap</option>
         </select>
 
-        <button
-          class="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-          [ngClass]="['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']"
-          (click)="openGeocodeModal()">
+        <button class="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="openGeocodeModal()">
           <i class="bi bi-globe2 text-[13px]"></i>
           Location
         </button>
@@ -57,9 +42,7 @@
         <div class="relative min-w-[200px] tracking-dropdown">
   
   <!-- Trigger -->
-  <button
-    (click)="toggleTrackingDropdown()"
-    class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] text-left flex items-center justify-between">
+  <button (click)="toggleTrackingDropdown()" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] text-left flex items-center justify-between">
     
     <span>{{ getTrackingLabel() }}</span>
     <i class="bi bi-chevron-down text-[11px] opacity-70"></i>
@@ -70,18 +53,12 @@
     <div class="absolute z-50 mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-lg overflow-hidden" (click)="$event.stopPropagation()">
       
       <label class="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-[var(--color-blue-710)]">
-        <input
-          type="checkbox"
-          [checked]="isSelected('aircraft')"
-          (change)="onTrackingSelectionChange('aircraft', $event)">
+        <input type="checkbox" [checked]="isSelected('aircraft')" (change)="onTrackingSelectionChange('aircraft', $event)">
         Aircraft
       </label>
 
       <label class="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-[var(--color-blue-710)]">
-        <input
-          type="checkbox"
-          [checked]="isSelected('ship')"
-          (change)="onTrackingSelectionChange('ship', $event)">
+        <input type="checkbox" [checked]="isSelected('ship')" (change)="onTrackingSelectionChange('ship', $event)">
         Ship
       </label>
 
@@ -136,18 +113,12 @@
         }
       </div>
         @if (isMapView) {
-  <div class="flex flex-col overflow-hidden border-l border-[var(--color-border)] bg-[var(--color-blue-760)]
-              max-[1200px]:max-h-[45vh] max-[1200px]:border-l-0 max-[1200px]:border-t">
+  <div class="flex flex-col overflow-hidden border-l border-[var(--color-border)] bg-[var(--color-blue-760)] max-[1200px]:max-h-[45vh] max-[1200px]:border-l-0 max-[1200px]:border-t">
 
     <!-- Tabs -->
     <div class="flex shrink-0 overflow-x-auto border-b border-[var(--color-border)]">
       @for (tab of panelTabs; track tab.id) {
-        <button
-          class="flex-1 whitespace-nowrap border-b-2 px-2 py-[10px] text-[10px] font-semibold uppercase tracking-[0.06em] transition-colors"
-          [ngClass]="activePanel === tab.id
-            ? 'border-b-[#3a7bd5] text-[#7eb8f7]'
-            : 'border-b-transparent text-[var(--color-text3)] hover:text-[var(--color-text1)]'"
-          (click)="setPanel(tab.id)">
+        <button class="flex-1 whitespace-nowrap border-b-2 px-2 py-[10px] text-[10px] font-semibold uppercase tracking-[0.06em] transition-colors" [ngClass]="activePanel === tab.id ? 'border-b-[#3a7bd5] text-[#7eb8f7]' : 'border-b-transparent text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setPanel(tab.id)">
           {{ tab.label }}
         </button>
       }
@@ -181,12 +152,7 @@
               Anomaly Detection
             </span>
 
-            <button
-              class="rounded-[6px] border border-[rgba(245,158,11,.35)]
-                     bg-[rgba(245,158,11,.1)] px-3 py-1 text-[11px] font-medium text-[#f59e0b]
-                     hover:bg-[rgba(245,158,11,.18)] disabled:opacity-60"
-              (click)="runAnomalyScan()"
-              [disabled]="isScanning()">
+            <button class="rounded-[6px] border border-[rgba(245,158,11,.35)] bg-[rgba(245,158,11,.1)] px-3 py-1 text-[11px] font-medium text-[#f59e0b] hover:bg-[rgba(245,158,11,.18)] disabled:opacity-60" (click)="runAnomalyScan()" [disabled]="isScanning()">
               Run Scan
             </button>
           </div>
@@ -261,12 +227,7 @@
               Facilities
             </span>
 
-            <button
-              class="rounded-[6px] border border-[#3a7bd5]
-                     bg-[#1a4a7a] px-3 py-1 text-[11px] font-medium text-[#7eb8f7]
-                     hover:bg-[#225d99] disabled:opacity-60"
-              (click)="loadFacilities()"
-              [disabled]="isScanning()">
+            <button class="rounded-[6px] border border-[#3a7bd5] bg-[#1a4a7a] px-3 py-1 text-[11px] font-medium text-[#7eb8f7] hover:bg-[#225d99] disabled:opacity-60" (click)="loadFacilities()" [disabled]="isScanning()">
               Load
             </button>
           </div>

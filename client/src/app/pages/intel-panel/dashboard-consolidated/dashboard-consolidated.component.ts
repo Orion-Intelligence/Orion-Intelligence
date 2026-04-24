@@ -368,20 +368,20 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.isNetworkIntel = false;
       this.isGrouped = false;
       this.isIOC = false;
-            this.isGeoFencing = false;
+      this.isGeoFencing = false;
       this.fetchRanked();
     }
     else if (tab == "IOCs") {
       this.isNetworkIntel = false;
       this.isIOC = true;
       this.isGrouped = false;
-            this.isGeoFencing = false;
+      this.isGeoFencing = false;
     }
     else if (tab == "Network Intelligence") {
       this.isNetworkIntel = true;
       this.isIOC = false;
       this.isGrouped = false;
-            this.isGeoFencing = false;
+      this.isGeoFencing = false;
     }
     else if (tab == "Geo Fencing") {
       this.isNetworkIntel = false;

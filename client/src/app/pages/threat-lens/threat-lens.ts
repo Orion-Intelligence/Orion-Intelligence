@@ -3,47 +3,13 @@ import { AfterViewInit, Component, ElementRef, NgZone, OnDestroy, ViewChild } fr
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom, Observable } from 'rxjs';
 import { loadModules, setDefaultOptions } from 'esri-loader';
-import { ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensMapData, ThreatLensMiddlewareService, ThreatLensRequestPayload } from './threat-lens-middleware.service';
 import { buildArcPath, buildArcPathPoints, buildCountryFeatureIndex, buildSurfacePath, collectArcPairs, getFeatureAnchor, getArcPointAtProgress } from './threat-lens-map.utils';
 import { SidebarService } from '../../shared/services/sidebar.service';
 import { FilterModel } from '../../shared/model/filter/filter.model';
 import { FiltersComponent } from "../../shared/partials/filters/filters.component";
 import { threat_lens_filters } from '../../shared/constants/filters';
-
-type ThreatLensLegendItem = {
-  categoryKey: ThreatLensCategoryModelKey;
-  label: string;
-  colorHex: string;
-  countryCount: number;
-  arcCount: number;
-  totalResults: number;
-};
-
-type SelectedCountryCategoryCount = {
-  label: string;
-  colorHex: string;
-  count: number;
-};
-
-type AnimatedArcDescriptor = {
-  categoryKey: ThreatLensCategoryModelKey;
-  color: [number, number, number];
-  weight: number;
-  arcPoints: [number, number, number][];
-  arcPaths: [number, number, number][][];
-  surfacePaths: [number, number][][];
-  countryAKey: string;
-  countryBKey: string;
-  animationOffset: number;
-  animationDuration: number;
-};
-
-type ThreatLensFeedRange = '1d' | '7d' | 'all';
-
-type ThreatLensDisplayFeedItem = ThreatLensFeedItem & {
-  displayDate: string;
-  colorHex: string;
-};
+import { AnimatedArcDescriptor, SelectedCountryCategoryCount, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensDisplayFeedItem, ThreatLensFeedItem, ThreatLensFeedRange, ThreatLensLegendItem, ThreatLensMapData, ThreatLensRequestPayload, } from './threat.lens.model';
+import { ThreatLensService } from './threat.lens.service';
 
 @Component({
   selector: 'app-threat-lens',
@@ -80,8 +46,6 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   private readonly arcBatchDuration = 6000;
   private readonly movingDotBaseSize = 90000;
   private readonly countryNameFields = ['COUNTRY', 'COUNTRYAFF', 'NAME', 'ADMIN', 'SOVEREIGNT'];
-  private activePulseGraphics: any[] = [];
-  private readonly segmentCount = 6;
   private movingDotGraphics: any[] = [];
   private activeArcCountryFilterKey = '';
   private loadRequestId = 0;
@@ -93,6 +57,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   private archiveFeedResumeTimer: number | null = null;
   private allNewsFeedItems: ThreatLensDisplayFeedItem[] = [];
   private allArchiveFeedItems: ThreatLensDisplayFeedItem[] = [];
+  private destroyed = false;
 
   protected readonly filterModel: FilterModel = threat_lens_filters;
   protected readonly feedRanges: Array<{ key: ThreatLensFeedRange; label: string }> = [{ key: '1d', label: '1 Day' }, { key: '7d', label: '1 Week' }, { key: 'all', label: 'All Time' }];
@@ -111,7 +76,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   newsFeedItems: ThreatLensDisplayFeedItem[] = [];
   archiveFeedItems: ThreatLensDisplayFeedItem[] = [];
 
-  constructor(private ngZone: NgZone, private threatLensMiddleware: ThreatLensMiddlewareService, protected sidebarService: SidebarService) {
+  constructor(private ngZone: NgZone, private threatLensService: ThreatLensService, protected sidebarService: SidebarService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -120,6 +85,8 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
+    this.loadRequestId += 1;
     this.mapClickHandle?.remove();
     this.mapClickHandle = null;
     this.clearHighlight();
@@ -139,10 +106,9 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   }
 
   async onTopCountrySelect(country: string): Promise<void> {
-    const normalizedCountry = this.threatLensMiddleware.normalizeCountryLabel(country);
+    const normalizedCountry = this.threatLensService.normalizeCountryLabel(country);
     this.searchTerm = normalizedCountry;
     await this.loadThreatLensData(normalizedCountry);
-    await this.focusCountryByKey(this.toCountryKey(normalizedCountry));
   }
 
   private async initializeMap(): Promise<void> {
@@ -150,83 +116,104 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    setDefaultOptions({ version: '4.34' });
+    try {
+      setDefaultOptions({ version: '4.34' });
 
-    const [
-      EsriMap,
-      SceneView,
-      FeatureLayer,
-      GraphicsLayer,
-      geometryEngine,
-      webMercatorUtils,
-    ] = await loadModules([
-      'esri/Map',
-      'esri/views/SceneView',
-      'esri/layers/FeatureLayer',
-      'esri/layers/GraphicsLayer',
-      'esri/geometry/geometryEngine',
-      'esri/geometry/support/webMercatorUtils',
-    ]);
+      const [
+        EsriMap,
+        SceneView,
+        FeatureLayer,
+        GraphicsLayer,
+        geometryEngine,
+        webMercatorUtils,
+      ] = await loadModules([
+        'esri/Map',
+        'esri/views/SceneView',
+        'esri/layers/FeatureLayer',
+        'esri/layers/GraphicsLayer',
+        'esri/geometry/geometryEngine',
+        'esri/geometry/support/webMercatorUtils',
+      ]);
 
-    this.geometryEngine = geometryEngine;
-    this.webMercatorUtils = webMercatorUtils;
+      if (this.destroyed) {
+        return;
+      }
 
-    this.countryLayer = new FeatureLayer({
-      url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries_(Generalized)/FeatureServer/0',
-      outFields: ['*'],
-      popupEnabled: false,
-      opacity: 1,
-      renderer: {
-        type: 'simple',
-        symbol: {
-          type: 'simple-fill',
-          color: [29, 45, 71, 1],
-          outline: {
-            color: [255, 255, 255, 0.1],
-            width: 0.8,
+      this.geometryEngine = geometryEngine;
+      this.webMercatorUtils = webMercatorUtils;
+
+      this.countryLayer = new FeatureLayer({
+        url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries_(Generalized)/FeatureServer/0',
+        outFields: ['*'],
+        popupEnabled: false,
+        opacity: 1,
+        renderer: {
+          type: 'simple',
+          symbol: {
+            type: 'simple-fill',
+            color: [29, 45, 71, 1],
+            outline: {
+              color: [255, 255, 255, 0.1],
+              width: 0.8,
+            },
           },
         },
-      },
-    });
+      });
 
-    this.newsGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens Intensity' });
-    this.arcGraphicsLayer = new GraphicsLayer({
-      title: 'Threat Lens Country Arcs',
-      elevationInfo: { mode: 'absolute-height' },
-    });
-    this.animatedArcGraphicsLayer = new GraphicsLayer({
-      title: 'Threat Lens Animated Arcs',
-      elevationInfo: { mode: 'absolute-height' },
-    });
-    this.arcSurfaceGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens Country Arc Connectors' });
+      this.newsGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens Intensity' });
+      this.arcGraphicsLayer = new GraphicsLayer({
+        title: 'Threat Lens Country Arcs',
+        elevationInfo: { mode: 'absolute-height' },
+      });
+      this.animatedArcGraphicsLayer = new GraphicsLayer({
+        title: 'Threat Lens Animated Arcs',
+        elevationInfo: { mode: 'absolute-height' },
+      });
+      this.arcSurfaceGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens Country Arc Connectors' });
 
-    const map = new EsriMap({
-      basemap: 'dark-gray-vector',
-      ground: 'world-elevation',
-      layers: [this.countryLayer, this.newsGraphicsLayer, this.arcSurfaceGraphicsLayer, this.arcGraphicsLayer, this.animatedArcGraphicsLayer],
-    });
+      const map = new EsriMap({
+        basemap: 'dark-gray-vector',
+        ground: 'world-elevation',
+        layers: [this.countryLayer, this.newsGraphicsLayer, this.arcSurfaceGraphicsLayer, this.arcGraphicsLayer, this.animatedArcGraphicsLayer],
+      });
 
-    this.view = new SceneView({
-      container: this.mapViewNode.nativeElement,
-      map,
-      qualityProfile: 'high',
-      viewingMode: 'global',
-      camera: {
-        position: { longitude: -10, latitude: 30, z: 17000000 },
-        tilt: 0,
-      },
-      environment: {
-        atmosphereEnabled: true,
-        starsEnabled: true,
-      },
-    });
+      this.view = new SceneView({
+        container: this.mapViewNode.nativeElement,
+        map,
+        qualityProfile: 'high',
+        viewingMode: 'global',
+        camera: {
+          position: { longitude: -10, latitude: 30, z: 17000000 },
+          tilt: 0,
+        },
+        environment: {
+          atmosphereEnabled: true,
+          starsEnabled: true,
+        },
+      });
 
-    await this.view.when();
-    this.view.ui.components = [];
-    this.countryLayerView = await this.view.whenLayerView(this.countryLayer);
-    await this.buildCountryFeatureIndex();
-    this.registerClickHandler();
-    await this.loadThreatLensData('');
+      await this.view.when();
+      if (this.destroyed) {
+        return;
+      }
+
+      this.view.ui.components = [];
+      this.countryLayerView = await this.view.whenLayerView(this.countryLayer);
+      await this.buildCountryFeatureIndex();
+      if (this.destroyed) {
+        return;
+      }
+
+      this.registerClickHandler();
+      await this.loadThreatLensData('');
+    }
+    catch (error) {
+      console.error('Failed to initialize threat lens map', error);
+      this.ngZone.run(() => {
+        this.isLoading = false;
+        this.statusMessage = 'Failed to initialize threat lens map.';
+      });
+    }
   }
 
   private registerClickHandler(): void {
@@ -284,7 +271,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     query.outFields = ['*'];
 
     const response = await this.countryLayer.queryFeatures(query);
-    this.countryFeatureIndex = buildCountryFeatureIndex(response.features, this.countryNameFields, (value) => this.threatLensMiddleware.normalizeCountryLabel(value), (value) => this.toCountryKey(value));
+    this.countryFeatureIndex = buildCountryFeatureIndex(response.features, this.countryNameFields, (value) => this.threatLensService.normalizeCountryLabel(value), (value) => this.toCountryKey(value));
   }
 
   private async loadThreatLensData(query: string): Promise<void> {
@@ -303,7 +290,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     const loadAllPages = false;
     let statsResult: { ok: true; stats: ThreatLensMapData } | { ok: false; stats: null };
     try {
-      const stats = await firstValueFrom(this.threatLensMiddleware.getThreatLensMapData(this.buildSearchPayload(activeQuery), loadAllPages),);
+      const stats = await firstValueFrom(this.threatLensService.getThreatLensMapData(this.buildSearchPayload(activeQuery), loadAllPages),);
       statsResult = { ok: true, stats };
     }
     catch (error) {
@@ -311,7 +298,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       statsResult = { ok: false, stats: null };
     }
 
-    if (requestId !== this.loadRequestId) {
+    if (!this.isActiveRequest(requestId)) {
       return;
     }
 
@@ -319,7 +306,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       await this.renderCountryArcs([]);
       this.arcCount = 0;
 
-      if (requestId !== this.loadRequestId) {
+      if (!this.isActiveRequest(requestId)) {
         return;
       }
 
@@ -358,7 +345,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     await this.renderNewsIntensity(stats.countryCounts, stats.maxCount);
     const { totalArcCount, arcCountByCategory } = await this.renderCountryArcs(stats.categoryData);
 
-    if (requestId !== this.loadRequestId) {
+    if (!this.isActiveRequest(requestId)) {
       return;
     }
 
@@ -493,8 +480,8 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   }
 
   private toCountryKey(value: string): string {
-    const normalized = this.threatLensMiddleware.normalizeCountryLabel(value);
-    return this.threatLensMiddleware.toCountryKey(normalized);
+    const normalized = this.threatLensService.normalizeCountryLabel(value);
+    return this.threatLensService.toCountryKey(normalized);
   }
 
   private getSelectedCountryBreakdown(countryKey: string): SelectedCountryCategoryCount[] {
@@ -531,11 +518,15 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   }
 
   openFeedItem(item: ThreatLensDisplayFeedItem): void {
-    if (!item.link || typeof window === 'undefined') {
+    if (!this.isBrowserEnvironment()) {
+      return;
+    }
+    const safeUrl = this.toSafeHttpUrl(item.link);
+    if (!safeUrl) {
       return;
     }
 
-    window.open(item.link, '_blank', 'noopener');
+    window.open(safeUrl, '_blank', 'noopener,noreferrer');
   }
 
   private buildSearchPayload(query: string): Partial<ThreatLensRequestPayload> {
@@ -544,7 +535,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       return payload;
     }
 
-    const normalizedCountry = this.threatLensMiddleware.normalizeCountryLabel(query);
+    const normalizedCountry = this.threatLensService.normalizeCountryLabel(query);
     const countryKey = this.toCountryKey(normalizedCountry);
     if (countryKey && this.countryFeatureIndex.has(countryKey)) {
       payload.q = '';
@@ -561,7 +552,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       return '';
     }
 
-    const normalizedCountry = this.threatLensMiddleware.normalizeCountryLabel(query);
+    const normalizedCountry = this.threatLensService.normalizeCountryLabel(query);
     const countryKey = this.toCountryKey(normalizedCountry);
     return countryKey && this.countryFeatureIndex.has(countryKey) ? countryKey : '';
   }
@@ -783,31 +774,6 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     this.ngZone.run(() => {
       this.arcCount = items.length;
     });
-    this.activePulseGraphics = [];
-
-    const totalGraphics = items.length * this.segmentCount;
-
-    for (let i = 0; i < totalGraphics; i++) {
-      this.activePulseGraphics.push({
-        geometry: null,
-        symbol: {
-          type: 'line-3d',
-          symbolLayers: [
-            {
-              type: 'path',
-              profile: 'quad',
-              width: 6,
-              cap: 'round',
-              material: { color: [255, 255, 255, 0.3] },
-              anchor: 'center',
-            }
-          ],
-        },
-      });
-    }
-
-    this.animatedArcGraphicsLayer.removeAll();
-    this.animatedArcGraphicsLayer.addMany(this.activePulseGraphics);
     this.movingDotGraphics = [];
 
     for (const arc of items) {
@@ -905,6 +871,10 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   }
 
   private startFeedAutoScroll(feedType: 'news' | 'archive'): void {
+    if (!this.isBrowserEnvironment()) {
+      return;
+    }
+
     const timer = window.setInterval(() => {
       const container = this.getFeedScroller(feedType)?.nativeElement;
       const isPaused = feedType === 'news' ? this.newsFeedAutoScrollPaused : this.archiveFeedAutoScrollPaused;
@@ -935,6 +905,10 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   }
 
   private stopFeedAutoScroll(feedType: 'news' | 'archive'): void {
+    if (!this.isBrowserEnvironment()) {
+      return;
+    }
+
     const activeTimer = feedType === 'news' ? this.newsFeedAutoScrollTimer : this.archiveFeedAutoScrollTimer;
     if (activeTimer !== null) {
       window.clearInterval(activeTimer);
@@ -974,6 +948,10 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   }
 
   private pauseFeedAutoScrollTemporarily(feedType: 'news' | 'archive'): void {
+    if (!this.isBrowserEnvironment()) {
+      return;
+    }
+
     this.setFeedAutoScrollPaused(feedType, true);
 
     const resumeTimer = window.setTimeout(() => {
@@ -999,9 +977,39 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   }
 
   private resetFeedScrollPositions(): void {
+    if (!this.isBrowserEnvironment()) {
+      return;
+    }
+
     window.setTimeout(() => {
       this.newsFeedScroller?.nativeElement.scrollTo({ top: 0 });
       this.archiveFeedScroller?.nativeElement.scrollTo({ top: 0 });
     });
+  }
+
+  private isActiveRequest(requestId: number): boolean {
+    return !this.destroyed && requestId === this.loadRequestId;
+  }
+
+  private isBrowserEnvironment(): boolean {
+    return typeof window !== 'undefined';
+  }
+
+  private toSafeHttpUrl(value: string): string {
+    const input = String(value || '').trim();
+    if (!input || !this.isBrowserEnvironment()) {
+      return '';
+    }
+
+    try {
+      const url = new URL(input, window.location.origin);
+      if (url.protocol === 'http:' || url.protocol === 'https:') {
+        return url.toString();
+      }
+    }
+    catch {
+    }
+
+    return '';
   }
 }

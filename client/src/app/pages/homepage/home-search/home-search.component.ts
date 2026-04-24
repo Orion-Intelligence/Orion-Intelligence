@@ -20,8 +20,6 @@ import { DemoTourComponent } from "../../demo-tour/demo-tour/demo-tour.component
   templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent implements OnInit {
-  protected readonly tabs = ['IOCs', 'Deep Search', 'Network Intelligence', 'Geo Fencing'];
-
   private insightPointerId: number | null = null;
   private insightStartY = 0;
   private insightStartOffset = 0;
@@ -29,6 +27,8 @@ export class HomeSearchComponent implements OnInit {
   private suppressInsightClick = false;
   private insightMax = 0;
   private removeWindowListeners: (() => void) | null = null;
+
+  protected readonly tabs = ['IOCs', 'Deep Search', 'Network Intelligence', 'Geo Fencing'];
 
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
