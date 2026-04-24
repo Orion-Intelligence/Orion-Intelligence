@@ -139,10 +139,10 @@ jobs:
           set -euo pipefail
           docker exec trusted-web-main sh -lc '
             set -e
-            cd /app
+            cd /app/backend
             python -m pip install --quiet pytest pytest-cov
-            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests \
-              --maxfail=1 --disable-warnings \
+            TESTING_ENABLED=1 PYTHONPATH=/app/backend python -m pytest -q tests \
+              --cov=orion --maxfail=1 --disable-warnings \
               --cov-report=xml:/tmp/backend-coverage.xml
           '
 
