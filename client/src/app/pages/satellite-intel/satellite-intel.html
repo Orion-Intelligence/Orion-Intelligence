@@ -41,14 +41,12 @@
       } @else if (isTrackingView){
         <div class="relative min-w-[200px] tracking-dropdown">
   
-  <!-- Trigger -->
   <button (click)="toggleTrackingDropdown()" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] text-left flex items-center justify-between">
     
     <span>{{ getTrackingLabel() }}</span>
     <i class="bi bi-chevron-down text-[11px] opacity-70"></i>
   </button>
 
-  <!-- Dropdown Panel -->
   @if (isTrackingDropdownOpen) {
     <div class="absolute z-50 mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-lg overflow-hidden" (click)="$event.stopPropagation()">
       
@@ -115,7 +113,6 @@
         @if (isMapView) {
   <div class="flex flex-col overflow-hidden border-l border-[var(--color-border)] bg-[var(--color-blue-760)] max-[1200px]:max-h-[45vh] max-[1200px]:border-l-0 max-[1200px]:border-t">
 
-    <!-- Tabs -->
     <div class="flex shrink-0 overflow-x-auto border-b border-[var(--color-border)]">
       @for (tab of panelTabs; track tab.id) {
         <button class="flex-1 whitespace-nowrap border-b-2 px-2 py-[10px] text-[10px] font-semibold uppercase tracking-[0.06em] transition-colors" [ngClass]="activePanel === tab.id ? 'border-b-[#3a7bd5] text-[#7eb8f7]' : 'border-b-transparent text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setPanel(tab.id)">
@@ -124,10 +121,8 @@
       }
     </div>
 
-    <!-- Content -->
     <div class="min-h-0 flex-1 overflow-y-auto">
 
-      <!-- ================= COMPARE ================= -->
       @if (activePanel === 'compare') {
         <app-satellite-month-compare
           [isScanning]="isScanning()"
@@ -142,11 +137,9 @@
         </app-satellite-month-compare>
       }
 
-      <!-- ================= ANOMALY ================= -->
       @if (activePanel === 'anomaly') {
         <div class="flex flex-col h-full">
 
-          <!-- Header -->
           <div class="flex items-center justify-between px-[14px] py-2 border-b border-[var(--color-border)]">
             <span class="text-[12px] font-semibold text-[var(--color-text1)]">
               Anomaly Detection
@@ -157,7 +150,6 @@
             </button>
           </div>
 
-          <!-- Content -->
           <div class="flex-1 overflow-auto">
             @if (!hasSearched) {
               <div class="px-[14px] py-6 text-center text-[12px] text-[var(--color-text3)]">
@@ -187,7 +179,6 @@
         </div>
       }
 
-      <!-- ================= SENTINEL ================= -->
       @if (activePanel === 'sentinel') {
         <app-satellite-sentinel-search
           [isScanning]="isScanning()"
@@ -202,7 +193,6 @@
         </app-satellite-sentinel-search>
       }
 
-      <!-- ================= IMAGE ================= -->
       @if (activePanel === 'image') {
         <app-satellite-sentinel-image
           [isScanning]="isScanning()"
@@ -217,11 +207,9 @@
         </app-satellite-sentinel-image>
       }
 
-      <!-- ================= FACILITIES ================= -->
       @if (activePanel === 'facilities') {
         <div class="flex flex-col h-full">
 
-          <!-- Header -->
           <div class="flex items-center justify-between px-[14px] py-2 border-b border-[var(--color-border)]">
             <span class="text-[12px] font-semibold text-[var(--color-text1)]">
               Facilities
@@ -232,7 +220,6 @@
             </button>
           </div>
 
-          <!-- Content -->
           <div class="flex-1 overflow-auto">
 
             @if (!hasSearched) {
