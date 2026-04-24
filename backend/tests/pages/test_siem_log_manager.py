@@ -10,7 +10,7 @@ from orion.api.server.crawl_manager.class_model.log_model import (
     SiemSearchRequestModel,
 )
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
-from tests.fake_model.fakes import FakeElastic
+from tests.fake_model.fakes import FakeElastic, FakeMongoEngine
 
 
 def _run(coro):
@@ -30,6 +30,7 @@ def test_siem_manager_can_inject_and_search_same_logs(monkeypatch):
     )
 
     manager = SiemLogManager.get_instance()
+    manager._engine = FakeMongoEngine(SimpleNamespace(event_management_enabled=True))
     current_user = SimpleNamespace(tenant_uuid="tenant-1")
 
     inject_payload = InjectionBatchRequestModel(
