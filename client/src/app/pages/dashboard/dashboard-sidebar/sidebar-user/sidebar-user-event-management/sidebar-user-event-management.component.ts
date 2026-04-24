@@ -87,7 +87,8 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
   }
 
   canAccessEventManagement(): boolean {
-    return this.licenseService.isAdmin() || this.licenseService.isMaintainer();
+    return (this.licenseService.isAdmin() || this.licenseService.isMaintainer()) &&
+      !!this.appService.userSessionData().tenant.eventManagementEnabled;
   }
 
   triggerSearch(searchQuery: string): void {

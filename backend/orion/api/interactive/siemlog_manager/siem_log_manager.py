@@ -1,10 +1,13 @@
 import asyncio
 
 import httpx
+from bson import ObjectId
+from fastapi import HTTPException
 
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX, ELASTIC_KEYS
 from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
+from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 
 
 class SiemLogManager:
@@ -19,11 +22,14 @@ class SiemLogManager:
         return SiemLogManager.__instance
 
     def __init__(self):
+        from orion.services.mongo_manager.mongo_controller import mongo_controller
+        self._engine = mongo_controller.get_instance().get_engine()
         if SiemLogManager.__instance is not None:
             raise Exception("This class is a singleton!")
         SiemLogManager.__instance = self
 
     async def inject_logs(self, payload, current_user):
+        await self._ensure_event_management_enabled(current_user)
         logs = payload.logs
         tenant_id = str(current_user.tenant_uuid)
         enriched_logs = await self._enrich_logs_with_iocs([item.model_dump(exclude_none=True) for item in logs])
@@ -144,6 +150,7 @@ class SiemLogManager:
         return None
 
     async def search_logs(self, payload, current_user):
+        await self._ensure_event_management_enabled(current_user)
         tenant_id = str(current_user.tenant_uuid)
         document, data_filter = elastic_request_generator.search_query_siem_logs(
             payload.q,
@@ -168,3 +175,8 @@ class SiemLogManager:
             "page_count": page_count,
             "batch_size": batch_size,
         }
+
+    async def _ensure_event_management_enabled(self, current_user) -> None:
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(current_user.tenant_uuid)))
+        if not tenant or not getattr(tenant, "event_management_enabled", False):
+            raise HTTPException(status_code=403, detail="Event management is disabled for this tenant")
