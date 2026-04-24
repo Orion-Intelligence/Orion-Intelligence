@@ -160,11 +160,12 @@ class SiemLogManager:
             payload.date_range,
         )
         success, response = await elastic_controller.get_instance().search_query(document, data_filter)
-        if not success or not isinstance(response, dict):
+        if not success:
             raise RuntimeError(f"SIEM search failed: {response}")
 
-        hits = response.get("hits", {}).get("hits", [])
-        total_field = response.get("hits", {}).get("total", 0)
+        body = response.body if hasattr(response, "body") else response
+        hits = body.get("hits", {}).get("hits", []) if isinstance(body, dict) else []
+        total_field = body.get("hits", {}).get("total", 0) if isinstance(body, dict) else 0
         total_hits = total_field.get("value", 0) if isinstance(total_field, dict) else int(total_field or 0)
         batch_size = data_filter["size"]
         page_count = (total_hits + batch_size - 1) // batch_size if batch_size > 0 else 0

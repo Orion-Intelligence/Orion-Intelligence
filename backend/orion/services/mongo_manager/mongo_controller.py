@@ -107,6 +107,9 @@ class mongo_controller:
         default_tenant = await self.__engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
         if not default_tenant:
             await tenant_boostrap(self.__engine)
+        elif getattr(default_tenant, "event_management_enabled", False) != True:
+            default_tenant.event_management_enabled = True
+            await self.__engine.save(default_tenant)
         await self.ensure_demo_user()
 
     def get_admin(self):

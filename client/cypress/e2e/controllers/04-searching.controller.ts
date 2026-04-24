@@ -1,4 +1,5 @@
 const SIDEBAR_GROUP_ROUTE_PREFIX: Record<string, string> = {
+  Profile: 'profile',
   'General Intelligence': 'strategic',
   Defacement: 'defacement',
   Social: 'social',
@@ -32,7 +33,7 @@ export function openSidebarGroup(title: string) {
       .should('be.visible')
       .click();
   }
-  cy.get(`[data-testid="${groupTestId}"]`).should('be.visible').click();
+  cy.get(`[data-testid="${groupTestId}"]`).scrollIntoView().should('be.visible').click();
   cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
     expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
   });
