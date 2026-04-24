@@ -1,0 +1,14 @@
+.ui-event-management-expand-side {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.55) transparent;
+  padding-bottom: 12px;
+}
+
+.ui-event-management-expand-side::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ui-event-management-expand-side::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 999px;
+}

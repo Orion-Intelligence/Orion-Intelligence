@@ -1,9 +1,9 @@
 <div class="flex w-full flex-wrap items-center gap-3 bg-[var(--color-blue-760)] py-[15px] max-[640px]:gap-2">
   @if (!isAdvanced) {
     <div class="flex flex-nowrap gap-2 overflow-x-auto max-w-full whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]">
-      @for (tag of [SearchTag.ALL, SearchTag.DOMAIN, SearchTag.EMAIL, SearchTag.CREDITCARD, SearchTag.IP]; track tag) {
+      @for (tag of basicTags(); track tag) {
         <div [attr.data-testid]="'ioc-basic-tag-' + tag" (click)="selectBasicTag(tag)" [ngClass]="selectedTag === tag ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]'" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors">
-          {{ FILTER_LABELS[tag] }}
+          {{ filterLabels()[tag] }}
         </div>
       }
     </div>
@@ -11,8 +11,8 @@
 
   @if (isAdvanced) {
     <div class="flex flex-col">
-      <span class="text-sm font-semibold text-[var(--color-text1)]">Advanced Filter Builder</span>
-      <span class="text-xs text-[var(--color-text4)]">Combine multiple filters with AND/OR for precise results</span>
+      <span class="text-sm font-semibold text-[var(--color-text1)]">{{ advancedTitle() }}</span>
+      <span class="text-xs text-[var(--color-text4)]">{{ advancedSubtitle() }}</span>
     </div>
   }
 
@@ -49,7 +49,7 @@
 
   @if (isAdvanced) {
     <div class="space-y-2.5" @fadeInDashboardItem>
-      @for (filter of advancedFilters; track trackByFilterId(i, filter); let i = $index) {
+      @for (filter of advancedFilters; track filter.id; let i = $index) {
         <div data-testid="ioc-adv-row" @advancedRowMotion class="ui-ioc-adv-row grid items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] md:grid-cols-[110px_1fr_2fr_auto]">
           <div class="text-xs font-semibold text-[var(--color-text4)]">
             <div class="relative">
@@ -63,7 +63,7 @@
           </div>
           <div class="relative">
             <select data-testid="ioc-adv-tag-select" [(ngModel)]="filter.tag" class="ui-ioc-adv-control h-11 w-full appearance-none rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 pr-11 text-xs font-semibold text-[var(--color-text1)] outline-none transition-colors focus:border-[var(--color-blue-640)]">
-              @for (tag of FILTER_LABELS | keyvalue; track tag.key) {
+              @for (tag of filterLabels() | keyvalue; track tag.key) {
                 <option [value]="tag.key">{{ tag.value }}</option>
               }
             </select>
@@ -74,7 +74,7 @@
             <button data-testid="ioc-adv-delete-filter" (click)="removeFilter(filter.id)" [disabled]="advancedFilters.length === 1" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-45">
               <img alt="delete filter" src="assets/images/shared/theme/bin.svg" class="h-4 w-4 ui-action-icon">
             </button>
-            @if (i === advancedFilters.length - 1 && advancedFilters.length < MAX_ADVANCED_FILTERS) {
+            @if (i === advancedFilters.length - 1 && advancedFilters.length < maxAdvancedFilters()) {
               <button data-testid="ioc-adv-add-filter" (click)="addFilter()" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:-translate-y-[1px]">
                 <img alt="add filter" src="assets/images/shared/theme/plus.svg" class="h-4 w-4 ui-action-icon">
               </button>

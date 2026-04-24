@@ -1250,21 +1250,21 @@ body.demo-tour-scroll-locked {
   border-color: #b9cde4 !important;
 }
 
-.light-theme app-credentials-search-bar [data-testid^='ioc-basic-tag-']:not(.text-white) {
+.light-theme app-ioc-search [data-testid^='ioc-basic-tag-']:not(.text-white) {
   background: #f9fbff !important;
   background-color: #f9fbff !important;
   border-color: var(--color-border) !important;
   color: var(--color-text3) !important;
 }
 
-.light-theme app-credentials-search-bar [data-testid^='ioc-basic-tag-']:not(.text-white):hover {
+.light-theme app-ioc-search [data-testid^='ioc-basic-tag-']:not(.text-white):hover {
   background: var(--color-blue-710) !important;
   background-color: var(--color-blue-710) !important;
   border-color: var(--color-border) !important;
   color: var(--color-text1) !important;
 }
 
-.light-theme app-credentials-search-bar .ui-cred-toolbar-btn {
+.light-theme app-ioc-search .ui-cred-toolbar-btn {
   background: #f9fbff !important;
   background-color: #f9fbff !important;
   border-color: var(--color-border) !important;
@@ -1272,7 +1272,7 @@ body.demo-tour-scroll-locked {
   transform: none !important;
 }
 
-.light-theme app-credentials-search-bar .ui-cred-toolbar-btn:hover {
+.light-theme app-ioc-search .ui-cred-toolbar-btn:hover {
   background: var(--color-blue-710) !important;
   background-color: var(--color-blue-710) !important;
   border-color: var(--color-border) !important;
@@ -1280,36 +1280,36 @@ body.demo-tour-scroll-locked {
   transform: none !important;
 }
 
-.light-theme app-credentials-search-bar .ui-ioc-adv-row {
+.light-theme app-ioc-search .ui-ioc-adv-row {
   background: #f9fbff !important;
   background-color: #f9fbff !important;
   border-color: #d7e2ef !important;
   box-shadow: none !important;
 }
 
-.light-theme app-credentials-search-bar .ui-ioc-adv-control,
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-value-input'],
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-operator-select'],
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-tag-select'],
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-delete-filter'],
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-add-filter'] {
+.light-theme app-ioc-search .ui-ioc-adv-control,
+.light-theme app-ioc-search [data-testid='ioc-adv-value-input'],
+.light-theme app-ioc-search [data-testid='ioc-adv-operator-select'],
+.light-theme app-ioc-search [data-testid='ioc-adv-tag-select'],
+.light-theme app-ioc-search [data-testid='ioc-adv-delete-filter'],
+.light-theme app-ioc-search [data-testid='ioc-adv-add-filter'] {
   background: #f9fbff !important;
   background-color: #f9fbff !important;
   border-color: var(--color-border) !important;
 }
 
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-value-input']:hover,
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-operator-select']:hover,
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-tag-select']:hover,
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-delete-filter']:hover,
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-add-filter']:hover {
+.light-theme app-ioc-search [data-testid='ioc-adv-value-input']:hover,
+.light-theme app-ioc-search [data-testid='ioc-adv-operator-select']:hover,
+.light-theme app-ioc-search [data-testid='ioc-adv-tag-select']:hover,
+.light-theme app-ioc-search [data-testid='ioc-adv-delete-filter']:hover,
+.light-theme app-ioc-search [data-testid='ioc-adv-add-filter']:hover {
   background: var(--color-blue-710) !important;
   background-color: var(--color-blue-710) !important;
   border-color: var(--color-border) !important;
 }
 
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-delete-filter'],
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-add-filter'] {
+.light-theme app-ioc-search [data-testid='ioc-adv-delete-filter'],
+.light-theme app-ioc-search [data-testid='ioc-adv-add-filter'] {
   transform: none !important;
 }
 

@@ -6,7 +6,7 @@ from .exploit_model import ExploitDataModel
 from .file_model import ScreenshotPayload
 from .general_model import GeneralDataModel
 from .leak_model import LeakDataModel
-from .log_model import LogModel, LogBatchModel
+from .log_model import InjectionBatchRequestModel, InjectionBatchResponseModel, InjectionLogModel, LogModel, LogBatchModel, SiemSearchRequestModel, SiemSearchResponseModel
 from .nlp_data_model import nlp_data_model
 from .open_sanctions_model import open_sanctions_data_model
 from .report_chat_data_model import ReportChatRequest
@@ -22,9 +22,14 @@ __all__ = [
     "ExploitDataModel",
     "ScreenshotPayload",
     "GeneralDataModel",
+    "InjectionBatchRequestModel",
+    "InjectionBatchResponseModel",
+    "InjectionLogModel",
     "LeakDataModel",
     "LogModel",
     "LogBatchModel",
+    "SiemSearchRequestModel",
+    "SiemSearchResponseModel",
     "nlp_data_model",
     "open_sanctions_data_model",
     "ReportChatRequest",

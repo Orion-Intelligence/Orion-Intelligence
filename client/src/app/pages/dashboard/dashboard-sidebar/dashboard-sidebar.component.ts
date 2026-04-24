@@ -232,6 +232,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     }
     return categories.filter(c => c !== ProfileSubCategory.TENANT &&
           c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+          c !== ProfileSubCategory.EVENT_MANAGEMENT &&
           c !== ProfileSubCategory.USERS &&
           c !== ProfileSubCategory.AUDITLOG &&
           c !== ProfileSubCategory.IOC &&
