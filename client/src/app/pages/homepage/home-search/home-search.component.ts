@@ -20,7 +20,8 @@ import { DemoTourComponent } from "../../demo-tour/demo-tour/demo-tour.component
   templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent implements OnInit {
-  private readonly allowedTabs = ['IOCs', 'Deep Search', 'Network Intelligence'];
+  protected readonly tabs = ['IOCs', 'Deep Search', 'Network Intelligence', 'Geo Fencing'];
+
   private insightPointerId: number | null = null;
   private insightStartY = 0;
   private insightStartOffset = 0;
@@ -53,7 +54,7 @@ export class HomeSearchComponent implements OnInit {
     this.computeInsightMax();
     this.route.queryParams.subscribe(params => {
       const tab = params['tab'];
-      if (typeof tab === 'string' && this.allowedTabs.includes(tab)) {
+      if (typeof tab === 'string' && this.tabs.includes(tab)) {
         this.selectTab(tab);
       }
       else{

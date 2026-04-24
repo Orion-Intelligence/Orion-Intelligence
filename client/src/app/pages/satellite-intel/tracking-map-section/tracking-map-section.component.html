@@ -1,21 +1,5 @@
 <div class="relative h-full w-full overflow-hidden rounded-none bg-[#08101b]">
   <div #mapContainer class="h-full w-full"></div>
-
-  <div class="pointer-events-none absolute left-3 top-3 z-[20] flex max-w-[calc(100%-24px)] flex-wrap gap-2">
-    <div class="rounded-md border border-white/10 bg-[rgba(8,16,27,0.88)] px-3 py-2 text-[11px] text-[#dbeafe] shadow-[0_8px_28px_rgba(2,6,23,.3)] backdrop-blur-sm">
-      <div class="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7dd3fc]">Tracking Engine</div>
-      <div class="mt-1 text-[12px] font-medium text-white">MapLibre GL + clustered GeoJSON sources</div>
-    </div>
-    <div class="rounded-md border border-white/10 bg-[rgba(8,16,27,0.88)] px-3 py-2 text-[11px] shadow-[0_8px_28px_rgba(2,6,23,.3)] backdrop-blur-sm">
-      <div class="font-semibold text-[#c4b5fd]">{{ aircraftModeLabel }}</div>
-      <div class="mt-1 text-[#d8b4fe]">{{ lastAircraftUpdateLabel }}</div>
-    </div>
-    <div class="rounded-md border border-white/10 bg-[rgba(8,16,27,0.88)] px-3 py-2 text-[11px] shadow-[0_8px_28px_rgba(2,6,23,.3)] backdrop-blur-sm">
-      <div class="font-semibold text-[#67e8f9]">{{ shipsModeLabel }}</div>
-      <div class="mt-1 text-[#a5f3fc]">{{ lastShipsUpdateLabel }}</div>
-    </div>
-  </div>
-
   <div class="pointer-events-none absolute bottom-3 left-3 z-[20] rounded-md border border-white/10 bg-[rgba(8,16,27,0.88)] px-3 py-2 text-[11px] text-[#bfdbfe] shadow-[0_8px_28px_rgba(2,6,23,.3)] backdrop-blur-sm">
     <div>{{ zoomLabel }}</div>
     <div class="mt-1 text-[#94a3b8]">{{ aircraftCount }} aircraft · {{ shipCount }} ships</div>

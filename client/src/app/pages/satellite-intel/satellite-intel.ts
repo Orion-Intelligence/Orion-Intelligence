@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, effect } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -41,7 +41,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private aircraftTimer?: ReturnType<typeof setInterval>;
   private shipsTimer?: ReturnType<typeof setInterval>;
   private searchTimer?: ReturnType<typeof setTimeout>;
-  private pendingRequest: 'facilities' | 'anomaly' | 'compare' | 'sentinel' | 'sentinel-image' | null = null;
+  private pendingRequest: 'facilities' | 'anomaly' | 'compare' | 'sentinel' | 'sentinel-image' = 'compare';
   private skipNextMapMovedEvent = false;
   private mainLoadingSequence = 0;
   private mainLoadingRequests = new Map<number, { title: string; message: string }>();
@@ -80,6 +80,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   isMainLoading = false;
   mainLoadingTitle = 'Loading Satellite Intel';
   mainLoadingMessage = 'Please wait while the request completes...';
+  selectedTrackingTypes: ('aircraft' | 'ship')[] = ['aircraft'];
+  isTrackingDropdownOpen = false;
   isScanning = computed(() =>
     this.satelliteService.isRunning() && !this.satelliteService.onError(),);
 
@@ -176,6 +178,10 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   setActiveView(view: 'map' | 'tracking'): void {
     this.activeTab = view;
+    if (view === 'tracking') {
+    this.selectedTrackingTypes = ['aircraft'];
+    this.handleTrackingSelection();
+  }
   }
 
   toggleFacilities(): void {
@@ -186,39 +192,104 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     }
   }
 
-  toggleGlobalAircraftTracking(): void {
-    this.globalAircraftTrackingEnabled = !this.globalAircraftTrackingEnabled;
-    this.trackingError = null;
+  // toggleGlobalAircraftTracking(): void {
+  //   this.globalAircraftTrackingEnabled = !this.globalAircraftTrackingEnabled;
+  //   this.trackingError = null;
 
-    if (!this.globalAircraftTrackingEnabled) {
-      this.aircraftData = [];
-      this.aircraftTrackSub?.unsubscribe();
-      clearInterval(this.aircraftTimer);
-      return;
+  //   if (!this.globalAircraftTrackingEnabled) {
+  //     this.aircraftData = [];
+  //     this.aircraftTrackSub?.unsubscribe();
+  //     clearInterval(this.aircraftTimer);
+  //     return;
+  //   }
+
+  //   this.activeTab = 'tracking';
+  //   this.refreshAircraftTracking(true);
+  //   clearInterval(this.aircraftTimer);
+  //   this.aircraftTimer = setInterval(() => this.refreshAircraftTracking(false), 25000);
+  // }
+
+  // toggleGlobalShipsTracking(): void {
+  //   this.globalShipsTrackingEnabled = !this.globalShipsTrackingEnabled;
+  //   this.trackingError = null;
+
+  //   if (!this.globalShipsTrackingEnabled) {
+  //     this.shipsData = [];
+  //     this.shipTrackSub?.unsubscribe();
+  //     clearInterval(this.shipsTimer);
+  //     return;
+  //   }
+
+  //   this.activeTab = 'tracking';
+  //   this.refreshShipsTracking(true);
+  //   clearInterval(this.shipsTimer);
+  //   this.shipsTimer = setInterval(() => this.refreshShipsTracking(false), 8000);
+  // }
+  isSelected(type: 'aircraft' | 'ship'): boolean {
+  return this.selectedTrackingTypes.includes(type);
+}
+
+getTrackingLabel(): string {
+  if (this.selectedTrackingTypes.length === 0) return 'Select Tracking';
+
+  if (this.selectedTrackingTypes.length === 2) return 'Aircraft + Ship';
+
+  return this.selectedTrackingTypes[0] === 'aircraft'
+    ? 'Aircraft'
+    : 'Ship';
+}
+onTrackingSelectionChange(type: 'aircraft' | 'ship', event: any): void {
+  const checked = event.target.checked;
+
+  if (checked) {
+    if (!this.selectedTrackingTypes.includes(type)) {
+      this.selectedTrackingTypes.push(type);
     }
-
-    this.activeTab = 'tracking';
-    this.refreshAircraftTracking(true);
-    clearInterval(this.aircraftTimer);
-    this.aircraftTimer = setInterval(() => this.refreshAircraftTracking(false), 25000);
+  } else {
+    this.selectedTrackingTypes = this.selectedTrackingTypes.filter(t => t !== type);
   }
 
-  toggleGlobalShipsTracking(): void {
-    this.globalShipsTrackingEnabled = !this.globalShipsTrackingEnabled;
-    this.trackingError = null;
+  this.handleTrackingSelection();
+}
+private handleTrackingSelection(): void {
+  this.trackingError = null;
 
-    if (!this.globalShipsTrackingEnabled) {
-      this.shipsData = [];
-      this.shipTrackSub?.unsubscribe();
-      clearInterval(this.shipsTimer);
-      return;
-    }
+  // STOP everything first (IMPORTANT)
+  this.aircraftTrackSub?.unsubscribe();
+  this.shipTrackSub?.unsubscribe();
+  clearInterval(this.aircraftTimer);
+  clearInterval(this.shipsTimer);
 
-    this.activeTab = 'tracking';
-    this.refreshShipsTracking(true);
-    clearInterval(this.shipsTimer);
-    this.shipsTimer = setInterval(() => this.refreshShipsTracking(false), 8000);
+  this.aircraftData = [];
+  this.shipsData = [];
+
+  // Aircraft
+  if (this.selectedTrackingTypes.includes('aircraft')) {
+    this.refreshGlobalAircraftTracking(true);
+    this.aircraftTimer = setInterval(() => {
+      this.refreshGlobalAircraftTracking(false);
+    }, 25000);
   }
+
+  // Ships
+  if (this.selectedTrackingTypes.includes('ship')) {
+    this.refreshGlobalShipsTracking(true);
+    this.shipsTimer = setInterval(() => {
+      this.refreshGlobalShipsTracking(false);
+    }, 8000);
+  }
+}
+toggleTrackingDropdown(): void {
+  this.isTrackingDropdownOpen = !this.isTrackingDropdownOpen;
+}
+@HostListener('document:click', ['$event'])
+onClickOutside(event: Event): void {
+  const target = event.target as HTMLElement;
+
+  if (!target.closest('.tracking-dropdown')) {
+    this.isTrackingDropdownOpen = false;
+  }
+}
 
   runAnomalyScan(): void {
     this.syncAppliedViewport();

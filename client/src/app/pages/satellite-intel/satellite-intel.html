@@ -12,37 +12,75 @@
   }
 
   <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
-    <div class="z-20 flex flex-nowrap items-center gap-2 overflow-x-auto border-b border-[#1e2a40] bg-[#0d1220] px-[14px] py-2">
-      <span class="mr-[2px] shrink-0 whitespace-nowrap text-[13px] font-medium text-[#7eb8f7]">Satellite Intel</span>
-
-      <div class="flex shrink-0 overflow-hidden rounded-[6px] border border-[#1e2a40] bg-[#0a1020]">
-        <button class="px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="activeTab === 'map' ? ['bg-[#17304d]','text-[#e2ecff]'] : ['text-[#7eb8f7]','hover:bg-[#10192a]']" (click)="setActiveView('map')">
-          Satellite map
+    <div class="z-20 flex w-full flex-wrap items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-760)] px-[14px] py-[15px] max-[640px]:gap-2">
+      <div class="flex max-w-full flex-nowrap gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <button
+          class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+          [ngClass]="activeTab === 'map' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']"
+          (click)="setActiveView('map')">
+          Satellite Map
         </button>
-        <button class="border-l border-[#1e2a40] px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="activeTab === 'tracking' ? ['bg-[#17304d]','text-[#e2ecff]'] : ['text-[#7eb8f7]','hover:bg-[#10192a]']" (click)="setActiveView('tracking')">
-          Live tracking
+        <button
+          class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+          [ngClass]="activeTab === 'tracking' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']"
+          (click)="setActiveView('tracking')">
+          World Tracking
         </button>
       </div>
+    </div>
 
+    <div class="z-10 flex min-h-[56px] flex-wrap items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-blur-760)] px-[14px] py-2 max-[640px]:gap-2">
       @if (isMapView) {
-        <select class="shrink-0 rounded-[5px] border border-[#1e2a40] bg-[#111827] px-[7px] py-[5px] text-[12px] text-[#c8d4e8] outline-none disabled:cursor-not-allowed disabled:opacity-60" [(ngModel)]="selectedLayer"  (change)="onLayerChange()">
+        <select
+          class="ui-select h-10 min-w-[180px] max-w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none transition focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-70"
+          [(ngModel)]="selectedLayer"
+          (change)="onLayerChange()">
           <option value="esri">ESRI Satellite</option>
           <option value="osm">OpenStreetMap</option>
         </select>
 
-        <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border border-[#3a7bd5] bg-[#1a4a7a] px-3 py-1.5 text-[12px] font-medium text-[#7eb8f7] transition-colors hover:bg-[#1e5a94] disabled:cursor-not-allowed disabled:opacity-60"  (click)="openGeocodeModal()">
+        <button
+          class="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+          [ngClass]="['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']"
+          (click)="openGeocodeModal()">
           <i class="bi bi-globe2 text-[13px]"></i>
           Location
         </button>
+      } @else {
+        <div class="relative min-w-[200px] tracking-dropdown">
+  
+  <!-- Trigger -->
+  <button
+    (click)="toggleTrackingDropdown()"
+    class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] text-left flex items-center justify-between">
+    
+    <span>{{ getTrackingLabel() }}</span>
+    <i class="bi bi-chevron-down text-[11px] opacity-70"></i>
+  </button>
 
-        } @else {
-        <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60"  [ngClass]="globalAircraftTrackingEnabled ? ['border-[#a855f7]','bg-[rgba(168,85,247,.25)]','text-[#e9d5ff]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleGlobalAircraftTracking()" title="Track aircraft worldwide">
-          {{ globalAircraftTrackingEnabled ? '🌍 Aircraft (global)' : 'Global aircraft' }}
-        </button>
+  <!-- Dropdown Panel -->
+  @if (isTrackingDropdownOpen) {
+    <div class="absolute z-50 mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-lg overflow-hidden" (click)="$event.stopPropagation()">
+      
+      <label class="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-[var(--color-blue-710)]">
+        <input
+          type="checkbox"
+          [checked]="isSelected('aircraft')"
+          (change)="onTrackingSelectionChange('aircraft', $event)">
+        Aircraft
+      </label>
 
-        <button class="inline-flex shrink-0 items-center gap-[5px] whitespace-nowrap rounded-[5px] border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60"  [ngClass]="globalShipsTrackingEnabled ? ['border-[#06d6d4]','bg-[rgba(6,214,212,.25)]','text-[#cffafe]'] : ['border-[#3a7bd5]','bg-[#1a4a7a]','text-[#7eb8f7]','hover:bg-[#1e5a94]']" (click)="toggleGlobalShipsTracking()" title="Track ships worldwide">
-          {{ globalShipsTrackingEnabled ? '🌍 Ships (global)' : 'Global ships' }}
-        </button>
+      <label class="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-[var(--color-blue-710)]">
+        <input
+          type="checkbox"
+          [checked]="isSelected('ship')"
+          (change)="onTrackingSelectionChange('ship', $event)">
+        Ship
+      </label>
+
+    </div>
+  }
+</div>
       }
     </div>
 
