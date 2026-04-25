@@ -222,21 +222,25 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   getProfileCategories(): string[] {
     const categories = Object.values(ProfileSubCategory);
     const eventManagementEnabled = this.appService.userSessionData().tenant.eventManagementEnabled === true;
+    const canAccessFeeder = this.licenseService.canUseModule('feeder');
 
     if (this.isAdmin()) {
       return categories.filter(c => c !== ProfileSubCategory.IOC &&
               c !== ProfileSubCategory.STATISTICS &&
               c !== ProfileSubCategory.TENANT_SETTINGS &&
+              (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
               (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
     }
     if (this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
       return categories.filter(c => c !== ProfileSubCategory.TENANT &&
               c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+              (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
               (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
     }
     return categories.filter(c => c !== ProfileSubCategory.TENANT &&
           c !== ProfileSubCategory.SYSTEM_SETTINGS &&
           c !== ProfileSubCategory.EVENT_MANAGEMENT &&
+          c !== ProfileSubCategory.FEEDER &&
           c !== ProfileSubCategory.USERS &&
           c !== ProfileSubCategory.AUDITLOG &&
           c !== ProfileSubCategory.IOC &&

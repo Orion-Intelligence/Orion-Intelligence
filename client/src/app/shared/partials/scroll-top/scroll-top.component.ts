@@ -7,6 +7,7 @@ export class ScrollTopComponent {
   scrollToTop(): void {
     const candidates = [
       document.querySelector('app-network-intel'),
+      document.getElementById('dashboard-body'),
       document.getElementById('dashboard-container'),
       document.scrollingElement,
     ].filter((element): element is Element => !!element);
