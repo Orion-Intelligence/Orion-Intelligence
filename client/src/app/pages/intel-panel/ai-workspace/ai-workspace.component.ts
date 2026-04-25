@@ -7,9 +7,9 @@ import { ApiService } from '../../../shared/services/api.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { SubscriptionService } from '../../../services/dashboard/subscription.service';
-import { ChatApiResponse } from '../../../shared/model/chat/chat-api-response.model';
 import { AiWorkspaceMessage } from '../../../shared/model/chat/ai-workspace-message.model';
 import { AiWorkspacePrompt } from '../../../shared/constants/shared-enums';
+import { NexusChatService } from './nexus-chat.service';
 type ChatHistoryMessage = {
   sender: 'user' | 'bot';
   text: string;
@@ -23,7 +23,6 @@ type ChatHistoryMessage = {
   templateUrl: './ai-workspace.component.html',
 })
 export class AiWorkspaceComponent implements OnInit {
-  private readonly sessionId: string;
   private activeChatRequest?: Subscription;
   @ViewChild('messagesContainer') private messagesContainer?: ElementRef<HTMLElement>;
   private readonly queryContext: string;
@@ -31,14 +30,14 @@ export class AiWorkspaceComponent implements OnInit {
   protected readonly quickPrompts = Object.values(AiWorkspacePrompt);
   protected readonly isSending = signal(false);
   protected readonly isLoadingHistory = signal(true);
+  protected readonly nexusStep = signal('');
   protected readonly contextQuery = computed(() => this.queryContext);
   protected readonly canUseNexusChat = computed(() => this.licenseService.canUseModule('ai'));
 
   messageDraft = '';
   messages: AiWorkspaceMessage[] = [];
 
-  constructor(private readonly api: ApiService, protected readonly appService: AppService, private readonly route: ActivatedRoute, private readonly router: Router, private readonly subscriptionService: SubscriptionService, protected readonly licenseService: LicenseService) {
-    this.sessionId = (appService.userSessionData()?.user.username || '').trim() || crypto.randomUUID();
+  constructor(private readonly api: ApiService, protected readonly appService: AppService, private readonly route: ActivatedRoute, private readonly router: Router, private readonly subscriptionService: SubscriptionService, protected readonly licenseService: LicenseService, private readonly nexusChatService: NexusChatService) {
     this.queryContext = (this.route.snapshot.queryParamMap.get('q') || '').trim();
   }
 
@@ -60,6 +59,7 @@ export class AiWorkspaceComponent implements OnInit {
     this.persistChatHistory();
     this.messageDraft = '';
     this.isSending.set(true);
+    this.nexusStep.set('');
     this.scrollToBottom();
 
     if (!this.subscriptionService.accountExpirable()) {
@@ -69,13 +69,20 @@ export class AiWorkspaceComponent implements OnInit {
       return;
     }
 
-    this.activeChatRequest = this.api.post<ChatApiResponse>('nexus/chat', {
-      session_id: this.sessionId,
+    const payload = {
       message: text,
       report: this.contextQuery() || '',
-    }).subscribe({
+    };
+
+    this.activeChatRequest = this.nexusChatService.pollNexusChat(payload).subscribe({
       next: (response) => {
-        const reply = (response?.result ?? response?.reply ?? response?.message ?? response?.text ?? '').toString().trim();
+        if (this.nexusChatService.isNexusPending(response)) {
+          this.nexusStep.set(this.nexusChatService.getNexusStep(response));
+          this.scrollToBottom();
+          return;
+        }
+
+        const reply = this.nexusChatService.getNexusChatReply(response);
         this.messages = [
           ...this.messages,
           reply ? this.createMessage('bot', reply) : this.createErrorMessage(text),
@@ -83,12 +90,14 @@ export class AiWorkspaceComponent implements OnInit {
         this.persistChatHistory();
         this.activeChatRequest = undefined;
         this.isSending.set(false);
+        this.nexusStep.set('');
         this.scrollToBottom();
       },
       error: () => {
         this.activeChatRequest = undefined;
         this.messages = [...this.messages, this.createErrorMessage(text)];
         this.isSending.set(false);
+        this.nexusStep.set('');
         this.scrollToBottom();
       }
     });
@@ -115,6 +124,7 @@ export class AiWorkspaceComponent implements OnInit {
     this.activeChatRequest = undefined;
     this.messages = [...this.messages, this.createCancelledMessage()];
     this.isSending.set(false);
+    this.nexusStep.set('');
     this.scrollToBottom();
   }
 

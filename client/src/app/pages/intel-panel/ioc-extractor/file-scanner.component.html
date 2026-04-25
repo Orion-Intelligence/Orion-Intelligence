@@ -1,8 +1,8 @@
 <div class="relative">
-  <input data-testid="scan-file-input" type="file" #fileInput id="fileInput" class="hidden" [attr.accept]="accept" (change)="onFileSelected($event)" />
+  <input data-testid="scan-file-input" type="file" #fileInput id="fileInput" class="hidden" (change)="onFileSelected($event)" />
 
   @if (!isFetched && !isLoading) {
-    <div class="p-[24px] flex items-center justify-center" @fadeInDashboardItem>
+    <div class="p-[24px] flex items-center justify-center">
       <div class="box-border w-full rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[24px] text-center shadow-[0_10px_30px_var(--color-shadow-medium)]">
         <div class="mx-auto mb-[12px] flex h-[64px] w-[64px] items-center justify-center rounded-full bg-[var(--color-blue-790-light)]">
           <img src="assets/images/shared/theme/file-search.svg" alt="File Upload" class="h-[32px] w-[32px]"/>
@@ -14,8 +14,8 @@
           Choose File
         </button>
         <div class="mt-[16px] text-left text-[12px] text-[var(--color-text4)]">
-          <div><strong>Supported formats:</strong> {{ type === 'apk' ? 'APK' : 'PDF, TXT, Images (PNG, JPG, JPEG)' }}</div>
-          <div class="mt-[4px]"><strong>Maximum file size:</strong> {{ type === 'apk' ? 'up to 30 MB' : 'up to 1 MB' }}</div>
+          <div><strong>Supported formats:</strong> All file types</div>
+          <div class="mt-[4px]"><strong>Maximum file size:</strong> up to 30 MB</div>
         </div>
       </div>
     </div>
@@ -27,20 +27,8 @@
         <h1 class="text-[20px] font-semibold text-[var(--color-text1)]">Analysis Report</h1>
         <p class="text-[13px] text-[var(--color-text4)]">File Processing Results</p>
       </div>
-      @if (!hasError && !isLoading && (extractionResult || apkResult || groupedIocs.length > 0)) {
-        <div>
-          <div class="inline-flex items-stretch overflow-hidden rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)]">
-            <button data-testid="scan-another-file" type="button" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]" appTooltip="Scan another file" (click)="triggerFileInput()" aria-label="Scan another file">
-              <img ngSrc="../../../../assets/images/shared/theme/file-search.svg" width="20" height="20" alt="scan" class="ui-action-icon" />
-            </button>
-            <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
-            <button data-testid="scan-download-report" type="button" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]" appTooltip="Download report" (click)="exportReport()" aria-label="Download report">
-              <img ngSrc="../../../../assets/images/shared/theme/download.svg" width="20" height="20" alt="download" class="ui-action-icon" />
-            </button>
-          </div>
-        </div>
-      }
     </div>
+
     @if (!hasError && isLoading && progress() < 100) {
       <div class="relative z-[1] mx-[32px] mt-[12px] max-w-[720px]">
         <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text1)]">
@@ -51,9 +39,10 @@
         </div>
       </div>
     }
+
     <div class="relative z-[1] mx-[20px] mt-[16px] mb-[100px] rounded-[10px] text-[var(--color-text1)]">
       @if (hasError && !isLoading) {
-        <div class="rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] shadow-[0_8px_22px_rgba(0,0,0,0.18)]" @fadeInDashboardItem>
+        <div class="rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] shadow-[0_8px_22px_rgba(0,0,0,0.18)]">
           <div class="mb-[6px] flex items-start justify-between gap-3">
             <div class="min-w-0">
               <div class="mt-[6px] text-[17px] font-semibold leading-tight text-[var(--color-text1)]">Processing Failed</div>
@@ -69,110 +58,122 @@
               <li>Please select a smaller file</li>
             </ul>
           }
-          @if (isUnsupportedFileError) {
-            <ul class="mt-[8px] list-disc space-y-1 pl-[18px] text-[13px] leading-5 text-[var(--color-text2)]">
-              <li><strong class="text-[var(--color-text1)]">Supported formats:</strong> {{ type === 'apk' ? 'APK' : 'PDF, TXT, Images' }}</li>
-            </ul>
-          }
           <button class="ui-btn ui-btn-danger mt-[10px] rounded-[8px] px-[14px] py-[8px] text-[14px]" (click)="triggerFileInput()">Try Again</button>
         </div>
       }
-      @if (!hasError && (isLoading || extractionResult || apkResult || groupedIocs.length > 0)) {
-        <section class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[15px]">
+
+      @if (!hasError && (isLoading || scanResult || resultSections.length > 0)) {
+        <section>
           @if (!isLoading) {
-            <div class="flex items-center justify-between" @fadeInDashboardItem>
-              <div class="text-[16px] font-semibold text-[var(--color-text1)]">
-                Analysis Report for
-                <span class="mx-[6px]">〡</span>
-                <span class="font-mono">{{ extractionResult?.original_filename || apkResult?.original_filename || fileName || 'file' }}</span>
+            <div class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
+              <div class="flex min-w-0 items-center gap-2">
+                <img alt="File" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
+                <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]" [title]="getDisplayFileName()">{{ getDisplayFileName() }}</div>
+                <div class="text-xs text-[var(--color-text4)]">File</div>
               </div>
-              <div>
-                <span data-testid="scan-success-badge" class="inline-flex items-center gap-[6px] rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-rose-500/10 text-rose-300'">
-                  <i class="bi" [ngClass]="(extractionResult?.status || apkResult?.status) === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
-                  {{ (extractionResult?.status || apkResult?.status || 'completed') | lowercase }}
-                </span>
+
+              <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
+
+              <div class="hidden items-center gap-2 md:flex">
+                <img alt="Results" src="assets/images/shared/results_found.svg" class="h-5 w-5">
+                <div class="text-sm font-semibold text-[var(--color-text1)]">{{ resultSections.length }}</div>
+                <div class="text-xs text-[var(--color-text4)]">Results</div>
+              </div>
+
+              <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
+
+              <div class="hidden items-center gap-2 lg:flex">
+                <img alt="Type" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
+                <div class="text-sm font-semibold uppercase text-[var(--color-text1)]">{{ getDisplayFileType() }}</div>
+                <div class="text-xs text-[var(--color-text4)]">File Type</div>
+              </div>
+
+              <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
+
+              <div class="hidden items-center gap-2 xl:flex">
+                <img alt="Fields" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
+                <div class="text-sm font-semibold text-[var(--color-text1)]">{{ getDisplayMetricValue() }}</div>
+                <div class="text-xs text-[var(--color-text4)]">Fields</div>
+              </div>
+
+              <div class="ml-auto flex items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
+                <button data-testid="scan-another-file" type="button" class="inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[12px] font-semibold text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" appTooltip="Scan another file" (click)="triggerFileInput()" aria-label="Scan another file">
+                  <img ngSrc="../../../../assets/images/shared/theme/file-search.svg" width="16" height="16" alt="scan" class="ui-action-icon" />
+                  <span>Upload another</span>
+                </button>
+                <div class="h-6 w-px bg-[var(--color-divider)]"></div>
+                <button data-testid="scan-download-report" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" appTooltip="Download report" (click)="exportReport()" aria-label="Download report">
+                  <img ngSrc="../../../../assets/images/shared/theme/download.svg" width="16" height="16" alt="download" class="ui-action-icon" />
+                </button>
               </div>
             </div>
           } @else {
-            <div class="flex items-center justify-between">
-              <div class="ui-shimmer h-[18px] w-[260px] rounded-[5px] bg-[#ffffff14]"></div>
-              <div class="ui-shimmer h-[22px] w-[84px] rounded-full bg-[#ffffff14]"></div>
-            </div>
-          }
-          @if (!isLoading) {
-            <div class="mt-[12px] grid grid-cols-1 gap-[10px] sm:grid-cols-2 lg:grid-cols-4" @fadeInDashboardItem>
-              @for (s of getSummaryStats(); track s.label) {
-                @if (s.label && s.value) {
-                  <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[12px]">
-                    <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]">
-                      <i class="bi" [ngClass]="s.label === 'Filename' ? 'bi-file-earmark-text' : s.label === 'File Type' ? 'bi-code-slash' : s.label === 'Extracted Text' ? 'bi-body-text' : s.label === 'Total Findings' ? 'bi-shield-exclamation' : 'bi-check-circle'"></i>
-                      {{ s.label }}
-                    </div>
-                    <div class="text-[14px]" [ngClass]="{ 'font-mono': s.label === 'Filename', 'text-[var(--color-text1)]': true }">{{ s.value }}</div>
-                  </div>
+            <div class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
+              @for (i of [1,2,3,4]; track i) {
+                <div class="flex items-center gap-2">
+                  <div class="ui-shimmer h-5 w-5 rounded bg-[var(--color-blue-720)]"></div>
+                  <div class="ui-shimmer h-4 w-24 rounded bg-[var(--color-blue-720)]"></div>
+                  <div class="ui-shimmer h-3 w-12 rounded bg-[var(--color-blue-720)]"></div>
+                </div>
+                @if (i < 4) {
+                  <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
                 }
               }
             </div>
-          } @else {
-            <div class="mt-[12px] grid grid-cols-1 gap-[10px] sm:grid-cols-2 lg:grid-cols-4">
-              @for (i of [1,2,3,4]; track i) {
-                <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[12px]">
-                  <div class="ui-shimmer h-[12px] w-[120px] rounded-[4px] bg-[#ffffff14]"></div>
-                  <div class="ui-shimmer mt-[8px] h-[16px] w-[160px] rounded-[4px] bg-[#ffffff14]"></div>
-                </div>
-              }
-            </div>
           }
+
           @if (isLoading) {
             <section class="mt-[16px] space-y-[16px]">
-              @for (i of [1,2]; track i) {
-                <div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[14px]">
-                  <div class="ui-shimmer h-[14px] w-[180px] rounded-[5px] bg-[#ffffff14]"></div>
-                  <div class="ui-shimmer mt-[8px] h-[11px] w-[90px] rounded-[4px] bg-[#ffffff14]"></div>
-                  <div class="mt-[12px] space-y-[10px]">
-                    @for (j of [1,2,3]; track j) {
-                      <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[10px]">
-                        <div class="ui-shimmer h-[12px] w-[70%] rounded-[4px] bg-[#ffffff14]"></div>
-                        <div class="ui-shimmer mt-[7px] h-[11px] w-[50%] rounded-[4px] bg-[#ffffff14]"></div>
-                      </div>
-                    }
-                  </div>
+              <div class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border border-[var(--ui-consolidated-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] [--ui-consolidated-sub-bg:var(--color-blue-700)] [--ui-consolidated-sub-hover:var(--color-blue-700)] [--ui-consolidated-border:var(--color-border)] [--ui-consolidated-divider:var(--color-divider)]">
+                <div class="border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
+                  <div class="ui-shimmer h-[13px] w-[160px] rounded bg-[var(--color-blue-720)]"></div>
+                  <div class="ui-shimmer mt-[7px] h-[11px] w-[92px] rounded bg-[var(--color-blue-720)]"></div>
                 </div>
-              }
+                <div class="grid grid-cols-1 gap-0 px-[14px] py-[6px] md:grid-cols-2 md:gap-x-[18px] max-[640px]:px-[10px]">
+                  @for (j of [1,2,3,4,5,6]; track j) {
+                    <div class="flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [ngClass]="{ 'border-b-0': j > 4 }">
+                      <div class="ui-shimmer h-[11px] w-[82px] shrink-0 rounded bg-[var(--color-blue-720)]"></div>
+                      <div class="ui-shimmer h-[13px] flex-1 rounded bg-[var(--color-blue-720)]"></div>
+                    </div>
+                  }
+                </div>
+              </div>
             </section>
           } @else {
-            @if (groupedIocs.length > 0) {
+            @if (resultSections.length > 0) {
               <section class="mt-[16px] space-y-[16px]">
-                @for (category of groupedIocs; track trackByCategory(i, category); let i = $index) {
-                  <div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[14px]" @fadeInDashboardItem>
-                    <div class="flex items-center justify-between">
-                      <div>
-                        <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ category.name }}</div>
-                        <div class="text-[12px] text-[var(--color-text4)]">{{ category.total }} Found</div>
-                      </div>
+                @for (section of resultSections; track section.title) {
+                  <div>
+                    <div class="my-[10px] flex items-center gap-[12px] text-[12px] font-semibold uppercase tracking-[1px] text-[#10b981]">
+                      <span>{{ section.title }}</span>
+                      <span class="h-px flex-1 bg-[linear-gradient(90deg,rgba(16,185,129,0.6),rgba(16,185,129,0))]"></span>
                     </div>
-                    <div class="mt-[12px] space-y-[10px]">
-                      @for (item of category.items; track trackByItem($index)) {
-                        <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[10px]" @fadeInDashboardItem>
-                          <div>
-                            <div class="text-[13px] text-[var(--color-text1)]">{{ item.value }}</div>
-                            <div class="text-[12px] text-[var(--color-text4)]">{{ item.description }}</div>
-                          </div>
-                          <div class="flex items-center gap-[8px]">
-                            <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">{{ category.name }}</span>
-                            <button class="inline-flex items-center gap-[6px] rounded-full border border-[var(--color-border)] px-[10px] py-[2px] text-[11px]" type="button" [ngClass]="{ 'bg-[var(--color-scan-green-100)] text-[var(--color-scan-green)]': copiedValue() === item.value, 'bg-[var(--color-blue-820)] text-[var(--color-text1)]': copiedValue() !== item.value }" (click)="copyValue(item.value)">
-                              <i class="bi" [ngClass]="copiedValue() === item.value ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
-                              <span>{{ copiedValue() === item.value ? 'Copied!' : 'Copy' }}</span>
-                            </button>
-                          </div>
+                    <div data-testid="defacement-report-card" class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border border-[var(--ui-consolidated-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] [--ui-consolidated-sub-bg:var(--color-blue-700)] [--ui-consolidated-sub-hover:var(--color-blue-700)] [--ui-consolidated-border:var(--color-border)] [--ui-consolidated-divider:var(--color-divider)]">
+                      <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
+                        <div class="min-w-0">
+                          <b data-testid="defacement-report-card-title" class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">{{ section.title }}</b>
+                          <div class="mt-[4px] text-[11px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text6)]">Fields: <span class="font-[600] text-[var(--color-text2)]">{{ section.items.length }}</span></div>
                         </div>
-                      }
+                      </div>
+                      <div class="grid grid-cols-1 gap-0 px-[14px] py-[8px] md:grid-cols-2 md:gap-x-[18px] max-[640px]:px-[10px]">
+                        @for (item of section.items; track $index; let itemIdx = $index) {
+                          <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [ngClass]="{ 'border-b-0': isLastSectionRow(section, itemIdx) }">
+                            <div class="w-[112px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[86px]">{{ item.label }}</div>
+                            <div class="flex min-w-0 flex-1 items-center gap-[8px]">
+                              <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [title]="item.value">{{ item.value }}</div>
+                              <button type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" [appTooltip]="copiedValue() === item.value ? 'Copied' : 'Copy'" (click)="copyValue(item.value)">
+                                <i class="bi" [ngClass]="copiedValue() === item.value ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
+                              </button>
+                            </div>
+                          </div>
+                        }
+                      </div>
                     </div>
                   </div>
                 }
               </section>
             } @else {
-              <div class="mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[20px] text-center" @fadeInDashboardItem>
+              <div class="mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[20px] text-center">
                 <div class="text-[30px] text-[var(--color-text1)]"><i class="bi bi-shield-check"></i></div>
                 <div class="mt-[6px] text-[16px] font-semibold text-[var(--color-text1)]">No Findings</div>
                 <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">No indicators or suspicious items were detected in the file.</div>
@@ -183,8 +184,9 @@
         </section>
       }
     </div>
+
     <div id="iocReport" class="hidden">
-      @if (extractionResult || apkResult || groupedIocs.length > 0) {
+      @if (scanResult) {
         <div class="p-[20px]">
           <h2>{{ title }} Report</h2>
           <hr/>

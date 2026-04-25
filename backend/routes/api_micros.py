@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
-from configs.app_dependency import license_required, role_required
+from configs.app_dependency import get_current_user, license_required, role_required
 from configs.limiter_dependency import limiter_dependency
+from orion.api.server.crawl_manager.class_model import nlp_data_model
 from orion.api.server.crawl_manager.class_model.report_chat_data_model import ReportChatRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
@@ -18,6 +19,20 @@ async def fetch_cti_label(payload: CTITextRequest, _=Depends(role_required([user
 
 
 @micro_routes.post(
+    "/api/nlp/parse/ai",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
+async def parse_ai(payload: nlp_data_model, current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().parse_chat_ai(payload, user_id=str(current_user.id))
+
+
+@micro_routes.post(
+    "/api/nlp/summarize/ai",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:ai", bypass_roles=[user_role.ADMIN])), Depends(limiter_dependency)])
+async def summarize_ai(payload: nlp_data_model, current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().parse_summarize_ai(payload, user_id=str(current_user.id))
+
+
+@micro_routes.post(
     "/api/nlp/chat/report",
     summary="Process chat report with NLP",
     description="Use NLP pipeline to parse and enrich chat-based report content.",
@@ -27,8 +42,8 @@ async def fetch_cti_label(payload: CTITextRequest, _=Depends(role_required([user
     status_code=200,
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN])), Depends(limiter_dependency)], )
-async def chat_report(payload: ReportChatRequest):
-    response = await crawl_model.getInstance().parse_chat_ai(payload)
+async def chat_report(payload: ReportChatRequest, current_user=Depends(get_current_user)):
+    response = await crawl_model.getInstance().parse_chat_ai(payload, user_id=str(current_user.id))
     return response
 
 
@@ -42,6 +57,6 @@ async def chat_report(payload: ReportChatRequest):
     status_code=200,
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:ai", bypass_roles=[user_role.ADMIN])), Depends(limiter_dependency)], )
-async def nexus_chat(payload: ReportChatRequest):
-    response = await crawl_model.getInstance().parse_nexus_chat_ai(payload)
+async def nexus_chat(payload: ReportChatRequest, current_user=Depends(get_current_user)):
+    response = await crawl_model.getInstance().parse_nexus_chat_ai(payload, user_id=str(current_user.id))
     return response

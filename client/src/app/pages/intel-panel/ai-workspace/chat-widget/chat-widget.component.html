@@ -21,27 +21,39 @@
           <img src="assets/images/shared/cross.svg" alt="close" class="h-[14px] w-[14px] ui-action-icon" />
         </button>
       </div>
-      <div #messagesContainer data-testid="chat-widget-messages" class="flex-1 space-y-3 overflow-y-auto px-4 py-4" (scroll)="onMessagesScroll()">
+      <div #messagesContainer data-testid="chat-widget-messages" class="flex-1 space-y-5 overflow-y-auto px-4 py-4" (scroll)="onMessagesScroll()">
         @for (msg of chatMessages; track trackByIndex($index)) {
           <div>
             @switch (msg.sender) {
               @case ('user') {
-                <div class="flex items-center gap-3">
-                  <div class="inline-block h-9 w-9 shrink-0 overflow-hidden rounded-full border-2 bg-[var(--color-blue-720)] box-border" [ngClass]="this.appService.userSessionData().user.theme === 'light-theme' ? 'border-[#57A5EB]' : 'border-white'">
-                    <img alt="profile icon" [src]="this.appService.userSessionData().user.image || '/api/s/static/user/default.png'" class="block h-full w-full rounded-full object-cover" />
+                <div class="flex w-full justify-end">
+                  <div class="max-w-[72%] space-y-1.5">
+                    <div class="flex min-h-[20px] items-center justify-end gap-2 px-1">
+                      <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ msg.time | date : 'h:mm a' }}</span>
+                      <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text1)]">Analyst</span>
+                    </div>
+                    <div class="ui-ai-chat-bubble ui-ai-chat-bubble-user rounded-[22px] rounded-tr-[10px] border border-[var(--color-border)] px-4 py-3.5 text-sm text-white shadow-[0_10px_28px_var(--color-shadow-medium)]">
+                      <p class="whitespace-pre-wrap leading-7">{{ msg.text }}</p>
+                    </div>
                   </div>
-                  <div class="rounded-2xl bg-[var(--color-blue-640)] px-3 py-2 text-sm text-white">
-                    <p>{{ msg.text }}</p>
+                  <div class="mt-1 ml-3.5 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)]" [ngClass]="this.appService.userSessionData().user.theme === 'light-theme' ? 'border-[#57A5EB]' : 'border-white'">
+                    <img alt="profile icon" [src]="this.appService.userSessionData().user.image || '/api/s/static/user/default.png'" class="block h-full w-full rounded-full object-cover" />
                   </div>
                 </div>
               }
               @case ('bot') {
-                <div class="flex items-center gap-3">
-                  <div class="inline-block h-9 w-9 shrink-0 overflow-hidden rounded-full border border-[#EBF0F4] bg-[var(--color-blue-720)] box-border">
+                <div class="flex w-full items-start gap-3.5">
+                  <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)]">
                     <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover" />
                   </div>
-                  <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-sm text-[var(--color-text1)]">
-                    <p>{{ msg.text }}</p>
+                  <div class="max-w-[78%] space-y-1.5">
+                    <div class="flex min-h-[20px] items-center gap-2 px-1">
+                      <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
+                      <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ msg.time | date : 'h:mm a' }}</span>
+                    </div>
+                    <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3.5 shadow-[0_10px_28px_var(--color-shadow-medium)]">
+                      <p class="whitespace-pre-wrap text-[14px] leading-7 text-[var(--color-text1)]">{{ msg.text }}</p>
+                    </div>
                   </div>
                 </div>
               }
@@ -60,10 +72,18 @@
           </div>
         }
         @if (isBotTyping) {
-          <div class="flex items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-sm text-[var(--color-text1)]">
-            <span class="h-2 w-2 animate-bounce rounded-full bg-[var(--color-text4)]"></span>
-            <span class="h-2 w-2 animate-bounce rounded-full bg-[var(--color-text4)] [animation-delay:120ms]"></span>
-            <span class="h-2 w-2 animate-bounce rounded-full bg-[var(--color-text4)] [animation-delay:240ms]"></span>
+          <div class="flex items-center gap-3">
+            <div class="inline-block h-9 w-9 shrink-0 overflow-hidden rounded-full border border-[#EBF0F4] bg-[var(--color-blue-720)] box-border">
+              <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover" />
+            </div>
+            <div class="flex flex-col gap-2 px-1 py-1.5 text-sm text-[var(--color-text1)]">
+              <span class="text-xs text-[var(--color-text4)]">{{ botStep }}</span>
+              <div class="flex items-center gap-2">
+                <span class="h-2 w-2 animate-bounce rounded-full bg-[var(--color-text4)]"></span>
+                <span class="h-2 w-2 animate-bounce rounded-full bg-[var(--color-text4)] [animation-delay:120ms]"></span>
+                <span class="h-2 w-2 animate-bounce rounded-full bg-[var(--color-text4)] [animation-delay:240ms]"></span>
+              </div>
+            </div>
           </div>
         }
         <div #bottomSentinel></div>

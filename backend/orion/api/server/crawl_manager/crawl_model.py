@@ -151,14 +151,21 @@ class crawl_model:
             return {"error": "Failed to parse chat"}
 
     @staticmethod
-    async def parse_summarize_ai(model: nlp_data_model):
+    async def parse_summarize_ai(model: nlp_data_model, user_id: str = "system"):
         try:
+            base_url = (env_handler.get_instance().env("DARKNEXUS_API_BASE") or "http://trusted-nexus-api:8030").strip().rstrip("/")
+
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    "http://trusted-micros-api:8010/nlp/summarize/ai", json={"data": model.data}, timeout=200)
+                    f"{base_url}/nlp/summarize/ai/{user_id}", json={"data": model.data}, timeout=120)
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling nlp/summarize/ai"})
                 return response.json()
         except Exception:
-            return {"error": "Failed to summarize chat"}
+            return JSONResponse(
+                status_code=500, content={"detail": "Something happened while calling nlp/summarize/ai"})
 
     @staticmethod
     async def scan_domain(model, user_id: str = "system"):
@@ -230,81 +237,37 @@ class crawl_model:
                 status_code=500, content={"detail": "Something happened while calling /ioc/extract"})
 
     @staticmethod
-    async def parse_chat_ai(model: ReportChatRequest):
+    async def parse_chat_ai(model, user_id: str = "system"):
         try:
+            base_url = (env_handler.get_instance().env("DARKNEXUS_API_BASE") or "http://trusted-nexus-api:8030").strip().rstrip("/")
+
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    "http://trusted-micros-api:8010/nlp/chat/report", json=model.model_dump(), timeout=200)
+                    f"{base_url}/nlp/chat/report/{user_id}", json=model.model_dump(), timeout=120)
                 response.raise_for_status()
                 return response.json()
         except Exception:
             return {"error": "Failed to generate chat report"}
 
     @staticmethod
-    async def parse_nexus_chat_ai(model: ReportChatRequest):
+    async def parse_nexus_chat_ai(model: ReportChatRequest, user_id: str = "system"):
         try:
-            configured_base_url = (env_handler.get_instance().env("DARKNEXUS_API_BASE") or "").strip().rstrip("/")
-            base_urls = [url for url in (
-                configured_base_url,
-                "http://172.18.0.1:8030",
-                "http://host.docker.internal:8030",
-                "http://localhost:8030",
-            ) if url]
+            base_url = (env_handler.get_instance().env("DARKNEXUS_API_BASE") or "http://trusted-nexus-api:8030").strip().rstrip("/")
+            has_report = bool((model.report or "").strip())
+            endpoint = f"{base_url}/nlp/chat/report/{user_id}" if has_report else f"{base_url}/api/chat/{user_id}"
+            nexus_payload = model.model_dump() if has_report else {"prompt": model.message}
 
             async with httpx.AsyncClient() as client:
-                for base_url in base_urls:
-                    try:
-                        response = await client.post(
-                            f"{base_url}/nlp/chat/report", json=model.model_dump(), timeout=30)
-                        response.raise_for_status()
-                        submit_payload = response.json()
-
-                        submit_status = str((submit_payload or {}).get("status", "")).strip().lower() if isinstance(submit_payload, dict) else ""
-                        if submit_status in {"done", "completed", "complete", "success", "succeeded"}:
-                            result = submit_payload.get("result") if isinstance(submit_payload, dict) else None
-                            if isinstance(result, dict):
-                                text = (result.get("response") or result.get("result") or result.get("text") or "").strip()
-                                if text:
-                                    return {"result": text}
-                            return {"error": "Failed to generate nexus chat report"}
-
-                        if submit_status in {"error", "failed", "cancelled", "canceled"}:
-                            return {"error": "Failed to generate nexus chat report"}
-
-                        job_id = ""
-                        if isinstance(submit_payload, dict):
-                            job_id = str(submit_payload.get("job_id") or "").strip()
-
-                        if not job_id:
-                            continue
-
-                        for _ in range(180):
-                            status_response = await client.get(
-                                f"{base_url}/v1/jobs/{job_id}",
-                                timeout=30,
-                            )
-                            status_response.raise_for_status()
-                            status_payload = status_response.json()
-                            status_value = str((status_payload or {}).get("status", "")).strip().lower()
-
-                            if status_value in {"done", "completed", "complete", "success", "succeeded"}:
-                                result = status_payload.get("result") if isinstance(status_payload, dict) else None
-                                if isinstance(result, dict):
-                                    text = (result.get("response") or result.get("result") or result.get("text") or "").strip()
-                                    if text:
-                                        return {"result": text}
-                                return {"error": "Failed to generate nexus chat report"}
-
-                            if status_value in {"failed", "error", "cancelled", "canceled"}:
-                                return {"error": "Failed to generate nexus chat report"}
-
-                            await asyncio.sleep(1)
-                    except Exception:
-                        continue
-
-                return {"error": "Failed to generate nexus chat report"}
+                response = await client.post(
+                    endpoint, json=nexus_payload, timeout=120)
+                if response.status_code != 200:
+                    return JSONResponse(
+                        status_code=response.status_code,
+                        content={"detail": "Something happened while calling api/chat"})
+                return response.json()
         except Exception:
-            return {"error": "Failed to generate nexus chat report"}
+            return JSONResponse(
+                status_code=500, content={"detail": "Something happened while calling api/chat"})
 
     @staticmethod
     async def invoke_stealerlog_index(credential_index: LogBatchModel):

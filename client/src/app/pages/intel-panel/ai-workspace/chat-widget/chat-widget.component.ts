@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, ChangeDetectorRef, NgZone, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../services/api.service';
-import { DashboardService } from '../../../services/dashboard/dashboard.service';
-import { chatBotAnimation } from '../../animations/chat.bot.animation';
-import { overlayFadeAnimation } from '../../animations/chat.overlay.animation';
-import { SubscriptionService } from '../../../services/dashboard/subscription.service';
-import { AppService } from '../../../services/core/app/app.service';
-import { ChatApiResponse } from '../../model/chat/chat-api-response.model';
+import { DashboardService } from '../../../../services/dashboard/dashboard.service';
+import { chatBotAnimation } from '../../../../shared/animations/chat.bot.animation';
+import { overlayFadeAnimation } from '../../../../shared/animations/chat.overlay.animation';
+import { SubscriptionService } from '../../../../services/dashboard/subscription.service';
+import { AppService } from '../../../../services/core/app/app.service';
+import { NexusChatService } from '../nexus-chat.service';
 
 @Component({
   selector: 'app-chat-widget',
@@ -17,7 +16,6 @@ import { ChatApiResponse } from '../../model/chat/chat-api-response.model';
   animations: [chatBotAnimation, overlayFadeAnimation]
 })
 export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
-  private sessionId = '';
   private userNearBottom = true;
   private io?: IntersectionObserver;
   private mo?: MutationObserver;
@@ -26,18 +24,17 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('bottomSentinel') bottomSentinel!: ElementRef<HTMLElement>;
   chatMessages: { id: string; sender: 'user' | 'bot' | 'error'; text: string; time: Date; retryPayload?: { message: string; report?: string; }; }[] = [];
   isBotTyping = false;
+  botStep = '';
   newMessage = '';
   chatOpen = false;
   readonly reportText = input<string>();
 
-  constructor(private api: ApiService, public appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService) { }
+  constructor(public appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService, private nexusChatService: NexusChatService) { }
 
   ngOnInit(): void {
-    const username = this.appService.userSessionData()?.user.username || '';
-    this.sessionId = username.trim() || crypto.randomUUID();
     if (this.chatMessages.length === 0) {
       this.chatMessages.push({
-        id: this.sessionId,
+        id: crypto.randomUUID(),
         sender: 'bot',
         text: 'Hi there! How can I help you today?',
         time: new Date()
@@ -64,9 +61,10 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!text) {
       return;
     }
-    this.chatMessages.push({ id: this.sessionId, sender: 'user', text, time: new Date() });
+    this.chatMessages.push({ id: crypto.randomUUID(), sender: 'user', text, time: new Date() });
     this.newMessage = '';
     this.isBotTyping = true;
+    this.botStep = '';
     this.scrollToNewMessage();
     this.aiSuggest(text);
   }
@@ -79,25 +77,32 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     const payload = {
-      session_id: this.sessionId,
       message: userMessage,
       report: this.reportText()
     };
-    this.api.post<ChatApiResponse>('nexus/chat', payload).subscribe({
+    this.nexusChatService.pollNexusReportChat(payload).subscribe({
       next: (response) => {
-        const reply = (response?.result ?? response?.reply ?? response?.message ?? response?.text ?? '').toString().trim();
+        if (this.nexusChatService.isNexusPending(response)) {
+          this.botStep = this.nexusChatService.getNexusStep(response);
+          this.scrollToNewMessage();
+          return;
+        }
+
+        const reply = this.nexusChatService.getNexusChatReply(response);
         if (!reply || (typeof response.message === 'string' && response.message.includes('went wrong'))) {
           this.showErrorMessage(userMessage);
         }
         else {
-          this.chatMessages.push({ id: this.sessionId, sender: 'bot', text: reply, time: new Date() });
+          this.chatMessages.push({ id: crypto.randomUUID(), sender: 'bot', text: reply, time: new Date() });
         }
         this.isBotTyping = false;
+        this.botStep = '';
         this.scrollToNewMessage();
       },
       error: () => {
         this.showErrorMessage(userMessage);
         this.isBotTyping = false;
+        this.botStep = '';
         this.scrollToNewMessage();
       }
     });
@@ -105,7 +110,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private showErrorMessage(originalMessage: string): void {
     this.chatMessages.push({
-      id: this.sessionId,
+      id: crypto.randomUUID(),
       sender: 'error',
       text: 'Something went wrong. try again.',
       time: new Date(),
@@ -115,6 +120,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
 
   retryMessage( payload: { message: string; report?: string; } ): void {
     this.isBotTyping = true;
+    this.botStep = '';
     this.scrollToNewMessage();
     this.aiSuggest(payload.message);
   }

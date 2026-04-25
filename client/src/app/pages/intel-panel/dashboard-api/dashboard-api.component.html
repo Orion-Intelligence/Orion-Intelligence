@@ -57,13 +57,22 @@
         </div>
       </div>
     }
-    <div class="mt-[14px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[14px]">
-      <div class="space-y-[12px]">
-        @for (i of [1,2,3]; track i) {
-          <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[14px]">
-            <div class="ui-shimmer h-[14px] w-[220px] rounded-[5px] bg-[#ffffff14]"></div>
-            <div class="ui-shimmer mt-[10px] h-[12px] w-full rounded-[5px] bg-[#ffffff14]"></div>
-            <div class="ui-shimmer mt-[8px] h-[12px] w-[75%] rounded-[5px] bg-[#ffffff14]"></div>
+    <div data-testid="ioc-threat-table-loading" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]" @fadeInDashboardItem>
+      <div class="ui-ioc-table-head grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[60px_1fr_120px_48px]">
+        <div>#</div>
+        <div>Result</div>
+        <div>Fields</div>
+        <div class="max-[640px]:hidden">API Type</div>
+        <div></div>
+      </div>
+      <div class="space-y-2 px-4 py-3">
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 max-[900px]:grid-cols-[60px_1fr_120px_48px]">
+            <div class="ui-shimmer h-3 w-8 rounded bg-[var(--color-blue-720)]"></div>
+            <div class="ui-shimmer h-3 w-44 rounded bg-[var(--color-blue-720)]"></div>
+            <div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-blue-720)]"></div>
+            <div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-blue-720)] max-[640px]:hidden"></div>
+            <div class="ui-shimmer h-7 w-7 rounded-md bg-[var(--color-blue-720)]"></div>
           </div>
         }
       </div>
@@ -72,46 +81,49 @@
 
   @if (query_triggered && !loading && hasResults) {
     <div class="mt-[15px] mx-0" @fadeInDashboardItem>
-      <section class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] p-[15px]">
-        <div class="flex items-center justify-between" @fadeInDashboardItem>
-          <div class="text-[16px] font-semibold text-[var(--color-text1)]">Search Results for <span class="mx-[6px]">〡</span><span class="font-mono">{{ displayQ1 || 'query' }}</span></div>
-          <div class="flex items-center gap-[8px]">
-            <button data-testid="scan-download-report" type="button" appTooltip="Download report" (click)="exportPdfReport()" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-0 transition-colors hover:bg-[var(--color-blue-710)]">
-              <img src="/assets/images/shared/theme/download.svg" height="18" width="18" alt="download" class="ui-action-icon" />
-            </button>
-            <span data-testid="scan-success-badge" class="inline-flex items-center gap-[6px] rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize bg-emerald-500/10 text-emerald-300">
-              <i class="bi bi-check-circle-fill"></i> success
-            </span>
+      <section>
+        <div class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3" @fadeInDashboardItem>
+          <div class="flex items-center gap-2">
+            <img alt="API Type" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
+            <div class="text-sm font-semibold capitalize text-[var(--color-text1)]">{{ apiType || 'api' }}</div>
+            <div class="text-xs text-[var(--color-text4)]">API Type</div>
+          </div>
+
+          <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
+
+          <div class="hidden items-center gap-2 md:flex">
+            <img alt="Results" src="assets/images/shared/results_found.svg" class="h-5 w-5">
+            <div class="text-sm font-semibold text-[var(--color-text1)]">{{ apiType === 'crypto' ? ((cryptoResult?.recent_transactions?.length || 0) || 1) : genericItems.length }}</div>
+            <div class="text-xs text-[var(--color-text4)]">Results</div>
+          </div>
+
+          <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
+
+          <div class="hidden min-w-0 items-center gap-2 lg:flex">
+            <img alt="Query" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
+            <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]" [title]="(displayQ1 || q1) || 'not found'">{{ (displayQ1 || q1) || 'not found' }}</div>
+            <div class="text-xs text-[var(--color-text4)]">Query</div>
+          </div>
+
+          <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
+
+          <div class="hidden items-center gap-2 xl:flex">
+            <img alt="Fields" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
+            <div class="text-sm font-semibold text-[var(--color-text1)]">{{ apiType === 'crypto' ? getObjectEntries(cryptoResult).length : getGenericTotalFieldCount() }}</div>
+            <div class="text-xs text-[var(--color-text4)]">Fields</div>
+          </div>
+
+          <div class="ml-auto flex items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
             @if (apiType === 'crypto' && txDrilldown) {
-              <button type="button" class="inline-flex items-center gap-[6px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-730)] px-[10px] py-[2px] text-[12px] text-[var(--color-text1)]" (click)="backFromTx()">
-                <i class="bi bi-arrow-left"></i> back
+              <button type="button" appTooltip="Back" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" (click)="backFromTx()">
+                <i class="bi bi-arrow-left text-[16px]"></i>
               </button>
+              <div class="h-6 w-px bg-[var(--color-divider)]"></div>
             }
+            <button data-testid="scan-download-report" type="button" appTooltip="Download report" (click)="exportPdfReport()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]">
+              <img src="assets/images/shared/theme/download.svg" alt="Download" class="h-4 w-4 ui-action-icon" />
+            </button>
           </div>
-        </div>
-        <div class="mt-[12px] grid grid-cols-1 gap-[10px] sm:grid-cols-2 lg:grid-cols-4" @fadeInDashboardItem>
-          <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[12px] shadow-[0_2px_6px_var(--color-shadow-light)]">
-            <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]"><i class="bi bi-diagram-3"></i> API Type</div>
-            <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ apiType }}</div>
-          </div>
-          <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[12px] shadow-[0_2px_6px_var(--color-shadow-light)]">
-            <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]"><i class="bi bi-shield-exclamation"></i> Total Results</div>
-            <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ apiType === 'crypto' ? ((cryptoResult?.recent_transactions?.length || 0) || 1) : cardsData.length }}</div>
-          </div>
-         <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[12px] shadow-[0_2px_6px_var(--color-shadow-light)]">
-        <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]">
-          <i class="bi bi-person-badge"></i> Query 1
-        </div>
-        <div class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[14px] font-mono text-[var(--color-text1)]"[title]="(displayQ1 || q1) || 'not found'">
-          {{ (displayQ1 || q1) || 'not found' }}
-        </div>
-      </div>
-          @if (apiType !== 'social' && apiType !== 'wanted' && apiType !== 'national-identity' && apiType !== 'cracked' && apiType !== 'software') {
-            <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-[12px] shadow-[0_2px_6px_var(--color-shadow-light)]">
-              <div class="mb-[6px] flex items-center gap-[8px] text-[12px] uppercase tracking-[0.3px] text-[var(--color-text4)]"><i class="bi bi-envelope"></i> Query 2</div>
-              <div class="text-[14px] font-mono text-[var(--color-text1)]">{{ (displayQ2 || q2) || 'not found' }}</div>
-            </div>
-          }
         </div>
         <section class="mt-[16px] space-y-[16px]">
           @if (apiType === 'crypto') {
@@ -261,144 +273,175 @@
                   </div>
                 }
               } @else {
-                <div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[14px]" @fadeInDashboardItem>
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <div class="text-[14px] font-semibold text-[var(--color-text1)]">Wallet</div>
-                      <div class="text-[12px] text-[var(--color-text4)]">{{ r?.network || r?.detected_network || 'crypto' }}</div>
-                    </div>
+                <div data-testid="ioc-threat-table" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]" @fadeInDashboardItem>
+                  <div class="ui-ioc-table-head grid min-w-[1128px] grid-cols-[60px_1.5fr_120px_150px_160px_160px_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)]">
+                    <div>#</div>
+                    <div>Address</div>
+                    <div>Network</div>
+                    <div>Balance</div>
+                    <div>Transactions</div>
+                    <div>Received / Sent</div>
+                    <div>Risk</div>
+                    <div>Status</div>
+                    <div></div>
                   </div>
-                  <div class="mt-[12px] space-y-[10px]">
-                    <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Address</div>
-                        <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.address || (displayQ1 || q1) || 'not found' }}</div>
-                      </div>
-                      <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Wallet</span>
+                  <div data-testid="ioc-threat-row" role="row" tabindex="0" class="ui-ioc-table-row grid min-w-[1128px] cursor-pointer grid-cols-[60px_1.5fr_120px_150px_160px_160px_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] px-4 py-3 text-sm text-[var(--color-text1)] transition-colors ui-ioc-row-even" [class.credential_row_expand]="cryptoSummaryExpanded" [attr.aria-expanded]="cryptoSummaryExpanded" (click)="toggleCryptoSummary()" (keydown.enter)="toggleCryptoSummary()" (keydown.space)="$event.preventDefault(); toggleCryptoSummary()">
+                    <div class="font-mono text-xs">1</div>
+                    <div class="truncate font-mono text-[12.5px]" [title]="r?.address || (displayQ1 || q1) || 'not found'">{{ r?.address || (displayQ1 || q1) || 'not found' }}</div>
+                    <div class="truncate capitalize" [title]="r?.network || r?.detected_network || 'crypto'">{{ r?.network || r?.detected_network || 'crypto' }}</div>
+                    <div class="truncate font-mono" [title]="'Confirmed: ' + (r?.balance?.confirmed ?? 'not available') + ' / Unconfirmed: ' + (r?.balance?.unconfirmed ?? 'not available')">
+                      {{ r?.balance?.confirmed ?? 'not available' }} / {{ r?.balance?.unconfirmed ?? 'NA' }}
                     </div>
-                    <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Confirmed Balance (sats)</div>
-                        <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.balance?.confirmed ?? 'not available' }}</div>
-                      </div>
-                      <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Balance</span>
+                    <div class="truncate font-mono" [title]="'Total / Received / Sent'">
+                      {{ r?.transaction_count?.total ?? 'NA' }} / {{ r?.transaction_count?.received ?? 'NA' }} / {{ r?.transaction_count?.sent ?? 'NA' }}
                     </div>
-                    <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Unconfirmed Balance (sats)</div>
-                        <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.balance?.unconfirmed ?? 'not available' }}</div>
-                      </div>
-                      <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Balance</span>
+                    <div class="truncate font-mono" [title]="'Received / Sent'">
+                      {{ r?.total_received ?? 'NA' }} / {{ r?.total_sent ?? 'NA' }}
                     </div>
-                    <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Transactions (Total / Received / Sent)</div>
-                        <div class="text-[13px] font-mono text-[var(--color-text1)]">
-                          {{ r?.transaction_count?.total ?? 'NA' }} / {{ r?.transaction_count?.received ?? 'NA' }} / {{ r?.transaction_count?.sent ?? 'NA' }}
+                    <div class="truncate capitalize" [title]="(r?.risk_assessment?.risk_factors && r.risk_assessment.risk_factors.length) ? r.risk_assessment.risk_factors.join(', ') : 'not available'">
+                      {{ r?.risk_assessment?.risk_level || 'not available' }}
+                    </div>
+                    <div class="truncate" [title]="r?.status || 'not available'">{{ r?.status || 'not available' }}</div>
+                    <button data-testid="ioc-threat-row-toggle" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="$event.stopPropagation(); toggleCryptoSummary()" [attr.aria-label]="cryptoSummaryExpanded ? 'Collapse row' : 'Expand row'" [attr.aria-pressed]="cryptoSummaryExpanded">
+                      <img class="h-3 w-3 ui-action-icon" [src]="cryptoSummaryExpanded ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" [alt]="cryptoSummaryExpanded ? 'Collapse row' : 'Expand row'">
+                    </button>
+                  </div>
+                  @if (cryptoSummaryExpanded) {
+                    <div class="border-b-0 bg-[var(--color-blue-790)] px-4 py-3" @fadeInDashboardItem>
+                      <div data-testid="defacement-report-card" class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border border-[var(--ui-consolidated-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] [--ui-consolidated-sub-bg:var(--color-blue-700)] [--ui-consolidated-sub-hover:var(--color-blue-700)] [--ui-consolidated-border:var(--color-border)] [--ui-consolidated-divider:var(--color-divider)]">
+                        <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
+                          <div class="min-w-0">
+                            <b data-testid="defacement-report-card-title" class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">
+                              CRYPTO WALLET | 1
+                            </b>
+                            <div class="mt-[4px] overflow-hidden text-ellipsis whitespace-nowrap text-[11px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text6)]">
+                              Network: <span class="font-[600] text-[var(--color-text2)]">{{ r?.network || r?.detected_network || 'crypto' }}</span>
+                            </div>
+                          </div>
+                          <div>
+                            <span class="inline-flex h-[32px] items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent px-[12px] text-[12px] font-[800] tracking-[0.2px] text-[var(--color-text1)]">
+                              {{ getVisibleObjectEntries(r).length }} Fields
+                            </span>
+                          </div>
+                        </div>
+                        <div class="grid grid-cols-1 gap-0 px-[14px] py-[6px] md:grid-cols-2 md:gap-x-[18px] max-[640px]:px-[10px]">
+                          @for (entry of getVisibleObjectEntries(r); track entry.key || $index; let fieldIdx = $index; let last = $last) {
+                            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [ngClass]="{ 'border-b-0': last || (fieldIdx === getVisibleObjectEntries(r).length - 2 && getVisibleObjectEntries(r).length % 2 === 0) }">
+                              <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">
+                                {{ displayFieldLabel(entry.key) }}
+                              </div>
+                              <div class="flex min-w-0 flex-1 items-center gap-[8px]">
+                                @if (!isArrayValue(entry.value)) {
+                                  @if (isUrlValue(entry.value)) {
+                                    <a class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-[600] text-[var(--color-text5)] hover:underline" [href]="entry.value" target="_blank" rel="noopener noreferrer">
+                                      {{ entry.value }}
+                                    </a>
+                                  } @else {
+                                    <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]">
+                                      {{ stringifyPrimitive(entry.value) }}
+                                    </div>
+                                  }
+                                }
+                                @if (isArrayValue(entry.value)) {
+                                  <div class="flex min-w-0 flex-1 flex-wrap gap-x-[10px] gap-y-[4px]">
+                                    @for (valueItem of deduplicateWithCount(entry.value); track trackByIndex($index)) {
+                                      <span class="inline-flex max-w-full items-center gap-[4px] text-[13px] font-[600] text-[var(--color-text1)]">
+                                        <span class="truncate">{{ stringifyPrimitive(valueItem.value) }}</span>
+                                        @if (valueItem.count > 1) {
+                                          <span class="ml-[2px] rounded-md bg-sky-500/10 border border-sky-500/20 px-[6px] py-[1px] text-[10px] font-semibold text-sky-400 tracking-wide">x{{ valueItem.count }}</span>
+                                        }
+                                      </span>
+                                    }
+                                  </div>
+                                }
+                              </div>
+                            </div>
+                          }
                         </div>
                       </div>
-                      <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">TX</span>
                     </div>
-                    <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Total Received / Sent (sats)</div>
-                        <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.total_received ?? 'NA' }} / {{ r?.total_sent ?? 'NA' }}</div>
-                      </div>
-                      <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Totals</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Avg Transaction Value (BTC)</div>
-                        <div class="text-[13px] font-mono text-[var(--color-text1)]">{{ r?.statistics?.avg_transaction_value ?? 'not available' }}</div>
-                      </div>
-                      <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Stats</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Active</div>
-                        <div class="text-[13px] text-[var(--color-text1)]">{{ r?.statistics?.is_active === true ? 'true' : (r?.statistics?.is_active === false ? 'false' : 'not available') }}</div>
-                      </div>
-                      <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[var(--color-text1)] text-[11px]">Stats</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Risk Level</div>
-                        <div class="text-[13px] capitalize text-[var(--color-text1)]">{{ r?.risk_assessment?.risk_level || 'not available' }}</div>
-                      </div>
-                      <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[var(--color-text1)] text-[11px]">Risk</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Risk Factors</div>
-                        <div class="text-[13px] text-[var(--color-text1)]">
-                          {{ (r?.risk_assessment?.risk_factors && r.risk_assessment.risk_factors.length) ? r.risk_assessment.risk_factors.join(', ') : 'not available' }}
-                        </div>
-                      </div>
-                      <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">Risk</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Status</div>
-                        <div class="text-[13px] text-[var(--color-text1)]">{{ r?.status || 'not available' }}</div>
-                      </div>
-                      <span class="rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">State</span>
-                    </div>
-                  </div>
+                  }
                 </div>
               }
             }
           } @else {
             @if (genericItems.length > 0) {
-              <div class="space-y-[16px]">
+              <div data-testid="ioc-threat-table" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]" @fadeInDashboardItem>
+                <div class="ui-ioc-table-head grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[60px_1fr_120px_48px]">
+                  <div>#</div>
+                  <div>Result</div>
+                  <div>Fields</div>
+                  <div class="max-[640px]:hidden">API Type</div>
+                  <div></div>
+                </div>
+
                 @for (item of genericItems; track trackByIndex($index); let idx = $index) {
-                  <div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[14px]" @fadeInDashboardItem>
-                    <button type="button" class="flex w-full items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-[10px] py-[9px] text-left transition hover:bg-[var(--color-blue-710)]" (click)="toggleResultItem(idx)">
-                      <div>
-                        <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ item?.m_title || item?.m_app_name || item?.title || ('Result ' + (idx + 1)) }}</div>
-                        <div class="text-[12px] text-[var(--color-text4)]">{{ getObjectEntries(item).length }} Fields</div>
-                      </div>
-                      <i class="bi text-[13px] text-[var(--color-text4)]" [ngClass]="expandedResultIndex === idx ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                  <div data-testid="ioc-threat-row" role="row" tabindex="0" class="ui-ioc-table-row grid min-w-[680px] cursor-pointer grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] px-4 py-3 text-sm text-[var(--color-text1)] transition-colors max-[900px]:grid-cols-[60px_1fr_120px_48px]" [class.ui-ioc-row-even]="idx % 2 === 0" [class.ui-ioc-row-odd]="idx % 2 !== 0" [class.credential_row_expand]="expandedResultIndex === idx" [attr.aria-expanded]="expandedResultIndex === idx" (click)="toggleResultItem(idx)" (keydown.enter)="toggleResultItem(idx)" (keydown.space)="$event.preventDefault(); toggleResultItem(idx)">
+                    <div class="font-mono text-xs">{{ idx + 1 }}</div>
+                    <div class="truncate" [title]="item?.m_title || item?.m_app_name || item?.title || ('Result ' + (idx + 1))">
+                      {{ item?.m_title || item?.m_app_name || item?.title || ('Result ' + (idx + 1)) }}
+                    </div>
+                    <div class="truncate" [title]="getVisibleObjectEntries(item).length + ' Fields'">{{ getVisibleObjectEntries(item).length }} Fields</div>
+                    <div class="text-xs capitalize text-[var(--color-text4)] max-[640px]:hidden">{{ apiType || 'api' }}</div>
+                    <button data-testid="ioc-threat-row-toggle" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="$event.stopPropagation(); toggleResultItem(idx)" [attr.aria-label]="expandedResultIndex === idx ? 'Collapse row' : 'Expand row'" [attr.aria-pressed]="expandedResultIndex === idx">
+                      <img class="h-3 w-3 ui-action-icon" [src]="expandedResultIndex === idx ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" [alt]="expandedResultIndex === idx ? 'Collapse row' : 'Expand row'">
                     </button>
-                    @if (expandedResultIndex === idx) {
-                      <div class="mt-[12px] space-y-[10px]">
-                        @for (entry of getObjectEntries(item); track entry.key || $index) {
-                          <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[10px]">
-                            <div class="text-[12px] text-[var(--color-text4)]">{{ displayFieldLabel(entry.key) }}</div>
-                            @if (!isArrayValue(entry.value) && !isObjectValue(entry.value)) {
-                              <div class="mt-[4px] text-[13px] text-[var(--color-text1)]">
-                                @if (isUrlValue(entry.value)) {
-                                  <a class="inline-flex max-w-full items-center gap-[8px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-[10px] py-[6px] text-[13px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" [href]="entry.value" target="_blank" rel="noopener noreferrer">
-                                    <span aria-hidden="true">🔗</span>
-                                    <span class="truncate max-w-[760px]">{{ entry.value }}</span>
-                                  </a>
-                                } @else {
-                                  {{ stringifyPrimitive(entry.value) }}
-                                }
-                              </div>
-                            }
-                            @if (isArrayValue(entry.value)) {
-                              <div class="mt-[4px] flex flex-wrap gap-[6px]">
-                                @for (item of deduplicateWithCount(entry.value); track trackByIndex($index)) {
-                                  <span class="inline-flex items-center gap-[4px] rounded-full border border-[var(--color-border)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">
-                                    {{ stringifyPrimitive(item.value) }}
-                                    @if (item.count > 1) {
-                                      <span class="ml-[2px] rounded-md bg-sky-500/10 border border-sky-500/20 px-[6px] py-[1px] text-[10px] font-semibold text-sky-400 tracking-wide">×{{ item.count }}</span>
-                                    }
-                                  </span>
-                                }
-                                @if (entry.value.length === 0) {
-                                  <span class="text-[13px] text-[var(--color-text4)]">[]</span>
-                                }
-                              </div>
-                            }
-                            @if (isObjectValue(entry.value)) {
-                              <pre class="mt-[6px] overflow-x-auto rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[8px] text-[12px] text-[var(--color-text1)]">{{ stringifyJson(entry.value) }}</pre>
-                            }
-                          </div>
-                        }
-                      </div>
-                    }
                   </div>
+                  @if (expandedResultIndex === idx) {
+                    <div class="border-b border-[var(--color-divider)] bg-[var(--color-blue-790)] px-4 py-3" @fadeInDashboardItem>
+                      <div data-testid="defacement-report-card" class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border border-[var(--ui-consolidated-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] [--ui-consolidated-sub-bg:var(--color-blue-700)] [--ui-consolidated-sub-hover:var(--color-blue-700)] [--ui-consolidated-border:var(--color-border)] [--ui-consolidated-divider:var(--color-divider)]">
+                        <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
+                          <div class="min-w-0">
+                            <b data-testid="defacement-report-card-title" class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">
+                              {{ (apiType || 'api') | uppercase }} RESULT | {{ idx + 1 }}
+                            </b>
+                            <div class="mt-[4px] overflow-hidden text-ellipsis whitespace-nowrap text-[11px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text6)]">
+                              Query: <span class="font-[600] text-[var(--color-text2)]">{{ displayQ1 || q1 || 'query' }}</span>
+                            </div>
+                          </div>
+                          <div>
+                            <span class="inline-flex h-[32px] items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent px-[12px] text-[12px] font-[800] tracking-[0.2px] text-[var(--color-text1)]">
+                              {{ getVisibleObjectEntries(item).length }} Fields
+                            </span>
+                          </div>
+                        </div>
+                        <div class="grid grid-cols-1 gap-0 px-[14px] py-[6px] md:grid-cols-2 md:gap-x-[18px] max-[640px]:px-[10px]">
+                          @for (entry of getVisibleObjectEntries(item); track entry.key || $index; let fieldIdx = $index; let last = $last) {
+                            <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [ngClass]="{ 'border-b-0': last || (fieldIdx === getVisibleObjectEntries(item).length - 2 && getVisibleObjectEntries(item).length % 2 === 0) }">
+                              <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">
+                                {{ displayFieldLabel(entry.key) }}
+                              </div>
+                              <div class="flex min-w-0 flex-1 items-center gap-[8px]">
+                                @if (!isArrayValue(entry.value)) {
+                                  @if (isUrlValue(entry.value)) {
+                                    <a class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-[600] text-[var(--color-text5)] hover:underline" [href]="entry.value" target="_blank" rel="noopener noreferrer">
+                                      {{ entry.value }}
+                                    </a>
+                                  } @else {
+                                    <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]">
+                                      {{ stringifyPrimitive(entry.value) }}
+                                    </div>
+                                  }
+                                }
+                                @if (isArrayValue(entry.value)) {
+                                  <div class="flex min-w-0 flex-1 flex-wrap gap-x-[10px] gap-y-[4px]">
+                                    @for (valueItem of deduplicateWithCount(entry.value); track trackByIndex($index)) {
+                                      <span class="inline-flex max-w-full items-center gap-[4px] text-[13px] font-[600] text-[var(--color-text1)]">
+                                        <span class="truncate">{{ stringifyPrimitive(valueItem.value) }}</span>
+                                        @if (valueItem.count > 1) {
+                                          <span class="ml-[2px] rounded-md bg-sky-500/10 border border-sky-500/20 px-[6px] py-[1px] text-[10px] font-semibold text-sky-400 tracking-wide">x{{ valueItem.count }}</span>
+                                        }
+                                      </span>
+                                    }
+                                  </div>
+                                }
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
                 }
               </div>
             } @else {

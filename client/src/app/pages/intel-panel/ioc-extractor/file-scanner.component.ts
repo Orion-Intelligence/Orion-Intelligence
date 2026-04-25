@@ -1,15 +1,17 @@
-import { Component, signal, ViewChild, ElementRef } from '@angular/core';
+import { Component, ElementRef, signal, ViewChild } from '@angular/core';
 import { CommonModule, NgClass, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
-import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
-import { NgxPrintModule } from 'ngx-print';
 import { FormsModule } from '@angular/forms';
-import { finalize, expand, switchMap, takeWhile } from 'rxjs/operators';
 import { EMPTY, timer } from 'rxjs';
-import { IocExtractionResult, IocItem, GroupedIoc, ApkScanResult, SummaryItem } from '../../../shared/model/ioc-extractor/ioc.extractor.model';
+import { expand, finalize, switchMap, takeWhile } from 'rxjs/operators';
+import { NgxPrintModule } from 'ngx-print';
+import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ApiService } from '../../../shared/services/api.service';
-import { ALLOWED_FILE_TYPES, APK_SCAN_ENDPOINT, IOC_EXTRACT_ENDPOINT, IOC_LABELS, MAX_FILE_SIZE_APK, MAX_FILE_SIZE_IOC } from './file-scanner.constants';
+import { APK_SCAN_ENDPOINT, IOC_EXTRACT_ENDPOINT, MAX_FILE_SIZE_APK } from './file-scanner.constants';
+
+type ScannerResultItem = { label: string; value: string };
+type ScannerResultSection = { title: string; items: ScannerResultItem[] };
+
 @Component({
   selector: 'app-ioc-extractor',
   standalone: true,
@@ -21,18 +23,13 @@ import { ALLOWED_FILE_TYPES, APK_SCAN_ENDPOINT, IOC_EXTRACT_ENDPOINT, IOC_LABELS
     TooltipDirective,
     FormsModule,
   ],
-  templateUrl: './file-scanner.component.html',
-  animations: [fadeInDashboardItem],
-  host: {
-    '(window:scroll)': 'onWindowScroll()'
-  }
+  templateUrl: './file-scanner.component.html'
 })
 export class FileScannerComponent {
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
   type = 'filescan';
   title = 'File Analysis';
   description = 'Upload a file to extract Indicators of Compromise (IOCs) or analyze APK';
-  accept = '.pdf,.txt,.png,.jpg,.jpeg';
   selectedFile: File | null = null;
   fileName = '';
   fileSize = '';
@@ -40,32 +37,19 @@ export class FileScannerComponent {
   isFetched = false;
   hasError = false;
   errorMessage = '';
-  isUnsupportedFileError = false;
   isFileSizeError = false;
-  extractionResult: IocExtractionResult | null = null;
-  apkResult: any = null;
-  groupedIocs: GroupedIoc[] = [];
+  scanResult: Record<string, any> | null = null;
+  resultSections: ScannerResultSection[] = [];
   progress = signal(0);
   currentStep = '';
-  isScrolled = signal(false);
   copiedValue = signal<string | null>(null);
-  trackByCategory = (_: number, c: any) => c.name;
-  trackByItem = (i: number) => i;
 
   constructor(private api: ApiService, private route: ActivatedRoute, private router: Router) {
     this.route.data.subscribe(data => {
       this.type = data['type'] ?? this.type;
       this.title = data['title'] ?? this.title;
       this.description = data['description'] ?? this.description;
-      this.accept = this.type === 'apk' ? '.apk' : '.pdf,.txt,.png,.jpg,.jpeg';
     });
-  }
-
-  onWindowScroll(): void {
-    const scrolled = window.scrollY > 10;
-    if (scrolled !== this.isScrolled()) {
-      this.isScrolled.set(scrolled);
-    }
   }
 
   onFileSelected(event: Event): void {
@@ -75,43 +59,20 @@ export class FileScannerComponent {
     }
   }
 
-  private isFileTypeAllowed(file: File): boolean {
-    const name = file.name.toLowerCase().trim();
-    const mime = (file.type || '').toLowerCase();
-    const isApk = name.endsWith('.apk') || mime === 'application/vnd.android.package-archive';
-    if (this.type === 'apk') {
-      return isApk;
-    }
-    if (isApk) {
-      return false;
-    }
-    return Object.keys(ALLOWED_FILE_TYPES).includes(mime) ||
-          Object.values(ALLOWED_FILE_TYPES).flat().some(ext => name.endsWith(ext));
-  }
-
   handleFileSelect(file: File): void {
     this.hasError = false;
     this.errorMessage = '';
-    this.isUnsupportedFileError = false;
     this.isFileSizeError = false;
-    const modeIsApk = this.type === 'apk';
-    if (!this.isFileTypeAllowed(file)) {
-      this.hasError = true;
-      this.isUnsupportedFileError = true;
-      this.errorMessage = `Unsupported file format: ${file.name}`;
-      this.resetFileInput();
-      this.isFetched = true;
-      return;
-    }
-    const maxSize = modeIsApk ? MAX_FILE_SIZE_APK : MAX_FILE_SIZE_IOC;
-    if (file.size > maxSize) {
+
+    if (file.size > MAX_FILE_SIZE_APK) {
       this.hasError = true;
       this.isFileSizeError = true;
-      this.errorMessage = `File size exceeds ${modeIsApk ? '30MB' : '1MB'}. Your file is ${this.formatFileSize(file.size)}.`;
+      this.errorMessage = `File size exceeds 30MB. Your file is ${this.formatFileSize(file.size)}.`;
       this.resetFileInput();
       this.isFetched = true;
       return;
     }
+
     this.selectedFile = file;
     this.fileName = file.name;
     this.fileSize = this.formatFileSize(file.size);
@@ -120,7 +81,7 @@ export class FileScannerComponent {
       queryParams: { file: encodeURIComponent(file.name) },
       queryParamsHandling: 'merge'
     }).catch(() => void 0);
-    this.scanFile(modeIsApk);
+    this.scanFile(this.type === 'apk');
   }
 
   private scanFile(isApk: boolean): void {
@@ -130,52 +91,21 @@ export class FileScannerComponent {
       this.isFetched = true;
       return;
     }
+
     const formData = new FormData();
     formData.append('file', this.selectedFile);
     const endpoint = isApk ? APK_SCAN_ENDPOINT : IOC_EXTRACT_ENDPOINT;
+    this.resetResultState();
     this.isLoading = true;
-    this.isFetched = false;
-    this.hasError = false;
-    this.errorMessage = '';
-    this.extractionResult = null;
-    this.apkResult = null;
-    this.groupedIocs = [];
-    this.progress.set(0);
     this.currentStep = isApk ? 'Analyzing APK...' : 'Uploading file...';
-    this.api
-      .post<any>(endpoint, formData)
+
+    const upload = () => this.api.post<any>(endpoint, formData);
+    upload()
       .pipe(expand(res => (res?.status === 'pending' || res?.status === 'processing')
-        ? timer(3000).pipe(switchMap(() => this.api.post<any>(endpoint, formData)))
+        ? timer(3000).pipe(switchMap(() => upload()))
         : EMPTY), takeWhile(res => res?.status === 'pending' || res?.status === 'processing', true), finalize(() => this.isLoading = false))
       .subscribe({
-        next: (res) => {
-          if (res?.status === 'pending' || res?.status === 'processing') {
-            const p = res?.progress ?? res?.result?.progress;
-            if (typeof p === 'number' && !Number.isNaN(p)) {
-              this.progress.set(p);
-            }
-            const st = res?.step ?? res?.result?.step;
-            if (typeof st === 'string' && st) {
-              this.currentStep = st;
-            }
-            return;
-          }
-          this.isFetched = true;
-          this.progress.set(100);
-          if (!res?.result) {
-            this.hasError = true;
-            this.errorMessage = 'No valid result received from server.';
-            return;
-          }
-          if (isApk) {
-            this.apkResult = res.result;
-            this.groupedIocs = this.processApkToIocFormat(res.result);
-          }
-          else {
-            this.extractionResult = res.result;
-            this.processIocs(res.result.iocs || []);
-          }
-        },
+        next: res => this.handleScanResponse(res),
         error: err => {
           this.isFetched = true;
           this.hasError = true;
@@ -184,149 +114,92 @@ export class FileScannerComponent {
       });
   }
 
-  private processApkToIocFormat(apk: ApkScanResult): GroupedIoc[] {
-    const categorized = new Map<string, {
-          key: string;
-          items: any[];
-      }>();
-    if (apk.network?.sample_urls?.length > 0) {
-      const key = 'm_url';
-      if (!categorized.has(key)) {
-        categorized.set(key, { key, items: [] });
+  private handleScanResponse(res: any): void {
+    if (res?.status === 'pending' || res?.status === 'processing') {
+      const p = res?.progress ?? res?.result?.progress;
+      if (typeof p === 'number' && Number.isFinite(p)) {
+        this.progress.set(Math.max(0, Math.min(100, Math.round(p))));
       }
-      apk.network.sample_urls.forEach(url => {
-              categorized.get(key)!.items.push({
-                type: key,
-                value: url,
-                display: url,
-                description: IOC_LABELS[key]?.description || 'URL found in APK'
-              });
-      });
-    }
-    if (apk.permissions?.dangerous_list?.length > 0) {
-      const key = 'm_permission';
-      if (!categorized.has(key)) {
-        categorized.set(key, { key, items: [] });
+      const step = res?.step ?? res?.result?.step;
+      if (typeof step === 'string' && step) {
+        this.currentStep = step;
       }
-      apk.permissions.dangerous_list.forEach(perm => {
-              categorized.get(key)!.items.push({
-                type: key,
-                value: perm,
-                display: perm,
-                description: IOC_LABELS[key]?.description || 'Dangerous permission'
-              });
-      });
-    }
-    if (apk.tampering?.suspected && apk.tampering.reasons?.length > 0) {
-      const key = 'm_tampering';
-      if (!categorized.has(key)) {
-        categorized.set(key, { key, items: [] });
-      }
-      apk.tampering.reasons.forEach(reason => {
-              categorized.get(key)!.items.push({
-                type: key,
-                value: reason,
-                display: reason,
-                description: IOC_LABELS[key]?.description || 'Tampering indicator'
-              });
-      });
-    }
-    if (apk.package) {
-      const key = 'm_package';
-      this.appendCategorizedItem(categorized, key, apk.package, 'Package name');
-    }
-    return this.buildGroupedIocs(categorized);
-  }
-
-  private processIocs(iocs: IocItem[]): void {
-    const categorized = new Map<string, {
-          key: string;
-          items: any[];
-      }>();
-    iocs.forEach(ioc => {
-      Object.entries(ioc).forEach(([key, value]) => {
-        this.appendCategorizedItem(categorized, key, value, 'Detected indicator');
-      });
-    });
-    this.groupedIocs = this.buildGroupedIocs(categorized);
-  }
-
-  private appendCategorizedItem( categorized: Map<string, { key: string; items: any[] }>, key: string, value: any, fallbackDescription: string ): void {
-    if (!this.hasRenderableValue(value)) {
       return;
     }
-    if (!categorized.has(key)) {
-      categorized.set(key, { key, items: [] });
+
+    this.isFetched = true;
+    this.progress.set(100);
+    if (res?.result == null) {
+      this.hasError = true;
+      this.errorMessage = 'No valid result received from server.';
+      return;
     }
-      categorized.get(key)!.items.push({
-        type: key,
-        value,
-        display: value,
-        description: IOC_LABELS[key]?.description || fallbackDescription
-      });
+    this.applyServerResult(res.result);
   }
 
-  private buildGroupedIocs( categorized: Map<string, { key: string; items: any[]; }> ): GroupedIoc[] {
-    return Array.from(categorized.entries())
-      .map(([_, meta]) => {
-        const validItems = meta.items.filter(item => this.hasRenderableValue(item?.value));
-        const uniqueItems = validItems.filter((item, index, self) => index === self.findIndex(t => t.value === item.value));
-        return {
-          name: IOC_LABELS[meta.key]?.label || this.formatIocType(meta.key),
-          total: uniqueItems.length,
-          items: uniqueItems,
-        };
-      })
-      .filter(c => c.items.length > 0);
+  private applyServerResult(result: unknown): void {
+    const record = this.toRecord(result);
+    this.scanResult = record || { value: result };
+    this.resultSections = this.buildResultSections(result);
   }
 
-  private formatIocType(key: string): string {
-    return key
-      .replace(/^m_/, '')
-      .replace(/_/g, ' ')
-      .split(' ')
-      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ');
+  private resetResultState(): void {
+    this.isFetched = false;
+    this.hasError = false;
+    this.errorMessage = '';
+    this.isFileSizeError = false;
+    this.scanResult = null;
+    this.resultSections = [];
+    this.progress.set(0);
+    this.currentStep = '';
   }
 
-  private handleError(err: any): void {
-    const status = err?.status;
-    switch (status) {
-      case 413:
-        this.errorMessage = 'File too large.';
-        this.isFileSizeError = true;
-        break;
-      default:
-        this.errorMessage = err?.error?.detail || err?.message || 'Upload failed.';
+  private buildResultSections(result: unknown): ScannerResultSection[] {
+    const record = this.toRecord(result);
+    if (!record) {
+      return this.isVisible(result)
+        ? [{ title: 'Result', items: [{ label: 'Value', value: this.stringifyValue(result) }] }]
+        : [];
     }
+
+    return Object.entries(record)
+      .filter(([key, value]) => key !== 'type' && this.isVisible(value))
+      .map(([key, value]) => ({
+        title: this.formatLabelKey(key),
+        items: this.flattenValue(value)
+      }))
+      .filter(section => section.items.length > 0);
+  }
+
+  private flattenValue(value: unknown, path: string[] = []): ScannerResultItem[] {
+    if (!this.isVisible(value)) {
+      return [];
+    }
+    if (Array.isArray(value)) {
+      return value.flatMap((item, index) => this.flattenValue(item, path.length ? path : [`Item ${index + 1}`]));
+    }
+
+    const record = this.toRecord(value);
+    if (!record) {
+      return [{
+        label: this.formatLabelKey(path[path.length - 1] || 'Value'),
+        value: this.stringifyValue(value)
+      }];
+    }
+
+    return Object.entries(record)
+      .flatMap(([key, child]) => this.flattenValue(child, [...path, key]))
+      .filter((item, index, items) => index === items.findIndex(match => match.label === item.label && match.value === item.value));
   }
 
   exportReport(): void {
-    if (!this.extractionResult && !this.apkResult) {
+    if (!this.scanResult) {
       return;
     }
-    const payload = this.apkResult
-      ? { ...this.apkResult, scan_mode: 'apk', exported_at: new Date().toISOString() }
-      : {
-        file_info: {
-          original_filename: this.extractionResult!.original_filename,
-          file_type: this.extractionResult!.file_type,
-          extracted_text_length: this.extractionResult!.extracted_text_length,
-          status: this.extractionResult!.status
-        },
-        total_iocs: this.getTotalIocCount(),
-        ioc_categories: this.groupedIocs.map(cat => ({
-          category: cat.name,
-          count: cat.total,
-          items: cat.items.map(item => item.value)
-        })),
-        raw_iocs: this.extractionResult!.iocs
-      };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify({ ...this.scanResult, exported_at: new Date().toISOString() }, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
-    const filenameBase = (this.apkResult?.original_filename || this.extractionResult?.original_filename || 'report')
-      .replace(/[^a-z0-9.-]/gi, '_');
-    const mode = this.apkResult ? 'apk' : 'ioc';
+    const filenameBase = (this.getDisplayFileName() || 'report').replace(/[^a-z0-9.-]/gi, '_');
+    const mode = this.getDisplayFileType().toLowerCase() || 'file';
     const dt = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     a.href = URL.createObjectURL(blob);
     a.download = `${filenameBase}-${mode}-report-${dt}.json`;
@@ -337,14 +210,12 @@ export class FileScannerComponent {
   }
 
   triggerFileInput(): void {
-    const fileInputElement = document.getElementById('fileInput') as HTMLInputElement;
-    fileInputElement?.click();
+    this.fileInputRef?.nativeElement?.click();
   }
 
   closeError(): void {
     this.hasError = false;
     this.errorMessage = '';
-    this.isUnsupportedFileError = false;
     this.isFileSizeError = false;
     this.isFetched = false;
   }
@@ -358,54 +229,106 @@ export class FileScannerComponent {
     }
   }
 
+  private handleError(err: any): void {
+    if (err?.status === 413) {
+      this.errorMessage = `File size exceeds 30MB${this.fileSize ? `. Your file is ${this.fileSize}.` : '.'}`;
+      this.isFileSizeError = true;
+      return;
+    }
+    this.errorMessage = err?.error?.detail || err?.message || 'Upload failed.';
+  }
+
   formatFileSize(bytes: number): string {
     if (bytes === 0) {
       return '0 Bytes';
     }
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+    const index = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
+    return `${Math.round((bytes / Math.pow(k, index)) * 100) / 100} ${sizes[index]}`;
   }
 
-  formatNumber(num: number): string {
-    return num?.toLocaleString() || '0';
+  isLastSectionRow(section: ScannerResultSection, index: number): boolean {
+    const count = section.items.length;
+    return index === count - 1 || (index === count - 2 && count % 2 === 0);
   }
 
-  getTotalIocCount(): number {
-    return this.groupedIocs.reduce((sum, cat) => sum + cat.total, 0);
+  getDisplayFileName(): string {
+    return this.getFirstString([
+      this.scanResult?.['metadata']?.file_name,
+      this.scanResult?.['metadata']?.metadata?.resourceName,
+      this.scanResult?.['ioc']?.filename,
+      this.scanResult?.['antivirus']?.file_name,
+      this.scanResult?.['original_filename'],
+      this.fileName
+    ]) || 'file';
   }
 
-  getSummaryStats(): SummaryItem[] {
-    const fileName = this.extractionResult?.original_filename || this.apkResult?.original_filename || this.fileName || '';
-    const fileType = this.apkResult ? 'APK' : (this.extractionResult?.file_type || '');
-    const status = this.extractionResult?.status || this.apkResult?.status || '';
-    const textLength = this.extractionResult?.extracted_text_length || 0;
-    const stats: SummaryItem[] = [
-      { label: 'Filename', value: fileName },
-      { label: 'File Type', value: fileType ? fileType.toUpperCase() : '' },
-      { label: 'Total Findings', value: this.getTotalIocCount() > 0 ? this.getTotalIocCount().toString() : '' },
-      { label: 'Status', value: status }
-    ];
-    if (this.extractionResult && !this.apkResult && textLength > 0) {
-      stats.splice(2, 0, {
-        label: 'Extracted Text',
-        value: `${this.formatNumber(textLength)} chars`
-      });
+  getDisplayFileType(): string {
+    return this.getFirstString([
+      this.scanResult?.['type'],
+      this.scanResult?.['ioc']?.file_type
+    ]) || 'file';
+  }
+
+  getDisplayMetricValue(): string {
+    return this.resultSections.reduce((sum, section) => sum + section.items.length, 0).toLocaleString();
+  }
+
+  private formatLabelKey(key: string): string {
+    return key
+      .replace(/^m_/, '')
+      .replace(/[:._-]+/g, ' ')
+      .split(' ')
+      .filter(Boolean)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ') || 'Value';
+  }
+
+  private stringifyValue(value: unknown): string {
+    if (typeof value === 'boolean') {
+      return value ? 'Yes' : 'No';
     }
-    return stats.filter(stat => this.hasRenderableValue(stat.value));
+    if (Array.isArray(value)) {
+      return value
+        .filter(item => this.isVisible(item))
+        .map(item => this.stringifyValue(item))
+        .join(', ');
+    }
+    if (this.toRecord(value)) {
+      return JSON.stringify(value);
+    }
+    return String(value);
   }
 
-  private hasRenderableValue(value: unknown): boolean {
+  private getFirstString(values: unknown[]): string {
+    const found = values.find(value => this.isVisible(value));
+    if (Array.isArray(found)) {
+      return this.stringifyValue(found[0]);
+    }
+    return found == null ? '' : String(found);
+  }
+
+  private toRecord(value: unknown): Record<string, any> | null {
+    return value && typeof value === 'object' && !Array.isArray(value)
+      ? value as Record<string, any>
+      : null;
+  }
+
+  private isVisible(value: unknown): boolean {
     if (value == null) {
       return false;
     }
     if (typeof value === 'string') {
-      const normalized = value.trim();
-      return normalized !== '' && normalized.toLowerCase() !== 'null' && normalized.toLowerCase() !== 'undefined';
+      const normalized = value.trim().toLowerCase();
+      return normalized !== '' && normalized !== 'null' && normalized !== 'undefined' && normalized !== 'not available';
     }
     if (Array.isArray(value)) {
-      return value.length > 0;
+      return value.some(item => this.isVisible(item));
+    }
+    const record = this.toRecord(value);
+    if (record) {
+      return Object.values(record).some(item => this.isVisible(item));
     }
     return true;
   }

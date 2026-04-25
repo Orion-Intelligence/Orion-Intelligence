@@ -197,20 +197,6 @@ async def parse_text(payload: nlp_data_model):
 
 
 @crawl_routes.post(
-    "/api/nlp/parse/ai",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
-async def parse_ai(payload: nlp_data_model):
-    return await crawl_model.getInstance().parse_chat_ai(payload)
-
-
-@crawl_routes.post(
-    "/api/nlp/summarize/ai",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
-async def summarize_ai(payload: nlp_data_model):
-    return await crawl_model.getInstance().parse_summarize_ai(payload)
-
-
-@crawl_routes.post(
     "/api/index/chat",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def index_chat_data(request: Request):

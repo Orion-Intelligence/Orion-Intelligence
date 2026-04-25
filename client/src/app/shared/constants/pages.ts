@@ -73,8 +73,7 @@ export enum ScannerSubCategory {
     // FULL = 'Port-Scan',
     NETWORK = 'Network-Scan',
     REPOSITORY = 'Repository-Scan',
-    SEO = 'SEO-Scan',
-    APK = 'APK-Scan'
+    SEO = 'SEO-Scan'
 }
 export enum DumpSubCategory {
     LISTING = 'Listing'

@@ -209,12 +209,15 @@ async def test_parse_wayback(payload: DomainScanRequest):
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
     ],
 )
+async def extract_ioc(file: UploadFile = File(...)):
+    return _pending_or_api_mock("ioc_file_extract", "ioc_file_extract.json")
 
-async def extract_ioc():
-    step = _mock_step(f"ioc_file_extract")
-    if step:
-        return step
-    return json.loads((_MOCKS_DIR / f"ioc_file_extract.json").read_text(encoding="utf-8"))
+@test_routes.post(
+    "/file/scan/{user_id}",
+    include_in_schema=False,
+)
+async def file_scan(user_id: str, file: UploadFile = File(...)):
+    return _pending_or_api_mock("ioc_file_extract", "ioc_file_extract.json")
 
 @test_routes.post(
     "/api/apk/scan",
