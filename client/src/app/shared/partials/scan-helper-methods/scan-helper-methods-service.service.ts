@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { EMPTY, Observable, Subject, Subscription, timer } from 'rxjs';
 import { expand, finalize, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
@@ -7,12 +7,11 @@ import { DnsResponse, SubdomainResponse, WaybackResponse } from '../../model/sca
 export class ScanHelperMethodsService {
   protected readonly pollDelayMs = 4000;
   protected currentCancel$?: Subject<boolean> = undefined;
+  protected api = inject(ApiService);
 
   progress = signal(0);
   onDone = signal<any>(null);
   onError = signal<any>(null);
-
-  constructor(protected api: ApiService) { }
 
   cancelCurrentScan(): void {
     if (this.currentCancel$) {
@@ -100,9 +99,13 @@ export class ScanHelperMethodsService {
     cancel$.complete();
   }
 
-  protected beforeTaskStart(): void {}
+  protected beforeTaskStart(): void {
+    // Optional extension hook for derived scanners.
+  }
 
-  protected afterTaskStop(): void {}
+  protected afterTaskStop(): void {
+    // Optional extension hook for derived scanners.
+  }
 
   protected handleTaskValue<T>(value: T): void {
     this.onDone.set(value);

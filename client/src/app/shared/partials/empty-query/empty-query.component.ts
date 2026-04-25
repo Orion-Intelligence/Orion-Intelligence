@@ -4,4 +4,5 @@ import { Component } from '@angular/core';
   templateUrl: './empty-query.component.html',
 })
 export class EmptyQueryComponent {
+  readonly templateOnly = true;
 }

@@ -8,7 +8,7 @@ import { StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../.
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 
-type SharedSearchAdvancedFilter = { id: string; tag: string; value: string; operator: '&&' | '||' };
+interface SharedSearchAdvancedFilter { id: string; tag: string; value: string; operator: '&&' | '||' }
 
 @Component({
   selector: 'app-ioc-search',

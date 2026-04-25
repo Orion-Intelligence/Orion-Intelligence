@@ -5,4 +5,5 @@ import { Component } from '@angular/core';
   templateUrl: './loading-form.component.html'
 })
 export class LoadingFormComponent {
+  readonly templateOnly = true;
 }

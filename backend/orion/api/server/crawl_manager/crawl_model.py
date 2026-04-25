@@ -84,7 +84,7 @@ class crawl_model:
     @classmethod
     def _get_swarm_bloom(cls) -> BloomFilter:
         if cls.__swarm_bloom is None:
-            bloom_dir = env_handler.get_instance().env("BLOOM_DIR") or "/tmp"
+            bloom_dir = env_handler.get_instance().env("BLOOM_DIR") or str(Path.cwd() / ".bloom")
             os.makedirs(bloom_dir, exist_ok=True)
             cls.__swarm_bloom = BloomFilter(
                 max_elements=10_000_000,
@@ -524,7 +524,7 @@ class crawl_model:
         url = "http://trusted-micros-api:8010/cti_classifier/classify"
         payload = {"data": payload.data}
 
-        response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload, timeout=120)
         response.raise_for_status()
 
         return response.json()["result"]

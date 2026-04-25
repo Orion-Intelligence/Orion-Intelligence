@@ -4,4 +4,5 @@ import { Component } from '@angular/core';
   templateUrl: './error-handler.component.html',
 })
 export class ErrorHandlerComponent {
+  readonly templateOnly = true;
 }

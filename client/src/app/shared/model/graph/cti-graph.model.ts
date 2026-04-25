@@ -1,5 +1,5 @@
-import { Color, Node } from 'vis-network';
-type GraphNodeColor = string | Color;
+import { Node } from 'vis-network';
+type GraphNodeColor = NonNullable<Node['color']>;
 export interface ExtendedNode extends Node {
     isGroup?: boolean;
     subNodes?: string[];

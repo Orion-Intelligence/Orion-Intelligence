@@ -180,8 +180,8 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
     return this.stringifyPrimitive(item?.timestamp || item?.ingested_at);
   }
 
-  getExtractedIocs(item: any): Array<{ name: string; values: string[] }> {
-    const normalized: Array<{ name: string; values: string[] }> = [];
+  getExtractedIocs(item: any): { name: string; values: string[] }[] {
+    const normalized: { name: string; values: string[] }[] = [];
     const seen = new Set<string>();
     const labelMap: Record<string, string> = {
       m_domain: 'Domain',

@@ -146,7 +146,7 @@ export class ResultInsightsComponent implements OnInit {
       consolidated.social_model,
       consolidated.defacement_model
     ];
-    return models.filter(model => model && model.Result && model.Result.length > 0).length;
+    return models.filter(model => model?.Result && model.Result.length > 0).length;
   }
 
   getUniqueLinks(consolidated: ConsolidatedCallbackModel, rankedData: any[], isGrouped: boolean): UniqueLinkItem[] {

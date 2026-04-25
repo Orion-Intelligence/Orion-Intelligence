@@ -40,7 +40,7 @@ export class ViewTenantComponent implements OnInit {
                         tenant.status === TenantStatusValues.DISABLE
             ? tenant.status
             : TenantStatusValues.ACTIVE,
-          licenses: tenant.licenses && tenant.licenses.length
+          licenses: tenant.licenses?.length
             ? tenant.licenses.filter((license: LicenseName) => license !== LicenseName.FEEDER)
             : [LicenseName.FREE],
         }));
