@@ -6,9 +6,9 @@ import { Component } from '@angular/core';
 export class ScrollTopComponent {
   scrollToTop(): void {
     const candidates = [
-      document.querySelector('app-network-intel'),
-      document.getElementById('dashboard-body'),
+      document.querySelector('[data-testid="dashboard-body"]'),
       document.getElementById('dashboard-container'),
+      document.querySelector('app-network-intel'),
       document.scrollingElement,
     ].filter((element): element is Element => !!element);
 
