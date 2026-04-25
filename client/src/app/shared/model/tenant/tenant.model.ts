@@ -25,6 +25,7 @@ export interface TenantModel {
     quotaExceeded?: boolean;
     email?: string;
     profile_visibility_enabled?: boolean;
+    event_management_enabled?: boolean;
 }
 export interface User {
     username: string;

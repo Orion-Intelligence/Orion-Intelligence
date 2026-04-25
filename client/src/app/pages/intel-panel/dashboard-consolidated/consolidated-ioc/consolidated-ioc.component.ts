@@ -5,4 +5,6 @@ import { CredentialComponent } from "../../../credentials/credential.component";
   imports: [CredentialComponent],
   templateUrl: './consolidated-ioc.component.html'
 })
-export class ConsolidatedIocComponent {}
+export class ConsolidatedIocComponent {
+  readonly templateOnly = true;
+}

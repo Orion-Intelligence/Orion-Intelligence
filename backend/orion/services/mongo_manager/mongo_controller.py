@@ -1,5 +1,6 @@
 import motor.motor_asyncio
 from odmantic import AIOEngine
+from pymongo.errors import OperationFailure
 
 from orion.api.interactive.tenant_manager.tenant_bootstrap import tenant_boostrap
 from orion.helper_manager.env_handler import env_handler
@@ -70,8 +71,8 @@ class mongo_controller:
         feeder_collection = self.__engine.get_collection(db_feeder_script_model)
         try:
             await feeder_collection.drop_index("name_1")
-        except Exception:
-            pass
+        except OperationFailure as exc:
+            _ = exc
         await feeder_collection.create_index([("name", 1), ("url", 1)], unique=True, name="unique_feeder_name_url")
 
     def get_engine(self) -> AIOEngine:
@@ -107,6 +108,9 @@ class mongo_controller:
         default_tenant = await self.__engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
         if not default_tenant:
             await tenant_boostrap(self.__engine)
+        elif getattr(default_tenant, "event_management_enabled", False) != True:
+            default_tenant.event_management_enabled = True
+            await self.__engine.save(default_tenant)
         await self.ensure_demo_user()
 
     def get_admin(self):

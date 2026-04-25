@@ -1,7 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { lastValueFrom, Observable, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
-import { ApiService } from '../../shared/services/api.service';
 import { ResolveIpResponse, NetworkIntelScanResponse, GeoCameraResponse } from '../../shared/model/network-intel/network-intel-api.models';
 import { IpPortData } from '../../shared/model/network-intel/network-intel.model';
 import { ScanHelperMethodsService as SharedScanHelperMethodsService } from '../../shared/partials/scan-helper-methods/scan-helper-methods-service.service';
@@ -9,10 +8,6 @@ import { ScanHelperMethodsService as SharedScanHelperMethodsService } from '../.
 @Injectable({ providedIn: 'root' })
 export class ScanHelperMethodsService extends SharedScanHelperMethodsService {
   isRunning = signal(false);
-
-  constructor(api: ApiService) {
-    super(api);
-  }
 
   resetState(): void {
     this.currentCancel$ = undefined;

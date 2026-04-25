@@ -232,7 +232,7 @@ class session_manager:
             user = await self._engine.find_one(db_user_account, db_user_account.username == username)
             if not user:
                 raise HTTPException(status_code=401, detail="User not found")
-            
+
             maintainer_user = await self._engine.find_one(db_user_account, (db_user_account.tenant_uuid == user.tenant_uuid) & (db_user_account.licenses == LicenseName.MAINTAINER))
             if not maintainer_user:
                 raise HTTPException(status_code=401, detail="Maintainer user not found")

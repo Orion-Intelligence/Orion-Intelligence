@@ -1,0 +1,1 @@
+{"siem_model":{"settings":{"index":{"routing":{"allocation":{"include":{"_tier_preference":"data_content"}}},"number_of_shards":"1","blocks":{"read_only_allow_delete":"false"},"provided_name":"siem_model","max_result_window":"1000000","creation_date":"1777018492427","number_of_replicas":"0","uuid":"lKwCn6U0ROGVK1DiWIUoYg","version":{"created":"8536000"}}}}}

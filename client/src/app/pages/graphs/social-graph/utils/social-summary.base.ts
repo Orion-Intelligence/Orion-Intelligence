@@ -7,7 +7,9 @@ export abstract class SocialSummaryBase extends ValuePresentationBase {
   protected readonly socialEntityUiService = inject(SocialEntityUiService);
   abstract scanUsernames: OutputEmitterRef<string[]>;
 
-  protected addTokensFromInput(): void {}
+  protected addTokensFromInput(): void {
+    // Optional extension hook for summary views.
+  }
 
   scanConnections(usernames: string[] | null | undefined): void {
     const normalized = this.socialEntityUiService.normalizeUsernames(usernames);

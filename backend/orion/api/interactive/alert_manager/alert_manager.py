@@ -445,7 +445,7 @@ class AlertManager:
             alert_doc = db_alert_model(
                 tenant_id=str(tenant_id), scan_running=value, alerts=[])
             await self._engine.save(alert_doc)
-        
+
         if(cancle_scan==True):
             alert_job = self.get_alert_job()
             await alert_job.get_instance().cancel_tenant_scan(tenant_id)

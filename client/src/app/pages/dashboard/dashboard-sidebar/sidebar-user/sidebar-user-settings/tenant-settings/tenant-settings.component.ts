@@ -62,6 +62,7 @@ export class TenantSettingsComponent implements OnInit {
       postal_code: this.userSessionData.tenant.postalCode,
       iocs: [],
       profile_visibility_enabled: this.userSessionData.tenant.profileVisibilityEnabled,
+      event_management_enabled: this.userSessionData.tenant.eventManagementEnabled === true,
     };
     this.apiService.post(route, tenantData).subscribe();
   }

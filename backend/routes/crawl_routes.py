@@ -27,8 +27,7 @@ async def feeder(index_type: str):
 
 
 @crawl_routes.get(
-    "/api/parser",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
+    "/api/parser")
 async def parser():
     return await crawl_model.getInstance().invoke_fetch_parser()
 

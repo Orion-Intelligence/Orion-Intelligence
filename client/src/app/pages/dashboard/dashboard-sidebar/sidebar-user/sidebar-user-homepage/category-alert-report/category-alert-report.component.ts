@@ -464,9 +464,7 @@ export class CategoryAlertReportComponent implements OnInit {
           this.apiService.post('alert/seen', [_alert]).subscribe({
             next: () => {
               this.decrementUnseenSummary(1);
-            },
-            error: (_err) => {
-            },
+            }
           });
         }
       }

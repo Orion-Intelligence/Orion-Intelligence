@@ -1,4 +1,5 @@
 import json
+from contextlib import suppress
 from datetime import datetime
 
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
@@ -273,9 +274,7 @@ class homepage_model:
     def parse_date_fallback(raw_date: str) -> str | None:
         formats = ["%Y-%m-%dT%H:%M:%S.%f%z", "%Y-%m-%d", "%Y-%m-%dT%H:%M:%S.%fZ"]
         for fmt in formats:
-            try:
+            with suppress(ValueError):
                 dt = datetime.strptime(raw_date, fmt)
                 return dt.strftime("%B %d, %Y")
-            except Exception:
-                continue
         return None

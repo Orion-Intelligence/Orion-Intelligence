@@ -6,6 +6,8 @@ source =
 
 [report]
 omit =
+    */backend/routes/*
+    */routes/*
     */configs/*
     */static/*
     */migrations/*

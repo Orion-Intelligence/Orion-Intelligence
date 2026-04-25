@@ -84,7 +84,7 @@ class crawl_model:
     @classmethod
     def _get_swarm_bloom(cls) -> BloomFilter:
         if cls.__swarm_bloom is None:
-            bloom_dir = env_handler.get_instance().env("BLOOM_DIR") or "/tmp"
+            bloom_dir = env_handler.get_instance().env("BLOOM_DIR") or str(Path.cwd() / ".bloom")
             os.makedirs(bloom_dir, exist_ok=True)
             cls.__swarm_bloom = BloomFilter(
                 max_elements=10_000_000,
@@ -100,12 +100,13 @@ class crawl_model:
             network_type: str,
             is_leak_update: bool,
             name: str = None):
-        normalized_url = base_url
+        raw_base_url = base_url or ""
+        normalized_url = raw_base_url
         if network_type != "telegram":
-            normalized_url = helper_controller.get_base_url(base_url).rstrip('/')
+            normalized_url = helper_controller.get_base_url(raw_base_url).rstrip('/')
 
-        if base_url.__contains__("twitter") or base_url.__contains__("reddit") or base_url.__contains__("forum"):
-            normalized_url = base_url
+        if any(token in raw_base_url for token in ("twitter", "reddit", "forum")):
+            normalized_url = raw_base_url
 
         general_model = await self._engine.find_one(db_url_data_model, db_url_data_model.url == normalized_url)
         if not new_content_type:
@@ -485,9 +486,21 @@ class crawl_model:
         return (f"{payload}\n" if payload else "").encode("utf-8")
 
     async def _build_parser_payload(self, parser_root: Path) -> bytes:
+        disabled_script_names = {
+            record.name
+            for record in await self._engine.find(
+                db_feeder_script_model,
+                {
+                    "entry_kind": "script",
+                    "feeder.index_status": False,
+                },
+            )
+        }
         zip_buffer = BytesIO()
         with ZipFile(zip_buffer, "w", compression=ZIP_DEFLATED) as archive:
             for source_path in sorted(path for path in parser_root.rglob("*") if path.is_file()):
+                if source_path.name in disabled_script_names:
+                    continue
                 archive.writestr(
                     source_path.relative_to(parser_root).as_posix(),
                     self._decrypt_parser_file(parser_root, source_path, source_path.read_bytes()),
@@ -540,7 +553,7 @@ class crawl_model:
         url = "http://trusted-micros-api:8010/cti_classifier/classify"
         payload = {"data": payload.data}
 
-        response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload, timeout=120)
         response.raise_for_status()
 
         return response.json()["result"]
