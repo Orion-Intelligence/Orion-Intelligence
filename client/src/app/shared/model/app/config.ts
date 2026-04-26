@@ -13,12 +13,15 @@ export class AppSettingsModel {
   home_header_pricing: string = '';
   home_header_pricing_allowed: boolean = true;
   home_header_whistle_blowing_allowed: boolean = false;
+  ai_endpoint_enabled: boolean = true;
   s_onion: string = '';
   api_allowed: string = '0';
 
   constructor(data?: Partial<Record<keyof AppSettingsModel, string | boolean>>) {
     if (data) {
+      const hasAiEndpointEnabled = data.ai_endpoint_enabled !== undefined;
       this.ai_endpoint = (data.ai_endpoint as string) || this.ai_endpoint;
+      this.ai_endpoint_enabled = data.ai_endpoint_enabled === true || data.ai_endpoint_enabled === '1' || (!hasAiEndpointEnabled && this.ai_endpoint_enabled);
       this.version = (data.version as string) || this.version;
       this.language_allowed = (data.language_allowed as string) || this.language_allowed;
       this.logo_url = (data.logo_url as string) || this.logo_url;
@@ -29,11 +32,11 @@ export class AppSettingsModel {
       this.app_name = (data.app_name as string) || this.app_name;
       this.meta_info = (data.meta_info as string) || this.meta_info;
       this.s_onion = (data.s_onion as string) || this.s_onion;
-      this.applyMetaInfo();
+      this.applyMetaInfo(hasAiEndpointEnabled);
     }
   }
 
-  private applyMetaInfo(): void {
+  private applyMetaInfo(hasAiEndpointEnabled = false): void {
     try {
       const parsed = this.meta_info ? JSON.parse(this.meta_info) : {};
       if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
@@ -44,6 +47,7 @@ export class AppSettingsModel {
       this.home_header_pricing = typeof parsed.S_HOME_HEADER_PRICING === 'string' ? parsed.S_HOME_HEADER_PRICING : this.home_header_pricing;
       this.home_header_pricing_allowed = typeof parsed.S_HOME_HEADER_PRICING_ALLOWED === 'boolean' ? parsed.S_HOME_HEADER_PRICING_ALLOWED : this.home_header_pricing_allowed;
       this.home_header_whistle_blowing_allowed = typeof parsed.S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED === 'boolean' ? parsed.S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED : this.home_header_whistle_blowing_allowed;
+      this.ai_endpoint_enabled = !hasAiEndpointEnabled && typeof parsed.S_AI_ENDPOINT_ENABLED === 'boolean' ? parsed.S_AI_ENDPOINT_ENABLED : this.ai_endpoint_enabled;
     }
     catch {
       return;
