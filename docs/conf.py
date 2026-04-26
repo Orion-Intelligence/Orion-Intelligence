@@ -11,6 +11,7 @@ source_suffix = [".rst", ".md"]
 master_doc = "index"
 html_theme = "shibuya"
 exclude_patterns = [
+    "api_docs/**",
     "llm_docs/**",
 ]
 

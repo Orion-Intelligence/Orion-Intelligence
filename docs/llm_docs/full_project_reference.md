@@ -17,7 +17,7 @@ This generated reference gives a source-level map of the Orion repository. It is
 
 ## Coverage Summary
 
-- Source files inventoried: **801**
+- Source files inventoried: **749**
 - Backend API endpoints discovered: **198**
 - Angular artifacts discovered: **210**
 
@@ -27,7 +27,7 @@ This generated reference gives a source-level map of the Orion repository. It is
 | --- | ---: |
 | client | 522 |
 | backend | 204 |
-| docs | 70 |
+| docs | 18 |
 | root | 5 |
 
 ## Counts By File Kind
@@ -39,12 +39,12 @@ This generated reference gives a source-level map of the Orion repository. It is
 | typescript | 84 |
 | backend manager/service | 76 |
 | backend model | 74 |
-| documentation | 63 |
 | angular service/resolver/guard | 60 |
-| backend python | 47 |
 | typescript model | 47 |
+| backend python | 45 |
 | stylesheet | 15 |
 | backend test | 14 |
+| documentation | 13 |
 | text | 11 |
 | backend route module | 10 |
 | json data/config | 6 |

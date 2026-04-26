@@ -211,7 +211,6 @@ def validate_index(failures: list[str]) -> None:
         "app_docs/user_manual",
         "app_docs/developer_documentation",
         "app_docs/swagger_api_reference",
-        "api_docs/README",
     )
     for entry in required_public_entries:
         if entry not in text:
@@ -222,6 +221,8 @@ def validate_readthedocs_excludes(failures: list[str]) -> None:
     text = SPHINX_CONF.read_text(encoding="utf-8")
     if '"llm_docs/**"' not in text and "'llm_docs/**'" not in text:
         fail("docs/conf.py does not exclude llm_docs/** from the ReadTheDocs build", failures)
+    if '"api_docs/**"' not in text and "'api_docs/**'" not in text:
+        fail("docs/conf.py does not exclude legacy api_docs/** from the ReadTheDocs build", failures)
 
 
 def main() -> int:

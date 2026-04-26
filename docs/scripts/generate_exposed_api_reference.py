@@ -40,10 +40,18 @@ def md_escape(value: Any) -> str:
 def strip_response_sections(description: str) -> str:
     if not description:
         return ""
-    text = re.split(r"\n##\s+(?:Response|Responses|Request)\b", description, maxsplit=1, flags=re.I)[0]
+    if "Documentation file not found:" in description:
+        return ""
+    description_match = re.search(r"^##\s*Description\s*\n(.*?)(?:\n##\s|\Z)", description, flags=re.I | re.M | re.S)
+    if description_match:
+        text = description_match.group(1)
+    else:
+        text = description
+    text = re.split(r"\n##\s+(?:Response|Responses|Request)\b", text, maxsplit=1, flags=re.I)[0]
     text = re.sub(r"```.*?```", "", text, flags=re.S)
-    text = re.sub(r"^#\s+.*\n+", "", text.strip())
-    return compact(text, 900)
+    text = re.sub(r"^\s*#{1,6}\s*Description\s*\n+", "", text.strip(), flags=re.I)
+    text = re.sub(r"^\s*#{1,6}\s+", "", text, flags=re.M)
+    return compact(text, 500)
 
 
 def schema_ref_name(schema: dict[str, Any]) -> str:
@@ -400,8 +408,9 @@ def render(schema: dict[str, Any]) -> str:
                     f"- **Response status:** `{response_status}`",
                 ]
             )
-            if operation.get("description"):
-                lines.extend(["", "**Description**", "", strip_response_sections(operation.get("description", ""))])
+            description = strip_response_sections(operation.get("description", ""))
+            if description:
+                lines.extend(["", "**Description**", "", description])
 
             lines.extend(["", "**Parameters**", "", *render_parameter_table(parameters, root)])
 

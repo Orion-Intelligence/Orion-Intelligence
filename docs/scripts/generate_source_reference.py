@@ -22,7 +22,6 @@ SOURCE_ROOTS = [
     "client/cypress",
     "docs/app_docs",
     "docs/llm_docs",
-    "docs/api_docs",
     "docs/scripts",
 ]
 

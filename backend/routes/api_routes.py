@@ -902,7 +902,7 @@ async def url_vulnerability_scan(param: UrlVulnerabilityScanRequest = Body(...),
     description=DYNAMIC_DOCS["geo_camera"]["description"],
     tags=["Network Intelligence"],
     operation_id="geoIotDetect",
-    response_description=DYNAMIC_DOCS["geo_camera"]["description"],
+    response_description=DYNAMIC_DOCS["geo_camera"]["response_description"],
     status_code=200,
     dependencies=SCANNING_DEPS,
 )
@@ -914,10 +914,10 @@ async def geo_camera_detect(param: GeoCameraDetectRequest = Body(...), current_u
 @api_routes.post(
     "/api/netintel/camera_detect_ranges",
     summary="Scan IP ranges for exposed cameras",
-    description=DYNAMIC_DOCS["geo_camera"]["description"],
+    description=DYNAMIC_DOCS["geo_camera_ranges"]["description"],
     tags=["Network Intelligence"],
     operation_id="geoCameraDetectRanges",
-    response_description=DYNAMIC_DOCS["geo_camera"]["description"],
+    response_description=DYNAMIC_DOCS["geo_camera_ranges"]["response_description"],
     status_code=200,
     dependencies=SCANNING_DEPS,
 )

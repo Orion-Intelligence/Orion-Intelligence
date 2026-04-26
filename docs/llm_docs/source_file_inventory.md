@@ -4,7 +4,7 @@
 
 This inventory is generated from maintainable source roots. It intentionally excludes dependency folders, build output, caches, and generated bundles. Static binary assets are summarized by nearby source references rather than expanded as implementation files.
 
-Inventory file count: **801**.
+Inventory file count: **749**.
 
 ## Counts By Kind
 
@@ -15,12 +15,12 @@ Inventory file count: **801**.
 | typescript | 84 |
 | backend manager/service | 76 |
 | backend model | 74 |
-| documentation | 63 |
 | angular service/resolver/guard | 60 |
-| backend python | 47 |
 | typescript model | 47 |
+| backend python | 45 |
 | stylesheet | 15 |
 | backend test | 14 |
+| documentation | 13 |
 | text | 11 |
 | backend route module | 10 |
 | json data/config | 6 |
@@ -1331,7 +1331,7 @@ Inventory file count: **801**.
 #### `backend/routes/api_routes.py`
 
 - **Kind:** backend route module
-- **Size:** 47684 bytes, 958 lines
+- **Size:** 47716 bytes, 958 lines
 - **Summary:** Defines functions _scan_domain_with_type, _enforce_demo_safe_search, index_injection, search_siem_logs, search_general; API routes /api/apk/scan, /api/cross/search, /api/crypto/scan.
 - **Details:** functions: _scan_domain_with_type, _enforce_demo_safe_search, index_injection, search_siem_logs, search_general, search_leak, search_social, search_exploit; api: /api/apk/scan, /api/cross/search, /api/crypto/scan, /api/directory, /api/dumps, /api/dynamic/cracked
 
@@ -5155,370 +5155,6 @@ Inventory file count: **801**.
 
 ### `docs`
 
-#### `docs/api_docs/ALL.md`
-
-- **Kind:** documentation
-- **Size:** 129522 bytes, 2990 lines
-- **Summary:** Documentation page: System Info.
-- **Details:** routes: /api/search/breach/screenshot/{m_screenshot}, /api/search/defacement; api: /api/search/breach/screenshot/{m_screenshot}, /api/search/defacement
-
-#### `docs/api_docs/IOC_DOC.md`
-
-- **Kind:** documentation
-- **Size:** 1504 bytes, 40 lines
-- **Summary:** Documentation page: IOC / Enrichment Fields.
-- **Details:** -
-
-#### `docs/api_docs/README.md`
-
-- **Kind:** documentation
-- **Size:** 1721 bytes, 133 lines
-- **Summary:** Documentation page: Orion API Documentation.
-- **Details:** -
-
-#### `docs/api_docs/convert_to_md.py`
-
-- **Kind:** backend python
-- **Size:** 2890 bytes, 83 lines
-- **Summary:** Lossless export of docs.py dicts to a Markdown folder structure
-- **Details:** functions: main
-
-#### `docs/api_docs/dynamic/apk_scan.md`
-
-- **Kind:** documentation
-- **Size:** 3395 bytes, 91 lines
-- **Summary:** Documentation page: Dynamic: dynamic_apk_scan.
-- **Details:** -
-
-#### `docs/api_docs/dynamic/crypto_scan.md`
-
-- **Kind:** documentation
-- **Size:** 3992 bytes, 100 lines
-- **Summary:** Documentation page: Dynamic: dynamic_crypto_scan.
-- **Details:** -
-
-#### `docs/api_docs/dynamic/deep_ip_scan.md`
-
-- **Kind:** documentation
-- **Size:** 22433 bytes, 615 lines
-- **Summary:** Documentation page: Dynamic: Deep_ip_scan.
-- **Details:** routes: /ISAPI/System/deviceInfo
-
-#### `docs/api_docs/dynamic/domain_scan.md`
-
-- **Kind:** documentation
-- **Size:** 3743 bytes, 118 lines
-- **Summary:** Documentation page: Dynamic: domain_scan.
-- **Details:** -
-
-#### `docs/api_docs/dynamic/dynamic_cracked.md`
-
-- **Kind:** documentation
-- **Size:** 2550 bytes, 57 lines
-- **Summary:** Documentation page: Dynamic: dynamic_cracked.
-- **Details:** -
-
-#### `docs/api_docs/dynamic/dynamic_social.md`
-
-- **Kind:** documentation
-- **Size:** 3876 bytes, 89 lines
-- **Summary:** Documentation page: Dynamic: dynamic_social.
-- **Details:** -
-
-#### `docs/api_docs/dynamic/dynamic_software.md`
-
-- **Kind:** documentation
-- **Size:** 2040 bytes, 75 lines
-- **Summary:** Documentation page: Dynamic: software_scan.
-- **Details:** -
-
-#### `docs/api_docs/dynamic/dynamic_user_email.md`
-
-- **Kind:** documentation
-- **Size:** 3765 bytes, 92 lines
-- **Summary:** Documentation page: Dynamic: dynamic_user_email.
-- **Details:** -
-
-#### `docs/api_docs/dynamic/dynamin_national_identity.md`
-
-- **Kind:** documentation
-- **Size:** 3868 bytes, 152 lines
-- **Summary:** Documentation page: Dynamic: dynamin_national_identity.
-- **Details:** -
-
-#### `docs/api_docs/dynamic/geo_camera.md`
-
-- **Kind:** documentation
-- **Size:** 8446 bytes, 291 lines
-- **Summary:** Documentation page: Dynamic: geo_iot_detect.
-- **Details:** -
-
-#### `docs/api_docs/dynamic/geo_camera_ranges.md`
-
-- **Kind:** documentation
-- **Size:** 7974 bytes, 275 lines
-- **Summary:** Documentation page: Dynamic: geo_camera_ranges.
-- **Details:** routes: /geo/iot_detect, /8, /24
-
-#### `docs/api_docs/dynamic/ioc_extract.md`
-
-- **Kind:** documentation
-- **Size:** 1468 bytes, 54 lines
-- **Summary:** Documentation page: Dynamic: dynamic_ioc_extract.
-- **Details:** -
-
-#### `docs/api_docs/dynamic/ip_resolve.md`
-
-- **Kind:** documentation
-- **Size:** 2922 bytes, 143 lines
-- **Summary:** Documentation page: Dynamic: ip_resolve.
-- **Details:** -
-
-#### `docs/api_docs/dynamic/onion_search.md`
-
-- **Kind:** documentation
-- **Size:** 1403 bytes, 59 lines
-- **Summary:** Documentation page: Dynamic: dynamic_cross_search.
-- **Details:** -
-
-#### `docs/api_docs/dynamic/wanted_scan.md`
-
-- **Kind:** documentation
-- **Size:** 3292 bytes, 95 lines
-- **Summary:** Documentation page: Dynamic: wanted_scanner.
-- **Details:** -
-
-#### `docs/api_docs/reports/breach.md`
-
-- **Kind:** documentation
-- **Size:** 4764 bytes, 106 lines
-- **Summary:** Documentation page: Report: breach.
-- **Details:** routes: /api/search/breach/screenshot/{m_screenshot}; api: /api/search/breach/screenshot/{m_screenshot}
-
-#### `docs/api_docs/reports/breach_screenshot.md`
-
-- **Kind:** documentation
-- **Size:** 776 bytes, 19 lines
-- **Summary:** Documentation page: Report: breach_screenshot.
-- **Details:** -
-
-#### `docs/api_docs/reports/chat.md`
-
-- **Kind:** documentation
-- **Size:** 8021 bytes, 135 lines
-- **Summary:** Documentation page: Report: chat.
-- **Details:** -
-
-#### `docs/api_docs/reports/defacement.md`
-
-- **Kind:** documentation
-- **Size:** 5513 bytes, 131 lines
-- **Summary:** Documentation page: Report: defacement.
-- **Details:** -
-
-#### `docs/api_docs/reports/exploit.md`
-
-- **Kind:** documentation
-- **Size:** 4812 bytes, 108 lines
-- **Summary:** Documentation page: Report: exploit.
-- **Details:** -
-
-#### `docs/api_docs/reports/news.md`
-
-- **Kind:** documentation
-- **Size:** 12930 bytes, 101 lines
-- **Summary:** Documentation page: Report: news.
-- **Details:** -
-
-#### `docs/api_docs/reports/social.md`
-
-- **Kind:** documentation
-- **Size:** 5119 bytes, 114 lines
-- **Summary:** Documentation page: Report: social.
-- **Details:** -
-
-#### `docs/api_docs/reports/stix.md`
-
-- **Kind:** documentation
-- **Size:** 4972 bytes, 144 lines
-- **Summary:** Documentation page: Report: stix.
-- **Details:** -
-
-#### `docs/api_docs/reports/strategic.md`
-
-- **Kind:** documentation
-- **Size:** 5961 bytes, 119 lines
-- **Summary:** Documentation page: Report: strategic.
-- **Details:** -
-
-#### `docs/api_docs/search/breach.md`
-
-- **Kind:** documentation
-- **Size:** 9605 bytes, 180 lines
-- **Summary:** Documentation page: Search: breach.
-- **Details:** -
-
-#### `docs/api_docs/search/consolidated.md`
-
-- **Kind:** documentation
-- **Size:** 3929 bytes, 119 lines
-- **Summary:** Documentation page: Search: consolidated.
-- **Details:** -
-
-#### `docs/api_docs/search/consolidated_ranked.md`
-
-- **Kind:** documentation
-- **Size:** 3566 bytes, 102 lines
-- **Summary:** Documentation page: Search: consolidated_ranked.
-- **Details:** -
-
-#### `docs/api_docs/search/defacement.md`
-
-- **Kind:** documentation
-- **Size:** 5996 bytes, 144 lines
-- **Summary:** Documentation page: Search: defacement.
-- **Details:** routes: /api/search/defacement; api: /api/search/defacement
-
-#### `docs/api_docs/search/exploit.md`
-
-- **Kind:** documentation
-- **Size:** 4412 bytes, 93 lines
-- **Summary:** Documentation page: Search: exploit.
-- **Details:** -
-
-#### `docs/api_docs/search/social.md`
-
-- **Kind:** documentation
-- **Size:** 5256 bytes, 99 lines
-- **Summary:** Documentation page: Search: social.
-- **Details:** -
-
-#### `docs/api_docs/search/stealerlogs.md`
-
-- **Kind:** documentation
-- **Size:** 4210 bytes, 107 lines
-- **Summary:** Documentation page: Search: stealerlogs.
-- **Details:** -
-
-#### `docs/api_docs/search/strategic.md`
-
-- **Kind:** documentation
-- **Size:** 6812 bytes, 129 lines
-- **Summary:** Documentation page: Search: strategic.
-- **Details:** -
-
-#### `docs/api_docs/search/telegram.md`
-
-- **Kind:** documentation
-- **Size:** 4359 bytes, 108 lines
-- **Summary:** Documentation page: Search: telegram.
-- **Details:** -
-
-#### `docs/api_docs/social/profile_ followers.md`
-
-- **Kind:** documentation
-- **Size:** 1558 bytes, 52 lines
-- **Summary:** Documentation page: Socail: profile_followers.
-- **Details:** -
-
-#### `docs/api_docs/social/profile_ following.md`
-
-- **Kind:** documentation
-- **Size:** 1657 bytes, 53 lines
-- **Summary:** Documentation page: Socail: profile_following.
-- **Details:** -
-
-#### `docs/api_docs/social/profile_global_presence.md`
-
-- **Kind:** documentation
-- **Size:** 2237 bytes, 59 lines
-- **Summary:** Documentation page: Socail: profile_global_presence.
-- **Details:** -
-
-#### `docs/api_docs/social/profile_images.md`
-
-- **Kind:** documentation
-- **Size:** 1986 bytes, 54 lines
-- **Summary:** Documentation page: Socail: profile_images.
-- **Details:** -
-
-#### `docs/api_docs/social/profile_metadata.md`
-
-- **Kind:** documentation
-- **Size:** 2249 bytes, 60 lines
-- **Summary:** Documentation page: Social: profile_metadata.
-- **Details:** -
-
-#### `docs/api_docs/social/profile_posts.md`
-
-- **Kind:** documentation
-- **Size:** 2443 bytes, 67 lines
-- **Summary:** Documentation page: Socail: profile_posts.
-- **Details:** -
-
-#### `docs/api_docs/social/profile_search.md`
-
-- **Kind:** documentation
-- **Size:** 1878 bytes, 58 lines
-- **Summary:** Documentation page: Socail: profile_search.
-- **Details:** -
-
-#### `docs/api_docs/social/recon_image_search.md`
-
-- **Kind:** documentation
-- **Size:** 2334 bytes, 55 lines
-- **Summary:** Documentation page: Socail: recon_image_search.
-- **Details:** -
-
-#### `docs/api_docs/source_docs.py`
-
-- **Kind:** backend python
-- **Size:** 158612 bytes, 2488 lines
-- **Summary:** Python source module.
-- **Details:** -
-
-#### `docs/api_docs/support/dns_scan.md`
-
-- **Kind:** documentation
-- **Size:** 792 bytes, 35 lines
-- **Summary:** Documentation page: Dynamic: dns_scan.
-- **Details:** -
-
-#### `docs/api_docs/support/subdomain_scan.md`
-
-- **Kind:** documentation
-- **Size:** 1193 bytes, 49 lines
-- **Summary:** Documentation page: Dynamic: subdomain_scan.
-- **Details:** -
-
-#### `docs/api_docs/support/wayback_scan.md`
-
-- **Kind:** documentation
-- **Size:** 1161 bytes, 49 lines
-- **Summary:** Documentation page: Dynamic: wayback_scan.
-- **Details:** -
-
-#### `docs/api_docs/system-info/directory.md`
-
-- **Kind:** documentation
-- **Size:** 1407 bytes, 43 lines
-- **Summary:** Documentation page: System Info: directory.
-- **Details:** -
-
-#### `docs/api_docs/system-info/dumps.md`
-
-- **Kind:** documentation
-- **Size:** 1784 bytes, 46 lines
-- **Summary:** Documentation page: System Info: dumps.
-- **Details:** -
-
-#### `docs/api_docs/system-info/insight.md`
-
-- **Kind:** documentation
-- **Size:** 11330 bytes, 360 lines
-- **Summary:** Documentation page: System Info: insight.
-- **Details:** -
-
 #### `docs/app_docs/developer_documentation.md`
 
 - **Kind:** documentation
@@ -5543,7 +5179,7 @@ Inventory file count: **801**.
 #### `docs/app_docs/swagger_api_reference.md`
 
 - **Kind:** documentation
-- **Size:** 170746 bytes, 5545 lines
+- **Size:** 160569 bytes, 5533 lines
 - **Summary:** Documentation page: Swagger API Reference.
 - **Details:** routes: /docs, /openapi.json, /openapi.json, /api/index/injection, /api/dynamic/user, /api/dynamic/cracked; api: /api/index/injection, /api/dynamic/user, /api/dynamic/cracked, /api/dynamic/software, /api/urlscan/domain, /api/dynamic/social
 
@@ -5599,7 +5235,7 @@ Inventory file count: **801**.
 #### `docs/llm_docs/swagger_api_reference.md`
 
 - **Kind:** documentation
-- **Size:** 170746 bytes, 5545 lines
+- **Size:** 160569 bytes, 5533 lines
 - **Summary:** Documentation page: Swagger API Reference.
 - **Details:** routes: /docs, /openapi.json, /openapi.json, /api/index/injection, /api/dynamic/user, /api/dynamic/cracked; api: /api/index/injection, /api/dynamic/user, /api/dynamic/cracked, /api/dynamic/software, /api/urlscan/domain, /api/dynamic/social
 
@@ -5613,7 +5249,7 @@ Inventory file count: **801**.
 #### `docs/scripts/generate_exposed_api_reference.py`
 
 - **Kind:** backend python
-- **Size:** 17230 bytes, 449 lines
+- **Size:** 17630 bytes, 458 lines
 - **Summary:** Defines functions load_openapi_schema, compact, md_escape, strip_response_sections, schema_ref_name.
 - **Details:** functions: load_openapi_schema, compact, md_escape, strip_response_sections, schema_ref_name, resolve_ref, merged_schema, sample_string
 
@@ -5627,7 +5263,7 @@ Inventory file count: **801**.
 #### `docs/scripts/generate_source_reference.py`
 
 - **Kind:** backend python
-- **Size:** 42211 bytes, 1095 lines
+- **Size:** 42190 bytes, 1094 lines
 - **Summary:** Defines classes FileDoc, EndpointDoc, ComponentDoc; functions rel, should_skip, iter_source_files, read_text, line_count.
 - **Details:** classes: FileDoc, EndpointDoc, ComponentDoc; functions: rel, should_skip, iter_source_files, read_text, line_count, first_sentence, node_name, literal_string
 
@@ -5641,7 +5277,7 @@ Inventory file count: **801**.
 #### `docs/scripts/validate_application_docs.py`
 
 - **Kind:** backend python
-- **Size:** 10109 bytes, 248 lines
+- **Size:** 10252 bytes, 249 lines
 - **Summary:** Defines functions fail, load_json, route_is_known, backend_route_paths, openapi_operation_count.
 - **Details:** functions: fail, load_json, route_is_known, backend_route_paths, openapi_operation_count, validate_feature_catalog, validate_feature_help, validate_application_feature_guide
 

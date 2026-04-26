@@ -17,5 +17,4 @@ app_docs/developer_documentation
 :caption: API Docs:
 
 app_docs/swagger_api_reference
-api_docs/README
 ```
