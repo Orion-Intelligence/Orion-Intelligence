@@ -340,7 +340,7 @@ class search_model:
             }
 
             response = await client.post(
-                f"http://trusted-micros-api:8010/file/scan/{user_id}",
+                f"http://trusted-micros-api:8010/ioc/extract/{user_id}",
                 files=files
             )
 

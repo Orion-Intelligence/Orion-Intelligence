@@ -247,6 +247,17 @@ async def extract_crypto():
 
 
 @test_routes.post(
+    "/api/nexus/analyze-text",
+    include_in_schema=False,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+    ],
+)
+async def test_nexus_analyze_text(_payload: dict = Body(...)):
+    return _load_api_mock("nexus_analyze_text.json")
+
+
+@test_routes.post(
     "/api/cross/search",
     include_in_schema=False,
     dependencies=[

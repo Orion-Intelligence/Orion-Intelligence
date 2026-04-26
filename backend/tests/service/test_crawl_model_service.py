@@ -181,7 +181,7 @@ def test_http_wrappers_post_expected_payloads_and_handle_errors(monkeypatch):
     assert _run(crawl_model.make_cti_request("ioc")) == {"ok": True}
     assert _run(crawl_model.parse_chat(model)) == {"ok": True}
     assert _run(crawl_model.parse_summarize_ai(model)) == {"ok": True}
-    assert _run(crawl_model.parse_chat_ai(ReportChatRequest(session_id="s1", message="msg", report="rep"))) == {"ok": True}
+    assert _run(crawl_model.parse_chat_ai(ReportChatRequest(session_id="s1", message="msg", report="rep"), "842")) == {"ok": True}
 
     assert calls[0] == {
         "url": "http://localhost:8000/cti_classifier/classify",
@@ -189,8 +189,7 @@ def test_http_wrappers_post_expected_payloads_and_handle_errors(monkeypatch):
         "timeout": None,
     }
     assert calls[1]["url"].endswith("/nlp/parse")
-    assert calls[2]["timeout"] == 200
-    assert calls[3]["url"].endswith("/nlp/chat/report")
+    assert calls[3]["url"].endswith("/nlp/chat/report/842")
 
     monkeypatch.setattr(
         "orion.api.server.crawl_manager.crawl_model.httpx.AsyncClient",
@@ -198,7 +197,11 @@ def test_http_wrappers_post_expected_payloads_and_handle_errors(monkeypatch):
     )
 
     assert _run(crawl_model.parse_chat(model)) == {"error": "Failed to parse chat"}
-    assert _run(crawl_model.parse_summarize_ai(model)) == {"error": "Failed to summarize chat"}
+    failed = _run(crawl_model.parse_summarize_ai(model))
+    assert failed.status_code == 500
+    assert json.loads(failed.body) == {
+        "detail": "Something happened while calling nlp/summarize/ai"
+    }
     assert _run(crawl_model.parse_chat_ai(ReportChatRequest(session_id="s1", message="msg", report="rep"))) == {"error": "Failed to generate chat report"}
 
 

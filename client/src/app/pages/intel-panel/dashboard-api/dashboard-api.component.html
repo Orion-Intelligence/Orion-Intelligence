@@ -82,7 +82,7 @@
   @if (query_triggered && !loading && hasResults) {
     <div class="mt-[15px] mx-0" @fadeInDashboardItem>
       <section>
-        <div class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3" @fadeInDashboardItem>
+        <div data-testid="scan-success-badge" class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3" @fadeInDashboardItem>
           <div class="flex items-center gap-2">
             <img alt="API Type" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
             <div class="text-sm font-semibold capitalize text-[var(--color-text1)]">{{ apiType || 'api' }}</div>

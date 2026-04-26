@@ -1,0 +1,40 @@
+{
+  "status": "success",
+  "text_length": 31,
+  "truncated": false,
+  "spam": {
+    "label": "spam",
+    "confidence": 0.9991,
+    "is_spam": true
+  },
+  "urls_found": 3,
+  "url_results": [
+    {
+      "url": "https://secure-login-update.example.com/verify",
+      "label": "malware",
+      "confidence": 0.5231,
+      "is_safe": false
+    },
+    {
+      "url": "https://bank-alert-check.example.net/account",
+      "label": "phishing",
+      "confidence": 0.5816,
+      "is_safe": false
+    },
+    {
+      "url": "https://prize-claim-now.example.org/reward",
+      "label": "phishing",
+      "confidence": 0.5174,
+      "is_safe": false
+    }
+  ],
+  "verdict": {
+    "safe": false,
+    "threats": [
+      "spam_detected",
+      "malicious_url:https://secure-login-update.example.com/verify",
+      "malicious_url:https://bank-alert-check.example.net/account",
+      "malicious_url:https://prize-claim-now.example.org/reward"
+    ]
+  }
+}

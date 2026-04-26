@@ -88,6 +88,7 @@ export const sidebarItemTooltips: Record<string, string> = {
   'SEO-Scan': 'SEO Scan',
   'APK-Scan': 'APK Scan',
   'File-Scanner': 'File Scanner',
+  'Text-Analysis': 'Text Analysis',
   'Crypto-Scanner': 'Crypto Scanner',
   'IOCS': 'IOCs',
   'Feeder': 'Feeder Scripts',

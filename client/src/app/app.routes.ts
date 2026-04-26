@@ -46,6 +46,7 @@ const loadViewTenantComponent = () => import('./pages/tenant/tenant-management/v
 const loadSidebarProfileSystemSettingsComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-system-settings/sidebar-user-system-settings.component').then(m => m.SidebarProfileSystemSettingsComponent);
 const loadTenantSettingsComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-settings/tenant-settings/tenant-settings.component').then(m => m.TenantSettingsComponent);
 const loadFileScannerComponent = () => import('./pages/intel-panel/ioc-extractor/file-scanner.component').then(m => m.FileScannerComponent);
+const loadTextAnalysisComponent = () => import('./pages/intel-panel/text-analysis/text-analysis.component').then(m => m.TextAnalysisComponent);
 const loadSocialMapperComponent = () => import('./pages/graphs/social-graph/social-mapper.component').then(m => m.SocialMapperComponent);
 const loadNetworkIntelComponent = () => import('./pages/network-intel/network-intel').then(m => m.NetworkIntel);
 const loadUserProfileActivityComponent = () => import('./pages/profile/user-profile-activity/user-profile-activity.component').then(m => m.UserProfileActivityComponent);
@@ -251,6 +252,15 @@ export const routes: Routes = [
               type: 'filescan',
               title: 'File Analysis',
               description: 'Upload a file to extract Indicators of Compromise (IOCs)'
+            }
+          },
+          {
+            path: 'text-analysis',
+            loadComponent: loadTextAnalysisComponent,
+            data: {
+              animation: 'TextAnalysisAPI',
+              title: 'Text Analysis',
+              description: 'Analyze text for spam and malicious URLs'
             }
           },
           {

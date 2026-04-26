@@ -52,6 +52,7 @@ export class SidebarSectionComponent {
     const mapped = {
       iocs: 'ioc',
       'file-scanner': 'archive',
+      'text-analysis': 'phishing',
       'crypto-scanner': 'cryptocurrency',
       feeder: 'account',
     }[normalized] || normalized;

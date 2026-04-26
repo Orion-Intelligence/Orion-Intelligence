@@ -65,7 +65,7 @@
       @if (!hasError && (isLoading || scanResult || resultSections.length > 0)) {
         <section>
           @if (!isLoading) {
-            <div class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
+            <div data-testid="scan-success-badge" class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
               <div class="flex min-w-0 items-center gap-2">
                 <img alt="File" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
                 <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]" [title]="getDisplayFileName()">{{ getDisplayFileName() }}</div>
