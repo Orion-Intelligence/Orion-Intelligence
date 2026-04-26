@@ -11,7 +11,8 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BACKEND_ROOT = REPO_ROOT / "backend"
-OUTPUT = REPO_ROOT / "docs" / "llm_docs" / "swagger_api_reference.md"
+PUBLIC_OUTPUT = REPO_ROOT / "docs" / "app_docs" / "swagger_api_reference.md"
+LLM_OUTPUT = REPO_ROOT / "docs" / "llm_docs" / "swagger_api_reference.md"
 
 HTTP_METHODS = ("get", "post", "put", "patch", "delete")
 JSON_CONTENT_TYPES = ("application/json", "application/*+json")
@@ -426,11 +427,16 @@ def render(schema: dict[str, Any]) -> str:
 
 def main() -> int:
     schema = load_openapi_schema()
-    OUTPUT.write_text(render(schema), encoding="utf-8")
+    content = render(schema)
+    PUBLIC_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    LLM_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    PUBLIC_OUTPUT.write_text(content, encoding="utf-8")
+    LLM_OUTPUT.write_text(content, encoding="utf-8")
     print(
         json.dumps(
             {
-                "output": OUTPUT.relative_to(REPO_ROOT).as_posix(),
+                "output": PUBLIC_OUTPUT.relative_to(REPO_ROOT).as_posix(),
+                "llm_output": LLM_OUTPUT.relative_to(REPO_ROOT).as_posix(),
                 "operations": sum(1 for path_item in schema.get("paths", {}).values() for method in HTTP_METHODS if method in path_item),
             },
             indent=2,

@@ -20,6 +20,7 @@ SOURCE_ROOTS = [
     "backend/tests",
     "client/src/app",
     "client/cypress",
+    "docs/app_docs",
     "docs/llm_docs",
     "docs/api_docs",
     "docs/scripts",

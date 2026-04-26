@@ -8,7 +8,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageFont
 
 
 ROOT = Path(__file__).resolve().parents[2]
-USER_MANUAL = ROOT / "docs" / "llm_docs" / "user_manual.md"
+USER_MANUAL = ROOT / "docs" / "app_docs" / "user_manual.md"
 
 
 def load_caption_map() -> dict[str, str]:

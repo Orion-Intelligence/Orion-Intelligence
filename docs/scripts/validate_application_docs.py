@@ -13,14 +13,15 @@ from PIL import Image
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DOCS_DIR = REPO_ROOT / "docs"
+APP_DOCS_DIR = DOCS_DIR / "app_docs"
 LLM_DOCS_DIR = DOCS_DIR / "llm_docs"
 BACKEND_ROUTES_DIR = REPO_ROOT / "backend" / "routes"
 
 FEATURE_CATALOG = LLM_DOCS_DIR / "feature_catalog.json"
 FEATURE_HELP = LLM_DOCS_DIR / "feature_help_knowledge_base.md"
 APPLICATION_FEATURE_GUIDE = LLM_DOCS_DIR / "application_feature_guide.md"
-SWAGGER_REFERENCE = LLM_DOCS_DIR / "swagger_api_reference.md"
-USER_MANUAL = LLM_DOCS_DIR / "user_manual.md"
+SWAGGER_REFERENCE = APP_DOCS_DIR / "swagger_api_reference.md"
+USER_MANUAL = APP_DOCS_DIR / "user_manual.md"
 DOCS_INDEX = DOCS_DIR / "index.md"
 SPHINX_CONF = DOCS_DIR / "conf.py"
 
@@ -191,8 +192,30 @@ def validate_index(failures: list[str]) -> None:
     text = DOCS_INDEX.read_text(encoding="utf-8")
     if ":caption: Source Reference:" in text:
         fail("docs/index.md exposes source references as a visible navigation tab", failures)
-    if "llm_docs/" in text or "app_docs/" in text:
+    if "llm_docs/" in text:
         fail("docs/index.md exposes LLM-only docs in the ReadTheDocs navigation", failures)
+    forbidden_public_entries = (
+        "app_docs/feature_help_knowledge_base",
+        "app_docs/application_feature_guide",
+        "app_docs/backend_api_reference",
+        "app_docs/frontend_source_reference",
+        "app_docs/full_project_reference",
+        "app_docs/source_file_inventory",
+    )
+    for entry in forbidden_public_entries:
+        if entry in text:
+            fail(f"docs/index.md exposes LLM/source-only docs entry: {entry}", failures)
+    required_public_entries = (
+        "app_docs/introduction_to_platform",
+        "app_docs/introduction_to_modules",
+        "app_docs/user_manual",
+        "app_docs/developer_documentation",
+        "app_docs/swagger_api_reference",
+        "api_docs/README",
+    )
+    for entry in required_public_entries:
+        if entry not in text:
+            fail(f"docs/index.md is missing public docs entry: {entry}", failures)
 
 
 def validate_readthedocs_excludes(failures: list[str]) -> None:

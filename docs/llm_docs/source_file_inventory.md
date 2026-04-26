@@ -4,7 +4,7 @@
 
 This inventory is generated from maintainable source roots. It intentionally excludes dependency folders, build output, caches, and generated bundles. Static binary assets are summarized by nearby source references rather than expanded as implementation files.
 
-Inventory file count: **796**.
+Inventory file count: **801**.
 
 ## Counts By Kind
 
@@ -15,8 +15,8 @@ Inventory file count: **796**.
 | typescript | 84 |
 | backend manager/service | 76 |
 | backend model | 74 |
+| documentation | 63 |
 | angular service/resolver/guard | 60 |
-| documentation | 58 |
 | backend python | 47 |
 | typescript model | 47 |
 | stylesheet | 15 |
@@ -5519,6 +5519,41 @@ Inventory file count: **796**.
 - **Summary:** Documentation page: System Info: insight.
 - **Details:** -
 
+#### `docs/app_docs/developer_documentation.md`
+
+- **Kind:** documentation
+- **Size:** 15769 bytes, 383 lines
+- **Summary:** Documentation page: Developer Documentation.
+- **Details:** routes: /srv/elasticsearch/data
+
+#### `docs/app_docs/introduction_to_modules.md`
+
+- **Kind:** documentation
+- **Size:** 12318 bytes, 380 lines
+- **Summary:** Documentation page: Introduction To Modules.
+- **Details:** -
+
+#### `docs/app_docs/introduction_to_platform.md`
+
+- **Kind:** documentation
+- **Size:** 9958 bytes, 140 lines
+- **Summary:** Documentation page: Orion Platform.
+- **Details:** -
+
+#### `docs/app_docs/swagger_api_reference.md`
+
+- **Kind:** documentation
+- **Size:** 170746 bytes, 5545 lines
+- **Summary:** Documentation page: Swagger API Reference.
+- **Details:** routes: /docs, /openapi.json, /openapi.json, /api/index/injection, /api/dynamic/user, /api/dynamic/cracked; api: /api/index/injection, /api/dynamic/user, /api/dynamic/cracked, /api/dynamic/software, /api/urlscan/domain, /api/dynamic/social
+
+#### `docs/app_docs/user_manual.md`
+
+- **Kind:** documentation
+- **Size:** 63160 bytes, 2170 lines
+- **Summary:** Documentation page: User Manual.
+- **Details:** -
+
 #### `docs/llm_docs/application_feature_guide.md`
 
 - **Kind:** documentation
@@ -5578,7 +5613,7 @@ Inventory file count: **796**.
 #### `docs/scripts/generate_exposed_api_reference.py`
 
 - **Kind:** backend python
-- **Size:** 16867 bytes, 443 lines
+- **Size:** 17230 bytes, 449 lines
 - **Summary:** Defines functions load_openapi_schema, compact, md_escape, strip_response_sections, schema_ref_name.
 - **Details:** functions: load_openapi_schema, compact, md_escape, strip_response_sections, schema_ref_name, resolve_ref, merged_schema, sample_string
 
@@ -5592,7 +5627,7 @@ Inventory file count: **796**.
 #### `docs/scripts/generate_source_reference.py`
 
 - **Kind:** backend python
-- **Size:** 42190 bytes, 1094 lines
+- **Size:** 42211 bytes, 1095 lines
 - **Summary:** Defines classes FileDoc, EndpointDoc, ComponentDoc; functions rel, should_skip, iter_source_files, read_text, line_count.
 - **Details:** classes: FileDoc, EndpointDoc, ComponentDoc; functions: rel, should_skip, iter_source_files, read_text, line_count, first_sentence, node_name, literal_string
 
@@ -5606,7 +5641,7 @@ Inventory file count: **796**.
 #### `docs/scripts/validate_application_docs.py`
 
 - **Kind:** backend python
-- **Size:** 9204 bytes, 225 lines
+- **Size:** 10109 bytes, 248 lines
 - **Summary:** Defines functions fail, load_json, route_is_known, backend_route_paths, openapi_operation_count.
 - **Details:** functions: fail, load_json, route_is_known, backend_route_paths, openapi_operation_count, validate_feature_catalog, validate_feature_help, validate_application_feature_guide
 
