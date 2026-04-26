@@ -11,7 +11,7 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BACKEND_ROOT = REPO_ROOT / "backend"
-OUTPUT = REPO_ROOT / "docs" / "app_docs" / "swagger_api_reference.md"
+OUTPUT = REPO_ROOT / "docs" / "llm_docs" / "swagger_api_reference.md"
 
 HTTP_METHODS = ("get", "post", "put", "patch", "delete")
 JSON_CONTENT_TYPES = ("application/json", "application/*+json")

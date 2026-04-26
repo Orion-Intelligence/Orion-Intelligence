@@ -6,6 +6,7 @@ This generated reference gives a source-level map of the Orion repository. It is
 
 ## Generated Reference Set
 
+- `feature_help_knowledge_base.md`: primary assistant-facing user navigation and feature workflow guide.
 - `application_feature_guide.md`: user-facing feature guide with routes, prerequisites, and steps.
 - `feature_catalog.json`: structured feature catalog for LLM/RAG retrieval.
 - `swagger_api_reference.md`: `/docs` and `/openapi.json` exposed API reference with request and response samples.
@@ -16,7 +17,7 @@ This generated reference gives a source-level map of the Orion repository. It is
 
 ## Coverage Summary
 
-- Source files inventoried: **798**
+- Source files inventoried: **796**
 - Backend API endpoints discovered: **198**
 - Angular artifacts discovered: **210**
 
@@ -26,7 +27,7 @@ This generated reference gives a source-level map of the Orion repository. It is
 | --- | ---: |
 | client | 522 |
 | backend | 204 |
-| docs | 67 |
+| docs | 65 |
 | root | 5 |
 
 ## Counts By File Kind
@@ -38,15 +39,15 @@ This generated reference gives a source-level map of the Orion repository. It is
 | typescript | 84 |
 | backend manager/service | 76 |
 | backend model | 74 |
-| documentation | 61 |
 | angular service/resolver/guard | 60 |
+| documentation | 58 |
+| backend python | 47 |
 | typescript model | 47 |
-| backend python | 45 |
 | stylesheet | 15 |
 | backend test | 14 |
 | text | 11 |
 | backend route module | 10 |
-| json data/config | 7 |
+| json data/config | 6 |
 | angular directive | 5 |
 | angular pipe | 5 |
 | configuration | 3 |
@@ -75,12 +76,13 @@ This generated reference gives a source-level map of the Orion repository. It is
 
 ## How To Use This Documentation With An LLM
 
-1. Use `feature_catalog.json` first for user questions about where to go or how to use a feature.
-2. Use `swagger_api_reference.md` for API requests that appear in the live `/docs` Swagger UI.
-3. Use `backend_api_reference.md` for broader backend route/source access, roles, license, and settings questions.
-4. Use `frontend_source_reference.md` for UI component, route, and template behavior questions.
-5. Use `source_file_inventory.json` to locate files by class, function, selector, route, or API path.
-6. Use `source_file_inventory.md` when a human-readable source map is needed.
+1. Use `feature_help_knowledge_base.md` first for user questions about where to go or how to use a feature.
+2. Use `feature_catalog.json` for structured retrieval, alias matching, and RAG indexing.
+3. Use `swagger_api_reference.md` for API requests that appear in the live `/docs` Swagger UI.
+4. Use `backend_api_reference.md` for broader backend route/source access, roles, license, and settings questions.
+5. Use `frontend_source_reference.md` for UI component, route, and template behavior questions.
+6. Use `source_file_inventory.json` to locate files by class, function, selector, route, or API path.
+7. Use `source_file_inventory.md` when a human-readable source map is needed.
 
 ## Known Limits
 

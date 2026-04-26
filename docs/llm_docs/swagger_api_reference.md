@@ -578,7 +578,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Desctiption Performs a scan for the Wanted people around the Globe in wanted databases, sanctions lists, watchlists, or law-enforcement records. This scan helps identify whether a person is flagged internationally and may return metadata such as aliases, issuing authority, offense category, risk indicators, and reference sources. The request is an HTTP POST and expects a JSON body with a text object containing identifying information about the person to analyze. # Request Body Example request:
+## Description Performs a scan for the Wanted people around the Globe in wanted databases, sanctions lists, watchlists, or law-enforcement records. This scan helps identify whether a person is flagged internationally and may return metadata such as aliases, issuing authority, offense category, risk indicators, and reference sources. The request is an HTTP POST and expects a JSON body with a text object containing identifying information about the person to analyze. # Request Body Example request:
 
 **Parameters**
 
@@ -913,7 +913,7 @@ Request content type: `application/json` `search_dynamic_crypto_model`.
 
 Response content type: `application/json`.
 
-```text
+```json
 {
   "result": {
     "address": "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
@@ -935,7 +935,7 @@ Response content type: `application/json`.
       "avg_transaction_value": 0.0161096501953125,
       "is_active": false
     },
-    "recent_transactions": [...],
+    "recent_transactions": [],
     "risk_assessment": {
       "risk_level": "medium",
       "risk_factors": [

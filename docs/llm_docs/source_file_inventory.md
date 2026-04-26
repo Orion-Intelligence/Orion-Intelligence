@@ -4,7 +4,7 @@
 
 This inventory is generated from maintainable source roots. It intentionally excludes dependency folders, build output, caches, and generated bundles. Static binary assets are summarized by nearby source references rather than expanded as implementation files.
 
-Inventory file count: **798**.
+Inventory file count: **796**.
 
 ## Counts By Kind
 
@@ -15,15 +15,15 @@ Inventory file count: **798**.
 | typescript | 84 |
 | backend manager/service | 76 |
 | backend model | 74 |
-| documentation | 61 |
 | angular service/resolver/guard | 60 |
+| documentation | 58 |
+| backend python | 47 |
 | typescript model | 47 |
-| backend python | 45 |
 | stylesheet | 15 |
 | backend test | 14 |
 | text | 11 |
 | backend route module | 10 |
-| json data/config | 7 |
+| json data/config | 6 |
 | angular directive | 5 |
 | angular pipe | 5 |
 | configuration | 3 |
@@ -5158,7 +5158,7 @@ Inventory file count: **798**.
 #### `docs/api_docs/ALL.md`
 
 - **Kind:** documentation
-- **Size:** 129528 bytes, 2993 lines
+- **Size:** 129522 bytes, 2990 lines
 - **Summary:** Documentation page: System Info.
 - **Details:** routes: /api/search/breach/screenshot/{m_screenshot}, /api/search/defacement; api: /api/search/breach/screenshot/{m_screenshot}, /api/search/defacement
 
@@ -5172,7 +5172,7 @@ Inventory file count: **798**.
 #### `docs/api_docs/README.md`
 
 - **Kind:** documentation
-- **Size:** 1072 bytes, 91 lines
+- **Size:** 1721 bytes, 133 lines
 - **Summary:** Documentation page: Orion API Documentation.
 - **Details:** -
 
@@ -5193,7 +5193,7 @@ Inventory file count: **798**.
 #### `docs/api_docs/dynamic/crypto_scan.md`
 
 - **Kind:** documentation
-- **Size:** 3996 bytes, 101 lines
+- **Size:** 3992 bytes, 100 lines
 - **Summary:** Documentation page: Dynamic: dynamic_crypto_scan.
 - **Details:** -
 
@@ -5284,7 +5284,7 @@ Inventory file count: **798**.
 #### `docs/api_docs/dynamic/wanted_scan.md`
 
 - **Kind:** documentation
-- **Size:** 3287 bytes, 96 lines
+- **Size:** 3292 bytes, 95 lines
 - **Summary:** Documentation page: Dynamic: wanted_scanner.
 - **Details:** -
 
@@ -5445,8 +5445,8 @@ Inventory file count: **798**.
 #### `docs/api_docs/social/profile_metadata.md`
 
 - **Kind:** documentation
-- **Size:** 2245 bytes, 60 lines
-- **Summary:** Documentation page: Socail: profile_metadata.
+- **Size:** 2249 bytes, 60 lines
+- **Summary:** Documentation page: Social: profile_metadata.
 - **Details:** -
 
 #### `docs/api_docs/social/profile_posts.md`
@@ -5519,84 +5519,56 @@ Inventory file count: **798**.
 - **Summary:** Documentation page: System Info: insight.
 - **Details:** -
 
-#### `docs/app_docs/application_feature_guide.md`
+#### `docs/llm_docs/application_feature_guide.md`
 
 - **Kind:** documentation
-- **Size:** 30597 bytes, 1179 lines
+- **Size:** 30614 bytes, 1178 lines
 - **Summary:** Documentation page: Application Feature Guide.
 - **Details:** routes: /dashboard, /dashboard/profile, /login, /signup, /reset, /reset/:token; api: /api/nlp/summarize/ai, /api/nlp/chat/report, /api/nexus/chat
 
-#### `docs/app_docs/backend_api_reference.md`
+#### `docs/llm_docs/developer_documentation.md`
 
 - **Kind:** documentation
-- **Size:** 137238 bytes, 3003 lines
-- **Summary:** Documentation page: Backend API Reference.
-- **Details:** routes: /admin/api/db_system_model/row-action, /admin/api/db_user_account/edit/{id}, /admin/api/db_user_account/edit/{id}/, /api/public/update, /api/system/image, /api/system/image; api: /api/public/update, /api/system/image, /api/system/image, /api/cti/fetch, /api/nlp/parse/ai, /api/nlp/summarize/ai
-
-#### `docs/app_docs/developer_documentation.md`
-
-- **Kind:** documentation
-- **Size:** 15656 bytes, 383 lines
+- **Size:** 15652 bytes, 383 lines
 - **Summary:** Documentation page: Developer Documentation.
 - **Details:** routes: /srv/elasticsearch/data
 
-#### `docs/app_docs/feature_catalog.json`
+#### `docs/llm_docs/feature_catalog.json`
 
 - **Kind:** json data/config
 - **Size:** 34753 bytes, 661 lines
 - **Summary:** JSON object with 4 top-level keys.
 - **Details:** -
 
-#### `docs/app_docs/frontend_source_reference.md`
+#### `docs/llm_docs/feature_help_knowledge_base.md`
 
 - **Kind:** documentation
-- **Size:** 296744 bytes, 4372 lines
-- **Summary:** Documentation page: Frontend Source Reference.
-- **Details:** routes: /dashboard/discussion/:category, /dashboard/discussion/:category, /dashboard/social/all, /dashboard/social/all, /dashboard/breach/databases
+- **Size:** 41801 bytes, 1241 lines
+- **Summary:** Documentation page: Feature Help Knowledge Base.
+- **Details:** routes: /login, /signup, /reset, /reset/:token, /onboarding, /dashboard, /dashboard/home, /dashboard/profile/homepage, /dashboard/home, /dashboard/profile/homepage, /dashboard/consolidated/all; api: /api/nexus/analyze-text, /api/nlp/parse/ai, /api/nlp/summarize/ai, /api/nlp/chat/report, /api/nexus/chat, /api/nexus/analyze-text
 
-#### `docs/app_docs/full_project_reference.md`
-
-- **Kind:** documentation
-- **Size:** 3958 bytes, 85 lines
-- **Summary:** Documentation page: Full Project Reference.
-- **Details:** -
-
-#### `docs/app_docs/introduction_to_modules.md`
+#### `docs/llm_docs/introduction_to_modules.md`
 
 - **Kind:** documentation
 - **Size:** 12318 bytes, 380 lines
 - **Summary:** Documentation page: Introduction To Modules.
 - **Details:** -
 
-#### `docs/app_docs/introduction_to_platform.md`
+#### `docs/llm_docs/introduction_to_platform.md`
 
 - **Kind:** documentation
-- **Size:** 9958 bytes, 140 lines
+- **Size:** 9978 bytes, 140 lines
 - **Summary:** Documentation page: Orion Platform.
 - **Details:** -
 
-#### `docs/app_docs/source_file_inventory.json`
-
-- **Kind:** json data/config
-- **Size:** 783473 bytes, 28090 lines
-- **Summary:** JSON object with 4 top-level keys.
-- **Details:** -
-
-#### `docs/app_docs/source_file_inventory.md`
+#### `docs/llm_docs/swagger_api_reference.md`
 
 - **Kind:** documentation
-- **Size:** 204788 bytes, 5609 lines
-- **Summary:** Documentation page: Source File Inventory.
-- **Details:** -
-
-#### `docs/app_docs/swagger_api_reference.md`
-
-- **Kind:** documentation
-- **Size:** 170749 bytes, 5545 lines
+- **Size:** 170746 bytes, 5545 lines
 - **Summary:** Documentation page: Swagger API Reference.
 - **Details:** routes: /docs, /openapi.json, /openapi.json, /api/index/injection, /api/dynamic/user, /api/dynamic/cracked; api: /api/index/injection, /api/dynamic/user, /api/dynamic/cracked, /api/dynamic/software, /api/urlscan/domain, /api/dynamic/social
 
-#### `docs/app_docs/user_manual.md`
+#### `docs/llm_docs/user_manual.md`
 
 - **Kind:** documentation
 - **Size:** 63160 bytes, 2170 lines
@@ -5610,10 +5582,17 @@ Inventory file count: **798**.
 - **Summary:** Defines functions load_openapi_schema, compact, md_escape, strip_response_sections, schema_ref_name.
 - **Details:** functions: load_openapi_schema, compact, md_escape, strip_response_sections, schema_ref_name, resolve_ref, merged_schema, sample_string
 
+#### `docs/scripts/generate_feature_help_knowledge_base.py`
+
+- **Kind:** backend python
+- **Size:** 7532 bytes, 185 lines
+- **Summary:** Defines functions as_list, join_inline, sentence, slug, render_feature.
+- **Details:** functions: as_list, join_inline, sentence, slug, render_feature, render, main
+
 #### `docs/scripts/generate_source_reference.py`
 
 - **Kind:** backend python
-- **Size:** 37870 bytes, 945 lines
+- **Size:** 42190 bytes, 1094 lines
 - **Summary:** Defines classes FileDoc, EndpointDoc, ComponentDoc; functions rel, should_skip, iter_source_files, read_text, line_count.
 - **Details:** classes: FileDoc, EndpointDoc, ComponentDoc; functions: rel, should_skip, iter_source_files, read_text, line_count, first_sentence, node_name, literal_string
 
@@ -5623,6 +5602,13 @@ Inventory file count: **798**.
 - **Size:** 6294 bytes, 207 lines
 - **Summary:** Defines functions load_caption_map, rounded_mask, render_border, load_font, normalize_canvas.
 - **Details:** functions: load_caption_map, rounded_mask, render_border, load_font, normalize_canvas, add_label, process_image, main
+
+#### `docs/scripts/validate_application_docs.py`
+
+- **Kind:** backend python
+- **Size:** 9204 bytes, 225 lines
+- **Summary:** Defines functions fail, load_json, route_is_known, backend_route_paths, openapi_operation_count.
+- **Details:** functions: fail, load_json, route_is_known, backend_route_paths, openapi_operation_count, validate_feature_catalog, validate_feature_help, validate_application_feature_guide
 
 ### `pyproject.toml`
 

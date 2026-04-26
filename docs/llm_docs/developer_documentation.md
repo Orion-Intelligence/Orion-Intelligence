@@ -254,9 +254,9 @@ Developers should prefer deterministic fixtures over ad hoc live data when addin
 
 ## Documentation Workflow
 
-### Application Docs
+### LLM Docs
 
-Application-facing documentation lives under `docs/app_docs/`. These files describe:
+LLM-facing application documentation lives under `docs/llm_docs/`. These files describe:
 
 - the platform
 - major modules

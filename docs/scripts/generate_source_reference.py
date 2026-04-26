@@ -10,7 +10,7 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DOCS_DIR = REPO_ROOT / "docs" / "app_docs"
+DOCS_DIR = REPO_ROOT / "docs" / "llm_docs"
 
 SOURCE_ROOTS = [
     "backend/orion",
@@ -20,7 +20,7 @@ SOURCE_ROOTS = [
     "backend/tests",
     "client/src/app",
     "client/cypress",
-    "docs/app_docs",
+    "docs/llm_docs",
     "docs/api_docs",
     "docs/scripts",
 ]
@@ -65,6 +65,14 @@ SKIP_PARTS = {
     "build",
     "dist",
     "coverage",
+}
+
+GENERATED_REFERENCE_FILES = {
+    "docs/llm_docs/backend_api_reference.md",
+    "docs/llm_docs/frontend_source_reference.md",
+    "docs/llm_docs/full_project_reference.md",
+    "docs/llm_docs/source_file_inventory.md",
+    "docs/llm_docs/source_file_inventory.json",
 }
 
 
@@ -133,6 +141,14 @@ def rel(path: Path) -> str:
 
 
 def should_skip(path: Path) -> bool:
+    try:
+        relative_path = rel(path)
+    except ValueError:
+        relative_path = path.as_posix()
+    if relative_path in GENERATED_REFERENCE_FILES:
+        return True
+    if relative_path.startswith("client/cypress/downloads/"):
+        return True
     return any(part in SKIP_PARTS for part in path.parts)
 
 
@@ -636,23 +652,154 @@ def parse_component_doc(path: Path, file_doc: FileDoc) -> ComponentDoc | None:
     )
 
 
+def matching_brace_end(text: str, start: int) -> int:
+    quote = ""
+    escape = False
+    depth = 0
+    for index in range(start, len(text)):
+        char = text[index]
+        if quote:
+            if escape:
+                escape = False
+            elif char == "\\":
+                escape = True
+            elif char == quote:
+                quote = ""
+            continue
+        if char in {"'", '"', "`"}:
+            quote = char
+            continue
+        if char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return index
+    return len(text) - 1
+
+
+def enclosing_object_block(text: str, position: int) -> str:
+    quote = ""
+    escape = False
+    stack: list[int] = []
+    for index, char in enumerate(text[: position + 1]):
+        if quote:
+            if escape:
+                escape = False
+            elif char == "\\":
+                escape = True
+            elif char == quote:
+                quote = ""
+            continue
+        if char in {"'", '"', "`"}:
+            quote = char
+            continue
+        if char == "{":
+            stack.append(index)
+        elif char == "}" and stack:
+            stack.pop()
+    if not stack:
+        return text[max(0, position - 300): min(len(text), position + 500)]
+    start = stack[-1]
+    end = matching_brace_end(text, start)
+    return text[start: end + 1]
+
+
+def top_level_property_value(block: str, key: str) -> str:
+    quote = ""
+    escape = False
+    depth = 0
+    index = 0
+    pattern = key + ":"
+    while index < len(block):
+        char = block[index]
+        if quote:
+            if escape:
+                escape = False
+            elif char == "\\":
+                escape = True
+            elif char == quote:
+                quote = ""
+            index += 1
+            continue
+        if char in {"'", '"', "`"}:
+            quote = char
+            index += 1
+            continue
+        if char in "{[":
+            depth += 1
+            index += 1
+            continue
+        if char in "}]":
+            depth -= 1
+            index += 1
+            continue
+        if depth == 1 and block.startswith(pattern, index):
+            start = index + len(pattern)
+            return read_top_level_value(block, start)
+        index += 1
+    return ""
+
+
+def read_top_level_value(block: str, start: int) -> str:
+    quote = ""
+    escape = False
+    depth = 0
+    value_start = start
+    while value_start < len(block) and block[value_start].isspace():
+        value_start += 1
+    for index in range(value_start, len(block)):
+        char = block[index]
+        if quote:
+            if escape:
+                escape = False
+            elif char == "\\":
+                escape = True
+            elif char == quote:
+                quote = ""
+            continue
+        if char in {"'", '"', "`"}:
+            quote = char
+            continue
+        if char in "{[(":
+            depth += 1
+            continue
+        if char in "}])":
+            if depth == 0:
+                return block[value_start:index].strip()
+            depth -= 1
+            continue
+        if char == "," and depth == 0:
+            return block[value_start:index].strip()
+    return block[value_start:].strip().rstrip("}")
+
+
+def clean_route_property(value: str, kind: str) -> str:
+    if not value:
+        return ""
+    value = value.strip()
+    if kind == "data" and value.startswith("{") and value.endswith("}"):
+        value = value[1:-1]
+    if kind == "redirect" and len(value) >= 2 and value[0] in {"'", '"'} and value[-1] == value[0]:
+        value = value[1:-1]
+    return compact(value, 200)
+
+
 def angular_routes(path: Path) -> list[dict[str, str]]:
     text = read_text(path)
     routes = []
     for match in re.finditer(r"path:\s*['\"]([^'\"]*)['\"]", text):
-        start = max(0, match.start() - 500)
-        end = min(len(text), match.end() + 700)
-        chunk = text[start:end]
-        load = re.search(r"loadComponent:\s*([A-Za-z0-9_]+|\(\)\s*=>\s*import\([^\n]+)", chunk)
-        redirect = re.search(r"redirectTo:\s*['\"]([^'\"]+)['\"]", chunk)
-        data = re.search(r"data:\s*\{([^}]*)\}", chunk, re.S)
+        chunk = enclosing_object_block(text, match.start())
+        load = top_level_property_value(chunk, "loadComponent")
+        redirect = top_level_property_value(chunk, "redirectTo")
+        data = top_level_property_value(chunk, "data")
         routes.append(
             {
                 "path": match.group(1),
                 "line": str(text[: match.start()].count("\n") + 1),
-                "load_component": compact(load.group(1), 160) if load else "",
-                "redirect_to": redirect.group(1) if redirect else "",
-                "data": compact(data.group(1), 200) if data else "",
+                "load_component": clean_route_property(load, "load"),
+                "redirect_to": clean_route_property(redirect, "redirect"),
+                "data": clean_route_property(data, "data"),
             }
         )
     return routes
@@ -849,6 +996,7 @@ def write_project_reference(files: list[FileDoc], endpoints: list[EndpointDoc], 
         "",
         "## Generated Reference Set",
         "",
+        "- `feature_help_knowledge_base.md`: primary assistant-facing user navigation and feature workflow guide.",
         "- `application_feature_guide.md`: user-facing feature guide with routes, prerequisites, and steps.",
         "- `feature_catalog.json`: structured feature catalog for LLM/RAG retrieval.",
         "- `swagger_api_reference.md`: `/docs` and `/openapi.json` exposed API reference with request and response samples.",
@@ -898,12 +1046,13 @@ def write_project_reference(files: list[FileDoc], endpoints: list[EndpointDoc], 
             "",
             "## How To Use This Documentation With An LLM",
             "",
-            "1. Use `feature_catalog.json` first for user questions about where to go or how to use a feature.",
-            "2. Use `swagger_api_reference.md` for API requests that appear in the live `/docs` Swagger UI.",
-            "3. Use `backend_api_reference.md` for broader backend route/source access, roles, license, and settings questions.",
-            "4. Use `frontend_source_reference.md` for UI component, route, and template behavior questions.",
-            "5. Use `source_file_inventory.json` to locate files by class, function, selector, route, or API path.",
-            "6. Use `source_file_inventory.md` when a human-readable source map is needed.",
+            "1. Use `feature_help_knowledge_base.md` first for user questions about where to go or how to use a feature.",
+            "2. Use `feature_catalog.json` for structured retrieval, alias matching, and RAG indexing.",
+            "3. Use `swagger_api_reference.md` for API requests that appear in the live `/docs` Swagger UI.",
+            "4. Use `backend_api_reference.md` for broader backend route/source access, roles, license, and settings questions.",
+            "5. Use `frontend_source_reference.md` for UI component, route, and template behavior questions.",
+            "6. Use `source_file_inventory.json` to locate files by class, function, selector, route, or API path.",
+            "7. Use `source_file_inventory.md` when a human-readable source map is needed.",
             "",
             "## Known Limits",
             "",

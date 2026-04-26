@@ -2988,6 +2988,3 @@ are detected. A typical `repo` scan looks like:
 
 The exact number of findings and the categories under **summary**, **threats**, and **proofs** depend on the
 target and the selected `scanType`.
-
-
----

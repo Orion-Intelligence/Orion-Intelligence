@@ -708,7 +708,7 @@ Common report capabilities:
 
 ## Profile, Tenant, Alerts, And Administration
 
-### Tenant Homepage
+### Tenant Homepage And Alert Summary
 
 **Use When:** A tenant user wants alert summaries, monitored IOC status, and quick actions.
 
@@ -1176,4 +1176,3 @@ Profile -> Feeder
 ```
 
 The `module:feeder` license is required.
-

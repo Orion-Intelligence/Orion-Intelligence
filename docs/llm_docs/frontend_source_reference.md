@@ -11,141 +11,141 @@ Generated Angular artifacts: **210**.
 
 | Path | Line | Load Component | Redirect | Data |
 | --- | ---: | --- | --- | --- |
-| `` | 59 | `loadDashboardConsolidatedComponent` | `all` | `type: 'consolidated', animation: 'HashPage'` |
-| `all` | 64 | `loadDashboardConsolidatedComponent` | `all` | `type: 'consolidated', animation: 'HashPage'` |
-| `chat/:m_hash` | 69 | `loadDashboardConsolidatedComponent` | `all` | `type: 'consolidated', animation: 'HashPage'` |
-| `social/:m_hash` | 74 | `loadDashboardConsolidatedComponent` | `all` | `type: 'consolidated', animation: 'HashPage'` |
-| `general/:m_hash` | 79 | `loadDashboardConsolidatedComponent` | `all` | `type: 'consolidated', animation: 'DataBreach'` |
-| `leak/:m_hash` | 84 | `loadDashboardConsolidatedComponent` | `dashboard` | `type: 'consolidated', animation: 'DataBreach'` |
-| `exploit/:m_hash` | 89 | `loadReportChatComponent` | `dashboard` | `animation: 'RootPage'` |
-| `defacement/:m_hash` | 94 | `loadReportChatComponent` | `dashboard` | `animation: 'RootPage'` |
-| `` | 101 | `loadReportComponent` | `dashboard` | `animation: 'RootPage'` |
-| `signup` | 107 | `loadReportComponent` | `dashboard` | `animation: 'RootPage'` |
-| `login` | 112 | `loadReportComponent` | `dashboard` | `animation: 'RootPage'` |
-| `onboarding` | 117 | `loadReportDefacementComponent` | `dashboard` | `animation: 'RootPage'` |
-| `welcome` | 124 | `loadSignupComponent` | `dashboard` | `animation: 'RootPage'` |
-| `welcome/:token` | 130 | `loadLoginComponent` | `-` | `animation: 'SignupPage'` |
-| `paymentGateway` | 136 | `loadTenantComponent` | `-` | `animation: 'TenantPage'` |
-| `reset` | 141 | `loadWelcomeComponent` | `-` | `animation: 'TenantPage'` |
-| `notification` | 147 | `loadWelcomeComponent` | `profile` | `animation: 'WelcomePage'` |
-| `reset/:token` | 152 | `loadTrailNotificationComponent` | `profile` | `animation: 'WelcomePage'` |
-| `dashboard` | 158 | `loadResetPasswordComponent` | `profile` | `animation: 'ForgotPasswordComponent'` |
-| `` | 168 | `loadResetPasswordComponent` | `profile` | `animation: 'PaymentGatewayComponent'` |
-| `scan` | 173 | `loadResetPasswordComponent` | `profile` | `animation: 'ForgotPasswordComponent'` |
-| `home` | 178 | `loadDashboardComponent` | `profile` | `animation: 'DashboardPage'` |
-| `ctigraph` | 183 | `loadSecurityScanComponent` | `profile` | `animation: 'DashboardPage'` |
-| `social-graph` | 188 | `loadSecurityScanComponent` | `social-intel` | `animation: 'HomePage'` |
-| `social-intel` | 193 | `loadHomepageComponent` | `social-intel` | `animation: 'HomePage'` |
-| `social-mapper` | 198 | `() => import('./pages/graphs/cti-graph/graphs.component').then(m => m.GraphComponent),` | `social-intel` | `animation: 'ctigraph'` |
-| `directory` | 203 | `loadSocialMapperComponent` | `social-intel` | `animation: 'ctigraph'` |
-| `api` | 208 | `loadSocialMapperComponent` | `social-intel` | `animation: 'SocialMapper'` |
-| `` | 213 | `loadSocialMapperComponent` | `social-intel` | `animation: 'SocialMapper'` |
-| `email-breach` | 218 | `loadDirectoryComponent` | `social-intel` | `animation: 'DirectoryPage'` |
-| `social-scanner` | 223 | `loadDashboardApiComponent` | `email-breach` | `animation: 'DirectoryPage'` |
-| `wanted-list` | 228 | `loadDashboardApiComponent` | `email-breach` | `animation: 'EmailAPI', type: 'user'` |
-| `national-identity` | 233 | `loadDashboardApiComponent` | `-` | `animation: 'EmailAPI', type: 'user'` |
-| `playstore-scanner` | 238 | `loadDashboardApiComponent` | `-` | `animation: 'SocialAPI', type: 'social'` |
-| `software-scanner` | 243 | `loadDashboardApiComponent` | `-` | `animation: 'WantedAPI', type: 'wanted'` |
-| `file-scanner` | 248 | `loadDashboardApiComponent` | `-` | `animation: 'NationalIdentityAPI', type: 'national-identity'` |
-| `text-analysis` | 258 | `loadDashboardApiComponent` | `-` | `animation: 'SoftwareAPI', type: 'software'` |
-| `crypto-scanner` | 267 | `loadTextAnalysisComponent` | `all` | `animation: 'TextAnalysisAPI', title: 'Text Analysis', description: 'Analyze text for spam and malicious URLs'` |
-| `discussion` | 279 | `loadDashboardApiComponent` | `all` | `animation: 'FileAPI', type: 'crypto', title: 'Crypto Analysis', description: 'provide a cryptocurrency address to extract related information and potential risks'` |
-| `` | 283 | `loadDashboardApiComponent` | `all` | `animation: 'FileAPI', type: 'crypto', title: 'Crypto Analysis', description: 'provide a cryptocurrency address to extract related information and potential risks'` |
-| `:category/social` | 288 | `loadDashboardResultContainer` | `all` | `animation: 'Discussion'` |
-| `all` | 293 | `loadDashboardResultContainer` | `all` | `animation: 'Discussion'` |
-| `:category/chat` | 299 | `loadDashboardResultContainer` | `all` | `type: 'Social', animation: 'Discussion'` |
-| `:category/chat/:m_hash` | 304 | `loadDashboardResultContainer` | `/dashboard/discussion/:category` | `type: 'Social', animation: 'Discussion'` |
-| `:category/social/:m_hash` | 310 | `loadReportChatComponent` | `/dashboard/discussion/:category` | `type: 'consolidated', animation: 'HashPage'` |
-| `:category` | 316 | `loadReportChatComponent` | `-` | `type: 'consolidated', animation: 'HashPage'` |
+| `` | 59 | `-` | `all` | `-` |
+| `all` | 64 | `loadDashboardConsolidatedComponent` | `-` | `type: 'consolidated', animation: 'DataBreach'` |
+| `chat/:m_hash` | 69 | `loadReportChatComponent` | `-` | `-` |
+| `social/:m_hash` | 74 | `loadReportChatComponent` | `-` | `-` |
+| `general/:m_hash` | 79 | `loadReportComponent` | `-` | `-` |
+| `leak/:m_hash` | 84 | `loadReportComponent` | `-` | `-` |
+| `exploit/:m_hash` | 89 | `loadReportComponent` | `-` | `-` |
+| `defacement/:m_hash` | 94 | `loadReportDefacementComponent` | `-` | `-` |
+| `` | 101 | `-` | `dashboard` | `animation: 'RootPage'` |
+| `signup` | 107 | `loadSignupComponent` | `-` | `animation: 'SignupPage'` |
+| `login` | 112 | `loadLoginComponent` | `-` | `animation: 'LoginPage'` |
+| `onboarding` | 117 | `loadTenantComponent` | `-` | `animation: 'TenantPage'` |
+| `welcome` | 124 | `loadWelcomeComponent` | `-` | `animation: 'WelcomePage'` |
+| `welcome/:token` | 130 | `loadWelcomeComponent` | `-` | `animation: 'WelcomePage'` |
+| `paymentGateway` | 136 | `loadTrailNotificationComponent` | `-` | `animation: 'TrailNotificationPage'` |
+| `reset` | 141 | `loadResetPasswordComponent` | `-` | `animation: 'ForgotPasswordComponent'` |
+| `notification` | 147 | `loadNotificationComponent` | `-` | `animation: 'PaymentGatewayComponent'` |
+| `reset/:token` | 152 | `loadResetPasswordComponent` | `-` | `animation: 'ForgotPasswordComponent'` |
+| `dashboard` | 158 | `loadDashboardComponent` | `-` | `animation: 'DashboardPage'` |
+| `` | 168 | `-` | `profile` | `-` |
+| `scan` | 173 | `loadSecurityScanComponent` | `-` | `animation: 'HomePage'` |
+| `home` | 178 | `loadHomepageComponent` | `-` | `animation: 'HomePage'` |
+| `ctigraph` | 183 | `() => import('./pages/graphs/cti-graph/graphs.component').then(m => m.GraphComponent)` | `-` | `animation: 'ctigraph'` |
+| `social-graph` | 188 | `loadSocialMapperComponent` | `-` | `animation: 'SocialMapper'` |
+| `social-intel` | 193 | `loadSocialMapperComponent` | `-` | `animation: 'SocialMapper'` |
+| `social-mapper` | 198 | `-` | `social-intel` | `-` |
+| `directory` | 203 | `loadDirectoryComponent` | `-` | `animation: 'DirectoryPage'` |
+| `api` | 208 | `-` | `-` | `animation: 'APIPage'` |
+| `` | 213 | `-` | `email-breach` | `-` |
+| `email-breach` | 218 | `loadDashboardApiComponent` | `-` | `animation: 'EmailAPI', type: 'user'` |
+| `social-scanner` | 223 | `loadDashboardApiComponent` | `-` | `animation: 'SocialAPI', type: 'social'` |
+| `wanted-list` | 228 | `loadDashboardApiComponent` | `-` | `animation: 'WantedAPI', type: 'wanted'` |
+| `national-identity` | 233 | `loadDashboardApiComponent` | `-` | `animation: 'NationalIdentityAPI', type: 'national-identity'` |
+| `playstore-scanner` | 238 | `loadDashboardApiComponent` | `-` | `animation: 'CrackedAPI', type: 'cracked'` |
+| `software-scanner` | 243 | `loadDashboardApiComponent` | `-` | `animation: 'SoftwareAPI', type: 'software'` |
+| `file-scanner` | 248 | `loadFileScannerComponent` | `-` | `animation: 'FileAPI', type: 'filescan', title: 'File Analysis', description: 'Upload a file to extract Indicators of Compromise (IOCs)'` |
+| `text-analysis` | 258 | `loadTextAnalysisComponent` | `-` | `animation: 'TextAnalysisAPI', title: 'Text Analysis', description: 'Analyze text for spam and malicious URLs'` |
+| `crypto-scanner` | 267 | `loadDashboardApiComponent` | `-` | `animation: 'FileAPI', type: 'crypto', title: 'Crypto Analysis', description: 'provide a cryptocurrency address to extract related information and potential risks'` |
+| `discussion` | 279 | `-` | `-` | `animation: 'Discussion'` |
+| `` | 283 | `-` | `all` | `-` |
+| `:category/social` | 288 | `-` | `/dashboard/discussion/:category` | `-` |
+| `all` | 293 | `loadDashboardResultContainer` | `-` | `type: 'Social', animation: 'Discussion'` |
+| `:category/chat` | 299 | `-` | `/dashboard/discussion/:category` | `-` |
+| `:category/chat/:m_hash` | 304 | `loadReportChatComponent` | `-` | `type: 'consolidated', animation: 'HashPage'` |
+| `:category/social/:m_hash` | 310 | `loadReportChatComponent` | `-` | `type: 'consolidated', animation: 'HashPage'` |
+| `:category` | 316 | `loadDashboardResultContainer` | `-` | `type: 'Social', animation: 'Discussion'` |
 | `social/:m_hash` | 322 | `loadReportChatComponent` | `-` | `type: 'consolidated', animation: 'HashPage'` |
-| `general/:m_hash` | 328 | `loadDashboardResultContainer` | `-` | `type: 'Social', animation: 'Discussion'` |
-| `leak/:m_hash` | 334 | `loadReportChatComponent` | `-` | `type: 'consolidated', animation: 'HashPage'` |
-| `exploit/:m_hash` | 340 | `loadReportComponent` | `all` | `type: 'consolidated', animation: 'HashPage'` |
-| `defacement/:m_hash` | 346 | `loadReportComponent` | `all` | `type: 'consolidated', animation: 'HashPage'` |
-| `**` | 352 | `loadReportComponent` | `all` | `type: 'consolidated', animation: 'HashPage'` |
-| `breach` | 358 | `loadReportDefacementComponent` | `all` | `type: 'consolidated', animation: 'HashPage'` |
-| `` | 362 | `loadReportDefacementComponent` | `all` | `type: 'consolidated', animation: 'HashPage'` |
-| `:category` | 367 | `loadDashboardResultContainer` | `all` | `type: 'consolidated', animation: 'HashPage'` |
-| `:category/:m_hash` | 372 | `loadDashboardResultContainer` | `all` | `animation: 'DataBreach'` |
-| `strategic` | 380 | `loadDashboardResultContainer` | `all` | `type: 'Breach', animation: 'DataBreach'` |
-| `` | 384 | `loadDashboardResultContainer` | `all` | `type: 'Breach', animation: 'DataBreach'` |
-| `:category` | 389 | `loadReportComponent` | `all` | `type: 'Breach', animation: 'HashPage'` |
-| `:category/:m_hash` | 394 | `loadDashboardResultContainer` | `all` | `type: 'Breach', animation: 'HashPage'` |
-| `defacement` | 402 | `loadDashboardResultContainer` | `all` | `type: 'strategic', animation: 'CategoryPage'` |
-| `` | 406 | `loadDashboardResultContainer` | `all` | `type: 'strategic', animation: 'CategoryPage'` |
-| `all` | 411 | `loadReportComponent` | `all` | `type: 'strategic', animation: 'HashPage'` |
-| `hacked` | 416 | `loadDashboardResultContainer` | `all` | `type: 'strategic', animation: 'HashPage'` |
-| `phishing` | 421 | `loadDashboardResultContainer` | `all` | `type: 'defacement', animation: 'DataBreach'` |
+| `general/:m_hash` | 328 | `loadReportComponent` | `-` | `type: 'consolidated', animation: 'HashPage'` |
+| `leak/:m_hash` | 334 | `loadReportComponent` | `-` | `type: 'consolidated', animation: 'HashPage'` |
+| `exploit/:m_hash` | 340 | `loadReportComponent` | `-` | `type: 'consolidated', animation: 'HashPage'` |
+| `defacement/:m_hash` | 346 | `loadReportDefacementComponent` | `-` | `type: 'consolidated', animation: 'HashPage'` |
+| `**` | 352 | `-` | `all` | `-` |
+| `breach` | 358 | `-` | `-` | `animation: 'DataBreach'` |
+| `` | 362 | `-` | `all` | `-` |
+| `:category` | 367 | `loadDashboardResultContainer` | `-` | `type: 'Breach', animation: 'DataBreach'` |
+| `:category/:m_hash` | 372 | `loadReportComponent` | `-` | `type: 'Breach', animation: 'HashPage'` |
+| `strategic` | 380 | `-` | `-` | `animation: 'StrategicPage'` |
+| `` | 384 | `-` | `all` | `-` |
+| `:category` | 389 | `loadDashboardResultContainer` | `-` | `type: 'strategic', animation: 'CategoryPage'` |
+| `:category/:m_hash` | 394 | `loadReportComponent` | `-` | `type: 'strategic', animation: 'HashPage'` |
+| `defacement` | 402 | `-` | `-` | `animation: 'DefacementPage'` |
+| `` | 406 | `-` | `all` | `-` |
+| `all` | 411 | `loadDashboardResultContainer` | `-` | `type: 'defacement', animation: 'DataBreach'` |
+| `hacked` | 416 | `loadDashboardResultContainer` | `-` | `type: 'defacement', animation: 'DataBreach'` |
+| `phishing` | 421 | `loadDashboardResultContainer` | `-` | `type: 'defacement', animation: 'DataBreach'` |
 | `databases` | 426 | `loadDashboardResultContainer` | `-` | `type: 'defacement', animation: 'DataBreach'` |
-| `:category` | 431 | `loadDashboardResultContainer` | `all` | `type: 'defacement', animation: 'DataBreach'` |
-| `:category/:m_hash` | 436 | `loadDashboardResultContainer` | `all` | `type: 'defacement', animation: 'DataBreach'` |
-| `social` | 444 | `loadDashboardResultContainer` | `all` | `type: 'Defacement', animation: 'CategoryPage'` |
-| `` | 448 | `loadReportDefacementComponent` | `all` | `type: 'Defacement', animation: 'CategoryPage'` |
-| `all` | 454 | `loadReportDefacementComponent` | `all` | `type: 'Defacement', animation: 'HashPage'` |
-| `chat` | 460 | `loadDashboardResultContainer` | `all` | `animation: 'SocialPage'` |
-| `telegram` | 466 | `loadDashboardResultContainer` | `/dashboard/social/all` | `type: 'social', animation: 'DataBreach'` |
-| `twitter` | 472 | `loadDashboardResultContainer` | `/dashboard/social/all` | `type: 'social', animation: 'DataBreach'` |
+| `:category` | 431 | `loadDashboardResultContainer` | `-` | `type: 'Defacement', animation: 'CategoryPage'` |
+| `:category/:m_hash` | 436 | `loadReportDefacementComponent` | `-` | `type: 'Defacement', animation: 'HashPage'` |
+| `social` | 444 | `-` | `-` | `animation: 'SocialPage'` |
+| `` | 448 | `-` | `all` | `type: 'social', animation: 'DataBreach'` |
+| `all` | 454 | `loadDashboardResultContainer` | `-` | `type: 'social', animation: 'DataBreach'` |
+| `chat` | 460 | `-` | `/dashboard/social/all` | `type: 'social', animation: 'DataBreach'` |
+| `telegram` | 466 | `loadDashboardResultContainer` | `-` | `type: 'social', animation: 'DataBreach'` |
+| `twitter` | 472 | `loadDashboardResultContainer` | `-` | `type: 'social', animation: 'DataBreach'` |
 | `mastodon` | 478 | `loadDashboardResultContainer` | `-` | `type: 'social', animation: 'DataBreach'` |
 | `pastebin` | 484 | `loadDashboardResultContainer` | `-` | `type: 'social', animation: 'DataBreach'` |
 | `forum` | 490 | `loadDashboardResultContainer` | `-` | `type: 'social', animation: 'DataBreach'` |
 | `reddit` | 496 | `loadDashboardResultContainer` | `-` | `type: 'social', animation: 'DataBreach'` |
-| `:category` | 502 | `loadDashboardResultContainer` | `-` | `type: 'social', animation: 'DataBreach'` |
-| `:category/:m_hash` | 507 | `loadDashboardResultContainer` | `news` | `type: 'social', animation: 'DataBreach'` |
-| `:category/all/:m_hash` | 513 | `loadDashboardResultContainer` | `news` | `type: 'social', animation: 'DataBreach'` |
-| `feed` | 521 | `loadReportChatComponent` | `news` | `type: 'Social', animation: 'HashPage'` |
-| `` | 525 | `loadReportChatComponent` | `news` | `type: 'Social', animation: 'HashPage'` |
-| `:category` | 530 | `loadReportChatComponent` | `news` | `type: 'Social', animation: 'HashPage'` |
-| `:category/:m_hash` | 535 | `loadDashboardResultContainer` | `news` | `type: 'Social', animation: 'HashPage'` |
-| `exploit` | 543 | `loadDashboardResultContainer` | `news` | `type: 'Feed', animation: 'CategoryPage'` |
-| `` | 547 | `loadDashboardResultContainer` | `all` | `type: 'Feed', animation: 'CategoryPage'` |
-| `all` | 552 | `loadReportComponent` | `all` | `type: 'Feed', animation: 'HashPage'` |
-| `tools` | 557 | `loadDashboardResultContainer` | `all` | `type: 'Feed', animation: 'HashPage'` |
-| `cve` | 562 | `loadDashboardResultContainer` | `all` | `type: 'exploit', animation: 'DataBreach'` |
+| `:category` | 502 | `loadDashboardResultContainer` | `-` | `type: 'Social', animation: 'CategoryPage'` |
+| `:category/:m_hash` | 507 | `loadReportChatComponent` | `-` | `type: 'Social', animation: 'HashPage'` |
+| `:category/all/:m_hash` | 513 | `loadReportChatComponent` | `-` | `type: 'Social', animation: 'HashPage'` |
+| `feed` | 521 | `-` | `-` | `animation: 'FeedPage'` |
+| `` | 525 | `-` | `news` | `-` |
+| `:category` | 530 | `loadDashboardResultContainer` | `-` | `type: 'Feed', animation: 'CategoryPage'` |
+| `:category/:m_hash` | 535 | `loadReportComponent` | `-` | `type: 'Feed', animation: 'HashPage'` |
+| `exploit` | 543 | `-` | `-` | `animation: 'ExploitPage'` |
+| `` | 547 | `-` | `all` | `-` |
+| `all` | 552 | `loadDashboardResultContainer` | `-` | `type: 'exploit', animation: 'DataBreach'` |
+| `tools` | 557 | `loadDashboardResultContainer` | `-` | `type: 'exploit', animation: 'DataBreach'` |
+| `cve` | 562 | `loadDashboardResultContainer` | `-` | `type: 'exploit', animation: 'DataBreach'` |
 | `zeroday` | 567 | `loadDashboardResultContainer` | `-` | `type: 'exploit', animation: 'DataBreach'` |
-| `:category` | 572 | `loadDashboardResultContainer` | `-` | `type: 'exploit', animation: 'DataBreach'` |
-| `:category/:m_hash` | 577 | `loadDashboardResultContainer` | `network-scan` | `type: 'exploit', animation: 'DataBreach'` |
-| `consolidated` | 586 | `loadDashboardResultContainer` | `network-scan` | `type: 'Social', animation: 'CategoryPage'` |
-| `scanner` | 592 | `loadReportComponent` | `network-scan` | `type: 'Exploit', animation: 'HashPage'` |
-| `` | 596 | `loadNetworkIntelComponent` | `network-scan` | `type: 'Exploit', animation: 'HashPage'` |
-| `network-scan` | 601 | `loadNetworkIntelComponent` | `network-scan` | `animation: 'ConsolidatedPage'` |
-| `repository-scan` | 606 | `loadNetworkIntelComponent` | `network-scan` | `animation: 'ScannerPage'` |
-| `seo-scan` | 611 | `loadNetworkIntelComponent` | `network-scan` | `animation: 'CategoryPage'` |
-| `apk-scan` | 616 | `loadNetworkIntelComponent` | `listing` | `animation: 'CategoryPage'` |
-| `dump` | 629 | `loadFileScannerComponent` | `listing` | `animation: 'CategoryPage', type: 'apk', title: 'APK Analysis', description: 'Upload an Android APK to perform static analysis, extract Indicators of Compromise (IOCs), and inspect permissions and b...` |
-| `` | 633 | `loadDumpComponent` | `listing` | `animation: 'CategoryPage', type: 'apk', title: 'APK Analysis', description: 'Upload an Android APK to perform static analysis, extract Indicators of Compromise (IOCs), and inspect permissions and b...` |
-| `listing` | 638 | `loadDumpComponent` | `listing` | `animation: 'DumpPage'` |
-| `credential` | 643 | `loadDumpComponent` | `listing` | `animation: 'DumpPage'` |
-| `stealerlogs` | 650 | `loadDumpComponent` | `listing` | `type: 'listing', animation: 'CategoryPage'` |
-| `` | 655 | `loadDumpComponent` | `iocs` | `type: 'listing', animation: 'CategoryPage'` |
-| `iocs` | 660 | `loadCredentialComponent` | `iocs` | `type: 'credential', animation: 'CategoryPage'` |
-| `tenant` | 667 | `loadCredentialComponent` | `iocs` | `animation: 'StealerlogsPage'` |
-| `` | 672 | `loadCredentialComponent` | `iocs` | `type: 'credential', animation: 'CategoryPage'` |
-| `view-profiles` | 677 | `loadCredentialComponent` | `view-profiles` | `type: 'credential', animation: 'CategoryPage'` |
-| `view-tenants` | 682 | `loadManageProfileComponent` | `view-profiles` | `animation: 'TenantPage'` |
-| `auditlog` | 687 | `loadManageProfileComponent` | `view-profiles` | `type: 'view', animation: 'CategoryPage'` |
-| `netint` | 694 | `loadManageProfileComponent` | `homepage` | `type: 'view', animation: 'CategoryPage'` |
-| `profile` | 700 | `loadViewTenantComponent` | `homepage` | `type: 'view', animation: 'CategoryPage'` |
-| `` | 706 | `loadNetworkIntelComponent` | `homepage` | `type: 'auditlog', animation: 'CategoryPage'` |
-| `ai` | 711 | `loadNetworkIntelComponent` | `homepage` | `animation: 'CategoryPage'` |
-| `consolidated` | 717 | `loadAiWorkspaceComponent` | `homepage` | `animation: 'ProifilePage'` |
-| `alerts/:type` | 722 | `loadAiWorkspaceComponent` | `homepage` | `type: 'ai', animation: 'CategoryPage'` |
-| `addcustomalert` | 727 | `loadCategoryAlertReportComponent` | `-` | `type: 'ai', animation: 'CategoryPage'` |
-| `homepage` | 732 | `loadCategoryAlertReportComponent` | `-` | `animation: 'ConsolidatedPage'` |
-| `statistics` | 737 | `loadAddCustomAlertComponent` | `-` | `type: 'alert', animation: 'AlertPage'` |
-| `ioc` | 743 | `loadSidebarUserHomepageComponent` | `-` | `type: 'homepage', animation: 'HomepagePage'` |
-| `consolidated` | 748 | `loadSidebarUserStatisticsComponent` | `-` | `type: 'homepage', animation: 'HomepagePage'` |
-| `auditlog` | 753 | `loadSidebarUserIocComponent` | `-` | `type: 'settings', animation: 'ProfilePage'` |
-| `users` | 758 | `loadSidebarUserIocComponent` | `-` | `type: 'settings', animation: 'ProfilePage'` |
-| `account` | 763 | `loadAuditlogComponent` | `-` | `animation: 'ConsolidatedPage'` |
-| `event-management` | 768 | `loadAuditlogComponent` | `-` | `type: 'auditlog', animation: 'CategoryPage'` |
-| `feeder` | 773 | `loadAccountSettingsComponent` | `-` | `type: 'profile', animation: 'CategoryPage'` |
-| `user/:user_id` | 778 | `loadSidebarUserEventManagementComponent` | `-` | `type: 'account', animation: 'CategoryPage'` |
-| `tenant-settings` | 783 | `loadSidebarUserFeederComponent` | `homepage` | `type: 'event-management', animation: 'CategoryPage'` |
-| `tenant` | 788 | `loadUserProfileActivityComponent` | `homepage` | `type: 'feeder', animation: 'CategoryPage'` |
-| `system-settings` | 793 | `loadTenantSettingsComponent` | `homepage` | `type: 'account', animation: 'CategoryPage'` |
-| `alerts` | 798 | `loadViewTenantComponent` | `homepage` | `type: 'settings', animation: 'CategoryPage'` |
-| `**` | 803 | `loadViewTenantComponent` | `homepage` | `type: 'view', animation: 'CategoryPage'` |
-| `**` | 811 | `loadSidebarProfileSystemSettingsComponent` | `homepage` | `type: 'srttings', animation: 'CategoryPage'` |
+| `:category` | 572 | `loadDashboardResultContainer` | `-` | `type: 'Social', animation: 'CategoryPage'` |
+| `:category/:m_hash` | 577 | `loadReportComponent` | `-` | `type: 'Exploit', animation: 'HashPage'` |
+| `consolidated` | 586 | `-` | `-` | `animation: 'ConsolidatedPage'` |
+| `scanner` | 592 | `-` | `-` | `animation: 'ScannerPage'` |
+| `` | 596 | `-` | `network-scan` | `-` |
+| `network-scan` | 601 | `loadNetworkIntelComponent` | `-` | `animation: 'CategoryPage'` |
+| `repository-scan` | 606 | `loadSecurityScanComponent` | `-` | `type: 'repo', animation: 'CategoryPage'` |
+| `seo-scan` | 611 | `loadSecurityScanComponent` | `-` | `type: 'seo', animation: 'CategoryPage'` |
+| `apk-scan` | 616 | `loadFileScannerComponent` | `-` | `animation: 'CategoryPage', type: 'apk', title: 'APK Analysis', description: 'Upload an Android APK to perform static analysis, extract Indicators of Compromise (IOCs), and inspect permissions and b...` |
+| `dump` | 629 | `-` | `-` | `animation: 'DumpPage'` |
+| `` | 633 | `-` | `listing` | `-` |
+| `listing` | 638 | `loadDumpComponent` | `-` | `type: 'listing', animation: 'CategoryPage'` |
+| `credential` | 643 | `loadCredentialComponent` | `-` | `type: 'credential', animation: 'CategoryPage'` |
+| `stealerlogs` | 650 | `-` | `-` | `animation: 'StealerlogsPage'` |
+| `` | 655 | `-` | `iocs` | `-` |
+| `iocs` | 660 | `loadCredentialComponent` | `-` | `type: 'credential', animation: 'CategoryPage'` |
+| `tenant` | 667 | `-` | `-` | `animation: 'TenantPage'` |
+| `` | 672 | `-` | `view-profiles` | `-` |
+| `view-profiles` | 677 | `loadManageProfileComponent` | `-` | `type: 'view', animation: 'CategoryPage'` |
+| `view-tenants` | 682 | `loadViewTenantComponent` | `-` | `type: 'view', animation: 'CategoryPage'` |
+| `auditlog` | 687 | `loadAuditlogComponent` | `-` | `type: 'auditlog', animation: 'CategoryPage'` |
+| `netint` | 694 | `loadNetworkIntelComponent` | `-` | `animation: 'CategoryPage'` |
+| `profile` | 700 | `-` | `-` | `animation: 'ProifilePage'` |
+| `` | 706 | `-` | `homepage` | `-` |
+| `ai` | 711 | `loadAiWorkspaceComponent` | `-` | `type: 'ai', animation: 'CategoryPage'` |
+| `consolidated` | 717 | `-` | `-` | `animation: 'ConsolidatedPage'` |
+| `alerts/:type` | 722 | `loadCategoryAlertReportComponent` | `-` | `type: 'alert', animation: 'AlertPage'` |
+| `addcustomalert` | 727 | `loadAddCustomAlertComponent` | `-` | `type: 'alert', animation: 'AlertPage'` |
+| `homepage` | 732 | `loadSidebarUserHomepageComponent` | `-` | `type: 'homepage', animation: 'HomepagePage'` |
+| `statistics` | 737 | `loadSidebarUserStatisticsComponent` | `-` | `type: 'settings', animation: 'ProfilePage'` |
+| `ioc` | 743 | `loadSidebarUserIocComponent` | `-` | `type: 'settings', animation: 'ProfilePage'` |
+| `consolidated` | 748 | `-` | `-` | `animation: 'ConsolidatedPage'` |
+| `auditlog` | 753 | `loadAuditlogComponent` | `-` | `type: 'auditlog', animation: 'CategoryPage'` |
+| `users` | 758 | `loadManageProfileComponent` | `-` | `type: 'profile', animation: 'CategoryPage'` |
+| `account` | 763 | `loadAccountSettingsComponent` | `-` | `type: 'account', animation: 'CategoryPage'` |
+| `event-management` | 768 | `loadSidebarUserEventManagementComponent` | `-` | `type: 'event-management', animation: 'CategoryPage'` |
+| `feeder` | 773 | `loadSidebarUserFeederComponent` | `-` | `type: 'feeder', animation: 'CategoryPage'` |
+| `user/:user_id` | 778 | `loadUserProfileActivityComponent` | `-` | `type: 'account', animation: 'CategoryPage'` |
+| `tenant-settings` | 783 | `loadTenantSettingsComponent` | `-` | `type: 'settings', animation: 'CategoryPage'` |
+| `tenant` | 788 | `loadViewTenantComponent` | `-` | `type: 'view', animation: 'CategoryPage'` |
+| `system-settings` | 793 | `loadSidebarProfileSystemSettingsComponent` | `-` | `type: 'srttings', animation: 'CategoryPage'` |
+| `alerts` | 798 | `-` | `homepage` | `-` |
+| `**` | 803 | `-` | `consolidated/all` | `-` |
+| `**` | 811 | `loadErrorHandlerComponent` | `-` | `animation: 'ErrorPage'` |
 
 ## Components
 

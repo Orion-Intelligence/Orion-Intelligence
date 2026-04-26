@@ -55,7 +55,7 @@ Example response:
       "avg_transaction_value": 0.0161096501953125,
       "is_active": false
     },
-    "recent_transactions": [...],
+    "recent_transactions": [],
     "risk_assessment": {
       "risk_level": "medium",
       "risk_factors": [
@@ -98,4 +98,3 @@ Field semantics for each element under **result**:
 - **status** — Indicates whether the scan completed successfully
 - **query_type** — Specifies whether the scan was performed using a wallet_address or transaction_hash
 - **detected_network** — Automatically detected blockchain network for the provided input
-
