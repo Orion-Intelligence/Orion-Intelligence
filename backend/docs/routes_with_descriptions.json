@@ -1,0 +1,1432 @@
+{
+  "client_routes": [
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "all",
+      "description": "All-items listing for this intelligence section."
+    },
+    {
+      "path": "chat/:m_hash",
+      "description": "Chat report detail route by message hash."
+    },
+    {
+      "path": "social/:m_hash",
+      "description": "Social report detail route by message hash."
+    },
+    {
+      "path": "general/:m_hash",
+      "description": "General report detail route by message hash."
+    },
+    {
+      "path": "leak/:m_hash",
+      "description": "Leak report detail route by message hash."
+    },
+    {
+      "path": "exploit/:m_hash",
+      "description": "Exploit report detail route by message hash."
+    },
+    {
+      "path": "defacement/:m_hash",
+      "description": "Defacement report detail route by message hash."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "signup",
+      "description": "User signup page for creating a new account."
+    },
+    {
+      "path": "login",
+      "description": "User login page for authentication."
+    },
+    {
+      "path": "onboarding",
+      "description": "Tenant onboarding flow for account setup."
+    },
+    {
+      "path": "welcome",
+      "description": "Welcome page shown after onboarding or invite."
+    },
+    {
+      "path": "welcome/:token",
+      "description": "Token-based welcome route for invited users."
+    },
+    {
+      "path": "paymentGateway",
+      "description": "Payment gateway callback and billing status route."
+    },
+    {
+      "path": "reset",
+      "description": "Password reset request and update page."
+    },
+    {
+      "path": "notification",
+      "description": "Notification landing page for system events."
+    },
+    {
+      "path": "reset/:token",
+      "description": "Token-based password reset confirmation route."
+    },
+    {
+      "path": "dashboard",
+      "description": "Main dashboard shell for authenticated users."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "scan",
+      "description": "Security scanning entry page."
+    },
+    {
+      "path": "home",
+      "description": "Dashboard home overview and summary route."
+    },
+    {
+      "path": "ctigraph",
+      "description": "CTI graph visualization and relationship explorer."
+    },
+    {
+      "path": "social-graph",
+      "description": "Social graph mapping view for entities."
+    },
+    {
+      "path": "social-intel",
+      "description": "Social intelligence analysis workspace."
+    },
+    {
+      "path": "social-mapper",
+      "description": "Legacy social mapper redirect route."
+    },
+    {
+      "path": "directory",
+      "description": "Directory view for indexed intelligence entities."
+    },
+    {
+      "path": "api",
+      "description": "API tools and integrations route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "email-breach",
+      "description": "Email breach lookup API page."
+    },
+    {
+      "path": "social-scanner",
+      "description": "Social scanner API page for social signals."
+    },
+    {
+      "path": "wanted-list",
+      "description": "Wanted-list intelligence API page."
+    },
+    {
+      "path": "national-identity",
+      "description": "National identity verification API page."
+    },
+    {
+      "path": "playstore-scanner",
+      "description": "Play Store and cracked app scanner page."
+    },
+    {
+      "path": "software-scanner",
+      "description": "Software scanner page for package checks."
+    },
+    {
+      "path": "file-scanner",
+      "description": "Upload a file to extract Indicators of Compromise (IOCs)"
+    },
+    {
+      "path": "crypto-scanner",
+      "description": "provide a cryptocurrency address to extract related information and potential risks"
+    },
+    {
+      "path": "discussion",
+      "description": "Discussion intelligence route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": ":category/social",
+      "description": "Redirect route for category social subview."
+    },
+    {
+      "path": "all",
+      "description": "All-items listing for this intelligence section."
+    },
+    {
+      "path": ":category/chat",
+      "description": "Redirect route for category chat subview."
+    },
+    {
+      "path": ":category/chat/:m_hash",
+      "description": "Category chat detail route by message hash."
+    },
+    {
+      "path": ":category/social/:m_hash",
+      "description": "Category social detail route by message hash."
+    },
+    {
+      "path": ":category",
+      "description": "Category listing route for the current section."
+    },
+    {
+      "path": "social/:m_hash",
+      "description": "Social report detail route by message hash."
+    },
+    {
+      "path": "general/:m_hash",
+      "description": "General report detail route by message hash."
+    },
+    {
+      "path": "leak/:m_hash",
+      "description": "Leak report detail route by message hash."
+    },
+    {
+      "path": "exploit/:m_hash",
+      "description": "Exploit report detail route by message hash."
+    },
+    {
+      "path": "defacement/:m_hash",
+      "description": "Defacement report detail route by message hash."
+    },
+    {
+      "path": "**",
+      "description": "Wildcard fallback route for unknown paths."
+    },
+    {
+      "path": "breach",
+      "description": "Data breach intelligence route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": ":category",
+      "description": "Category listing route for the current section."
+    },
+    {
+      "path": ":category/:m_hash",
+      "description": "Category item detail route by message hash."
+    },
+    {
+      "path": "strategic",
+      "description": "Strategic intelligence route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": ":category",
+      "description": "Category listing route for the current section."
+    },
+    {
+      "path": ":category/:m_hash",
+      "description": "Category item detail route by message hash."
+    },
+    {
+      "path": "defacement",
+      "description": "Website defacement intelligence route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "all",
+      "description": "All-items listing for this intelligence section."
+    },
+    {
+      "path": "hacked",
+      "description": "Hacked-site listing within defacement intelligence."
+    },
+    {
+      "path": "phishing",
+      "description": "Phishing-related listing within defacement intelligence."
+    },
+    {
+      "path": "databases",
+      "description": "Database exposure listing within defacement intelligence."
+    },
+    {
+      "path": ":category",
+      "description": "Category listing route for the current section."
+    },
+    {
+      "path": ":category/:m_hash",
+      "description": "Category item detail route by message hash."
+    },
+    {
+      "path": "social",
+      "description": "Social intelligence route group and listings."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "all",
+      "description": "All-items listing for this intelligence section."
+    },
+    {
+      "path": "chat",
+      "description": "Chat-specific route or redirect for social intelligence."
+    },
+    {
+      "path": "telegram",
+      "description": "Telegram intelligence listing."
+    },
+    {
+      "path": "twitter",
+      "description": "Twitter intelligence listing."
+    },
+    {
+      "path": "mastodon",
+      "description": "Mastodon intelligence listing."
+    },
+    {
+      "path": "pastebin",
+      "description": "Pastebin intelligence listing."
+    },
+    {
+      "path": "forum",
+      "description": "Forum intelligence listing."
+    },
+    {
+      "path": "reddit",
+      "description": "Reddit intelligence listing."
+    },
+    {
+      "path": ":category",
+      "description": "Category listing route for the current section."
+    },
+    {
+      "path": ":category/:m_hash",
+      "description": "Category item detail route by message hash."
+    },
+    {
+      "path": ":category/all/:m_hash",
+      "description": "Category all-feed detail route by message hash."
+    },
+    {
+      "path": "feed",
+      "description": "News and feed intelligence route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": ":category",
+      "description": "Category listing route for the current section."
+    },
+    {
+      "path": ":category/:m_hash",
+      "description": "Category item detail route by message hash."
+    },
+    {
+      "path": "exploit",
+      "description": "Exploit intelligence route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "all",
+      "description": "All-items listing for this intelligence section."
+    },
+    {
+      "path": "tools",
+      "description": "Exploit tools intelligence listing."
+    },
+    {
+      "path": "cve",
+      "description": "CVE intelligence listing."
+    },
+    {
+      "path": "zeroday",
+      "description": "Zero-day intelligence listing."
+    },
+    {
+      "path": ":category",
+      "description": "Category listing route for the current section."
+    },
+    {
+      "path": ":category/:m_hash",
+      "description": "Category item detail route by message hash."
+    },
+    {
+      "path": "consolidated",
+      "description": "Consolidated intelligence route group."
+    },
+    {
+      "path": "scanner",
+      "description": "Security scanner route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "basic-scan",
+      "description": "Basic scanner mode route."
+    },
+    {
+      "path": "port-scan",
+      "description": "Port scanner mode route."
+    },
+    {
+      "path": "repository-scan",
+      "description": "Repository scanner mode route."
+    },
+    {
+      "path": "seo-scan",
+      "description": "SEO scanner mode route."
+    },
+    {
+      "path": "apk-scan",
+      "description": "Upload an Android APK to perform static analysis, extract Indicators of Compromise (IOCs), and inspect permissions and behaviors"
+    },
+    {
+      "path": "dump",
+      "description": "Dump intelligence route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "listing",
+      "description": "Dump listing route for available records."
+    },
+    {
+      "path": "credential",
+      "description": "Credential dump listing route."
+    },
+    {
+      "path": "stealerlogs",
+      "description": "Stealer logs route group for IOC review."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "iocs",
+      "description": "Indicator-of-compromise listing route."
+    },
+    {
+      "path": "tenant",
+      "description": "Tenant management route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "view-profiles",
+      "description": "Tenant profile listing and management route."
+    },
+    {
+      "path": "view-tenants",
+      "description": "Tenant listing and management route."
+    },
+    {
+      "path": "auditlog",
+      "description": "Audit log route for administrative tracking."
+    },
+    {
+      "path": "netint",
+      "description": "Network intelligence single-page route."
+    },
+    {
+      "path": "profile",
+      "description": "User profile and settings route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "consolidated",
+      "description": "Consolidated intelligence route group."
+    },
+    {
+      "path": "alerts/:type",
+      "description": "Typed alert listing route for selected alert class."
+    },
+    {
+      "path": "addcustomalert",
+      "description": "Route for creating custom user alerts."
+    },
+    {
+      "path": "homepage",
+      "description": "User profile homepage and personal dashboard route."
+    },
+    {
+      "path": "statistics",
+      "description": "User statistics and insight charts route."
+    },
+    {
+      "path": "ioc",
+      "description": "IOC summary route for user profile."
+    },
+    {
+      "path": "consolidated",
+      "description": "Consolidated intelligence route group."
+    },
+    {
+      "path": "auditlog",
+      "description": "Audit log route for administrative tracking."
+    },
+    {
+      "path": "users",
+      "description": "User management route for administrators."
+    },
+    {
+      "path": "account",
+      "description": "Account settings and user preferences route."
+    },
+    {
+      "path": "user/:user_id",
+      "description": "User activity details route by user identifier."
+    },
+    {
+      "path": "tenant-settings",
+      "description": "Tenant settings management route."
+    },
+    {
+      "path": "tenant",
+      "description": "Tenant management route group."
+    },
+    {
+      "path": "system-settings",
+      "description": "System settings route for platform configuration."
+    },
+    {
+      "path": "alerts",
+      "description": "Alerts shortcut route under profile."
+    },
+    {
+      "path": "**",
+      "description": "Wildcard fallback route for unknown paths."
+    },
+    {
+      "path": "**",
+      "description": "Wildcard fallback route for unknown paths."
+    }
+  ],
+  "backend_routes": [
+    {
+      "path": "/api/search/strategic",
+      "description": "SEARCH_DOCS['strategic']['description']"
+    },
+    {
+      "path": "/api/search/breach",
+      "description": "SEARCH_DOCS['breach']['description']"
+    },
+    {
+      "path": "/api/search/social",
+      "description": "SEARCH_DOCS['strategic']['description']"
+    },
+    {
+      "path": "/api/search/exploit",
+      "description": "SEARCH_DOCS['strategic']['description']"
+    },
+    {
+      "path": "/api/search/defacement",
+      "description": "SEARCH_DOCS['strategic']['description']"
+    },
+    {
+      "path": "/api/directory",
+      "description": "SYSTEM_INFO_DOCS['directory']['description']"
+    },
+    {
+      "path": "/api/dumps",
+      "description": "SYSTEM_INFO_DOCS['dumps']['description']"
+    },
+    {
+      "path": "/api/insight",
+      "description": "SYSTEM_INFO_DOCS['insight']['description']"
+    },
+    {
+      "path": "/api/search/stealerlogs",
+      "description": "SEARCH_DOCS['stealerlogs']['description']"
+    },
+    {
+      "path": "/api/search/stealer/ioc",
+      "description": "SEARCH_DOCS['stealerlogs']['description']"
+    },
+    {
+      "path": "/api/search/consolidated",
+      "description": "SEARCH_DOCS['consolidated']['description']"
+    },
+    {
+      "path": "/api/search/defacement/{doc_id}",
+      "description": "REPORT_DOCS['defacement']['description']"
+    },
+    {
+      "path": "/api/search/breach/{doc_id}",
+      "description": "REPORT_DOCS['breach']['description']"
+    },
+    {
+      "path": "/api/search/news/{doc_id}",
+      "description": "REPORT_DOCS['news']['description']"
+    },
+    {
+      "path": "/api/search/exploit/{doc_id}",
+      "description": "REPORT_DOCS['exploit']['description']"
+    },
+    {
+      "path": "/api/search/strategic/{doc_id}",
+      "description": "REPORT_DOCS['strategic']['description']"
+    },
+    {
+      "path": "/api/search/chat/{doc_id}",
+      "description": "REPORT_DOCS['chat']['description']"
+    },
+    {
+      "path": "/api/search/social/{doc_id}",
+      "description": "REPORT_DOCS['social_models']['description']"
+    },
+    {
+      "path": "/api/search/breach/screenshot/{filename}",
+      "description": "REPORT_DOCS['breach_screenshot']['description']"
+    },
+    {
+      "path": "/api/dynamic/user",
+      "description": "DYNAMIC_DOCS['dynamic_user_email']['description']"
+    },
+    {
+      "path": "/api/dynamic/cracked",
+      "description": "DYNAMIC_DOCS['dynamic_cracked']['description']"
+    },
+    {
+      "path": "/api/dynamic/software",
+      "description": "DYNAMIC_DOCS['dynamic_software']['description']"
+    },
+    {
+      "path": "/api/urlscan/domain",
+      "description": "DYNAMIC_DOCS['domain_scan']['description']"
+    },
+    {
+      "path": "/api/urlscan/subdomains",
+      "description": "SUPPORT_METHOD_DOCS['subdomain_scan']['description']"
+    },
+    {
+      "path": "/api/urlscan/dns",
+      "description": "SUPPORT_METHOD_DOCS['dns_scan']['description']"
+    },
+    {
+      "path": "/api/urlscan/wayback",
+      "description": "SUPPORT_METHOD_DOCS['wayback_scan']['description']"
+    },
+    {
+      "path": "/api/dynamic/social",
+      "description": "DYNAMIC_DOCS['dynamic_social']['description']"
+    },
+    {
+      "path": "/api/dynamic/wanted",
+      "description": "DYNAMIC_DOCS['wanted_scanner']['description']"
+    },
+    {
+      "path": "/api/dynamic/national-identity",
+      "description": "DYNAMIC_DOCS['dynamin_national_identity']['description']"
+    },
+    {
+      "path": "/api/search/breach/stix/{doc_id}",
+      "description": "REPORT_DOCS['stix']['description']"
+    },
+    {
+      "path": "/api/search/strategic/stix/{doc_id}",
+      "description": "REPORT_DOCS['stix']['description']"
+    },
+    {
+      "path": "/api/search/defacement/stix/{doc_id}",
+      "description": "REPORT_DOCS['stix']['description']"
+    },
+    {
+      "path": "/api/search/exploit/stix/{doc_id}",
+      "description": "REPORT_DOCS['stix']['description']"
+    },
+    {
+      "path": "/api/search/social/stix/{doc_id}",
+      "description": "REPORT_DOCS['stix']['description']"
+    },
+    {
+      "path": "/api/search/chat/stix/{doc_id}",
+      "description": "REPORT_DOCS['stix']['description']"
+    },
+    {
+      "path": "/api/graph",
+      "description": "Fetch graph relationships for a given entity based on its type and value."
+    },
+    {
+      "path": "/api/search/news/stix/{doc_id}",
+      "description": "REPORT_DOCS['stix']['description']"
+    },
+    {
+      "path": "/api/ioc/extract",
+      "description": "DYNAMIC_DOCS['ioc_extract']['description']"
+    },
+    {
+      "path": "/api/apk/scan",
+      "description": "DYNAMIC_DOCS['apk_scan']['description']"
+    },
+    {
+      "path": "/api/crypto/scan",
+      "description": "CRYPTO_DOCS['crypto_scan']['description']"
+    },
+    {
+      "path": "/api/cross/search",
+      "description": "CROSS_SEARCH_DOCS['cross_search']['description']"
+    },
+    {
+      "path": "/api/netintel/resolve_ip",
+      "description": "DYNAMIC_DOCS['ip_resolve']['description']"
+    },
+    {
+      "path": "/api/netintel/ipscanner",
+      "description": "DYNAMIC_DOCS['deep_ip_scan']['description']"
+    },
+    {
+      "path": "/api/netintel/url_vulnerability_scan",
+      "description": "DYNAMIC_DOCS['domain_scan']['description']"
+    },
+    {
+      "path": "/api/netintel/iot_detect",
+      "description": "DYNAMIC_DOCS['geo_camera']['description']"
+    },
+    {
+      "path": "/api/netintel/camera_detect_ranges",
+      "description": "DYNAMIC_DOCS['geo_camera']['description']"
+    }
+  ],
+  "all_routes": [
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "all",
+      "description": "All-items listing for this intelligence section."
+    },
+    {
+      "path": "chat/:m_hash",
+      "description": "Chat report detail route by message hash."
+    },
+    {
+      "path": "social/:m_hash",
+      "description": "Social report detail route by message hash."
+    },
+    {
+      "path": "general/:m_hash",
+      "description": "General report detail route by message hash."
+    },
+    {
+      "path": "leak/:m_hash",
+      "description": "Leak report detail route by message hash."
+    },
+    {
+      "path": "exploit/:m_hash",
+      "description": "Exploit report detail route by message hash."
+    },
+    {
+      "path": "defacement/:m_hash",
+      "description": "Defacement report detail route by message hash."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "signup",
+      "description": "User signup page for creating a new account."
+    },
+    {
+      "path": "login",
+      "description": "User login page for authentication."
+    },
+    {
+      "path": "onboarding",
+      "description": "Tenant onboarding flow for account setup."
+    },
+    {
+      "path": "welcome",
+      "description": "Welcome page shown after onboarding or invite."
+    },
+    {
+      "path": "welcome/:token",
+      "description": "Token-based welcome route for invited users."
+    },
+    {
+      "path": "paymentGateway",
+      "description": "Payment gateway callback and billing status route."
+    },
+    {
+      "path": "reset",
+      "description": "Password reset request and update page."
+    },
+    {
+      "path": "notification",
+      "description": "Notification landing page for system events."
+    },
+    {
+      "path": "reset/:token",
+      "description": "Token-based password reset confirmation route."
+    },
+    {
+      "path": "dashboard",
+      "description": "Main dashboard shell for authenticated users."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "scan",
+      "description": "Security scanning entry page."
+    },
+    {
+      "path": "home",
+      "description": "Dashboard home overview and summary route."
+    },
+    {
+      "path": "ctigraph",
+      "description": "CTI graph visualization and relationship explorer."
+    },
+    {
+      "path": "social-graph",
+      "description": "Social graph mapping view for entities."
+    },
+    {
+      "path": "social-intel",
+      "description": "Social intelligence analysis workspace."
+    },
+    {
+      "path": "social-mapper",
+      "description": "Legacy social mapper redirect route."
+    },
+    {
+      "path": "directory",
+      "description": "Directory view for indexed intelligence entities."
+    },
+    {
+      "path": "api",
+      "description": "API tools and integrations route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "email-breach",
+      "description": "Email breach lookup API page."
+    },
+    {
+      "path": "social-scanner",
+      "description": "Social scanner API page for social signals."
+    },
+    {
+      "path": "wanted-list",
+      "description": "Wanted-list intelligence API page."
+    },
+    {
+      "path": "national-identity",
+      "description": "National identity verification API page."
+    },
+    {
+      "path": "playstore-scanner",
+      "description": "Play Store and cracked app scanner page."
+    },
+    {
+      "path": "software-scanner",
+      "description": "Software scanner page for package checks."
+    },
+    {
+      "path": "file-scanner",
+      "description": "Upload a file to extract Indicators of Compromise (IOCs)"
+    },
+    {
+      "path": "crypto-scanner",
+      "description": "provide a cryptocurrency address to extract related information and potential risks"
+    },
+    {
+      "path": "discussion",
+      "description": "Discussion intelligence route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": ":category/social",
+      "description": "Redirect route for category social subview."
+    },
+    {
+      "path": "all",
+      "description": "All-items listing for this intelligence section."
+    },
+    {
+      "path": ":category/chat",
+      "description": "Redirect route for category chat subview."
+    },
+    {
+      "path": ":category/chat/:m_hash",
+      "description": "Category chat detail route by message hash."
+    },
+    {
+      "path": ":category/social/:m_hash",
+      "description": "Category social detail route by message hash."
+    },
+    {
+      "path": ":category",
+      "description": "Category listing route for the current section."
+    },
+    {
+      "path": "social/:m_hash",
+      "description": "Social report detail route by message hash."
+    },
+    {
+      "path": "general/:m_hash",
+      "description": "General report detail route by message hash."
+    },
+    {
+      "path": "leak/:m_hash",
+      "description": "Leak report detail route by message hash."
+    },
+    {
+      "path": "exploit/:m_hash",
+      "description": "Exploit report detail route by message hash."
+    },
+    {
+      "path": "defacement/:m_hash",
+      "description": "Defacement report detail route by message hash."
+    },
+    {
+      "path": "**",
+      "description": "Wildcard fallback route for unknown paths."
+    },
+    {
+      "path": "breach",
+      "description": "Data breach intelligence route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": ":category",
+      "description": "Category listing route for the current section."
+    },
+    {
+      "path": ":category/:m_hash",
+      "description": "Category item detail route by message hash."
+    },
+    {
+      "path": "strategic",
+      "description": "Strategic intelligence route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": ":category",
+      "description": "Category listing route for the current section."
+    },
+    {
+      "path": ":category/:m_hash",
+      "description": "Category item detail route by message hash."
+    },
+    {
+      "path": "defacement",
+      "description": "Website defacement intelligence route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "all",
+      "description": "All-items listing for this intelligence section."
+    },
+    {
+      "path": "hacked",
+      "description": "Hacked-site listing within defacement intelligence."
+    },
+    {
+      "path": "phishing",
+      "description": "Phishing-related listing within defacement intelligence."
+    },
+    {
+      "path": "databases",
+      "description": "Database exposure listing within defacement intelligence."
+    },
+    {
+      "path": ":category",
+      "description": "Category listing route for the current section."
+    },
+    {
+      "path": ":category/:m_hash",
+      "description": "Category item detail route by message hash."
+    },
+    {
+      "path": "social",
+      "description": "Social intelligence route group and listings."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "all",
+      "description": "All-items listing for this intelligence section."
+    },
+    {
+      "path": "chat",
+      "description": "Chat-specific route or redirect for social intelligence."
+    },
+    {
+      "path": "telegram",
+      "description": "Telegram intelligence listing."
+    },
+    {
+      "path": "twitter",
+      "description": "Twitter intelligence listing."
+    },
+    {
+      "path": "mastodon",
+      "description": "Mastodon intelligence listing."
+    },
+    {
+      "path": "pastebin",
+      "description": "Pastebin intelligence listing."
+    },
+    {
+      "path": "forum",
+      "description": "Forum intelligence listing."
+    },
+    {
+      "path": "reddit",
+      "description": "Reddit intelligence listing."
+    },
+    {
+      "path": ":category",
+      "description": "Category listing route for the current section."
+    },
+    {
+      "path": ":category/:m_hash",
+      "description": "Category item detail route by message hash."
+    },
+    {
+      "path": ":category/all/:m_hash",
+      "description": "Category all-feed detail route by message hash."
+    },
+    {
+      "path": "feed",
+      "description": "News and feed intelligence route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": ":category",
+      "description": "Category listing route for the current section."
+    },
+    {
+      "path": ":category/:m_hash",
+      "description": "Category item detail route by message hash."
+    },
+    {
+      "path": "exploit",
+      "description": "Exploit intelligence route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "all",
+      "description": "All-items listing for this intelligence section."
+    },
+    {
+      "path": "tools",
+      "description": "Exploit tools intelligence listing."
+    },
+    {
+      "path": "cve",
+      "description": "CVE intelligence listing."
+    },
+    {
+      "path": "zeroday",
+      "description": "Zero-day intelligence listing."
+    },
+    {
+      "path": ":category",
+      "description": "Category listing route for the current section."
+    },
+    {
+      "path": ":category/:m_hash",
+      "description": "Category item detail route by message hash."
+    },
+    {
+      "path": "consolidated",
+      "description": "Consolidated intelligence route group."
+    },
+    {
+      "path": "scanner",
+      "description": "Security scanner route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "basic-scan",
+      "description": "Basic scanner mode route."
+    },
+    {
+      "path": "port-scan",
+      "description": "Port scanner mode route."
+    },
+    {
+      "path": "repository-scan",
+      "description": "Repository scanner mode route."
+    },
+    {
+      "path": "seo-scan",
+      "description": "SEO scanner mode route."
+    },
+    {
+      "path": "apk-scan",
+      "description": "Upload an Android APK to perform static analysis, extract Indicators of Compromise (IOCs), and inspect permissions and behaviors"
+    },
+    {
+      "path": "dump",
+      "description": "Dump intelligence route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "listing",
+      "description": "Dump listing route for available records."
+    },
+    {
+      "path": "credential",
+      "description": "Credential dump listing route."
+    },
+    {
+      "path": "stealerlogs",
+      "description": "Stealer logs route group for IOC review."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "iocs",
+      "description": "Indicator-of-compromise listing route."
+    },
+    {
+      "path": "tenant",
+      "description": "Tenant management route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "view-profiles",
+      "description": "Tenant profile listing and management route."
+    },
+    {
+      "path": "view-tenants",
+      "description": "Tenant listing and management route."
+    },
+    {
+      "path": "auditlog",
+      "description": "Audit log route for administrative tracking."
+    },
+    {
+      "path": "netint",
+      "description": "Network intelligence single-page route."
+    },
+    {
+      "path": "profile",
+      "description": "User profile and settings route group."
+    },
+    {
+      "path": "",
+      "description": "Default redirect route for this section."
+    },
+    {
+      "path": "consolidated",
+      "description": "Consolidated intelligence route group."
+    },
+    {
+      "path": "alerts/:type",
+      "description": "Typed alert listing route for selected alert class."
+    },
+    {
+      "path": "addcustomalert",
+      "description": "Route for creating custom user alerts."
+    },
+    {
+      "path": "homepage",
+      "description": "User profile homepage and personal dashboard route."
+    },
+    {
+      "path": "statistics",
+      "description": "User statistics and insight charts route."
+    },
+    {
+      "path": "ioc",
+      "description": "IOC summary route for user profile."
+    },
+    {
+      "path": "consolidated",
+      "description": "Consolidated intelligence route group."
+    },
+    {
+      "path": "auditlog",
+      "description": "Audit log route for administrative tracking."
+    },
+    {
+      "path": "users",
+      "description": "User management route for administrators."
+    },
+    {
+      "path": "account",
+      "description": "Account settings and user preferences route."
+    },
+    {
+      "path": "user/:user_id",
+      "description": "User activity details route by user identifier."
+    },
+    {
+      "path": "tenant-settings",
+      "description": "Tenant settings management route."
+    },
+    {
+      "path": "tenant",
+      "description": "Tenant management route group."
+    },
+    {
+      "path": "system-settings",
+      "description": "System settings route for platform configuration."
+    },
+    {
+      "path": "alerts",
+      "description": "Alerts shortcut route under profile."
+    },
+    {
+      "path": "**",
+      "description": "Wildcard fallback route for unknown paths."
+    },
+    {
+      "path": "**",
+      "description": "Wildcard fallback route for unknown paths."
+    },
+    {
+      "path": "/api/search/strategic",
+      "description": "SEARCH_DOCS['strategic']['description']"
+    },
+    {
+      "path": "/api/search/breach",
+      "description": "SEARCH_DOCS['breach']['description']"
+    },
+    {
+      "path": "/api/search/social",
+      "description": "SEARCH_DOCS['strategic']['description']"
+    },
+    {
+      "path": "/api/search/exploit",
+      "description": "SEARCH_DOCS['strategic']['description']"
+    },
+    {
+      "path": "/api/search/defacement",
+      "description": "SEARCH_DOCS['strategic']['description']"
+    },
+    {
+      "path": "/api/directory",
+      "description": "SYSTEM_INFO_DOCS['directory']['description']"
+    },
+    {
+      "path": "/api/dumps",
+      "description": "SYSTEM_INFO_DOCS['dumps']['description']"
+    },
+    {
+      "path": "/api/insight",
+      "description": "SYSTEM_INFO_DOCS['insight']['description']"
+    },
+    {
+      "path": "/api/search/stealerlogs",
+      "description": "SEARCH_DOCS['stealerlogs']['description']"
+    },
+    {
+      "path": "/api/search/stealer/ioc",
+      "description": "SEARCH_DOCS['stealerlogs']['description']"
+    },
+    {
+      "path": "/api/search/consolidated",
+      "description": "SEARCH_DOCS['consolidated']['description']"
+    },
+    {
+      "path": "/api/search/defacement/{doc_id}",
+      "description": "REPORT_DOCS['defacement']['description']"
+    },
+    {
+      "path": "/api/search/breach/{doc_id}",
+      "description": "REPORT_DOCS['breach']['description']"
+    },
+    {
+      "path": "/api/search/news/{doc_id}",
+      "description": "REPORT_DOCS['news']['description']"
+    },
+    {
+      "path": "/api/search/exploit/{doc_id}",
+      "description": "REPORT_DOCS['exploit']['description']"
+    },
+    {
+      "path": "/api/search/strategic/{doc_id}",
+      "description": "REPORT_DOCS['strategic']['description']"
+    },
+    {
+      "path": "/api/search/chat/{doc_id}",
+      "description": "REPORT_DOCS['chat']['description']"
+    },
+    {
+      "path": "/api/search/social/{doc_id}",
+      "description": "REPORT_DOCS['social_models']['description']"
+    },
+    {
+      "path": "/api/search/breach/screenshot/{filename}",
+      "description": "REPORT_DOCS['breach_screenshot']['description']"
+    },
+    {
+      "path": "/api/dynamic/user",
+      "description": "DYNAMIC_DOCS['dynamic_user_email']['description']"
+    },
+    {
+      "path": "/api/dynamic/cracked",
+      "description": "DYNAMIC_DOCS['dynamic_cracked']['description']"
+    },
+    {
+      "path": "/api/dynamic/software",
+      "description": "DYNAMIC_DOCS['dynamic_software']['description']"
+    },
+    {
+      "path": "/api/urlscan/domain",
+      "description": "DYNAMIC_DOCS['domain_scan']['description']"
+    },
+    {
+      "path": "/api/urlscan/subdomains",
+      "description": "SUPPORT_METHOD_DOCS['subdomain_scan']['description']"
+    },
+    {
+      "path": "/api/urlscan/dns",
+      "description": "SUPPORT_METHOD_DOCS['dns_scan']['description']"
+    },
+    {
+      "path": "/api/urlscan/wayback",
+      "description": "SUPPORT_METHOD_DOCS['wayback_scan']['description']"
+    },
+    {
+      "path": "/api/dynamic/social",
+      "description": "DYNAMIC_DOCS['dynamic_social']['description']"
+    },
+    {
+      "path": "/api/dynamic/wanted",
+      "description": "DYNAMIC_DOCS['wanted_scanner']['description']"
+    },
+    {
+      "path": "/api/dynamic/national-identity",
+      "description": "DYNAMIC_DOCS['dynamin_national_identity']['description']"
+    },
+    {
+      "path": "/api/search/breach/stix/{doc_id}",
+      "description": "REPORT_DOCS['stix']['description']"
+    },
+    {
+      "path": "/api/search/strategic/stix/{doc_id}",
+      "description": "REPORT_DOCS['stix']['description']"
+    },
+    {
+      "path": "/api/search/defacement/stix/{doc_id}",
+      "description": "REPORT_DOCS['stix']['description']"
+    },
+    {
+      "path": "/api/search/exploit/stix/{doc_id}",
+      "description": "REPORT_DOCS['stix']['description']"
+    },
+    {
+      "path": "/api/search/social/stix/{doc_id}",
+      "description": "REPORT_DOCS['stix']['description']"
+    },
+    {
+      "path": "/api/search/chat/stix/{doc_id}",
+      "description": "REPORT_DOCS['stix']['description']"
+    },
+    {
+      "path": "/api/graph",
+      "description": "Fetch graph relationships for a given entity based on its type and value."
+    },
+    {
+      "path": "/api/search/news/stix/{doc_id}",
+      "description": "REPORT_DOCS['stix']['description']"
+    },
+    {
+      "path": "/api/ioc/extract",
+      "description": "DYNAMIC_DOCS['ioc_extract']['description']"
+    },
+    {
+      "path": "/api/apk/scan",
+      "description": "DYNAMIC_DOCS['apk_scan']['description']"
+    },
+    {
+      "path": "/api/crypto/scan",
+      "description": "CRYPTO_DOCS['crypto_scan']['description']"
+    },
+    {
+      "path": "/api/cross/search",
+      "description": "CROSS_SEARCH_DOCS['cross_search']['description']"
+    },
+    {
+      "path": "/api/netintel/resolve_ip",
+      "description": "DYNAMIC_DOCS['ip_resolve']['description']"
+    },
+    {
+      "path": "/api/netintel/ipscanner",
+      "description": "DYNAMIC_DOCS['deep_ip_scan']['description']"
+    },
+    {
+      "path": "/api/netintel/url_vulnerability_scan",
+      "description": "DYNAMIC_DOCS['domain_scan']['description']"
+    },
+    {
+      "path": "/api/netintel/iot_detect",
+      "description": "DYNAMIC_DOCS['geo_camera']['description']"
+    },
+    {
+      "path": "/api/netintel/camera_detect_ranges",
+      "description": "DYNAMIC_DOCS['geo_camera']['description']"
+    }
+  ]
+}

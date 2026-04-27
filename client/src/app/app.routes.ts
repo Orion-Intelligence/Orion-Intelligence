@@ -53,43 +53,50 @@ const HASH_CONSOLIDATED_ROUTE = {
 const consolidatedChildren :Route[] = [
   {
     path: '',
+    data: { description: 'Default redirect route for this section.' },
     redirectTo: 'all',
     pathMatch: 'full'
   },
   {
     path: 'all',
     loadComponent: loadDashboardConsolidatedComponent,
-    data: { type: 'consolidated', animation: 'DataBreach' }
+    data: {type: 'consolidated', animation: 'DataBreach', description: 'All-items listing for this intelligence section.'}
   },
   {
     path: 'chat/:m_hash',
     loadComponent: loadReportChatComponent,
-    ...HASH_CONSOLIDATED_ROUTE
+    ...HASH_CONSOLIDATED_ROUTE,
+    data: { ...HASH_CONSOLIDATED_ROUTE.data, description: 'Chat report detail route by message hash.' }
   },
   {
     path: 'social/:m_hash',
     loadComponent: loadReportChatComponent,
-    ...HASH_CONSOLIDATED_ROUTE
+    ...HASH_CONSOLIDATED_ROUTE,
+    data: { ...HASH_CONSOLIDATED_ROUTE.data, description: 'Social report detail route by message hash.' }
   },
   {
     path: 'general/:m_hash',
     loadComponent: loadReportComponent,
-    ...HASH_CONSOLIDATED_ROUTE
+    ...HASH_CONSOLIDATED_ROUTE,
+    data: { ...HASH_CONSOLIDATED_ROUTE.data, description: 'General report detail route by message hash.' }
   },
   {
     path: 'leak/:m_hash',
     loadComponent: loadReportComponent,
-    ...HASH_CONSOLIDATED_ROUTE
+    ...HASH_CONSOLIDATED_ROUTE,
+    data: { ...HASH_CONSOLIDATED_ROUTE.data, description: 'Leak report detail route by message hash.' }
   },
   {
     path: 'exploit/:m_hash',
     loadComponent: loadReportComponent,
-    ...HASH_CONSOLIDATED_ROUTE
+    ...HASH_CONSOLIDATED_ROUTE,
+    data: { ...HASH_CONSOLIDATED_ROUTE.data, description: 'Exploit report detail route by message hash.' }
   },
   {
     path: 'defacement/:m_hash',
     loadComponent: loadReportDefacementComponent,
-    ...HASH_CONSOLIDATED_ROUTE
+    ...HASH_CONSOLIDATED_ROUTE,
+    data: { ...HASH_CONSOLIDATED_ROUTE.data, description: 'Defacement report detail route by message hash.' }
   }
 ];
 export const routes: Routes = [
@@ -97,58 +104,58 @@ export const routes: Routes = [
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full',
-    data: { animation: 'RootPage' }
+    data: {animation: 'RootPage', description: 'Default redirect route for this section.'}
   },
   {
     path: 'signup',
     loadComponent: loadSignupComponent,
-    data: { animation: 'SignupPage' }
+    data: {animation: 'SignupPage', description: 'User signup page for creating a new account.'}
   },
   {
     path: 'login',
     loadComponent: loadLoginComponent,
-    data: { animation: 'LoginPage' }
+    data: {animation: 'LoginPage', description: 'User login page for authentication.'}
   },
   {
     path: 'onboarding',
     resolve: { config: ConfigResolver },
     loadComponent: loadTenantComponent,
     canActivate: [TenantGuard],
-    data: { animation: 'TenantPage' }
+    data: {animation: 'TenantPage', description: 'Tenant onboarding flow for account setup.'}
   },
   {
     path: 'welcome',
     loadComponent: loadWelcomeComponent,
     canActivate: [NotificationGuard],
-    data: { animation: 'WelcomePage' }
+    data: {animation: 'WelcomePage', description: 'Welcome page shown after onboarding or invite.'}
   },
   {
     path: 'welcome/:token',
     loadComponent: loadWelcomeComponent,
     canActivate: [NotificationGuard],
-    data: { animation: 'WelcomePage' }
+    data: {animation: 'WelcomePage', description: 'Token-based welcome route for invited users.'}
   },
   {
     path: 'paymentGateway',
     loadComponent: loadTrailNotificationComponent,
-    data: { animation: 'TrailNotificationPage' }
+    data: {animation: 'TrailNotificationPage', description: 'Payment gateway callback and billing status route.'}
   },
   {
     path: 'reset',
     loadComponent: loadResetPasswordComponent,
     canActivate: [NotificationGuard],
-    data: { animation: 'ForgotPasswordComponent' }
+    data: {animation: 'ForgotPasswordComponent', description: 'Password reset request and update page.'}
   },
   {
     path: 'notification',
     loadComponent: loadNotificationComponent,
-    data: { animation: 'PaymentGatewayComponent' }
+    data: {animation: 'PaymentGatewayComponent', description: 'Notification landing page for system events.'}
   },
   {
     path: 'reset/:token',
     loadComponent: loadResetPasswordComponent,
     canActivate: [NotificationGuard],
-    data: { animation: 'ForgotPasswordComponent' }
+    data: {animation: 'ForgotPasswordComponent', description: 'Token-based password reset confirmation route.'}
   },
   {
     path: 'dashboard',
@@ -158,87 +165,90 @@ export const routes: Routes = [
       config: ConfigResolver,
       session: DashboardResolver
     },
-    data: { animation: 'DashboardPage' },
+    data: {animation: 'DashboardPage', description: 'Main dashboard shell for authenticated users.'},
     children: [
       {
         path: '',
+        data: { description: 'Default redirect route for this section.' },
         redirectTo: 'profile',
         pathMatch: 'full'
       },
       {
         path: 'scan',
         loadComponent: loadSecurityScanComponent,
-        data: { animation: 'HomePage' }
+        data: {animation: 'HomePage', description: 'Security scanning entry page.'}
       },
       {
         path: 'home',
         loadComponent: loadHomepageComponent,
-        data: { animation: 'HomePage' }
+        data: {animation: 'HomePage', description: 'Dashboard home overview and summary route.'}
       },
       {
         path: 'ctigraph',
         loadComponent: () => import('./pages/graphs/cti-graph/graphs.component').then(m => m.GraphComponent),
-        data: { animation: 'ctigraph' }
+        data: {animation: 'ctigraph', description: 'CTI graph visualization and relationship explorer.'}
       },
       {
         path: 'social-graph',
         loadComponent: loadSocialMapperComponent,
-        data: { animation: 'SocialMapper' }
+        data: {animation: 'SocialMapper', description: 'Social graph mapping view for entities.'}
       },
       {
         path: 'social-intel',
         loadComponent: loadSocialMapperComponent,
-        data: { animation: 'SocialMapper' }
+        data: {animation: 'SocialMapper', description: 'Social intelligence analysis workspace.'}
       },
       {
         path: 'social-mapper',
+        data: { description: 'Legacy social mapper redirect route.' },
         redirectTo: 'social-intel',
         pathMatch: 'full'
       },
       {
         path: 'directory',
         loadComponent: loadDirectoryComponent,
-        data: { animation: 'DirectoryPage' }
+        data: {animation: 'DirectoryPage', description: 'Directory view for indexed intelligence entities.'}
       },
       {
         path: 'api',
         canActivate: [subscriptionGuard],
-        data: { animation: 'APIPage' },
+        data: {animation: 'APIPage', description: 'API tools and integrations route group.'},
         children: [
           {
             path: '',
+            data: { description: 'Default redirect route for this section.' },
             redirectTo: 'email-breach',
             pathMatch: 'full'
           },
           {
             path: 'email-breach',
             loadComponent: loadDashboardApiComponent,
-            data: { animation: 'EmailAPI', type: 'user' }
+            data: {animation: 'EmailAPI', type: 'user', description: 'Email breach lookup API page.'}
           },
           {
             path: 'social-scanner',
             loadComponent: loadDashboardApiComponent,
-            data: { animation: 'SocialAPI', type: 'social' }
+            data: {animation: 'SocialAPI', type: 'social', description: 'Social scanner API page for social signals.'}
           },
           {
             path: 'wanted-list',
             loadComponent: loadDashboardApiComponent,
-            data: { animation: 'WantedAPI', type: 'wanted' }
+            data: {animation: 'WantedAPI', type: 'wanted', description: 'Wanted-list intelligence API page.'}
           },
           {
             path: 'national-identity',
             loadComponent: loadDashboardApiComponent,
-            data: { animation: 'NationalIdentityAPI', type: 'national-identity' }
+            data: {animation: 'NationalIdentityAPI', type: 'national-identity', description: 'National identity verification API page.'}
           },
           {
             path: 'playstore-scanner',
             loadComponent: loadDashboardApiComponent,
-            data: { animation: 'CrackedAPI', type: 'cracked' }
+            data: {animation: 'CrackedAPI', type: 'cracked', description: 'Play Store and cracked app scanner page.'}
           },
           {
             path: 'software-scanner',
             loadComponent: loadDashboardApiComponent,
-            data: { animation: 'SoftwareAPI', type: 'software' }
+            data: {animation: 'SoftwareAPI', type: 'software', description: 'Software scanner page for package checks.'}
           },
           {
             path: 'file-scanner',
@@ -264,26 +274,29 @@ export const routes: Routes = [
       },
       {
         path: 'discussion',
-        data: { animation: 'Discussion' },
+        data: {animation: 'Discussion', description: 'Discussion intelligence route group.'},
         children: [
           {
             path: '',
+            data: { description: 'Default redirect route for this section.' },
             redirectTo: 'all',
             pathMatch: 'full'
           },
           {
             path: ':category/social',
+            data: { description: 'Redirect route for category social subview.' },
             redirectTo: '/dashboard/discussion/:category',
             pathMatch: 'full'
           },
           {
             path: 'all',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'Social', animation: 'Discussion' },
+            data: {type: 'Social', animation: 'Discussion', description: 'All-items listing for this intelligence section.'},
             pathMatch: 'full'
           },
           {
             path: ':category/chat',
+            data: { description: 'Redirect route for category chat subview.' },
             redirectTo: '/dashboard/discussion/:category',
             pathMatch: 'full'
           },
@@ -291,318 +304,325 @@ export const routes: Routes = [
             path: ':category/chat/:m_hash',
             loadComponent: loadReportChatComponent,
             resolve: { reportdata: ReportConsolidatedResolver },
-            data: { type: 'consolidated', animation: 'HashPage' }
+            data: {type: 'consolidated', animation: 'HashPage', description: 'Category chat detail route by message hash.'}
           },
           {
             path: ':category/social/:m_hash',
             loadComponent: loadReportChatComponent,
             resolve: { reportdata: ReportConsolidatedResolver },
-            data: { type: 'consolidated', animation: 'HashPage' }
+            data: {type: 'consolidated', animation: 'HashPage', description: 'Category social detail route by message hash.'}
           },
           {
             path: ':category',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'Social', animation: 'Discussion' },
+            data: {type: 'Social', animation: 'Discussion', description: 'Category listing route for the current section.'},
             pathMatch: 'full'
           },
           {
             path: 'social/:m_hash',
             loadComponent: loadReportChatComponent,
             resolve: { reportdata: ReportConsolidatedResolver },
-            data: { type: 'consolidated', animation: 'HashPage' }
+            data: {type: 'consolidated', animation: 'HashPage', description: 'Social report detail route by message hash.'}
           },
           {
             path: 'general/:m_hash',
             loadComponent: loadReportComponent,
             resolve: { reportdata: ReportConsolidatedResolver },
-            data: { type: 'consolidated', animation: 'HashPage' }
+            data: {type: 'consolidated', animation: 'HashPage', description: 'General report detail route by message hash.'}
           },
           {
             path: 'leak/:m_hash',
             loadComponent: loadReportComponent,
             resolve: { reportdata: ReportConsolidatedResolver },
-            data: { type: 'consolidated', animation: 'HashPage' }
+            data: {type: 'consolidated', animation: 'HashPage', description: 'Leak report detail route by message hash.'}
           },
           {
             path: 'exploit/:m_hash',
             loadComponent: loadReportComponent,
             resolve: { reportdata: ReportConsolidatedResolver },
-            data: { type: 'consolidated', animation: 'HashPage' }
+            data: {type: 'consolidated', animation: 'HashPage', description: 'Exploit report detail route by message hash.'}
           },
           {
             path: 'defacement/:m_hash',
             loadComponent: loadReportDefacementComponent,
             resolve: { reportdata: ReportConsolidatedResolver },
-            data: { type: 'consolidated', animation: 'HashPage' }
+            data: {type: 'consolidated', animation: 'HashPage', description: 'Defacement report detail route by message hash.'}
           },
           {
             path: '**',
+            data: { description: 'Wildcard fallback route for unknown paths.' },
             redirectTo: 'all'
           }
         ]
       },
       {
         path: 'breach',
-        data: { animation: 'DataBreach' },
+        data: {animation: 'DataBreach', description: 'Data breach intelligence route group.'},
         children: [
           {
             path: '',
+            data: { description: 'Default redirect route for this section.' },
             redirectTo: 'all',
             pathMatch: 'full'
           },
           {
             path: ':category',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'Breach', animation: 'DataBreach' }
+            data: {type: 'Breach', animation: 'DataBreach', description: 'Category listing route for the current section.'}
           },
           {
             path: ':category/:m_hash',
             loadComponent: loadReportComponent,
             resolve: { reportdata: ReportResolver },
-            data: { type: 'Breach', animation: 'HashPage' }
+            data: {type: 'Breach', animation: 'HashPage', description: 'Category item detail route by message hash.'}
           }
         ]
       },
       {
         path: 'strategic',
-        data: { animation: 'StrategicPage' },
+        data: {animation: 'StrategicPage', description: 'Strategic intelligence route group.'},
         children: [
           {
             path: '',
+            data: { description: 'Default redirect route for this section.' },
             redirectTo: 'all',
             pathMatch: 'full'
           },
           {
             path: ':category',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'strategic', animation: 'CategoryPage' }
+            data: {type: 'strategic', animation: 'CategoryPage', description: 'Category listing route for the current section.'}
           },
           {
             path: ':category/:m_hash',
             loadComponent: loadReportComponent,
             resolve: { reportdata: ReportResolver },
-            data: { type: 'strategic', animation: 'HashPage' }
+            data: {type: 'strategic', animation: 'HashPage', description: 'Category item detail route by message hash.'}
           }
         ]
       },
       {
         path: 'defacement',
-        data: { animation: 'DefacementPage' },
+        data: {animation: 'DefacementPage', description: 'Website defacement intelligence route group.'},
         children: [
           {
             path: '',
+            data: { description: 'Default redirect route for this section.' },
             redirectTo: 'all',
             pathMatch: 'full'
           },
           {
             path: 'all',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'defacement', animation: 'DataBreach' }
+            data: {type: 'defacement', animation: 'DataBreach', description: 'All-items listing for this intelligence section.'}
           },
           {
             path: 'hacked',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'defacement', animation: 'DataBreach' }
+            data: {type: 'defacement', animation: 'DataBreach', description: 'Hacked-site listing within defacement intelligence.'}
           },
           {
             path: 'phishing',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'defacement', animation: 'DataBreach' }
+            data: {type: 'defacement', animation: 'DataBreach', description: 'Phishing-related listing within defacement intelligence.'}
           },
           {
             path: 'databases',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'defacement', animation: 'DataBreach' }
+            data: {type: 'defacement', animation: 'DataBreach', description: 'Database exposure listing within defacement intelligence.'}
           },
           {
             path: ':category',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'Defacement', animation: 'CategoryPage' }
+            data: {type: 'Defacement', animation: 'CategoryPage', description: 'Category listing route for the current section.'}
           },
           {
             path: ':category/:m_hash',
             loadComponent: loadReportDefacementComponent,
             resolve: { reportdata: ReportResolver },
-            data: { type: 'Defacement', animation: 'HashPage' }
+            data: {type: 'Defacement', animation: 'HashPage', description: 'Category item detail route by message hash.'}
           }
         ]
       },
       {
         path: 'social',
-        data: { animation: 'SocialPage' },
+        data: {animation: 'SocialPage', description: 'Social intelligence route group and listings.'},
         children: [
           {
             path: '',
             redirectTo: 'all',
             pathMatch: 'full',
-            data: { type: 'social', animation: 'DataBreach' }
+            data: {type: 'social', animation: 'DataBreach', description: 'Default redirect route for this section.'}
           },
           {
             path: 'all',
             loadComponent: loadDashboardResultContainer,
             pathMatch: 'full',
-            data: { type: 'social', animation: 'DataBreach' }
+            data: {type: 'social', animation: 'DataBreach', description: 'All-items listing for this intelligence section.'}
           },
           {
             path: 'chat',
             redirectTo: '/dashboard/social/all',
             pathMatch: 'full',
-            data: { type: 'social', animation: 'DataBreach' }
+            data: {type: 'social', animation: 'DataBreach', description: 'Chat-specific route or redirect for social intelligence.'}
           },
           {
             path: 'telegram',
             loadComponent: loadDashboardResultContainer,
             pathMatch: 'full',
-            data: { type: 'social', animation: 'DataBreach' }
+            data: {type: 'social', animation: 'DataBreach', description: 'Telegram intelligence listing.'}
           },
           {
             path: 'twitter',
             loadComponent: loadDashboardResultContainer,
             pathMatch: 'full',
-            data: { type: 'social', animation: 'DataBreach' }
+            data: {type: 'social', animation: 'DataBreach', description: 'Twitter intelligence listing.'}
           },
           {
             path: 'mastodon',
             loadComponent: loadDashboardResultContainer,
             pathMatch: 'full',
-            data: { type: 'social', animation: 'DataBreach' }
+            data: {type: 'social', animation: 'DataBreach', description: 'Mastodon intelligence listing.'}
           },
           {
             path: 'pastebin',
             loadComponent: loadDashboardResultContainer,
             pathMatch: 'full',
-            data: { type: 'social', animation: 'DataBreach' }
+            data: {type: 'social', animation: 'DataBreach', description: 'Pastebin intelligence listing.'}
           },
           {
             path: 'forum',
             loadComponent: loadDashboardResultContainer,
             pathMatch: 'full',
-            data: { type: 'social', animation: 'DataBreach' }
+            data: {type: 'social', animation: 'DataBreach', description: 'Forum intelligence listing.'}
           },
           {
             path: 'reddit',
             loadComponent: loadDashboardResultContainer,
             pathMatch: 'full',
-            data: { type: 'social', animation: 'DataBreach' }
+            data: {type: 'social', animation: 'DataBreach', description: 'Reddit intelligence listing.'}
           },
           {
             path: ':category',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'Social', animation: 'CategoryPage' }
+            data: {type: 'Social', animation: 'CategoryPage', description: 'Category listing route for the current section.'}
           },
           {
             path: ':category/:m_hash',
             loadComponent: loadReportChatComponent,
             resolve: { reportdata: ReportResolver },
-            data: { type: 'Social', animation: 'HashPage' }
+            data: {type: 'Social', animation: 'HashPage', description: 'Category item detail route by message hash.'}
           },
           {
             path: ':category/all/:m_hash',
             loadComponent: loadReportChatComponent,
             resolve: { reportdata: ReportResolver },
-            data: { type: 'Social', animation: 'HashPage' }
+            data: {type: 'Social', animation: 'HashPage', description: 'Category all-feed detail route by message hash.'}
           }
         ]
       },
       {
         path: 'feed',
-        data: { animation: 'FeedPage' },
+        data: {animation: 'FeedPage', description: 'News and feed intelligence route group.'},
         children: [
           {
             path: '',
+            data: { description: 'Default redirect route for this section.' },
             redirectTo: 'news',
             pathMatch: 'full'
           },
           {
             path: ':category',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'Feed', animation: 'CategoryPage' }
+            data: {type: 'Feed', animation: 'CategoryPage', description: 'Category listing route for the current section.'}
           },
           {
             path: ':category/:m_hash',
             loadComponent: loadReportComponent,
             resolve: { reportdata: ReportResolver },
-            data: { type: 'Feed', animation: 'HashPage' }
+            data: {type: 'Feed', animation: 'HashPage', description: 'Category item detail route by message hash.'}
           }
         ]
       },
       {
         path: 'exploit',
-        data: { animation: 'ExploitPage' },
+        data: {animation: 'ExploitPage', description: 'Exploit intelligence route group.'},
         children: [
           {
             path: '',
+            data: { description: 'Default redirect route for this section.' },
             redirectTo: 'all',
             pathMatch: 'full'
           },
           {
             path: 'all',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'exploit', animation: 'DataBreach' }
+            data: {type: 'exploit', animation: 'DataBreach', description: 'All-items listing for this intelligence section.'}
           },
           {
             path: 'tools',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'exploit', animation: 'DataBreach' }
+            data: {type: 'exploit', animation: 'DataBreach', description: 'Exploit tools intelligence listing.'}
           },
           {
             path: 'cve',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'exploit', animation: 'DataBreach' }
+            data: {type: 'exploit', animation: 'DataBreach', description: 'CVE intelligence listing.'}
           },
           {
             path: 'zeroday',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'exploit', animation: 'DataBreach' }
+            data: {type: 'exploit', animation: 'DataBreach', description: 'Zero-day intelligence listing.'}
           },
           {
             path: ':category',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'Social', animation: 'CategoryPage' }
+            data: {type: 'Social', animation: 'CategoryPage', description: 'Category listing route for the current section.'}
           },
           {
             path: ':category/:m_hash',
             loadComponent: loadReportComponent,
             resolve: { reportdata: ReportResolver },
-            data: { type: 'Exploit', animation: 'HashPage' }
+            data: {type: 'Exploit', animation: 'HashPage', description: 'Category item detail route by message hash.'}
           }
         ]
       },
       {
         canActivate: [subscriptionGuard],
         path: 'consolidated',
-        data: { animation: 'ConsolidatedPage' },
+        data: {animation: 'ConsolidatedPage', description: 'Consolidated intelligence route group.'},
         children: consolidatedChildren
       },
       {
         canActivate: [subscriptionGuard],
         path: 'scanner',
-        data: { animation: 'ScannerPage' },
+        data: {animation: 'ScannerPage', description: 'Security scanner route group.'},
         children: [
           {
             path: '',
+            data: { description: 'Default redirect route for this section.' },
             redirectTo: 'basic-scan',
             pathMatch: 'full'
           },
           {
             path: 'basic-scan',
             loadComponent: loadSecurityScanComponent,
-            data: { type: 'basic', animation: 'CategoryPage' }
+            data: {type: 'basic', animation: 'CategoryPage', description: 'Basic scanner mode route.'}
           },
           {
             path: 'port-scan',
             loadComponent: loadSecurityScanComponent,
-            data: { type: 'advanced', animation: 'CategoryPage' }
+            data: {type: 'advanced', animation: 'CategoryPage', description: 'Port scanner mode route.'}
           },
           {
             path: 'repository-scan',
             loadComponent: loadSecurityScanComponent,
-            data: { type: 'repo', animation: 'CategoryPage' }
+            data: {type: 'repo', animation: 'CategoryPage', description: 'Repository scanner mode route.'}
           },
           {
             path: 'seo-scan',
             loadComponent: loadSecurityScanComponent,
-            data: { type: 'seo', animation: 'CategoryPage' }
+            data: {type: 'seo', animation: 'CategoryPage', description: 'SEO scanner mode route.'}
           },
           {
             path: 'apk-scan',
@@ -619,66 +639,69 @@ export const routes: Routes = [
       {
         canActivate: [subscriptionGuard],
         path: 'dump',
-        data: { animation: 'DumpPage' },
+        data: {animation: 'DumpPage', description: 'Dump intelligence route group.'},
         children: [
           {
             path: '',
+            data: { description: 'Default redirect route for this section.' },
             redirectTo: 'listing',
             pathMatch: 'full'
           },
           {
             path: 'listing',
             loadComponent: loadDumpComponent,
-            data: { type: 'listing', animation: 'CategoryPage' }
+            data: {type: 'listing', animation: 'CategoryPage', description: 'Dump listing route for available records.'}
           },
           {
             path: 'credential',
             loadComponent: loadCredentialComponent,
-            data: { type: 'credential', animation: 'CategoryPage' }
+            data: {type: 'credential', animation: 'CategoryPage', description: 'Credential dump listing route.'}
           }
         ]
       },
       {
         path: 'stealerlogs',
         canActivate: [subscriptionGuard],
-        data: { animation: 'StealerlogsPage' },
+        data: {animation: 'StealerlogsPage', description: 'Stealer logs route group for IOC review.'},
         children: [
           {
             path: '',
+            data: { description: 'Default redirect route for this section.' },
             redirectTo: 'iocs',
             pathMatch: 'full'
           },
           {
             path: 'iocs',
             loadComponent: loadCredentialComponent,
-            data: { type: 'credential', animation: 'CategoryPage' }
+            data: {type: 'credential', animation: 'CategoryPage', description: 'Indicator-of-compromise listing route.'}
           }
         ]
       },
       {
         path: 'tenant',
         canActivate: [subscriptionGuard],
-        data: { animation: 'TenantPage' },
+        data: {animation: 'TenantPage', description: 'Tenant management route group.'},
         children: [
           {
             path: '',
+            data: { description: 'Default redirect route for this section.' },
             redirectTo: 'view-profiles',
             pathMatch: 'full'
           },
           {
             path: 'view-profiles',
             loadComponent: loadManageProfileComponent,
-            data: { type: 'view', animation: 'CategoryPage' }
+            data: {type: 'view', animation: 'CategoryPage', description: 'Tenant profile listing and management route.'}
           },
           {
             path: 'view-tenants',
             loadComponent: loadViewTenantComponent,
-            data: { type: 'view', animation: 'CategoryPage' }
+            data: {type: 'view', animation: 'CategoryPage', description: 'Tenant listing and management route.'}
           },
           {
             path: 'auditlog',
             loadComponent: loadAuditlogComponent,
-            data: { type: 'auditlog', animation: 'CategoryPage' }
+            data: {type: 'auditlog', animation: 'CategoryPage', description: 'Audit log route for administrative tracking.'}
           }
         ]
       },
@@ -686,98 +709,101 @@ export const routes: Routes = [
         path: 'netint',
         canActivate: [subscriptionGuard],
         loadComponent: loadNetworkIntelComponent,
-        data: { animation: 'CategoryPage' }
+        data: {animation: 'CategoryPage', description: 'Network intelligence single-page route.'}
       },
       {
         path: 'profile',
         canActivate: [subscriptionGuard, OnboardingGuard],
         resolve: { ioc: IocResolver },
-        data: { animation: 'ProifilePage' },
+        data: {animation: 'ProifilePage', description: 'User profile and settings route group.'},
         children: [
           {
             path: '',
+            data: { description: 'Default redirect route for this section.' },
             redirectTo: 'homepage',
             pathMatch: 'full'
           },
           {
             canActivate: [subscriptionGuard],
             path: 'consolidated',
-            data: { animation: 'ConsolidatedPage' },
+            data: {animation: 'ConsolidatedPage', description: 'Consolidated intelligence route group.'},
             children: consolidatedChildren
           },
           {
             path: 'alerts/:type',
             loadComponent: loadCategoryAlertReportComponent,
-            data: { type: 'alert', animation: 'AlertPage' },
+            data: {type: 'alert', animation: 'AlertPage', description: 'Typed alert listing route for selected alert class.'},
           },
           {
             path: 'addcustomalert',
             loadComponent: loadAddCustomAlertComponent,
-            data: { type: 'alert', animation: 'AlertPage' },
+            data: {type: 'alert', animation: 'AlertPage', description: 'Route for creating custom user alerts.'},
           },
           {
             path: 'homepage',
             loadComponent: loadSidebarUserHomepageComponent,
-            data: { type: 'homepage', animation: 'HomepagePage' },
+            data: {type: 'homepage', animation: 'HomepagePage', description: 'User profile homepage and personal dashboard route.'},
           },
           {
             path: 'statistics',
             loadComponent: loadSidebarUserStatisticsComponent,
             resolve: { insights: InsightResolver },
-            data: { type: 'settings', animation: 'ProfilePage' }
+            data: {type: 'settings', animation: 'ProfilePage', description: 'User statistics and insight charts route.'}
           },
           {
             path: 'ioc',
             loadComponent: loadSidebarUserIocComponent,
-            data: { type: 'settings', animation: 'ProfilePage' }
+            data: {type: 'settings', animation: 'ProfilePage', description: 'IOC summary route for user profile.'}
           },
           {
             path: 'consolidated',
-            data: { animation: 'ConsolidatedPage' },
+            data: {animation: 'ConsolidatedPage', description: 'Consolidated intelligence route group.'},
             children: consolidatedChildren
           },
           {
             path: 'auditlog',
             loadComponent: loadAuditlogComponent,
-            data: { type: 'auditlog', animation: 'CategoryPage' }
+            data: {type: 'auditlog', animation: 'CategoryPage', description: 'Audit log route for administrative tracking.'}
           },
           {
             path: 'users',
             loadComponent: loadManageProfileComponent,
-            data: { type: 'profile', animation: 'CategoryPage' }
+            data: {type: 'profile', animation: 'CategoryPage', description: 'User management route for administrators.'}
           },
           {
             path: 'account',
             loadComponent: loadAccountSettingsComponent,
-            data: { type: 'account', animation: 'CategoryPage' }
+            data: {type: 'account', animation: 'CategoryPage', description: 'Account settings and user preferences route.'}
           },
           {
             path: 'user/:user_id',
             loadComponent: loadUserProfileActivityComponent,
-            data: { type: 'account', animation: 'CategoryPage' }
+            data: {type: 'account', animation: 'CategoryPage', description: 'User activity details route by user identifier.'}
           },
           {
             path: 'tenant-settings',
             loadComponent: loadTenantSettingsComponent,
-            data: { type: 'settings', animation: 'CategoryPage' }
+            data: {type: 'settings', animation: 'CategoryPage', description: 'Tenant settings management route.'}
           },
           {
             path: 'tenant',
             loadComponent: loadViewTenantComponent,
-            data: { type: 'view', animation: 'CategoryPage' }
+            data: {type: 'view', animation: 'CategoryPage', description: 'Tenant management route group.'}
           },
           {
             path: 'system-settings',
             loadComponent: loadSidebarProfileSystemSettingsComponent,
-            data: { type: 'srttings', animation: 'CategoryPage' }
+            data: {type: 'srttings', animation: 'CategoryPage', description: 'System settings route for platform configuration.'}
           },
           {
             path: 'alerts',
+            data: { description: 'Alerts shortcut route under profile.' },
             redirectTo: 'homepage',
             pathMatch: 'full'
           },
           {
             path: '**',
+            data: { description: 'Wildcard fallback route for unknown paths.' },
             redirectTo: 'consolidated/all'
           }
         ]
@@ -787,6 +813,6 @@ export const routes: Routes = [
   {
     path: '**',
     loadComponent: loadErrorHandlerComponent,
-    data: { animation: 'ErrorPage' }
+    data: {animation: 'ErrorPage', description: 'Wildcard fallback route for unknown paths.'}
   }
 ];
