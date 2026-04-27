@@ -297,13 +297,16 @@ export class HomeSearchComponent implements OnInit {
     this.detachWindowPointerListeners();
   }
 
-  selectTab(tab:string){
+  async selectTab(tab:string){
     this.selectedTab=tab;
-    this.router.navigate([], {
+    await this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { tab },
       queryParamsHandling: 'merge',
     });
+    if(tab === 'Geo Fencing'){
+      this.onSearchSubmit();
+    }
   }
 
   @HostListener('document:click', ['$event'])

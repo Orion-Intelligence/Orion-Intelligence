@@ -5,7 +5,7 @@
   [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters"
 (reloadFilters)="reloadFilters($event)" [showSelectedFilters]="true"></app-result>
 
-<div [class]="isGeoFencing ? 'ui-consolidated-theme mt-4 mx-[30px] w-auto min-h-0 flex-1 overflow-y-auto overflow-x-hidden max-[1200px]:mx-[20px] max-[1000px]:mx-[15px] max-[640px]:mx-[10px]' : 'ui-consolidated-theme mt-4 mx-[30px] w-auto space-y-4 pb-16 max-[1200px]:mx-[20px] max-[1000px]:mx-[15px] max-[640px]:mx-[10px]'">
+<div [class]="isGeoFencing ? 'ui-consolidated-theme mt-4 w-auto min-h-0 flex-1 overflow-y-auto overflow-x-hidden max-[1200px]:mx-[20px] max-[1000px]:mx-[15px] max-[640px]:mx-[10px]' : 'ui-consolidated-theme mt-4 mx-[30px] w-auto space-y-4 pb-16 max-[1200px]:mx-[20px] max-[1000px]:mx-[15px] max-[640px]:mx-[10px]'">
   @if (isNetworkIntel) {
     <app-network-intel></app-network-intel>
   } @else if(isGeoFencing) {
