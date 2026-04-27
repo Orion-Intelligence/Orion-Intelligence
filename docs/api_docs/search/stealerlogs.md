@@ -5,7 +5,6 @@
 Search stealer log credentials and log files using a flexible IOC-based query system, along with optional date range filtering. The search supports multiple field-based filters (such as domain, email, username, IP, etc.) and logical operators (&&, ||) to build complex queries.
 
 Request body (`search_credential_param_model`):
-- **daterange** — optional creation date range in `YYYY-MM-DD,YYYY-MM-DD` format; empty string means no filter
 - **ioc** — main search query string using field-based syntax
   - General search across all fields:
     - "m_search_all:<value>"
@@ -39,6 +38,13 @@ Minimal example request for a credential (stealer log) search:
 ```
 
 Example with Filters
+```json
+{
+  "ioc": "m_domain:jon.com",
+  "daterange": "2026-04-09,2026-04-17"
+}
+```
+
 ```json
 {
   "ioc": "m_domain:jon.com && m_email:jon@gmail.com",
