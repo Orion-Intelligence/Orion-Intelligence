@@ -281,30 +281,6 @@ class search_model:
 
         return grouped_consolidated_search_callback_model(**results)
 
-    async def search_stealerlogs_result(self, param: search_credential_param_model, alert=False):
-
-        document, data_filter = elastic_request_generator().on_search_stealerlogs_data(param, param.entity_filter, alert=alert)
-
-        if not data_filter:
-            return False, []
-
-        m_status, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
-
-        hits = m_documents.get("hits", {}).get("hits", [])
-        for h in hits:
-            src = h.get("_source", {})
-            src["_id"] = h.get("_id")
-            if param.category != "credential" and "mapping" in src:
-                src["mapping"] = [s.rsplit(":", 1)[0].strip("{}").replace("_", " ").strip() for s in src["mapping"]]
-
-        response = await self.__search_callback.search_handler(
-            m_status, m_documents, search_stealerlog_callback_model, {}, data_limit=False)
-        page = getattr(param, "page", 1) or 1
-        size = getattr(param, "size", 500) or 500
-        result_count = len(response.Result or [])
-        response.Page_Count = page + 1 if result_count >= size else (page if result_count > 0 else max(1, page - 1))
-        return response
-
     async def search_stealer_iocs(self, param: search_credential_param_model):
 
         document, data_filter  = elastic_request_generator().on_search_stealer_iocs(param)
