@@ -12,67 +12,26 @@
   }
 
   <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
+    @if (showTopBar) {
     <div class="z-20 flex w-full flex-wrap items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-760)] px-[14px] py-[15px] max-[640px]:gap-2">
       <div class="flex max-w-full flex-nowrap gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="activeTab === 'map' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setActiveView('map')">
           Satellite Map
-        </button>
-        <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="activeTab === 'tracking' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setActiveView('tracking')">
-          World Tracking
         </button>
         <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="activeTab === 'threat' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setActiveView('threat')">
           Threat Lens
         </button>
       </div>
     </div>
+    }
 
-    @if(!isThreatView){
-    <div class="z-10 flex min-h-[56px] flex-wrap items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-blur-760)] px-[14px] py-2 max-[640px]:gap-2">
-      @if (isMapView) {
-        <select class="ui-select h-10 min-w-[180px] max-w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none transition focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-70" [(ngModel)]="selectedLayer" (change)="onLayerChange()">
-          <option value="esri">ESRI Satellite</option>
-          <option value="osm">OpenStreetMap</option>
-        </select>
-
-        <button class="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="openGeocodeModal()">
-          <i class="bi bi-globe2 text-[13px]"></i>
-          Location
-        </button>
-      } @else if (isTrackingView){
-        <div class="relative min-w-[200px] tracking-dropdown">
-
-  <button (click)="toggleTrackingDropdown()" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] text-left flex items-center justify-between">
-
-    <span>{{ getTrackingLabel() }}</span>
-    <i class="bi bi-chevron-down text-[11px] opacity-70"></i>
-  </button>
-
-  @if (isTrackingDropdownOpen) {
-    <div class="absolute z-50 mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-lg overflow-hidden" (click)="$event.stopPropagation()">
-
-      <label class="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-[var(--color-blue-710)]">
-        <input type="checkbox" [checked]="isSelected('aircraft')" (change)="onTrackingSelectionChange('aircraft', $event)">
-        Aircraft
-      </label>
-
-      <label class="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-[var(--color-blue-710)]">
-        <input type="checkbox" [checked]="isSelected('ship')" (change)="onTrackingSelectionChange('ship', $event)">
-        Ship
-      </label>
-
-    </div>
-  }
-</div>
-      }
-    </div>
-  }
     @if (isTrackingView && trackingError) {
       <div class="border-b border-[rgba(239,68,68,.25)] bg-[rgba(239,68,68,.08)] px-[14px] py-[7px] text-[12px] text-[#fca5a5]">
         <i class="bi bi-exclamation-triangle"></i> {{ trackingError }}
       </div>
     }
 
-    <div class="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)] overflow-hidden" [ngClass]="isMapView ? ['grid-cols-[minmax(0,1fr)_300px]','max-[1100px]:grid-cols-1','max-[1100px]:grid-rows-[minmax(0,1fr)_auto]'] : ['grid-cols-1']">
+    <div class="relative grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden">
       <div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:min-h-[380px]">
         @if (isTrackingView) {
           <app-satellite-tracking-map-section class="block h-full min-h-0 min-w-0 overflow-hidden"
@@ -107,23 +66,67 @@
             (featureSelected)="onMapFeatureSelected($event)"
             (mapMoved)="onMapMoved($event)">
           </app-satellite-map-section>
+          <div class="absolute right-3 top-3 z-[920] flex items-center gap-2 map-overlay-menu">
+            <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] shadow-[0_8px_24px_rgba(2,6,23,.35)]">
+              <button class="px-3 py-2 text-[11px] font-semibold transition-colors" [ngClass]="selectedLayer === 'esri' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('esri')">Satellite</button>
+              <button class="px-3 py-2 text-[11px] font-semibold transition-colors" [ngClass]="selectedLayer === 'osm' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('osm')">Street</button>
+            </div>
+            <button class="map-overlay-menu rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-[13px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)]" (click)="togglePanelMenu()">
+              <i class="bi bi-list"></i>
+            </button>
+          </div>
+
+          @if (isPanelMenuOpen) {
+            <div class="map-overlay-menu absolute right-3 top-16 z-[930] flex w-[230px] flex-col overflow-hidden rounded-[12px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_16px_40px_rgba(2,6,23,.45)] backdrop-blur-md">
+              <div class="border-b border-white/10 p-2">
+                <button class="flex w-full items-center gap-2 rounded-[8px] border border-white/15 bg-white/5 px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text1)] transition-colors hover:bg-white/10" (click)="openGeocodeModal()">
+                  <i class="bi bi-geo-alt"></i>
+                  Location
+                </button>
+                <button class="mt-2 flex w-full items-center gap-2 rounded-[8px] border border-white/15 bg-white/5 px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text1)] transition-colors hover:bg-white/10" (click)="setActiveView('tracking')">
+                  <i class="bi bi-globe2"></i>
+                  World Tracking
+                </button>
+              </div>
+              @if (isTrackingView) {
+                <div class="tracking-dropdown border-b border-white/10 p-2">
+                  <button (click)="toggleTrackingDropdown()" class="flex h-9 w-full items-center justify-between rounded-[8px] border border-white/15 bg-white/5 px-3 text-left text-[12px] font-medium text-[var(--color-text1)]">
+                    <span>{{ getTrackingLabel() }}</span>
+                    <i class="bi bi-chevron-down text-[10px] opacity-70"></i>
+                  </button>
+                  @if (isTrackingDropdownOpen) {
+                    <div class="mt-1 overflow-hidden rounded-[8px] border border-white/15 bg-[rgba(8,16,27,0.96)]" (click)="$event.stopPropagation()">
+                      <label class="flex cursor-pointer items-center gap-2 px-3 py-2 text-[12px] text-[var(--color-text1)] hover:bg-white/5">
+                        <input type="checkbox" [checked]="isSelected('aircraft')" (change)="onTrackingSelectionChange('aircraft', $event)">
+                        Aircraft
+                      </label>
+                      <label class="flex cursor-pointer items-center gap-2 px-3 py-2 text-[12px] text-[var(--color-text1)] hover:bg-white/5">
+                        <input type="checkbox" [checked]="isSelected('ship')" (change)="onTrackingSelectionChange('ship', $event)">
+                        Ship
+                      </label>
+                    </div>
+                  }
+                </div>
+              }
+              @for (tab of panelTabs; track tab.id) {
+                <button class="border-b border-white/10 px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text3)] transition-colors last:border-b-0 hover:bg-white/5 hover:text-[var(--color-text1)]" (click)="openPanelPopup(tab.id)">
+                  {{ tab.label }}
+                </button>
+              }
+            </div>
+          }
         } @else if(isThreatView){
           <div class="h-full min-h-0 w-full overflow-y-auto overflow-x-hidden">
             <app-threat-lens class="block w-full min-h-[560px]"></app-threat-lens>
           </div>
         }
       </div>
-        @if (isMapView) {
-  <div class="flex flex-col overflow-hidden border-l border-[var(--color-border)] bg-[var(--color-blue-760)] max-[1200px]:max-h-[45vh] max-[1200px]:border-l-0 max-[1200px]:border-t">
-
-    <div class="flex shrink-0 overflow-x-auto border-b border-[var(--color-border)]">
-      @for (tab of panelTabs; track tab.id) {
-        <button class="flex-1 whitespace-nowrap border-b-2 px-2 py-[10px] text-[10px] font-semibold uppercase tracking-[0.06em] transition-colors" [ngClass]="activePanel === tab.id ? 'border-b-[#3a7bd5] text-[#7eb8f7]' : 'border-b-transparent text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setPanel(tab.id)">
-          {{ tab.label }}
-        </button>
-      }
+        @if (isMapView && isPanelPopupOpen) {
+  <div class="map-overlay-menu absolute right-3 top-28 z-[930] flex h-[min(70vh,620px)] w-[min(380px,calc(100%-24px))] flex-col overflow-hidden rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md">
+    <div class="flex shrink-0 items-center justify-between border-b border-white/10 px-3 py-2">
+      <div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">{{ activePanelLabel }}</div>
+      <button class="rounded-[8px] border border-[var(--color-border)] px-2 py-1 text-[11px] text-[var(--color-text3)] hover:text-[var(--color-text1)]" (click)="closePanelPopup()">Close</button>
     </div>
-
     <div class="min-h-0 flex-1 overflow-y-auto">
 
 @if (activePanel === 'dashboard') {

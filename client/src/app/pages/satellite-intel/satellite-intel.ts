@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit, computed, effect } from '@angular/core';
+import { Component, HostListener, Input, OnDestroy, OnInit, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, Subscription } from 'rxjs';
@@ -40,6 +40,7 @@ import { ORION_INFRASTRUCTURE_FILTERS, ORION_POWER_FILTERS, OrionSatelliteFeatur
   animations: [fadeInDashboardItem],
 })
 export class SatelliteIntel implements OnInit, OnDestroy {
+  @Input() toolbarMode: 'hidden' | 'geo' = 'hidden';
   private sub?: Subscription;
   private aircraftTrackSub?: Subscription;
   private shipTrackSub?: Subscription;
@@ -101,6 +102,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   mainLoadingMessage = 'Please wait while the request completes...';
   selectedTrackingTypes: ('aircraft' | 'ship')[] = ['aircraft'];
   isTrackingDropdownOpen = false;
+  isPanelMenuOpen = false;
+  isPanelPopupOpen = false;
   isScanning = computed(() =>
     !!this.pendingRequest && !this.satelliteService.onError(),);
 
@@ -194,6 +197,10 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     return this.activeTab === 'threat';
   }
 
+  get showTopBar(): boolean {
+    return this.toolbarMode !== 'hidden';
+  }
+
   setPanel(id: typeof this.activePanel): void {
     this.activePanel = id;
 
@@ -217,10 +224,36 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   setActiveView(view: 'map' | 'tracking' | 'threat'): void {
     this.activeTab = view;
+    this.isPanelMenuOpen = false;
+    this.isPanelPopupOpen = false;
     if (view === 'tracking') {
       this.selectedTrackingTypes = ['aircraft'];
       this.handleTrackingSelection();
     }
+  }
+
+  get activePanelLabel(): string {
+    const tab = this.panelTabs.find((entry) => entry.id === this.activePanel);
+    return tab?.label ?? 'Panel';
+  }
+
+  setLayer(layer: 'esri' | 'osm'): void {
+    this.selectedLayer = layer;
+    this.onLayerChange();
+  }
+
+  togglePanelMenu(): void {
+    this.isPanelMenuOpen = !this.isPanelMenuOpen;
+  }
+
+  openPanelPopup(id: typeof this.activePanel): void {
+    this.setPanel(id);
+    this.isPanelPopupOpen = true;
+    this.isPanelMenuOpen = false;
+  }
+
+  closePanelPopup(): void {
+    this.isPanelPopupOpen = false;
   }
 
   toggleFacilities(): void {
@@ -303,6 +336,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
     if (!target.closest('.tracking-dropdown')) {
       this.isTrackingDropdownOpen = false;
+    }
+    if (!target.closest('.map-overlay-menu')) {
+      this.isPanelMenuOpen = false;
     }
   }
 

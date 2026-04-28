@@ -687,7 +687,7 @@ export const routes: Routes = [
         data: { animation: 'CategoryPage' }
       },
       {
-        path: 'satelliteint',
+        path: 'satellite-intel',
         canActivate: [subscriptionGuard],
         loadComponent: loadSatelliteIntelComponent
       },

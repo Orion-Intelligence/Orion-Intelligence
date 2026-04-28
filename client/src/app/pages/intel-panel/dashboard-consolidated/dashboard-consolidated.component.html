@@ -10,7 +10,7 @@
     <app-network-intel></app-network-intel>
   } @else if(isGeoFencing) {
     <div class="flex h-full min-h-0 w-full">
-      <app-satellite-intel class="block h-full min-h-0 w-full"></app-satellite-intel>
+      <app-satellite-intel class="block h-full min-h-0 w-full" [toolbarMode]="'geo'"></app-satellite-intel>
     </div>
   }@else if (!isIOC) {
     @if (licenseService.canUseScanning()) {
