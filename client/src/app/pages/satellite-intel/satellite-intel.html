@@ -1,11 +1,11 @@
 <div class="relative flex h-full min-h-0 w-full flex-col overflow-hidden">
   @if (isMainLoading) {
-    <div class="absolute inset-0 z-[10000] flex items-center justify-center bg-[var(--color-blue-850)]">
-      <div class="mx-4 flex min-w-[220px] max-w-[360px] flex-col items-center gap-3 rounded-[16px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-6 py-5 text-center shadow-[0_12px_30px_rgba(0,0,0,0.2)] [body.light-theme_&]:shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
-        <div class="h-11 w-11 animate-spin rounded-full border-4 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></div>
+    <div class="absolute inset-0 z-[1000] flex items-center justify-center bg-[rgba(2,6,23,0.86)] backdrop-blur-[2px]">
+      <div class="mx-4 flex min-w-[220px] max-w-[360px] flex-col items-center gap-3 rounded-[16px] border border-sky-400/20 bg-[#0d1220]/95 px-6 py-5 text-center shadow-[0_0_30px_rgba(56,189,248,0.12)]">
+        <div class="h-11 w-11 animate-spin rounded-full border-4 border-sky-400/20 border-t-sky-300"></div>
         <div>
-          <p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">{{ mainLoadingTitle }}</p>
-          <p class="mt-1 text-[12px] text-[var(--color-text3)]">{{ mainLoadingMessage }}</p>
+          <p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-sky-200">{{ mainLoadingTitle }}</p>
+          <p class="mt-1 text-[12px] text-[#c8d4e8]">{{ mainLoadingMessage }}</p>
         </div>
       </div>
     </div>
@@ -24,16 +24,12 @@
           Threat Lens
         </button>
       </div>
-    </div>
 
-    @if(!isThreatView){
-    <div class="z-10 flex min-h-[56px] flex-wrap items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-blur-760)] px-[14px] py-2 max-[640px]:gap-2">
       @if (isMapView) {
         <select class="ui-select h-10 min-w-[180px] max-w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none transition focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-70" [(ngModel)]="selectedLayer" (change)="onLayerChange()">
           <option value="esri">ESRI Satellite</option>
           <option value="osm">OpenStreetMap</option>
         </select>
-
         <button class="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="openGeocodeModal()">
           <i class="bi bi-globe2 text-[13px]"></i>
           Location
@@ -64,8 +60,11 @@
   }
 </div>
       }
+      @else if (isThreatView) {
+        <app-threat-lens></app-threat-lens>
+      }
     </div>
-  }
+
     @if (isTrackingView && trackingError) {
       <div class="border-b border-[rgba(239,68,68,.25)] bg-[rgba(239,68,68,.08)] px-[14px] py-[7px] text-[12px] text-[#fca5a5]">
         <i class="bi bi-exclamation-triangle"></i> {{ trackingError }}
@@ -74,7 +73,7 @@
 
     <div class="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)] overflow-hidden" [ngClass]="isMapView ? ['grid-cols-[minmax(0,1fr)_300px]','max-[1100px]:grid-cols-1','max-[1100px]:grid-rows-[minmax(0,1fr)_auto]'] : ['grid-cols-1']">
       <div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:min-h-[380px]">
-        @if (isTrackingView) {
+        @if (activeTab === 'tracking') {
           <app-satellite-tracking-map-section class="block h-full min-h-0 min-w-0 overflow-hidden"
             [lat]="lat"
             [lon]="lon"
@@ -85,31 +84,30 @@
             [globalShipsTrackingEnabled]="globalShipsTrackingEnabled"
             (mapMoved)="onMapMoved($event)">
           </app-satellite-tracking-map-section>
-        } @else if(isMapView) {
+        } @else {
           <app-satellite-map-section class="block h-full min-h-0 min-w-0 overflow-hidden"
             [lat]="lat"
             [lon]="lon"
             [delta]="delta"
             [selectedLayer]="selectedLayer"
             [facilitiesVisible]="facilitiesVisible"
-            [facilitiesData]="facilitiesData"
+            [orionData]="filteredData"
             [anomalyData]="anomalyResult"
             [aircraftData]="[]"
             [shipsData]="[]"
+            [focusedFeature]="focusedFeature"
             [isScanning]="isScanning()"
             [progress]="satelliteService.progress()"
             [currentStep]="currentStep"
             [progressSegments]="progressSegments"
             [errorMessage]="satelliteService.onError()?.message || null"
             [hasSearched]="hasSearched"
+            (featureSelected)="onMapFeatureSelected($event)"
             (mapMoved)="onMapMoved($event)">
           </app-satellite-map-section>
-        } @else if(isThreatView){
-          <div class="h-full min-h-0 w-full overflow-y-auto overflow-x-hidden">
-            <app-threat-lens class="block w-full min-h-[560px]"></app-threat-lens>
-          </div>
         }
       </div>
+
         @if (isMapView) {
   <div class="flex flex-col overflow-hidden border-l border-[var(--color-border)] bg-[var(--color-blue-760)] max-[1200px]:max-h-[45vh] max-[1200px]:border-l-0 max-[1200px]:border-t">
 
@@ -122,8 +120,105 @@
     </div>
 
     <div class="min-h-0 flex-1 overflow-y-auto">
+@if (activePanel === 'dashboard') {
+              <div class="px-[14px] py-3">
+                <div class="rounded-[12px] border border-[#1e2a40] bg-[#0a1020] p-3">
+                  <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6f8fb3]">Search</div>
+                  <div class="mt-2 flex items-center gap-2 rounded-[10px] border border-[#21314b] bg-[#08101d] px-3 py-2">
+                    <i class="bi bi-search text-[12px] text-[#6f8fb3]"></i>
+                    <input type="text" [ngModel]="dashboardSearch" (ngModelChange)="onDashboardSearchInput($event)" placeholder="Search power plants or facilities" class="w-full bg-transparent text-[13px] text-[#e8f0fc] outline-none placeholder:text-[#4c6889]"/>
+                    @if (dashboardSearch) {
+                      <button type="button" class="text-[12px] text-[#6f8fb3] hover:text-white" (click)="clearDashboardSearch()">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    }
+                  </div>
 
-      @if (activePanel === 'compare') {
+                  @if (dashboardSearchResults.length > 0) {
+                    <div class="mt-2 overflow-hidden rounded-[10px] border border-[#1c2740]">
+                      @for (feature of dashboardSearchResults; track feature.id) {
+                        <button type="button" class="flex w-full items-start justify-between border-b border-[#182133] bg-[#0c1423] px-3 py-2 text-left transition-colors last:border-b-0 hover:bg-[#101a2c]" (click)="focusDashboardFeature(feature)">
+                          <div>
+                            <div class="text-[12px] font-semibold text-[#ecf3ff]">{{ feature.name }}</div>
+                            <div class="mt-0.5 text-[11px] text-[#6f8fb3]">{{ feature.type }} · {{ feature.source }}</div>
+                          </div>
+                          <span class="mt-0.5 h-2.5 w-2.5 rounded-full" [ngClass]="typeDotClass(feature.type)"></span>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <div class="mt-3 rounded-[12px] border border-[#1e2a40] bg-[#0a1020] p-3">
+                  <div class="flex items-center justify-between">
+                    <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6f8fb3]">Power</div>
+                    <div class="text-[11px] text-[#4c6889]">{{ visiblePowerCount }} visible</div>
+                  </div>
+                  <div class="mt-2 grid grid-cols-2 gap-2">
+                    @for (filter of powerFilters; track filter.key) {
+                      <button type="button" class="flex items-center justify-between rounded-[10px] border px-3 py-2 text-[12px] transition-colors" [ngClass]="isFilterSelected(filter.key) ? ['border-[#284a71]','bg-[#11243d]','text-[#ecf3ff]'] : ['border-[#1d2940]','bg-[#0b1322]','text-[#6885a9]']" (click)="toggleDashboardFilter(filter.key)">
+                        <span class="inline-flex items-center gap-2">
+                          <span class="h-2.5 w-2.5 rounded-full" [ngClass]="typeDotClass(filter.key)"></span>
+                          {{ filter.label }}
+                        </span>
+                        <span class="font-mono text-[11px]">{{ filterCount(filter.key) }}</span>
+                      </button>
+                    }
+                  </div>
+                </div>
+
+                <div class="mt-3 rounded-[12px] border border-[#1e2a40] bg-[#0a1020] p-3">
+                  <div class="flex items-center justify-between">
+                    <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6f8fb3]">Infrastructure</div>
+                    <div class="flex items-center gap-2">
+                      <div class="text-[11px] text-[#4c6889]">{{ visibleInfrastructureCount }} visible</div>
+                      <button type="button" class="rounded-[6px] border px-2 py-1 text-[11px] font-medium transition-colors" [ngClass]="facilitiesVisible ? ['border-[#1d9e75]','bg-[#0f6e56]','text-[#9fe1cb]'] : ['border-[#27466d]','bg-[#142843]','text-[#7eb8f7]']" (click)="toggleFacilities()">
+                        {{ facilitiesVisible ? 'On' : 'Off' }}
+                      </button>
+                    </div>
+                  </div>
+                  <div class="mt-2 grid grid-cols-2 gap-2">
+                    @for (filter of infrastructureFilters; track filter.key) {
+                      <button type="button" class="flex items-center justify-between rounded-[10px] border px-3 py-2 text-[12px] transition-colors" [ngClass]="isFilterSelected(filter.key) ? ['border-[#284a71]','bg-[#11243d]','text-[#ecf3ff]'] : ['border-[#1d2940]','bg-[#0b1322]','text-[#6885a9]']" (click)="toggleDashboardFilter(filter.key)">
+                        <span class="inline-flex items-center gap-2">
+                          <span class="h-2.5 w-2.5 rounded-full" [ngClass]="typeDotClass(filter.key)"></span>
+                          {{ filter.label }}
+                        </span>
+                        <span class="font-mono text-[11px]">{{ filterCount(filter.key) }}</span>
+                      </button>
+                    }
+                  </div>
+                </div>
+
+                <div class="mt-3 rounded-[12px] border border-[#1e2a40] bg-[#0a1020] p-3">
+                  <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6f8fb3]">Selection</div>
+                  @if (selectedFeature) {
+                    <div class="mt-2 rounded-[10px] border border-[#1b2a40] bg-[#0d1627] p-3">
+                      <div class="flex items-start justify-between gap-3">
+                        <div>
+                          <div class="text-[13px] font-semibold text-[#ecf3ff]">{{ selectedFeature.name }}</div>
+                          <div class="mt-1 text-[11px] text-[#6f8fb3]">{{ selectedFeature.type }} · {{ selectedFeature.source }}</div>
+                        </div>
+                        <span class="mt-1 h-3 w-3 rounded-full" [ngClass]="typeDotClass(selectedFeature.type)"></span>
+                      </div>
+                      @if (selectedFeature.capacityMw !== null && selectedFeature.capacityMw !== undefined) {
+                        <div class="mt-3 flex justify-between text-[12px]">
+                          <span class="text-[#6f8fb3]">Capacity</span>
+                          <span class="font-mono text-[#ecf3ff]">{{ selectedFeature.capacityMw }} MW</span>
+                        </div>
+                      }
+                      <div class="mt-2 flex justify-between text-[12px]">
+                        <span class="text-[#6f8fb3]">Coordinates</span>
+                        <span class="font-mono text-[#ecf3ff]">{{ selectedFeature.coordinates[1].toFixed(4) }}, {{ selectedFeature.coordinates[0].toFixed(4) }}</span>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="mt-2 text-[12px] leading-[1.7] text-[#4c6889]">Click a map point or choose a search result to inspect capacity, source, and coordinates.</div>
+                  }
+                </div>
+              </div>
+            }
+      @else if (activePanel === 'compare') {
         <app-satellite-month-compare
           [isScanning]="isScanning()"
           [useMainLoading]="true"
@@ -137,7 +232,7 @@
         </app-satellite-month-compare>
       }
 
-      @if (activePanel === 'anomaly') {
+      @else if (activePanel === 'anomaly') {
         <div class="flex flex-col h-full">
 
           <div class="flex items-center justify-between px-[14px] py-2 border-b border-[var(--color-border)]">
@@ -154,18 +249,14 @@
             @if (!hasSearched) {
               <div class="px-[14px] py-6 text-center text-[12px] text-[var(--color-text3)]">
                 Run scan to detect anomalies
+
               </div>
-            } @else if (isScanning()) {
-              <div class="px-[14px] py-6 text-center text-[12px] text-[var(--color-text3)]">
-                Loading anomaly data...
-              </div>
-            } @else if (!anomalyResult) {
-              <div class="px-[14px] py-6 text-center text-[12px] text-[var(--color-text3)]">
-                No anomaly data found
-              </div>
-            } @else {
+            }
+
+
+            <div class="flex-1 overflow-auto">
               <app-satellite-anomaly-section
-                [isScanning]="false"
+                [isScanning]="isScanning()"
                 [useMainLoading]="true"
                 [progress]="satelliteService.progress()"
                 [currentStep]="currentStep"
@@ -174,40 +265,38 @@
                 [hasSearched]="hasSearched"
                 [anomalyResult]="anomalyResult">
               </app-satellite-anomaly-section>
+              </div></div></div>
             }
-          </div>
-        </div>
-      }
 
-      @if (activePanel === 'sentinel') {
-        <app-satellite-sentinel-search
-          [isScanning]="isScanning()"
-          [useMainLoading]="true"
-          [progress]="satelliteService.progress()"
-          [currentStep]="currentStep"
-          [progressSegments]="progressSegments"
-          [errorMessage]="satelliteService.onError()?.message || null"
-          [hasSearched]="hasSearched"
-          [sentinelResults]="sentinelResults?.results || null"
-          (runSearch)="onRunSentinelSearch()">
-        </app-satellite-sentinel-search>
-      }
+            @else if (activePanel === 'sentinel') {
+              <app-satellite-sentinel-search
+                [isScanning]="isScanning()"
+                [useMainLoading]="true"
+                [progress]="satelliteService.progress()"
+                [currentStep]="currentStep"
+                [progressSegments]="progressSegments"
+                [errorMessage]="satelliteService.onError()?.message || null"
+                [hasSearched]="hasSearched"
+                [sentinelResults]="sentinelResults?.results || null"
+                (runSearch)="onRunSentinelSearch()">
+              </app-satellite-sentinel-search>
+            }
 
-      @if (activePanel === 'image') {
-        <app-satellite-sentinel-image
-          [isScanning]="isScanning()"
-          [useMainLoading]="true"
-          [progress]="satelliteService.progress()"
-          [currentStep]="currentStep"
-          [progressSegments]="progressSegments"
-          [errorMessage]="satelliteService.onError()?.message || null"
-          [hasSearched]="hasSearched"
-          [imageResult]="sentinelImageResult"
-          (runFetch)="onRunSentinelImage($event)">
-        </app-satellite-sentinel-image>
-      }
+            @else if (activePanel === 'image') {
+              <app-satellite-sentinel-image
+                [isScanning]="isScanning()"
+                [useMainLoading]="true"
+                [progress]="satelliteService.progress()"
+                [currentStep]="currentStep"
+                [progressSegments]="progressSegments"
+                [errorMessage]="satelliteService.onError()?.message || null"
+                [hasSearched]="hasSearched"
+                [imageResult]="sentinelImageResult"
+                (runFetch)="onRunSentinelImage($event)">
+              </app-satellite-sentinel-image>
+            }
 
-      @if (activePanel === 'facilities') {
+            @else if (activePanel === 'facilities') {
         <div class="flex flex-col h-full">
 
           <div class="flex items-center justify-between px-[14px] py-2 border-b border-[var(--color-border)]">
@@ -254,10 +343,9 @@
           </div>
         </div>
       }
-
-    </div>
-  </div>
-}
+          </div>
+        </div>
+      }
     </div>
   </div>
 

@@ -1,9 +1,12 @@
 import { Component, HostListener, OnDestroy, OnInit, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SatelliteIntelService } from './satellite-intel-service.service';
+import { OrionSatelliteService } from './orion-satellite.service';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { GeocodeModalComponent } from './components/geocode-modal/geocode-modal.component';
 import { MapSectionComponent } from './map-section/map-section.component';
@@ -12,8 +15,9 @@ import { MonthCompareSectionComponent } from './month-compare-section/month-comp
 import { AnomalySectionComponent } from './anomaly-section/anomaly-section.component';
 import { SentinelSearchSectionComponent } from './sentinel-search-section/sentinel-search-section.component';
 import { SentinelImageSectionComponent } from './sentinel-image-section/sentinel-image-section.component';
-import { SatelliteFacilitiesResponse, SatelliteAnomalyResponse, SatelliteCompareResponse, SatelliteSentinelImageResult, SatelliteSentinelSearchResponse, SatelliteGeocodeResult, SatelliteLiveAircraft, SatelliteLiveShip, } from '../../shared/model/satellite-intel/satellite-intel-api.models';
-import { ThreatLensComponent } from "../threat-lens/threat-lens";
+import { SatelliteFacilitiesResponse, SatelliteAnomalyResponse, SatelliteCompareResponse, SatelliteSentinelImageResult, SatelliteSentinelSearchResponse, SatelliteLiveAircraft, SatelliteLiveShip, } from '../../shared/model/satellite-intel/satellite-intel-api.models';
+import { ORION_INFRASTRUCTURE_FILTERS, ORION_POWER_FILTERS, OrionSatelliteFeature, OrionSatelliteFeatureType } from './model/satellite-intel.model';
+import { ThreatLensComponent } from '../threat-lens/threat-lens';
 
 @Component({
   selector:    'app-satellite-intel',
@@ -22,7 +26,7 @@ import { ThreatLensComponent } from "../threat-lens/threat-lens";
   host:        {
     'class': 'flex h-full min-h-0 w-full flex-1',
   },
-  imports: [
+  imports:    [
     CommonModule,
     FormsModule,
     GeocodeModalComponent,
@@ -38,18 +42,24 @@ import { ThreatLensComponent } from "../threat-lens/threat-lens";
 })
 export class SatelliteIntel implements OnInit, OnDestroy {
   private sub?: Subscription;
+  private wriSub?: Subscription;
+  private facilitiesSub?: Subscription;
   private aircraftTrackSub?: Subscription;
   private shipTrackSub?: Subscription;
   private aircraftTimer?: ReturnType<typeof setInterval>;
   private shipsTimer?: ReturnType<typeof setInterval>;
+  private dashboardSearchSub?: Subscription;
+  private readonly dashboardSearch$ = new Subject<string>();
   private pendingRequest: 'facilities' | 'anomaly' | 'compare' | 'sentinel' | 'sentinel-image' | null = null;
   private skipNextMapMovedEvent = false;
   private mainLoadingSequence = 0;
   private mainLoadingRequests = new Map<number, { title: string; message: string }>();
 
   readonly progressSegments = Array.from({ length: 20 }, (_, i) => i);
-  readonly panelTabs = [ { id: 'compare', label: 'Compare' }, { id: 'anomaly', label: 'Anomaly' }, { id: 'sentinel', label: 'Sentinel' }, { id: 'image', label: 'Image' }, { id: 'facilities', label: 'Facilities' }, ] as const;
-  activePanel: 'compare' | 'anomaly' | 'sentinel' | 'image' | 'facilities' = 'compare';
+  readonly powerFilters = ORION_POWER_FILTERS;
+  readonly infrastructureFilters = ORION_INFRASTRUCTURE_FILTERS;
+  readonly panelTabs = [ { id: 'dashboard', label: 'Dashboard' }, { id: 'compare', label: 'Compare' }, { id: 'anomaly', label: 'Anomaly' }, { id: 'sentinel', label: 'Sentinel' }, { id: 'image', label: 'Image' }, { id: 'facilities', label: 'Facilities' }, ] as const;
+  activePanel: 'dashboard' | 'compare' | 'anomaly' | 'sentinel' | 'image' | 'facilities' = 'dashboard';
   activeTab: 'map' | 'tracking' | 'threat' = 'map';
   coordsForm = { value: '', delta: 0.05 };
   formError:  string | null = null;
@@ -65,12 +75,19 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   trackingError: string | null = null;
   aircraftData: SatelliteLiveAircraft[] = [];
   shipsData: SatelliteLiveShip[] = [];
-  searchQuery = '';
-  searchResults: SatelliteGeocodeResult[] = [];
+  dashboardSearch = '';
+  dashboardSearchResults: OrionSatelliteFeature[] = [];
   lat:   number | null = null;
   lon:   number | null = null;
   delta                = 0.05;
   facilitiesData:  SatelliteFacilitiesResponse['result'] | null = null;
+  wriData: OrionSatelliteFeature[] = [];
+  facilitiesMapData: OrionSatelliteFeature[] = [];
+  mergedData: OrionSatelliteFeature[] = [];
+  filteredData: OrionSatelliteFeature[] = [];
+  selectedFilters: OrionSatelliteFeatureType[] = [...ORION_POWER_FILTERS.map((filter) => filter.key), ...ORION_INFRASTRUCTURE_FILTERS.map((filter) => filter.key)];
+  focusedFeature: OrionSatelliteFeature | null = null;
+  selectedFeature: OrionSatelliteFeature | null = null;
   anomalyResult:   SatelliteAnomalyResponse['result']    | null = null;
   compareResult:   SatelliteCompareResponse['result']    | null = null;
   sentinelImageResult: SatelliteSentinelImageResult | null = null;
@@ -84,9 +101,10 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   selectedTrackingTypes: ('aircraft' | 'ship')[] = ['aircraft'];
   isTrackingDropdownOpen = false;
   isScanning = computed(() =>
-    !!this.pendingRequest && !this.satelliteService.onError(),);
+    this.satelliteService.isRunning() && !this.satelliteService.onError(),);
 
-  constructor( public satelliteService: SatelliteIntelService, private route: ActivatedRoute ) {
+  constructor( public satelliteService: SatelliteIntelService, private orionSatelliteService: OrionSatelliteService, private route: ActivatedRoute, private router: Router, ) {
+  // >>>>>>> origin/power_plants_addition
     effect(() => {
       const done = this.satelliteService.onDone();
       if (!done) {
@@ -128,7 +146,15 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.satelliteService.resetState();
-    this.setPanel('compare');
+    this.wriSub = this.orionSatelliteService.loadWRI().subscribe({
+      next: (data) => {
+        this.wriData = data;
+        this.refreshMergedData();
+      },
+    });
+    this.dashboardSearchSub = this.dashboardSearch$.pipe(debounceTime(300), distinctUntilChanged()).subscribe((query) => {
+      this.updateDashboardSearchResults(query);
+    });
     const section = this.route.snapshot.queryParamMap.get('section');
     const q = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
     if (section) {
@@ -140,14 +166,20 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       if (parsed) {
         this.inputLat = parsed.lat;
         this.inputLon = parsed.lon;
+        this.lat = parsed.lat;
+        this.lon = parsed.lon;
+        this.loadFacilities();
       }
     }
   }
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.wriSub?.unsubscribe();
+    this.facilitiesSub?.unsubscribe();
     this.aircraftTrackSub?.unsubscribe();
     this.shipTrackSub?.unsubscribe();
+    this.dashboardSearchSub?.unsubscribe();
     clearInterval(this.aircraftTimer);
     clearInterval(this.shipsTimer);
     this.satelliteService.cancelCurrentScan();
@@ -171,6 +203,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.satelliteService.resetState();
     this.pendingRequest = null;
     this.currentStep = '';
+
   }
 
   goToCoords(): void {
@@ -198,8 +231,11 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.facilitiesVisible = !this.facilitiesVisible;
     if (this.facilitiesVisible) {
       this.syncAppliedViewport();
-      this.loadFacilities();
+      if (!this.facilitiesMapData.length) {
+        this.loadFacilities();
+      }
     }
+    this.refreshMergedData();
   }
 
   isSelected(type: 'aircraft' | 'ship'): boolean {
@@ -311,30 +347,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.showGeocodeModal = true;
   }
 
-  selectSearchResult(r: SatelliteGeocodeResult): void {
-    this.inputLat   = r.lat;
-    this.inputLon   = r.lon;
-    this.inputDelta = r.delta;
-    this.searchQuery = r.name;
-    this.searchResults = [];
-    this.lat   = r.lat;
-    this.lon   = r.lon;
-    this.delta = r.delta;
-    this.coordsForm.value = `${r.lat}, ${r.lon}`;
-    this.coordsForm.delta = r.delta;
-    this.hasSearched = true;
-    this.loadFacilities();
-  }
-
-  closeSearchDrop(): void {
-    this.searchResults = [];
-  }
-
-  clearSearch(): void {
-    this.searchQuery = '';
-    this.searchResults = [];
-  }
-
   onMapMoved(center: { lat: number; lon: number; zoom: number }): void {
     if (this.skipNextMapMovedEvent) {
       this.skipNextMapMovedEvent = false;
@@ -357,7 +369,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     const lat = this.lat ?? this.inputLat;
     const lon = this.lon ?? this.inputLon;
     if (!lat || !lon) {
-      this.pendingRequest = null;
       return;
     }
     this.lat = lat;
@@ -470,6 +481,73 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.loadFacilities();
   }
 
+  onDashboardSearchInput(query: string): void {
+    this.dashboardSearch = query;
+    this.dashboardSearch$.next(query.trim().toLowerCase());
+  }
+
+  clearDashboardSearch(): void {
+    this.dashboardSearch = '';
+    this.dashboardSearchResults = [];
+    this.focusedFeature = null;
+    this.dashboardSearch$.next('');
+  }
+
+  toggleDashboardFilter(type: OrionSatelliteFeatureType): void {
+    if (this.selectedFilters.includes(type)) {
+      this.selectedFilters = this.selectedFilters.filter((entry) => entry !== type);
+    }
+    else {
+      this.selectedFilters = [...this.selectedFilters, type];
+    }
+    this.refreshMergedData();
+  }
+
+  isFilterSelected(type: OrionSatelliteFeatureType): boolean {
+    return this.selectedFilters.includes(type);
+  }
+
+  typeDotClass(type: OrionSatelliteFeatureType): string {
+    switch (type) {
+      case 'hydro':
+        return 'bg-[#2563eb]';
+      case 'nuclear':
+        return 'bg-[#dc2626]';
+      case 'coal':
+        return 'bg-[#111827]';
+      case 'oil':
+        return 'bg-[#f97316]';
+      case 'gas':
+      case 'industrial':
+      case 'other':
+        return 'bg-[#6b7280]';
+      case 'solar':
+        return 'bg-[#facc15]';
+      case 'wind':
+        return 'bg-[#16a34a]';
+      case 'airport':
+        return 'bg-[#9333ea]';
+      case 'port':
+        return 'bg-[#0d9488]';
+      case 'warehouse':
+        return 'bg-[#92400e]';
+      default:
+        return 'bg-[#6b7280]';
+    }
+  }
+
+  focusDashboardFeature(feature: OrionSatelliteFeature): void {
+    this.selectedFeature = feature;
+    this.focusedFeature = feature;
+    this.dashboardSearchResults = [];
+    this.dashboardSearch = feature.name;
+  }
+
+  onMapFeatureSelected(feature: OrionSatelliteFeature): void {
+    this.selectedFeature = feature;
+    this.focusedFeature = feature;
+  }
+
   cancel(): void {
     this.satelliteService.cancelCurrentScan();
     this.mainLoadingRequests.clear();
@@ -478,6 +556,18 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   facEntries(): [string, number][] {
     return Object.entries(this.facilitiesData?.type_counts || {}).sort((a, b) => b[1] - a[1]) as [string, number][];
+  }
+
+  filterCount(type: OrionSatelliteFeatureType): number {
+    return this.orionSatelliteService.filterByType(this.mergedData, type).length;
+  }
+
+  get visiblePowerCount(): number {
+    return this.filteredData.filter((feature) => feature.source === 'WRI').length;
+  }
+
+  get visibleInfrastructureCount(): number {
+    return this.filteredData.filter((feature) => feature.source === 'OSM').length;
   }
 
   get lastResultCount(): number {
@@ -498,24 +588,62 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   public loadFacilities(): void {
     if (!this.lat || !this.lon || !this.facilitiesVisible) {
+      console.log(this.lon+" "+this.lat+" "+this.facilitiesVisible);
+      this.facilitiesMapData = [];
+      this.facilitiesData = null;
+      this.refreshMergedData();
+      console.log("no coords or not visible");
       return;
     }
-    this.facilitiesData = null;
-    this.pendingRequest = 'facilities';
-    this.satelliteService.resetState();
-    this.sub?.unsubscribe();
+    this.facilitiesSub?.unsubscribe();
     const loadingId = this.beginMainLoading('Loading Satellite Intel', 'Loading nearby facilities...');
-    this.sub = this.satelliteService.fetchFacilities(this.lat, this.lon, 5).subscribe({
-      next: (res) => {
-        this.facilitiesData = res.result;
-        if(res.result){  
-          this.endMainLoading(loadingId);
-        }
+    this.facilitiesSub = this.orionSatelliteService.loadFacilities(this.lat, this.lon, 5).subscribe({
+      next: (items) => {
+        this.facilitiesMapData = items;
+        this.facilitiesData = {
+          status: 'done',
+          type: 'FeatureCollection',
+          features: [],
+          total: items.length,
+          type_counts: this.buildFacilityTypeCounts(items),
+          overpass_ok: true,
+        };
+        this.refreshMergedData();
+        this.endMainLoading(loadingId);
       },
       error: () => {
+        this.facilitiesMapData = [];
+        this.facilitiesData = null;
+        this.refreshMergedData();
         this.endMainLoading(loadingId);
-      }
+      },
     });
+  }
+
+  private refreshMergedData(): void {
+    this.mergedData = this.facilitiesVisible ? [...this.wriData, ...this.facilitiesMapData] : [...this.wriData];
+    this.filteredData = this.mergedData.filter((feature) => this.selectedFilters.includes(feature.type));
+    this.updateDashboardSearchResults(this.dashboardSearch.trim().toLowerCase());
+  }
+
+  private updateDashboardSearchResults(query: string): void {
+    const trimmedQuery = query.trim().toLowerCase();
+    if (!trimmedQuery) {
+      this.dashboardSearchResults = [];
+      return;
+    }
+
+    this.dashboardSearchResults = this.filteredData
+      .filter((feature) => feature.name.toLowerCase().includes(trimmedQuery))
+      .sort((left, right) => left.name.localeCompare(right.name))
+      .slice(0, 8);
+  }
+
+  private buildFacilityTypeCounts(items: OrionSatelliteFeature[]): Record<string, number> {
+    return items.reduce<Record<string, number>>((counts, item) => {
+      counts[item.type] = (counts[item.type] || 0) + 1;
+      return counts;
+    }, {});
   }
 
   private syncAppliedViewport(): void {
