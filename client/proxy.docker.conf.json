@@ -1,0 +1,14 @@
+{
+  "/api/**": {
+    "target": "https://nginx:8443",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/static/**": {
+    "target": "https://nginx:8443",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

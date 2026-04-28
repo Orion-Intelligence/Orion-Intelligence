@@ -224,6 +224,20 @@ if [ "$1" = "-docs" ]; then
     exit 0
 fi
 
+if [ "$1" = "dev" ]; then
+    stop_docker
+    create_parser_zip
+    set_testing_enabled "default"
+    set_swarm_url_to_local_ip
+    ensure_local_ssl_cert
+    cp nginx/nginx-dev.conf nginx/nginx.conf
+    docker network create --driver bridge shared_bridge 2>/dev/null || true
+    docker compose -p "$PROJECT_NAME" -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+    echo "Orion Intelligence dev service started"
+    echo "Open https://127.0.0.1:8443 or http://127.0.0.1:4200"
+    exit 0
+fi
+
 stop_docker
 
 create_parser_zip
