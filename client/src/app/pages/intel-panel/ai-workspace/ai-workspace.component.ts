@@ -10,6 +10,7 @@ import { SubscriptionService } from '../../../services/dashboard/subscription.se
 import { AiWorkspaceMessage } from '../../../shared/model/chat/ai-workspace-message.model';
 import { AiWorkspacePrompt } from '../../../shared/constants/shared-enums';
 import { NexusChatService } from './nexus-chat.service';
+import { BotMessageActionsComponent } from './bot-message-actions/bot-message-actions.component';
 type ChatHistoryMessage = {
   sender: 'user' | 'bot';
   text: string;
@@ -19,7 +20,7 @@ type ChatHistoryMessage = {
 @Component({
   selector: 'app-ai-workspace',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, RouterLink],
+  imports: [CommonModule, DatePipe, FormsModule, RouterLink, BotMessageActionsComponent],
   templateUrl: './ai-workspace.component.html',
 })
 export class AiWorkspaceComponent implements OnInit, OnDestroy {
@@ -270,7 +271,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.api.post<{ chat_history?: ChatHistoryMessage[] }>('get/current/user/chat-history', {}).subscribe({
       next: (response) => {
         const history = response?.chat_history || [];
-        this.messages = history
+        const messages = history
           .filter((message) => message.sender === 'user' || message.sender === 'bot')
           .map((message) => ({
             id: crypto.randomUUID(),
@@ -278,6 +279,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
             text: message.text,
             time: new Date(message.time),
           }));
+        this.messages = this.addMissingAiFailureMessages(messages);
         this.isLoadingHistory.set(false);
         this.scrollToBottom();
       },
@@ -286,6 +288,17 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         this.restoreChatHistory();
       }
     });
+  }
+
+  private addMissingAiFailureMessages(messages: AiWorkspaceMessage[]): AiWorkspaceMessage[] {
+    const result: AiWorkspaceMessage[] = [];
+    messages.forEach((message, index) => {
+      result.push(message);
+      if (message.sender === 'user' && messages[index + 1]?.sender !== 'bot') {
+        result.push(this.createErrorMessage(message.text));
+      }
+    });
+    return result;
   }
 
   private buildChatHistoryPayload(): ChatHistoryMessage[] {
