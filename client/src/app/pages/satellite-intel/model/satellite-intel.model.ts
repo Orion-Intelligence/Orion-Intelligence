@@ -15,6 +15,79 @@ export interface SatelliteGeocodeResponse {
 }
 
 export type TrackKind = 'aircraft' | 'ship';
+export type OrionPowerType =
+  | 'hydro'
+  | 'nuclear'
+  | 'coal'
+  | 'oil'
+  | 'gas'
+  | 'solar'
+  | 'wind'
+  | 'other';
+
+export type OrionInfrastructureType =
+  | 'airport'
+  | 'port'
+  | 'warehouse'
+  | 'industrial';
+
+export type OrionSatelliteFeatureType = OrionPowerType | OrionInfrastructureType;
+export type OrionSatelliteSource = 'WRI' | 'OSM';
+
+export interface OrionSatelliteFeature {
+  id: string;
+  name: string;
+  type: OrionSatelliteFeatureType;
+  rawType: string;
+  source: OrionSatelliteSource;
+  coordinates: [number, number];
+  color: string;
+  capacityMw?: number | null;
+}
+
+export interface OrionSatelliteFilterOption {
+  key: OrionSatelliteFeatureType;
+  label: string;
+  color: string;
+}
+
+export interface OrionSatelliteGeoJsonFeature {
+  type: 'Feature';
+  geometry: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+  properties: {
+    name?: string;
+    country?: string;
+    fuel?: string;
+    primary_fuel?: string;
+    capacity_mw?: number | null;
+    source?: string;
+  };
+}
+
+export interface OrionSatelliteGeoJsonCollection {
+  type: 'FeatureCollection';
+  features: OrionSatelliteGeoJsonFeature[];
+}
+
+export const ORION_POWER_FILTERS: OrionSatelliteFilterOption[] = [
+  { key: 'hydro', label: 'hydro', color: '#2563eb' },
+  { key: 'nuclear', label: 'nuclear', color: '#dc2626' },
+  { key: 'coal', label: 'coal', color: '#111827' },
+  { key: 'oil', label: 'oil', color: '#f97316' },
+  { key: 'solar', label: 'solar', color: '#facc15' },
+  { key: 'wind', label: 'wind', color: '#16a34a' },
+  { key: 'gas', label: 'gas', color: '#6b7280' },
+];
+
+export const ORION_INFRASTRUCTURE_FILTERS: OrionSatelliteFilterOption[] = [
+  { key: 'airport', label: 'airport', color: '#9333ea' },
+  { key: 'port', label: 'port', color: '#0d9488' },
+  { key: 'warehouse', label: 'warehouse', color: '#92400e' },
+  { key: 'industrial', label: 'industrial', color: '#6b7280' },
+];
 
 export interface TrackingProperties {
   id: string;

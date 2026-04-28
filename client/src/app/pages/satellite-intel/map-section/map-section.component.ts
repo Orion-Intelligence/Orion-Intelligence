@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, EventEmitter, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { OrionSatelliteFeature } from '../model/satellite-intel.model';
 
 @Component({
   selector:    'app-satellite-map-section',
@@ -25,6 +26,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private L: any            = null;
   private moveTimer: any    = null;
   private resizeObserver: ResizeObserver | null = null;
+  private orionLayer: any = null;
 
   zoomLabel = 'zoom 2.5';
 
@@ -43,7 +45,10 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   @Input() anomalyData:      any | null = null;
   @Input() aircraftData:     SatelliteLiveAircraft[] = [];
   @Input() shipsData:        SatelliteLiveShip[]     = [];
+  @Input() orionData:      OrionSatelliteFeature[] = [];
+  @Input() focusedFeature: OrionSatelliteFeature | null = null;
 
+  @Output() featureSelected = new EventEmitter<OrionSatelliteFeature>();
   @Output() mapMoved  = new EventEmitter<{ lat: number; lon: number; zoom: number }>();
 
   get progressValue(): number {
@@ -80,6 +85,12 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     }
     if (changes['shipsData']) {
       this.renderShips();
+    }
+    if (changes['orionData'] || changes['facilitiesVisible']) {
+      this.renderOrionData();
+    }
+    if (changes['focusedFeature']) {
+      this.focusOnFeature();
     }
     if (changes['selectedLayer'])   {
       this.switchLayer();
@@ -148,6 +159,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       this.anomalyLayer = this.L.layerGroup().addTo(this.leafletMap);
       this.aircraftLayer = this.L.layerGroup().addTo(this.leafletMap);
       this.shipsLayer = this.L.layerGroup().addTo(this.leafletMap);
+      this.orionLayer = this.L.layerGroup().addTo(this.leafletMap);
 
       this.leafletMap.on('moveend zoomend', () => {
         const c = this.leafletMap.getCenter();
@@ -173,6 +185,9 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       }
       if (this.shipsData?.length) {
         this.renderShips();
+      }
+      if (this.orionData?.length) {
+        this.renderOrionData();
       }
       this.resizeObserver = new ResizeObserver(() => {
         this.leafletMap?.invalidateSize();
@@ -337,6 +352,48 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       this.shipsLayer.addLayer(marker);
     }
 
+  }
+
+  private renderOrionData(): void {
+    if (!this.orionLayer || !this.L) {
+      return;
+    }
+    this.orionLayer.clearLayers();
+
+    const data = this.orionData || [];
+    for (const feat of data) {
+      if (!this.facilitiesVisible && feat.source !== 'WRI') {
+        continue;
+      }
+      const [lon, lat] = feat.coordinates;
+      const color = feat.color || '#3b82f6';
+
+      const marker = this.L.circleMarker([lat, lon], {
+        radius:      6,
+        color:       color,
+        fillColor:   color,
+        fillOpacity: feat.source === 'WRI' ? 0.72 : 0.88,
+        weight:      1.5,
+      });
+
+      marker.bindPopup(`<div style="font-size:13px;font-weight:600;margin-bottom:3px">${feat.name || 'Feature'}</div>` +
+        `<div style="font-size:12px;color:#888">Type: ${feat.type || ''}</div>` +
+        `<div style="font-size:12px;color:#888">Source: ${feat.source || ''}</div>`);
+
+      marker.on('click', () => this.featureSelected.emit(feat));
+      this.orionLayer.addLayer(marker);
+    }
+  }
+
+  private focusOnFeature(): void {
+    if (!this.leafletMap || !this.L || !this.focusedFeature) {
+      return;
+    }
+    const [lon, lat] = this.focusedFeature.coordinates;
+    const currentZoom = this.leafletMap.getZoom();
+    this.leafletMap.easeTo
+      ? this.leafletMap.flyTo([lat, lon], Math.max(currentZoom, 8))
+      : this.leafletMap.setView([lat, lon], Math.max(currentZoom, 8));
   }
 
   private deltaToZoom(d: number): number {
