@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, ElementRef, OnInit, ViewChild, computed, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -22,14 +22,18 @@ type ChatHistoryMessage = {
   imports: [CommonModule, DatePipe, FormsModule, RouterLink],
   templateUrl: './ai-workspace.component.html',
 })
-export class AiWorkspaceComponent implements OnInit {
+export class AiWorkspaceComponent implements OnInit, OnDestroy {
   private activeChatRequest?: Subscription;
+  private chatRequestId = 0;
+  private stoppedRequestIds = new Set<number>();
   @ViewChild('messagesContainer') private messagesContainer?: ElementRef<HTMLElement>;
   private readonly queryContext: string;
 
   protected readonly quickPrompts = Object.values(AiWorkspacePrompt);
   protected readonly isSending = signal(false);
   protected readonly isLoadingHistory = signal(true);
+  protected readonly isStreamingReply = signal(false);
+  protected readonly streamingMessageId = signal<string | null>(null);
   protected readonly nexusStep = signal('');
   protected readonly contextQuery = computed(() => this.queryContext);
   protected readonly canUseNexusChat = computed(() => this.licenseService.canUseModule('ai'));
@@ -45,6 +49,16 @@ export class AiWorkspaceComponent implements OnInit {
     this.loadChatHistory();
   }
 
+  ngOnDestroy(): void {
+    this.cancelActiveNexusRequest();
+    this.stoppedRequestIds.clear();
+  }
+
+  @HostListener('window:beforeunload')
+  onBeforeUnload(): void {
+    this.cancelActiveNexusRequest();
+  }
+
   sendMessage(): void {
     if (this.isSending()) {
       return;
@@ -55,6 +69,7 @@ export class AiWorkspaceComponent implements OnInit {
       return;
     }
 
+    this.cancelActiveNexusRequest();
     this.messages = [...this.messages, this.createMessage('user', text)];
     this.persistChatHistory();
     this.messageDraft = '';
@@ -74,27 +89,69 @@ export class AiWorkspaceComponent implements OnInit {
       report: this.contextQuery() || '',
     };
 
-    this.activeChatRequest = this.nexusChatService.pollNexusChat(payload).subscribe({
-      next: (response) => {
-        if (this.nexusChatService.isNexusPending(response)) {
-          this.nexusStep.set(this.nexusChatService.getNexusStep(response));
-          this.scrollToBottom();
+    const requestId = ++this.chatRequestId;
+    this.stoppedRequestIds.delete(requestId);
+    let reply = '';
+    let botMessage: AiWorkspaceMessage | undefined;
+    const updateReply = (value: string) => {
+      if (requestId !== this.chatRequestId) {
+        return;
+      }
+      if (!botMessage) {
+        botMessage = this.createMessage('bot', '');
+        this.messages = [...this.messages, botMessage];
+        this.isStreamingReply.set(true);
+        this.streamingMessageId.set(botMessage.id);
+      }
+      this.messages = this.messages.map(message => message.id === botMessage?.id ? { ...message, text: value } : message);
+    };
+    const finishStream = () => {
+      if (requestId !== this.chatRequestId) {
+        return;
+      }
+      this.activeChatRequest = undefined;
+      this.isStreamingReply.set(false);
+      this.streamingMessageId.set(null);
+      this.isSending.set(false);
+      this.nexusStep.set('');
+      if (!reply.trim()) {
+        this.messages = botMessage ? this.messages.filter(message => message.id !== botMessage?.id) : this.messages;
+        this.messages = [...this.messages, this.createErrorMessage(text)];
+      }
+      else {
+        this.persistChatHistory();
+      }
+      this.scrollToBottom();
+    };
+
+    this.activeChatRequest = this.nexusChatService.streamNexusChat(payload).subscribe({
+      next: (chunk) => {
+        if (requestId !== this.chatRequestId) {
           return;
         }
-
-        const reply = this.nexusChatService.getNexusChatReply(response);
-        this.messages = [
-          ...this.messages,
-          reply ? this.createMessage('bot', reply) : this.createErrorMessage(text),
-        ];
-        this.persistChatHistory();
-        this.activeChatRequest = undefined;
-        this.isSending.set(false);
-        this.nexusStep.set('');
-        this.scrollToBottom();
+        if (chunk.delta) {
+          reply += chunk.delta;
+          updateReply(reply);
+        }
+        if (chunk.response) {
+          reply = chunk.response;
+          updateReply(reply);
+        }
+      },
+      complete: () => {
+        if (requestId !== this.chatRequestId || this.stoppedRequestIds.has(requestId)) {
+          return;
+        }
+        finishStream();
       },
       error: () => {
+        if (requestId !== this.chatRequestId || this.stoppedRequestIds.has(requestId)) {
+          return;
+        }
         this.activeChatRequest = undefined;
+        this.isStreamingReply.set(false);
+        this.streamingMessageId.set(null);
+        this.messages = botMessage ? this.messages.filter(message => message.id !== botMessage?.id) : this.messages;
         this.messages = [...this.messages, this.createErrorMessage(text)];
         this.isSending.set(false);
         this.nexusStep.set('');
@@ -120,15 +177,24 @@ export class AiWorkspaceComponent implements OnInit {
   }
 
   stopMessageGeneration(): void {
-    this.activeChatRequest?.unsubscribe();
-    this.activeChatRequest = undefined;
+    this.stoppedRequestIds.add(this.chatRequestId);
+    this.chatRequestId += 1;
+    this.cancelActiveNexusRequest();
     this.messages = [...this.messages, this.createCancelledMessage()];
     this.isSending.set(false);
+    this.isStreamingReply.set(false);
+    this.streamingMessageId.set(null);
     this.nexusStep.set('');
     this.scrollToBottom();
   }
 
   startNewChat(): void {
+    this.chatRequestId += 1;
+    this.stoppedRequestIds.clear();
+    this.cancelActiveNexusRequest();
+    this.isSending.set(false);
+    this.isStreamingReply.set(false);
+    this.streamingMessageId.set(null);
     this.api.post('update/current/user/chat-history', {
       chat_history: [],
     }).subscribe({
@@ -160,6 +226,14 @@ export class AiWorkspaceComponent implements OnInit {
       text,
       time: new Date(),
     };
+  }
+
+  private cancelActiveNexusRequest(): void {
+    if (this.activeChatRequest || this.isSending() || this.isStreamingReply()) {
+      this.nexusChatService.cancelNexusChat();
+    }
+    this.activeChatRequest?.unsubscribe();
+    this.activeChatRequest = undefined;
   }
 
   private createErrorMessage(text: string): AiWorkspaceMessage {

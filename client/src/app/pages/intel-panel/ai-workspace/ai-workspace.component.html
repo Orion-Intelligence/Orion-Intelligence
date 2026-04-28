@@ -58,8 +58,16 @@
                     <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
                     <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
                   </div>
-                  <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3.5 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
-                    <p class="whitespace-pre-wrap text-[14px] leading-7 text-[var(--color-text1)]">{{ message.text }}</p>
+                  <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot relative rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3.5 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
+                    <p class="whitespace-pre-wrap text-[14px] leading-7 text-[var(--color-text1)]">
+                      {{ message.text }}@if (streamingMessageId() === message.id) {
+                        <span class="ml-1 inline-flex translate-y-[-1px] items-center gap-1 align-middle">
+                          <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
+                          <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:140ms]"></span>
+                          <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:280ms]"></span>
+                        </span>
+                      }
+                    </p>
                   </div>
                 </div>
               </div>
@@ -101,7 +109,7 @@
           }
         }
 
-        @if (isSending()) {
+        @if (isSending() && !isStreamingReply()) {
           <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
             <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
               <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">

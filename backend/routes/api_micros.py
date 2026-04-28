@@ -64,8 +64,16 @@ async def chat_report(payload: ReportChatRequest, current_user=Depends(get_curre
     include_in_schema=False,
     dependencies=[Depends(ai_endpoint_required), Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), Depends(limiter_dependency)], )
 async def nexus_chat(payload: ReportChatRequest, current_user=Depends(get_current_user)):
-    response = await crawl_model.getInstance().parse_nexus_chat_ai(payload, user_id=str(current_user.id))
+    response = await crawl_model.getInstance().parse_nexus_chat_ai(payload, user_id=str(current_user.id), stream=True)
     return response
+
+
+@micro_routes.post(
+    "/api/nexus/chat/cancel",
+    include_in_schema=False,
+    dependencies=[Depends(ai_endpoint_required), Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))], )
+async def cancel_nexus_chat(current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().cancel_nexus_chat_ai(user_id=str(current_user.id))
 
 
 @micro_routes.post(
