@@ -40,7 +40,6 @@ import { ORION_INFRASTRUCTURE_FILTERS, ORION_POWER_FILTERS, OrionSatelliteFeatur
   animations: [fadeInDashboardItem],
 })
 export class SatelliteIntel implements OnInit, OnDestroy {
-  @Input() toolbarMode: 'hidden' | 'geo' = 'hidden';
   private sub?: Subscription;
   private aircraftTrackSub?: Subscription;
   private shipTrackSub?: Subscription;
@@ -106,6 +105,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   isPanelPopupOpen = false;
   isScanning = computed(() =>
     !!this.pendingRequest && !this.satelliteService.onError(),);
+
+  @Input() toolbarMode: 'hidden' | 'geo' = 'hidden';
 
   constructor( public satelliteService: SatelliteIntelService,private orionSatelliteService: OrionSatelliteService, private route: ActivatedRoute ) {
     effect(() => {

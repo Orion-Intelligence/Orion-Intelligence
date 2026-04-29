@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, EventEmitter, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
-import { OrionSatelliteFeature } from '../model/satellite-intel.model';
 
 @Component({
   selector:    'app-satellite-map-section',
   standalone:  true,
   imports:     [CommonModule],
   templateUrl: './map-section.component.html',
+  // styleUrl:    './map-section.component.css',
   host:        {
     'class': 'block h-full w-full',
   },
@@ -22,13 +22,14 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private anomalyLayer: any = null;
   private aircraftLayer: any = null;
   private shipsLayer: any    = null;
+  private orionCluster: any = null;
   private clickMarker: any  = null;
   private L: any            = null;
   private moveTimer: any    = null;
   private resizeObserver: ResizeObserver | null = null;
-  private orionLayer: any = null;
 
   zoomLabel = 'zoom 2.5';
+  isMapFeaturesHovered = false;
 
   @Input() isScanning       = false;
   @Input() progress         = 0;
@@ -45,11 +46,11 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   @Input() anomalyData:      any | null = null;
   @Input() aircraftData:     SatelliteLiveAircraft[] = [];
   @Input() shipsData:        SatelliteLiveShip[]     = [];
-  @Input() orionData:      OrionSatelliteFeature[] = [];
-  @Input() focusedFeature: OrionSatelliteFeature | null = null;
+  @Input() orionData:        any[] = [];
+  @Input() focusedFeature:   any = null;
 
-  @Output() featureSelected = new EventEmitter<OrionSatelliteFeature>();
   @Output() mapMoved  = new EventEmitter<{ lat: number; lon: number; zoom: number }>();
+  @Output() featureSelected = new EventEmitter<any>();
 
   get progressValue(): number {
     return Math.max(6, Math.min(100, Math.round(this.progress || 0)));
@@ -159,7 +160,27 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       this.anomalyLayer = this.L.layerGroup().addTo(this.leafletMap);
       this.aircraftLayer = this.L.layerGroup().addTo(this.leafletMap);
       this.shipsLayer = this.L.layerGroup().addTo(this.leafletMap);
-      this.orionLayer = this.L.layerGroup().addTo(this.leafletMap);
+
+      const MarkerCluster = (await import('leaflet.markercluster' as any)) as any;
+      this.orionCluster = this.L.markerClusterGroup({
+        maxClusterRadius: 40,
+        showCoverageOnHover: false,
+        iconCreateFunction: (cluster: any) => {
+          const count = cluster.getChildCount();
+          return this.L.divIcon({
+            html: `<div style="
+              background:#3b82f6;border-radius:50%;width:32px;height:32px;
+              display:flex;align-items:center;justify-content:center;
+              color:#fff;font-size:11px;font-weight:700;
+              box-shadow:0 0 0 3px rgba(59,130,246,0.3);">
+              ${count}
+            </div>`,
+            className: '',
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+          });
+        },
+      }).addTo(this.leafletMap);
 
       this.leafletMap.on('moveend zoomend', () => {
         const c = this.leafletMap.getCenter();
@@ -355,10 +376,10 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   }
 
   private renderOrionData(): void {
-    if (!this.orionLayer || !this.L) {
+    if (!this.orionCluster || !this.L) {
       return;
     }
-    this.orionLayer.clearLayers();
+    this.orionCluster.clearLayers();
 
     const data = this.orionData || [];
     for (const feat of data) {
@@ -376,12 +397,14 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
         weight:      1.5,
       });
 
-      marker.bindPopup(`<div style="font-size:13px;font-weight:600;margin-bottom:3px">${feat.name || 'Feature'}</div>` +
+      marker.bindPopup(
+        `<div style="font-size:13px;font-weight:600;margin-bottom:3px">${feat.name || 'Feature'}</div>` +
         `<div style="font-size:12px;color:#888">Type: ${feat.type || ''}</div>` +
-        `<div style="font-size:12px;color:#888">Source: ${feat.source || ''}</div>`);
+        `<div style="font-size:12px;color:#888">Source: ${feat.source || ''}</div>`
+      );
 
       marker.on('click', () => this.featureSelected.emit(feat));
-      this.orionLayer.addLayer(marker);
+      this.orionCluster.addLayer(marker);
     }
   }
 
@@ -391,9 +414,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     }
     const [lon, lat] = this.focusedFeature.coordinates;
     const currentZoom = this.leafletMap.getZoom();
-    this.leafletMap.easeTo
-      ? this.leafletMap.flyTo([lat, lon], Math.max(currentZoom, 8))
-      : this.leafletMap.setView([lat, lon], Math.max(currentZoom, 8));
+    this.leafletMap.flyTo([lat, lon], Math.max(currentZoom, 8));
   }
 
   private deltaToZoom(d: number): number {
