@@ -11,9 +11,9 @@ import { ShareResponseDialogComponent } from '../share-response-dialog/share-res
   templateUrl: './bot-message-actions.component.html',
 })
 export class BotMessageActionsComponent {
-  @Input({ required: true }) message!: AiWorkspaceMessage;
-
   protected readonly copied = signal(false);
+
+  @Input({ required: true }) message!: AiWorkspaceMessage;
 
   constructor(private readonly resultRowHelper: ResultRowHelperService) {}
 

@@ -10,10 +10,10 @@ import { ResultRowHelperService } from '../../../../shared/services/result-row-h
   templateUrl: './share-response-dialog.component.html',
 })
 export class ShareResponseDialogComponent {
-  @Input() text = '';
-
   protected readonly copied = signal(false);
   protected readonly visible = signal(false);
+
+  @Input() text = '';
 
   constructor(private readonly resultRowHelper: ResultRowHelperService) {}
 

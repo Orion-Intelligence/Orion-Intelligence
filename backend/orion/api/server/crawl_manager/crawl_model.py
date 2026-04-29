@@ -343,6 +343,28 @@ class crawl_model:
             return {"cancelled": False}
 
     @staticmethod
+    async def clear_nexus_chat_session(user_id: str = "system"):
+        try:
+            base_url = (env_handler.get_instance().env("DARKNEXUS_API_BASE") or "http://trusted-nexus-api:8030").strip().rstrip("/")
+            payload = {
+                "jsonrpc": "2.0",
+                "id": "nexus-chat-clear-session",
+                "method": "tools/call",
+                "params": {
+                    "name": "clear_session",
+                    "arguments": {"user_id": user_id},
+                },
+            }
+            async with httpx.AsyncClient(timeout=10) as client:
+                response = await client.post(f"{base_url}/mcp", json=payload)
+                if response.status_code != 200:
+                    return {"cleared": False, "status_code": response.status_code}
+                result = response.json()
+                return result.get("result") or result
+        except Exception:
+            return {"cleared": False}
+
+    @staticmethod
     async def analyze_text_with_nexus(model: NexusTextAnalysisRequest, user_id: str = "system"):
         try:
             base_url = (env_handler.get_instance().env("DARKNEXUS_API_BASE") or "http://trusted-nexus-api:8030").strip().rstrip("/")

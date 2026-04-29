@@ -196,6 +196,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.isSending.set(false);
     this.isStreamingReply.set(false);
     this.streamingMessageId.set(null);
+    this.nexusChatService.clearNexusSession().subscribe();
     this.api.post('update/current/user/chat-history', {
       chat_history: [],
     }).subscribe({

@@ -77,6 +77,14 @@ async def cancel_nexus_chat(current_user=Depends(get_current_user)):
 
 
 @micro_routes.post(
+    "/api/nexus/chat/clear-session",
+    include_in_schema=False,
+    dependencies=[Depends(ai_endpoint_required), Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))], )
+async def clear_nexus_chat_session(current_user=Depends(get_current_user)):
+    return await crawl_model.getInstance().clear_nexus_chat_session(user_id=str(current_user.id))
+
+
+@micro_routes.post(
     "/api/nexus/analyze-text",
     summary="Analyze text with Nexus OCR classifier",
     description="Use the Nexus OCR classifier to analyze text for spam and malicious URLs.",

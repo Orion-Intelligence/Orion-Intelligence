@@ -86,6 +86,10 @@ export class NexusChatService {
     }).catch(() => undefined);
   }
 
+  clearNexusSession(): Observable<{ cleared?: boolean; }> {
+    return this.api.post<{ cleared?: boolean; }>('nexus/chat/clear-session', {});
+  }
+
   pollNexusReportChat(payload: NexusChatPayload) {
     return this.api.post<ChatApiResponse>('nlp/chat/report', payload).pipe(expand(response => this.isNexusPending(response)
       ? timer(2000).pipe(switchMap(() => this.api.post<ChatApiResponse>('nlp/chat/report', payload)))
