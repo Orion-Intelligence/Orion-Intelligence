@@ -28,6 +28,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   private chatRequestId = 0;
   private stoppedRequestIds = new Set<number>();
   @ViewChild('messagesContainer') private messagesContainer?: ElementRef<HTMLElement>;
+  @ViewChild('composerInput') private composerInput?: ElementRef<HTMLTextAreaElement>;
   private readonly queryContext: string;
 
   protected readonly quickPrompts = Object.values(AiWorkspacePrompt);
@@ -41,6 +42,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   messageDraft = '';
   messages: AiWorkspaceMessage[] = [];
+  composerExpanded = false;
 
   constructor(private readonly api: ApiService, protected readonly appService: AppService, private readonly route: ActivatedRoute, private readonly router: Router, private readonly subscriptionService: SubscriptionService, protected readonly licenseService: LicenseService, private readonly nexusChatService: NexusChatService) {
     this.queryContext = (this.route.snapshot.queryParamMap.get('q') || '').trim();
@@ -74,6 +76,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.messages = [...this.messages, this.createMessage('user', text)];
     this.persistChatHistory();
     this.messageDraft = '';
+    this.queueComposerResize();
     this.isSending.set(true);
     this.nexusStep.set('');
     this.scrollToBottom();
@@ -168,8 +171,21 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     }
   }
 
+  resizeComposer(): void {
+    const textarea = this.composerInput?.nativeElement;
+    if (!textarea) {
+      return;
+    }
+
+    textarea.style.height = 'auto';
+    const nextHeight = Math.max(32, textarea.scrollHeight);
+    textarea.style.height = `${nextHeight}px`;
+    this.composerExpanded = nextHeight > 32;
+  }
+
   usePrompt(prompt: string): void {
     this.messageDraft = prompt;
+    this.queueComposerResize();
   }
 
   retryMessage(prompt: string): void {
@@ -196,13 +212,20 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.isSending.set(false);
     this.isStreamingReply.set(false);
     this.streamingMessageId.set(null);
-    this.nexusChatService.clearNexusSession().subscribe();
+    this.nexusChatService.clearNexusSession().subscribe({
+      next: () => this.clearSavedChatHistory(),
+      error: () => this.clearSavedChatHistory(),
+    });
+  }
+
+  private clearSavedChatHistory(): void {
     this.api.post('update/current/user/chat-history', {
       chat_history: [],
     }).subscribe({
       next: () => {
         this.messages = [];
         this.messageDraft = '';
+        this.queueComposerResize();
         this.router.navigate(['/dashboard/profile/ai'], {
           queryParams: { q: this.contextQuery() || null },
           queryParamsHandling: 'merge',
@@ -359,5 +382,9 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
       container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
     });
+  }
+
+  queueComposerResize(): void {
+    requestAnimationFrame(() => this.resizeComposer());
   }
 }
