@@ -7,7 +7,6 @@ import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../shared/model/
   standalone:  true,
   imports:     [CommonModule],
   templateUrl: './map-section.component.html',
-  // styleUrl:    './map-section.component.css',
   host:        {
     'class': 'block h-full w-full',
   },
@@ -161,7 +160,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       this.aircraftLayer = this.L.layerGroup().addTo(this.leafletMap);
       this.shipsLayer = this.L.layerGroup().addTo(this.leafletMap);
 
-      const MarkerCluster = (await import('leaflet.markercluster' as any)) as any;
+      await import('leaflet.markercluster' as any) as any;
       this.orionCluster = this.L.markerClusterGroup({
         maxClusterRadius: 40,
         showCoverageOnHover: false,
@@ -397,11 +396,9 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
         weight:      1.5,
       });
 
-      marker.bindPopup(
-        `<div style="font-size:13px;font-weight:600;margin-bottom:3px">${feat.name || 'Feature'}</div>` +
+      marker.bindPopup(`<div style="font-size:13px;font-weight:600;margin-bottom:3px">${feat.name || 'Feature'}</div>` +
         `<div style="font-size:12px;color:#888">Type: ${feat.type || ''}</div>` +
-        `<div style="font-size:12px;color:#888">Source: ${feat.source || ''}</div>`
-      );
+        `<div style="font-size:12px;color:#888">Source: ${feat.source || ''}</div>`);
 
       marker.on('click', () => this.featureSelected.emit(feat));
       this.orionCluster.addLayer(marker);
