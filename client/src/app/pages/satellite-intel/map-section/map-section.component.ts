@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, EventEmitter, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { ORION_POWER_FILTERS } from '../model/satellite-intel.model';
 
 @Component({
   selector:    'app-satellite-map-section',
@@ -27,6 +28,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private moveTimer: any    = null;
   private resizeObserver: ResizeObserver | null = null;
 
+  readonly powerPlantLegend = ORION_POWER_FILTERS;
   zoomLabel = 'zoom 2.5';
   isMapFeaturesHovered = false;
 
@@ -387,14 +389,42 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       }
       const [lon, lat] = feat.coordinates;
       const color = feat.color || '#3b82f6';
-
-      const marker = this.L.circleMarker([lat, lon], {
-        radius:      6,
-        color:       '#000000',
-        fillColor:   color,
-        fillOpacity: feat.source === 'WRI' ? 0.72 : 0.88,
-        weight:      1.5,
-      });
+      const marker = feat.source === 'WRI'
+        ? this.L.marker([lat, lon], {
+          icon: this.L.divIcon({
+            html: `<div style="
+              position:relative;
+              width:18px;
+              height:18px;
+              background:${color};
+              border:2px solid #ffffff;
+              border-radius:50% 50% 50% 0;
+              transform:rotate(-45deg);
+              box-sizing:border-box;
+            ">
+              <div style="
+                position:absolute;
+                top:50%;
+                left:50%;
+                width:6px;
+                height:6px;
+                border-radius:50%;
+                background:#ffffff;
+                transform:translate(-50%, -50%) rotate(45deg);
+              "></div>
+            </div>`,
+            className: '',
+            iconSize: [18, 18],
+            iconAnchor: [9, 18],
+          }),
+        })
+        : this.L.circleMarker([lat, lon], {
+          radius:      6,
+          color:       '#ffffff',
+          fillColor:   color,
+          fillOpacity: 0.88,
+          weight:      1.5,
+        });
 
       const rows: string[] = [];
       const title = typeof feat.name === 'string' && feat.name.trim() ? feat.name.trim() : 'Feature';
@@ -438,6 +468,20 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       return;
     }
     rows.push(this.popupRow(label, formatted));
+  }
+
+  powerPlantDotClass(type: string): string {
+    const map: Record<string, string> = {
+      hydro: 'bg-[#2563eb]',
+      nuclear: 'bg-[#dc2626]',
+      coal: 'bg-[#111827]',
+      oil: 'bg-[#f97316]',
+      solar: 'bg-[#facc15]',
+      wind: 'bg-[#16a34a]',
+      gas: 'bg-[#6b7280]',
+      other: 'bg-[#6b7280]',
+    };
+    return map[type] || 'bg-[#6b7280]';
   }
 
   private humanizeFieldLabel(key: string): string {

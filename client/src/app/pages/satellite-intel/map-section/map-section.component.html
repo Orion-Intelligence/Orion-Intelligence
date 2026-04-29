@@ -7,6 +7,16 @@
     {{ zoomLabel }}
   </div>
 
+  <div class="pointer-events-none absolute bottom-7 left-1/2 z-[900] flex max-w-[min(540px,calc(100%-24px))] -translate-x-1/2 flex-wrap items-center justify-center gap-x-3 gap-y-2 rounded border border-white/10 bg-[rgba(13,21,37,.92)] px-[10px] py-[6px] font-mono text-[10px] text-white/70">
+    <span class="text-white/45">POWER PLANTS</span>
+    @for (plant of powerPlantLegend; track plant.key) {
+      <span class="inline-flex items-center gap-1.5 whitespace-nowrap">
+        <span class="h-2.5 w-2.5 rounded-full" [ngClass]="powerPlantDotClass(plant.key)"></span>
+        <span>{{ plant.label }}</span>
+      </span>
+    }
+  </div>
+
 
   @if (errorMessage && !isScanning) {
     <div class="absolute left-3 right-3 top-3 z-[900] max-w-[min(520px,calc(100%-24px))] rounded-lg border border-red-500/30 bg-red-500/12 px-[14px] py-[10px] text-[12px] text-red-300">
