@@ -59,6 +59,7 @@ class config_controller:
             return f"/api/s/static/system/{base}_default.png"
 
         fresh_config["ai_endpoint"] = "1"
+        fresh_config["app_name"] = f"{fresh_config.get('app_name') or 'Orion Intelligence'} - BACKEND LIVE TEST 2"
         fresh_config["logo_url"] = asset("logo_url")
         fresh_config["logo_wide_light"] = asset("logo_wide_light")
         fresh_config["logo_wide_dark"] = asset("logo_wide_dark")

@@ -19,7 +19,24 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                     "/npm/swagger-ui-dist@5/swagger-ui-bundle.js"]):
             return response
 
-        if request.url.path.startswith("/admin"):
+        if self.DEBUG:
+            response.headers["Content-Security-Policy"] = ("default-src 'self' data: blob:; "
+                                                           "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+                                                           "script-src-elem 'self' 'unsafe-inline'; "
+                                                           "script-src-attr 'none'; "
+                                                           "style-src 'self' 'unsafe-inline'; "
+                                                           "style-src-elem 'self' 'unsafe-inline'; "
+                                                           "style-src-attr 'unsafe-inline'; "
+                                                           "img-src 'self' data: blob: http: https:; "
+                                                           "font-src 'self' data:; "
+                                                           "connect-src 'self' http: https: ws: wss:; "
+                                                           "media-src 'self' data: blob:; "
+                                                           "frame-ancestors 'self'; "
+                                                           "object-src 'none'; "
+                                                           "form-action 'self'; "
+                                                           "base-uri 'self'; "
+                                                           "report-to csp-endpoint;")
+        elif request.url.path.startswith("/admin"):
             response.headers["Content-Security-Policy"] = ("default-src 'self' data: blob:; "
                                                            "script-src 'self' 'unsafe-inline';"
                                                            "style-src 'self' 'unsafe-inline' *; "

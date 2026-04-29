@@ -233,8 +233,8 @@ if [ "$1" = "dev" ]; then
     cp nginx/nginx-dev.conf nginx/nginx.conf
     docker network create --driver bridge shared_bridge 2>/dev/null || true
     docker compose -p "$PROJECT_NAME" -f docker-compose.yml -f docker-compose.dev.yml up -d --build
-    echo "Orion Intelligence dev service started"
-    echo "Open https://127.0.0.1:8443 or http://127.0.0.1:4200"
+    echo "Orion Intelligence backend dev service started"
+    echo "Open http://127.0.0.1:8080 or https://127.0.0.1:8443"
     exit 0
 fi
 

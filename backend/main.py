@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import asyncio
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -35,6 +36,17 @@ async def lifespan(p_app: FastAPI):
     await test_manager.get_instance().apply_test_overrides()
     service_manager_instance = service_manager.get_instance()
     await service_manager_instance.build_assets(ANGULAR_BUILD_DIR)
+
+    if env_handler.get_instance().env("PRODUCTION", "0") != "1":
+        async def start_services_in_background():
+            await service_manager_instance.init_services()
+            setup_admin(mongo_controller.get_instance().get_engine()).mount_to(p_app)
+
+        asyncio.create_task(start_services_in_background())
+        app.include_router(interface)
+        yield
+        return
+
     await service_manager_instance.init_services()
     setup_admin(mongo_controller.get_instance().get_engine()).mount_to(p_app)
     app.include_router(interface)
