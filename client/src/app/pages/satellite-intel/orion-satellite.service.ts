@@ -81,6 +81,9 @@ export class OrionSatelliteService {
       coordinates: [lon, lat],
       color: this.getColor(type),
       capacityMw: typeof feature.properties?.capacity_mw === 'number' ? feature.properties.capacity_mw : null,
+      properties: {
+        ...feature.properties,
+      },
     };
   }
 
@@ -102,6 +105,9 @@ export class OrionSatelliteService {
       coordinates,
       color: this.getColor(type),
       capacityMw: null,
+      properties: {
+        ...(feature?.properties || {}),
+      },
     };
   }
 

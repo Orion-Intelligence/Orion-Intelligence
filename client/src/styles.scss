@@ -3765,3 +3765,23 @@ app-demo-tour .demo-tour-active {
     justify-content: center;
   }
 }
+
+.orion-popup .leaflet-popup-content-wrapper {
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.orion-popup .leaflet-popup-content {
+  margin: 0 !important;
+}
+
+.orion-popup .leaflet-popup-tip {
+  background: #0d1627 !important;
+  box-shadow: none !important;
+}
+
+.orion-popup .leaflet-popup-close-button {
+  color: #ffffff !important;
+}

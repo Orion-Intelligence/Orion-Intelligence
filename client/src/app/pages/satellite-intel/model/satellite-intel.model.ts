@@ -43,6 +43,7 @@ export interface OrionSatelliteFeature {
   coordinates: [number, number];
   color: string;
   capacityMw?: number | null;
+  properties?: Record<string, unknown>;
 }
 
 export interface OrionSatelliteFilterOption {

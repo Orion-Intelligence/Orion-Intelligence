@@ -390,19 +390,85 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
 
       const marker = this.L.circleMarker([lat, lon], {
         radius:      6,
-        color:       color,
+        color:       '#000000',
         fillColor:   color,
         fillOpacity: feat.source === 'WRI' ? 0.72 : 0.88,
         weight:      1.5,
       });
 
-      marker.bindPopup(`<div style="font-size:13px;font-weight:600;margin-bottom:3px">${feat.name || 'Feature'}</div>` +
-        `<div style="font-size:12px;color:#888">Type: ${feat.type || ''}</div>` +
-        `<div style="font-size:12px;color:#888">Source: ${feat.source || ''}</div>`);
+      const rows: string[] = [];
+      const title = typeof feat.name === 'string' && feat.name.trim() ? feat.name.trim() : 'Feature';
+      const properties = feat.properties && typeof feat.properties === 'object' ? feat.properties as Record<string, unknown> : {};
+
+      rows.push(`<div style="font-size:12px;font-weight:700;line-height:1.35;margin-bottom:8px;color:#ffffff;">${title}</div>`);
+      this.appendPopupRow(rows, 'Country', properties['country']);
+      this.appendPopupRow(rows, 'Fuel', properties['fuel'] ?? properties['primary_fuel']);
+      this.appendPopupRow(rows, 'Capacity', this.formatCapacityValue(properties['capacity_mw'] ?? feat.capacityMw));
+      this.appendPopupRow(rows, 'Source', properties['source'] ?? feat.source);
+
+      for (const [key, rawValue] of Object.entries(properties)) {
+        if ([ 'name', 'country', 'fuel', 'primary_fuel', 'capacity_mw', 'source' ].includes(key)) {
+          continue;
+        }
+        this.appendPopupRow(rows, this.humanizeFieldLabel(key), rawValue);
+      }
+
+      rows.push(this.popupRow('Coordinates', `${lat.toFixed(3)}, ${lon.toFixed(3)}`, true));
+
+      marker.bindPopup(`<div style="width:178px;padding:8px 9px;background:#0d1627;border-radius:8px;">
+        ${rows.join('')}
+      </div>`, { className: 'orion-popup' });
 
       marker.on('click', () => this.featureSelected.emit(feat));
       this.orionCluster.addLayer(marker);
     }
+  }
+
+  private popupRow(label: string, value: string, stacked = false): string {
+    return `<div style="display:flex;${stacked ? 'flex-direction:column;align-items:flex-start;' : 'justify-content:space-between;align-items:flex-start;'}gap:4px;
+      padding:4px 0;border-top:1px solid rgba(255,255,255,0.12);font-size:11px;line-height:1.35;">
+      <span style="color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.04em;">${label}</span>
+      <span style="color:#ffffff;font-weight:600;${stacked ? '' : 'text-align:right;'}word-break:break-word;">${value}</span>
+    </div>`;
+  }
+
+  private appendPopupRow(rows: string[], label: string, value: unknown): void {
+    const formatted = this.formatPopupValue(value);
+    if (!formatted) {
+      return;
+    }
+    rows.push(this.popupRow(label, formatted));
+  }
+
+  private humanizeFieldLabel(key: string): string {
+    return key
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/_/g, ' ')
+      .replace(/^./, (char) => char.toUpperCase());
+  }
+
+  private formatPopupValue(value: unknown): string {
+    if (value === null || value === undefined || value === '') {
+      return '';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (typeof value === 'number' || typeof value === 'boolean') {
+      return String(value);
+    }
+    if (Array.isArray(value)) {
+      return value.join(', ');
+    }
+
+    return JSON.stringify(value);
+  }
+
+  private formatCapacityValue(value: unknown): string {
+    if (typeof value !== 'number') {
+      return this.formatPopupValue(value);
+    }
+    return `${value} MW`;
   }
 
   private focusOnFeature(): void {
