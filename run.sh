@@ -31,6 +31,61 @@ create_parser_zip() {
     fi
 }
 
+stop_local_frontend_server() {
+    local pids
+    pids="$(ss -ltnp 2>/dev/null | awk '/127\.0\.0\.1:4200|0\.0\.0\.0:4200|\*:4200/ {print $NF}' | sed -n 's/.*pid=\([0-9]\+\).*/\1/p' | sort -u)"
+    if [ -n "$pids" ]; then
+        echo "Stopping local frontend process on port 4200: $pids"
+        kill $pids 2>/dev/null || true
+        sleep 2
+    fi
+}
+
+start_local_frontend_server() {
+    if ss -ltn 2>/dev/null | grep -Eq '127\.0\.0\.1:4200|0\.0\.0\.0:4200|\*:4200'; then
+        return 0
+    fi
+
+    if [ ! -x "client/node_modules/.bin/ng" ]; then
+        npm --prefix client install
+    fi
+
+    echo "Starting Angular dev server on http://127.0.0.1:4200"
+    (
+        cd client || exit 1
+        setsid npx ng serve --host 0.0.0.0 --port 4200 --allowed-hosts all --proxy-config proxy.conf.json > .ng-serve.log 2>&1 < /dev/null &
+    )
+}
+
+wait_for_local_frontend_server() {
+    echo "Waiting for Angular dev server on http://127.0.0.1:4200"
+    for _ in $(seq 1 90); do
+        if curl -fsS http://127.0.0.1:4200/ >/dev/null 2>&1; then
+            return 0
+        fi
+        sleep 2
+    done
+
+    echo "Angular dev server did not become ready. Last frontend log lines:"
+    tail -60 client/.ng-serve.log 2>/dev/null || true
+    exit 1
+}
+
+wait_for_dev_gateway() {
+    echo "Waiting for dev gateway on http://127.0.0.1:8080"
+    for _ in $(seq 1 90); do
+        if curl -fsS http://127.0.0.1:8080/ >/dev/null 2>&1 \
+            && curl -fsS http://127.0.0.1:8080/api/public >/dev/null 2>&1; then
+            return 0
+        fi
+        sleep 2
+    done
+
+    echo "Dev gateway did not become ready. Recent nginx and backend logs:"
+    docker compose -p "$PROJECT_NAME" -f docker-compose.yml -f docker-compose.dev.yml logs --tail=80 nginx web 2>/dev/null || true
+    exit 1
+}
+
 ensure_local_ssl_cert() {
     mkdir -p "$LOCAL_SSL_DIR"
     if [ -f "$LOCAL_SSL_CERT" ] && [ -f "$LOCAL_SSL_KEY" ]; then
@@ -228,6 +283,9 @@ fi
 
 if [ "$1" = "dev" ]; then
     stop_docker
+    stop_local_frontend_server
+    start_local_frontend_server
+    wait_for_local_frontend_server
     create_parser_zip
     set_testing_enabled "default"
     set_swarm_url_to_local_ip
@@ -235,8 +293,9 @@ if [ "$1" = "dev" ]; then
     cp nginx/nginx-dev.conf nginx/nginx.conf
     docker network create --driver bridge shared_bridge 2>/dev/null || true
     docker compose -p "$PROJECT_NAME" -f docker-compose.yml -f docker-compose.dev.yml up -d --build
-    echo "Orion Intelligence backend dev service started"
-    echo "Open http://127.0.0.1:8080 or https://127.0.0.1:8443"
+    wait_for_dev_gateway
+    echo "Orion Intelligence dev services started"
+    echo "Open http://127.0.0.1:4200 or http://127.0.0.1:8080"
     exit 0
 fi
 

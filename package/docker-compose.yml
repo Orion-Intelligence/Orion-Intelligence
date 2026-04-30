@@ -1,15 +1,27 @@
 services:
   web:
     container_name: trusted-web-main
-    image: msmannan01/orion-intelligence:1.0.3.1
+    build:
+      context: .
+      dockerfile: dockerFiles/api_docker
     env_file:
       - .env
+    environment:
+      BLOOM_DIR: /app
+      PYTHONPATH: /app
     working_dir: /app
     depends_on:
       - elasticsearch
+      - mailpit
       - mongo
-    environment:
-      - PYTHONPATH=/app
+      - arangodb
+    volumes:
+      - ./backend/sitecustomize.py:/app/sitecustomize.py:ro
+      - ./backend/orion:/app/orion:cached
+      - ./backend/routes:/app/routes:cached
+      - ./backend/static:/app/static:cached
+      - ./backend/migrations:/app/migrations:cached
+      - ./client/build:/app/build:delegated
     expose:
       - "8070"
     networks:
@@ -22,93 +34,78 @@ services:
       retries: 3
       start_period: 10s
     command: >
-      sh -c "python3 /app/cronjobs.py & exec gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
+      sh -c "python3 /app/cronjobs.py & exec gunicorn --preload -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070"
+
+  arangodb:
+    container_name: trusted-web-arangodb
+    image: arangodb:3.11
+    restart: unless-stopped
+    environment:
+      ARANGO_ROOT_PASSWORD: ${ARANGO_PASSWORD}
+      ARANGODB_DEFAULT_SERVER_ENDPOINT: tcp://0.0.0.0:8529
+    ports:
+      - "8529:8529"
+    volumes:
+      - arangodb:/var/lib/arangodb3
+    networks:
+      backend:
+        ipv4_address: 172.20.1.15
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:8529/_admin/server/availability" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   nginx:
     container_name: trusted-web-nginx
     image: fholzer/nginx-brotli:latest
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:8080"
+      - "8443:8443"
     depends_on:
       - web
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./app/static:/app/static:cached
+      - ./backend/.ssl:/etc/nginx/local-certs:ro
+      - ./backend/static:/app/static:cached
+      - ./client/build:/client_build:ro
       - /var/www/certbot:/var/www/certbot
       - /etc/letsencrypt:/etc/letsencrypt:ro
     networks:
       backend:
         ipv4_address: 172.20.1.13
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:80 || exit 1" ]
+      test: [ "CMD-SHELL", "curl -fk https://localhost:8443 >/dev/null 2>&1 || exit 1" ]
       interval: 30s
       timeout: 5s
       retries: 3
     environment:
       - ENABLE_BROTLI=1
 
-  traefik:
-    image: traefik:v2.10
-    container_name: trusted-web-traefik
-    ports:
-      - "9090:9090"
-      - "9443:9443"
-    command:
-      - "--entrypoints.web.address=:9090"
-      - "--entrypoints.websecure.address=:9443"
-      - "--providers.file.directory=/etc/traefik"
-      - "--providers.docker=true"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./dockerFiles/traefik:/etc/traefik
-    restart: unless-stopped
-    networks:
-      - backend
-    healthcheck:
-      test: [ "CMD-SHELL", "exit 0" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
-  dozzle:
-    container_name: trusted-web-dozzle
-    image: amir20/dozzle:latest
-    networks:
-      - backend
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.dozzle.rule=Host(`dozzle.localhost`)"
-      - "traefik.http.services.dozzle.loadbalancer.server.port=8080"
-      - "traefik.http.routers.dozzle.middlewares=auth@file"
-    restart: unless-stopped
-
   elasticsearch:
     container_name: trusted-web-elastic
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.20
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.2
     environment:
+      - cluster.routing.allocation.disk.threshold_enabled=false
       - discovery.type=single-node
       - network.host=0.0.0.0
       - http.port=9400
+      - ELASTIC_USERNAME=${ELASTIC_ROOT_USERNAME}
+      - ELASTIC_PASSWORD=${ELASTIC_ROOT_PASSWORD}
       - xpack.security.enabled=false
       - xpack.security.transport.ssl.enabled=false
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m -XX:MaxDirectMemorySize=256m
       - indices.memory.index_buffer_size=5%
       - node.store.allow_mmap=false
+      - ES_JAVA_OPTS=-Djdk.internal.platform.disableContainerSupport=true -Xms512m -Xmx512m
+    env_file:
+      - .env
     ports:
       - "9400:9400"
     volumes:
       - elastic:/usr/share/elasticsearch/data
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    mem_limit: 1g
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9400/_cluster/health || exit 1"]
+      test: curl -f http://localhost:9400/_cluster/health || exit 1
       interval: 10s
       timeout: 5s
       retries: 3
@@ -116,6 +113,10 @@ services:
     networks:
       backend:
         ipv4_address: 172.20.1.11
+    deploy:
+      resources:
+        limits:
+          memory: 5G
 
   redis_server:
     container_name: trusted-web-redis
@@ -142,6 +143,21 @@ services:
           memory: 512M
         reservations:
           memory: 128M
+
+  mailpit:
+    container_name: trustly-web-mailpit
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "true"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "true"
+      MP_SMTP_AUTH_USERNAME: accounts@example.com
+      MP_SMTP_AUTH_PASSWORD: test
+    networks:
+      - backend
 
   mongo:
     image: mongo:latest
@@ -204,3 +220,4 @@ volumes:
   elastic:
   static_volume:
   media_volume:
+  arangodb:

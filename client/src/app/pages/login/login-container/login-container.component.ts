@@ -20,7 +20,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   private tempToken: string | null = null;
   private pendingUsername: string | null = null;
 
-  user = { mail: 'component-live-test@orion.local', password: '' };
+  user = { mail: '', password: '' };
   errorMessage: string | null = null;
   authenticated = true;
   copied = false;
