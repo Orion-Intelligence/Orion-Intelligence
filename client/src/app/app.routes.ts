@@ -25,16 +25,19 @@ const loadDumpComponent = () => import('./pages/dump/dump.component').then(m => 
 const loadCredentialComponent = () => import('./pages/credentials/credential.component').then(m => m.CredentialComponent);
 const loadErrorHandlerComponent = () => import('./shared/partials/error-handler/error-handler.component').then(m => m.ErrorHandlerComponent);
 const loadDashboardConsolidatedComponent = () => import('./pages/intel-panel/dashboard-consolidated/dashboard-consolidated.component').then(m => m.DashboardConsolidatedComponent);
+const loadAiWorkspaceComponent = () => import('./pages/intel-panel/ai-workspace/ai-workspace.component').then(m => m.AiWorkspaceComponent);
 const loadSecurityScanComponent = () => import('./pages/security-scan/security-scan.component').then(m => m.SecurityScanComponent);
 const loadTenantComponent = () => import('./pages/tenant/tenant.component').then(m => m.TenantComponent);
 const loadWelcomeComponent = () => import('./pages/welcome/welcome.component').then(m => m.WelcomeComponent);
 const loadResetPasswordComponent = () => import('./shared/partials/forgot-password/reset-password.component').then(m => m.ResetPasswordComponent);
 const loadSidebarUserStatisticsComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-statistics/sidebar-user-statistics.component').then(m => m.SidebarUserStatisticsComponent);
 const loadSidebarUserIocComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-ioc/sidebar-user-ioc.component').then(m => m.SidebarUserIocComponent);
+const loadSidebarUserEventManagementComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-event-management/sidebar-user-event-management.component').then(m => m.SidebarUserEventManagementComponent);
 const loadAuditlogComponent = () => import('./pages/admin/auditlog/auditlog.component').then(m => m.AuditlogComponent);
 const loadNotificationComponent = () => import('./shared/partials/notification/notification.component').then(m => m.NotificationComponent);
 const loadTrailNotificationComponent = () => import('./shared/partials/trail-notification/trail-notification.component').then(m => m.TrailNotificationComponent);
 const loadAccountSettingsComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-settings/account-settings.component').then(m => m.AccountSettingsComponent);
+const loadSidebarUserFeederComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-feeder/sidebar-user-feeder.component').then(m => m.SidebarUserFeederComponent);
 const loadSidebarUserHomepageComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-homepage/sidebar-user-homepage.component').then(m => m.SidebarUserHomepageComponent);
 const loadCategoryAlertReportComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component').then(m => m.CategoryAlertReportComponent);
 const loadAddCustomAlertComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-homepage/add-custom-alert/add-custom-alert.component').then(m => m.AddCustomAlertComponent);
@@ -43,6 +46,7 @@ const loadViewTenantComponent = () => import('./pages/tenant/tenant-management/v
 const loadSidebarProfileSystemSettingsComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-system-settings/sidebar-user-system-settings.component').then(m => m.SidebarProfileSystemSettingsComponent);
 const loadTenantSettingsComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-settings/tenant-settings/tenant-settings.component').then(m => m.TenantSettingsComponent);
 const loadFileScannerComponent = () => import('./pages/intel-panel/ioc-extractor/file-scanner.component').then(m => m.FileScannerComponent);
+const loadTextAnalysisComponent = () => import('./pages/intel-panel/text-analysis/text-analysis.component').then(m => m.TextAnalysisComponent);
 const loadSocialMapperComponent = () => import('./pages/graphs/social-graph/social-mapper.component').then(m => m.SocialMapperComponent);
 const loadNetworkIntelComponent = () => import('./pages/network-intel/network-intel').then(m => m.NetworkIntel);
 const loadUserProfileActivityComponent = () => import('./pages/profile/user-profile-activity/user-profile-activity.component').then(m => m.UserProfileActivityComponent);
@@ -248,6 +252,15 @@ export const routes: Routes = [
               type: 'filescan',
               title: 'File Analysis',
               description: 'Upload a file to extract Indicators of Compromise (IOCs)'
+            }
+          },
+          {
+            path: 'text-analysis',
+            loadComponent: loadTextAnalysisComponent,
+            data: {
+              animation: 'TextAnalysisAPI',
+              title: 'Text Analysis',
+              description: 'Analyze text for spam and malicious URLs'
             }
           },
           {
@@ -581,18 +594,13 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'basic-scan',
+            redirectTo: 'network-scan',
             pathMatch: 'full'
           },
           {
-            path: 'basic-scan',
-            loadComponent: loadSecurityScanComponent,
-            data: { type: 'basic', animation: 'CategoryPage' }
-          },
-          {
-            path: 'port-scan',
-            loadComponent: loadSecurityScanComponent,
-            data: { type: 'advanced', animation: 'CategoryPage' }
+            path: 'network-scan',
+            loadComponent: loadNetworkIntelComponent,
+            data: { animation: 'CategoryPage' }
           },
           {
             path: 'repository-scan',
@@ -700,6 +708,11 @@ export const routes: Routes = [
             pathMatch: 'full'
           },
           {
+            path: 'ai',
+            loadComponent: loadAiWorkspaceComponent,
+            data: { type: 'ai', animation: 'CategoryPage' }
+          },
+          {
             canActivate: [subscriptionGuard],
             path: 'consolidated',
             data: { animation: 'ConsolidatedPage' },
@@ -750,6 +763,16 @@ export const routes: Routes = [
             path: 'account',
             loadComponent: loadAccountSettingsComponent,
             data: { type: 'account', animation: 'CategoryPage' }
+          },
+          {
+            path: 'event-management',
+            loadComponent: loadSidebarUserEventManagementComponent,
+            data: { type: 'event-management', animation: 'CategoryPage' }
+          },
+          {
+            path: 'feeder',
+            loadComponent: loadSidebarUserFeederComponent,
+            data: { type: 'feeder', animation: 'CategoryPage' }
           },
           {
             path: 'user/:user_id',

@@ -1,10 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { AppService } from '../../services/core/app/app.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProxyController {
   private isInitialized = false;
+  private readonly appService = inject(AppService);
   private readonly handleDocumentClick = (event: MouseEvent): void => {
     if (event.button !== 0) {
       return;
@@ -46,6 +48,7 @@ export class ProxyController {
   }
 
   private getAnchorFromEvent(event: MouseEvent): HTMLAnchorElement | null {
+
     const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
     for (const node of path) {
       if (node instanceof HTMLAnchorElement && node.matches('a[target="_blank"][href]')) {
@@ -77,7 +80,7 @@ export class ProxyController {
         || currentHost.endsWith('.localhost');
       const onionHost = resolvedUrl.hostname.toLowerCase();
 
-      if (isCurrentOnionHost) {
+      if (isCurrentOnionHost || this.appService.isMobileMode()) {
         return resolvedUrl.toString();
       }
 

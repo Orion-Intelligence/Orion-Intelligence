@@ -15,7 +15,7 @@ import { ReportMappingComponent } from "../../../../shared/partials/report-mappi
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { ReportHeaderComponent } from '../../../../shared/partials/report-header/report-header.component';
-import { ChatWidgetComponent } from '../../../../shared/partials/chat-widget/chat-widget.component';
+import { ChatWidgetComponent } from '../../../../pages/intel-panel/ai-workspace/chat-widget/chat-widget.component';
 import { CodeBlockComponent } from '../../../../shared/partials/code-block/code-block.component';
 import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
 import { formatKeyLabel as formatKeyLabelUtil, getDisplayTitle as getDisplayTitleUtil, getStatusText as getStatusTextUtil, isWithinDays as isWithinDaysUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
@@ -24,7 +24,7 @@ import { ScrollService } from '../../../../shared/services/scroll.service';
 @Component({
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
-  imports: [ResultListComponent, CommonModule, NgClass, ResultSectionComponent, TooltipDirective, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ReportHeaderComponent, ChatWidgetComponent, CodeBlockComponent, ReportInteractionHostComponent],
+  imports: [ResultListComponent, CommonModule, NgClass, ResultSectionComponent, TooltipDirective, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ChatWidgetComponent, CodeBlockComponent, ReportInteractionHostComponent],
   animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit, AfterViewInit {

@@ -1,0 +1,156 @@
+<div class="flex flex-nowrap gap-2 overflow-x-auto max-w-full whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)] mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[943px]:mx-[10px]">
+  @if (canUseNexusChat()) {
+    <button data-testid="consolidated-tab-ai" type="button" [routerLink]="['/dashboard/profile/homepage']" [queryParams]="{ q: contextQuery() || null }" queryParamsHandling="merge" aria-label="AI" class="group flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border transition-all duration-200 border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
+      <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" class="h-[14px] w-[14px] drop-shadow-[0_1px_4px_rgba(255,255,255,0.18)]">
+        <path fill="#ffffff" d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.73 1.73 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.73 1.73 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.73 1.73 0 0 0 3.407 2.31zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732L9.1 2.137a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"></path>
+      </svg>
+    </button>
+  }
+  <button data-testid="consolidated-tab-iocs" type="button" [routerLink]="['/dashboard/profile/consolidated/all']" [queryParams]="{ tab: 'IOCs', q: contextQuery() || null }" queryParamsHandling="merge" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors shrink-0 border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">IOCs</button>
+  <button data-testid="consolidated-tab-deep-search" type="button" [routerLink]="['/dashboard/profile/consolidated/all']" [queryParams]="{ tab: 'Deep Search', q: contextQuery() || null }" queryParamsHandling="merge" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors shrink-0 border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">Deep Search</button>
+  <button data-testid="consolidated-tab-network-intelligence" type="button" [routerLink]="['/dashboard/profile/consolidated/all']" [queryParams]="{ tab: 'Network Intelligence', q: contextQuery() || null }" queryParamsHandling="merge" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors shrink-0 border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">Network Intelligence</button>
+</div>
+
+<div class="ui-consolidated-theme w-auto space-y-4 m-0 h-[calc(100vh-120px)] overflow-hidden p-[32px] max-[1100px]:p-[20px] max-[640px]:h-[calc(100vh-70px)] max-[640px]:p-[10px]">
+  <div class="flex h-full min-h-0 items-stretch overflow-hidden">
+    <div class="chat-support__window ui-ai-chat-surface-pattern flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl bg-[var(--color-blue-700)] shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
+      <div class="shrink-0 px-5 pt-4 max-[640px]:px-4">
+        <button type="button" (click)="startNewChat()" class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
+          New Chat
+        </button>
+      </div>
+      <div #messagesContainer data-testid="chat-widget-messages" [class]="messages.length ? 'min-h-0 flex-1 space-y-5 overflow-y-auto scroll-smooth px-5 pt-5 pb-[300px] [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-4 max-[640px]:px-4 max-[640px]:pb-[300px] max-[640px]:[mask-image:none]' : 'min-h-0 flex-1 space-y-5 overflow-y-auto scroll-smooth px-5 pt-5 pb-6 [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-4 max-[640px]:px-4 max-[640px]:pb-0 max-[640px]:[mask-image:none]'">
+        @if (isLoadingHistory()) {
+          <div class="flex min-h-full items-start justify-center pt-8 max-[640px]:pt-5">
+            <div class="inline-flex items-center gap-3 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-2.5 text-[13px] text-[var(--color-text3)] shadow-[0_8px_20px_var(--color-shadow-medium)]">
+              <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
+              <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:140ms]"></span>
+              <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:280ms]"></span>
+              <span class="ml-1">Fetching chat history</span>
+            </div>
+          </div>
+        } @else if (!messages.length) {
+          <div class="flex min-h-full items-start justify-center pt-6 max-[640px]:block max-[640px]:min-h-0 max-[640px]:pt-4">
+            <div class="w-full max-w-[620px] text-center">
+              <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] shadow-[0_6px_14px_rgba(0,0,0,0.08)]">
+                <img alt="chat" src="assets/images/shared/chat-icon.svg" class="h-9 w-9 rounded-full object-cover">
+              </div>
+              <h3 class="mt-5 text-[32px] font-semibold tracking-[-0.03em] text-[var(--color-text1)] max-[640px]:text-[26px]">How can Nexus help?</h3>
+              <p class="mx-auto mt-3 max-w-[580px] text-[14px] leading-7 text-[var(--color-text4)]">Use this compact analyst assistant for summaries, triage notes, and quick next-step guidance without leaving the dashboard.</p>
+              <div class="mt-7 flex flex-wrap justify-center gap-3 max-[640px]:grid max-[640px]:grid-cols-1">
+                @for (prompt of quickPrompts; track prompt) {
+                  <button type="button" (click)="usePrompt(prompt)" class="rounded-full border border-[rgba(87,165,235,0.16)] bg-[linear-gradient(180deg,rgba(87,165,235,0.12)_0%,rgba(87,165,235,0.07)_100%)] px-4 py-2 text-[12px] font-medium text-[var(--color-text3)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:border-[rgba(87,165,235,0.28)] hover:bg-[linear-gradient(180deg,rgba(87,165,235,0.18)_0%,rgba(87,165,235,0.11)_100%)] hover:text-[var(--color-text1)] max-[640px]:w-full max-[640px]:justify-center">
+                    {{ prompt }}
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        } @else {
+          @for (message of messages; track trackMessage($index, message)) {
+            @if (message.sender === 'bot') {
+              <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
+                <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
+                  <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
+                </div>
+                <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
+                  <div class="flex min-h-[20px] items-center gap-2 px-1">
+                    <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
+                  </div>
+                  <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3.5 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
+                    <p class="whitespace-pre-wrap text-[14px] leading-7 text-[var(--color-text1)]">{{ message.text }}</p>
+                  </div>
+                </div>
+              </div>
+            } @else if (message.sender === 'user') {
+              <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] justify-end">
+                <div class="max-w-[72%] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
+                  <div class="flex min-h-[20px] items-center justify-end gap-2 px-1">
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
+                    <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text1)]">Analyst</span>
+                  </div>
+                  <div class="ui-ai-chat-bubble ui-ai-chat-bubble-user rounded-[22px] rounded-tr-[10px] border border-[var(--color-border)] px-4 py-3.5 text-sm text-[var(--color-text1)] shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
+                    <p class="whitespace-pre-wrap leading-7 text-[var(--color-text1)]">{{ message.text }}</p>
+                  </div>
+                </div>
+                <div class="mt-1 ml-3.5 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
+                  <img alt="user avatar" [src]="appService.userSessionData().user.image || '/api/s/static/user/default.png'" class="block h-full w-full rounded-full object-cover">
+                </div>
+              </div>
+            } @else {
+              <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
+                <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border-red)] bg-[var(--color-red-100)] box-border max-[640px]:hidden">
+                  <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
+                </div>
+                <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
+                  <div class="flex min-h-[20px] items-center gap-2 px-1">
+                    <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
+                  </div>
+                  <div class="ui-ai-chat-bubble-cancel rounded-[22px] rounded-tl-[10px] border px-4 py-3 text-sm shadow-[0_10px_24px_var(--color-shadow-medium)] max-[640px]:w-full">
+                    <p class="whitespace-pre-wrap leading-7 text-[var(--color-text7)]">{{ message.text }}</p>
+                  </div>
+                  @if (message.retryPayload) {
+                    <button type="button" (click)="retryMessage(message.retryPayload)" class="mt-1 inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text1)] transition hover:opacity-90">
+                      Retry
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          }
+        }
+
+        @if (isSending()) {
+          <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
+            <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
+              <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
+            </div>
+            <div class="max-w-[240px] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
+              <div class="flex min-h-[20px] items-center gap-2 px-1">
+                <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
+                <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">Thinking</span>
+              </div>
+              <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
+                  <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:140ms]"></span>
+                  <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:280ms]"></span>
+                  <span class="ml-1 text-[12px] text-[var(--color-text4)]">{{ nexusStep() }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="shrink-0 border-t border-[var(--color-border)] p-3">
+        <div [class]="messages.length ? 'mb-0 max-h-0 overflow-hidden opacity-0 pointer-events-none transition-all duration-200 max-[640px]:hidden' : 'mb-3 flex flex-wrap gap-2 transition-all duration-200 max-[640px]:hidden'">
+          @for (prompt of quickPrompts; track prompt) {
+            <button type="button" (click)="usePrompt(prompt)" class="rounded-full border border-[rgba(87,165,235,0.16)] bg-[linear-gradient(180deg,rgba(87,165,235,0.12)_0%,rgba(87,165,235,0.07)_100%)] px-3 py-1.5 text-[11px] font-medium text-[var(--color-text4)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:border-[rgba(87,165,235,0.28)] hover:bg-[linear-gradient(180deg,rgba(87,165,235,0.18)_0%,rgba(87,165,235,0.11)_100%)] hover:text-[var(--color-text1)] max-[640px]:w-full max-[640px]:justify-center">
+              {{ prompt }}
+            </button>
+          }
+        </div>
+
+        <form novalidate class="rounded-full border border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-800)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+          <div class="flex items-center gap-2">
+            <input [(ngModel)]="messageDraft" (keydown)="onComposerKeydown($event)" data-testid="chat-widget-input" type="text" name="message" placeholder="Write a message" class="flex-1 rounded-full bg-[var(--color-blue-800)] px-3 py-1.5 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" />
+            <button data-testid="chat-widget-send" type="button" (click)="isSending() ? stopMessageGeneration() : sendMessage()" [disabled]="!isSending() && !messageDraft.trim()" [class]="isSending() ? 'flex h-8 w-8 items-center justify-center rounded-full bg-[#6a4b4b] transition hover:bg-[#755555] disabled:cursor-not-allowed disabled:opacity-50' : 'flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] transition hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50'">
+              @if (isSending()) {
+                <img src="assets/images/shared/cross.svg" alt="stop" class="h-3.5 w-3.5 [filter:brightness(0)_invert(1)]">
+              } @else {
+                <img src="assets/images/shared/chat_small.svg" alt="chat" class="h-4 w-4 [filter:brightness(0)_invert(1)]">
+              }
+            </button>
+          </div>
+        </form>
+
+        <div class="mt-2 flex flex-wrap items-center justify-between gap-2 px-1 text-[11px] text-[var(--color-text6)] max-[640px]:hidden">
+          <p>Enter sends. Shift + Enter adds a new line.</p>
+          <p>Session resets when you switch away.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

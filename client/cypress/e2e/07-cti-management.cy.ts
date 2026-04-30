@@ -233,7 +233,7 @@ describe('Orion Intelligence - CTI and Social Graph Management Flows', () => {
       .invoke('css', 'width', '1px')
       .invoke('css', 'height', '1px')
       .invoke('css', 'opacity', '1')
-      .selectFile('cypress/fixtures/profile.png');
+      .selectFile('cypress/fixtures/profile.png', { force: true });
     cy.wait('@imageRecon');
     cy.get('[data-testid="social-manage-profiles-modal"]').should('be.visible');
     cy.get('[data-testid="social-manage-profiles-filter"]').should('be.visible').type('twit');

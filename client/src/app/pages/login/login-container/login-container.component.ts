@@ -66,6 +66,9 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   }
 
   getLoginLogoSrc(): string {
+    if (!this.brandingResolved) {
+      return '';
+    }
     const logo = this.appService.getConfig().appSettings.logo_wide_light;
     if (!logo || logo === '/api/s/static/system/logo_wide_light_default.png') {
       return LoginContainerComponent.DEFAULT_LOGO_SRC;
@@ -87,7 +90,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
     });
   }
 
-  async onSubmit(form: NgForm) {
+  onSubmit(form: NgForm) {
     this.errorMessage = null;
     if (!form.valid) {
       return;

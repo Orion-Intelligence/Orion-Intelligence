@@ -1,33 +1,30 @@
-import { ChangeDetectorRef, Component, inject, input, output } from '@angular/core';
+import { Component, ViewChild, inject, input, output } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { HelperService } from '../../services/helper.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { ApiService } from '../../services/api.service';
-import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { GeneralResultItem } from '../../model/results/general/general.callback.model';
 import { LeakResultItem } from '../../model/results/leak/leak.callback.model';
 import { HttpParams } from '@angular/common/http';
 import { AppService } from '../../../services/core/app/app.service';
-import { SubscriptionService } from '../../../services/dashboard/subscription.service';
 import { Router } from '@angular/router';
 import { ReportExportService } from '../../services/report-export.service';
 import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice-modal.component';
 import { REPORT_EXPORT_OPTIONS } from '../../model/report/export-choice.model';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { ProxyController } from '../../services/proxy-controller';
+import { AiSummaryComponent } from '../../../pages/intel-panel/ai-workspace/ai-summary/ai-summary.component';
 @Component({
   selector: 'app-report-header',
   standalone: true,
-  imports: [NgOptimizedImage, TooltipDirective, ExportChoiceModalComponent],
+  imports: [NgOptimizedImage, TooltipDirective, ExportChoiceModalComponent, AiSummaryComponent],
   templateUrl: './report-header.component.html',
-  animations: [fadeInDashboardItem]
 })
 export class ReportHeaderComponent {
   private readonly proxied_resource = inject(ProxyController);
+  @ViewChild(AiSummaryComponent) private aiSummary?: AiSummaryComponent;
 
-  aiSuggestStatus = false;
-  aiSuggestSummary = '';
   isExportChoiceOpen = false;
   readonly reportExportOptions = REPORT_EXPORT_OPTIONS;
   readonly csv_object = input<string | object | null | undefined>(null);
@@ -37,7 +34,7 @@ export class ReportHeaderComponent {
   readonly lang_detected = input<string>("");
   readonly languageUpdated = output<LeakResultItem | GeneralResultItem>();
 
-  constructor(private helperService: HelperService, private api: ApiService, protected appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private subscriptionService: SubscriptionService, protected route: Router, protected licenseServise: LicenseService, private reportExportService: ReportExportService) {
+  constructor(private helperService: HelperService, private api: ApiService, protected appService: AppService, private dashboardService: DashboardService, protected route: Router, protected licenseServise: LicenseService, private reportExportService: ReportExportService) {
   }
 
   downloadCSV() {
@@ -122,22 +119,7 @@ export class ReportHeaderComponent {
   }
 
   aiSuggest() {
-    if (!this.subscriptionService.accountExpirable()) {
-      this.dashboardService.showSubscription.set(true);
-      return;
-    }
-    this.api.post<{
-          result: string;
-      }>('nlp/summarize/ai', {
-        data: [this.content()]
-      }).subscribe({
-        next: (response) => {
-          this.aiSuggestStatus = true;
-          this.aiSuggestSummary = response.result || 'No summary available';
-          this.cdr.detectChanges();
-        },
-        error: (_err) => void 0
-      });
+    this.aiSummary?.summarize();
   }
 
   langUpdate() {

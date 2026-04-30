@@ -48,6 +48,7 @@ export enum ApiSubCategory {
     CRACKED = 'Playstore-Scanner',
     SOFTWARE = 'Software-Scanner',
     FILE = 'File-Scanner',
+    TEXT_ANALYSIS = 'Text-Analysis',
     CRYPTO = 'Crypto-Scanner'
 }
 export enum SocialSubCategory {
@@ -69,11 +70,11 @@ export enum FeedSubCategory {
     NEWS = 'News'
 }
 export enum ScannerSubCategory {
-    BASIC = 'Basic-Scan',
-    FULL = 'Port-Scan',
+    // BASIC = 'Basic-Scan',
+    // FULL = 'Port-Scan',
+    NETWORK = 'Network-Scan',
     REPOSITORY = 'Repository-Scan',
-    SEO = 'SEO-Scan',
-    APK = 'APK-Scan'
+    SEO = 'SEO-Scan'
 }
 export enum DumpSubCategory {
     LISTING = 'Listing'
@@ -93,6 +94,8 @@ export enum NETINTSubCategory {
 }
 export enum ProfileSubCategory {
     HOMEPAGE = 'Homepage',
+    EVENT_MANAGEMENT = 'Event-Management',
+    FEEDER = 'Feeder',
     IOC = 'IOC',
     TENANT_SETTINGS = 'Tenant-Settings',
     ACCOUNT = 'Account',

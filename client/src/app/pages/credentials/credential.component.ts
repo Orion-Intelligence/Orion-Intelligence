@@ -14,11 +14,15 @@ import { FormsModule } from '@angular/forms';
 import { EmptyQueryComponent } from '../../shared/partials/empty-query/empty-query.component';
 import { PaginationComponent } from "../../shared/partials/pagination/pagination.component";
 import { RankedCallbackModel } from '../../shared/model/results/consolidated/ranked.callback.model';
-import { CredentialsSearchBarComponent } from "./credentials-search-bar/credentials-search-bar.component";
+import { IocSearchComponent } from "../../shared/partials/ioc-search/ioc-search.component";
 import { finalize } from 'rxjs/operators';
 import { PasswordSchemaComponent } from './password-schema/password-schema.component';
 import { PasswordSchemaFilter } from '../../shared/model/stealerlogs-filter/stealerlogs-filters';
 import { ScanHelperMethods } from '../../shared/partials/scan-helper-methods/scan-helper-methods.component';
+import { ExportChoiceModalComponent } from '../../shared/partials/export-choice-modal/export-choice-modal.component';
+import { REPORT_EXPORT_OPTIONS } from '../../shared/model/report/export-choice.model';
+import { ReportExportService } from '../../shared/services/report-export.service';
+import { GraphReportPayload, GraphReportTableRow } from '../../shared/model/report/report-export.model';
 @Component({
   selector: 'app-credential',
   standalone: true,
@@ -29,9 +33,10 @@ import { ScanHelperMethods } from '../../shared/partials/scan-helper-methods/sca
     EmptyQueryComponent,
     NgClass,
     PaginationComponent,
-    CredentialsSearchBarComponent,
+    IocSearchComponent,
     PasswordSchemaComponent,
-    ScanHelperMethods
+    ScanHelperMethods,
+    ExportChoiceModalComponent
   ],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],
@@ -40,11 +45,13 @@ export class CredentialComponent implements OnInit {
   private pendingRequests = 0;
   private isSearchLoading = false;
   private isRankedLoading = false;
+  private readonly exportCsvColumns = [ 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
 
   protected readonly Math = Math;
   protected readonly filters = stealer_filters;
   protected readonly length = length;
 
+  readonly reportExportOptions = REPORT_EXPORT_OPTIONS;
   searchQuery: string = '';
   isLoading: boolean = false;
   firstTrigger: boolean = true;
@@ -58,6 +65,7 @@ export class CredentialComponent implements OnInit {
   allSearchApiTime: any = 0;
   showPasswordscheme = false;
   showSubdomains = false;
+  isExportChoiceOpen = false;
   subdomainList: string[] = [];
   isStandaloneStealerlogsRoute = false;
 
@@ -69,7 +77,7 @@ export class CredentialComponent implements OnInit {
     this.isLoading = this.pendingRequests > 0;
   }
 
-  constructor(protected helperService: HelperService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService) {
+  constructor(protected helperService: HelperService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private reportExportService: ReportExportService) {
     this.type = this.route.snapshot.data['type'];
   }
 
@@ -240,20 +248,155 @@ export class CredentialComponent implements OnInit {
   }
 
   onDownload() {
-    const combinedData = {
-      stealerLog: this.stealerlogCallbackModel,
-      rankedResult: this.rankedResult
-    };
-    const json = JSON.stringify(combinedData, null, 2);
-    const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+    this.isExportChoiceOpen = true;
+  }
+
+  closeExportChoice() {
+    this.isExportChoiceOpen = false;
+  }
+
+  selectExport(type: string) {
+    if (type === 'csv') {
+      this.downloadCombinedResultsCsv();
+    }
+    else {
+      this.exportCombinedResultsPdf();
+    }
+    this.closeExportChoice();
+  }
+
+  private downloadCombinedResultsCsv(): void {
+    const rows = this.buildCombinedExportRows();
+    const csvLines = [
+      this.exportCsvColumns.join(','),
+      ...rows.map(row => this.exportCsvColumns.map(column => this.escapeCsvValue(row[column] ?? '-')).join(','))
+    ];
+    const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'stealerLog.json';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'credentials_export.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  }
+
+  private exportCombinedResultsPdf(): void {
+    const stealerResults = this.stealerlogCallbackModel?.Result ?? [];
+    const rankedResults = this.rankedResult?.result ?? [];
+    const tables: GraphReportTableRow[] = [];
+
+    if (stealerResults.length) {
+      tables.push(this.buildPdfSection('Stealer Records', this.buildStealerExportRows()));
+    }
+
+    if (rankedResults.length) {
+      tables.push(this.buildPdfSection('Ranked Records', this.buildRankedExportRows()));
+    }
+
+    const payload: GraphReportPayload = {
+      graphKind: 'cti',
+      title: 'Credentials Export',
+      sessionName: this.searchQuery || 'Stealerlogs Search',
+      generatedAtIso: new Date().toISOString(),
+      nodes: [],
+      edges: [],
+      summary: {
+        search_query: this.searchQuery || '-',
+        total_records: stealerResults.length + rankedResults.length,
+        stealer_records: stealerResults.length,
+        ranked_records: rankedResults.length,
+        stealer_pages: this.stealerlogCallbackModel?.Page_Count ?? 0,
+        ranked_pages: this.rankedResult?.pageCount ?? 0
+      },
+      tables
+    };
+
+    this.reportExportService.exportByType(payload, 'doc_pdf');
+  }
+
+  private buildCombinedExportRows(): Record<string, string>[] {
+    const searchQuery = this.searchQuery || '-';
+    return [
+      ...this.buildStealerExportRows(searchQuery),
+      ...this.buildRankedExportRows(searchQuery)
+    ];
+  }
+
+  private buildStealerExportRows(searchQuery = this.searchQuery || '-'): Record<string, string>[] {
+    return (this.stealerlogCallbackModel?.Result ?? []).map((item, index) => ({
+      recordType: 'stealer',
+      recordIndex: String(index + 1),
+      searchQuery,
+      email: this.toExportValue(item?.['email']),
+      username: this.toExportValue(item?.['username']),
+      domain: this.toExportValue(item?.['domain']),
+      source: this.toExportValue(item?.['channel'] || item?.['filename'] || item?.['file']),
+      hash: this.toExportValue(item?.['m_hash']),
+      title: '-',
+      url: '-',
+      rank: '-',
+      date: '-',
+      team: '-',
+      summary: '-'
+    }));
+  }
+
+  private buildRankedExportRows(searchQuery = this.searchQuery || '-'): Record<string, string>[] {
+    return (this.rankedResult?.result ?? []).map((item, index) => ({
+      recordType: 'ranked',
+      recordIndex: String(index + 1),
+      searchQuery,
+      email: '-',
+      username: '-',
+      domain: '-',
+      source: '-',
+      hash: this.toExportValue(item?.['m_hash']),
+      title: this.toExportValue(item?.['m_title'], 160),
+      url: this.toExportValue(item?.['m_url'], 160),
+      rank: this.toExportValue(item?.['rank_index']),
+      date: this.toExportValue(item?.['m_leak_date'] || item?.['m_update_date']),
+      team: this.toExportValue(item?.['m_team']),
+      summary: this.toExportValue(item?.['m_important_content'] || item?.['m_content'], 240)
+    }));
+  }
+
+  private buildPdfSection(title: string, rows: Record<string, string>[]): GraphReportTableRow {
+    return {
+      title,
+      values: Object.fromEntries(rows.map((row) => [
+        `Record ${row['recordIndex']}`,
+        Object.entries(row)
+          .filter(([key]) => key !== 'recordType' && key !== 'recordIndex' && key !== 'searchQuery')
+          .filter(([_, value]) => value && value !== '-')
+          .map(([key, value]) => `${this.toTitleCase(key)}: ${value}`)
+          .join(' | ')
+      ]))
+    };
+  }
+
+  private toExportValue(value: unknown, maxLength = 120): string {
+    if (Array.isArray(value)) {
+      return this.toExportValue(value.join(', '), maxLength);
+    }
+    if (value === null || value === undefined || value === '') {
+      return '-';
+    }
+    const text = String(value).replace(/\s+/g, ' ').trim();
+    if (!text) {
+      return '-';
+    }
+    return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+  }
+
+  private escapeCsvValue(value: string | number): string {
+    const text = String(value ?? '');
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+
+  private toTitleCase(value: string): string {
+    return value.replace(/([A-Z])/g, ' $1').replace(/^./, match => match.toUpperCase()).trim();
   }
 
   openScheme() {
@@ -288,6 +431,9 @@ export class CredentialComponent implements OnInit {
   }
 
   get maxPages(): number {
+    if (this.isStandaloneStealerlogsRoute) {
+      return Math.max(Number(this.stealerlogCallbackModel.Page_Count || 0), 1);
+    }
     return Math.max(Number(this.stealerlogCallbackModel.Page_Count || 0),
       Number(this.rankedResult.pageCount || 0),
       1);

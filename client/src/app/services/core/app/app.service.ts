@@ -63,7 +63,8 @@ export class AppService {
         userId: '',
         licenses: [],
         assignedQuota: '0',
-        quotaExceeded: false
+        quotaExceeded: false,
+        eventManagementEnabled: false
       },
       alerts: [],
       alert_summary: {

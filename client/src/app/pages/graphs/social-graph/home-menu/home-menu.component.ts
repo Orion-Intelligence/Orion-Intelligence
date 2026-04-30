@@ -98,7 +98,7 @@ export class HomeMenuComponent implements OnDestroy {
     if (job.status === 'completed') {
       return `${baseClasses} border-slate-700 cursor-pointer hover:border-indigo-500 hover:bg-slate-800`;
     }
-    if (job.status === 'in_progress') {
+    if (job.status === 'in_progress' || job.status === 'queued') {
       return `${baseClasses} border-indigo-500/50`;
     }
     if (job.status === 'failed') {
@@ -193,7 +193,7 @@ export class HomeMenuComponent implements OnDestroy {
       let hasChanges = false;
       for (const job of jobs) {
         let target = -1;
-        if (job.status === 'in_progress') {
+        if (job.status === 'in_progress' || job.status === 'queued') {
           target = Math.max(0, Math.min(100, job.progress));
         }
         else if (job.status === 'completed') {

@@ -1,1 +1,125 @@
-{"result":{"filename":"tmpmrdchf4q.pdf","file_type":"pdf","extracted_text_length":6959,"iocs":[{"m_domain":"bellevue.edu"},{"m_domain":"xxx.com"},{"m_email":"imasample1@xxx.com"},{"m_email":"careerservices@bellevue.edu"},{"m_location":"NE"},{"m_location":"Nebraska"},{"m_location":"Bellevue"},{"m_username":"careerservices"},{"m_username":"imasample1"},{"m_language":"en"}],"status":"success","original_filename":"resume-sample.pdf"}}
+{
+  "job_id": "4173935476713587483",
+  "status": "done",
+  "result": {
+    "type": "file",
+    "metadata": {
+      "file_name": "tmppt5fhhy_.zip",
+      "metadata": {
+        "X-TIKA:Parsed-By": [
+          "org.apache.tika.parser.DefaultParser",
+          "org.apache.tika.parser.pkg.PackageParser",
+          [
+            "org.apache.tika.parser.DefaultParser",
+            "org.apache.tika.parser.csv.TextAndCSVParser"
+          ],
+          [
+            "org.apache.tika.parser.DefaultParser",
+            "org.apache.tika.parser.pkg.PackageParser"
+          ]
+        ],
+        "X-TIKA:Parsed-By-Full-Set": [
+          "org.apache.tika.parser.DefaultParser",
+          "org.apache.tika.parser.pkg.PackageParser",
+          "org.apache.tika.parser.csv.TextAndCSVParser"
+        ],
+        "X-TIKA:content_handler": [
+          "ToTextContentHandler",
+          "ToTextContentHandler",
+          "ToTextContentHandler"
+        ],
+        "X-TIKA:parse_time_millis": [
+          "7",
+          "2",
+          "3"
+        ],
+        "X-TIKA:embedded_depth": [
+          "0",
+          "2",
+          "1"
+        ],
+        "resourceName": [
+          "b'tmppt5fhhy_.zip'",
+          "eicar.com",
+          "eicar_com.zip"
+        ],
+        "X-TIKA:detectedEncoding": [
+          "ISO-8859-1",
+          "ISO-8859-1",
+          "ISO-8859-1"
+        ],
+        "Content-Length": [
+          "308",
+          "68",
+          "184"
+        ],
+        "X-TIKA:encodingDetector": [
+          "UniversalEncodingDetector",
+          "UniversalEncodingDetector",
+          "UniversalEncodingDetector"
+        ],
+        "Content-Type": [
+          "application/zip",
+          "text/plain; charset=ISO-8859-1",
+          "application/zip"
+        ],
+        "X-TIKA:final_embedded_resource_path": [
+          "/eicar_com.zip/eicar.com",
+          "/eicar_com.zip"
+        ],
+        "X-TIKA:embedded_id_path": [
+          "/1/2",
+          "/1"
+        ],
+        "dcterms:modified": [
+          "2000-05-24T19:07:00Z",
+          "2000-07-11T21:33:36Z"
+        ],
+        "embeddedRelationshipId": [
+          "eicar.com",
+          "eicar_com.zip"
+        ],
+        "Content-Encoding": "ISO-8859-1",
+        "X-TIKA:embedded_resource_path": [
+          "/eicar_com.zip/eicar.com",
+          "/eicar_com.zip"
+        ],
+        "X-TIKA:embedded_id": [
+          "2",
+          "1"
+        ]
+      },
+      "content_preview": "\n\n\n\n\n\n\n\n\n\n\n\neicar_com.zip\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nX5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\neicar.com\n\n",
+      "content_length": 143,
+      "status": "success"
+    },
+    "ioc": {
+      "filename": "tmppt5fhhy_.zip",
+      "file_type": "unknown",
+      "extracted_text": "",
+      "extracted_text_length": 0,
+      "status": "error",
+      "error_message": "Unsupported file format: .zip",
+      "iocs": []
+    },
+    "antivirus": {
+      "file_name": "tmppt5fhhy_.zip",
+      "file_path": "/tmp/tmppt5fhhy_.zip",
+      "file_size": 308,
+      "sha256": "e1105070ba828007508566e28a2b8d4c65d192e9eaf3b7868382b7cae747b397",
+      "engine": "ClamAV",
+      "engine_version": "ClamAV 1.5.2/27982/Sat Apr 25 06:24:36 2026",
+      "raw_result": {
+        "stream": [
+          "FOUND",
+          "Eicar-Test-Signature"
+        ]
+      },
+      "clamav_status": "FOUND",
+      "scan_time_ms": 8,
+      "status": "infected",
+      "malware": "Eicar-Test-Signature",
+      "message": "Virus detected"
+    }
+  }
+}

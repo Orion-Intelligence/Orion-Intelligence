@@ -17,7 +17,7 @@ class MailMessage(str, Enum):
 
 class MailUrlHeading(str, Enum):
     VERIFICATION = "Verification link : "
-    FORGOT_PASSWORD = "Password rest link : "
+    FORGOT_PASSWORD = "Reset link : "
     PRO_SUBSCRIPTION = "Pro subscription details : "
     SUPPORT = "Message : "
     ACCOUNT_CREATED = "Verify your account : "

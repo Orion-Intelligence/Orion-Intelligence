@@ -1,0 +1,213 @@
+<div class="mb-[200px] w-full px-[32px] pt-[24px] max-[1200px]:px-[15px] max-[1200px]:pt-[18px] max-[943px]:px-[10px] max-[943px]:pt-[14px]" @fadeInDashboardItem>
+  <div class="mb-5">
+    <h1 class="ui-page-title">Event Management</h1>
+    <p class="ui-page-description">Search SIEM events for your own tenant only. Admin and maintainer access is tenant-scoped.</p>
+  </div>
+
+  <div class="rounded-[14px] bg-[var(--color-blue-760)] py-[15px]" @fadeInDashboardItem>
+    <app-ioc-search
+      [basicTags]="searchBuilderTags"
+      [filterLabels]="searchBuilderLabels"
+      [allTag]="'all'"
+      [defaultBasicTag]="'all'"
+      [defaultAdvancedTag]="'domain'"
+      [valueValidators]="searchBuilderValueValidators"
+      [tagValidators]="searchBuilderTagValidators"
+      [useRouteQuery]="false"
+      [advancedTitle]="'Advanced Filter Builder'"
+      [advancedSubtitle]="'Combine multiple filters with AND/OR for precise SIEM results'"
+      (searchTriggered)="triggerSearch($event)"
+    ></app-ioc-search>
+
+    @if (activeDateRange) {
+      <div class="mt-3 flex flex-wrap gap-2">
+        <div class="inline-flex items-center gap-[8px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-1.5 text-[12px] font-semibold text-[var(--color-text2)]">
+          Date: {{ activeDateRange }}
+          <button type="button" class="inline-flex h-4 w-4 items-center justify-center text-[var(--color-text3)] transition hover:text-[var(--color-text1)]" (click)="clearSidebarFilters()" aria-label="Clear date filter">
+            <i class="bi bi-x-circle-fill text-[12px]"></i>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (sidebarReady && (isFilterOpen$ | async)) {
+    <div class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()"></div>
+  }
+
+  @if (sidebarReady) {
+    <div class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !(isFilterOpen$ | async), 'translate-x-0 pointer-events-auto': (isFilterOpen$ | async) }">
+      <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilters($event)" (filterReset)="reloadFilters({})" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="mt-4 rounded-[10px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.28)] px-4 py-3 text-sm text-[var(--color-text1)]">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (loading) {
+    <div class="mt-4 w-full" @fadeInDashboardItem>
+      <app-loading-form></app-loading-form>
+    </div>
+  }
+
+  @if (!queryTriggered && !loading) {
+    <div class="mt-4 w-full" @fadeInDashboardItem>
+      <app-empty-query></app-empty-query>
+    </div>
+  }
+
+  @if (queryTriggered && !loading && !errorMessage && records.length === 0) {
+    <div class="mt-4 w-full" @fadeInDashboardItem>
+      <app-empty-result [searchQuery]="query"></app-empty-result>
+    </div>
+  }
+
+  @if (queryTriggered && !loading && records.length > 0) {
+    <section class="mt-[15px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] p-[15px]" @fadeInDashboardItem>
+      <div class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
+        <div class="flex items-center gap-2">
+          <img alt="Search" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
+          <div class="text-sm font-semibold text-[var(--color-text1)]">{{ getActorLabel() }}</div>
+          <div class="text-xs text-[var(--color-text4)]">Access</div>
+        </div>
+
+        <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
+
+        <div class="hidden items-center gap-2 md:flex">
+          <img alt="Search" src="assets/images/shared/results_found.svg" class="h-5 w-5">
+          <div class="text-sm font-semibold text-[var(--color-text1)]">{{ totalHits }}</div>
+          <div class="text-xs text-[var(--color-text4)]">Total Hits</div>
+        </div>
+
+        <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
+
+        <div class="hidden items-center gap-2 lg:flex">
+          <img alt="Search" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
+          <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]" [title]="displayQuery || 'query'">{{ displayQuery || 'query' }}</div>
+          <div class="text-xs text-[var(--color-text4)]">Query</div>
+        </div>
+
+        <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
+
+        <div class="hidden items-center gap-2 xl:flex">
+          <img alt="Search" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
+          <div class="text-sm font-semibold text-[var(--color-text1)]">{{ currentBatchSize }} / {{ pageCount }}</div>
+          <div class="text-xs text-[var(--color-text4)]">Batch / Pages</div>
+        </div>
+      </div>
+
+      <div class="mt-[16px]">
+        <div class="ui-ioc-table-shell overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+          <div class="ui-ioc-table-head grid min-w-[980px] grid-cols-[70px_1.5fr_130px_180px_180px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[70px_1.5fr_130px_180px_48px]">
+            <div>#</div>
+            <div>Event</div>
+            <div>Severity</div>
+            <div class="max-[900px]:hidden">Source / Host</div>
+            <div>Date</div>
+            <div></div>
+          </div>
+
+          @if (!records.length) {
+            <div class="ui-ioc-table-empty grid min-w-[980px] grid-cols-[70px_1.5fr_130px_180px_180px_48px] gap-2 bg-[var(--color-blue-720)] px-4 py-3 text-sm text-[var(--color-text4)] max-[900px]:grid-cols-[70px_1.5fr_130px_180px_48px]">
+              <div>-</div><div>-</div><div>-</div><div class="max-[900px]:hidden">-</div><div>-</div><div></div>
+            </div>
+          }
+
+          <div>
+            @for (item of records; track trackByIndex($index); let idx = $index) {
+              <div data-testid="siem-log-row" class="ui-ioc-table-row grid min-w-[980px] cursor-pointer grid-cols-[70px_1.5fr_130px_180px_180px_48px] items-center gap-2 border-b border-[var(--color-divider)] px-4 py-3 text-sm text-[var(--color-text1)] transition-colors max-[900px]:grid-cols-[70px_1.5fr_130px_180px_48px]" [class.ui-ioc-row-even]="idx % 2 === 0" [class.ui-ioc-row-odd]="idx % 2 !== 0" [class.credential_row_expand]="expandedResultIndex === idx" role="row" tabindex="0" [attr.aria-expanded]="expandedResultIndex === idx" (click)="toggleResultItem(idx)">
+                <div class="font-mono text-xs">{{ getDisplayIndex(idx) }}</div>
+                <div class="min-w-0">
+                  <div class="truncate font-medium" [title]="getResultTitle(item, idx)">{{ getResultTitle(item, idx) }}</div>
+                  <div class="mt-[2px] truncate text-xs text-[var(--color-text4)]" [title]="getRawPreview(item)">{{ getRawPreview(item) }}</div>
+                </div>
+                <div>
+                  <span class="inline-flex items-center rounded-full border px-[8px] py-[2px] text-[11px] font-semibold uppercase" [ngClass]="{ 'border-red-400/30 bg-red-500/10 text-red-300': stringifyPrimitive(item?.severity).toLowerCase() === 'critical', 'border-orange-400/30 bg-orange-500/10 text-orange-300': stringifyPrimitive(item?.severity).toLowerCase() === 'high', 'border-amber-400/30 bg-amber-500/10 text-amber-300': stringifyPrimitive(item?.severity).toLowerCase() === 'medium', 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300': stringifyPrimitive(item?.severity).toLowerCase() === 'low', 'border-[var(--color-border)] bg-[var(--color-blue-730)] text-[var(--color-text2)]': !['critical', 'high', 'medium', 'low'].includes(stringifyPrimitive(item?.severity).toLowerCase()) }">
+                    {{ stringifyPrimitive(item?.severity) }}
+                  </span>
+                </div>
+                <div class="max-[900px]:hidden">
+                  <div class="truncate" [title]="stringifyPrimitive(item?.source)">{{ stringifyPrimitive(item?.source) }}</div>
+                  <div class="mt-[2px] truncate text-xs text-[var(--color-text4)]" [title]="stringifyPrimitive(item?.host)">{{ stringifyPrimitive(item?.host) }}</div>
+                </div>
+                <div class="text-xs text-[var(--color-text4)]">{{ getEventTimestamp(item) }}</div>
+                <button data-testid="siem-log-row-toggle" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="$event.stopPropagation(); toggleResultItem(idx)" [attr.aria-label]="expandedResultIndex === idx ? 'Collapse row' : 'Expand row'" [attr.aria-pressed]="expandedResultIndex === idx">
+                  <img [src]="expandedResultIndex === idx ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" [alt]="expandedResultIndex === idx ? 'Collapse row' : 'Expand row'" class="h-3 w-3 ui-action-icon" />
+                </button>
+              </div>
+
+              @if (expandedResultIndex === idx) {
+                <div @fadeInDashboardItem class="border-b border-[var(--color-divider)] bg-[var(--color-blue-720)] px-4 py-4 text-sm text-[var(--color-text1)]">
+                  <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+                    <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-4">
+                      <div class="min-h-[64px] leading-6">{{ stringifyPrimitive(item?.raw) }}</div>
+                      @if (item?.tags?.length) {
+                        <div class="mt-[12px] flex flex-wrap gap-[6px]">
+                          @for (tag of item.tags; track trackByIndex($index)) {
+                            <span class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">{{ stringifyPrimitive(tag) }}</span>
+                          }
+                        </div>
+                      }
+
+                      <div class="my-4 h-px w-full bg-[var(--color-divider)]"></div>
+
+                      <div>
+                        <div class="text-[12px] text-[var(--color-text4)]">Extracted IOCs</div>
+                        @if (getExtractedIocs(item).length) {
+                          <div class="mt-[8px] flex flex-wrap gap-3">
+                            @for (ioc of getExtractedIocs(item); track ioc.name) {
+                              @for (value of ioc.values; track value) {
+                                <div class="min-w-[180px] max-w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[10px]">
+                                  <div class="text-[12px] text-[var(--color-text4)]">{{ ioc.name }}</div>
+                                  <div class="mt-[4px] break-all text-[13px] text-[var(--color-text1)]">{{ value }}</div>
+                                </div>
+                              }
+                            }
+                          </div>
+                        } @else {
+                          <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">No extracted IOCs available</div>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="ui-event-management-expand-side max-h-[320px] overflow-y-auto pr-1">
+                      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
+                          <div class="text-[12px] text-[var(--color-text4)]">Event ID</div>
+                          <div class="mt-[4px] text-[13px] font-mono text-[var(--color-text1)]">{{ stringifyPrimitive(item?.event_id) }}</div>
+                        </div>
+                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
+                          <div class="text-[12px] text-[var(--color-text4)]">User</div>
+                          <div class="mt-[4px] text-[13px] text-[var(--color-text1)]">{{ stringifyPrimitive(item?.user) }}</div>
+                        </div>
+                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
+                          <div class="text-[12px] text-[var(--color-text4)]">Timestamp</div>
+                          <div class="mt-[4px] text-[13px] text-[var(--color-text1)]">{{ stringifyPrimitive(item?.timestamp) }}</div>
+                        </div>
+                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
+                          <div class="text-[12px] text-[var(--color-text4)]">Ingested At</div>
+                          <div class="mt-[4px] text-[13px] text-[var(--color-text1)]">{{ stringifyPrimitive(item?.ingested_at) }}</div>
+                        </div>
+                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px] sm:col-span-2">
+                          <div class="text-[12px] text-[var(--color-text4)]">Hash</div>
+                          <div class="mt-[4px] break-all text-[13px] font-mono text-[var(--color-text1)]">{{ stringifyPrimitive(item?.hash) }}</div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      </div>
+
+      <app-pagination [currentPage]="currentPage" [maxPages]="pageCount" (pageChange)="onPageChange($event)"></app-pagination>
+    </section>
+  }
+
+</div>

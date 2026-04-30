@@ -1,4 +1,4 @@
-<div class="w-full p-3 md:p-4">
+<div class="w-full p-3 pb-[150px] md:p-4 md:pb-[150px]">
   <form class="ui-page-container w-full max-w-[2400px]" @fadeInDashboardItem>
     <div class="mb-4 flex items-start justify-between gap-3 max-[760px]:flex-col">
       <div class="flex items-start gap-3">
@@ -101,8 +101,8 @@
 
     @if (isMember() && !licenseService.getLicenses().includes('free')) {
       <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-        <div class="ui-section-title">Contacts</div>
-        <div class="ui-section-description">Tenant communication details.</div>
+        <div class="ui-section-title">Contacts, Users & Address</div>
+        <div class="ui-section-description">Tenant communication details, assigned quota, and address information.</div>
         <div class="mt-3 grid gap-3 sm:grid-cols-2">
           <div>
             <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
@@ -122,50 +122,15 @@
             </label>
             <input type="text" [(ngModel)]="userSessionData.tenant.phone" name="tenant_phone" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!isEditing" [ngClass]="isEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" placeholder="Enter phone..." />
           </div>
-        </div>
-      </div>
-    }
-
-    @if (isMember() && !licenseService.getLicenses().includes('free')) {
-      <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-        <div class="ui-section-title">Users</div>
-        <div class="ui-section-description">Assigned quota for tenant members.</div>
-        <div class="mt-3">
-          <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-            <span>Assigned User Quota</span>
-            @if (isEditing) {
-              <img src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
-            }
-          </label>
-          <input type="text" [value]="userSessionData.tenant.assignedQuota || '0'" disabled class="h-10 w-full cursor-not-allowed rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-3 text-sm text-[var(--color-text4)]" />
-        </div>
-      </div>
-    }
-
-    @if (isMember() && !licenseService.getLicenses().includes('free')) {
-      <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-        <div class="ui-section-title">Privacy</div>
-        <div class="ui-section-description">Control whether tenant users can expose profile details to others.</div>
-        <div class="mt-3 cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="userSessionData.tenant.profileVisibilityEnabled = !userSessionData.tenant.profileVisibilityEnabled; updateUser()">
-          <div class="flex items-center justify-between gap-3">
-            <div>
-              <label class="block text-sm font-semibold text-[var(--color-text1)]">Allow User Profile Visibility</label>
-              <p class="mt-1 text-xs text-[var(--color-text4)]">{{ userSessionData.tenant.profileVisibilityEnabled !== false ? 'Users can manage their profile visibility' : 'User profile visibility is disabled for this tenant' }}</p>
-            </div>
-            <label class="pointer-events-none relative h-6 w-11 shrink-0">
-              <input type="checkbox" class="peer h-0 w-0 opacity-0" [checked]="userSessionData.tenant.profileVisibilityEnabled !== false" />
-              <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-300 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[3px] before:left-[3px] before:h-[18px] before:w-[18px] before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-300 peer-checked:before:translate-x-[20px]"></span>
+          <div>
+            <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
+              <span>Assigned User Quota</span>
+              @if (isEditing) {
+                <img src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
+              }
             </label>
+            <input type="text" [value]="userSessionData.tenant.assignedQuota || '0'" disabled class="h-10 w-full cursor-not-allowed rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-3 text-sm text-[var(--color-text4)]" />
           </div>
-        </div>
-      </div>
-    }
-
-    @if (isMember() && !licenseService.getLicenses().includes('free')) {
-      <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-        <div class="ui-section-title">Address</div>
-        <div class="ui-section-description">Country and city/state details for the tenant.</div>
-        <div class="mt-3 grid gap-3 sm:grid-cols-2">
           <div>
             <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
               <span>Country</span>
@@ -183,6 +148,39 @@
               }
             </label>
             <input type="text" [(ngModel)]="userSessionData.tenant .city" name="tenant_city" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!isEditing" [ngClass]="isEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" placeholder="Enter city/state..." />
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (isMember() && !licenseService.getLicenses().includes('free')) {
+      <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+        <div class="ui-section-title">Privacy & Access</div>
+        <div class="ui-section-description">Manage profile visibility and tenant access to Event Management.</div>
+
+        <div class="mt-3 cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="userSessionData.tenant.profileVisibilityEnabled = !userSessionData.tenant.profileVisibilityEnabled; updateUser()">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <label class="block text-sm font-semibold text-[var(--color-text1)]">Allow User Profile Visibility</label>
+              <p class="mt-1 text-xs text-[var(--color-text4)]">{{ userSessionData.tenant.profileVisibilityEnabled !== false ? 'Users can manage their profile visibility' : 'User profile visibility is disabled for this tenant' }}</p>
+            </div>
+            <label class="pointer-events-none relative h-6 w-11 shrink-0">
+              <input type="checkbox" class="peer h-0 w-0 opacity-0" [checked]="userSessionData.tenant.profileVisibilityEnabled !== false" />
+              <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-300 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[3px] before:left-[3px] before:h-[18px] before:w-[18px] before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-300 peer-checked:before:translate-x-[20px]"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="mt-3 cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="userSessionData.tenant.eventManagementEnabled = userSessionData.tenant.eventManagementEnabled !== true; updateUser()">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <label class="block text-sm font-semibold text-[var(--color-text1)]">Allow Event Management</label>
+              <p class="mt-1 text-xs text-[var(--color-text4)]">{{ userSessionData.tenant.eventManagementEnabled === true ? 'Event Management is enabled for this tenant' : 'Event Management is disabled for this tenant' }}</p>
+            </div>
+            <label class="pointer-events-none relative h-6 w-11 shrink-0">
+              <input type="checkbox" class="peer h-0 w-0 opacity-0" [checked]="userSessionData.tenant.eventManagementEnabled === true" />
+              <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-300 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[3px] before:left-[3px] before:h-[18px] before:w-[18px] before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-300 peer-checked:before:translate-x-[20px]"></span>
+            </label>
           </div>
         </div>
       </div>

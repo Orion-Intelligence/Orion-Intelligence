@@ -32,7 +32,7 @@ export class DashboardHeaderComponent implements OnInit {
   updateBreadcrumb(url: string) {
     const urlTree: UrlTree = this.router.parseUrl(url);
     const segments = urlTree.root.children['primary']?.segments.map((segment) => segment.path) ?? [];
-    const formatLabel = (segment: string) => segment === 'netint' ? 'Network Intel' : segment;
+    const formatLabel = (segment: string) => segment === 'netint' ? 'Network Intel' : segment === 'ai' ? 'AI' : segment;
     this.breadcrumb = segments.length > 1
       ? segments.slice(1).map((segment) => ({ path: segment, label: formatLabel(segment) }))
       : segments.map((segment) => ({ path: segment, label: formatLabel(segment) }));
@@ -48,6 +48,10 @@ export class DashboardHeaderComponent implements OnInit {
         this.router.navigateByUrl(backUrl).then();
         return;
       }
+    }
+    if (this.router.url.includes('/profile/ai')) {
+      this.router.navigate(['/dashboard/profile/homepage'], { queryParams }).then();
+      return;
     }
     if (this.router.url.includes('profile/consolidated/all') || this.router.url.includes('profile/alerts')) {
       this.router.navigate(['/dashboard/profile/homepage'], { queryParams }).then();

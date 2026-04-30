@@ -8,6 +8,15 @@
         "scanning": false,
         "maintainer": false
     },
+    "feeder": {
+        "modules": [
+            "feeder"
+        ],
+        "cti_graph": false,
+        "mapping": false,
+        "scanning": false,
+        "maintainer": false
+    },
     "osint_basic": {
         "modules": [
             "general",
@@ -57,7 +66,9 @@
         "maintainer": false
     },
     "maintainer": {
-        "modules": [],
+        "modules": [
+            "event_management"
+        ],
         "scanning": false,
         "cti_graph": false,
         "mapping": false,
