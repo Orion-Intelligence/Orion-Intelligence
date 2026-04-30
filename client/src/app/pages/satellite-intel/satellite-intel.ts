@@ -283,27 +283,28 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   onTrackingSelectionChange(type: 'aircraft' | 'ship'): void {
-  let isEnabled = false;
+    let isEnabled = false;
 
-  if (type === 'aircraft') {
-    this.aircraftTrackingEnabled = !this.aircraftTrackingEnabled;
-    isEnabled = this.aircraftTrackingEnabled;
-  } 
-  else if (type === 'ship') {
-    this.shipsTrackingEnabled = !this.shipsTrackingEnabled;
-    isEnabled = this.shipsTrackingEnabled;
-  }
-
-  if (isEnabled) {
-    if (!this.selectedTrackingTypes.includes(type)) {
-      this.selectedTrackingTypes.push(type);
+    if (type === 'aircraft') {
+      this.aircraftTrackingEnabled = !this.aircraftTrackingEnabled;
+      isEnabled = this.aircraftTrackingEnabled;
+    } 
+    else if (type === 'ship') {
+      this.shipsTrackingEnabled = !this.shipsTrackingEnabled;
+      isEnabled = this.shipsTrackingEnabled;
     }
-  } else {
-    this.selectedTrackingTypes = this.selectedTrackingTypes.filter(t => t !== type);
-  }
 
-  this.handleTrackingSelection();
-}
+    if (isEnabled) {
+      if (!this.selectedTrackingTypes.includes(type)) {
+        this.selectedTrackingTypes.push(type);
+      }
+    }
+    else {
+      this.selectedTrackingTypes = this.selectedTrackingTypes.filter(t => t !== type);
+    }
+
+    this.handleTrackingSelection();
+  }
 
   private handleTrackingSelection(): void {
     this.trackingError = null;

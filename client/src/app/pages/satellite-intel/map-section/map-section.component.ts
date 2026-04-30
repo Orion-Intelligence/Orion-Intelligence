@@ -26,8 +26,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private moveTimer: any    = null;
   private resizeObserver: ResizeObserver | null = null;
   private aircraftCluster!: any;
-private shipCluster!: any;
-
+  private shipCluster!: any;
 
   readonly powerPlantLegend = ORION_POWER_FILTERS;
   zoomLabel = 'zoom 2.5';
@@ -161,106 +160,106 @@ private shipCluster!: any;
 
       this.anomalyLayer = this.L.layerGroup().addTo(this.leafletMap);
 
-      await import('leaflet.markercluster' as any) as any;
-      this.orionCluster = this.L.markerClusterGroup({
-        maxClusterRadius: 40,
-        showCoverageOnHover: false,
-        iconCreateFunction: (cluster: any) => {
-          const count = cluster.getChildCount();
-          return this.L.divIcon({
-            html: `<div style="
-              background:#3b82f6;border-radius:50%;width:32px;height:32px;
-              display:flex;align-items:center;justify-content:center;
-              color:#fff;font-size:11px;font-weight:700;
-              box-shadow:0 0 0 3px rgba(59,130,246,0.3);">
-              ${count}
-            </div>`,
-            className: '',
-            iconSize: [32, 32],
-            iconAnchor: [16, 16],
-          });
-        },
-      }).addTo(this.leafletMap);
-      this.aircraftCluster = (this.L as any).markerClusterGroup({
-  maxClusterRadius: 40,
-  showCoverageOnHover: false,
-  iconCreateFunction: (cluster: any) => {
-    const count = cluster.getChildCount();
-    return this.L.divIcon({
-      html: `<div style="
-        background:#22c55e;
-        border-radius:50%;
-        width:32px;height:32px;
-        display:flex;align-items:center;justify-content:center;
-        color:#fff;font-size:11px;font-weight:700;
-        box-shadow:0 0 0 3px rgba(34,197,94,0.3);">
-        ${count}
-      </div>`,
-      className: '',
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
-    });
-  },
-}).addTo(this.leafletMap);
-this.shipCluster = (this.L as any).markerClusterGroup({
-  maxClusterRadius: 40,
-  showCoverageOnHover: false,
-  iconCreateFunction: (cluster: any) => {
-    const count = cluster.getChildCount();
-    return this.L.divIcon({
-      html: `<div style="
-        background:#06b6d4;
-        border-radius:50%;
-        width:32px;height:32px;
-        display:flex;align-items:center;justify-content:center;
-        color:#fff;font-size:11px;font-weight:700;
-        box-shadow:0 0 0 3px rgba(6,182,212,0.3);">
-        ${count}
-      </div>`,
-      className: '',
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
-    });
-  },
-}).addTo(this.leafletMap);
+        await import('leaflet.markercluster' as any) as any;
+        this.orionCluster = this.L.markerClusterGroup({
+          maxClusterRadius: 40,
+          showCoverageOnHover: false,
+          iconCreateFunction: (cluster: any) => {
+            const count = cluster.getChildCount();
+            return this.L.divIcon({
+              html: `<div style="
+                background:#3b82f6;border-radius:50%;width:32px;height:32px;
+                display:flex;align-items:center;justify-content:center;
+                color:#fff;font-size:11px;font-weight:700;
+                box-shadow:0 0 0 3px rgba(59,130,246,0.3);">
+                ${count}
+              </div>`,
+              className: '',
+              iconSize: [32, 32],
+              iconAnchor: [16, 16],
+            });
+          },
+        }).addTo(this.leafletMap);
+        this.aircraftCluster = (this.L as any).markerClusterGroup({
+          maxClusterRadius: 40,
+          showCoverageOnHover: false,
+          iconCreateFunction: (cluster: any) => {
+            const count = cluster.getChildCount();
+            return this.L.divIcon({
+              html: `<div style="
+          background:#22c55e;
+          border-radius:50%;
+          width:32px;height:32px;
+          display:flex;align-items:center;justify-content:center;
+          color:#fff;font-size:11px;font-weight:700;
+          box-shadow:0 0 0 3px rgba(34,197,94,0.3);">
+          ${count}
+        </div>`,
+              className: '',
+              iconSize: [32, 32],
+              iconAnchor: [16, 16],
+            });
+          },
+        }).addTo(this.leafletMap);
+        this.shipCluster = (this.L as any).markerClusterGroup({
+          maxClusterRadius: 40,
+          showCoverageOnHover: false,
+          iconCreateFunction: (cluster: any) => {
+            const count = cluster.getChildCount();
+            return this.L.divIcon({
+              html: `<div style="
+          background:#06b6d4;
+          border-radius:50%;
+          width:32px;height:32px;
+          display:flex;align-items:center;justify-content:center;
+          color:#fff;font-size:11px;font-weight:700;
+          box-shadow:0 0 0 3px rgba(6,182,212,0.3);">
+          ${count}
+        </div>`,
+              className: '',
+              iconSize: [32, 32],
+              iconAnchor: [16, 16],
+            });
+          },
+        }).addTo(this.leafletMap);
 
-      this.leafletMap.on('moveend zoomend', () => {
-        const c = this.leafletMap.getCenter();
-        const z = this.leafletMap.getZoom();
-        this.zoomLabel = `zoom ${z.toFixed(1)}  ·  ${c.lat.toFixed(4)}°N  ${c.lng.toFixed(4)}°E`;
-        clearTimeout(this.moveTimer);
-        this.moveTimer = setTimeout(() => {
-          this.mapMoved.emit({ lat: c.lat, lon: c.lng, zoom: z });
-        }, 500);
-      });
+        this.leafletMap.on('moveend zoomend', () => {
+          const c = this.leafletMap.getCenter();
+          const z = this.leafletMap.getZoom();
+          this.zoomLabel = `zoom ${z.toFixed(1)}  ·  ${c.lat.toFixed(4)}°N  ${c.lng.toFixed(4)}°E`;
+          clearTimeout(this.moveTimer);
+          this.moveTimer = setTimeout(() => {
+            this.mapMoved.emit({ lat: c.lat, lon: c.lng, zoom: z });
+          }, 500);
+        });
 
-      if (this.lat && this.lon) {
-        this.updateMapView();
-      }
-      if (this.facilitiesData)  {
-        this.renderFacilities();
-      }
-      if (this.anomalyData)     {
-        this.renderAnomaly();
-      }
-      if (this.aircraftData?.length) {
-        this.renderAircraftCluster();
-      }
-      if (this.shipsData?.length) {
-        this.renderShipCluster();
-      }
-      if (this.orionData?.length) {
-        this.renderOrionData();
-      }
-      this.resizeObserver = new ResizeObserver(() => {
-        this.leafletMap?.invalidateSize();
-        this.updateMinZoomToFitContainer();
-      });
-      this.resizeObserver.observe(this.mapContainer.nativeElement);
-      setTimeout(() => {
-        this.leafletMap?.invalidateSize();
-        this.updateMinZoomToFitContainer();
-      }, 0);
+        if (this.lat && this.lon) {
+          this.updateMapView();
+        }
+        if (this.facilitiesData)  {
+          this.renderFacilities();
+        }
+        if (this.anomalyData)     {
+          this.renderAnomaly();
+        }
+        if (this.aircraftData?.length) {
+          this.renderAircraftCluster();
+        }
+        if (this.shipsData?.length) {
+          this.renderShipCluster();
+        }
+        if (this.orionData?.length) {
+          this.renderOrionData();
+        }
+        this.resizeObserver = new ResizeObserver(() => {
+          this.leafletMap?.invalidateSize();
+          this.updateMinZoomToFitContainer();
+        });
+        this.resizeObserver.observe(this.mapContainer.nativeElement);
+        setTimeout(() => {
+          this.leafletMap?.invalidateSize();
+          this.updateMinZoomToFitContainer();
+        }, 0);
     }
     catch { }
   }
@@ -308,37 +307,42 @@ this.shipCluster = (this.L as any).markerClusterGroup({
   }
 
   private renderAircraftCluster(): void {
-  if (!this.aircraftCluster) return;
+    if (!this.aircraftCluster) {
+      return;
+    }
 
-  this.aircraftCluster.clearLayers();
+    this.aircraftCluster.clearLayers();
 
-  const markers = this.aircraftData.map(a => {
-    return this.L.marker([a.latitude, a.longitude], {
-      icon: this.L.divIcon({
-        html: `✈️`,
-        className: '',
-        iconSize: [30, 30],
-      }),
+    const markers = this.aircraftData.map(a => {
+      return this.L.marker([a.latitude, a.longitude], {
+        icon: this.L.divIcon({
+          html: `✈️`,
+          className: '',
+          iconSize: [30, 30],
+        }),
+      });
     });
-  });
-  this.aircraftCluster.addLayers(markers);
-}
-private renderShipCluster(): void {
-  if (!this.shipCluster) return;
+    this.aircraftCluster.addLayers(markers);
+  }
 
-  this.shipCluster.clearLayers();
-  const markers = this.shipsData.map(s => {
-    return this.L.marker([s.latitude, s.longitude], {
-      icon: this.L.divIcon({
-        html: `🚢`,
-        className: '',
-        iconSize: [30, 30],
-      }),
+  private renderShipCluster(): void {
+    if (!this.shipCluster) {
+      return;
+    }
+
+    this.shipCluster.clearLayers();
+    const markers = this.shipsData.map(s => {
+      return this.L.marker([s.latitude, s.longitude], {
+        icon: this.L.divIcon({
+          html: `🚢`,
+          className: '',
+          iconSize: [30, 30],
+        }),
+      });
     });
-  });
 
-  this.shipCluster.addLayers(markers);
-}
+    this.shipCluster.addLayers(markers);
+  }
 
   private renderFacilities(): void {
     if (!this.facLayer) {
@@ -363,7 +367,6 @@ private renderShipCluster(): void {
       .bindPopup(`<b>Anomaly zone</b><br>Alert: <b>${this.anomalyData.alert_level}</b><br>NDVI delta: <b>${this.anomalyData.delta_score}%</b>`);
     this.leafletMap?.fitBounds([[mnLa, mnLo], [mxLa, mxLo]], { padding: [40, 40] });
   }
-
 
   private renderOrionData(): void {
     if (!this.orionCluster || !this.L) {
