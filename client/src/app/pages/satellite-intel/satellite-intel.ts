@@ -7,7 +7,6 @@ import { SatelliteIntelService } from './satellite-intel-service.service';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { GeocodeModalComponent } from './components/geocode-modal/geocode-modal.component';
 import { MapSectionComponent } from './map-section/map-section.component';
-import { TrackingMapSectionComponent } from './tracking-map-section/tracking-map-section.component';
 import { MonthCompareSectionComponent } from './month-compare-section/month-compare-section.component';
 import { AnomalySectionComponent } from './anomaly-section/anomaly-section.component';
 import { SentinelSearchSectionComponent } from './sentinel-search-section/sentinel-search-section.component';
@@ -30,7 +29,6 @@ import { ORION_INFRASTRUCTURE_FILTERS, ORION_POWER_FILTERS, OrionSatelliteFeatur
     FormsModule,
     GeocodeModalComponent,
     MapSectionComponent,
-    TrackingMapSectionComponent,
     MonthCompareSectionComponent,
     AnomalySectionComponent,
     SentinelSearchSectionComponent,
@@ -105,6 +103,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   isPanelPopupOpen = false;
   isScanning = computed(() =>
     !!this.pendingRequest && !this.satelliteService.onError(),);
+  isAircraftLoading: boolean = false;
+  isShipsLoading: boolean = false;
 
   @Input() toolbarMode: 'hidden' | 'geo' = 'hidden';
 
@@ -223,14 +223,10 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   onLayerChange(): void { /* handled by map-section input */ }
 
-  setActiveView(view: 'map' | 'tracking' | 'threat'): void {
+  setActiveView(view: 'map' | 'threat'): void {
     this.activeTab = view;
     this.isPanelMenuOpen = false;
     this.isPanelPopupOpen = false;
-    if (view === 'tracking') {
-      this.selectedTrackingTypes = ['aircraft'];
-      this.handleTrackingSelection();
-    }
   }
 
   get activePanelLabel(): string {
@@ -286,20 +282,28 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       : 'Ship';
   }
 
-  onTrackingSelectionChange(type: 'aircraft' | 'ship', event: any): void {
-    const checked = event.target.checked;
+  onTrackingSelectionChange(type: 'aircraft' | 'ship'): void {
+  let isEnabled = false;
 
-    if (checked) {
-      if (!this.selectedTrackingTypes.includes(type)) {
-        this.selectedTrackingTypes.push(type);
-      }
-    }
-    else {
-      this.selectedTrackingTypes = this.selectedTrackingTypes.filter(t => t !== type);
-    }
-
-    this.handleTrackingSelection();
+  if (type === 'aircraft') {
+    this.aircraftTrackingEnabled = !this.aircraftTrackingEnabled;
+    isEnabled = this.aircraftTrackingEnabled;
+  } 
+  else if (type === 'ship') {
+    this.shipsTrackingEnabled = !this.shipsTrackingEnabled;
+    isEnabled = this.shipsTrackingEnabled;
   }
+
+  if (isEnabled) {
+    if (!this.selectedTrackingTypes.includes(type)) {
+      this.selectedTrackingTypes.push(type);
+    }
+  } else {
+    this.selectedTrackingTypes = this.selectedTrackingTypes.filter(t => t !== type);
+  }
+
+  this.handleTrackingSelection();
+}
 
   private handleTrackingSelection(): void {
     this.trackingError = null;
@@ -313,14 +317,14 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.shipsData = [];
 
     if (this.selectedTrackingTypes.includes('aircraft')) {
-      this.refreshGlobalAircraftTracking(true);
+      this.refreshGlobalAircraftTracking(false);
       this.aircraftTimer = setInterval(() => {
         this.refreshGlobalAircraftTracking(false);
       }, 25000);
     }
 
     if (this.selectedTrackingTypes.includes('ship')) {
-      this.refreshGlobalShipsTracking(true);
+      this.refreshGlobalShipsTracking(false);
       this.shipsTimer = setInterval(() => {
         this.refreshGlobalShipsTracking(false);
       }, 8000);
@@ -704,6 +708,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   private refreshGlobalAircraftTracking(showLoading = false): void {
+    this.isAircraftLoading = true;
     const loadingId = showLoading ? this.beginMainLoading('Loading Satellite Intel', 'Loading global aircraft tracking data...') : null;
     this.aircraftTrackSub?.unsubscribe();
     this.aircraftTrackSub = this.satelliteService.pollAircraftGlobal().subscribe({
@@ -719,6 +724,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       },
     });
     this.aircraftTrackSub.add(() => {
+      this.isAircraftLoading = false;
       if (loadingId !== null) {
         this.endMainLoading(loadingId);
       }
@@ -757,6 +763,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   private refreshGlobalShipsTracking(showLoading = false): void {
+    this.isShipsLoading=true;
     const loadingId = showLoading ? this.beginMainLoading('Loading Satellite Intel', 'Loading global ship tracking data...') : null;
     this.shipTrackSub?.unsubscribe();
     this.shipTrackSub = this.satelliteService.pollShipsGlobal().subscribe({
@@ -772,6 +779,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       },
     });
     this.shipTrackSub.add(() => {
+      this.isShipsLoading= false;
       if (loadingId !== null) {
         this.endMainLoading(loadingId);
       }

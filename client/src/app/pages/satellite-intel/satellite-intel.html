@@ -33,18 +33,7 @@
 
     <div class="relative grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden">
       <div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:min-h-[380px]">
-        @if (isTrackingView) {
-          <app-satellite-tracking-map-section class="block h-full min-h-0 min-w-0 overflow-hidden"
-            [lat]="lat"
-            [lon]="lon"
-            [delta]="delta"
-            [aircraftData]="aircraftData"
-            [shipsData]="shipsData"
-            [globalAircraftTrackingEnabled]="globalAircraftTrackingEnabled"
-            [globalShipsTrackingEnabled]="globalShipsTrackingEnabled"
-            (mapMoved)="onMapMoved($event)">
-          </app-satellite-tracking-map-section>
-        } @else if(isMapView) {
+        @if(isMapView) {
           <app-satellite-map-section class="block h-full min-h-0 min-w-0 overflow-hidden"
             [lat]="lat"
             [lon]="lon"
@@ -55,8 +44,8 @@
             [orionData]="filteredData"
             [focusedFeature]="focusedFeature"
             [anomalyData]="anomalyResult"
-            [aircraftData]="[]"
-            [shipsData]="[]"
+            [aircraftData]="aircraftData"
+            [shipsData]="shipsData"
             [isScanning]="isScanning()"
             [progress]="satelliteService.progress()"
             [currentStep]="currentStep"
@@ -66,6 +55,23 @@
             (featureSelected)="onMapFeatureSelected($event)"
             (mapMoved)="onMapMoved($event)">
           </app-satellite-map-section>
+          @if (isAircraftLoading || isShipsLoading) {
+              <div class="pointer-events-none absolute left-12 top-3 z-[920] flex flex-col gap-2">
+                @if (isAircraftLoading) {
+                  <div class="inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.9)] px-3 py-2 text-[12px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)]">
+                    <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
+                    Aircrafts loading...
+                  </div>
+                }
+                @if (isShipsLoading) {
+                  <div class="inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.9)] px-3 py-2 text-[12px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)]">
+                    <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
+                    Ships loading...
+                  </div>
+                }
+              </div>
+            }
+          }
           <div class="absolute right-3 top-3 z-[920] flex items-center gap-2 map-overlay-menu">
             <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] shadow-[0_8px_24px_rgba(2,6,23,.35)]">
               <button class="px-3 py-2 text-[11px] font-semibold transition-colors" [ngClass]="selectedLayer === 'esri' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('esri')">Satellite</button>
@@ -77,15 +83,11 @@
           </div>
 
           @if (isPanelMenuOpen) {
-            <div class="map-overlay-menu absolute right-3 top-16 z-[930] flex w-[230px] flex-col overflow-hidden rounded-[12px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_16px_40px_rgba(2,6,23,.45)] backdrop-blur-md">
+            <div class="map-overlay-menu absolute right-3 top-16 z-[999] flex w-[230px] flex-col overflow-hidden rounded-[12px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_16px_40px_rgba(2,6,23,.45)] backdrop-blur-md">
               <div class="border-b border-white/10 p-2">
                 <button class="flex w-full items-center gap-2 rounded-[8px] border border-white/15 bg-white/5 px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text1)] transition-colors hover:bg-white/10" (click)="openGeocodeModal()">
                   <i class="bi bi-geo-alt"></i>
                   Location
-                </button>
-                <button class="mt-2 flex w-full items-center gap-2 rounded-[8px] border border-white/15 bg-white/5 px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text1)] transition-colors hover:bg-white/10" (click)="setActiveView('tracking')">
-                  <i class="bi bi-globe2"></i>
-                  World Tracking
                 </button>
               </div>
               @if (isTrackingView) {
@@ -94,18 +96,7 @@
                     <span>{{ getTrackingLabel() }}</span>
                     <i class="bi bi-chevron-down text-[10px] opacity-70"></i>
                   </button>
-                  @if (isTrackingDropdownOpen) {
-                    <div class="mt-1 overflow-hidden rounded-[8px] border border-white/15 bg-[rgba(8,16,27,0.96)]" (click)="$event.stopPropagation()">
-                      <label class="flex cursor-pointer items-center gap-2 px-3 py-2 text-[12px] text-[var(--color-text1)] hover:bg-white/5">
-                        <input type="checkbox" [checked]="isSelected('aircraft')" (change)="onTrackingSelectionChange('aircraft', $event)">
-                        Aircraft
-                      </label>
-                      <label class="flex cursor-pointer items-center gap-2 px-3 py-2 text-[12px] text-[var(--color-text1)] hover:bg-white/5">
-                        <input type="checkbox" [checked]="isSelected('ship')" (change)="onTrackingSelectionChange('ship', $event)">
-                        Ship
-                      </label>
-                    </div>
-                  }
+                  
                 </div>
               }
               @for (tab of panelTabs; track tab.id) {
@@ -114,7 +105,6 @@
                 </button>
               }
             </div>
-          }
         } @else if(isThreatView){
           <div class="h-full min-h-0 w-full overflow-y-auto overflow-x-hidden">
             <app-threat-lens class="block w-full min-h-[560px]"></app-threat-lens>
@@ -197,7 +187,23 @@
         }
       </div>
     </div>
-
+<div class="mt-3 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3">
+      <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Tracking</div>
+      <div class="mt-2 grid grid-cols-2 gap-2">
+        <button type="button" class="flex items-center justify-between rounded-[10px] border px-3 py-2 text-[12px] transition-colors" [ngClass]="aircraftTrackingEnabled ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-720)]','text-[var(--color-text1)]'] : ['border-[var(--color-border)]','bg-[var(--color-blue-790)]','text-[var(--color-text3)]']" (click)="onTrackingSelectionChange('aircraft')">
+          <span class="inline-flex items-center gap-2">
+              <span>✈️</span>
+               Aircrafts</span>
+            <span class="font-mono text-[11px]">{{ aircraftData.length }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-[10px] border px-3 py-2 text-[12px] transition-colors" [ngClass]="shipsTrackingEnabled ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-720)]','text-[var(--color-text1)]'] : ['border-[var(--color-border)]','bg-[var(--color-blue-790)]','text-[var(--color-text3)]']" (click)="onTrackingSelectionChange('ship')">
+          <span class="inline-flex items-center gap-2">
+              <span>🚢</span>
+               Ships</span>
+          <span class="font-mono text-[11px]">{{ shipsData.length }}</span>
+        </button>
+      </div>
+    </div>
     <div class="mt-3 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3">
       <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Selection</div>
       @if (selectedFeature) {

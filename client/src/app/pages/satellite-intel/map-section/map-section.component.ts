@@ -20,13 +20,14 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private osmLayer: any     = null;
   private facLayer: any     = null;
   private anomalyLayer: any = null;
-  private aircraftLayer: any = null;
-  private shipsLayer: any    = null;
   private orionCluster: any = null;
   private clickMarker: any  = null;
   private L: any            = null;
   private moveTimer: any    = null;
   private resizeObserver: ResizeObserver | null = null;
+  private aircraftCluster!: any;
+private shipCluster!: any;
+
 
   readonly powerPlantLegend = ORION_POWER_FILTERS;
   zoomLabel = 'zoom 2.5';
@@ -83,10 +84,10 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       this.renderAnomaly();
     }
     if (changes['aircraftData']) {
-      this.renderAircraft();
+      this.renderAircraftCluster();
     }
     if (changes['shipsData']) {
-      this.renderShips();
+      this.renderShipCluster();
     }
     if (changes['orionData'] || changes['facilitiesVisible']) {
       this.renderOrionData();
@@ -159,8 +160,6 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       }).addTo(this.leafletMap);
 
       this.anomalyLayer = this.L.layerGroup().addTo(this.leafletMap);
-      this.aircraftLayer = this.L.layerGroup().addTo(this.leafletMap);
-      this.shipsLayer = this.L.layerGroup().addTo(this.leafletMap);
 
       await import('leaflet.markercluster' as any) as any;
       this.orionCluster = this.L.markerClusterGroup({
@@ -182,6 +181,48 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
           });
         },
       }).addTo(this.leafletMap);
+      this.aircraftCluster = (this.L as any).markerClusterGroup({
+  maxClusterRadius: 40,
+  showCoverageOnHover: false,
+  iconCreateFunction: (cluster: any) => {
+    const count = cluster.getChildCount();
+    return this.L.divIcon({
+      html: `<div style="
+        background:#22c55e;
+        border-radius:50%;
+        width:32px;height:32px;
+        display:flex;align-items:center;justify-content:center;
+        color:#fff;font-size:11px;font-weight:700;
+        box-shadow:0 0 0 3px rgba(34,197,94,0.3);">
+        ${count}
+      </div>`,
+      className: '',
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+    });
+  },
+}).addTo(this.leafletMap);
+this.shipCluster = (this.L as any).markerClusterGroup({
+  maxClusterRadius: 40,
+  showCoverageOnHover: false,
+  iconCreateFunction: (cluster: any) => {
+    const count = cluster.getChildCount();
+    return this.L.divIcon({
+      html: `<div style="
+        background:#06b6d4;
+        border-radius:50%;
+        width:32px;height:32px;
+        display:flex;align-items:center;justify-content:center;
+        color:#fff;font-size:11px;font-weight:700;
+        box-shadow:0 0 0 3px rgba(6,182,212,0.3);">
+        ${count}
+      </div>`,
+      className: '',
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+    });
+  },
+}).addTo(this.leafletMap);
 
       this.leafletMap.on('moveend zoomend', () => {
         const c = this.leafletMap.getCenter();
@@ -203,10 +244,10 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
         this.renderAnomaly();
       }
       if (this.aircraftData?.length) {
-        this.renderAircraft();
+        this.renderAircraftCluster();
       }
       if (this.shipsData?.length) {
-        this.renderShips();
+        this.renderShipCluster();
       }
       if (this.orionData?.length) {
         this.renderOrionData();
@@ -266,6 +307,39 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     }
   }
 
+  private renderAircraftCluster(): void {
+  if (!this.aircraftCluster) return;
+
+  this.aircraftCluster.clearLayers();
+
+  const markers = this.aircraftData.map(a => {
+    return this.L.marker([a.latitude, a.longitude], {
+      icon: this.L.divIcon({
+        html: `✈️`,
+        className: '',
+        iconSize: [30, 30],
+      }),
+    });
+  });
+  this.aircraftCluster.addLayers(markers);
+}
+private renderShipCluster(): void {
+  if (!this.shipCluster) return;
+
+  this.shipCluster.clearLayers();
+  const markers = this.shipsData.map(s => {
+    return this.L.marker([s.latitude, s.longitude], {
+      icon: this.L.divIcon({
+        html: `🚢`,
+        className: '',
+        iconSize: [30, 30],
+      }),
+    });
+  });
+
+  this.shipCluster.addLayers(markers);
+}
+
   private renderFacilities(): void {
     if (!this.facLayer) {
       return;
@@ -290,91 +364,6 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     this.leafletMap?.fitBounds([[mnLa, mnLo], [mxLa, mxLo]], { padding: [40, 40] });
   }
 
-  private renderAircraft(): void {
-    if (!this.aircraftLayer || !this.L) {
-      return;
-    }
-
-    this.aircraftLayer.clearLayers();
-
-    const aircraftArray = this.aircraftData || [];
-
-    const bounds: any[] = [];
-
-    for (const aircraft of aircraftArray) {
-      const lat = aircraft.latitude;
-      const lon = aircraft.longitude;
-      if (typeof lat !== 'number' || typeof lon !== 'number') {
-        continue;
-      }
-
-      bounds.push([lat, lon]);
-      const rotation = aircraft.true_track ?? 0;
-      const callsign = aircraft.callsign || aircraft.icao24;
-
-      // Create airplane icon SVG (yellow like in your screenshot)
-      const airplaneIcon = this.L.divIcon({
-        html: `<svg width="28" height="28" viewBox="0 0 28 28" style="transform: rotate(${rotation}deg); filter: drop-shadow(0 0 2px rgba(0,0,0,0.3));" xmlns="http://www.w3.org/2000/svg">
-          <path d="M14 2 L20 12 L26 14 L20 16 L14 26 L12 16 L2 14 L12 12 Z" fill="#fbbf24" stroke="#f59e0b" stroke-width="0.5"/>
-        </svg>`,
-        className: 'aircraft-icon',
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
-      });
-
-      const marker = this.L.marker([lat, lon], { icon: airplaneIcon })
-        .bindPopup(`<div style="font-size:13px;font-weight:600;margin-bottom:3px">${callsign}</div>` +
-          `<div style="font-size:12px;color:#888">ICAO24: ${aircraft.icao24}</div>` +
-          `<div style="font-size:12px;color:#888">Alt: ${aircraft.baro_altitude ?? 'n/a'} m</div>` +
-          `<div style="font-size:12px;color:#888">Speed: ${aircraft.velocity ?? 'n/a'} m/s</div>` +
-          `<div style="font-size:12px;color:#888">Track: ${aircraft.true_track ?? 'n/a'}°</div>`);
-
-      this.aircraftLayer.addLayer(marker);
-    }
-  }
-
-  private renderShips(): void {
-    if (!this.shipsLayer || !this.L) {
-      return;
-    }
-
-    this.shipsLayer.clearLayers();
-
-    const shipsArray = this.shipsData || [];
-
-    const bounds: any[] = [];
-
-    for (const ship of shipsArray) {
-      const lat = ship.latitude;
-      const lon = ship.longitude;
-      if (typeof lat !== 'number' || typeof lon !== 'number') {
-        continue;
-      }
-
-      bounds.push([lat, lon]);
-      const rotation = ship.course ?? 0;
-      const name = ship.name || ship.mmsi;
-
-      // Create ship icon SVG
-      const shipIcon = this.L.divIcon({
-        html: `<svg width="24" height="24" viewBox="0 0 24 24" style="transform: rotate(${rotation}deg); filter: drop-shadow(0 0 2px rgba(0,0,0,0.3));" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2 L18 10 L16 22 L8 22 L6 10 Z M12 2 L12 10 M8 22 L16 22 L15 18 L9 18" fill="#10b981" stroke="#059669" stroke-width="0.5"/>
-        </svg>`,
-        className: 'ship-icon',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
-      });
-
-      const marker = this.L.marker([lat, lon], { icon: shipIcon })
-        .bindPopup(`<div style="font-size:13px;font-weight:600;margin-bottom:3px">${name}</div>` +
-          `<div style="font-size:12px;color:#888">MMSI: ${ship.mmsi}</div>` +
-          `<div style="font-size:12px;color:#888">Speed: ${ship.speed ?? 'n/a'} kn</div>` +
-          `<div style="font-size:12px;color:#888">Course: ${ship.course ?? 'n/a'}°</div>`);
-
-      this.shipsLayer.addLayer(marker);
-    }
-
-  }
 
   private renderOrionData(): void {
     if (!this.orionCluster || !this.L) {
