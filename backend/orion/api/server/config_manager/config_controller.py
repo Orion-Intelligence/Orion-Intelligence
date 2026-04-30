@@ -61,7 +61,7 @@ class config_controller:
             return f"/api/s/static/system/{base}_default.png"
 
         fresh_config["ai_endpoint"] = "1"
-        fresh_config["app_name"] = fresh_config.get("app_name") or "Orion Intelligence - BACKEND LIVE TEST"
+        fresh_config["app_name"] = fresh_config.get("app_name") or "Orion Intelligence"
         fresh_config["ai_endpoint_enabled"] = fresh_config.get("ai_endpoint_enabled") or "1"
         fresh_config["logo_url"] = asset("logo_url")
         fresh_config["logo_wide_light"] = asset("logo_wide_light")
@@ -86,7 +86,7 @@ class config_controller:
             log.g().e(f"Error fetching config: {ex}")
             return config_data(settings={
                 "ai_endpoint": "1",
-                "app_name": "Orion Intelligence - BACKEND LIVE TEST",
+                "app_name": "Orion Intelligence",
                 "ai_endpoint_enabled": "1",
                 "s_onion": "",
                 "logo_url": "/api/s/static/system/logo_url_default.png",
