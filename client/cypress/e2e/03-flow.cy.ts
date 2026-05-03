@@ -1,5 +1,5 @@
 import {FLOW_ADMIN_SECTIONS, FLOW_DATA_BREACH_SECTIONS, FLOW_DEFACEMENT_SECTIONS, FLOW_ENTITY_API_SECTIONS, FLOW_EXPLOIT_SECTIONS, FLOW_GENERAL_INTELLIGENCE_SECTIONS, FLOW_SOCIAL_SECTIONS, FLOW_WEB_SCANS_SECTIONS} from '../support/constants';
-import {applyDateRange, applyDirectoryDropdown, assertDirectoryContentVisible, assertFreeModeDashboardChrome, clickSidebarSubItem, DIRECTORY_CONTENT_OPTION, DIRECTORY_INDEX_OPTION, DIRECTORY_NETWORK_OPTION, getHeatmapComponent, openCountryReportFromMap, openHomepage, openSidebarGroup, resetDirectoryFilters, waitForDirectoryRequest} from './controllers/03-flow.controller';
+import {applyDateRange, applyDirectoryDropdown, assertDirectoryContentVisible, assertFreeModeDashboardChrome, clickSidebarSubItem, DIRECTORY_CONTENT_OPTION, DIRECTORY_INDEX_OPTION, DIRECTORY_NETWORK_OPTION, getHeatmapComponent, openCountryReportFromMap, openSidebarGroup, resetDirectoryFilters, waitForDirectoryRequest} from './controllers/03-flow.controller';
 
 describe('Orion Intelligence - Free Mode Flow', () => {
   after(() => {
@@ -139,7 +139,8 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
       body: '{"output":{"response":"ok"}}\n',
     }).as('nexusChat');
 
-    openHomepage();
+    cy.visit('/dashboard/profile/homepage');
+    cy.get('app-world-heatmap').should('be.visible');
     cy.get('[data-testid="ioc-basic-tag-AI"]').filter(':visible').first().should('be.visible').click();
     cy.location('pathname').should('include', '/dashboard/profile/ai');
     cy.get('[data-testid="chat-widget-input"]').filter(':visible').first().should('be.enabled').type('hello from basic flow{enter}');
