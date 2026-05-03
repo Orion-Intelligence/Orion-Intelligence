@@ -21,10 +21,10 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   private userNearBottom = true;
   private io?: IntersectionObserver;
   private mo?: MutationObserver;
+  @ViewChild('composerInput') private composerInput?: ElementRef<HTMLTextAreaElement>;
 
   @ViewChild('messagesContainer') messagesContainer!: ElementRef<HTMLElement>;
   @ViewChild('bottomSentinel') bottomSentinel!: ElementRef<HTMLElement>;
-  @ViewChild('composerInput') private composerInput?: ElementRef<HTMLTextAreaElement>;
   chatMessages: AiWorkspaceMessage[] = [];
   isBotTyping = false;
   botStep = '';
@@ -32,6 +32,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   chatOpen = false;
   isFullScreen = false;
   composerExpanded = false;
+  composerHeightClass = 'h-8';
   readonly reportText = input<string>();
   readonly report = input<string>();
   readonly showLauncher = input(true);
@@ -186,9 +187,10 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!textarea) {
       return;
     }
-    textarea.style.height = '32px';
+    this.composerHeightClass = 'h-8';
+    this.cdr.detectChanges();
     const nextHeight = Math.min(120, Math.max(32, textarea.scrollHeight));
-    textarea.style.height = `${nextHeight}px`;
+    this.composerHeightClass = this.getComposerHeightClass(nextHeight);
     this.composerExpanded = nextHeight > 32;
     this.cdr.detectChanges();
   }
@@ -203,6 +205,25 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
       return true;
     }
     return el.scrollHeight - el.clientHeight - el.scrollTop <= threshold;
+  }
+
+  private getComposerHeightClass(height: number): string {
+    if (height <= 32) {
+      return 'h-8';
+    }
+    if (height <= 52) {
+      return 'h-[52px]';
+    }
+    if (height <= 72) {
+      return 'h-[72px]';
+    }
+    if (height <= 92) {
+      return 'h-[92px]';
+    }
+    if (height <= 112) {
+      return 'h-[112px]';
+    }
+    return 'h-[120px]';
   }
 
   private scrollToNewMessage(): void {

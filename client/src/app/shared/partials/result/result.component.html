@@ -25,25 +25,9 @@
                 <div class="flex items-center gap-[8px]">
                   <div id="homeSearch" class="flex h-[40px] min-w-0 w-full flex-nowrap overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-full max-[550px]:px-0': !homeSearchService.showFiltersOverlay }">
 
-                  @if (licenseService.canUseModule('ai') && app_service.configData().appSettings.ai_endpoint_enabled) {
-                    <button type="button" data-testid="ioc-basic-tag-AI" class="ui-home-ai-button group ml-3 flex h-6 w-6 shrink-0 self-center items-center justify-center rounded-md border border-[rgba(87,165,235,0.24)] bg-[linear-gradient(180deg,rgba(87,165,235,0.14)_0%,rgba(87,165,235,0.07)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-200 hover:border-[rgba(87,165,235,0.38)] hover:bg-[linear-gradient(180deg,rgba(87,165,235,0.2)_0%,rgba(87,165,235,0.1)_100%)] hover:shadow-[0_0_0_2px_rgba(87,165,235,0.08),inset_0_1px_0_rgba(255,255,255,0.12)]" aria-label="Open AI workspace" (click)="resultChatWidget.openChat()">
-                      <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" class="h-2.5 w-2.5 drop-shadow-[0_1px_4px_rgba(255,255,255,0.18)]">
-                        <defs>
-                          <linearGradient id="result-ai-stars-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#7dd3fc"></stop>
-                            <stop offset="35%" stop-color="#a78bfa"></stop>
-                            <stop offset="68%" stop-color="#f472b6"></stop>
-                            <stop offset="100%" stop-color="#facc15"></stop>
-                          </linearGradient>
-                        </defs>
-                        <path fill="url(#result-ai-stars-gradient)" d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.73 1.73 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.73 1.73 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.73 1.73 0 0 0 3.407 2.31zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732L9.1 2.137a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"></path>
-                      </svg>
-                    </button>
-                  } @else {
-                    <button data-testid="dashboard-search-submit" class="flex h-[40px] w-[42px] items-center justify-center bg-white transition-colors hover:bg-white" type="submit">
-                      <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
-                    </button>
-                  }
+                  <button data-testid="dashboard-search-submit" class="flex h-[40px] w-[42px] items-center justify-center bg-white transition-colors hover:bg-white" type="submit">
+                    <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
+                  </button>
                   <input #searchInput data-testid="dashboard-general-input" class="h-[40px] flex-1 bg-white text-[15px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[14px] placeholder:text-[rgba(0,0,0,0.38)]" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" maxlength="350" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)" />
                   <button type="button" class="ui-search-clear-btn group flex h-[40px] w-[38px] items-center justify-center bg-white px-0 transition-colors hover:bg-[#f3f4f6]" aria-label="Clear input" title="Clear input" (click)="clearSearchInput()" [disabled]="!searchQuery">
                     <i class="bi bi-x-circle-fill text-[14px] text-[#374151] transition-colors group-hover:text-[#111827]" [ngClass]="{ 'invisible': !searchQuery }"></i>

@@ -7,7 +7,7 @@
 </div>
 
 @if (chatOpen) {
-  <div class="fixed inset-0 z-[1400] flex items-end justify-end bg-black/40 p-4 max-[640px]:items-stretch max-[640px]:justify-stretch max-[640px]:p-5" @overlayFade (click)="closeChat()">
+  <div data-testid="chat-widget-overlay" class="fixed inset-0 z-[1400] flex items-end justify-end bg-black/40 p-4 max-[640px]:items-stretch max-[640px]:justify-stretch max-[640px]:p-5" @overlayFade (click)="closeChat()">
     <div class="chat-support__window ui-ai-chat-surface-pattern flex min-h-0 w-full flex-col overflow-hidden rounded-2xl bg-[var(--color-blue-700)] shadow-[0_24px_80px_rgba(0,0,0,0.35)] max-[640px]:h-full max-[640px]:max-w-none" [ngClass]="isFullScreen ? 'h-[calc(100vh-32px)] max-w-[714px]' : 'h-[640px] max-w-[420px]'" @chatBotAnimation (click)="$event.stopPropagation()">
       <div class="flex shrink-0 items-center justify-between px-5 pt-5">
         <button type="button" class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
@@ -112,7 +112,7 @@
         <div class="mb-0 max-h-0 overflow-hidden opacity-0 pointer-events-none transition-all duration-200 max-[640px]:hidden"></div>
         <form novalidate class="border border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-800)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded" (submit)="sendMessage($event)">
           <div class="flex items-end gap-2">
-          <textarea #composerInput data-testid="chat-widget-input" rows="1" [(ngModel)]="newMessage" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" name="message" placeholder="Write a message" class="block min-h-8 max-h-[120px] flex-1 resize-none overflow-y-hidden whitespace-pre-wrap break-words bg-[var(--color-blue-800)] px-3 py-1.5 text-sm leading-5 text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded" [disabled]="isBotTyping" required></textarea>
+          <textarea #composerInput data-testid="chat-widget-input" rows="1" [(ngModel)]="newMessage" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" name="message" placeholder="Write a message" class="block min-h-8 max-h-[120px] flex-1 resize-none overflow-y-hidden whitespace-pre-wrap break-words bg-[var(--color-blue-800)] px-3 py-1.5 text-sm leading-5 text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" [ngClass]="composerHeightClass" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded" [disabled]="isBotTyping" required></textarea>
           <button data-testid="chat-widget-send" #submitBtn type="submit" class="ui-chat-send-btn flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] hover:bg-[#4b98dc]" [disabled]="isBotTyping" (click)="pushButton(submitBtn)">
             <img src="assets/images/shared/chat_small.svg" alt="chat" class="h-4 w-4 [filter:brightness(0)_invert(1)]" />
           </button>

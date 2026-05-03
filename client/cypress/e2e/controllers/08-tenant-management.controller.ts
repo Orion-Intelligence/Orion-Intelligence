@@ -258,6 +258,7 @@ export function applyAuditLogDateRange(monthsBack: number) {
 
   cy.get('[data-testid="side-filter-date-day-1"]').filter(':visible').first().scrollIntoView().click();
   cy.get('[data-testid="side-filter-date-day-25"]').filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-date-day-11"]').filter(':visible').first().scrollIntoView().click();
   cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().scrollIntoView().click();
 }
 
