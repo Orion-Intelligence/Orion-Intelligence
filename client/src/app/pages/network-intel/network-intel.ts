@@ -143,8 +143,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   setTab(id: 'dns' | 'shodan' | 'vuln' | 'geo'): void {
-    if (this.isScanning()) {
+    if (this.activeTab === id) {
       return;
+    }
+    if (this.isScanning()) {
+      this.cancel();
     }
     this.activeTab = id;
     if (id !== 'geo') {
@@ -155,8 +158,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   setGeoTab(): void {
-    if (this.isScanning()) {
+    if (this.activeTab === 'geo') {
       return;
+    }
+    if (this.isScanning()) {
+      this.cancel();
     }
     this.geoMode = 'coords';
     this.activeTab = 'geo';

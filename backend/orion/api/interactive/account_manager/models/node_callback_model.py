@@ -38,6 +38,7 @@ class TenantDataModel(BaseModel):
     quotaExceeded: bool
     image: Optional[str] = None
     profileVisibilityEnabled: bool = True
+    eventManagementEnabled: bool = False
 
 
 class NodeCallbackModel(BaseModel):

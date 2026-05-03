@@ -30,7 +30,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.logout();
   });
 
-  it('creates five users with configured licenses as admin', () => {
+  it('creates seven users with configured licenses as admin', () => {
     cy.loginAsAdmin();
     cy.intercept('POST', '**/api/users').as('usersApi');
     cy.visit('/dashboard/profile/homepage');
@@ -174,6 +174,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.get('[data-testid="report-user-sidebar-open-profile"]').should('not.exist');
     cy.logout();
   });
+
 });
 
 describe('Orion Intelligence - Enterprise Demo Tour', () => {
@@ -286,7 +287,7 @@ describe('Orion Intelligence - User Management Deletion Flow', () => {
   it('deletes configured test users', () => {
     cy.env(['TEST_USERS']).then(({TEST_USERS}) => {
       const usernames = Object.keys(TEST_USERS || {})
-        .filter((key) => /^testing\d+$/.test(key) && key !== 'testing3' && key !== 'testing4' && key !== 'testing5')
+        .filter((key) => /^testing\d+$/.test(key) && key !== 'testing3' && key !== 'testing4' && key !== 'testing5' && key !== 'testing6' && key !== 'testing7')
         .map((key) => TEST_USERS[key]?.username)
         .filter(Boolean);
 

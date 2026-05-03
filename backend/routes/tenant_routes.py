@@ -5,6 +5,7 @@ from fastapi import Depends, UploadFile
 
 from configs.app_dependency import license_required, role_required, status_required, get_current_user
 from orion.api.interactive.account_manager.account_manager import AccountManager
+from orion.api.interactive.account_manager.models.chat_history_model import chat_history_model
 from orion.api.interactive.account_manager.models.user_meta_model import user_meta_model
 from orion.api.interactive.account_manager.models.user_param_model import user_param_model
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
@@ -18,7 +19,6 @@ from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.management.jobs.alert_job import alert_job
 from orion.api.interactive.account_manager.models.user_model import user_model
-
 tenant_routes = APIRouter(
     dependencies=[Depends(status_required([UserStatus.ACTIVE]))], tags=["Orion API"], )
 
@@ -94,6 +94,22 @@ async def update_user(user: tenant_param_model, current_user=Depends(get_current
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
 async def update_user(user: user_meta_model, current_user=Depends(get_current_user)):
     return await AccountManager.get_instance().update_current_user(user, current_user)
+
+
+@tenant_routes.post(
+    "/api/get/current/user/chat-history",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
+async def get_current_user_chat_history(current_user=Depends(get_current_user)):
+    return await AccountManager.get_instance().get_current_user_chat_history(current_user)
+
+
+@tenant_routes.post(
+    "/api/update/current/user/chat-history",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
+async def update_current_user_chat_history(data: chat_history_model, current_user=Depends(get_current_user)):
+    return await AccountManager.get_instance().update_current_user_chat_history(data, current_user)
 
 
 @tenant_routes.delete(

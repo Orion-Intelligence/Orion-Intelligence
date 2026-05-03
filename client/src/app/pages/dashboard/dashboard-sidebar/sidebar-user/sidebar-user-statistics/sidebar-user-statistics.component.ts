@@ -6,4 +6,5 @@ import { HomeInsightComponent } from "../../../../homepage/home-insight/home-ins
   templateUrl: './sidebar-user-statistics.component.html',
 })
 export class SidebarUserStatisticsComponent {
+  readonly templateOnly = true;
 }

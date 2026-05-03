@@ -8,7 +8,7 @@ on:
 permissions: read-all
 
 jobs:
-  Test:
+  client-tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -106,7 +106,7 @@ jobs:
       - run: |
           set -euo pipefail
           cd "${{ steps.compose_loc.outputs.dir }}"
-          export COMPOSE_PROJECT_NAME="ci_${{ github.run_id }}_${{ github.run_attempt }}"
+          export COMPOSE_PROJECT_NAME="ci_client_${{ github.run_id }}_${{ github.run_attempt }}"
           docker-compose -f "${{ steps.compose_loc.outputs.file }}" up -d --build
 
       - run: |
@@ -134,58 +134,173 @@ jobs:
           set -euo pipefail
           test -s client/coverage/lcov.info
 
-      - name: Run backend static tests with coverage
+      - name: Detect client artifacts
+        if: always()
+        id: client_artifacts
+        run: |
+          set -euo pipefail
+          has_cypress=false
+          has_coverage=false
+
+          if find client/cypress/screenshots client/cypress/videos -type f 2>/dev/null | grep -q .; then
+            has_cypress=true
+          fi
+
+          if [ -s client/coverage/lcov.info ]; then
+            has_coverage=true
+          fi
+
+          {
+            echo "has_cypress=${has_cypress}"
+            echo "has_coverage=${has_coverage}"
+          } >> "$GITHUB_OUTPUT"
+
+      - if: always() && steps.client_artifacts.outputs.has_cypress == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-artifacts
+          path: |
+            client/cypress/screenshots/
+            client/cypress/videos/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - if: always() && steps.client_artifacts.outputs.has_coverage == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-coverage
+          path: client/coverage/lcov.info
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - if: always()
+        run: |
+          set -euo pipefail
+          docker ps -aq | xargs -r docker rm -f || true
+          docker network prune -f || true
+          docker system prune -f --volumes || true
+
+  backend-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - run: |
+          set -euo pipefail
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends bash curl git ca-certificates gnupg jq docker-compose python3
+          curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google.gpg
+          echo "deb [signed-by=/usr/share/keyrings/google.gpg arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends google-chrome-stable
+
+      - run: |
+          set -euo pipefail
+          cd client
+          export npm_config_loglevel=error
+          export NODE_OPTIONS=--no-deprecation
+          npm install
+          npx ng build --configuration=instrumented
+
+      - run: |
+          set -euo pipefail
+          echo "=== checking client build folder ==="
+          if [ -d "client/build" ]; then
+            find client/build -maxdepth 4 -type d -print || true
+            find client/build -maxdepth 2 -type f -print | head -n 200 || true
+          else
+            exit 1
+          fi
+
+      - run: |
+          set -euo pipefail
+          chmod +x ./run.sh
+          ./run.sh build -b
+
+      - id: compose_loc
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, sys
+          targets = {"docker-compose.yml","docker-compose.yaml","compose.yml","compose.yaml"}
+          found = None
+          for root, dirs, files in os.walk("."):
+            if root.count(os.sep) > 6:
+              dirs[:] = []
+              continue
+            for f in files:
+              if f in targets:
+                found = os.path.abspath(os.path.join(root, f))
+                break
+            if found:
+              break
+          if not found:
+            sys.exit(1)
+          d = os.path.dirname(found)
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fp:
+            fp.write(f"dir={d}\n")
+            fp.write(f"file={found}\n")
+          PY
+
+      - env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        run: |
+          set -euo pipefail
+          cd "${{ steps.compose_loc.outputs.dir }}"
+          python3 - <<'PY'
+          import os, pathlib
+          p = pathlib.Path(".env")
+          p.write_text(os.environ["ENV_FILE"], encoding="utf-8")
+          with p.open("a", encoding="utf-8") as fp:
+            fp.write("\nCOVERAGE_PROCESS_START=/app/.coveragerc\n")
+            fp.write("COVERAGE_FILE=/app/.coverage\n")
+            fp.write("TESTING_ENABLED=1\n")
+          PY
+          test -s .env
+
+      - run: |
+          set -euo pipefail
+          docker ps -aq | xargs -r docker rm -f || true
+          docker network prune -f || true
+          docker system prune -f --volumes || true
+
+      - run: |
+          set -euo pipefail
+          docker network inspect shared_bridge >/dev/null 2>&1 || docker network create shared_bridge
+
+      - run: |
+          set -euo pipefail
+          cd "${{ steps.compose_loc.outputs.dir }}"
+          export COMPOSE_PROJECT_NAME="ci_backend_${{ github.run_id }}_${{ github.run_attempt }}"
+          docker-compose -f "${{ steps.compose_loc.outputs.file }}" up -d --build
+
+      - run: |
+          set -euo pipefail
+          for i in $(seq 1 180); do
+            code="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080 || echo 000)"
+            if [ "$code" != "000" ] && [ "$code" != "502" ]; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
+
+      - name: Run backend tests with coverage
         run: |
           set -euo pipefail
           docker exec trusted-web-main sh -lc '
             set -e
             cd /app
             python -m pip install --quiet pytest pytest-cov
-            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests/static \
-              -m static --maxfail=1 --disable-warnings
-          '
-
-      - name: Run backend journey tests with coverage append
-        run: |
-          set -euo pipefail
-          docker exec trusted-web-main sh -lc '
-            set -e
-            cd /app
-            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests/journey \
-              -m journey --cov-append --maxfail=1 --disable-warnings \
-              --cov-report=xml:/tmp/backend-coverage.xml
-          '
-
-      - name: Run backend service tests with coverage append
-        run: |
-          set -euo pipefail
-          docker exec trusted-web-main sh -lc '
-            set -e
-            cd /app
-            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests/service \
-              --cov-append --maxfail=1 --disable-warnings \
-              --cov-report=xml:/tmp/backend-coverage.xml
-          '
-
-      - name: Run backend tenant tests with coverage append
-        run: |
-          set -euo pipefail
-          docker exec trusted-web-main sh -lc '
-            set -e
-            cd /app
-            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests/tenant \
-              --cov-append --maxfail=1 --disable-warnings \
-              --cov-report=xml:/tmp/backend-coverage.xml
-          '
-
-      - name: Run backend crawler tests with coverage append
-        run: |
-          set -euo pipefail
-          docker exec trusted-web-main sh -lc '
-            set -e
-            cd /app
-            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests/crawler \
-              --cov-append --maxfail=1 --disable-warnings \
+            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests \
+              --cov=orion --maxfail=1 --disable-warnings \
               --cov-report=xml:/tmp/backend-coverage.xml
           '
 
@@ -195,7 +310,48 @@ jobs:
           docker cp trusted-web-main:/tmp/backend-coverage.xml backend/coverage.xml
           test -s backend/coverage.xml
 
-      - name: Upload combined coverage to Codacy
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage.xml
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - if: always()
+        run: |
+          set -euo pipefail
+          docker ps -aq | xargs -r docker rm -f || true
+          docker network prune -f || true
+          docker system prune -f --volumes || true
+
+  coverage-report:
+    runs-on: ubuntu-latest
+    needs: [client-tests, backend-tests]
+    if: always()
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download client coverage
+        if: always()
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: client-coverage
+          path: client/coverage
+
+      - name: Download backend coverage
+        if: always()
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend
+
+      - name: Detect coverage reports
         if: always()
         id: codacy_reports
         run: |
@@ -238,7 +394,6 @@ jobs:
           client_total = 0
           client_covered = 0
           if lcov_path.exists() and lcov_path.stat().st_size > 0:
-            # Parse LCOV line coverage.
             for raw in lcov_path.read_text(encoding="utf-8", errors="ignore").splitlines():
               if raw.startswith("DA:"):
                 _, pair = raw.split("DA:", 1)
@@ -253,7 +408,6 @@ jobs:
           backend_total = 0
           backend_covered = 0
           if backend_xml.exists() and backend_xml.stat().st_size > 0:
-            # Parse backend Cobertura line coverage.
             cov = ET.parse(backend_xml).getroot()
             backend_total = int(cov.attrib.get("lines-valid", "0"))
             backend_covered = int(cov.attrib.get("lines-covered", "0"))
@@ -301,51 +455,25 @@ jobs:
           print((out_dir / "coverage-summary.md").read_text(encoding="utf-8"))
           PY
 
-      - name: Detect artifact files
+      - name: Detect merged coverage artifacts
         if: always()
-        id: artifact_files
+        id: coverage_artifacts
         run: |
           set -euo pipefail
-          has_cypress=false
           has_coverage=false
-
-          if find client/cypress/screenshots client/cypress/videos -type f 2>/dev/null | grep -q .; then
-            has_cypress=true
-          fi
-
-          if [ -s backend/coverage.xml ] || [ -s coverage-merged/coverage-summary.json ] || [ -s coverage-merged/coverage-summary.md ]; then
+          if [ -s coverage-merged/coverage-summary.json ] || [ -s coverage-merged/coverage-summary.md ]; then
             has_coverage=true
           fi
+          echo "has_coverage=${has_coverage}" >> "$GITHUB_OUTPUT"
 
-          {
-            echo "has_cypress=${has_cypress}"
-            echo "has_coverage=${has_coverage}"
-          } >> "$GITHUB_OUTPUT"
-
-      - if: always() && steps.artifact_files.outputs.has_cypress == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-artifacts
-          path: |
-            client/cypress/screenshots/
-            client/cypress/videos/
-          if-no-files-found: ignore
-          retention-days: 7
-
-      - if: always() && steps.artifact_files.outputs.has_coverage == 'true'
+      - if: always() && steps.coverage_artifacts.outputs.has_coverage == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-artifacts
           path: |
             backend/coverage.xml
+            client/coverage/lcov.info
             coverage-merged/coverage-summary.json
             coverage-merged/coverage-summary.md
           if-no-files-found: ignore
           retention-days: 7
-
-      - if: always()
-        run: |
-          set -euo pipefail
-          docker ps -aq | xargs -r docker rm -f || true
-          docker network prune -f || true
-          docker system prune -f --volumes || true

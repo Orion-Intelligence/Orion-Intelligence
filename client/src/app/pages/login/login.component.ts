@@ -8,4 +8,5 @@ import { LoginContainerComponent } from './login-container/login-container.compo
   ]
 })
 export class LoginComponent {
+  readonly templateOnly = true;
 }

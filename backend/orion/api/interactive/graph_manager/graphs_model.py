@@ -20,7 +20,7 @@ class graphs_model:
     async def social_search(self, model, key: str):
         try:
             async with httpx.AsyncClient() as client:
-                if type(model) is dict and "file_bytes" in model:
+                if isinstance(model, dict) and "file_bytes" in model:
                     response = await client.post(
                         "http://trusted-social-api:8020/social/" + key,
                         files={

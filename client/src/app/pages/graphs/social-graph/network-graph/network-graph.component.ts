@@ -10,7 +10,7 @@ import { ensureStylesheet } from '../../../../shared/utils/ensure-stylesheet.uti
 interface GraphPosition { x: number; y: number; }
 interface NetworkInstance {
   focus(nodeId: string, options?: unknown): void;
-  selectNodes(nodeIds: Array<string | number>): void;
+  selectNodes(nodeIds: (string | number)[]): void;
   addEdgeMode(): void;
   disableEditMode(): void;
   unselectAll(): void;

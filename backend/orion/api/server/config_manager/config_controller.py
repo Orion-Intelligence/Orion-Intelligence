@@ -59,6 +59,7 @@ class config_controller:
             return f"/api/s/static/system/{base}_default.png"
 
         fresh_config["ai_endpoint"] = "1"
+        fresh_config["ai_endpoint_enabled"] = fresh_config.get("ai_endpoint_enabled") or "1"
         fresh_config["logo_url"] = asset("logo_url")
         fresh_config["logo_wide_light"] = asset("logo_wide_light")
         fresh_config["logo_wide_dark"] = asset("logo_wide_dark")
@@ -82,6 +83,7 @@ class config_controller:
             log.g().e(f"Error fetching config: {ex}")
             return config_data(settings={
                 "ai_endpoint": "1",
+                "ai_endpoint_enabled": "1",
                 "s_onion": "",
                 "logo_url": "/api/s/static/system/logo_url_default.png",
                 "logo_wide_light": "/api/s/static/system/logo_wide_light_default.png",
@@ -104,6 +106,8 @@ class config_controller:
                 key = AllowedKeys.APP_NAME
             elif key_str == "meta_info":
                 key = AllowedKeys.META_INFO
+            elif key_str == "ai_endpoint_enabled":
+                key = AllowedKeys.AI_ENDPOINT_ENABLED
             elif key_str == "s_onion":
                 key = AllowedKeys.S_ONION
             else:

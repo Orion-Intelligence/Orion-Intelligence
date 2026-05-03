@@ -174,10 +174,10 @@ export class IconService {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text x="50%" y="50%" dy=".35em" text-anchor="middle" font-family="sans-serif" font-size="${fontSize}" font-weight="bold" fill="${fillColor}">${firstLetter}</text></svg>`;
   }
 
-  async getWhiteIconDataUrl(platformName: string, options: IconOptions = { type: 'default' }): Promise<string> {
+  getWhiteIconDataUrl(platformName: string, options: IconOptions = { type: 'default' }): Promise<string> {
     const cacheKey = `${platformName}-${options.type}`;
     if (this.iconCache.has(cacheKey)) {
-      return this.iconCache.get(cacheKey)!;
+      return Promise.resolve(this.iconCache.get(cacheKey)!);
     }
     const lowerCasePlatform = platformName.toLowerCase();
     const slug = iconMap[lowerCasePlatform] || lowerCasePlatform.replace(/[\s.]+/g, '');
@@ -187,7 +187,7 @@ export class IconService {
       : this.buildFallbackSvg(platformName, options);
     const dataUrl = `data:image/svg+xml;base64,${btoa(svgText)}`;
     this.iconCache.set(cacheKey, dataUrl);
-    return dataUrl;
+    return Promise.resolve(dataUrl);
   }
 
   getPlatformBrandColor(platformName: string): string {

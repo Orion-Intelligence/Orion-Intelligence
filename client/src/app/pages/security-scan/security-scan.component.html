@@ -1,16 +1,12 @@
-<div class="mx-auto w-full max-w-[2400px] px-5 py-4 lg:px-8">
+<div class="mx-auto w-full max-w-[2400px] px-5 pt-4 pb-[200px] lg:px-8">
   <form #searchForm="ngForm" (submit)="onSearchSubmit()" action="" enctype="multipart/form-data" method="GET" class="mt-6 flex items-center">
-    <div class="flex w-full flex-wrap items-start gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-770)] p-3">
-      <div class="w-full">
-        <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white">
-          <div class="flex w-[45px] items-center justify-center bg-white">
-            <img alt="Search" height="20" ngSrc="/assets/images/shared/domain.svg" priority width="20" class="brightness-0 opacity-80">
-          </div>
-          <input data-testid="scan-primary-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]" maxlength="150" name="username" [placeholder]="scanType === 'repo' ? 'Repository' : 'Domain'" type="url" required pattern="^(?:https?:\/\/)?([a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}|localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?(\/[^\s]*)?$">
-          <input type="hidden" value="1">
-          <button data-testid="scan-search-button" class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40" [disabled]="!searchForm.valid">Search</button>
-        </div>
+    <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white">
+      <div class="flex w-[45px] items-center justify-center bg-white">
+        <img alt="Search" height="20" ngSrc="/assets/images/shared/domain.svg" priority width="20" class="brightness-0 opacity-80">
       </div>
+      <input data-testid="scan-primary-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]" maxlength="150" name="username" [placeholder]="scanType === 'repo' ? 'Repository' : 'Domain'" type="url" required pattern="^(?:https?:\/\/)?([a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}|localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?(\/[^\s]*)?$">
+      <input type="hidden" value="1">
+      <button data-testid="scan-search-button" class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40" [disabled]="!searchForm.valid">Search</button>
     </div>
   </form>
 
@@ -156,26 +152,28 @@
       @if (!isLoading && !hasError) {
         @if (categories.length) {
           @for (cat of categories; track trackByCategory($index, cat)) {
-            <div class="security-scan-findings-section mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" @fadeInDashboardItem>
-              <h3 data-testid="scan-findings-title" class="text-[18px] font-medium text-[var(--color-blue-640)]">{{ cat.name }} Findings ({{ cat.total }})</h3>
-              <div class="my-[15px] h-px bg-[var(--color-divider)]"></div>
+            <div class="security-scan-findings-section mt-[16px] rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[18px] shadow-[0_8px_22px_var(--color-shadow-light)]" @fadeInDashboardItem>
+              <div class="flex flex-wrap items-center justify-between gap-[12px]">
+                <h3 data-testid="scan-findings-title" class="text-[17px] font-semibold tracking-[0.01em] text-[var(--color-text1)]">{{ cat.name }} Findings</h3>
+                <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-[10px] py-[3px] text-[12px] font-semibold text-[var(--color-text3)]">{{ cat.total }} findings</span>
+              </div>
+              <div class="my-[14px] h-px bg-[var(--color-divider)]"></div>
               <div class="flex flex-col gap-[15px]">
                 @for (item of cat.items; track trackByItem($index)) {
-                  <div class="security-scan-finding-card rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[14px]" @fadeInDashboardItem>
-                    <div class="flex items-center gap-[8px]">
-                      <span class="h-[10px] w-[10px] rounded-full" [ngClass]="{ 'bg-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high', 'bg-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium', 'bg-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low', 'bg-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational' }"></span>
-                      <h4 class="text-[16px] font-semibold text-[var(--color-text1)]">{{ item.header }}</h4>
-                    </div>
-                    <p class="mt-[10px] text-[14px] text-[var(--color-text4)]">{{ item.description }}</p>
-                    <div class="mt-[10px]">
-                      <span class="security-scan-risk-pill inline-flex items-center rounded-full bg-[var(--color-tags)] px-[13px] py-[4px] text-[14px] font-medium" [ngClass]="{ 'text-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high', 'text-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium', 'text-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low', 'text-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational' }">
+                  <div class="security-scan-finding-card rounded-[10px] border border-l-[3px] border-[var(--color-border)] bg-[var(--color-blue-730)] p-[14px] shadow-[0_4px_14px_var(--color-shadow-light)]" [ngClass]="{ 'border-l-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high', 'border-l-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium', 'border-l-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low', 'border-l-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational' }" @fadeInDashboardItem>
+                    <div class="flex flex-wrap items-center justify-between gap-[10px]">
+                      <div class="flex min-w-0 flex-1 items-center gap-[8px]">
+                        <span class="h-[9px] w-[9px] shrink-0 rounded-full" [ngClass]="{ 'bg-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high', 'bg-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium', 'bg-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low', 'bg-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational' }"></span>
+                        <h4 class="truncate text-[15px] font-semibold text-[var(--color-text1)]">{{ item.header }}</h4>
+                      </div>
+                      <span class="security-scan-risk-pill inline-flex shrink-0 items-center rounded-full border px-[11px] py-[3px] text-[12px] font-semibold" [ngClass]="{ 'border-red-400/20 bg-red-500/10 text-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high', 'border-orange-400/20 bg-orange-500/10 text-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium', 'border-emerald-400/20 bg-emerald-500/10 text-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low', 'border-sky-400/20 bg-sky-500/10 text-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational' }">
                         {{ item.risk }} Risk ({{ item.confidence }} Confidence)
                       </span>
                     </div>
+                    <p class="mt-[10px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-[12px] py-[9px] text-[14px] leading-6 text-[var(--color-text3)]">{{ item.description }}</p>
                     @if (item.proof) {
                       <app-code-block [code]="item.proof"></app-code-block>
                     }
-                    <div class="my-[15px] h-px bg-[var(--color-divider)]"></div>
                   </div>
                 }
               </div>

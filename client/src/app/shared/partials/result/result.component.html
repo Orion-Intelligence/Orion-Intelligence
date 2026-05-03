@@ -12,6 +12,7 @@
   }
 
   @if (!domain() && (!consolidated || activeTab === 'Deep Search')) {
+    <app-chat-widget #resultChatWidget [showLauncher]="false" tool="orion_api_docs" [type]="aiToolRoutingService.getType()"></app-chat-widget>
     <form (submit)="onFormSubmit($event)" @fadeInDashboardItem class="mt-[24px] mx-[30px] flex items-center max-[1000px]:mx-[15px] max-[550px]:grid" [ngClass]="{ 'mt-0': consolidated }">
       <div class="flex w-full flex-wrap items-start justify-between">
         <div class="w-full">
@@ -21,7 +22,8 @@
           <div class="relative">
             <div class="flex w-full items-center justify-between gap-[8px] max-[900px]:flex-col max-[900px]:items-stretch">
               <div class="relative min-w-0 flex-1 max-[900px]:max-w-full" [ngClass]="authService.getIsMobileDemo() ? 'max-w-full' : 'max-w-[910px]'">
-                <div id="homeSearch" class="flex h-[40px] min-w-0 w-full flex-nowrap overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-full max-[550px]:px-0': !homeSearchService.showFiltersOverlay }">
+                <div class="flex items-center gap-[8px]">
+                  <div id="homeSearch" class="flex h-[40px] min-w-0 w-full flex-nowrap overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-full max-[550px]:px-0': !homeSearchService.showFiltersOverlay }">
 
                   <button data-testid="dashboard-search-submit" class="flex h-[40px] w-[42px] items-center justify-center bg-white transition-colors hover:bg-white" type="submit">
                     <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
@@ -50,6 +52,7 @@
                       </button>
                     </ng-container>
                   </div>
+                </div>
                 </div>
                 @if (homeSearchService.showFiltersOverlay) {
                   <div class="hidden max-[550px]:block h-[43px]"></div>

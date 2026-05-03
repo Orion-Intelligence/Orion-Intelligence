@@ -132,6 +132,26 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.get('[data-testid="heatmap-report"]').should('not.exist');
   });
 
+  it('opens AI workspace from homepage and sends messages with enter and button', () => {
+    cy.intercept('POST', '**/api/nexus/chat', {
+      statusCode: 200,
+      headers: {'content-type': 'application/x-ndjson'},
+      body: '{"output":{"response":"ok"}}\n',
+    }).as('nexusChat');
+
+    cy.visit('/dashboard/profile/homepage');
+    cy.get('app-world-heatmap').should('be.visible');
+    cy.get('[data-testid="ioc-basic-tag-AI"]').filter(':visible').first().should('be.visible').click();
+    cy.location('pathname').should('include', '/dashboard/profile/ai');
+    cy.get('[data-testid="chat-widget-input"]').filter(':visible').first().should('be.enabled').type('hello from basic flow{enter}');
+    cy.wait('@nexusChat');
+    cy.get('[data-testid="chat-widget-messages"]').filter(':visible').first().should('contain.text', 'hello from basic flow');
+    cy.get('[data-testid="chat-widget-input"]').filter(':visible').first().should('be.enabled').type('send with button');
+    cy.get('[data-testid="chat-widget-send"]').filter(':visible').first().should('be.enabled').click();
+    cy.wait('@nexusChat');
+    cy.get('[data-testid="chat-widget-messages"]').filter(':visible').first().should('contain.text', 'send with button');
+  });
+
   it('covers branch paths by invoking heatmap component API', () => {
     cy.loginAsAdmin();
 

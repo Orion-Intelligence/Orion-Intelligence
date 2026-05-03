@@ -1043,6 +1043,19 @@ body.demo-tour-scroll-locked {
   border-bottom-color: #d8e0e9 !important;
 }
 
+.light-theme app-text-analysis .text-analysis-input-panel {
+  background: #ffffff !important;
+  border-color: #c9d8e8 !important;
+}
+
+.light-theme app-text-analysis .text-analysis-input-bar {
+  background: #f1f5fb !important;
+}
+
+.light-theme app-text-analysis .text-analysis-input-field {
+  background: #ffffff !important;
+}
+
 .ui-ioc-row-even {
   background: var(--color-blue-700);
 }
@@ -1250,21 +1263,21 @@ body.demo-tour-scroll-locked {
   border-color: #b9cde4 !important;
 }
 
-.light-theme app-credentials-search-bar [data-testid^='ioc-basic-tag-']:not(.text-white) {
+.light-theme app-ioc-search [data-testid^='ioc-basic-tag-']:not(.text-white) {
   background: #f9fbff !important;
   background-color: #f9fbff !important;
   border-color: var(--color-border) !important;
   color: var(--color-text3) !important;
 }
 
-.light-theme app-credentials-search-bar [data-testid^='ioc-basic-tag-']:not(.text-white):hover {
+.light-theme app-ioc-search [data-testid^='ioc-basic-tag-']:not(.text-white):hover {
   background: var(--color-blue-710) !important;
   background-color: var(--color-blue-710) !important;
   border-color: var(--color-border) !important;
   color: var(--color-text1) !important;
 }
 
-.light-theme app-credentials-search-bar .ui-cred-toolbar-btn {
+.light-theme app-ioc-search .ui-cred-toolbar-btn {
   background: #f9fbff !important;
   background-color: #f9fbff !important;
   border-color: var(--color-border) !important;
@@ -1272,7 +1285,7 @@ body.demo-tour-scroll-locked {
   transform: none !important;
 }
 
-.light-theme app-credentials-search-bar .ui-cred-toolbar-btn:hover {
+.light-theme app-ioc-search .ui-cred-toolbar-btn:hover {
   background: var(--color-blue-710) !important;
   background-color: var(--color-blue-710) !important;
   border-color: var(--color-border) !important;
@@ -1280,36 +1293,36 @@ body.demo-tour-scroll-locked {
   transform: none !important;
 }
 
-.light-theme app-credentials-search-bar .ui-ioc-adv-row {
+.light-theme app-ioc-search .ui-ioc-adv-row {
   background: #f9fbff !important;
   background-color: #f9fbff !important;
   border-color: #d7e2ef !important;
   box-shadow: none !important;
 }
 
-.light-theme app-credentials-search-bar .ui-ioc-adv-control,
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-value-input'],
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-operator-select'],
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-tag-select'],
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-delete-filter'],
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-add-filter'] {
+.light-theme app-ioc-search .ui-ioc-adv-control,
+.light-theme app-ioc-search [data-testid='ioc-adv-value-input'],
+.light-theme app-ioc-search [data-testid='ioc-adv-operator-select'],
+.light-theme app-ioc-search [data-testid='ioc-adv-tag-select'],
+.light-theme app-ioc-search [data-testid='ioc-adv-delete-filter'],
+.light-theme app-ioc-search [data-testid='ioc-adv-add-filter'] {
   background: #f9fbff !important;
   background-color: #f9fbff !important;
   border-color: var(--color-border) !important;
 }
 
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-value-input']:hover,
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-operator-select']:hover,
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-tag-select']:hover,
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-delete-filter']:hover,
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-add-filter']:hover {
+.light-theme app-ioc-search [data-testid='ioc-adv-value-input']:hover,
+.light-theme app-ioc-search [data-testid='ioc-adv-operator-select']:hover,
+.light-theme app-ioc-search [data-testid='ioc-adv-tag-select']:hover,
+.light-theme app-ioc-search [data-testid='ioc-adv-delete-filter']:hover,
+.light-theme app-ioc-search [data-testid='ioc-adv-add-filter']:hover {
   background: var(--color-blue-710) !important;
   background-color: var(--color-blue-710) !important;
   border-color: var(--color-border) !important;
 }
 
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-delete-filter'],
-.light-theme app-credentials-search-bar [data-testid='ioc-adv-add-filter'] {
+.light-theme app-ioc-search [data-testid='ioc-adv-delete-filter'],
+.light-theme app-ioc-search [data-testid='ioc-adv-add-filter'] {
   transform: none !important;
 }
 
@@ -1475,20 +1488,22 @@ body.demo-tour-scroll-locked {
 
 .ui-popup-select,
 .ui-graph-popup-panel select,
-.ui-select {
+.ui-select,
+select:not(.ui-popup-select):not(.ui-select) {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  padding-right: 2.5rem !important;
+  padding-right: 2.75rem !important;
   background-image: var(--filter-dropdown-icon);
   background-repeat: no-repeat;
-  background-position: right 0.8rem center;
+  background-position: right 1rem center;
   background-size: 11px 11px;
 }
 
 .ui-popup-select::-ms-expand,
 .ui-graph-popup-panel select::-ms-expand,
-.ui-select::-ms-expand {
+.ui-select::-ms-expand,
+select:not(.ui-popup-select):not(.ui-select)::-ms-expand {
   display: none;
 }
 
@@ -3759,4 +3774,54 @@ app-demo-tour .demo-tour-active {
     width: 100%;
     justify-content: center;
   }
+}
+
+.ui-ai-chat-bubble {
+  background: color-mix(in srgb, var(--color-text1) 4%, transparent);
+}
+
+.ui-ai-chat-surface-pattern {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.011) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.011) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.ui-ai-chat-bubble-cancel {
+  border-color: color-mix(in srgb, var(--color-border) 86%, var(--color-border-red));
+  background: #6a4b4b;
+}
+
+@keyframes ui-ai-chat-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ui-ai-chat-row {
+  animation: ui-ai-chat-row-in 180ms ease-out;
+}
+
+.light-theme .ui-ai-chat-bubble-bot {
+  background: color-mix(in srgb, var(--color-blue-640) 10%, var(--color-blue-720));
+}
+
+.light-theme .ui-ai-chat-bubble-user {
+  background: color-mix(in srgb, var(--color-blue-640) 14%, var(--color-consolidated-primary));
+}
+
+.light-theme .ui-home-ai-button {
+  border-color: var(--color-border) !important;
+  background: var(--color-blue-720) !important;
+  box-shadow: none !important;
+}
+
+.light-theme .ui-home-ai-button:hover {
+  border-color: color-mix(in srgb, var(--color-blue-640) 18%, var(--color-border)) !important;
+  background: color-mix(in srgb, var(--color-blue-640) 8%, var(--color-blue-720)) !important;
 }

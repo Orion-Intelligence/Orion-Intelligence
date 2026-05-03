@@ -1,4 +1,5 @@
 const SIDEBAR_GROUP_ROUTE_PREFIX: Record<string, string> = {
+  Profile: 'profile',
   'General Intelligence': 'strategic',
   Defacement: 'defacement',
   Social: 'social',
@@ -25,7 +26,14 @@ function getSidebarGroupTestId(title: string): string {
 
 export function openSidebarGroup(title: string) {
   const groupTestId = getSidebarGroupTestId(title);
-  cy.get(`[data-testid="${groupTestId}"]`).should('be.visible').click();
+  if (title === 'Entity API') {
+    cy.get('[data-testid="dashboard-sidebar"]').scrollTo('bottom', { ensureScrollable: false });
+    cy.get('[data-testid="sidebar-group-stealerlogs"]')
+      .scrollIntoView()
+      .should('be.visible')
+      .click();
+  }
+  cy.get(`[data-testid="${groupTestId}"]`).scrollIntoView().should('be.visible').click();
   cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
     expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
   });
@@ -44,14 +52,14 @@ export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
     cy.get(`[data-testid="sidebar-subitem-${routePrefix}-${aliasedTestId}"]`)
       .scrollIntoView()
       .should('be.visible')
-      .click({ force: true });
+      .click();
     return;
   }
 
   cy.contains(`[data-testid^="sidebar-subitem-${routePrefix}-"] div`, new RegExp(`^\\s*${itemTitle}\\s*$`))
     .scrollIntoView()
     .should('be.visible')
-    .click({ force: true });
+    .click();
 }
 
 export function waitForSearchReady() {

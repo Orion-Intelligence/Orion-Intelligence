@@ -1,4 +1,4 @@
-# Socail: profile_metadata
+# Social: profile_metadata
 
 ## Description
 
@@ -16,12 +16,12 @@ Example request payload:
 ```json
 {
   "tokens": [
-    "pti","scam"
+    "pti",
+    "scam"
   ],
   "username": "ImranKhan",
   "platform": "Twitter"
-
-}'
+}
 ```
 
 ## Response

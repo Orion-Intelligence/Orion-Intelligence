@@ -1,3 +1,4 @@
+from datetime import date
 from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -24,7 +25,7 @@ class CardExtractionModel(BaseModel):
     m_websites: Optional[List[str]] = Field(default_factory=list)
     m_company_name: Optional[str] = None
     m_logo_or_images: Optional[List[str]] = Field(default_factory=list)
-    m_leak_date: Optional[str] = None
+    m_leak_date: Optional[date] = None
     m_data_size: Optional[str] = None
     m_country_name: Optional[str] = None
     m_revenue: Optional[str] = None

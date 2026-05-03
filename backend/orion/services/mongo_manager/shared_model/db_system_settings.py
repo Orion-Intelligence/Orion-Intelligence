@@ -13,6 +13,7 @@ class AllowedKeys(str, Enum):
     META_INFO = "meta_info"
     LANGUAGE_ALLOWED = "language_allowed"
     AI_ENDPOINT = "ai_endpoint"
+    AI_ENDPOINT_ENABLED = "ai_endpoint_enabled"
     S_ONION = "s_onion"
     LOGO_URL = "logo_url"
     LOGO_WIDE_LIGHT = "logo_wide_light"
@@ -39,10 +40,10 @@ class db_system_model(Model):
             v.strip()), AllowedKeys.APP_NAME: lambda v: bool(
             v.strip()), AllowedKeys.META_INFO: lambda v: v == "" or _is_valid_meta_info(v), AllowedKeys.LANGUAGE_ALLOWED: lambda v: v in VALID_LANGUAGE_CODES, AllowedKeys.AI_ENDPOINT: lambda
                 v: v == "" or bool(
-            ENDPOINT_URL_REGEX.match(v)), AllowedKeys.S_ONION: lambda v: v == "" or bool(
+            ENDPOINT_URL_REGEX.match(v)), AllowedKeys.AI_ENDPOINT_ENABLED: lambda v: v in ("0", "1"), AllowedKeys.S_ONION: lambda v: v == "" or bool(
             ONION_ADDRESS_REGEX.match(v)), }
 
-        error_messages = {AllowedKeys.API_ALLOWED: "API_ALLOWED must be '0' or '1'", AllowedKeys.VERSION: "VERSION must be a non-empty string", AllowedKeys.APP_NAME: "APP_NAME must be a non-empty string", AllowedKeys.META_INFO: "META_INFO must be a JSON object with string keys and string or boolean values or empty", AllowedKeys.LANGUAGE_ALLOWED: f"LANGUAGE_ALLOWED must be one of: {', '.join(sorted(VALID_LANGUAGE_CODES))}", AllowedKeys.AI_ENDPOINT: "AI_ENDPOINT must be an http(s) URL or empty", AllowedKeys.S_ONION: "S_ONION must be a valid onion address or empty", }
+        error_messages = {AllowedKeys.API_ALLOWED: "API_ALLOWED must be '0' or '1'", AllowedKeys.VERSION: "VERSION must be a non-empty string", AllowedKeys.APP_NAME: "APP_NAME must be a non-empty string", AllowedKeys.META_INFO: "META_INFO must be a JSON object with string keys and string or boolean values or empty", AllowedKeys.LANGUAGE_ALLOWED: f"LANGUAGE_ALLOWED must be one of: {', '.join(sorted(VALID_LANGUAGE_CODES))}", AllowedKeys.AI_ENDPOINT: "AI_ENDPOINT must be an http(s) URL or empty", AllowedKeys.AI_ENDPOINT_ENABLED: "AI_ENDPOINT_ENABLED must be '0' or '1'", AllowedKeys.S_ONION: "S_ONION must be a valid onion address or empty", }
 
         if key in validators and not validators[key](value):
             raise ValueError(error_messages[key])

@@ -1,6 +1,7 @@
 .env
 .DS_Store
 **/.DS_Store
+backend/static/.well-known/parser_files/*
 backend/backend_cov_app/*
 *.bak
 *.log
@@ -58,3 +59,5 @@ backend/static/resource/**
 !backend/static/resource/**/*default*
 
 nginx/nginx-prod.conf
+nginx/nginx.conf
+nginx/nginx.conf

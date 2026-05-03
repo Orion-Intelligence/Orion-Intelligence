@@ -150,6 +150,8 @@ export class LicenseService {
         return 'Maintainer';
       case LicenseName.FREE:
         return 'Free';
+      case LicenseName.FEEDER:
+        return 'Feeder';
       case LicenseName.OSINT_BASIC:
         return 'OSINT Basic';
       case LicenseName.OSINT_ADVANCED:

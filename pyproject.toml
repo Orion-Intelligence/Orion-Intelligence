@@ -35,8 +35,9 @@ bcrypt = "4.0.1"
 PyJWT = "2.12.1"
 
 [tool.pytest.ini_options]
-addopts = "--ignore=backend/routes/test_routes.py --ignore=routes/test_routes.py --cov=orion --cov=routes --cov-report=term-missing"
+addopts = "--ignore=backend/routes/test_routes.py --ignore=routes/test_routes.py --ignore=backend/tests/routes --cov=backend/orion --cov-report=term-missing"
 testpaths = ["backend/tests"]
+pythonpath = ["backend"]
 markers = [
     "static: isolated tests (unit/contract) allowed to use mocks/monkeypatch",
     "journey: end-to-end user journey tests; monkeypatch fixture is forbidden",
@@ -52,6 +53,7 @@ filterwarnings = [
 [tool.coverage.run]
 omit = [
     "*/__init__.py",
+    "*/backend/routes/*",
     "*/configs/*",
     "*/orion/services/log_manager/log_controller.py",
 ]

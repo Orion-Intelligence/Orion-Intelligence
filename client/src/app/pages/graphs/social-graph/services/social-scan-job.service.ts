@@ -8,14 +8,14 @@ import { SocialMapperStateService } from './social-mapper-state.service';
 
 type UpdateStateFn = (updater: (state: TabState) => void, shouldScheduleSave?: boolean) => void;
 
-type ScanJobOptions = {
+interface ScanJobOptions {
   jobs: () => Job[];
   updateState: UpdateStateFn;
   state: SocialMapperStateService;
   scanService: SocialScanService;
   destroyRef: DestroyRef;
   cancelScanSubjects: Map<string, Subject<void>>;
-};
+}
 
 @Injectable({ providedIn: 'root' })
 export class SocialScanJobService {

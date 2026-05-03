@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { EmptyQueryComponent } from '../../shared/partials/empty-query/empty-query.component';
 import { PaginationComponent } from "../../shared/partials/pagination/pagination.component";
 import { RankedCallbackModel } from '../../shared/model/results/consolidated/ranked.callback.model';
-import { CredentialsSearchBarComponent } from "./credentials-search-bar/credentials-search-bar.component";
+import { IocSearchComponent } from "../../shared/partials/ioc-search/ioc-search.component";
 import { finalize } from 'rxjs/operators';
 import { PasswordSchemaComponent } from './password-schema/password-schema.component';
 import { PasswordSchemaFilter } from '../../shared/model/stealerlogs-filter/stealerlogs-filters';
@@ -33,7 +33,7 @@ import { GraphReportPayload, GraphReportTableRow } from '../../shared/model/repo
     EmptyQueryComponent,
     NgClass,
     PaginationComponent,
-    CredentialsSearchBarComponent,
+    IocSearchComponent,
     PasswordSchemaComponent,
     ScanHelperMethods,
     ExportChoiceModalComponent

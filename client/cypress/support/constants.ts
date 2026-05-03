@@ -34,5 +34,5 @@ export const FLOW_DEFACEMENT_SECTIONS = ['All', 'Hacked', 'Phishing', 'Databases
 export const FLOW_SOCIAL_SECTIONS = ['All', 'Telegram', 'Twitter', 'Mastodon', 'Pastebin', 'Forum', 'Reddit'];
 export const FLOW_EXPLOIT_SECTIONS = ['All', 'CVE', 'Tools', 'ZeroDay'];
 export const FLOW_WEB_SCANS_SECTIONS = ['Basic Scan', 'Port Scan', 'Repository Scan', 'SEO Scan'];
-export const FLOW_ENTITY_API_SECTIONS = ['Email Breach', 'Social Scanner', 'Wanted List', 'National Identity', 'Playstore Scanner', 'Software Scanner', 'File Scanner', 'Crypto Scanner'];
+export const FLOW_ENTITY_API_SECTIONS = ['Email Breach', 'Social Scanner', 'Wanted List', 'National Identity', 'Playstore Scanner', 'Software Scanner', 'File Scanner', 'Text Analysis', 'Crypto Scanner'];
 export const DOMAIN_SCANNER_TEST_DOMAINS = ['example.com', 'google.com', 'openai.com'];

@@ -13,6 +13,7 @@ async def create_default_tenant(engine):
         id=ObjectId(),
         name="default",
         is_default=True,
+        event_management_enabled=True,
         status=TenantStatus.ACTIVE,
         licenses=["free"],
         phone="",

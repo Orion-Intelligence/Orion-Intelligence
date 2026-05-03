@@ -91,7 +91,7 @@ export class GraphOrchestratorService {
       this.addNodesAndEdges(state, username, platformsToDisplay, iconUrlMap);
     }
     else {
-      await this.updateUserConnections(state);
+      this.updateUserConnections(state);
     }
   }
 
@@ -136,7 +136,7 @@ export class GraphOrchestratorService {
     state.activeUsernames.update(s => new Set(s).add(username));
     const addNodeSequentially = (index: number) => {
       if (index >= platformNodes.length) {
-        void this.updateUserConnections(state);
+        this.updateUserConnections(state);
         return;
       }
       const node = platformNodes[index], edge = { id: `${centralNodeId}->${node.id}`, from: centralNodeId, to: node.id };
@@ -178,7 +178,7 @@ export class GraphOrchestratorService {
     state.graphPlatformBatches.update(batches => {
       const newBatches = new Map(batches); newBatches.delete(username); return newBatches; 
     });
-    this.updateUserConnections(state).then();
+    this.updateUserConnections(state);
   }
 
   public addEntityToGraph(state: TabState, entityId: string) {
@@ -339,7 +339,7 @@ export class GraphOrchestratorService {
     }
   }
 
-  public async updateUserConnections(state: TabState) {
+  public updateUserConnections(state: TabState) {
     const activeUsers = Array.from(state.activeUsernames());
     const scanResults = state.scanResults();
     const currentNetworkData = state.networkData();

@@ -1,7 +1,7 @@
 import { Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, inject } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { ActivatedRoute, Params } from '@angular/router';
-import { Color, Edge, Network } from 'vis-network';
+import { Edge, Network } from 'vis-network';
 import { DataSet } from 'vis-data';
 import { ApiService } from '../../../shared/services/api.service';
 import { CtiSidebarComponent } from './cti-sidebar/cti-sidebar.component';
@@ -22,7 +22,7 @@ import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export
 import { ensureStylesheet } from '../../../shared/utils/ensure-stylesheet.util';
 import { ProxyController } from '../../../shared/services/proxy-controller';
 
-type GraphNodeColor = string | Color;
+type GraphNodeColor = NonNullable<ExtendedNode['color']>;
 @Component({
   selector: 'app-graphs',
   standalone: true,

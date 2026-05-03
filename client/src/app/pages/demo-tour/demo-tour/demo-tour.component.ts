@@ -11,7 +11,7 @@ import { TourStep } from '../../../shared/model/demo-tour/demo.tour.model';
 export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   private static readonly hostRuntimeSelector = 'app-demo-tour.demo-tour-runtime';
   private static readonly bodyRuntimeSelector = 'body.demo-tour-scroll-locked';
-  private readonly fallbackPositions: Array<NonNullable<TourStep['position']>> = ['bottom', 'top', 'right', 'left'];
+  private readonly fallbackPositions: NonNullable<TourStep['position']>[] = ['bottom', 'top', 'right', 'left'];
   private readonly minimumLoadingMs = 350;
   private readonly geometryTolerancePx = 1.5;
   private readonly geometryTrackingWindowMs = 100;
@@ -25,7 +25,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   private stepPreparationToken = 0;
   private activeInput: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null = null;
   private activeInputWasDisabled = false;
-  private disabledElements: Array<{ element: HTMLButtonElement | HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement; wasDisabled: boolean; }> = [];
+  private disabledElements: { element: HTMLButtonElement | HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement; wasDisabled: boolean; }[] = [];
   private nextTransitionInProgress = false;
   private scrollLockY = 0;
   private preparingStep = false;
@@ -42,7 +42,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   stepReady = false;
   loadingVisible = false;
   positionStyle: Record<string, string> = {};
-  cutoutRects: Array<{ top: number; left: number; width: number; height: number; rx: number; ry: number; }> = [];
+  cutoutRects: { top: number; left: number; width: number; height: number; rx: number; ry: number; }[] = [];
   currentIndex = 0;
   totalSteps = 0;
   spotlightRevealVariant = 0;
@@ -555,7 +555,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const primaryPosition: NonNullable<TourStep['position']> = effectivePreferredPosition ?? 'bottom';
-    const positions: Array<NonNullable<TourStep['position']>> = [
+    const positions: NonNullable<TourStep['position']>[] = [
       primaryPosition,
       ...this.fallbackPositions.filter(position => position !== primaryPosition)
     ];
@@ -817,7 +817,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private getAdditionalSpotlightStyles(step: TourStep, padding: { top: number; right: number; bottom: number; left: number; }): Array<Record<string, string>> {
+  private getAdditionalSpotlightStyles(step: TourStep, padding: { top: number; right: number; bottom: number; left: number; }): Record<string, string>[] {
     if (!step.additionalElementIds?.length) {
       return [];
     }
@@ -830,7 +830,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       left: Math.max(padding.left, minimumPadding)
     };
 
-    const styles: Array<Record<string, string>> = [];
+    const styles: Record<string, string>[] = [];
     for (const elementId of step.additionalElementIds) {
       const element = document.getElementById(elementId);
       if (!element) {
@@ -1019,7 +1019,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     this.syncRuntimeStyles();
   }
 
-  private animateCutoutRects(nextCutoutRects: Array<{ top: number; left: number; width: number; height: number; rx: number; ry: number; }>): void {
+  private animateCutoutRects(nextCutoutRects: { top: number; left: number; width: number; height: number; rx: number; ry: number; }[]): void {
     if (this.cutoutAnimationFrameId !== null) {
       cancelAnimationFrame(this.cutoutAnimationFrameId);
       this.cutoutAnimationFrameId = null;
@@ -1111,7 +1111,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
 
     for (const sheet of Array.from(document.styleSheets)) {
       try {
-        const styleSheet = sheet as CSSStyleSheet;
+        const styleSheet = sheet;
         void styleSheet.cssRules;
         this.runtimeStyleSheet = styleSheet;
         return styleSheet;
@@ -1162,7 +1162,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private triggerStepSubmit(element: HTMLElement, step: TourStep): void {
     const input = this.getStepInput(element, step);
-    const form = (input?.closest('form') ?? element.closest('form')) as HTMLFormElement | null;
+    const form = input?.closest('form') ?? element.closest('form');
     if (!form) {
       return;
     }

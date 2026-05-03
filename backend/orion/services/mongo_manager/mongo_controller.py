@@ -1,5 +1,6 @@
 import motor.motor_asyncio
 from odmantic import AIOEngine
+from pymongo.errors import OperationFailure
 
 from orion.api.interactive.tenant_manager.tenant_bootstrap import tenant_boostrap
 from orion.helper_manager.env_handler import env_handler
@@ -8,7 +9,15 @@ from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, LicenseName
 from orion.services.mongo_manager.shared_model.db_document_feedback_model import db_document_feedback_model
 from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
-from orion.services.mongo_manager import *
+from orion.services.mongo_manager.shared_model.db_feeder_script_model import db_feeder_script_model
+from orion.services.mongo_manager.shared_model.db_keys import db_keys
+from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
+from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
+from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
+from orion.services.mongo_manager.shared_views.tenant_admin_view import TenantAdminView
+from orion.services.mongo_manager.shared_views.tenant_key_admin_view import TenantKeyAdminView
+from orion.services.mongo_manager.shared_views.user_admin_view import UserAdminView
+from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role
 
 
 class mongo_controller:
@@ -59,6 +68,12 @@ class mongo_controller:
 
         await self.__engine.get_collection(db_system_model).create_index("key", unique=True)
         await self.__engine.get_collection(db_document_feedback_model).create_index("doc_id", unique=True)
+        feeder_collection = self.__engine.get_collection(db_feeder_script_model)
+        try:
+            await feeder_collection.drop_index("name_1")
+        except OperationFailure as exc:
+            _ = exc
+        await feeder_collection.create_index([("name", 1), ("url", 1)], unique=True, name="unique_feeder_name_url")
 
     def get_engine(self) -> AIOEngine:
         return self.__engine
@@ -93,6 +108,9 @@ class mongo_controller:
         default_tenant = await self.__engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
         if not default_tenant:
             await tenant_boostrap(self.__engine)
+        elif getattr(default_tenant, "event_management_enabled", False) != True:
+            default_tenant.event_management_enabled = True
+            await self.__engine.save(default_tenant)
         await self.ensure_demo_user()
 
     def get_admin(self):
@@ -104,6 +122,7 @@ class mongo_controller:
         admin.add_view(TenantKeyAdminView(db_keys, engine=self.__engine, icon="fa fa-link"))
         admin.add_view(ModelView(db_system_model, icon="fa fa-building"))
         admin.add_view(ModelView(db_url_data_model, icon="fa fa-link"))
+        admin.add_view(ModelView(db_feeder_script_model, icon="fa fa-file"))
         admin.add_view(ModelView(db_dump_record_model, icon="fa fa-link"))
         admin.add_view(ModelView(db_document_feedback_model, icon="fa fa-comments"))
         return admin

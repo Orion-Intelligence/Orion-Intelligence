@@ -256,7 +256,7 @@ Developers should prefer deterministic fixtures over ad hoc live data when addin
 
 ### Application Docs
 
-Application-facing documentation lives under `docs/app_docs/`. These files describe:
+Public application documentation lives under `docs/app_docs/`. LLM-only retrieval documentation lives under `docs/llm_docs/` and is excluded from the ReadTheDocs build. These public files describe:
 
 - the platform
 - major modules

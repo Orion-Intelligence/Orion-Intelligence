@@ -90,7 +90,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
     });
   }
 
-  async onSubmit(form: NgForm) {
+  onSubmit(form: NgForm) {
     this.errorMessage = null;
     if (!form.valid) {
       return;
