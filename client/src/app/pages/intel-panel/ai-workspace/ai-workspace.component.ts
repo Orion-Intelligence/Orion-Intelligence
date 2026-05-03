@@ -177,10 +177,14 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       return;
     }
 
-    textarea.style.height = 'auto';
-    const nextHeight = Math.max(32, textarea.scrollHeight);
-    textarea.style.height = `${nextHeight}px`;
-    this.composerExpanded = nextHeight > 32;
+    requestAnimationFrame(() => {
+      const currentTextarea = this.composerInput?.nativeElement;
+      if (!currentTextarea) {
+        return;
+      }
+      const nextHeight = Math.max(32, currentTextarea.scrollHeight);
+      this.composerExpanded = nextHeight > 32;
+    });
   }
 
   usePrompt(prompt: string): void {
@@ -213,31 +217,19 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.isStreamingReply.set(false);
     this.streamingMessageId.set(null);
     this.nexusChatService.clearNexusSession().subscribe({
-      next: () => this.clearSavedChatHistory(),
-      error: () => this.clearSavedChatHistory(),
+      next: () => this.clearChatView(),
+      error: () => this.clearChatView(),
     });
   }
 
-  private clearSavedChatHistory(): void {
-    this.api.post('update/current/user/chat-history', {
-      chat_history: [],
-    }).subscribe({
-      next: () => {
-        this.messages = [];
-        this.messageDraft = '';
-        this.queueComposerResize();
-        this.router.navigate(['/dashboard/profile/ai'], {
-          queryParams: { q: this.contextQuery() || null },
-          queryParamsHandling: 'merge',
-        }).then();
-      },
-      error: () => {
-        this.router.navigate(['/dashboard/profile/ai'], {
-          queryParams: { q: this.contextQuery() || null },
-          queryParamsHandling: 'merge',
-        }).then();
-      }
-    });
+  private clearChatView(): void {
+    this.messages = [];
+    this.messageDraft = '';
+    this.queueComposerResize();
+    this.router.navigate(['/dashboard/profile/ai'], {
+      queryParams: { q: this.contextQuery() || null },
+      queryParamsHandling: 'merge',
+    }).then();
   }
 
   trackMessage(_index: number, message: AiWorkspaceMessage): string {
