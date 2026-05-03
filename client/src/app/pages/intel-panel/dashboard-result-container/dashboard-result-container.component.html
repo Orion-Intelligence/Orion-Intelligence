@@ -72,7 +72,7 @@
 }
 
 @if (currentResultModel?.length>0) {
-  <div @fadeInDashboardItem class="mt-4 mx-[32px] w-[calc(100%-64px)] max-w-[910px] max-[1000px]:mx-[15px] max-[1000px]:w-[calc(100%-30px)]">
+  <div @fadeInDashboardItem class="mt-4 mx-[32px] w-[calc(100%-64px)] max-w-[910px] pb-[100px] max-[1000px]:mx-[15px] max-[1000px]:w-[calc(100%-30px)]">
     <app-pagination
       (pageChange)="onPageChange($event)"
       [align]="'left'"

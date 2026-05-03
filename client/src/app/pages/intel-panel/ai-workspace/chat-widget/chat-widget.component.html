@@ -1,5 +1,5 @@
-<div class="fixed bottom-6 right-6 z-40">
-  @if (!chatOpen) {
+<div class="fixed bottom-6 right-6 z-[1400]">
+  @if (showLauncher() && !chatOpen) {
     <button data-testid="chat-widget-open" class="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-blue-640)] shadow-lg transition hover:bg-[var(--color-blue-630)]" (click)="openChat()" type="button">
       <span><img src="assets/images/shared/theme/chat.svg" alt="chat" class="h-5 w-5 [filter:brightness(0)_invert(1)]" /></span>
     </button>
@@ -7,95 +7,122 @@
 </div>
 
 @if (chatOpen) {
-  <div class="fixed inset-0 z-50 flex items-end justify-end bg-black/40 p-4" @overlayFade (click)="closeChat()">
-    <div class="chat-support__window flex h-[640px] w-full max-w-[360px] flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-[0_24px_80px_rgba(0,0,0,0.35)]" @chatBotAnimation (click)="$event.stopPropagation()">
-      <div class="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
-        <div class="flex items-center gap-3">
-          <div class="relative inline-block h-9 w-9 shrink-0 overflow-hidden rounded-full border-2 border-white box-border">
-            <img alt="chat" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover" />
-            <span class="chat-support__status-indicator absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-[var(--color-blue-700)]"></span>
-          </div>
-          <div class="text-sm font-semibold text-[var(--color-text1)]">Orion Analyst</div>
-        </div>
-        <button class="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]" (click)="closeChat()">
-          <img src="assets/images/shared/cross.svg" alt="close" class="h-[14px] w-[14px] ui-action-icon" />
+  <div class="fixed inset-0 z-[1400] flex items-end justify-end bg-black/40 p-4 max-[640px]:items-stretch max-[640px]:justify-stretch max-[640px]:p-5" @overlayFade (click)="closeChat()">
+    <div class="chat-support__window ui-ai-chat-surface-pattern flex min-h-0 w-full flex-col overflow-hidden rounded-2xl bg-[var(--color-blue-700)] shadow-[0_24px_80px_rgba(0,0,0,0.35)] max-[640px]:h-full max-[640px]:max-w-none" [ngClass]="isFullScreen ? 'h-[calc(100vh-32px)] max-w-[714px]' : 'h-[640px] max-w-[420px]'" @chatBotAnimation (click)="$event.stopPropagation()">
+      <div class="flex shrink-0 items-center justify-between px-5 pt-5">
+        <button type="button" class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
+          New Chat
         </button>
+        <div class="flex items-center gap-2">
+          <button type="button" class="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]" (click)="isFullScreen = !isFullScreen" [attr.aria-label]="isFullScreen ? 'Original size' : 'Full screen'">
+            <img [src]="isFullScreen ? 'assets/images/shared/collapse.svg' : 'assets/images/shared/expand.svg'" alt="" class="h-[14px] w-[14px] ui-action-icon [filter:brightness(0)_invert(1)]" />
+          </button>
+          <button class="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]" (click)="closeChat()">
+            <img src="assets/images/shared/cross.svg" alt="close" class="h-[14px] w-[14px] ui-action-icon" />
+          </button>
+        </div>
       </div>
-      <div #messagesContainer data-testid="chat-widget-messages" class="flex-1 space-y-5 overflow-y-auto px-4 py-4" (scroll)="onMessagesScroll()">
+      <div #messagesContainer data-testid="chat-widget-messages" class="min-h-0 flex-1 space-y-5 overflow-y-auto scroll-smooth px-5 pt-5 pb-[220px] [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-4 max-[640px]:px-4 max-[640px]:[mask-image:none]" (scroll)="onMessagesScroll()">
         @for (msg of chatMessages; track trackByIndex($index)) {
-          <div>
-            @switch (msg.sender) {
-              @case ('user') {
-                <div class="flex w-full justify-end">
-                  <div class="max-w-[72%] space-y-1.5">
-                    <div class="flex min-h-[20px] items-center justify-end gap-2 px-1">
-                      <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ msg.time | date : 'h:mm a' }}</span>
-                      <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text1)]">Analyst</span>
-                    </div>
-                    <div class="ui-ai-chat-bubble ui-ai-chat-bubble-user rounded-[22px] rounded-tr-[10px] border border-[var(--color-border)] px-4 py-3.5 text-sm text-white shadow-[0_10px_28px_var(--color-shadow-medium)]">
-                      <p class="whitespace-pre-wrap leading-7">{{ msg.text }}</p>
-                    </div>
+          @switch (msg.sender) {
+            @case ('user') {
+              <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] justify-end">
+                <div class="max-w-[72%] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
+                  <div class="flex min-h-[20px] items-center justify-end gap-2 px-1">
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ msg.time | date : 'h:mm a' }}</span>
+                    <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text1)]">Analyst</span>
                   </div>
-                  <div class="mt-1 ml-3.5 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)]" [ngClass]="this.appService.userSessionData().user.theme === 'light-theme' ? 'border-[#57A5EB]' : 'border-white'">
-                    <img alt="profile icon" [src]="this.appService.userSessionData().user.image || '/api/s/static/user/default.png'" class="block h-full w-full rounded-full object-cover" />
+                  <div class="ui-ai-chat-bubble ui-ai-chat-bubble-user rounded-[22px] rounded-tr-[10px] border border-[var(--color-border)] px-4 py-2.5 text-sm text-[var(--color-text1)] shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
+                    <p class="whitespace-pre-wrap leading-7 text-[var(--color-text1)]">{{ msg.text }}</p>
                   </div>
                 </div>
-              }
-              @case ('bot') {
-                <div class="flex w-full items-start gap-3.5">
-                  <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)]">
-                    <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover" />
+                <div class="mt-1 ml-3.5 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
+                  <img alt="user avatar" [src]="this.appService.userSessionData().user.image || '/api/s/static/user/default.png'" class="block h-full w-full rounded-full object-cover">
+                </div>
+              </div>
+            }
+            @case ('bot') {
+              <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
+                <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
+                  <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
+                </div>
+                <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
+                  <div class="flex min-h-[20px] items-center gap-2 px-1">
+                    <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ msg.time | date : 'h:mm a' }}</span>
                   </div>
-                  <div class="max-w-[78%] space-y-1.5">
-                    <div class="flex min-h-[20px] items-center gap-2 px-1">
-                      <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
-                      <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ msg.time | date : 'h:mm a' }}</span>
-                    </div>
-                    <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3.5 shadow-[0_10px_28px_var(--color-shadow-medium)]">
-                      <p class="whitespace-pre-wrap text-[14px] leading-7 text-[var(--color-text1)]">{{ msg.text }}</p>
-                    </div>
+                  <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot relative rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3.5 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full" [class.pb-12]="!!msg.text.trim()">
+                    <p class="whitespace-pre-wrap text-[14px] leading-7 text-[var(--color-text1)]">{{ msg.text }}</p>
+                    @if (msg.text.trim()) {
+                      <app-bot-message-actions [message]="msg"></app-bot-message-actions>
+                    }
                   </div>
                 </div>
-              }
-              @case ('error') {
-                <div class="rounded-xl border border-[var(--color-border-red)] bg-[var(--color-red-200)] px-3 py-2 text-sm text-[var(--color-text1)]">
-                  <p>{{ msg.text }}</p>
+              </div>
+            }
+            @case ('error') {
+              <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
+                <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border-red)] bg-[var(--color-red-100)] box-border max-[640px]:hidden">
+                  <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
+                </div>
+                <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
+                  <div class="flex min-h-[20px] items-center gap-2 px-1">
+                    <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
+                  </div>
+                  <div class="ui-ai-chat-bubble-cancel rounded-[18px] rounded-tl-[8px] border border-red-300/25 bg-red-950/35 px-4 py-2.5 text-sm text-red-100 shadow-[0_10px_24px_var(--color-shadow-medium)] max-[640px]:w-full">
+                    <p class="flex items-center gap-2 whitespace-pre-wrap leading-6">
+                      <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-red-300/25 bg-red-950/60 text-[10px] font-semibold text-red-100">!</span>
+                      <span>{{ msg.text }}</span>
+                    </p>
+                  </div>
                   @if (msg.retryPayload) {
-                    <button class="mt-2 inline-flex items-center gap-2 rounded-md border border-[var(--color-border)] bg-white/10 px-3 py-1 text-xs" (click)="retryMessage(msg.retryPayload)" aria-label="Retry">
-                      <img src="assets/images/shared/chat-support-retry.svg" alt="Retry" class="h-4 w-4" />
+                    <button type="button" class="mt-1 inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text1)] transition hover:opacity-90" (click)="retryMessage(msg.retryPayload)" aria-label="Retry">
                       Retry
                     </button>
                   }
                 </div>
-              }
+              </div>
             }
-          </div>
+          }
         }
         @if (isBotTyping) {
-          <div class="flex items-center gap-3">
-            <div class="inline-block h-9 w-9 shrink-0 overflow-hidden rounded-full border border-[#EBF0F4] bg-[var(--color-blue-720)] box-border">
-              <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover" />
+          <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
+            <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
+              <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
             </div>
-            <div class="flex flex-col gap-2 px-1 py-1.5 text-sm text-[var(--color-text1)]">
-              <span class="text-xs text-[var(--color-text4)]">{{ botStep }}</span>
-              <div class="flex items-center gap-2">
-                <span class="h-2 w-2 animate-bounce rounded-full bg-[var(--color-text4)]"></span>
-                <span class="h-2 w-2 animate-bounce rounded-full bg-[var(--color-text4)] [animation-delay:120ms]"></span>
-                <span class="h-2 w-2 animate-bounce rounded-full bg-[var(--color-text4)] [animation-delay:240ms]"></span>
+            <div class="max-w-[240px] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
+              <div class="flex min-h-[20px] items-center gap-2 px-1">
+                <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
+                <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">Thinking</span>
+              </div>
+              <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
+                  <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:140ms]"></span>
+                  <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:280ms]"></span>
+                  <span class="ml-1 text-[12px] text-[var(--color-text4)]">{{ botStep }}</span>
+                </div>
               </div>
             </div>
           </div>
         }
         <div #bottomSentinel></div>
       </div>
-      <form class="border-t border-[var(--color-border)] p-3" (submit)="sendMessage($event)">
-        <div class="flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2">
-          <input data-testid="chat-widget-input" type="text" [(ngModel)]="newMessage" name="message" placeholder="Write a message" class="flex-1 bg-transparent text-sm text-[var(--color-text1)] outline-none" [disabled]="isBotTyping" required />
+      <div class="shrink-0 border-t border-[var(--color-border)] p-3">
+        <div class="mb-0 max-h-0 overflow-hidden opacity-0 pointer-events-none transition-all duration-200 max-[640px]:hidden"></div>
+        <form novalidate class="border border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-800)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded" (submit)="sendMessage($event)">
+          <div class="flex items-end gap-2">
+          <textarea #composerInput data-testid="chat-widget-input" rows="1" [(ngModel)]="newMessage" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" name="message" placeholder="Write a message" class="block min-h-8 max-h-[120px] flex-1 resize-none overflow-y-hidden whitespace-pre-wrap break-words bg-[var(--color-blue-800)] px-3 py-1.5 text-sm leading-5 text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded" [disabled]="isBotTyping" required></textarea>
           <button data-testid="chat-widget-send" #submitBtn type="submit" class="ui-chat-send-btn flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] hover:bg-[#4b98dc]" [disabled]="isBotTyping" (click)="pushButton(submitBtn)">
             <img src="assets/images/shared/chat_small.svg" alt="chat" class="h-4 w-4 [filter:brightness(0)_invert(1)]" />
           </button>
+          </div>
+        </form>
+        <div class="mt-2 flex flex-wrap items-center justify-between gap-2 px-1 text-[11px] text-[var(--color-text6)] max-[640px]:hidden">
+          <p>Enter sends.</p>
+          <p>Session resets when you switch away.</p>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 }

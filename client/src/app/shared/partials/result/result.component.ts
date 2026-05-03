@@ -28,13 +28,15 @@ import { HomeSearchService } from '../../../services/home_search/home.search.ser
 import { normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../utils/intel-report.util';
 import { ProxyController } from '../../services/proxy-controller';
 import { CrossSearchCardComponent } from '../onion-search-engine/cross-search-card.component';
+import { ChatWidgetComponent } from '../../../pages/intel-panel/ai-workspace/chat-widget/chat-widget.component';
+import { AiToolRoutingService } from '../../services/ai-tool-routing.service';
 
 @Component({
   selector: 'app-result',
   standalone: true,
   templateUrl: './result.component.html',
   animations: [fadeInDashboardItem, searchFilterAnimation],
-  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent, CrossSearchCardComponent],
+  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent, CrossSearchCardComponent, ChatWidgetComponent],
 })
 export class ResultComponent implements OnInit, OnChanges {
   private readonly proxied_resource = inject(ProxyController);
@@ -112,7 +114,7 @@ export class ResultComponent implements OnInit, OnChanges {
       && !!this.searchQuery.trim();
   }
 
-  constructor( protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService ) {
+  constructor( protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService, protected aiToolRoutingService: AiToolRoutingService ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
     effect(() => {
       const resultCount = this.resultCountInput();

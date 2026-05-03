@@ -1,6 +1,8 @@
 export interface NexusChatPayload {
   message: string;
   report?: string;
+  tool?: string;
+  type?: string;
 }
 
 export interface NexusSummaryPayload {

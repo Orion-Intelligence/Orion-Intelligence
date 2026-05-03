@@ -2,11 +2,11 @@ import httpx
 from fastapi.responses import StreamingResponse
 from starlette.responses import JSONResponse
 
-from api.server.nexus_manager.stream_manager import NexusStreamManager
 from orion.api.server.crawl_manager.class_model.report_chat_data_model import (
     NexusTextAnalysisRequest,
     ReportChatRequest,
 )
+from orion.api.server.nexus_manager.stream_manager import NexusStreamManager
 from orion.helper_manager.env_handler import env_handler
 
 
@@ -27,7 +27,7 @@ class nexus_manager:
 
     async def parse_chat(self, model: ReportChatRequest, user_id: str = "system"):
         try:
-            return StreamingResponse(self.stream_manager.stream_response(model.message, user_id), media_type="application/x-ndjson", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+            return StreamingResponse(self.stream_manager.stream_response(model.message, user_id, tool=model.tool or "default", type_name=model.type or "default"), media_type="application/x-ndjson", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
         except Exception:
             return JSONResponse(status_code=500, content={"detail": "Something happened while calling api/chat"})
 

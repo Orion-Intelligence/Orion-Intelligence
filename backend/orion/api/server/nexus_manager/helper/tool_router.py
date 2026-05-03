@@ -5,6 +5,9 @@ from fastapi import HTTPException, status
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import (
     search_consolidated_param_model,
 )
+from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import (
+    search_credential_param_model,
+)
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (
     DomainScanRequest,
@@ -39,7 +42,13 @@ class ToolRouter:
     async def request(self, api_name: str, payload: dict[str, Any], user_id: str = "system"):
         if api_name == "/api/search/strategic":
             model = search_consolidated_param_model.model_validate(payload or {})
-            return await search_model.getInstance().search_consolidated_ranked_result(model, [ELASTIC_INDEX.S_GENERIC_INDEX], [], [])
+            base_index = [ELASTIC_INDEX.S_GENERIC_INDEX]
+            result = await search_model.getInstance().search_consolidated_ranked_result(model, base_index, [], [])
+            for item in result.get("Result", []):
+                item.pop("m_images", None)
+                item.pop("m_url", None)
+
+            return result
 
         if api_name == "/api/search/breach":
             model = search_consolidated_param_model.model_validate(payload or {})
@@ -68,6 +77,16 @@ class ToolRouter:
             model = search_consolidated_param_model.model_validate(payload or {})
             model.content = model.category
             return await search_model.getInstance().search_consolidated_ranked_result(model, [ELASTIC_INDEX.S_DEFACEMENT_INDEX], [], [model.category], "defacement")
+
+        if api_name == "/api/search/stealer/ioc":
+            model = search_credential_param_model.model_validate(payload or {})
+            response = await search_model.getInstance().search_stealer_iocs(model)
+            print("::::::::::::::::::::::::::::::::::", flush=True)
+            print(payload, flush=True)
+            print(model, flush=True)
+            print(response, flush=True)
+            print("::::::::::::::::::::::::::::::::::", flush=True)
+            return response.Result
 
         if api_name in self.NETWORK_ROUTES:
             model_class, route_name = self.NETWORK_ROUTES[api_name]

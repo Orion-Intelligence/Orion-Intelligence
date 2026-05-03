@@ -7,11 +7,13 @@ import { overlayFadeAnimation } from '../../../../shared/animations/chat.overlay
 import { SubscriptionService } from '../../../../services/dashboard/subscription.service';
 import { AppService } from '../../../../services/core/app/app.service';
 import { NexusChatService } from '../nexus-chat.service';
+import { AiWorkspaceMessage } from '../../../../shared/model/chat/ai-workspace-message.model';
+import { BotMessageActionsComponent } from '../bot-message-actions/bot-message-actions.component';
 
 @Component({
   selector: 'app-chat-widget',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BotMessageActionsComponent],
   templateUrl: './chat-widget.component.html',
   animations: [chatBotAnimation, overlayFadeAnimation]
 })
@@ -22,12 +24,19 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('messagesContainer') messagesContainer!: ElementRef<HTMLElement>;
   @ViewChild('bottomSentinel') bottomSentinel!: ElementRef<HTMLElement>;
-  chatMessages: { id: string; sender: 'user' | 'bot' | 'error'; text: string; time: Date; retryPayload?: { message: string; report?: string; }; }[] = [];
+  @ViewChild('composerInput') private composerInput?: ElementRef<HTMLTextAreaElement>;
+  chatMessages: AiWorkspaceMessage[] = [];
   isBotTyping = false;
   botStep = '';
   newMessage = '';
   chatOpen = false;
+  isFullScreen = false;
+  composerExpanded = false;
   readonly reportText = input<string>();
+  readonly report = input<string>();
+  readonly showLauncher = input(true);
+  readonly tool = input('default');
+  readonly type = input('default');
 
   constructor(public appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService, private nexusChatService: NexusChatService) { }
 
@@ -63,10 +72,19 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.chatMessages.push({ id: crypto.randomUUID(), sender: 'user', text, time: new Date() });
     this.newMessage = '';
+    this.queueComposerResize();
     this.isBotTyping = true;
     this.botStep = '';
     this.scrollToNewMessage();
     this.aiSuggest(text);
+  }
+
+  onComposerKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Enter' || event.shiftKey) {
+      return;
+    }
+    event.preventDefault();
+    this.sendMessage(event);
   }
 
   aiSuggest(userMessage: string): void {
@@ -76,25 +94,27 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
       this.scrollToNewMessage();
       return;
     }
+    const report = (this.report() || this.reportText() || '').trim();
     const payload = {
-      message: userMessage,
-      report: this.reportText()
+      message: report ? `${report}\n\n${userMessage}` : userMessage,
+      tool: this.tool() || 'default',
+      type: this.type() || 'default'
     };
-    this.nexusChatService.pollNexusReportChat(payload).subscribe({
-      next: (response) => {
-        if (this.nexusChatService.isNexusPending(response)) {
-          this.botStep = this.nexusChatService.getNexusStep(response);
-          this.scrollToNewMessage();
+    let botMessage: AiWorkspaceMessage | undefined;
+    this.nexusChatService.streamNexusChat(payload).subscribe({
+      next: (chunk) => {
+        const reply = chunk.response ?? chunk.delta ?? '';
+        if (!reply) {
           return;
         }
-
-        const reply = this.nexusChatService.getNexusChatReply(response);
-        if (!reply || (typeof response.message === 'string' && response.message.includes('went wrong'))) {
-          this.showErrorMessage(userMessage);
+        if (!botMessage) {
+          botMessage = { id: crypto.randomUUID(), sender: 'bot', text: '', time: new Date() };
+          this.chatMessages.push(botMessage);
         }
-        else {
-          this.chatMessages.push({ id: crypto.randomUUID(), sender: 'bot', text: reply, time: new Date() });
-        }
+        botMessage.text = reply;
+        this.scrollToNewMessage();
+      },
+      complete: () => {
         this.isBotTyping = false;
         this.botStep = '';
         this.scrollToNewMessage();
@@ -114,15 +134,15 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
       sender: 'error',
       text: 'Something went wrong. try again.',
       time: new Date(),
-      retryPayload: { message: originalMessage, report: this.reportText() }
+      retryPayload: originalMessage
     });
   }
 
-  retryMessage( payload: { message: string; report?: string; } ): void {
+  retryMessage( payload: string ): void {
     this.isBotTyping = true;
     this.botStep = '';
     this.scrollToNewMessage();
-    this.aiSuggest(payload.message);
+    this.aiSuggest(payload);
   }
 
   openChat() {
@@ -133,11 +153,13 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     this.chatOpen = true;
     this.cdr.detectChanges();
     this.setupObserversIfPossible();
+    this.queueComposerResize();
     this.scrollToBottom(true);
   }
 
   closeChat() {
     this.chatOpen = false;
+    this.composerExpanded = false;
     this.io?.disconnect();
     this.mo?.disconnect();
     this.io = undefined;
@@ -157,6 +179,22 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onMessagesScroll(): void {
     this.userNearBottom = this.isAtBottom(80);
+  }
+
+  resizeComposer(): void {
+    const textarea = this.composerInput?.nativeElement;
+    if (!textarea) {
+      return;
+    }
+    textarea.style.height = '32px';
+    const nextHeight = Math.min(120, Math.max(32, textarea.scrollHeight));
+    textarea.style.height = `${nextHeight}px`;
+    this.composerExpanded = nextHeight > 32;
+    this.cdr.detectChanges();
+  }
+
+  queueComposerResize(): void {
+    requestAnimationFrame(() => this.resizeComposer());
   }
 
   private isAtBottom(threshold = 4): boolean {

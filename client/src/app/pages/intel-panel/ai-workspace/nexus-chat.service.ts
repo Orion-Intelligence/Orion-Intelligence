@@ -163,15 +163,23 @@ export class NexusChatService {
         detail = 'Nexus is still finishing the previous chat. Try again in a moment.';
       }
       if (delta !== undefined) {
-        observer.next({ delta: String(delta) });
+        observer.next({ delta: this.streamValueToText(delta) });
       }
       if (response !== undefined) {
-        observer.next({ response: String(response) });
+        observer.next({ response: this.streamValueToText(response) });
       }
       else if (detail !== undefined) {
-        observer.next({ response: String(detail) });
+        observer.next({ response: this.streamValueToText(detail) });
       }
     }
     return rest;
+  }
+
+  private streamValueToText(value: unknown): string {
+    const record = this.asRecord(value);
+    if (record) {
+      return this.streamValueToText(record['response'] ?? record['result'] ?? record['text'] ?? JSON.stringify(record));
+    }
+    return String(value);
   }
 }
