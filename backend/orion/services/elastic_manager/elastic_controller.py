@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from string import capwords
 
 from elasticsearch import AsyncElasticsearch
@@ -62,6 +62,7 @@ class elastic_controller:
             mapping_generic_model = ELASTIC_ENUMS.mapping_generic_model
             mapping_defacement_model = ELASTIC_ENUMS.mapping_defacement_model
             mapping_exploit_model = ELASTIC_ENUMS.mapping_exploit_model
+            mapping_siem_model = ELASTIC_ENUMS.mapping_siem_model
             mapping_chat_model = ELASTIC_ENUMS.mapping_chat_model
             mapping_stealer_model = ELASTIC_ENUMS.mapping_stealer_log_model
             mapping_social_model = ELASTIC_ENUMS.mapping_social_model
@@ -110,6 +111,16 @@ class elastic_controller:
                     index=ELASTIC_INDEX.S_EXPLOIT_INDEX, body=mapping_exploit_model, request_timeout=220)
                 await self.__m_core_connection.indices.put_settings(
                     index=ELASTIC_INDEX.S_EXPLOIT_INDEX,
+                    body={"index.blocks.read_only_allow_delete": False},
+                    request_timeout=220)
+
+            if not await self.__m_core_connection.indices.exists(
+                    index=ELASTIC_INDEX.S_SIEM_INDEX,
+                    request_timeout=220):
+                await self.__m_core_connection.indices.create(
+                    index=ELASTIC_INDEX.S_SIEM_INDEX, body=mapping_siem_model, request_timeout=220)
+                await self.__m_core_connection.indices.put_settings(
+                    index=ELASTIC_INDEX.S_SIEM_INDEX,
                     body={"index.blocks.read_only_allow_delete": False},
                     request_timeout=220)
 
@@ -163,8 +174,7 @@ class elastic_controller:
             #     request_timeout=220
             # )
 
-            days_15_seconds = int(timedelta(days=15).total_seconds())
-            m_request_defacement = {"query": {"range": {"m_leak_date": {"lt": f"now-{days_15_seconds}s"}}}}
+            m_request_defacement = {"query": {"range": {"m_leak_date": {"lt": "now-6M"}}}}
             await self.__m_core_connection.delete_by_query(
                 index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body=m_request_defacement, ignore=[404], request_timeout=220)
 

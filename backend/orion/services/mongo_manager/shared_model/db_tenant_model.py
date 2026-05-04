@@ -30,6 +30,7 @@ class db_tenant_model(Model):
     licenses: List[str] = []
     email: Optional[str] = ""
     profile_visibility_enabled: bool = True
+    event_management_enabled: bool = False
 
     @model_validator(mode="before")
     @classmethod
@@ -50,3 +51,4 @@ class TenantRequest(BaseModel):
     status: Optional[TenantStatus] = None
     licenses: List[str] = []
     profile_visibility_enabled: Optional[bool] = None
+    event_management_enabled: Optional[bool] = None

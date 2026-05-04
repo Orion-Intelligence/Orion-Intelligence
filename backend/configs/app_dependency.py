@@ -105,8 +105,6 @@ def license_required(feature: str, bypass_roles: Optional[list[user_role]] = Non
         return True
 
     return checker
-
-
 def get_user_permissions(user):
     final = {"modules": set(), "cti_graph": False, "mapping": False, "scanning": False, "maintainer": False}
 

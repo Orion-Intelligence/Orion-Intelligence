@@ -31,6 +31,7 @@ import { DefacementCallbackModel } from '../../../shared/model/results/defacemen
 import { applyQueryAndPageFromParams, isRouteChanged } from '../dashboard-manager.utils';
 import { NetworkIntel } from '../../network-intel/network-intel';
 import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
+
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
@@ -186,7 +187,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.isStealerLogLoading.set(true);
       this.dashboardService.consolidatedParamModel.url = this.dashboardService.consolidatedParamModel.q;
       this.dashboardService.consolidatedParamModel.category = "credential";
-      this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealerlogs', this.dashboardService.consolidatedParamModel)
+      this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealer/ioc', this.dashboardService.consolidatedParamModel)
         .pipe(switchMap(response => timer(300).pipe(map(() => response))))
         .subscribe(response => {
           if (response.success && response.data) {

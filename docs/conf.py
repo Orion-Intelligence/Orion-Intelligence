@@ -10,6 +10,10 @@ extensions = [
 source_suffix = [".rst", ".md"]
 master_doc = "index"
 html_theme = "shibuya"
+exclude_patterns = [
+    "api_docs/**",
+    "llm_docs/**",
+]
 
 myst_enable_extensions = [
     "colon_fence",

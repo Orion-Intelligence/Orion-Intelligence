@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { NgClass, NgOptimizedImage } from '@angular/common';
+import { NgClass, NgOptimizedImage, UpperCasePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Observable, EMPTY, of, timer } from 'rxjs';
 import { catchError, expand, finalize, switchMap, takeWhile } from 'rxjs/operators';
@@ -13,7 +13,7 @@ import { GraphReportPayload } from '../../../shared/model/report/report-export.m
 import { ValuePresentationBase } from '../../../shared/utils/value-presentation.base';
 @Component({
   selector: 'app-dashboard-api',
-  imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass],
+  imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass, UpperCasePipe],
   animations: [fadeInDashboardItem],
   templateUrl: './dashboard-api.component.html'
 })
@@ -37,6 +37,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   prevDisplayQ2 = '';
   prevBreachData: any = null;
   expandedResultIndex: number | null = null;
+  cryptoSummaryExpanded = false;
   trackByIndex = (index: number) => index;
 
   constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: ReportExportService) {
@@ -136,13 +137,12 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     return Array.from(map.entries()).map(([value, count]) => ({ value, count }));
   }
 
-  stringifyJson(value: any): string {
-    try {
-      return JSON.stringify(value, null, 2);
-    }
-    catch {
-      return String(value);
-    }
+  getGenericTotalFieldCount(): number {
+    return this.genericItems.reduce((total, item) => total + this.getVisibleObjectEntries(item).length, 0);
+  }
+
+  getVisibleObjectEntries(item: any): { key: string; value: any }[] {
+    return this.getFlattenedObjectEntries(item).filter(entry => !this.isEmptyDisplayValue(entry.value));
   }
 
   ngOnInit(): void {
@@ -251,6 +251,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     this.progress = 0;
     this.currentStep = '';
     this.query_triggered = true;
+    this.cryptoSummaryExpanded = false;
   }
 
   onSearchSubmit($event: SubmitEvent | null) {
@@ -264,6 +265,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     this.currentStep = '';
     this.query_triggered = true;
     this.expandedResultIndex = null;
+    this.cryptoSummaryExpanded = false;
     let payload: any;
     if (this.apiType === 'user') {
       payload = { text: { username: this.q1, email: this.q2 } };
@@ -419,6 +421,10 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     this.expandedResultIndex = this.expandedResultIndex === index ? null : index;
   }
 
+  toggleCryptoSummary(): void {
+    this.cryptoSummaryExpanded = !this.cryptoSummaryExpanded;
+  }
+
   exportPdfReport(): void {
     if (!this.hasResults) {
       return;
@@ -475,7 +481,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     const items = this.genericItems || [];
     const tables = items.slice(0, 40).map((item, idx) => {
       const values: Record<string, string> = {};
-      this.getObjectEntries(item).slice(0, 25).forEach(entry => {
+      this.getVisibleObjectEntries(item).slice(0, 25).forEach(entry => {
         values[this.displayFieldLabel(entry.key)] = toCompact(entry.value);
       });
       return { title: `Result ${idx + 1}`, values };

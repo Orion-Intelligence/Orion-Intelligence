@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Any, Optional
 
 from starlette.requests import Request

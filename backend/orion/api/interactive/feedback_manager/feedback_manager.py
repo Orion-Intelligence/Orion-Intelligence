@@ -165,10 +165,11 @@ class FeedbackManager:
                 data = await loader()
             except HTTPException as exc:
                 if exc.status_code == 404:
-                    continue
-                continue
+                    data = None
+                else:
+                    data = None
             except Exception:
-                continue
+                data = None
 
             if not isinstance(data, dict):
                 continue

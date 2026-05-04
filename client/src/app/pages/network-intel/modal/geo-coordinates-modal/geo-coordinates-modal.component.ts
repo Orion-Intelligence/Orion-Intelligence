@@ -14,7 +14,7 @@ import { AppService } from '../../../../services/core/app/app.service';
 export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   @ViewChild('mapContainer') private mapContainer?: ElementRef<HTMLDivElement>;
   @ViewChild('mapViewport') private mapViewport?: ElementRef<HTMLDivElement>;
-  private projection: d3.GeoProjection | null = null;
+  private projection: ReturnType<typeof d3.geoNaturalEarth1> | null = null;
   private dragStartX = 0;
   private dragStartY = 0;
   private dragStartScrollLeft = 0;

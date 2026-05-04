@@ -15,10 +15,11 @@ import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { sidebarModeAnimation } from '../../../shared/animations/sidebar.mode.animation';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
+import { ChatWidgetComponent } from '../../intel-panel/ai-workspace/chat-widget/chat-widget.component';
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
-  imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective],
+  imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective, ChatWidgetComponent],
   templateUrl: './dashboard-sidebar.component.html',
   animations: [sidebarModeAnimation],
 })
@@ -140,7 +141,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
           firstSubcategory = this.stealerlogsCategories[0];
           break;
         case Category.PROFILE:
-          firstSubcategory = this.profileCategories[0];
+          firstSubcategory = this.getProfileCategories()[0];
           break;
       }
       if (firstSubcategory) {
@@ -221,17 +222,26 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   getProfileCategories(): string[] {
     const categories = Object.values(ProfileSubCategory);
+    const eventManagementEnabled = this.appService.userSessionData().tenant.eventManagementEnabled === true;
+    const canAccessFeeder = this.licenseService.canUseModule('feeder');
+
     if (this.isAdmin()) {
       return categories.filter(c => c !== ProfileSubCategory.IOC &&
               c !== ProfileSubCategory.STATISTICS &&
-              c !== ProfileSubCategory.TENANT_SETTINGS);
+              c !== ProfileSubCategory.TENANT_SETTINGS &&
+              (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
+              (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
     }
     if (this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
       return categories.filter(c => c !== ProfileSubCategory.TENANT &&
-              c !== ProfileSubCategory.SYSTEM_SETTINGS);
+              c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+              (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
+              (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
     }
     return categories.filter(c => c !== ProfileSubCategory.TENANT &&
           c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+          c !== ProfileSubCategory.EVENT_MANAGEMENT &&
+          (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
           c !== ProfileSubCategory.USERS &&
           c !== ProfileSubCategory.AUDITLOG &&
           c !== ProfileSubCategory.IOC &&

@@ -1,3 +1,5 @@
+<app-chat-widget #sidebarChatWidget [showLauncher]="false" tool="orion_docs_search" type="support"></app-chat-widget>
+
 @if (this.sidebar_default) {
   <nav @sidebarMode [@.disabled]="animationsDisabled" class="w-full">
     <div class="mt-[10px] flex w-full items-center justify-between px-[20px] py-[10px] text-[24px] font-medium">
@@ -203,6 +205,13 @@
             </div>
           </div>
         </a>
+        @if (appService.getConfig().appSettings.ai_endpoint_enabled) {
+          <div class="my-[6px] rounded-[8px] select-none">
+            <button (click)="sidebarChatWidget.openChat()" class="flex h-[46px] w-full items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" type="button">
+              <img alt="Help and Support" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" src="assets/images/shared/theme/chat.svg">Help &amp; Support
+            </button>
+          </div>
+        }
       }
     </div>
   </nav>
@@ -403,6 +412,13 @@
           </a>
         }
       </li>
+      @if (appService.getConfig().appSettings.ai_endpoint_enabled) {
+        <li class="my-[6px] rounded-[8px] select-none">
+          <button (click)="sidebarChatWidget.openChat()" appTooltip="Help & Support" aria-label="Open Help and Support" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none" type="button">
+            <img alt="Help and Support" class="h-[20px] w-[20px] opacity-100" src="assets/images/shared/theme/chat.svg">
+          </button>
+        </li>
+      }
     </div>
   </nav>
 }

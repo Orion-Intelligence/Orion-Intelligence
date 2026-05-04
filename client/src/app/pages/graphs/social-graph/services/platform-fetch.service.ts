@@ -75,7 +75,7 @@ export class PlatformFetchService {
           if (stateKey === 'followers' || stateKey === 'following' || stateKey === 'posts') {
             const tabState = activeTabState();
             if (tabState) {
-              void graphOrchestrator.updateUserConnections(tabState);
+              graphOrchestrator.updateUserConnections(tabState);
             }
           }
         },

@@ -74,12 +74,7 @@ export class DemoTourService {
       preferences: currentUser.preferences,
       demo_tour: currentUser.demo_tour
     };
-    this.apiService.post(route, userMeta).subscribe({
-      next: () => {
-      },
-      error: (_err) => {
-      },
-    });
+    this.apiService.post(route, userMeta).subscribe();
   }
 
   getCurrentStep(): TourStep | null {

@@ -28,6 +28,7 @@ class UserStatus(str, Enum):
 
 class LicenseName(str, Enum):
     FREE = "free"
+    FEEDER = "feeder"
     OSINT_BASIC = "osint_basic"
     OSINT_ADVANCED = "osint_advanced"
     SOCIAL_MAPPER = 'social_mapper'
@@ -57,6 +58,7 @@ class db_user_account(Model):
     account_verify_at: Optional[datetime] = Field(default=None)
     subscription: bool = Field(default=False)
     preferences: Optional[Dict[str, Any]] = {}
+    chat_history: Optional[List[Dict[str, Any]]] = []
     current_session_id: Optional[str] = Field(default=None)
     licenses: List[LicenseName] = Field(default=[LicenseName.FREE])
     demo_tour: bool = Field(default=False)

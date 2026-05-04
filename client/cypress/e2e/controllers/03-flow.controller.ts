@@ -30,6 +30,12 @@ export const DIRECTORY_CONTENT_OPTION = {label: 'Forums', value: 'forums'};
 
 export function openSidebarGroup(title: string) {
   const groupTestId = getSidebarGroupTestId(title);
+  if (title === 'Entity API') {
+    cy.get('[data-testid="sidebar-group-stealerlogs"]')
+      .scrollIntoView()
+      .should('be.visible')
+      .click({ force: true });
+  }
   cy.get(`[data-testid="${groupTestId}"]`).then(($group) => {
     cy.wrap($group).scrollIntoView();
     let group = $group.parent('div');
@@ -179,6 +185,7 @@ export function applyDateRange(monthsBack: number) {
 
   cy.get('[data-testid="side-filter-date-day-1"]').filter(':visible').first().scrollIntoView().click();
   cy.get('[data-testid="side-filter-date-day-25"]').filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-date-day-5"]').filter(':visible').first().scrollIntoView().click();
   cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
   waitForDirectoryRequest();
   cy.location('search').should('include', 'daterange=');

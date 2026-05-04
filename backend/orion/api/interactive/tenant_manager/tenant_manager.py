@@ -134,7 +134,8 @@ class TenantManager:
 
         tenant_request = TenantRequest(
             id=str(current_user.tenant_uuid), name=enc.decrypt(tenant.name.encode()).decode(), iocs=ioc_models,
-            profile_visibility_enabled=getattr(tenant, "profile_visibility_enabled", True))
+            profile_visibility_enabled=getattr(tenant, "profile_visibility_enabled", True),
+            event_management_enabled=getattr(tenant, "event_management_enabled", False))
 
         return tenant_request
 
@@ -178,10 +179,15 @@ class TenantManager:
             tenant.status = data.status
 
         if data.licenses is not None and len(data.licenses) > 0:
+            if LicenseName.FEEDER.value in data.licenses:
+                raise HTTPException(status_code=400, detail="Feeder license cannot be assigned to tenant")
             tenant.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
 
         if data.profile_visibility_enabled is not None:
             tenant.profile_visibility_enabled = data.profile_visibility_enabled
+
+        if data.event_management_enabled is not None:
+            tenant.event_management_enabled = data.event_management_enabled
 
         if data.iocs is not None:
             tenant.iocs = [IocCategory(

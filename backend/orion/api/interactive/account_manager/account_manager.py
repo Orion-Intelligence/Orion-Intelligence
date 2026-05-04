@@ -242,6 +242,28 @@ class AccountManager:
         except Exception:
             return ""
 
+    async def get_current_user_chat_history(self, current_user):
+        user = await self._engine.find_one(db_user_account, db_user_account.username == current_user.username)
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        return {"chat_history": getattr(user, "chat_history", []) or []}
+
+    async def update_current_user_chat_history(self, chat_history, current_user):
+        user = await self._engine.find_one(db_user_account, db_user_account.username == current_user.username)
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        user.chat_history = [message.model_dump() for message in chat_history.chat_history]
+        await self._engine.save(user)
+        return {"message": "Chat history updated successfully"}
+
+    async def clear_current_user_chat_history(self, current_user):
+        user = await self._engine.find_one(db_user_account, db_user_account.username == current_user.username)
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        user.chat_history = []
+        await self._engine.save(user)
+        return {"cleared": True}
+
     async def get_node(self, current_user) -> NodeCallbackModel:
         user = current_user
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
@@ -288,7 +310,8 @@ class AccountManager:
                 enc, tenant.postal_code), "taxId": self.safe_decrypt(enc, tenant.id), "userId": "", "licenses": [
                 self.safe_decrypt(enc, l) for l in (tenant.licenses or [])], "assignedQuota": str(
                 assigned_quota), "quotaExceeded": quota_exceeded, "image": tenant_image_path,
-                "profileVisibilityEnabled": getattr(tenant, "profile_visibility_enabled", True), }, "alerts": [], "alert_summary": alert_summary, })
+                "profileVisibilityEnabled": getattr(tenant, "profile_visibility_enabled", True),
+                "eventManagementEnabled": getattr(tenant, "event_management_enabled", False), }, "alerts": [], "alert_summary": alert_summary, })
 
         return node
 

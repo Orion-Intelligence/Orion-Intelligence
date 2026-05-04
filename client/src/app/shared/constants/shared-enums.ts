@@ -39,6 +39,12 @@ export enum GraphClusterType {
     Chat = 'chat',
     Exploit = 'exploit'
 }
+export enum AiWorkspacePrompt {
+    SUMMARY_BRIEF = 'Summarize current findings into a short analyst brief.',
+    PRIORITY_INDICATORS = 'List the highest priority indicators to review next.',
+    COLLECTION_PLAN = 'Turn this query into a focused collection plan.',
+    TRIAGE_NOTE = 'Draft a triage note for suspicious activity.'
+}
 export const sidebarItemTooltips: Record<string, string> = {
   'All': 'Comprehensive Overview',
   'General': 'Broad Data Pool',
@@ -82,8 +88,10 @@ export const sidebarItemTooltips: Record<string, string> = {
   'SEO-Scan': 'SEO Scan',
   'APK-Scan': 'APK Scan',
   'File-Scanner': 'File Scanner',
+  'Text-Analysis': 'Text Analysis',
   'Crypto-Scanner': 'Crypto Scanner',
   'IOCS': 'IOCs',
+  'Feeder': 'Feeder Scripts',
 };
 export const ALLOWED_CONSOLIDATED_RANKED_SINGLETON: Set<string> = new Set<string>([
   "tools",

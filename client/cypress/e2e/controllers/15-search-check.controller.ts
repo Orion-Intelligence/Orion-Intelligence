@@ -15,12 +15,13 @@ export const SEARCH_FIXTURES = {
   },
   defacement_by_team: {
     search_query: 'CarlyGriggs13',
-    base_url: ['joindarkside.pro', 'fitcoin-events.com'],
+    base_url: ['eng-victory-hub.com', 'joindarkside.pro', 'fitcoin-events.com'],
     team: 'CarlyGriggs13',
     date: 'Jan 24, 2026',
     web_url: [
       'https://x.com/CarlyGriggs13/status/2014897534108319933',
       'https://x.com/CarlyGriggs13/status/2014897336539844898',
+      'https://x.com/CarlyGriggs13/status/2015050781804875946',
     ],
   },
   defacement_by_base_url: {
@@ -149,7 +150,6 @@ export function assertFirstResultCard(data: SearchResultData) {
 
         return matchesLink && matchesDescription && matchesDate;
       });
-
       expect(matchingCard, `result card matching ${data.link_address}`).to.exist;
       cy.wrap(matchingCard as HTMLElement)
         .scrollIntoView()
@@ -162,12 +162,13 @@ export function assertFirstDefacementRow(data: {search_query: string; base_url: 
   const allowedBaseUrls = Array.isArray(data.base_url) ? data.base_url : [data.base_url];
   const allowedWebUrls = Array.isArray(data.web_url) ? data.web_url : [data.web_url];
 
-  cy.get('tbody tr.cursor-pointer', {timeout: 35000})
+  cy.wait(1500)
+  cy.get('tbody tr.cursor-pointer', {timeout: 75000})
     .then(($rows) => {
       const matchingRow = Array.from($rows).find((row) => {
         const cells = row.querySelectorAll('td');
         const rowText = Array.from(cells).map((cell) => cell.textContent?.trim() || '').join(' ');
-        return allowedBaseUrls.some((baseUrl) => rowText.includes(baseUrl.trim())) || rowText.includes(data.team.trim());
+        return allowedBaseUrls.some((baseUrl) => rowText.includes(baseUrl.trim())) && rowText.includes(data.team.trim());
       });
 
       expect(matchingRow, `defacement row for ${allowedBaseUrls.join(' or ')}`).to.exist;

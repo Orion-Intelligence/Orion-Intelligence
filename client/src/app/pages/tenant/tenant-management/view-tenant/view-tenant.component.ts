@@ -19,7 +19,7 @@ export class ViewTenantComponent implements OnInit {
   protected readonly JSON = JSON;
 
   tenants: any[] = [];
-  licenseList = Object.values(LicenseName);
+  licenseList = Object.values(LicenseName).filter((license) => license !== LicenseName.FEEDER);
   isLoading = true;
   selectedTenantId: string | null = null;
   TenantStatus = TenantStatusValues;
@@ -40,8 +40,8 @@ export class ViewTenantComponent implements OnInit {
                         tenant.status === TenantStatusValues.DISABLE
             ? tenant.status
             : TenantStatusValues.ACTIVE,
-          licenses: tenant.licenses && tenant.licenses.length
-            ? tenant.licenses
+          licenses: tenant.licenses?.length
+            ? tenant.licenses.filter((license: LicenseName) => license !== LicenseName.FEEDER)
             : [LicenseName.FREE],
         }));
         this.isLoading = false;

@@ -179,6 +179,15 @@ export const audit_filters: FilterModel = {
     daterange: DATERANGE_DEFAULT
   }
 };
+export const event_management_filters: FilterModel = {
+  filters: {
+    daterange: {
+      ...DATERANGE_DEFAULT,
+      title: "Event Date",
+      tooltip: "Event Date"
+    }
+  }
+};
 export const stealer_filters: FilterModel = {
   filters: {
     daterange: DATERANGE_DEFAULT

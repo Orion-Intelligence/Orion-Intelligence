@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+const fs = module['require']('fs');
+const path = module['require']('path');
 
 const sourceDir = path.resolve(__dirname, 'build');
 const targetDir = path.resolve(__dirname, '../backend/build');

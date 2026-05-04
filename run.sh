@@ -15,20 +15,6 @@ stop_docker() {
     docker rm trusted-web-nginx 2>/dev/null || true
 }
 
-create_parser_zip() {
-    PARSER_DIR="backend/static/.well-known/parser_files"
-    OUTPUT_DIR="backend/static/.well-known"
-    ZIP_FILE="$OUTPUT_DIR/parser_files.zip"
-    if ! command -v zip &> /dev/null; then
-        echo "Error: 'zip' command not found. Please install 'zip' and try again."
-        exit 1
-    fi
-    [ -f "$ZIP_FILE" ] && rm -f "$ZIP_FILE"
-    if [ -d "$PARSER_DIR" ]; then
-        (cd "$PARSER_DIR" && zip -r "../parser_files.zip" .) || exit 1
-    fi
-}
-
 ensure_local_ssl_cert() {
     mkdir -p "$LOCAL_SSL_DIR"
     if [ -f "$LOCAL_SSL_CERT" ] && [ -f "$LOCAL_SSL_KEY" ]; then
@@ -192,11 +178,20 @@ set_testing_enabled() {
         echo 'TESTING_ENABLED="0"' >> "$ENV_FILE"
     fi
 }
-
 set_swarm_url_to_local_ip() {
     local local_ip
-    local_ip="$(hostname -I | awk '{print $1}')"
-    sed -i '/^SWARM_URL=/d' "$ENV_FILE" 2>/dev/null || true
+
+    if [[ "$(uname)" == "Darwin" ]]; then
+        local_ip="$(ipconfig getifaddr en0 || ipconfig getifaddr en1)"
+    else
+        local_ip="$(hostname -I | awk '{print $1}')"
+    fi
+    
+    if [[ -z "$local_ip" ]]; then
+        local_ip="$(ifconfig | awk '/inet / && $2 != "127.0.0.1" {print $2; exit}')"
+    fi
+
+    sed -i.bak '/^SWARM_URL=/d' "$ENV_FILE" 2>/dev/null || true
     echo "SWARM_URL=http://$local_ip:5132" >> "$ENV_FILE"
 }
 
@@ -225,8 +220,6 @@ if [ "$1" = "-docs" ]; then
 fi
 
 stop_docker
-
-create_parser_zip
 
 COMMAND=$1
 FLAG=$2

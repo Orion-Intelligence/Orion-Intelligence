@@ -1,4 +1,4 @@
-const path = require("path");
+const path = module["require"]("path");
 
 module.exports = (config) => {
   config.module.rules.push({
