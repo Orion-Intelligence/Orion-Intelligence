@@ -179,7 +179,6 @@ class search_model:
 
     @staticmethod
     async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, blocked_categories, allowed_categories,search_type=""):
-        return None;
         filter_dict = param.entity_filter if param.entity_filter else {}
         indices, query, indices_boost = elastic_request_generator().on_search_consolidated_ranked_data(
             param, filter_dict, base_index, blocked_categories, allowed_categories,search_type)
