@@ -73,16 +73,19 @@ wait_for_local_frontend_server() {
 
 wait_for_dev_gateway() {
     echo "Waiting for dev gateway on http://127.0.0.1:8080"
+    local token_status
     for _ in $(seq 1 90); do
+        token_status="$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:8080/api/token || true)"
         if curl -fsS http://127.0.0.1:8080/ >/dev/null 2>&1 \
-            && curl -fsS http://127.0.0.1:8080/api/public >/dev/null 2>&1; then
+            && curl -fsS http://127.0.0.1:8080/api/public >/dev/null 2>&1 \
+            && { [ "$token_status" = "422" ] || [ "$token_status" = "401" ]; }; then
             return 0
         fi
         sleep 2
     done
 
     echo "Dev gateway did not become ready. Recent nginx and backend logs:"
-    docker compose -p "$PROJECT_NAME" -f docker-compose.yml -f docker-compose.dev.yml logs --tail=80 nginx web 2>/dev/null || true
+    docker compose -p "$PROJECT_NAME" -f docker-compose.yml --profile dev logs --tail=80 nginx-dev web-dev 2>/dev/null || true
     exit 1
 }
 
@@ -290,9 +293,8 @@ if [ "$1" = "dev" ]; then
     set_testing_enabled "default"
     set_swarm_url_to_local_ip
     ensure_local_ssl_cert
-    cp nginx/nginx-dev.conf nginx/nginx.conf
     docker network create --driver bridge shared_bridge 2>/dev/null || true
-    docker compose -p "$PROJECT_NAME" -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+    docker compose -p "$PROJECT_NAME" -f docker-compose.yml --profile dev up -d --build web-dev nginx-dev
     wait_for_dev_gateway
     echo "Orion Intelligence dev services started"
     echo "Open http://127.0.0.1:4200 or http://127.0.0.1:8080"
@@ -357,7 +359,11 @@ if [ "$COMMAND" = "build" ]; then
             ;;
     esac
 
-    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build
+    if [ "$COMPOSE_FILE" = "docker-compose.yml" ]; then
+        docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build web
+    else
+        docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build
+    fi
 
 elif [ "$COMMAND" = "production" ]; then
     use_compose_file "production"
@@ -366,7 +372,11 @@ else
 fi
 
 docker network create --driver bridge shared_bridge 2>/dev/null || true
-docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
+if [ "$COMPOSE_FILE" = "docker-compose.yml" ]; then
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d web nginx
+else
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
+fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     wait_for_server
