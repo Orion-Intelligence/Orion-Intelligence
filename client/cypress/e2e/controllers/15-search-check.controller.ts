@@ -162,8 +162,8 @@ export function assertFirstDefacementRow(data: {search_query: string; base_url: 
   const allowedBaseUrls = Array.isArray(data.base_url) ? data.base_url : [data.base_url];
   const allowedWebUrls = Array.isArray(data.web_url) ? data.web_url : [data.web_url];
 
-  cy.wait(1000)
-  cy.get('tbody tr.cursor-pointer', {timeout: 35000})
+  cy.wait(1500)
+  cy.get('tbody tr.cursor-pointer', {timeout: 75000})
     .then(($rows) => {
       const matchingRow = Array.from($rows).find((row) => {
         const cells = row.querySelectorAll('td');

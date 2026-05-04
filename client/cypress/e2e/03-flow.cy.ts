@@ -133,6 +133,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
   });
 
   it('opens AI workspace from homepage and sends messages with enter and button', () => {
+    cy.loginAsAdmin();
     cy.intercept('POST', '**/api/nexus/chat', {
       statusCode: 200,
       headers: {'content-type': 'application/x-ndjson'},
