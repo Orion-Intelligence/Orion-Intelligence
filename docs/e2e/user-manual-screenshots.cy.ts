@@ -257,7 +257,7 @@ describe('User Manual Screenshot Flow', () => {
     cy.get('[data-testid="heatmap-report-close"]').click();
     cy.get('[data-testid="homepage-search-input"]').click().type('orion');
     capture('homepage-searchbar');
-    cy.get('[data-testid="homepage-search-input"]').clear();
+    cy.get('[data-testid="homepage-search-input"]').filter(':visible').first().type('{selectall}{backspace}', { force: true });
 
     cy.get('[data-testid="profile-menu"]').filter(':visible').first().should('be.visible').click({ scrollBehavior: false });
     cy.get('[data-testid="profile-help-support"]').filter(':visible').first().should('be.visible').click({ scrollBehavior: false });
