@@ -7,6 +7,7 @@ from string import capwords
 from elasticsearch import AsyncElasticsearch, helpers as es_helpers
 from fastapi import HTTPException
 
+from orion.constants import constant
 from orion.helper_manager.env_handler import env_handler
 from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATION_MAPPING, LEAK_AGGREGATION_MAPPING, DEFACEMENT_AGGREGATION_MAPPING
 from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
@@ -172,26 +173,16 @@ class elastic_controller:
         key_str = json.dumps(key_payload, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(key_str.encode("utf-8")).hexdigest()
 
-    @staticmethod
-    def __power_plants_asset_path() -> Path:
-        return Path(__file__).resolve().parents[4] / "build" / "assets" / "data" / "satellite" / "wri_power_plants.geojson"
-
     async def __initialize_power_plants_data(self, mapping_power_plants_model):
-        asset_path = self.__power_plants_asset_path()
-        if not asset_path.exists():
-            log.g().e(f"Power plants data file not found: {asset_path}")
-            return
-
         index_name = ELASTIC_INDEX.S_WRI_POWER_PLANTS_INDEX
 
         if not await self.__m_core_connection.indices.exists(index=index_name, request_timeout=220):
             await self.__m_core_connection.indices.create(index=index_name, body=mapping_power_plants_model, request_timeout=220)
 
-        with asset_path.open("r", encoding="utf-8") as handle:
-            documents = json.load(handle)
+        raw_data = constant.power_plant_data
+        raw_data = json.loads(raw_data)
 
-        if not isinstance(documents, list):
-            raise ValueError(f"Expected a list of documents in {asset_path}")
+        documents = raw_data if isinstance(raw_data, list) else []
 
         def action_generator():
             for document in documents:
@@ -204,7 +195,7 @@ class elastic_controller:
                     "_source": self.prepare_power_plants_document(document),
                 }
 
-        await es_helpers.async_bulk(
+        success_count, errors = await es_helpers.async_bulk(
             self.__m_core_connection,
             action_generator(),
             chunk_size=2000,
@@ -212,6 +203,7 @@ class elastic_controller:
             raise_on_error=False,
             raise_on_exception=False,
         )
+        log.g().i(f"Power plants indexing completed: indexed={success_count}, errors={len(errors) if errors else 0}, index={index_name}")
 
     async def purge_old_records(self):
         try:
