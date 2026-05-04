@@ -251,45 +251,6 @@ class crawl_model:
             return {"error": "Failed to generate chat report"}
 
     @staticmethod
-    async def parse_nexus_chat_ai(model: ReportChatRequest, user_id: str = "system"):
-        try:
-            base_url = (env_handler.get_instance().env("DARKNEXUS_API_BASE") or "http://trusted-nexus-api:8030").strip().rstrip("/")
-            has_report = bool((model.report or "").strip())
-            endpoint = f"{base_url}/nlp/chat/report/{user_id}" if has_report else f"{base_url}/api/chat/{user_id}"
-            nexus_payload = model.model_dump() if has_report else {"prompt": model.message}
-
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    endpoint, json=nexus_payload, timeout=120)
-                if response.status_code != 200:
-                    return JSONResponse(
-                        status_code=response.status_code,
-                        content={"detail": "Something happened while calling api/chat"})
-                return response.json()
-        except Exception:
-            return JSONResponse(
-                status_code=500, content={"detail": "Something happened while calling api/chat"})
-
-    @staticmethod
-    async def analyze_text_with_nexus(model: NexusTextAnalysisRequest, user_id: str = "system"):
-        try:
-            base_url = (env_handler.get_instance().env("DARKNEXUS_API_BASE") or "http://trusted-nexus-api:8030").strip().rstrip("/")
-            payload = model.model_dump()
-            payload["job_id"] = payload.get("job_id") or user_id
-
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    f"{base_url}/ocr_classifier/analyze_text", json=payload, timeout=120)
-                if response.status_code != 200:
-                    return JSONResponse(
-                        status_code=response.status_code,
-                        content={"detail": "Something happened while calling ocr_classifier/analyze_text"})
-                return response.json()
-        except Exception:
-            return JSONResponse(
-                status_code=500, content={"detail": "Something happened while calling ocr_classifier/analyze_text"})
-
-    @staticmethod
     async def invoke_stealerlog_index(credential_index: LogBatchModel):
         m_data = elastic_request_generator().index_query_stealerlog(credential_index.model_dump())
 

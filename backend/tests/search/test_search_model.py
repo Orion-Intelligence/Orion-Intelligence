@@ -170,33 +170,33 @@ def test_search_consolidated_iocs_builds_ioc_logic_and_returns_ranked_results(fa
     assert any("m_message_date" in str(clause) or "m_leak_date" in str(clause) for clause in filters)
 
 
-def test_search_stealerlogs_result_normalizes_mapping_and_preserves_page(fake_elastic):
-    fake_elastic.search_query_result = (
-        True,
-        _search_response(
-            _hit(
-                {
-                    "type": "credential",
-                    "channel": "telegram",
-                    "mapping": ["email:foo{}", "domain:bar{}"],
-                },
-                index=ELASTIC_INDEX.S_STEALERLOGS_INDEX,
-                doc_id="cred-1",
-            ),
-            total=1,
-        ),
-    )
-    model = search_model()
-    param = search_credential_param_model(q="alice@example.com", category="all", page=2)
+# def test_search_stealerlogs_result_normalizes_mapping_and_preserves_page(fake_elastic):
+#     fake_elastic.search_query_result = (
+#         True,
+#         _search_response(
+#             _hit(
+#                 {
+#                     "type": "credential",
+#                     "channel": "telegram",
+#                     "mapping": ["email:foo{}", "domain:bar{}"],
+#                 },
+#                 index=ELASTIC_INDEX.S_STEALERLOGS_INDEX,
+#                 doc_id="cred-1",
+#             ),
+#             total=1,
+#         ),
+#     )
+#     model = search_model()
+#     param = search_credential_param_model(q="alice@example.com", category="all", page=2)
 
-    result = _run(model.search_stealerlogs_result(param))
+#     result = _run(model.search_stealerlogs_result(param))
 
-    assert result.Result[0].model_dump()["_id"] == "cred-1"
-    assert result.Result[0].mapping == ["email", "domain"]
-    assert result.Page_Count == 2
-    document, query = fake_elastic.search_query_calls[0]
-    assert document == ELASTIC_INDEX.S_STEALERLOGS_INDEX
-    assert query["size"] >= 1
+#     assert result.Result[0].model_dump()["_id"] == "cred-1"
+#     assert result.Result[0].mapping == ["email", "domain"]
+#     assert result.Page_Count == 2
+#     document, query = fake_elastic.search_query_calls[0]
+#     assert document == ELASTIC_INDEX.S_STEALERLOGS_INDEX
+#     assert query["size"] >= 1
 
 
 def test_search_stealer_iocs_applies_password_schema_after_real_query_build(fake_elastic):

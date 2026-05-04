@@ -7,12 +7,15 @@ import { advancedRowMotionAnimation } from '../../../shared/animations/advanced.
 import { StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
+import { ChatWidgetComponent } from '../../../pages/intel-panel/ai-workspace/chat-widget/chat-widget.component';
+import { LicenseService } from '../../../services/licenses/licenses.service';
+import { AppService } from '../../../services/core/app/app.service';
 
 interface SharedSearchAdvancedFilter { id: string; tag: string; value: string; operator: '&&' | '||' }
 
 @Component({
   selector: 'app-ioc-search',
-  imports: [KeyValuePipe, FormsModule, TooltipDirective, NgClass],
+  imports: [KeyValuePipe, FormsModule, TooltipDirective, NgClass, ChatWidgetComponent],
   templateUrl: './ioc-search.component.html',
   animations: [fadeInDashboardItem, advancedRowMotionAnimation],
 })
@@ -39,7 +42,7 @@ export class IocSearchComponent implements OnInit {
   advancedFilters: SharedSearchAdvancedFilter[] = [{ id: this.generateId(), tag: this.defaultAdvancedTag(), value: '', operator: '&&' }];
   readonly searchTriggered = output<string>();
 
-  constructor(protected sidebarService: SidebarService, private route: ActivatedRoute) { }
+  constructor(protected sidebarService: SidebarService, private route: ActivatedRoute, protected licenseService: LicenseService, protected appService: AppService) { }
 
   ngOnInit(): void {
     this.selectedTag = this.defaultBasicTag();

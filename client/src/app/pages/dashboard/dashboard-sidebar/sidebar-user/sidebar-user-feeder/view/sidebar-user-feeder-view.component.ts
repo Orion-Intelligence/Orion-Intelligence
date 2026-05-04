@@ -364,21 +364,28 @@ export class SidebarUserFeederViewComponent implements OnChanges {
     return this.canTransferOwnership() ? 9 : 8;
   }
 
-  getRuntimeStatus(script: FeederScriptItem): 'failed' | 'success' | 'unknown' {
+  getRuntimeStatus(script: FeederScriptItem): 'failed' | 'success' | 'warning' | 'unknown' {
     return this.getDateDerivedStatus(script.last_failure_date, script.last_success_date);
   }
 
-  private getDateDerivedStatus(lastFailureDate?: string | null, lastSuccessDate?: string | null): 'failed' | 'success' | 'unknown' {
+  private getDateDerivedStatus(lastFailureDate?: string | null, lastSuccessDate?: string | null): 'failed' | 'success' | 'warning' | 'unknown' {
     const failureTime = lastFailureDate ? Date.parse(lastFailureDate) : NaN;
     const successTime = lastSuccessDate ? Date.parse(lastSuccessDate) : NaN;
+    const isStaleSuccess = !Number.isNaN(successTime) && successTime < Date.now() - this.oneDayMs;
 
     if (!Number.isNaN(failureTime)) {
       if (Number.isNaN(successTime) || successTime < failureTime - this.oneDayMs) {
         return 'failed';
       }
+      if (isStaleSuccess) {
+        return 'warning';
+      }
       return 'success';
     }
     if (!Number.isNaN(successTime)) {
+      if (isStaleSuccess) {
+        return 'warning';
+      }
       return 'success';
     }
     return 'unknown';

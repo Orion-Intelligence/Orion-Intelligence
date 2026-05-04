@@ -251,7 +251,7 @@
                   </span>
                 </td>
                 <td class="px-4 py-2.5">
-                  <span class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getRuntimeStatus(script) === 'failed' ? 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-700' : getRuntimeStatus(script) === 'success' ? 'bg-sky-500/10 text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-700' : 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:text-slate-600'">
+                  <span class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getRuntimeStatus(script) === 'failed' ? 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-700' : getRuntimeStatus(script) === 'success' ? 'bg-sky-500/10 text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-700' : getRuntimeStatus(script) === 'warning' ? 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-700' : 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:text-slate-600'">
                     {{ getRuntimeStatus(script) }}
                   </span>
                 </td>
@@ -343,7 +343,7 @@
               <span [attr.data-testid]="'feeder-script-active-status-' + script.file_name" class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="script.enabled ? 'bg-emerald-500/10 text-emerald-300' : 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-700'">
                 {{ script.enabled ? 'enabled' : 'disabled' }}
               </span>
-              <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="getRuntimeStatus(script) === 'failed' ? 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-700' : getRuntimeStatus(script) === 'success' ? 'bg-sky-500/10 text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-700' : 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:text-slate-600'">
+              <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="getRuntimeStatus(script) === 'failed' ? 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-700' : getRuntimeStatus(script) === 'success' ? 'bg-sky-500/10 text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-700' : getRuntimeStatus(script) === 'warning' ? 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-700' : 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:text-slate-600'">
                 {{ getRuntimeStatus(script) }}
               </span>
             </div>

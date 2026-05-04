@@ -2,44 +2,54 @@
 
 ## Description
 
-Search stealer log credentials and log files using filters such as free-text query, URL, username, type and date range; returns normalized credential or log records from the stealer logs index.
+Search stealer log credentials and log files using a flexible IOC-based query system, along with optional date range filtering. The search supports multiple field-based filters (such as domain, email, username, IP, etc.) and logical operators (&&, ||) to build complex queries.
 
 Request body (`search_credential_param_model`):
 - **daterange** — optional creation date range in `YYYY-MM-DD,YYYY-MM-DD` format; empty string means no filter
-- **q** — free-text search across the raw line and extracted fields (email, domain, username, URL, etc.)
-- **url** — optional URL/domain filter (for example `accounts.epicgames.com`)
-- **user** — optional username or login identifier (for example `uzzalsen2530`)
-- **type** — record type; `"c"` returns credential-level stealer log entries (email/password, username, etc.); any other value returns log/file-style entries (for example leaked CSV or other files)
-- **page** — page number of the paginated result set (1-based)
-- **category** — optional category string (reserved for future use)
-- **fullsearch** — when `false`, uses an optimized/simple search (for example email domain lookups like `gmail.com`) for faster responses; when `true`, enables full wildcard/substring search over `raw` and extracted fields at the cost of performance.
+- **ioc** — main search query string using field-based syntax
+  - General search across all fields:
+    - "m_search_all:<value>"
+  - Field-specific search examples:
+    - "username:jon"
+    - "m_domain:jon.com"
+    - "m_email:jon@gmail.com"
+    - "ip:1.1.1.1"
+    - "file_name:log.txt"
+    - "channel:telegram"
+    - "credit_card:xxxx"
+  - Logical operators supported:
+    - AND (&&)
+    - OR (||)
+  - Example queries:
+    - "ioc": "m_domain:jon.com && m_email:jon@gmail.com"
+    - "ioc": "m_domain:jon.com && m_email:jon@gmail.com || m_domain:jon2.com"
+- **daterange** — optional filter to restrict results based on date
+  - Format: "YYYY-MM-DD,YYYY-MM-DD"
+  - Returns records whose date falls within the given range
+  - Example: "daterange": "2026-04-09,2026-04-17"
+
+
 
 Minimal example request for a credential (stealer log) search:
 ```json
 {
-  "q": "",
-  "url": "",
-  "user": "uzzalsen2530",
-  "type": "c",
-  "page": 1,
-  "fullsearch": false,
-  "daterange": "",
-  "password_schema":""
+  "ioc": "m_search_all:jon",
+  "daterange": ""
 }
 ```
-Example full wildcard search over a password value:
+
+Example with Filters
 ```json
 {
-  "q": "Zolkina23!",
-  "type": "c",
-  "page": 1,
-  "fullsearch": true
+  "ioc": "m_domain:jon.com && m_email:jon@gmail.com",
+  "daterange": "2026-04-09,2026-04-17"
 }
 ```
+
 
 ## Response
 
-Stealer logs search results containing a paginated list of matching credential or log records.
+Stealer logs search results containing a list of matching records based on the IOC query and optional date filter.
 
 The response is a JSON object with:
 - **Result** — list of matching records from the stealer logs index
@@ -47,17 +57,18 @@ The response is a JSON object with:
 - **Page_Count** — number of pages available for the given query and filters (may be fractional depending on the backend calculation)
 
 Each entry in **Result** for `type = "c"` (credential mode) typically contains:
-- **type** — record type (for example `"c"` for credential)
-- **raw** — original raw line as found in the source log
-- **channel** — high-level source channel (for example `"Collection"`)
-- **file** — optional file name or identifier when available, otherwise `null`
-- **domain** — list of extracted domains (for example `"gmail.com"` or `"authenticate.riotgames.com"`)
-- **email** — list of extracted email addresses when present
-- **password** — extracted password value when present
-- **username** — list of extracted usernames or logins
-- **_id** — internal unique identifier of the record
-- **m_index** — internal index/model used for search (for example `"stealer_model"`)
-- **m_sub_host** — extracted sub-host or path component (for example `"/"`)
+- **type** — record type (e.g., "combo", "c", etc.)
+- **raw** — original raw line from the log
+- **channel** — source channel (e.g., Telegram group, collection source)
+- **file** — optional file identifier (may be null)
+- **file_name** — full file path or file source name
+- **date** — record date (YYYY-MM-DD)
+- **email** — list of extracted email addresses
+- **password** — extracted password (if available)
+- **username** — list of extracted usernames
+- **hash** — unique hash identifier of the record
+- **m_index** — internal index used (e.g., "stealer_model")
+- **m_sub_host** — extracted sub-host or path
 
 When `type` is not `"c"`, records may represent higher-level log or file objects (for example leaked CSV or other file-based dumps) and can include additional file-related metadata fields depending on the source.
 
@@ -66,37 +77,20 @@ Example response:
 {
   "Result": [
     {
-      "type": "c",
-      "raw": "https://accounts.epicgames.com/register/customized uzzalsen2530@gmail.com:Lazpro&Adi@2022!",
-      "channel": "Collection",
+      "type": "combo",
+      "raw": "abc@abc.com:Blades52",
+      "channel": "°-| [D3V1LZoNe] Commiunity |-°",
       "file": null,
-      "domain": [
-        "gmail.com"
-      ],
+      "file_name": "/home/morgan-freeman/Workspace/Orion/Orion-Crawler/app/crawler/crawler_instance/genbot_service/telegram_parser/scripts/dump/result_22-01-2026_19-30-11.txt",
+      "date": "2026-01-24",
       "email": [
-        "uzzalsen2530@gmail.com"
+        "abc@abc.com"
       ],
-      "password": "Lazpro&Adi@2022!",
+      "password": "abcdef123",
       "username": [
-        "uzzalsen2530"
+        "abc"
       ],
-      "_id": "2025_UTC_1d57898b680608fcb703a2bccede92d4b913bd810f84ef81fd95c8037493b4f6",
-      "m_index": "stealer_model",
-      "m_sub_host": "/"
-    },
-    {
-      "type": "c",
-      "raw": "https://authenticate.riotgames.com/ FaM1R:Zolkina23!",
-      "channel": "Collection",
-      "file": null,
-      "domain": [
-        "authenticate.riotgames.com"
-      ],
-      "password": "Zolkina23!",
-      "username": [
-        "FaM1R"
-      ],
-      "_id": "2025_UTC_ac9459ac22cc2fe21060f39980882d98aa0cf15f524e7f835a55c94c08631371",
+      "hash": "e257c2aa4c1e6d7194b967c7ff10cdc0e617a0ed777c09639560ee63d95e32ef",
       "m_index": "stealer_model",
       "m_sub_host": "/"
     }

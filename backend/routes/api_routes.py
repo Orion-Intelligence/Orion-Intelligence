@@ -324,22 +324,6 @@ async def get_country_insight(
 
 
 @api_routes.post(
-    "/api/search/stealerlogs",
-    summary="Search stealer log reports",
-    description=SEARCH_DOCS["stealerlogs"]["description"],
-    tags=["Search"],
-    operation_id="searchStealerLogReports",
-    response_description=SEARCH_DOCS["stealerlogs"]["response_description"],
-    include_in_schema=False,
-    status_code=200,
-    dependencies=STEALER_LOG_DEPS)
-async def search_stealerlog(param: search_credential_param_model = Body(...), current_user=Depends(get_current_user)):
-    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
-    param.q = ""
-    return await search_model.getInstance().search_stealerlogs_result(param)
-
-
-@api_routes.post(
     "/api/search/stealer/ioc",
     summary="Search stealer log reports",
     description=SEARCH_DOCS["stealerlogs"]["description"],
@@ -902,7 +886,7 @@ async def url_vulnerability_scan(param: UrlVulnerabilityScanRequest = Body(...),
     description=DYNAMIC_DOCS["geo_camera"]["description"],
     tags=["Network Intelligence"],
     operation_id="geoIotDetect",
-    response_description=DYNAMIC_DOCS["geo_camera"]["description"],
+    response_description=DYNAMIC_DOCS["geo_camera"]["response_description"],
     status_code=200,
     dependencies=SCANNING_DEPS,
 )
@@ -914,10 +898,10 @@ async def geo_camera_detect(param: GeoCameraDetectRequest = Body(...), current_u
 @api_routes.post(
     "/api/netintel/camera_detect_ranges",
     summary="Scan IP ranges for exposed cameras",
-    description=DYNAMIC_DOCS["geo_camera"]["description"],
+    description=DYNAMIC_DOCS["geo_camera_ranges"]["description"],
     tags=["Network Intelligence"],
     operation_id="geoCameraDetectRanges",
-    response_description=DYNAMIC_DOCS["geo_camera"]["description"],
+    response_description=DYNAMIC_DOCS["geo_camera_ranges"]["response_description"],
     status_code=200,
     dependencies=SCANNING_DEPS,
 )

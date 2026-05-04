@@ -185,6 +185,7 @@ export function applyDateRange(monthsBack: number) {
 
   cy.get('[data-testid="side-filter-date-day-1"]').filter(':visible').first().scrollIntoView().click();
   cy.get('[data-testid="side-filter-date-day-25"]').filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-date-day-5"]').filter(':visible').first().scrollIntoView().click();
   cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
   waitForDirectoryRequest();
   cy.location('search').should('include', 'daterange=');

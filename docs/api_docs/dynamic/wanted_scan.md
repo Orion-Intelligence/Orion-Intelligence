@@ -1,6 +1,6 @@
 # Dynamic: wanted_scanner
 
-## Desctiption
+## Description
 
 Performs a scan for the Wanted people around the Globe in wanted databases, sanctions lists, watchlists, or law-enforcement records.
 This scan helps identify whether a person is flagged internationally and may return metadata such as aliases, issuing authority, offense category, risk indicators, and reference sources.
@@ -14,11 +14,10 @@ Example request:
 
 ```json
 {
-  
-  {text: {query: "Jhon Doe"}}
-  
+  "text": {
+    "query": "John Doe"
+  }
 }
-
 ```
 
 ## Request Fields
@@ -26,7 +25,7 @@ Example request:
 - **text** — query container
   - **name** — any name to scan  
     Examples:
-    - `Jhon Do`
+    - `John Doe`
 
 
 # Response

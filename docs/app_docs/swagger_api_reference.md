@@ -198,7 +198,7 @@ Response content type: `application/json` `InjectionBatchResponseModel`.
 
 **Description**
 
-## Description Perform a dynamic search for user email addresses discovered in monitored breach and defacement data, returning exposed account metadata for further investigation and remediation. This operation also fetches **real-time results from external dark-web intelligence APIs**, which may take additional time to process. During this period the API may return a pending response indicating that the upstream data collection is still running. A typical in-progress response looks like: The request is an HTTP POST and expects a JSON body with a **text** object containing the lookup fields. Typical request payload: The **username** field is optional and can be left empty when only the email address should be used for the exposure search.
+Perform a dynamic search for user email addresses discovered in monitored breach and defacement data, returning exposed account metadata for further investigation and remediation. This operation also fetches **real-time results from external dark-web intelligence APIs**, which may take additional time to process. During this period the API may return a pending response indicating that the upstream data collection is still running. A typical in-progress response looks like: The request is an H...
 
 **Parameters**
 
@@ -284,7 +284,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Perform a dynamic search for cracked credentials or applications identified in breach and defacement datasets, highlighting high-risk compromised apps, accounts and password reuse exposure. The request is an HTTP POST and expects a JSON body with a **text** object. For APK/app lookups, the backend currently supports using a Play Store URL to identify cracked or repackaged versions: The **playstore** field should contain a valid Google Play application URL for which cracked or modified artifacts should be discovered.
+Perform a dynamic search for cracked credentials or applications identified in breach and defacement datasets, highlighting high-risk compromised apps, accounts and password reuse exposure. The request is an HTTP POST and expects a JSON body with a **text** object. For APK/app lookups, the backend currently supports using a Play Store URL to identify cracked or repackaged versions: The **playstore** field should contain a valid Google Play application URL for which cracked or modified artifac...
 
 **Parameters**
 
@@ -352,7 +352,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Scan for software or game titles to identify the presence of cracked, pirated, or unofficial distributions across indexed sources. This scan is typically used to detect: - Cracked software - Pirated games - Modded or repackaged distributions - Unofficial download sources
+Scan for software or game titles to identify the presence of cracked, pirated, or unofficial distributions across indexed sources. This scan is typically used to detect: - Cracked software - Pirated games - Modded or repackaged distributions - Unofficial download sources
 
 **Parameters**
 
@@ -420,7 +420,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Scan a target domain using the configured scanning engine. The request is an HTTP POST and expects a JSON body matching the `DomainScanRequest` schema: Fields: - **domain** — target domain or host to scan (e.g. `www.bbc.com`) - **scanType** — scan mode selector. Supported values: - `basic` — infrastructure & HTTP intelligence (security headers, caching, CSP, CORS, etc.) - `advanced` — same as `basic`, plus port scanning and service-level inspection - `seo` — SEO metadata, indexing and ranking-related signals - `repo` — linked repository scan (GitHub/GitLab, exposed files, commit metadata) - **checkLive** - check to get live subdomains Payload examples by **scanType** (all share the same schema; only `scanType` changes):
+Scan a target domain using the configured scanning engine. The request is an HTTP POST and expects a JSON body matching the `DomainScanRequest` schema: Fields: - **domain** — target domain or host to scan (e.g. `www.bbc.com`) - **scanType** — scan mode selector. Supported values: - `basic` — infrastructure & HTTP intelligence (security headers, caching, CSP, CORS, etc.) - `advanced` — same as `basic`, plus port scanning and service-level inspection - `seo` — SEO metadata, indexing and ranking...
 
 **Parameters**
 
@@ -476,7 +476,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Perform a dynamic search for social media identifiers and related email addresses found in breach and defacement data, helping uncover exposed or impersonated social accounts. The request is an HTTP POST and expects a JSON body with a **text** object containing the social handle or username to look up. Example request payload: The **username** field should contain the social identifier to be resolved across monitored platforms and breach-related datasets.
+Perform a dynamic search for social media identifiers and related email addresses found in breach and defacement data, helping uncover exposed or impersonated social accounts. The request is an HTTP POST and expects a JSON body with a **text** object containing the social handle or username to look up. Example request payload: The **username** field should contain the social identifier to be resolved across monitored platforms and breach-related datasets.
 
 **Parameters**
 
@@ -578,7 +578,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Desctiption Performs a scan for the Wanted people around the Globe in wanted databases, sanctions lists, watchlists, or law-enforcement records. This scan helps identify whether a person is flagged internationally and may return metadata such as aliases, issuing authority, offense category, risk indicators, and reference sources. The request is an HTTP POST and expects a JSON body with a text object containing identifying information about the person to analyze. # Request Body Example request:
+Performs a scan for the Wanted people around the Globe in wanted databases, sanctions lists, watchlists, or law-enforcement records. This scan helps identify whether a person is flagged internationally and may return metadata such as aliases, issuing authority, offense category, risk indicators, and reference sources. The request is an HTTP POST and expects a JSON body with a text object containing identifying information about the person to analyze. Request Body Example request:
 
 **Parameters**
 
@@ -660,7 +660,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Perform a dynamic lookup for Pakistani national identity and law-enforcement–related records using: - CNIC (Computerized National Identity Card number) - Phone number - Family number This API correlates national identity records, associated phone numbers, addresses, family tree information, and FIR/complaint-related metadata. Depending on the input type, the API returns different structured datasets: - **CNIC** - Returns associated phone numbers, addresses, person details, and family tree data. - **Phone number** - Returns identity details and FIR/complaint records. - **Family number** - Returns complete family tree information. - **CNIC (extended mode)** - Can also return FIR/complaint records if available. The request is an HTTP POST and expects a JSON body matching the `search_dynamic_crack_model` schema: Fields: - **pak_query** — Can contain: - `CNIC number` (e.g.,...
+Perform a dynamic lookup for Pakistani national identity and law-enforcement–related records using: - CNIC (Computerized National Identity Card number) - Phone number - Family number This API correlates national identity records, associated phone numbers, addresses, family tree information, and FIR/complaint-related metadata. Depending on the input type, the API returns different structured datasets: - **CNIC** - Returns associated phone numbers, addresses, person details, and family tree dat...
 
 **Parameters**
 
@@ -714,7 +714,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Perform a dynamic extraction of Indicators of Compromise (IOCs) from uploaded files or images. The API analyzes textual and visual content to identify security-relevant indicators such as CVEs, domains, IPs, URLs, hashes, and detected language metadata. Supported input formats include: - Text files: .txt, .pdf - Images: .png, .jpg, .jpeg The API automatically extracts readable text (OCR applied for images when required) and scans it for known IOC patterns.
+Perform a dynamic extraction of Indicators of Compromise (IOCs) from uploaded files or images. The API analyzes textual and visual content to identify security-relevant indicators such as CVEs, domains, IPs, URLs, hashes, and detected language metadata. Supported input formats include: - Text files: .txt, .pdf - Images: .png, .jpg, .jpeg The API automatically extracts readable text (OCR applied for images when required) and scans it for known IOC patterns.
 
 **Parameters**
 
@@ -780,7 +780,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Perform a dynamic static-analysis scan of an uploaded Android APK file to identify application metadata, security posture, permission usage, cryptographic weaknesses, network behavior, and potential tampering or cracking indicators. The API inspects the APK without executing it and extracts security-relevant signals useful for malware analysis, threat intelligence, and mobile application risk assessment. Supported File Types - .apk
+Perform a dynamic static-analysis scan of an uploaded Android APK file to identify application metadata, security posture, permission usage, cryptographic weaknesses, network behavior, and potential tampering or cracking indicators. The API inspects the APK without executing it and extracts security-relevant signals useful for malware analysis, threat intelligence, and mobile application risk assessment. Supported File Types - .apk
 
 **Parameters**
 
@@ -872,7 +872,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Perform a dynamic cryptocurrency scan to retrieve intelligence related to Bitcoin wallet addresses or transaction hashes. This helps identify wallet activity, transaction history, balance information, and potential risk indicators. The request is an HTTP POST and expects a JSON body with a **text** object containing either a cryptocurrency wallet address or a transaction hash to analyze. The **wallet** field should contain a valid cryptocurrency wallet address. The **hash** field should contain a valid cryptocurrency transaction hash. Only one field (wallet or hash) should be provided per request.
+Perform a dynamic cryptocurrency scan to retrieve intelligence related to Bitcoin wallet addresses or transaction hashes. This helps identify wallet activity, transaction history, balance information, and potential risk indicators. The request is an HTTP POST and expects a JSON body with a **text** object containing either a cryptocurrency wallet address or a transaction hash to analyze. The **wallet** field should contain a valid cryptocurrency wallet address. The **hash** field should conta...
 
 **Parameters**
 
@@ -913,7 +913,7 @@ Request content type: `application/json` `search_dynamic_crypto_model`.
 
 Response content type: `application/json`.
 
-```text
+```json
 {
   "result": {
     "address": "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
@@ -935,7 +935,7 @@ Response content type: `application/json`.
       "avg_transaction_value": 0.0161096501953125,
       "is_active": false
     },
-    "recent_transactions": [...],
+    "recent_transactions": [],
     "risk_assessment": {
       "risk_level": "medium",
       "risk_factors": [
@@ -960,7 +960,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Resolve a domain name to its associated IP addresses (both IPv4 and IPv6) using DNS A and AAAA record queries. The request is an HTTP POST and expects a JSON body matching the `DNSResolveRequest` schema: Fields: - **domain** — target domain name to resolve (e.g. `www.bbc.com`, `google.com`, `example.org`)
+Resolve a domain name to its associated IP addresses (both IPv4 and IPv6) using DNS A and AAAA record queries. The request is an HTTP POST and expects a JSON body matching the `DNSResolveRequest` schema: Fields: - **domain** — target domain name to resolve (e.g. `www.bbc.com`, `google.com`, `example.org`)
 
 **Parameters**
 
@@ -1017,7 +1017,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Perform comprehensive network reconnaissance on a target IP address using advanced port scanning, service fingerprinting, and security analysis. The request is an HTTP POST and expects a JSON body matching the `IPScanRequest` schema: Fields: - **ip** — target IPv4 address to scan (e.g. `52.211.48.174`, `192.168.1.1`) Payload example:
+Perform comprehensive network reconnaissance on a target IP address using advanced port scanning, service fingerprinting, and security analysis. The request is an HTTP POST and expects a JSON body matching the `IPScanRequest` schema: Fields: - **ip** — target IPv4 address to scan (e.g. `52.211.48.174`, `192.168.1.1`) Payload example:
 
 **Parameters**
 
@@ -1207,7 +1207,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Scan a target domain using the configured scanning engine. The request is an HTTP POST and expects a JSON body matching the `DomainScanRequest` schema: Fields: - **domain** — target domain or host to scan (e.g. `www.bbc.com`) - **scanType** — scan mode selector. Supported values: - `basic` — infrastructure & HTTP intelligence (security headers, caching, CSP, CORS, etc.) - `advanced` — same as `basic`, plus port scanning and service-level inspection - `seo` — SEO metadata, indexing and ranking-related signals - `repo` — linked repository scan (GitHub/GitLab, exposed files, commit metadata) - **checkLive** - check to get live subdomains Payload examples by **scanType** (all share the same schema; only `scanType` changes):
+Scan a target domain using the configured scanning engine. The request is an HTTP POST and expects a JSON body matching the `DomainScanRequest` schema: Fields: - **domain** — target domain or host to scan (e.g. `www.bbc.com`) - **scanType** — scan mode selector. Supported values: - `basic` — infrastructure & HTTP intelligence (security headers, caching, CSP, CORS, etc.) - `advanced` — same as `basic`, plus port scanning and service-level inspection - `seo` — SEO metadata, indexing and ranking...
 
 **Parameters**
 
@@ -1257,7 +1257,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Discover internet-exposed cameras near specified geographic coordinates using GeoIP database and intelligent port scanning. The request is an HTTP POST and expects a JSON body matching the `GeoCameraRequest` schema: Fields: - **coordinates** — geographic location in `lat,lon` format (e.g. `31.4829403,74.3343893`) - Latitude: -90 to 90 - Longitude: -180 to 180 - Works worldwide (18+ countries supported) - Country is auto-detected from coordinates - **radius_km** — search radius in kilometers (default: `20`, max: `100`) - Recommended: `20-30` for city coverage - Larger radius = more IPs extracted but longer scan time - **max_ips** — maximum IPs to extract from GeoLite2 database (default: `500`, max: `2000`) - More IPs = higher chance of finding cameras - Recommended: `500-1000` for balanced results - **parallel_scans** — number of concurrent scans (default: `50`, max: `10...
+Discover internet-exposed cameras near specified geographic coordinates using GeoIP database and intelligent port scanning. The request is an HTTP POST and expects a JSON body matching the `GeoCameraRequest` schema: Fields: - **coordinates** — geographic location in `lat,lon` format (e.g. `31.4829403,74.3343893`) - Latitude: -90 to 90 - Longitude: -180 to 180 - Works worldwide (18+ countries supported) - Country is auto-detected from coordinates - **radius_km** — search radius in kilometers (...
 
 **Parameters**
 
@@ -1313,7 +1313,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Discover internet-exposed cameras near specified geographic coordinates using GeoIP database and intelligent port scanning. The request is an HTTP POST and expects a JSON body matching the `GeoCameraRequest` schema: Fields: - **coordinates** — geographic location in `lat,lon` format (e.g. `31.4829403,74.3343893`) - Latitude: -90 to 90 - Longitude: -180 to 180 - Works worldwide (18+ countries supported) - Country is auto-detected from coordinates - **radius_km** — search radius in kilometers (default: `20`, max: `100`) - Recommended: `20-30` for city coverage - Larger radius = more IPs extracted but longer scan time - **max_ips** — maximum IPs to extract from GeoLite2 database (default: `500`, max: `2000`) - More IPs = higher chance of finding cameras - Recommended: `500-1000` for balanced results - **parallel_scans** — number of concurrent scans (default: `50`, max: `10...
+Discover internet-exposed cameras across explicitly specified IP ranges without needing geographic coordinates. Accepts CIDR blocks, start–end IP ranges, or individual IPs — ideal when you already know the target network space. The request is an HTTP POST and expects a JSON body matching the `GeoRangesRequest` schema: Fields: - **ip_ranges** — list of IP ranges to scan (required, at least one entry) - CIDR notation: `"119.152.0.0/13"` - Start–end range: `"39.32.0.0-39.63.255.255"` - Single IP...
 
 **Parameters**
 
@@ -1455,7 +1455,7 @@ Response content type: `application/json` `SiemSearchResponseModel`.
 
 **Description**
 
-## Description Search defacement intelligence reports for hacked or phishing websites; returns a paginated list of defacement events and their metadata. Request body (`search_defacement_param_model`): - **q** — free-text search over URL, IP, team, attacker handle and content fields (default: empty string) - **category** — optional category filter (default `all`) - **page** — page number of the paginated result set (1-based) - **network** — one of: `all`, `clearnet`, `onion`, `i2p` (default `all`) - **daterange** — optional leak/observation date range in `YYYY-MM-DD,YYYY-MM-DD` format; empty string means no date filter - **attacker** — attacker nick/handle to match against `m_attacker` - **team** — defacement crew or group name to match against `m_team` - **content** — optional content/type string (for example an IOC/incident label) depending on configuration - **must** — when `true`,...
+Search defacement intelligence reports for hacked or phishing websites; returns a paginated list of defacement events and their metadata. Request body (`search_defacement_param_model`): - **q** — free-text search over URL, IP, team, attacker handle and content fields (default: empty string) - **category** — optional category filter (default `all`) - **page** — page number of the paginated result set (1-based) - **network** — one of: `all`, `clearnet`, `onion`, `i2p` (default `all`) - **datera...
 
 **Parameters**
 
@@ -1521,7 +1521,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Get a specific breach monitoring report for a tracked website or asset by its report ID. The request is an HTTP GET and accepts: - **doc_id** (path) — string identifier of the breach report document - **lang** (query, optional) — language code for localized narrative content when available. No request body is required.
+Get a specific breach monitoring report for a tracked website or asset by its report ID. The request is an HTTP GET and accepts: - **doc_id** (path) — string identifier of the breach report document - **lang** (query, optional) — language code for localized narrative content when available. No request body is required.
 
 **Parameters**
 
@@ -1592,7 +1592,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Get a specific breach-related news intelligence report generated from external news feeds by its report ID. The request is an HTTP GET and accepts: - **doc_id** (path) — string identifier of the news report document - **lang** (query, optional) — language code to localize narrative sections when supported. No request body is required.
+Get a specific breach-related news intelligence report generated from external news feeds by its report ID. The request is an HTTP GET and accepts: - **doc_id** (path) — string identifier of the news report document - **lang** (query, optional) — language code to localize narrative sections when supported. No request body is required.
 
 **Parameters**
 
@@ -1658,7 +1658,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Get a specific exploit intelligence report (CVE, exploit kit, zero-day activity, etc.) by its report ID. The request is an HTTP GET and accepts: - **doc_id** (path) — string identifier of the exploit report document - **lang** (query, optional) — language code for localized narrative fields when available. No request body is required.
+Get a specific exploit intelligence report (CVE, exploit kit, zero-day activity, etc.) by its report ID. The request is an HTTP GET and accepts: - **doc_id** (path) — string identifier of the exploit report document - **lang** (query, optional) — language code for localized narrative fields when available. No request body is required.
 
 **Parameters**
 
@@ -1725,7 +1725,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Get a specific strategic intelligence report aggregating crawled content from onion, I2P, and similar hidden-service pages by its report ID. The request is an HTTP GET and accepts: - **doc_id** (path) — string identifier of the strategic (generic) report document - **lang** (query, optional) — language code for localized narrative content. No request body is required.
+Get a specific strategic intelligence report aggregating crawled content from onion, I2P, and similar hidden-service pages by its report ID. The request is an HTTP GET and accepts: - **doc_id** (path) — string identifier of the strategic (generic) report document - **lang** (query, optional) — language code for localized narrative content. No request body is required.
 
 **Parameters**
 
@@ -1791,7 +1791,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Get a specific chat intelligence report focused on messaging platforms such as Telegram by its report ID. The request is an HTTP GET and accepts: - **doc_id** (path) — string identifier of the chat report document - **lang** (query, optional) — language code used to localize analytical summaries when available. No request body is required.
+Get a specific chat intelligence report focused on messaging platforms such as Telegram by its report ID. The request is an HTTP GET and accepts: - **doc_id** (path) — string identifier of the chat report document - **lang** (query, optional) — language code used to localize analytical summaries when available. No request body is required.
 
 **Parameters**
 
@@ -1879,10 +1879,6 @@ Response content type: `application/json`.
 - **Auth:** Bearer token required
 - **Response status:** `200`
 
-**Description**
-
-Documentation file not found: /home/morgan-freeman/Workspace/Orion/Orion-Intelligence/docs/api_docs/reports/social_models.md
-
 **Parameters**
 
 | Name | In | Required | Type | Description | Sample |
@@ -1918,7 +1914,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Retrieve the screenshot image associated with a specific breach report, stored in WebP format. The request is an HTTP GET and accepts: - **filename** (path) — base filename of the screenshot without extension. No request body is required.
+Retrieve the screenshot image associated with a specific breach report, stored in WebP format. The request is an HTTP GET and accepts: - **filename** (path) — base filename of the screenshot without extension. No request body is required.
 
 **Parameters**
 
@@ -1954,7 +1950,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Search strategic intelligence reports using filters such as free-text query, network, date range, MITRE/STIX object type or IOC entities; returns metadata for matching strategic reports that can be opened via the strategic report API. Request body (`search_general_param_model`): - **q** — free-text search over title, content and enrichment fields (default: empty string) - **page** — page number of the paginated result set (1-based) - **network** — one of: `all`, `clearnet`, `onion`, `i2p` - **content** — content-type key such as: `all`, `breach`, `credential`, `ransomware`, `phishing`, `scam`, `malware`, `infostealer`, `c2`, `ddos`, `exploit`, `leak`, `logs`, `vpn`, `carding`, `rat`, `keylogger`, `spyware`, `sqlinjection`, `xss`, `supplychain`, `insider`, `fraud`, `obfuscation`, `crack`, `cheats`, `cve`, `zero_day`, `rootkit`, `apt`, `threat_intel`, `darkweb`, `rce`, `l...
+Search strategic intelligence reports using filters such as free-text query, network, date range, MITRE/STIX object type or IOC entities; returns metadata for matching strategic reports that can be opened via the strategic report API. Request body (`search_general_param_model`): - **q** — free-text search over title, content and enrichment fields (default: empty string) - **page** — page number of the paginated result set (1-based) - **network** — one of: `all`, `clearnet`, `onion`, `i2p` - *...
 
 **Parameters**
 
@@ -2138,7 +2134,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Search breach / leak intelligence reports aggregated from ransomware blogs, extortion sites, leak forums, and darkweb data-dump portals; returns a paginated list of breach announcements and related metadata. Request body (`search_leak_param_model`): - **q** — free-text search term applied across title, content, location, industry, team name, domains, etc. (default: empty string) - **category** — logical content bucket. `"all"` searches across consolidated leak indices; other values may restrict the search to specific collections such as `"leaks"`, `"tracking"`, or `"news"` depending on deployment (default: `"all"`). When `"all"`, the backend runs a consolidated ranked search over the core leak index. - **page** — page number of the paginated result set (1-based; default: `1`). - **safe** — safe-search toggle. When `true`, sensitive or graphic content is filtered or down...
+Search breach / leak intelligence reports aggregated from ransomware blogs, extortion sites, leak forums, and darkweb data-dump portals; returns a paginated list of breach announcements and related metadata. Request body (`search_leak_param_model`): - **q** — free-text search term applied across title, content, location, industry, team name, domains, etc. (default: empty string) - **category** — logical content bucket. `"all"` searches across consolidated leak indices; other values may restri...
 
 **Parameters**
 
@@ -2301,7 +2297,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Search strategic intelligence reports using filters such as free-text query, network, date range, MITRE/STIX object type or IOC entities; returns metadata for matching strategic reports that can be opened via the strategic report API. Request body (`search_general_param_model`): - **q** — free-text search over title, content and enrichment fields (default: empty string) - **page** — page number of the paginated result set (1-based) - **network** — one of: `all`, `clearnet`, `onion`, `i2p` - **content** — content-type key such as: `all`, `breach`, `credential`, `ransomware`, `phishing`, `scam`, `malware`, `infostealer`, `c2`, `ddos`, `exploit`, `leak`, `logs`, `vpn`, `carding`, `rat`, `keylogger`, `spyware`, `sqlinjection`, `xss`, `supplychain`, `insider`, `fraud`, `obfuscation`, `crack`, `cheats`, `cve`, `zero_day`, `rootkit`, `apt`, `threat_intel`, `darkweb`, `rce`, `l...
+Search strategic intelligence reports using filters such as free-text query, network, date range, MITRE/STIX object type or IOC entities; returns metadata for matching strategic reports that can be opened via the strategic report API. Request body (`search_general_param_model`): - **q** — free-text search over title, content and enrichment fields (default: empty string) - **page** — page number of the paginated result set (1-based) - **network** — one of: `all`, `clearnet`, `onion`, `i2p` - *...
 
 **Parameters**
 
@@ -2485,7 +2481,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Search strategic intelligence reports using filters such as free-text query, network, date range, MITRE/STIX object type or IOC entities; returns metadata for matching strategic reports that can be opened via the strategic report API. Request body (`search_general_param_model`): - **q** — free-text search over title, content and enrichment fields (default: empty string) - **page** — page number of the paginated result set (1-based) - **network** — one of: `all`, `clearnet`, `onion`, `i2p` - **content** — content-type key such as: `all`, `breach`, `credential`, `ransomware`, `phishing`, `scam`, `malware`, `infostealer`, `c2`, `ddos`, `exploit`, `leak`, `logs`, `vpn`, `carding`, `rat`, `keylogger`, `spyware`, `sqlinjection`, `xss`, `supplychain`, `insider`, `fraud`, `obfuscation`, `crack`, `cheats`, `cve`, `zero_day`, `rootkit`, `apt`, `threat_intel`, `darkweb`, `rce`, `l...
+Search strategic intelligence reports using filters such as free-text query, network, date range, MITRE/STIX object type or IOC entities; returns metadata for matching strategic reports that can be opened via the strategic report API. Request body (`search_general_param_model`): - **q** — free-text search over title, content and enrichment fields (default: empty string) - **page** — page number of the paginated result set (1-based) - **network** — one of: `all`, `clearnet`, `onion`, `i2p` - *...
 
 **Parameters**
 
@@ -2669,7 +2665,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Search strategic intelligence reports using filters such as free-text query, network, date range, MITRE/STIX object type or IOC entities; returns metadata for matching strategic reports that can be opened via the strategic report API. Request body (`search_general_param_model`): - **q** — free-text search over title, content and enrichment fields (default: empty string) - **page** — page number of the paginated result set (1-based) - **network** — one of: `all`, `clearnet`, `onion`, `i2p` - **content** — content-type key such as: `all`, `breach`, `credential`, `ransomware`, `phishing`, `scam`, `malware`, `infostealer`, `c2`, `ddos`, `exploit`, `leak`, `logs`, `vpn`, `carding`, `rat`, `keylogger`, `spyware`, `sqlinjection`, `xss`, `supplychain`, `insider`, `fraud`, `obfuscation`, `crack`, `cheats`, `cve`, `zero_day`, `rootkit`, `apt`, `threat_intel`, `darkweb`, `rce`, `l...
+Search strategic intelligence reports using filters such as free-text query, network, date range, MITRE/STIX object type or IOC entities; returns metadata for matching strategic reports that can be opened via the strategic report API. Request body (`search_general_param_model`): - **q** — free-text search over title, content and enrichment fields (default: empty string) - **page** — page number of the paginated result set (1-based) - **network** — one of: `all`, `clearnet`, `onion`, `i2p` - *...
 
 **Parameters**
 
@@ -2853,7 +2849,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Search stealer log credentials and log files using filters such as free-text query, URL, username, type and date range; returns normalized credential or log records from the stealer logs index. Request body (`search_credential_param_model`): - **daterange** — optional creation date range in `YYYY-MM-DD,YYYY-MM-DD` format; empty string means no filter - **q** — free-text search across the raw line and extracted fields (email, domain, username, URL, etc.) - **url** — optional URL/domain filter (for example `accounts.epicgames.com`) - **user** — optional username or login identifier (for example `uzzalsen2530`) - **type** — record type; `"c"` returns credential-level stealer log entries (email/password, username, etc.); any other value returns log/file-style entries (for example leaked CSV or other files) - **page** — page number of the paginated result set (1-based) - **c...
+Search stealer log credentials and log files using filters such as free-text query, URL, username, type and date range; returns normalized credential or log records from the stealer logs index. Request body (`search_credential_param_model`): - **daterange** — optional creation date range in `YYYY-MM-DD,YYYY-MM-DD` format; empty string means no filter - **q** — free-text search across the raw line and extracted fields (email, domain, username, URL, etc.) - **url** — optional URL/domain filter...
 
 **Parameters**
 
@@ -2990,7 +2986,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Search across all report types (breach/leak, exploit, generic/strategic, chat, social, etc.) and return a consolidated, section-grouped set of report metadata. The request is an HTTP POST and expects a JSON body matching the `search_consolidated_param_model` schema. A typical request payload might look like: Semantics: - **q** — free-text query across all supported indices - **page** — page number for paginated results - **network** — network filter (e.g. `all`, `clearnet`, `onion`, `i2p`) - **matchtype** — logical query mode, typically `or` or `and` - **safe** — when true, enables additional safety/content restrictions - **daterange** — optional date range filter in `YYYY-MM-DD,YYYY-MM-DD` format - **content** — high-level content type filter when supported (e.g. `all`, `leaks`, `news`) - **entity / entity_filter** — IOC/entity-based filters (e.g. `m_company_name`, `m_...
+Search across all report types (breach/leak, exploit, generic/strategic, chat, social, etc.) and return a consolidated, section-grouped set of report metadata. The request is an HTTP POST and expects a JSON body matching the `search_consolidated_param_model` schema. A typical request payload might look like: Semantics: - **q** — free-text query across all supported indices - **page** — page number for paginated results - **network** — network filter (e.g. `all`, `clearnet`, `onion`, `i2p`) -...
 
 **Parameters**
 
@@ -3161,7 +3157,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Scans a vast ecosystem of over 100+ social networks, professional forums, and niche community sites to identify profiles associated with a specific name or query. This API is designed for digital reconnaissance, identity mapping, and background verification, providing a comprehensive view of a target's online presence across fragmented platforms. The API distinguishes between direct URL matches (active) and potential engine-indexed matches (suggested), ensuring high-confidence results. Supported request fields: - **query** — The name, alias, or search string to locate across the web. Example request payload:
+Scans a vast ecosystem of over 100+ social networks, professional forums, and niche community sites to identify profiles associated with a specific name or query. This API is designed for digital reconnaissance, identity mapping, and background verification, providing a comprehensive view of a target's online presence across fragmented platforms. The API distinguishes between direct URL matches (active) and potential engine-indexed matches (suggested), ensuring high-confidence results. Suppor...
 
 **Parameters**
 
@@ -3226,7 +3222,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Scrape public profile information for a requested social media account by platform and username; returns structured profile metadata for the specified account. This endpoint corresponds to /api/search/social_profile and expects a JSON body containing the target platform and username. Supported request fields: - **platform** — name of the social media platform - **username** — account handle / username to scrape Example request payload:
+Scrape public profile information for a requested social media account by platform and username; returns structured profile metadata for the specified account. This endpoint corresponds to /api/search/social_profile and expects a JSON body containing the target platform and username. Supported request fields: - **platform** — name of the social media platform - **username** — account handle / username to scrape Example request payload:
 
 **Parameters**
 
@@ -3291,7 +3287,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Retrieves a collection of images associated with a specific social media profile. This API performs a deep search across indexed web resources to locate profile pictures, shared posts, and media assets linked to the requested username and platform. The API is particularly effective for digital asset discovery, profile verification, and visual content archival. Supported request fields: - **platform** — name of the social media platform - **username** — account handle / username to scrape Example request payload:
+Retrieves a collection of images associated with a specific social media profile. This API performs a deep search across indexed web resources to locate profile pictures, shared posts, and media assets linked to the requested username and platform. The API is particularly effective for digital asset discovery, profile verification, and visual content archival. Supported request fields: - **platform** — name of the social media platform - **username** — account handle / username to scrape Exam...
 
 **Parameters**
 
@@ -3358,7 +3354,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Performs a reverse image search to identify and locate a specific person or profile across various digital platforms. By uploading an image, the API scans social networks, professional portfolios, and public databases to find matching visual identities and their associated social handles. This API is a powerful tool for OSINT (Open Source Intelligence), identity verification, and cross-platform profile linking. Supported File Types: - image: .png, .jpg, .jpeg
+Performs a reverse image search to identify and locate a specific person or profile across various digital platforms. By uploading an image, the API scans social networks, professional portfolios, and public databases to find matching visual identities and their associated social handles. This API is a powerful tool for OSINT (Open Source Intelligence), identity verification, and cross-platform profile linking. Supported File Types: - image: .png, .jpg, .jpeg
 
 **Parameters**
 
@@ -3423,10 +3419,6 @@ Response content type: `application/json`.
 - **Auth:** Bearer token required
 - **Response status:** `200`
 
-**Description**
-
-Documentation file not found: /home/morgan-freeman/Workspace/Orion/Orion-Intelligence/docs/api_docs/social/profile_followers.md
-
 **Parameters**
 
 No path or query parameters.
@@ -3478,10 +3470,6 @@ Response content type: `application/json`.
 - **Operation ID:** `getSocailProfileFollowing`
 - **Auth:** Bearer token required
 - **Response status:** `200`
-
-**Description**
-
-Documentation file not found: /home/morgan-freeman/Workspace/Orion/Orion-Intelligence/docs/api_docs/social/profile_following.md
 
 **Parameters**
 
@@ -3537,7 +3525,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Scrapes and retrieves a detailed feed of posts from a requested social media account based on the provided platform and username. This API extracts post-specific data including engagement metrics, media types, and audience interactions. The API is useful for social media monitoring, sentiment analysis, influencer tracking, and digital footprint assessment. Supported request fields: - **platform** — name of the social media platform (e.g. Instagram, Twitter, Facebook, etc.) - **username** — account handle / username to scrape Example request payload:
+Scrapes and retrieves a detailed feed of posts from a requested social media account based on the provided platform and username. This API extracts post-specific data including engagement metrics, media types, and audience interactions. The API is useful for social media monitoring, sentiment analysis, influencer tracking, and digital footprint assessment. Supported request fields: - **platform** — name of the social media platform (e.g. Instagram, Twitter, Facebook, etc.) - **username** — ac...
 
 **Parameters**
 
@@ -3610,7 +3598,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Scans a specified social media platform for mentions of a target username in conjunction with a list of specific search tokens or keywords. This API is designed for brand reputation monitoring, crisis management, and sentiment discovery, allowing users to find specific narrative clusters (e.g., specific events or scandals) surrounding a public figure or organization. The API combines the provided tokens with the username to generate a targeted search query and returns the most relevant posts and threads. Supported request fields: - **tokens** — An array of keywords to search for alongside the username - **username** — The social media handle or name of the target - **platform** — The specific social network to scan (e.g., "Twitter") Example request payload:
+Scans a specified social media platform for mentions of a target username in conjunction with a list of specific search tokens or keywords. This API is designed for brand reputation monitoring, crisis management, and sentiment discovery, allowing users to find specific narrative clusters (e.g., specific events or scandals) surrounding a public figure or organization. The API combines the provided tokens with the username to generate a targeted search query and returns the most relevant posts...
 
 **Parameters**
 
@@ -3684,7 +3672,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Return a **STIX 2.1 bundle** for a single document. This endpoint converts an Orion document into a STIX 2.1 `bundle` (spec_version `2.1`) containing: - **TLP marking definitions** (AMBER and RED) - a primary **report** object - optional **infrastructure** describing the source/service (e.g., onion market/forum) - extracted **SCO observables** (e.g., `url`, `domain-name`, `ipv4-addr`, `ipv6-addr`, `email-addr`, `autonomous-system`, `directory`, `user-agent`) - an **observed-data** object referencing extracted SCOs - optional **indicator** objects with STIX patterns for extracted observables Request: - **doc_id** — required. Orion document identifier. - **lang** — optional. Language variant requested from backend. Notes: - Missing fields are skipped (no empty objects are emitted). - `report.object_refs` links all generated objects (indicators, infrastructure, observed-da...
+Return a **STIX 2.1 bundle** for a single document. This endpoint converts an Orion document into a STIX 2.1 `bundle` (spec_version `2.1`) containing: - **TLP marking definitions** (AMBER and RED) - a primary **report** object - optional **infrastructure** describing the source/service (e.g., onion market/forum) - extracted **SCO observables** (e.g., `url`, `domain-name`, `ipv4-addr`, `ipv6-addr`, `email-addr`, `autonomous-system`, `directory`, `user-agent`) - an **observed-data** object refe...
 
 **Parameters**
 
@@ -3848,7 +3836,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Return a **STIX 2.1 bundle** for a single document. This endpoint converts an Orion document into a STIX 2.1 `bundle` (spec_version `2.1`) containing: - **TLP marking definitions** (AMBER and RED) - a primary **report** object - optional **infrastructure** describing the source/service (e.g., onion market/forum) - extracted **SCO observables** (e.g., `url`, `domain-name`, `ipv4-addr`, `ipv6-addr`, `email-addr`, `autonomous-system`, `directory`, `user-agent`) - an **observed-data** object referencing extracted SCOs - optional **indicator** objects with STIX patterns for extracted observables Request: - **doc_id** — required. Orion document identifier. - **lang** — optional. Language variant requested from backend. Notes: - Missing fields are skipped (no empty objects are emitted). - `report.object_refs` links all generated objects (indicators, infrastructure, observed-da...
+Return a **STIX 2.1 bundle** for a single document. This endpoint converts an Orion document into a STIX 2.1 `bundle` (spec_version `2.1`) containing: - **TLP marking definitions** (AMBER and RED) - a primary **report** object - optional **infrastructure** describing the source/service (e.g., onion market/forum) - extracted **SCO observables** (e.g., `url`, `domain-name`, `ipv4-addr`, `ipv6-addr`, `email-addr`, `autonomous-system`, `directory`, `user-agent`) - an **observed-data** object refe...
 
 **Parameters**
 
@@ -4012,7 +4000,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Return a **STIX 2.1 bundle** for a single document. This endpoint converts an Orion document into a STIX 2.1 `bundle` (spec_version `2.1`) containing: - **TLP marking definitions** (AMBER and RED) - a primary **report** object - optional **infrastructure** describing the source/service (e.g., onion market/forum) - extracted **SCO observables** (e.g., `url`, `domain-name`, `ipv4-addr`, `ipv6-addr`, `email-addr`, `autonomous-system`, `directory`, `user-agent`) - an **observed-data** object referencing extracted SCOs - optional **indicator** objects with STIX patterns for extracted observables Request: - **doc_id** — required. Orion document identifier. - **lang** — optional. Language variant requested from backend. Notes: - Missing fields are skipped (no empty objects are emitted). - `report.object_refs` links all generated objects (indicators, infrastructure, observed-da...
+Return a **STIX 2.1 bundle** for a single document. This endpoint converts an Orion document into a STIX 2.1 `bundle` (spec_version `2.1`) containing: - **TLP marking definitions** (AMBER and RED) - a primary **report** object - optional **infrastructure** describing the source/service (e.g., onion market/forum) - extracted **SCO observables** (e.g., `url`, `domain-name`, `ipv4-addr`, `ipv6-addr`, `email-addr`, `autonomous-system`, `directory`, `user-agent`) - an **observed-data** object refe...
 
 **Parameters**
 
@@ -4175,7 +4163,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Return a **STIX 2.1 bundle** for a single document. This endpoint converts an Orion document into a STIX 2.1 `bundle` (spec_version `2.1`) containing: - **TLP marking definitions** (AMBER and RED) - a primary **report** object - optional **infrastructure** describing the source/service (e.g., onion market/forum) - extracted **SCO observables** (e.g., `url`, `domain-name`, `ipv4-addr`, `ipv6-addr`, `email-addr`, `autonomous-system`, `directory`, `user-agent`) - an **observed-data** object referencing extracted SCOs - optional **indicator** objects with STIX patterns for extracted observables Request: - **doc_id** — required. Orion document identifier. - **lang** — optional. Language variant requested from backend. Notes: - Missing fields are skipped (no empty objects are emitted). - `report.object_refs` links all generated objects (indicators, infrastructure, observed-da...
+Return a **STIX 2.1 bundle** for a single document. This endpoint converts an Orion document into a STIX 2.1 `bundle` (spec_version `2.1`) containing: - **TLP marking definitions** (AMBER and RED) - a primary **report** object - optional **infrastructure** describing the source/service (e.g., onion market/forum) - extracted **SCO observables** (e.g., `url`, `domain-name`, `ipv4-addr`, `ipv6-addr`, `email-addr`, `autonomous-system`, `directory`, `user-agent`) - an **observed-data** object refe...
 
 **Parameters**
 
@@ -4339,7 +4327,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Return a **STIX 2.1 bundle** for a single document. This endpoint converts an Orion document into a STIX 2.1 `bundle` (spec_version `2.1`) containing: - **TLP marking definitions** (AMBER and RED) - a primary **report** object - optional **infrastructure** describing the source/service (e.g., onion market/forum) - extracted **SCO observables** (e.g., `url`, `domain-name`, `ipv4-addr`, `ipv6-addr`, `email-addr`, `autonomous-system`, `directory`, `user-agent`) - an **observed-data** object referencing extracted SCOs - optional **indicator** objects with STIX patterns for extracted observables Request: - **doc_id** — required. Orion document identifier. - **lang** — optional. Language variant requested from backend. Notes: - Missing fields are skipped (no empty objects are emitted). - `report.object_refs` links all generated objects (indicators, infrastructure, observed-da...
+Return a **STIX 2.1 bundle** for a single document. This endpoint converts an Orion document into a STIX 2.1 `bundle` (spec_version `2.1`) containing: - **TLP marking definitions** (AMBER and RED) - a primary **report** object - optional **infrastructure** describing the source/service (e.g., onion market/forum) - extracted **SCO observables** (e.g., `url`, `domain-name`, `ipv4-addr`, `ipv6-addr`, `email-addr`, `autonomous-system`, `directory`, `user-agent`) - an **observed-data** object refe...
 
 **Parameters**
 
@@ -4503,7 +4491,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Return a **STIX 2.1 bundle** for a single document. This endpoint converts an Orion document into a STIX 2.1 `bundle` (spec_version `2.1`) containing: - **TLP marking definitions** (AMBER and RED) - a primary **report** object - optional **infrastructure** describing the source/service (e.g., onion market/forum) - extracted **SCO observables** (e.g., `url`, `domain-name`, `ipv4-addr`, `ipv6-addr`, `email-addr`, `autonomous-system`, `directory`, `user-agent`) - an **observed-data** object referencing extracted SCOs - optional **indicator** objects with STIX patterns for extracted observables Request: - **doc_id** — required. Orion document identifier. - **lang** — optional. Language variant requested from backend. Notes: - Missing fields are skipped (no empty objects are emitted). - `report.object_refs` links all generated objects (indicators, infrastructure, observed-da...
+Return a **STIX 2.1 bundle** for a single document. This endpoint converts an Orion document into a STIX 2.1 `bundle` (spec_version `2.1`) containing: - **TLP marking definitions** (AMBER and RED) - a primary **report** object - optional **infrastructure** describing the source/service (e.g., onion market/forum) - extracted **SCO observables** (e.g., `url`, `domain-name`, `ipv4-addr`, `ipv6-addr`, `email-addr`, `autonomous-system`, `directory`, `user-agent`) - an **observed-data** object refe...
 
 **Parameters**
 
@@ -4667,7 +4655,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Return a **STIX 2.1 bundle** for a single document. This endpoint converts an Orion document into a STIX 2.1 `bundle` (spec_version `2.1`) containing: - **TLP marking definitions** (AMBER and RED) - a primary **report** object - optional **infrastructure** describing the source/service (e.g., onion market/forum) - extracted **SCO observables** (e.g., `url`, `domain-name`, `ipv4-addr`, `ipv6-addr`, `email-addr`, `autonomous-system`, `directory`, `user-agent`) - an **observed-data** object referencing extracted SCOs - optional **indicator** objects with STIX patterns for extracted observables Request: - **doc_id** — required. Orion document identifier. - **lang** — optional. Language variant requested from backend. Notes: - Missing fields are skipped (no empty objects are emitted). - `report.object_refs` links all generated objects (indicators, infrastructure, observed-da...
+Return a **STIX 2.1 bundle** for a single document. This endpoint converts an Orion document into a STIX 2.1 `bundle` (spec_version `2.1`) containing: - **TLP marking definitions** (AMBER and RED) - a primary **report** object - optional **infrastructure** describing the source/service (e.g., onion market/forum) - extracted **SCO observables** (e.g., `url`, `domain-name`, `ipv4-addr`, `ipv6-addr`, `email-addr`, `autonomous-system`, `directory`, `user-agent`) - an **observed-data** object refe...
 
 **Parameters**
 
@@ -4834,7 +4822,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Scan a target domain using the configured scanning engine. The request is an HTTP POST and expects a following JSON schema: Fields: - **domain** — target domain or host to scan (e.g. `www.bbc.com`) - **checkLive** - check to get live subdomains
+Scan a target domain using the configured scanning engine. The request is an HTTP POST and expects a following JSON schema: Fields: - **domain** — target domain or host to scan (e.g. `www.bbc.com`) - **checkLive** - check to get live subdomains
 
 **Parameters**
 
@@ -4890,7 +4878,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Performs reverse DNS lookup and ping test to return hostname and connectivity status for a given IP The request is an HTTP POST and expects a following JSON schema: Fields: - **domain** — target domain or host to scan (e.g. `www.bbc.com`)
+Performs reverse DNS lookup and ping test to return hostname and connectivity status for a given IP The request is an HTTP POST and expects a following JSON schema: Fields: - **domain** — target domain or host to scan (e.g. `www.bbc.com`)
 
 **Parameters**
 
@@ -4946,7 +4934,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Retrieves historical archived snapshots and timestamps of the provided domain from web archive sources The request is an HTTP POST and expects a following JSON schema: Fields: - **domain** — target domain or host to scan (e.g. `www.bbc.com`)
+Retrieves historical archived snapshots and timestamps of the provided domain from web archive sources The request is an HTTP POST and expects a following JSON schema: Fields: - **domain** — target domain or host to scan (e.g. `www.bbc.com`)
 
 **Parameters**
 
@@ -5002,7 +4990,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Perform a dynamic Cross Search using a user-provided query string. The API submits the query to multiple search engines and returns raw results without UI rendering. Supported input: - **query**: search string (keywords, onion URLs, or identifiers) The API is designed for rapid investigative lookups and does not require rendering on the client.
+Perform a dynamic Cross Search using a user-provided query string. The API submits the query to multiple search engines and returns raw results without UI rendering. Supported input: - **query**: search string (keywords, onion URLs, or identifiers) The API is designed for rapid investigative lookups and does not require rendering on the client.
 
 **Parameters**
 
@@ -5076,7 +5064,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Retrieve the complete list of monitored and crawled sources across Clearnet, Onion, and I2P. Supported filters: - **page:** page number of the result - **network:** all, onion, i2p, clearnet - **index:** all, general, leak, defacement, chat, exploit, twitter, reddit - **content_type:** all, general, forums, news, stolen, drugs, hacking, marketplaces, cryptocurrency, leaks, adult, tracking, chat, social - **daterange:** optional date range (e.g., `2025-12-03,2025-12-18`) Results include URL, detected content type(s), index classification, network layer, and last-update metadata.
+Retrieve the complete list of monitored and crawled sources across Clearnet, Onion, and I2P. Supported filters: - **page:** page number of the result - **network:** all, onion, i2p, clearnet - **index:** all, general, leak, defacement, chat, exploit, twitter, reddit - **content_type:** all, general, forums, news, stolen, drugs, hacking, marketplaces, cryptocurrency, leaks, adult, tracking, chat, social - **daterange:** optional date range (e.g., `2025-12-03,2025-12-18`) Results include URL, d...
 
 **Parameters**
 
@@ -5130,7 +5118,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Retrieve the complete catalog of breach dumps collected from Telegram channels and monitored websites. Supported filters: - **page:** page number of the result set - **source:** all, telegram, websites (origin of the leak, e.g., Telegram or monitored websites) - **group:** leak group or channel name derived from the source (e.g., Telegram channel name) - **status:** all, parsed, unparsed - **daterange:** optional date range string (e.g., `2025-01-01,2025-01-15`) - **q:** free-text search query applied to `leak_url`, `source`, `group`, and other indexed fields (default: `*`) Common use-cases include identifying newly leaked dumps, retrieving unparsed dumps for analysis, or filtering dumps from specific threat groups or Telegram channels.
+Retrieve the complete catalog of breach dumps collected from Telegram channels and monitored websites. Supported filters: - **page:** page number of the result set - **source:** all, telegram, websites (origin of the leak, e.g., Telegram or monitored websites) - **group:** leak group or channel name derived from the source (e.g., Telegram channel name) - **status:** all, parsed, unparsed - **daterange:** optional date range string (e.g., `2025-01-01,2025-01-15`) - **q:** free-text search quer...
 
 **Parameters**
 
@@ -5181,7 +5169,7 @@ Response content type: `application/json`.
 
 **Description**
 
-## Description Retrieve system-wide analytics and high-level intelligence metrics across all monitored data sources. This endpoint does not take any parameters and returns pre-aggregated insights computed by Orion. Returned analytics include (per data type such as general, leak, defacement): - Document volume and activity over time (`document_count`, `updated_5_days_ago`, `updated_9_days_ago`) - Freshness indicators (`most_recent`, `oldest_update`) - Enrichment density (`url_document_count`, `archive_document_count`, `email_document_count`, `phone_document_count`, `clearnet_document_count`) - Common content characteristics (`common_types`, `top_team`, `common_server`, `unique_base_urls`, `dumps_document_count`, etc.) Each metric is returned as an object containing: - **key** — human-readable label - **value** — current metric value - **change_weekly** — weekly change percentage (strin...
+Retrieve system-wide analytics and high-level intelligence metrics across all monitored data sources. This endpoint does not take any parameters and returns pre-aggregated insights computed by Orion. Returned analytics include (per data type such as general, leak, defacement): - Document volume and activity over time (`document_count`, `updated_5_days_ago`, `updated_9_days_ago`) - Freshness indicators (`most_recent`, `oldest_update`) - Enrichment density (`url_document_count`, `archive_docume...
 
 **Parameters**
 

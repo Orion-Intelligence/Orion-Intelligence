@@ -15,10 +15,11 @@ import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { sidebarModeAnimation } from '../../../shared/animations/sidebar.mode.animation';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
+import { ChatWidgetComponent } from '../../intel-panel/ai-workspace/chat-widget/chat-widget.component';
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
-  imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective],
+  imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective, ChatWidgetComponent],
   templateUrl: './dashboard-sidebar.component.html',
   animations: [sidebarModeAnimation],
 })

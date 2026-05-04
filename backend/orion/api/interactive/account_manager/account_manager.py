@@ -256,6 +256,14 @@ class AccountManager:
         await self._engine.save(user)
         return {"message": "Chat history updated successfully"}
 
+    async def clear_current_user_chat_history(self, current_user):
+        user = await self._engine.find_one(db_user_account, db_user_account.username == current_user.username)
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        user.chat_history = []
+        await self._engine.save(user)
+        return {"cleared": True}
+
     async def get_node(self, current_user) -> NodeCallbackModel:
         user = current_user
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))

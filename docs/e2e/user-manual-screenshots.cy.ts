@@ -318,7 +318,7 @@ describe('User Manual Screenshot Flow', () => {
     cy.get('[data-testid="chat-widget-messages"]').filter(':visible').first().find('div').should('exist');
     capture('report-chatbot');
     cy.get('[data-testid="chat-widget-messages"]').filter(':visible').first()
-      .closest('.fixed.inset-0.z-50')
+      .closest('[data-testid="chat-widget-overlay"]')
       .click('topLeft', { force: true });
     cy.get('[data-testid="chat-widget-messages"]').should('not.exist');
     cy.get('body').type('{esc}');
