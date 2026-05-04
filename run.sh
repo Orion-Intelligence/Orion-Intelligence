@@ -8,6 +8,39 @@ LOCAL_SSL_DIR="backend/.ssl"
 LOCAL_SSL_CERT="$LOCAL_SSL_DIR/localhost-cert.pem"
 LOCAL_SSL_KEY="$LOCAL_SSL_DIR/localhost-key.pem"
 
+is_port_listening() {
+    local port="$1"
+    if command -v ss >/dev/null 2>&1; then
+        ss -ltn 2>/dev/null | grep -Eq "127\\.0\\.0\\.1:$port|0\\.0\\.0\\.0:$port|\\*:$port|\\[::\\]:$port"
+        return $?
+    fi
+
+    if command -v lsof >/dev/null 2>&1; then
+        lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1
+        return $?
+    fi
+
+    return 1
+}
+
+get_port_pids() {
+    local port="$1"
+    if command -v ss >/dev/null 2>&1; then
+        ss -ltnp 2>/dev/null \
+            | awk -v port=":$port" '$0 ~ port {print $NF}' \
+            | sed -n 's/.*pid=\([0-9]\+\).*/\1/p' \
+            | sort -u || true
+        return 0
+    fi
+
+    if command -v lsof >/dev/null 2>&1; then
+        lsof -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null | sort -u || true
+        return 0
+    fi
+
+    return 0
+}
+
 stop_docker() {
     docker compose -p "$PROJECT_NAME" down --remove-orphans
     rm -rf staticfiles
@@ -33,7 +66,7 @@ create_parser_zip() {
 
 stop_local_frontend_server() {
     local pids
-    pids="$(ss -ltnp 2>/dev/null | awk '/127\.0\.0\.1:4200|0\.0\.0\.0:4200|\*:4200/ {print $NF}' | sed -n 's/.*pid=\([0-9]\+\).*/\1/p' | sort -u)"
+    pids="$(get_port_pids 4200)"
     if [ -n "$pids" ]; then
         echo "Stopping local frontend process on port 4200: $pids"
         kill $pids 2>/dev/null || true
@@ -42,7 +75,7 @@ stop_local_frontend_server() {
 }
 
 start_local_frontend_server() {
-    if ss -ltn 2>/dev/null | grep -Eq '127\.0\.0\.1:4200|0\.0\.0\.0:4200|\*:4200'; then
+    if is_port_listening 4200; then
         return 0
     fi
 
@@ -53,7 +86,11 @@ start_local_frontend_server() {
     echo "Starting Angular dev server on http://127.0.0.1:4200"
     (
         cd client || exit 1
-        setsid npx ng serve --host 0.0.0.0 --port 4200 --allowed-hosts all --proxy-config proxy.conf.json > .ng-serve.log 2>&1 < /dev/null &
+        if command -v setsid >/dev/null 2>&1; then
+            setsid npx ng serve --host 0.0.0.0 --port 4200 --allowed-hosts all --proxy-config proxy.conf.json > .ng-serve.log 2>&1 < /dev/null &
+        else
+            nohup npx ng serve --host 0.0.0.0 --port 4200 --allowed-hosts all --proxy-config proxy.conf.json > .ng-serve.log 2>&1 < /dev/null &
+        fi
     )
 }
 
