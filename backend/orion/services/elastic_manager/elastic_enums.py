@@ -19,6 +19,7 @@ class ELASTIC_INDEX:
     S_STEALERLOGS_INDEX = "stealer_model"
     S_SOCIAL_INDEX = "social_model"
     S_OPENSANCTIONS_INDEX = "sanction_model"
+    S_WRI_POWER_PLANTS_INDEX = "wri_power_plants_geo"
 
 
 class ELASTIC_SEMANTIC:
@@ -106,6 +107,30 @@ class ELASTIC_ENUMS:
                 "raw_record": {"type": "text", "index": False},
                 "address_entity_raw": {"type": "text", "index": False},
             },
+        },
+    }
+
+    mapping_power_plants_model = {
+        "settings": {
+            "number_of_shards": 1,
+            "number_of_replicas": 0,
+            "max_result_window": 1000000,
+        },
+        "mappings": {
+            "properties": {
+                "name": {"type": "text", "fields": {"keyword": {"type": "keyword", "ignore_above": 256}}},
+                "country": {"type": "keyword"},
+                "type": {"type": "keyword"},
+                "capacity_mw": {"type": "float"},
+                "source": {"type": "keyword"},
+                "location": {
+                    "properties": {
+                        "lat": {"type": "float"},
+                        "lon": {"type": "float"},
+                    }
+                },
+                "location_point": {"type": "geo_point"},
+            }
         },
     }
 

@@ -1,7 +1,10 @@
+import json
+import hashlib
+from pathlib import Path
 from datetime import datetime, timezone
 from string import capwords
 
-from elasticsearch import AsyncElasticsearch
+from elasticsearch import AsyncElasticsearch, helpers as es_helpers
 from fastapi import HTTPException
 
 from orion.helper_manager.env_handler import env_handler
@@ -66,6 +69,7 @@ class elastic_controller:
             mapping_stealer_model = ELASTIC_ENUMS.mapping_stealer_log_model
             mapping_social_model = ELASTIC_ENUMS.mapping_social_model
             mapping_saction_model = ELASTIC_ENUMS.mapping_opensanctions_model
+            mapping_power_plants_model = ELASTIC_ENUMS.mapping_power_plants_model
 
             if not await self.__m_core_connection.indices.exists(index=ELASTIC_INDEX.S_LEAK_INDEX, request_timeout=220):
                 await self.__m_core_connection.indices.create(
@@ -142,8 +146,72 @@ class elastic_controller:
                     body={"index.blocks.read_only_allow_delete": False},
                     request_timeout=220)
 
+            await self.__initialize_power_plants_data(mapping_power_plants_model)
+
         except Exception as ex:
             log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
+
+    @staticmethod
+    def prepare_power_plants_document(document: dict) -> dict:
+        prepared = dict(document)
+        location = prepared.get("location")
+        if isinstance(location, dict) and "lat" in location and "lon" in location:
+            prepared["location_point"] = {"lat": location["lat"], "lon": location["lon"]}
+        return prepared
+
+    @staticmethod
+    def power_plants_document_id(document: dict) -> str:
+        location = document.get("location") if isinstance(document, dict) else None
+        key_payload = {
+            "name": document.get("name") if isinstance(document, dict) else None,
+            "country": document.get("country") if isinstance(document, dict) else None,
+            "type": document.get("type") if isinstance(document, dict) else None,
+            "lat": location.get("lat") if isinstance(location, dict) else None,
+            "lon": location.get("lon") if isinstance(location, dict) else None,
+        }
+        key_str = json.dumps(key_payload, sort_keys=True, separators=(",", ":"))
+        return hashlib.sha256(key_str.encode("utf-8")).hexdigest()
+
+    @staticmethod
+    def __power_plants_asset_path() -> Path:
+        return Path(__file__).resolve().parents[4] / "build" / "assets" / "data" / "satellite" / "wri_power_plants.geojson"
+
+    async def __initialize_power_plants_data(self, mapping_power_plants_model):
+        asset_path = self.__power_plants_asset_path()
+        if not asset_path.exists():
+            log.g().e(f"Power plants data file not found: {asset_path}")
+            return
+
+        index_name = ELASTIC_INDEX.S_WRI_POWER_PLANTS_INDEX
+
+        if not await self.__m_core_connection.indices.exists(index=index_name, request_timeout=220):
+            await self.__m_core_connection.indices.create(index=index_name, body=mapping_power_plants_model, request_timeout=220)
+
+        with asset_path.open("r", encoding="utf-8") as handle:
+            documents = json.load(handle)
+
+        if not isinstance(documents, list):
+            raise ValueError(f"Expected a list of documents in {asset_path}")
+
+        def action_generator():
+            for document in documents:
+                if not isinstance(document, dict):
+                    continue
+                yield {
+                    "_op_type": "index",
+                    "_index": index_name,
+                    "_id": self.power_plants_document_id(document),
+                    "_source": self.prepare_power_plants_document(document),
+                }
+
+        await es_helpers.async_bulk(
+            self.__m_core_connection,
+            action_generator(),
+            chunk_size=2000,
+            request_timeout=220,
+            raise_on_error=False,
+            raise_on_exception=False,
+        )
 
     async def purge_old_records(self):
         try:
