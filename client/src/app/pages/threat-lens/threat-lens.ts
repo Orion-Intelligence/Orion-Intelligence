@@ -172,7 +172,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       this.arcSurfaceGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens Country Arc Connectors' });
 
       const map = new EsriMap({
-        basemap: 'dark-gray-vector',
+        basemap: 'oceans',
         ground: 'world-elevation',
         layers: [this.countryLayer, this.newsGraphicsLayer, this.arcSurfaceGraphicsLayer, this.arcGraphicsLayer, this.animatedArcGraphicsLayer],
       });
@@ -187,7 +187,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
           tilt: 0,
         },
         environment: {
-          atmosphereEnabled: true,
+          atmosphereEnabled: false,
           starsEnabled: true,
         },
       });
