@@ -285,15 +285,23 @@ if [ "$1" = "-docs" ]; then
 fi
 
 if [ "$1" = "dev" ]; then
+    echo "Starting Orion Intelligence dev mode"
+    echo "Stopping Docker services for project $PROJECT_NAME"
     stop_docker
+    echo "Checking local Angular dev server on port 4200"
     stop_local_frontend_server
+    echo "Starting local Angular dev server"
     start_local_frontend_server
     wait_for_local_frontend_server
+    echo "Preparing parser assets"
     create_parser_zip
+    echo "Writing local development environment values"
     set_testing_enabled "default"
     set_swarm_url_to_local_ip
     ensure_local_ssl_cert
+    echo "Ensuring shared Docker network exists"
     docker network create --driver bridge shared_bridge 2>/dev/null || true
+    echo "Starting Docker dev services from docker-compose.yml profile dev"
     docker compose -p "$PROJECT_NAME" -f docker-compose.yml --profile dev up -d --build web-dev nginx-dev
     wait_for_dev_gateway
     echo "Orion Intelligence dev services started"
