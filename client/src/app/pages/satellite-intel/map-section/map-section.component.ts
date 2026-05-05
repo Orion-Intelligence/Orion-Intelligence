@@ -306,43 +306,74 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     }
   }
 
-  private renderAircraftCluster(): void {
-    if (!this.aircraftCluster) {
-      return;
-    }
+private renderAircraftCluster(): void {
+  if (!this.aircraftCluster) return;
 
-    this.aircraftCluster.clearLayers();
+  this.aircraftCluster.clearLayers();
 
-    const markers = this.aircraftData.map(a => {
-      return this.L.marker([a.latitude, a.longitude], {
-        icon: this.L.divIcon({
-          html: `✈️`,
-          className: '',
-          iconSize: [30, 30],
-        }),
-      });
+  const markers = this.aircraftData.map(a => {
+    return this.L.marker([a.latitude, a.longitude], {
+      icon: this.L.divIcon({
+        html: `
+          <div class="w-10 h-10 flex items-center justify-center 
+                      rounded-full bg-blue-600 shadow-xl border-2 border-white"
+               style="transform: rotate(${a.true_track ?? 0}deg);">
+            
+            <svg viewBox="0 0 24 24" class="w-6 h-6 fill-white">
+              <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9L2 14v2l8-2.5V19l-2 1.5V22l3-1 3 1v-1.5L12 19v-5.5L21 16z"/>
+            </svg>
+
+          </div>
+        `,
+        className: 'bg-transparent border-0',
+        iconSize: [40, 40],
+        iconAnchor: [20, 20],
+      }),
     });
-    this.aircraftCluster.addLayers(markers);
-  }
+  });
 
-  private renderShipCluster(): void {
-    if (!this.shipCluster) {
-      return;
-    }
+  this.aircraftCluster.addLayers(markers);
+}
 
-    this.shipCluster.clearLayers();
-    const markers = this.shipsData.map(s => {
-      return this.L.marker([s.latitude, s.longitude], {
-        icon: this.L.divIcon({
-          html: `🚢`,
-          className: '',
-          iconSize: [30, 30],
-        }),
-      });
+private renderShipCluster(): void {
+  if (!this.shipCluster) return;
+
+  this.shipCluster.clearLayers();
+
+  const markers = this.shipsData.map(s => {
+    return this.L.marker([s.latitude!, s.longitude!], {
+      icon: this.L.divIcon({
+        html: `
+          <div class="relative w-11 h-11 flex items-center justify-center">
+
+            <!-- soft radar glow -->
+            <div class="absolute w-full h-full rounded-full bg-emerald-500/20"></div>
+
+            <!-- ship base -->
+            <div class="w-9 h-9 flex items-center justify-center 
+                        rounded-full bg-emerald-700 shadow-lg">
+
+              <!-- clean AIS-style ship -->
+              <svg 
+                viewBox="0 0 24 24" 
+                class="w-6 h-6 fill-white"
+                style="transform: rotate(${s.true_heading ?? s.course ?? 0}deg); transform-origin: center;">
+                
+                <path d="M12 2l2 6h6l-4 3 2 7-6-4-6 4 2-7-4-3h6z"/>
+              </svg>
+
+            </div>
+          </div>
+        `,
+        className: 'bg-transparent border-0',
+        iconSize: [44, 44],
+        iconAnchor: [22, 22],
+      }),
     });
+  });
 
-    this.shipCluster.addLayers(markers);
-  }
+  this.shipCluster.addLayers(markers);
+}
 
   private renderFacilities(): void {
     if (!this.facLayer) {

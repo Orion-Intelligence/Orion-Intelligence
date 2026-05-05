@@ -55,7 +55,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   readonly progressSegments = Array.from({ length: 20 }, (_, i) => i);
   readonly powerFilters = ORION_POWER_FILTERS;
   readonly infrastructureFilters = ORION_INFRASTRUCTURE_FILTERS;
-  readonly panelTabs = [ { id: 'dashboard', label: 'Dashboard' },{ id: 'compare', label: 'Compare' }, { id: 'anomaly', label: 'Anomaly' }, { id: 'sentinel', label: 'Sentinel' }, { id: 'image', label: 'Image' }, { id: 'facilities', label: 'Facilities' }, ] as const;
+  readonly panelTabs = [ { id: 'dashboard', label: 'Dashboard' },{ id: 'compare', label: 'Compare' }, { id: 'anomaly', label: 'Anomaly' }, { id: 'sentinel', label: 'Sentinel' }, { id: 'image', label: 'Image' }, ] as const;
   activePanel: 'dashboard' |'compare' | 'anomaly' | 'sentinel' | 'image' | 'facilities' = 'compare';
   activeTab: 'map' | 'tracking' | 'threat' = 'map';
   coordsForm = { value: '', delta: 0.05 };
@@ -288,7 +288,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     if (type === 'aircraft') {
       this.aircraftTrackingEnabled = !this.aircraftTrackingEnabled;
       isEnabled = this.aircraftTrackingEnabled;
-    } 
+    }
     else if (type === 'ship') {
       this.shipsTrackingEnabled = !this.shipsTrackingEnabled;
       isEnabled = this.shipsTrackingEnabled;
@@ -631,30 +631,21 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   public loadFacilities(): void {
-    if (!this.lat || !this.lon || !this.facilitiesVisible) {
-      this.facilitiesMapData = [];
+    this.syncAppliedViewport();
+    this.hasSearched = true;
+    if (this.lat === null || this.lat === undefined || this.lon === null || this.lon === undefined) {
       this.facilitiesData = null;
-      this.refreshMergedData();
       return;
     }
     this.facilitiesSub?.unsubscribe();
     const loadingId = this.beginMainLoading('Loading Satellite Intel', 'Loading nearby facilities...');
-    this.facilitiesSub = this.orionSatelliteService.loadFacilities(this.lat, this.lon, 5).subscribe({
-      next: (items) => {
-        this.facilitiesMapData = items;
-        this.facilitiesData = {
-          status: 'done', type: 'FeatureCollection', features: [],
-          total: items.length,
-          type_counts: this.buildFacilityTypeCounts(items),
-          overpass_ok: true,
-        };
-        this.refreshMergedData();
+    this.facilitiesSub = this.satelliteService.fetchFacilities(this.lat, this.lon, 5).subscribe({
+      next: (res) => {
+        this.facilitiesData = res.result;
         this.endMainLoading(loadingId);
       },
       error: () => {
-        this.facilitiesMapData = [];
         this.facilitiesData = null;
-        this.refreshMergedData();
         this.endMainLoading(loadingId);
       },
     });
