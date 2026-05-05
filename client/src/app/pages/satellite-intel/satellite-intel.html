@@ -12,19 +12,6 @@
   }
 
   <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
-    @if (showTopBar) {
-    <div class="z-20 flex w-full flex-wrap items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-760)] px-[30px] py-[15px] pt-0 pr-[30px] max-[640px]:gap-2">
-      <div class="flex max-w-full flex-nowrap gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="activeTab === 'map' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setActiveView('map')">
-          Satellite Map
-        </button>
-        <button class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="activeTab === 'threat' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setActiveView('threat')">
-          Threat Lens
-        </button>
-      </div>
-    </div>
-    }
-
     @if (isTrackingView && trackingError) {
       <div class="border-b border-[rgba(239,68,68,.25)] bg-[rgba(239,68,68,.08)] px-[14px] py-[7px] text-[12px] text-[#fca5a5]">
         <i class="bi bi-exclamation-triangle"></i> {{ trackingError }}
@@ -73,6 +60,16 @@
             }
           }
           <div class="absolute right-3 top-3 z-[920] flex items-center gap-2 map-overlay-menu">
+            @if (showTopBar) {
+              <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] shadow-[0_8px_24px_rgba(2,6,23,.35)]">
+                <button class="px-3 py-2 text-[11px] font-semibold transition-colors" [ngClass]="activeTab === 'map' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('map')">
+                  Satellite Map
+                </button>
+                <button class="px-3 py-2 text-[11px] font-semibold transition-colors" [ngClass]="activeTab === 'threat' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('threat')">
+                  Threat Lens
+                </button>
+              </div>
+            }
             <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] shadow-[0_8px_24px_rgba(2,6,23,.35)]">
               <button class="px-3 py-2 text-[11px] font-semibold transition-colors" [ngClass]="selectedLayer === 'esri' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('esri')">Satellite</button>
               <button class="px-3 py-2 text-[11px] font-semibold transition-colors" [ngClass]="selectedLayer === 'osm' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('osm')">Street</button>
