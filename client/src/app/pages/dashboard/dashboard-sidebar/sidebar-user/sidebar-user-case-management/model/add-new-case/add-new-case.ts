@@ -1,12 +1,38 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
 import { Case } from '../../../../../../../shared/model/case-management/case.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-add-new-case',
   imports: [CommonModule, FormsModule],
-  templateUrl: './add-new-case.html'
+  templateUrl: './add-new-case.html',
+
+  animations: [
+    trigger('slideIn', [
+      state(
+        'closed',
+        style({
+          transform: 'translateX(100%)'
+        })
+      ),
+      state(
+        'open',
+        style({
+          transform: 'translateX(0)'
+        })
+      ),
+      transition(
+        'closed => open',
+        animate('300ms ease-out')
+      ),
+      transition(
+        'open => closed',
+        animate('250ms ease-in')
+      )
+    ])
+  ]
 })
 export class AddNewCase {
   @Output() close = new EventEmitter<void>();
@@ -28,9 +54,15 @@ export class AddNewCase {
   priorityOptions = ['low', 'medium', 'high', 'critical'];
   statusOptions = ['open', 'in-progress', 'resolved', 'closed'];
 
+  constructor(private cdr: ChangeDetectorRef) { }
+
   ngOnInit(): void {
     this.generateCaseId();
-    this.isOpen = true;
+
+    setTimeout(() => {
+      this.isOpen = true;
+      this.cdr.detectChanges();
+    });
   }
 
   generateCaseId(): void {
@@ -69,7 +101,10 @@ export class AddNewCase {
 
   closePopup(): void {
     this.isOpen = false;
-    setTimeout(() => this.close.emit(), 300);
+
+    setTimeout(() => {
+      this.close.emit();
+    }, 300);
   }
 
 }

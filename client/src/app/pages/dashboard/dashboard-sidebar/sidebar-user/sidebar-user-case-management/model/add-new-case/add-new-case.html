@@ -6,13 +6,11 @@
     </div>
 
     <!-- Right Side Drawer -->
-    <div class="absolute right-0 top-0 h-full w-full max-w-2xl bg-[var(--color-blue-700)] shadow-2xl flex flex-col
-        transform transition-transform duration-300 ease-out"
-        [ngClass]="isOpen ? 'translate-x-0' : 'translate-x-full'">
+    <div class="absolute right-0 top-0 h-full w-full max-w-2xl bg-[var(--color-blue-700)] shadow-2xl flex flex-col"
+        [@slideIn]="isOpen ? 'open' : 'closed'">
 
         <!-- Header -->
-        <div
-            class="relative flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)]">
+        <div class="relative flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)]">
             <h2 class="text-2xl font-bold text-[var(--color-text1)]">
                 Add New Case
             </h2>
