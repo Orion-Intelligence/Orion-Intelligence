@@ -11,48 +11,30 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 
   animations: [
     trigger('slideIn', [
-      state(
-        'closed',
+      state('closed',
         style({
           transform: 'translateX(100%)'
-        })
-      ),
-      state(
-        'open',
+        })),
+      state('open',
         style({
           transform: 'translateX(0)'
-        })
-      ),
-      transition(
-        'closed => open',
-        animate('300ms ease-out')
-      ),
-      transition(
-        'open => closed',
-        animate('250ms ease-in')
-      )
+        })),
+      transition('closed => open',
+        animate('300ms ease-out')),
+      transition('open => closed',
+        animate('250ms ease-in'))
     ])
   ]
 })
 export class AddNewCase {
-  @Output() close = new EventEmitter<void>();
-  @Output() caseAdded = new EventEmitter<Case>();
   isOpen = false;
-
-  caseForm: Case = {
-    caseId: '',
-    caseType: 'Data Leak',
-    owner: '',
-    createdDate: new Date(),
-    modifiedDate: new Date(),
-    status: 'open',
-    priority: 'low',
-    intakeSource: ''
-  };
-
+  caseForm: Case = { caseId: '', caseType: 'Data Leak', owner: '', createdDate: new Date(), modifiedDate: new Date(), status: 'open', priority: 'low', intakeSource: '' };
   caseTypeOptions = ['Data Leak', 'Account Takeover', 'Fraud', 'Malware'];
   priorityOptions = ['low', 'medium', 'high', 'critical'];
   statusOptions = ['open', 'in-progress', 'resolved', 'closed'];
+
+  @Output() close = new EventEmitter<void>();
+  @Output() caseAdded = new EventEmitter<Case>();
 
   constructor(private cdr: ChangeDetectorRef) { }
 
@@ -67,9 +49,9 @@ export class AddNewCase {
 
   generateCaseId(): void {
     const stored = localStorage.getItem('nextCaseId');
-    let nextId = stored ? parseInt(stored, 10) : 1;
+    const nextId = stored ? parseInt(stored, 10) : 1;
+
     this.caseForm.caseId = String(nextId).padStart(5, '0');
-    localStorage.setItem('nextCaseId', String(nextId + 1));
   }
 
   getFormattedDateTime(date: Date): string {
@@ -83,11 +65,23 @@ export class AddNewCase {
     });
   }
 
+  closePopup(): void {
+    this.isOpen = false;
+
+    setTimeout(() => {
+      this.close.emit();
+    }, 300);
+  }
+
   onSubmit(): void {
     if (!this.caseForm.owner.trim()) {
       alert('Officer name is required');
       return;
     }
+
+    const stored = localStorage.getItem('nextCaseId');
+    const nextId = stored ? parseInt(stored, 10) : 1;
+    localStorage.setItem('nextCaseId', String(nextId + 1));
 
     const newCase: Case = {
       ...this.caseForm,
@@ -98,13 +92,4 @@ export class AddNewCase {
     this.caseAdded.emit(newCase);
     this.closePopup();
   }
-
-  closePopup(): void {
-    this.isOpen = false;
-
-    setTimeout(() => {
-      this.close.emit();
-    }, 300);
-  }
-
 }
