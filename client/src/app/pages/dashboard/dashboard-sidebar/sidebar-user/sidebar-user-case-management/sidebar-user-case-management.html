@@ -134,6 +134,10 @@
                 </div>
                 }
             </div>
+            @if (showAddCasePopup) {
+            <app-add-new-case (close)="closeAddCasePopup()" (caseAdded)="onCaseAdded($event)">
+            </app-add-new-case>
+            }
         </div>
     </div>
     <span id="bottom"></span>

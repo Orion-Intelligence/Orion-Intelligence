@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Case } from '../../../../../shared/model/case-management/case.model';
+import { AddNewCase } from './model/add-new-case/add-new-case';
 
 @Component({
   selector: 'app-sidebar-user-case-management',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AddNewCase],
   templateUrl: './sidebar-user-case-management.html'
 })
 export class SidebarUserCaseManagement implements OnInit {
@@ -19,7 +20,8 @@ export class SidebarUserCaseManagement implements OnInit {
 
   loadCases(): void {
     // Mock data - replace with API call later
-    this.cases = [];
+    const stored = localStorage.getItem('cases');
+    this.cases = stored ? JSON.parse(stored) : [];
   }
 
   addCase(): void {
@@ -30,8 +32,9 @@ export class SidebarUserCaseManagement implements OnInit {
     this.showAddCasePopup = false;
   }
 
-  onCaseAdded(): void {
-    this.loadCases();
+  onCaseAdded(newCase: Case): void {
+    this.cases.push(newCase);
+    localStorage.setItem('cases', JSON.stringify(this.cases));
     this.closeAddCasePopup();
   }
 
