@@ -1,7 +1,7 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, Output, Renderer2, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SatelliteIntelService } from '../../satellite-intel-service.service';
+import { SatelliteIntelService } from '../../satellite-intel-service';
 import { SatelliteGeocodeResult } from '../../model/satellite-intel.model';
 
 @Component({

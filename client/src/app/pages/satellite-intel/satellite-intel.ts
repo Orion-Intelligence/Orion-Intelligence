@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import { SatelliteIntelService } from './satellite-intel-service.service';
+import { SatelliteIntelService } from './satellite-intel-service';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { GeocodeModalComponent } from './components/geocode-modal/geocode-modal.component';
 import { MapSectionComponent } from './map-section/map-section.component';

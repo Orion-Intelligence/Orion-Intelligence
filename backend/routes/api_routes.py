@@ -15,6 +15,7 @@ from orion.api.interactive.hompage_manager.homepage_model import homepage_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_crack_model, search_dynamic_crypto_model, search_dynamic_onion_search, search_dynamic_param_model, search_dynamic_social_model
+from orion.api.interactive.search_manager.search_data_model.power_plants.search_power_plants_param_model import search_power_plants_param_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (
     DomainScanRequest,
@@ -182,6 +183,21 @@ async def search_defacement(param: search_consolidated_param_model = Body(...), 
     param.content = param.category
     base_index = [ELASTIC_INDEX.S_DEFACEMENT_INDEX]
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category],"defacement")
+
+@api_routes.post(
+    "/api/search/power-plants",
+    summary="Search power plants",
+    tags=["Search"],
+    operation_id="searchPowerPlants",
+    status_code=200,
+    dependencies=GENERAL_MODULE_DEPS,)
+async def search_power_plants(param: search_power_plants_param_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().register(
+        str(current_user.tenant_uuid),
+        str(current_user.id),
+        param.model_dump_json()
+    )
+    return await search_model.getInstance().search_power_plants(param)
 
 
 @api_routes.post(
@@ -456,6 +472,18 @@ async def get_news_document(doc_id: str, lang: Optional[str] = Query(
 async def get_exploit_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
     return await search_model.getInstance().request_exploit_doc(doc_id, lang)
+
+
+@api_routes.post(
+    "/api/search/power-plants/by-ids",
+    summary="Get multiple power plants by IDs",
+    tags=["Reports"],
+    operation_id="getPowerPlantsByIds",
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
+        Depends(license_required("module:general", bypass_licenses=["maintainer"]))],)
+async def get_power_plants_by_ids(param: list[str] = Body(...),):
+    return await search_model.getInstance().request_power_plants_by_ids(param)
 
 
 @api_routes.get(

@@ -1,4 +1,5 @@
 from typing import List, Optional
+import json
 import httpx
 from fastapi import HTTPException
 from starlette import status
@@ -8,6 +9,7 @@ from orion.api.interactive.search_manager.search_data_model.consolidated.search_
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_stealerlog_callback_model import search_stealerlog_callback_model
+from orion.api.interactive.search_manager.search_data_model.power_plants.search_power_plants_param_model import search_power_plants_param_model
 from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
@@ -148,6 +150,106 @@ class search_model:
 
     async def request_general_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
         return await self._request_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id, lang, ["m_content", "m_important_content"])
+
+    async def request_power_plants_by_ids(self, doc_ids: list[str]):
+        if not doc_ids:
+            return {"Result": [], "Count": 0}
+        body = {
+            "ids": doc_ids
+        }
+
+        res = await elastic_controller.get_instance().mget_docs(
+            ELASTIC_INDEX.S_WRI_POWER_PLANTS_INDEX,
+            body
+        )
+
+        if not res:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to fetch documents"
+            )
+
+        docs = res.get("docs", [])
+
+        results = []
+        for d in docs:
+            if not d.get("found"):
+                continue
+
+            src = d.get("_source", {}) or {}
+
+            results.append({
+                "id": d.get("_id"),
+                "name": src.get("name"),
+                "country": src.get("country"),
+                "type": src.get("type"),
+                "capacity": src.get("capacity_mw"),
+                "source": src.get("source"),
+                "location": src.get("location"),
+                "location_point": src.get("location_point"),
+            })
+
+        return {
+            "Result": results,
+            "Count": len(results)
+        }
+    
+
+    async def search_power_plants(self, param: search_power_plants_param_model):
+        page = max(1, param.page)
+        size = max(1, min(param.size, 1000))  
+
+        from_ = (page - 1) * size
+
+        query = {
+            "from": from_,
+            "size": size,
+            "_source": ["name", "location.lat", "location.lon"],
+            "track_total_hits": True,
+            "query": {
+                "match_all": {}
+            }
+        }
+
+        m_status, docs = await elastic_controller.get_instance().search_query(
+            ELASTIC_INDEX.S_WRI_POWER_PLANTS_INDEX,
+            query,
+        )
+
+        if not m_status:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to fetch power plants"
+            )
+
+        body = docs.body if hasattr(docs, "body") else docs
+        hits = body.get("hits", {}).get("hits", [])
+
+        result = []
+        for hit in hits:
+            src = hit.get("_source", {}) or {}
+            loc = src.get("location", {}) or {}
+
+            result.append({
+                "id": hit.get("_id"),
+                "name": src.get("name"),
+                "location": {
+                    "lat": loc.get("lat"),
+                    "lon": loc.get("lon"),
+                }
+            })
+
+        total = body.get("hits", {}).get("total", {}).get("value", 0)
+        total_pages = (total + size - 1) // size
+
+        return {
+            "Result": result,
+            "Page": page,
+            "Page_Count": total_pages,
+            "Total_Hits": total
+        }
+
+    
 
     @staticmethod
     def _build_ranked_response(response, query, default_size: int, approximate_page_count: bool = False):

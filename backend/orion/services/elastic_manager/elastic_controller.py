@@ -469,3 +469,10 @@ class elastic_controller:
         except Exception as ex:
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
             raise HTTPException(status_code=500, detail="Failed to index dump data")
+        
+    async def mget_docs(self, index, body):
+        return await self.__m_core_connection.mget(
+            index=self._read_index(index),
+            body=body,
+            request_timeout=60
+        )
