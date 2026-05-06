@@ -164,6 +164,8 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
         this.orionCluster = this.L.markerClusterGroup({
           maxClusterRadius: 40,
           showCoverageOnHover: false,
+          zoomToBoundsOnClick: false,
+          spiderfyOnMaxZoom: false,
           iconCreateFunction: (cluster: any) => {
             const count = cluster.getChildCount();
             return this.L.divIcon({
@@ -183,6 +185,8 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
         this.aircraftCluster = (this.L as any).markerClusterGroup({
           maxClusterRadius: 40,
           showCoverageOnHover: false,
+          zoomToBoundsOnClick: false,
+          spiderfyOnMaxZoom: false,
           iconCreateFunction: (cluster: any) => {
             const count = cluster.getChildCount();
             return this.L.divIcon({
@@ -204,6 +208,8 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
         this.shipCluster = (this.L as any).markerClusterGroup({
           maxClusterRadius: 40,
           showCoverageOnHover: false,
+          zoomToBoundsOnClick: false,
+          spiderfyOnMaxZoom: false,
           iconCreateFunction: (cluster: any) => {
             const count = cluster.getChildCount();
             return this.L.divIcon({
