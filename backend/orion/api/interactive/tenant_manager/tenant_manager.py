@@ -350,7 +350,6 @@ class TenantManager:
                 licenses=data.licenses,
                 tenant_uuid=tenant_uuid,
                 password_reset_required=True, )
-                tenant_uuid=tenant_uuid, )
             
             await mail_manager.get_instance().validate_mail_configuration()
             await engine.save(user)

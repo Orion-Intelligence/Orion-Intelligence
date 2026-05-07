@@ -65,12 +65,7 @@ class config_controller:
             "S_HOME_HEADER_DATA_SOURCES": "https://www.orionintelligence.org/sources",
             "S_HOME_HEADER_ADVERSARIES": "https://www.orionintelligence.org/adversaries",
             "S_HOME_HEADER_PRICING": "https://www.orionintelligence.org/pricing",
-            "S_HOME_HEADER_PRICING_ALLOWED": True,
-            "ACCOUNTS_MAIL": "accounts@example.com",
-            "ACCOUNTS_MAIL_PASSWORD": "test",
-            "ACCOUNTS_SMTP_SERVER": "mailpit",
-            "ACCOUNTS_SMTP_PORT": 1025
-
+            "S_HOME_HEADER_PRICING_ALLOWED": True
         })
         return config_data(settings=fresh_config)
 
@@ -92,11 +87,7 @@ class config_controller:
                     "S_HOME_HEADER_DATA_SOURCES": "https://www.orionintelligence.org/sources",
                     "S_HOME_HEADER_ADVERSARIES": "https://www.orionintelligence.org/adversaries",
                     "S_HOME_HEADER_PRICING": "https://www.orionintelligence.org/pricing",
-                    "S_HOME_HEADER_PRICING_ALLOWED": True,
-                    "ACCOUNTS_MAIL": "accounts@example.com",
-                    "ACCOUNTS_MAIL_PASSWORD": "test",
-                    "ACCOUNTS_SMTP_SERVER": "mailpit",
-                    "ACCOUNTS_SMTP_PORT": 1025
+                    "S_HOME_HEADER_PRICING_ALLOWED": True
                 }),
             })
 

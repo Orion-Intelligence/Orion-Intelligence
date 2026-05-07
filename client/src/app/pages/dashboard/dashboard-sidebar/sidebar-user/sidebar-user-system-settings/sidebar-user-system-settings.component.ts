@@ -22,7 +22,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   configurationError = '';
   networkConfigurationError = '';
   systemData = { ai_endpoint: '', ai_endpoint_enabled: true, language_allowed: '', version: '', api_allowed: '0', app_name: '0', s_onion: '' };
-  form = { language: '', version: '', api_allowed: '0', app_name: '0', ai_endpoint: '', ai_endpoint_enabled: true, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: 'test', accounts_mail: 'accounts@example.com', accounts_smtp_server: 'mailpit', accounts_smtp_port: '1025' };
+  form = { language: '', version: '', api_allowed: '0', app_name: '0', ai_endpoint: '', ai_endpoint_enabled: true, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
   languageOptions = [ 'en', 'fr', 'es', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko', 'ar', 'hi', 'bn', 'tr', 'nl', 'sv', 'pl', 'cs' ];
   onionPattern = /^(https?:\/\/)?[a-z2-7]{56}\.onion\/?$/i;
   urlPattern = /^https?:\/\/.+/i;
@@ -64,10 +64,10 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.pricing_url = typeof metaInfo['S_HOME_HEADER_PRICING'] === 'string' ? metaInfo['S_HOME_HEADER_PRICING'] : '';
     this.form.documentation_allowed = metaInfo['S_HOME_HEADER_PRICING_ALLOWED'] === true;
     this.form.whistle_blowing_allowed = metaInfo['S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED'] === true;
-    this.form.accounts_mail_password = typeof metaInfo['ACCOUNTS_MAIL_PASSWORD'] === 'string' ? metaInfo['ACCOUNTS_MAIL_PASSWORD'] : 'test';
-    this.form.accounts_mail = typeof metaInfo['ACCOUNTS_MAIL'] === 'string' ? metaInfo['ACCOUNTS_MAIL'] : 'accounts@example.com';
-    this.form.accounts_smtp_server = typeof metaInfo['ACCOUNTS_SMTP_SERVER'] === 'string' ? metaInfo['ACCOUNTS_SMTP_SERVER'] : 'mailpit';
-    this.form.accounts_smtp_port = typeof metaInfo['ACCOUNTS_SMTP_PORT'] === 'string' ? metaInfo['ACCOUNTS_SMTP_PORT'] : '1025';
+    this.form.accounts_mail_password = typeof metaInfo['ACCOUNTS_MAIL_PASSWORD'] === 'string' ? metaInfo['ACCOUNTS_MAIL_PASSWORD'] : '';
+    this.form.accounts_mail = typeof metaInfo['ACCOUNTS_MAIL'] === 'string' ? metaInfo['ACCOUNTS_MAIL'] : '';
+    this.form.accounts_smtp_server = typeof metaInfo['ACCOUNTS_SMTP_SERVER'] === 'string' ? metaInfo['ACCOUNTS_SMTP_SERVER'] : '';
+    this.form.accounts_smtp_port = typeof metaInfo['ACCOUNTS_SMTP_PORT'] === 'string' ? metaInfo['ACCOUNTS_SMTP_PORT'] : '';
     this.configurationError = '';
     this.networkConfigurationError = '';
   }
@@ -149,7 +149,8 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       if (typeof value !== 'string' || !value.trim()) {
         if (String(field.key).startsWith('accounts_')) {
           this.networkConfigurationError = `${field.label} is required`;
-        } else {
+        }
+        else {
           this.configurationError = `${field.label} is required`;
         }
         return;

@@ -46,11 +46,17 @@ class mail_manager:
         except (TypeError, ValueError):
             meta_info = {}
 
-        # Prefer values from System Settings (meta_info), then fallback to env.
-        ACCOUNTS_MAIL_PASSWORD = str(meta_info.get("ACCOUNTS_MAIL_PASSWORD") or env_handler.get_instance().env("ACCOUNTS_MAIL_PASSWORD"))
-        sender_email = str(meta_info.get("ACCOUNTS_MAIL") or env_handler.get_instance().env("ACCOUNTS_MAIL"))
-        smtp_server = str(meta_info.get("ACCOUNTS_SMTP_SERVER") or env_handler.get_instance().env("ACCOUNTS_SMTP_SERVER"))
-        smtp_port = int(str(meta_info.get("ACCOUNTS_SMTP_PORT") or env_handler.get_instance().env("ACCOUNTS_SMTP_PORT")))
+        # Mail configuration must be explicitly saved in System Settings.
+        ACCOUNTS_MAIL_PASSWORD = meta_info.get("ACCOUNTS_MAIL_PASSWORD")
+        sender_email = meta_info.get("ACCOUNTS_MAIL")
+        smtp_server = meta_info.get("ACCOUNTS_SMTP_SERVER")
+        smtp_port_raw = meta_info.get("ACCOUNTS_SMTP_PORT")
+        if not ACCOUNTS_MAIL_PASSWORD or not sender_email or not smtp_server or not smtp_port_raw:
+            raise HTTPException(status_code=400, detail="SMTP configuration is incomplete")
+        try:
+            smtp_port = int(str(smtp_port_raw))
+        except ValueError:
+            raise HTTPException(status_code=400, detail="SMTP configuration is incomplete")
         msg = MIMEMultipart("alternative")
         msg["From"] = sender_email
         msg["To"] = to_header
@@ -104,10 +110,16 @@ class mail_manager:
         except:
             meta_info = {}
 
-        password = str(meta_info.get("ACCOUNTS_MAIL_PASSWORD") or env_handler.get_instance().env("ACCOUNTS_MAIL_PASSWORD"))
-        sender_email = str(meta_info.get("ACCOUNTS_MAIL") or env_handler.get_instance().env("ACCOUNTS_MAIL"))
-        smtp_server = str(meta_info.get("ACCOUNTS_SMTP_SERVER") or env_handler.get_instance().env("ACCOUNTS_SMTP_SERVER"))
-        smtp_port = int(str(meta_info.get("ACCOUNTS_SMTP_PORT") or env_handler.get_instance().env("ACCOUNTS_SMTP_PORT")))
+        password = meta_info.get("ACCOUNTS_MAIL_PASSWORD")
+        sender_email = meta_info.get("ACCOUNTS_MAIL")
+        smtp_server = meta_info.get("ACCOUNTS_SMTP_SERVER")
+        smtp_port_raw = meta_info.get("ACCOUNTS_SMTP_PORT")
+        if not password or not sender_email or not smtp_server or not smtp_port_raw:
+            raise HTTPException(status_code=400, detail="SMTP configuration is incomplete")
+        try:
+            smtp_port = int(str(smtp_port_raw))
+        except ValueError:
+            raise HTTPException(status_code=400, detail="SMTP configuration is incomplete")
 
         try:
             is_production = env_handler.get_instance().env("PRODUCTION", "0") == "1"

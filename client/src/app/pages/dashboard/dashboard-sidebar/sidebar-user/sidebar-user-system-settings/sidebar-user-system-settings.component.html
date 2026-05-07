@@ -205,26 +205,6 @@
         </div>
       </div>
 
-      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 sm:col-span-2">
-        <div class="ui-section-title">Service Status</div>
-        <div class="ui-section-description">Read-only runtime flags.</div>
-        <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2">
-            <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">API Allowed</span>
-            <span class="rounded-full border px-3 py-1 text-[12px] font-semibold" [ngClass]="systemData.api_allowed === '1' ? 'border-emerald-400/30 bg-emerald-400/15 text-emerald-300' : 'border-rose-400/30 bg-rose-400/15 text-rose-300'">
-              {{ systemData.api_allowed === '1' ? 'Enabled' : 'Disabled' }}
-            </span>
-          </div>
-
-          <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2">
-            <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">AI Endpoint Enabled</span>
-            <span class="rounded-full border px-3 py-1 text-[12px] font-semibold" [ngClass]="systemData.ai_endpoint_enabled ? 'border-emerald-400/30 bg-emerald-400/15 text-emerald-300' : 'border-rose-400/30 bg-rose-400/15 text-rose-300'">
-              {{ systemData.ai_endpoint_enabled ? 'Enabled' : 'Disabled' }}
-            </span>
-          </div>
-        </div>
-      </div>
-
       <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 sm:col-span-2" [ngClass]="isEditing ? 'ring-2 ring-sky-400/20 border-sky-400/35' : ''">
         <div class="ui-section-title">Network Configuration</div>
         <div class="ui-section-description">Set mail and app connectivity variables.</div>
@@ -274,6 +254,26 @@
               {{ networkConfigurationError }}
             </div>
           }
+        </div>
+      </div>
+
+      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 sm:col-span-2">
+        <div class="ui-section-title">Service Status</div>
+        <div class="ui-section-description">Read-only runtime flags.</div>
+        <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2">
+            <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">API Allowed</span>
+            <span class="rounded-full border px-3 py-1 text-[12px] font-semibold" [ngClass]="systemData.api_allowed === '1' ? 'border-emerald-400/30 bg-emerald-400/15 text-emerald-300' : 'border-rose-400/30 bg-rose-400/15 text-rose-300'">
+              {{ systemData.api_allowed === '1' ? 'Enabled' : 'Disabled' }}
+            </span>
+          </div>
+
+          <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2">
+            <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">AI Endpoint Enabled</span>
+            <span class="rounded-full border px-3 py-1 text-[12px] font-semibold" [ngClass]="systemData.ai_endpoint_enabled ? 'border-emerald-400/30 bg-emerald-400/15 text-emerald-300' : 'border-rose-400/30 bg-rose-400/15 text-rose-300'">
+              {{ systemData.ai_endpoint_enabled ? 'Enabled' : 'Disabled' }}
+            </span>
+          </div>
         </div>
       </div>
     </div>
