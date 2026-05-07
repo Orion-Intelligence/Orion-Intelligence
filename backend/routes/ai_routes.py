@@ -13,9 +13,9 @@ from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 ai_routes = APIRouter()
 
 
-async def ai_endpoint_required():
+async def ai_enabled_required():
     if config_controller.getInstance().get("ai_endpoint_enabled", "1") != "1":
-        raise HTTPException(status_code=403, detail="AI endpoint is disabled")
+        raise HTTPException(status_code=403, detail="AI is disabled")
 
 
 @ai_routes.post(
@@ -28,7 +28,7 @@ async def ai_endpoint_required():
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(ai_endpoint_required),
+        Depends(ai_enabled_required),
         Depends(
             role_required(
                 [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
@@ -47,7 +47,7 @@ async def nexus_chat(payload: ReportChatRequest, current_user=Depends(get_curren
     "/api/nexus/chat/cancel",
     include_in_schema=False,
     dependencies=[
-        Depends(ai_endpoint_required),
+        Depends(ai_enabled_required),
         Depends(
             role_required(
                 [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
@@ -84,7 +84,7 @@ async def clear_nexus_chat_session(current_user=Depends(get_current_user)):
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(ai_endpoint_required),
+        Depends(ai_enabled_required),
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:ai", bypass_roles=[user_role.ADMIN])),
         Depends(limiter_dependency),

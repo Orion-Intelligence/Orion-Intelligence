@@ -272,7 +272,7 @@ Recommended Social Intel workflow:
 | `Users` | Tenant user management. | Table/card view, add user, expand row, status change, license edit, delete, quota limits. |
 | `Tenants` | Platform-level tenant administration. | Verification state, quota, status, license assignment, tenant detail editing. |
 | `Audit Logs` | Activity trail across user and tenant actions. | Export, date filters, pagination, reset. |
-| `System Settings` | Platform branding, visibility, URLs, runtime indicators. | Logos, app name, language, onion address, docs visibility, whistle-blowing visibility, API allowed, AI endpoint enabled. |
+| `System Settings` | Platform branding, visibility, URLs, runtime indicators. | Logos, app name, language, onion address, docs visibility, whistle-blowing visibility, AI enabled. |
 
 Tenant monitoring depends on IOC quality. If alert results are poor, advise the user to review `Manage IOCs`, tenant licenses, alert categories, and scan/flush actions.
 
@@ -341,7 +341,7 @@ System Settings can reject oversized image uploads. The documented validation li
 | User redirected to onboarding | Tenant setup incomplete or verification/license not finished. | Explain the onboarding sequence and ask admin to verify tenant state if blocked. |
 | Search returns no results | Query too narrow, filters active, date range empty, source not indexed. | Tell user to clear filters, switch search mode, broaden query, or use Consolidated. |
 | Results too broad | Semantic/OR mode too loose or no filters. | Suggest AND/full-query mode, content/network filters, and date range. |
-| Report lacks AI summary/chat | AI endpoint disabled or license/settings unavailable. | Check `ai_endpoint_enabled`, module license, and deployment config. |
+| Report lacks AI summary/chat | AI disabled or license/settings unavailable. | Check `ai_endpoint_enabled`, module license, and deployment config. |
 | Upload fails | Unsupported type, file too large, or scanner validation. | Verify file type/size and use scanner-specific reset or `Analyze Another File`. |
 | Scan is slow or stuck | Scan target scope, backend readiness, network service delay. | Suggest checking target format, cancel/retry, or waiting for polling/final status. |
 | Directory appears empty | Filters active, no monitored entries, network/content/date mismatch. | Reset filters and verify monitored source availability. |
@@ -395,7 +395,7 @@ For developer-facing answers, tie the user-visible workflow back to the code are
 | Tenant/user/admin behavior | `backend/routes/tenant_routes.py`, tenant/account managers | Profile/admin pages, role/license UI visibility, Cypress tenant tests. |
 | Auth/session/2FA | `backend/routes/auth_routes.py`, auth/account managers | Login/reset/account UI, session handling, Cypress auth tests. |
 | Feeder behavior | `backend/routes/crawl_routes.py`, feeder manager | Feeder UI, owner/enable/disable/delete flows. |
-| AI/chat behavior | `backend/routes/api_micros.py`, AI endpoint checks | Report chat UI, AI workspace, `ai_endpoint_enabled`. |
+| AI/chat behavior | `backend/routes/api_micros.py`, AI enabled checks | Report chat UI, AI workspace, `ai_endpoint_enabled`. |
 | Graph behavior | Graph managers and CTI/social pages | Canvas/list views, session import/export, context menus. |
 | Documentation screenshots | `docs/e2e`, `docs/screenshots`, `docs/scripts/postprocess_screenshots.py`, `run.sh` | Cypress docs screenshot workflow. |
 
@@ -483,7 +483,7 @@ Keep this shape for new features so LLM responses can reliably describe any feat
 | [Manage IOCs](#manage-iocs) | Profile And Alerts | `/dashboard/profile/ioc` | ioc, manage iocs, tenant iocs, monitored indicators |
 | [Account Settings](#account-settings) | Settings | `/dashboard/profile/account` | account, profile settings, theme, 2fa, profile visibility, avatar |
 | [Tenant Settings](#tenant-settings) | Settings | `/dashboard/profile/tenant-settings` | tenant settings, tenant branding, company settings |
-| [System Settings](#system-settings) | Settings | `/dashboard/profile/system-settings` | system settings, branding, app name, language, ai endpoint enabled, documentation allowed, onion address |
+| [System Settings](#system-settings) | Settings | `/dashboard/profile/system-settings` | system settings, branding, app name, language, AI enabled, documentation allowed, onion address |
 | [Users](#users) | Administration | `/dashboard/profile/users, /dashboard/tenant/view-profiles` | users, manage users, view profiles, tenant users |
 | [User Activity](#user-activity) | Administration | `/dashboard/profile/user/:user_id` | user activity, profile activity, user profile |
 | [Tenant Administration](#tenant-administration) | Administration | `/dashboard/tenant/view-tenants` | tenant administration, view tenants, all tenants |
@@ -1228,7 +1228,7 @@ Keep this shape for new features so LLM responses can reliably describe any feat
 
 **Visibility And Troubleshooting**
 
-- If API returns 403, enable AI Endpoint Enabled in System Settings.
+- If API returns 403, enable AI in System Settings.
 - Confirm AI module license.
 
 #### Crypto Scanner
@@ -1477,8 +1477,8 @@ Keep this shape for new features so LLM responses can reliably describe any feat
 
 **Visibility And Troubleshooting**
 
-- If the button is missing, enable AI Endpoint Enabled in System Settings.
-- If API returns 403, AI Endpoint Enabled is off.
+- If the button is missing, enable AI in System Settings.
+- If API returns 403, AI is off.
 - Confirm AI module license.
 
 #### AI Report Summary
@@ -1500,7 +1500,7 @@ Keep this shape for new features so LLM responses can reliably describe any feat
 
 **Visibility And Troubleshooting**
 
-- If hidden or blocked, check AI Endpoint Enabled and AI license.
+- If hidden or blocked, check AI settings and AI license.
 
 #### Report Chat
 
@@ -1521,7 +1521,7 @@ Keep this shape for new features so LLM responses can reliably describe any feat
 
 **Visibility And Troubleshooting**
 
-- If API returns 403, enable AI Endpoint Enabled.
+- If API returns 403, enable AI.
 - Confirm the user can access the report.
 
 
@@ -1572,7 +1572,7 @@ Keep this shape for new features so LLM responses can reliably describe any feat
 **Visibility And Troubleshooting**
 
 - Toolbar actions depend on report type and deployment settings.
-- AI summary requires AI Endpoint Enabled and AI licensing.
+- AI summary requires AI to be enabled and licensed.
 - Export can be blocked if the user lacks access to the source module.
 
 #### Result Insights Side Panel
@@ -1850,11 +1850,11 @@ Keep this shape for new features so LLM responses can reliably describe any feat
 #### System Settings
 
 - **Feature ID:** `system_settings`
-- **User asks for:** system settings; branding; app name; language; ai endpoint enabled; documentation allowed; onion address
+- **User asks for:** system settings; branding; app name; language; AI enabled; documentation allowed; onion address
 - **Where to go:** `/dashboard/profile/system-settings`
 - **Roles:** `admin`
 - **Licenses:** none
-- **Settings:** `api_allowed`, `ai_endpoint_enabled`, `s_onion`, `meta_info`
+- **Settings:** `ai_endpoint_enabled`, `s_onion`, `meta_info`
 - **Related backend APIs:** `/api/public/update`, `/api/system/image`
 
 **Workflow**
@@ -1862,14 +1862,14 @@ Keep this shape for new features so LLM responses can reliably describe any feat
 1. Open System Settings.
 2. Click edit.
 3. Update app name, language, onion address, homepage links, branding assets, or feature toggles.
-4. Toggle AI Endpoint Enabled to allow or block AI UI and AI backend endpoints.
+4. Toggle AI Enabled to allow or block AI UI and AI backend routes.
 5. Save settings.
 
 **Visibility And Troubleshooting**
 
 - Admin role is required to save settings.
 - URLs must start with http:// or https://.
-- AI Endpoint Enabled is stored as ai_endpoint_enabled.
+- AI Enabled is stored as ai_endpoint_enabled.
 
 
 ### Administration

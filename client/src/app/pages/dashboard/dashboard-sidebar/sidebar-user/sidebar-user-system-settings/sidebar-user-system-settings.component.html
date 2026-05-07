@@ -165,7 +165,7 @@
             <label class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2" [class.cursor-pointer]="isEditing" [class.cursor-not-allowed]="!isEditing">
               <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">AI Enabled</span>
               <span class="relative inline-flex items-center">
-                <input data-testid="system-settings-ai-endpoint-enabled" type="checkbox" class="sr-only peer" aria-label="AI endpoint enabled" [(ngModel)]="form.ai_endpoint_enabled" [disabled]="!isEditing" />
+                <input data-testid="system-settings-ai-enabled" type="checkbox" class="sr-only peer" aria-label="AI enabled" [(ngModel)]="form.ai_endpoint_enabled" [disabled]="!isEditing" />
                 <span class="relative h-[18px] w-[32px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] transition-colors duration-300 peer-checked:bg-sky-500/70 peer-disabled:opacity-60">
                   <span class="absolute left-[1px] top-0 mt-[1px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="form.ai_endpoint_enabled ? 'translate-x-[14px]' : 'translate-x-0'"></span>
                 </span>

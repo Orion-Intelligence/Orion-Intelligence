@@ -11,9 +11,9 @@ from orion.api.server.crawl_manager.class_model.CTITextRequest import CTITextReq
 micro_routes = APIRouter()
 
 
-async def ai_endpoint_required():
+async def ai_enabled_required():
     if config_controller.getInstance().get("ai_endpoint_enabled", "1") != "1":
-        raise HTTPException(status_code=403, detail="AI endpoint is disabled")
+        raise HTTPException(status_code=403, detail="AI is disabled")
 
 
 @micro_routes.post(
@@ -26,14 +26,14 @@ async def fetch_cti_label(payload: CTITextRequest, _=Depends(role_required([user
 
 @micro_routes.post(
     "/api/nlp/parse/ai",
-    dependencies=[Depends(ai_endpoint_required), Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
+    dependencies=[Depends(ai_enabled_required), Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def parse_ai(payload: nlp_data_model, current_user=Depends(get_current_user)):
     return await crawl_model.getInstance().parse_chat_ai(payload, user_id=str(current_user.id))
 
 
 @micro_routes.post(
     "/api/nlp/summarize/ai",
-    dependencies=[Depends(ai_endpoint_required), Depends(role_required([user_role.ADMIN, user_role.CRAWLER, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:ai", bypass_roles=[user_role.ADMIN])), Depends(limiter_dependency)])
+    dependencies=[Depends(ai_enabled_required), Depends(role_required([user_role.ADMIN, user_role.CRAWLER, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:ai", bypass_roles=[user_role.ADMIN])), Depends(limiter_dependency)])
 async def summarize_ai(payload: nlp_data_model, current_user=Depends(get_current_user)):
     return await crawl_model.getInstance().parse_summarize_ai(payload, user_id=str(current_user.id))
 
@@ -47,8 +47,7 @@ async def summarize_ai(payload: nlp_data_model, current_user=Depends(get_current
     response_description="Parsed and enriched chat report.",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(ai_endpoint_required), Depends(role_required([user_role.ADMIN])), Depends(limiter_dependency)], )
+    dependencies=[Depends(ai_enabled_required), Depends(role_required([user_role.ADMIN])), Depends(limiter_dependency)], )
 async def chat_report(payload: ReportChatRequest, current_user=Depends(get_current_user)):
     response = await crawl_model.getInstance().parse_chat_ai(payload, user_id=str(current_user.id))
     return response
-

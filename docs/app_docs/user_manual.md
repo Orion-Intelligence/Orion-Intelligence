@@ -1211,7 +1211,7 @@ JSON inspection view for raw structured report data.
 
 ### AI Chat and Summary
 
-If an AI endpoint is configured, users may also see:
+If AI is enabled, users may also see:
 
 - AI summary generation
 - chat over the report content
@@ -1544,7 +1544,7 @@ Editable platform settings can include:
 The page also shows read-only runtime flags such as:
 
 - API allowed
-- AI endpoint enabled
+- AI enabled
 
 Depending on deployment data, this area may also function as a quick verification point for platform version, enabled services, and branding visibility choices.
 
