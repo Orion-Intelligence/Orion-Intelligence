@@ -58,22 +58,22 @@ describe('System Settings - Admin Update Flow', () => {
     cy.get('[data-testid="system-settings-edit"]').should('be.visible').click();
     cy.contains('div', 'Network Configuration').scrollIntoView().should('be.visible');
 
-    cy.get('input[placeholder="accounts@example.com"]')
+    cy.get('[data-testid="system-settings-account-mail"]')
       .scrollIntoView()
       .should('be.visible')
       .clear()
       .type('infra@example.com');
-    cy.get('input[placeholder="test"]')
+    cy.get('[data-testid="system-settings-account-mail-password"]')
       .scrollIntoView()
       .should('be.visible')
       .clear()
       .type('StrongPass123!');
-    cy.get('input[placeholder="mailpit"]')
+    cy.get('[data-testid="system-settings-account-smtp-server"]')
       .scrollIntoView()
       .should('be.visible')
       .clear()
       .type('smtp.example.com');
-    cy.get('input[placeholder="1025"]')
+    cy.get('[data-testid="system-settings-account-smtp-port"]')
       .scrollIntoView()
       .should('be.visible')
       .clear()

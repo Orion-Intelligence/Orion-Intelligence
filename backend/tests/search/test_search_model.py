@@ -324,7 +324,7 @@ def test_extract_ioc_from_file_raises_http_exception_on_failed_service(monkeypat
             return False
 
         async def post(self, url, files):
-            assert "ioc/extract/user-1" in url
+            assert "file/scan/user-1" in url
             assert files["file"][0] == "ioc.txt"
             return _Response()
 
