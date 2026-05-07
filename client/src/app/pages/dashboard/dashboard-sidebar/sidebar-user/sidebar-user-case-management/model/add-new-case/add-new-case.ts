@@ -20,7 +20,8 @@ import { EntityDetailsComponent } from '../entity-details/entity-details';
 })
 export class AddNewCase {
   isOpen = false;
-  caseForm: Case = { caseId: '', caseType: 'Data Leak', owner: '', createdDate: new Date(), modifiedDate: new Date(), status: 'open', priority: 'low', intakeSource: '', entityName: '', socialMediaProfiles: [{ platform: '', username: '' }], webUrls: [''], emails: [''], phoneNumbers: [''], additionalIdentifiers: [{ type: '', value: '' }], relatedEntities: [{ name: '', socialMediaProfiles: [{ platform: '', username: '' }], webUrls: [''], emails: [''], phoneNumbers: [''], additionalIdentifiers: [{ type: '', value: '' }] }] };
+  primaryEntity: RelatedEntity = { name: '', socialMediaProfiles: [{ platform: '', username: '' }], webUrls: [''], emails: [''], phoneNumbers: [''], additionalIdentifiers: [{ type: '', value: '' }] };
+  caseForm: Case = { caseId: '', caseType: 'Data Leak', owner: '', createdDate: new Date(), modifiedDate: new Date(), status: 'open', priority: 'low', intakeSource: '', entityName: '', socialMediaProfiles: [{ platform: '', username: '' }], webUrls: [''], emails: [''], phoneNumbers: [''], additionalIdentifiers: [{ type: '', value: '' }], relatedEntities: [ { name: '', socialMediaProfiles: [{ platform: '', username: '' }], webUrls: [''], emails: [''], phoneNumbers: [''], additionalIdentifiers: [{ type: '', value: '' }] } ] };
   caseTypeOptions = ['Data Leak', 'Account Takeover', 'Fraud', 'Malware'];
   priorityOptions = ['low', 'medium', 'high', 'critical'];
   statusOptions = ['open', 'in-progress', 'resolved', 'closed'];
@@ -78,7 +79,19 @@ export class AddNewCase {
     this.caseForm.relatedEntities.splice(index, 1);
   }
 
+  syncPrimaryEntityToCase(): void {
+    this.caseForm.entityName = this.primaryEntity.name;
+    this.caseForm.socialMediaProfiles = this.primaryEntity.socialMediaProfiles;
+    this.caseForm.webUrls = this.primaryEntity.webUrls;
+    this.caseForm.emails = this.primaryEntity.emails;
+    this.caseForm.phoneNumbers = this.primaryEntity.phoneNumbers;
+    this.caseForm.additionalIdentifiers = this.primaryEntity.additionalIdentifiers;
+  }
+
   onSubmit(): void {
+    // Sync primary entity to caseForm
+    this.syncPrimaryEntityToCase();
+
     // Validate primary case fields
     if (!this.caseForm.owner.trim()) {
       alert('Officer name is required');
