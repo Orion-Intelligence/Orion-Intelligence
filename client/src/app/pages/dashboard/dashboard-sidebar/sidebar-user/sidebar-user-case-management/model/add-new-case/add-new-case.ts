@@ -3,10 +3,11 @@ import { Case, RelatedEntity } from '../../../../../../../shared/model/case-mana
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { EntityDetailsComponent } from '../entity-details/entity-details';
 
 @Component({
   selector: 'app-add-new-case',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EntityDetailsComponent],
   templateUrl: './add-new-case.html',
   animations: [
     trigger('slideIn', [
@@ -23,8 +24,6 @@ export class AddNewCase {
   caseTypeOptions = ['Data Leak', 'Account Takeover', 'Fraud', 'Malware'];
   priorityOptions = ['low', 'medium', 'high', 'critical'];
   statusOptions = ['open', 'in-progress', 'resolved', 'closed'];
-  socialMediaPlatforms = ['Facebook', 'Twitter', 'Instagram', 'LinkedIn', 'TikTok', 'YouTube'];
-  identifierTypes = ['IP Address', 'Domain', 'Wallet Address', 'Employee ID', 'Hash'];
 
   @Output() close = new EventEmitter<void>();
   @Output() caseAdded = new EventEmitter<Case>();
@@ -63,126 +62,6 @@ export class AddNewCase {
     }, 300);
   }
 
-  addSocialMedia(entityPath?: string): void {
-    if (entityPath) {
-      const entity = this.getEntityByPath(entityPath);
-      if (entity) {
-        entity.socialMediaProfiles.push({ platform: '', username: '' });
-      }
-    }
-    else {
-      this.caseForm.socialMediaProfiles.push({ platform: '', username: '' });
-    }
-  }
-
-  removeSocialMedia(index: number, entityPath?: string): void {
-    if (entityPath) {
-      const entity = this.getEntityByPath(entityPath);
-      if (entity) {
-        entity.socialMediaProfiles.splice(index, 1);
-      }
-    }
-    else {
-      this.caseForm.socialMediaProfiles.splice(index, 1);
-    }
-  }
-
-  addWebUrl(entityPath?: string): void {
-    if (entityPath) {
-      const entity = this.getEntityByPath(entityPath);
-      if (entity) {
-        entity.webUrls.push('');
-      }
-    }
-    else {
-      this.caseForm.webUrls.push('');
-    }
-  }
-
-  removeWebUrl(index: number, entityPath?: string): void {
-    if (entityPath) {
-      const entity = this.getEntityByPath(entityPath);
-      if (entity) {
-        entity.webUrls.splice(index, 1);
-      }
-    }
-    else {
-      this.caseForm.webUrls.splice(index, 1);
-    }
-  }
-
-  addEmail(entityPath?: string): void {
-    if (entityPath) {
-      const entity = this.getEntityByPath(entityPath);
-      if (entity) {
-        entity.emails.push('');
-      }
-    }
-    else {
-      this.caseForm.emails.push('');
-    }
-  }
-
-  removeEmail(index: number, entityPath?: string): void {
-    if (entityPath) {
-      const entity = this.getEntityByPath(entityPath);
-      if (entity) {
-        entity.emails.splice(index, 1);
-      }
-    }
-    else {
-      this.caseForm.emails.splice(index, 1);
-    }
-  }
-
-  addPhoneNumber(entityPath?: string): void {
-    if (entityPath) {
-      const entity = this.getEntityByPath(entityPath);
-      if (entity) {
-        entity.phoneNumbers.push('');
-      }
-    }
-    else {
-      this.caseForm.phoneNumbers.push('');
-    }
-  }
-
-  removePhoneNumber(index: number, entityPath?: string): void {
-    if (entityPath) {
-      const entity = this.getEntityByPath(entityPath);
-      if (entity) {
-        entity.phoneNumbers.splice(index, 1);
-      }
-    }
-    else {
-      this.caseForm.phoneNumbers.splice(index, 1);
-    }
-  }
-
-  addIdentifier(entityPath?: string): void {
-    if (entityPath) {
-      const entity = this.getEntityByPath(entityPath);
-      if (entity) {
-        entity.additionalIdentifiers.push({ type: '', value: '' });
-      }
-    }
-    else {
-      this.caseForm.additionalIdentifiers.push({ type: '', value: '' });
-    }
-  }
-
-  removeIdentifier(index: number, entityPath?: string): void {
-    if (entityPath) {
-      const entity = this.getEntityByPath(entityPath);
-      if (entity) {
-        entity.additionalIdentifiers.splice(index, 1);
-      }
-    }
-    else {
-      this.caseForm.additionalIdentifiers.splice(index, 1);
-    }
-  }
-
   addRelatedEntity(): void {
     const newEntity: RelatedEntity = {
       name: '',
@@ -199,17 +78,8 @@ export class AddNewCase {
     this.caseForm.relatedEntities.splice(index, 1);
   }
 
-  getEntityByPath(path: string): RelatedEntity | null {
-    const parts = path.split('.');
-    if (parts[0] === 'relatedEntities' && parts[1]) {
-      const index = parseInt(parts[1], 10);
-      return this.caseForm.relatedEntities[index] || null;
-    }
-    return null;
-  }
-
   onSubmit(): void {
-    // Validate primary entity
+    // Validate primary case fields
     if (!this.caseForm.owner.trim()) {
       alert('Officer name is required');
       return;
