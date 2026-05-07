@@ -111,13 +111,12 @@
                 <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
               }
             </label>
-            <div class="relative">
+            <div>
               <select class="h-10 w-full appearance-none rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] pl-3 pr-11 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-70" [(ngModel)]="form.language" [disabled]="!isEditing">
                 @for (lang of languageOptions; track lang) {
                   <option [value]="lang">{{ lang.toUpperCase() }}</option>
                 }
               </select>
-              <i class="bi bi-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[var(--color-text4)]"></i>
             </div>
           </div>
 

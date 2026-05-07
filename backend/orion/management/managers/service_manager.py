@@ -1,5 +1,6 @@
 import asyncio
 from asyncio import sleep
+from migrations.migration import migration_manager
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
@@ -40,6 +41,7 @@ class service_manager:
 
                 await test_manager.get_instance().reset_test_mongo_and_import_mocks()
 
+                await migration_manager.get_instance().init_migration()
                 await mongo_controller.get_instance().ensure_indexes()
                 await mongo_controller.get_instance().initialize()
 

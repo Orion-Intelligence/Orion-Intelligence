@@ -7,7 +7,7 @@ from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model, AllowedKeys
 
 
-async def run_migration(version):
+async def run_migration(version, app_version=None):
     await mongo_controller.get_instance().link_connection()
     engine = mongo_controller.get_instance().get_engine()
     if engine is None:
@@ -27,6 +27,9 @@ async def run_migration(version):
         migration_versions.append((version_str, file))
     migration_versions.sort(key=lambda x: [int(part) if part.isdigit() else part for part in x[0].split(".")])
 
+    if stored_version is None and app_version:
+        stored_version = app_version
+        await engine.save(db_system_model(key=AllowedKeys.VERSION, value=app_version))
     stored_version = stored_version or version
     target_version_parts = [int(part) if part.isdigit() else part for part in version.split(".")]
     if stored_version.__contains__("_"):

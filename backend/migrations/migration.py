@@ -21,12 +21,8 @@ class migration_manager:
 
     async def init_migration(self):
         try:
-            version, _ = self.get_versions_from_toml()
-            engine = await run_migration(version)
-
-            if 1 == 1:
-                return
-
+            version, app_version = self.get_versions_from_toml()
+            engine = await run_migration(version, app_version)
             existing_version_entry = await engine.find_one(db_system_model, db_system_model.key == AllowedKeys.VERSION)
             if existing_version_entry:
                 existing_version_entry.value = version
