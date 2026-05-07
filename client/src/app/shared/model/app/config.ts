@@ -14,6 +14,7 @@ export class AppSettingsModel {
   home_header_pricing_allowed: boolean = true;
   home_header_whistle_blowing_allowed: boolean = false;
   ai_endpoint_enabled: boolean = true;
+  smtp_configured: boolean = false;
   s_onion: string = '';
   api_allowed: string = '0';
 
@@ -29,6 +30,7 @@ export class AppSettingsModel {
       this.logo_wide_dark = (data.logo_wide_dark as string) || this.logo_wide_dark;
       this.auth_dashboard_icon=(data.auth_dashboard_icon as string) || this.auth_dashboard_icon;
       this.api_allowed = (data.api_allowed as string) || this.api_allowed;
+      this.smtp_configured = data.smtp_configured === true || data.smtp_configured === '1';
       this.app_name = (data.app_name as string) || this.app_name;
       this.meta_info = (data.meta_info as string) || this.meta_info;
       this.s_onion = (data.s_onion as string) || this.s_onion;

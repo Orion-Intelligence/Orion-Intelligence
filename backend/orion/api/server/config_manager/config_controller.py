@@ -48,6 +48,26 @@ class config_controller:
     async def refresh_config(self):
         await self.load_config()
 
+    @staticmethod
+    def _is_smtp_configured(meta_info_raw) -> bool:
+        try:
+            meta_info = json.loads(meta_info_raw) if isinstance(meta_info_raw, str) else {}
+        except (TypeError, ValueError):
+            return False
+        required = [
+            meta_info.get("ACCOUNTS_MAIL"),
+            meta_info.get("ACCOUNTS_MAIL_PASSWORD"),
+            meta_info.get("ACCOUNTS_SMTP_SERVER"),
+            meta_info.get("ACCOUNTS_SMTP_PORT")
+        ]
+        if any(not value for value in required):
+            return False
+        try:
+            smtp_port = int(str(meta_info.get("ACCOUNTS_SMTP_PORT")))
+        except ValueError:
+            return False
+        return 1 <= smtp_port <= 65535
+
     def _build_system_info_from_cache(self) -> config_data:
         fresh_config = dict(self._config)
 
@@ -67,6 +87,7 @@ class config_controller:
             "S_HOME_HEADER_PRICING": "https://www.orionintelligence.org/pricing",
             "S_HOME_HEADER_PRICING_ALLOWED": True
         })
+        fresh_config["smtp_configured"] = "1" if self._is_smtp_configured(fresh_config.get("meta_info")) else "0"
         return config_data(settings=fresh_config)
 
     async def get_system_info(self) -> config_data:
@@ -89,6 +110,7 @@ class config_controller:
                     "S_HOME_HEADER_PRICING": "https://www.orionintelligence.org/pricing",
                     "S_HOME_HEADER_PRICING_ALLOWED": True
                 }),
+                "smtp_configured": "0",
             })
 
     async def update_public_config(self, data: config_data):

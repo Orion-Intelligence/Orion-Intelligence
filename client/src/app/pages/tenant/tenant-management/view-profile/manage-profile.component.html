@@ -7,8 +7,8 @@
           <h1 class="ui-page-title">Tenant Users</h1>
           <p class="ui-page-description">Manage user access, status, and licenses.</p>
         </div>
-        <span [appTooltip]="appService.userSessionData().tenant.quotaExceeded ? 'Access blocked' : ''">
-          <button type="button" data-testid="tenant-add-user-button" class="ui-btn" [ngClass]="appService.userSessionData().tenant.quotaExceeded ? 'cursor-not-allowed border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text4)]' : 'ui-btn-primary'" [disabled]="appService.userSessionData().tenant.quotaExceeded" (click)="addtenant()">
+        <span [appTooltip]="getAddUserTooltip()">
+          <button type="button" data-testid="tenant-add-user-button" class="ui-btn" [ngClass]="isAddUserDisabled() ? 'cursor-not-allowed border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text4)]' : 'ui-btn-primary'" [disabled]="isAddUserDisabled()" (click)="addtenant()">
             Add User
           </button>
         </span>

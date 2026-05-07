@@ -160,7 +160,24 @@ export class ManageProfileComponent implements OnInit {
       : 'bg-slate-500/10 text-slate-300';
   }
 
+  isAddUserDisabled(): boolean {
+    return this.appService.userSessionData().tenant.quotaExceeded || !this.appService.getConfig().appSettings.smtp_configured;
+  }
+
+  getAddUserTooltip(): string {
+    if (this.appService.userSessionData().tenant.quotaExceeded) {
+      return 'Access blocked';
+    }
+    if (!this.appService.getConfig().appSettings.smtp_configured) {
+      return 'SMTP configuration is incomplete';
+    }
+    return '';
+  }
+
   addtenant() {
+    if (this.isAddUserDisabled()) {
+      return;
+    }
     this.showAddTenantPopup = true;
   }
 
