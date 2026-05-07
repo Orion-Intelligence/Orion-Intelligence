@@ -6,7 +6,9 @@
             {{ isMainEntity ? 'Primary Entity' : 'Entity ' + (entityIndex + 1) }}
         </h3>
         @if (!isMainEntity) {
-        <button type="button" (click)="onRemove()" class="text-red-400 hover:text-red-300 text-sm">Delete</button>
+        <button type="button" (click)="onRemove()" class="text-red-400 hover:text-red-300 text-sm flex items-center gap-1">
+            <i class="bi bi-trash3"></i> Delete
+        </button>
         }
     </div>
 
@@ -19,22 +21,30 @@
     </div>
 
     <!-- Social Media Profiles -->
-    <div class="mb-5 p-4 rounded-[8px]" [ngClass]="isMainEntity ? 'bg-[var(--color-blue-760)]' : 'bg-[var(--color-blue-760)]'">
+    <div class="mb-5 p-4 rounded-[8px] bg-[var(--color-blue-760)]">
         <div class="flex items-center justify-between mb-3">
             <label class="text-sm font-semibold text-[var(--color-text4)] uppercase">Social Media Profiles</label>
-            <button type="button" (click)="addSocialMedia()" class="text-blue-400 hover:text-blue-300 text-sm">+
-                Add</button>
+            <button type="button" (click)="addSocialMedia()" class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
+                <i class="bi bi-plus-lg"></i> Add
+            </button>
         </div>
         @for (profile of entity.socialMediaProfiles; track $index; let i = $index) {
-        <div class="flex gap-3 mb-3">
-            <select [(ngModel)]="profile.platform" [name]="'platform-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)]">
-                <option value="">Select Platform</option>
-                @for (platform of socialMediaPlatforms; track platform) {
-                <option [value]="platform">{{ platform }}</option>
-                }
-            </select>
-            <input type="text" [(ngModel)]="profile.username" [name]="'username-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)]" placeholder="Username" />
-            <button type="button" (click)="removeSocialMedia(i)" class="text-red-400 hover:text-red-300">🗑️</button>
+        <div class="mb-3">
+            <div class="flex gap-3 mb-1">
+                <select [(ngModel)]="profile.platform" [name]="'platform-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)]">
+                    <option value="">Select Platform</option>
+                    @for (platform of socialMediaPlatforms; track platform) {
+                    <option [value]="platform">{{ platform }}</option>
+                    }
+                </select>
+                <input type="text" [(ngModel)]="profile.username" [name]="'username-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)]" placeholder="Username" />
+                <button type="button" (click)="removeSocialMedia(i)" class="text-red-400 hover:text-red-300">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </div>
+            @if (getSocialMediaError(profile)) {
+            <p class="text-red-400 text-xs ml-0">{{ getSocialMediaError(profile) }}</p>
+            }
         </div>
         }
     </div>
@@ -43,12 +53,21 @@
     <div class="mb-5 p-4 rounded-[8px] bg-[var(--color-blue-760)]">
         <div class="flex items-center justify-between mb-3">
             <label class="text-sm font-semibold text-[var(--color-text4)] uppercase">Web URLs</label>
-            <button type="button" (click)="addWebUrl()" class="text-blue-400 hover:text-blue-300 text-sm">+ Add</button>
+            <button type="button" (click)="addWebUrl()" class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
+                <i class="bi bi-plus-lg"></i> Add
+            </button>
         </div>
         @for (url of entity.webUrls; track $index; let i = $index) {
-        <div class="flex gap-3 mb-3">
-            <input type="url" [(ngModel)]="entity.webUrls[i]" [name]="'url-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)]" placeholder="https://example.com" />
-            <button type="button" (click)="removeWebUrl(i)" class="text-red-400 hover:text-red-300">🗑️</button>
+        <div class="mb-3">
+            <div class="flex gap-3 mb-1">
+                <input type="url" [(ngModel)]="entity.webUrls[i]" [name]="'url-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)]" placeholder="https://example.com" />
+                <button type="button" (click)="removeWebUrl(i)" class="text-red-400 hover:text-red-300">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </div>
+            @if (getUrlError(entity.webUrls[i])) {
+            <p class="text-red-400 text-xs ml-0">{{ getUrlError(entity.webUrls[i]) }}</p>
+            }
         </div>
         }
     </div>
@@ -57,12 +76,21 @@
     <div class="mb-5 p-4 rounded-[8px] bg-[var(--color-blue-760)]">
         <div class="flex items-center justify-between mb-3">
             <label class="text-sm font-semibold text-[var(--color-text4)] uppercase">Emails</label>
-            <button type="button" (click)="addEmail()" class="text-blue-400 hover:text-blue-300 text-sm">+ Add</button>
+            <button type="button" (click)="addEmail()" class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
+                <i class="bi bi-plus-lg"></i> Add
+            </button>
         </div>
         @for (email of entity.emails; track $index; let i = $index) {
-        <div class="flex gap-3 mb-3">
-            <input type="email" [(ngModel)]="entity.emails[i]" [name]="'email-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)]" placeholder="email@example.com" />
-            <button type="button" (click)="removeEmail(i)" class="text-red-400 hover:text-red-300">🗑️</button>
+        <div class="mb-3">
+            <div class="flex gap-3 mb-1">
+                <input type="email" [(ngModel)]="entity.emails[i]" [name]="'email-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)]" placeholder="email@example.com" />
+                <button type="button" (click)="removeEmail(i)" class="text-red-400 hover:text-red-300">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </div>
+            @if (getEmailError(entity.emails[i])) {
+            <p class="text-red-400 text-xs ml-0">{{ getEmailError(entity.emails[i]) }}</p>
+            }
         </div>
         }
     </div>
@@ -71,13 +99,21 @@
     <div class="mb-5 p-4 rounded-[8px] bg-[var(--color-blue-760)]">
         <div class="flex items-center justify-between mb-3">
             <label class="text-sm font-semibold text-[var(--color-text4)] uppercase">Phone Numbers</label>
-            <button type="button" (click)="addPhoneNumber()" class="text-blue-400 hover:text-blue-300 text-sm">+
-                Add</button>
+            <button type="button" (click)="addPhoneNumber()" class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
+                <i class="bi bi-plus-lg"></i> Add
+            </button>
         </div>
         @for (phone of entity.phoneNumbers; track $index; let i = $index) {
-        <div class="flex gap-3 mb-3">
-            <input type="tel" [(ngModel)]="entity.phoneNumbers[i]" [name]="'phone-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)]" placeholder="+1 (555) 000-0000" />
-            <button type="button" (click)="removePhoneNumber(i)" class="text-red-400 hover:text-red-300">🗑️</button>
+        <div class="mb-3">
+            <div class="flex gap-3 mb-1">
+                <input type="tel" [(ngModel)]="entity.phoneNumbers[i]" [name]="'phone-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)]" placeholder="+1 (555) 000-0000" />
+                <button type="button" (click)="removePhoneNumber(i)" class="text-red-400 hover:text-red-300">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </div>
+            @if (getPhoneError(entity.phoneNumbers[i])) {
+            <p class="text-red-400 text-xs ml-0">{{ getPhoneError(entity.phoneNumbers[i]) }}</p>
+            }
         </div>
         }
     </div>
@@ -86,19 +122,27 @@
     <div class="mb-5 p-4 rounded-[8px] bg-[var(--color-blue-760)]">
         <div class="flex items-center justify-between mb-3">
             <label class="text-sm font-semibold text-[var(--color-text4)] uppercase">Additional Identifiers</label>
-            <button type="button" (click)="addIdentifier()" class="text-blue-400 hover:text-blue-300 text-sm">+
-                Add</button>
+            <button type="button" (click)="addIdentifier()" class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
+                <i class="bi bi-plus-lg"></i> Add
+            </button>
         </div>
         @for (identifier of entity.additionalIdentifiers; track $index; let i = $index) {
-        <div class="flex gap-3 mb-3">
-            <select [(ngModel)]="identifier.type" [name]="'idType-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)]">
-                <option value="">Select Type</option>
-                @for (type of identifierTypes; track type) {
-                <option [value]="type">{{ type }}</option>
-                }
-            </select>
-            <input type="text" [(ngModel)]="identifier.value" [name]="'idValue-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)]" placeholder="Value" />
-            <button type="button" (click)="removeIdentifier(i)" class="text-red-400 hover:text-red-300">🗑️</button>
+        <div class="mb-3">
+            <div class="flex gap-3 mb-1">
+                <select [(ngModel)]="identifier.type" [name]="'idType-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)]">
+                    <option value="">Select Type</option>
+                    @for (type of identifierTypes; track type) {
+                    <option [value]="type">{{ type }}</option>
+                    }
+                </select>
+                <input type="text" [(ngModel)]="identifier.value" [name]="'idValue-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)]" placeholder="Value" />
+                <button type="button" (click)="removeIdentifier(i)" class="text-red-400 hover:text-red-300">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </div>
+            @if (getIdentifierError(identifier)) {
+            <p class="text-red-400 text-xs ml-0">{{ getIdentifierError(identifier) }}</p>
+            }
         </div>
         }
     </div>

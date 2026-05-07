@@ -20,7 +20,7 @@ import { EntityDetailsComponent } from '../entity-details/entity-details';
 })
 export class AddNewCase {
   isOpen = false;
-  caseForm: Case = { caseId: '', caseType: 'Data Leak', owner: '', createdDate: new Date(), modifiedDate: new Date(), status: 'open', priority: 'low', intakeSource: '', entityName: '', socialMediaProfiles: [{ platform: '', username: '' }], webUrls: [''], emails: [''], phoneNumbers: [''], additionalIdentifiers: [{ type: '', value: '' }], relatedEntities: [ { name: '', socialMediaProfiles: [{ platform: '', username: '' }], webUrls: [''], emails: [''], phoneNumbers: [''], additionalIdentifiers: [{ type: '', value: '' }] } ] };
+  caseForm: Case = { caseId: '', caseType: 'Data Leak', owner: '', createdDate: new Date(), modifiedDate: new Date(), status: 'open', priority: 'low', intakeSource: '', entityName: '', socialMediaProfiles: [{ platform: '', username: '' }], webUrls: [''], emails: [''], phoneNumbers: [''], additionalIdentifiers: [{ type: '', value: '' }], relatedEntities: [{ name: '', socialMediaProfiles: [{ platform: '', username: '' }], webUrls: [''], emails: [''], phoneNumbers: [''], additionalIdentifiers: [{ type: '', value: '' }] }] };
   caseTypeOptions = ['Data Leak', 'Account Takeover', 'Fraud', 'Malware'];
   priorityOptions = ['low', 'medium', 'high', 'critical'];
   statusOptions = ['open', 'in-progress', 'resolved', 'closed'];
@@ -108,6 +108,135 @@ export class AddNewCase {
     if (!this.caseForm.entityName.trim()) {
       alert('Entity name is required');
       return;
+    }
+
+    // Validate emails format
+    const invalidEmails = this.caseForm.emails.filter(email => {
+      if (!email.trim()) {
+        return false;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return !emailRegex.test(email);
+    });
+    if (invalidEmails.length > 0) {
+      alert('Invalid email format detected in primary entity');
+      return;
+    }
+
+    // Validate phone numbers format
+    const invalidPhones = this.caseForm.phoneNumbers.filter(phone => {
+      if (!phone.trim()) {
+        return false;
+      }
+      const phoneRegex = /^[\d\s\-\+\(\)]{10,}$/;
+      return !phoneRegex.test(phone.replace(/\s/g, ''));
+    });
+    if (invalidPhones.length > 0) {
+      alert('Invalid phone number format detected in primary entity');
+      return;
+    }
+
+    // Validate URLs format
+    const invalidUrls = this.caseForm.webUrls.filter(url => {
+      if (!url.trim()) {
+        return false;
+      }
+      try {
+        new URL(url);
+        return false;
+      }
+      catch {
+        return true;
+      }
+    });
+    if (invalidUrls.length > 0) {
+      alert('Invalid URL format detected in primary entity');
+      return;
+    }
+
+    // Validate social media profiles
+    const invalidSocial = this.caseForm.socialMediaProfiles.filter(p => {
+      return (p.platform && !p.username) || (!p.platform && p.username);
+    });
+    if (invalidSocial.length > 0) {
+      alert('Social media profiles must have both platform and username');
+      return;
+    }
+
+    // Validate additional identifiers
+    const invalidIdentifiers = this.caseForm.additionalIdentifiers.filter(id => {
+      return (id.type && !id.value) || (!id.type && id.value);
+    });
+    if (invalidIdentifiers.length > 0) {
+      alert('Additional identifiers must have both type and value');
+      return;
+    }
+
+    // Validate related entities
+    for (let entity of this.caseForm.relatedEntities) {
+      if (entity.name.trim()) {
+        // Validate related entity emails
+        const relatedInvalidEmails = entity.emails.filter(email => {
+          if (!email.trim()) {
+            return false;
+          }
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return !emailRegex.test(email);
+        });
+        if (relatedInvalidEmails.length > 0) {
+          alert(`Invalid email format in related entity: ${entity.name}`);
+          return;
+        }
+
+        // Validate related entity phone numbers
+        const relatedInvalidPhones = entity.phoneNumbers.filter(phone => {
+          if (!phone.trim()) {
+            return false;
+          }
+          const phoneRegex = /^[\d\s\-\+\(\)]{10,}$/;
+          return !phoneRegex.test(phone.replace(/\s/g, ''));
+        });
+        if (relatedInvalidPhones.length > 0) {
+          alert(`Invalid phone format in related entity: ${entity.name}`);
+          return;
+        }
+
+        // Validate related entity URLs
+        const relatedInvalidUrls = entity.webUrls.filter(url => {
+          if (!url.trim()) {
+            return false;
+          }
+          try {
+            new URL(url);
+            return false;
+          }
+          catch {
+            return true;
+          }
+        });
+        if (relatedInvalidUrls.length > 0) {
+          alert(`Invalid URL format in related entity: ${entity.name}`);
+          return;
+        }
+
+        // Validate related entity social media
+        const relatedInvalidSocial = entity.socialMediaProfiles.filter(p => {
+          return (p.platform && !p.username) || (!p.platform && p.username);
+        });
+        if (relatedInvalidSocial.length > 0) {
+          alert(`Social media validation failed in related entity: ${entity.name}`);
+          return;
+        }
+
+        // Validate related entity identifiers
+        const relatedInvalidIdentifiers = entity.additionalIdentifiers.filter(id => {
+          return (id.type && !id.value) || (!id.type && id.value);
+        });
+        if (relatedInvalidIdentifiers.length > 0) {
+          alert(`Identifier validation failed in related entity: ${entity.name}`);
+          return;
+        }
+      }
     }
 
     // Clean up empty arrays
