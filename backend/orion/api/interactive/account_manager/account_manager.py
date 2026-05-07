@@ -108,7 +108,8 @@ class AccountManager:
                 role=data.role,
                 status=data.status,
                 subscription=data.subscription,
-                licenses=data.licenses, )
+                licenses=data.licenses,
+                password_reset_required=True, )
 
             await engine.save(user)
             return {"message": "User created successfully", "username": username, "email": email}
@@ -187,6 +188,8 @@ class AccountManager:
 
 
         user.licenses = request.licenses
+        if request.password_reset_required is not None:
+            user.password_reset_required = request.password_reset_required
         await self._engine.save(user)
 
         await AuditLogManager.get_instance().register(
@@ -301,7 +304,7 @@ class AccountManager:
             theme = "dark-theme"
 
         node = NodeCallbackModel.model_validate(
-            {"user": {"email": user.email, "theme": theme, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "license": [
+            {"user": {"email": user.email, "theme": theme, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": user.verification_token if getattr(user, "password_reset_required", False) else None, "license": [
                 license.value for license in
                 user.licenses], "image": user_image_path, "preferences": user.preferences or {}, "demo_tour": getattr(user, "demo_tour", True) }, "tenant": {"hasOnboarding": tenant.status == TenantStatus.ONBOARDING, "id": str(
                 tenant.id), "isDefault": str(tenant.is_default), "name": self.safe_decrypt(

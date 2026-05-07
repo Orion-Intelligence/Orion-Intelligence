@@ -35,6 +35,7 @@ export interface User {
     subscription?: boolean;
     verificationDate: string;
     licenses?: string[] | null;
+    password_reset_required?: boolean;
 }
 export interface TenantTeamModel {
     username: string;

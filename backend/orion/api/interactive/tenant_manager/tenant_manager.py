@@ -348,7 +348,8 @@ class TenantManager:
                 status=data.status,
                 subscription=data.subscription,
                 licenses=data.licenses,
-                tenant_uuid=tenant_uuid, )
+                tenant_uuid=tenant_uuid,
+                password_reset_required=True, )
 
             await engine.save(user)
             await AuditLogManager.get_instance().register(

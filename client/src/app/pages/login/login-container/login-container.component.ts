@@ -42,6 +42,11 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
     this.authSubscription = this.authService.authState$.subscribe(authState => {
       if (authState.isAuthenticated) {
         this.appService.loadSession(true).subscribe(() => {
+          const user = this.appService.userSessionData().user;
+          if (user.password_reset_required && user.password_reset_token) {
+            this.router.navigate(['/reset', user.password_reset_token], { replaceUrl: true }).then();
+            return;
+          }
           this.router.navigate(['dashboard'], { replaceUrl: true }).then();
         });
       }

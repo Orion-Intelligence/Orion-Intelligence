@@ -18,4 +18,5 @@ class user_param_model(BaseModel):
     status: Optional[UserStatus] = None
     subscription: Optional[bool] = None
     licenses: Optional[List[LicenseName]] = None
+    password_reset_required: Optional[bool] = None
     preferences: Optional[Dict[str, Any]] = None

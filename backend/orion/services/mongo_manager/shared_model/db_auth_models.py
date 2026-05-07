@@ -54,6 +54,7 @@ class db_user_account(Model):
 
     twofa_enabled: bool = Field(default=False)
     twofa_secret: Optional[str] = Field(default=None)
+    password_reset_required: bool = Field(default=False)
 
     account_verify_at: Optional[datetime] = Field(default=None)
     subscription: bool = Field(default=False)

@@ -90,6 +90,10 @@ class auth_manager:
         if user.status == UserStatus.DISABLE:
             raise HTTPException(status_code=401, detail="Account Blocked")
 
+        if getattr(user, "password_reset_required", False) and not user.verification_token:
+            user.verification_token = session_manager.get_instance().generate_verification_token()
+            await engine.save(user)
+
         if user.role == user_role.CRAWLER:
             access_token_expires = timedelta(weeks=92)
         else:
@@ -104,7 +108,7 @@ class auth_manager:
         onboarding_exists = await session_manager.get_instance().has_onboarding(str(user.tenant_uuid))
 
         session_data = {"role": role, "username": user.username, "status": user.status, "hasOnboarding": onboarding_exists, "subscription": user.subscription, "verificationDate": user.account_verify_at, "licenses": [
-            license.value for license in user.licenses], }
+            license.value for license in user.licenses], "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": user.verification_token if getattr(user, "password_reset_required", False) else None, }
 
 
         return {"access_token": access_token, "token_type": "bearer", "session": session_data, }
@@ -141,6 +145,7 @@ class auth_manager:
             raise HTTPException(status_code=400, detail="New password must be different from the old one.")
 
         user.password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
+        user.password_reset_required = False
         user.verification_token = None
         await engine.save(user)
 

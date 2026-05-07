@@ -24,6 +24,8 @@ export interface UserDataModel {
     status: string;
     subscription: boolean;
     verificationDate: string;
+    password_reset_required?: boolean;
+    password_reset_token?: string | null;
     license: string[];
     image?: string;
     preferences?: Record<string, any>;

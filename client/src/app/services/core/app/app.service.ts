@@ -47,6 +47,8 @@ export class AppService {
         status: '',
         subscription: false,
         verificationDate: '',
+        password_reset_required: false,
+        password_reset_token: null,
         license: [],
         demo_tour:false,
       },

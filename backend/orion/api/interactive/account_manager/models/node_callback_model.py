@@ -15,6 +15,8 @@ class UserDataModel(BaseModel):
     status: UserStatus
     subscription: bool
     verificationDate: Optional[datetime]
+    password_reset_required: bool = False
+    password_reset_token: Optional[str] = None
     license: List[LicenseName]
     image: Optional[str] = None
     theme: Literal["dark-theme", "light-theme"] = "dark-theme"

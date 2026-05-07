@@ -212,6 +212,8 @@ class session_manager:
             "hasOnboarding": onboarding_exists,
             "subscription": user.subscription,
             "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None,
+            "password_reset_required": getattr(user, "password_reset_required", False),
+            "password_reset_token": user.verification_token if getattr(user, "password_reset_required", False) else None,
             "licenses": [user_license.value for user_license in user.licenses],
         }
 
