@@ -195,60 +195,136 @@ class search_model:
         }
     
 
-    async def search_power_plants(self, param: search_power_plants_param_model):
-        page = max(1, param.page)
-        size = max(1, min(param.size, 1000))  
+    # async def search_power_plants(self, param: search_power_plants_param_model):
+    #     page = max(1, param.page)
+    #     size = max(1, min(param.size, 1000))  
 
-        from_ = (page - 1) * size
+    #     from_ = (page - 1) * size
 
-        query = {
-            "from": from_,
-            "size": size,
-            "_source": ["name", "location.lat", "location.lon"],
-            "track_total_hits": True,
-            "query": {
-                "match_all": {}
-            }
-        }
+    #     query = {
+    #         "from": from_,
+    #         "size": size,
+    #         "_source": ["name", "location.lat", "location.lon"],
+    #         "track_total_hits": True,
+    #         "query": {
+    #             "match_all": {}
+    #         }
+    #     }
 
-        m_status, docs = await elastic_controller.get_instance().search_query(
-            ELASTIC_INDEX.S_WRI_POWER_PLANTS_INDEX,
-            query,
-        )
+    #     m_status, docs = await elastic_controller.get_instance().search_query(
+    #         ELASTIC_INDEX.S_WRI_POWER_PLANTS_INDEX,
+    #         query,
+    #     )
 
-        if not m_status:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to fetch power plants"
-            )
+    #     if not m_status:
+    #         raise HTTPException(
+    #             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #             detail="Failed to fetch power plants"
+    #         )
 
-        body = docs.body if hasattr(docs, "body") else docs
-        hits = body.get("hits", {}).get("hits", [])
+    #     body = docs.body if hasattr(docs, "body") else docs
+    #     hits = body.get("hits", {}).get("hits", [])
 
-        result = []
-        for hit in hits:
-            src = hit.get("_source", {}) or {}
-            loc = src.get("location", {}) or {}
+    #     result = []
+    #     for hit in hits:
+    #         src = hit.get("_source", {}) or {}
+    #         loc = src.get("location", {}) or {}
 
-            result.append({
-                "id": hit.get("_id"),
-                "name": src.get("name"),
-                "location": {
-                    "lat": loc.get("lat"),
-                    "lon": loc.get("lon"),
+    #         result.append({
+    #             "id": hit.get("_id"),
+    #             "name": src.get("name"),
+    #             "location": {
+    #                 "lat": loc.get("lat"),
+    #                 "lon": loc.get("lon"),
+    #             }
+    #         })
+
+    #     total = body.get("hits", {}).get("total", {}).get("value", 0)
+    #     total_pages = (total + size - 1) // size
+
+    #     return {
+    #         "Result": result,
+    #         "Page": page,
+    #         "Page_Count": total_pages,
+    #         "Total_Hits": total
+    #     }
+
+    async def stream_power_plants_points(self, chunk_size: int = 1000):
+
+        chunk_size = max(100, min(chunk_size, 5000))
+
+        async def generator():
+
+            search_after = None
+
+            while True:
+
+                query = {
+                    "size": chunk_size,
+                    "_source": [
+                        "name",
+                        "location.lat",
+                        "location.lon"
+                    ],
+                    "sort": [
+                        {"_id": "asc"}
+                    ],
+                    "track_total_hits": False,
+                    "query": {
+                        "match_all": {}
+                    }
                 }
-            })
 
-        total = body.get("hits", {}).get("total", {}).get("value", 0)
-        total_pages = (total + size - 1) // size
+                if search_after:
+                    query["search_after"] = search_after
 
-        return {
-            "Result": result,
-            "Page": page,
-            "Page_Count": total_pages,
-            "Total_Hits": total
-        }
+                m_status, docs = await elastic_controller.get_instance().search_query(
+                    ELASTIC_INDEX.S_WRI_POWER_PLANTS_INDEX,
+                    query
+                )
 
+                if not m_status:
+                    break
+
+                body = docs.body if hasattr(docs, "body") else docs
+
+                hits = body.get("hits", {}).get("hits", [])
+
+                if not hits:
+                    break
+
+                result = []
+
+                for hit in hits:
+
+                    src = hit.get("_source", {}) or {}
+                    loc = src.get("location", {}) or {}
+
+                    lat = loc.get("lat")
+                    lon = loc.get("lon")
+
+                    if lat is None or lon is None:
+                        continue
+
+                    result.append({
+                        "id": hit.get("_id"),
+                        "name": src.get("name"),
+                        "lat": lat,
+                        "lon": lon,
+                    })
+
+                yield (
+                    json.dumps(result, separators=(",", ":")) + "\n"
+                ).encode("utf-8")
+
+                last_sort = hits[-1].get("sort")
+
+                if not last_sort:
+                    break
+
+                search_after = last_sort
+
+        return generator()
     
 
     @staticmethod

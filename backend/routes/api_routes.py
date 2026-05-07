@@ -1,6 +1,7 @@
 import asyncio
 from typing import Optional
 from fastapi import APIRouter, Body, Depends, Query, UploadFile, File
+from fastapi.responses import StreamingResponse
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from configs.app_dependency import license_required, role_required, status_required, get_current_role, get_current_user, get_is_free_token
 from configs.limiter_dependency import limiter_dependency
@@ -184,20 +185,47 @@ async def search_defacement(param: search_consolidated_param_model = Body(...), 
     base_index = [ELASTIC_INDEX.S_DEFACEMENT_INDEX]
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category],"defacement")
 
+# @api_routes.post(
+#     "/api/search/power-plants",
+#     summary="Search power plants",
+#     tags=["Search"],
+#     operation_id="searchPowerPlants",
+#     status_code=200,
+#     dependencies=GENERAL_MODULE_DEPS,)
+# async def search_power_plants(param: search_power_plants_param_model = Body(...), current_user=Depends(get_current_user)):
+#     await AuditLogManager.get_instance().register(
+#         str(current_user.tenant_uuid),
+#         str(current_user.id),
+#         param.model_dump_json()
+#     )
+#     return await search_model.getInstance().search_power_plants(param)
+
 @api_routes.post(
-    "/api/search/power-plants",
-    summary="Search power plants",
+    "/api/search/power-plants/stream",
+    summary="Stream power plant points",
     tags=["Search"],
-    operation_id="searchPowerPlants",
+    operation_id="streamPowerPlants",
     status_code=200,
-    dependencies=GENERAL_MODULE_DEPS,)
-async def search_power_plants(param: search_power_plants_param_model = Body(...), current_user=Depends(get_current_user)):
+    dependencies=GENERAL_MODULE_DEPS,
+)
+async def stream_power_plants(
+    param: search_power_plants_param_model = Body(...),
+    current_user=Depends(get_current_user)
+):
     await AuditLogManager.get_instance().register(
         str(current_user.tenant_uuid),
         str(current_user.id),
         param.model_dump_json()
     )
-    return await search_model.getInstance().search_power_plants(param)
+
+    stream = await search_model.getInstance().stream_power_plants_points(
+        chunk_size=param.size
+    )
+
+    return StreamingResponse(
+        stream,
+        media_type="application/x-ndjson"
+    )
 
 
 @api_routes.post(

@@ -1,45 +1,92 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, combineLatest } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { ApiService } from '../../shared/services/api.service';
 import { SatelliteFacilitiesResponse } from '../../shared/model/satellite-intel/satellite-intel-api.models';
-import { OrionSatelliteFeature, OrionSatelliteFeatureType, OrionSatelliteGeoJsonCollection, PowerPlantByIdItem, PowerPlantsByIdsResponse, PowerPlantsSearchResponse } from './model/satellite-intel.model';
-
+import { OrionSatelliteFeature, OrionSatelliteFeatureType, PowerPlantByIdItem, PowerPlantsByIdsResponse, PowerPlantsSearchItem, PowerPlantsSearchResponse } from './model/satellite-intel.model';
+import { AuthService } from '../../services/authetication/auth.service';
 @Injectable({ providedIn: 'root' })
 export class OrionSatelliteService {
   private readonly wriPath = 'assets/data/satellite/wri_power_plants.geojson';
   private wriCache$?: Observable<OrionSatelliteFeature[]>;
   private readonly facilitiesCache = new Map<string, Observable<OrionSatelliteFeature[]>>();
 
-  constructor(private http: HttpClient, private api: ApiService) {}
+  constructor(private http: HttpClient, private api: ApiService, private auth: AuthService) {}
 
-  loadWRI(): Observable<OrionSatelliteFeature[]> {
-    // previous method kept for fallback/reference (commented intentionally)
-    // if (!this.wriCache$) {
-    //   this.wriCache$ = this.http.get<OrionSatelliteGeoJsonCollection>(this.wriPath).pipe(map((collection) => Array.isArray(collection?.features) ? collection.features : []),
-    //     map((features) => features
-    //       .filter((feature) => Array.isArray(feature?.geometry?.coordinates) && feature.geometry.coordinates.length >= 2)
-    //       .map((feature, index) => this.toWriFeature(feature, index))
-    //       .filter((feature): feature is OrionSatelliteFeature => feature !== null),),
-    //     shareReplay(1),);
-    // }
-    // return this.wriCache$;
+  async streamPowerPlants( size: number, onChunk: (items: OrionSatelliteFeature[]) => void, onComplete?: () => void, onError?: (error: any) => void ): Promise<void> {
 
-    if (!this.wriCache$) {
-      this.wriCache$ = this.api.post<PowerPlantsSearchResponse>('search/power-plants', { page: 1, size: 1000 }).pipe(
-        map((response) => this.extractPowerPlantItems(response)),
-        map((items) => items
-          .map((item, index) => this.toPowerPlantFeature(item, index))
-          .filter((feature): feature is OrionSatelliteFeature => feature !== null),),
-        shareReplay(1),);
+    try {
+
+      const response = await fetch(`/api/search/power-plants/stream`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.auth.getStoredToken()}`
+          },
+          body: JSON.stringify({
+            size
+          })
+        });
+
+      if (!response.body) {
+        throw new Error('No response body');
+      }
+
+      const reader = response.body.getReader();
+
+      const decoder = new TextDecoder();
+
+      let buffer = '';
+
+      while (true) {
+
+        const { done, value } = await reader.read();
+
+        if (done) {
+          break;
+        }
+
+        buffer += decoder.decode(value, {
+          stream: true
+        });
+
+        const lines = buffer.split('\n');
+
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+
+          if (!line.trim()) {
+            continue;
+          }
+
+          const chunk = JSON.parse(line);
+
+          const mapped = chunk
+            .map((item: any) => this.toFeatureFromById({
+              id: item.id,
+              name: item.name,
+              source: 'WRI',
+              location: {
+                lat: item.lat,
+                lon: item.lon,
+              },
+            }))
+            .filter((item: PowerPlantsSearchItem | null): item is PowerPlantsSearchItem => item !== null);
+
+          onChunk(mapped);
+        }
+      }
+
+      onComplete?.();
+
     }
+    catch (error) {
 
-    return this.wriCache$;
-  }
-
-  searchPowerPlants(page: number, size: number): Observable<PowerPlantsSearchResponse> {
-    return this.api.post<PowerPlantsSearchResponse>('search/power-plants', { page, size });
+      onError?.(error);
+    }
   }
 
   getPowerPlantsByIds(ids: string[]): Observable<PowerPlantsByIdsResponse> {
@@ -68,42 +115,8 @@ export class OrionSatelliteService {
     return request$;
   }
 
-  getMergedData(lat: number, lon: number, radiusKm = 5): Observable<OrionSatelliteFeature[]> {
-    return combineLatest([
-      this.loadWRI(),
-      this.loadFacilities(lat, lon, radiusKm),
-    ]).pipe(map(([wriData, facilitiesData]) => [...wriData, ...facilitiesData]));
-  }
-
   filterByType(data: OrionSatelliteFeature[], type: string): OrionSatelliteFeature[] {
     return data.filter((feature) => feature.type === type);
-  }
-
-  private toWriFeature(feature: OrionSatelliteGeoJsonCollection['features'][number], index: number): OrionSatelliteFeature | null {
-    const rawFuel = String(feature.properties?.primary_fuel || feature.properties?.fuel || '').trim().toLowerCase();
-    const type = this.normalizeWriFuel(rawFuel);
-    if (!type) {
-      return null;
-    }
-
-    const [lon, lat] = feature.geometry.coordinates;
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-      return null;
-    }
-
-    return {
-      id: `wri-${index}`,
-      name: feature.properties?.name?.trim() || `Power plant ${index + 1}`,
-      type,
-      rawType: rawFuel || type,
-      source: 'WRI',
-      coordinates: [lon, lat],
-      color: this.getColor(type),
-      capacityMw: typeof feature.properties?.capacity_mw === 'number' ? feature.properties.capacity_mw : null,
-      properties: {
-        ...feature.properties,
-      },
-    };
   }
 
   private toPowerPlantFeature(item: { id?: string; _id?: string; name?: string; location?: { lat?: number; lon?: number }; location_point?: { lat?: number; lon?: number }; lat?: number; lon?: number }, index: number): OrionSatelliteFeature | null {

@@ -10,11 +10,12 @@ import { PowerPlantByIdItem } from '../../model/satellite-intel.model';
   templateUrl: './power-plant-popup.component.html',
 })
 export class PowerPlantPopupComponent {
+  search = '';
+
   @Input() isOpen = false;
   @Input() items: PowerPlantByIdItem[] = [];
-  @Output() close = new EventEmitter<void>();
 
-  search = '';
+  @Output() close = new EventEmitter<void>();
 
   onOverlayClose(): void {
     this.close.emit();

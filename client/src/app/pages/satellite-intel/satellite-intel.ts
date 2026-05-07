@@ -16,7 +16,7 @@ import { SatelliteFacilitiesResponse, SatelliteAnomalyResponse, SatelliteCompare
 import { ThreatLensComponent } from "../threat-lens/threat-lens";
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { OrionSatelliteService } from './orion-satellite.service';
-import { ORION_INFRASTRUCTURE_FILTERS, ORION_POWER_FILTERS, OrionSatelliteFeature, OrionSatelliteFeatureType, PowerPlantByIdItem, PowerPlantsSearchItem } from './model/satellite-intel.model';
+import { ORION_INFRASTRUCTURE_FILTERS, ORION_POWER_FILTERS, OrionSatelliteFeature, OrionSatelliteFeatureType, PowerPlantByIdItem } from './model/satellite-intel.model';
 
 @Component({
   selector:    'app-satellite-intel',
@@ -162,7 +162,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.satelliteService.resetState();
-    this.loadPowerPlantsPage(1, false);
+    // this.loadPowerPlantsPage(1, false);
+    this.loadPowerPlants();
     this.dashboardSearchSub = this.dashboardSearch$.pipe(debounceTime(300), distinctUntilChanged()).subscribe((query) => {
       this.updateDashboardSearchResults(query);
     });
@@ -633,7 +634,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     if (!this.hasMorePowerPlants() || this.isPowerPlantLoading || this.isPowerPlantLoadingMore) {
       return;
     }
-    this.loadPowerPlantsPage(this.powerPlantPage + 1, true);
+    // this.loadPowerPlantsPage(this.powerPlantPage + 1, true);
   }
 
   filterCount(type: OrionSatelliteFeatureType): number {
@@ -888,44 +889,38 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.updateDashboardSearchResults(this.dashboardSearch.trim().toLowerCase());
   }
 
-  private loadPowerPlantsPage(page: number, append: boolean): void {
-    if (append) {
-      this.isPowerPlantLoadingMore = true;
-    }
-    else {
-      this.isPowerPlantLoading = true;
-    }
-    this.powerPlantsSub?.unsubscribe();
-    this.powerPlantsSub = this.orionSatelliteService.searchPowerPlants(page, this.powerPlantPageSize).subscribe({
-      next: (response) => {
-        const items = Array.isArray(response?.Result)
-          ? response.Result
-          : (Array.isArray((response as any)?.result) ? (response as any).result : []);
-        const mapped = items
-          .map((item: { id: any; name: any; location: any; }) => this.orionSatelliteService.toFeatureFromById({
-            id: item.id || (item as any)._id,
-            name: item.name,
-            source: 'WRI',
-            location: item.location || (item as any).location_point,
-          }))
-          .filter((item: PowerPlantsSearchItem | null): item is PowerPlantsSearchItem => item !== null);
-        this.powerPlantPage = response?.Page || (response as any)?.page || page;
-        this.powerPlantPageCount = response?.Page_Count || (response as any)?.page_count || this.powerPlantPage;
-        this.powerPlantTotalHits = response?.Total_Hits || (response as any)?.total_hits || 0;
-        this.wriData = append ? [...this.wriData, ...mapped] : mapped;
+  async loadPowerPlants(): Promise<void> {
+
+    this.isPowerPlantLoading = true;
+
+    this.wriData = [];
+
+    this.refreshMergedData();
+
+    await this.orionSatelliteService.streamPowerPlants(1000,
+
+      // onChunk
+      (chunk) => {
+
+        this.wriData = [
+          ...this.wriData,
+          ...chunk
+        ];
+
         this.refreshMergedData();
       },
-      error: () => {
-        if (!append) {
-          this.wriData = [];
-          this.refreshMergedData();
-        }
+
+      // onComplete
+      () => {
+
+        this.isPowerPlantLoading = false;
       },
-    });
-    this.powerPlantsSub.add(() => {
-      this.isPowerPlantLoading = false;
-      this.isPowerPlantLoadingMore = false;
-    });
+
+      // onError
+      () => {
+
+        this.isPowerPlantLoading = false;
+      });
   }
 
   private updateDashboardSearchResults(query: string): void {
