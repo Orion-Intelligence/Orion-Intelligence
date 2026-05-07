@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import asyncio
 import json
-from datetime import datetime
+
+import pytest
 
 from orion.management.jobs.insight_job import insight_job
 from orion.management.models.insight_model import InsightData
@@ -10,16 +11,12 @@ from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 from tests.fake_model.fakes import FakeRedis
 
 
-def _run(coro):
-    return asyncio.run(coro)
-
-
 def test_populate_comparison_model_calculates_daily_and_weekly_changes():
     old_daily = InsightData()
     old_weekly = InsightData()
     new = InsightData()
     new.general.document_count = 10
-    new.general.most_recent = datetime(2026, 4, 1)
+    new.general.most_recent = "2026-04-01"
     new.leak.document_count = 5
     old_daily.leak.document_count = 5
     old_weekly.general.document_count = 5
@@ -33,7 +30,8 @@ def test_populate_comparison_model_calculates_daily_and_weekly_changes():
     assert result.general.most_recent.value == "2026-04-01"
 
 
-def test_update_trending_insights_reads_old_values_and_writes_day_snapshot(monkeypatch):
+@pytest.mark.anyio
+async def test_update_trending_insights_reads_old_values_and_writes_day_snapshot(monkeypatch):
     fake_redis = FakeRedis()
     new_insight = InsightData()
     new_insight.general.document_count = 7
@@ -48,7 +46,7 @@ def test_update_trending_insights_reads_old_values_and_writes_day_snapshot(monke
     )
 
     job = object.__new__(insight_job)
-    _run(job.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_DAY))
+    await job.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_DAY)
 
     assert any(call[1][0] == REDIS_KEYS.INSIGHT_STAT for call in fake_redis.calls)
     assert REDIS_KEYS.INSIGHT_OLD_DAY in fake_redis.values
@@ -56,7 +54,8 @@ def test_update_trending_insights_reads_old_values_and_writes_day_snapshot(monke
     assert stored["general"]["document_count"] == 7
 
 
-def test_update_trending_insights_writes_week_snapshot_when_requested(monkeypatch):
+@pytest.mark.anyio
+async def test_update_trending_insights_writes_week_snapshot_when_requested(monkeypatch):
     fake_redis = FakeRedis(
         {
             REDIS_KEYS.INSIGHT_OLD_DAY: InsightData().model_dump_json(),
@@ -76,13 +75,14 @@ def test_update_trending_insights_writes_week_snapshot_when_requested(monkeypatc
     )
 
     job = object.__new__(insight_job)
-    _run(job.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_WEEK))
+    await job.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_WEEK)
 
     stored = json.loads(fake_redis.values[REDIS_KEYS.INSIGHT_OLD_WEEK])
     assert stored["defacement"]["document_count"] == 3
 
 
-def test_update_insights_runs_day_then_weekly_rollover(monkeypatch):
+@pytest.mark.anyio
+async def test_update_insights_runs_day_then_weekly_rollover(monkeypatch):
     class _StopLoop(Exception):
         pass
 
@@ -107,7 +107,7 @@ def test_update_insights_runs_day_then_weekly_rollover(monkeypatch):
     job = object.__new__(insight_job)
 
     try:
-        _run(job.update_insights())
+        await job.update_insights()
     except _StopLoop:
         pass
 

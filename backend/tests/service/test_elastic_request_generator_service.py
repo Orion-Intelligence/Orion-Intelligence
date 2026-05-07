@@ -80,42 +80,6 @@ def test_date_filters_and_bulk_lookup_include_expected_ranges():
     assert "domain_0" in query["aggs"]
 
 
-# def test_consolidated_and_stealer_queries_build_clean_outputs():
-#     generator = elastic_request_generator()
-#     ranked = generator.on_search_consolidated_ranked_data(
-#         SimpleNamespace(
-#             q="alpha beta",
-#             matchtype="full",
-#             daterange="2026-01-01,2026-01-31",
-#             network="telegram",
-#             page=2,
-#             content="all",
-#             platform="",
-#             safe=True,
-#             category="leaks",
-#             must=False,
-#         ),
-#         {"m_url": ["example.com"]},
-#         [ELASTIC_INDEX.S_LEAK_INDEX],
-#         blocked_categories=["adult"],
-#         allowed_categories=["leaks"],
-#     )
-#     stealer_doc, stealer_query = elastic_request_generator.on_search_stealerlogs_data(
-#         SimpleNamespace(q="alice@example.com example.com", user=None, url=None, page=1, size=10, category="logs", entity_filter={}),
-#         {"m_username": ["alice"], "m_domain": ["example.com"]},
-#     )
-#     ioc_doc, ioc_query = elastic_request_generator.on_search_stealer_iocs(
-#         SimpleNamespace(ioc="m_email:alice@example.com", daterange="2026-01-01,2026-01-10", page=1, size=None)
-#     )
-
-#     assert ranked[0] == [ELASTIC_INDEX.S_LEAK_INDEX]
-#     assert ranked[1]["from"] == 15
-#     assert stealer_doc == ELASTIC_INDEX.S_STEALERLOGS_INDEX
-#     assert stealer_query["query"]["bool"]["must"]
-#     assert ioc_doc == ELASTIC_INDEX.S_STEALERLOGS_INDEX
-#     assert ioc_query["query"]["bool"]["filter"]
-
-
 def test_index_queries_and_summary_queries_return_entries():
     general_entries = elastic_request_generator.index_query_general(
         {"m_important_content": "important", "m_title": "Doc", "m_url": "https://example.com"}
