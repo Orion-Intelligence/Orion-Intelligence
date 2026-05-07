@@ -76,13 +76,44 @@ export function addUser(user: ManagedUser) {
   cy.contains(user.username).should('exist');
 }
 
+export function openUserEditor(username: string) {
+  cy.contains('tbody tr', username)
+    .scrollIntoView()
+    .should('be.visible')
+    .within(() => {
+      cy.get('[data-testid="tenant-edit-user-button"]').first().scrollIntoView().should('be.visible').click();
+    });
+
+  cy.contains('tbody tr', username)
+    .next()
+    .as('expandedUserEditor')
+    .should('contain.text', 'Edit User');
+}
+
+export function setPasswordResetRequired(username: string, required: boolean) {
+  openUserEditor(username);
+  cy.scrollDashboardToBottom();
+  cy.get('@expandedUserEditor').within(() => {
+    cy.get('[data-testid="tenant-password-reset-required-toggle"]')
+      .find('input[type="checkbox"]')
+      .then(($checkbox) => {
+        if ($checkbox.is(':checked') !== required) {
+          cy.wrap($checkbox).click({force: true});
+        }
+      });
+    cy.intercept('POST', '**/api/update/user').as('updateUser');
+    cy.contains('button', 'Save changes').scrollIntoView().should('be.visible').click();
+  });
+  cy.wait('@updateUser');
+}
+
 export function loginAsUser(username: string, password: string) {
   cy.intercept('POST', '**/api/token').as('loginRequest');
   cy.visit('/login');
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
   cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
-  cy.get('[data-testid="dashboard-main"]').should('be.visible');
+  cy.scrollDashboardToBottom();
 
   cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
     .filter(':visible')

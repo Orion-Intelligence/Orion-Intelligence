@@ -72,6 +72,10 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
                 cy.get('[data-testid="login-user"]').clear().type(TEST_USERS.testing3.username);
                 cy.get('[data-testid="login-pass"]').clear().type(resolvedNewPassword, {log: false});
                 cy.get('[data-testid="login-button"]').click();
+                cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
+                    .filter(':visible')
+                    .should('have.length.greaterThan', 0);
+                cy.logout();
             });
         });
     });

@@ -1,9 +1,11 @@
-import {addUser, completeSubscriptionPopupFlow, deleteUsersByUsername, loginAndClickSidebar, loginAsUser, ManagedUser, openFirstStrategicReportFromSearch, openSidebarGroup, openSidebarSubItem} from './controllers/05-user-management.controller';
+import {addUser, completeSubscriptionPopupFlow, deleteUsersByUsername, loginAndClickSidebar, loginAsUser, ManagedUser, openFirstStrategicReportFromSearch, openSidebarGroup, openSidebarSubItem, openUserEditor, setPasswordResetRequired} from './controllers/05-user-management.controller';
 
 let testUsers: any = {};
 let testData: any = {};
 let createUsers: ManagedUser[] = [];
 let profileUserId = '';
+const forcedResetUserKey = 'testing1';
+const forcedResetNewPassword = '2wsx@WSX';
 
 describe('Orion Intelligence - User Management Creation Flow', () => {
   before(() => {
@@ -40,6 +42,41 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.wait('@usersApi');
 
     createUsers.forEach((u) => addUser(u));
+    createUsers.forEach((u) => {
+      if (u.username !== testUsers[forcedResetUserKey]?.username) {
+        setPasswordResetRequired(u.username, false);
+      }
+    });
+    cy.logout();
+  });
+
+  it('forces testing1 to change password on first login and clears the reset flag', () => {
+    const user = testUsers[forcedResetUserKey] as ManagedUser;
+
+    cy.visit('/login');
+    cy.get('[data-testid="login-user"]').should('be.visible').clear().type(user.username);
+    cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(user.password, {log: false});
+    cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+
+    cy.url().should('include', '/reset/');
+    cy.get('[data-testid="reset-title"]').should('contain.text', 'Change Password');
+    cy.get('[data-testid="reset-password"]').should('be.visible').clear().type(forcedResetNewPassword, {log: false});
+    cy.get('[data-testid="reset-confirm-password"]').should('be.visible').clear().type(forcedResetNewPassword, {log: false});
+    cy.get('[data-testid="reset-submit"]').should('not.be.disabled').click();
+    cy.get('[data-testid="dashboard-main"]').should('be.visible');
+    testUsers[forcedResetUserKey].password = forcedResetNewPassword;
+    cy.logout();
+
+    cy.loginAsAdmin();
+    cy.intercept('POST', '**/api/users').as('usersApi');
+    cy.visit('/dashboard/profile/users');
+    cy.wait('@usersApi');
+    openUserEditor(user.username);
+    cy.get('@expandedUserEditor').within(() => {
+      cy.get('[data-testid="tenant-password-reset-required-toggle"]')
+        .find('input[type="checkbox"]')
+        .should('not.be.checked');
+    });
     cy.logout();
   });
 
@@ -200,6 +237,7 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
     cy.url().should('include', '/dashboard/profile/users');
     cy.wait('@usersApi');
     addUser(enterpriseUser);
+    setPasswordResetRequired(enterpriseUser.username, false);
     cy.logout();
   });
 
