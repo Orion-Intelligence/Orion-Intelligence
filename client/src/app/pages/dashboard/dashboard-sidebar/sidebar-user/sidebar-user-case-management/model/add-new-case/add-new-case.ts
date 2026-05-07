@@ -79,6 +79,26 @@ export class AddNewCase {
       return;
     }
 
+    if (!this.caseForm.intakeSource.trim()) {
+      alert('Intake source is required');
+      return;
+    }
+
+    if (!this.caseForm.caseType.trim()) {
+      alert('Case type is required');
+      return;
+    }
+
+    if (!this.caseForm.priority.trim()) {
+      alert('Priority is required');
+      return;
+    }
+
+    if (!this.caseForm.status.trim()) {
+      alert('Status is required');
+      return;
+    }
+
     const stored = localStorage.getItem('nextCaseId');
     const nextId = stored ? parseInt(stored, 10) : 1;
     localStorage.setItem('nextCaseId', String(nextId + 1));
