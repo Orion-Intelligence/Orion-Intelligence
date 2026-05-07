@@ -52,6 +52,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
 
   @Output() mapMoved  = new EventEmitter<{ lat: number; lon: number; zoom: number }>();
   @Output() featureSelected = new EventEmitter<any>();
+  @Output() featureIdsSelected = new EventEmitter<string[]>();
 
   get progressValue(): number {
     return Math.max(6, Math.min(100, Math.round(this.progress || 0)));
@@ -182,6 +183,15 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
             });
           },
         }).addTo(this.leafletMap);
+        this.orionCluster.on('clusterclick', (event: any) => {
+          const childMarkers = event?.layer?.getAllChildMarkers?.() || [];
+          const ids = childMarkers
+            .map((marker: any) => marker?.orionFeature?.id)
+            .filter((id: unknown) => typeof id === 'string' && id.length > 0);
+          if (ids.length > 0) {
+            this.featureIdsSelected.emit(Array.from(new Set(ids)));
+          }
+        });
         this.aircraftCluster = (this.L as any).markerClusterGroup({
           maxClusterRadius: 40,
           showCoverageOnHover: false,
@@ -482,7 +492,13 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
         ${rows.join('')}
       </div>`, { className: 'orion-popup' });
 
-      marker.on('click', () => this.featureSelected.emit(feat));
+      marker.orionFeature = feat;
+      marker.on('click', () => {
+        this.featureSelected.emit(feat);
+        if (feat?.source === 'WRI' && feat?.id) {
+          this.featureIdsSelected.emit([feat.id]);
+        }
+      });
       this.orionCluster.addLayer(marker);
     }
   }

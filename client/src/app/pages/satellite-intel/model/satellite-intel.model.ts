@@ -46,6 +46,57 @@ export interface OrionSatelliteFeature {
   properties?: Record<string, unknown>;
 }
 
+export interface PowerPlantsSearchRequest {
+  page: number;
+  size: number;
+}
+
+export interface PowerPlantsSearchItem {
+  id?: string;
+  _id?: string;
+  name?: string;
+  location?: {
+    lat?: number;
+    lon?: number;
+  };
+  location_point?: {
+    lat?: number;
+    lon?: number;
+  };
+  lat?: number;
+  lon?: number;
+}
+
+export interface PowerPlantsSearchResponse {
+  Result?: PowerPlantsSearchItem[];
+  result?: PowerPlantsSearchItem[];
+  Page?: number;
+  page?: number;
+  Page_Count?: number;
+  page_count?: number;
+  Total_Hits?: number;
+  total_hits?: number;
+}
+
+export interface PowerPlantByIdItem {
+  id: string;
+  name?: string;
+  country?: string;
+  type?: string;
+  capacity?: number;
+  source?: string;
+  location?: {
+    lat?: number;
+    lon?: number;
+  };
+  location_point?: string;
+}
+
+export interface PowerPlantsByIdsResponse {
+  Result: PowerPlantByIdItem[];
+  Count: number;
+}
+
 export interface OrionSatelliteFilterOption {
   key: OrionSatelliteFeatureType;
   label: string;
@@ -81,6 +132,7 @@ export const ORION_POWER_FILTERS: OrionSatelliteFilterOption[] = [
   { key: 'solar', label: 'solar', color: '#facc15' },
   { key: 'wind', label: 'wind', color: '#16a34a' },
   { key: 'gas', label: 'gas', color: '#6b7280' },
+  { key: 'other', label: 'other', color: '#6b7280' },
 ];
 
 export const ORION_INFRASTRUCTURE_FILTERS: OrionSatelliteFilterOption[] = [

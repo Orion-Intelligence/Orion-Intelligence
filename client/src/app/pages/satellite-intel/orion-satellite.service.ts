@@ -4,7 +4,7 @@ import { Observable, combineLatest } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { ApiService } from '../../shared/services/api.service';
 import { SatelliteFacilitiesResponse } from '../../shared/model/satellite-intel/satellite-intel-api.models';
-import { OrionSatelliteFeature, OrionSatelliteFeatureType, OrionSatelliteGeoJsonCollection } from './model/satellite-intel.model';
+import { OrionSatelliteFeature, OrionSatelliteFeatureType, OrionSatelliteGeoJsonCollection, PowerPlantByIdItem, PowerPlantsByIdsResponse, PowerPlantsSearchResponse } from './model/satellite-intel.model';
 
 @Injectable({ providedIn: 'root' })
 export class OrionSatelliteService {
@@ -15,16 +15,35 @@ export class OrionSatelliteService {
   constructor(private http: HttpClient, private api: ApiService) {}
 
   loadWRI(): Observable<OrionSatelliteFeature[]> {
+    // previous method kept for fallback/reference (commented intentionally)
+    // if (!this.wriCache$) {
+    //   this.wriCache$ = this.http.get<OrionSatelliteGeoJsonCollection>(this.wriPath).pipe(map((collection) => Array.isArray(collection?.features) ? collection.features : []),
+    //     map((features) => features
+    //       .filter((feature) => Array.isArray(feature?.geometry?.coordinates) && feature.geometry.coordinates.length >= 2)
+    //       .map((feature, index) => this.toWriFeature(feature, index))
+    //       .filter((feature): feature is OrionSatelliteFeature => feature !== null),),
+    //     shareReplay(1),);
+    // }
+    // return this.wriCache$;
+
     if (!this.wriCache$) {
-      this.wriCache$ = this.http.get<OrionSatelliteGeoJsonCollection>(this.wriPath).pipe(map((collection) => Array.isArray(collection?.features) ? collection.features : []),
-        map((features) => features
-          .filter((feature) => Array.isArray(feature?.geometry?.coordinates) && feature.geometry.coordinates.length >= 2)
-          .map((feature, index) => this.toWriFeature(feature, index))
+      this.wriCache$ = this.api.post<PowerPlantsSearchResponse>('search/power-plants', { page: 1, size: 1000 }).pipe(
+        map((response) => this.extractPowerPlantItems(response)),
+        map((items) => items
+          .map((item, index) => this.toPowerPlantFeature(item, index))
           .filter((feature): feature is OrionSatelliteFeature => feature !== null),),
         shareReplay(1),);
     }
 
     return this.wriCache$;
+  }
+
+  searchPowerPlants(page: number, size: number): Observable<PowerPlantsSearchResponse> {
+    return this.api.post<PowerPlantsSearchResponse>('search/power-plants', { page, size });
+  }
+
+  getPowerPlantsByIds(ids: string[]): Observable<PowerPlantsByIdsResponse> {
+    return this.api.post<PowerPlantsByIdsResponse>('search/power-plants/by-ids', ids);
   }
 
   loadFacilities(lat: number, lon: number, radiusKm = 5): Observable<OrionSatelliteFeature[]> {
@@ -85,6 +104,76 @@ export class OrionSatelliteService {
         ...feature.properties,
       },
     };
+  }
+
+  private toPowerPlantFeature(item: { id?: string; _id?: string; name?: string; location?: { lat?: number; lon?: number }; location_point?: { lat?: number; lon?: number }; lat?: number; lon?: number }, index: number): OrionSatelliteFeature | null {
+    const parsedLocation = this.extractLatLon(item);
+    const lat = parsedLocation?.lat;
+    const lon = parsedLocation?.lon;
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      return null;
+    }
+
+    return {
+      id: item.id || item._id || `wri-${index}`,
+      name: item.name?.trim() || `Power plant ${index + 1}`,
+      type: 'other',
+      rawType: 'unknown',
+      source: 'WRI',
+      coordinates: [lon as number, lat as number],
+      color: this.getColor('other'),
+      capacityMw: null,
+      properties: {
+        source: 'WRI',
+      },
+    };
+  }
+
+  toFeatureFromById(item: PowerPlantByIdItem): OrionSatelliteFeature | null {
+    const parsedLocation = this.extractLatLon(item as any);
+    const lat = parsedLocation?.lat;
+    const lon = parsedLocation?.lon;
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      return null;
+    }
+    const type = this.normalizeWriFuel(String(item?.type || '').trim().toLowerCase()) || 'other';
+    return {
+      id: item.id,
+      name: String(item?.name || 'Power plant').trim(),
+      type,
+      rawType: String(item?.type || type),
+      source: 'WRI',
+      coordinates: [lon as number, lat as number],
+      color: this.getColor(type),
+      capacityMw: typeof item?.capacity === 'number' ? item.capacity : null,
+      properties: {
+        country: item?.country,
+        fuel: item?.type,
+        source: item?.source || 'WRI',
+      },
+    };
+  }
+
+  private extractPowerPlantItems(response: PowerPlantsSearchResponse | null | undefined): any[] {
+    if (!response) {
+      return [];
+    }
+    if (Array.isArray(response.Result)) {
+      return response.Result;
+    }
+    if (Array.isArray(response.result)) {
+      return response.result;
+    }
+    return [];
+  }
+
+  private extractLatLon(item: any): { lat: number; lon: number } | null {
+    const lat = item?.location?.lat ?? item?.location_point?.lat ?? item?.lat;
+    const lon = item?.location?.lon ?? item?.location_point?.lon ?? item?.lon;
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      return null;
+    }
+    return { lat, lon };
   }
 
   private toFacilityFeature(feature: any, index: number): OrionSatelliteFeature | null {

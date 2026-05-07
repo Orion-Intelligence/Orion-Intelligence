@@ -1,0 +1,36 @@
+@if (isOpen) {
+  <div class="absolute inset-0 z-[1200] flex items-center justify-center bg-black/45 p-4" (click)="onOverlayClose()">
+    <div class="flex h-[min(560px,72vh)] w-full max-w-[460px] flex-col rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-4" (click)="$event.stopPropagation()">
+      <div class="mb-3 flex items-center justify-between">
+        <div class="text-[13px] font-semibold text-[var(--color-text1)]">Facility Details</div>
+        <button type="button" class="text-[12px] text-[var(--color-text3)] hover:text-[var(--color-text1)]" (click)="onCloseButton()">Close</button>
+      </div>
+
+      <div class="mb-3 flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2">
+        <i class="bi bi-search text-[12px] text-[var(--color-text3)]"></i>
+        <input type="text" [(ngModel)]="search" placeholder="Search in selected facilities" class="w-full bg-transparent text-[12px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text3)]"/>
+      </div>
+
+      <div class="min-h-0 flex-1 overflow-auto">
+        @if (!filteredItems.length) {
+          <div class="ui-consolidated-sub-bg rounded-[10px] border border-[var(--color-border)] p-3 text-[12px] text-[var(--color-text3)]">
+            No matching facilities
+          </div>
+        } @else {
+          @for (item of filteredItems; track item.id) {
+            <div class="ui-consolidated-sub-bg mb-2 rounded-[10px] border border-[var(--color-border)] p-3 text-[12px]">
+              <div class="font-semibold text-[var(--color-text1)]">{{ item.name || 'Facility' }}</div>
+              <div class="mt-2 grid grid-cols-2 gap-y-1 text-[var(--color-text3)]">
+                <span>Country</span><span class="text-right text-[var(--color-text1)]">{{ item.country || '-' }}</span>
+                <span>Type</span><span class="text-right text-[var(--color-text1)]">{{ item.type || '-' }}</span>
+                <span>Capacity</span><span class="text-right text-[var(--color-text1)]">{{ item.capacity ?? '-' }}</span>
+                <span>Source</span><span class="text-right text-[var(--color-text1)]">{{ item.source || '-' }}</span>
+                <span>Coordinates</span><span class="text-right text-[var(--color-text1)]">{{ item.location?.lat ?? '-' }}, {{ item.location?.lon ?? '-' }}</span>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+}

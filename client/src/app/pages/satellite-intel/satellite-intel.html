@@ -40,6 +40,7 @@
             [errorMessage]="satelliteService.onError()?.message || null"
             [hasSearched]="hasSearched"
             (featureSelected)="onMapFeatureSelected($event)"
+            (featureIdsSelected)="onPowerPlantFeatureIdsSelected($event)"
             (mapMoved)="onMapMoved($event)">
           </app-satellite-map-section>
           @if (isAircraftLoading || isShipsLoading) {
@@ -102,6 +103,13 @@
           </div>
         }
       </div>
+      @if (isMapView) {
+        <app-power-plant-popup
+          [isOpen]="powerPlantPopupOpen"
+          [items]="powerPlantPopupData"
+          (close)="closePowerPlantPopup()">
+        </app-power-plant-popup>
+      }
         @if (isMapView && isPanelPopupOpen) {
   <div class="map-overlay-menu absolute right-3 top-16 bottom-0 z-[930] flex w-[min(380px,calc(100%-24px))] flex-col overflow-hidden rounded-t-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md">
     <div class="flex shrink-0 items-center justify-between border-b border-white/10 px-3 py-2">
@@ -143,6 +151,15 @@
         <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Power</div>
         <div class="text-[11px] text-[var(--color-text3)]">{{ visiblePowerCount }} visible</div>
       </div>
+      <div class="mt-2 flex items-center justify-between text-[11px] text-[var(--color-text3)]">
+        <span>Loaded {{ wriData.length }} / {{ powerPlantTotalHits }}</span>
+        <span>Page {{ powerPlantPage }} of {{ powerPlantPageCount }}</span>
+      </div>
+      @if (hasMorePowerPlants()) {
+        <button type="button" class="mt-2 w-full rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-720)] px-3 py-2 text-[12px] font-semibold text-[var(--color-text1)] hover:bg-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isPowerPlantLoading || isPowerPlantLoadingMore" (click)="loadMorePowerPlants()">
+          {{ isPowerPlantLoadingMore ? 'Loading...' : 'Load More' }}
+        </button>
+      }
       <div class="mt-2 grid grid-cols-2 gap-2">
         @for (filter of powerFilters; track filter.key) {
           <button type="button" class="flex items-center justify-between rounded-[10px] border px-3 py-2 text-[12px] transition-colors" [ngClass]="isFilterSelected(filter.key) ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-720)]','text-[var(--color-text1)]'] : ['border-[var(--color-border)]','bg-[var(--color-blue-790)]','text-[var(--color-text3)]']" (click)="toggleDashboardFilter(filter.key)">
@@ -247,6 +264,7 @@
     </div>
   </div>
 }
+
       @if (activePanel === 'compare') {
         <app-satellite-month-compare
           [isScanning]="isScanning()"

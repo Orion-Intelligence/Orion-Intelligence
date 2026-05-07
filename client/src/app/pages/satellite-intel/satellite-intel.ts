@@ -11,11 +11,12 @@ import { MonthCompareSectionComponent } from './month-compare-section/month-comp
 import { AnomalySectionComponent } from './anomaly-section/anomaly-section.component';
 import { SentinelSearchSectionComponent } from './sentinel-search-section/sentinel-search-section.component';
 import { SentinelImageSectionComponent } from './sentinel-image-section/sentinel-image-section.component';
+import { PowerPlantPopupComponent } from './components/power-plant-popup/power-plant-popup.component';
 import { SatelliteFacilitiesResponse, SatelliteAnomalyResponse, SatelliteCompareResponse, SatelliteSentinelImageResult, SatelliteSentinelSearchResponse, SatelliteGeocodeResult, SatelliteLiveAircraft, SatelliteLiveShip, } from '../../shared/model/satellite-intel/satellite-intel-api.models';
 import { ThreatLensComponent } from "../threat-lens/threat-lens";
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { OrionSatelliteService } from './orion-satellite.service';
-import { ORION_INFRASTRUCTURE_FILTERS, ORION_POWER_FILTERS, OrionSatelliteFeature, OrionSatelliteFeatureType } from './model/satellite-intel.model';
+import { ORION_INFRASTRUCTURE_FILTERS, ORION_POWER_FILTERS, OrionSatelliteFeature, OrionSatelliteFeatureType, PowerPlantByIdItem, PowerPlantsSearchItem } from './model/satellite-intel.model';
 
 @Component({
   selector:    'app-satellite-intel',
@@ -33,6 +34,7 @@ import { ORION_INFRASTRUCTURE_FILTERS, ORION_POWER_FILTERS, OrionSatelliteFeatur
     AnomalySectionComponent,
     SentinelSearchSectionComponent,
     SentinelImageSectionComponent,
+    PowerPlantPopupComponent,
     ThreatLensComponent
   ],
   animations: [fadeInDashboardItem],
@@ -50,6 +52,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private wriSub?: Subscription;
   private facilitiesSub?: Subscription;
   private dashboardSearchSub?: Subscription;
+  private powerPlantsSub?: Subscription;
+  private powerPlantDetailsSub?: Subscription;
   private readonly dashboardSearch$ = new Subject<string>();
 
   readonly progressSegments = Array.from({ length: 20 }, (_, i) => i);
@@ -76,6 +80,14 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   dashboardSearchResults: OrionSatelliteFeature[] = [];
   wriData: OrionSatelliteFeature[] = [];
   facilitiesMapData: OrionSatelliteFeature[] = [];
+  powerPlantPage = 1;
+  powerPlantPageSize = 1000;
+  powerPlantPageCount = 1;
+  powerPlantTotalHits = 0;
+  isPowerPlantLoading = false;
+  isPowerPlantLoadingMore = false;
+  powerPlantPopupOpen = false;
+  powerPlantPopupData: PowerPlantByIdItem[] = [];
   mergedData: OrionSatelliteFeature[] = [];
   filteredData: OrionSatelliteFeature[] = [];
   selectedFilters: OrionSatelliteFeatureType[] = [...ORION_POWER_FILTERS.map(f => f.key), ...ORION_INFRASTRUCTURE_FILTERS.map(f => f.key)];
@@ -150,11 +162,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.satelliteService.resetState();
-    this.wriSub = this.orionSatelliteService.loadWRI().subscribe({
-      next: (data) => {
-        this.wriData = data; this.refreshMergedData();
-      },
-    });
+    this.loadPowerPlantsPage(1, false);
     this.dashboardSearchSub = this.dashboardSearch$.pipe(debounceTime(300), distinctUntilChanged()).subscribe((query) => {
       this.updateDashboardSearchResults(query);
     });
@@ -181,6 +189,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     clearInterval(this.aircraftTimer);
     clearInterval(this.shipsTimer);
     this.wriSub?.unsubscribe();
+    this.powerPlantsSub?.unsubscribe();
+    this.powerPlantDetailsSub?.unsubscribe();
     this.facilitiesSub?.unsubscribe();
     this.dashboardSearchSub?.unsubscribe();
     this.satelliteService.cancelCurrentScan();
@@ -592,6 +602,40 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.focusedFeature = feature;
   }
 
+  onPowerPlantFeatureIdsSelected(ids: string[]): void {
+    const normalizedIds = Array.from(new Set((ids || []).filter((id) => typeof id === 'string' && !!id.trim())));
+    if (!normalizedIds.length) {
+      return;
+    }
+    this.powerPlantDetailsSub?.unsubscribe();
+    this.powerPlantDetailsSub = this.orionSatelliteService.getPowerPlantsByIds(normalizedIds).subscribe({
+      next: (response) => {
+        this.powerPlantPopupData = Array.isArray(response?.Result) ? response.Result : [];
+        this.powerPlantPopupOpen = this.powerPlantPopupData.length > 0;
+      },
+      error: () => {
+        this.powerPlantPopupData = [];
+        this.powerPlantPopupOpen = false;
+      },
+    });
+  }
+
+  closePowerPlantPopup(): void {
+    this.powerPlantPopupOpen = false;
+    this.powerPlantPopupData = [];
+  }
+
+  hasMorePowerPlants(): boolean {
+    return this.powerPlantPage < this.powerPlantPageCount;
+  }
+
+  loadMorePowerPlants(): void {
+    if (!this.hasMorePowerPlants() || this.isPowerPlantLoading || this.isPowerPlantLoadingMore) {
+      return;
+    }
+    this.loadPowerPlantsPage(this.powerPlantPage + 1, true);
+  }
+
   filterCount(type: OrionSatelliteFeatureType): number {
     return this.orionSatelliteService.filterByType(this.mergedData, type).length;
   }
@@ -842,6 +886,46 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       : [...this.wriData];
     this.filteredData = this.mergedData.filter(f => this.selectedFilters.includes(f.type));
     this.updateDashboardSearchResults(this.dashboardSearch.trim().toLowerCase());
+  }
+
+  private loadPowerPlantsPage(page: number, append: boolean): void {
+    if (append) {
+      this.isPowerPlantLoadingMore = true;
+    }
+    else {
+      this.isPowerPlantLoading = true;
+    }
+    this.powerPlantsSub?.unsubscribe();
+    this.powerPlantsSub = this.orionSatelliteService.searchPowerPlants(page, this.powerPlantPageSize).subscribe({
+      next: (response) => {
+        const items = Array.isArray(response?.Result)
+          ? response.Result
+          : (Array.isArray((response as any)?.result) ? (response as any).result : []);
+        const mapped = items
+          .map((item: { id: any; name: any; location: any; }) => this.orionSatelliteService.toFeatureFromById({
+            id: item.id || (item as any)._id,
+            name: item.name,
+            source: 'WRI',
+            location: item.location || (item as any).location_point,
+          }))
+          .filter((item: PowerPlantsSearchItem | null): item is PowerPlantsSearchItem => item !== null);
+        this.powerPlantPage = response?.Page || (response as any)?.page || page;
+        this.powerPlantPageCount = response?.Page_Count || (response as any)?.page_count || this.powerPlantPage;
+        this.powerPlantTotalHits = response?.Total_Hits || (response as any)?.total_hits || 0;
+        this.wriData = append ? [...this.wriData, ...mapped] : mapped;
+        this.refreshMergedData();
+      },
+      error: () => {
+        if (!append) {
+          this.wriData = [];
+          this.refreshMergedData();
+        }
+      },
+    });
+    this.powerPlantsSub.add(() => {
+      this.isPowerPlantLoading = false;
+      this.isPowerPlantLoadingMore = false;
+    });
   }
 
   private updateDashboardSearchResults(query: string): void {
