@@ -349,10 +349,12 @@ class TenantManager:
                 subscription=data.subscription,
                 licenses=data.licenses,
                 tenant_uuid=tenant_uuid, )
+            
+            await mail_manager.get_instance().validate_mail_configuration()
 
             await engine.save(user)
             await AuditLogManager.get_instance().register(
-                str(current_user.tenant_uuid), str(current_user.id), "tenent created successfully")
+                str(current_user.tenant_uuid), str(current_user.id), "tenant created successfully")
 
             APP_URL = env_handler.get_instance().env("APP_URL")
             login_url = f"{APP_URL}/login"
@@ -380,5 +382,5 @@ class TenantManager:
 
         except HTTPException as e:
             raise e
-        except Exception:
-            raise HTTPException(status_code=400, detail="Error creating user")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Error creating user {str(e)}")

@@ -5,7 +5,6 @@ from pathlib import Path
 from fastapi import UploadFile, HTTPException
 from fastapi.responses import Response
 
-from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.server.config_manager.model.config_data import config_data
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
@@ -66,7 +65,12 @@ class config_controller:
             "S_HOME_HEADER_DATA_SOURCES": "https://www.orionintelligence.org/sources",
             "S_HOME_HEADER_ADVERSARIES": "https://www.orionintelligence.org/adversaries",
             "S_HOME_HEADER_PRICING": "https://www.orionintelligence.org/pricing",
-            "S_HOME_HEADER_PRICING_ALLOWED": True
+            "S_HOME_HEADER_PRICING_ALLOWED": True,
+            "ACCOUNTS_MAIL": "accounts@example.com",
+            "ACCOUNTS_MAIL_PASSWORD": "test",
+            "ACCOUNTS_SMTP_SERVER": "mailpit",
+            "ACCOUNTS_SMTP_PORT": 1025
+
         })
         return config_data(settings=fresh_config)
 
@@ -88,7 +92,11 @@ class config_controller:
                     "S_HOME_HEADER_DATA_SOURCES": "https://www.orionintelligence.org/sources",
                     "S_HOME_HEADER_ADVERSARIES": "https://www.orionintelligence.org/adversaries",
                     "S_HOME_HEADER_PRICING": "https://www.orionintelligence.org/pricing",
-                    "S_HOME_HEADER_PRICING_ALLOWED": True
+                    "S_HOME_HEADER_PRICING_ALLOWED": True,
+                    "ACCOUNTS_MAIL": "accounts@example.com",
+                    "ACCOUNTS_MAIL_PASSWORD": "test",
+                    "ACCOUNTS_SMTP_SERVER": "mailpit",
+                    "ACCOUNTS_SMTP_PORT": 1025
                 }),
             })
 
@@ -139,6 +147,7 @@ class config_controller:
         return Response(content=data, media_type="image/png")
 
     async def uploadSystemResource(self, file: UploadFile, current_user, key: str):
+        from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
         contents = await file.read()
         MAX_FILE_SIZE = 1024 * 1024
 

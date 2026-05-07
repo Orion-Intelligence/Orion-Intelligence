@@ -224,6 +224,52 @@
           </div>
         </div>
       </div>
+
+      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 sm:col-span-2" [ngClass]="isEditing ? 'ring-2 ring-sky-400/20 border-sky-400/35' : ''">
+        <div class="ui-section-title">Network Configuration</div>
+        <div class="ui-section-description">Set mail and app connectivity variables.</div>
+        <div class="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <div>
+            <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
+              ACCOUNT MAIL
+              @if (isEditing) {
+                <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
+              }
+            </label>
+            <input class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.accounts_mail" [disabled]="!isEditing" placeholder="accounts@example.com" />
+          </div>
+
+          <div>
+            <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
+              ACCOUNT MAIL PASSWORD
+              @if (isEditing) {
+                <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
+              }
+            </label>
+            <input class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.accounts_mail_password" [disabled]="!isEditing" placeholder="test" />
+          </div>
+
+          <div>
+            <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
+              ACCOUNT SMTP SERVER
+              @if (isEditing) {
+                <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
+              }
+            </label>
+            <input class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.accounts_smtp_server" [disabled]="!isEditing" placeholder="mailpit" />
+          </div>
+
+          <div>
+            <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
+              ACCOUNT SMTP PORT
+              @if (isEditing) {
+                <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
+              }
+            </label>
+            <input class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.accounts_smtp_port" [disabled]="!isEditing" placeholder="1025" />
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

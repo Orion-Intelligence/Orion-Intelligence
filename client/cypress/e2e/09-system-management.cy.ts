@@ -47,4 +47,49 @@ describe('System Settings - Admin Update Flow', () => {
 
     cy.logout();
   });
+
+  it('updates network configuration fields from system settings', () => {
+    cy.loginAsAdmin();
+
+    openSystemSettings();
+
+    cy.intercept('POST', '**/api/public/update').as('updateSystemSettings');
+
+    cy.get('[data-testid="system-settings-edit"]').should('be.visible').click();
+    cy.contains('div', 'Network Configuration').scrollIntoView().should('be.visible');
+
+    cy.get('input[placeholder="accounts@example.com"]')
+      .scrollIntoView()
+      .should('be.visible')
+      .clear()
+      .type('infra@example.com');
+    cy.get('input[placeholder="test"]')
+      .scrollIntoView()
+      .should('be.visible')
+      .clear()
+      .type('StrongPass123!');
+    cy.get('input[placeholder="mailpit"]')
+      .scrollIntoView()
+      .should('be.visible')
+      .clear()
+      .type('smtp.example.com');
+    cy.get('input[placeholder="1025"]')
+      .scrollIntoView()
+      .should('be.visible')
+      .clear()
+      .type('587');
+
+    cy.scrollDashboardToTop();
+    cy.get('[data-testid="system-settings-save"]').should('be.visible').click();
+
+    cy.wait('@updateSystemSettings').then(({ request }) => {
+      const metaInfo = JSON.parse(request.body.settings.meta_info);
+      expect(metaInfo.ACCOUNTS_MAIL).to.eq('infra@example.com');
+      expect(metaInfo.ACCOUNTS_MAIL_PASSWORD).to.eq('StrongPass123!');
+      expect(metaInfo.ACCOUNTS_SMTP_SERVER).to.eq('smtp.example.com');
+      expect(metaInfo.ACCOUNTS_SMTP_PORT).to.eq('587');
+    });
+
+    cy.logout();
+  });
 });
