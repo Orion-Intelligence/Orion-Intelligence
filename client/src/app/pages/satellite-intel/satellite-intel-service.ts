@@ -376,4 +376,36 @@ export class SatelliteIntelService {
   pollShipsGlobal(aisstreamApiKey?: string): Observable<SatelliteLiveShipsBBoxResponse> {
     return this.createPolledRequest(() => this.fetchShipsGlobal(aisstreamApiKey), (res) => (res?.result?.status || res?.status) as any, 3000);
   }
+
+  fetchAircraftByICAO(icao: string): Observable<SatelliteLiveAircraftBBoxResponse> {
+    return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft/icao', { icao24: icao });
+  }
+
+  pollAircraftByICAO(icao: string): Observable<SatelliteLiveAircraftBBoxResponse> {
+    return this.createPolledRequest(() => this.fetchAircraftByICAO(icao), (res) => (res?.result?.status || res?.status) as any, 3000);
+  }
+
+  fetchAircraftTrack(icao: string): Observable<any> {
+    return this.api.post<any>('satellite/livetrack/aircraft/track', { icao24: icao });
+  }
+
+  pollAircraftTrack(icao: string): Observable<any> {
+    return this.createPolledRequest(() => this.fetchAircraftTrack(icao), (res) => (res?.result?.status || res?.status) as any, 3000);
+  }
+
+  fetchShipByMMSI(mmsi: string): Observable<SatelliteLiveShipsBBoxResponse> {
+    return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships/mmsi', { mmsi: mmsi });
+  }
+
+  pollShipByMMSI(mmsi: string): Observable<SatelliteLiveShipsBBoxResponse> {
+    return this.createPolledRequest(() => this.fetchShipByMMSI(mmsi), (res) => (res?.result?.status || res?.status) as any, 3000);
+  }
+
+  fetchLivetrackStatus(): Observable<any> {
+    return this.api.post<any>('satellite/livetrack/status', {});
+  }
+
+  pollLivetrackStatus(): Observable<any> {
+    return this.createPolledRequest(() => this.fetchLivetrackStatus(), (res) => (res?.result?.status || res?.status) as any, 3000);
+  }
 }

@@ -24,4 +24,153 @@
       {{ errorMessage }}
     </div>
   }
+
+  @if (sidebarVisible) {
+<!--    <div class="absolute inset-0 z-[1190] bg-black/30 backdrop-blur-[1px]" (click)="closeSidebar()"></div>-->
+    <div class="absolute bottom-0 right-0 top-0 z-[1200] w-[360px] max-w-[min(360px,100%)] overflow-hidden border-l border-l-[#ffffff15] bg-[var(--color-blue-820-light)] text-[14px] text-[var(--color-text2)] shadow-[-20px_0_40px_rgba(0,0,0,0.35)]">
+      <div class="flex h-full flex-col">
+        <div class="border-b border-[var(--color-divider)] bg-[var(--color-blue-820-light)] px-4 pb-3 pt-3">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <div class="text-[14px] font-semibold text-[var(--color-text1)]">
+                @if (selectedEntity?.type === 'aircraft') { Aircraft Details } @else { Ship Details }
+              </div>
+              <div class="mt-1 text-[12px] text-[var(--color-text4)]">
+                @if (sidebarLoading) { Loading live tracking details... }
+                @else if (selectedEntity?.type === 'aircraft') { Live aircraft details and telemetry. }
+                @else { Live ship details and telemetry. }
+              </div>
+            </div>
+            <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-720)]" (click)="closeSidebar()">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+          @if (sidebarLoading) {
+            <div class="mt-3 inline-flex items-center gap-2 rounded-full border border-[var(--color-blue-630)] bg-[var(--color-blue-700)] px-3 py-1 text-[11px] font-semibold text-[var(--color-text2)]">
+              <span class="h-2 w-2 rounded-full bg-amber-300"></span>
+              Fetching details
+            </div>
+          }
+        </div>
+
+        <div class="flex-1 overflow-y-auto bg-[var(--color-blue-820-light)] p-3">
+          @if (sidebarLoading) {
+            <div class="w-full animate-pulse">
+              <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+                <div class="h-4 w-28 rounded-full bg-[var(--color-blue-700)]"></div>
+                <div class="mt-2 h-3 w-40 rounded-full bg-[var(--color-blue-700)]"></div>
+                <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div class="h-14 rounded-[8px] bg-[var(--color-blue-720)]"></div>
+                  <div class="h-14 rounded-[8px] bg-[var(--color-blue-720)]"></div>
+                  <div class="h-14 rounded-[8px] bg-[var(--color-blue-720)]"></div>
+                  <div class="h-14 rounded-[8px] bg-[var(--color-blue-720)]"></div>
+                  <div class="h-14 rounded-[8px] bg-[var(--color-blue-720)]"></div>
+                  <div class="h-14 rounded-[8px] bg-[var(--color-blue-720)]"></div>
+                </div>
+              </div>
+            </div>
+          } @else if (sidebarError) {
+            <div class="rounded-[10px] border border-rose-400/25 bg-rose-500/10 p-4">
+              <div class="text-[14px] font-medium text-rose-200">Unable to load details</div>
+              <p class="mt-1 text-[12px] text-rose-200/80">{{ sidebarError }}</p>
+            </div>
+          } @else if (selectedEntity?.type === 'aircraft' && selectedEntity?.data) {
+            @let aircraft = selectedEntity!.data;
+            <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+              <div class="ui-section-title">Aircraft</div>
+              <div class="ui-section-description">Live transponder identity, movement, and position.</div>
+              <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">ICAO24</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 font-mono text-sm text-[var(--color-text1)]">{{ aircraft.icao24 || '-' }}</div>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">Callsign</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ aircraft.callsign || '-' }}</div>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">Origin Country</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ aircraft.origin_country || '-' }}</div>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">On Ground</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ aircraft.on_ground ?? '-' }}</div>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">Altitude</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ aircraft.baro_altitude ?? aircraft.geo_altitude ?? '-' }}</div>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">Velocity</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ aircraft.velocity ?? '-' }}</div>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">Heading</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ aircraft.true_track ?? '-' }}</div>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">Vertical Rate</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ aircraft.vertical_rate ?? '-' }}</div>
+                </div>
+              </div>
+              <div class="mt-3">
+                <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">Coordinates</label>
+                <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ (aircraft.latitude !== undefined && aircraft.latitude !== null && aircraft.longitude !== undefined && aircraft.longitude !== null) ? (aircraft.latitude.toFixed(3) + ', ' + aircraft.longitude.toFixed(3)) : '-' }}</div>
+              </div>
+            </div>
+          } @else if (selectedEntity?.type === 'ship' && selectedEntity?.data) {
+            @let ship = selectedEntity!.data;
+            <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+              <div class="ui-section-title">Ship</div>
+              <div class="ui-section-description">AIS identity, route, and movement state.</div>
+              <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">MMSI</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 font-mono text-sm text-[var(--color-text1)]">{{ ship.mmsi || '-' }}</div>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">Name</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ ship.name || '-' }}</div>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">Callsign</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ ship.call_sign || '-' }}</div>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">Destination</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ ship.destination || '-' }}</div>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">Speed</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ ship.speed ?? '-' }}</div>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">Course</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ ship.course ?? '-' }}</div>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">True Heading</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ ship.true_heading ?? '-' }}</div>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">Nav Status</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ ship.nav_status ?? '-' }}</div>
+                </div>
+              </div>
+              <div class="mt-3 grid gap-3">
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">Ship Type</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ ship.ship_type ?? '-' }}</div>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">Coordinates</label>
+                  <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]">{{ (ship.latitude !== undefined && ship.latitude !== null && ship.longitude !== undefined && ship.longitude !== null) ? (ship.latitude.toFixed(3) + ', ' + ship.longitude.toFixed(3)) : '-' }}</div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
 </div>
