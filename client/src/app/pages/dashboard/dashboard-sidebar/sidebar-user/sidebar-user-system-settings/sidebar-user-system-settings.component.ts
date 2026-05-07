@@ -19,12 +19,15 @@ const DEFAULT_APP_NAME = 'Orion Intelligence';
 })
 export class SidebarProfileSystemSettingsComponent implements OnInit {
   isEditing = false;
-  formError = '';
+  configurationError = '';
+  networkConfigurationError = '';
   systemData = { ai_endpoint: '', ai_endpoint_enabled: true, language_allowed: '', version: '', api_allowed: '0', app_name: '0', s_onion: '' };
-  form = { language: '', version: '', api_allowed: '0', app_name: '0', ai_endpoint: '', ai_endpoint_enabled: true, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false };
+  form = { language: '', version: '', api_allowed: '0', app_name: '0', ai_endpoint: '', ai_endpoint_enabled: true, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: 'test', accounts_mail: 'accounts@example.com', accounts_smtp_server: 'mailpit', accounts_smtp_port: '1025' };
   languageOptions = [ 'en', 'fr', 'es', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko', 'ar', 'hi', 'bn', 'tr', 'nl', 'sv', 'pl', 'cs' ];
   onionPattern = /^(https?:\/\/)?[a-z2-7]{56}\.onion\/?$/i;
   urlPattern = /^https?:\/\/.+/i;
+  emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  smtpServerPattern = /^(?=.{1,253}$)(localhost|([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}|(\d{1,3}\.){3}\d{1,3})$/;
 
   constructor(private apiService: ApiService, protected appService: AppService, protected authService: AuthService,private messageNotificationService: MessageNotificationService) {
   }
@@ -61,7 +64,12 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.pricing_url = typeof metaInfo['S_HOME_HEADER_PRICING'] === 'string' ? metaInfo['S_HOME_HEADER_PRICING'] : '';
     this.form.documentation_allowed = metaInfo['S_HOME_HEADER_PRICING_ALLOWED'] === true;
     this.form.whistle_blowing_allowed = metaInfo['S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED'] === true;
-    this.formError = '';
+    this.form.accounts_mail_password = typeof metaInfo['ACCOUNTS_MAIL_PASSWORD'] === 'string' ? metaInfo['ACCOUNTS_MAIL_PASSWORD'] : 'test';
+    this.form.accounts_mail = typeof metaInfo['ACCOUNTS_MAIL'] === 'string' ? metaInfo['ACCOUNTS_MAIL'] : 'accounts@example.com';
+    this.form.accounts_smtp_server = typeof metaInfo['ACCOUNTS_SMTP_SERVER'] === 'string' ? metaInfo['ACCOUNTS_SMTP_SERVER'] : 'mailpit';
+    this.form.accounts_smtp_port = typeof metaInfo['ACCOUNTS_SMTP_PORT'] === 'string' ? metaInfo['ACCOUNTS_SMTP_PORT'] : '1025';
+    this.configurationError = '';
+    this.networkConfigurationError = '';
   }
 
   toggleEdit() {
@@ -123,18 +131,27 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   }
 
   save() {
-    this.formError = '';
+    this.configurationError = '';
+    this.networkConfigurationError = '';
     const requiredFields = [
       { key: 'app_name', label: 'App Name' },
       { key: 'language', label: 'Language' },
       { key: 'data_sources_url', label: 'Data Sources URL' },
       { key: 'adversaries_url', label: 'Adversaries URL' },
-      { key: 'pricing_url', label: 'Pricing URL' }
+      { key: 'pricing_url', label: 'Pricing URL' },
+      { key: 'accounts_mail_password', label: 'Account Mail Password' },
+      { key: 'accounts_mail', label: 'Account Mail' },
+      { key: 'accounts_smtp_server', label: 'Account SMTP Server' },
+      { key: 'accounts_smtp_port', label: 'Account SMTP Port' }
     ] as const;
     for (const field of requiredFields) {
       const value = this.form[field.key];
       if (typeof value !== 'string' || !value.trim()) {
-        this.formError = `${field.label} is required`;
+        if (String(field.key).startsWith('accounts_')) {
+          this.networkConfigurationError = `${field.label} is required`;
+        } else {
+          this.configurationError = `${field.label} is required`;
+        }
         return;
       }
     }
@@ -144,6 +161,10 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.data_sources_url = this.form.data_sources_url.trim();
     this.form.adversaries_url = this.form.adversaries_url.trim();
     this.form.pricing_url = this.form.pricing_url.trim();
+    this.form.accounts_mail_password = this.form.accounts_mail_password.trim();
+    this.form.accounts_mail = this.form.accounts_mail.trim();
+    this.form.accounts_smtp_server = this.form.accounts_smtp_server.trim();
+    this.form.accounts_smtp_port = this.form.accounts_smtp_port.trim();
     if (this.form.s_onion && !this.onionPattern.test(this.form.s_onion)) {
       this.messageNotificationService.show('Invalid onion address');
       return;
@@ -151,7 +172,20 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     if ((this.form.data_sources_url && !this.urlPattern.test(this.form.data_sources_url)) ||
       (this.form.adversaries_url && !this.urlPattern.test(this.form.adversaries_url)) ||
       (this.form.pricing_url && !this.urlPattern.test(this.form.pricing_url))) {
-      this.formError = 'Data Sources URL, Adversaries URL, and Pricing URL must start with http:// or https://';
+      this.configurationError = 'Data Sources URL, Adversaries URL, and Pricing URL must start with http:// or https://';
+      return;
+    }
+    if (!this.emailPattern.test(this.form.accounts_mail)) {
+      this.networkConfigurationError = 'Account Mail must be a valid email address';
+      return;
+    }
+    if (!this.smtpServerPattern.test(this.form.accounts_smtp_server)) {
+      this.networkConfigurationError = 'Account SMTP Server must be a valid hostname, localhost, or IPv4 address';
+      return;
+    }
+    const smtpPort = Number(this.form.accounts_smtp_port);
+    if (!Number.isInteger(smtpPort) || smtpPort < 1 || smtpPort > 65535) {
+      this.networkConfigurationError = 'Account SMTP Port must be a valid port number (1-65535)';
       return;
     }
     const settings = {
@@ -167,7 +201,11 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
         S_HOME_HEADER_ADVERSARIES: this.form.adversaries_url,
         S_HOME_HEADER_PRICING: this.form.pricing_url,
         S_HOME_HEADER_PRICING_ALLOWED: this.form.documentation_allowed,
-        S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED: this.form.whistle_blowing_allowed
+        S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED: this.form.whistle_blowing_allowed,
+        ACCOUNTS_MAIL_PASSWORD: this.form.accounts_mail_password,
+        ACCOUNTS_MAIL: this.form.accounts_mail,
+        ACCOUNTS_SMTP_SERVER: this.form.accounts_smtp_server,
+        ACCOUNTS_SMTP_PORT: this.form.accounts_smtp_port
       })
     };
     this.apiService.post<any>('public/update', { settings }).subscribe({

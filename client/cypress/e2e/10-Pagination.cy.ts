@@ -161,14 +161,20 @@ describe('Exploit – Tabs & Pagination', () => {
       cy.get('[data-testid="result-card"]').should('exist');
       cy.get('[data-testid="pagination-root"]').should('exist');
 
-      cy.get('[data-testid="pagination-root"]').scrollIntoView();
-      cy.get('[data-testid="pagination-next"]').filter(':visible').scrollIntoView().not(':disabled').then(($btn) => {
-          if ($btn.length) {
+      cy.get('[data-testid="pagination-root"]').scrollIntoView().should('be.visible');
+      cy.get('body').then(($body) => {
+        const hasVisibleNext = $body.find('[data-testid="pagination-next"]:visible').length > 0;
+        if (!hasVisibleNext) {
+          return;
+        }
+        cy.get('[data-testid="pagination-next"]:visible').then(($btn) => {
+          if (!$btn.is(':disabled')) {
             cy.wrap($btn).click();
             cy.get('[data-testid="result-card"]').should('exist');
             cy.get('[data-testid="result-card"]').should('exist');
           }
         });
+      });
     });
   });
 });

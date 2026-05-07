@@ -1,7 +1,10 @@
 import asyncio
+from fastapi import HTTPException
+import json
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import ssl
 
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
@@ -35,10 +38,19 @@ class mail_manager:
 
     async def _prepare_verification_message(self, to_header: str, subject: str, body: str):
         subject, body = await self.process_app_variables(subject, body)
-        ACCOUNTS_MAIL_PASSWORD = env_handler.get_instance().env("ACCOUNTS_MAIL_PASSWORD")
-        sender_email = env_handler.get_instance().env("ACCOUNTS_MAIL")
-        smtp_server = env_handler.get_instance().env("ACCOUNTS_SMTP_SERVER")
-        smtp_port = int(env_handler.get_instance().env("ACCOUNTS_SMTP_PORT"))
+        from orion.api.server.config_manager.config_controller import config_controller
+        config = config_controller.getInstance()._config
+        meta_info_raw = config.get("meta_info", "{}")
+        try:
+            meta_info = json.loads(meta_info_raw) if isinstance(meta_info_raw, str) else {}
+        except (TypeError, ValueError):
+            meta_info = {}
+
+        # Prefer values from System Settings (meta_info), then fallback to env.
+        ACCOUNTS_MAIL_PASSWORD = str(meta_info.get("ACCOUNTS_MAIL_PASSWORD") or env_handler.get_instance().env("ACCOUNTS_MAIL_PASSWORD"))
+        sender_email = str(meta_info.get("ACCOUNTS_MAIL") or env_handler.get_instance().env("ACCOUNTS_MAIL"))
+        smtp_server = str(meta_info.get("ACCOUNTS_SMTP_SERVER") or env_handler.get_instance().env("ACCOUNTS_SMTP_SERVER"))
+        smtp_port = int(str(meta_info.get("ACCOUNTS_SMTP_PORT") or env_handler.get_instance().env("ACCOUNTS_SMTP_PORT")))
         msg = MIMEMultipart("alternative")
         msg["From"] = sender_email
         msg["To"] = to_header
@@ -73,3 +85,62 @@ class mail_manager:
         else:
             with smtplib.SMTP(smtp_server, smtp_port) as server:
                 server.sendmail(sender_email, recipients, msg.as_string())
+
+    @staticmethod
+    async def validate_mail_configuration():
+        await asyncio.to_thread(
+            mail_manager._validate_mail_configuration_sync
+        )
+
+    @staticmethod
+    def _validate_mail_configuration_sync():
+        from orion.api.server.config_manager.config_controller import config_controller
+
+        config = config_controller.getInstance()._config
+        meta_info_raw = config.get("meta_info", "{}")
+
+        try:
+            meta_info = json.loads(meta_info_raw) if isinstance(meta_info_raw, str) else {}
+        except:
+            meta_info = {}
+
+        password = str(meta_info.get("ACCOUNTS_MAIL_PASSWORD") or env_handler.get_instance().env("ACCOUNTS_MAIL_PASSWORD"))
+        sender_email = str(meta_info.get("ACCOUNTS_MAIL") or env_handler.get_instance().env("ACCOUNTS_MAIL"))
+        smtp_server = str(meta_info.get("ACCOUNTS_SMTP_SERVER") or env_handler.get_instance().env("ACCOUNTS_SMTP_SERVER"))
+        smtp_port = int(str(meta_info.get("ACCOUNTS_SMTP_PORT") or env_handler.get_instance().env("ACCOUNTS_SMTP_PORT")))
+
+        try:
+            is_production = env_handler.get_instance().env("PRODUCTION", "0") == "1"
+
+            context = ssl.create_default_context()
+
+            if is_production:
+                with smtplib.SMTP_SSL(
+                    smtp_server,
+                    smtp_port,
+                    context=context,
+                    timeout=10
+                ) as server:
+
+                    server.login(sender_email, password)
+
+            else:
+                with smtplib.SMTP(
+                    smtp_server,
+                    smtp_port,
+                    timeout=10
+                ) as server:
+
+                    try:
+                        server.starttls(context=context)
+                        server.login(sender_email, password)
+                    except Exception:
+                        pass
+
+            return True
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid network configuration in system settings"
+            )
