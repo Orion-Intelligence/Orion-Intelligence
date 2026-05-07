@@ -21,8 +21,8 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   isEditing = false;
   configurationError = '';
   networkConfigurationError = '';
-  systemData = { ai_endpoint: '', ai_endpoint_enabled: true, language_allowed: '', version: '', api_allowed: '0', app_name: '0', s_onion: '' };
-  form = { language: '', version: '', api_allowed: '0', app_name: '0', ai_endpoint: '', ai_endpoint_enabled: true, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
+  systemData = { ai_endpoint_enabled: true, language_allowed: '', version: '', app_name: '0', s_onion: '' };
+  form = { language: '', version: '', app_name: '0', ai_endpoint_enabled: true, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
   languageOptions = [ 'en', 'fr', 'es', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko', 'ar', 'hi', 'bn', 'tr', 'nl', 'sv', 'pl', 'cs' ];
   onionPattern = /^(https?:\/\/)?[a-z2-7]{56}\.onion\/?$/i;
   urlPattern = /^https?:\/\/.+/i;
@@ -54,9 +54,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     };
     this.form.language = settings.language_allowed;
     this.form.version = settings.version;
-    this.form.api_allowed = settings.api_allowed;
     this.form.app_name = settings.app_name?.trim() || DEFAULT_APP_NAME;
-    this.form.ai_endpoint = settings.ai_endpoint;
     this.form.ai_endpoint_enabled = settings.ai_endpoint_enabled;
     this.form.s_onion = settings.s_onion;
     this.form.data_sources_url = typeof metaInfo['S_HOME_HEADER_DATA_SOURCES'] === 'string' ? metaInfo['S_HOME_HEADER_DATA_SOURCES'] : '';
@@ -192,9 +190,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     const settings = {
       language: this.form.language,
       version: this.form.version,
-      api_allowed: this.form.api_allowed,
       app_name: this.form.app_name,
-      ai_endpoint: this.form.ai_endpoint,
       ai_endpoint_enabled: this.form.ai_endpoint_enabled ? '1' : '0',
       s_onion: this.form.s_onion,
       meta_info: JSON.stringify({
@@ -217,11 +213,9 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           const s = this.appService.configData()?.appSettings;
           if (s) {
             this.systemData = {
-              ai_endpoint: s.ai_endpoint,
               ai_endpoint_enabled: s.ai_endpoint_enabled,
               language_allowed: s.language_allowed,
               version: s.version,
-              api_allowed: s.api_allowed,
               app_name: s.app_name?.trim() || DEFAULT_APP_NAME,
               s_onion: s.s_onion
             };

@@ -22,8 +22,6 @@ class migration_1_0_3_1:
         if existing_version_entry is None:
             new_entry = db_system_model(key=AllowedKeys.VERSION, value=str(version))
             await engine.save(new_entry)
-            new_entry = db_system_model(key=AllowedKeys.API_ALLOWED, value="1")
-            await engine.save(new_entry)
         else:
             existing_version_entry.value = str(version)
             await engine.save(existing_version_entry)
