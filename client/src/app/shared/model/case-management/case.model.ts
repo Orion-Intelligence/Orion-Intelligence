@@ -33,4 +33,7 @@ export interface Case {
     phoneNumbers: string[];
     additionalIdentifiers: AdditionalIdentifier[];
     relatedEntities: RelatedEntity[];
+    linkedCaseId?: string;
+    linkedReason?: string;
+    linkedCases?: string[];
 }

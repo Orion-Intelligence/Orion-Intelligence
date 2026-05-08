@@ -95,6 +95,70 @@
                     </div>
                 </div>
 
+                <!-- Duplicate/Linking Case Section -->
+                <div class="border-t border-[var(--color-border)] pt-6 mt-6">
+                    <h3 class="text-lg font-bold text-[var(--color-text1)] mb-4">Duplicate or Linked Case</h3>
+
+                    <div class="mb-5 p-4 rounded-[8px] bg-[#131e30] border border-[var(--color-border)]">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" [(ngModel)]="isLinkingCase" name="isLinkingCase" class="w-4 h-4 cursor-pointer" />
+                            <span class="text-sm font-semibold text-[var(--color-text4)] uppercase">Link this case to a
+                                previous case</span>
+                        </label>
+                    </div>
+
+                    @if (isLinkingCase) {
+                    <div class="space-y-5 p-4 rounded-[8px] bg-[#0a0f1a] border border-[var(--color-border)]">
+
+                        <!-- Case Number Input -->
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">
+                                Previous Case Number <span class="text-red-500">*</span>
+                            </label>
+                            <div class="flex gap-2 mt-1">
+                                <input type="text" [(ngModel)]="linkedCaseNumber" name="linkedCaseNumber" (blur)="checkCaseExists()" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="e.g., 00001" />
+                                @if (caseNumberLoading) {
+                                <button type="button" disabled class="px-4 py-2 bg-gray-600 text-white rounded-[8px] text-sm">
+                                    Checking...
+                                </button>
+                                }
+                                @if (!caseNumberLoading && !caseNumberError && linkedCaseNumber.trim()) {
+                                <button type="button" disabled class="px-4 py-2 bg-green-600 text-white rounded-[8px] text-sm flex items-center gap-1">
+                                    <i class="bi bi-check-circle"></i> Valid
+                                </button>
+                                }
+                            </div>
+                            @if (caseNumberError) {
+                            <p class="text-red-400 text-xs mt-2">
+                                <i class="bi bi-exclamation-circle"></i> {{ caseNumberError }}
+                            </p>
+                            }
+                            @if (!caseNumberError && linkedCaseNumber.trim() && !caseNumberLoading) {
+                            <p class="text-green-400 text-xs mt-2">
+                                <i class="bi bi-check-circle"></i> Case found successfully
+                            </p>
+                            }
+                        </div>
+
+                        <!-- Linking Reason -->
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">
+                                Reason for Linking <span class="text-red-500">*</span>
+                            </label>
+                            <textarea [(ngModel)]="linkingReason" name="linkingReason" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40 resize-none" rows="4" placeholder="Explain why this case is linked to the previous case (e.g., Follow-up investigation, Related incident, etc.)"></textarea>
+                        </div>
+
+                        <!-- Info Box -->
+                        <div class="p-3 rounded-[8px] bg-blue-900/30 border border-blue-500/30">
+                            <p class="text-xs text-blue-300">
+                                <i class="bi bi-info-circle"></i> Linking this case will create a bidirectional
+                                relationship. Both cases will be marked as linked.
+                            </p>
+                        </div>
+                    </div>
+                    }
+                </div>
+
                 <!-- Primary Entity Component -->
                 <app-entity-details [entity]="primaryEntity" [isMainEntity]="true"
                     [entityIndex]="0"></app-entity-details>
