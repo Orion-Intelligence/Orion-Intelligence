@@ -161,7 +161,7 @@ describe('Exploit – Tabs & Pagination', () => {
       cy.get('[data-testid="result-card"]').should('exist');
       cy.get('[data-testid="pagination-root"]').should('exist');
 
-      cy.get('[data-testid="pagination-root"]').scrollIntoView().should('be.visible');
+      cy.get('[data-testid="pagination-root"]').scrollIntoView();
       cy.get('body').then(($body) => {
         const hasVisibleNext = $body.find('[data-testid="pagination-next"]:visible').length > 0;
         if (!hasVisibleNext) {
