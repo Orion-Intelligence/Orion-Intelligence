@@ -105,9 +105,15 @@ export class AddNewCase {
     }
     this.caseNumberLoading = true;
     this.caseNumberError = '';
-    this.caseService.validateCase(this.linkedCaseNumber).subscribe({
-      next: () => {
-        this.caseNumberError = '';
+
+    this.caseService.checkCaseExistsFromDb(this.linkedCaseNumber).subscribe({
+      next: (response) => {
+        if (response.exists) {
+          this.caseNumberError = '';
+        }
+        else {
+          this.caseNumberError = `No case found with ID: ${this.linkedCaseNumber}.`;
+        }
         this.caseNumberLoading = false;
         this.cdr.detectChanges();
       },
@@ -208,7 +214,7 @@ export class AddNewCase {
     const invalidSocial = this.caseForm.socialMediaProfiles.filter(profile => {
       return (
         (profile.platform && !profile.username) ||
-         (!profile.platform && profile.username)
+        (!profile.platform && profile.username)
       );
     });
 
@@ -221,7 +227,7 @@ export class AddNewCase {
     const invalidIdentifiers = this.caseForm.additionalIdentifiers.filter(identifier => {
       return (
         (identifier.type && !identifier.value) ||
-         (!identifier.type && identifier.value)
+        (!identifier.type && identifier.value)
       );
     });
 
@@ -288,7 +294,7 @@ export class AddNewCase {
         const relatedInvalidSocial = entity.socialMediaProfiles.filter(profile => {
           return (
             (profile.platform && !profile.username) ||
-             (!profile.platform && profile.username)
+            (!profile.platform && profile.username)
           );
         });
 
@@ -301,7 +307,7 @@ export class AddNewCase {
         const relatedInvalidIdentifiers = entity.additionalIdentifiers.filter(identifier => {
           return (
             (identifier.type && !identifier.value) ||
-             (!identifier.type && identifier.value)
+            (!identifier.type && identifier.value)
           );
         });
 
@@ -351,22 +357,22 @@ export class AddNewCase {
 
     // Clean up empty arrays
     this.caseForm.socialMediaProfiles =
-       this.caseForm.socialMediaProfiles.filter(profile => profile.platform && profile.username);
+      this.caseForm.socialMediaProfiles.filter(profile => profile.platform && profile.username);
 
     this.caseForm.webUrls =
-       this.caseForm.webUrls.filter(url => url.trim());
+      this.caseForm.webUrls.filter(url => url.trim());
 
     this.caseForm.emails =
-       this.caseForm.emails.filter(email => email.trim());
+      this.caseForm.emails.filter(email => email.trim());
 
     this.caseForm.phoneNumbers =
-       this.caseForm.phoneNumbers.filter(phone => phone.trim());
+      this.caseForm.phoneNumbers.filter(phone => phone.trim());
 
     this.caseForm.additionalIdentifiers =
-       this.caseForm.additionalIdentifiers.filter(identifier => identifier.type && identifier.value);
+      this.caseForm.additionalIdentifiers.filter(identifier => identifier.type && identifier.value);
 
     this.caseForm.relatedEntities =
-       this.caseForm.relatedEntities.filter(entity => entity.name.trim());
+      this.caseForm.relatedEntities.filter(entity => entity.name.trim());
 
     // Save case using API
     this.caseService.createCase(this.caseForm).subscribe({
@@ -379,8 +385,8 @@ export class AddNewCase {
         console.error('Failed to save case:', err);
 
         alert(err?.error?.detail ||
-           err?.message ||
-           'Failed to save case');
+          err?.message ||
+          'Failed to save case');
       }
     });
   }

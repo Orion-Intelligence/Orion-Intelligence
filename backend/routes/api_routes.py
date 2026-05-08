@@ -1002,3 +1002,12 @@ async def get_case(case_id: str, current_user=Depends(get_current_user)):
 )
 async def update_case(case_id: str, payload: CreateCaseRequest = Body(...), current_user=Depends(get_current_user)):
     return await CaseManager.get_instance().update_case(case_id, payload, current_user)
+
+@api_routes.get(
+    "/api/profile/cases/check/{case_id}",
+    status_code=200,
+    tags=["Case Management"],
+    dependencies=[Depends(role_required(CASE_ROLE_DEPS))],
+)
+async def check_case_exists(case_id: str, current_user=Depends(get_current_user)):
+    return await CaseManager.get_instance().check_case_exists_safe(case_id, current_user)

@@ -30,4 +30,8 @@ export class CaseManagement {
   updateCase(caseId: string, caseData: Case): Observable<Case> {
     return this.api.put<Case>(`profile/cases/${caseId}`, caseData);
   }
+
+  checkCaseExistsFromDb(caseId: string): Observable<{ exists: boolean }> {
+    return this.api.get<{ exists: boolean }>(`profile/cases/check/${caseId}`);
+  }
 }

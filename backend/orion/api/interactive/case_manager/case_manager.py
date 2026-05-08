@@ -181,3 +181,15 @@ class CaseManager:
         )
         next_id = str(len(records) + 1).zfill(5)
         return {"nextCaseId": next_id}
+
+    async def check_case_exists_safe(self, case_id: str, current_user) -> dict:
+        """Safe check without raising exceptions - returns exists flag"""
+        try:
+            record = await self._engine.find_one(
+                db_case_model,
+                (db_case_model.caseId == case_id) &
+                (db_case_model.tenant_uuid == str(current_user.tenant_uuid))
+            )
+            return {"exists": record is not None}
+        except Exception:
+            return {"exists": False}
