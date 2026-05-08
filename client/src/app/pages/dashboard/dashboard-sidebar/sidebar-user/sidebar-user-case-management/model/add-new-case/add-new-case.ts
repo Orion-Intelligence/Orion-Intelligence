@@ -21,10 +21,16 @@ import { EntityDetailsComponent } from '../entity-details/entity-details';
 export class AddNewCase {
   isOpen = false;
   primaryEntity: RelatedEntity = { name: '', socialMediaProfiles: [{ platform: '', username: '' }], webUrls: [''], emails: [''], phoneNumbers: [''], additionalIdentifiers: [{ type: '', value: '' }] };
-  caseForm: Case = { caseId: '', caseType: 'Data Leak', owner: '', createdDate: new Date(), modifiedDate: new Date(), status: 'open', priority: 'low', intakeSource: '', entityName: '', socialMediaProfiles: [{ platform: '', username: '' }], webUrls: [''], emails: [''], phoneNumbers: [''], additionalIdentifiers: [{ type: '', value: '' }], relatedEntities: [ { name: '', socialMediaProfiles: [{ platform: '', username: '' }], webUrls: [''], emails: [''], phoneNumbers: [''], additionalIdentifiers: [{ type: '', value: '' }] } ] };
+  caseForm: Case = { caseId: '', caseType: 'Data Leak', owner: '', createdDate: new Date(), modifiedDate: new Date(), status: 'open', priority: 'low', intakeSource: '', entityName: '', socialMediaProfiles: [{ platform: '', username: '' }], webUrls: [''], emails: [''], phoneNumbers: [''], additionalIdentifiers: [{ type: '', value: '' }], relatedEntities: [{ name: '', socialMediaProfiles: [{ platform: '', username: '' }], webUrls: [''], emails: [''], phoneNumbers: [''], additionalIdentifiers: [{ type: '', value: '' }] }] };
   caseTypeOptions = ['Data Leak', 'Account Takeover', 'Fraud', 'Malware'];
   priorityOptions = ['low', 'medium', 'high', 'critical'];
   statusOptions = ['open', 'in-progress', 'resolved', 'closed'];
+  duplicateLinkingOptions = ['Follow-up', 'Related Investigation', 'Consolidated Case', 'Escalation', 'Other']
+  isLinkingCase = false;
+  linkedCaseNumber = '';
+  linkingReason = '';
+  caseNumberError = '';
+  caseNumberLoading = false;
 
   @Output() close = new EventEmitter<void>();
   @Output() caseAdded = new EventEmitter<Case>();
@@ -86,6 +92,28 @@ export class AddNewCase {
     this.caseForm.emails = this.primaryEntity.emails;
     this.caseForm.phoneNumbers = this.primaryEntity.phoneNumbers;
     this.caseForm.additionalIdentifiers = this.primaryEntity.additionalIdentifiers;
+  }
+
+  checkCaseExists(): void {
+    if (!this.linkedCaseNumber.trim()) {
+      this.caseNumberError = '';
+      return;
+    }
+
+    this.caseNumberLoading = true;
+    this.caseNumberError = '';
+
+    setTimeout(() => {
+      // Temporary mock validation
+      const mockCases = ['00001', '00002', '00003'];
+      if (mockCases.includes(this.linkedCaseNumber)) {
+        this.caseNumberError = '';
+      }
+      else {
+        this.caseNumberError = `No case found with ID: ${this.linkedCaseNumber}. Please verify the case number and try again.`;
+      }
+      this.caseNumberLoading = false;
+    }, 500);
   }
 
   onSubmit(): void {
@@ -250,6 +278,38 @@ export class AddNewCase {
           return;
         }
       }
+    }
+
+    // Validate duplicate/linking case
+    if (this.isLinkingCase) {
+      if (!this.linkedCaseNumber.trim()) {
+        alert('Please enter a case number to link');
+        return;
+      }
+
+      if (this.caseNumberError) {
+        alert(this.caseNumberError);
+        return;
+      }
+
+      if (!this.linkingReason.trim()) {
+        alert('Please provide a reason for linking this case');
+        return;
+      }
+
+      if (this.linkedCaseNumber === this.caseForm.caseId) {
+        alert('Cannot link a case to itself');
+        return;
+      }
+    }
+
+    // Sync primary entity to caseForm
+    this.syncPrimaryEntityToCase();
+
+    // Sync linking information
+    if (this.isLinkingCase) {
+      this.caseForm.linkedCaseId = this.linkedCaseNumber;
+      this.caseForm.linkedReason = this.linkingReason;
     }
 
     // Clean up empty arrays

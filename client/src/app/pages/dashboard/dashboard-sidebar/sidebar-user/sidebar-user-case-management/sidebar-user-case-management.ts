@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Case } from '../../../../../shared/model/case-management/case.model';
@@ -14,12 +15,13 @@ export class SidebarUserCaseManagement implements OnInit {
   isLoading = false;
   showAddCasePopup = false;
 
+  constructor(private router: Router) { }
+
   ngOnInit(): void {
     this.loadCases();
   }
 
   loadCases(): void {
-    // Mock data - replace with API call later
     const stored = localStorage.getItem('cases');
     this.cases = stored ? JSON.parse(stored) : [];
   }
@@ -36,6 +38,13 @@ export class SidebarUserCaseManagement implements OnInit {
     this.cases.push(newCase);
     localStorage.setItem('cases', JSON.stringify(this.cases));
     this.closeAddCasePopup();
+  }
+
+  viewCase(caseId: string): void {
+    const url = this.router.createUrlTree(['/dashboard/profile/case-details'], {
+      queryParams: { caseId: caseId }
+    }).toString();
+    window.open(url, '_blank');
   }
 
   getStatusBadgeClass(status: string): string {

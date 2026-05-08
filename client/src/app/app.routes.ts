@@ -51,11 +51,12 @@ const loadSocialMapperComponent = () => import('./pages/graphs/social-graph/soci
 const loadNetworkIntelComponent = () => import('./pages/network-intel/network-intel').then(m => m.NetworkIntel);
 const loadSidebarUserCaseManagement = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-case-management/sidebar-user-case-management').then(m => m.SidebarUserCaseManagement);
 const loadUserProfileActivityComponent = () => import('./pages/profile/user-profile-activity/user-profile-activity.component').then(m => m.UserProfileActivityComponent);
+const loadCaseDetailsComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-case-management/model/case-details/case-details').then(m => m.CaseDetails);
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
   data: { type: 'consolidated', animation: 'HashPage' }
 };
-const consolidatedChildren :Route[] = [
+const consolidatedChildren: Route[] = [
   {
     path: '',
     redirectTo: 'all',
@@ -799,6 +800,11 @@ export const routes: Routes = [
             path: 'case-management',
             loadComponent: loadSidebarUserCaseManagement,
             data: { type: 'case-management', animation: 'CategoryPage' }
+          },
+          {
+            path: 'case-details',
+            loadComponent: loadCaseDetailsComponent,
+            data: { type: 'case-details', animation: 'CaseDetailsPage' }
           },
           {
             path: 'alerts',

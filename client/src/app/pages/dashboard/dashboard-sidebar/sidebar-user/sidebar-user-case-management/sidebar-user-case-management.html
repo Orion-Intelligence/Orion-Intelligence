@@ -56,7 +56,7 @@
                                     </span>
                                 </td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
-                                    <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" aria-label="View case">
+                                    <button type="button" (click)="viewCase(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" aria-label="View case">
                                         <img src="assets/images/shared/view.svg" width="18" alt="view" class="case-action-icon cursor-pointer" />
                                     </button>
                                 </td>
