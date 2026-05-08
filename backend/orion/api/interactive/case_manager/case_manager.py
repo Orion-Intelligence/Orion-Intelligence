@@ -129,6 +129,51 @@ class CaseManager:
             raise HTTPException(status_code=404, detail="Case not found")
         return self._to_response(record)
 
+    async def get_case_by_id(self, case_id: str, current_user) -> CaseResponse:
+        record = await self._engine.find_one(
+            db_case_model,
+            (db_case_model.caseId == case_id) &
+            (db_case_model.tenant_uuid == str(current_user.tenant_uuid))
+        )
+        if not record:
+            raise HTTPException(status_code=404, detail="Case not found")
+        return self._to_response(record)
+
+    async def update_case(self, case_id: str, data: CreateCaseRequest, current_user) -> CaseResponse:
+        record = await self._engine.find_one(
+            db_case_model,
+            (db_case_model.caseId == case_id) &
+            (db_case_model.tenant_uuid == str(current_user.tenant_uuid))
+        )
+        if not record:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        record.caseType = data.caseType
+        record.owner = data.owner
+        record.status = data.status
+        record.priority = data.priority
+        record.intakeSource = data.intakeSource
+        record.entityName = data.entityName
+        record.socialMediaProfiles = [p.model_dump() for p in data.socialMediaProfiles]
+        record.webUrls = data.webUrls
+        record.emails = data.emails
+        record.phoneNumbers = data.phoneNumbers
+        record.additionalIdentifiers = [i.model_dump() for i in data.additionalIdentifiers]
+        record.relatedEntities = [
+            {
+                **e.model_dump(exclude={"socialMediaProfiles", "additionalIdentifiers"}),
+                "socialMediaProfiles": [p.model_dump() for p in e.socialMediaProfiles],
+                "additionalIdentifiers": [i.model_dump() for i in e.additionalIdentifiers],
+            }
+            for e in data.relatedEntities
+        ]
+        record.linkedCaseId = data.linkedCaseId
+        record.linkedReason = data.linkedReason
+        record.modifiedDate = datetime.now(timezone.utc)
+        
+        await self._engine.save(record)
+        return self._to_response(record)
+
     async def get_next_case_id(self, current_user) -> dict:
         records = await self._engine.find(
             db_case_model,

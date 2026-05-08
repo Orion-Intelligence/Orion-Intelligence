@@ -22,4 +22,12 @@ export class CaseManagement {
   validateCase(caseId: string): Observable<Case> {
     return this.api.get<Case>(`profile/cases/validate/${caseId}`);
   }
+
+  getCaseById(caseId: string): Observable<Case> {
+    return this.api.get<Case>(`profile/cases/${caseId}`);
+  }
+
+  updateCase(caseId: string, caseData: Case): Observable<Case> {
+    return this.api.put<Case>(`profile/cases/${caseId}`, caseData);
+  }
 }
