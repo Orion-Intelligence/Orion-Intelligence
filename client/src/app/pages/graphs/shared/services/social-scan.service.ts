@@ -272,7 +272,7 @@ export class SocialScanService {
       category: '',
       fullsearch: false
     };
-    return this.api.post<any>('search/stealerlogs', payload).pipe(map((res) => {
+    return this.api.post<any>('search/stealer/ioc', payload).pipe(map((res) => {
       if (Array.isArray(res?.Result)) {
         return res.Result;
       }
