@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EntityDetailsComponent } from '../entity-details/entity-details';
 import { Case } from '../../../../../../../shared/model/case-management/case.model';
+import { CaseManagement } from '../../../../../../../services/case-management/case-management';
 
 @Component({
   selector: 'app-case-details',
@@ -21,7 +22,7 @@ export class CaseDetails implements OnInit {
   priorityOptions = ['low', 'medium', 'high', 'critical'];
   statusOptions = ['open', 'in-progress', 'resolved', 'closed'];
 
-  constructor(private route: ActivatedRoute, private router: Router) { }
+  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement) { }
 
   ngOnInit(): void {
     this.loadCaseDetails();
@@ -38,36 +39,33 @@ export class CaseDetails implements OnInit {
       return;
     }
 
-    // Mock data - replace with API call later
-    const stored = localStorage.getItem('cases');
-    const allCases: Case[] = stored ? JSON.parse(stored) : [];
-    const foundCase = allCases.find(c => c.caseId === caseId);
-
-    if (foundCase) {
-      this.caseData = foundCase;
-      if (foundCase.linkedCaseId) {
-        this.loadLinkedCase(foundCase.linkedCaseId);
+    this.caseService.getCaseById(caseId).subscribe({
+      next: (caseData) => {
+        this.caseData = caseData;
+        if (caseData.linkedCaseId) {
+          this.loadLinkedCase(caseData.linkedCaseId);
+        }
+        this.isLoading = false;
+      },
+      error: () => {
+        alert('Case not found');
+        this.router.navigate(['/dashboard/profile/case-management']);
+        this.isLoading = false;
       }
-    }
-    else {
-      alert('Case not found');
-      this.router.navigate(['/dashboard/profile/case-management']);
-    }
-
-    this.isLoading = false;
+    });
   }
 
   loadLinkedCase(linkedCaseId: string): void {
     this.isLoadingLinkedCase = true;
-    const stored = localStorage.getItem('cases');
-    const allCases: Case[] = stored ? JSON.parse(stored) : [];
-    const found = allCases.find(c => c.caseId === linkedCaseId);
-
-    if (found) {
-      this.linkedCase = found;
-    }
-
-    this.isLoadingLinkedCase = false;
+    this.caseService.getCaseById(linkedCaseId).subscribe({
+      next: (caseData) => {
+        this.linkedCase = caseData;
+        this.isLoadingLinkedCase = false;
+      },
+      error: () => {
+        this.isLoadingLinkedCase = false;
+      }
+    });
   }
 
   enableEditing(): void {
@@ -98,19 +96,17 @@ export class CaseDetails implements OnInit {
       return;
     }
 
-    // Update localStorage
-    const stored = localStorage.getItem('cases');
-    const allCases: Case[] = stored ? JSON.parse(stored) : [];
-    const index = allCases.findIndex(c => c.caseId === this.editedCase!.caseId);
-
-    if (index !== -1) {
-      this.editedCase.modifiedDate = new Date();
-      allCases[index] = this.editedCase;
-      localStorage.setItem('cases', JSON.stringify(allCases));
-      this.caseData = this.editedCase;
-      this.isEditing = false;
-      alert('Case updated successfully');
-    }
+    this.editedCase.modifiedDate = new Date();
+    this.caseService.updateCase(this.editedCase.caseId, this.editedCase).subscribe({
+      next: (updated) => {
+        this.caseData = updated;
+        this.isEditing = false;
+        alert('Case updated successfully');
+      },
+      error: () => {
+        alert('Failed to update case');
+      }
+    });
   }
 
   getFormattedDateTime(date: Date): string {

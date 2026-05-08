@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Case } from '../../../../../shared/model/case-management/case.model';
 import { AddNewCase } from './model/add-new-case/add-new-case';
+import { CaseManagement } from '../../../../../services/case-management/case-management';
 
 @Component({
   selector: 'app-sidebar-user-case-management',
@@ -15,15 +16,23 @@ export class SidebarUserCaseManagement implements OnInit {
   isLoading = false;
   showAddCasePopup = false;
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private caseService: CaseManagement) { }
 
   ngOnInit(): void {
     this.loadCases();
   }
 
   loadCases(): void {
-    const stored = localStorage.getItem('cases');
-    this.cases = stored ? JSON.parse(stored) : [];
+    this.isLoading = true;
+    this.caseService.getCases().subscribe({
+      next: (cases) => {
+        this.cases = cases;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false; 
+      }
+    });
   }
 
   addCase(): void {
@@ -36,7 +45,6 @@ export class SidebarUserCaseManagement implements OnInit {
 
   onCaseAdded(newCase: Case): void {
     this.cases.push(newCase);
-    localStorage.setItem('cases', JSON.stringify(this.cases));
     this.closeAddCasePopup();
   }
 
