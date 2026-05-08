@@ -70,12 +70,8 @@ export function typeDashboardSearch(value: string) {
   cy.scrollDashboardToTop();
   waitForSearchReady();
   cy.scrollDashboardToTop();
-  cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().should('be.visible').and('be.enabled').then(($input) => {
-    const currentValue = String($input.val() ?? '').trim();
-    if (currentValue.length > 0) {
-      cy.wrap($input).clear();
-    }
-  }).type(`${value}{enter}`);
+  cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().should('be.visible').and('be.enabled').click();
+  cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().should('be.visible').and('be.enabled').type(`{selectall}{backspace}${value}{enter}`, { force: true });
 }
 
 export function openExploitSubmenu(submenu: string) {
