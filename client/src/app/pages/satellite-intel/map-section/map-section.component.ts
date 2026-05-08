@@ -18,7 +18,9 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   @ViewChild('mapContainer') private mapContainer?: ElementRef<HTMLDivElement>;
   private leafletMap: any   = null;
   private esriLayer: any    = null;
+  private esriLowResLayer: any = null;
   private osmLayer: any     = null;
+  private osmLowResLayer: any = null;
   private facLayer: any     = null;
   private anomalyLayer: any = null;
   private orionCluster: any = null;
@@ -30,6 +32,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private sidebarRequestToken = 0;
   private markerZoomBucket = 0;
   private aircraftRenderKey = '';
+  private shipRenderKey = '';
   private shipCluster!: any;
 
   readonly powerPlantLegend = ORION_POWER_FILTERS;
@@ -203,15 +206,54 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
         worldCopyJump: false,
         zoomAnimation: true,
         markerZoomAnimation: false,
-        fadeAnimation: false,
         preferCanvas: true,
       });
 
       this.esriLayer = this.L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        { attribution: 'Tiles © Esri', maxZoom: 20, maxNativeZoom: 19, noWrap: true, bounds: MapSectionComponent.WORLD_BOUNDS },).addTo(this.leafletMap);
+        {
+          attribution: 'Tiles © Esri',
+          maxZoom: 20,
+          maxNativeZoom: 19,
+          noWrap: true,
+          bounds: MapSectionComponent.WORLD_BOUNDS,
+        },);
+
+      this.esriLowResLayer = this.L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        {
+          attribution: 'Tiles © Esri',
+          maxZoom: 20,
+          maxNativeZoom: 8,
+          noWrap: true,
+          bounds: MapSectionComponent.WORLD_BOUNDS,
+          updateWhenIdle: true,
+          updateWhenZooming: false,
+          updateInterval: 300,
+          keepBuffer: 1,
+        },);
 
       this.osmLayer = this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        { attribution: '© OpenStreetMap', maxZoom: 19, noWrap: true, bounds: MapSectionComponent.WORLD_BOUNDS },);
+        {
+          attribution: '© OpenStreetMap',
+          maxZoom: 19,
+          maxNativeZoom: 19,
+          noWrap: true,
+          bounds: MapSectionComponent.WORLD_BOUNDS,
+        },);
+
+      this.osmLowResLayer = this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+          attribution: '© OpenStreetMap',
+          maxZoom: 19,
+          maxNativeZoom: 8,
+          noWrap: true,
+          bounds: MapSectionComponent.WORLD_BOUNDS,
+          updateWhenIdle: true,
+          updateWhenZooming: false,
+          updateInterval: 300,
+          keepBuffer: 1,
+        },);
+
+      this.refreshBaseLayerDetail();
 
       this.updateMinZoomToFitContainer();
 
@@ -285,13 +327,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
           },
         }).addTo(this.leafletMap);
         this.aircraftCluster = this.L.layerGroup().addTo(this.leafletMap);
-        this.shipCluster = (this.L as any).markerClusterGroup({
-          maxClusterRadius: 40,
-          showCoverageOnHover: false,
-          zoomToBoundsOnClick: false,
-          spiderfyOnMaxZoom: false,
-          iconCreateFunction: (cluster: any) => this.createTransportClusterIcon('ship', cluster.getChildCount()),
-        }).addTo(this.leafletMap);
+        this.shipCluster = this.L.layerGroup().addTo(this.leafletMap);
 
         this.leafletMap.on('zoomstart', () => {
           this.loadingEntity = null;
@@ -301,6 +337,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
           const c = this.leafletMap.getCenter();
           const z = this.leafletMap.getZoom();
           this.zoomLabel = `zoom ${z.toFixed(1)}  ·  ${c.lat.toFixed(4)}°N  ${c.lng.toFixed(4)}°E`;
+          this.refreshBaseLayerDetail();
           this.refreshMarkerSizingForZoom(z);
         });
 
@@ -378,13 +415,27 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     if (!this.leafletMap || !this.L) {
       return;
     }
+    this.refreshBaseLayerDetail();
+  }
+
+  private refreshBaseLayerDetail(): void {
+    if (!this.leafletMap) {
+      return;
+    }
+    const zoom = this.leafletMap.getZoom?.() ?? 3;
+    const useLowRes = zoom < 5;
+
+    [this.esriLayer, this.esriLowResLayer, this.osmLayer, this.osmLowResLayer].forEach(layer => {
+      if (layer && this.leafletMap.hasLayer(layer)) {
+        this.leafletMap.removeLayer(layer);
+      }
+    });
+
     if (this.selectedLayer === 'osm') {
-      this.leafletMap.removeLayer(this.esriLayer);
-      this.osmLayer.addTo(this.leafletMap);
+      (useLowRes ? this.osmLowResLayer : this.osmLayer)?.addTo(this.leafletMap);
     }
     else {
-      this.leafletMap.removeLayer(this.osmLayer);
-      this.esriLayer.addTo(this.leafletMap);
+      (useLowRes ? this.esriLowResLayer : this.esriLayer)?.addTo(this.leafletMap);
     }
   }
 
@@ -423,8 +474,12 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
                   return;
                 } // stale, discard
                 const aircraft = this.extractAircraftDetails(res);
+                const status = this.getResponseStatus(res);
                 if (aircraft) {
                   this.ngZone.run(() => this.openSidebar('aircraft', aircraft));
+                }
+                else if (this.isPendingStatus(status)) {
+                  return;
                 }
                 else {
                   this.openSidebarError('aircraft', markerId, 'Unable to load aircraft details');
@@ -449,9 +504,15 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       return;
     }
 
+    const renderKey = this.getShipRenderKey();
+    if (renderKey === this.shipRenderKey) {
+      return;
+    }
+    this.shipRenderKey = renderKey;
+
     this.shipCluster.clearLayers();
 
-    const markers = this.shipsData
+    const markers = this.getRenderableShips()
       .filter(s => Number.isFinite(s.latitude) && Number.isFinite(s.longitude))
       .map(s => {
         const mmsiId = this.normalizeEntityId(s.mmsi);
@@ -473,8 +534,12 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
                   return;
                 }
                 const ship = this.extractShipDetails(res);
+                const status = this.getResponseStatus(res);
                 if (ship) {
                   this.ngZone.run(() => this.openSidebar('ship', ship));
+                }
+                else if (this.isPendingStatus(status)) {
+                  return;
                 }
                 else {
                   this.openSidebarError('ship', markerId, 'Unable to load ship details');
@@ -492,7 +557,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
         return marker;
       });
 
-    this.shipCluster.addLayers(markers);
+    markers.forEach(marker => this.shipCluster.addLayer(marker));
   }
 
   private createAircraftIcon(a: SatelliteLiveAircraft, isSelected: boolean, isLoading: boolean): any {
@@ -523,20 +588,17 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private createShipIcon(s: SatelliteLiveShip, isSelected: boolean, isLoading: boolean): any {
     const size = this.getMarkerBaseSize('ship');
     const half = Math.round(size / 2);
-    const innerSize = Math.round(size * 0.82);
-    const iconSize = Math.round(size * 0.56);
-    const glow = isSelected ? 'rgba(20,184,166,0.34)' : 'rgba(16,185,129,0.18)';
-    const ring = isSelected ? '#5eead4' : '#064e3b';
+    const iconSize = Math.round(size * 0.8);
+    const glow = isSelected ? 'drop-shadow(0 0 8px rgba(96,165,250,0.92)) drop-shadow(0 0 18px rgba(96,165,250,0.62))' : 'drop-shadow(0 1px 2px rgba(0,0,0,0.42))';
     const badge = isLoading
       ? `<div style="position:absolute;top:1px;right:1px;width:12px;height:12px;border-radius:9999px;background:#fde68a;border:2px solid #081421;"></div>`
       : '';
     return this.L.divIcon({
       html: `
         <div style="position:relative;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;">
-          <div style="position:absolute;inset:0;border-radius:9999px;background:${glow};box-shadow:0 0 20px ${glow};"></div>
-          <div style="position:relative;width:${innerSize}px;height:${innerSize}px;display:flex;align-items:center;justify-content:center;border-radius:9999px;background:${isSelected ? '#0f766e' : '#047857'};border:2px solid ${ring};box-shadow:0 10px 24px rgba(15,23,42,0.34);">
-            <svg viewBox="0 0 24 24" style="width:${iconSize}px;height:${iconSize}px;fill:#ffffff;transform:rotate(${s.true_heading ?? s.course ?? 0}deg);transform-origin:center;">
-              <path d="M12 2l2 6h6l-4 3 2 7-6-4-6 4 2-7-4-3h6z"/>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(${s.true_heading ?? s.course ?? 0}deg);filter:${glow};">
+            <svg viewBox="0 0 24 24" style="width:${iconSize}px;height:${iconSize}px;fill:#38bdf8;stroke:${isSelected ? '#dbeafe' : '#0ea5e9'};stroke-width:0.6;">
+              <path d="M12 2L19 20L12 16L5 20L12 2Z"/>
             </svg>
           </div>
           ${badge}
@@ -548,31 +610,9 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     });
   }
 
-  private createTransportClusterIcon(type: 'aircraft' | 'ship', count: number): any {
-    const size = this.getClusterSize(count);
-    const half = Math.round(size / 2);
-    const iconSize = Math.max(16, Math.round(size * 0.52));
-    const palette = { bg: '#0f766e', ring: 'rgba(45,212,191,0.26)', badge: '#ccfbf1', badgeText: '#134e4a' };
-    const glyph = '<path d="M12 2l2 6h6l-4 3 2 7-6-4-6 4 2-7-4-3h6z"/>';
-    return this.L.divIcon({
-      html: `
-        <div style="position:relative;width:${size}px;height:${size}px;">
-          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:9999px;background:${palette.bg};box-shadow:0 0 0 4px ${palette.ring}, 0 10px 24px rgba(15,23,42,0.22);">
-            <svg viewBox="0 0 24 24" style="width:${iconSize}px;height:${iconSize}px;fill:#ffffff;">${glyph}</svg>
-          </div>
-          <div style="position:absolute;right:-4px;bottom:-4px;min-width:${Math.max(18, Math.round(size * 0.42))}px;height:${Math.max(18, Math.round(size * 0.42))}px;padding:0 5px;display:flex;align-items:center;justify-content:center;border-radius:9999px;background:${palette.badge};border:2px solid #081421;color:${palette.badgeText};font-size:${Math.max(10, Math.round(size * 0.24))}px;font-weight:700;line-height:1;">
-            ${count}
-          </div>
-        </div>
-      `,
-      className: 'bg-transparent border-0',
-      iconSize: [size, size],
-      iconAnchor: [half, half],
-    });
-  }
-
   private refreshSelectionState(): void {
     this.aircraftRenderKey = '';
+    this.shipRenderKey = '';
     this.renderAircraftCluster();
     this.renderShipCluster();
   }
@@ -591,10 +631,18 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
 
   private getMarkerBaseSize(type: 'aircraft' | 'ship'): number {
     const zoom = this.leafletMap?.getZoom?.() ?? 3;
-    const base = type === 'aircraft' ? 26 : 42;
+    const base = type === 'aircraft' ? 26 : 28;
     const growth = type === 'aircraft' ? 1.8 : 1.6;
-    const cap = type === 'aircraft' ? 20 : 14;
+    const cap = type === 'aircraft' ? 20 : 8;
     return base + Math.max(0, Math.min(cap, Math.round((zoom - 3) * growth)));
+  }
+
+  private getResponseStatus(res: any): string | undefined {
+    return res?.result?.status || res?.status;
+  }
+
+  private isPendingStatus(status: string | undefined): boolean {
+    return status === 'pending' || status === 'busy';
   }
 
   private getClusterSize(count: number): number {
@@ -620,6 +668,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     }
     this.markerZoomBucket = bucket;
     this.aircraftRenderKey = '';
+    this.shipRenderKey = '';
     this.renderAircraftCluster();
     this.renderShipCluster();
   }
@@ -661,22 +710,25 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   }
 
   private getAircraftSampleRatio(zoom: number): number {
-    if (zoom >= 7) {
+    if (zoom >= 8) {
       return 1;
     }
+    if (zoom >= 7) {
+      return 0.82;
+    }
     if (zoom >= 6) {
-      return 0.92;
+      return 0.58;
     }
     if (zoom >= 5) {
-      return 0.72;
+      return 0.3;
     }
     if (zoom >= 4) {
-      return 0.46;
+      return 0.15;
     }
     if (zoom >= 3) {
-      return 0.28;
+      return 0.08;
     }
-    return 0.18;
+    return 0.05;
   }
 
   private shouldKeepAircraftSample(a: SatelliteLiveAircraft, ratio: number): boolean {
@@ -686,6 +738,73 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       hash = ((hash << 5) - hash + key.charCodeAt(i)) | 0;
     }
     return (Math.abs(hash) % 100) < Math.round(ratio * 100);
+  }
+
+  private getRenderableShips(): SatelliteLiveShip[] {
+    const bounds = this.leafletMap?.getBounds?.();
+    const zoom = this.leafletMap?.getZoom?.() ?? 3;
+    const visible = this.shipsData.filter(s => {
+      if (!Number.isFinite(s.latitude) || !Number.isFinite(s.longitude)) {
+        return false;
+      }
+      if (!bounds) {
+        return true;
+      }
+      return bounds.pad(0.18).contains([s.latitude, s.longitude]);
+    });
+    const sampleRatio = this.getShipSampleRatio(zoom);
+    if (sampleRatio >= 1) {
+      return visible;
+    }
+    return visible.filter(s => this.shouldKeepShipSample(s, sampleRatio));
+  }
+
+  private getShipSampleRatio(zoom: number): number {
+    if (zoom >= 8) {
+      return 1;
+    }
+    if (zoom >= 7) {
+      return 0.8;
+    }
+    if (zoom >= 6) {
+      return 0.55;
+    }
+    if (zoom >= 5) {
+      return 0.26;
+    }
+    if (zoom >= 4) {
+      return 0.12;
+    }
+    if (zoom >= 3) {
+      return 0.07;
+    }
+    return 0.04;
+  }
+
+  private shouldKeepShipSample(s: SatelliteLiveShip, ratio: number): boolean {
+    const key = this.normalizeEntityId(s.mmsi) ?? `${s.latitude}:${s.longitude}`;
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+      hash = ((hash << 5) - hash + key.charCodeAt(i)) | 0;
+    }
+    return (Math.abs(hash) % 100) < Math.round(ratio * 100);
+  }
+
+  private getShipRenderKey(): string {
+    const zoom = this.leafletMap?.getZoom?.() ?? 3;
+    const bounds = this.leafletMap?.getBounds?.();
+    if (!bounds) {
+      return `z:${Math.round(zoom * 2)}|sel:${this.activeEntity?.id || ''}|load:${this.loadingEntity?.id || ''}|count:${this.shipsData.length}`;
+    }
+    const center = bounds.getCenter();
+    return [
+      `z:${Math.round(zoom * 2)}`,
+      `c:${center.lat.toFixed(1)},${center.lng.toFixed(1)}`,
+      `d:${bounds.getNorth().toFixed(1)},${bounds.getEast().toFixed(1)},${bounds.getSouth().toFixed(1)},${bounds.getWest().toFixed(1)}`,
+      `sel:${this.activeEntity?.id || ''}`,
+      `load:${this.loadingEntity?.id || ''}`,
+      `count:${this.shipsData.length}`,
+    ].join('|');
   }
 
   private extractAircraftDetails(res: any): SatelliteLiveAircraft | null {
