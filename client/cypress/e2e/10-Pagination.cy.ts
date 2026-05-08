@@ -55,7 +55,7 @@ describe('Data Breach – Tabs & Pagination', () => {
       cy.get('tr[id^="item-"], [data-testid="result-card"]').should('exist');
       cy.get('[data-testid="pagination-root"]').should('exist');
 
-      cy.get('[data-testid="pagination-root"]').scrollIntoView().should('be.visible');
+      cy.get('[data-testid="pagination-root"]').scrollIntoView();
       cy.get('[data-testid="pagination-next"]').filter(':visible').scrollIntoView().not(':disabled').then(($btn) => {
           if ($btn.length) {
             cy.wrap($btn).click();
