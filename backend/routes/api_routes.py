@@ -29,6 +29,8 @@ from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus,
 from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
 from orion.services.stix_manager.stix_manager import stix_manager
 from routes.docs.docs import CRYPTO_DOCS, CROSS_SEARCH_DOCS, DYNAMIC_DOCS, REPORT_DOCS, SEARCH_DOCS, SUPPORT_METHOD_DOCS, SYSTEM_INFO_DOCS
+from orion.api.interactive.case_manager.case_manager import CaseManager
+from orion.api.interactive.case_manager.models.case_models import CreateCaseRequest
 
 api_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 SCAN_ROLE_DEPS = [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
@@ -940,3 +942,44 @@ async def convert_stix_batch(kind: str, payloads: list[dict] = Body(...)):
     if kind_normalized not in STIX_KIND_VALUES:
         return {"error": "Unsupported STIX kind", "supported_kinds": sorted(STIX_KIND_VALUES)}
     return {"items": [convert_to_stix(kind_normalized, payload) for payload in payloads]}
+
+CASE_ROLE_DEPS = [user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]
+
+@api_routes.get(
+    "/api/profile/cases",
+    status_code=200,
+    tags=["Case Management"],
+    dependencies=[Depends(role_required(CASE_ROLE_DEPS))],
+)
+async def get_cases(current_user=Depends(get_current_user)):
+    return await CaseManager.get_instance().get_cases(current_user)
+
+
+@api_routes.post(
+    "/api/profile/cases",
+    status_code=201,
+    tags=["Case Management"],
+    dependencies=[Depends(role_required(CASE_ROLE_DEPS))],
+)
+async def create_case(payload: CreateCaseRequest = Body(...), current_user=Depends(get_current_user)):
+    return await CaseManager.get_instance().create_case(payload, current_user)
+
+
+@api_routes.get(
+    "/api/profile/cases/next-id",
+    status_code=200,
+    tags=["Case Management"],
+    dependencies=[Depends(role_required(CASE_ROLE_DEPS))],
+)
+async def get_next_case_id(current_user=Depends(get_current_user)):
+    return await CaseManager.get_instance().get_next_case_id(current_user)
+
+
+@api_routes.get(
+    "/api/profile/cases/validate/{case_id}",
+    status_code=200,
+    tags=["Case Management"],
+    dependencies=[Depends(role_required(CASE_ROLE_DEPS))],
+)
+async def validate_case(case_id: str, current_user=Depends(get_current_user)):
+    return await CaseManager.get_instance().validate_case_exists(case_id, current_user)

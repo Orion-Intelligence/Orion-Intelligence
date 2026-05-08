@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { EntityDetailsComponent } from '../entity-details/entity-details';
+import { CaseManagement } from '../../../../../../../services/case-management/case-management';
 
 @Component({
   selector: 'app-add-new-case',
@@ -35,7 +36,7 @@ export class AddNewCase {
   @Output() close = new EventEmitter<void>();
   @Output() caseAdded = new EventEmitter<Case>();
 
-  constructor(private cdr: ChangeDetectorRef) { }
+  constructor(private cdr: ChangeDetectorRef, private caseService: CaseManagement) { }
 
   ngOnInit(): void {
     this.generateCaseId();
@@ -46,9 +47,12 @@ export class AddNewCase {
   }
 
   generateCaseId(): void {
-    const stored = localStorage.getItem('nextCaseId');
-    const nextId = stored ? parseInt(stored, 10) : 1;
-    this.caseForm.caseId = String(nextId).padStart(5, '0');
+    this.caseService.getNextCaseId().subscribe({
+      next: (res) => {
+        this.caseForm.caseId = res.nextCaseId;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   getFormattedDateTime(date: Date): string {
@@ -99,21 +103,20 @@ export class AddNewCase {
       this.caseNumberError = '';
       return;
     }
-
     this.caseNumberLoading = true;
     this.caseNumberError = '';
-
-    setTimeout(() => {
-      // Temporary mock validation
-      const mockCases = ['00001', '00002', '00003'];
-      if (mockCases.includes(this.linkedCaseNumber)) {
+    this.caseService.validateCase(this.linkedCaseNumber).subscribe({
+      next: () => {
         this.caseNumberError = '';
+        this.caseNumberLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.caseNumberError = `No case found with ID: ${this.linkedCaseNumber}.`;
+        this.caseNumberLoading = false;
+        this.cdr.detectChanges();
       }
-      else {
-        this.caseNumberError = `No case found with ID: ${this.linkedCaseNumber}. Please verify the case number and try again.`;
-      }
-      this.caseNumberLoading = false;
-    }, 500);
+    });
   }
 
   onSubmit(): void {
@@ -156,9 +159,11 @@ export class AddNewCase {
       if (!email.trim()) {
         return false;
       }
+
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return !emailRegex.test(email);
     });
+
     if (invalidEmails.length > 0) {
       alert('Invalid email format detected in primary entity');
       return;
@@ -169,9 +174,11 @@ export class AddNewCase {
       if (!phone.trim()) {
         return false;
       }
+
       const phoneRegex = /^[\d\s\-\+\(\)]{10,}$/;
       return !phoneRegex.test(phone.replace(/\s/g, ''));
     });
+
     if (invalidPhones.length > 0) {
       alert('Invalid phone number format detected in primary entity');
       return;
@@ -182,6 +189,7 @@ export class AddNewCase {
       if (!url.trim()) {
         return false;
       }
+
       try {
         new URL(url);
         return false;
@@ -190,40 +198,52 @@ export class AddNewCase {
         return true;
       }
     });
+
     if (invalidUrls.length > 0) {
       alert('Invalid URL format detected in primary entity');
       return;
     }
 
     // Validate social media profiles
-    const invalidSocial = this.caseForm.socialMediaProfiles.filter(p => {
-      return (p.platform && !p.username) || (!p.platform && p.username);
+    const invalidSocial = this.caseForm.socialMediaProfiles.filter(profile => {
+      return (
+        (profile.platform && !profile.username) ||
+         (!profile.platform && profile.username)
+      );
     });
+
     if (invalidSocial.length > 0) {
       alert('Social media profiles must have both platform and username');
       return;
     }
 
     // Validate additional identifiers
-    const invalidIdentifiers = this.caseForm.additionalIdentifiers.filter(id => {
-      return (id.type && !id.value) || (!id.type && id.value);
+    const invalidIdentifiers = this.caseForm.additionalIdentifiers.filter(identifier => {
+      return (
+        (identifier.type && !identifier.value) ||
+         (!identifier.type && identifier.value)
+      );
     });
+
     if (invalidIdentifiers.length > 0) {
       alert('Additional identifiers must have both type and value');
       return;
     }
 
     // Validate related entities
-    for (let entity of this.caseForm.relatedEntities) {
+    for (const entity of this.caseForm.relatedEntities) {
       if (entity.name.trim()) {
+
         // Validate related entity emails
         const relatedInvalidEmails = entity.emails.filter(email => {
           if (!email.trim()) {
             return false;
           }
+
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           return !emailRegex.test(email);
         });
+
         if (relatedInvalidEmails.length > 0) {
           alert(`Invalid email format in related entity: ${entity.name}`);
           return;
@@ -234,9 +254,11 @@ export class AddNewCase {
           if (!phone.trim()) {
             return false;
           }
+
           const phoneRegex = /^[\d\s\-\+\(\)]{10,}$/;
           return !phoneRegex.test(phone.replace(/\s/g, ''));
         });
+
         if (relatedInvalidPhones.length > 0) {
           alert(`Invalid phone format in related entity: ${entity.name}`);
           return;
@@ -247,6 +269,7 @@ export class AddNewCase {
           if (!url.trim()) {
             return false;
           }
+
           try {
             new URL(url);
             return false;
@@ -255,24 +278,33 @@ export class AddNewCase {
             return true;
           }
         });
+
         if (relatedInvalidUrls.length > 0) {
           alert(`Invalid URL format in related entity: ${entity.name}`);
           return;
         }
 
         // Validate related entity social media
-        const relatedInvalidSocial = entity.socialMediaProfiles.filter(p => {
-          return (p.platform && !p.username) || (!p.platform && p.username);
+        const relatedInvalidSocial = entity.socialMediaProfiles.filter(profile => {
+          return (
+            (profile.platform && !profile.username) ||
+             (!profile.platform && profile.username)
+          );
         });
+
         if (relatedInvalidSocial.length > 0) {
           alert(`Social media validation failed in related entity: ${entity.name}`);
           return;
         }
 
         // Validate related entity identifiers
-        const relatedInvalidIdentifiers = entity.additionalIdentifiers.filter(id => {
-          return (id.type && !id.value) || (!id.type && id.value);
+        const relatedInvalidIdentifiers = entity.additionalIdentifiers.filter(identifier => {
+          return (
+            (identifier.type && !identifier.value) ||
+             (!identifier.type && identifier.value)
+          );
         });
+
         if (relatedInvalidIdentifiers.length > 0) {
           alert(`Identifier validation failed in related entity: ${entity.name}`);
           return;
@@ -282,6 +314,7 @@ export class AddNewCase {
 
     // Validate duplicate/linking case
     if (this.isLinkingCase) {
+
       if (!this.linkedCaseNumber.trim()) {
         alert('Please enter a case number to link');
         return;
@@ -303,7 +336,7 @@ export class AddNewCase {
       }
     }
 
-    // Sync primary entity to caseForm
+    // Sync primary entity again before submit
     this.syncPrimaryEntityToCase();
 
     // Sync linking information
@@ -311,26 +344,44 @@ export class AddNewCase {
       this.caseForm.linkedCaseId = this.linkedCaseNumber;
       this.caseForm.linkedReason = this.linkingReason;
     }
+    else {
+      this.caseForm.linkedCaseId = '';
+      this.caseForm.linkedReason = '';
+    }
 
     // Clean up empty arrays
-    this.caseForm.socialMediaProfiles = this.caseForm.socialMediaProfiles.filter(p => p.platform && p.username);
-    this.caseForm.webUrls = this.caseForm.webUrls.filter(url => url.trim());
-    this.caseForm.emails = this.caseForm.emails.filter(email => email.trim());
-    this.caseForm.phoneNumbers = this.caseForm.phoneNumbers.filter(phone => phone.trim());
-    this.caseForm.additionalIdentifiers = this.caseForm.additionalIdentifiers.filter(id => id.type && id.value);
-    this.caseForm.relatedEntities = this.caseForm.relatedEntities.filter(entity => entity.name.trim());
+    this.caseForm.socialMediaProfiles =
+       this.caseForm.socialMediaProfiles.filter(profile => profile.platform && profile.username);
 
-    const stored = localStorage.getItem('nextCaseId');
-    const nextId = stored ? parseInt(stored, 10) : 1;
-    localStorage.setItem('nextCaseId', String(nextId + 1));
+    this.caseForm.webUrls =
+       this.caseForm.webUrls.filter(url => url.trim());
 
-    const newCase: Case = {
-      ...this.caseForm,
-      createdDate: new Date(this.caseForm.createdDate),
-      modifiedDate: new Date(this.caseForm.modifiedDate)
-    };
+    this.caseForm.emails =
+       this.caseForm.emails.filter(email => email.trim());
 
-    this.caseAdded.emit(newCase);
-    this.closePopup();
+    this.caseForm.phoneNumbers =
+       this.caseForm.phoneNumbers.filter(phone => phone.trim());
+
+    this.caseForm.additionalIdentifiers =
+       this.caseForm.additionalIdentifiers.filter(identifier => identifier.type && identifier.value);
+
+    this.caseForm.relatedEntities =
+       this.caseForm.relatedEntities.filter(entity => entity.name.trim());
+
+    // Save case using API
+    this.caseService.createCase(this.caseForm).subscribe({
+      next: (savedCase) => {
+        this.caseAdded.emit(savedCase);
+        this.closePopup();
+      },
+
+      error: (err) => {
+        console.error('Failed to save case:', err);
+
+        alert(err?.error?.detail ||
+           err?.message ||
+           'Failed to save case');
+      }
+    });
   }
 }
