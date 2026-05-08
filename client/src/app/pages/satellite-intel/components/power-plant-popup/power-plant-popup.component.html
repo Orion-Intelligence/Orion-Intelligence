@@ -1,10 +1,10 @@
 @if (isOpen) {
-  <div class="absolute inset-0 z-[1200] flex items-center justify-center bg-black/45 p-4" (click)="onOverlayClose()">
-    <div class="flex h-[min(560px,72vh)] w-full max-w-[460px] flex-col rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-4" (click)="$event.stopPropagation()">
+  <div class="ui-consolidated-theme absolute inset-0 z-[1200] flex items-center justify-center bg-black/45 p-4" (click)="onOverlayClose()">
+    <div class="ui-consolidated-main flex h-[min(560px,72vh)] w-full max-w-[460px] flex-col rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-4" (click)="$event.stopPropagation()">
       <div class="mb-3 flex items-center justify-between">
-        <div class="text-[13px] font-semibold text-[var(--color-text1)]">Facility Details</div>
-        <button type="button" class="text-[12px] text-[var(--color-text3)] hover:text-[var(--color-text1)]" (click)="onCloseButton()">Close</button>
-      </div>
+        <div class="text-[18px] font-semibold text-[var(--color-text1)]">Facility Details</div>
+      <button type="button" class="ui-popup-close right-5 top-5 h-[42px] w-[42px] rounded-[8px] border-none bg-transparent text-[28px] leading-none text-[#ccc] transition-[color,background-color] duration-200 hover:bg-[var(--color-blue-700)] hover:text-[var(--color-blue-640)]" (click)="onCloseButton()" aria-label="Close popup">×</button>
+     </div>
 
       <div class="mb-3 flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2">
         <i class="bi bi-search text-[12px] text-[var(--color-text3)]"></i>
@@ -13,12 +13,12 @@
 
       <div class="min-h-0 flex-1 overflow-auto">
         @if (!filteredItems.length) {
-          <div class="ui-consolidated-sub-bg rounded-[10px] border border-[var(--color-border)] p-3 text-[12px] text-[var(--color-text3)]">
+          <div class="ui-consolidated-sub rounded-[10px] border border-[var(--ui-consolidated-border)] p-3 text-[12px] text-[var(--color-text3)]">
             No matching facilities
           </div>
         } @else {
           @for (item of filteredItems; track item.id) {
-            <div class="ui-consolidated-sub-bg mb-2 rounded-[10px] border border-[var(--color-border)] p-3 text-[12px]">
+            <div class="ui-consolidated-sub mb-2 rounded-[10px] border border-[var(--ui-consolidated-border)] p-3 text-[12px]">
               <div class="font-semibold text-[var(--color-text1)]">{{ item.name || 'Facility' }}</div>
               <div class="mt-2 grid grid-cols-2 gap-y-1 text-[var(--color-text3)]">
                 <span>Country</span><span class="text-right text-[var(--color-text1)]">{{ item.country || '-' }}</span>
