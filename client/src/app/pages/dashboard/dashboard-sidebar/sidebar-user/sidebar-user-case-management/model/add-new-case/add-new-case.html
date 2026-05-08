@@ -1,0 +1,193 @@
+<div class="fixed inset-0 z-[1301]">
+
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/50 transition-opacity duration-300" [ngClass]="isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'" (click)="closePopup()">
+    </div>
+
+    <!-- Right Side Drawer -->
+    <div class="absolute right-0 top-0 h-full w-full max-w-2xl bg-[#172235] shadow-2xl flex flex-col" [@slideIn]="isOpen ? 'open' : 'closed'">
+
+        <!-- Header -->
+        <div class="relative flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)]">
+            <h2 class="text-2xl font-bold text-[var(--color-text1)]">
+                Add New Case
+            </h2>
+
+            <button type="button" (click)="closePopup()" class="relative z-[1000] text-[var(--color-text4)] hover:text-[var(--color-text1)] text-xl">
+                ✕
+            </button>
+        </div>
+
+        <!-- Body (scrollable) -->
+        <div class="flex-1 overflow-y-auto p-6">
+
+            <form (ngSubmit)="onSubmit()" class="space-y-5">
+
+                <!-- Case Details Section -->
+                <div>
+                    <h3 class="text-lg font-bold text-[var(--color-text1)] mb-4">Case Details</h3>
+
+                    <!-- Case ID -->
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">Case ID</label>
+                        <input type="text" [value]="caseForm.caseId" disabled class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] cursor-not-allowed outline-none" />
+                    </div>
+
+                    <!-- Officer Name -->
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">
+                            Officer Name <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" [(ngModel)]="caseForm.owner" name="owner" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Enter officer name" />
+                    </div>
+
+                    <!-- Creation Date -->
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">
+                            Creation Date & Time
+                        </label>
+                        <input type="text" [value]="getFormattedDateTime(caseForm.createdDate)" disabled class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] cursor-not-allowed outline-none" />
+                    </div>
+
+                    <!-- Modification Date -->
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">
+                            Modification Date & Time
+                        </label>
+                        <input type="text" [value]="getFormattedDateTime(caseForm.modifiedDate)" disabled class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] cursor-not-allowed outline-none" />
+                    </div>
+
+                    <!-- Intake Source -->
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">Intake Source
+                            <span class="text-red-500">*</span></label>
+                        <input type="text" [(ngModel)]="caseForm.intakeSource" name="intakeSource" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="e.g. API Alert, Email, etc." />
+                    </div>
+
+                    <!-- Case Type -->
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">Case Type <span class="text-red-500">*</span></label>
+                        <select [(ngModel)]="caseForm.caseType" name="caseType" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                            @for (type of caseTypeOptions; track type) {
+                            <option [value]="type">{{ type }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Priority -->
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">Priority <span class="text-red-500">*</span></label>
+                        <select [(ngModel)]="caseForm.priority" name="priority" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                            @for (p of priorityOptions; track p) {
+                            <option [value]="p" class="capitalize">{{ p }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">Status <span class="text-red-500">*</span></label>
+                        <select [(ngModel)]="caseForm.status" name="status" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                            @for (s of statusOptions; track s) {
+                            <option [value]="s" class="capitalize">{{ s }}</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Duplicate/Linking Case Section -->
+                <div class="border-t border-[var(--color-border)] pt-6 mt-6">
+                    <h3 class="text-lg font-bold text-[var(--color-text1)] mb-4">Duplicate or Linked Case</h3>
+
+                    <div class="mb-5 p-4 rounded-[8px] bg-[#131e30] border border-[var(--color-border)]">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" [(ngModel)]="isLinkingCase" name="isLinkingCase" class="w-4 h-4 cursor-pointer" />
+                            <span class="text-sm font-semibold text-[var(--color-text4)] uppercase">Link this case to a
+                                previous case</span>
+                        </label>
+                    </div>
+
+                    @if (isLinkingCase) {
+                    <div class="space-y-5 p-4 rounded-[8px] bg-[#0a0f1a] border border-[var(--color-border)]">
+
+                        <!-- Case Number Input -->
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">
+                                Previous Case Number <span class="text-red-500">*</span>
+                            </label>
+                            <div class="flex gap-2 mt-1">
+                                <input type="text" [(ngModel)]="linkedCaseNumber" name="linkedCaseNumber" (blur)="checkCaseExists()" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="e.g., 00001" />
+                                @if (caseNumberLoading) {
+                                <button type="button" disabled class="px-4 py-2 bg-gray-600 text-white rounded-[8px] text-sm">
+                                    Checking...
+                                </button>
+                                }
+                                @if (!caseNumberLoading && !caseNumberError && linkedCaseNumber.trim()) {
+                                <button type="button" disabled class="px-4 py-2 bg-green-600 text-white rounded-[8px] text-sm flex items-center gap-1">
+                                    <i class="bi bi-check-circle"></i> Valid
+                                </button>
+                                }
+                            </div>
+                            @if (caseNumberError) {
+                            <p class="text-red-400 text-xs mt-2">
+                                <i class="bi bi-exclamation-circle"></i> {{ caseNumberError }}
+                            </p>
+                            }
+                            @if (!caseNumberError && linkedCaseNumber.trim() && !caseNumberLoading) {
+                            <p class="text-green-400 text-xs mt-2">
+                                <i class="bi bi-check-circle"></i> Case found successfully
+                            </p>
+                            }
+                        </div>
+
+                        <!-- Linking Reason -->
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">
+                                Reason for Linking <span class="text-red-500">*</span>
+                            </label>
+                            <textarea [(ngModel)]="linkingReason" name="linkingReason" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40 resize-none" rows="4" placeholder="Explain why this case is linked to the previous case (e.g., Follow-up investigation, Related incident, etc.)"></textarea>
+                        </div>
+
+                        <!-- Info Box -->
+                        <div class="p-3 rounded-[8px] bg-blue-900/30 border border-blue-500/30">
+                            <p class="text-xs text-blue-300">
+                                <i class="bi bi-info-circle"></i> Linking this case will create a bidirectional
+                                relationship. Both cases will be marked as linked.
+                            </p>
+                        </div>
+                    </div>
+                    }
+                </div>
+
+                <!-- Primary Entity Component -->
+                <app-entity-details [entity]="primaryEntity" [isMainEntity]="true"
+                    [entityIndex]="0"></app-entity-details>
+
+                <!-- Related Entities Section -->
+                <div class="border-t border-[var(--color-border)] pt-6 mt-6">
+                    <div class="flex items-center justify-between mb-5">
+                        <h3 class="text-lg font-bold text-[var(--color-text1)]">Related Entities</h3>
+                        <button type="button" (click)="addRelatedEntity()" class="text-blue-400 hover:text-blue-300 text-sm">+ Add Entity</button>
+                    </div>
+
+                    @for (entity of caseForm.relatedEntities; track $index; let i = $index) {
+                    <app-entity-details [entity]="entity" [isMainEntity]="false" [entityIndex]="i"
+                        (remove)="removeRelatedEntity(i)"></app-entity-details>
+                    }
+                </div>
+
+            </form>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="px-6 py-4 border-t border-[var(--color-border)] flex justify-end gap-3 bg-[#172235]">
+            <button type="button" (click)="closePopup()" class="ui-btn border border-[var(--color-border)]">
+                Cancel
+            </button>
+            <button type="button" (click)="onSubmit()" class="ui-btn ui-btn-primary">
+                Save Case
+            </button>
+        </div>
+
+    </div>
+</div>
