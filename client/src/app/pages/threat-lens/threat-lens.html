@@ -20,20 +20,8 @@
 		<div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-3">
 			<div class="flex items-center justify-between gap-3">
 				<p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">Search</p>
-				<button
-  type="button"
-  (click)="togglePanel('search')"
-  [attr.aria-label]="isSearchPanelCollapsed ? 'Expand' : 'Collapse'"
-  class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]"
->
-  <img
-    src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-    alt="toggle icon"
-    class="h-4 w-4 transition duration-200"
-    [ngClass]="{
-      'rotate-180': !isSearchPanelCollapsed
-    }"
-  />
+				<button type="button" (click)="togglePanel('search')" [attr.aria-label]="isSearchPanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
+  <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 transition duration-200" [ngClass]="{ 'rotate-180': !isSearchPanelCollapsed }" />
 </button>
 			</div>
 			@if (!isSearchPanelCollapsed) {
@@ -88,20 +76,8 @@
 		<div class="w-full rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3 text-[var(--color-text1)] max-[1100px]:w-full">
 			<div class="flex items-center justify-between gap-3">
 				<h2 class="text-[14px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text1)]">Threat Lens</h2>
-				<button
-  type="button"
-  (click)="togglePanel('threat')"
-  [attr.aria-label]="isThreatPanelCollapsed ? 'Expand' : 'Collapse'"
-  class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]"
->
-  <img
-    src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-    alt="toggle icon"
-    class="h-4 w-4 transition duration-200"
-    [ngClass]="{
-      'rotate-180': !isThreatPanelCollapsed
-    }"
-  />
+				<button type="button" (click)="togglePanel('threat')" [attr.aria-label]="isThreatPanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
+  <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 transition duration-200" [ngClass]="{ 'rotate-180': !isThreatPanelCollapsed }" />
 </button>
 			</div>
 			@if (!isThreatPanelCollapsed) {
@@ -136,12 +112,7 @@
 
 		<div class="min-h-0 flex-1 space-y-3 max-[1100px]:min-h-[unset]">
 			<div class="flex flex-col overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-sm max-[1100px]:h-auto max-[1100px]:min-h-[280px]" [ngClass]="isNewsPanelCollapsed ? ['h-auto', 'min-h-0'] : ['h-[calc(50%-0.375rem)]', 'min-h-[250px]']">
-  <div
-    class="border-b border-[var(--color-border)] px-4 py-3"
-    [ngClass]="{
-      '!border-b-0': isNewsPanelCollapsed
-    }"
-  >
+  <div class="border-b border-[var(--color-border)] px-4 py-3" [ngClass]="{ '!border-b-0': isNewsPanelCollapsed }">
 
     <div class="flex items-start justify-between gap-3">
 
@@ -153,9 +124,7 @@
             News Feed
           </p>
 
-          <span
-            class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-[3px] text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text2)]"
-          >
+          <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-[3px] text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text2)]">
             {{ newsFeedItems.length }}
           </span>
 
@@ -167,20 +136,8 @@
 
       </div>
 
-      <button
-        type="button"
-        (click)="togglePanel('news')"
-        [attr.aria-label]="isNewsPanelCollapsed ? 'Expand' : 'Collapse'"
-        class="ui-consolidated-sub flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]"
-      >
-        <img
-          src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-          alt="toggle icon"
-          class="h-4 w-4 transition duration-200"
-          [ngClass]="{
-            'rotate-180': !isNewsPanelCollapsed
-          }"
-        />
+      <button type="button" (click)="togglePanel('news')" [attr.aria-label]="isNewsPanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
+        <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 transition duration-200" [ngClass]="{ 'rotate-180': !isNewsPanelCollapsed }" />
       </button>
 
     </div>
@@ -189,13 +146,7 @@
 
       <div class="mt-3 flex items-center gap-2">
 
-        <input
-          [ngModel]="newsSearchTerm"
-          (ngModelChange)="onNewsSearchInput($event)"
-          type="text"
-          placeholder="Search news feed..."
-          class="h-9 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[12px] text-[var(--color-text1)] outline-none transition focus:border-[var(--color-blue-640)]"
-        />
+        <input [ngModel]="newsSearchTerm" (ngModelChange)="onNewsSearchInput($event)" type="text" placeholder="Search news feed..." class="h-9 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[12px] text-[var(--color-text1)] outline-none transition focus:border-[var(--color-blue-640)]" />
 
       </div>
 
@@ -209,26 +160,7 @@
 
         @for (range of feedRanges; track range.key) {
 
-          <button
-            type="button"
-            (click)="setFeedRange(range.key)"
-            class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition"
-            [ngClass]="
-              selectedFeedRange === range.key
-                ? [
-                    'border-[var(--color-blue-640)]',
-                    'bg-[var(--color-blue-790)]',
-                    'text-[var(--color-text1)]'
-                  ]
-                : [
-                    'border-[var(--color-border)]',
-                    'bg-[var(--color-blue-780)]',
-                    'text-[var(--color-text4)]',
-                    'hover:text-[var(--color-text1)]',
-                    'hover:bg-[var(--color-blue-790)]'
-                  ]
-            "
-          >
+          <button type="button" (click)="setFeedRange(range.key)" class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition" [ngClass]=" selectedFeedRange === range.key ? [ 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-790)]', 'text-[var(--color-text1)]' ] : [ 'border-[var(--color-border)]', 'bg-[var(--color-blue-780)]', 'text-[var(--color-text4)]', 'hover:text-[var(--color-text1)]', 'hover:bg-[var(--color-blue-790)]' ] ">
             {{ range.label }}
           </button>
 
@@ -236,9 +168,7 @@
 
       </div>
 
-      <p
-        class="mt-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[10px] leading-4 text-[var(--color-text3)]"
-      >
+      <p class="mt-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[10px] leading-4 text-[var(--color-text3)]">
         Feed tabs filter loaded data. Use sidebar date filter to fetch new data.
       </p>
 
@@ -291,22 +221,10 @@
 
 </div>
 
-			<div
-  class="flex flex-col overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-sm max-[1100px]:h-auto max-[1100px]:min-h-[280px]"
-  [ngClass]="
-    isArchivePanelCollapsed
-      ? ['h-auto', 'min-h-0']
-      : ['h-[calc(50%-0.375rem)]', 'min-h-[250px]']
-  "
->
+			<div class="flex flex-col overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-sm max-[1100px]:h-auto max-[1100px]:min-h-[280px]" [ngClass]=" isArchivePanelCollapsed ? ['h-auto', 'min-h-0'] : ['h-[calc(50%-0.375rem)]', 'min-h-[250px]'] ">
 
   <!-- HEADER -->
-  <div
-    class="border-b border-[var(--color-border)] px-4 py-3"
-    [ngClass]="{
-      '!border-b-0': isArchivePanelCollapsed
-    }"
-  >
+  <div class="border-b border-[var(--color-border)] px-4 py-3" [ngClass]="{ '!border-b-0': isArchivePanelCollapsed }">
 
     <div class="flex items-start justify-between gap-3">
 
@@ -318,9 +236,7 @@
             Archive
           </p>
 
-          <span
-            class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-[3px] text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text2)]"
-          >
+          <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-[3px] text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text2)]">
             {{ archiveFeedItems.length }}
           </span>
 
@@ -332,20 +248,8 @@
 
       </div>
 
-      <button
-        type="button"
-        (click)="togglePanel('archive')"
-        [attr.aria-label]="isArchivePanelCollapsed ? 'Expand' : 'Collapse'"
-        class="ui-consolidated-sub flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]"
-      >
-        <img
-          src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
-          alt="toggle icon"
-          class="h-4 w-4 transition duration-200"
-          [ngClass]="{
-            'rotate-180': !isArchivePanelCollapsed
-          }"
-        />
+      <button type="button" (click)="togglePanel('archive')" [attr.aria-label]="isArchivePanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
+        <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 transition duration-200" [ngClass]="{ 'rotate-180': !isArchivePanelCollapsed }" />
       </button>
 
     </div>
@@ -355,13 +259,7 @@
 
       <div class="mt-3 flex items-center gap-2">
 
-        <input
-          [ngModel]="archiveSearchTerm"
-          (ngModelChange)="onArchiveSearchInput($event)"
-          type="text"
-          placeholder="Search archive..."
-          class="h-9 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[12px] text-[var(--color-text1)] outline-none transition focus:border-[var(--color-blue-640)]"
-        />
+        <input [ngModel]="archiveSearchTerm" (ngModelChange)="onArchiveSearchInput($event)" type="text" placeholder="Search archive..." class="h-9 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[12px] text-[var(--color-text1)] outline-none transition focus:border-[var(--color-blue-640)]" />
 
       </div>
 
@@ -375,26 +273,7 @@
 
         @for (range of feedRanges; track range.key) {
 
-          <button
-            type="button"
-            (click)="setFeedRange(range.key)"
-            class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition"
-            [ngClass]="
-              selectedFeedRange === range.key
-                ? [
-                    'border-[var(--color-blue-640)]',
-                    'bg-[var(--color-blue-790)]',
-                    'text-[var(--color-text1)]'
-                  ]
-                : [
-                    'border-[var(--color-border)]',
-                    'bg-[var(--color-blue-780)]',
-                    'text-[var(--color-text4)]',
-                    'hover:text-[var(--color-text1)]',
-                    'hover:bg-[var(--color-blue-790)]'
-                  ]
-            "
-          >
+          <button type="button" (click)="setFeedRange(range.key)" class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition" [ngClass]=" selectedFeedRange === range.key ? [ 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-790)]', 'text-[var(--color-text1)]' ] : [ 'border-[var(--color-border)]', 'bg-[var(--color-blue-780)]', 'text-[var(--color-text4)]', 'hover:text-[var(--color-text1)]', 'hover:bg-[var(--color-blue-790)]' ] ">
             {{ range.label }}
           </button>
 
@@ -402,9 +281,7 @@
 
       </div>
 
-      <p
-        class="mt-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[10px] leading-4 text-[var(--color-text3)]"
-      >
+      <p class="mt-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[10px] leading-4 text-[var(--color-text3)]">
         Feed tabs filter loaded data. Use sidebar date filter to fetch new data.
       </p>
 
@@ -415,14 +292,7 @@
   <!-- FEED LIST -->
   @if (!isArchivePanelCollapsed) {
 
-    <div
-      #archiveFeedScroller
-      (mouseenter)="onFeedHover('archive', true)"
-      (mouseleave)="onFeedHover('archive', false)"
-      (wheel)="onFeedInteract('archive')"
-      (touchstart)="onFeedInteract('archive')"
-      class="min-h-0 flex-1 overflow-y-auto px-3 py-3"
-    >
+    <div #archiveFeedScroller (mouseenter)="onFeedHover('archive', true)" (mouseleave)="onFeedHover('archive', false)" (wheel)="onFeedInteract('archive')" (touchstart)="onFeedInteract('archive')" class="min-h-0 flex-1 overflow-y-auto px-3 py-3">
 
       @if (archiveFeedItems.length) {
 
@@ -430,11 +300,7 @@
 
           @for (item of archiveFeedItems; track item.id) {
 
-            <button
-              type="button"
-              (click)="openFeedItem(item)"
-              class="block w-full rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-3 text-left transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-780)]"
-            >
+            <button type="button" (click)="openFeedItem(item)" class="block w-full rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-3 text-left transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-780)]">
 
               <div class="flex items-start justify-between gap-3">
 
@@ -442,18 +308,8 @@
 
                   <div class="flex items-center gap-2">
 
-                    <svg
-                      viewBox="0 0 12 12"
-                      class="h-3 w-3 shrink-0 drop-shadow-[0_0_6px_currentColor]"
-                      [attr.color]="item.colorHex"
-                      aria-hidden="true"
-                    >
-                      <circle
-                        cx="6"
-                        cy="6"
-                        r="5"
-                        [attr.fill]="item.colorHex"
-                      ></circle>
+                    <svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0 drop-shadow-[0_0_6px_currentColor]" [attr.color]="item.colorHex" aria-hidden="true">
+                      <circle cx="6" cy="6" r="5" [attr.fill]="item.colorHex"></circle>
                     </svg>
 
                     <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text2)]">
@@ -486,9 +342,7 @@
 
                   @for (highlight of item.highlights; track highlight) {
 
-                    <span
-                      class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-780)] px-2 py-1 text-[10px] text-[var(--color-text2)]"
-                    >
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-780)] px-2 py-1 text-[10px] text-[var(--color-text2)]">
                       {{ highlight }}
                     </span>
 
@@ -506,9 +360,7 @@
 
       } @else {
 
-        <div
-          class="flex h-full min-h-[140px] items-center justify-center rounded-[12px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-790)] px-4 text-center text-[12px] text-[var(--color-text4)]"
-        >
+        <div class="flex h-full min-h-[140px] items-center justify-center rounded-[12px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-790)] px-4 text-center text-[12px] text-[var(--color-text4)]">
           No archive activity found for the selected time window.
         </div>
 
