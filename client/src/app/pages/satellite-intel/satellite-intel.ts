@@ -55,6 +55,12 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private powerPlantsSub?: Subscription;
   private powerPlantDetailsSub?: Subscription;
   private readonly dashboardSearch$ = new Subject<string>();
+  private powerPlantChunkQueue: OrionSatelliteFeature[][] = [];
+  private powerPlantFlushTimer: ReturnType<typeof setTimeout> | null = null;
+  private isPowerPlantFlushing = false;
+  private streamFinished = false;
+  private readonly powerPlantFlushIntervalMs = 10;
+  private readonly powerPlantBatchSize = 100;
 
   readonly progressSegments = Array.from({ length: 20 }, (_, i) => i);
   readonly powerFilters = ORION_POWER_FILTERS;
@@ -117,6 +123,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     !!this.pendingRequest && !this.satelliteService.onError(),);
   isAircraftLoading: boolean = false;
   isShipsLoading: boolean = false;
+  isPowerPlantDetailsLoading = false;
 
   @Input() toolbarMode: 'hidden' | 'geo' = 'hidden';
 
@@ -195,6 +202,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.facilitiesSub?.unsubscribe();
     this.dashboardSearchSub?.unsubscribe();
     this.satelliteService.cancelCurrentScan();
+    this.resetPowerPlantStreamState();
   }
 
   get isMapView(): boolean {
@@ -604,10 +612,14 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   onPowerPlantFeatureIdsSelected(ids: string[]): void {
+    if (this.isPowerPlantDetailsLoading) {
+      return;
+    }
     const normalizedIds = Array.from(new Set((ids || []).filter((id) => typeof id === 'string' && !!id.trim())));
     if (!normalizedIds.length) {
       return;
     }
+    this.isPowerPlantDetailsLoading = true;
     this.powerPlantDetailsSub?.unsubscribe();
     this.powerPlantDetailsSub = this.orionSatelliteService.getPowerPlantsByIds(normalizedIds).subscribe({
       next: (response) => {
@@ -618,6 +630,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
         this.powerPlantPopupData = [];
         this.powerPlantPopupOpen = false;
       },
+    });
+    this.powerPlantDetailsSub.add(() => {
+      this.isPowerPlantDetailsLoading = false;
     });
   }
 
@@ -891,36 +906,90 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   async loadPowerPlants(): Promise<void> {
 
+    this.resetPowerPlantStreamState();
     this.isPowerPlantLoading = true;
 
     this.wriData = [];
 
     this.refreshMergedData();
 
-    await this.orionSatelliteService.streamPowerPlants(1000,
+    await this.orionSatelliteService.streamPowerPlants(100,
 
       // onChunk
       (chunk) => {
-
-        this.wriData = [
-          ...this.wriData,
-          ...chunk
-        ];
-
-        this.refreshMergedData();
+        this.powerPlantChunkQueue.push(chunk);
+        this.schedulePowerPlantFlush();
       },
 
       // onComplete
       () => {
-
-        this.isPowerPlantLoading = false;
+        this.streamFinished = true;
+        this.schedulePowerPlantFlush();
       },
 
       // onError
       () => {
 
         this.isPowerPlantLoading = false;
+        this.resetPowerPlantStreamState();
       });
+  }
+
+  private schedulePowerPlantFlush(): void {
+    if (this.powerPlantFlushTimer) {
+      return;
+    }
+    this.powerPlantFlushTimer = setTimeout(() => {
+      this.powerPlantFlushTimer = null;
+      void this.flushPowerPlantQueue();
+    }, this.powerPlantFlushIntervalMs);
+  }
+
+  private async flushPowerPlantQueue(): Promise<void> {
+    if (this.isPowerPlantFlushing) {
+      return;
+    }
+
+    this.isPowerPlantFlushing = true;
+    try {
+      let added = 0;
+      while (this.powerPlantChunkQueue.length && added < this.powerPlantBatchSize) {
+        const chunk = this.powerPlantChunkQueue.shift();
+        if (!chunk?.length) {
+          continue;
+        }
+        this.wriData.push(...chunk);
+        added += chunk.length;
+      }
+
+      if (added > 0) {
+        this.refreshMergedData();
+      }
+
+      if (this.powerPlantChunkQueue.length > 0) {
+        this.schedulePowerPlantFlush();
+      }
+      else if (this.streamFinished) {
+        this.isPowerPlantLoading = false;
+        this.resetPowerPlantStreamState(false);
+      }
+    }
+    finally {
+      this.isPowerPlantFlushing = false;
+    }
+  }
+
+  private resetPowerPlantStreamState(resetLoading = true): void {
+    this.powerPlantChunkQueue = [];
+    if (this.powerPlantFlushTimer) {
+      clearTimeout(this.powerPlantFlushTimer);
+      this.powerPlantFlushTimer = null;
+    }
+    this.isPowerPlantFlushing = false;
+    this.streamFinished = false;
+    if (resetLoading) {
+      this.isPowerPlantLoading = false;
+    }
   }
 
   private updateDashboardSearchResults(query: string): void {

@@ -24,6 +24,8 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private facLayer: any     = null;
   private anomalyLayer: any = null;
   private orionCluster: any = null;
+  private orionMarkers = new Map<string, any>();
+  private orionMarkerSignatures = new Map<string, string>();
   private clickMarker: any  = null;
   private L: any            = null;
   private moveTimer: any    = null;
@@ -875,84 +877,139 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     if (!this.orionCluster || !this.L) {
       return;
     }
-    this.orionCluster.clearLayers();
 
     const data = this.orionData || [];
+    const visibleIds = new Set<string>();
+
     for (const feat of data) {
       if (!this.facilitiesVisible && feat.source !== 'WRI') {
         continue;
       }
-      const [lon, lat] = feat.coordinates;
-      const color = feat.color || '#3b82f6';
-      const marker = feat.source === 'WRI'
-        ? this.L.marker([lat, lon], {
-          icon: this.L.divIcon({
-            html: `<div style="
-              position:relative;
-              width:18px;
-              height:18px;
-              background:${color};
-              border:2px solid #ffffff;
-              border-radius:50% 50% 50% 0;
-              transform:rotate(-45deg);
-              box-sizing:border-box;
-            ">
-              <div style="
-                position:absolute;
-                top:50%;
-                left:50%;
-                width:6px;
-                height:6px;
-                border-radius:50%;
-                background:#ffffff;
-                transform:translate(-50%, -50%) rotate(45deg);
-              "></div>
-            </div>`,
-            className: '',
-            iconSize: [18, 18],
-            iconAnchor: [9, 18],
-          }),
-        })
-        : this.L.circleMarker([lat, lon], {
-          radius:      6,
-          color:       '#ffffff',
-          fillColor:   color,
-          fillOpacity: 0.88,
-          weight:      1.5,
-        });
+      const featureId = String(feat?.id || '').trim();
+      if (!featureId) {
+        continue;
+      }
+      visibleIds.add(featureId);
 
-      const rows: string[] = [];
-      const title = typeof feat.name === 'string' && feat.name.trim() ? feat.name.trim() : 'Feature';
-      const properties = feat.properties && typeof feat.properties === 'object' ? feat.properties as Record<string, unknown> : {};
+      const nextSignature = this.getOrionFeatureSignature(feat);
+      const existing = this.orionMarkers.get(featureId);
+      const previousSignature = this.orionMarkerSignatures.get(featureId);
 
-      rows.push(`<div style="font-size:12px;font-weight:700;line-height:1.35;margin-bottom:8px;color:#ffffff;">${title}</div>`);
-      this.appendPopupRow(rows, 'Country', properties['country']);
-      this.appendPopupRow(rows, 'Fuel', properties['fuel'] ?? properties['primary_fuel']);
-      this.appendPopupRow(rows, 'Capacity', this.formatCapacityValue(properties['capacity_mw'] ?? feat.capacityMw));
-      this.appendPopupRow(rows, 'Source', properties['source'] ?? feat.source);
-
-      for (const [key, rawValue] of Object.entries(properties)) {
-        if ([ 'name', 'country', 'fuel', 'primary_fuel', 'capacity_mw', 'source' ].includes(key)) {
-          continue;
-        }
-        this.appendPopupRow(rows, this.humanizeFieldLabel(key), rawValue);
+      if (!existing) {
+        const marker = this.createOrionMarker(feat);
+        this.orionMarkers.set(featureId, marker);
+        this.orionMarkerSignatures.set(featureId, nextSignature);
+        this.orionCluster.addLayer(marker);
+        continue;
       }
 
-      rows.push(this.popupRow('Coordinates', `${lat.toFixed(3)}, ${lon.toFixed(3)}`, true));
-
-      marker.bindPopup(`<div style="width:178px;padding:8px 9px;background:#0d1627;border-radius:8px;">
-        ${rows.join('')}
-      </div>`, { className: 'orion-popup' });
-
-      marker.orionFeature = feat;
-      marker.on('click', () => {
-        this.featureSelected.emit(feat);
-        if (feat?.source === 'WRI' && feat?.id) {
-          this.featureIdsSelected.emit([feat.id]);
-        }
-      });
-      this.orionCluster.addLayer(marker);
+      if (previousSignature !== nextSignature) {
+        this.orionCluster.removeLayer(existing);
+        const marker = this.createOrionMarker(feat);
+        this.orionMarkers.set(featureId, marker);
+        this.orionMarkerSignatures.set(featureId, nextSignature);
+        this.orionCluster.addLayer(marker);
+      }
     }
+
+    for (const [featureId, marker] of Array.from(this.orionMarkers.entries())) {
+      if (visibleIds.has(featureId)) {
+        continue;
+      }
+      this.orionCluster.removeLayer(marker);
+      this.orionMarkers.delete(featureId);
+      this.orionMarkerSignatures.delete(featureId);
+    }
+  }
+
+  private createOrionMarker(feat: any): any {
+    const [lon, lat] = feat.coordinates;
+    const color = feat.color || '#3b82f6';
+    const marker = feat.source === 'WRI'
+      ? this.L.marker([lat, lon], {
+        icon: this.L.divIcon({
+          html: `<div style="
+            position:relative;
+            width:18px;
+            height:18px;
+            background:${color};
+            border:2px solid #ffffff;
+            border-radius:50% 50% 50% 0;
+            transform:rotate(-45deg);
+            box-sizing:border-box;
+          ">
+            <div style="
+              position:absolute;
+              top:50%;
+              left:50%;
+              width:6px;
+              height:6px;
+              border-radius:50%;
+              background:#ffffff;
+              transform:translate(-50%, -50%) rotate(45deg);
+            "></div>
+          </div>`,
+          className: '',
+          iconSize: [18, 18],
+          iconAnchor: [9, 18],
+        }),
+      })
+      : this.L.circleMarker([lat, lon], {
+        radius:      6,
+        color:       '#ffffff',
+        fillColor:   color,
+        fillOpacity: 0.88,
+        weight:      1.5,
+      });
+
+    const rows: string[] = [];
+    const title = typeof feat.name === 'string' && feat.name.trim() ? feat.name.trim() : 'Feature';
+    const properties = feat.properties && typeof feat.properties === 'object' ? feat.properties as Record<string, unknown> : {};
+
+    rows.push(`<div style="font-size:12px;font-weight:700;line-height:1.35;margin-bottom:8px;color:#ffffff;">${title}</div>`);
+    this.appendPopupRow(rows, 'Country', properties['country']);
+    this.appendPopupRow(rows, 'Fuel', properties['fuel'] ?? properties['primary_fuel']);
+    this.appendPopupRow(rows, 'Capacity', this.formatCapacityValue(properties['capacity_mw'] ?? feat.capacityMw));
+    this.appendPopupRow(rows, 'Source', properties['source'] ?? feat.source);
+
+    for (const [key, rawValue] of Object.entries(properties)) {
+      if ([ 'name', 'country', 'fuel', 'primary_fuel', 'capacity_mw', 'source' ].includes(key)) {
+        continue;
+      }
+      this.appendPopupRow(rows, this.humanizeFieldLabel(key), rawValue);
+    }
+
+    rows.push(this.popupRow('Coordinates', `${lat.toFixed(3)}, ${lon.toFixed(3)}`, true));
+
+    marker.bindPopup(`<div style="width:178px;padding:8px 9px;background:#0d1627;border-radius:8px;">
+      ${rows.join('')}
+    </div>`, { className: 'orion-popup' });
+
+    marker.orionFeature = feat;
+    marker.on('click', () => {
+      this.featureSelected.emit(feat);
+      if (feat?.source === 'WRI' && feat?.id) {
+        this.featureIdsSelected.emit([feat.id]);
+      }
+    });
+    return marker;
+  }
+
+  private getOrionFeatureSignature(feat: any): string {
+    const coords = Array.isArray(feat?.coordinates) ? feat.coordinates : [null, null];
+    const properties = feat?.properties && typeof feat.properties === 'object' ? feat.properties : {};
+    return JSON.stringify({
+      id: feat?.id ?? null,
+      name: feat?.name ?? null,
+      source: feat?.source ?? null,
+      type: feat?.type ?? null,
+      rawType: feat?.rawType ?? null,
+      color: feat?.color ?? null,
+      capacityMw: feat?.capacityMw ?? null,
+      lon: coords[0] ?? null,
+      lat: coords[1] ?? null,
+      properties,
+    });
   }
 
   private popupRow(label: string, value: string, stacked = false): string {

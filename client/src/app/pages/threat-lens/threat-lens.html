@@ -1,4 +1,4 @@
-<section class="relative h-full min-h-[560px] overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-850)] max-[1100px]:min-h-[640px] max-[1100px]:overflow-y-auto">
+<section class="ui-consolidated-theme relative h-full min-h-[560px] overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-850)] max-[1100px]:min-h-[640px] max-[1100px]:overflow-y-auto">
 
 	<div #mapViewNode class="h-full w-full max-[1100px]:h-[52vh] max-[1100px]:min-h-[320px]"></div>
 
@@ -18,55 +18,93 @@
 
 	<div class="absolute left-4 top-4 z-20 flex w-[min(24rem,calc(100%-5rem))] flex-col gap-3 max-[640px]:w-[calc(100%-2rem)] max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:top-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pt-3">
 		<div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-3">
-			<div class="flex items-center gap-2">
-				<input [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" type="text" placeholder="Search keyword (e.g. pakistan database)" class="h-10 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[13px] text-[var(--color-text1)] outline-none ring-0 transition focus:border-[var(--color-blue-640)] [body.light-theme_&]:bg-[var(--color-white)] [body.light-theme_&]:text-[var(--color-gray-900)]" />
-				<button (click)="onSearch()" [disabled]="isLoading" class="h-10 rounded-[10px] bg-[var(--color-blue-640)] px-4 text-[13px] font-semibold text-[var(--color-white)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60">
-					Search
-				</button>
+			<div class="flex items-center justify-between gap-3">
+				<p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">Search</p>
+				<button
+  type="button"
+  (click)="togglePanel('search')"
+  [attr.aria-label]="isSearchPanelCollapsed ? 'Expand' : 'Collapse'"
+  class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]"
+>
+  <img
+    src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
+    alt="toggle icon"
+    class="h-4 w-4 transition duration-200"
+    [ngClass]="{
+      'rotate-180': !isSearchPanelCollapsed
+    }"
+  />
+</button>
 			</div>
-
-			@if (currentQuery) {
-				<p class="mt-2 text-[12px] text-[var(--color-text2)]">Active keyword: <span class="font-semibold">{{ currentQuery }}</span></p>
-			}
-
-			@if (topCountries.length) {
-				<h3 class="mt-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">Top Highlighted Countries</h3>
-				<div class="mt-2 max-h-[260px] space-y-1 overflow-auto pr-1">
-					@for (item of topCountries; track item.country) {
-						<button type="button" (click)="onTopCountrySelect(item.country)" class="flex w-full items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-1.5 text-left text-[12px] text-[var(--color-text2)] transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-780)]">
-							<span class="truncate pr-2">{{ item.country }}</span>
-							<span class="font-semibold text-[var(--color-text1)]">{{ item.count }}</span>
-						</button>
-					}
+			@if (!isSearchPanelCollapsed) {
+				<div class="mt-3 flex items-center gap-2">
+					<input [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" type="text" placeholder="Search keyword (e.g. pakistan database)" class="h-10 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[13px] text-[var(--color-text1)] outline-none ring-0 transition focus:border-[var(--color-blue-640)] [body.light-theme_&]:bg-[var(--color-white)] [body.light-theme_&]:text-[var(--color-gray-900)]" />
+					<button (click)="onSearch()" [disabled]="isLoading" class="h-10 rounded-[10px] bg-[var(--color-blue-640)] px-4 text-[13px] font-semibold text-[var(--color-white)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60">
+						Search
+					</button>
 				</div>
-			}
-			@else {
-				<p class="mt-3 text-[12px] text-[var(--color-text3)]">No country matches found for the current keyword.</p>
-			}
 
-			@if (categoryLegend.length) {
-				<h3 class="mt-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">Category Layers</h3>
-				<div class="mt-2 max-h-[220px] space-y-1 overflow-auto pr-1">
-					@for (item of categoryLegend; track item.categoryKey) {
-						<div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-1.5 text-[12px] text-[var(--color-text2)]">
-							<div class="flex items-center justify-between gap-3">
-								<span class="flex min-w-0 items-center gap-2">
-									<svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0 drop-shadow-[0_0_6px_currentColor]" [attr.color]="item.colorHex" aria-hidden="true">
-										<circle cx="6" cy="6" r="5" [attr.fill]="item.colorHex"></circle>
-									</svg>
-									<span class="truncate font-semibold text-[var(--color-text1)]">{{ item.label }}</span>
-								</span>
-								<span>{{ item.arcCount }} arcs</span>
+				@if (currentQuery) {
+					<p class="mt-2 text-[12px] text-[var(--color-text2)]">Active keyword: <span class="font-semibold">{{ currentQuery }}</span></p>
+				}
+
+				@if (topCountries.length) {
+					<h3 class="mt-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">Top Highlighted Countries</h3>
+					<div class="mt-2 max-h-[260px] space-y-1 overflow-auto pr-1">
+						@for (item of topCountries; track item.country) {
+							<button type="button" (click)="onTopCountrySelect(item.country)" class="flex w-full items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-1.5 text-left text-[12px] text-[var(--color-text2)] transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-780)]">
+								<span class="truncate pr-2">{{ item.country }}</span>
+								<span class="font-semibold text-[var(--color-text1)]">{{ item.count }}</span>
+							</button>
+						}
+					</div>
+				}
+				@else {
+					<p class="mt-3 text-[12px] text-[var(--color-text3)]">No country matches found for the current keyword.</p>
+				}
+
+				@if (categoryLegend.length) {
+					<h3 class="mt-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">Category Layers</h3>
+					<div class="mt-2 max-h-[220px] space-y-1 overflow-auto pr-1">
+						@for (item of categoryLegend; track item.categoryKey) {
+							<div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-1.5 text-[12px] text-[var(--color-text2)]">
+								<div class="flex items-center justify-between gap-3">
+									<span class="flex min-w-0 items-center gap-2">
+										<svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0 drop-shadow-[0_0_6px_currentColor]" [attr.color]="item.colorHex" aria-hidden="true">
+											<circle cx="6" cy="6" r="5" [attr.fill]="item.colorHex"></circle>
+										</svg>
+										<span class="truncate font-semibold text-[var(--color-text1)]">{{ item.label }}</span>
+									</span>
+									<span>{{ item.arcCount }} arcs</span>
+								</div>
+								<p class="mt-1 text-[11px] text-[var(--color-text4)]">{{ item.totalResults }} results, {{ item.countryCount }} countries</p>
 							</div>
-							<p class="mt-1 text-[11px] text-[var(--color-text4)]">{{ item.totalResults }} results, {{ item.countryCount }} countries</p>
-						</div>
-					}
-				</div>
+						}
+					</div>
+				}
 			}
 		</div>
 
-		<div class="w-fit max-w-full rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3 text-[var(--color-text1)] max-[1100px]:w-full">
-			<h2 class="text-[14px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text1)]">Threat Lens</h2>
+		<div class="w-full rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3 text-[var(--color-text1)] max-[1100px]:w-full">
+			<div class="flex items-center justify-between gap-3">
+				<h2 class="text-[14px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text1)]">Threat Lens</h2>
+				<button
+  type="button"
+  (click)="togglePanel('threat')"
+  [attr.aria-label]="isThreatPanelCollapsed ? 'Expand' : 'Collapse'"
+  class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]"
+>
+  <img
+    src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
+    alt="toggle icon"
+    class="h-4 w-4 transition duration-200"
+    [ngClass]="{
+      'rotate-180': !isThreatPanelCollapsed
+    }"
+  />
+</button>
+			</div>
+			@if (!isThreatPanelCollapsed) {
 			@if (selectedCountryName) {
 				<p class="mt-2 text-[13px] text-[var(--color-text2)]">Selected: <span class="font-semibold text-[var(--color-text1)]">{{ selectedCountryName }}</span></p>
 				@if (selectedCountryBreakdown.length) {
@@ -84,6 +122,7 @@
 			}
 			<p class="mt-2 max-w-[420px] text-[12px] text-[var(--color-text3)]">{{ statusMessage }}</p>
 			<p class="mt-2 text-[11px] text-[var(--color-text4)]">Arcs currently visible: <span class="font-semibold text-[var(--color-text2)]">{{ arcCount }}</span></p>
+			}
 		</div>
 	</div>
 
@@ -96,30 +135,119 @@
 		</div>
 
 		<div class="min-h-0 flex-1 space-y-3 max-[1100px]:min-h-[unset]">
-			<div class="flex h-[calc(50%-0.375rem)] min-h-[250px] flex-col overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-sm max-[1100px]:h-auto max-[1100px]:min-h-[280px]">
-				<div class="border-b border-[var(--color-border)] px-4 py-3">
-					<div class="flex items-start justify-between gap-3">
-						<div>
-							<p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">News Feed</p>
-							<p class="mt-1 text-[11px] text-[var(--color-text4)]">Live news stream from threat records.</p>
-						</div>
-						<span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text2)]">
-							{{ newsFeedItems.length }} items
-						</span>
-					</div>
-					<div class="mt-3 flex flex-wrap gap-2">
-						@for (range of feedRanges; track range.key) {
-							<button type="button" (click)="setFeedRange(range.key)" class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition" [ngClass]="selectedFeedRange === range.key ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-790)]','text-[var(--color-text1)]'] : ['border-[var(--color-border)]','bg-[var(--color-blue-780)]','text-[var(--color-text4)]','hover:text-[var(--color-text1)]','hover:bg-[var(--color-blue-790)]']">
-								{{ range.label }}
-							</button>
-						}
-					</div>
-					<p class="mt-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[10px] leading-4 text-[var(--color-text3)]">
-						Feed tabs filter loaded data. Use sidebar date filter to fetch new data.
-					</p>
-				</div>
+			<div class="flex flex-col overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-sm max-[1100px]:h-auto max-[1100px]:min-h-[280px]" [ngClass]="isNewsPanelCollapsed ? ['h-auto', 'min-h-0'] : ['h-[calc(50%-0.375rem)]', 'min-h-[250px]']">
+  <div
+    class="border-b border-[var(--color-border)] px-4 py-3"
+    [ngClass]="{
+      '!border-b-0': isNewsPanelCollapsed
+    }"
+  >
 
-				<div #newsFeedScroller (mouseenter)="onFeedHover('news', true)" (mouseleave)="onFeedHover('news', false)" (wheel)="onFeedInteract('news')" (touchstart)="onFeedInteract('news')" class="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+    <div class="flex items-start justify-between gap-3">
+
+      <div class="min-w-0">
+
+        <div class="flex items-center gap-2">
+
+          <p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">
+            News Feed
+          </p>
+
+          <span
+            class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-[3px] text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text2)]"
+          >
+            {{ newsFeedItems.length }}
+          </span>
+
+        </div>
+
+        <p class="mt-1 text-[11px] text-[var(--color-text4)]">
+          Live news stream from threat records.
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        (click)="togglePanel('news')"
+        [attr.aria-label]="isNewsPanelCollapsed ? 'Expand' : 'Collapse'"
+        class="ui-consolidated-sub flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]"
+      >
+        <img
+          src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
+          alt="toggle icon"
+          class="h-4 w-4 transition duration-200"
+          [ngClass]="{
+            'rotate-180': !isNewsPanelCollapsed
+          }"
+        />
+      </button>
+
+    </div>
+
+    @if (!isNewsPanelCollapsed) {
+
+      <div class="mt-3 flex items-center gap-2">
+
+        <input
+          [ngModel]="newsSearchTerm"
+          (ngModelChange)="onNewsSearchInput($event)"
+          type="text"
+          placeholder="Search news feed..."
+          class="h-9 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[12px] text-[var(--color-text1)] outline-none transition focus:border-[var(--color-blue-640)]"
+        />
+
+      </div>
+
+      @if (newsSearchTerm) {
+        <p class="mt-2 text-[10px] text-[var(--color-text4)]">
+          Local search active: "{{ newsSearchTerm }}"
+        </p>
+      }
+
+      <div class="mt-3 flex flex-wrap gap-2">
+
+        @for (range of feedRanges; track range.key) {
+
+          <button
+            type="button"
+            (click)="setFeedRange(range.key)"
+            class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition"
+            [ngClass]="
+              selectedFeedRange === range.key
+                ? [
+                    'border-[var(--color-blue-640)]',
+                    'bg-[var(--color-blue-790)]',
+                    'text-[var(--color-text1)]'
+                  ]
+                : [
+                    'border-[var(--color-border)]',
+                    'bg-[var(--color-blue-780)]',
+                    'text-[var(--color-text4)]',
+                    'hover:text-[var(--color-text1)]',
+                    'hover:bg-[var(--color-blue-790)]'
+                  ]
+            "
+          >
+            {{ range.label }}
+          </button>
+
+        }
+
+      </div>
+
+      <p
+        class="mt-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[10px] leading-4 text-[var(--color-text3)]"
+      >
+        Feed tabs filter loaded data. Use sidebar date filter to fetch new data.
+      </p>
+
+    }
+
+  </div>
+
+  @if (!isNewsPanelCollapsed) {
+<div #newsFeedScroller (mouseenter)="onFeedHover('news', true)" (mouseleave)="onFeedHover('news', false)" (wheel)="onFeedInteract('news')" (touchstart)="onFeedInteract('news')" class="min-h-0 flex-1 overflow-y-auto px-3 py-3">
 					@if (newsFeedItems.length) {
 						<div class="space-y-2">
 							@for (item of newsFeedItems; track item.id) {
@@ -158,71 +286,239 @@
 						</div>
 					}
 				</div>
-			</div>
 
-			<div class="flex h-[calc(50%-0.375rem)] min-h-[250px] flex-col overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-sm max-[1100px]:h-auto max-[1100px]:min-h-[280px]">
-				<div class="border-b border-[var(--color-border)] px-4 py-3">
-					<div class="flex items-start justify-between gap-3">
-						<div>
-							<p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">Archive</p>
-							<p class="mt-1 text-[11px] text-[var(--color-text4)]">Defacement, social, exploit, leak and other activity.</p>
-						</div>
-						<span class="whitespace-nowrap rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text2)]">
-							{{ archiveFeedItems.length }} items
-						</span>
-					</div>
-					<div class="mt-3 flex flex-wrap gap-2">
-						@for (range of feedRanges; track range.key) {
-							<button type="button" (click)="setFeedRange(range.key)" class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition" [ngClass]="selectedFeedRange === range.key ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-790)]','text-[var(--color-text1)]'] : ['border-[var(--color-border)]','bg-[var(--color-blue-780)]','text-[var(--color-text4)]','hover:text-[var(--color-text1)]','hover:bg-[var(--color-blue-790)]']">
-								{{ range.label }}
-							</button>
-						}
-					</div>
-					<p class="mt-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[10px] leading-4 text-[var(--color-text3)]">
-						Feed tabs filter loaded data. Use sidebar date filter to fetch new data.
-					</p>
-				</div>
+  }
 
-				<div #archiveFeedScroller (mouseenter)="onFeedHover('archive', true)" (mouseleave)="onFeedHover('archive', false)" (wheel)="onFeedInteract('archive')" (touchstart)="onFeedInteract('archive')" class="min-h-0 flex-1 overflow-y-auto px-3 py-3">
-					@if (archiveFeedItems.length) {
-						<div class="space-y-2">
-							@for (item of archiveFeedItems; track item.id) {
-								<button type="button" (click)="openFeedItem(item)" class="block w-full rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-3 text-left transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-780)]">
-									<div class="flex items-start justify-between gap-3">
-										<div class="min-w-0">
-											<div class="flex items-center gap-2">
-												<svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0 drop-shadow-[0_0_6px_currentColor]" [attr.color]="item.colorHex" aria-hidden="true">
-													<circle cx="6" cy="6" r="5" [attr.fill]="item.colorHex"></circle>
-												</svg>
-												<span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text2)]">{{ item.categoryLabel }}</span>
-											</div>
-											<p class="mt-2 line-clamp-2 text-[13px] font-semibold text-[var(--color-text1)]">{{ item.title }}</p>
-										</div>
-										<span class="shrink-0 text-[10px] uppercase tracking-[0.12em] text-[var(--color-text4)]">{{ item.displayDate }}</span>
-									</div>
+</div>
 
-									@if (item.summary) {
-										<p class="mt-2 line-clamp-3 text-[11px] leading-5 text-[var(--color-text3)]">{{ item.summary }}</p>
-									}
+			<div
+  class="flex flex-col overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-sm max-[1100px]:h-auto max-[1100px]:min-h-[280px]"
+  [ngClass]="
+    isArchivePanelCollapsed
+      ? ['h-auto', 'min-h-0']
+      : ['h-[calc(50%-0.375rem)]', 'min-h-[250px]']
+  "
+>
 
-									@if (item.highlights.length) {
-										<div class="mt-3 flex flex-wrap gap-1.5">
-											@for (highlight of item.highlights; track highlight) {
-												<span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-780)] px-2 py-1 text-[10px] text-[var(--color-text2)]">{{ highlight }}</span>
-											}
-										</div>
-									}
-								</button>
-							}
-						</div>
-					}
-					@else {
-						<div class="flex h-full min-h-[140px] items-center justify-center rounded-[12px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-790)] px-4 text-center text-[12px] text-[var(--color-text4)]">
-							No archive activity found for the selected time window.
-						</div>
-					}
-				</div>
-			</div>
+  <!-- HEADER -->
+  <div
+    class="border-b border-[var(--color-border)] px-4 py-3"
+    [ngClass]="{
+      '!border-b-0': isArchivePanelCollapsed
+    }"
+  >
+
+    <div class="flex items-start justify-between gap-3">
+
+      <div class="min-w-0">
+
+        <div class="flex items-center gap-2">
+
+          <p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">
+            Archive
+          </p>
+
+          <span
+            class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-[3px] text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text2)]"
+          >
+            {{ archiveFeedItems.length }}
+          </span>
+
+        </div>
+
+        <p class="mt-1 text-[11px] text-[var(--color-text4)]">
+          Defacement, social, exploit, leak and other activity.
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        (click)="togglePanel('archive')"
+        [attr.aria-label]="isArchivePanelCollapsed ? 'Expand' : 'Collapse'"
+        class="ui-consolidated-sub flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]"
+      >
+        <img
+          src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg"
+          alt="toggle icon"
+          class="h-4 w-4 transition duration-200"
+          [ngClass]="{
+            'rotate-180': !isArchivePanelCollapsed
+          }"
+        />
+      </button>
+
+    </div>
+
+    <!-- COLLAPSIBLE FILTER CONTENT -->
+    @if (!isArchivePanelCollapsed) {
+
+      <div class="mt-3 flex items-center gap-2">
+
+        <input
+          [ngModel]="archiveSearchTerm"
+          (ngModelChange)="onArchiveSearchInput($event)"
+          type="text"
+          placeholder="Search archive..."
+          class="h-9 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[12px] text-[var(--color-text1)] outline-none transition focus:border-[var(--color-blue-640)]"
+        />
+
+      </div>
+
+      @if (archiveSearchTerm) {
+        <p class="mt-2 text-[10px] text-[var(--color-text4)]">
+          Local search active: "{{ archiveSearchTerm }}"
+        </p>
+      }
+
+      <div class="mt-3 flex flex-wrap gap-2">
+
+        @for (range of feedRanges; track range.key) {
+
+          <button
+            type="button"
+            (click)="setFeedRange(range.key)"
+            class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition"
+            [ngClass]="
+              selectedFeedRange === range.key
+                ? [
+                    'border-[var(--color-blue-640)]',
+                    'bg-[var(--color-blue-790)]',
+                    'text-[var(--color-text1)]'
+                  ]
+                : [
+                    'border-[var(--color-border)]',
+                    'bg-[var(--color-blue-780)]',
+                    'text-[var(--color-text4)]',
+                    'hover:text-[var(--color-text1)]',
+                    'hover:bg-[var(--color-blue-790)]'
+                  ]
+            "
+          >
+            {{ range.label }}
+          </button>
+
+        }
+
+      </div>
+
+      <p
+        class="mt-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[10px] leading-4 text-[var(--color-text3)]"
+      >
+        Feed tabs filter loaded data. Use sidebar date filter to fetch new data.
+      </p>
+
+    }
+
+  </div>
+
+  <!-- FEED LIST -->
+  @if (!isArchivePanelCollapsed) {
+
+    <div
+      #archiveFeedScroller
+      (mouseenter)="onFeedHover('archive', true)"
+      (mouseleave)="onFeedHover('archive', false)"
+      (wheel)="onFeedInteract('archive')"
+      (touchstart)="onFeedInteract('archive')"
+      class="min-h-0 flex-1 overflow-y-auto px-3 py-3"
+    >
+
+      @if (archiveFeedItems.length) {
+
+        <div class="space-y-2">
+
+          @for (item of archiveFeedItems; track item.id) {
+
+            <button
+              type="button"
+              (click)="openFeedItem(item)"
+              class="block w-full rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-3 text-left transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-780)]"
+            >
+
+              <div class="flex items-start justify-between gap-3">
+
+                <div class="min-w-0">
+
+                  <div class="flex items-center gap-2">
+
+                    <svg
+                      viewBox="0 0 12 12"
+                      class="h-3 w-3 shrink-0 drop-shadow-[0_0_6px_currentColor]"
+                      [attr.color]="item.colorHex"
+                      aria-hidden="true"
+                    >
+                      <circle
+                        cx="6"
+                        cy="6"
+                        r="5"
+                        [attr.fill]="item.colorHex"
+                      ></circle>
+                    </svg>
+
+                    <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text2)]">
+                      {{ item.categoryLabel }}
+                    </span>
+
+                  </div>
+
+                  <p class="mt-2 line-clamp-2 text-[13px] font-semibold text-[var(--color-text1)]">
+                    {{ item.title }}
+                  </p>
+
+                </div>
+
+                <span class="shrink-0 text-[10px] uppercase tracking-[0.12em] text-[var(--color-text4)]">
+                  {{ item.displayDate }}
+                </span>
+
+              </div>
+
+              @if (item.summary) {
+                <p class="mt-2 line-clamp-3 text-[11px] leading-5 text-[var(--color-text3)]">
+                  {{ item.summary }}
+                </p>
+              }
+
+              @if (item.highlights.length) {
+
+                <div class="mt-3 flex flex-wrap gap-1.5">
+
+                  @for (highlight of item.highlights; track highlight) {
+
+                    <span
+                      class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-780)] px-2 py-1 text-[10px] text-[var(--color-text2)]"
+                    >
+                      {{ highlight }}
+                    </span>
+
+                  }
+
+                </div>
+
+              }
+
+            </button>
+
+          }
+
+        </div>
+
+      } @else {
+
+        <div
+          class="flex h-full min-h-[140px] items-center justify-center rounded-[12px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-790)] px-4 text-center text-[12px] text-[var(--color-text4)]"
+        >
+          No archive activity found for the selected time window.
+        </div>
+
+      }
+
+    </div>
+
+  }
+
+</div>
 		</div>
 	</div>
 </section>

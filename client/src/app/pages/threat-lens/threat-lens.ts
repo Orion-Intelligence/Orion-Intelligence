@@ -75,6 +75,12 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   selectedFeedRange: ThreatLensFeedRange = 'all';
   newsFeedItems: ThreatLensDisplayFeedItem[] = [];
   archiveFeedItems: ThreatLensDisplayFeedItem[] = [];
+  newsSearchTerm = '';
+  archiveSearchTerm = '';
+  isSearchPanelCollapsed = false;
+  isThreatPanelCollapsed = false;
+  isNewsPanelCollapsed = false;
+  isArchivePanelCollapsed = false;
 
   constructor(private ngZone: NgZone, private threatLensService: ThreatLensService, protected sidebarService: SidebarService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
@@ -509,6 +515,34 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     this.resetFeedScrollPositions();
   }
 
+  togglePanel(panel: 'search' | 'threat' | 'news' | 'archive'): void {
+    if (panel === 'search') {
+      this.isSearchPanelCollapsed = !this.isSearchPanelCollapsed;
+      return;
+    }
+    if (panel === 'threat') {
+      this.isThreatPanelCollapsed = !this.isThreatPanelCollapsed;
+      return;
+    }
+    if (panel === 'news') {
+      this.isNewsPanelCollapsed = !this.isNewsPanelCollapsed;
+      return;
+    }
+    this.isArchivePanelCollapsed = !this.isArchivePanelCollapsed;
+  }
+
+  onNewsSearchInput(value: string): void {
+    this.newsSearchTerm = value;
+    this.applyFeedRangeFilter();
+    this.resetFeedScrollPositions();
+  }
+
+  onArchiveSearchInput(value: string): void {
+    this.archiveSearchTerm = value;
+    this.applyFeedRangeFilter();
+    this.resetFeedScrollPositions();
+  }
+
   onFeedHover(feedType: 'news' | 'archive', paused: boolean): void {
     this.setFeedAutoScrollPaused(feedType, paused);
   }
@@ -819,16 +853,23 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
 
   private applyFeedRangeFilter(): void {
     const minTimestamp = this.getFeedRangeMinTimestamp();
-    this.newsFeedItems = this.filterFeedItemsByRange(this.allNewsFeedItems, minTimestamp);
-    this.archiveFeedItems = this.filterFeedItemsByRange(this.allArchiveFeedItems, minTimestamp);
+    this.newsFeedItems = this.filterFeedItems(this.allNewsFeedItems, minTimestamp, this.newsSearchTerm);
+    this.archiveFeedItems = this.filterFeedItems(this.allArchiveFeedItems, minTimestamp, this.archiveSearchTerm);
   }
 
-  private filterFeedItemsByRange(items: ThreatLensDisplayFeedItem[], minTimestamp: number): ThreatLensDisplayFeedItem[] {
-    if (!minTimestamp) {
-      return items;
-    }
+  private filterFeedItems(items: ThreatLensDisplayFeedItem[], minTimestamp: number, localSearch: string): ThreatLensDisplayFeedItem[] {
+    const normalizedLocalSearch = localSearch.trim().toLowerCase();
+    return items.filter((item) => {
+      if (minTimestamp && item.timestamp < minTimestamp) {
+        return false;
+      }
+      if (!normalizedLocalSearch) {
+        return true;
+      }
 
-    return items.filter((item) => item.timestamp >= minTimestamp);
+      const searchable = `${item.title} ${item.summary || ''} ${item.categoryLabel} ${item.highlights.join(' ')}`.toLowerCase();
+      return searchable.includes(normalizedLocalSearch);
+    });
   }
 
   private getFeedRangeMinTimestamp(): number {
