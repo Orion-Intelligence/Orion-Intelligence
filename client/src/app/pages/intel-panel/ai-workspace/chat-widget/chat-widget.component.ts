@@ -103,7 +103,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     const report = (this.report() || this.reportText() || '').trim();
     const payload = {
       message: report ? `${report}\n\n${userMessage}` : userMessage,
-      tool: this.tool() || 'default',
+      tool: this.resolveTool(report),
       type: this.type() || 'default'
     };
     const requestId = ++this.chatRequestId;
@@ -285,6 +285,11 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.activeChatRequest?.unsubscribe();
     this.activeChatRequest = undefined;
+  }
+
+  private resolveTool(report: string): string {
+    const tool = this.tool() || 'default';
+    return report && tool === 'default' ? 'final_summary' : tool;
   }
 
   private resetChatView(): void {

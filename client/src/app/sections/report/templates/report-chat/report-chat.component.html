@@ -195,5 +195,5 @@
   </app-report-interaction-host>
 }
 @if (appService.getConfig().appSettings.ai_endpoint_enabled) {
-  <app-chat-widget [reportText]="resultItem?.m_content"></app-chat-widget>
+  <app-chat-widget [reportText]="resultItem?.m_content" tool="final_summary"></app-chat-widget>
 }

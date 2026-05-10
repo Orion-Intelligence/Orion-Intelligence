@@ -112,15 +112,15 @@
         <div class="mb-0 max-h-0 overflow-hidden opacity-0 pointer-events-none transition-all duration-200 max-[640px]:hidden"></div>
         <form novalidate class="border border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-800)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded" (submit)="sendMessage($event)">
           <div class="flex items-end gap-2">
-          <textarea #composerInput data-testid="chat-widget-input" rows="1" [(ngModel)]="newMessage" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" name="message" placeholder="Write a message" class="block min-h-8 max-h-[120px] flex-1 resize-none overflow-y-hidden whitespace-pre-wrap break-words bg-[var(--color-blue-800)] px-3 py-1.5 text-sm leading-5 text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded" required></textarea>
-          <button data-testid="chat-widget-send" #submitBtn type="button" (click)="pushButton(submitBtn); isBotTyping ? stopMessageGeneration() : sendMessage($event)" [disabled]="!isBotTyping && !newMessage.trim()" [attr.aria-label]="isBotTyping ? 'Stop generation' : 'Send message'" [class]="isBotTyping ? 'flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 bg-red-950/70 text-red-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_1px_rgba(248,113,113,0.08)] transition hover:bg-red-900/80 hover:text-white disabled:cursor-not-allowed disabled:opacity-50' : 'ui-chat-send-btn flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] transition hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50'">
-            @if (isBotTyping) {
-              <span class="h-3 w-3 rounded-[3px] bg-current shadow-[0_0_10px_rgba(248,113,113,0.28)]" aria-hidden="true"></span>
-              <span class="sr-only">Stop generation</span>
-            } @else {
-              <img src="assets/images/shared/chat_small.svg" alt="chat" class="h-4 w-4 [filter:brightness(0)_invert(1)]" />
-            }
-          </button>
+            <textarea #composerInput data-testid="chat-widget-input" rows="1" [(ngModel)]="newMessage" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" name="message" placeholder="Write a message" class="block min-h-8 max-h-[120px] flex-1 resize-none overflow-y-hidden whitespace-pre-wrap break-words bg-[var(--color-blue-800)] px-3 py-1.5 text-sm leading-5 text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded" required></textarea>
+            <button data-testid="chat-widget-send" #submitBtn type="button" (click)="pushButton(submitBtn); isBotTyping ? stopMessageGeneration() : sendMessage($event)" [disabled]="!isBotTyping && !newMessage.trim()" [attr.aria-label]="isBotTyping ? 'Stop generation' : 'Send message'" [class]="isBotTyping ? 'flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 bg-red-950/70 text-red-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_1px_rgba(248,113,113,0.08)] transition hover:bg-red-900/80 hover:text-white disabled:cursor-not-allowed disabled:opacity-50' : 'ui-chat-send-btn flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] transition hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50'">
+              @if (isBotTyping) {
+                <span class="h-3 w-3 rounded-[3px] bg-current shadow-[0_0_10px_rgba(248,113,113,0.28)]" aria-hidden="true"></span>
+                <span class="sr-only">Stop generation</span>
+              } @else {
+                <img src="assets/images/shared/chat_small.svg" alt="chat" class="h-4 w-4 [filter:brightness(0)_invert(1)]" />
+              }
+            </button>
           </div>
         </form>
         <div class="mt-2 flex flex-wrap items-center justify-between gap-2 px-1 text-[11px] text-[var(--color-text6)] max-[640px]:hidden">
