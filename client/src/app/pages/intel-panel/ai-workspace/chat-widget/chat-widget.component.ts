@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, ChangeDetectorRef, NgZone, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { chatBotAnimation } from '../../../../shared/animations/chat.bot.animation';
 import { overlayFadeAnimation } from '../../../../shared/animations/chat.overlay.animation';
@@ -18,6 +19,9 @@ import { BotMessageActionsComponent } from '../bot-message-actions/bot-message-a
   animations: [chatBotAnimation, overlayFadeAnimation]
 })
 export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
+  private activeChatRequest?: Subscription;
+  private chatRequestId = 0;
+  private stoppedRequestIds = new Set<number>();
   private userNearBottom = true;
   private io?: IntersectionObserver;
   private mo?: MutationObserver;
@@ -32,7 +36,6 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   chatOpen = false;
   isFullScreen = false;
   composerExpanded = false;
-  composerHeightClass = 'h-8';
   readonly reportText = input<string>();
   readonly report = input<string>();
   readonly showLauncher = input(true);
@@ -58,12 +61,14 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.cancelActiveNexusRequest();
+    this.stoppedRequestIds.clear();
     this.io?.disconnect();
     this.mo?.disconnect();
   }
 
-  sendMessage(event: Event): void {
-    event.preventDefault();
+  sendMessage(event?: Event): void {
+    event?.preventDefault();
     if (this.isBotTyping) {
       return;
     }
@@ -101,26 +106,58 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
       tool: this.tool() || 'default',
       type: this.type() || 'default'
     };
+    const requestId = ++this.chatRequestId;
+    this.stoppedRequestIds.delete(requestId);
+    let reply = '';
     let botMessage: AiWorkspaceMessage | undefined;
-    this.nexusChatService.streamNexusChat(payload).subscribe({
+    const updateReply = (value: string) => {
+      if (requestId !== this.chatRequestId || this.stoppedRequestIds.has(requestId)) {
+        return;
+      }
+      if (!botMessage) {
+        botMessage = { id: crypto.randomUUID(), sender: 'bot', text: '', time: new Date() };
+        this.chatMessages.push(botMessage);
+      }
+      botMessage.text = value;
+      this.scrollToNewMessage();
+    };
+    const finishStream = () => {
+      if (requestId !== this.chatRequestId || this.stoppedRequestIds.has(requestId)) {
+        return;
+      }
+      this.activeChatRequest = undefined;
+      this.isBotTyping = false;
+      this.botStep = '';
+      if (!reply.trim()) {
+        this.chatMessages = botMessage ? this.chatMessages.filter(message => message.id !== botMessage?.id) : this.chatMessages;
+        this.showErrorMessage(userMessage);
+      }
+      this.scrollToNewMessage();
+    };
+
+    this.activeChatRequest = this.nexusChatService.streamNexusChat(payload).subscribe({
       next: (chunk) => {
-        const reply = chunk.response ?? chunk.delta ?? '';
-        if (!reply) {
+        if (requestId !== this.chatRequestId || this.stoppedRequestIds.has(requestId)) {
           return;
         }
-        if (!botMessage) {
-          botMessage = { id: crypto.randomUUID(), sender: 'bot', text: '', time: new Date() };
-          this.chatMessages.push(botMessage);
+        if (chunk.delta) {
+          reply += chunk.delta;
+          updateReply(reply);
         }
-        botMessage.text = reply;
-        this.scrollToNewMessage();
+        if (chunk.response) {
+          reply = chunk.response;
+          updateReply(reply);
+        }
       },
       complete: () => {
-        this.isBotTyping = false;
-        this.botStep = '';
-        this.scrollToNewMessage();
+        finishStream();
       },
       error: () => {
+        if (requestId !== this.chatRequestId || this.stoppedRequestIds.has(requestId)) {
+          return;
+        }
+        this.activeChatRequest = undefined;
+        this.chatMessages = botMessage ? this.chatMessages.filter(message => message.id !== botMessage?.id) : this.chatMessages;
         this.showErrorMessage(userMessage);
         this.isBotTyping = false;
         this.botStep = '';
@@ -140,10 +177,40 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   retryMessage( payload: string ): void {
+    if (this.isBotTyping) {
+      return;
+    }
     this.isBotTyping = true;
     this.botStep = '';
     this.scrollToNewMessage();
     this.aiSuggest(payload);
+  }
+
+  stopMessageGeneration(): void {
+    this.stoppedRequestIds.add(this.chatRequestId);
+    this.chatRequestId += 1;
+    this.cancelActiveNexusRequest();
+    this.chatMessages.push({
+      id: crypto.randomUUID(),
+      sender: 'error',
+      text: 'Message canceled.',
+      time: new Date()
+    });
+    this.isBotTyping = false;
+    this.botStep = '';
+    this.scrollToNewMessage();
+  }
+
+  startNewChat(): void {
+    this.chatRequestId += 1;
+    this.stoppedRequestIds.clear();
+    this.cancelActiveNexusRequest();
+    this.isBotTyping = false;
+    this.botStep = '';
+    this.nexusChatService.clearNexusSession().subscribe({
+      next: () => this.resetChatView(),
+      error: () => this.resetChatView(),
+    });
   }
 
   openChat() {
@@ -159,6 +226,10 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   closeChat() {
+    this.chatRequestId += 1;
+    this.cancelActiveNexusRequest();
+    this.isBotTyping = false;
+    this.botStep = '';
     this.chatOpen = false;
     this.composerExpanded = false;
     this.io?.disconnect();
@@ -187,12 +258,13 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!textarea) {
       return;
     }
-    this.composerHeightClass = 'h-8';
-    this.cdr.detectChanges();
-    const nextHeight = Math.min(120, Math.max(32, textarea.scrollHeight));
-    this.composerHeightClass = this.getComposerHeightClass(nextHeight);
+
+    textarea.style.height = 'auto';
+    const scrollHeight = textarea.scrollHeight;
+    const nextHeight = Math.min(120, Math.max(32, scrollHeight));
+    textarea.style.height = `${nextHeight}px`;
+    textarea.style.overflowY = scrollHeight > 120 ? 'auto' : 'hidden';
     this.composerExpanded = nextHeight > 32;
-    this.cdr.detectChanges();
   }
 
   queueComposerResize(): void {
@@ -207,23 +279,25 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     return el.scrollHeight - el.clientHeight - el.scrollTop <= threshold;
   }
 
-  private getComposerHeightClass(height: number): string {
-    if (height <= 32) {
-      return 'h-8';
+  private cancelActiveNexusRequest(): void {
+    if (this.activeChatRequest || this.isBotTyping) {
+      this.nexusChatService.cancelNexusChat();
     }
-    if (height <= 52) {
-      return 'h-[52px]';
-    }
-    if (height <= 72) {
-      return 'h-[72px]';
-    }
-    if (height <= 92) {
-      return 'h-[92px]';
-    }
-    if (height <= 112) {
-      return 'h-[112px]';
-    }
-    return 'h-[120px]';
+    this.activeChatRequest?.unsubscribe();
+    this.activeChatRequest = undefined;
+  }
+
+  private resetChatView(): void {
+    this.chatMessages = [{
+      id: crypto.randomUUID(),
+      sender: 'bot',
+      text: 'Hi there! How can I help you today?',
+      time: new Date()
+    }];
+    this.newMessage = '';
+    this.composerExpanded = false;
+    this.queueComposerResize();
+    this.scrollToBottom(true);
   }
 
   private scrollToNewMessage(): void {

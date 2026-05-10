@@ -10,7 +10,7 @@
   <div data-testid="chat-widget-overlay" class="fixed inset-0 z-[1400] flex items-end justify-end bg-black/40 p-4 max-[640px]:items-stretch max-[640px]:justify-stretch max-[640px]:p-5" @overlayFade (click)="closeChat()">
     <div class="chat-support__window ui-ai-chat-surface-pattern flex min-h-0 w-full flex-col overflow-hidden rounded-2xl bg-[var(--color-blue-700)] shadow-[0_24px_80px_rgba(0,0,0,0.35)] max-[640px]:h-full max-[640px]:max-w-none" [ngClass]="isFullScreen ? 'h-[calc(100vh-32px)] max-w-[714px]' : 'h-[640px] max-w-[420px]'" @chatBotAnimation (click)="$event.stopPropagation()">
       <div class="flex shrink-0 items-center justify-between px-5 pt-5">
-        <button type="button" class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
+        <button type="button" class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]" (click)="startNewChat()">
           New Chat
         </button>
         <div class="flex items-center gap-2">
@@ -112,15 +112,19 @@
         <div class="mb-0 max-h-0 overflow-hidden opacity-0 pointer-events-none transition-all duration-200 max-[640px]:hidden"></div>
         <form novalidate class="border border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-800)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded" (submit)="sendMessage($event)">
           <div class="flex items-end gap-2">
-          <textarea #composerInput data-testid="chat-widget-input" rows="1" [(ngModel)]="newMessage" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" name="message" placeholder="Write a message" class="block min-h-8 max-h-[120px] flex-1 resize-none overflow-y-hidden whitespace-pre-wrap break-words bg-[var(--color-blue-800)] px-3 py-1.5 text-sm leading-5 text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" [ngClass]="composerHeightClass" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded" [disabled]="isBotTyping" required></textarea>
-          <button data-testid="chat-widget-send" #submitBtn type="submit" class="ui-chat-send-btn flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] hover:bg-[#4b98dc]" [disabled]="isBotTyping" (click)="pushButton(submitBtn)">
-            <img src="assets/images/shared/chat_small.svg" alt="chat" class="h-4 w-4 [filter:brightness(0)_invert(1)]" />
+          <textarea #composerInput data-testid="chat-widget-input" rows="1" [(ngModel)]="newMessage" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" name="message" placeholder="Write a message" class="block min-h-8 max-h-[120px] flex-1 resize-none overflow-y-hidden whitespace-pre-wrap break-words bg-[var(--color-blue-800)] px-3 py-1.5 text-sm leading-5 text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded" required></textarea>
+          <button data-testid="chat-widget-send" #submitBtn type="button" (click)="pushButton(submitBtn); isBotTyping ? stopMessageGeneration() : sendMessage($event)" [disabled]="!isBotTyping && !newMessage.trim()" [attr.aria-label]="isBotTyping ? 'Stop generation' : 'Send message'" [class]="isBotTyping ? 'flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 bg-red-950/70 text-red-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_1px_rgba(248,113,113,0.08)] transition hover:bg-red-900/80 hover:text-white disabled:cursor-not-allowed disabled:opacity-50' : 'ui-chat-send-btn flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] transition hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50'">
+            @if (isBotTyping) {
+              <span class="h-3 w-3 rounded-[3px] bg-current shadow-[0_0_10px_rgba(248,113,113,0.28)]" aria-hidden="true"></span>
+              <span class="sr-only">Stop generation</span>
+            } @else {
+              <img src="assets/images/shared/chat_small.svg" alt="chat" class="h-4 w-4 [filter:brightness(0)_invert(1)]" />
+            }
           </button>
           </div>
         </form>
         <div class="mt-2 flex flex-wrap items-center justify-between gap-2 px-1 text-[11px] text-[var(--color-text6)] max-[640px]:hidden">
-          <p>Enter sends.</p>
-          <p>Session resets when you switch away.</p>
+          <p>Enter sends. Shift + Enter adds a new line.</p>
         </div>
       </div>
     </div>
