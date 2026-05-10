@@ -172,10 +172,15 @@ export class NexusChatService {
       const output = this.asRecord(parsed?.output);
       const delta = output?.['delta'];
       const response = output?.['response'];
+      const status = this.asRecord(parsed?.status);
+      const statusMessage = status?.['message'] ?? parsed?.status_message;
       const error = this.asRecord(parsed?.error);
       let detail = parsed?.detail ?? error?.['message'];
       if (typeof detail === 'string' && detail.toLowerCase().includes('stream is already active')) {
         detail = 'Nexus is still finishing the previous chat. Try again in a moment.';
+      }
+      if (statusMessage !== undefined) {
+        observer.next({ status: this.streamValueToText(statusMessage) });
       }
       if (delta !== undefined) {
         observer.next({ delta: this.streamValueToText(delta) });

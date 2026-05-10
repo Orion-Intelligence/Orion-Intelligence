@@ -133,6 +133,9 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         if (requestId !== this.chatRequestId) {
           return;
         }
+        if (chunk.status) {
+          this.nexusStep.set(chunk.status);
+        }
         if (chunk.delta) {
           reply += chunk.delta;
           updateReply(reply);

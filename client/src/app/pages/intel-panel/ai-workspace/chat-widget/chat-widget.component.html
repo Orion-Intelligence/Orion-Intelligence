@@ -90,17 +90,21 @@
             <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
               <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
             </div>
-            <div class="max-w-[240px] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
+            <div class="max-w-[300px] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
               <div class="flex min-h-[20px] items-center gap-2 px-1">
                 <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
                 <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">Thinking</span>
               </div>
-              <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
-                <div class="flex items-center gap-2">
-                  <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
-                  <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:140ms]"></span>
-                  <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:280ms]"></span>
-                  <span class="ml-1 text-[12px] text-[var(--color-text4)]">{{ botStep }}</span>
+              <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot min-w-0 w-[280px] max-w-full rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
+                <div class="flex min-w-0 flex-col gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
+                    <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:140ms]"></span>
+                    <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:280ms]"></span>
+                  </div>
+                  @if (botStep) {
+                    <span class="block max-w-full truncate whitespace-nowrap text-[12px] leading-5 text-[var(--color-text4)]">{{ botStep }}</span>
+                  }
                 </div>
               </div>
             </div>

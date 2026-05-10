@@ -140,6 +140,10 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
         if (requestId !== this.chatRequestId || this.stoppedRequestIds.has(requestId)) {
           return;
         }
+        if (chunk.status) {
+          this.botStep = chunk.status;
+          this.cdr.detectChanges();
+        }
         if (chunk.delta) {
           reply += chunk.delta;
           updateReply(reply);

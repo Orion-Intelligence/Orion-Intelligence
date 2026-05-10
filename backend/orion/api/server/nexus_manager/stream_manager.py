@@ -81,6 +81,10 @@ class NexusStreamManager:
                         yield json.dumps({"output": {"response": error_message}, "done": True, "error": True}, ensure_ascii=True) + "\n", "", True, None
                         return
 
+                    status_value = parsed_line.get("status")
+                    if status_value:
+                        yield json.dumps({"status": status_value, "done": False, "error": False}, ensure_ascii=True) + "\n", "", False, None
+
                     output = parsed_line.get("output") or {}
                     response_type = output.get("response_type") or parsed_line.get("response_type")
                     if response_type == "api_pipeline":
@@ -130,6 +134,8 @@ class NexusStreamManager:
                     )
 
                     async for summary_line, summary_answer, summary_failed, _ in self._stream(client, endpoint, summary_prompt, user_id, tool="final_summary"):
+                        if summary_line:
+                            yield summary_line
                         if summary_failed:
                             return
                         if summary_answer:
