@@ -177,14 +177,12 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       return;
     }
 
-    requestAnimationFrame(() => {
-      const currentTextarea = this.composerInput?.nativeElement;
-      if (!currentTextarea) {
-        return;
-      }
-      const nextHeight = Math.max(32, currentTextarea.scrollHeight);
-      this.composerExpanded = nextHeight > 32;
-    });
+    textarea.style.height = 'auto';
+    const scrollHeight = textarea.scrollHeight;
+    const nextHeight = Math.min(120, Math.max(32, scrollHeight));
+    textarea.style.height = `${nextHeight}px`;
+    textarea.style.overflowY = scrollHeight > 120 ? 'auto' : 'hidden';
+    this.composerExpanded = nextHeight > 32;
   }
 
   usePrompt(prompt: string): void {

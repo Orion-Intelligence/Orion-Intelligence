@@ -28,6 +28,11 @@ class NexusStreamManager:
         if isinstance(tool_response, list):
             return bool(tool_response)
         if isinstance(tool_response, dict):
+            if "total" in tool_response:
+                try:
+                    return int(tool_response.get("total") or 0) > 0
+                except (TypeError, ValueError):
+                    return bool(tool_response.get("total"))
             if "Result" in tool_response:
                 return bool(tool_response.get("Result"))
             return bool(tool_response)
@@ -113,9 +118,6 @@ class NexusStreamManager:
                 if tool_request:
                     tool_request = json.loads(tool_request)
                     tool_response = await self.tool_router.request(tool_request["api_name"], tool_request.get("payload") or {}, user_id=user_id)
-                    print("::::::::::::::::::::::::::::::::::", flush=True)
-                    print(tool_response, flush = True)
-                    print("::::::::::::::::::::::::::::::::::", flush=True)
 
                     if not self._has_results(tool_response):
                         yield json.dumps({"output": {"response": self.NOT_FOUND_RESPONSE}, "done": True, "error": False}, ensure_ascii=True) + "\n"
@@ -137,8 +139,7 @@ class NexusStreamManager:
                 if answer:
                     yield json.dumps({"output": {"response": answer.strip()}, "done": True, "error": False}, ensure_ascii=True) + "\n"
                     return
-        except Exception as ex:
-
+        except Exception as _:
             yield json.dumps({"output": {"response": "Something happened while calling api/chat"}, "done": True, "error": True}, ensure_ascii=True) + "\n"
         finally:
             if self.active_chat_tasks.get(user_id) is current_task:
