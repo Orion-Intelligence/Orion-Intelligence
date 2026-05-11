@@ -37,11 +37,11 @@ export class SentinelImageSectionComponent {
   get loadingStepLabel(): string {
     const raw = (this.currentStep || '').trim();
     if (!raw) {
-      return 'Fetching Sentinel image...'; 
+      return 'Fetching Sentinel image...';
     }
     const normalized = raw.toLowerCase();
     if (normalized === 'queued' || normalized.includes('queue')) {
-      return 'Queued: waiting for availability...'; 
+      return 'Queued: waiting for availability...';
     }
     return raw;
   }
@@ -53,13 +53,13 @@ export class SentinelImageSectionComponent {
   get imageSrc(): string | null {
     const result = this.imageResult;
     if (!result) {
-      return null; 
+      return null;
     }
     const direct = result.image_url || result.data_url;
     if (typeof direct === 'string' && direct.trim()) {
-      return direct; 
+      return direct;
     }
-    const base64 = result.image_base64;
+    const base64 = result['image_b64'];
     if (typeof base64 === 'string' && base64.trim()) {
       const mime = result.mime_type || result.content_type || 'image/png';
       return `data:${mime};base64,${base64}`;
@@ -70,7 +70,7 @@ export class SentinelImageSectionComponent {
   get detailEntries(): { label: string; value: string }[] {
     const result = this.imageResult;
     if (!result) {
-      return []; 
+      return [];
     }
     const entries: { label: string; value: string }[] = [];
     if (typeof result.month === 'string' && result.month.trim()) {
@@ -92,7 +92,7 @@ export class SentinelImageSectionComponent {
   }
 
   selectType(key: string): void {
-    this.selectedType = key; 
+    this.selectedType = key;
   }
 
   onRunFetch(): void {
@@ -105,11 +105,11 @@ export class SentinelImageSectionComponent {
 
   openLightbox(): void {
     if (this.imageSrc) {
-      this.lightboxSrc = this.imageSrc; 
+      this.lightboxSrc = this.imageSrc;
     }
   }
 
   closeLightbox(): void {
-    this.lightboxSrc = null; 
+    this.lightboxSrc = null;
   }
 }
