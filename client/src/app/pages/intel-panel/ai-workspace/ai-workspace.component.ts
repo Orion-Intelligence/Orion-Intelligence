@@ -43,6 +43,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   messageDraft = '';
   messages: AiWorkspaceMessage[] = [];
   composerExpanded = false;
+  composerRows = 1;
+  composerScrollable = false;
 
   constructor(private readonly api: ApiService, protected readonly appService: AppService, private readonly route: ActivatedRoute, private readonly router: Router, private readonly subscriptionService: SubscriptionService, protected readonly licenseService: LicenseService, private readonly nexusChatService: NexusChatService) {
     this.queryContext = (this.route.snapshot.queryParamMap.get('q') || '').trim();
@@ -180,12 +182,10 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       return;
     }
 
-    textarea.style.height = 'auto';
-    const scrollHeight = textarea.scrollHeight;
-    const nextHeight = Math.min(120, Math.max(32, scrollHeight));
-    textarea.style.height = `${nextHeight}px`;
-    textarea.style.overflowY = scrollHeight > 120 ? 'auto' : 'hidden';
-    this.composerExpanded = nextHeight > 32;
+    const lineCount = this.getComposerLineCount(textarea);
+    this.composerRows = Math.min(5, lineCount);
+    this.composerScrollable = lineCount > 5;
+    this.composerExpanded = this.composerRows > 1;
   }
 
   usePrompt(prompt: string): void {
@@ -379,5 +379,15 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   queueComposerResize(): void {
     requestAnimationFrame(() => this.resizeComposer());
+  }
+
+  private getComposerLineCount(textarea: HTMLTextAreaElement): number {
+    const horizontalPadding = 24;
+    const averageCharWidth = 7;
+    const availableWidth = Math.max(averageCharWidth, textarea.clientWidth - horizontalPadding);
+    const charsPerLine = Math.max(1, Math.floor(availableWidth / averageCharWidth));
+    const lines = (textarea.value || '').split('\n');
+
+    return Math.max(1, lines.reduce((total, line) => total + Math.max(1, Math.ceil(line.length / charsPerLine)), 0));
   }
 }

@@ -36,6 +36,8 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   chatOpen = false;
   isFullScreen = false;
   composerExpanded = false;
+  composerRows = 1;
+  composerScrollable = false;
   readonly reportText = input<string>();
   readonly report = input<string>();
   readonly showLauncher = input(true);
@@ -236,6 +238,8 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     this.botStep = '';
     this.chatOpen = false;
     this.composerExpanded = false;
+    this.composerRows = 1;
+    this.composerScrollable = false;
     this.io?.disconnect();
     this.mo?.disconnect();
     this.io = undefined;
@@ -263,12 +267,10 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    textarea.style.height = 'auto';
-    const scrollHeight = textarea.scrollHeight;
-    const nextHeight = Math.min(120, Math.max(32, scrollHeight));
-    textarea.style.height = `${nextHeight}px`;
-    textarea.style.overflowY = scrollHeight > 120 ? 'auto' : 'hidden';
-    this.composerExpanded = nextHeight > 32;
+    const lineCount = this.getComposerLineCount(textarea);
+    this.composerRows = Math.min(5, lineCount);
+    this.composerScrollable = lineCount > 5;
+    this.composerExpanded = this.composerRows > 1;
   }
 
   queueComposerResize(): void {
@@ -305,8 +307,20 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     }];
     this.newMessage = '';
     this.composerExpanded = false;
+    this.composerRows = 1;
+    this.composerScrollable = false;
     this.queueComposerResize();
     this.scrollToBottom(true);
+  }
+
+  private getComposerLineCount(textarea: HTMLTextAreaElement): number {
+    const horizontalPadding = 24;
+    const averageCharWidth = 7;
+    const availableWidth = Math.max(averageCharWidth, textarea.clientWidth - horizontalPadding);
+    const charsPerLine = Math.max(1, Math.floor(availableWidth / averageCharWidth));
+    const lines = (textarea.value || '').split('\n');
+
+    return Math.max(1, lines.reduce((total, line) => total + Math.max(1, Math.ceil(line.length / charsPerLine)), 0));
   }
 
   private scrollToNewMessage(): void {
