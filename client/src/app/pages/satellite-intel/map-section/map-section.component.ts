@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { geoContains } from 'd3-geo';
+import { feature as topojsonFeature } from 'topojson-client';
 import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
 import { SatelliteIntelService } from '../satellite-intel-service';
 import { ORION_POWER_FILTERS } from '../model/satellite-intel.model';
@@ -24,6 +26,9 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private facLayer: any     = null;
   private anomalyLayer: any = null;
   private orionCluster: any = null;
+  private countryBoundaryLayer: any = null;
+  private countryHighlightLayer: any = null;
+  private countryHoverLayer: any = null;
   private orionMarkers = new Map<string, any>();
   private orionMarkerSignatures = new Map<string, string>();
   private clickMarker: any  = null;
@@ -36,6 +41,8 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private aircraftRenderKey = '';
   private shipRenderKey = '';
   private shipCluster!: any;
+  private worldCountryFeatures: any[] = [];
+  private highlightedCountryFeature: any | null = null;
 
   readonly powerPlantLegend = ORION_POWER_FILTERS;
   zoomLabel = 'zoom 2.5';
@@ -257,6 +264,22 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
 
       this.refreshBaseLayerDetail();
 
+      // Create custom pane for country highlighting with high z-index
+      try {
+        let countryPane = this.leafletMap.getPane('countryPane');
+        if (!countryPane && this.leafletMap.createPane) {
+          countryPane = this.leafletMap.createPane('countryPane');
+        }
+        if (countryPane) {
+          (countryPane as HTMLElement).setAttribute('style', 'z-index: 450 !important');
+        }
+      }
+      catch (error) {
+        console.error('[Country Highlight] Failed to create pane:', error);
+      }
+
+      await this.initCountryBoundaryLayer();
+
       this.updateMinZoomToFitContainer();
 
       this.facLayer = this.L.geoJSON(null, {
@@ -439,6 +462,282 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     else {
       (useLowRes ? this.esriLowResLayer : this.esriLayer)?.addTo(this.leafletMap);
     }
+  }
+
+  private async initCountryBoundaryLayer(): Promise<void> {
+    if (!this.leafletMap || !this.L || this.countryBoundaryLayer) {
+      this.updateCountryHighlight();
+      return;
+    }
+
+    try {
+      const response = await fetch('/assets/data/map/world.json');
+      if (!response.ok) {
+        console.error('[Country Highlight] Failed to fetch world.json:', response.status);
+        return;
+      }
+
+      const topology = await response.json();
+      const countryCollection = topojsonFeature(topology, topology.objects?.countries) as any;
+      this.worldCountryFeatures = Array.isArray(countryCollection?.features) ? countryCollection.features : [];
+      const renderableCountryCollection = {
+        ...countryCollection,
+        features: this.worldCountryFeatures.map((feature: any) => this.normalizeCountryFeature(feature)),
+      };
+      // Create highlight and hover layers before wiring the country boundaries
+      this.countryHighlightLayer = this.L.geoJSON(null, {
+        interactive: false,
+        pane: 'countryPane',
+        noClip: true,
+        style: () => this.getCountryHighlightStyle(),
+      }).addTo(this.leafletMap);
+
+      this.countryHoverLayer = this.L.geoJSON(null, {
+        interactive: false,
+        pane: 'countryPane',
+        noClip: true,
+        style: () => this.getCountryHoverStyle(),
+      }).addTo(this.leafletMap);
+
+      this.countryBoundaryLayer = this.L.geoJSON(renderableCountryCollection, {
+        interactive: true,
+        pane: 'countryPane',
+        noClip: true,
+        smoothFactor: 0,
+        style: () => this.getCountryBoundaryStyle(),
+        onEachFeature: (feature: any, layer: any) => {
+          const countryName = feature?.properties?.name || 'Country';
+          layer.bindTooltip(countryName, {
+            direction: 'center',
+            sticky: true,
+            opacity: 0.95,
+            className: 'country-hover-tooltip',
+          });
+          // click to highlight this country permanently
+          layer.on('click', () => {
+            if (this.isSameCountryFeature(feature, this.highlightedCountryFeature)) {
+              this.clearCountryHighlight();
+              return;
+            }
+
+            this.highlightCountryFeature(feature);
+          });
+
+          // hover: show visual highlight using a stroke-only overlay layer
+          layer.on('mouseover', () => {
+            try {
+              if (this.countryHoverLayer) {
+                this.countryHoverLayer.clearLayers();
+                this.countryHoverLayer.addData(feature);
+                this.countryHoverLayer.bringToFront();
+              }
+            }
+            catch { }
+          });
+
+          // mouseout: restore base style and re-apply persistent highlight if present
+          layer.on('mouseout', () => {
+            try {
+              if (this.countryHoverLayer) {
+                this.countryHoverLayer.clearLayers();
+              }
+              if (this.highlightedCountryFeature && this.countryHighlightLayer) {
+                this.countryHighlightLayer.clearLayers();
+                this.countryHighlightLayer.addData(this.highlightedCountryFeature);
+                this.countryHighlightLayer.bringToFront();
+              }
+            }
+            catch { }
+          });
+        },
+      }).addTo(this.leafletMap);
+
+      this.updateCountryHighlight();
+    }
+    catch (error) {
+      console.error('[Country Highlight] Error loading country data:', error);
+      this.worldCountryFeatures = [];
+    }
+  }
+
+  private getCountryBoundaryStyle(): Record<string, any> {
+    return {
+      color:       'rgba(34,34,34,0.9)',
+      weight:      1,
+      opacity:     0.9,
+      fillColor:   'rgba(0,0,0,0)',
+      fillOpacity: 0,
+      lineJoin:    'round',
+      lineCap:     'round',
+    };
+  }
+
+  private getCountryHoverStyle(): Record<string, any> {
+    return {
+      color:       'rgba(96,165,250,0.98)',
+      weight:      2.5,
+      opacity:     1,
+      fillColor:   'rgba(96,165,250,0)',
+      fillOpacity: 0,
+      lineJoin:    'round',
+      lineCap:     'round',
+    };
+  }
+
+  private normalizeCountryFeature(feature: any): any {
+    if (!feature?.geometry) {
+      return feature;
+    }
+
+    return {
+      ...feature,
+      geometry: this.normalizeCountryGeometry(feature.geometry),
+    };
+  }
+
+  private normalizeCountryGeometry(geometry: any): any {
+    const type = geometry?.type;
+    const coordinates = geometry?.coordinates;
+
+    if (!type || !coordinates) {
+      return geometry;
+    }
+
+    if (type === 'Polygon') {
+      return {
+        ...geometry,
+        coordinates: coordinates.map((ring: any) => this.unwrapCountryRing(ring)),
+      };
+    }
+
+    if (type === 'MultiPolygon') {
+      return {
+        ...geometry,
+        coordinates: coordinates.map((polygon: any) => polygon.map((ring: any) => this.unwrapCountryRing(ring))),
+      };
+    }
+
+    return geometry;
+  }
+
+  private unwrapCountryRing(ring: any[]): any[] {
+    if (!Array.isArray(ring) || ring.length < 2) {
+      return ring;
+    }
+
+    const normalizedRing: any[] = [];
+    let offset = 0;
+
+    const firstPoint = ring[0];
+    normalizedRing.push([firstPoint[0], firstPoint[1]]);
+    let previousLongitude = firstPoint[0];
+
+    for (let index = 1; index < ring.length; index += 1) {
+      const point = ring[index];
+      if (!Array.isArray(point) || point.length < 2) {
+        continue;
+      }
+
+      let longitude = point[0] + offset;
+      const latitude = point[1];
+
+      while (longitude - previousLongitude > 180) {
+        offset -= 360;
+        longitude = point[0] + offset;
+      }
+
+      while (previousLongitude - longitude > 180) {
+        offset += 360;
+        longitude = point[0] + offset;
+      }
+
+      normalizedRing.push([longitude, latitude]);
+      previousLongitude = longitude;
+    }
+
+    return normalizedRing;
+  }
+
+  private getCountryHighlightStyle(): Record<string, any> {
+    return {
+      color:       'rgba(59,130,246,0.98)',
+      weight:      2.2,
+      opacity:     0.95,
+      fillColor:   'rgba(56,189,248,0)',
+      fillOpacity: 0,
+      lineJoin:    'round',
+      lineCap:     'round',
+    };
+  }
+
+  private getFocusedFeatureCoordinates(): [number, number] | null {
+    const coordinates = this.focusedFeature?.coordinates;
+    if (!Array.isArray(coordinates) || coordinates.length < 2) {
+      return null;
+    }
+
+    const [lon, lat] = coordinates;
+    if (!Number.isFinite(lon) || !Number.isFinite(lat)) {
+      return null;
+    }
+
+    return [lon, lat];
+  }
+
+  private updateCountryHighlight(): void {
+    const coordinates = this.getFocusedFeatureCoordinates();
+    this.highlightedCountryFeature = null;
+
+    if (coordinates) {
+      this.highlightedCountryFeature = this.worldCountryFeatures.find((countryFeature: any) => {
+        try {
+          return geoContains(countryFeature, coordinates);
+        }
+        catch {
+          return false;
+        }
+      }) ?? null;
+    }
+
+    if (this.countryHighlightLayer) {
+      this.countryHighlightLayer.clearLayers();
+      if (this.highlightedCountryFeature) {
+        this.countryHighlightLayer.addData(this.highlightedCountryFeature);
+        this.countryHighlightLayer.bringToFront();
+      }
+    }
+  }
+
+  private highlightCountryFeature(feature: any): void {
+    if (!feature) {
+      return;
+    }
+
+    this.highlightedCountryFeature = feature;
+
+    if (this.countryHighlightLayer) {
+      this.countryHighlightLayer.clearLayers();
+      this.countryHighlightLayer.addData(feature);
+      this.countryHighlightLayer.bringToFront();
+    }
+  }
+
+  private clearCountryHighlight(): void {
+    this.highlightedCountryFeature = null;
+
+    if (this.countryHighlightLayer) {
+      this.countryHighlightLayer.clearLayers();
+    }
+  }
+
+  private isSameCountryFeature(left: any, right: any): boolean {
+    if (!left || !right) {
+      return false;
+    }
+
+    const leftId = left?.id ?? left?.properties?.name ?? left?.properties?.iso_a3 ?? left?.properties?.admin;
+    const rightId = right?.id ?? right?.properties?.name ?? right?.properties?.iso_a3 ?? right?.properties?.admin;
+    return String(leftId || '').trim() !== '' && String(leftId) === String(rightId);
   }
 
   private renderAircraftCluster(): void {
@@ -1075,11 +1374,13 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
 
   private focusOnFeature(): void {
     if (!this.leafletMap || !this.L || !this.focusedFeature) {
+      this.updateCountryHighlight();
       return;
     }
     const [lon, lat] = this.focusedFeature.coordinates;
     const currentZoom = this.leafletMap.getZoom();
     this.leafletMap.flyTo([lat, lon], Math.max(currentZoom, 8));
+    this.updateCountryHighlight();
   }
 
   private deltaToZoom(d: number): number {
