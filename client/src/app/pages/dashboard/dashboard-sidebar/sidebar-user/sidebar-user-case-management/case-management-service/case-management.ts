@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from '../../shared/services/api.service';
-import { Case } from '../../shared/model/case-management/case.model';
+import { ApiService } from '../../../../../../shared/services/api.service';
+import { Case } from '../../../../../../shared/model/case-management/case.model';
 
 @Injectable({ providedIn: 'root' })
 export class CaseManagement {

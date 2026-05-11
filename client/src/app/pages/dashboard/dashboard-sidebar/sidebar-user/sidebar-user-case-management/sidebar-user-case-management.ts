@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Case } from '../../../../../shared/model/case-management/case.model';
 import { AddNewCase } from './model/add-new-case/add-new-case';
-import { CaseManagement } from '../../../../../services/case-management/case-management';
+import { CaseManagement } from './case-management-service/case-management';
 
 @Component({
   selector: 'app-sidebar-user-case-management',
@@ -49,7 +49,7 @@ export class SidebarUserCaseManagement implements OnInit {
   }
 
   viewCase(caseId: string): void {
-    const url = this.router.createUrlTree(['/dashboard/profile/case-details'], {
+    const url = this.router.createUrlTree(['/dashboard/profile/case-management/case-details'], {
       queryParams: { caseId: caseId }
     }).toString();
     window.open(url, '_blank');
