@@ -86,13 +86,15 @@
                 </button>
               </div>
             }
-            <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] shadow-[0_8px_24px_rgba(2,6,23,.35)]">
-              <button class="px-3 py-2 text-[11px] font-semibold transition-colors" [ngClass]="selectedLayer === 'esri' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('esri')">Satellite</button>
-              <button class="px-3 py-2 text-[11px] font-semibold transition-colors" [ngClass]="selectedLayer === 'osm' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('osm')">Street</button>
+            <div class="flex items-center gap-2">
+            <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition-opacity" [ngClass]="showTopBar && activeTab === 'threat' ? 'pointer-events-none opacity-50' : 'opacity-100'">
+              <button class="px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed" [disabled]="showTopBar && activeTab === 'threat'" [ngClass]="selectedLayer === 'esri' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('esri')">Satellite</button>
+              <button class="px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed" [disabled]="showTopBar && activeTab === 'threat'" [ngClass]="selectedLayer === 'osm' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('osm')">Street</button>
             </div>
             <button class="map-overlay-menu rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-3 py-2 text-[13px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)]" (click)="togglePanelMenu()">
               <i class="bi bi-list"></i>
             </button>
+          </div>
           </div>
 
           @if (isPanelMenuOpen) {
@@ -106,15 +108,23 @@
                   
                 </div>
               }
-              @for (tab of panelTabs; track tab.id) {
-                <button class="border-b border-white/10 px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text3)] transition-colors last:border-b-0 hover:bg-white/5 hover:text-[var(--color-text1)]" (click)="openPanelPopup(tab.id)">
-                  {{ tab.label }}
+              @if (isThreatView) {
+                <button class="border-b border-white/10 px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text3)] transition-colors last:border-b-0 hover:bg-white/5 hover:text-[var(--color-text1)]" (click)="openThreatFilters()">
+                  Filter
                 </button>
+              } @else {
+                @for (tab of panelTabs; track tab.id) {
+                  <button class="border-b border-white/10 px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text3)] transition-colors last:border-b-0 hover:bg-white/5 hover:text-[var(--color-text1)]" (click)="openPanelPopup(tab.id)">
+                    {{ tab.label }}
+                  </button>
+                }
               }
             </div>
-        } @else if(isThreatView){
+          }
+
+        @if(isThreatView){
           <div class="h-full min-h-0 w-full overflow-y-auto overflow-x-hidden">
-            <app-threat-lens class="block h-full w-full min-h-[560px]"></app-threat-lens>
+            <app-threat-lens class="block h-full w-full min-h-[560px]" [showFilterButton]="false"></app-threat-lens>
           </div>
         }
       </div>

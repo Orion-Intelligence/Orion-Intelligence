@@ -5,19 +5,20 @@
 	<div class="pointer-events-none absolute inset-0 bg-[var(--color-mono)] opacity-25"></div>
 
 	@if (isLoading) {
-		<div class="absolute inset-0 z-30 flex items-center justify-center bg-[var(--color-blue-850)]">
+		<div class="absolute inset-0 z-30 flex items-center justify-center bg-[var(--color-blue-850)]/65 backdrop-blur-sm">
 			<div class="mx-4 flex min-w-[220px] max-w-[360px] flex-col items-center gap-3 rounded-[16px] bg-[var(--color-blue-790)] px-6 py-5 text-center shadow-lg">
 				<div class="h-11 w-11 animate-spin rounded-full border-4 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></div>
 				<div>
 					<p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">Loading Threat Lens</p>
 					<p class="mt-1 text-[12px] text-[var(--color-text3)]">{{ statusMessage }}</p>
 				</div>
-			</div>
+      </div>
 		</div>
 	}
 
-	<div class="absolute left-4 top-4 z-20 flex w-[min(24rem,calc(100%-5rem))] flex-col gap-3 max-[640px]:w-[calc(100%-2rem)] max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:top-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pt-3">
-		<div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-3">
+	<div class="absolute left-4 top-4 bottom-4 z-20 flex w-[min(24rem,calc(100%-5rem))] flex-col gap-3 max-[640px]:w-[calc(100%-2rem)] max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:top-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pt-3">
+		<div class="h-[40px] shrink-0 max-[1100px]:hidden"></div>
+    <div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-3">
 			<div class="flex items-center justify-between gap-3">
 				<p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">Search</p>
 				<button type="button" (click)="togglePanel('search')" [attr.aria-label]="isSearchPanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
@@ -103,14 +104,17 @@
 	</div>
 
 	<div class="absolute right-4 top-4 bottom-4 z-20 flex w-[min(25rem,calc(100%-2rem))] flex-col gap-3 max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:right-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pb-3">
-		<div class="flex justify-end">
-			<label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)] max-[550px]:w-full max-[550px]:justify-center">
-				<img alt="Filter Icon" height="20" src="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
-				<span>Filter</span>
-			</label>
-		</div>
+		@if (showFilterButton) {
+			<div class="flex justify-end">
+				<label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)] max-[550px]:w-full max-[550px]:justify-center">
+					<img alt="Filter Icon" height="20" src="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
+					<span>Filter</span>
+				</label>
+			</div>
+		}
 
 		<div class="min-h-0 flex-1 space-y-3 max-[1100px]:min-h-[unset]">
+      <div class="h-[40px] shrink-0 max-[1100px]:hidden"></div>
 			<div class="flex flex-col overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-sm max-[1100px]:h-auto max-[1100px]:min-h-[280px]" [ngClass]="isNewsPanelCollapsed ? ['h-auto', 'min-h-0'] : ['h-[calc(50%-0.375rem)]', 'min-h-[250px]']">
   <div class="border-b border-[var(--color-border)] px-4 py-3" [ngClass]="{ '!border-b-0': isNewsPanelCollapsed }">
 

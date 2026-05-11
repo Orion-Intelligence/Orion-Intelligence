@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
+import { SidebarService } from '../../shared/services/sidebar.service';
 import { SatelliteIntelService } from './satellite-intel-service';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { GeocodeModalComponent } from './components/geocode-modal/geocode-modal.component';
@@ -127,7 +128,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   @Input() toolbarMode: 'hidden' | 'geo' = 'hidden';
 
-  constructor( public satelliteService: SatelliteIntelService,private orionSatelliteService: OrionSatelliteService, private route: ActivatedRoute ) {
+  constructor( public satelliteService: SatelliteIntelService,private orionSatelliteService: OrionSatelliteService, private route: ActivatedRoute, private sidebarService: SidebarService ) {
     effect(() => {
       const done = this.satelliteService.onDone();
       if (!done) {
@@ -260,6 +261,11 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   togglePanelMenu(): void {
     this.isPanelMenuOpen = !this.isPanelMenuOpen;
+  }
+
+  openThreatFilters(): void {
+    this.sidebarService.openSidebar();
+    this.isPanelMenuOpen = false;
   }
 
   openPanelPopup(id: typeof this.activePanel): void {

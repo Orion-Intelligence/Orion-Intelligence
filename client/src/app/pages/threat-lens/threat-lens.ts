@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ChangeDetectorRef } from '@angular/core';
 import { firstValueFrom, Observable } from 'rxjs';
 import { loadModules, setDefaultOptions } from 'esri-loader';
 import { buildArcPath, buildArcPathPoints, buildCountryFeatureIndex, buildSurfacePath, collectArcPairs, getFeatureAnchor, getArcPointAtProgress } from './threat-lens-map.utils';
@@ -82,7 +83,9 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   isNewsPanelCollapsed = false;
   isArchivePanelCollapsed = false;
 
-  constructor(private ngZone: NgZone, private threatLensService: ThreatLensService, protected sidebarService: SidebarService) {
+  @Input() showFilterButton = true;
+
+  constructor(private ngZone: NgZone, private cdr: ChangeDetectorRef, private threatLensService: ThreatLensService, protected sidebarService: SidebarService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -223,12 +226,15 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   }
 
   private registerClickHandler(): void {
+    console.log('Registering click handler');
     if (!this.view || !this.countryLayer) {
+      console.log('1st return');
       return;
     }
 
     this.mapClickHandle = this.view.on('click', async (event: any) => {
       if (!this.view || !this.countryLayer) {
+        console.log('2nd return');
         return;
       }
 
@@ -242,6 +248,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
           this.selectedCountryBreakdown = [];
           this.statusMessage = 'No country detected at clicked point.';
         });
+        console.log('3rd return');
         return;
       }
 
@@ -255,6 +262,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
         this.statusMessage = name
           ? `${name}: ${countryCount} related threat result(s).`
           : 'Country selected.';
+        this.cdr.detectChanges();
       });
 
       this.applyHighlight(countryGraphic);
@@ -608,11 +616,14 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     this.ngZone.run(() => {
       this.selectedCountryName = countryName;
       this.selectedCountryBreakdown = this.getSelectedCountryBreakdown(countryKey);
+      this.cdr.detectChanges();
     });
 
     if (geometryToFocus) {
       await this.view.goTo(geometryToFocus, { duration: 750, easing: 'ease-in-out' }).then(() => undefined, () => undefined);
     }
+
+
   }
 
   private applyHighlight(graphic: any): void {
