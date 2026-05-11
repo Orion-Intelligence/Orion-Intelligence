@@ -58,7 +58,10 @@ export enum SocialSubCategory {
     MASTODON = 'Mastodon',
     PASTEBIN = 'Pastebin',
     FORUM = 'Forum',
-    REDDIT = 'Reddit'
+    REDDIT = 'Reddit',
+    YOUTUBE = 'YouTube',
+    FACEBOOK = 'Facebook',
+    TIKTOK = 'TikTok'
 }
 export enum ExploitSubCategory {
     ALL = 'All',

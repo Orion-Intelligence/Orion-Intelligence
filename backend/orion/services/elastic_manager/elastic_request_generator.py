@@ -546,6 +546,9 @@ class elastic_request_generator:
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
+        if m_platform and m_platform not in ("", "all"):
+            must_clauses.append({"term": {"m_platform": m_platform}})
+
         if m_safe_search and m_safe_search == True:
             must_not_clause.append({"term": {"m_content_type": "adult"}})
 

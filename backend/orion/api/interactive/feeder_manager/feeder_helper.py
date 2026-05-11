@@ -16,7 +16,7 @@ from orion.services.mongo_manager.shared_model.db_feeder_script_model import db_
 
 class FeederHelper:
     ROOT_SUBCATEGORY = "__root__"
-    MAX_FILE_SIZE = 15 * 1024
+    MAX_FILE_SIZE = 50 * 1024
     model = db_feeder_script_model
     SEED_URL_PATTERN = re.compile(
         r"(?m)^[ \t]*@property[ \t]*\r?\n"

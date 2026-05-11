@@ -119,7 +119,7 @@ class FeederManager:
         if not content:
             raise HTTPException(status_code=400, detail="Uploaded file is empty")
         if len(content) > self._helper.MAX_FILE_SIZE:
-            raise HTTPException(status_code=400, detail="File size must be 15 KB or less")
+            raise HTTPException(status_code=400, detail="File size must be 50 KB or less")
 
         try:
             decoded = content.decode("utf-8")
