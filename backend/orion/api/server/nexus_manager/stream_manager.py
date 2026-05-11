@@ -2,6 +2,7 @@ import asyncio
 import ast
 import json
 import re
+from typing import Any
 
 import httpx
 
@@ -53,17 +54,63 @@ class NexusStreamManager:
         answer = re.sub(r"^(?:it appears that|the result matches(?: the original user query)?[:,]?)\s*", "", answer, flags=re.IGNORECASE)
         return answer.strip()
 
-    async def _stream(self, client: httpx.AsyncClient, endpoint: str, prompt: str, user_id: str, tool: str = "default", type_name: str = "default"):
+    @staticmethod
+    def _clean_history_text(value: Any) -> str:
+        return re.sub(r"\s+", " ", str(value or "")).strip()[:2000]
+
+    @classmethod
+    def _build_history_turns(cls, history: list[dict[str, Any]], limit: int = 4) -> list[dict[str, str]]:
+        turns: list[dict[str, str]] = []
+        pending_message = ""
+
+        for item in history:
+            sender = item.get("sender")
+            if sender == "user":
+                pending_message = cls._clean_history_text(item.get("text"))
+                continue
+            if sender == "bot" and pending_message:
+                response = cls._clean_history_text(item.get("text"))
+                if response:
+                    turns.append({"message": pending_message, "response": response})
+                pending_message = ""
+
+        return turns[-limit:]
+
+    async def get_recent_chat_history(self, current_user) -> list[dict[str, str]]:
+        try:
+            history = await AccountManager.get_instance().get_current_user_chat_history(current_user)
+        except Exception:
+            return []
+        return self._build_history_turns(history.get("chat_history") or [])
+
+    async def _stream(
+        self,
+        client: httpx.AsyncClient,
+        endpoint: str,
+        prompt: str,
+        user_id: str,
+        tool: str = "default",
+        type_name: str = "default",
+        chat_history: list[dict[str, str]] | None = None,
+    ):
         response = None
         answer = ""
         try:
+            arguments: dict[str, Any] = {
+                "prompt": prompt,
+                "user_id": user_id,
+                "tool": tool or "default",
+                "type": type_name or "default",
+            }
+            if chat_history:
+                arguments["chat_history"] = chat_history
             request = client.build_request(
                 "POST",
                 endpoint,
                 json=NexusRpcPayloadModel.tool_call(
                     request_id="nexus-chat",
                     name="ai_chat",
-                    arguments={"prompt": prompt, "user_id": user_id, "tool": tool or "default", "type": type_name or "default"},
+                    arguments=arguments,
                 ).model_dump(),
             )
             response = await client.send(request, stream=True)
@@ -107,14 +154,29 @@ class NexusStreamManager:
             if response is not None:
                 await response.aclose()
 
-    async def stream_response(self, prompt: str, user_id: str, tool: str = "default", type_name: str = "default"):
+    async def stream_response(
+        self,
+        prompt: str,
+        user_id: str,
+        tool: str = "default",
+        type_name: str = "default",
+        chat_history: list[dict[str, str]] | None = None,
+    ):
         endpoint = f"{self.base_url}/mcp"
         client = httpx.AsyncClient(timeout=None)
         current_task = asyncio.current_task()
         if current_task is not None:
             self.active_chat_tasks[user_id] = current_task
         try:
-            async for line, answer, failed, tool_request in self._stream(client, endpoint, prompt, user_id, tool=tool, type_name=type_name):
+            async for line, answer, failed, tool_request in self._stream(
+                client,
+                endpoint,
+                prompt,
+                user_id,
+                tool=tool,
+                type_name=type_name,
+                chat_history=chat_history,
+            ):
                 if line:
                     yield line
                 if failed:
@@ -133,7 +195,14 @@ class NexusStreamManager:
                         f"Relevant data:\n{json.dumps(tool_response, ensure_ascii=True, default=str)}\n\n"
                     )
 
-                    async for summary_line, summary_answer, summary_failed, _ in self._stream(client, endpoint, summary_prompt, user_id, tool="final_summary"):
+                    async for summary_line, summary_answer, summary_failed, _ in self._stream(
+                        client,
+                        endpoint,
+                        summary_prompt,
+                        user_id,
+                        tool="final_summary",
+                        chat_history=chat_history,
+                    ):
                         if summary_line:
                             yield summary_line
                         if summary_failed:

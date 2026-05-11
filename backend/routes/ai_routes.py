@@ -39,7 +39,7 @@ async def ai_enabled_required():
     ],
 )
 async def nexus_chat(payload: ReportChatRequest, current_user=Depends(get_current_user)):
-    response = await nexus_manager.getInstance().parse_chat(payload, user_id=str(current_user.id))
+    response = await nexus_manager.getInstance().parse_chat(payload, user_id=str(current_user.id), current_user=current_user)
     return response
 
 
