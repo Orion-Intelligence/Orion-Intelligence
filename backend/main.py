@@ -26,6 +26,7 @@ from routes.public_api_routes import public_routes
 from routes.tenant_routes import tenant_routes
 from routes.test_routes import test_routes
 from routes.social_routes import social_routes
+from routes.case_routes import case_routes
 
 BASE_DIR = Path(__file__).resolve().parent
 ANGULAR_BUILD_DIR = BASE_DIR / "build"
@@ -79,6 +80,7 @@ app.include_router(ai_routes, include_in_schema=False)
 app.include_router(tenant_routes, include_in_schema=False)
 app.include_router(api_routes)
 app.include_router(social_routes)
+app.include_router(case_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
