@@ -77,11 +77,11 @@
           }
           <div class="absolute right-3 top-3 z-[920] flex items-center gap-2 map-overlay-menu">
             @if (showTopBar) {
-              <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] shadow-[0_8px_24px_rgba(2,6,23,.35)]">
-                <button class="px-3 py-2 text-[11px] font-semibold transition-colors" [ngClass]="activeTab === 'map' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('map')">
+              <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition-opacity" [ngClass]="isThreatToolbarDisabled ? 'opacity-50' : 'opacity-100'">
+                <button class="px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed" [disabled]="isThreatToolbarDisabled" [ngClass]="activeTab === 'map' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('map')">
                   Satellite Map
                 </button>
-                <button class="px-3 py-2 text-[11px] font-semibold transition-colors" [ngClass]="activeTab === 'threat' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('threat')">
+                <button class="px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed" [disabled]="isThreatToolbarDisabled" [ngClass]="activeTab === 'threat' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('threat')">
                   Threat Lens
                 </button>
               </div>
@@ -124,7 +124,7 @@
 
         @if(isThreatView){
           <div class="h-full min-h-0 w-full overflow-y-auto overflow-x-hidden">
-            <app-threat-lens class="block h-full w-full min-h-[560px]" [showFilterButton]="false"></app-threat-lens>
+            <app-threat-lens class="block h-full w-full min-h-[560px]" [showFilterButton]="false" (loadingChange)="onThreatLensLoadingChange($event)"></app-threat-lens>
           </div>
         }
       </div>

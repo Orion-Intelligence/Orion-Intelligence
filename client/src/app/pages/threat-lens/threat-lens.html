@@ -18,7 +18,7 @@
 
 	<div class="absolute left-4 top-4 bottom-4 z-20 flex w-[min(24rem,calc(100%-5rem))] flex-col gap-3 max-[640px]:w-[calc(100%-2rem)] max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:top-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pt-3">
 		<div class="h-[40px] shrink-0 max-[1100px]:hidden"></div>
-    <div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-3">
+    <div class="rounded-[12px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.58)] p-3 shadow-[0_10px_30px_rgba(2,6,23,.24)] backdrop-blur-md [body.light-theme_&]:bg-[rgba(255,255,255,0.25)]">
 			<div class="flex items-center justify-between gap-3">
 				<p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">Search</p>
 				<button type="button" (click)="togglePanel('search')" [attr.aria-label]="isSearchPanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
@@ -74,7 +74,7 @@
 			}
 		</div>
 
-		<div class="w-full rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3 text-[var(--color-text1)] max-[1100px]:w-full">
+		<div class="w-full rounded-[12px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.58)] px-4 py-3 text-[var(--color-text1)] shadow-[0_10px_30px_rgba(2,6,23,.24)] backdrop-blur-md max-[1100px]:w-full [body.light-theme_&]:bg-[rgba(255,255,255,0.25)]">
 			<div class="flex items-center justify-between gap-3">
 				<h2 class="text-[14px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text1)]">Threat Lens</h2>
 				<button type="button" (click)="togglePanel('threat')" [attr.aria-label]="isThreatPanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
@@ -115,7 +115,7 @@
 
 		<div class="min-h-0 flex-1 space-y-3 max-[1100px]:min-h-[unset]">
       <div class="h-[40px] shrink-0 max-[1100px]:hidden"></div>
-			<div class="flex flex-col overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-sm max-[1100px]:h-auto max-[1100px]:min-h-[280px]" [ngClass]="isNewsPanelCollapsed ? ['h-auto', 'min-h-0'] : ['h-[calc(50%-0.375rem)]', 'min-h-[250px]']">
+			<div class="flex flex-col overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.58)] shadow-[0_10px_30px_rgba(2,6,23,.24)] backdrop-blur-md max-[1100px]:h-auto max-[1100px]:min-h-[280px] [body.light-theme_&]:bg-[rgba(255,255,255,0.25)]" [ngClass]="isNewsPanelCollapsed ? ['h-auto', 'min-h-0'] : ['h-[calc(50%-0.375rem)]', 'min-h-[250px]']">
   <div class="border-b border-[var(--color-border)] px-4 py-3" [ngClass]="{ '!border-b-0': isNewsPanelCollapsed }">
 
     <div class="flex items-start justify-between gap-3">
@@ -225,7 +225,7 @@
 
 </div>
 
-			<div class="flex flex-col overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-sm max-[1100px]:h-auto max-[1100px]:min-h-[280px]" [ngClass]=" isArchivePanelCollapsed ? ['h-auto', 'min-h-0'] : ['h-[calc(50%-0.375rem)]', 'min-h-[250px]'] ">
+			<div class="flex flex-col overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.58)] shadow-[0_10px_30px_rgba(2,6,23,.24)] backdrop-blur-md max-[1100px]:h-auto max-[1100px]:min-h-[280px] [body.light-theme_&]:bg-[rgba(255,255,255,0.25)]" [ngClass]=" isArchivePanelCollapsed ? ['h-auto', 'min-h-0'] : ['h-[calc(50%-0.375rem)]', 'min-h-[250px]'] ">
 
   <!-- HEADER -->
   <div class="border-b border-[var(--color-border)] px-4 py-3" [ngClass]="{ '!border-b-0': isArchivePanelCollapsed }">

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, Input, NgZone, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, NgZone, OnDestroy, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChangeDetectorRef } from '@angular/core';
 import { firstValueFrom, Observable } from 'rxjs';
@@ -84,6 +84,8 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   isArchivePanelCollapsed = false;
 
   @Input() showFilterButton = true;
+
+  @Output() loadingChange = new EventEmitter<boolean>();
 
   constructor(private ngZone: NgZone, private cdr: ChangeDetectorRef, private threatLensService: ThreatLensService, protected sidebarService: SidebarService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
@@ -219,7 +221,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     catch (error) {
       console.error('Failed to initialize threat lens map', error);
       this.ngZone.run(() => {
-        this.isLoading = false;
+        this.setLoading(false);
         this.statusMessage = 'Failed to initialize threat lens map.';
       });
     }
@@ -295,7 +297,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     this.activeArcCountryFilterKey = this.getSearchedCountryKey(activeQuery);
 
     this.ngZone.run(() => {
-      this.isLoading = true;
+      this.setLoading(true);
       this.statusMessage = activeQuery
         ? `Searching threat lens results for "${activeQuery}"...`
         : 'Loading complete threat lens dataset...';
@@ -335,7 +337,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
         this.statusMessage = activeQuery
           ? `Failed to load threat lens data for "${activeQuery}" from /api/threat/lens.`
           : 'Failed to load threat lens data from /api/threat/lens.';
-        this.isLoading = false;
+        this.setLoading(false);
       });
       return;
     }
@@ -392,7 +394,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
 
       if (!mostActive) {
         this.statusMessage = `Loaded ${stats.totalResults} records${queryLabel}, but no country metadata was found.`;
-        this.isLoading = false;
+        this.setLoading(false);
         return;
       }
 
@@ -403,7 +405,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
         : this.activeArcCountryFilterKey
           ? `Loaded ${stats.totalResults} records${queryLabel}, but no arc connections were found for ${this.selectedCountryName || activeQuery}.`
           : `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries, but no multi-country co-occurrence was found for arcs.`;
-      this.isLoading = false;
+      this.setLoading(false);
     });
 
     if (this.activeArcCountryFilterKey) {
@@ -411,6 +413,15 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     }
 
     this.restartFeedAutoScroll();
+  }
+
+  private setLoading(value: boolean): void {
+    if (this.isLoading === value) {
+      return;
+    }
+
+    this.isLoading = value;
+    this.loadingChange.emit(value);
   }
 
   private async renderCountryArcs(categoryData: ThreatLensCategoryMapData[]): Promise<{

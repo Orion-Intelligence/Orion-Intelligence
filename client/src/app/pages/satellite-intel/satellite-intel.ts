@@ -120,6 +120,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   isTrackingDropdownOpen = false;
   isPanelMenuOpen = false;
   isPanelPopupOpen = false;
+  isThreatLensLoading = false;
   isScanning = computed(() =>
     !!this.pendingRequest && !this.satelliteService.onError(),);
   isAircraftLoading: boolean = false;
@@ -244,9 +245,22 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   onLayerChange(): void { /* handled by map-section input */ }
 
   setActiveView(view: 'map' | 'threat'): void {
+    if (this.isThreatToolbarDisabled) {
+      return;
+    }
+
     this.activeTab = view;
+    this.isThreatLensLoading = view === 'threat';
     this.isPanelMenuOpen = false;
     this.isPanelPopupOpen = false;
+  }
+
+  get isThreatToolbarDisabled(): boolean {
+    return this.isThreatView && this.isThreatLensLoading;
+  }
+
+  onThreatLensLoadingChange(isLoading: boolean): void {
+    this.isThreatLensLoading = isLoading;
   }
 
   get activePanelLabel(): string {
