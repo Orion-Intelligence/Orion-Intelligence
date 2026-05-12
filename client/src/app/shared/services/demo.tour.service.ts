@@ -55,7 +55,9 @@ export class DemoTourService {
         demo_tour: true
       }
     }));
-    this.updateUser();
+    if(this.appService.userSessionData().user.role !== 'demo') {
+      this.updateUser();
+    }
     this.currentStepIndex.next(-1);
   }
 
