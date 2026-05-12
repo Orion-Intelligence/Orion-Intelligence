@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { EntityDetailsComponent } from '../entity-details/entity-details';
-import { CaseManagement } from '../../../../../../../services/case-management/case-management';
+import { CaseManagement } from '../../case-management-service/case-management';
 
 @Component({
   selector: 'app-add-new-case',
