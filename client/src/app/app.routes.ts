@@ -798,13 +798,18 @@ export const routes: Routes = [
           },
           {
             path: 'case-management',
-            loadComponent: loadSidebarUserCaseManagement,
-            data: { type: 'case-management', animation: 'CategoryPage' }
-          },
-          {
-            path: 'case-details',
-            loadComponent: loadCaseDetailsComponent,
-            data: { type: 'case-details', animation: 'CaseDetailsPage' }
+            data: { type: 'case-management', animation: 'CategoryPage' },
+            children: [
+              {
+                path: '',
+                loadComponent: loadSidebarUserCaseManagement
+              },
+              {
+                path: 'case-details',
+                loadComponent: loadCaseDetailsComponent,
+                data: { type: 'case-details', animation: 'CaseDetailsPage' }
+              }
+            ]
           },
           {
             path: 'alerts',

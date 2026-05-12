@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EntityDetailsComponent } from '../entity-details/entity-details';
 import { Case } from '../../../../../../../shared/model/case-management/case.model';
-import { CaseManagement } from '../../../../../../../services/case-management/case-management';
+import { CaseManagement } from '../../case-management-service/case-management';
 
 @Component({
   selector: 'app-case-details',
@@ -25,6 +25,7 @@ export class CaseDetails implements OnInit {
   constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement) { }
 
   ngOnInit(): void {
+    console.log('Loading case details...');
     this.loadCaseDetails();
   }
 

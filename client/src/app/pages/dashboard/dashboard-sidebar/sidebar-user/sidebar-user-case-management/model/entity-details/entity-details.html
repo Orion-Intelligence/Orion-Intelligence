@@ -17,7 +17,7 @@
         <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">
             Entity Name <span class="text-red-500">*</span>
         </label>
-        <input type="text" [(ngModel)]="entity.name" [name]="'entityName-' + entityIndex" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Enter entity name" />
+        <input type="text" [(ngModel)]="entity.name" [name]="'entityName-' + entityIndex" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] outline-none focus:border-sky-400/40" placeholder="Enter entity name" />
     </div>
 
     <!-- Social Media Profiles -->
@@ -31,13 +31,13 @@
         @for (profile of entity.socialMediaProfiles; track $index; let i = $index) {
         <div class="mb-3">
             <div class="flex gap-3 mb-1">
-                <select [(ngModel)]="profile.platform" [name]="'platform-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                <select [(ngModel)]="profile.platform" [name]="'platform-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] outline-none focus:border-sky-400/40">
                     <option value="">Select Platform</option>
                     @for (platform of socialMediaPlatforms; track platform) {
                     <option [value]="platform">{{ platform }}</option>
                     }
                 </select>
-                <input type="text" [(ngModel)]="profile.username" [name]="'username-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Username" />
+                <input type="text" [(ngModel)]="profile.username" [name]="'username-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] outline-none focus:border-sky-400/40" placeholder="Username" />
                 <button type="button" (click)="removeSocialMedia(i)" class="text-red-400 hover:text-red-300">
                     <i class="bi bi-trash3"></i>
                 </button>
@@ -60,7 +60,7 @@
         @for (url of entity.webUrls; track $index; let i = $index) {
         <div class="mb-3">
             <div class="flex gap-3 mb-1">
-                <input type="url" [(ngModel)]="entity.webUrls[i]" [name]="'url-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="https://example.com" />
+                <input type="url" [(ngModel)]="entity.webUrls[i]" [name]="'url-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] outline-none focus:border-sky-400/40" placeholder="https://example.com" />
                 <button type="button" (click)="removeWebUrl(i)" class="text-red-400 hover:text-red-300">
                     <i class="bi bi-trash3"></i>
                 </button>
@@ -83,7 +83,7 @@
         @for (email of entity.emails; track $index; let i = $index) {
         <div class="mb-3">
             <div class="flex gap-3 mb-1">
-                <input type="email" [(ngModel)]="entity.emails[i]" [name]="'email-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="email@example.com" />
+                <input type="email" [(ngModel)]="entity.emails[i]" [name]="'email-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] outline-none focus:border-sky-400/40" placeholder="email@example.com" />
                 <button type="button" (click)="removeEmail(i)" class="text-red-400 hover:text-red-300">
                     <i class="bi bi-trash3"></i>
                 </button>
@@ -106,7 +106,7 @@
         @for (phone of entity.phoneNumbers; track $index; let i = $index) {
         <div class="mb-3">
             <div class="flex gap-3 mb-1">
-                <input type="tel" [(ngModel)]="entity.phoneNumbers[i]" [name]="'phone-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="+1 (555) 000-0000" />
+                <input type="tel" [(ngModel)]="entity.phoneNumbers[i]" [name]="'phone-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] outline-none focus:border-sky-400/40" placeholder="+1 (555) 000-0000" />
                 <button type="button" (click)="removePhoneNumber(i)" class="text-red-400 hover:text-red-300">
                     <i class="bi bi-trash3"></i>
                 </button>
@@ -129,13 +129,13 @@
         @for (identifier of entity.additionalIdentifiers; track $index; let i = $index) {
         <div class="mb-3">
             <div class="flex gap-3 mb-1">
-                <select [(ngModel)]="identifier.type" [name]="'idType-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                <select [(ngModel)]="identifier.type" [name]="'idType-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] outline-none focus:border-sky-400/40">
                     <option value="">Select Type</option>
                     @for (type of identifierTypes; track type) {
                     <option [value]="type">{{ type }}</option>
                     }
                 </select>
-                <input type="text" [(ngModel)]="identifier.value" [name]="'idValue-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[#131e30] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Value" />
+                <input type="text" [(ngModel)]="identifier.value" [name]="'idValue-' + entityIndex + '-' + i" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] outline-none focus:border-sky-400/40" placeholder="Value" />
                 <button type="button" (click)="removePhoneNumber(i)" class="text-red-400 hover:text-red-300">
                     <i class="bi bi-trash3"></i>
                 </button>
