@@ -29,8 +29,6 @@ from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus,
 from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
 from orion.services.stix_manager.stix_manager import stix_manager
 from routes.docs.docs import CRYPTO_DOCS, CROSS_SEARCH_DOCS, DYNAMIC_DOCS, REPORT_DOCS, SEARCH_DOCS, SUPPORT_METHOD_DOCS, SYSTEM_INFO_DOCS
-from orion.api.interactive.case_manager.case_manager import CaseManager
-from orion.api.interactive.case_manager.models.case_models import CreateCaseRequest
 
 api_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 SCAN_ROLE_DEPS = [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
