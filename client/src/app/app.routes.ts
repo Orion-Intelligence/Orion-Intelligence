@@ -499,19 +499,7 @@ export const routes: Routes = [
             data: { type: 'social', animation: 'DataBreach' }
           },
           {
-            path: 'youtube',
-            loadComponent: loadDashboardResultContainer,
-            pathMatch: 'full',
-            data: { type: 'social', animation: 'DataBreach' }
-          },
-          {
             path: 'facebook',
-            loadComponent: loadDashboardResultContainer,
-            pathMatch: 'full',
-            data: { type: 'social', animation: 'DataBreach' }
-          },
-          {
-            path: 'tiktok',
             loadComponent: loadDashboardResultContainer,
             pathMatch: 'full',
             data: { type: 'social', animation: 'DataBreach' }
