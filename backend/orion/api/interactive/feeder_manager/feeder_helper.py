@@ -40,11 +40,18 @@ class FeederHelper:
     def sanitize_file_name(file_name: str) -> str:
         suffix = Path(file_name).suffix.lower()
         stem = Path(file_name).stem
-        stem = re.sub(r"[^A-Za-z0-9_-]+", "-", stem).strip("-_").lower()
+        stem = re.sub(r"[^A-Za-z0-9_-]+", "-", stem).strip("-").lower()
         safe_stem = stem[:64] or "script"
         if not safe_stem.startswith("_"):
             safe_stem = f"_{safe_stem}"
         return f"{safe_stem}{suffix or '.py'}"
+
+    @staticmethod
+    def sanitize_support_file_name(script_name: str, file_name: str) -> str:
+        suffix = Path(file_name).suffix.lower()
+        stem = Path(script_name).stem
+        stem = re.sub(r"[^A-Za-z0-9_-]+", "-", stem).strip("-").lower()
+        return f"{stem[:64] or 'script'}_session{suffix}"
 
     def resolve_target_dir(self, category_key: str, subcategory_key: str) -> Path:
         base_dir = self._parser_root / category_key
@@ -224,7 +231,7 @@ class FeederHelper:
         except Exception as exc:
             raise HTTPException(status_code=500, detail="Failed to decrypt feeder script") from exc
 
-    async def process_upload(self, rule_key: str, category_key: str, subcategory_key: str, file_name: str, content: str, current_user, url: str | None = None) -> FeederScriptItem:
+    async def process_upload(self, rule_key: str, category_key: str, subcategory_key: str, file_name: str, content: str, current_user, url: str | None = None, session_file_name: str | None = None, session_content: bytes | None = None) -> FeederScriptItem:
         target_dir = self.resolve_target_dir(category_key, subcategory_key)
         target_dir.mkdir(parents=True, exist_ok=True)
 
@@ -241,6 +248,8 @@ class FeederHelper:
             raise HTTPException(status_code=409, detail="Script owner already exists")
 
         target_path.write_bytes(encrypted_content.encode())
+        if session_file_name and session_content:
+            (target_dir / self.sanitize_support_file_name(target_name, session_file_name)).write_bytes(session_content)
 
         if existing:
             existing.rule_key = rule_key
@@ -341,6 +350,25 @@ class FeederHelper:
 
         return None
 
+    @staticmethod
+    def session_file_name(target_path: Path) -> str | None:
+        if not target_path.is_file():
+            return None
+        exact_match = target_path.parent / f"{target_path.stem}_session"
+        if exact_match.is_file():
+            return exact_match.name
+        matches = sorted(target_path.parent.glob(f"{target_path.stem}_session.*"))
+        if matches:
+            return matches[0].name
+        if target_path.stem.startswith("_"):
+            legacy_stem = target_path.stem.lstrip("_")
+            legacy_exact_match = target_path.parent / f"{legacy_stem}_session"
+            if legacy_exact_match.is_file():
+                return legacy_exact_match.name
+            legacy_matches = sorted(target_path.parent.glob(f"{legacy_stem}_session.*"))
+            return legacy_matches[0].name if legacy_matches else None
+        return None
+
     async def to_script_item(self, record: db_feeder_script_model) -> FeederScriptItem:
         target_path = self.resolve_record_file_path(record)
         metadata = self.path_metadata(record, target_path)
@@ -356,6 +384,7 @@ class FeederHelper:
             category_key=str(metadata["category_key"]) if has_file else "",
             subcategory_key=str(metadata["subcategory_key"]) if has_file else self.ROOT_SUBCATEGORY,
             path=str(Path(metadata["relative_path"]).parent.as_posix()) if has_file and "/" in str(metadata["relative_path"]) else "",
+            session_file_name=self.session_file_name(target_path),
             content=content,
             url=record.url,
             values=[

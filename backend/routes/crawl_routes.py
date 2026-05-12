@@ -124,8 +124,9 @@ async def upload_feeder_script(
         mode: str = Form(...),
         values_text: str | None = Form(None),
         file: UploadFile | None = File(None),
+        session_file: UploadFile | None = File(None),
         current_user=Depends(get_current_user)):
-    return await FeederManager.get_instance().upload_script(rule_key, mode, file, values_text, current_user)
+    return await FeederManager.get_instance().upload_script(rule_key, mode, file, values_text, session_file, current_user)
 
 
 @crawl_routes.post(

@@ -36,6 +36,7 @@ class FeederScriptItem(BaseModel):
     category_key: str
     subcategory_key: str
     path: str | None = None
+    session_file_name: str | None = None
     content: str | None = None
     url: str | None = None
     values: List[FeederValueItem] = Field(default_factory=list)

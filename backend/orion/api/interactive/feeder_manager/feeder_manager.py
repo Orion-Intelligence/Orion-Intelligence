@@ -81,7 +81,7 @@ class FeederManager:
             has_more=(skip + len(scripts)) < total,
         )
 
-    async def upload_script(self, rule_key: str, mode: str, file: UploadFile | None, values_text: str | None, current_user) -> FeederUploadResponse:
+    async def upload_script(self, rule_key: str, mode: str, file: UploadFile | None, values_text: str | None, session_file: UploadFile | None, current_user) -> FeederUploadResponse:
         rule = constant.url_rules.get(rule_key)
         if not rule:
             raise HTTPException(status_code=400, detail="Invalid rule")
@@ -112,6 +112,22 @@ class FeederManager:
             raise HTTPException(status_code=400, detail="Invalid upload mode")
         if rule_type == "generic":
             raise HTTPException(status_code=400, detail="Generic rules only support URL value uploads")
+        if session_file and not file:
+            records = await self._engine.find(
+                self._helper.model,
+                self._helper.script_query(current_user, rule_key),
+            )
+            scripts = self._helper.filter_records(records, "scripts")
+            if not scripts:
+                raise HTTPException(status_code=400, detail="Upload the parser file before adding session")
+            content = await session_file.read()
+            if not content:
+                raise HTTPException(status_code=400, detail="Uploaded session file is empty")
+            target_path = self._helper.resolve_record_file_path(scripts[0])
+            target_dir = target_path.parent if target_path.is_file() else self._helper.resolve_target_dir(*self._helper.rule_path_parts(rule.get("path")))
+            script_name = target_path.name if target_path.is_file() else scripts[0].name
+            (target_dir / self._helper.sanitize_support_file_name(script_name, session_file.filename or "session")).write_bytes(content)
+            return FeederUploadResponse(message="Session file uploaded successfully", script=await self._helper.to_script_item(scripts[0]))
         if not file or not file.filename or not file.filename.lower().endswith(".py"):
             raise HTTPException(status_code=400, detail="Only Python files are allowed")
 
@@ -141,6 +157,8 @@ class FeederManager:
             content=decoded,
             current_user=current_user,
             url=seed_url if rule_type == "unique" else None,
+            session_file_name=session_file.filename if session_file else None,
+            session_content=await session_file.read() if session_file else None,
         )
         return FeederUploadResponse(
             message="Feeder script uploaded successfully",
