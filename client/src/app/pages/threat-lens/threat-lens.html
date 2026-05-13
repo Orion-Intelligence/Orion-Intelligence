@@ -1,4 +1,4 @@
-<section class="ui-consolidated-theme relative h-full min-h-[560px] overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-850)] max-[1100px]:min-h-[640px] max-[1100px]:overflow-y-auto">
+<section class="ui-consolidated-theme relative h-full min-h-[560px] overflow-hidden border border-[var(--color-border)] bg-[var(--color-blue-850)] max-[1100px]:min-h-[640px] max-[1100px]:overflow-y-auto">
 
 	<div #mapViewNode class="h-full w-full max-[1100px]:h-[52vh] max-[1100px]:min-h-[320px]"></div>
 
@@ -103,7 +103,7 @@
 		</div>
 	</div>
 
-	<div class="absolute right-4 top-4 bottom-4 z-20 flex w-[min(25rem,calc(100%-2rem))] flex-col gap-3 max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:right-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pb-3">
+	<div class="absolute right-4 top-4 bottom-4 z-20 flex w-[min(25rem,calc(100%-2rem))] flex-col gap-0 max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:right-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pb-3">
 		@if (showFilterButton) {
 			<div class="flex justify-end">
 				<label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)] max-[550px]:w-full max-[550px]:justify-center">
@@ -114,7 +114,7 @@
 		}
 
 		<div class="min-h-0 flex-1 space-y-3 max-[1100px]:min-h-[unset]">
-      <div class="h-[40px] shrink-0 max-[1100px]:hidden"></div>
+      <div class="shrink-0 max-[1100px]:hidden" [ngClass]="{ 'h-[40px]': !showFilterButton }"></div>
 			<div class="flex flex-col overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.58)] shadow-[0_10px_30px_rgba(2,6,23,.24)] backdrop-blur-md max-[1100px]:h-auto max-[1100px]:min-h-[280px] [body.light-theme_&]:bg-[rgba(255,255,255,0.25)]" [ngClass]="isNewsPanelCollapsed ? ['h-auto', 'min-h-0'] : ['h-[calc(50%-0.375rem)]', 'min-h-[250px]']">
   <div class="border-b border-[var(--color-border)] px-4 py-3" [ngClass]="{ '!border-b-0': isNewsPanelCollapsed }">
 

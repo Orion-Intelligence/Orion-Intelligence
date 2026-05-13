@@ -59,6 +59,9 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   private allNewsFeedItems: ThreatLensDisplayFeedItem[] = [];
   private allArchiveFeedItems: ThreatLensDisplayFeedItem[] = [];
   private destroyed = false;
+  private hoverHighlightHandle: { remove: () => void } | null = null;
+private hoverTooltipEl: HTMLDivElement | null = null;
+private hoveredCountryKey = '';
 
   protected readonly filterModel: FilterModel = threat_lens_filters;
   protected readonly feedRanges: Array<{ key: ThreatLensFeedRange; label: string }> = [{ key: '1d', label: '1 Day' }, { key: '7d', label: '1 Week' }, { key: 'all', label: 'All Time' }];
@@ -110,6 +113,13 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
 
     this.stopFeedAutoScroll('news');
     this.stopFeedAutoScroll('archive');
+
+    this.clearHoverHighlight();
+
+if (this.hoverTooltipEl) {
+  this.hoverTooltipEl.remove();
+  this.hoverTooltipEl = null;
+}
   }
 
   async onSearch(): Promise<void> {
@@ -154,22 +164,48 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       this.webMercatorUtils = webMercatorUtils;
 
       this.countryLayer = new FeatureLayer({
-        url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries_(Generalized)/FeatureServer/0',
-        outFields: ['*'],
-        popupEnabled: false,
-        opacity: 1,
-        renderer: {
-          type: 'simple',
-          symbol: {
-            type: 'simple-fill',
-            color: [29, 45, 71, 1],
-            outline: {
-              color: [255, 255, 255, 0.1],
-              width: 0.8,
-            },
-          },
-        },
-      });
+  url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries_(Generalized)/FeatureServer/0',
+  outFields: ['*'],
+  popupEnabled: false,
+  opacity: 1,
+
+  renderer: {
+    type: 'simple',
+    symbol: {
+      type: 'simple-fill',
+      color: [29, 45, 71, 1],
+      outline: {
+        color: [255, 255, 255, 0.1],
+        width: 0.8,
+      },
+    },
+  },
+
+  labelsVisible: true,
+
+  labelingInfo: [
+    {
+      labelExpressionInfo: {
+        expression: '$feature.COUNTRY'
+      },
+
+      symbol: {
+        type: 'text',
+        color: 'white',
+
+        haloColor: 'black',
+        haloSize: 1.5,
+
+        font: {
+          size: 10,
+          family: 'Arial',
+        }
+      },
+
+      labelPlacement: 'always-horizontal'
+    }
+  ]
+});
 
       this.newsGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens Intensity' });
       this.arcGraphicsLayer = new GraphicsLayer({
@@ -183,7 +219,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       this.arcSurfaceGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens Country Arc Connectors' });
 
       const map = new EsriMap({
-        basemap: 'oceans',
+        basemap: 'dark-gray-vector',
         ground: 'world-elevation',
         layers: [this.countryLayer, this.newsGraphicsLayer, this.arcSurfaceGraphicsLayer, this.arcGraphicsLayer, this.animatedArcGraphicsLayer],
       });
@@ -204,6 +240,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       });
 
       await this.view.when();
+      this.createTooltip();
       if (this.destroyed) {
         return;
       }
@@ -216,6 +253,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       }
 
       this.registerClickHandler();
+      this.registerHoverHandler();
       await this.loadThreatLensData('');
     }
     catch (error) {
@@ -276,6 +314,219 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  private registerHoverHandler(): void {
+  if (!this.view || !this.countryLayer) {
+    return;
+  }
+this.clearHighlight();
+  this.view.on('pointer-move', async (event: any) => {
+    if (!this.view || !this.countryLayer) {
+      return;
+    }
+
+    const hit = await this.view.hitTest(event, {
+      include: [this.countryLayer]
+    });
+
+    const countryGraphic = hit.results.find(
+      (result: any) => result.graphic?.layer === this.countryLayer
+    )?.graphic;
+
+    if (!countryGraphic) {
+      this.clearHoverHighlight();
+      this.hideTooltip();
+      return;
+    }
+
+    const countryName = this.extractCountryName(countryGraphic.attributes);
+    const countryKey = this.toCountryKey(countryName);
+
+    // Prevent unnecessary rerender
+  if (this.hoveredCountryKey === countryKey) {
+  this.moveTooltip(event);
+  return;
+}
+
+    this.hoveredCountryKey = countryKey;
+
+    this.clearHoverHighlight();
+
+    this.hoverHighlightHandle =
+      this.countryLayerView?.highlight(countryGraphic);
+
+    const threatCount =
+  this.countryNewsCountByKey.get(countryKey) || 0;
+
+  const breakdown = this.getSelectedCountryBreakdown(countryKey);
+
+  this.showTooltip(event,countryName,threatCount, breakdown);
+});
+}
+private clearHoverHighlight(): void {
+  if (this.hoverHighlightHandle) {
+    this.hoverHighlightHandle.remove();
+    this.hoverHighlightHandle = null;
+  }
+
+  this.hoveredCountryKey = '';
+}
+private createTooltip(): void {
+  if (!this.isBrowserEnvironment()) {
+    return;
+  }
+
+  this.hoverTooltipEl = document.createElement('div');
+
+  
+
+this.hoverTooltipEl.style.boxShadow = '0 0 24px rgba(0,224,255,0.18)';
+
+
+
+  this.hoverTooltipEl.style.position = 'fixed';
+  this.hoverTooltipEl.style.zIndex = '9999';
+
+  this.hoverTooltipEl.style.padding = '6px 10px';
+  this.hoverTooltipEl.style.borderRadius = '8px';
+
+  // this.hoverTooltipEl.style.background = 'rgba(10,15,25,0.92)';
+  this.hoverTooltipEl.style.background ='linear-gradient(180deg, rgba(7,12,22,0.97), rgba(2,6,14,0.98))';
+  this.hoverTooltipEl.style.color = '#fff';
+
+  this.hoverTooltipEl.style.fontSize = '12px';
+  this.hoverTooltipEl.style.fontWeight = '600';
+
+  this.hoverTooltipEl.style.pointerEvents = 'none';
+
+  // this.hoverTooltipEl.style.border = '1px solid rgba(255,255,255,0.15)';
+  this.hoverTooltipEl.style.border ='1px solid rgba(0,224,255,0.15)';
+
+  this.hoverTooltipEl.style.backdropFilter = 'blur(8px)';
+
+  this.hoverTooltipEl.style.display = 'none';
+
+  document.body.appendChild(this.hoverTooltipEl);
+}
+private showTooltip(event: any,
+  countryName: string,
+  threatCount: number,
+  breakdown: SelectedCountryCategoryCount[]
+): void {
+
+  if (!this.hoverTooltipEl) {
+    return;
+  }
+
+  const breakdownHtml = breakdown.map(item => `
+    
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:6px;
+      gap:14px;
+    ">
+
+      <div style="
+        display:flex;
+        align-items:center;
+        gap:8px;
+      ">
+
+        <div style="
+          width:8px;
+          height:8px;
+          border-radius:50%;
+          background:${item.colorHex};
+          box-shadow:0 0 8px ${item.colorHex};
+        "></div>
+
+        <span style="
+          color:rgba(255,255,255,0.82);
+          font-size:11px;
+        ">
+          ${item.label}
+        </span>
+
+      </div>
+
+      <span style="
+        color:white;
+        font-size:12px;
+        font-weight:700;
+      ">
+        ${item.count}
+      </span>
+
+    </div>
+
+  `).join('');
+
+  this.hoverTooltipEl.innerHTML = `
+
+    <div style="
+      min-width:180px;
+    ">
+
+      <div style="
+        font-size:14px;
+        font-weight:700;
+        color:#ffffff;
+        margin-bottom:10px;
+      ">
+        ${countryName}
+      </div>
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:10px;
+        padding-bottom:8px;
+        border-bottom:1px solid rgba(255,255,255,0.08);
+      ">
+
+        <span style="
+          color:rgba(255,255,255,0.7);
+          font-size:11px;
+        ">
+          Total Threats
+        </span>
+
+        <span style="
+          color:#00e0ff;
+          font-size:14px;
+          font-weight:700;
+          text-shadow:0 0 12px rgba(0,224,255,0.7);
+        ">
+          ${threatCount}
+        </span>
+
+      </div>
+
+      ${breakdownHtml}
+
+    </div>
+
+  `;
+
+  this.hoverTooltipEl.style.display = 'block';
+
+  this.moveTooltip(event);
+}
+private moveTooltip(event: any): void {
+  if (!this.hoverTooltipEl) {
+    return;
+  }
+
+  this.hoverTooltipEl.style.left = `${event.x - 16}px`;
+  this.hoverTooltipEl.style.top = `${event.y - 16}px`;
+}
+private hideTooltip(): void {
+  if (this.hoverTooltipEl) {
+    this.hoverTooltipEl.style.display = 'none';
+  }
+}
   private async buildCountryFeatureIndex(): Promise<void> {
     if (!this.countryLayer) {
       return;
