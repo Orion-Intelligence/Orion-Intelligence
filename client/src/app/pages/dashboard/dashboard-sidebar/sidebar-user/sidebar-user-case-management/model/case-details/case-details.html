@@ -1,0 +1,506 @@
+<div class="w-full max-w-[2400px] rounded-[12px] p-5">
+    @if (isLoading) {
+    <div class="ui-page-container flex min-h-[70vh] items-center justify-center p-5">
+        <div class="text-center">
+            <div class="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-sky-400"></div>
+            <p class="text-[var(--color-text4)]">Loading case details...</p>
+        </div>
+    </div>
+    } @else if (caseData) {
+
+    <div class="ui-page-container p-5">
+
+        <!-- Header -->
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-4 ml-[6px]">
+                <div>
+                    <h1 class="ui-page-title">Case {{ caseData.caseId }}</h1>
+                    <p class="ui-page-description">
+                        Manage and review case information, entities, and linked investigations.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                @if (!isEditing) {
+                <button (click)="enableEditing()" class="ui-btn ui-btn-primary">
+                    <i class="bi bi-pencil"></i>
+                    Edit
+                </button>
+                } @else {
+
+                <button (click)="saveChanges()" class="ui-btn bg-green-600 text-white hover:bg-green-700">
+                    <i class="bi bi-check-circle"></i>
+                    Save Changes
+                </button>
+
+                <button (click)="cancelEditing()" class="ui-btn border border-[var(--color-border)] bg-[var(--color-blue-820)] text-[var(--color-text2)] hover:bg-[var(--tenant-chip-hover)]">
+                    <i class="bi bi-x-circle"></i>
+                    Cancel
+                </button>
+
+                }
+            </div>
+        </div>
+
+        <div class="my-5 hidden h-px w-full bg-[var(--color-divider)] md:block"></div>
+
+        <div class="space-y-5">
+
+            <!-- Case Details -->
+            <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-5">
+                <div class="mb-4 flex items-center gap-2">
+                    <i class="bi bi-file-text text-sky-400 text-lg"></i>
+                    <h2 class="text-[19px] font-bold text-[var(--color-text1)]">
+                        Case Details
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+                    <!-- Case ID -->
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Case ID
+                        </label>
+
+                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm text-[var(--color-text1)]">
+                            {{ caseData.caseId }}
+                        </div>
+                    </div>
+
+                    <!-- Case Type -->
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Case Type
+                        </label>
+
+                        @if (isEditing) {
+                        <select [(ngModel)]="editedCase!.caseType" name="caseType" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none">
+                            @for (type of caseTypeOptions; track type) {
+                            <option [value]="type">{{ type }}</option>
+                            }
+                        </select>
+                        } @else {
+                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm text-[var(--color-text1)]">
+                            {{ caseData.caseType }}
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Officer -->
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Officer Name
+                        </label>
+
+                        @if (isEditing) {
+                        <input type="text" [(ngModel)]="editedCase!.owner" name="owner" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" />
+                        } @else {
+                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm text-[var(--color-text1)]">
+                            {{ caseData.owner }}
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Priority -->
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Priority
+                        </label>
+
+                        @if (isEditing) {
+                        <select [(ngModel)]="editedCase!.priority" name="priority" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none">
+                            @for (p of priorityOptions; track p) {
+                            <option [value]="p" class="capitalize">{{ p }}</option>
+                            }
+                        </select>
+                        } @else {
+                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2">
+                            <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getPriorityBadgeClass(caseData.priority)">
+                                {{ caseData.priority }}
+                            </span>
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Status -->
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Status
+                        </label>
+
+                        @if (isEditing) {
+                        <select [(ngModel)]="editedCase!.status" name="status" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none">
+                            @for (s of statusOptions; track s) {
+                            <option [value]="s" class="capitalize">{{ s }}</option>
+                            }
+                        </select>
+                        } @else {
+                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2">
+                            <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(caseData.status)">
+                                {{ caseData.status }}
+                            </span>
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Created -->
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Created Date
+                        </label>
+
+                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm text-[var(--color-text1)]">
+                            {{ getFormattedDateTime(caseData.createdDate) }}
+                        </div>
+                    </div>
+
+                    <!-- Modified -->
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Modified Date
+                        </label>
+
+                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm text-[var(--color-text1)]">
+                            {{ getFormattedDateTime(caseData.modifiedDate) }}
+                        </div>
+                    </div>
+
+                    <!-- Intake Source -->
+                    <div class="space-y-1 md:col-span-2">
+                        <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Intake Source
+                        </label>
+
+                        @if (isEditing) {
+                        <input type="text" [(ngModel)]="editedCase!.intakeSource" name="intakeSource" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" />
+                        } @else {
+                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm text-[var(--color-text1)]">
+                            {{ caseData.intakeSource }}
+                        </div>
+                        }
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Primary Entity -->
+            <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-5">
+                <div class="mb-4 flex items-center gap-2">
+                    <i class="bi bi-person text-violet-400 text-lg"></i>
+                    <h2 class="text-[19px] font-bold text-[var(--color-text1)]">
+                        Primary Entity
+                    </h2>
+                </div>
+
+                <div class="space-y-4">
+
+                    <!-- Entity Name -->
+                    <div>
+                        <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Entity Name
+                        </label>
+
+                        @if (isEditing) {
+                        <input type="text" [(ngModel)]="editedCase!.entityName" name="entityName" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" />
+                        } @else {
+                        <div class="mt-1 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm text-[var(--color-text1)]">
+                            {{ caseData.entityName }}
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Social Media -->
+                    @if ((caseData.socialMediaProfiles?.length || 0) > 0) {
+                    <div>
+                        <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Social Media Profiles
+                        </div>
+
+                        <div class="flex flex-wrap gap-2">
+                            @for (profile of caseData.socialMediaProfiles; track $index) {
+                            <div class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs">
+                                <span class="font-semibold text-sky-400">{{ profile.platform }}</span>
+                                <span class="ml-1 text-[var(--color-text2)]">{{ profile.username }}</span>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                    }
+
+                    <!-- URLs -->
+                    @if ((caseData.webUrls?.length || 0) > 0) {
+                    <div>
+                        <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Web URLs
+                        </div>
+
+                        <div class="space-y-2">
+                            @for (url of caseData.webUrls; track $index) {
+                            <a [href]="url" target="_blank" class="block break-all rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm text-sky-400 transition hover:bg-[var(--tenant-chip-hover)]">
+                                {{ url }}
+                            </a>
+                            }
+                        </div>
+                    </div>
+                    }
+
+                    <!-- Emails -->
+                    @if ((caseData.emails?.length || 0) > 0) {
+                    <div>
+                        <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Emails
+                        </div>
+
+                        <div class="flex flex-wrap gap-2">
+                            @for (email of caseData.emails; track $index) {
+                            <a [href]="'mailto:' + email" class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs font-medium text-sky-400 transition hover:bg-[var(--tenant-chip-hover)]">
+                                {{ email }}
+                            </a>
+                            }
+                        </div>
+                    </div>
+                    }
+
+                    <!-- Phones -->
+                    @if ((caseData.phoneNumbers?.length || 0) > 0) {
+                    <div>
+                        <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Phone Numbers
+                        </div>
+
+                        <div class="flex flex-wrap gap-2">
+                            @for (phone of caseData.phoneNumbers; track $index) {
+                            <a [href]="'tel:' + phone" class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs font-medium text-sky-400 transition hover:bg-[var(--tenant-chip-hover)]">
+                                {{ phone }}
+                            </a>
+                            }
+                        </div>
+                    </div>
+                    }
+
+                    <!-- Additional Identifiers -->
+                    @if ((caseData.additionalIdentifiers?.length || 0) > 0) {
+                    <div>
+                        <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Additional Identifiers
+                        </div>
+
+                        <div class="flex flex-wrap gap-2">
+                            @for (identifier of caseData.additionalIdentifiers; track $index) {
+                            <div class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs">
+                                <span class="font-semibold text-green-400">{{ identifier.type }}</span>
+                                <span class="ml-1 text-[var(--color-text2)]">{{ identifier.value }}</span>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                    }
+
+                </div>
+            </div>
+
+            <!-- Related Entities -->
+            @if ((caseData.relatedEntities?.length || 0) > 0) {
+            <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-5">
+                <div class="mb-4 flex items-center gap-2">
+                    <i class="bi bi-people text-orange-400 text-lg"></i>
+                    <h2 class="text-[19px] font-bold text-[var(--color-text1)]">
+                        Related Entities
+                    </h2>
+                </div>
+
+                <div class="space-y-4">
+                    @for (entity of caseData.relatedEntities; track $index; let i = $index) {
+
+                    <div class="rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-4">
+
+                        <div class="mb-3 text-sm font-semibold text-[var(--color-text1)]">
+                            Entity {{ i + 1 }} — {{ entity.name }}
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+                            @if ((entity.socialMediaProfiles?.length || 0) > 0) {
+                            <div>
+                                <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Social Media
+                                </div>
+
+                                <div class="space-y-1">
+                                    @for (profile of entity.socialMediaProfiles; track $index) {
+                                    <div class="text-sm">
+                                        <span class="font-semibold text-sky-400">{{ profile.platform }}</span>
+                                        <span class="ml-1 text-[var(--color-text2)]">{{ profile.username }}</span>
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                            }
+
+                            @if ((entity.webUrls?.length || 0) > 0) {
+                            <div>
+                                <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Web URLs
+                                </div>
+
+                                <div class="space-y-1">
+                                    @for (url of entity.webUrls; track $index) {
+                                    <a [href]="url" target="_blank" class="block break-all text-sm text-sky-400">
+                                        {{ url }}
+                                    </a>
+                                    }
+                                </div>
+                            </div>
+                            }
+
+                            @if ((entity.emails?.length || 0) > 0) {
+                            <div>
+                                <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Emails
+                                </div>
+
+                                <div class="space-y-1">
+                                    @for (email of entity.emails; track $index) {
+                                    <div class="text-sm text-sky-400">
+                                        {{ email }}
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                            }
+
+                            @if ((entity.phoneNumbers?.length || 0) > 0) {
+                            <div>
+                                <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Phone Numbers
+                                </div>
+
+                                <div class="space-y-1">
+                                    @for (phone of entity.phoneNumbers; track $index) {
+                                    <div class="text-sm text-sky-400">
+                                        {{ phone }}
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                            }
+
+                            @if ((entity.additionalIdentifiers?.length || 0) > 0) {
+                            <div>
+                                <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Identifiers
+                                </div>
+
+                                <div class="space-y-1">
+                                    @for (identifier of entity.additionalIdentifiers; track $index) {
+                                    <div class="text-sm">
+                                        <span class="font-semibold text-green-400">{{ identifier.type }}</span>
+                                        <span class="ml-1 text-[var(--color-text2)]">{{ identifier.value }}</span>
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                            }
+
+                        </div>
+                    </div>
+
+                    }
+                </div>
+            </div>
+            }
+
+            <!-- Linked Case -->
+            @if (caseData.linkedCaseId) {
+            <div class="rounded-[10px] border border-yellow-500/30 bg-[var(--tenant-expand-bg)] p-5">
+                <div class="mb-2 flex items-center gap-2">
+                    <i class="bi bi-link text-yellow-400 text-lg"></i>
+
+                    <h2 class="text-[19px] font-bold text-[var(--color-text1)]">
+                        Linked Case
+                    </h2>
+                </div>
+
+                <p class="mb-4 text-sm text-[var(--color-text4)]">
+                    Reason: {{ caseData.linkedReason }}
+                </p>
+
+                @if (isLoadingLinkedCase) {
+
+                <div class="flex items-center gap-2">
+                    <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-sky-400"></div>
+                    <span class="text-sm text-[var(--color-text4)]">
+                        Loading linked case...
+                    </span>
+                </div>
+
+                } @else if (linkedCase) {
+
+                <div class="rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-4">
+
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+
+                        <div>
+                            <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                Case ID
+                            </div>
+
+                            <div class="mt-1 text-sm font-semibold text-[var(--color-text1)]">
+                                {{ linkedCase.caseId }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                Type
+                            </div>
+
+                            <div class="mt-1 text-sm text-[var(--color-text1)]">
+                                {{ linkedCase.caseType }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                Status
+                            </div>
+
+                            <span class="mt-1 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(linkedCase.status)">
+                                {{ linkedCase.status }}
+                            </span>
+                        </div>
+
+                        <div>
+                            <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                Priority
+                            </div>
+
+                            <span class="mt-1 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getPriorityBadgeClass(linkedCase.priority)">
+                                {{ linkedCase.priority }}
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <button (click)="goToLinkedCase()" class="ui-btn ui-btn-primary mt-4 w-full">
+                        <i class="bi bi-arrow-right"></i>
+                        View Linked Case
+                    </button>
+
+                </div>
+
+                }
+            </div>
+            }
+
+        </div>
+    </div>
+
+    } @else {
+    <div class="ui-page-container flex min-h-[70vh] items-center justify-center p-5">
+        <p class="text-[var(--color-text4)]">Case not found</p>
+    </div>
+    }
+</div>

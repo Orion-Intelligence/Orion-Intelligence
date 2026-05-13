@@ -1,0 +1,25 @@
+FROM python:3.11-slim AS base
+
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY backend/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r /tmp/requirements.txt
+RUN pip install pydantic[email]
+RUN pip install coverage
+
+COPY backend/ /app/
+COPY .env /app/.env
+COPY pyproject.toml /app/pyproject.toml
+COPY README.md /app/s.md
+COPY docs/ /app/docs/
+
+RUN mkdir -p /app/build/assets
+
+EXPOSE 8070

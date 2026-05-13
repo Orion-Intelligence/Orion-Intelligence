@@ -104,5 +104,6 @@ export enum ProfileSubCategory {
     STATISTICS = 'Statistics',
     AUDITLOG = 'Auditlog',
     TENANT = 'Tenant',
-    SYSTEM_SETTINGS = 'System-Settings'
+    SYSTEM_SETTINGS = 'System-Settings',
+    CASE_MANAGEMENT = 'Case-Management'
 }
