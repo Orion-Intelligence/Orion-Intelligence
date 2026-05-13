@@ -202,6 +202,9 @@ export class CredentialComponent implements OnInit {
 
   fetchRanked() {
     this.rankedResult = new RankedCallbackModel();
+    if (this.isStandaloneStealerlogsRoute) {
+      return;
+    }
     if (this.isRankedLoading) {
       return;
     }
