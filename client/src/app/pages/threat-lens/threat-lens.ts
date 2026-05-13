@@ -62,6 +62,8 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   private hoverHighlightHandle: { remove: () => void } | null = null;
 private hoverTooltipEl: HTMLDivElement | null = null;
 private hoveredCountryKey = '';
+private startMarkerGraphics: any[] = [];
+private endMarkerGraphics: any[] = [];
 
   protected readonly filterModel: FilterModel = threat_lens_filters;
   protected readonly feedRanges: Array<{ key: ThreatLensFeedRange; label: string }> = [{ key: '1d', label: '1 Day' }, { key: '7d', label: '1 Week' }, { key: 'all', label: 'All Time' }];
@@ -325,8 +327,24 @@ this.clearHighlight();
     }
 
     const hit = await this.view.hitTest(event, {
-      include: [this.countryLayer]
+      // include: [this.countryLayer]
+      include: [
+          this.animatedArcGraphicsLayer,
+          this.arcGraphicsLayer,
+          this.arcSurfaceGraphicsLayer,
+          this.countryLayer
+        ].filter(Boolean)
     });
+
+const arcGraphic = hit.results.find(
+  (result: any) => this.isArcTooltipGraphic(result.graphic)
+)?.graphic;
+
+if (arcGraphic) {
+  this.clearHoverHighlight();
+  this.showArcTooltip(event, arcGraphic.attributes || {});
+  return;
+}
 
     const countryGraphic = hit.results.find(
       (result: any) => result.graphic?.layer === this.countryLayer
@@ -361,6 +379,108 @@ this.clearHighlight();
 
   this.showTooltip(event,countryName,threatCount, breakdown);
 });
+}
+private isArcTooltipGraphic(graphic: any): boolean {
+  const role = graphic?.attributes?.role;
+
+  return (
+    role === 'arc' ||
+    role === 'arc-surface' ||
+    role === 'arc-start' ||
+    role === 'arc-end' ||
+    role === 'arc-traveler'
+  );
+}
+private showArcTooltip(
+  event: any,
+  attributes: Record<string, unknown>
+): void {
+
+  if (!this.hoverTooltipEl) {
+    return;
+  }
+
+  this.hoveredCountryKey = '';
+
+  const startCountry =
+    typeof attributes['start_country'] === 'string'
+      ? attributes['start_country']
+      : 'Unknown start';
+
+  const endCountry =
+    typeof attributes['end_country'] === 'string'
+      ? attributes['end_country']
+      : 'Unknown end';
+
+  const category =
+    typeof attributes['category_label'] === 'string'
+      ? attributes['category_label']
+      : 'Threat';
+
+  const weight =
+    typeof attributes['weight'] === 'number'
+      ? attributes['weight']
+      : Number(attributes['weight'] || 0);
+
+  this.hoverTooltipEl.innerHTML = `
+    <div style="min-width:220px">
+
+      <div style="
+        margin-bottom:10px;
+        color:#00e0ff;
+        font-size:13px;
+        font-weight:700;
+        letter-spacing:0.08em;
+        text-transform:uppercase;
+      ">
+        Arc Route
+      </div>
+
+      ${this.buildTooltipRow('Start', startCountry)}
+      ${this.buildTooltipRow('End', endCountry)}
+      ${this.buildTooltipRow('Category', category)}
+      ${this.buildTooltipRow('Records', String(weight))}
+
+    </div>
+  `;
+
+  this.hoverTooltipEl.style.display = 'block';
+
+  this.moveTooltip(event);
+}
+private buildTooltipRow(label: string, value: string): string {
+
+  return `
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-top:6px;
+    ">
+
+      <span style="
+        color:rgba(255,255,255,0.68);
+        font-size:11px;
+      ">
+        ${label}
+      </span>
+
+      <span style="
+        color:white;
+        font-size:12px;
+        font-weight:700;
+        text-align:right;
+        max-width:140px;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+      ">
+        ${value}
+      </span>
+
+    </div>
+  `;
 }
 private clearHoverHighlight(): void {
   if (this.hoverHighlightHandle) {
@@ -721,7 +841,7 @@ private hideTooltip(): void {
 
         this.animatedArcs.push({
           categoryKey: category.categoryKey,
-          categoryLabel: '',
+          categoryLabel: category.categoryLabel,
           color: category.color,
           weight: pair.weight,
           arcPoints,
@@ -1013,7 +1133,8 @@ private hideTooltip(): void {
     if (!this.arcGraphicsLayer || !this.arcSurfaceGraphicsLayer) {
       return;
     }
-
+this.startMarkerGraphics = [];
+this.endMarkerGraphics = [];
     const items = batchItems ?? (index >= 0 ? this.animatedArcs.slice(index * this.arcBatchSize, (index + 1) * this.arcBatchSize) : []);
     this.visibleBatchIndex = index;
     this.arcGraphicsLayer.removeAll();
@@ -1034,10 +1155,22 @@ private hideTooltip(): void {
         spatialReference: { wkid: 4326 },
       },
       attributes: {
-        category: arc.categoryKey,
-        country_a: arc.countryAKey,
-        country_b: arc.countryBKey,
-        weight: arc.weight,
+        role: 'arc',
+
+  category: arc.categoryKey,
+  category_label: arc.categoryLabel,
+
+  country_a: arc.countryAKey,
+  country_b: arc.countryBKey,
+
+  start_country: arc.countryAName,
+  end_country: arc.countryBName,
+
+  weight: arc.weight,
+        // category: arc.categoryKey,
+        // country_a: arc.countryAKey,
+        // country_b: arc.countryBKey,
+        // weight: arc.weight,
       },
       symbol: {
         type: 'line-3d',
@@ -1069,10 +1202,22 @@ private hideTooltip(): void {
         spatialReference: { wkid: 4326 },
       },
       attributes: {
-        category: arc.categoryKey,
-        country_a: arc.countryAKey,
-        country_b: arc.countryBKey,
-        weight: arc.weight,
+        role: 'arc-surface',
+
+  category: arc.categoryKey,
+  category_label: arc.categoryLabel,
+
+  country_a: arc.countryAKey,
+  country_b: arc.countryBKey,
+
+  start_country: arc.countryAName,
+  end_country: arc.countryBName,
+
+  weight: arc.weight,
+        // category: arc.categoryKey,
+        // country_a: arc.countryAKey,
+        // country_b: arc.countryBKey,
+        // weight: arc.weight,
       },
       symbol: {
         type: 'simple-line',
@@ -1088,7 +1233,90 @@ private hideTooltip(): void {
 
     for (const arc of items) {
       const movingDotSize = Math.min(120000, this.movingDotBaseSize + (arc.weight * 2200));
+const startPoint = arc.arcPoints[0];
+const endPoint = arc.arcPoints[arc.arcPoints.length - 1];
+this.startMarkerGraphics.push({
+  geometry: {
+    type: 'point',
+    longitude: startPoint[0],
+    latitude: startPoint[1],
+    z: startPoint[2],
+    spatialReference: { wkid: 4326 }
+  },
 
+  attributes: {
+    role: 'arc-start',
+
+    start_country: arc.countryAName,
+    end_country: arc.countryBName,
+
+    category_label: arc.categoryLabel,
+    weight: arc.weight,
+  },
+
+  symbol: {
+    type: 'point-3d',
+
+    symbolLayers: [
+      {
+        type: 'object',
+
+        resource: {
+          primitive: 'sphere'
+        },
+
+        width: 90000,
+        height: 90000,
+        depth: 90000,
+
+        material: {
+          color: [...arc.color, 1]
+        }
+      }
+    ]
+  }
+});
+this.endMarkerGraphics.push({
+  geometry: {
+    type: 'point',
+    longitude: endPoint[0],
+    latitude: endPoint[1],
+    z: endPoint[2],
+    spatialReference: { wkid: 4326 }
+  },
+
+  attributes: {
+    role: 'arc-end',
+
+    start_country: arc.countryAName,
+    end_country: arc.countryBName,
+
+    category_label: arc.categoryLabel,
+    weight: arc.weight,
+  },
+
+  symbol: {
+    type: 'point-3d',
+
+    symbolLayers: [
+      {
+        type: 'object',
+
+        resource: {
+          primitive: 'sphere'
+        },
+
+        width: 120000,
+        height: 120000,
+        depth: 120000,
+
+        material: {
+          color: [...arc.color, 0.85]
+        }
+      }
+    ]
+  }
+});
       const graphic = {
         geometry: null,
         symbol: {
@@ -1110,7 +1338,12 @@ private hideTooltip(): void {
     }
 
     this.animatedArcGraphicsLayer.removeAll();
-    this.animatedArcGraphicsLayer.addMany(this.movingDotGraphics);
+    // this.animatedArcGraphicsLayer.addMany(this.movingDotGraphics);
+    this.animatedArcGraphicsLayer.addMany([
+  ...this.startMarkerGraphics,
+  ...this.endMarkerGraphics,
+  ...this.movingDotGraphics,
+]);
 
   }
 
