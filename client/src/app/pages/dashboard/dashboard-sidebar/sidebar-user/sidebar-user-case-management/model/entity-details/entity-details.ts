@@ -15,6 +15,7 @@ export class EntityDetailsComponent {
   @Input() entity!: RelatedEntity;
   @Input() isMainEntity = false;
   @Input() entityIndex = 0;
+  @Input() entityNameError = '';
 
   @Output() remove = new EventEmitter<void>();
 

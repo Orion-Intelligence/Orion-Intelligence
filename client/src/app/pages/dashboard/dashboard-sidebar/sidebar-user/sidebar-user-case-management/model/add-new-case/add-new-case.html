@@ -5,105 +5,125 @@
     </div>
 
     <!-- Right Side Drawer -->
-    <div class="absolute right-0 top-0 h-full w-full max-w-2xl bg-[var(--color-blue-830)] shadow-2xl flex flex-col" [@slideIn]="isOpen ? 'open' : 'closed'">
+    <div class="absolute right-0 top-0 flex h-full w-full max-w-2xl flex-col overflow-y-auto border-l border-[var(--color-border)] bg-[var(--color-blue-830)] shadow-[-18px_0_40px_rgba(0,0,0,0.34)]" [@slideIn]="isOpen ? 'open' : 'closed'">
 
         <!-- Header -->
-        <div class="relative flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)]">
-            <h2 class="text-2xl font-bold text-[var(--color-text1)]">
-                Add New Case
-            </h2>
+        <div class="flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-blue-830)]/95 px-6 py-3 backdrop-blur">
+            <div class="min-w-0">
+                <h2 class="text-[16px] font-semibold leading-tight text-[var(--color-text1)]">Add New Case</h2>
+                <p class="mt-1 text-[11px] font-medium text-[var(--color-text4)]">Create case details, entities, and links.</p>
+            </div>
 
-            <button type="button" (click)="closePopup()" class="relative z-[1000] text-[var(--color-text4)] hover:text-[var(--color-text1)] text-xl">
+            <button type="button" (click)="closePopup()" class="ml-4 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] text-[14px] text-[var(--color-text4)] transition hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]">
                 ✕
             </button>
         </div>
 
         <!-- Body (scrollable) -->
-        <div class="flex-1 overflow-y-auto p-6 bg-[var(--color-blue-830)]">
+        <div class="p-6 bg-[var(--color-blue-830)]">
 
             <form (ngSubmit)="onSubmit()" class="space-y-5">
 
                 <!-- Case Details Section -->
                 <div>
-                    <h3 class="text-lg font-bold text-[var(--color-text1)] mb-4">Case Details</h3>
+                    <h3 class="text-[15px] font-bold leading-tight text-[var(--color-text1)] mb-4">Case Details</h3>
 
                     <!-- Case ID -->
                     <div class="mb-5">
-                        <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">Case ID</label>
-                        <input type="text" [value]="caseForm.caseId" disabled class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] cursor-not-allowed outline-none" />
+                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Case ID</label>
+                        <input type="text" [value]="caseForm.caseId" disabled class="mt-1 w-full cursor-not-allowed rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[var(--color-text4)] outline-none" />
                     </div>
 
                     <!-- Officer Name -->
                     <div class="mb-5">
-                        <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">
+                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
                             Officer Name <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" [(ngModel)]="caseForm.owner" name="owner" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] outline-none focus:border-sky-400/40" placeholder="Enter officer name" />
+                        <input type="text" [(ngModel)]="caseForm.owner" name="owner" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Enter officer name" />
+                        @if (validationErrors['owner']) {
+                        <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['owner'] }}</p>
+                        }
                     </div>
 
                     <!-- Creation Date -->
                     <div class="mb-5">
-                        <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">
+                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
                             Creation Date & Time
                         </label>
-                        <input type="text" [value]="getFormattedDateTime(caseForm.createdDate)" disabled class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] cursor-not-allowed outline-none" />
+                        <input type="text" [value]="getFormattedDateTime(caseForm.createdDate)" disabled class="mt-1 w-full cursor-not-allowed rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[var(--color-text4)] outline-none" />
                     </div>
 
                     <!-- Modification Date -->
                     <div class="mb-5">
-                        <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">
+                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
                             Modification Date & Time
                         </label>
-                        <input type="text" [value]="getFormattedDateTime(caseForm.modifiedDate)" disabled class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] cursor-not-allowed outline-none" />
+                        <input type="text" [value]="getFormattedDateTime(caseForm.modifiedDate)" disabled class="mt-1 w-full cursor-not-allowed rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[var(--color-text4)] outline-none" />
                     </div>
 
                     <!-- Intake Source -->
                     <div class="mb-5">
-                        <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">Intake Source
+                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Intake Source
                             <span class="text-red-500">*</span></label>
-                        <input type="text" [(ngModel)]="caseForm.intakeSource" name="intakeSource" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] outline-none focus:border-sky-400/40" placeholder="e.g. API Alert, Email, etc." />
+                        <input type="text" [(ngModel)]="caseForm.intakeSource" name="intakeSource" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="e.g. API Alert, Email, etc." />
+                        @if (validationErrors['intakeSource']) {
+                        <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['intakeSource'] }}</p>
+                        }
                     </div>
 
                     <!-- Case Type -->
                     <div class="mb-5">
-                        <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">Case Type <span class="text-red-500">*</span></label>
-                        <select [(ngModel)]="caseForm.caseType" name="caseType" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] outline-none focus:border-sky-400/40">
+                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Case Type <span class="text-red-500">*</span></label>
+                        <select [(ngModel)]="caseForm.caseType" name="caseType" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
                             @for (type of caseTypeOptions; track type) {
                             <option [value]="type">{{ type }}</option>
                             }
                         </select>
+                        @if (validationErrors['caseType']) {
+                        <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['caseType'] }}</p>
+                        }
                     </div>
 
                     <!-- Priority -->
                     <div class="mb-5">
-                        <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">Priority <span class="text-red-500">*</span></label>
-                        <select [(ngModel)]="caseForm.priority" name="priority" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] outline-none focus:border-sky-400/40">
+                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Priority <span class="text-red-500">*</span></label>
+                        <select [(ngModel)]="caseForm.priority" name="priority" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
                             @for (p of priorityOptions; track p) {
                             <option [value]="p" class="capitalize">{{ p }}</option>
                             }
                         </select>
+                        @if (validationErrors['priority']) {
+                        <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['priority'] }}</p>
+                        }
                     </div>
 
                     <!-- Status -->
                     <div class="mb-5">
-                        <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">Status <span class="text-red-500">*</span></label>
-                        <select [(ngModel)]="caseForm.status" name="status" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] outline-none focus:border-sky-400/40">
+                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Status <span class="text-red-500">*</span></label>
+                        <select [(ngModel)]="caseForm.status" name="status" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
                             @for (s of statusOptions; track s) {
                             <option [value]="s" class="capitalize">{{ s }}</option>
                             }
                         </select>
+                        @if (validationErrors['status']) {
+                        <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['status'] }}</p>
+                        }
                     </div>
                 </div>
 
                 <!-- Duplicate/Linking Case Section -->
                 <div class="border-t border-[var(--color-border)] pt-6 mt-6">
-                    <h3 class="text-lg font-bold text-[var(--color-text1)] mb-4">Duplicate or Linked Case</h3>
+                    <h3 class="text-[15px] font-bold leading-tight text-[var(--color-text1)] mb-4">Duplicate or Linked Case</h3>
 
-                    <div class="mb-5 p-4 rounded-[8px] bg-[var(--color-white)] border border-[var(--color-border)]">
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" [(ngModel)]="isLinkingCase" name="isLinkingCase" class="w-4 h-4 cursor-pointer" />
-                            <span class="text-sm font-semibold text-[var(--color-text4)] uppercase">Link this case to a
-                                previous case</span>
+                    <div class="mb-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-4 py-3">
+                        <label class="flex cursor-pointer items-center justify-between gap-3">
+                            <span class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Link this case to a previous case</span>
+                            <span class="relative inline-flex shrink-0 items-center">
+                                <input type="checkbox" [(ngModel)]="isLinkingCase" name="isLinkingCase" class="sr-only peer" />
+                                <span class="case-link-toggle-track relative h-[18px] w-[32px] rounded-full border border-[#36506f] bg-[#243754] transition-colors duration-300 [body.light-theme_&]:border-[#c4d1df] [body.light-theme_&]:bg-[#d7e2ee] peer-checked:!border-sky-400/45 peer-checked:!bg-sky-500/70 peer-checked:[&>span]:translate-x-[14px] peer-checked:[&>span]:bg-white">
+                                    <span class="case-link-toggle-thumb absolute left-[1px] top-0 mt-[1px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300"></span>
+                                </span>
+                            </span>
                         </label>
                     </div>
 
@@ -112,11 +132,11 @@
 
                         <!-- Case Number Input -->
                         <div>
-                            <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">
+                            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
                                 Previous Case Number <span class="text-red-500">*</span>
                             </label>
                             <div class="flex gap-2 mt-1">
-                                <input type="text" [(ngModel)]="linkedCaseNumber" name="linkedCaseNumber" (blur)="checkCaseExists()" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] outline-none focus:border-sky-400/40" placeholder="e.g., 00001" />
+                                <input type="text" [(ngModel)]="linkedCaseNumber" name="linkedCaseNumber" (blur)="checkCaseExists()" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="e.g., 00001" />
                                 @if (caseNumberLoading) {
                                 <button type="button" disabled class="px-4 py-2 bg-gray-600 text-white rounded-[8px] text-sm">
                                     Checking...
@@ -128,8 +148,11 @@
                                 </button>
                                 }
                             </div>
+                            @if (validationErrors['linkedCaseNumber']) {
+                            <p class="case-form-error text-red-400 text-xs mt-2">{{ validationErrors['linkedCaseNumber'] }}</p>
+                            }
                             @if (caseNumberError) {
-                            <p class="text-red-400 text-xs mt-2">
+                            <p class="case-form-error text-red-400 text-xs mt-2">
                                 <i class="bi bi-exclamation-circle"></i> {{ caseNumberError }}
                             </p>
                             }
@@ -142,10 +165,13 @@
 
                         <!-- Linking Reason -->
                         <div>
-                            <label class="block text-sm font-semibold text-[var(--color-text4)] uppercase">
+                            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
                                 Reason for Linking <span class="text-red-500">*</span>
                             </label>
-                            <textarea [(ngModel)]="linkingReason" name="linkingReason" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-white)] px-3 py-2 text-[var(--color-gray-900)] outline-none focus:border-sky-400/40 resize-none" rows="4" placeholder="Explain why this case is linked to the previous case (e.g., Follow-up investigation, Related incident, etc.)"></textarea>
+                            <textarea [(ngModel)]="linkingReason" name="linkingReason" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40 resize-none" rows="4" placeholder="Explain why this case is linked to the previous case (e.g., Follow-up investigation, Related incident, etc.)"></textarea>
+                            @if (validationErrors['linkingReason']) {
+                            <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['linkingReason'] }}</p>
+                            }
                         </div>
 
                         <!-- Info Box -->
@@ -160,13 +186,13 @@
                 </div>
 
                 <!-- Primary Entity Component -->
-                <app-entity-details [entity]="primaryEntity" [isMainEntity]="true"
+                <app-entity-details [entity]="primaryEntity" [isMainEntity]="true" [entityNameError]="validationErrors['entityName'] || ''"
                     [entityIndex]="0"></app-entity-details>
 
                 <!-- Related Entities Section -->
                 <div class="border-t border-[var(--color-border)] pt-6 mt-6">
                     <div class="flex items-center justify-between mb-5">
-                        <h3 class="text-lg font-bold text-[var(--color-text1)]">Related Entities</h3>
+                        <h3 class="text-[15px] font-bold leading-tight text-[var(--color-text1)]">Related Entities</h3>
                         <button type="button" (click)="addRelatedEntity()" class="text-blue-400 hover:text-blue-300 text-sm">+ Add Entity</button>
                     </div>
 
@@ -180,7 +206,7 @@
         </div>
 
         <!-- Footer Buttons -->
-        <div class="px-6 py-4 border-t border-[var(--color-border)] flex justify-end gap-3 bg-[var(--color-blue-820-light)]">
+        <div class="sticky bottom-0 flex justify-end gap-3 border-t border-[var(--color-border)] bg-[var(--color-blue-830)]/95 px-6 py-4 backdrop-blur">
             <button type="button" (click)="closePopup()" class="ui-btn text-[var(--color-text1)] border border-[var(--color-border)]">
                 Cancel
             </button>

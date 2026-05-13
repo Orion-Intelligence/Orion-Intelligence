@@ -1,10 +1,11 @@
-import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Output } from '@angular/core';
 import { Case, RelatedEntity } from '../../../../../../../shared/model/case-management/case.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { EntityDetailsComponent } from '../entity-details/entity-details';
 import { CaseManagement } from '../../case-management-service/case-management';
+import { MessageNotificationService } from '../../../../../../../services/message_notification/message-notification.service';
 
 @Component({
   selector: 'app-add-new-case',
@@ -32,11 +33,12 @@ export class AddNewCase {
   linkingReason = '';
   caseNumberError = '';
   caseNumberLoading = false;
+  validationErrors: Record<string, string> = {};
 
   @Output() close = new EventEmitter<void>();
   @Output() caseAdded = new EventEmitter<Case>();
 
-  constructor(private cdr: ChangeDetectorRef, private caseService: CaseManagement) { }
+  constructor(private cdr: ChangeDetectorRef, private caseService: CaseManagement, private host: ElementRef<HTMLElement>, private messageNotificationService: MessageNotificationService) { }
 
   ngOnInit(): void {
     this.generateCaseId();
@@ -125,38 +127,48 @@ export class AddNewCase {
     });
   }
 
+  private scrollToFirstError(): void {
+    setTimeout(() => {
+      this.host.nativeElement.querySelector('.case-form-error')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    });
+  }
+
   onSubmit(): void {
+    this.validationErrors = {};
+
     // Sync primary entity to caseForm
     this.syncPrimaryEntityToCase();
 
     // Validate primary case fields
     if (!this.caseForm.owner.trim()) {
-      alert('Officer name is required');
-      return;
+      this.validationErrors['owner'] = 'Officer name is required';
     }
 
     if (!this.caseForm.intakeSource.trim()) {
-      alert('Intake source is required');
-      return;
+      this.validationErrors['intakeSource'] = 'Intake source is required';
     }
 
     if (!this.caseForm.caseType.trim()) {
-      alert('Case type is required');
-      return;
+      this.validationErrors['caseType'] = 'Case type is required';
     }
 
     if (!this.caseForm.priority.trim()) {
-      alert('Priority is required');
-      return;
+      this.validationErrors['priority'] = 'Priority is required';
     }
 
     if (!this.caseForm.status.trim()) {
-      alert('Status is required');
-      return;
+      this.validationErrors['status'] = 'Status is required';
     }
 
     if (!this.caseForm.entityName.trim()) {
-      alert('Entity name is required');
+      this.validationErrors['entityName'] = 'Entity name is required';
+    }
+
+    if (Object.keys(this.validationErrors).length > 0) {
+      this.scrollToFirstError();
       return;
     }
 
@@ -171,7 +183,7 @@ export class AddNewCase {
     });
 
     if (invalidEmails.length > 0) {
-      alert('Invalid email format detected in primary entity');
+      this.messageNotificationService.show('Invalid email format detected in primary entity');
       return;
     }
 
@@ -186,7 +198,7 @@ export class AddNewCase {
     });
 
     if (invalidPhones.length > 0) {
-      alert('Invalid phone number format detected in primary entity');
+      this.messageNotificationService.show('Invalid phone number format detected in primary entity');
       return;
     }
 
@@ -206,7 +218,7 @@ export class AddNewCase {
     });
 
     if (invalidUrls.length > 0) {
-      alert('Invalid URL format detected in primary entity');
+      this.messageNotificationService.show('Invalid URL format detected in primary entity');
       return;
     }
 
@@ -219,7 +231,7 @@ export class AddNewCase {
     });
 
     if (invalidSocial.length > 0) {
-      alert('Social media profiles must have both platform and username');
+      this.messageNotificationService.show('Social media profiles must have both platform and username');
       return;
     }
 
@@ -232,7 +244,7 @@ export class AddNewCase {
     });
 
     if (invalidIdentifiers.length > 0) {
-      alert('Additional identifiers must have both type and value');
+      this.messageNotificationService.show('Additional identifiers must have both type and value');
       return;
     }
 
@@ -251,7 +263,7 @@ export class AddNewCase {
         });
 
         if (relatedInvalidEmails.length > 0) {
-          alert(`Invalid email format in related entity: ${entity.name}`);
+          this.messageNotificationService.show(`Invalid email format in related entity: ${entity.name}`);
           return;
         }
 
@@ -266,7 +278,7 @@ export class AddNewCase {
         });
 
         if (relatedInvalidPhones.length > 0) {
-          alert(`Invalid phone format in related entity: ${entity.name}`);
+          this.messageNotificationService.show(`Invalid phone format in related entity: ${entity.name}`);
           return;
         }
 
@@ -286,7 +298,7 @@ export class AddNewCase {
         });
 
         if (relatedInvalidUrls.length > 0) {
-          alert(`Invalid URL format in related entity: ${entity.name}`);
+          this.messageNotificationService.show(`Invalid URL format in related entity: ${entity.name}`);
           return;
         }
 
@@ -299,7 +311,7 @@ export class AddNewCase {
         });
 
         if (relatedInvalidSocial.length > 0) {
-          alert(`Social media validation failed in related entity: ${entity.name}`);
+          this.messageNotificationService.show(`Social media validation failed in related entity: ${entity.name}`);
           return;
         }
 
@@ -312,7 +324,7 @@ export class AddNewCase {
         });
 
         if (relatedInvalidIdentifiers.length > 0) {
-          alert(`Identifier validation failed in related entity: ${entity.name}`);
+          this.messageNotificationService.show(`Identifier validation failed in related entity: ${entity.name}`);
           return;
         }
       }
@@ -322,22 +334,25 @@ export class AddNewCase {
     if (this.isLinkingCase) {
 
       if (!this.linkedCaseNumber.trim()) {
-        alert('Please enter a case number to link');
-        return;
+        this.validationErrors['linkedCaseNumber'] = 'Case number is required';
       }
 
       if (this.caseNumberError) {
-        alert(this.caseNumberError);
+        this.scrollToFirstError();
         return;
       }
 
       if (!this.linkingReason.trim()) {
-        alert('Please provide a reason for linking this case');
+        this.validationErrors['linkingReason'] = 'Reason for linking is required';
+      }
+
+      if (this.validationErrors['linkedCaseNumber'] || this.validationErrors['linkingReason']) {
+        this.scrollToFirstError();
         return;
       }
 
       if (this.linkedCaseNumber === this.caseForm.caseId) {
-        alert('Cannot link a case to itself');
+        this.messageNotificationService.show('Cannot link a case to itself');
         return;
       }
     }
@@ -377,6 +392,7 @@ export class AddNewCase {
     // Save case using API
     this.caseService.createCase(this.caseForm).subscribe({
       next: (savedCase) => {
+        this.messageNotificationService.show('Case added successfully', 'success');
         this.caseAdded.emit(savedCase);
         this.closePopup();
       },
@@ -384,7 +400,7 @@ export class AddNewCase {
       error: (err) => {
         console.error('Failed to save case:', err);
 
-        alert(err?.error?.detail ||
+        this.messageNotificationService.show(err?.error?.detail ||
           err?.message ||
           'Failed to save case');
       }

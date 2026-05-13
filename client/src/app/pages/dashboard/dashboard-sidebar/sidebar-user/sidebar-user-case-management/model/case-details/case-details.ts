@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { EntityDetailsComponent } from '../entity-details/entity-details';
 import { Case } from '../../../../../../../shared/model/case-management/case.model';
 import { CaseManagement } from '../../case-management-service/case-management';
+import { MessageNotificationService } from '../../../../../../../services/message_notification/message-notification.service';
 
 @Component({
   selector: 'app-case-details',
@@ -22,7 +23,7 @@ export class CaseDetails implements OnInit {
   priorityOptions = ['low', 'medium', 'high', 'critical'];
   statusOptions = ['open', 'in-progress', 'resolved', 'closed'];
 
-  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement) { }
+  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private messageNotificationService: MessageNotificationService) { }
 
   ngOnInit(): void {
     console.log('Loading case details...');
@@ -35,7 +36,7 @@ export class CaseDetails implements OnInit {
 
     if (!caseId) {
       this.isLoading = false;
-      alert('No case ID provided');
+      this.messageNotificationService.show('No case ID provided');
       this.router.navigate(['/dashboard/profile/case-management']);
       return;
     }
@@ -49,7 +50,7 @@ export class CaseDetails implements OnInit {
         this.isLoading = false;
       },
       error: () => {
-        alert('Case not found');
+        this.messageNotificationService.show('Case not found');
         this.router.navigate(['/dashboard/profile/case-management']);
         this.isLoading = false;
       }
@@ -88,12 +89,12 @@ export class CaseDetails implements OnInit {
 
     // Validate
     if (!this.editedCase.owner.trim()) {
-      alert('Officer name is required');
+      this.messageNotificationService.show('Officer name is required');
       return;
     }
 
     if (!this.editedCase.intakeSource.trim()) {
-      alert('Intake source is required');
+      this.messageNotificationService.show('Intake source is required');
       return;
     }
 
@@ -102,10 +103,10 @@ export class CaseDetails implements OnInit {
       next: (updated) => {
         this.caseData = updated;
         this.isEditing = false;
-        alert('Case updated successfully');
+        this.messageNotificationService.show('Case updated successfully', 'success');
       },
       error: () => {
-        alert('Failed to update case');
+        this.messageNotificationService.show('Failed to update case');
       }
     });
   }

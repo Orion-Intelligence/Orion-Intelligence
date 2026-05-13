@@ -161,6 +161,14 @@ html:has(body.dark-theme) {
   background: #0e1626;
 }
 
+.light-theme .case-link-toggle-thumb {
+  background: var(--color-text4);
+}
+
+.light-theme .peer:checked + span > .case-link-toggle-thumb {
+  background: #ffffff;
+}
+
 .app-background {
   position: fixed;
   inset: 0;
