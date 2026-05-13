@@ -14,7 +14,7 @@ ai_routes = APIRouter()
 
 
 async def ai_enabled_required():
-    if config_controller.getInstance().get("ai_endpoint_enabled", "1") != "1":
+    if await config_controller.getInstance().get_cached("ai_endpoint_enabled", "1") != "1":
         raise HTTPException(status_code=403, detail="AI is disabled")
 
 
