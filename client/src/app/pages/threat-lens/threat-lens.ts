@@ -721,6 +721,7 @@ private hideTooltip(): void {
 
         this.animatedArcs.push({
           categoryKey: category.categoryKey,
+          categoryLabel: '',
           color: category.color,
           weight: pair.weight,
           arcPoints,
@@ -728,6 +729,8 @@ private hideTooltip(): void {
           surfacePaths,
           countryAKey: pair.countryAKey,
           countryBKey: pair.countryBKey,
+          countryAName: this.extractCountryName(featureA.attributes),
+          countryBName: this.extractCountryName(featureB.attributes),
           animationOffset: renderedArcCount * 0.11,
           animationDuration: Math.max(1800, 3300 - Math.min(1200, pair.weight * 110)),
         });
