@@ -10,6 +10,7 @@ from orion.services.arango_manager.arango_controller import arango_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.redis_manager.redis_controller import redis_controller
+from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 
 
 class service_manager:
@@ -48,6 +49,7 @@ class service_manager:
                 await test_manager.get_instance().reset_test_elastic_and_import_mocks()
 
                 await redis_controller.getInstance().initialize()
+                await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [config_controller.CONFIG_CACHE_KEY])
                 await config_controller.getInstance().load_config()
                 await asyncio.sleep(5)
 

@@ -201,7 +201,7 @@ async def test_service_ready_middleware_returns_503_when_services_not_ready(monk
         return {"ok": True}
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
-        response = await client.get("/")
+        response = await client.get("/api/public")
 
     assert response.status_code == 503
     assert response.json() == {"detail": "Service Not Ready"}

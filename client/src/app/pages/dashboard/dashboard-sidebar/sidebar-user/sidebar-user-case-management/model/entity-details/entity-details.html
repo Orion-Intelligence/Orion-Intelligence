@@ -17,7 +17,7 @@
         <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
             Entity Name <span class="text-red-500">*</span>
         </label>
-        <input type="text" [(ngModel)]="entity.name" [name]="'entityName-' + entityIndex" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Enter entity name" />
+        <input type="text" [(ngModel)]="entity.name" [name]="'entityName-' + entityIndex" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Enter entity name" [attr.data-testid]="isMainEntity ? 'case-primary-entity-name-input' : 'case-related-entity-name-input-' + entityIndex" />
         @if (entityNameError) {
         <p class="case-form-error mt-1 text-xs text-red-400">{{ entityNameError }}</p>
         }

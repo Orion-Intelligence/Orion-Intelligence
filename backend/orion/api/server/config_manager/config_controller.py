@@ -49,6 +49,8 @@ class config_controller:
 
     async def load_config(self, force_db: bool = False):
         try:
+            if self._engine is None:
+                self._engine = mongo_controller.get_instance().get_engine()
             if not force_db:
                 try:
                     cached = await redis_controller.getInstance().invoke_trigger(
@@ -141,6 +143,8 @@ class config_controller:
             })
 
     async def update_public_config(self, data: config_data):
+        if self._engine is None:
+            self._engine = mongo_controller.get_instance().get_engine()
         for key_str, value in data.settings.items():
             if key_str == "language":
                 key = AllowedKeys.LANGUAGE_ALLOWED

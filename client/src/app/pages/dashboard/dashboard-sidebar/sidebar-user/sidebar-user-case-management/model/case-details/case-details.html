@@ -1,6 +1,6 @@
 <div class="w-full max-w-[2400px] p-0 sm:p-5">
     @if (isLoading) {
-    <div class="ui-page-container p-3 sm:p-5">
+    <div class="ui-page-container p-3 sm:p-5" data-testid="case-details-page">
         <div class="mb-4 flex items-start justify-between gap-3">
             <div class="min-w-0 flex-1">
                 <div class="ui-shimmer h-6 w-40 rounded bg-[var(--color-blue-720)]"></div>
@@ -32,7 +32,7 @@
     </div>
     } @else if (caseData) {
 
-    <div class="ui-page-container p-3 sm:p-5">
+    <div class="ui-page-container p-3 sm:p-5" data-testid="case-details-page">
 
         <!-- Header -->
         <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -47,16 +47,16 @@
 
             <div class="flex flex-wrap items-center gap-2 sm:justify-end">
                 @if (!isEditing) {
-                <button (click)="enableEditing()" type="button" aria-label="Edit case" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
+                <button (click)="enableEditing()" type="button" aria-label="Edit case" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-details-edit">
                     <img src="assets/images/shared/edit.svg" width="16" alt="edit" class="ui-action-icon" />
                 </button>
                 } @else {
 
-                <button (click)="cancelEditing()" type="button" aria-label="Cancel edit" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
+                <button (click)="cancelEditing()" type="button" aria-label="Cancel edit" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-details-cancel">
                     <i class="bi bi-x-lg text-sm"></i>
                 </button>
 
-                <button (click)="saveChanges()" type="button" aria-label="Save case" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
+                <button (click)="saveChanges()" type="button" aria-label="Save case" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-details-save">
                     <i class="bi bi-check-lg text-sm"></i>
                 </button>
 
@@ -82,7 +82,7 @@
                             Case ID
                         </label>
 
-                        <div class="flex min-h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-medium leading-relaxed text-[var(--color-text1)] break-words">
+                        <div class="flex min-h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-medium leading-relaxed text-[var(--color-text1)] break-words" data-testid="case-details-case-id-value">
                             {{ caseData.caseId }}
                         </div>
                     </div>
@@ -94,13 +94,13 @@
                         </label>
 
                         @if (isEditing) {
-                        <select [(ngModel)]="editedCase!.caseType" name="caseType" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20">
+                        <select [(ngModel)]="editedCase!.caseType" name="caseType" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-type-select">
                             @for (type of caseTypeOptions; track type) {
                             <option [value]="type">{{ type }}</option>
                             }
                         </select>
                         } @else {
-                        <div class="flex min-h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-medium leading-relaxed text-[var(--color-text1)] break-words">
+                        <div class="flex min-h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-medium leading-relaxed text-[var(--color-text1)] break-words" data-testid="case-details-type-value">
                             {{ caseData.caseType }}
                         </div>
                         }
@@ -113,9 +113,9 @@
                         </label>
 
                         @if (isEditing) {
-                        <input type="text" [(ngModel)]="editedCase!.owner" name="owner" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" />
+                        <input type="text" [(ngModel)]="editedCase!.owner" name="owner" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-owner-input" />
                         } @else {
-                        <div class="flex min-h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-medium leading-relaxed text-[var(--color-text1)] break-words">
+                        <div class="flex min-h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-medium leading-relaxed text-[var(--color-text1)] break-words" data-testid="case-details-owner-value">
                             {{ caseData.owner }}
                         </div>
                         }
@@ -128,13 +128,13 @@
                         </label>
 
                         @if (isEditing) {
-                        <select [(ngModel)]="editedCase!.priority" name="priority" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20">
+                        <select [(ngModel)]="editedCase!.priority" name="priority" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-priority-select">
                             @for (p of priorityOptions; track p) {
                             <option [value]="p" class="capitalize">{{ p }}</option>
                             }
                         </select>
                         } @else {
-                        <div class="flex min-h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-medium capitalize text-[var(--color-text1)]">
+                        <div class="flex min-h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-medium capitalize text-[var(--color-text1)]" data-testid="case-details-priority-value">
                             {{ caseData.priority }}
                         </div>
                         }
@@ -147,13 +147,13 @@
                         </label>
 
                         @if (isEditing) {
-                        <select [(ngModel)]="editedCase!.status" name="status" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20">
+                        <select [(ngModel)]="editedCase!.status" name="status" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-status-select">
                             @for (s of statusOptions; track s) {
                             <option [value]="s" class="capitalize">{{ s }}</option>
                             }
                         </select>
                         } @else {
-                        <div class="flex min-h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-medium capitalize text-[var(--color-text1)]">
+                        <div class="flex min-h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-medium capitalize text-[var(--color-text1)]" data-testid="case-details-status-value">
                             {{ caseData.status }}
                         </div>
                         }
@@ -188,9 +188,9 @@
                         </label>
 
                         @if (isEditing) {
-                        <input type="text" [(ngModel)]="editedCase!.intakeSource" name="intakeSource" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" />
+                        <input type="text" [(ngModel)]="editedCase!.intakeSource" name="intakeSource" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-intake-source-input" />
                         } @else {
-                        <div class="flex min-h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-medium leading-relaxed text-[var(--color-text1)] break-words">
+                        <div class="flex min-h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-medium leading-relaxed text-[var(--color-text1)] break-words" data-testid="case-details-intake-source-value">
                             {{ caseData.intakeSource }}
                         </div>
                         }
@@ -214,9 +214,9 @@
                         </label>
 
                         @if (isEditing) {
-                        <input type="text" [(ngModel)]="editedCase!.entityName" name="entityName" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" />
+                        <input type="text" [(ngModel)]="editedCase!.entityName" name="entityName" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-entity-name-input" />
                         } @else {
-                        <div class="mt-1 flex min-h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-medium leading-relaxed text-[var(--color-text1)] break-words">
+                        <div class="mt-1 flex min-h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-medium leading-relaxed text-[var(--color-text1)] break-words" data-testid="case-details-entity-name-value">
                             {{ caseData.entityName }}
                         </div>
                         }

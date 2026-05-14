@@ -16,7 +16,6 @@ class service_ready_middleware:
         )
         return (
             path == "/"
-            or path == "/api/public"
             or path == "/robots.txt"
             or path.startswith("/assets/")
             or path.startswith("/api/s/static/")
