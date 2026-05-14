@@ -60,10 +60,10 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   private allArchiveFeedItems: ThreatLensDisplayFeedItem[] = [];
   private destroyed = false;
   private hoverHighlightHandle: { remove: () => void } | null = null;
-private hoverTooltipEl: HTMLDivElement | null = null;
-private hoveredCountryKey = '';
-private startMarkerGraphics: any[] = [];
-private endMarkerGraphics: any[] = [];
+  private hoverTooltipEl: HTMLDivElement | null = null;
+  private hoveredCountryKey = '';
+  private startMarkerGraphics: any[] = [];
+  private endMarkerGraphics: any[] = [];
 
   protected readonly filterModel: FilterModel = threat_lens_filters;
   protected readonly feedRanges: Array<{ key: ThreatLensFeedRange; label: string }> = [{ key: '1d', label: '1 Day' }, { key: '7d', label: '1 Week' }, { key: 'all', label: 'All Time' }];
@@ -118,10 +118,10 @@ private endMarkerGraphics: any[] = [];
 
     this.clearHoverHighlight();
 
-if (this.hoverTooltipEl) {
-  this.hoverTooltipEl.remove();
-  this.hoverTooltipEl = null;
-}
+    if (this.hoverTooltipEl) {
+      this.hoverTooltipEl.remove();
+      this.hoverTooltipEl = null;
+    }
   }
 
   async onSearch(): Promise<void> {
@@ -166,48 +166,48 @@ if (this.hoverTooltipEl) {
       this.webMercatorUtils = webMercatorUtils;
 
       this.countryLayer = new FeatureLayer({
-  url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries_(Generalized)/FeatureServer/0',
-  outFields: ['*'],
-  popupEnabled: false,
-  opacity: 1,
+        url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries_(Generalized)/FeatureServer/0',
+        outFields: ['*'],
+        popupEnabled: false,
+        opacity: 1,
 
-  renderer: {
-    type: 'simple',
-    symbol: {
-      type: 'simple-fill',
-      color: [29, 45, 71, 1],
-      outline: {
-        color: [255, 255, 255, 0.1],
-        width: 0.8,
-      },
-    },
-  },
+        renderer: {
+          type: 'simple',
+          symbol: {
+            type: 'simple-fill',
+            color: [29, 45, 71, 1],
+            outline: {
+              color: [255, 255, 255, 0.1],
+              width: 0.8,
+            },
+          },
+        },
 
-  labelsVisible: true,
+        labelsVisible: true,
 
-  labelingInfo: [
-    {
-      labelExpressionInfo: {
-        expression: '$feature.COUNTRY'
-      },
+        labelingInfo: [
+          {
+            labelExpressionInfo: {
+              expression: '$feature.COUNTRY'
+            },
 
-      symbol: {
-        type: 'text',
-        color: 'white',
+            symbol: {
+              type: 'text',
+              color: 'white',
 
-        haloColor: 'black',
-        haloSize: 1.5,
+              haloColor: 'black',
+              haloSize: 1.5,
 
-        font: {
-          size: 10,
-          family: 'Arial',
-        }
-      },
+              font: {
+                size: 10,
+                family: 'Arial',
+              }
+            },
 
-      labelPlacement: 'always-horizontal'
-    }
-  ]
-});
+            labelPlacement: 'always-horizontal'
+          }
+        ]
+      });
 
       this.newsGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens Intensity' });
       this.arcGraphicsLayer = new GraphicsLayer({
@@ -317,336 +317,245 @@ if (this.hoverTooltipEl) {
   }
 
   private registerHoverHandler(): void {
-  if (!this.view || !this.countryLayer) {
-    return;
-  }
-this.clearHighlight();
-  this.view.on('pointer-move', async (event: any) => {
     if (!this.view || !this.countryLayer) {
       return;
     }
+    this.clearHighlight();
+    this.view.on('pointer-move', async (event: any) => {
+      if (!this.view || !this.countryLayer) {
+        return;
+      }
 
-    const hit = await this.view.hitTest(event, {
-      // include: [this.countryLayer]
-      include: [
+      const hit = await this.view.hitTest(event, {
+        // include: [this.countryLayer]
+        include: [
           this.animatedArcGraphicsLayer,
           this.arcGraphicsLayer,
           this.arcSurfaceGraphicsLayer,
           this.countryLayer
         ].filter(Boolean)
-    });
+      });
 
-const arcGraphic = hit.results.find(
-  (result: any) => this.isArcTooltipGraphic(result.graphic)
-)?.graphic;
+      const arcGraphic = hit.results.find((result: any) => this.isArcTooltipGraphic(result.graphic))?.graphic;
 
-if (arcGraphic) {
-  this.clearHoverHighlight();
-  this.showArcTooltip(event, arcGraphic.attributes || {});
-  return;
-}
+      if (arcGraphic) {
+        this.clearHoverHighlight();
+        this.showArcTooltip(event, arcGraphic.attributes || {});
+        return;
+      }
 
-    const countryGraphic = hit.results.find(
-      (result: any) => result.graphic?.layer === this.countryLayer
-    )?.graphic;
+      const countryGraphic = hit.results.find((result: any) => result.graphic?.layer === this.countryLayer)?.graphic;
 
-    if (!countryGraphic) {
+      if (!countryGraphic) {
+        this.clearHoverHighlight();
+        this.hideTooltip();
+        return;
+      }
+
+      const countryName = this.extractCountryName(countryGraphic.attributes);
+      const countryKey = this.toCountryKey(countryName);
+
+      // Prevent unnecessary rerender
+      if (this.hoveredCountryKey === countryKey) {
+        this.moveTooltip(event);
+        return;
+      }
+
+      this.hoveredCountryKey = countryKey;
+
       this.clearHoverHighlight();
-      this.hideTooltip();
+
+      this.hoverHighlightHandle =
+        this.countryLayerView?.highlight(countryGraphic);
+
+      const threatCount =
+    this.countryNewsCountByKey.get(countryKey) || 0;
+
+      const breakdown = this.getSelectedCountryBreakdown(countryKey);
+
+      this.showTooltip(event,countryName,threatCount, breakdown);
+    });
+  }
+
+  private isArcTooltipGraphic(graphic: any): boolean {
+    const role = graphic?.attributes?.role;
+
+    return (
+      role === 'arc' ||
+      role === 'arc-surface' ||
+      role === 'arc-start' ||
+      role === 'arc-end' ||
+      role === 'arc-traveler'
+    );
+  }
+
+  private showArcTooltip( event: any, attributes: Record<string, unknown> ): void {
+
+    if (!this.hoverTooltipEl) {
       return;
     }
 
-    const countryName = this.extractCountryName(countryGraphic.attributes);
-    const countryKey = this.toCountryKey(countryName);
+    this.hoveredCountryKey = '';
 
-    // Prevent unnecessary rerender
-  if (this.hoveredCountryKey === countryKey) {
-  this.moveTooltip(event);
-  return;
-}
+    const startCountry =
+      typeof attributes['start_country'] === 'string'
+        ? attributes['start_country']
+        : 'Unknown start';
 
-    this.hoveredCountryKey = countryKey;
+    const endCountry =
+      typeof attributes['end_country'] === 'string'
+        ? attributes['end_country']
+        : 'Unknown end';
 
-    this.clearHoverHighlight();
+    const category =
+      typeof attributes['category_label'] === 'string'
+        ? attributes['category_label']
+        : 'Threat';
 
-    this.hoverHighlightHandle =
-      this.countryLayerView?.highlight(countryGraphic);
+    const weight =
+      typeof attributes['weight'] === 'number'
+        ? attributes['weight']
+        : Number(attributes['weight'] || 0);
 
-    const threatCount =
-  this.countryNewsCountByKey.get(countryKey) || 0;
+    const tooltipContent = document.createElement('div');
+    tooltipContent.className = 'threat-lens-tooltip__content threat-lens-tooltip__content--arc';
 
-  const breakdown = this.getSelectedCountryBreakdown(countryKey);
+    const title = document.createElement('div');
+    title.className = 'threat-lens-tooltip__arc-title';
+    title.textContent = 'Arc Route';
 
-  this.showTooltip(event,countryName,threatCount, breakdown);
-});
-}
-private isArcTooltipGraphic(graphic: any): boolean {
-  const role = graphic?.attributes?.role;
+    tooltipContent.append(title, this.buildTooltipRow('Start', startCountry), this.buildTooltipRow('End', endCountry), this.buildTooltipRow('Category', category), this.buildTooltipRow('Records', String(weight)));
 
-  return (
-    role === 'arc' ||
-    role === 'arc-surface' ||
-    role === 'arc-start' ||
-    role === 'arc-end' ||
-    role === 'arc-traveler'
-  );
-}
-private showArcTooltip(
-  event: any,
-  attributes: Record<string, unknown>
-): void {
+    this.hoverTooltipEl.replaceChildren(tooltipContent);
+    this.hoverTooltipEl.hidden = false;
 
-  if (!this.hoverTooltipEl) {
-    return;
+    this.moveTooltip(event);
   }
 
-  this.hoveredCountryKey = '';
+  private buildTooltipRow(label: string, value: string): HTMLDivElement {
+    const row = document.createElement('div');
+    row.className = 'threat-lens-tooltip__row';
 
-  const startCountry =
-    typeof attributes['start_country'] === 'string'
-      ? attributes['start_country']
-      : 'Unknown start';
+    const labelEl = document.createElement('span');
+    labelEl.className = 'threat-lens-tooltip__label';
+    labelEl.textContent = label;
 
-  const endCountry =
-    typeof attributes['end_country'] === 'string'
-      ? attributes['end_country']
-      : 'Unknown end';
+    const valueEl = document.createElement('span');
+    valueEl.className = 'threat-lens-tooltip__value';
+    valueEl.textContent = value;
 
-  const category =
-    typeof attributes['category_label'] === 'string'
-      ? attributes['category_label']
-      : 'Threat';
+    row.append(labelEl, valueEl);
 
-  const weight =
-    typeof attributes['weight'] === 'number'
-      ? attributes['weight']
-      : Number(attributes['weight'] || 0);
-
-  this.hoverTooltipEl.innerHTML = `
-    <div style="min-width:220px">
-
-      <div style="
-        margin-bottom:10px;
-        color:#00e0ff;
-        font-size:13px;
-        font-weight:700;
-        letter-spacing:0.08em;
-        text-transform:uppercase;
-      ">
-        Arc Route
-      </div>
-
-      ${this.buildTooltipRow('Start', startCountry)}
-      ${this.buildTooltipRow('End', endCountry)}
-      ${this.buildTooltipRow('Category', category)}
-      ${this.buildTooltipRow('Records', String(weight))}
-
-    </div>
-  `;
-
-  this.hoverTooltipEl.style.display = 'block';
-
-  this.moveTooltip(event);
-}
-private buildTooltipRow(label: string, value: string): string {
-
-  return `
-    <div style="
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      margin-top:6px;
-    ">
-
-      <span style="
-        color:rgba(255,255,255,0.68);
-        font-size:11px;
-      ">
-        ${label}
-      </span>
-
-      <span style="
-        color:white;
-        font-size:12px;
-        font-weight:700;
-        text-align:right;
-        max-width:140px;
-        overflow:hidden;
-        text-overflow:ellipsis;
-        white-space:nowrap;
-      ">
-        ${value}
-      </span>
-
-    </div>
-  `;
-}
-private clearHoverHighlight(): void {
-  if (this.hoverHighlightHandle) {
-    this.hoverHighlightHandle.remove();
-    this.hoverHighlightHandle = null;
+    return row;
   }
 
-  this.hoveredCountryKey = '';
-}
-private createTooltip(): void {
-  if (!this.isBrowserEnvironment()) {
-    return;
+  private clearHoverHighlight(): void {
+    if (this.hoverHighlightHandle) {
+      this.hoverHighlightHandle.remove();
+      this.hoverHighlightHandle = null;
+    }
+
+    this.hoveredCountryKey = '';
   }
 
-  this.hoverTooltipEl = document.createElement('div');
+  private createTooltip(): void {
+    if (!this.isBrowserEnvironment()) {
+      return;
+    }
 
-  
+    this.hoverTooltipEl = document.createElement('div');
+    this.hoverTooltipEl.className = 'threat-lens-tooltip';
+    this.hoverTooltipEl.hidden = true;
 
-this.hoverTooltipEl.style.boxShadow = '0 0 24px rgba(0,224,255,0.18)';
-
-
-
-  this.hoverTooltipEl.style.position = 'fixed';
-  this.hoverTooltipEl.style.zIndex = '9999';
-
-  this.hoverTooltipEl.style.padding = '6px 10px';
-  this.hoverTooltipEl.style.borderRadius = '8px';
-
-  // this.hoverTooltipEl.style.background = 'rgba(10,15,25,0.92)';
-  this.hoverTooltipEl.style.background ='linear-gradient(180deg, rgba(7,12,22,0.97), rgba(2,6,14,0.98))';
-  this.hoverTooltipEl.style.color = '#fff';
-
-  this.hoverTooltipEl.style.fontSize = '12px';
-  this.hoverTooltipEl.style.fontWeight = '600';
-
-  this.hoverTooltipEl.style.pointerEvents = 'none';
-
-  // this.hoverTooltipEl.style.border = '1px solid rgba(255,255,255,0.15)';
-  this.hoverTooltipEl.style.border ='1px solid rgba(0,224,255,0.15)';
-
-  this.hoverTooltipEl.style.backdropFilter = 'blur(8px)';
-
-  this.hoverTooltipEl.style.display = 'none';
-
-  document.body.appendChild(this.hoverTooltipEl);
-}
-private showTooltip(event: any,
-  countryName: string,
-  threatCount: number,
-  breakdown: SelectedCountryCategoryCount[]
-): void {
-
-  if (!this.hoverTooltipEl) {
-    return;
+    document.body.appendChild(this.hoverTooltipEl);
   }
 
-  const breakdownHtml = breakdown.map(item => `
-    
-    <div style="
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-top:6px;
-      gap:14px;
-    ">
+  private showTooltip( event: any, countryName: string, threatCount: number, breakdown: SelectedCountryCategoryCount[] ): void {
 
-      <div style="
-        display:flex;
-        align-items:center;
-        gap:8px;
-      ">
+    if (!this.hoverTooltipEl) {
+      return;
+    }
 
-        <div style="
-          width:8px;
-          height:8px;
-          border-radius:50%;
-          background:${item.colorHex};
-          box-shadow:0 0 8px ${item.colorHex};
-        "></div>
+    const tooltipContent = document.createElement('div');
+    tooltipContent.className = 'threat-lens-tooltip__content threat-lens-tooltip__content--country';
 
-        <span style="
-          color:rgba(255,255,255,0.82);
-          font-size:11px;
-        ">
-          ${item.label}
-        </span>
+    const countryTitle = document.createElement('div');
+    countryTitle.className = 'threat-lens-tooltip__country-title';
+    countryTitle.textContent = countryName;
 
-      </div>
+    const totalRow = document.createElement('div');
+    totalRow.className = 'threat-lens-tooltip__total-row';
 
-      <span style="
-        color:white;
-        font-size:12px;
-        font-weight:700;
-      ">
-        ${item.count}
-      </span>
+    const totalLabel = document.createElement('span');
+    totalLabel.className = 'threat-lens-tooltip__total-label';
+    totalLabel.textContent = 'Total Threats';
 
-    </div>
+    const totalValue = document.createElement('span');
+    totalValue.className = 'threat-lens-tooltip__total-value';
+    totalValue.textContent = String(threatCount);
 
-  `).join('');
+    totalRow.append(totalLabel, totalValue);
+    tooltipContent.append(countryTitle, totalRow);
 
-  this.hoverTooltipEl.innerHTML = `
+    for (const item of breakdown) {
+      tooltipContent.append(this.buildBreakdownTooltipRow(item));
+    }
 
-    <div style="
-      min-width:180px;
-    ">
+    this.hoverTooltipEl.replaceChildren(tooltipContent);
+    this.hoverTooltipEl.hidden = false;
 
-      <div style="
-        font-size:14px;
-        font-weight:700;
-        color:#ffffff;
-        margin-bottom:10px;
-      ">
-        ${countryName}
-      </div>
-
-      <div style="
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        margin-bottom:10px;
-        padding-bottom:8px;
-        border-bottom:1px solid rgba(255,255,255,0.08);
-      ">
-
-        <span style="
-          color:rgba(255,255,255,0.7);
-          font-size:11px;
-        ">
-          Total Threats
-        </span>
-
-        <span style="
-          color:#00e0ff;
-          font-size:14px;
-          font-weight:700;
-          text-shadow:0 0 12px rgba(0,224,255,0.7);
-        ">
-          ${threatCount}
-        </span>
-
-      </div>
-
-      ${breakdownHtml}
-
-    </div>
-
-  `;
-
-  this.hoverTooltipEl.style.display = 'block';
-
-  this.moveTooltip(event);
-}
-private moveTooltip(event: any): void {
-  if (!this.hoverTooltipEl) {
-    return;
+    this.moveTooltip(event);
   }
 
-  this.hoverTooltipEl.style.left = `${event.x - 16}px`;
-  this.hoverTooltipEl.style.top = `${event.y - 16}px`;
-}
-private hideTooltip(): void {
-  if (this.hoverTooltipEl) {
-    this.hoverTooltipEl.style.display = 'none';
+  private moveTooltip(event: any): void {
+    if (!this.hoverTooltipEl) {
+      return;
+    }
+
+    this.hoverTooltipEl.setAttribute('style', `left:${event.x - 16}px;top:${event.y - 16}px`);
   }
-}
+
+  private hideTooltip(): void {
+    if (this.hoverTooltipEl) {
+      this.hoverTooltipEl.hidden = true;
+    }
+  }
+
+  private buildBreakdownTooltipRow(item: SelectedCountryCategoryCount): HTMLDivElement {
+    const row = document.createElement('div');
+    row.className = 'threat-lens-tooltip__breakdown-row';
+
+    const labelWrap = document.createElement('div');
+    labelWrap.className = 'threat-lens-tooltip__breakdown-label-wrap';
+
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    dot.setAttribute('viewBox', '0 0 12 12');
+    dot.setAttribute('aria-hidden', 'true');
+    dot.setAttribute('color', item.colorHex);
+    dot.classList.add('threat-lens-tooltip__breakdown-dot');
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', '6');
+    circle.setAttribute('cy', '6');
+    circle.setAttribute('r', '5');
+    circle.setAttribute('fill', item.colorHex);
+
+    dot.append(circle);
+
+    const label = document.createElement('span');
+    label.className = 'threat-lens-tooltip__breakdown-label';
+    label.textContent = item.label;
+
+    const count = document.createElement('span');
+    count.className = 'threat-lens-tooltip__breakdown-count';
+    count.textContent = String(item.count);
+
+    labelWrap.append(dot, label);
+    row.append(labelWrap, count);
+
+    return row;
+  }
+
   private async buildCountryFeatureIndex(): Promise<void> {
     if (!this.countryLayer) {
       return;
@@ -1133,8 +1042,8 @@ private hideTooltip(): void {
     if (!this.arcGraphicsLayer || !this.arcSurfaceGraphicsLayer) {
       return;
     }
-this.startMarkerGraphics = [];
-this.endMarkerGraphics = [];
+    this.startMarkerGraphics = [];
+    this.endMarkerGraphics = [];
     const items = batchItems ?? (index >= 0 ? this.animatedArcs.slice(index * this.arcBatchSize, (index + 1) * this.arcBatchSize) : []);
     this.visibleBatchIndex = index;
     this.arcGraphicsLayer.removeAll();
@@ -1157,16 +1066,16 @@ this.endMarkerGraphics = [];
       attributes: {
         role: 'arc',
 
-  category: arc.categoryKey,
-  category_label: arc.categoryLabel,
+        category: arc.categoryKey,
+        category_label: arc.categoryLabel,
 
-  country_a: arc.countryAKey,
-  country_b: arc.countryBKey,
+        country_a: arc.countryAKey,
+        country_b: arc.countryBKey,
 
-  start_country: arc.countryAName,
-  end_country: arc.countryBName,
+        start_country: arc.countryAName,
+        end_country: arc.countryBName,
 
-  weight: arc.weight,
+        weight: arc.weight,
         // category: arc.categoryKey,
         // country_a: arc.countryAKey,
         // country_b: arc.countryBKey,
@@ -1204,16 +1113,16 @@ this.endMarkerGraphics = [];
       attributes: {
         role: 'arc-surface',
 
-  category: arc.categoryKey,
-  category_label: arc.categoryLabel,
+        category: arc.categoryKey,
+        category_label: arc.categoryLabel,
 
-  country_a: arc.countryAKey,
-  country_b: arc.countryBKey,
+        country_a: arc.countryAKey,
+        country_b: arc.countryBKey,
 
-  start_country: arc.countryAName,
-  end_country: arc.countryBName,
+        start_country: arc.countryAName,
+        end_country: arc.countryBName,
 
-  weight: arc.weight,
+        weight: arc.weight,
         // category: arc.categoryKey,
         // country_a: arc.countryAKey,
         // country_b: arc.countryBKey,
@@ -1233,90 +1142,90 @@ this.endMarkerGraphics = [];
 
     for (const arc of items) {
       const movingDotSize = Math.min(120000, this.movingDotBaseSize + (arc.weight * 2200));
-const startPoint = arc.arcPoints[0];
-const endPoint = arc.arcPoints[arc.arcPoints.length - 1];
-this.startMarkerGraphics.push({
-  geometry: {
-    type: 'point',
-    longitude: startPoint[0],
-    latitude: startPoint[1],
-    z: startPoint[2],
-    spatialReference: { wkid: 4326 }
-  },
-
-  attributes: {
-    role: 'arc-start',
-
-    start_country: arc.countryAName,
-    end_country: arc.countryBName,
-
-    category_label: arc.categoryLabel,
-    weight: arc.weight,
-  },
-
-  symbol: {
-    type: 'point-3d',
-
-    symbolLayers: [
-      {
-        type: 'object',
-
-        resource: {
-          primitive: 'sphere'
+      const startPoint = arc.arcPoints[0];
+      const endPoint = arc.arcPoints[arc.arcPoints.length - 1];
+      this.startMarkerGraphics.push({
+        geometry: {
+          type: 'point',
+          longitude: startPoint[0],
+          latitude: startPoint[1],
+          z: startPoint[2],
+          spatialReference: { wkid: 4326 }
         },
 
-        width: 90000,
-        height: 90000,
-        depth: 90000,
+        attributes: {
+          role: 'arc-start',
 
-        material: {
-          color: [...arc.color, 1]
-        }
-      }
-    ]
-  }
-});
-this.endMarkerGraphics.push({
-  geometry: {
-    type: 'point',
-    longitude: endPoint[0],
-    latitude: endPoint[1],
-    z: endPoint[2],
-    spatialReference: { wkid: 4326 }
-  },
+          start_country: arc.countryAName,
+          end_country: arc.countryBName,
 
-  attributes: {
-    role: 'arc-end',
-
-    start_country: arc.countryAName,
-    end_country: arc.countryBName,
-
-    category_label: arc.categoryLabel,
-    weight: arc.weight,
-  },
-
-  symbol: {
-    type: 'point-3d',
-
-    symbolLayers: [
-      {
-        type: 'object',
-
-        resource: {
-          primitive: 'sphere'
+          category_label: arc.categoryLabel,
+          weight: arc.weight,
         },
 
-        width: 120000,
-        height: 120000,
-        depth: 120000,
+        symbol: {
+          type: 'point-3d',
 
-        material: {
-          color: [...arc.color, 0.85]
+          symbolLayers: [
+            {
+              type: 'object',
+
+              resource: {
+                primitive: 'sphere'
+              },
+
+              width: 90000,
+              height: 90000,
+              depth: 90000,
+
+              material: {
+                color: [...arc.color, 1]
+              }
+            }
+          ]
         }
-      }
-    ]
-  }
-});
+      });
+      this.endMarkerGraphics.push({
+        geometry: {
+          type: 'point',
+          longitude: endPoint[0],
+          latitude: endPoint[1],
+          z: endPoint[2],
+          spatialReference: { wkid: 4326 }
+        },
+
+        attributes: {
+          role: 'arc-end',
+
+          start_country: arc.countryAName,
+          end_country: arc.countryBName,
+
+          category_label: arc.categoryLabel,
+          weight: arc.weight,
+        },
+
+        symbol: {
+          type: 'point-3d',
+
+          symbolLayers: [
+            {
+              type: 'object',
+
+              resource: {
+                primitive: 'sphere'
+              },
+
+              width: 120000,
+              height: 120000,
+              depth: 120000,
+
+              material: {
+                color: [...arc.color, 0.85]
+              }
+            }
+          ]
+        }
+      });
       const graphic = {
         geometry: null,
         symbol: {
@@ -1340,10 +1249,10 @@ this.endMarkerGraphics.push({
     this.animatedArcGraphicsLayer.removeAll();
     // this.animatedArcGraphicsLayer.addMany(this.movingDotGraphics);
     this.animatedArcGraphicsLayer.addMany([
-  ...this.startMarkerGraphics,
-  ...this.endMarkerGraphics,
-  ...this.movingDotGraphics,
-]);
+      ...this.startMarkerGraphics,
+      ...this.endMarkerGraphics,
+      ...this.movingDotGraphics,
+    ]);
 
   }
 
