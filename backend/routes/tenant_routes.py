@@ -91,7 +91,7 @@ async def update_user(user: tenant_param_model, current_user=Depends(get_current
 @tenant_routes.post(
     "/api/update/current/user",
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))], )
 async def update_user(user: user_meta_model, current_user=Depends(get_current_user)):
     return await AccountManager.get_instance().update_current_user(user, current_user)
 

@@ -20,14 +20,12 @@ _leak_deps = [
 ]
 
 @crawl_routes.get(
-    "/api/feeder/{index_type}",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
+    "/api/feeder/{index_type}")
 async def feeder(index_type: str):
     return await crawl_model.getInstance().invoke_fetch_feeder(index_type)
 
 
-@crawl_routes.get(
-    "/api/parser")
+@crawl_routes.get("/api/parser")
 async def parser():
     return await crawl_model.getInstance().invoke_fetch_parser()
 
@@ -126,8 +124,9 @@ async def upload_feeder_script(
         mode: str = Form(...),
         values_text: str | None = Form(None),
         file: UploadFile | None = File(None),
+        session_file: UploadFile | None = File(None),
         current_user=Depends(get_current_user)):
-    return await FeederManager.get_instance().upload_script(rule_key, mode, file, values_text, current_user)
+    return await FeederManager.get_instance().upload_script(rule_key, mode, file, values_text, session_file, current_user)
 
 
 @crawl_routes.post(

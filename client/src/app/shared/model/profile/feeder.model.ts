@@ -26,6 +26,7 @@ export interface FeederScriptItem {
   enabled: boolean;
   file_name: string;
   path?: string | null;
+  session_file_name?: string | null;
   content?: string | null;
   url?: string | null;
   values: FeederValueItem[];

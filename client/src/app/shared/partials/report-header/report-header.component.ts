@@ -118,6 +118,14 @@ export class ReportHeaderComponent {
     this.proxied_resource.open(fullUrl);
   }
 
+  showCtiGraph(): boolean {
+    if (!this.route.url.toLowerCase().includes('/strategic/')) {
+      return true;
+    }
+    const cleanUrl = (this.url() || '').trim().split(/[?#]/)[0].replace(/\/+$/, '');
+    return cleanUrl.endsWith('.onion');
+  }
+
   aiSuggest() {
     this.aiSummary?.summarize();
   }

@@ -158,7 +158,7 @@
                       <div class="grid grid-cols-1 gap-0 px-[14px] py-[8px] md:grid-cols-2 md:gap-x-[18px] max-[640px]:px-[10px]">
                         @for (item of section.items; track $index; let itemIdx = $index) {
                           <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [ngClass]="{ 'border-b-0': isLastSectionRow(section, itemIdx) }">
-                            <div class="w-[112px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[86px]">{{ item.label }}</div>
+                            <div class="w-[150px] shrink-0 break-words font-[Inter] text-[10px] font-[700] uppercase leading-[1.25] tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[110px]" [title]="item.label">{{ item.label }}</div>
                             <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                               <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [title]="item.value">{{ item.value }}</div>
                               <button type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" [appTooltip]="copiedValue() === item.value ? 'Copied' : 'Copy'" (click)="copyValue(item.value)">

@@ -43,6 +43,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   messageDraft = '';
   messages: AiWorkspaceMessage[] = [];
   composerExpanded = false;
+  composerRows = 1;
+  composerScrollable = false;
 
   constructor(private readonly api: ApiService, protected readonly appService: AppService, private readonly route: ActivatedRoute, private readonly router: Router, private readonly subscriptionService: SubscriptionService, protected readonly licenseService: LicenseService, private readonly nexusChatService: NexusChatService) {
     this.queryContext = (this.route.snapshot.queryParamMap.get('q') || '').trim();
@@ -133,6 +135,9 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         if (requestId !== this.chatRequestId) {
           return;
         }
+        if (chunk.status) {
+          this.nexusStep.set(chunk.status);
+        }
         if (chunk.delta) {
           reply += chunk.delta;
           updateReply(reply);
@@ -177,14 +182,10 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       return;
     }
 
-    requestAnimationFrame(() => {
-      const currentTextarea = this.composerInput?.nativeElement;
-      if (!currentTextarea) {
-        return;
-      }
-      const nextHeight = Math.max(32, currentTextarea.scrollHeight);
-      this.composerExpanded = nextHeight > 32;
-    });
+    const lineCount = this.getComposerLineCount(textarea);
+    this.composerRows = Math.min(5, lineCount);
+    this.composerScrollable = lineCount > 5;
+    this.composerExpanded = this.composerRows > 1;
   }
 
   usePrompt(prompt: string): void {
@@ -378,5 +379,15 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   queueComposerResize(): void {
     requestAnimationFrame(() => this.resizeComposer());
+  }
+
+  private getComposerLineCount(textarea: HTMLTextAreaElement): number {
+    const horizontalPadding = 24;
+    const averageCharWidth = 7;
+    const availableWidth = Math.max(averageCharWidth, textarea.clientWidth - horizontalPadding);
+    const charsPerLine = Math.max(1, Math.floor(availableWidth / averageCharWidth));
+    const lines = (textarea.value || '').split('\n');
+
+    return Math.max(1, lines.reduce((total, line) => total + Math.max(1, Math.ceil(line.length / charsPerLine)), 0));
   }
 }

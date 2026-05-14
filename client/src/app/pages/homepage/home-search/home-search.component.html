@@ -1,25 +1,28 @@
-<div class="flex flex-nowrap gap-2 overflow-x-auto max-w-full whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]" [ngClass]="compactLayout() ? 'mt-[4px] mx-[2px] mb-[15px] max-[1000px]:mx-0 max-[640px]:mt-0 max-[640px]:mx-[2px]' : 'mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[943px]:mx-[10px]'">
-  @if (licenseService.canUseModule('ai') && app_service.configData().appSettings.ai_endpoint_enabled) {
-    <button type="button" data-testid="ioc-basic-tag-AI" [routerLink]="['/dashboard/profile/ai']" [queryParams]="{ q: searchQuery || null }" queryParamsHandling="merge" class="ui-home-ai-button group flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border border-[rgba(87,165,235,0.18)] bg-[linear-gradient(180deg,rgba(87,165,235,0.14)_0%,rgba(87,165,235,0.08)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-200 hover:border-[rgba(87,165,235,0.3)] hover:bg-[linear-gradient(180deg,rgba(87,165,235,0.18)_0%,rgba(87,165,235,0.12)_100%)]" aria-label="Open AI workspace">
-      <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" class="h-[14px] w-[14px] drop-shadow-[0_1px_4px_rgba(255,255,255,0.18)]">
-        <defs>
-          <linearGradient id="homepage-ai-stars-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#7dd3fc"></stop>
-            <stop offset="35%" stop-color="#a78bfa"></stop>
-            <stop offset="68%" stop-color="#f472b6"></stop>
-            <stop offset="100%" stop-color="#facc15"></stop>
-          </linearGradient>
-        </defs>
-        <path fill="url(#homepage-ai-stars-gradient)" d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.73 1.73 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.73 1.73 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.73 1.73 0 0 0 3.407 2.31zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732L9.1 2.137a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"></path>
-      </svg>
-    </button>
-  }
-  @for (tab of ["IOCs", "Deep Search", "Network Intelligence"]; track tab) {
-    <div [attr.data-testid]="'ioc-basic-tag-' + tab" (click)="selectTab(tab)" [ngClass]="selectedTab === tab ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]'" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors">
-      {{ tab }}
-    </div>
-  }
-</div>
+@if (app_service.userSessionData().user.role === 'admin' || licenseService.isMaintainer() ||
+  (app_service.userSessionData().user.role === 'analyst' && licenseService.getLicenses().includes('enterprise'))) {
+  <div class="flex flex-nowrap gap-2 overflow-x-auto max-w-full whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]" [ngClass]="compactLayout() ? 'mt-[4px] mx-[2px] mb-[15px] max-[1000px]:mx-0 max-[640px]:mt-0 max-[640px]:mx-[2px]' : 'mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[943px]:mx-[10px]'">
+    @if (licenseService.canUseModule('ai') && app_service.configData().appSettings.ai_endpoint_enabled) {
+      <button type="button" data-testid="ioc-basic-tag-AI" [routerLink]="['/dashboard/profile/ai']" [queryParams]="{ q: searchQuery || null }" queryParamsHandling="merge" class="ui-home-ai-button group flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border border-[rgba(87,165,235,0.18)] bg-[linear-gradient(180deg,rgba(87,165,235,0.14)_0%,rgba(87,165,235,0.08)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-200 hover:border-[rgba(87,165,235,0.3)] hover:bg-[linear-gradient(180deg,rgba(87,165,235,0.18)_0%,rgba(87,165,235,0.12)_100%)]" aria-label="Open AI workspace">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" class="h-[14px] w-[14px] drop-shadow-[0_1px_4px_rgba(255,255,255,0.18)]">
+          <defs>
+            <linearGradient id="homepage-ai-stars-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#7dd3fc"></stop>
+              <stop offset="35%" stop-color="#a78bfa"></stop>
+              <stop offset="68%" stop-color="#f472b6"></stop>
+              <stop offset="100%" stop-color="#facc15"></stop>
+            </linearGradient>
+          </defs>
+          <path fill="url(#homepage-ai-stars-gradient)" d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.73 1.73 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.73 1.73 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.73 1.73 0 0 0 3.407 2.31zM10.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732L9.1 2.137a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"></path>
+        </svg>
+      </button>
+    }
+    @for (tab of ["IOCs", "Deep Search", "Network Intelligence"]; track tab) {
+      <div [attr.data-testid]="'ioc-basic-tag-' + tab" (click)="selectTab(tab)" [ngClass]="selectedTab === tab ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]'" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors">
+        {{ tab }}
+      </div>
+    }
+  </div>
+}
 <form (submit)="onSearchSubmit($event)" class="flex items-center max-[550px]:grid" [ngClass]="compactLayout() ? 'mt-[4px] mx-[2px] mb-[6px] max-[1000px]:mx-0 max-[640px]:mt-0 max-[640px]:mx-[2px]' : 'mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[943px]:mx-[10px]'">
   <div class="flex w-full flex-wrap items-start justify-between">
     <div class="w-full">
@@ -27,8 +30,8 @@
         <div class="fixed inset-0 z-[50] hidden max-[550px]:block bg-[rgba(0,0,0,0.7)]"></div>
       }
 
-      @if (app_service.userSessionData().user.role === 'admin' || licenseService.getLicenses().includes('enterprise') ||
-        app_service.userSessionData().user.role === 'analyst' || licenseService.isMaintainer()) {
+      @if (app_service.userSessionData().user.role === 'admin' || licenseService.isMaintainer() ||
+        (app_service.userSessionData().user.role === 'analyst' && licenseService.getLicenses().includes('enterprise'))) {
         <div class="relative">
           <div >
           <div id="homeSearch" class="mb-[8px] flex h-[42px] w-full max-w-[910px] flex-nowrap overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-[calc(100vw-90px)] max-[550px]:px-0 max-[550px]:mr-0': !homeSearchService.showFiltersOverlay }">
@@ -96,7 +99,7 @@
       @if (!hideHeatmapAndAnalytics()) {
         @defer (on idle) {
           <div>
-            <app-world-heatmap [canOpenReports]="app_service.userSessionData().user.role === 'admin' || licenseService.getLicenses().includes('enterprise') || app_service.userSessionData().user.role === 'analyst'"></app-world-heatmap>
+            <app-world-heatmap [canOpenReports]="app_service.userSessionData().user.role === 'admin' || licenseService.isMaintainer() || (app_service.userSessionData().user.role === 'analyst' && licenseService.getLicenses().includes('enterprise'))"></app-world-heatmap>
           </div>
           <div class="relative will-change-transform transition-transform duration-300 ease-out" [class.transition-none]="insightDragging" [ngClass]="'ui-translate-y-neg-' + insightTranslateY">
               <div class="absolute left-1/2 top-[-54px] z-[30] -translate-x-1/2 touch-none select-none" (click)="onInsightToggleClick($event)" (pointerdown)="onInsightPointerDown($event)">

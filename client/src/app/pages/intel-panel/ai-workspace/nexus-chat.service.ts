@@ -7,12 +7,20 @@ import { ApiService } from '../../../shared/services/api.service';
 
 @Injectable({ providedIn: 'root' })
 export class NexusChatService {
+  private readonly streamTimeoutMs = 900000;
+
   constructor(private readonly api: ApiService) {}
 
   streamNexusChat(payload: NexusChatPayload): Observable<NexusChatStreamChunk> {
     return new Observable<NexusChatStreamChunk>((observer) => {
       const controller = new AbortController();
       let cancelled = false;
+      let timedOut = false;
+      const timeoutId = window.setTimeout(() => {
+        timedOut = true;
+        this.cancelNexusChat();
+        controller.abort();
+      }, this.streamTimeoutMs);
       const token = localStorage.getItem('token');
       const headers: Record<string, string> = {
         Accept: 'application/x-ndjson',
@@ -55,15 +63,22 @@ export class NexusChatService {
         this.emitStreamLines(`${buffer}\n`, observer);
         observer.complete();
       }).catch((error) => {
+        if (timedOut) {
+          observer.error(new Error('Nexus chat timed out.'));
+          return;
+        }
         if (cancelled || error?.name === 'AbortError') {
           observer.complete();
           return;
         }
         observer.error(error);
+      }).finally(() => {
+        window.clearTimeout(timeoutId);
       });
 
       return () => {
         cancelled = true;
+        window.clearTimeout(timeoutId);
         controller.abort();
       };
     });
@@ -157,10 +172,15 @@ export class NexusChatService {
       const output = this.asRecord(parsed?.output);
       const delta = output?.['delta'];
       const response = output?.['response'];
+      const status = this.asRecord(parsed?.status);
+      const statusMessage = status?.['message'] ?? parsed?.status_message;
       const error = this.asRecord(parsed?.error);
       let detail = parsed?.detail ?? error?.['message'];
       if (typeof detail === 'string' && detail.toLowerCase().includes('stream is already active')) {
         detail = 'Nexus is still finishing the previous chat. Try again in a moment.';
+      }
+      if (statusMessage !== undefined) {
+        observer.next({ status: this.streamValueToText(statusMessage) });
       }
       if (delta !== undefined) {
         observer.next({ delta: this.streamValueToText(delta) });

@@ -47,5 +47,30 @@
     "rule_type": "shared",
     "path": "social/platform",
     "value_regex": "^https?://(?:www\\.)?x\\.com(?:/.*)?$"
+  },
+  "facebook": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?(?:facebook\\.com|fb\\.com|fb\\.me)(?:/.*)?$"
+  },
+  "instagram": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?instagram\\.com(?:/.*)?$"
+  },
+  "tiktok": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?tiktok\\.com(?:/.*)?$"
+  },
+  "youtube": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?(?:youtube\\.com|youtu\\.be)(?:/.*)?$"
+  },
+  "whatsapp": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?(?:whatsapp\\.com|wa\\.me)(?:/.*)?$"
   }
 }

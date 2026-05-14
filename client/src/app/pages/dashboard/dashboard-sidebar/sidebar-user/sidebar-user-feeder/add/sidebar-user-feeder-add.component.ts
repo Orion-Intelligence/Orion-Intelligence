@@ -14,12 +14,14 @@ import { supportsFileUploadForRuleType, supportsValueUploadForRuleType } from '.
   templateUrl: './sidebar-user-feeder-add.component.html',
 })
 export class SidebarUserFeederAddComponent implements OnChanges {
-  private readonly maxFileSize = 15 * 1024;
+  private readonly maxFileSize = 50 * 1024;
   private pendingUploadInput: HTMLInputElement | null = null;
 
   sharedRuleScripts: FeederScriptItem[] = [];
   uploadMode: 'file' | 'values' = 'file';
   selectedFiles: File[] = [];
+  selectedSessionFile: File | null = null;
+  uploadedSessionFileName = '';
   valuesText = '';
   isSubmitting = false;
   isSharedScriptStatusLoading = false;
@@ -44,6 +46,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
       this.loadSharedRuleScripts();
       this.loadCurrentRuleValues();
       this.formError = '';
+      this.uploadedSessionFileName = '';
     }
   }
 
@@ -57,6 +60,10 @@ export class SidebarUserFeederAddComponent implements OnChanges {
 
   hasSharedScriptUploaded(): boolean {
     return this.sharedRuleScripts.length > 0;
+  }
+
+  get currentSessionFileName(): string {
+    return this.selectedSessionFile?.name || this.uploadedSessionFileName || this.sharedRuleScripts.find(script => script.session_file_name)?.session_file_name || '';
   }
 
   isSharedValueBlocked(): boolean {
@@ -88,6 +95,11 @@ export class SidebarUserFeederAddComponent implements OnChanges {
     this.selectedFiles = Array.from(input.files || []);
   }
 
+  onSessionFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.selectedSessionFile = input.files?.[0] || null;
+  }
+
   supportsValueUpload(): boolean {
     return supportsValueUploadForRuleType(this.selectedRuleType);
   }
@@ -110,6 +122,11 @@ export class SidebarUserFeederAddComponent implements OnChanges {
     input.value = '';
     this.selectedFiles = [];
     this.resetUploadProgress();
+  }
+
+  clearSessionFile(input: HTMLInputElement): void {
+    input.value = '';
+    this.selectedSessionFile = null;
   }
 
   uploadScript(fileInput: HTMLInputElement): void {
@@ -136,7 +153,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
       this.submitUpload(fileInput);
       return;
     }
-    if (!this.selectedFiles.length) {
+    if (!this.selectedFiles.length && !this.selectedSessionFile) {
       this.formError = 'Python file is required';
       return;
     }
@@ -146,7 +163,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
         return;
       }
       if (file.size > this.maxFileSize) {
-        this.formError = 'File size must be 15 KB or less';
+        this.formError = 'File size must be 50 KB or less';
         return;
       }
     }
@@ -160,10 +177,16 @@ export class SidebarUserFeederAddComponent implements OnChanges {
       .subscribe({
         next: (response) => {
           const existingScripts = this.findExistingScripts(response?.scripts ?? []);
+          const existingSessionScripts = this.findExistingSessionScripts(response?.scripts ?? []);
           if (existingScripts.length) {
             this.replaceConfirmationMessage = existingScripts.length === 1
               ? `A script named ${this.formatReplacementName(existingScripts[0].file_name)} already exists in this destination. Are you sure you want to replace it?`
               : `${existingScripts.length} selected scripts already exist in this destination. Are you sure you want to replace them?`;
+            this.isReplaceConfirmationOpen = true;
+            return;
+          }
+          if (existingSessionScripts.length) {
+            this.replaceConfirmationMessage = `A session file named ${existingSessionScripts[0].session_file_name} already exists in this destination. Are you sure you want to replace it?`;
             this.isReplaceConfirmationOpen = true;
             return;
           }
@@ -228,7 +251,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
     this.deferStateUpdate(() => {
       this.sharedRuleScripts = [];
     });
-    if (this.selectedRuleType !== 'shared' || !this.selectedRuleKey) {
+    if (!this.selectedRuleKey || !this.supportsFileUpload()) {
       this.deferStateUpdate(() => {
         this.isSharedScriptStatusLoading = false;
       });
@@ -264,11 +287,15 @@ export class SidebarUserFeederAddComponent implements OnChanges {
   }
 
   private submitUpload(fileInput: HTMLInputElement): void {
-    if (this.uploadMode === 'file' && !this.selectedFiles.length) {
+    if (this.uploadMode === 'file' && !this.selectedFiles.length && !this.selectedSessionFile) {
       return;
     }
 
     if (this.uploadMode === 'file') {
+      if (!this.selectedFiles.length && this.selectedSessionFile) {
+        this.submitSessionUpload(fileInput);
+        return;
+      }
       this.submitFileUploads(fileInput, 0, null);
       return;
     }
@@ -302,6 +329,33 @@ export class SidebarUserFeederAddComponent implements OnChanges {
       });
   }
 
+  private submitSessionUpload(fileInput: HTMLInputElement): void {
+    const formData = new FormData();
+    formData.append('rule_key', this.selectedRuleKey);
+    formData.append('mode', 'file');
+    formData.append('session_file', this.selectedSessionFile!);
+
+    this.isSubmitting = true;
+    this.feederService.upload(formData)
+      .pipe(finalize(() => {
+        this.isSubmitting = false;
+      }))
+      .subscribe({
+        next: (response) => {
+          this.messageNotificationService.show(response?.message || 'Session file uploaded successfully', 'success');
+          this.uploadedSessionFileName = response?.script?.session_file_name || this.selectedSessionFile?.name || '';
+          if (this.selectedRuleType === 'shared' && response?.script) {
+            this.sharedRuleScripts = [response.script];
+          }
+          this.selectedSessionFile = null;
+          fileInput.value = '';
+        },
+        error: (error) => {
+          this.formError = error?.error?.detail || 'Failed to upload session file';
+        }
+      });
+  }
+
   private submitFileUploads(fileInput: HTMLInputElement, index: number, lastUploadedScript: FeederScriptItem | null): void {
     const file = this.selectedFiles[index];
     if (!file) {
@@ -309,6 +363,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
       this.resetUploadProgress();
       this.messageNotificationService.show('Upload completed successfully', 'success');
       this.selectedFiles = [];
+      this.selectedSessionFile = null;
       fileInput.value = '';
       if (lastUploadedScript) {
         if (this.selectedRuleType === 'shared') {
@@ -323,6 +378,9 @@ export class SidebarUserFeederAddComponent implements OnChanges {
     formData.append('rule_key', this.selectedRuleKey);
     formData.append('mode', this.uploadMode);
     formData.append('file', file);
+    if (this.selectedSessionFile) {
+      formData.append('session_file', this.selectedSessionFile);
+    }
 
     this.isSubmitting = true;
     this.uploadProgressTotal = this.selectedFiles.length;
@@ -354,6 +412,16 @@ export class SidebarUserFeederAddComponent implements OnChanges {
     return existingScripts.filter((script) =>
       (script.path || '') === (this.selectedRule?.path || '')
       && normalizedNames.has(script.file_name));
+  }
+
+  private findExistingSessionScripts(existingScripts: FeederScriptItem[]): FeederScriptItem[] {
+    if (!this.selectedSessionFile || this.uploadMode !== 'file') {
+      return [];
+    }
+
+    return existingScripts.filter((script) =>
+      (script.path || '') === (this.selectedRule?.path || '')
+      && !!script.session_file_name);
   }
 
   private sanitizeFileName(fileName: string): string {

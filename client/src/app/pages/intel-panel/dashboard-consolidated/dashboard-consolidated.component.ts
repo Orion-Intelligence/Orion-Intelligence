@@ -146,6 +146,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     if (!this.dashboardService.consolidatedParamModel.q) {
       this.isStealerLogLoading.set(false);
       this.dashboardService.consolidatedParamModel.q = '';
+      this.dashboardService.consolidatedParamModel.ioc='';
       this.router.navigate([], { queryParams: {}, queryParamsHandling: '' }).then();
     }
     const cleanedParams: any = {};
@@ -186,6 +187,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     if (this.isEmailOrUrl(this.dashboardService.consolidatedParamModel.q)) {
       this.isStealerLogLoading.set(true);
       this.dashboardService.consolidatedParamModel.url = this.dashboardService.consolidatedParamModel.q;
+      this.dashboardService.consolidatedParamModel.ioc = `m_search_all:${this.dashboardService.consolidatedParamModel.q}`;
       this.dashboardService.consolidatedParamModel.category = "credential";
       this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealer/ioc', this.dashboardService.consolidatedParamModel)
         .pipe(switchMap(response => timer(300).pipe(map(() => response))))

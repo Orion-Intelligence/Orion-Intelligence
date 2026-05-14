@@ -8,11 +8,122 @@ LOCAL_SSL_DIR="backend/.ssl"
 LOCAL_SSL_CERT="$LOCAL_SSL_DIR/localhost-cert.pem"
 LOCAL_SSL_KEY="$LOCAL_SSL_DIR/localhost-key.pem"
 
+is_port_listening() {
+    local port="$1"
+    if command -v ss >/dev/null 2>&1; then
+        ss -ltn 2>/dev/null | grep -Eq "127\\.0\\.0\\.1:$port|0\\.0\\.0\\.0:$port|\\*:$port|\\[::\\]:$port"
+        return $?
+    fi
+
+    if command -v lsof >/dev/null 2>&1; then
+        lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1
+        return $?
+    fi
+
+    return 1
+}
+
+get_port_pids() {
+    local port="$1"
+    if command -v ss >/dev/null 2>&1; then
+        ss -ltnp 2>/dev/null \
+            | awk -v port=":$port" '$0 ~ port {print $NF}' \
+            | sed -n 's/.*pid=\([0-9]\+\).*/\1/p' \
+            | sort -u || true
+        return 0
+    fi
+
+    if command -v lsof >/dev/null 2>&1; then
+        lsof -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null | sort -u || true
+        return 0
+    fi
+
+    return 0
+}
+
 stop_docker() {
     docker compose -p "$PROJECT_NAME" down --remove-orphans
     rm -rf staticfiles
     docker stop trusted-web-nginx 2>/dev/null || true
     docker rm trusted-web-nginx 2>/dev/null || true
+}
+
+create_parser_zip() {
+    PARSER_DIR="backend/static/.well-known/parser_files"
+    OUTPUT_DIR="backend/static/.well-known"
+    ZIP_FILE="$OUTPUT_DIR/parser_files.zip"
+
+    if ! command -v zip >/dev/null 2>&1; then
+        echo "Error: 'zip' command not found. Please install 'zip' and try again."
+        exit 1
+    fi
+
+    [ -f "$ZIP_FILE" ] && rm -f "$ZIP_FILE"
+    if [ -d "$PARSER_DIR" ]; then
+        (cd "$PARSER_DIR" && zip -r "../parser_files.zip" .) || exit 1
+    fi
+}
+
+stop_local_frontend_server() {
+    local pids
+    pids="$(get_port_pids 4200)"
+    if [ -n "$pids" ]; then
+        echo "Stopping local frontend process on port 4200: $pids"
+        kill $pids 2>/dev/null || true
+        sleep 2
+    fi
+}
+
+start_local_frontend_server() {
+    if is_port_listening 4200; then
+        return 0
+    fi
+
+    if [ ! -x "client/node_modules/.bin/ng" ]; then
+        npm --prefix client install
+    fi
+
+    echo "Starting Angular dev server on http://127.0.0.1:4200"
+    (
+        cd client || exit 1
+        if command -v setsid >/dev/null 2>&1; then
+            setsid npx ng serve --host 0.0.0.0 --port 4200 --allowed-hosts all --proxy-config proxy.conf.json > .ng-serve.log 2>&1 < /dev/null &
+        else
+            nohup npx ng serve --host 0.0.0.0 --port 4200 --allowed-hosts all --proxy-config proxy.conf.json > .ng-serve.log 2>&1 < /dev/null &
+        fi
+    )
+}
+
+wait_for_local_frontend_server() {
+    echo "Waiting for Angular dev server on http://127.0.0.1:4200"
+    for _ in $(seq 1 90); do
+        if curl -fsS http://127.0.0.1:4200/ >/dev/null 2>&1; then
+            return 0
+        fi
+        sleep 2
+    done
+
+    echo "Angular dev server did not become ready. Last frontend log lines:"
+    tail -60 client/.ng-serve.log 2>/dev/null || true
+    exit 1
+}
+
+wait_for_dev_gateway() {
+    echo "Waiting for dev gateway on http://127.0.0.1:8080"
+    local token_status
+    for _ in $(seq 1 90); do
+        token_status="$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:8080/api/token || true)"
+        if curl -fsS http://127.0.0.1:8080/ >/dev/null 2>&1 \
+            && curl -fsS http://127.0.0.1:8080/api/public >/dev/null 2>&1 \
+            && { [ "$token_status" = "422" ] || [ "$token_status" = "401" ]; }; then
+            return 0
+        fi
+        sleep 2
+    done
+
+    echo "Dev gateway did not become ready. Recent nginx and backend logs:"
+    docker compose -p "$PROJECT_NAME" -f docker-compose.yml --profile dev logs --tail=80 nginx-dev web-dev 2>/dev/null || true
+    exit 1
 }
 
 ensure_local_ssl_cert() {
@@ -137,6 +248,7 @@ generate_docs() {
     fi
 
     cd client || exit
+    npm test -- run --browser electron --config baseUrl="http://127.0.0.1:8080" --spec cypress/e2e/05-user-management.cy.ts
     npm test -- run --browser electron --config baseUrl="http://127.0.0.1:8080" --spec cypress/e2e/08-tenant-management.cy.ts
     mkdir -p "$target_dir"
     rm -rf "$nested_dir"
@@ -219,6 +331,31 @@ if [ "$1" = "-docs" ]; then
     exit 0
 fi
 
+if [ "$1" = "dev" ]; then
+    echo "Starting Orion Intelligence dev mode"
+    echo "Stopping Docker services for project $PROJECT_NAME"
+    stop_docker
+    echo "Checking local Angular dev server on port 4200"
+    stop_local_frontend_server
+    echo "Starting local Angular dev server"
+    start_local_frontend_server
+    wait_for_local_frontend_server
+    echo "Preparing parser assets"
+    create_parser_zip
+    echo "Writing local development environment values"
+    set_testing_enabled "default"
+    set_swarm_url_to_local_ip
+    ensure_local_ssl_cert
+    echo "Ensuring shared Docker network exists"
+    docker network create --driver bridge shared_bridge 2>/dev/null || true
+    echo "Starting Docker dev services from docker-compose.yml profile dev"
+    docker compose -p "$PROJECT_NAME" -f docker-compose.yml --profile dev up -d --build web-dev nginx-dev
+    wait_for_dev_gateway
+    echo "Orion Intelligence dev services started"
+    echo "Open http://127.0.0.1:4200 or http://127.0.0.1:8080"
+    exit 0
+fi
+
 stop_docker
 
 COMMAND=$1
@@ -277,7 +414,11 @@ if [ "$COMMAND" = "build" ]; then
             ;;
     esac
 
-    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build
+    if [ "$COMPOSE_FILE" = "docker-compose.yml" ]; then
+        docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build web
+    else
+        docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build
+    fi
 
 elif [ "$COMMAND" = "production" ]; then
     use_compose_file "production"
@@ -286,7 +427,11 @@ else
 fi
 
 docker network create --driver bridge shared_bridge 2>/dev/null || true
-docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
+if [ "$COMPOSE_FILE" = "docker-compose.yml" ]; then
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d web nginx
+else
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
+fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     wait_for_server

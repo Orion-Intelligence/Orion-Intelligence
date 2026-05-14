@@ -120,17 +120,21 @@
             <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
               <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
             </div>
-            <div class="max-w-[240px] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
+            <div class="max-w-[300px] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
               <div class="flex min-h-[20px] items-center gap-2 px-1">
                 <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
                 <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">Thinking</span>
               </div>
-              <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
-                <div class="flex items-center gap-2">
-                  <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
-                  <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:140ms]"></span>
-                  <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:280ms]"></span>
-                  <span class="ml-1 text-[12px] text-[var(--color-text4)]">{{ nexusStep() }}</span>
+              <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot min-w-0 w-[280px] max-w-full rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
+                <div class="flex min-w-0 flex-col gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
+                    <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:140ms]"></span>
+                    <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:280ms]"></span>
+                  </div>
+                  @if (nexusStep()) {
+                    <span class="block max-w-full truncate whitespace-nowrap text-[12px] leading-5 text-[var(--color-text4)]">{{ nexusStep() }}</span>
+                  }
                 </div>
               </div>
             </div>
@@ -149,7 +153,7 @@
 
         <form novalidate class="border border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-800)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded">
           <div class="flex items-end gap-2">
-            <textarea #composerInput [(ngModel)]="messageDraft" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" data-testid="chat-widget-input" rows="1" name="message" placeholder="Write a message" class="block min-h-8 flex-1 resize-none overflow-y-hidden whitespace-pre-wrap break-words bg-[var(--color-blue-800)] px-3 py-1.5 text-sm leading-5 text-[var(--color-text1)] outline-none [field-sizing:content] placeholder:text-[var(--color-text4)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded"></textarea>
+            <textarea #composerInput [(ngModel)]="messageDraft" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" data-testid="chat-widget-input" [rows]="composerRows" name="message" placeholder="Write a message" class="block min-h-8 max-h-[120px] flex-1 resize-none whitespace-pre-wrap break-words bg-[var(--color-blue-800)] px-3 py-1.5 text-sm leading-5 text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" [class.overflow-y-hidden]="!composerScrollable" [class.overflow-y-auto]="composerScrollable" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded"></textarea>
             <button data-testid="chat-widget-send" type="button" (click)="isSending() ? stopMessageGeneration() : sendMessage()" [disabled]="!isSending() && !messageDraft.trim()" [class]="isSending() ? 'flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 bg-red-950/70 text-red-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_1px_rgba(248,113,113,0.08)] transition hover:bg-red-900/80 hover:text-white disabled:cursor-not-allowed disabled:opacity-50' : 'flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] transition hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50'">
               @if (isSending()) {
                 <span class="h-3 w-3 rounded-[3px] bg-current shadow-[0_0_10px_rgba(248,113,113,0.28)]" aria-hidden="true"></span>
@@ -163,7 +167,6 @@
 
         <div class="mt-2 flex flex-wrap items-center justify-between gap-2 px-1 text-[11px] text-[var(--color-text6)] max-[640px]:hidden">
           <p>Enter sends. Shift + Enter adds a new line.</p>
-          <p>Session resets when you switch away.</p>
         </div>
       </div>
     </div>

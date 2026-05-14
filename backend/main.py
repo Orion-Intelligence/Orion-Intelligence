@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import asyncio
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -25,6 +26,7 @@ from routes.public_api_routes import public_routes
 from routes.tenant_routes import tenant_routes
 from routes.test_routes import test_routes
 from routes.social_routes import social_routes
+from routes.case_routes import case_routes
 
 BASE_DIR = Path(__file__).resolve().parent
 ANGULAR_BUILD_DIR = BASE_DIR / "build"
@@ -36,6 +38,17 @@ async def lifespan(p_app: FastAPI):
     await test_manager.get_instance().apply_test_overrides()
     service_manager_instance = service_manager.get_instance()
     await service_manager_instance.build_assets(ANGULAR_BUILD_DIR)
+
+    if env_handler.get_instance().env("PRODUCTION", "0") != "1":
+        async def start_services_in_background():
+            await service_manager_instance.init_services()
+            setup_admin(mongo_controller.get_instance().get_engine()).mount_to(p_app)
+
+        asyncio.create_task(start_services_in_background())
+        app.include_router(interface)
+        yield
+        return
+
     await service_manager_instance.init_services()
     setup_admin(mongo_controller.get_instance().get_engine()).mount_to(p_app)
     app.include_router(interface)
@@ -67,6 +80,7 @@ app.include_router(ai_routes, include_in_schema=False)
 app.include_router(tenant_routes, include_in_schema=False)
 app.include_router(api_routes)
 app.include_router(social_routes)
+app.include_router(case_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)

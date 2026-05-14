@@ -36,11 +36,12 @@
     <button (click)="redirectToUrl()" appTooltip="Open Breach Link" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
       <img alt="Open Breach Link" height="16" ngSrc="assets/images/shared/theme/redirect.svg" width="16" class="ui-action-icon" />
     </button>
-    <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
-
-    <button (click)="open_graph()" appTooltip="Open CTI Graph" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-      <img alt="Graph" height="17" ngSrc="assets/images/sidebar/graph.svg" width="17" class="ui-action-icon" />
-    </button>
+    @if (showCtiGraph()) {
+      <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
+      <button (click)="open_graph()" appTooltip="Open CTI Graph" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+        <img alt="Graph" height="17" ngSrc="assets/images/sidebar/graph.svg" width="17" class="ui-action-icon" />
+      </button>
+    }
   </div>
 </div>
 

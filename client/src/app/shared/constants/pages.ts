@@ -58,7 +58,11 @@ export enum SocialSubCategory {
     MASTODON = 'Mastodon',
     PASTEBIN = 'Pastebin',
     FORUM = 'Forum',
-    REDDIT = 'Reddit'
+    REDDIT = 'Reddit',
+    FACEBOOK = 'Facebook',
+    INSTAGRAM = 'Instagram',
+    TIKTOK = 'TikTok',
+    YOUTUBE = 'YouTube',
 }
 export enum ExploitSubCategory {
     ALL = 'All',
@@ -103,5 +107,6 @@ export enum ProfileSubCategory {
     STATISTICS = 'Statistics',
     AUDITLOG = 'Auditlog',
     TENANT = 'Tenant',
-    SYSTEM_SETTINGS = 'System-Settings'
+    SYSTEM_SETTINGS = 'System-Settings',
+    CASE_MANAGEMENT = 'Case-Management'
 }

@@ -1,102 +1,73 @@
+import asyncio
 from typing import Any
 
 from fastapi import HTTPException, status
 
-from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import (
-    search_consolidated_param_model,
-)
-from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import (
-    search_credential_param_model,
+from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import (
+    search_dynamic_crack_model,
+    search_dynamic_crypto_model,
+    search_dynamic_param_model,
+    search_dynamic_social_model,
 )
 from orion.api.interactive.search_manager.search_model import search_model
-from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (
-    DomainScanRequest,
-    UrlVulnerabilityScanRequest,
+from orion.api.server.crawl_manager.class_model.report_chat_data_model import (
+    NexusTextAnalysisRequest,
 )
-from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (
-    GeoCameraDetectRangesRequest,
-    GeoCameraDetectRequest,
-    NetIntelDeepScanRequest,
-    ResolveIPRequest,
-)
-from orion.api.server.crawl_manager.crawl_model import crawl_model
-from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 
 
 class ToolRouter:
-    NETWORK_ROUTES = {
-        "/api/netintel/resolve_ip": (ResolveIPRequest, "resolve_ip"),
-        "/api/netintel/ipscanner": (NetIntelDeepScanRequest, "netintel_scanner"),
-        "/api/netintel/url_vulnerability_scan": (UrlVulnerabilityScanRequest, "url_vulnerability_scan"),
-        "/api/netintel/iot_detect": (GeoCameraDetectRequest, "iot_detect"),
-        "/api/netintel/camera_detect_ranges": (GeoCameraDetectRangesRequest, "camera_detect_ranges"),
+    POLL_INTERVAL_SECONDS = 2
+    PENDING_STATUSES = {"pending", "processing", "running", "busy"}
+
+    DYNAMIC_ROUTES = {
+        "/api/dynamic/user": (search_dynamic_param_model, "user"),
+        "/api/dynamic/social": (search_dynamic_social_model, "social"),
+        "/api/dynamic/national-identity": (search_dynamic_crack_model, "pak_database"),
+        "/api/dynamic/cracked": (search_dynamic_crack_model, "cracked"),
+        "/api/dynamic/software": (search_dynamic_crack_model, "software"),
+        "/api/crypto/scan": (search_dynamic_crypto_model, "crypto"),
     }
 
-    DOMAIN_SCAN_ROUTES = {
-        "/api/urlscan/domain": None,
-        "/api/urlscan/subdomains": "subdomains",
-        "/api/urlscan/dns": "dns",
-        "/api/urlscan/wayback": "wayback",
-    }
+    @classmethod
+    def _is_pending_response(cls, response: Any) -> bool:
+        if not isinstance(response, dict):
+            return False
+        top_status = str(response.get("status") or "").lower()
+        nested_result = response.get("result") if isinstance(response.get("result"), dict) else {}
+        nested_status = str(nested_result.get("status") or "").lower()
+        return top_status in cls.PENDING_STATUSES or nested_status in cls.PENDING_STATUSES
+
+    @staticmethod
+    def _is_failed_pending_response(response: Any) -> bool:
+        if not isinstance(response, dict):
+            return False
+        nested_result = response.get("result") if isinstance(response.get("result"), dict) else {}
+        status_value = response.get("status") or nested_result.get("status")
+        progress_value = nested_result.get("progress", response.get("progress"))
+        step_value = nested_result.get("step", response.get("step"))
+        return status_value == "pending" and progress_value == 0 and step_value == "failed"
+
+    async def _dynamic_search_until_complete(self, model: Any, route_name: str, user_id: str):
+        result = await search_model.getInstance().dynamic_search(model, route_name, user_id=user_id)
+        while self._is_pending_response(result) and not self._is_failed_pending_response(result):
+            await asyncio.sleep(self.POLL_INTERVAL_SECONDS)
+            result = await search_model.getInstance().dynamic_search(model, route_name, user_id=user_id)
+        return result
 
     async def request(self, api_name: str, payload: dict[str, Any], user_id: str = "system"):
-        if api_name == "/api/search/strategic":
-            model = search_consolidated_param_model.model_validate(payload or {})
-            base_index = [ELASTIC_INDEX.S_GENERIC_INDEX]
-            result = await search_model.getInstance().search_consolidated_ranked_result(model, base_index, [], [])
-            for item in result.get("Result", []):
-                item.pop("m_images", None)
-                item.pop("m_url", None)
+        if api_name in self.DYNAMIC_ROUTES:
+            model_class, route_name = self.DYNAMIC_ROUTES[api_name]
+            model = model_class.model_validate(payload or {})
+            return await self._dynamic_search_until_complete(model, route_name, user_id)
 
-            return result
+        if api_name == "/api/dynamic/wanted":
+            model = search_dynamic_social_model.model_validate(payload or {})
+            return await search_model.getInstance().search_wanted_list(model)
 
-        if api_name == "/api/search/breach":
-            model = search_consolidated_param_model.model_validate(payload or {})
-            if model.category == "all":
-                return await search_model.getInstance().search_consolidated_ranked_result(model, [ELASTIC_INDEX.S_LEAK_INDEX], ["news"], ["leaks", "tracking"])
-            if model.category == "databases":
-                model.category = "leaks"
-            return await search_model.getInstance().search_consolidated_ranked_result(model, [ELASTIC_INDEX.S_LEAK_INDEX], [], [model.category])
+        if api_name == "/api/nexus/analyze-text":
+            from orion.api.server.nexus_manager.nexus_manager import nexus_manager
 
-        if api_name == "/api/search/social":
-            model = search_consolidated_param_model.model_validate(payload or {})
-            if model.category == "all":
-                return await search_model.getInstance().search_consolidated_ranked_result(model, [ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX], [], [])
-            if model.category == "telegram":
-                model.category = "all"
-                return await search_model.getInstance().search_consolidated_ranked_result(model, [ELASTIC_INDEX.S_CHATS_INDEX], [], [])
-            model.platform = model.category
-            model.category = "all"
-            return await search_model.getInstance().search_consolidated_ranked_result(model, [ELASTIC_INDEX.S_SOCIAL_INDEX], [], [])
-
-        if api_name == "/api/search/exploit":
-            model = search_consolidated_param_model.model_validate(payload or {})
-            return await search_model.getInstance().search_consolidated_ranked_result(model, [ELASTIC_INDEX.S_EXPLOIT_INDEX], [], [model.category])
-
-        if api_name == "/api/search/defacement":
-            model = search_consolidated_param_model.model_validate(payload or {})
-            model.content = model.category
-            return await search_model.getInstance().search_consolidated_ranked_result(model, [ELASTIC_INDEX.S_DEFACEMENT_INDEX], [], [model.category], "defacement")
-
-        if api_name == "/api/search/stealer/ioc":
-            model = search_credential_param_model.model_validate(payload or {})
-            response = await search_model.getInstance().search_stealer_iocs(model)
-            print("::::::::::::::::::::::::::::::::::", flush=True)
-            print(payload, flush=True)
-            print(model, flush=True)
-            print(response, flush=True)
-            print("::::::::::::::::::::::::::::::::::", flush=True)
-            return response.Result
-
-        if api_name in self.NETWORK_ROUTES:
-            model_class, route_name = self.NETWORK_ROUTES[api_name]
-            return await search_model.getInstance().network_intel(model_class.model_validate(payload or {}), route_name, user_id=user_id)
-
-        if api_name in self.DOMAIN_SCAN_ROUTES:
-            model = DomainScanRequest.model_validate(payload or {})
-            scan_type = self.DOMAIN_SCAN_ROUTES[api_name]
-            if scan_type:
-                model.scanType = scan_type
-            return await crawl_model.getInstance().scan_domain(model, user_id=user_id)
+            model = NexusTextAnalysisRequest.model_validate(payload or {})
+            return await nexus_manager.getInstance().analyze_text(model, user_id=user_id)
 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tool route not found")

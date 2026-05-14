@@ -101,6 +101,12 @@ export class CredentialComponent implements OnInit {
           if(params['q']){
             this.searchQuery="m_search_all:"+params['q'];
           }
+          else if(params['url']){
+            this.searchQuery="m_search_all:"+params['url'];
+          }
+          else if(params['user']){
+            this.searchQuery="m_search_all:"+params['user'];
+          }
           this.fetchSearchResults(false);
           this.fetchRanked();
         }
@@ -196,6 +202,9 @@ export class CredentialComponent implements OnInit {
 
   fetchRanked() {
     this.rankedResult = new RankedCallbackModel();
+    if (this.isStandaloneStealerlogsRoute) {
+      return;
+    }
     if (this.isRankedLoading) {
       return;
     }

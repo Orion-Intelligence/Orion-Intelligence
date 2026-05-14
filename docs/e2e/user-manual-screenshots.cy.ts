@@ -368,7 +368,7 @@ describe('User Manual Screenshot Flow', () => {
     cy.visit('/dashboard/scanner/network-scan');
     ensureDashboardReady();
     cy.get('[data-testid="network-intel-tab-host-recon"]').should('be.visible');
-    cy.get('[data-testid="network-intel-search-input"]').clear().type('ucp.edu.pk{enter}');
+    cy.get('[data-testid="network-intel-search-input"]').should('be.visible').click().type('{selectall}{backspace}ucp.edu.pk{enter}');
     cy.get('[data-testid^="network-intel-dns-row-"]').filter(':visible').should('have.length.greaterThan', 0);
     capture('web-scan-report');
 
@@ -394,7 +394,7 @@ describe('User Manual Screenshot Flow', () => {
     cy.visit('/dashboard/netint');
     ensureDashboardReady();
     cy.get('[data-testid="network-intel-tab-host-recon"]').click();
-    cy.get('[data-testid="network-intel-search-input"]').clear().type('example.com{enter}');
+    cy.get('[data-testid="network-intel-search-input"]').should('be.visible').click().type('{selectall}{backspace}example.com{enter}');
     cy.wait('@resolveIp');
     cy.get('[data-testid="network-intel-dns-row-93.184.216.34"]').should('be.visible');
     capture('network-intel-host-recon');
@@ -406,13 +406,13 @@ describe('User Manual Screenshot Flow', () => {
     cy.get('[data-testid="network-intel-geo-close"]').click();
 
     cy.get('[data-testid="network-intel-tab-ip-scan"]').click();
-    cy.get('[data-testid="network-intel-search-input"]').clear().type('8.8.8.8{enter}');
+    cy.get('[data-testid="network-intel-search-input"]').should('be.visible').click().type('{selectall}{backspace}8.8.8.8{enter}');
     cy.wait('@ipScanner');
     cy.get('[data-testid="network-intel-ip-result"]').should('be.visible');
     capture('network-intel-ip-scan');
 
     cy.get('[data-testid="network-intel-tab-vulnerability-scan"]').click();
-    cy.get('[data-testid="network-intel-search-input"]').clear().type('bbc.com{enter}');
+    cy.get('[data-testid="network-intel-search-input"]').should('be.visible').click().type('{selectall}{backspace}bbc.com{enter}');
     cy.contains('span', 'bbc.com', { timeout: 60000 }).click();
     cy.wait('@vulnerabilityScan');
     cy.contains('[data-testid="network-intel-vulnerability-result"]', 'Missing Content-Security-Policy', {
@@ -461,7 +461,7 @@ describe('User Manual Screenshot Flow', () => {
     visitSocialGraph();
     setupSocialGraphInterceptors();
     waitForToolbarSearchReady();
-    cy.get('[data-testid="graph-toolbar-search-input"]').clear().type(testData.cti_social_username || 'orion_demo_actor');
+    cy.get('[data-testid="graph-toolbar-search-input"]').should('be.visible').click().type(`{selectall}{backspace}${testData.cti_social_username || 'orion_demo_actor'}`);
     cy.get('[data-testid="graph-toolbar-search-button"]').click();
     cy.get('[data-testid="social-graph-root"]').should('be.visible');
     capture('social-intel');

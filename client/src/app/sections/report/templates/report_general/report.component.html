@@ -129,7 +129,7 @@
   </div>
 
   @if (resultItem?.m_code_snippet?.length) {
-    <app-code-block [code]="resultItem?.m_code_snippet"></app-code-block>
+    <app-code-block class="block mx-[12px] sm:mx-[15px] lg:mx-[30px]" [code]="resultItem?.m_code_snippet"></app-code-block>
   }
 
   @if (type == Category.BREACH && this.resultItem?.m_screenshot && this.resultItem?.m_screenshot!='') {
@@ -170,7 +170,7 @@
   <app-json-api-viewer [jsonData]="resultItem"></app-json-api-viewer>
   <app-report-mapping></app-report-mapping>
   @if (appService.getConfig().appSettings.ai_endpoint_enabled) {
-    <app-chat-widget [reportText]="resultItem?.m_content"></app-chat-widget>
+    <app-chat-widget [reportText]="resultItem?.m_content" tool="final_summary"></app-chat-widget>
   }
 </div>
 </app-report-interaction-host>

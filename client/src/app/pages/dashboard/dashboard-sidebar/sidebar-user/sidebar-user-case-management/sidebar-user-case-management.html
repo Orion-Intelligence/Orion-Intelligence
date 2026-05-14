@@ -1,0 +1,131 @@
+<ng-container>
+    <span id="top"></span>
+    <div class="w-full max-w-[2400px] rounded-[12px] p-5">
+        <div class="ui-page-container p-5" data-testid="case-management-page">
+            <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="ui-page-title">Cases</h1>
+                    <p class="ui-page-description">Manage cybersecurity cases</p>
+                </div>
+                <button type="button" data-testid="add-case-button" class="ui-btn ui-btn-primary" (click)="addCase()">
+                    Add Case
+                </button>
+            </div>
+
+            <div class="my-5 hidden h-px w-full bg-[var(--color-divider)] md:block"></div>
+
+            <div class="case-table-shell m-0 overflow-hidden rounded-none border-0 shadow-none md:rounded-[8px] md:border md:!border-[var(--tenant-line)] md:shadow-none">
+                @if (!isLoading) {
+                <div class="relative hidden overflow-x-auto overflow-y-visible md:block">
+                    <table class="w-full min-w-[1120px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]" data-testid="case-management-table">
+                        <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
+                            <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">Case ID</th>
+                                <th class="w-[130px] overflow-clip align-middle px-4 py-3.5">Case Type</th>
+                                <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">Owner</th>
+                                <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">Creation Date</th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">Status</th>
+                                <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">Modification Date</th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">Priority</th>
+                                <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">Action</th>
+                            </tr>
+                        </thead>
+
+                        @if ((cases?.length || 0) > 0) {
+                        <tbody class="text-[15px] font-normal text-[var(--color-text3)]">
+                            @for (case of cases; track case.caseId || $index; let i = $index) {
+                            <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [attr.data-testid]="'case-row-' + case.caseId">
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">
+                                    {{ case.caseId }}</td>
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ case.caseType }}
+                                </td>
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ case.owner }}
+                                </td>
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ case.createdDate
+                                    | date: 'short' }}</td>
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                                    <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(case.status)">
+                                        {{ case.status }}
+                                    </span>
+                                </td>
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{
+                                    case.modifiedDate | date: 'short' }}</td>
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                                    <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getPriorityBadgeClass(case.priority)">
+                                        {{ case.priority }}
+                                    </span>
+                                </td>
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
+                                    <button type="button" (click)="viewCase(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" aria-label="View case" [attr.data-testid]="'case-view-' + case.caseId">
+                                        <img src="assets/images/shared/view.svg" width="18" alt="view" class="case-action-icon cursor-pointer" />
+                                    </button>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                        }
+                        @if ((cases?.length || 0) === 0) {
+                        <tbody>
+                            <tr class="border-t !border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]" data-testid="case-management-empty">
+                                <td class="px-4 py-12 text-center text-sm text-[var(--color-text4)]" colspan="8">No case
+                                    available.</td>
+                            </tr>
+                        </tbody>
+                        }
+                    </table>
+                </div>
+                } @else {
+                <div class="relative hidden overflow-x-auto overflow-y-visible md:block">
+                    <table class="w-full min-w-[1120px] text-left text-sm">
+                        <thead class="border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
+                            <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
+                                <th class="overflow-clip align-middle px-4 py-3.5">Case ID</th>
+                                <th class="overflow-clip align-middle px-4 py-3.5">Case Type</th>
+                                <th class="overflow-clip align-middle px-4 py-3.5">Owner</th>
+                                <th class="overflow-clip align-middle px-4 py-3.5">Creation Date</th>
+                                <th class="overflow-clip align-middle px-4 py-3.5">Status</th>
+                                <th class="overflow-clip align-middle px-4 py-3.5">Modification Date</th>
+                                <th class="overflow-clip align-middle px-4 py-3.5">Priority</th>
+                                <th class="overflow-clip align-middle px-4 py-3.5">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-expand-bg)]">
+                                <td class="px-4 py-3">
+                                    <div class="ui-shimmer h-3 w-12 rounded bg-[var(--color-blue-760)]"></div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="ui-shimmer h-3 w-24 rounded bg-[var(--color-blue-760)]"></div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="ui-shimmer h-3 w-32 rounded bg-[var(--color-blue-760)]"></div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="ui-shimmer h-3 w-24 rounded bg-[var(--color-blue-760)]"></div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="ui-shimmer h-3 w-16 rounded bg-[var(--color-blue-760)]"></div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="ui-shimmer h-3 w-24 rounded bg-[var(--color-blue-760)]"></div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="ui-shimmer h-3 w-16 rounded bg-[var(--color-blue-760)]"></div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="ui-shimmer h-3 w-10 rounded bg-[var(--color-blue-760)]"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                }
+            </div>
+            @if (showAddCasePopup) {
+            <app-add-new-case (close)="closeAddCasePopup()" (caseAdded)="onCaseAdded($event)">
+            </app-add-new-case>
+            }
+        </div>
+    </div>
+    <span id="bottom"></span>
+</ng-container>

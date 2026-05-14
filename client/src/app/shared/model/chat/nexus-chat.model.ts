@@ -12,4 +12,5 @@ export interface NexusSummaryPayload {
 export interface NexusChatStreamChunk {
   delta?: string;
   response?: string;
+  status?: string;
 }
