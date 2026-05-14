@@ -245,6 +245,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
           c !== ProfileSubCategory.USERS &&
           c !== ProfileSubCategory.AUDITLOG &&
           c !== ProfileSubCategory.IOC &&
+          c !== ProfileSubCategory.CASE_MANAGEMENT &&
           c !== ProfileSubCategory.STATISTICS &&
           c !== ProfileSubCategory.TENANT_SETTINGS);
   }
