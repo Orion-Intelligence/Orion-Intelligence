@@ -109,7 +109,9 @@ class CaseManager:
 
     async def create_case(self, data: CreateCaseRequest, current_user) -> CaseResponse:
         existing = await self._engine.find_one(
-            db_case_model, db_case_model.caseId == data.caseId
+            db_case_model,
+            (db_case_model.caseId == data.caseId)
+            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
         )
         if existing:
             raise HTTPException(status_code=400, detail="Case ID already exists")
