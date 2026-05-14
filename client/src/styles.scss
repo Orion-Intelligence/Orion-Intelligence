@@ -198,6 +198,117 @@ html:has(body.dark-theme) {
   border-color: var(--color-blue-640);
 }
 
+.threat-lens-tooltip {
+  position: fixed;
+  z-index: 9999;
+  padding: 6px 10px;
+  border: 1px solid rgba(0, 224, 255, 0.15);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(7, 12, 22, 0.97), rgba(2, 6, 14, 0.98));
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  pointer-events: none;
+  box-shadow: 0 0 24px rgba(0, 224, 255, 0.18) !important;
+  backdrop-filter: blur(8px);
+}
+
+.threat-lens-tooltip__content--arc {
+  min-width: 220px;
+}
+
+.threat-lens-tooltip__content--country {
+  min-width: 180px;
+}
+
+.threat-lens-tooltip__arc-title {
+  margin-bottom: 10px;
+  color: #00e0ff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.threat-lens-tooltip__row,
+.threat-lens-tooltip__breakdown-row,
+.threat-lens-tooltip__total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.threat-lens-tooltip__row {
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.threat-lens-tooltip__label,
+.threat-lens-tooltip__total-label {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 11px;
+}
+
+.threat-lens-tooltip__value {
+  max-width: 140px;
+  overflow: hidden;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.threat-lens-tooltip__country-title {
+  margin-bottom: 10px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.threat-lens-tooltip__total-row {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.threat-lens-tooltip__total-value {
+  color: #00e0ff;
+  font-size: 14px;
+  font-weight: 700;
+  text-shadow: 0 0 12px rgba(0, 224, 255, 0.7);
+}
+
+.threat-lens-tooltip__breakdown-row {
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.threat-lens-tooltip__breakdown-label-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.threat-lens-tooltip__breakdown-dot {
+  width: 8px;
+  height: 8px;
+  overflow: visible;
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+.threat-lens-tooltip__breakdown-label {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 11px;
+}
+
+.threat-lens-tooltip__breakdown-count {
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .ui-consolidated-theme {
   --ui-consolidated-main-bg: #f9fbff;
   --ui-consolidated-sub-bg: #ffffff;

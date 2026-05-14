@@ -67,6 +67,7 @@ export interface SelectedCountryCategoryCount {
 
 export interface AnimatedArcDescriptor {
   categoryKey: ThreatLensCategoryModelKey;
+  categoryLabel: string;
   color: [number, number, number];
   weight: number;
   arcPoints: [number, number, number][];
@@ -74,6 +75,8 @@ export interface AnimatedArcDescriptor {
   surfacePaths: [number, number][][];
   countryAKey: string;
   countryBKey: string;
+  countryAName: string;
+  countryBName: string;
   animationOffset: number;
   animationDuration: number;
 }

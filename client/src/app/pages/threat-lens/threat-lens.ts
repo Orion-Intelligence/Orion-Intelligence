@@ -59,6 +59,11 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   private allNewsFeedItems: ThreatLensDisplayFeedItem[] = [];
   private allArchiveFeedItems: ThreatLensDisplayFeedItem[] = [];
   private destroyed = false;
+  private hoverHighlightHandle: { remove: () => void } | null = null;
+  private hoverTooltipEl: HTMLDivElement | null = null;
+  private hoveredCountryKey = '';
+  private startMarkerGraphics: any[] = [];
+  private endMarkerGraphics: any[] = [];
 
   protected readonly filterModel: FilterModel = threat_lens_filters;
   protected readonly feedRanges: Array<{ key: ThreatLensFeedRange; label: string }> = [{ key: '1d', label: '1 Day' }, { key: '7d', label: '1 Week' }, { key: 'all', label: 'All Time' }];
@@ -110,6 +115,13 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
 
     this.stopFeedAutoScroll('news');
     this.stopFeedAutoScroll('archive');
+
+    this.clearHoverHighlight();
+
+    if (this.hoverTooltipEl) {
+      this.hoverTooltipEl.remove();
+      this.hoverTooltipEl = null;
+    }
   }
 
   async onSearch(): Promise<void> {
@@ -158,6 +170,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
         outFields: ['*'],
         popupEnabled: false,
         opacity: 1,
+
         renderer: {
           type: 'simple',
           symbol: {
@@ -169,6 +182,31 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
             },
           },
         },
+
+        labelsVisible: true,
+
+        labelingInfo: [
+          {
+            labelExpressionInfo: {
+              expression: '$feature.COUNTRY'
+            },
+
+            symbol: {
+              type: 'text',
+              color: 'white',
+
+              haloColor: 'black',
+              haloSize: 1.5,
+
+              font: {
+                size: 10,
+                family: 'Arial',
+              }
+            },
+
+            labelPlacement: 'always-horizontal'
+          }
+        ]
       });
 
       this.newsGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens Intensity' });
@@ -183,7 +221,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       this.arcSurfaceGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens Country Arc Connectors' });
 
       const map = new EsriMap({
-        basemap: 'oceans',
+        basemap: 'dark-gray-vector',
         ground: 'world-elevation',
         layers: [this.countryLayer, this.newsGraphicsLayer, this.arcSurfaceGraphicsLayer, this.arcGraphicsLayer, this.animatedArcGraphicsLayer],
       });
@@ -204,6 +242,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       });
 
       await this.view.when();
+      this.createTooltip();
       if (this.destroyed) {
         return;
       }
@@ -216,6 +255,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       }
 
       this.registerClickHandler();
+      this.registerHoverHandler();
       await this.loadThreatLensData('');
     }
     catch (error) {
@@ -274,6 +314,246 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
         await this.view.goTo(geometryToFocus, { duration: 750, easing: 'ease-in-out' }).then(() => undefined, () => undefined);
       }
     });
+  }
+
+  private registerHoverHandler(): void {
+    if (!this.view || !this.countryLayer) {
+      return;
+    }
+    this.clearHighlight();
+    this.view.on('pointer-move', async (event: any) => {
+      if (!this.view || !this.countryLayer) {
+        return;
+      }
+
+      const hit = await this.view.hitTest(event, {
+        // include: [this.countryLayer]
+        include: [
+          this.animatedArcGraphicsLayer,
+          this.arcGraphicsLayer,
+          this.arcSurfaceGraphicsLayer,
+          this.countryLayer
+        ].filter(Boolean)
+      });
+
+      const arcGraphic = hit.results.find((result: any) => this.isArcTooltipGraphic(result.graphic))?.graphic;
+
+      if (arcGraphic) {
+        this.clearHoverHighlight();
+        this.showArcTooltip(event, arcGraphic.attributes || {});
+        return;
+      }
+
+      const countryGraphic = hit.results.find((result: any) => result.graphic?.layer === this.countryLayer)?.graphic;
+
+      if (!countryGraphic) {
+        this.clearHoverHighlight();
+        this.hideTooltip();
+        return;
+      }
+
+      const countryName = this.extractCountryName(countryGraphic.attributes);
+      const countryKey = this.toCountryKey(countryName);
+
+      // Prevent unnecessary rerender
+      if (this.hoveredCountryKey === countryKey) {
+        this.moveTooltip(event);
+        return;
+      }
+
+      this.hoveredCountryKey = countryKey;
+
+      this.clearHoverHighlight();
+
+      this.hoverHighlightHandle =
+        this.countryLayerView?.highlight(countryGraphic);
+
+      const threatCount =
+    this.countryNewsCountByKey.get(countryKey) || 0;
+
+      const breakdown = this.getSelectedCountryBreakdown(countryKey);
+
+      this.showTooltip(event,countryName,threatCount, breakdown);
+    });
+  }
+
+  private isArcTooltipGraphic(graphic: any): boolean {
+    const role = graphic?.attributes?.role;
+
+    return (
+      role === 'arc' ||
+      role === 'arc-surface' ||
+      role === 'arc-start' ||
+      role === 'arc-end' ||
+      role === 'arc-traveler'
+    );
+  }
+
+  private showArcTooltip( event: any, attributes: Record<string, unknown> ): void {
+
+    if (!this.hoverTooltipEl) {
+      return;
+    }
+
+    this.hoveredCountryKey = '';
+
+    const startCountry =
+      typeof attributes['start_country'] === 'string'
+        ? attributes['start_country']
+        : 'Unknown start';
+
+    const endCountry =
+      typeof attributes['end_country'] === 'string'
+        ? attributes['end_country']
+        : 'Unknown end';
+
+    const category =
+      typeof attributes['category_label'] === 'string'
+        ? attributes['category_label']
+        : 'Threat';
+
+    const weight =
+      typeof attributes['weight'] === 'number'
+        ? attributes['weight']
+        : Number(attributes['weight'] || 0);
+
+    const tooltipContent = document.createElement('div');
+    tooltipContent.className = 'threat-lens-tooltip__content threat-lens-tooltip__content--arc';
+
+    const title = document.createElement('div');
+    title.className = 'threat-lens-tooltip__arc-title';
+    title.textContent = 'Arc Route';
+
+    tooltipContent.append(title, this.buildTooltipRow('Start', startCountry), this.buildTooltipRow('End', endCountry), this.buildTooltipRow('Category', category), this.buildTooltipRow('Records', String(weight)));
+
+    this.hoverTooltipEl.replaceChildren(tooltipContent);
+    this.hoverTooltipEl.hidden = false;
+
+    this.moveTooltip(event);
+  }
+
+  private buildTooltipRow(label: string, value: string): HTMLDivElement {
+    const row = document.createElement('div');
+    row.className = 'threat-lens-tooltip__row';
+
+    const labelEl = document.createElement('span');
+    labelEl.className = 'threat-lens-tooltip__label';
+    labelEl.textContent = label;
+
+    const valueEl = document.createElement('span');
+    valueEl.className = 'threat-lens-tooltip__value';
+    valueEl.textContent = value;
+
+    row.append(labelEl, valueEl);
+
+    return row;
+  }
+
+  private clearHoverHighlight(): void {
+    if (this.hoverHighlightHandle) {
+      this.hoverHighlightHandle.remove();
+      this.hoverHighlightHandle = null;
+    }
+
+    this.hoveredCountryKey = '';
+  }
+
+  private createTooltip(): void {
+    if (!this.isBrowserEnvironment()) {
+      return;
+    }
+
+    this.hoverTooltipEl = document.createElement('div');
+    this.hoverTooltipEl.className = 'threat-lens-tooltip';
+    this.hoverTooltipEl.hidden = true;
+
+    document.body.appendChild(this.hoverTooltipEl);
+  }
+
+  private showTooltip( event: any, countryName: string, threatCount: number, breakdown: SelectedCountryCategoryCount[] ): void {
+
+    if (!this.hoverTooltipEl) {
+      return;
+    }
+
+    const tooltipContent = document.createElement('div');
+    tooltipContent.className = 'threat-lens-tooltip__content threat-lens-tooltip__content--country';
+
+    const countryTitle = document.createElement('div');
+    countryTitle.className = 'threat-lens-tooltip__country-title';
+    countryTitle.textContent = countryName;
+
+    const totalRow = document.createElement('div');
+    totalRow.className = 'threat-lens-tooltip__total-row';
+
+    const totalLabel = document.createElement('span');
+    totalLabel.className = 'threat-lens-tooltip__total-label';
+    totalLabel.textContent = 'Total Threats';
+
+    const totalValue = document.createElement('span');
+    totalValue.className = 'threat-lens-tooltip__total-value';
+    totalValue.textContent = String(threatCount);
+
+    totalRow.append(totalLabel, totalValue);
+    tooltipContent.append(countryTitle, totalRow);
+
+    for (const item of breakdown) {
+      tooltipContent.append(this.buildBreakdownTooltipRow(item));
+    }
+
+    this.hoverTooltipEl.replaceChildren(tooltipContent);
+    this.hoverTooltipEl.hidden = false;
+
+    this.moveTooltip(event);
+  }
+
+  private moveTooltip(event: any): void {
+    if (!this.hoverTooltipEl) {
+      return;
+    }
+
+    this.hoverTooltipEl.setAttribute('style', `left:${event.x - 16}px;top:${event.y - 16}px`);
+  }
+
+  private hideTooltip(): void {
+    if (this.hoverTooltipEl) {
+      this.hoverTooltipEl.hidden = true;
+    }
+  }
+
+  private buildBreakdownTooltipRow(item: SelectedCountryCategoryCount): HTMLDivElement {
+    const row = document.createElement('div');
+    row.className = 'threat-lens-tooltip__breakdown-row';
+
+    const labelWrap = document.createElement('div');
+    labelWrap.className = 'threat-lens-tooltip__breakdown-label-wrap';
+
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    dot.setAttribute('viewBox', '0 0 12 12');
+    dot.setAttribute('aria-hidden', 'true');
+    dot.setAttribute('color', item.colorHex);
+    dot.classList.add('threat-lens-tooltip__breakdown-dot');
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', '6');
+    circle.setAttribute('cy', '6');
+    circle.setAttribute('r', '5');
+    circle.setAttribute('fill', item.colorHex);
+
+    dot.append(circle);
+
+    const label = document.createElement('span');
+    label.className = 'threat-lens-tooltip__breakdown-label';
+    label.textContent = item.label;
+
+    const count = document.createElement('span');
+    count.className = 'threat-lens-tooltip__breakdown-count';
+    count.textContent = String(item.count);
+
+    labelWrap.append(dot, label);
+    row.append(labelWrap, count);
+
+    return row;
   }
 
   private async buildCountryFeatureIndex(): Promise<void> {
@@ -470,6 +750,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
 
         this.animatedArcs.push({
           categoryKey: category.categoryKey,
+          categoryLabel: category.categoryLabel,
           color: category.color,
           weight: pair.weight,
           arcPoints,
@@ -477,6 +758,8 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
           surfacePaths,
           countryAKey: pair.countryAKey,
           countryBKey: pair.countryBKey,
+          countryAName: this.extractCountryName(featureA.attributes),
+          countryBName: this.extractCountryName(featureB.attributes),
           animationOffset: renderedArcCount * 0.11,
           animationDuration: Math.max(1800, 3300 - Math.min(1200, pair.weight * 110)),
         });
@@ -759,7 +1042,8 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     if (!this.arcGraphicsLayer || !this.arcSurfaceGraphicsLayer) {
       return;
     }
-
+    this.startMarkerGraphics = [];
+    this.endMarkerGraphics = [];
     const items = batchItems ?? (index >= 0 ? this.animatedArcs.slice(index * this.arcBatchSize, (index + 1) * this.arcBatchSize) : []);
     this.visibleBatchIndex = index;
     this.arcGraphicsLayer.removeAll();
@@ -780,10 +1064,22 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
         spatialReference: { wkid: 4326 },
       },
       attributes: {
+        role: 'arc',
+
         category: arc.categoryKey,
+        category_label: arc.categoryLabel,
+
         country_a: arc.countryAKey,
         country_b: arc.countryBKey,
+
+        start_country: arc.countryAName,
+        end_country: arc.countryBName,
+
         weight: arc.weight,
+        // category: arc.categoryKey,
+        // country_a: arc.countryAKey,
+        // country_b: arc.countryBKey,
+        // weight: arc.weight,
       },
       symbol: {
         type: 'line-3d',
@@ -815,10 +1111,22 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
         spatialReference: { wkid: 4326 },
       },
       attributes: {
+        role: 'arc-surface',
+
         category: arc.categoryKey,
+        category_label: arc.categoryLabel,
+
         country_a: arc.countryAKey,
         country_b: arc.countryBKey,
+
+        start_country: arc.countryAName,
+        end_country: arc.countryBName,
+
         weight: arc.weight,
+        // category: arc.categoryKey,
+        // country_a: arc.countryAKey,
+        // country_b: arc.countryBKey,
+        // weight: arc.weight,
       },
       symbol: {
         type: 'simple-line',
@@ -834,7 +1142,90 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
 
     for (const arc of items) {
       const movingDotSize = Math.min(120000, this.movingDotBaseSize + (arc.weight * 2200));
+      const startPoint = arc.arcPoints[0];
+      const endPoint = arc.arcPoints[arc.arcPoints.length - 1];
+      this.startMarkerGraphics.push({
+        geometry: {
+          type: 'point',
+          longitude: startPoint[0],
+          latitude: startPoint[1],
+          z: startPoint[2],
+          spatialReference: { wkid: 4326 }
+        },
 
+        attributes: {
+          role: 'arc-start',
+
+          start_country: arc.countryAName,
+          end_country: arc.countryBName,
+
+          category_label: arc.categoryLabel,
+          weight: arc.weight,
+        },
+
+        symbol: {
+          type: 'point-3d',
+
+          symbolLayers: [
+            {
+              type: 'object',
+
+              resource: {
+                primitive: 'sphere'
+              },
+
+              width: 90000,
+              height: 90000,
+              depth: 90000,
+
+              material: {
+                color: [...arc.color, 1]
+              }
+            }
+          ]
+        }
+      });
+      this.endMarkerGraphics.push({
+        geometry: {
+          type: 'point',
+          longitude: endPoint[0],
+          latitude: endPoint[1],
+          z: endPoint[2],
+          spatialReference: { wkid: 4326 }
+        },
+
+        attributes: {
+          role: 'arc-end',
+
+          start_country: arc.countryAName,
+          end_country: arc.countryBName,
+
+          category_label: arc.categoryLabel,
+          weight: arc.weight,
+        },
+
+        symbol: {
+          type: 'point-3d',
+
+          symbolLayers: [
+            {
+              type: 'object',
+
+              resource: {
+                primitive: 'sphere'
+              },
+
+              width: 120000,
+              height: 120000,
+              depth: 120000,
+
+              material: {
+                color: [...arc.color, 0.85]
+              }
+            }
+          ]
+        }
+      });
       const graphic = {
         geometry: null,
         symbol: {
@@ -856,7 +1247,12 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     }
 
     this.animatedArcGraphicsLayer.removeAll();
-    this.animatedArcGraphicsLayer.addMany(this.movingDotGraphics);
+    // this.animatedArcGraphicsLayer.addMany(this.movingDotGraphics);
+    this.animatedArcGraphicsLayer.addMany([
+      ...this.startMarkerGraphics,
+      ...this.endMarkerGraphics,
+      ...this.movingDotGraphics,
+    ]);
 
   }
 
