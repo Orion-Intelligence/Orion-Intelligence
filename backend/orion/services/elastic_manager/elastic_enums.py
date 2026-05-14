@@ -117,6 +117,7 @@ class ELASTIC_ENUMS:
             "max_result_window": 1000000,
         },
         "mappings": {
+            "dynamic": True,
             "properties": {
                 "name": {"type": "text", "fields": {"keyword": {"type": "keyword", "ignore_above": 256}}},
                 "country": {"type": "keyword"},
@@ -130,6 +131,11 @@ class ELASTIC_ENUMS:
                     }
                 },
                 "location_point": {"type": "geo_point"},
+                "aeroway": {"type": "keyword"},
+                "military": {"type": "keyword"},
+                "operator": {"type": "text", "fields": {"keyword": {"type": "keyword", "ignore_above": 256}}},
+                "fuel": {"type": "keyword"},
+                "primary_fuel": {"type": "keyword"},
             }
         },
     }

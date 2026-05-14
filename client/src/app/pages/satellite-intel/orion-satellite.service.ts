@@ -8,8 +8,8 @@ import { OrionSatelliteFeature, OrionSatelliteFeatureType, PowerPlantByIdItem, P
 import { AuthService } from '../../services/authetication/auth.service';
 @Injectable({ providedIn: 'root' })
 export class OrionSatelliteService {
-  private readonly wriPath = 'assets/data/satellite/wri_power_plants.geojson';
-  private wriCache$?: Observable<OrionSatelliteFeature[]>;
+  // private readonly wriPath = 'assets/data/satellite/wri_power_plants.geojson';
+  // private wriCache$?: Observable<OrionSatelliteFeature[]>;
   private readonly facilitiesCache = new Map<string, Observable<OrionSatelliteFeature[]>>();
 
   constructor(private http: HttpClient, private api: ApiService, private auth: AuthService) {}
@@ -65,15 +65,7 @@ export class OrionSatelliteService {
           const chunk = JSON.parse(line);
 
           const mapped = chunk
-            .map((item: any) => this.toFeatureFromById({
-              id: item.id,
-              name: item.name,
-              source: 'WRI',
-              location: {
-                lat: item.lat,
-                lon: item.lon,
-              },
-            }))
+            .map((item: any, index: number) => this.toPowerPlantFeature(item, index))
             .filter((item: PowerPlantsSearchItem | null): item is PowerPlantsSearchItem => item !== null);
 
           onChunk(mapped);
@@ -119,25 +111,36 @@ export class OrionSatelliteService {
     return data.filter((feature) => feature.type === type);
   }
 
-  private toPowerPlantFeature(item: { id?: string; _id?: string; name?: string; location?: { lat?: number; lon?: number }; location_point?: { lat?: number; lon?: number }; lat?: number; lon?: number }, index: number): OrionSatelliteFeature | null {
+  private toPowerPlantFeature(item: { id?: string; _id?: string; name?: string; type?: string; primary_fuel?: string; country?: string; capacity_mw?: number; source?: string; location?: { lat?: number; lon?: number }; location_point?: { lat?: number; lon?: number }; lat?: number; lon?: number }, index: number): OrionSatelliteFeature | null {
     const parsedLocation = this.extractLatLon(item);
     const lat = parsedLocation?.lat;
     const lon = parsedLocation?.lon;
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+    // Allow records without valid coordinates - still create feature but with null coordinates
+    const hasValidCoords = Number.isFinite(lat) && Number.isFinite(lon);
+    
+    const type = this.detectTypeFromRecord(item);
+    const rawType = String(item?.type || item?.primary_fuel || '').trim();
+
+    // Only return null if record has no identifying info at all
+    if (!item.id && !item._id && !item.name) {
       return null;
     }
 
     return {
       id: item.id || item._id || `wri-${index}`,
-      name: item.name?.trim() || `Power plant ${index + 1}`,
-      type: 'other',
-      rawType: 'unknown',
+      name: item.name?.trim() || `Facility ${index + 1}`,
+      type,
+      rawType: rawType || type,
       source: 'WRI',
-      coordinates: [lon as number, lat as number],
-      color: this.getColor('other'),
-      capacityMw: null,
+      coordinates: hasValidCoords ? [lon as number, lat as number] : [0, 0],
+      color: this.getColor(type),
+      capacityMw: typeof item?.capacity_mw === 'number' ? item.capacity_mw : null,
       properties: {
         source: 'WRI',
+        country: item?.country,
+        type: item?.type,
+        capacity_mw: item?.capacity_mw,
+        hasValidCoordinates: hasValidCoords,
       },
     };
   }
@@ -146,23 +149,24 @@ export class OrionSatelliteService {
     const parsedLocation = this.extractLatLon(item as any);
     const lat = parsedLocation?.lat;
     const lon = parsedLocation?.lon;
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-      return null;
-    }
-    const type = this.normalizeWriFuel(String(item?.type || '').trim().toLowerCase()) || 'other';
+    // Allow records without valid coordinates
+    const hasValidCoords = Number.isFinite(lat) && Number.isFinite(lon);
+    
+    const type = this.detectTypeFromRecord(item);
     return {
       id: item.id,
-      name: String(item?.name || 'Power plant').trim(),
+      name: String(item?.name || 'Facility').trim(),
       type,
       rawType: String(item?.type || type),
       source: 'WRI',
-      coordinates: [lon as number, lat as number],
+      coordinates: hasValidCoords ? [lon as number, lat as number] : [0, 0],
       color: this.getColor(type),
       capacityMw: typeof item?.capacity === 'number' ? item.capacity : null,
       properties: {
         country: item?.country,
         fuel: item?.type,
         source: item?.source || 'WRI',
+        hasValidCoordinates: hasValidCoords,
       },
     };
   }
@@ -214,28 +218,195 @@ export class OrionSatelliteService {
   }
 
   private normalizeWriFuel(rawFuel: string): OrionSatelliteFeatureType | null {
-    switch (rawFuel) {
+    const lower = rawFuel.toLowerCase().trim();
+    switch (lower) {
+      case 'airport':
+      case 'aerodrome':
+      case 'airfield':
+      case 'heliport':
+        return 'airport';
+      case 'port':
+      case 'harbour':
+      case 'harbor':
+      case 'seaport':
+      case 'dock':
+      case 'marina':
+        return 'port';
+      case 'warehouse':
+      case 'depot':
+      case 'storage_depot':
+        return 'warehouse';
+      case 'industrial':
+      case 'industry':
+      case 'factory':
+        return 'industrial';
+      case 'military':
+      case 'barracks':
+      case 'military_base':
+        return 'military';
       case 'hydro':
-      case 'nuclear':
-      case 'coal':
-      case 'oil':
-      case 'gas':
+      case 'hydroelectric':
+      case 'hydropower':
+        return 'hydro';
       case 'solar':
+      case 'photovoltaic':
+      case 'pv':
+        return 'solar';
       case 'wind':
-        return rawFuel;
-      case 'petcoke':
+      case 'wind_turbine':
+      case 'windfarm':
+        return 'wind';
+      case 'gas':
+      case 'natural_gas':
+      case 'lng':
+      case 'cng':
+        return 'gas';
+      case 'coal':
+      case 'lignite':
         return 'coal';
-      case 'cogeneration':
-      case 'biomass':
+      case 'oil':
+      case 'diesel':
+      case 'petroleum':
+      case 'fuel_oil':
+        return 'oil';
+      case 'nuclear':
+      case 'atomic':
+        return 'nuclear';
       case 'geothermal':
-      case 'other':
-      case 'storage':
+      case 'geotherm':
+        return 'geothermal';
+      case 'biomass':
+      case 'biogas':
+      case 'wood':
+      case 'bagasse':
+        return 'biomass';
       case 'waste':
+      case 'waste_to_energy':
+      case 'landfill_gas':
+        return 'waste';
+      case 'storage':
+      case 'battery':
+      case 'pumped_hydro':
+        return 'storage';
+      case 'cogeneration':
+      case 'chp':
+      case 'combined_heat_power':
+        return 'cogeneration';
+      case 'petcoke':
+        return 'petcoke';
       case 'wave and tidal':
+      case 'wave':
+      case 'tidal':
+      case 'tidal_stream':
+        return 'wave_and_tidal';
+      case 'other':
         return 'other';
       default:
-        return rawFuel ? 'other' : null;
+        return lower ? 'other' : null;
     }
+  }
+
+  private detectTypeFromRecord(record: any): OrionSatelliteFeatureType {
+    const landuse = String(record?.landuse || '').toLowerCase().trim();
+    const building = String(record?.building || '').toLowerCase().trim();
+    const manMade = String(record?.man_made || '').toLowerCase().trim();
+
+    // Priority 1: Direct power type field
+    if (record?.type) {
+      const detected = this.normalizeWriFuel(String(record.type));
+      if (detected && detected !== 'other') {
+        return detected;
+      }
+    }
+
+    // Priority 2: Aeroway = airport/port facilities
+    if (record?.aeroway) {
+      const aeroway = String(record.aeroway).toLowerCase().trim();
+      if (['aerodrome', 'airfield', 'airstrip', 'hangar', 'helipad', 'heliport', 'terminal'].includes(aeroway)) {
+        return 'airport';
+      }
+    }
+
+    // Priority 2.5: Explicit port/warehouse/industrial tags
+    if (record?.port) {
+      return 'port';
+    }
+    if (record?.harbour || record?.harbor) {
+      return 'port';
+    }
+    if (['port', 'harbour', 'harbor', 'dock', 'marina'].includes(landuse)) {
+      return 'port';
+    }
+    if (['port', 'harbour', 'harbor', 'dock', 'pier', 'quay', 'jetty', 'wharf', 'shipyard'].includes(building)) {
+      return 'port';
+    }
+    if (['pier', 'quay', 'wharf', 'jetty', 'breakwater', 'dock', 'dolphin'].includes(manMade)) {
+      return 'port';
+    }
+
+    // Priority 3: Military field
+    if (record?.military) {
+      const military = String(record.military).toLowerCase().trim();
+      if (military && military !== 'no') {
+        return 'military';
+      }
+    }
+
+    // Priority 4: Landuse field
+    if (record?.landuse) {
+      if (landuse === 'industrial' || landuse === 'power' || landuse === 'brownfield' || landuse === 'quarry') {
+        return 'industrial';
+      }
+      if (['port', 'harbour', 'harbor', 'dock'].includes(landuse)) {
+        return 'port';
+      }
+      if (['warehouse', 'logistics', 'depot'].includes(landuse)) {
+        return 'warehouse';
+      }
+      if (landuse === 'windfarm') {
+        return 'wind';
+      }
+      if (landuse === 'aeroway' || landuse === 'airport') {
+        return 'airport';
+      }
+    }
+
+    // Priority 5: Building field for commercial/industrial
+    if (record?.building) {
+      if (['warehouse', 'storage', 'depot'].includes(building)) {
+        return 'warehouse';
+      }
+      if (['industrial', 'factory', 'power_plant', 'power_station', 'electricity'].includes(building)) {
+        return 'industrial';
+      }
+      if (['airport_terminal', 'terminal', 'hangar'].includes(building)) {
+        return 'airport';
+      }
+      if (building === 'military base' || building === 'barrack' || building === 'barracks' || building === 'bunker') {
+        return 'military';
+      }
+    }
+
+    // Priority 6: Man_made field
+    if (record?.man_made) {
+      if (['wind_farm', 'power_station', 'biogas_plant', 'heat_plant', 'solar_panels'].includes(manMade)) {
+        return 'industrial';
+      }
+      if (['radar', 'military'].includes(manMade)) {
+        return 'military';
+      }
+    }
+
+    // Priority 7: Power field (plant vs substation)
+    if (record?.power) {
+      const power = String(record.power).toLowerCase().trim();
+      if (power === 'plant') {
+        return 'industrial';
+      }
+    }
+
+    // Default fallback
+    return 'other';
   }
 
   private normalizeFacilityType(rawKind: string): OrionSatelliteFeatureType {
@@ -291,28 +462,45 @@ export class OrionSatelliteService {
     switch (type) {
       case 'hydro':
         return '#2563eb';
-      case 'nuclear':
-        return '#dc2626';
-      case 'coal':
-        return '#111827';
-      case 'oil':
-        return '#f97316';
-      case 'gas':
-      case 'industrial':
-      case 'other':
-        return '#6b7280';
       case 'solar':
         return '#facc15';
       case 'wind':
         return '#16a34a';
+      case 'gas':
+        return '#f59e0b';
+      case 'coal':
+        return '#111827';
+      case 'oil':
+        return '#f97316';
+      case 'nuclear':
+        return '#dc2626';
+      case 'geothermal':
+        return '#ec4899';
+      case 'biomass':
+        return '#84cc16';
+      case 'waste':
+        return '#8b5cf6';
+      case 'storage':
+        return '#06b6d4';
+      case 'cogeneration':
+        return '#14b8a6';
+      case 'petcoke':
+        return '#78716c';
+      case 'wave_and_tidal':
+        return '#0ea5e9';
       case 'airport':
         return '#9333ea';
       case 'port':
         return '#0d9488';
       case 'warehouse':
         return '#92400e';
-      default:
+      case 'industrial':
         return '#6b7280';
+      case 'military':
+        return '#d71c1c';
+      case 'other':
+      default:
+        return '#a3a3a3';
     }
   }
 }

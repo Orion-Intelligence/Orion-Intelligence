@@ -157,8 +157,25 @@ class elastic_controller:
         prepared = dict(document)
         location = prepared.get("location")
         if isinstance(location, dict) and "lat" in location and "lon" in location:
-            prepared["location_point"] = {"lat": location["lat"], "lon": location["lon"]}
+            try:
+                lat = float(location["lat"])
+                lon = float(location["lon"])
+                prepared["location_point"] = {"lat": lat, "lon": lon}
+            except (ValueError, TypeError):
+                pass
         return prepared
+
+    @staticmethod
+    def is_power_plant_document(document: dict) -> bool:
+        if not isinstance(document, dict):
+            return False
+
+        location = document.get("location")
+        has_location = isinstance(location, dict) and location.get("lat") is not None and location.get("lon") is not None
+        has_type = bool(str(document.get("type") or "").strip())
+        has_capacity = document.get("capacity_mw") is not None
+
+        return has_location and has_type and has_capacity
 
     @staticmethod
     def power_plants_document_id(document: dict) -> str:
@@ -178,21 +195,27 @@ class elastic_controller:
 
         if not await self.__m_core_connection.indices.exists(index=index_name, request_timeout=220):
             await self.__m_core_connection.indices.create(index=index_name, body=mapping_power_plants_model, request_timeout=220)
+        else:
+            await self.__m_core_connection.indices.delete(index=index_name, request_timeout=220)
+            await self.__m_core_connection.indices.create(index=index_name, body=mapping_power_plants_model, request_timeout=220)
 
         raw_data = constant.power_plant_data
         raw_data = json.loads(raw_data)
 
-        documents = raw_data if isinstance(raw_data, list) else []
+        documents = [
+            document for document in (raw_data if isinstance(raw_data, list) else [])
+        ]
 
         def action_generator():
             for document in documents:
                 if not isinstance(document, dict):
                     continue
+                prepared = self.prepare_power_plants_document(document)
                 yield {
                     "_op_type": "index",
                     "_index": index_name,
                     "_id": self.power_plants_document_id(document),
-                    "_source": self.prepare_power_plants_document(document),
+                    "_source": prepared,
                 }
 
         success_count, errors = await es_helpers.async_bulk(
@@ -203,7 +226,9 @@ class elastic_controller:
             raise_on_error=False,
             raise_on_exception=False,
         )
-        log.g().i(f"Power plants indexing completed: indexed={success_count}, errors={len(errors) if errors else 0}, index={index_name}")
+        log.g().i(
+            f"Power plants indexing completed: indexed={success_count}, filtered={len(documents)}, errors={len(errors) if errors else 0}, index={index_name}"
+        )
 
     async def purge_old_records(self):
         try:
@@ -229,6 +254,15 @@ class elastic_controller:
 
         except Exception as ex:
             log.g().e(f"Failed to delete old records: {str(ex)}")
+
+    async def reindex_power_plants_data(self):
+        """Re-index power plants data from constant.power_plant_data"""
+        try:
+            mapping_power_plants_model = ELASTIC_ENUMS.mapping_power_plants_model
+            await self.__initialize_power_plants_data(mapping_power_plants_model)
+            log.g().i("Power plants data re-indexed successfully")
+        except Exception as ex:
+            log.g().e(f"Failed to re-index power plants data: {str(ex)}")
 
     async def get_doc(self, index, doc_id: str):
         try:

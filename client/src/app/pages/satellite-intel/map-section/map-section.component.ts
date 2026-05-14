@@ -4,7 +4,7 @@ import { geoContains } from 'd3-geo';
 import { feature as topojsonFeature } from 'topojson-client';
 import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
 import { SatelliteIntelService } from '../satellite-intel-service';
-import { ORION_POWER_FILTERS } from '../model/satellite-intel.model';
+import { ORION_POWER_FILTERS, OrionSatelliteFilterOption } from '../model/satellite-intel.model';
 
 @Component({
   selector:    'app-satellite-map-section',
@@ -44,7 +44,6 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private worldCountryFeatures: any[] = [];
   private highlightedCountryFeature: any | null = null;
 
-  readonly powerPlantLegend = ORION_POWER_FILTERS;
   zoomLabel = 'zoom 2.5';
   isMapFeaturesHovered = false;
   selectedEntity: { type: 'aircraft' | 'ship'; data: any | null } | null = null;
@@ -54,6 +53,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   activeEntity: { type: 'aircraft' | 'ship'; id: string } | null = null;
   loadingEntity: { type: 'aircraft' | 'ship'; id: string } | null = null;
 
+  @Input() legendFilters: OrionSatelliteFilterOption[] = ORION_POWER_FILTERS;
   @Input() isScanning       = false;
   @Input() progress         = 0;
   @Input() currentStep      = '';
@@ -1188,6 +1188,13 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       if (!featureId) {
         continue;
       }
+
+      // Skip rendering records without valid coordinates (but count them in data)
+      const hasValidCoords = feat.properties?.hasValidCoordinates !== false && feat.coordinates && feat.coordinates[0] !== 0 && feat.coordinates[1] !== 0;
+      if (!hasValidCoords) {
+        continue;
+      }
+
       visibleIds.add(featureId);
 
       const nextSignature = this.getOrionFeatureSignature(feat);
@@ -1330,13 +1337,25 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   powerPlantDotClass(type: string): string {
     const map: Record<string, string> = {
       hydro: 'bg-[#2563eb]',
-      nuclear: 'bg-[#dc2626]',
-      coal: 'bg-[#111827]',
-      oil: 'bg-[#f97316]',
       solar: 'bg-[#facc15]',
       wind: 'bg-[#16a34a]',
-      gas: 'bg-[#6b7280]',
-      other: 'bg-[#6b7280]',
+      gas: 'bg-[#f59e0b]',
+      coal: 'bg-[#111827]',
+      oil: 'bg-[#f97316]',
+      nuclear: 'bg-[#dc2626]',
+      geothermal: 'bg-[#ec4899]',
+      biomass: 'bg-[#84cc16]',
+      waste: 'bg-[#8b5cf6]',
+      storage: 'bg-[#06b6d4]',
+      cogeneration: 'bg-[#14b8a6]',
+      petcoke: 'bg-[#78716c]',
+      wave_and_tidal: 'bg-[#0ea5e9]',
+      airport: 'bg-[#9333ea]',
+      port: 'bg-[#0d9488]',
+      warehouse: 'bg-[#92400e]',
+      industrial: 'bg-[#6b7280]',
+      military: 'bg-[#d71c1c]',
+      other: 'bg-[#a3a3a3]',
     };
     return map[type] || 'bg-[#6b7280]';
   }

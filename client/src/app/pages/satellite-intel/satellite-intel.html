@@ -27,6 +27,7 @@
             [delta]="delta"
             [selectedLayer]="selectedLayer"
             [facilitiesVisible]="facilitiesVisible"
+            [legendFilters]="visibleDashboardTypeFilters"
             [facilitiesData]="facilitiesData"
             [orionData]="filteredData"
             [focusedFeature]="focusedFeature"
@@ -174,26 +175,21 @@
 
     <div class="mt-3 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3">
       <div class="flex items-center justify-between">
-        <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Power</div>
+        <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">All Facilities</div>
         <div class="text-[11px] text-[var(--color-text3)]">{{ visiblePowerCount }} visible</div>
       </div>
       <div class="mt-2 flex items-center justify-between text-[11px] text-[var(--color-text3)]">
-        <span>Loaded {{ wriData.length }} / {{ powerPlantTotalHits }}</span>
-        <span>Page {{ powerPlantPage }} of {{ powerPlantPageCount }}</span>
+        <span>Loaded {{ wriData.length }} records</span>
       </div>
-      @if (hasMorePowerPlants()) {
-        <button type="button" class="mt-2 w-full rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-720)] px-3 py-2 text-[12px] font-semibold text-[var(--color-text1)] hover:bg-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isPowerPlantLoading || isPowerPlantLoadingMore" (click)="loadMorePowerPlants()">
-          {{ isPowerPlantLoadingMore ? 'Loading...' : 'Load More' }}
-        </button>
-      }
-      <div class="mt-2 grid grid-cols-2 gap-2">
-        @for (filter of powerFilters; track filter.key) {
+      <div class="mt-3 grid grid-cols-2 gap-2">
+        @for (filter of dashboardTypeFilters; track filter.key) {
           <button type="button" class="flex items-center justify-between rounded-[10px] border px-3 py-2 text-[12px] transition-colors" [ngClass]="isFilterSelected(filter.key) ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-720)]','text-[var(--color-text1)]'] : ['border-[var(--color-border)]','bg-[var(--color-blue-790)]','text-[var(--color-text3)]']" (click)="toggleDashboardFilter(filter.key)">
             <span class="inline-flex items-center gap-2">
-              <span class="h-2.5 w-2.5 rounded-full" [ngClass]="typeDotClass(filter.key)"></span>
+              <!-- eslint-disable-next-line @angular-eslint/template/no-inline-styles -->
+              <span class="h-2.5 w-2.5 rounded-full" [style.backgroundColor]="filter.color"></span>
               {{ filter.label }}
             </span>
-            <span class="font-mono text-[11px]">{{ filterCount(filter.key) }}</span>
+            <span class="font-mono text-[11px]">{{ filter.count }}</span>
           </button>
         }
       </div>

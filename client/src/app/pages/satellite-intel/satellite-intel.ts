@@ -62,6 +62,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private streamFinished = false;
   private readonly powerPlantFlushIntervalMs = 10;
   private readonly powerPlantBatchSize = 100;
+  private typeFiltersInitialized = false;
+  private typeFiltersTouched = false;
 
   readonly progressSegments = Array.from({ length: 20 }, (_, i) => i);
   readonly powerFilters = ORION_POWER_FILTERS;
@@ -97,7 +99,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   powerPlantPopupData: PowerPlantByIdItem[] = [];
   mergedData: OrionSatelliteFeature[] = [];
   filteredData: OrionSatelliteFeature[] = [];
-  selectedFilters: OrionSatelliteFeatureType[] = [...ORION_POWER_FILTERS.map(f => f.key), ...ORION_INFRASTRUCTURE_FILTERS.map(f => f.key)];
+  selectedFilters: OrionSatelliteFeatureType[] = [];
   focusedFeature: OrionSatelliteFeature | null = null;
   selectedFeature: OrionSatelliteFeature | null = null;
   searchQuery = '';
@@ -596,8 +598,11 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   toggleDashboardFilter(type: OrionSatelliteFeatureType): void {
+    this.typeFiltersInitialized = true;
+    this.typeFiltersTouched = true;
+
     if (this.selectedFilters.includes(type)) {
-      this.selectedFilters = this.selectedFilters.filter(e => e !== type);
+      this.selectedFilters = this.selectedFilters.filter((entry) => entry !== type);
     }
     else {
       this.selectedFilters = [...this.selectedFilters, type];
@@ -609,12 +614,47 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     return this.selectedFilters.includes(type);
   }
 
+  get dashboardTypeFilters(): Array<{ key: OrionSatelliteFeatureType; label: string; color: string; count: number }> {
+    const counts = new Map<OrionSatelliteFeatureType, number>();
+    for (const feature of this.mergedData) {
+      counts.set(feature.type, (counts.get(feature.type) || 0) + 1);
+    }
+
+    return ORION_POWER_FILTERS.map((option) => ({
+      key: option.key as OrionSatelliteFeatureType,
+      label: option.label,
+      color: option.color,
+      count: counts.get(option.key as OrionSatelliteFeatureType) || 0,
+    }));
+  }
+
+  get visibleDashboardTypeFilters(): Array<{ key: OrionSatelliteFeatureType; label: string; color: string; count: number }> {
+    const selected = new Set(this.selectedFilters);
+    return this.dashboardTypeFilters.filter((option) => selected.has(option.key));
+  }
+
   typeDotClass(type: OrionSatelliteFeatureType): string {
     const map: Record<string, string> = {
-      hydro: 'bg-[#2563eb]', nuclear: 'bg-[#dc2626]', coal: 'bg-[#111827]',
-      oil: 'bg-[#f97316]', gas: 'bg-[#6b7280]', industrial: 'bg-[#6b7280]',
-      other: 'bg-[#6b7280]', solar: 'bg-[#facc15]', wind: 'bg-[#16a34a]',
-      airport: 'bg-[#9333ea]', port: 'bg-[#0d9488]', warehouse: 'bg-[#92400e]',
+      hydro: 'bg-[#2563eb]',
+      solar: 'bg-[#facc15]',
+      wind: 'bg-[#16a34a]',
+      gas: 'bg-[#f59e0b]',
+      coal: 'bg-[#111827]',
+      oil: 'bg-[#f97316]',
+      nuclear: 'bg-[#dc2626]',
+      geothermal: 'bg-[#ec4899]',
+      biomass: 'bg-[#84cc16]',
+      waste: 'bg-[#8b5cf6]',
+      storage: 'bg-[#06b6d4]',
+      cogeneration: 'bg-[#14b8a6]',
+      petcoke: 'bg-[#78716c]',
+      wave_and_tidal: 'bg-[#0ea5e9]',
+      airport: 'bg-[#9333ea]',
+      port: 'bg-[#0d9488]',
+      warehouse: 'bg-[#92400e]',
+      industrial: 'bg-[#6b7280]',
+      military: 'bg-[#d71c1c]',
+      other: 'bg-[#a3a3a3]',
     };
     return map[type] || 'bg-[#6b7280]';
   }
@@ -662,18 +702,15 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   hasMorePowerPlants(): boolean {
-    return this.powerPlantPage < this.powerPlantPageCount;
+    return false;
   }
 
   loadMorePowerPlants(): void {
-    if (!this.hasMorePowerPlants() || this.isPowerPlantLoading || this.isPowerPlantLoadingMore) {
-      return;
-    }
-    // this.loadPowerPlantsPage(this.powerPlantPage + 1, true);
+    // No pagination for the streamed WRI dataset
   }
 
   filterCount(type: OrionSatelliteFeatureType): number {
-    return this.orionSatelliteService.filterByType(this.mergedData, type).length;
+    return this.mergedData.filter((feature) => feature.type === type).length;
   }
 
   get visiblePowerCount(): number {
@@ -920,7 +957,29 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.mergedData = this.facilitiesVisible
       ? [...this.wriData, ...this.facilitiesMapData]
       : [...this.wriData];
-    this.filteredData = this.mergedData.filter(f => this.selectedFilters.includes(f.type));
+
+    const availableTypes = Array.from(new Set(this.mergedData.map((feature) => feature.type))) as OrionSatelliteFeatureType[];
+    if (!this.typeFiltersInitialized) {
+      this.selectedFilters = availableTypes;
+      this.typeFiltersInitialized = true;
+    }
+    else if (!this.typeFiltersTouched) {
+      const selected = new Set(this.selectedFilters);
+      let changed = false;
+      for (const type of availableTypes) {
+        if (!selected.has(type)) {
+          selected.add(type);
+          changed = true;
+        }
+      }
+      if (changed) {
+        this.selectedFilters = Array.from(selected);
+      }
+    }
+
+    this.filteredData = this.selectedFilters.length
+      ? this.mergedData.filter((feature) => this.selectedFilters.includes(feature.type))
+      : this.mergedData;
     this.updateDashboardSearchResults(this.dashboardSearch.trim().toLowerCase());
   }
 
@@ -928,6 +987,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
     this.resetPowerPlantStreamState();
     this.isPowerPlantLoading = true;
+    this.typeFiltersInitialized = false;
+    this.typeFiltersTouched = false;
+    this.selectedFilters = [];
 
     this.wriData = [];
 

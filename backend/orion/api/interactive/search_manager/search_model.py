@@ -208,8 +208,22 @@ class search_model:
                     "size": chunk_size,
                     "_source": [
                         "name",
+                        "type",
+                        "country",
+                        "capacity_mw",
+                        "source",
+                        "aeroway",
+                        "building",
+                        "landuse",
+                        "man_made",
+                        "military",
+                        "power",
                         "location.lat",
-                        "location.lon"
+                        "location.lon",
+                        "location_point.lat",
+                        "location_point.lon",
+                        "location",
+                        "location_point"
                     ],
                     "sort": ["_shard_doc"],
                     "track_total_hits": False,
@@ -241,16 +255,28 @@ class search_model:
                 for hit in hits:
                     src = hit.get("_source", {}) or {}
                     loc = src.get("location", {}) or {}
+                    loc_point = src.get("location_point", {}) or {}
 
-                    lat = loc.get("lat")
-                    lon = loc.get("lon")
-
+                    lat = loc.get("lat") if isinstance(loc, dict) else None
+                    lon = loc.get("lon") if isinstance(loc, dict) else None
                     if lat is None or lon is None:
-                        continue
-
+                        lat = loc_point.get("lat") if isinstance(loc_point, dict) else lat
+                        lon = loc_point.get("lon") if isinstance(loc_point, dict) else lon
                     result.append({
                         "id": hit.get("_id"),
                         "name": src.get("name"),
+                        "type": src.get("type"),
+                        "country": src.get("country"),
+                        "capacity_mw": src.get("capacity_mw"),
+                        "source": src.get("source"),
+                        "aeroway": src.get("aeroway"),
+                        "building": src.get("building"),
+                        "landuse": src.get("landuse"),
+                        "man_made": src.get("man_made"),
+                        "military": src.get("military"),
+                        "power": src.get("power"),
+                        "location": src.get("location"),
+                        "location_point": src.get("location_point"),
                         "lat": lat,
                         "lon": lon,
                     })

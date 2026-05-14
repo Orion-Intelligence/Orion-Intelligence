@@ -17,19 +17,32 @@ export interface SatelliteGeocodeResponse {
 export type TrackKind = 'aircraft' | 'ship';
 export type OrionPowerType =
   | 'hydro'
-  | 'nuclear'
-  | 'coal'
-  | 'oil'
-  | 'gas'
   | 'solar'
   | 'wind'
+  | 'gas'
+  | 'coal'
+  | 'oil'
+  | 'nuclear'
+  | 'geothermal'
+  | 'biomass'
+  | 'waste'
+  | 'storage'
+  | 'cogeneration'
+  | 'petcoke'
+  | 'wave_and_tidal'
+  | 'airport'
+  | 'port'
+  | 'warehouse'
+  | 'industrial'
+  | 'military'
   | 'other';
 
 export type OrionInfrastructureType =
   | 'airport'
   | 'port'
   | 'warehouse'
-  | 'industrial';
+  | 'industrial'
+  | 'military';
 
 export type OrionSatelliteFeatureType = OrionPowerType | OrionInfrastructureType;
 export type OrionSatelliteSource = 'WRI' | 'OSM';
@@ -126,13 +139,25 @@ export interface OrionSatelliteGeoJsonCollection {
 
 export const ORION_POWER_FILTERS: OrionSatelliteFilterOption[] = [
   { key: 'hydro', label: 'hydro', color: '#2563eb' },
-  { key: 'nuclear', label: 'nuclear', color: '#dc2626' },
-  { key: 'coal', label: 'coal', color: '#111827' },
-  { key: 'oil', label: 'oil', color: '#f97316' },
   { key: 'solar', label: 'solar', color: '#facc15' },
   { key: 'wind', label: 'wind', color: '#16a34a' },
-  { key: 'gas', label: 'gas', color: '#6b7280' },
-  { key: 'other', label: 'other', color: '#6b7280' },
+  { key: 'gas', label: 'gas', color: '#f59e0b' },
+  { key: 'coal', label: 'coal', color: '#111827' },
+  { key: 'oil', label: 'oil', color: '#f97316' },
+  { key: 'nuclear', label: 'nuclear', color: '#dc2626' },
+  { key: 'geothermal', label: 'geothermal', color: '#ec4899' },
+  { key: 'biomass', label: 'biomass', color: '#84cc16' },
+  { key: 'waste', label: 'waste', color: '#8b5cf6' },
+  { key: 'storage', label: 'storage', color: '#06b6d4' },
+  { key: 'cogeneration', label: 'cogeneration', color: '#14b8a6' },
+  { key: 'petcoke', label: 'petcoke', color: '#78716c' },
+  { key: 'wave_and_tidal', label: 'wave & tidal', color: '#0ea5e9' },
+  { key: 'airport', label: 'airport', color: '#9333ea' },
+  { key: 'port', label: 'port', color: '#0d9488' },
+  { key: 'warehouse', label: 'warehouse', color: '#92400e' },
+  { key: 'industrial', label: 'industrial', color: '#6b7280' },
+  { key: 'military', label: 'military', color: '#d71c1c' },
+  { key: 'other', label: 'other', color: '#a3a3a3' },
 ];
 
 export const ORION_INFRASTRUCTURE_FILTERS: OrionSatelliteFilterOption[] = [
@@ -140,6 +165,7 @@ export const ORION_INFRASTRUCTURE_FILTERS: OrionSatelliteFilterOption[] = [
   { key: 'port', label: 'port', color: '#0d9488' },
   { key: 'warehouse', label: 'warehouse', color: '#92400e' },
   { key: 'industrial', label: 'industrial', color: '#6b7280' },
+  { key: 'military', label: 'military', color: '#d71c1c' },
 ];
 
 export interface TrackingProperties {

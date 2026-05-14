@@ -1,6 +1,7 @@
 import asyncio
 from asyncio import sleep
 from orion.api.server.config_manager.config_controller import config_controller
+from orion.constants import constant
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.management.managers.cronjob_manager import cronjob_manager
@@ -9,6 +10,7 @@ from orion.services.arango_manager.arango_controller import arango_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.redis_manager.redis_controller import redis_controller
+from orion.services.log_manager.log_controller import log
 
 
 class service_manager:
@@ -72,3 +74,47 @@ class service_manager:
     @staticmethod
     async def build_assets(build_dir):
         helper_controller.build_assets(build_dir)
+
+    async def watch_wri_power_plants_file(self, build_dir):
+        power_plant_file = None
+        power_plant_candidates = [
+            build_dir / "assets" / "data" / "satellite" / "wri_power_plantsv2.0.json",
+            build_dir.parent / "client" / "src" / "assets" / "data" / "satellite" / "wri_power_plantsv2.0.json",
+        ]
+
+        for candidate in power_plant_candidates:
+            if candidate.exists():
+                power_plant_file = candidate
+                break
+
+        if not power_plant_file:
+            log.g().w("WRI power plants file not found, file watching disabled")
+            return
+
+        log.g().i(f"Loading power plants data from: {power_plant_file}")
+        try:
+            constant.power_plant_data = power_plant_file.read_text(encoding="utf-8")
+            await elastic_controller.get_instance().reindex_power_plants_data()
+            log.g().i("Initial power plants data indexed successfully")
+        except Exception as ex:
+            log.g().e(f"Error during initial indexing: {str(ex)}")
+
+        last_modified = power_plant_file.stat().st_mtime
+        log.g().i(f"File watcher started for: {power_plant_file}")
+
+        while True:
+            try:
+                await asyncio.sleep(5)
+                if power_plant_file.exists():
+                    current_modified = power_plant_file.stat().st_mtime
+                    if current_modified > last_modified:
+                        last_modified = current_modified
+                        log.g().i(f"Detected change in {power_plant_file.name}, re-indexing...")
+                        try:
+                            constant.power_plant_data = power_plant_file.read_text(encoding="utf-8")
+                            await elastic_controller.get_instance().reindex_power_plants_data()
+                        except Exception as ex:
+                            log.g().e(f"Error during re-indexing: {str(ex)}")
+            except Exception as ex:
+                log.g().e(f"File watcher error: {str(ex)}")
+                await asyncio.sleep(5)
