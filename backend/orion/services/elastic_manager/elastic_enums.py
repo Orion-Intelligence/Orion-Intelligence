@@ -230,7 +230,7 @@ class ELASTIC_ENUMS:
         "m_phone_number": ["m_phone_number"],
         "m_email": ["m_email"],
         "m_domain": ["m_domain", "m_domain.raw"],
-        "m_country": ["m_country"],
+        "m_country": ["m_country", "m_country_name", "m_location", "country", "location"],
         "m_url": ["m_url", "m_url.raw"],
         "m_cve": ["m_cve", "m_cwe"],
         "m_ip": ["m_ip"],
@@ -263,4 +263,3 @@ class ELASTIC_ENUMS:
         "m_industry": ["m_industry"],
         "m_scrap_file": ["m_scrap_file"],
     }
-
