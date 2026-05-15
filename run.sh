@@ -7,6 +7,7 @@ ENV_FILE=".env"
 LOCAL_SSL_DIR="backend/.ssl"
 LOCAL_SSL_CERT="$LOCAL_SSL_DIR/localhost-cert.pem"
 LOCAL_SSL_KEY="$LOCAL_SSL_DIR/localhost-key.pem"
+MAINTENANCE_FLAG="backend/static/.maintenance"
 
 is_port_listening() {
     local port="$1"
@@ -174,6 +175,14 @@ wait_for_server() {
         sleep 2
     done
     sudo systemctl restart tor@default
+}
+
+enable_maintenance_mode() {
+    touch "$MAINTENANCE_FLAG"
+}
+
+disable_maintenance_mode() {
+    rm -f "$MAINTENANCE_FLAG"
 }
 
 wait_for_test_service() {
@@ -369,6 +378,10 @@ fi
 set_testing_enabled "$FLAG"
 
 if [ "$COMMAND" = "build" ]; then
+    if [ "$FLAG" = "-p" ]; then
+        enable_maintenance_mode
+    fi
+
     docker pull python:3.11-slim
     npm --prefix client install
     npm --prefix client run lint
@@ -444,6 +457,7 @@ fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     wait_for_server
+    disable_maintenance_mode
 fi
 
 if [ "$COMMAND" = "build" ] && { [ "$FLAG" = "-t" ] || [ "$FLAG" = "-tb" ]; }; then
