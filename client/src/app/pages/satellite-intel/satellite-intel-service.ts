@@ -219,14 +219,12 @@ export class SatelliteIntelService {
       lat,
       lon,
       radius_km: radiusKm,
-    }).pipe(
-      map((response) => response?.result ?? response as any),
+    }).pipe(map((response) => response?.result ?? response as any),
       map((result: any) => Array.isArray(result?.features) ? result.features : []),
       map((features: any[]) => features
         .map((feature, index) => this.toFacilityFeature(feature, index))
         .filter((feature): feature is OrionSatelliteFeature => feature !== null)),
-      shareReplay(1),
-    );
+      shareReplay(1),);
 
     this.facilitiesCache.set(cacheKey, request$);
     return request$;
