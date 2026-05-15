@@ -144,13 +144,16 @@ client_build() {
     cd client || exit
         npm install
     npm run lint
-    rm -rf build
+    rm -rf build-next
     if [ "$1" = "-t" ]; then
-        npx ng build --configuration instrumented
+        npx ng build --configuration instrumented --output-path build-next
     else
-        npx ng build --configuration production
+        npx ng build --configuration production --output-path build-next
     fi
-    test -d build
+    test -d build-next
+    mkdir -p build
+    rsync -a build-next/ build/
+    rm -rf build-next
     cd ..
     rm -rf backend/build
     mkdir -p backend/build
