@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
-import { SatelliteAnomalyResponse } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
+import { SatelliteAnomalyResponse } from '../../../../shared/model/satellite-intel/satellite-intel-api.models';
 
 @Component({
   selector:    'app-satellite-anomaly-section',

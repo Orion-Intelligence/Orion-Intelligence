@@ -2,9 +2,9 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { geoContains } from 'd3-geo';
 import { feature as topojsonFeature } from 'topojson-client';
-import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
-import { SatelliteIntelService } from '../satellite-intel-service';
-import { ORION_POWER_FILTERS, OrionSatelliteFilterOption } from '../model/satellite-intel.model';
+import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteIntelService } from '../../satellite-intel-service';
+import { ORION_POWER_FILTERS, OrionSatelliteFilterOption } from '../../model/satellite-intel.model';
 
 @Component({
   selector:    'app-satellite-map-section',
@@ -40,6 +40,9 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private markerZoomBucket = 0;
   private aircraftRenderKey = '';
   private shipRenderKey = '';
+  private orionRenderKey = '';
+  private orionRenderVersion = 0;
+  private orionRenderTimer: ReturnType<typeof setTimeout> | null = null;
   private shipCluster!: any;
   private worldCountryFeatures: any[] = [];
   private highlightedCountryFeature: any | null = null;
@@ -167,10 +170,13 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       this.renderShipCluster();
     }
     if (changes['orionData'] || changes['facilitiesVisible']) {
-      this.renderOrionData();
+      this.orionRenderVersion += 1;
+      this.scheduleOrionRender();
     }
     if (changes['focusedFeature']) {
       this.focusOnFeature();
+      this.orionRenderKey = '';
+      this.scheduleOrionRender();
     }
     if (changes['selectedLayer'])   {
       this.switchLayer();
@@ -189,6 +195,10 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
 
   ngOnDestroy(): void {
     clearTimeout(this.moveTimer);
+    if (this.orionRenderTimer) {
+      clearTimeout(this.orionRenderTimer);
+      this.orionRenderTimer = null;
+    }
     this.resizeObserver?.disconnect();
     this.leafletMap?.remove();
   }
@@ -303,6 +313,11 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
           showCoverageOnHover: false,
           zoomToBoundsOnClick: false,
           spiderfyOnMaxZoom: false,
+          chunkedLoading: true,
+          chunkInterval: 40,
+          chunkDelay: 30,
+          removeOutsideVisibleBounds: true,
+          animate: false,
           iconCreateFunction: (cluster: any) => {
             const count = cluster.getChildCount();
             return this.L.divIcon({
@@ -364,6 +379,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
           this.zoomLabel = `zoom ${z.toFixed(1)}  ·  ${c.lat.toFixed(4)}°N  ${c.lng.toFixed(4)}°E`;
           this.refreshBaseLayerDetail();
           this.refreshMarkerSizingForZoom(z);
+          this.scheduleOrionRender();
         });
 
         this.leafletMap.on('moveend', () => {
@@ -371,6 +387,8 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
           const z = this.leafletMap.getZoom();
           this.zoomLabel = `zoom ${z.toFixed(1)}  ·  ${c.lat.toFixed(4)}°N  ${c.lng.toFixed(4)}°E`;
           this.renderAircraftCluster();
+          this.renderShipCluster();
+          this.scheduleOrionRender();
           clearTimeout(this.moveTimer);
           this.moveTimer = setTimeout(() => {
             this.mapMoved.emit({ lat: c.lat, lon: c.lng, zoom: z });
@@ -914,6 +932,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private refreshSelectionState(): void {
     this.aircraftRenderKey = '';
     this.shipRenderKey = '';
+    this.orionRenderKey = '';
     this.renderAircraftCluster();
     this.renderShipCluster();
   }
@@ -970,6 +989,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     this.markerZoomBucket = bucket;
     this.aircraftRenderKey = '';
     this.shipRenderKey = '';
+    this.orionRenderKey = '';
     this.renderAircraftCluster();
     this.renderShipCluster();
   }
@@ -1177,21 +1197,19 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       return;
     }
 
-    const data = this.orionData || [];
+    const renderKey = this.getOrionRenderKey();
+    if (renderKey === this.orionRenderKey) {
+      return;
+    }
+    this.orionRenderKey = renderKey;
+
+    const data = this.getRenderableOrionFeatures();
     const visibleIds = new Set<string>();
+    const markersToAdd: any[] = [];
 
     for (const feat of data) {
-      if (!this.facilitiesVisible && feat.source !== 'WRI') {
-        continue;
-      }
       const featureId = String(feat?.id || '').trim();
       if (!featureId) {
-        continue;
-      }
-
-      // Skip rendering records without valid coordinates (but count them in data)
-      const hasValidCoords = feat.properties?.hasValidCoordinates !== false && feat.coordinates && feat.coordinates[0] !== 0 && feat.coordinates[1] !== 0;
-      if (!hasValidCoords) {
         continue;
       }
 
@@ -1205,7 +1223,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
         const marker = this.createOrionMarker(feat);
         this.orionMarkers.set(featureId, marker);
         this.orionMarkerSignatures.set(featureId, nextSignature);
-        this.orionCluster.addLayer(marker);
+        markersToAdd.push(marker);
         continue;
       }
 
@@ -1214,7 +1232,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
         const marker = this.createOrionMarker(feat);
         this.orionMarkers.set(featureId, marker);
         this.orionMarkerSignatures.set(featureId, nextSignature);
-        this.orionCluster.addLayer(marker);
+        markersToAdd.push(marker);
       }
     }
 
@@ -1226,6 +1244,119 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       this.orionMarkers.delete(featureId);
       this.orionMarkerSignatures.delete(featureId);
     }
+
+    if (markersToAdd.length > 0) {
+      if (typeof this.orionCluster.addLayers === 'function') {
+        this.orionCluster.addLayers(markersToAdd);
+      }
+      else {
+        markersToAdd.forEach(marker => this.orionCluster.addLayer(marker));
+      }
+    }
+  }
+
+  private scheduleOrionRender(): void {
+    if (!this.orionCluster || !this.L) {
+      return;
+    }
+    if (this.orionRenderTimer) {
+      return;
+    }
+    this.orionRenderTimer = setTimeout(() => {
+      this.orionRenderTimer = null;
+      this.renderOrionData();
+    }, 80);
+  }
+
+  private getRenderableOrionFeatures(): any[] {
+    const bounds = this.leafletMap?.getBounds?.();
+    const paddedBounds = bounds?.pad(0.18);
+    const zoom = this.leafletMap?.getZoom?.() ?? 3;
+    const sampleRatio = this.getOrionSampleRatio(zoom);
+
+    return (this.orionData || []).filter((feat) => {
+      if (!this.isValidOrionFeature(feat)) {
+        return false;
+      }
+      if (!this.facilitiesVisible && feat.source !== 'WRI') {
+        return false;
+      }
+
+      const [lon, lat] = feat.coordinates;
+      if (paddedBounds && !paddedBounds.contains([lat, lon])) {
+        return false;
+      }
+
+      return sampleRatio >= 1 || this.shouldKeepOrionSample(feat, sampleRatio);
+    });
+  }
+
+  private isValidOrionFeature(feat: any): boolean {
+    if (!feat?.id || !Array.isArray(feat.coordinates) || feat.coordinates.length < 2) {
+      return false;
+    }
+
+    const [lon, lat] = feat.coordinates;
+    return feat.properties?.hasValidCoordinates !== false &&
+      Number.isFinite(lon) &&
+      Number.isFinite(lat) &&
+      lon !== 0 &&
+      lat !== 0;
+  }
+
+  private getOrionSampleRatio(zoom: number): number {
+    if (zoom >= 8) {
+      return 1;
+    }
+    if (zoom >= 7) {
+      return 0.78;
+    }
+    if (zoom >= 6) {
+      return 0.55;
+    }
+    if (zoom >= 5) {
+      return 0.32;
+    }
+    if (zoom >= 4) {
+      return 0.15;
+    }
+    return 0.1;
+  }
+
+  private shouldKeepOrionSample(feat: any, ratio: number): boolean {
+    if (this.focusedFeature?.id && String(this.focusedFeature.id) === String(feat?.id)) {
+      return true;
+    }
+
+    const key = String(feat?.id || `${feat?.coordinates?.[1]}:${feat?.coordinates?.[0]}`);
+    return (Math.abs(this.stableHash(key)) % 100) < Math.round(ratio * 100);
+  }
+
+  private stableHash(key: string): number {
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+      hash = ((hash << 5) - hash + key.charCodeAt(i)) | 0;
+    }
+    return hash;
+  }
+
+  private getOrionRenderKey(): string {
+    const zoom = this.leafletMap?.getZoom?.() ?? 3;
+    const bounds = this.leafletMap?.getBounds?.();
+    if (!bounds) {
+      return `z:${Math.round(zoom * 2)}|count:${this.orionData.length}|v:${this.orionRenderVersion}|fac:${this.facilitiesVisible}|focus:${this.focusedFeature?.id || ''}`;
+    }
+
+    const center = bounds.getCenter();
+    return [
+      `z:${Math.round(zoom * 2)}`,
+      `c:${center.lat.toFixed(1)},${center.lng.toFixed(1)}`,
+      `d:${bounds.getNorth().toFixed(1)},${bounds.getEast().toFixed(1)},${bounds.getSouth().toFixed(1)},${bounds.getWest().toFixed(1)}`,
+      `count:${this.orionData.length}`,
+      `v:${this.orionRenderVersion}`,
+      `fac:${this.facilitiesVisible}`,
+      `focus:${this.focusedFeature?.id || ''}`,
+    ].join('|');
   }
 
   private createOrionMarker(feat: any): any {

@@ -7,16 +7,15 @@ import { SidebarService } from '../../shared/services/sidebar.service';
 import { SatelliteIntelService } from './satellite-intel-service';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { GeocodeModalComponent } from './components/geocode-modal/geocode-modal.component';
-import { MapSectionComponent } from './map-section/map-section.component';
-import { MonthCompareSectionComponent } from './month-compare-section/month-compare-section.component';
-import { AnomalySectionComponent } from './anomaly-section/anomaly-section.component';
-import { SentinelSearchSectionComponent } from './sentinel-search-section/sentinel-search-section.component';
-import { SentinelImageSectionComponent } from './sentinel-image-section/sentinel-image-section.component';
+import { MapSectionComponent } from './components/map-section/map-section.component';
+import { MonthCompareSectionComponent } from './components/month-compare-section/month-compare-section.component';
+import { AnomalySectionComponent } from './components/anomaly-section/anomaly-section.component';
+import { SentinelSearchSectionComponent } from './components/sentinel-search-section/sentinel-search-section.component';
+import { SentinelImageSectionComponent } from './components/sentinel-image-section/sentinel-image-section.component';
 import { PowerPlantPopupComponent } from './components/power-plant-popup/power-plant-popup.component';
 import { SatelliteFacilitiesResponse, SatelliteAnomalyResponse, SatelliteCompareResponse, SatelliteSentinelImageResult, SatelliteSentinelSearchResponse, SatelliteGeocodeResult, SatelliteLiveAircraft, SatelliteLiveShip, } from '../../shared/model/satellite-intel/satellite-intel-api.models';
 import { ThreatLensComponent } from "../threat-lens/threat-lens";
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { OrionSatelliteService } from './orion-satellite.service';
 import { ORION_INFRASTRUCTURE_FILTERS, ORION_POWER_FILTERS, OrionSatelliteFeature, OrionSatelliteFeatureType, PowerPlantByIdItem } from './model/satellite-intel.model';
 
 @Component({
@@ -60,10 +59,18 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private powerPlantFlushTimer: ReturnType<typeof setTimeout> | null = null;
   private isPowerPlantFlushing = false;
   private streamFinished = false;
-  private readonly powerPlantFlushIntervalMs = 10;
-  private readonly powerPlantBatchSize = 100;
+  private readonly powerPlantFlushIntervalMs = 80;
+  private readonly powerPlantBatchSize = 1000;
   private typeFiltersInitialized = false;
   private typeFiltersTouched = false;
+  private dashboardTypeFilterCache: Array<{ key: OrionSatelliteFeatureType; label: string; color: string; count: number }> = ORION_POWER_FILTERS.map((option) => ({
+    key: option.key as OrionSatelliteFeatureType,
+    label: option.label,
+    color: option.color,
+    count: 0,
+  }));
+  private visiblePowerCountCache = 0;
+  private visibleInfrastructureCountCache = 0;
 
   readonly progressSegments = Array.from({ length: 20 }, (_, i) => i);
   readonly powerFilters = ORION_POWER_FILTERS;
@@ -131,7 +138,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   @Input() toolbarMode: 'hidden' | 'geo' = 'hidden';
 
-  constructor( public satelliteService: SatelliteIntelService,private orionSatelliteService: OrionSatelliteService, private route: ActivatedRoute, private sidebarService: SidebarService ) {
+  constructor( public satelliteService: SatelliteIntelService, private route: ActivatedRoute, private sidebarService: SidebarService ) {
     effect(() => {
       const done = this.satelliteService.onDone();
       if (!done) {
@@ -615,17 +622,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   get dashboardTypeFilters(): Array<{ key: OrionSatelliteFeatureType; label: string; color: string; count: number }> {
-    const counts = new Map<OrionSatelliteFeatureType, number>();
-    for (const feature of this.mergedData) {
-      counts.set(feature.type, (counts.get(feature.type) || 0) + 1);
-    }
-
-    return ORION_POWER_FILTERS.map((option) => ({
-      key: option.key as OrionSatelliteFeatureType,
-      label: option.label,
-      color: option.color,
-      count: counts.get(option.key as OrionSatelliteFeatureType) || 0,
-    }));
+    return this.dashboardTypeFilterCache;
   }
 
   get visibleDashboardTypeFilters(): Array<{ key: OrionSatelliteFeatureType; label: string; color: string; count: number }> {
@@ -681,7 +678,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     }
     this.isPowerPlantDetailsLoading = true;
     this.powerPlantDetailsSub?.unsubscribe();
-    this.powerPlantDetailsSub = this.orionSatelliteService.getPowerPlantsByIds(normalizedIds).subscribe({
+    this.powerPlantDetailsSub = this.satelliteService.getPowerPlantsByIds(normalizedIds).subscribe({
       next: (response) => {
         this.powerPlantPopupData = Array.isArray(response?.Result) ? response.Result : [];
         this.powerPlantPopupOpen = this.powerPlantPopupData.length > 0;
@@ -714,11 +711,11 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   get visiblePowerCount(): number {
-    return this.filteredData.filter(f => f.source === 'WRI').length;
+    return this.visiblePowerCountCache;
   }
 
   get visibleInfrastructureCount(): number {
-    return this.filteredData.filter(f => f.source === 'OSM').length;
+    return this.visibleInfrastructureCountCache;
   }
 
   cancel(): void {
@@ -980,7 +977,35 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.filteredData = this.selectedFilters.length
       ? this.mergedData.filter((feature) => this.selectedFilters.includes(feature.type))
       : this.mergedData;
+    this.refreshDashboardStats();
     this.updateDashboardSearchResults(this.dashboardSearch.trim().toLowerCase());
+  }
+
+  private refreshDashboardStats(): void {
+    const counts = new Map<OrionSatelliteFeatureType, number>();
+    for (const feature of this.mergedData) {
+      counts.set(feature.type, (counts.get(feature.type) || 0) + 1);
+    }
+
+    this.dashboardTypeFilterCache = ORION_POWER_FILTERS.map((option) => ({
+      key: option.key as OrionSatelliteFeatureType,
+      label: option.label,
+      color: option.color,
+      count: counts.get(option.key as OrionSatelliteFeatureType) || 0,
+    }));
+
+    let powerCount = 0;
+    let infrastructureCount = 0;
+    for (const feature of this.filteredData) {
+      if (feature.source === 'WRI') {
+        powerCount += 1;
+      }
+      else if (feature.source === 'OSM') {
+        infrastructureCount += 1;
+      }
+    }
+    this.visiblePowerCountCache = powerCount;
+    this.visibleInfrastructureCountCache = infrastructureCount;
   }
 
   async loadPowerPlants(): Promise<void> {
@@ -995,7 +1020,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
     this.refreshMergedData();
 
-    await this.orionSatelliteService.streamPowerPlants(100,
+    await this.satelliteService.streamPowerPlants(100,
 
       // onChunk
       (chunk) => {

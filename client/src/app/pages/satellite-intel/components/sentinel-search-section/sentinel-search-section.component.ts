@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
-import { SatelliteSentinelPass } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
+import { SatelliteSentinelPass } from '../../../../shared/model/satellite-intel/satellite-intel-api.models';
 
 @Component({
   selector:    'app-satellite-sentinel-search',

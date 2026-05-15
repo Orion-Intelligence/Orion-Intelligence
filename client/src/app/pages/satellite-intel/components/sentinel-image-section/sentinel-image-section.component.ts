@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
-import { SATELLITE_IMAGE_TYPES, SatelliteImageType } from '../../../shared/model/satellite-intel/satellite-intel.model';
-import { SatelliteSentinelImageResult } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
+import { SATELLITE_IMAGE_TYPES, SatelliteImageType } from '../../../../shared/model/satellite-intel/satellite-intel.model';
+import { SatelliteSentinelImageResult } from '../../../../shared/model/satellite-intel/satellite-intel-api.models';
 
 @Component({
   selector:    'app-satellite-sentinel-image',
