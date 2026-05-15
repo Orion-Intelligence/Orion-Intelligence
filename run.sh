@@ -167,8 +167,10 @@ use_compose_file() {
 }
 
 wait_for_server() {
-    local url="https://try.orionintelligence.org"
-    until curl -s -o /dev/null "$url"; do
+    local url="http://127.0.0.1/"
+    local status
+    until status="$(curl -s -o /dev/null -w '%{http_code}' "$url" 2>/dev/null)" \
+        && { [ "$status" = "200" ] || [ "$status" = "301" ] || [ "$status" = "302" ] || [ "$status" = "503" ]; }; do
         sleep 2
     done
     sudo systemctl restart tor@default
@@ -356,11 +358,13 @@ if [ "$1" = "dev" ]; then
     exit 0
 fi
 
-stop_docker
-
 COMMAND=$1
 FLAG=$2
 EXTRA_FLAG=$3
+
+if [ "$COMMAND" != "build" ] || [ "$FLAG" != "-p" ]; then
+    stop_docker
+fi
 
 set_testing_enabled "$FLAG"
 
