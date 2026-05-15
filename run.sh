@@ -7,6 +7,21 @@ ENV_FILE=".env"
 LOCAL_SSL_DIR="backend/.ssl"
 LOCAL_SSL_CERT="$LOCAL_SSL_DIR/localhost-cert.pem"
 LOCAL_SSL_KEY="$LOCAL_SSL_DIR/localhost-key.pem"
+FULL_RESTART=0
+
+ARGS=()
+for arg in "$@"; do
+    if [ "$arg" = "-full" ]; then
+        FULL_RESTART=1
+    else
+        ARGS+=("$arg")
+    fi
+done
+set -- "${ARGS[@]}"
+
+is_nginx_running() {
+    [ "$(docker inspect -f '{{.State.Running}}' trusted-web-nginx 2>/dev/null || true)" = "true" ]
+}
 
 is_port_listening() {
     local port="$1"
@@ -42,10 +57,19 @@ get_port_pids() {
 }
 
 stop_docker() {
-    docker compose -p "$PROJECT_NAME" down --remove-orphans
+    if [ "$FULL_RESTART" = "1" ]; then
+        docker compose -p "$PROJECT_NAME" down --remove-orphans
+        docker stop trusted-web-nginx 2>/dev/null || true
+        docker rm trusted-web-nginx 2>/dev/null || true
+    else
+        local containers
+        containers="$(docker ps -a --filter "label=com.docker.compose.project=$PROJECT_NAME" --format '{{.ID}} {{.Label "com.docker.compose.service"}}' | awk '$2 != "nginx" && $2 != "nginx-dev" {print $1}')"
+        if [ -n "$containers" ]; then
+            docker stop $containers 2>/dev/null || true
+            docker rm $containers 2>/dev/null || true
+        fi
+    fi
     rm -rf staticfiles
-    docker stop trusted-web-nginx 2>/dev/null || true
-    docker rm trusted-web-nginx 2>/dev/null || true
 }
 
 create_parser_zip() {
@@ -313,6 +337,7 @@ if [ "$1" = "-ip" ]; then
 fi
 
 if [ "$1" = "stop" ]; then
+    FULL_RESTART=1
     stop_docker
     echo "Orion Intelligence service stopped"
     exit 0
@@ -349,7 +374,13 @@ if [ "$1" = "dev" ]; then
     echo "Ensuring shared Docker network exists"
     docker network create --driver bridge shared_bridge 2>/dev/null || true
     echo "Starting Docker dev services from docker-compose.yml profile dev"
-    docker compose -p "$PROJECT_NAME" -f docker-compose.yml --profile dev up -d --build web-dev nginx-dev
+    if [ "$FULL_RESTART" = "1" ]; then
+        docker compose -p "$PROJECT_NAME" -f docker-compose.yml --profile dev up -d --build web-dev nginx-dev
+    elif is_nginx_running; then
+        docker compose -p "$PROJECT_NAME" -f docker-compose.yml --profile dev up -d --build web-dev
+    else
+        docker compose -p "$PROJECT_NAME" -f docker-compose.yml --profile dev up -d --build web-dev nginx-dev
+    fi
     wait_for_dev_gateway
     echo "Orion Intelligence dev services started"
     echo "Open http://127.0.0.1:4200 or http://127.0.0.1:8080"
@@ -427,10 +458,22 @@ else
 fi
 
 docker network create --driver bridge shared_bridge 2>/dev/null || true
-if [ "$COMPOSE_FILE" = "docker-compose.yml" ]; then
+if [ "$FULL_RESTART" = "1" ] && [ "$COMPOSE_FILE" = "docker-compose.yml" ]; then
     docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d web nginx
-else
+elif [ "$FULL_RESTART" = "1" ]; then
     docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
+elif [ "$COMPOSE_FILE" = "docker-compose-production.yml" ]; then
+    if is_nginx_running; then
+        docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d web arangodb elasticsearch redis_server mongo
+    else
+        docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d web arangodb elasticsearch redis_server mongo nginx
+    fi
+else
+    if is_nginx_running; then
+        docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d web arangodb elasticsearch redis_server mailpit mongo
+    else
+        docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d web arangodb elasticsearch redis_server mailpit mongo nginx
+    fi
 fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
