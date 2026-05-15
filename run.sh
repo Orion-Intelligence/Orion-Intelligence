@@ -456,6 +456,8 @@ if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && [ "$EXTRA_FLAG" = "-full" ]
 fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" exec -T nginx nginx -t
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload
     wait_for_server
     disable_maintenance_mode
 fi
