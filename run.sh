@@ -369,6 +369,7 @@ fi
 
 COMMAND=$1
 FLAG=$2
+EXTRA_FLAG=$3
 
 if [ "$COMMAND" != "build" ] || [ "$FLAG" != "-p" ]; then
     stop_docker
@@ -450,7 +451,7 @@ else
     docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
 fi
 
-if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
+if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && [ "$EXTRA_FLAG" = "-full" ]; then
     docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --force-recreate nginx
 fi
 
