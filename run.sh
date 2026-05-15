@@ -360,6 +360,7 @@ stop_docker
 
 COMMAND=$1
 FLAG=$2
+EXTRA_FLAG=$3
 
 set_testing_enabled "$FLAG"
 
@@ -431,6 +432,10 @@ if [ "$COMPOSE_FILE" = "docker-compose.yml" ]; then
     docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d web nginx
 else
     docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
+fi
+
+if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && [ "$EXTRA_FLAG" = "-full" ]; then
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --force-recreate nginx
 fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
