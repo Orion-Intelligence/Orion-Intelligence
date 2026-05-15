@@ -111,6 +111,7 @@ services:
   nginx:
     container_name: trusted-web-nginx
     image: wokalek/nginx-brotli
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
