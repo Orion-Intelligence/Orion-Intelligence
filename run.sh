@@ -459,6 +459,9 @@ if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && [ "$EXTRA_FLAG" = "-full" ]
 fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
+    if ! docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" exec -T nginx test -f /client_build/assets/data/map/world.json; then
+        docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --force-recreate nginx
+    fi
     docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" exec -T nginx nginx -t
     docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload
     wait_for_server
