@@ -143,7 +143,8 @@ client_build() {
     cd client || exit
         npm install
     npm run lint
-    rm -rf build
+    mkdir -p build
+    find build -mindepth 1 -maxdepth 1 -exec rm -rf {} +
     if [ "$1" = "-t" ]; then
         npx ng build --configuration instrumented
     else
