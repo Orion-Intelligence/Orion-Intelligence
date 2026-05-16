@@ -279,7 +279,7 @@ jobs:
           set -euo pipefail
           cd "${{ steps.compose_loc.outputs.dir }}"
           export COMPOSE_PROJECT_NAME="ci_backend_${{ github.run_id }}_${{ github.run_attempt }}"
-          docker-compose -f "${{ steps.compose_loc.outputs.file }}" up -d --build
+          COMPOSE_PROFILES=local docker-compose -f "${{ steps.compose_loc.outputs.file }}" up -d --build web nginx
 
       - run: |
           set -euo pipefail
