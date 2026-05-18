@@ -31,7 +31,7 @@ import { DefacementCallbackModel } from '../../../shared/model/results/defacemen
 import { applyQueryAndPageFromParams, isRouteChanged } from '../dashboard-manager.utils';
 import { NetworkIntel } from '../../network-intel/network-intel';
 import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
-import { SatelliteIntel } from "../../satellite-intel/satellite-intel";
+import { SatelliteIntel } from "../../geo-fencing/satellite-intel/satellite-intel";
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,

@@ -5,23 +5,24 @@ import { ChangeDetectorRef } from '@angular/core';
 import { firstValueFrom, Observable } from 'rxjs';
 import { loadModules, setDefaultOptions } from 'esri-loader';
 import { buildArcPath, buildArcPathPoints, buildCountryFeatureIndex, buildSurfacePath, collectArcPairs, getFeatureAnchor, getArcPointAtProgress } from './threat-lens-map.utils';
-import { SidebarService } from '../../shared/services/sidebar.service';
-import { FilterModel } from '../../shared/model/filter/filter.model';
-import { FiltersComponent } from "../../shared/partials/filters/filters.component";
-import { threat_lens_filters } from '../../shared/constants/filters';
+import { SidebarService } from '../../../shared/services/sidebar.service';
+import { FilterModel } from '../../../shared/model/filter/filter.model';
+import { FiltersComponent } from "../../../shared/partials/filters/filters.component";
+import { threat_lens_filters } from '../../../shared/constants/filters';
 import { AnimatedArcDescriptor, SelectedCountryCategoryCount, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensDisplayFeedItem, ThreatLensFeedItem, ThreatLensFeedRange, ThreatLensLegendItem, ThreatLensMapData, ThreatLensRequestPayload, } from './threat.lens.model';
 import { ThreatLensService } from './threat.lens.service';
+import { ThreatLensFeedPanelComponent } from './threat-lens-feed-panel/threat-lens-feed-panel';
 
 @Component({
   selector: 'app-threat-lens',
   standalone: true,
-  imports: [CommonModule, FormsModule, FiltersComponent],
+  imports: [CommonModule, FormsModule, FiltersComponent, ThreatLensFeedPanelComponent],
   templateUrl: './threat-lens.html',
 })
 export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   @ViewChild('mapViewNode', { static: true }) private mapViewNode?: ElementRef<HTMLDivElement>;
-  @ViewChild('newsFeedScroller') private newsFeedScroller?: ElementRef<HTMLDivElement>;
-  @ViewChild('archiveFeedScroller') private archiveFeedScroller?: ElementRef<HTMLDivElement>;
+  @ViewChild('newsFeedPanel') private newsFeedPanel?: ThreatLensFeedPanelComponent;
+  @ViewChild('archiveFeedPanel') private archiveFeedPanel?: ThreatLensFeedPanelComponent;
   private view: any | null = null;
   private countryLayer: any | null = null;
   private newsGraphicsLayer: any | null = null;
@@ -1335,7 +1336,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     }
 
     const timer = window.setInterval(() => {
-      const container = this.getFeedScroller(feedType)?.nativeElement;
+      const container = this.getFeedScroller(feedType);
       const isPaused = feedType === 'news' ? this.newsFeedAutoScrollPaused : this.archiveFeedAutoScrollPaused;
 
       if (!container || isPaused) {
@@ -1431,8 +1432,8 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     this.archiveFeedResumeTimer = resumeTimer;
   }
 
-  private getFeedScroller(feedType: 'news' | 'archive'): ElementRef<HTMLDivElement> | undefined {
-    return feedType === 'news' ? this.newsFeedScroller : this.archiveFeedScroller;
+  private getFeedScroller(feedType: 'news' | 'archive'): HTMLDivElement | undefined {
+    return feedType === 'news' ? this.newsFeedPanel?.getScrollerElement() : this.archiveFeedPanel?.getScrollerElement();
   }
 
   private resetFeedScrollPositions(): void {
@@ -1441,8 +1442,8 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     }
 
     window.setTimeout(() => {
-      this.newsFeedScroller?.nativeElement.scrollTo({ top: 0 });
-      this.archiveFeedScroller?.nativeElement.scrollTo({ top: 0 });
+      this.newsFeedPanel?.scrollToTop();
+      this.archiveFeedPanel?.scrollToTop();
     });
   }
 

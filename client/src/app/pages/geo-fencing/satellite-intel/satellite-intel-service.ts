@@ -1,9 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 import { EMPTY, lastValueFrom, Observable, Subject, timer } from 'rxjs';
 import { expand, finalize, map, shareReplay, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
-import { ApiService } from '../../shared/services/api.service';
-import { SatelliteGeocodeResponse, SatelliteFacilitiesResponse, SatelliteSentinelSearchResponse, SatelliteSentinelImageResponse, SatelliteAnomalyResponse, SatelliteCompareResponse, SatelliteLiveAircraftBBoxResponse, SatelliteLiveShipsBBoxResponse, } from '../../shared/model/satellite-intel/satellite-intel-api.models';
-import { AuthService } from '../../services/authetication/auth.service';
+import { ApiService } from '../../../shared/services/api.service';
+import { SatelliteGeocodeResponse, SatelliteFacilitiesResponse, SatelliteSentinelSearchResponse, SatelliteSentinelImageResponse, SatelliteAnomalyResponse, SatelliteCompareResponse, SatelliteLiveAircraftBBoxResponse, SatelliteLiveShipsBBoxResponse, } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { AuthService } from '../../../services/authetication/auth.service';
 import { OrionSatelliteFeature, OrionSatelliteFeatureType, PowerPlantByIdItem, PowerPlantsByIdsResponse } from './model/satellite-intel.model';
 
 @Injectable({ providedIn: 'root' })

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { geoContains } from 'd3-geo';
 import { feature as topojsonFeature } from 'topojson-client';
-import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
 import { SatelliteIntelService } from '../../satellite-intel-service';
 import { ORION_POWER_FILTERS, OrionSatelliteFilterOption } from '../../model/satellite-intel.model';
 
@@ -307,121 +307,63 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
 
       this.anomalyLayer = this.L.layerGroup().addTo(this.leafletMap);
 
-        await import('leaflet.markercluster' as any) as any;
-        this.orionCluster = this.L.markerClusterGroup({
-          maxClusterRadius: 40,
-          showCoverageOnHover: false,
-          zoomToBoundsOnClick: false,
-          spiderfyOnMaxZoom: false,
-          chunkedLoading: true,
-          chunkInterval: 40,
-          chunkDelay: 30,
-          removeOutsideVisibleBounds: true,
-          animate: false,
-          iconCreateFunction: (cluster: any) => {
-            const count = cluster.getChildCount();
-            return this.L.divIcon({
-              html: `<div style="
-                background:#3b82f6;border-radius:50%;width:32px;height:32px;
-                display:flex;align-items:center;justify-content:center;
-                color:#fff;font-size:11px;font-weight:700;
-                box-shadow:0 0 0 3px rgba(59,130,246,0.3);">
-                ${count}
-              </div>`,
-              className: '',
-              iconSize: [32, 32],
-              iconAnchor: [16, 16],
-            });
-          },
-        }).addTo(this.leafletMap);
-        this.orionCluster.on('clusterclick', (event: any) => {
-          const childMarkers = event?.layer?.getAllChildMarkers?.() || [];
-          const ids = childMarkers
-            .map((marker: any) => marker?.orionFeature?.id)
-            .filter((id: unknown) => typeof id === 'string' && id.length > 0);
-          if (ids.length > 0) {
-            this.featureIdsSelected.emit(Array.from(new Set(ids)));
-          }
-        });
-        this.aircraftCluster = (this.L as any).markerClusterGroup({
-          maxClusterRadius: 40,
-          showCoverageOnHover: false,
-          zoomToBoundsOnClick: false,
-          spiderfyOnMaxZoom: false,
-          iconCreateFunction: (cluster: any) => {
-            const count = cluster.getChildCount();
-            return this.L.divIcon({
-              html: `<div style="
-          background:#22c55e;
-          border-radius:50%;
-          width:32px;height:32px;
-          display:flex;align-items:center;justify-content:center;
-          color:#fff;font-size:11px;font-weight:700;
-          box-shadow:0 0 0 3px rgba(34,197,94,0.3);">
-          ${count}
-        </div>`,
-              className: '',
-              iconSize: [32, 32],
-              iconAnchor: [16, 16],
-            });
-          },
-        }).addTo(this.leafletMap);
-        this.aircraftCluster = this.L.layerGroup().addTo(this.leafletMap);
-        this.shipCluster = this.L.layerGroup().addTo(this.leafletMap);
+      this.orionCluster = this.L.layerGroup().addTo(this.leafletMap);
+      this.aircraftCluster = this.L.layerGroup().addTo(this.leafletMap);
+      this.shipCluster = this.L.layerGroup().addTo(this.leafletMap);
 
-        this.leafletMap.on('zoomstart', () => {
-          this.loadingEntity = null;
-        });
+      this.leafletMap.on('zoomstart', () => {
+        this.loadingEntity = null;
+      });
 
-        this.leafletMap.on('zoomend', () => {
-          const c = this.leafletMap.getCenter();
-          const z = this.leafletMap.getZoom();
-          this.zoomLabel = `zoom ${z.toFixed(1)}  ·  ${c.lat.toFixed(4)}°N  ${c.lng.toFixed(4)}°E`;
-          this.refreshBaseLayerDetail();
-          this.refreshMarkerSizingForZoom(z);
-          this.scheduleOrionRender();
-        });
+      this.leafletMap.on('zoomend', () => {
+        const c = this.leafletMap.getCenter();
+        const z = this.leafletMap.getZoom();
+        this.zoomLabel = `zoom ${z.toFixed(1)}  ·  ${c.lat.toFixed(4)}°N  ${c.lng.toFixed(4)}°E`;
+        this.refreshBaseLayerDetail();
+        this.refreshMarkerSizingForZoom(z);
+        this.scheduleOrionRender();
+      });
 
-        this.leafletMap.on('moveend', () => {
-          const c = this.leafletMap.getCenter();
-          const z = this.leafletMap.getZoom();
-          this.zoomLabel = `zoom ${z.toFixed(1)}  ·  ${c.lat.toFixed(4)}°N  ${c.lng.toFixed(4)}°E`;
-          this.renderAircraftCluster();
-          this.renderShipCluster();
-          this.scheduleOrionRender();
-          clearTimeout(this.moveTimer);
-          this.moveTimer = setTimeout(() => {
-            this.mapMoved.emit({ lat: c.lat, lon: c.lng, zoom: z });
-          }, 500);
-        });
+      this.leafletMap.on('moveend', () => {
+        const c = this.leafletMap.getCenter();
+        const z = this.leafletMap.getZoom();
+        this.zoomLabel = `zoom ${z.toFixed(1)}  ·  ${c.lat.toFixed(4)}°N  ${c.lng.toFixed(4)}°E`;
+        this.renderAircraftCluster();
+        this.renderShipCluster();
+        this.scheduleOrionRender();
+        clearTimeout(this.moveTimer);
+        this.moveTimer = setTimeout(() => {
+          this.mapMoved.emit({ lat: c.lat, lon: c.lng, zoom: z });
+        }, 500);
+      });
 
-        if (this.lat && this.lon) {
-          this.updateMapView();
-        }
-        if (this.facilitiesData)  {
-          this.renderFacilities();
-        }
-        if (this.anomalyData)     {
-          this.renderAnomaly();
-        }
-        if (this.aircraftData?.length) {
-          this.renderAircraftCluster();
-        }
-        if (this.shipsData?.length) {
-          this.renderShipCluster();
-        }
-        if (this.orionData?.length) {
-          this.renderOrionData();
-        }
-        this.resizeObserver = new ResizeObserver(() => {
-          this.leafletMap?.invalidateSize();
-          this.updateMinZoomToFitContainer();
-        });
-        this.resizeObserver.observe(this.mapContainer.nativeElement);
-        setTimeout(() => {
-          this.leafletMap?.invalidateSize();
-          this.updateMinZoomToFitContainer();
-        }, 0);
+      if (this.lat && this.lon) {
+        this.updateMapView();
+      }
+      if (this.facilitiesData)  {
+        this.renderFacilities();
+      }
+      if (this.anomalyData)     {
+        this.renderAnomaly();
+      }
+      if (this.aircraftData?.length) {
+        this.renderAircraftCluster();
+      }
+      if (this.shipsData?.length) {
+        this.renderShipCluster();
+      }
+      if (this.orionData?.length) {
+        this.renderOrionData();
+      }
+      this.resizeObserver = new ResizeObserver(() => {
+        this.leafletMap?.invalidateSize();
+        this.updateMinZoomToFitContainer();
+      });
+      this.resizeObserver.observe(this.mapContainer.nativeElement);
+      setTimeout(() => {
+        this.leafletMap?.invalidateSize();
+        this.updateMinZoomToFitContainer();
+      }, 0);
     }
     catch { }
   }
@@ -884,14 +826,22 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     const half = Math.round(size / 2);
     const iconSize = Math.round(size * 0.86);
     const halo = isSelected ? 'drop-shadow(0 0 8px rgba(250,204,21,0.95)) drop-shadow(0 0 18px rgba(250,204,21,0.72))' : 'drop-shadow(0 1px 2px rgba(0,0,0,0.45))';
+    const hoverHalo = isSelected
+      ? 'drop-shadow(0 0 8px rgba(250,204,21,0.95)) drop-shadow(0 0 18px rgba(250,204,21,0.72))'
+      : 'drop-shadow(0 0 7px rgba(56,189,248,0.9)) drop-shadow(0 0 16px rgba(56,189,248,0.55))';
+    const strokeColor = isSelected ? '#fff7bf' : '#eab308';
     const badge = isLoading
       ? `<div style="position:absolute;top:-1px;right:-1px;width:12px;height:12px;border-radius:9999px;background:#fde68a;border:2px solid #081421;"></div>`
       : '';
     return this.L.divIcon({
       html: `
-        <div style="position:relative;width:${size}px;height:${size}px;">
-          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(${a.true_track ?? 0}deg);filter:${halo};">
-            <svg viewBox="0 0 24 24" style="width:${iconSize}px;height:${iconSize}px;fill:#facc15;stroke:${isSelected ? '#fff7bf' : '#eab308'};stroke-width:0.65;">
+        <style>
+          .aircraft-marker:hover .aircraft-icon-wrap { filter:${hoverHalo} !important; }
+          .aircraft-marker:hover .aircraft-icon { fill:#38bdf8 !important; stroke:#dbeafe !important; }
+        </style>
+        <div class="aircraft-marker" style="position:relative;width:${size}px;height:${size}px;">
+          <div class="aircraft-icon-wrap" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(${a.true_track ?? 0}deg);filter:${halo};">
+            <svg class="aircraft-icon" viewBox="0 0 24 24" style="width:${iconSize}px;height:${iconSize}px;fill:#facc15;stroke:${strokeColor};stroke-width:0.65;transition:fill 120ms ease,stroke 120ms ease;">
               <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9L2 14v2l8-2.5V19l-2 1.5V22l3-1 3 1v-1.5L12 19v-5.5L21 16z"/>
             </svg>
           </div>
@@ -1272,9 +1222,8 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     const bounds = this.leafletMap?.getBounds?.();
     const paddedBounds = bounds?.pad(0.18);
     const zoom = this.leafletMap?.getZoom?.() ?? 3;
-    const sampleRatio = this.getOrionSampleRatio(zoom);
 
-    return (this.orionData || []).filter((feat) => {
+    const visibleFeatures = (this.orionData || []).filter((feat) => {
       if (!this.isValidOrionFeature(feat)) {
         return false;
       }
@@ -1287,8 +1236,10 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
         return false;
       }
 
-      return sampleRatio >= 1 || this.shouldKeepOrionSample(feat, sampleRatio);
+      return true;
     });
+
+    return this.limitOrionFeaturesForZoom(visibleFeatures, zoom, paddedBounds);
   }
 
   private isValidOrionFeature(feat: any): boolean {
@@ -1304,32 +1255,118 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       lat !== 0;
   }
 
-  private getOrionSampleRatio(zoom: number): number {
-    if (zoom >= 8) {
-      return 1;
+  private limitOrionFeaturesForZoom(features: any[], zoom: number, bounds: any): any[] {
+    const limit = this.getOrionVisibleLimit(zoom);
+    if (!Number.isFinite(limit) || features.length <= limit) {
+      return features;
     }
-    if (zoom >= 7) {
-      return 0.78;
+
+    const focusedId = this.focusedFeature?.id ? String(this.focusedFeature.id) : '';
+    const focusedFeature = focusedId
+      ? features.find((feat) => String(feat?.id || '') === focusedId) ?? null
+      : null;
+    const remainingLimit = Math.max(0, limit - (focusedFeature ? 1 : 0));
+    const grid = this.getOrionGridSize(zoom);
+    const buckets = new Map<string, Array<{ feat: any; score: number }>>();
+
+    for (const feat of features) {
+      if (focusedFeature && String(feat?.id || '') === focusedId) {
+        continue;
+      }
+
+      const bucketKey = this.getOrionGridKey(feat, bounds, grid.cols, grid.rows);
+      const bucket = buckets.get(bucketKey) || [];
+      bucket.push({
+        feat,
+        score: Math.abs(this.stableHash(String(feat?.id || `${feat?.coordinates?.[1]}:${feat?.coordinates?.[0]}`))),
+      });
+      buckets.set(bucketKey, bucket);
     }
-    if (zoom >= 6) {
-      return 0.55;
+
+    const sortedBuckets = Array.from(buckets.values())
+      .map((bucket) => bucket.sort((left, right) => left.score - right.score))
+      .sort((left, right) => right.length - left.length);
+
+    const limitedFeatures: any[] = [];
+    let round = 0;
+    while (limitedFeatures.length < remainingLimit) {
+      let addedThisRound = false;
+      for (const bucket of sortedBuckets) {
+        const entry = bucket[round];
+        if (!entry) {
+          continue;
+        }
+        limitedFeatures.push(entry.feat);
+        addedThisRound = true;
+        if (limitedFeatures.length >= remainingLimit) {
+          break;
+        }
+      }
+      if (!addedThisRound) {
+        break;
+      }
+      round += 1;
     }
-    if (zoom >= 5) {
-      return 0.32;
-    }
-    if (zoom >= 4) {
-      return 0.15;
-    }
-    return 0.1;
+
+    return focusedFeature ? [focusedFeature, ...limitedFeatures] : limitedFeatures;
   }
 
-  private shouldKeepOrionSample(feat: any, ratio: number): boolean {
-    if (this.focusedFeature?.id && String(this.focusedFeature.id) === String(feat?.id)) {
-      return true;
+  private getOrionVisibleLimit(zoom: number): number {
+    if (zoom >= 11) {
+      return Number.POSITIVE_INFINITY;
     }
+    if (zoom >= 10) {
+      return 8000;
+    }
+    if (zoom >= 9) {
+      return 5200;
+    }
+    if (zoom >= 8) {
+      return 3200;
+    }
+    if (zoom >= 7) {
+      return 1900;
+    }
+    if (zoom >= 6) {
+      return 1100;
+    }
+    if (zoom >= 5) {
+      return 700;
+    }
+    if (zoom >= 4) {
+      return 450;
+    }
+    return 280;
+  }
 
-    const key = String(feat?.id || `${feat?.coordinates?.[1]}:${feat?.coordinates?.[0]}`);
-    return (Math.abs(this.stableHash(key)) % 100) < Math.round(ratio * 100);
+  private getOrionGridSize(zoom: number): { cols: number; rows: number } {
+    if (zoom >= 10) {
+      return { cols: 36, rows: 24 };
+    }
+    if (zoom >= 8) {
+      return { cols: 30, rows: 20 };
+    }
+    if (zoom >= 6) {
+      return { cols: 24, rows: 16 };
+    }
+    if (zoom >= 4) {
+      return { cols: 20, rows: 12 };
+    }
+    return { cols: 16, rows: 10 };
+  }
+
+  private getOrionGridKey(feat: any, bounds: any, cols: number, rows: number): string {
+    const [lon, lat] = feat.coordinates;
+    const west = bounds?.getWest?.() ?? -180;
+    const east = bounds?.getEast?.() ?? 180;
+    const south = bounds?.getSouth?.() ?? -85;
+    const north = bounds?.getNorth?.() ?? 85;
+    const lonSpan = Math.max(0.000001, east - west);
+    const latSpan = Math.max(0.000001, north - south);
+    const x = Math.max(0, Math.min(cols - 1, Math.floor(((lon - west) / lonSpan) * cols)));
+    const y = Math.max(0, Math.min(rows - 1, Math.floor(((north - lat) / latSpan) * rows)));
+
+    return `${x}:${y}`;
   }
 
   private stableHash(key: string): number {

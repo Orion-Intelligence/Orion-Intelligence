@@ -29,7 +29,7 @@ from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (
     NetIntelDeepScanRequest,
     ResolveIPRequest,
 )
-from orion.api.server.crawl_manager.class_model.satellite_request_models import (
+from orion.api.server.geo_fencing_manager.class_model.satellite_request_models import (
     SatelliteImageRequest,
     SatelliteAnomalyRequest,
     SatelliteCompareRequest,
@@ -49,6 +49,7 @@ from orion.api.server.crawl_manager.class_model.social_scrape_request_model impo
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
+from orion.api.server.geo_fencing_manager.geo_fencing_manager import geo_fencing_manager
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
 from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
@@ -973,7 +974,7 @@ async def geo_camera_detect_ranges(param: GeoCameraDetectRangesRequest = Body(..
     dependencies=SATELLITE_INTEL_DEPS,
 )
 async def satellite_geocode(payload: SatelliteGeocodeRequest = Body(...), current_user=Depends(get_current_user)):
-    return await crawl_model.getInstance().geocode(payload, user_id=str(current_user.id))
+    return await geo_fencing_manager.get_instance().geocode(payload, user_id=str(current_user.id))
 
 
 @api_routes.post(
@@ -984,7 +985,7 @@ async def satellite_geocode(payload: SatelliteGeocodeRequest = Body(...), curren
     dependencies=SATELLITE_INTEL_DEPS,
 )
 async def satellite_facilities(payload: SatelliteFacilitiesRequest = Body(...), current_user=Depends(get_current_user)):
-    return await crawl_model.getInstance().facilities(payload, user_id=str(current_user.id))
+    return await geo_fencing_manager.get_instance().facilities(payload, user_id=str(current_user.id))
 
 
 @api_routes.post(
@@ -995,7 +996,7 @@ async def satellite_facilities(payload: SatelliteFacilitiesRequest = Body(...), 
     dependencies=SATELLITE_INTEL_DEPS,
 )
 async def satellite_sentinel_search(payload: SatelliteSentinelSearchRequest = Body(...), current_user=Depends(get_current_user)):
-    return await crawl_model.getInstance().sentinel_search(payload, user_id=str(current_user.id))
+    return await geo_fencing_manager.get_instance().sentinel_search(payload, user_id=str(current_user.id))
 
 
 @api_routes.post(
@@ -1006,7 +1007,7 @@ async def satellite_sentinel_search(payload: SatelliteSentinelSearchRequest = Bo
     dependencies=SATELLITE_INTEL_DEPS,
 )
 async def satellite_sentinel_image(payload: SatelliteImageRequest = Body(...), current_user=Depends(get_current_user)):
-    return await crawl_model.getInstance().sentinel_image(payload, user_id=str(current_user.id))
+    return await geo_fencing_manager.get_instance().sentinel_image(payload, user_id=str(current_user.id))
 
 
 @api_routes.post(
@@ -1017,7 +1018,7 @@ async def satellite_sentinel_image(payload: SatelliteImageRequest = Body(...), c
     dependencies=SATELLITE_INTEL_DEPS,
 )
 async def satellite_anomaly(payload: SatelliteAnomalyRequest = Body(...), current_user=Depends(get_current_user)):
-    return await crawl_model.getInstance().anomaly(payload, user_id=str(current_user.id))
+    return await geo_fencing_manager.get_instance().anomaly(payload, user_id=str(current_user.id))
 
 
 @api_routes.post(
@@ -1028,7 +1029,7 @@ async def satellite_anomaly(payload: SatelliteAnomalyRequest = Body(...), curren
     dependencies=SATELLITE_INTEL_DEPS,
 )
 async def satellite_compare(payload: SatelliteCompareRequest = Body(...), current_user=Depends(get_current_user)):
-    return await crawl_model.getInstance().compare(payload, user_id=str(current_user.id))
+    return await geo_fencing_manager.get_instance().compare(payload, user_id=str(current_user.id))
 
 
 @api_routes.post(
@@ -1039,7 +1040,7 @@ async def satellite_compare(payload: SatelliteCompareRequest = Body(...), curren
     dependencies=SATELLITE_INTEL_DEPS,
 )
 async def satellite_livetrack_aircraft_bbox(payload: SatelliteLiveTrackerBBoxRequest = Body(...), current_user=Depends(get_current_user)):
-    return await crawl_model.getInstance().livetrack_aircraft_bbox(payload, user_id=str(current_user.id))
+    return await geo_fencing_manager.get_instance().livetrack_aircraft_bbox(payload, user_id=str(current_user.id))
 
 
 @api_routes.post(
@@ -1050,7 +1051,7 @@ async def satellite_livetrack_aircraft_bbox(payload: SatelliteLiveTrackerBBoxReq
     dependencies=SATELLITE_INTEL_DEPS,
 )
 async def satellite_livetrack_aircraft_icao(payload: SatelliteLiveTrackerAircraftIcaoRequest = Body(...), current_user=Depends(get_current_user)):
-    return await crawl_model.getInstance().livetrack_aircraft_icao(payload, user_id=str(current_user.id))
+    return await geo_fencing_manager.get_instance().livetrack_aircraft_icao(payload, user_id=str(current_user.id))
 
 
 @api_routes.post(
@@ -1061,7 +1062,7 @@ async def satellite_livetrack_aircraft_icao(payload: SatelliteLiveTrackerAircraf
     dependencies=SATELLITE_INTEL_DEPS,
 )
 async def satellite_livetrack_aircraft_track(payload: SatelliteLiveTrackerAircraftTrackRequest = Body(...), current_user=Depends(get_current_user)):
-    return await crawl_model.getInstance().livetrack_aircraft_track(payload, user_id=str(current_user.id))
+    return await geo_fencing_manager.get_instance().livetrack_aircraft_track(payload, user_id=str(current_user.id))
 
 
 @api_routes.post(
@@ -1072,7 +1073,7 @@ async def satellite_livetrack_aircraft_track(payload: SatelliteLiveTrackerAircra
     dependencies=SATELLITE_INTEL_DEPS,
 )
 async def satellite_livetrack_ships_bbox(payload: SatelliteLiveTrackerBBoxRequest = Body(...), current_user=Depends(get_current_user)):
-    return await crawl_model.getInstance().livetrack_ships_bbox(payload, user_id=str(current_user.id))
+    return await geo_fencing_manager.get_instance().livetrack_ships_bbox(payload, user_id=str(current_user.id))
 
 
 @api_routes.post(
@@ -1083,7 +1084,7 @@ async def satellite_livetrack_ships_bbox(payload: SatelliteLiveTrackerBBoxReques
     dependencies=SATELLITE_INTEL_DEPS,
 )
 async def satellite_livetrack_ships_mmsi(payload: SatelliteLiveTrackerShipMmsiRequest = Body(...), current_user=Depends(get_current_user)):
-    return await crawl_model.getInstance().livetrack_ships_mmsi(payload, user_id=str(current_user.id))
+    return await geo_fencing_manager.get_instance().livetrack_ships_mmsi(payload, user_id=str(current_user.id))
 
 
 @api_routes.post(
@@ -1094,7 +1095,7 @@ async def satellite_livetrack_ships_mmsi(payload: SatelliteLiveTrackerShipMmsiRe
     dependencies=SATELLITE_INTEL_DEPS,
 )
 async def satellite_livetrack_status(payload: SatelliteLiveTrackerStatusRequest = Body(...), current_user=Depends(get_current_user)):
-    return await crawl_model.getInstance().livetrack_status(payload, user_id=str(current_user.id))
+    return await geo_fencing_manager.get_instance().livetrack_status(payload, user_id=str(current_user.id))
 
 @api_routes.post(
     "/api/stix/convert/{kind}",

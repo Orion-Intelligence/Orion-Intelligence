@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { firstValueFrom, from, map, Observable } from 'rxjs';
-import { ConsolidatedCallbackModel } from '../../shared/model/results/consolidated/consolidated.callback.model';
-import { ConsolidatedParamModel } from '../../shared/model/results/consolidated/consolidated.param.model';
-import { ApiService } from '../../shared/services/api.service';
-import { DashboardService } from '../../services/dashboard/dashboard.service';
+import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
+import { ConsolidatedParamModel } from '../../../shared/model/results/consolidated/consolidated.param.model';
+import { ApiService } from '../../../shared/services/api.service';
+import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { THREAT_LENS_CATEGORY_CONFIG, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensMapData, ThreatLensRequestPayload, } from './threat.lens.model';
 
 const COUNTRY_ALIAS: Record<string, string> = {

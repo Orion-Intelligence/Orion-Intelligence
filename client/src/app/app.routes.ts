@@ -10,7 +10,7 @@ import { IocResolver } from './shared/resolvers/ioc.resolver';
 import { ConfigResolver } from './shared/resolvers/config.resolver';
 import { OnboardingGuard } from './shared/guards/onboarding-guar';
 import { NotificationGuard } from './shared/guards/notification.guard';
-import { ThreatLensComponent } from './pages/threat-lens/threat-lens';
+import { ThreatLensComponent } from './pages/geo-fencing/threat-lens/threat-lens';
 const loadLoginComponent = () => import('./pages/login/login.component').then(m => m.LoginComponent);
 const loadSignupComponent = () => import('./pages/signup/signup.component').then(m => m.SignupComponent);
 const loadDashboardComponent = () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent);
@@ -46,7 +46,7 @@ const loadTenantSettingsComponent = () => import('./pages/dashboard/dashboard-si
 const loadFileScannerComponent = () => import('./pages/intel-panel/ioc-extractor/file-scanner.component').then(m => m.FileScannerComponent);
 const loadSocialMapperComponent = () => import('./pages/graphs/social-graph/social-mapper.component').then(m => m.SocialMapperComponent);
 const loadNetworkIntelComponent = () => import('./pages/network-intel/network-intel').then(m => m.NetworkIntel);
-const loadSatelliteIntelComponent =()=>import('./pages/satellite-intel/satellite-intel').then(m=>m.SatelliteIntel);
+const loadSatelliteIntelComponent =()=>import('./pages/geo-fencing/satellite-intel/satellite-intel').then(m=>m.SatelliteIntel);
 const loadUserProfileActivityComponent = () => import('./pages/profile/user-profile-activity/user-profile-activity.component').then(m => m.UserProfileActivityComponent);
 
 const HASH_CONSOLIDATED_ROUTE = {

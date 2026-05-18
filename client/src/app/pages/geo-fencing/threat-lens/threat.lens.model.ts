@@ -1,4 +1,4 @@
-import { ConsolidatedParamModel } from '../../shared/model/results/consolidated/consolidated.param.model';
+import { ConsolidatedParamModel } from '../../../shared/model/results/consolidated/consolidated.param.model';
 
 export const THREAT_LENS_CATEGORY_CONFIG = [
   { key: 'leak_model', label: 'Leak', color: [244, 114, 182] as [number, number, number] },

@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import { SidebarService } from '../../shared/services/sidebar.service';
+import { SidebarService } from '../../../shared/services/sidebar.service';
 import { SatelliteIntelService } from './satellite-intel-service';
-import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
+import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { GeocodeModalComponent } from './components/geocode-modal/geocode-modal.component';
 import { MapSectionComponent } from './components/map-section/map-section.component';
 import { MonthCompareSectionComponent } from './components/month-compare-section/month-compare-section.component';
@@ -13,10 +13,12 @@ import { AnomalySectionComponent } from './components/anomaly-section/anomaly-se
 import { SentinelSearchSectionComponent } from './components/sentinel-search-section/sentinel-search-section.component';
 import { SentinelImageSectionComponent } from './components/sentinel-image-section/sentinel-image-section.component';
 import { PowerPlantPopupComponent } from './components/power-plant-popup/power-plant-popup.component';
-import { SatelliteFacilitiesResponse, SatelliteAnomalyResponse, SatelliteCompareResponse, SatelliteSentinelImageResult, SatelliteSentinelSearchResponse, SatelliteGeocodeResult, SatelliteLiveAircraft, SatelliteLiveShip, } from '../../shared/model/satellite-intel/satellite-intel-api.models';
-import { ThreatLensComponent } from "../threat-lens/threat-lens";
+import { SatelliteFacilitiesResponse, SatelliteAnomalyResponse, SatelliteCompareResponse, SatelliteSentinelImageResult, SatelliteSentinelSearchResponse, SatelliteGeocodeResult, SatelliteLiveAircraft, SatelliteLiveShip, } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { ThreatLensComponent } from ".././threat-lens/threat-lens";
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ORION_INFRASTRUCTURE_FILTERS, ORION_POWER_FILTERS, OrionSatelliteFeature, OrionSatelliteFeatureType, PowerPlantByIdItem } from './model/satellite-intel.model';
+
+type SatelliteIntelPanel = 'dashboard' | 'compare' | 'anomaly' | 'sentinel' | 'image';
 
 @Component({
   selector:    'app-satellite-intel',
@@ -75,8 +77,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   readonly progressSegments = Array.from({ length: 20 }, (_, i) => i);
   readonly powerFilters = ORION_POWER_FILTERS;
   readonly infrastructureFilters = ORION_INFRASTRUCTURE_FILTERS;
-  readonly panelTabs = [ { id: 'dashboard', label: 'Dashboard' },{ id: 'compare', label: 'Compare' }, { id: 'anomaly', label: 'Anomaly' }, { id: 'sentinel', label: 'Sentinel' }, { id: 'image', label: 'Image' }, ] as const;
-  activePanel: 'dashboard' |'compare' | 'anomaly' | 'sentinel' | 'image' | 'facilities' = 'compare';
+  readonly panelTabs: Array<{ id: SatelliteIntelPanel; label: string }> = [ { id: 'dashboard', label: 'Dashboard' },{ id: 'compare', label: 'Compare' }, { id: 'anomaly', label: 'Anomaly' }, { id: 'sentinel', label: 'Sentinel' }, { id: 'image', label: 'Image' }, ];
+  activePanel: SatelliteIntelPanel = 'dashboard';
   activeTab: 'map' | 'tracking' | 'threat' = 'map';
   coordsForm = { value: '', delta: 0.05 };
   formError:  string | null = null;
@@ -128,7 +130,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   selectedTrackingTypes: ('aircraft' | 'ship')[] = ['aircraft'];
   isTrackingDropdownOpen = false;
   isPanelMenuOpen = false;
-  isPanelPopupOpen = false;
+  isPanelPopupOpen = true;
   isThreatLensLoading = false;
   isScanning = computed(() =>
     !!this.pendingRequest && !this.satelliteService.onError(),);
@@ -185,12 +187,11 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.dashboardSearchSub = this.dashboardSearch$.pipe(debounceTime(300), distinctUntilChanged()).subscribe((query) => {
       this.updateDashboardSearchResults(query);
     });
-    this.setPanel('compare');
+    this.setPanel('dashboard');
     const section = this.route.snapshot.queryParamMap.get('section');
     const q = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
-    if (section) {
-      this.activePanel = section as any;
-    }
+    this.setPanel(this.isPanelId(section) ? section : 'dashboard');
+    this.isPanelPopupOpen = true;
     if (q) {
       this.coordsForm.value = q;
       const parsed = this.satelliteService.parseCoordinates(q);
@@ -232,7 +233,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     return this.toolbarMode !== 'hidden';
   }
 
-  setPanel(id: typeof this.activePanel): void {
+  setPanel(id: SatelliteIntelPanel): void {
     this.activePanel = id;
 
     this.satelliteService.resetState();
@@ -291,7 +292,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.isPanelMenuOpen = false;
   }
 
-  openPanelPopup(id: typeof this.activePanel): void {
+  openPanelPopup(id: SatelliteIntelPanel): void {
     this.setPanel(id);
     this.isPanelPopupOpen = true;
     this.isPanelMenuOpen = false;
@@ -729,9 +730,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   get lastResultCount(): number {
-    if (this.activePanel === 'facilities') {
-      return this.facilitiesData?.total ?? 0;
-    }
     if (this.activePanel === 'sentinel')   {
       return this.sentinelResults?.results?.length ?? 0;
     }
@@ -742,6 +740,14 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       return this.compareResult?.months?.length ?? 0;
     }
     return 0;
+  }
+
+  private isPanelId(value: string | null): value is SatelliteIntelPanel {
+    return value === 'dashboard' ||
+      value === 'compare' ||
+      value === 'anomaly' ||
+      value === 'sentinel' ||
+      value === 'image';
   }
 
   public loadFacilities(): void {
@@ -974,9 +980,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       }
     }
 
-    this.filteredData = this.selectedFilters.length
-      ? this.mergedData.filter((feature) => this.selectedFilters.includes(feature.type))
-      : this.mergedData;
+    this.filteredData = this.mergedData.filter((feature) => this.selectedFilters.includes(feature.type));
     this.refreshDashboardStats();
     this.updateDashboardSearchResults(this.dashboardSearch.trim().toLowerCase());
   }
