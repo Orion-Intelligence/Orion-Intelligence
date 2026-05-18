@@ -1,6 +1,9 @@
 import {
+  addArtifactsAndTasksToCreatedCase,
   addCase,
+  addCommentToCreatedCase,
   assertCreatedCaseDetails,
+  closeCreatedCase,
   editCreatedCase,
   openCaseManagement,
   openCreatedCaseFromList
@@ -19,5 +22,8 @@ describe('Case Management - Add View Edit Flow', () => {
     openCreatedCaseFromList();
     assertCreatedCaseDetails();
     editCreatedCase();
+    addArtifactsAndTasksToCreatedCase();
+    addCommentToCreatedCase();
+    closeCreatedCase();
   });
 });

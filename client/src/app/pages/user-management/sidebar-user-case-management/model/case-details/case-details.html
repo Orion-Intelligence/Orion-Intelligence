@@ -129,11 +129,11 @@
                     <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Closure</h2>
                     @if (isEditing && editedCase) {
                     @if (editedCase.closure) {
-                    <button type="button" (click)="removeClosure()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200">
+                    <button type="button" (click)="removeClosure()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" data-testid="case-closure-remove">
                         <i class="bi bi-x-lg"></i> Remove
                     </button>
                     } @else {
-                    <button type="button" (click)="addClosure()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
+                    <button type="button" (click)="addClosure()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200" data-testid="case-closure-add">
                         <i class="bi bi-plus-lg"></i> Add
                     </button>
                     }
@@ -146,7 +146,7 @@
                     <div class="grid gap-3 md:grid-cols-2">
                         <div>
                             <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Reason</label>
-                            <select [(ngModel)]="closure.reason" name="closureReason" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35">
+                            <select [(ngModel)]="closure.reason" name="closureReason" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-closure-reason-select">
                                 @for (reason of closureReasonOptions; track reason.value) {
                                 <option [value]="reason.value">{{ reason.label }}</option>
                                 }
@@ -159,11 +159,11 @@
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Summary</label>
-                            <textarea [(ngModel)]="closure.summary" name="closureSummary" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35"></textarea>
+                            <textarea [(ngModel)]="closure.summary" name="closureSummary" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-closure-summary-input"></textarea>
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Resolution</label>
-                            <textarea [(ngModel)]="closure.resolution" name="closureResolution" rows="3" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35"></textarea>
+                            <textarea [(ngModel)]="closure.resolution" name="closureResolution" rows="3" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-closure-resolution-input"></textarea>
                         </div>
                     </div>
                     } @else {
@@ -177,20 +177,20 @@
                         <div class="min-w-0 p-4">
                             <div>
                                 <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Closure Reason</div>
-                                <div class="text-sm font-medium leading-6 text-[var(--color-text2)] break-words">
+                                <div class="text-sm font-medium leading-6 text-[var(--color-text2)] break-words" data-testid="case-closure-reason-value">
                                     {{ formatLabel(closure.reason) }}
                                 </div>
                             </div>
                             <div class="mt-3">
                                 <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Closure Summary</div>
-                                <div class="text-sm leading-6 text-[var(--color-text2)] break-words">
+                                <div class="text-sm leading-6 text-[var(--color-text2)] break-words" data-testid="case-closure-summary-value">
                                     {{ closure.summary || 'No closure summary provided.' }}
                                 </div>
                             </div>
                             @if (closure.resolution) {
                             <div class="mt-3">
                                 <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Resolution Notes</div>
-                                <div class="text-sm leading-6 text-[var(--color-text2)] break-words">
+                                <div class="text-sm leading-6 text-[var(--color-text2)] break-words" data-testid="case-closure-resolution-value">
                                     {{ closure.resolution }}
                                 </div>
                             </div>
@@ -200,11 +200,11 @@
                             <div class="grid grid-cols-1 gap-x-5 gap-y-4 xl:grid-cols-2">
                                 <div>
                                     <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Closed By</div>
-                                    <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all">{{ getAnalystLabel(closure.closedBy) }}</div>
+                                    <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all" data-testid="case-closure-closed-by-value">{{ getAnalystLabel(closure.closedBy) }}</div>
                                 </div>
                                 <div>
                                     <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Closed At</div>
-                                    <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{ getFormattedDateTime(closure.closedAt) }}</div>
+                                    <div class="mt-1 text-xs font-medium text-[var(--color-text1)]" data-testid="case-closure-closed-at-value">{{ getFormattedDateTime(closure.closedAt) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -233,21 +233,21 @@
                             <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">Status</div>
                             <div class="mt-1 flex items-center gap-1.5 truncate text-xs font-semibold text-[var(--color-text1)]">
                                 <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-current"></span>
-                                <span class="truncate">{{ formatLabel(caseData.status) }}</span>
+                                <span class="truncate" data-testid="case-details-status-value">{{ formatLabel(caseData.status) }}</span>
                             </div>
                         </div>
                         <div class="min-w-0 border-r border-[var(--tenant-line)] px-3 py-2" [ngClass]="{ 'bg-red-500/10 text-red-300': caseData.severity === 'critical', 'bg-orange-500/10 text-orange-300': caseData.severity === 'high', 'bg-yellow-500/10 text-yellow-300': caseData.severity === 'medium', 'bg-green-500/10 text-green-300': caseData.severity !== 'critical' && caseData.severity !== 'high' && caseData.severity !== 'medium' }">
                             <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">Severity</div>
                             <div class="mt-1 flex items-center gap-1.5 truncate text-xs font-semibold capitalize text-[var(--color-text1)]">
                                 <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-current"></span>
-                                <span class="truncate">{{ caseData.severity }}</span>
+                                <span class="truncate" data-testid="case-details-severity-value">{{ caseData.severity }}</span>
                             </div>
                         </div>
                         <div class="min-w-0 px-3 py-2" [ngClass]="{ 'bg-red-500/10 text-red-300': caseData.priority === 'critical', 'bg-orange-500/10 text-orange-300': caseData.priority === 'high', 'bg-yellow-500/10 text-yellow-300': caseData.priority === 'medium', 'bg-green-500/10 text-green-300': caseData.priority !== 'critical' && caseData.priority !== 'high' && caseData.priority !== 'medium' }">
                             <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">Priority</div>
                             <div class="mt-1 flex items-center gap-1.5 truncate text-xs font-semibold capitalize text-[var(--color-text1)]">
                                 <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-current"></span>
-                                <span class="truncate">{{ caseData.priority }}</span>
+                                <span class="truncate" data-testid="case-details-priority-value">{{ caseData.priority }}</span>
                             </div>
                         </div>
                     </div>
@@ -423,9 +423,9 @@
                 <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
                     <div class="min-w-0 p-4">
                         <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Value</div>
-                        <div class="mt-1 text-[18px] font-semibold leading-snug text-[var(--color-text1)] break-all">{{ primaryEntity.value }}</div>
+                        <div class="mt-1 text-[18px] font-semibold leading-snug text-[var(--color-text1)] break-all" data-testid="case-primary-entity-value">{{ primaryEntity.value }}</div>
                         <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Display Name</div>
-                        <div class="mt-2 text-sm leading-6 text-[var(--color-text3)] break-words">
+                        <div class="mt-2 text-sm leading-6 text-[var(--color-text3)] break-words" data-testid="case-primary-entity-display-name">
                             {{ primaryEntity.displayName || primaryEntity.value }}
                         </div>
                         @if ((primaryEntity.tags?.length || 0) > 0) {
@@ -718,7 +718,7 @@
                     <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
                         <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Artifacts</h2>
                         @if (isEditing) {
-                        <button type="button" (click)="addArtifact()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
+                        <button type="button" (click)="addArtifact()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200" data-testid="case-artifact-add">
                             <i class="bi bi-plus-lg"></i> Add
                         </button>
                         }
@@ -730,18 +730,18 @@
                         <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
                             <div class="mb-3 flex items-center justify-between gap-3">
                                 <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Artifact {{ i + 1 }}</span>
-                                <button type="button" (click)="removeArtifact(i)" aria-label="Remove artifact" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text3)] transition hover:bg-red-500/10 hover:text-red-300">
+                                <button type="button" (click)="removeArtifact(i)" aria-label="Remove artifact" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text3)] transition hover:bg-red-500/10 hover:text-red-300" [attr.data-testid]="'case-artifact-remove-' + i">
                                     <i class="bi bi-trash3"></i>
                                 </button>
                             </div>
                             <div class="grid gap-3 md:grid-cols-2">
                                 <div>
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
-                                    <input [(ngModel)]="artifact.title" [name]="'artifact-title-' + i" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
+                                    <input [(ngModel)]="artifact.title" [name]="'artifact-title-' + i" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-title-input-' + i" />
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Type</label>
-                                    <select [(ngModel)]="artifact.type" [name]="'artifact-type-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35">
+                                    <select [(ngModel)]="artifact.type" [name]="'artifact-type-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-type-select-' + i">
                                         @for (type of artifactTypeOptions; track type.value) {
                                         <option [value]="type.value">{{ type.label }}</option>
                                         }
@@ -749,7 +749,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Source</label>
-                                    <select [(ngModel)]="artifact.source" [name]="'artifact-source-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35">
+                                    <select [(ngModel)]="artifact.source" [name]="'artifact-source-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-source-select-' + i">
                                         @for (source of sourceTypeOptions; track source.value) {
                                         <option [value]="source.value">{{ source.label }}</option>
                                         }
@@ -757,19 +757,19 @@
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Captured</label>
-                                    <input [ngModel]="getDateInputValue(artifact.capturedAt)" (ngModelChange)="setDateInputValue(artifact, 'capturedAt', $event)" [name]="'artifact-captured-' + i" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
+                                    <input [ngModel]="getDateInputValue(artifact.capturedAt)" (ngModelChange)="setDateInputValue(artifact, 'capturedAt', $event)" [name]="'artifact-captured-' + i" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-captured-input-' + i" />
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
-                                    <textarea [(ngModel)]="artifact.description" [name]="'artifact-description-' + i" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35"></textarea>
+                                    <textarea [(ngModel)]="artifact.description" [name]="'artifact-description-' + i" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-description-input-' + i"></textarea>
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">URL</label>
-                                    <input [(ngModel)]="artifact.url" [name]="'artifact-url-' + i" type="url" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
+                                    <input [(ngModel)]="artifact.url" [name]="'artifact-url-' + i" type="url" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-url-input-' + i" />
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">File Name</label>
-                                    <input [(ngModel)]="artifact.fileName" [name]="'artifact-file-' + i" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
+                                    <input [(ngModel)]="artifact.fileName" [name]="'artifact-file-' + i" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-file-input-' + i" />
                                 </div>
                             </div>
                         </div>
@@ -780,11 +780,11 @@
                     } @else {
                     <div class="space-y-3 p-4">
                         @for (artifact of (caseData.artifacts || []); track artifact.artifactId) {
-                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
+                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3" [attr.data-testid]="'case-artifact-card-' + $index">
                             <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                 <div class="min-w-0">
                                     <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Artifact Title</div>
-                                    <div class="text-sm font-semibold text-[var(--color-text1)] break-words">{{ artifact.title }}</div>
+                                    <div class="text-sm font-semibold text-[var(--color-text1)] break-words" [attr.data-testid]="'case-artifact-title-value-' + $index">{{ artifact.title }}</div>
                                     <div class="mt-1 text-xs text-[var(--color-text4)]">{{ formatLabel(artifact.type) }} · {{ formatLabel(artifact.source) }}</div>
                                 </div>
                                 <div class="flex flex-wrap gap-2 sm:justify-end">
@@ -814,7 +814,7 @@
                     <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
                         <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Tasks</h2>
                         @if (isEditing) {
-                        <button type="button" (click)="addTask()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
+                        <button type="button" (click)="addTask()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200" data-testid="case-task-add">
                             <i class="bi bi-plus-lg"></i> Add
                         </button>
                         }
@@ -826,18 +826,18 @@
                         <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
                             <div class="mb-3 flex items-center justify-between gap-3">
                                 <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Task {{ i + 1 }}</span>
-                                <button type="button" (click)="removeTask(i)" aria-label="Remove task" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text3)] transition hover:bg-red-500/10 hover:text-red-300">
+                                <button type="button" (click)="removeTask(i)" aria-label="Remove task" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text3)] transition hover:bg-red-500/10 hover:text-red-300" [attr.data-testid]="'case-task-remove-' + i">
                                     <i class="bi bi-trash3"></i>
                                 </button>
                             </div>
                             <div class="grid gap-3 md:grid-cols-2">
                                 <div class="md:col-span-2">
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
-                                    <input [(ngModel)]="task.title" [name]="'task-title-' + i" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
+                                    <input [(ngModel)]="task.title" [name]="'task-title-' + i" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-title-input-' + i" />
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
-                                    <select [(ngModel)]="task.status" [name]="'task-status-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35">
+                                    <select [(ngModel)]="task.status" [name]="'task-status-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-status-select-' + i">
                                         @for (status of taskStatusOptions; track status.value) {
                                         <option [value]="status.value">{{ status.label }}</option>
                                         }
@@ -845,7 +845,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Priority</label>
-                                    <select [(ngModel)]="task.priority" [name]="'task-priority-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35">
+                                    <select [(ngModel)]="task.priority" [name]="'task-priority-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-priority-select-' + i">
                                         @for (priority of priorityOptions; track priority) {
                                         <option [value]="priority" class="capitalize">{{ priority }}</option>
                                         }
@@ -853,7 +853,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Assign To</label>
-                                    <select [(ngModel)]="task.assignedTo" [name]="'task-assignee-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35">
+                                    <select [(ngModel)]="task.assignedTo" [name]="'task-assignee-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-assignee-select-' + i">
                                         <option value="">Unassigned</option>
                                         @for (analyst of getCaseAnalysts(editedCase); track analyst.id) {
                                         <option [value]="analyst.id">{{ analyst.username || analyst.email || analyst.id }}</option>
@@ -862,11 +862,11 @@
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Due Date</label>
-                                    <input [ngModel]="getDateInputValue(task.dueAt)" (ngModelChange)="setDateInputValue(task, 'dueAt', $event)" [name]="'task-due-' + i" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
+                                    <input [ngModel]="getDateInputValue(task.dueAt)" (ngModelChange)="setDateInputValue(task, 'dueAt', $event)" [name]="'task-due-' + i" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-due-input-' + i" />
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
-                                    <textarea [(ngModel)]="task.description" [name]="'task-description-' + i" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35"></textarea>
+                                    <textarea [(ngModel)]="task.description" [name]="'task-description-' + i" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-description-input-' + i"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -877,11 +877,11 @@
                     } @else {
                     <div class="space-y-3 p-4">
                         @for (task of (caseData.tasks || []); track task.taskId) {
-                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
+                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3" [attr.data-testid]="'case-task-card-' + $index">
                             <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                 <div class="min-w-0">
                                     <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Task Title</div>
-                                    <div class="text-sm font-semibold text-[var(--color-text1)] break-words">{{ task.title }}</div>
+                                    <div class="text-sm font-semibold text-[var(--color-text1)] break-words" [attr.data-testid]="'case-task-title-value-' + $index">{{ task.title }}</div>
                                     @if (task.description) {
                                     <div class="mt-2 text-xs text-[var(--color-text4)] break-words"><span class="font-semibold uppercase tracking-wide">Description:</span> {{ task.description }}</div>
                                     }
@@ -910,7 +910,7 @@
                 <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
                     <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Linked Cases</h2>
                     @if (isEditing) {
-                    <button type="button" (click)="addLinkedCase()" [disabled]="!hasLinkableCases(editedCase)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 disabled:pointer-events-none disabled:opacity-50">
+                    <button type="button" (click)="addLinkedCase()" [disabled]="!hasLinkableCases(editedCase)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 disabled:pointer-events-none disabled:opacity-50" data-testid="case-linked-case-add">
                         <i class="bi bi-plus-lg"></i> Add
                     </button>
                     }
@@ -922,14 +922,14 @@
                     <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
                         <div class="mb-3 flex items-center justify-between gap-3">
                             <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Link {{ i + 1 }}</span>
-                            <button type="button" (click)="removeLinkedCase(i)" aria-label="Remove linked case" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text3)] transition hover:bg-red-500/10 hover:text-red-300">
+                            <button type="button" (click)="removeLinkedCase(i)" aria-label="Remove linked case" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text3)] transition hover:bg-red-500/10 hover:text-red-300" [attr.data-testid]="'case-linked-case-remove-' + i">
                                 <i class="bi bi-trash3"></i>
                             </button>
                         </div>
                         <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
                             <div>
                                 <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case</label>
-                                <select [(ngModel)]="linkedCase.targetCaseId" [name]="'linked-case-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35">
+                                <select [(ngModel)]="linkedCase.targetCaseId" [name]="'linked-case-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-linked-case-select-' + i">
                                     <option value="">Select case</option>
                                     @for (candidateCase of getLinkableCases(editedCase); track candidateCase.caseId) {
                                     <option [value]="candidateCase.caseId">{{ candidateCase.caseId }} · {{ candidateCase.title }}</option>
@@ -938,7 +938,7 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Relationship</label>
-                                <select [(ngModel)]="linkedCase.relationship" [name]="'linked-relationship-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35">
+                                <select [(ngModel)]="linkedCase.relationship" [name]="'linked-relationship-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-linked-case-relationship-select-' + i">
                                     @for (relationship of caseLinkRelationshipOptions; track relationship.value) {
                                     <option [value]="relationship.value">{{ relationship.label }}</option>
                                     }
@@ -946,7 +946,7 @@
                             </div>
                             <div class="md:col-span-2">
                                 <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Reason</label>
-                                <input [(ngModel)]="linkedCase.reason" [name]="'linked-reason-' + i" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
+                                <input [(ngModel)]="linkedCase.reason" [name]="'linked-reason-' + i" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-linked-case-reason-input-' + i" />
                             </div>
                         </div>
                     </div>
@@ -959,8 +959,8 @@
                 } @else {
                 <div class="space-y-3 p-4">
                     @for (linkedCase of caseData.linkedCases; track linkedCase.targetCaseId) {
-                    <button type="button" (click)="goToLinkedCase(linkedCase.targetCaseId)" class="w-full rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3 text-left transition hover:bg-[var(--tenant-chip-hover)]">
-                        <div class="text-sm font-semibold text-[var(--color-text1)]">{{ linkedCase.targetCaseId }}</div>
+                    <button type="button" (click)="goToLinkedCase(linkedCase.targetCaseId)" class="w-full rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3 text-left transition hover:bg-[var(--tenant-chip-hover)]" [attr.data-testid]="'case-linked-case-card-' + $index">
+                        <div class="text-sm font-semibold text-[var(--color-text1)]" [attr.data-testid]="'case-linked-case-target-value-' + $index">{{ linkedCase.targetCaseId }}</div>
                         <div class="mt-1 text-xs text-[var(--color-text4)]">
                             {{ formatLabel(linkedCase.relationship) }} · {{ linkedCase.reason }}
                         </div>
