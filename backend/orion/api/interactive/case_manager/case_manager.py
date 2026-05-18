@@ -1,10 +1,12 @@
 from uuid import uuid4
 
+from cryptography.fernet import Fernet
 from fastapi import HTTPException
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.interactive.case_manager.models.case_models import CaseResponse
 from orion.api.interactive.case_manager.models.case_models import CreateCaseRequest
 from orion.api.interactive.case_manager.models.case_models import UpdateCaseRequest
+from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifact
 from orion.services.mongo_manager.shared_model.db_case_model import CaseClosure
@@ -35,7 +37,61 @@ class CaseManager:
             CaseManager()
         return CaseManager.__instance
 
-    def _to_response(self, record: db_case_model) -> CaseResponse:
+    async def _get_case_cipher(self, current_user) -> Fernet:
+        dek = await KeyManager.get_instance().get_or_create_dek(str(current_user.tenant_uuid))
+        return Fernet(dek)
+
+    def _encrypt_value(self, enc: Fernet, value: str) -> str:
+        if not value:
+            return value
+        return enc.encrypt(value.encode()).decode()
+
+    def _decrypt_value(self, enc: Fernet, value: str) -> str:
+        if not value:
+            return value
+        try:
+            return enc.decrypt(value.encode()).decode()
+        except Exception:
+            return value
+
+    def _apply_sensitive_case_values(self, record: db_case_model, transform) -> None:
+        record.title = transform(record.title)
+        record.description = transform(record.description)
+        for entity in record.entities or []:
+            entity.value = transform(entity.value)
+            entity.displayName = transform(entity.displayName)
+            self._apply_sensitive_entity_values(entity, transform)
+        for artifact in record.artifacts or []:
+            artifact.title = transform(artifact.title)
+            artifact.description = transform(artifact.description)
+            artifact.url = transform(artifact.url)
+            artifact.fileName = transform(artifact.fileName)
+            artifact.fileType = transform(artifact.fileType)
+        for comment in record.comments or []:
+            comment.body = transform(comment.body)
+        for task in record.tasks or []:
+            task.title = transform(task.title)
+            task.description = transform(task.description)
+        for linked_case in record.linkedCases or []:
+            linked_case.reason = transform(linked_case.reason)
+        if record.closure:
+            record.closure.summary = transform(record.closure.summary)
+            record.closure.resolution = transform(record.closure.resolution)
+
+    def _apply_sensitive_entity_values(self, entity: CaseEntity, transform) -> None:
+        for identifier in entity.identifiers or []:
+            identifier.value = transform(identifier.value)
+            identifier.issuer = transform(identifier.issuer)
+        for profile in entity.socialProfiles or []:
+            profile.username = transform(profile.username)
+            profile.profileUrl = transform(profile.profileUrl)
+            profile.displayName = transform(profile.displayName)
+        for attribute in entity.attributes or []:
+            attribute.value = transform(attribute.value)
+
+    async def _to_response(self, record: db_case_model, current_user) -> CaseResponse:
+        enc = await self._get_case_cipher(current_user)
+        self._apply_sensitive_case_values(record, lambda value: self._decrypt_value(enc, value))
         data = record.model_dump()
         data["id"] = str(record.id)
         return CaseResponse(**data)
@@ -154,7 +210,7 @@ class CaseManager:
             f"All cases retrieved: total_count={len(records)}",
         )
 
-        return [self._to_response(r) for r in records]
+        return [await self._to_response(r, current_user) for r in records]
 
     async def create_case(self, data: CreateCaseRequest, current_user) -> CaseResponse:
         existing = await self._engine.find_one(
@@ -227,15 +283,17 @@ class CaseManager:
             closure=CaseClosure(**data.closure.model_dump(), closedBy=actor_id, closedAt=server_now) if data.closure else None,
             closedAt=server_now if data.closure else None,
         )
+        enc = await self._get_case_cipher(current_user)
+        self._apply_sensitive_case_values(record, lambda value: self._encrypt_value(enc, value))
         await self._engine.save(record)
 
         await AuditLogManager.get_instance().register(
             str(current_user.tenant_uuid),
             str(current_user.id),
-            f"Case created: caseId={record.caseId}, title={record.title}, caseType={record.caseType}, status={record.status}, priority={record.priority}, severity={record.severity}, intakeSource={record.intakeSource}, entities_count={len(record.entities)}",
+            f"Case created: caseId={record.caseId}, title={data.title}, caseType={record.caseType}, status={record.status}, priority={record.priority}, severity={record.severity}, intakeSource={record.intakeSource}, entities_count={len(record.entities)}",
         )
 
-        return self._to_response(record)
+        return await self._to_response(record, current_user)
 
     async def get_case_analysts(self, current_user) -> list[dict]:
         users = await self._engine.find(
@@ -277,7 +335,7 @@ class CaseManager:
             f"Case retrieved: caseId={case_id}",
         )
 
-        return self._to_response(record)
+        return await self._to_response(record, current_user)
 
     async def update_case(self, case_id: str, data: UpdateCaseRequest, current_user) -> CaseResponse:
         record = await self._engine.find_one(
@@ -297,6 +355,8 @@ class CaseManager:
         server_now = utc_now()
         if not self._can_view_case(record, current_user):
             raise HTTPException(status_code=403, detail="Access forbidden")
+        enc = await self._get_case_cipher(current_user)
+        self._apply_sensitive_case_values(record, lambda value: self._decrypt_value(enc, value))
         if record.closure is not None:
             raise HTTPException(status_code=403, detail="Closed cases cannot be edited")
         if data.assignedAnalystIds != (record.assignedAnalystIds or []) and not self._can_manage_case_assignments(record, current_user):
@@ -400,6 +460,7 @@ class CaseManager:
             record.closedAt = None
         record.updatedAt = utc_now()
 
+        self._apply_sensitive_case_values(record, lambda value: self._encrypt_value(enc, value))
         await self._engine.save(record)
 
         await AuditLogManager.get_instance().register(
@@ -408,7 +469,7 @@ class CaseManager:
             f"Case updated: caseId={case_id}",
         )
 
-        return self._to_response(record)
+        return await self._to_response(record, current_user)
 
     async def delete_case(self, case_id: str, current_user) -> dict:
         record = await self._engine.find_one(
