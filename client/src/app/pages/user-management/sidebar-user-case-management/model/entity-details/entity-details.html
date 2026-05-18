@@ -84,7 +84,7 @@
         </div>
     </div>
 
-    <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)] p-4">
+    <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)] [body.light-theme_&]:![background:color-mix(in_srgb,var(--color-blue-820-light)_72%,white_28%)] p-4">
         <label class="mb-3 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Tags</label>
         <div class="flex gap-2 overflow-x-auto pb-1 pr-8 [mask-image:linear-gradient(to_right,black_calc(100%-32px),transparent)]">
             @for (tag of tagOptions; track tag.value) {
@@ -95,7 +95,7 @@
         </div>
     </div>
 
-    <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)]" [ngClass]="entity.socialProfiles.length ? 'p-4' : 'px-3 py-2.5'">
+    <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)] [body.light-theme_&]:![background:color-mix(in_srgb,var(--color-blue-820-light)_72%,white_28%)]" [ngClass]="entity.socialProfiles.length ? 'p-4' : 'px-3 py-2.5'">
         <div class="flex items-center justify-between gap-3" [ngClass]="entity.socialProfiles.length ? 'mb-4' : ''">
             <div class="min-w-0">
                 <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Social Profiles</label>
@@ -135,7 +135,7 @@
         }
     </div>
 
-    <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)]" [ngClass]="entity.identifiers.length ? 'p-4' : 'px-3 py-2.5'">
+    <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)] [body.light-theme_&]:![background:color-mix(in_srgb,var(--color-blue-820-light)_72%,white_28%)]" [ngClass]="entity.identifiers.length ? 'p-4' : 'px-3 py-2.5'">
         <div class="flex items-center justify-between gap-3" [ngClass]="entity.identifiers.length ? 'mb-4' : ''">
             <div class="min-w-0">
                 <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Identifiers</label>
@@ -183,7 +183,7 @@
         }
     </div>
 
-    <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)]" [ngClass]="entity.attributes.length ? 'p-4' : 'px-3 py-2.5'">
+    <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)] [body.light-theme_&]:![background:color-mix(in_srgb,var(--color-blue-820-light)_72%,white_28%)]" [ngClass]="entity.attributes.length ? 'p-4' : 'px-3 py-2.5'">
         <div class="flex items-center justify-between gap-3" [ngClass]="entity.attributes.length ? 'mb-4' : ''">
             <div class="min-w-0">
                 <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Attributes</label>
