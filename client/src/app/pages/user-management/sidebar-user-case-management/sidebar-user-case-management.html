@@ -21,12 +21,12 @@
                         <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
                             <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
                                 <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">Case ID</th>
-                                <th class="w-[130px] overflow-clip align-middle px-4 py-3.5">Case Type</th>
-                                <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">Owner</th>
-                                <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">Creation Date</th>
-                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">Status</th>
-                                <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">Modification Date</th>
+                                <th class="w-[220px] overflow-clip align-middle px-4 py-3.5">Title</th>
+                                <th class="w-[160px] overflow-clip align-middle px-4 py-3.5">Case Type</th>
+                                <th class="w-[120px] overflow-clip align-middle px-4 py-3.5">Status</th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">Severity</th>
                                 <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">Priority</th>
+                                <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">Updated</th>
                                 <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">Action</th>
                             </tr>
                         </thead>
@@ -37,28 +37,40 @@
                             <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [attr.data-testid]="'case-row-' + case.caseId">
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">
                                     {{ case.caseId }}</td>
-                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ case.caseType }}
+                                <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5" [title]="case.title">{{ case.title }}
                                 </td>
-                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ case.owner }}
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ formatLabel(case.caseType) }}
                                 </td>
-                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ case.createdDate
-                                    | date: 'short' }}</td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                                    <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(case.status)">
-                                        {{ case.status }}
+                                    <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="{ 'bg-blue-500/10 text-blue-300': case.status === 'new' || case.status === 'triaged' || case.status === 'assigned', 'bg-yellow-500/10 text-yellow-300': case.status === 'investigating' || case.status === 'waiting_on_response' || case.status === 'remediating' || case.status === 'review', 'bg-emerald-500/10 text-emerald-300': case.status === 'resolved', 'bg-slate-500/10 text-slate-300': case.status !== 'new' && case.status !== 'triaged' && case.status !== 'assigned' && case.status !== 'investigating' && case.status !== 'waiting_on_response' && case.status !== 'remediating' && case.status !== 'review' && case.status !== 'resolved' }">
+                                        {{ formatLabel(case.status) }}
                                     </span>
                                 </td>
-                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{
-                                    case.modifiedDate | date: 'short' }}</td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                                    <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getPriorityBadgeClass(case.priority)">
+                                    <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="{ 'bg-red-500/10 text-red-300': case.severity === 'critical', 'bg-orange-500/10 text-orange-300': case.severity === 'high', 'bg-yellow-500/10 text-yellow-300': case.severity === 'medium', 'bg-green-500/10 text-green-300': case.severity !== 'critical' && case.severity !== 'high' && case.severity !== 'medium' }">
+                                        {{ case.severity }}
+                                    </span>
+                                </td>
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                                    <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="{ 'bg-red-500/10 text-red-300': case.priority === 'critical', 'bg-orange-500/10 text-orange-300': case.priority === 'high', 'bg-yellow-500/10 text-yellow-300': case.priority === 'medium', 'bg-green-500/10 text-green-300': case.priority !== 'critical' && case.priority !== 'high' && case.priority !== 'medium' }">
                                         {{ case.priority }}
                                     </span>
                                 </td>
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                                    <div class="text-sm font-medium text-[var(--color-text1)]">{{ getFormattedDate(case.updatedAt) }}</div>
+                                    <div class="mt-1 text-xs text-[var(--color-text4)]">{{ getFormattedTime(case.updatedAt) }}</div>
+                                </td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
+                                    <div class="inline-flex items-center justify-center gap-2">
                                     <button type="button" (click)="viewCase(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" aria-label="View case" [attr.data-testid]="'case-view-' + case.caseId">
                                         <img src="assets/images/shared/view.svg" width="18" alt="view" class="case-action-icon cursor-pointer" />
                                     </button>
+                                    @if (canDeleteCases()) {
+                                    <button type="button" (click)="openDeleteConfirmation(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)]" aria-label="Delete case" [attr.data-testid]="'case-delete-' + case.caseId">
+                                        <img src="assets/images/shared/theme/bin.svg" width="18" alt="delete" class="case-action-icon cursor-pointer" />
+                                    </button>
+                                    }
+                                    </div>
                                 </td>
                             </tr>
                             }
@@ -80,12 +92,12 @@
                         <thead class="border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
                             <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
                                 <th class="overflow-clip align-middle px-4 py-3.5">Case ID</th>
+                                <th class="overflow-clip align-middle px-4 py-3.5">Title</th>
                                 <th class="overflow-clip align-middle px-4 py-3.5">Case Type</th>
-                                <th class="overflow-clip align-middle px-4 py-3.5">Owner</th>
-                                <th class="overflow-clip align-middle px-4 py-3.5">Creation Date</th>
                                 <th class="overflow-clip align-middle px-4 py-3.5">Status</th>
-                                <th class="overflow-clip align-middle px-4 py-3.5">Modification Date</th>
+                                <th class="overflow-clip align-middle px-4 py-3.5">Severity</th>
                                 <th class="overflow-clip align-middle px-4 py-3.5">Priority</th>
+                                <th class="overflow-clip align-middle px-4 py-3.5">Updated</th>
                                 <th class="overflow-clip align-middle px-4 py-3.5">Action</th>
                             </tr>
                         </thead>
@@ -124,6 +136,9 @@
             @if (showAddCasePopup) {
             <app-add-new-case (close)="closeAddCasePopup()" (caseAdded)="onCaseAdded($event)">
             </app-add-new-case>
+            }
+            @if (isDeleteConfirmationOpen) {
+            <app-confirmation-popup [message]="'Are you sure you want to delete this case?'" (confirmed)="deleteCase($event)"></app-confirmation-popup>
             }
         </div>
     </div>

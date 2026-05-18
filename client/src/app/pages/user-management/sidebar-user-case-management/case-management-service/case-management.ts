@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../../shared/services/api.service';
-import { Case } from '../../../../shared/model/case-management/case.model';
+import { Case, CaseAnalyst, CaseRequest, CaseUpdateRequest } from '../../../../shared/model/case-management/case.model';
 
 @Injectable({ providedIn: 'root' })
 export class CaseManagement {
@@ -11,7 +11,7 @@ export class CaseManagement {
     return this.api.get<Case[]>('profile/cases');
   }
 
-  createCase(caseData: Case): Observable<Case> {
+  createCase(caseData: CaseRequest): Observable<Case> {
     return this.api.post<Case>('profile/cases', caseData);
   }
 
@@ -19,19 +19,20 @@ export class CaseManagement {
     return this.api.get<{ nextCaseId: string }>('profile/cases/next-id');
   }
 
-  validateCase(caseId: string): Observable<Case> {
-    return this.api.get<Case>(`profile/cases/validate/${caseId}`);
+  getAnalysts(): Observable<CaseAnalyst[]> {
+    return this.api.get<CaseAnalyst[]>('profile/cases/analysts');
   }
 
   getCaseById(caseId: string): Observable<Case> {
     return this.api.get<Case>(`profile/cases/${caseId}`);
   }
 
-  updateCase(caseId: string, caseData: Case): Observable<Case> {
+  updateCase(caseId: string, caseData: CaseUpdateRequest): Observable<Case> {
     return this.api.put<Case>(`profile/cases/${caseId}`, caseData);
   }
 
-  checkCaseExistsFromDb(caseId: string): Observable<{ exists: boolean }> {
-    return this.api.get<{ exists: boolean }>(`profile/cases/check/${caseId}`);
+  deleteCase(caseId: string): Observable<{ success: boolean }> {
+    return this.api.delete<{ success: boolean }>(`profile/cases/${caseId}`);
   }
+
 }

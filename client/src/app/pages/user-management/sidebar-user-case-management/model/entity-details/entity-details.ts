@@ -1,7 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RelatedEntity, SocialMediaProfile, AdditionalIdentifier } from '../../../../../shared/model/case-management/case.model';
+import { AdditionalIdentifier, CaseEntity, CaseEntityAttribute, CaseTag, SocialMediaProfile } from '../../../../../shared/model/case-management/case.model';
+import { CASE_TAG_OPTIONS, ENTITY_ATTRIBUTE_TYPE_OPTIONS, ENTITY_RELATIONSHIP_OPTIONS, ENTITY_ROLE_OPTIONS, ENTITY_TYPE_OPTIONS, IDENTIFIER_TYPE_OPTIONS, SOCIAL_PLATFORM_OPTIONS, SOURCE_TYPE_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
 
 @Component({
   selector: 'app-entity-details',
@@ -9,82 +10,46 @@ import { RelatedEntity, SocialMediaProfile, AdditionalIdentifier } from '../../.
   templateUrl: './entity-details.html'
 })
 export class EntityDetailsComponent {
-  socialMediaPlatforms = ['Facebook', 'Twitter', 'Instagram', 'LinkedIn', 'TikTok', 'YouTube'];
-  identifierTypes = ['IP Address', 'Domain', 'Wallet Address', 'Employee ID', 'Hash'];
+  entityTypes = ENTITY_TYPE_OPTIONS;
+  entityRoles = ENTITY_ROLE_OPTIONS;
+  entityRelationships = ENTITY_RELATIONSHIP_OPTIONS;
+  sourceTypes = SOURCE_TYPE_OPTIONS;
+  socialMediaPlatforms = SOCIAL_PLATFORM_OPTIONS;
+  identifierTypes = IDENTIFIER_TYPE_OPTIONS;
+  tagOptions = CASE_TAG_OPTIONS;
+  attributeTypes = ENTITY_ATTRIBUTE_TYPE_OPTIONS;
 
-  @Input() entity!: RelatedEntity;
+  @Input() entity!: CaseEntity;
   @Input() isMainEntity = false;
   @Input() entityIndex = 0;
-  @Input() entityNameError = '';
+  @Input() entityValueError = '';
+  @Input() showTitle = true;
+  @Input() showTopDivider = true;
+  @Input() showRoleRelationshipFields = true;
 
   @Output() remove = new EventEmitter<void>();
 
-  validateEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+  get controlPrefix(): string {
+    return `${this.isMainEntity ? 'primary' : 'related'}-${this.entityIndex}`;
   }
 
-  validatePhoneNumber(phone: string): boolean {
-    const phoneRegex = /^[\d\s\-\+\(\)]{10,}$/;
-    return phoneRegex.test(phone.replace(/\s/g, ''));
-  }
-
-  validateUrl(url: string): boolean {
-    try {
-      new URL(url);
-      return true;
-    }
-    catch {
-      return false;
-    }
-  }
-
-  isSocialMediaValid(profile: SocialMediaProfile): boolean {
-    if (profile.platform && !profile.username) {
-      return false;
-    }
-    if (!profile.platform && profile.username) {
-      return false;
-    }
-    return true;
-  }
-
-  isIdentifierValid(identifier: AdditionalIdentifier): boolean {
+  getIdentifierError(identifier: AdditionalIdentifier): string | null {
     if (identifier.type && !identifier.value) {
-      return false;
+      return 'Value required';
     }
     if (!identifier.type && identifier.value) {
-      return false;
+      return 'Type required';
     }
-    return true;
-  }
-
-  getEmailError(email: string): string | null {
-    if (!email.trim()) {
-      return null;
-    }
-    if (!this.validateEmail(email)) {
+    if (identifier.type === 'email' && identifier.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier.value)) {
       return 'Invalid email format';
     }
-    return null;
-  }
-
-  getPhoneError(phone: string): string | null {
-    if (!phone.trim()) {
-      return null;
-    }
-    if (!this.validatePhoneNumber(phone)) {
-      return 'Invalid phone format';
-    }
-    return null;
-  }
-
-  getUrlError(url: string): string | null {
-    if (!url.trim()) {
-      return null;
-    }
-    if (!this.validateUrl(url)) {
-      return 'Invalid URL format';
+    if (identifier.type === 'url' && identifier.value) {
+      try {
+        new URL(identifier.value);
+      }
+      catch {
+        return 'Invalid URL format';
+      }
     }
     return null;
   }
@@ -96,57 +61,61 @@ export class EntityDetailsComponent {
     if (!profile.platform && profile.username) {
       return 'Platform required';
     }
+    if (profile.profileUrl) {
+      try {
+        new URL(profile.profileUrl);
+      }
+      catch {
+        return 'Invalid URL format';
+      }
+    }
     return null;
   }
 
-  getIdentifierError(identifier: AdditionalIdentifier): string | null {
-    if (identifier.type && !identifier.value) {
+  getAttributeError(attribute: CaseEntityAttribute): string | null {
+    if (attribute.type && !attribute.value) {
       return 'Value required';
     }
-    if (!identifier.type && identifier.value) {
+    if (!attribute.type && attribute.value) {
       return 'Type required';
     }
     return null;
   }
 
+  toggleTag(tag: CaseTag): void {
+    if (this.entity.tags.includes(tag)) {
+      this.entity.tags = this.entity.tags.filter(item => item !== tag);
+      return;
+    }
+    this.entity.tags = [...this.entity.tags, tag];
+  }
+
+  isTagSelected(tag: CaseTag): boolean {
+    return this.entity.tags.includes(tag);
+  }
+
   addSocialMedia(): void {
-    this.entity.socialMediaProfiles.push({ platform: '', username: '' });
+    this.entity.socialProfiles.push({ platform: '', username: '', profileUrl: '', displayName: '' });
   }
 
   removeSocialMedia(index: number): void {
-    this.entity.socialMediaProfiles.splice(index, 1);
-  }
-
-  addWebUrl(): void {
-    this.entity.webUrls.push('');
-  }
-
-  removeWebUrl(index: number): void {
-    this.entity.webUrls.splice(index, 1);
-  }
-
-  addEmail(): void {
-    this.entity.emails.push('');
-  }
-
-  removeEmail(index: number): void {
-    this.entity.emails.splice(index, 1);
-  }
-
-  addPhoneNumber(): void {
-    this.entity.phoneNumbers.push('');
-  }
-
-  removePhoneNumber(index: number): void {
-    this.entity.phoneNumbers.splice(index, 1);
+    this.entity.socialProfiles.splice(index, 1);
   }
 
   addIdentifier(): void {
-    this.entity.additionalIdentifiers.push({ type: '', value: '' });
+    this.entity.identifiers.push({ type: '', value: '', issuer: '', verified: false });
   }
 
   removeIdentifier(index: number): void {
-    this.entity.additionalIdentifiers.splice(index, 1);
+    this.entity.identifiers.splice(index, 1);
+  }
+
+  addAttribute(): void {
+    this.entity.attributes.push({ type: '', value: '' });
+  }
+
+  removeAttribute(index: number): void {
+    this.entity.attributes.splice(index, 1);
   }
 
   onRemove(): void {

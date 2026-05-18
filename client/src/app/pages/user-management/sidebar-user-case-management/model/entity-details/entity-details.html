@@ -1,8 +1,8 @@
-<div [ngClass]="isMainEntity ? 'border-t border-[var(--color-border)] pt-6 mt-6' : 'mb-6 rounded-[8px] border border-[var(--color-border)] p-4'">
+<div [ngClass]="isMainEntity ? (showTopDivider ? 'mt-7 space-y-4 border-t border-[var(--color-border)] pt-7' : 'space-y-4') : 'mb-6 space-y-4 rounded-[8px] border border-[var(--color-border)] p-4'">
 
-    <!-- Header -->
-    <div [ngClass]="isMainEntity ? 'mb-5' : 'flex items-center justify-between mb-4'">
-        <h3 [ngClass]="isMainEntity ? 'text-[15px] font-bold leading-tight text-[var(--color-text1)] mb-5' : 'text-sm font-bold text-[var(--color-text1)]'">
+    @if (showTitle) {
+    <div class="flex items-center justify-between gap-3">
+        <h3 [ngClass]="isMainEntity ? 'm-0 text-[15px] font-bold leading-tight text-[var(--color-text1)]' : 'm-0 text-sm font-bold text-[var(--color-text1)]'">
             {{ isMainEntity ? 'Primary Entity' : 'Entity ' + (entityIndex + 1) }}
         </h3>
         @if (!isMainEntity) {
@@ -11,140 +11,211 @@
         </button>
         }
     </div>
+    }
 
-    <!-- Entity Name -->
-    <div class="mb-5">
-        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
-            Entity Name <span class="text-red-500">*</span>
-        </label>
-        <input type="text" [(ngModel)]="entity.name" [name]="'entityName-' + entityIndex" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Enter entity name" [attr.data-testid]="isMainEntity ? 'case-primary-entity-name-input' : 'case-related-entity-name-input-' + entityIndex" />
-        @if (entityNameError) {
-        <p class="case-form-error mt-1 text-xs text-red-400">{{ entityNameError }}</p>
-        }
+    <div class="grid gap-3 md:grid-cols-2">
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
+                Entity Type <span class="text-red-500">*</span>
+            </label>
+            <select [(ngModel)]="entity.type" [name]="'entityType-' + controlPrefix" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-primary-entity-type-select">
+                @for (type of entityTypes; track type.value) {
+                <option [value]="type.value">{{ type.label }}</option>
+                }
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
+                Entity Value <span class="text-red-500">*</span>
+            </label>
+            <input type="text" [(ngModel)]="entity.value" [name]="'entityValue-' + controlPrefix" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Name, email, domain, IP, URL, etc." [attr.data-testid]="isMainEntity ? 'case-primary-entity-value-input' : 'case-related-entity-value-input-' + entityIndex" />
+            @if (entityValueError) {
+            <p class="case-form-error mt-1 text-xs text-red-400">{{ entityValueError }}</p>
+            }
+        </div>
     </div>
 
-    <!-- Social Media Profiles -->
-    <div class="mb-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-        <div class="flex items-center justify-between mb-3">
-            <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Social Media Profiles</label>
-            <button type="button" (click)="addSocialMedia()" class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
+    <div>
+        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
+            Display Name
+        </label>
+        <input type="text" [(ngModel)]="entity.displayName" [name]="'entityDisplayName-' + controlPrefix" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Optional display name" />
+    </div>
+
+    <div class="grid gap-3 md:grid-cols-2">
+        @if (showRoleRelationshipFields) {
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Role</label>
+            @if (isMainEntity) {
+            <div class="mt-1 flex h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-sm font-medium text-[var(--color-text2)]">Primary</div>
+            } @else {
+            <select [(ngModel)]="entity.role" [name]="'entityRole-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                @for (role of entityRoles; track role.value) {
+                <option [value]="role.value">{{ role.label }}</option>
+                }
+            </select>
+            }
+        </div>
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Relationship</label>
+            @if (isMainEntity) {
+            <div class="mt-1 flex h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-sm font-medium text-[var(--color-text2)]">Subject Of Case</div>
+            } @else {
+            <select [(ngModel)]="entity.relationshipToCase" [name]="'entityRelationship-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                @for (relationship of entityRelationships; track relationship.value) {
+                <option [value]="relationship.value">{{ relationship.label }}</option>
+                }
+            </select>
+            }
+        </div>
+        }
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Source</label>
+            <select [(ngModel)]="entity.source" [name]="'entitySource-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                @for (source of sourceTypes; track source.value) {
+                <option [value]="source.value">{{ source.label }}</option>
+                }
+            </select>
+        </div>
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Confidence</label>
+            <input type="number" min="0" max="1" step="0.05" [(ngModel)]="entity.confidence" [name]="'entityConfidence-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40" />
+        </div>
+    </div>
+
+    <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)] p-4">
+        <label class="mb-3 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Tags</label>
+        <div class="flex gap-2 overflow-x-auto pb-1 pr-8 [mask-image:linear-gradient(to_right,black_calc(100%-32px),transparent)]">
+            @for (tag of tagOptions; track tag.value) {
+            <button type="button" (click)="toggleTag(tag.value)" class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isTagSelected(tag.value) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
+                {{ tag.label }}
+            </button>
+            }
+        </div>
+    </div>
+
+    <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)]" [ngClass]="entity.socialProfiles.length ? 'p-4' : 'px-3 py-2.5'">
+        <div class="flex items-center justify-between gap-3" [ngClass]="entity.socialProfiles.length ? 'mb-4' : ''">
+            <div class="min-w-0">
+                <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Social Profiles</label>
+                @if (entity.socialProfiles.length) {
+                <p class="mt-1 text-xs text-[var(--color-text4)]">{{ entity.socialProfiles.length }} profile{{ entity.socialProfiles.length === 1 ? '' : 's' }}</p>
+                } @else {
+                <p class="mt-1 text-xs text-[var(--color-text4)]">None added</p>
+                }
+            </div>
+            <button type="button" (click)="addSocialMedia()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
                 <i class="bi bi-plus-lg"></i> Add
             </button>
         </div>
-        @for (profile of entity.socialMediaProfiles; track $index; let i = $index) {
-        <div class="mb-3">
-            <div class="flex flex-wrap mb-1 sm:flex-nowrap">
-                <select [(ngModel)]="profile.platform" [name]="'platform-' + entityIndex + '-' + i" class="h-[38px] min-w-0 flex-[1_1_100%] rounded-t-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 sm:flex-1 sm:rounded-l-[8px] sm:rounded-tr-none">
-                    <option value="">Select Platform</option>
-                    @for (platform of socialMediaPlatforms; track platform) {
-                    <option [value]="platform">{{ platform }}</option>
-                    }
-                </select>
-                <input type="text" [(ngModel)]="profile.username" [name]="'username-' + entityIndex + '-' + i" class="h-[38px] min-w-0 flex-1 rounded-bl-[8px] border-y border-l border-r border-[var(--color-border)] max-sm:border-t-0 bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 sm:rounded-bl-none" placeholder="Username" />
-                <button type="button" (click)="removeSocialMedia(i)" class="inline-flex h-[38px] w-[38px] items-center justify-center rounded-r-lg border-y border-r max-sm:rounded-tr-none max-sm:border-t-0 border-[var(--color-border)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] hover:text-[var(--color-text1)]">
+        @for (profile of entity.socialProfiles; track $index; let i = $index) {
+        <div class="mb-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] p-3 last:mb-0">
+            <div class="mb-2 flex items-center justify-between gap-3">
+                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Profile {{ i + 1 }}</span>
+                <button type="button" (click)="removeSocialMedia(i)" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text3)] transition hover:bg-red-500/10 hover:text-red-300" aria-label="Remove social profile">
                     <i class="bi bi-trash3"></i>
                 </button>
+            </div>
+            <div class="grid gap-2 md:grid-cols-2">
+                <select [(ngModel)]="profile.platform" [name]="'platform-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                    <option value="">Select Platform</option>
+                    @for (platform of socialMediaPlatforms; track platform.value) {
+                    <option [value]="platform.value">{{ platform.label }}</option>
+                    }
+                </select>
+                <input type="text" [(ngModel)]="profile.username" [name]="'username-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Username / handle" />
+                <input type="text" [(ngModel)]="profile.displayName" [name]="'profileDisplayName-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 md:col-span-2" placeholder="Display name" />
+                <input type="url" [(ngModel)]="profile.profileUrl" [name]="'profileUrl-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 md:col-span-2" placeholder="Profile URL" />
             </div>
             @if (getSocialMediaError(profile)) {
-            <p class="case-form-error text-red-400 text-xs ml-0">{{ getSocialMediaError(profile) }}</p>
+            <p class="case-form-error mt-2 text-xs text-red-400">{{ getSocialMediaError(profile) }}</p>
             }
         </div>
         }
     </div>
 
-    <!-- Web URLs -->
-    <div class="mb-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-        <div class="flex items-center justify-between mb-3">
-            <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Web URLs</label>
-            <button type="button" (click)="addWebUrl()" class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
+    <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)]" [ngClass]="entity.identifiers.length ? 'p-4' : 'px-3 py-2.5'">
+        <div class="flex items-center justify-between gap-3" [ngClass]="entity.identifiers.length ? 'mb-4' : ''">
+            <div class="min-w-0">
+                <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Identifiers</label>
+                @if (entity.identifiers.length) {
+                <p class="mt-1 text-xs text-[var(--color-text4)]">{{ entity.identifiers.length }} identifier{{ entity.identifiers.length === 1 ? '' : 's' }}</p>
+                } @else {
+                <p class="mt-1 text-xs text-[var(--color-text4)]">None added</p>
+                }
+            </div>
+            <button type="button" (click)="addIdentifier()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
                 <i class="bi bi-plus-lg"></i> Add
             </button>
         </div>
-        @for (url of entity.webUrls; track $index; let i = $index) {
-        <div class="mb-3">
-            <div class="flex mb-1">
-                <input type="url" [(ngModel)]="entity.webUrls[i]" [name]="'url-' + entityIndex + '-' + i" class="h-[38px] flex-1 rounded-l-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="https://example.com" />
-                <button type="button" (click)="removeWebUrl(i)" class="inline-flex h-[38px] w-[38px] items-center justify-center rounded-r-lg border-y border-r border-[var(--color-border)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] hover:text-[var(--color-text1)]">
+        @for (identifier of entity.identifiers; track $index; let i = $index) {
+        <div class="mb-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] p-3 last:mb-0">
+            <div class="mb-2 flex items-center justify-between gap-3">
+                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Identifier {{ i + 1 }}</span>
+                <button type="button" (click)="removeIdentifier(i)" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text3)] transition hover:bg-red-500/10 hover:text-red-300" aria-label="Remove identifier">
                     <i class="bi bi-trash3"></i>
                 </button>
             </div>
-            @if (getUrlError(entity.webUrls[i])) {
-            <p class="case-form-error text-red-400 text-xs ml-0">{{ getUrlError(entity.webUrls[i]) }}</p>
-            }
-        </div>
-        }
-    </div>
-
-    <!-- Emails -->
-    <div class="mb-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-        <div class="flex items-center justify-between mb-3">
-            <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Emails</label>
-            <button type="button" (click)="addEmail()" class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
-                <i class="bi bi-plus-lg"></i> Add
-            </button>
-        </div>
-        @for (email of entity.emails; track $index; let i = $index) {
-        <div class="mb-3">
-            <div class="flex mb-1">
-                <input type="email" [(ngModel)]="entity.emails[i]" [name]="'email-' + entityIndex + '-' + i" class="h-[38px] flex-1 rounded-l-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="email@example.com" />
-                <button type="button" (click)="removeEmail(i)" class="inline-flex h-[38px] w-[38px] items-center justify-center rounded-r-lg border-y border-r border-[var(--color-border)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] hover:text-[var(--color-text1)]">
-                    <i class="bi bi-trash3"></i>
-                </button>
-            </div>
-            @if (getEmailError(entity.emails[i])) {
-            <p class="case-form-error text-red-400 text-xs ml-0">{{ getEmailError(entity.emails[i]) }}</p>
-            }
-        </div>
-        }
-    </div>
-
-    <!-- Phone Numbers -->
-    <div class="mb-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-        <div class="flex items-center justify-between mb-3">
-            <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Phone Numbers</label>
-            <button type="button" (click)="addPhoneNumber()" class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
-                <i class="bi bi-plus-lg"></i> Add
-            </button>
-        </div>
-        @for (phone of entity.phoneNumbers; track $index; let i = $index) {
-        <div class="mb-3">
-            <div class="flex mb-1">
-                <input type="tel" [(ngModel)]="entity.phoneNumbers[i]" [name]="'phone-' + entityIndex + '-' + i" class="h-[38px] flex-1 rounded-l-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="+1 (555) 000-0000" />
-                <button type="button" (click)="removePhoneNumber(i)" class="inline-flex h-[38px] w-[38px] items-center justify-center rounded-r-lg border-y border-r border-[var(--color-border)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] hover:text-[var(--color-text1)]">
-                    <i class="bi bi-trash3"></i>
-                </button>
-            </div>
-            @if (getPhoneError(entity.phoneNumbers[i])) {
-            <p class="case-form-error text-red-400 text-xs ml-0">{{ getPhoneError(entity.phoneNumbers[i]) }}</p>
-            }
-        </div>
-        }
-    </div>
-
-    <!-- Additional Identifiers -->
-    <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-        <div class="flex items-center justify-between mb-3">
-            <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Additional Identifiers</label>
-            <button type="button" (click)="addIdentifier()" class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
-                <i class="bi bi-plus-lg"></i> Add
-            </button>
-        </div>
-        @for (identifier of entity.additionalIdentifiers; track $index; let i = $index) {
-        <div class="mb-3">
-            <div class="flex flex-wrap mb-1 sm:flex-nowrap">
-                <select [(ngModel)]="identifier.type" [name]="'idType-' + entityIndex + '-' + i" class="h-[38px] min-w-0 flex-[1_1_100%] rounded-t-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 sm:flex-1 sm:rounded-l-[8px] sm:rounded-tr-none">
+            <div class="grid gap-2 md:grid-cols-2">
+                <select [(ngModel)]="identifier.type" [name]="'idType-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
                     <option value="">Select Type</option>
-                    @for (type of identifierTypes; track type) {
-                    <option [value]="type">{{ type }}</option>
+                    @for (type of identifierTypes; track type.value) {
+                    <option [value]="type.value">{{ type.label }}</option>
                     }
                 </select>
-                <input type="text" [(ngModel)]="identifier.value" [name]="'idValue-' + entityIndex + '-' + i" class="h-[38px] min-w-0 flex-1 rounded-bl-[8px] border-y border-l border-r border-[var(--color-border)] max-sm:border-t-0 bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 sm:rounded-bl-none" placeholder="Value" />
-                <button type="button" (click)="removeIdentifier(i)" class="inline-flex h-[38px] w-[38px] items-center justify-center rounded-r-lg border-y border-r max-sm:rounded-tr-none max-sm:border-t-0 border-[var(--color-border)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] hover:text-[var(--color-text1)]">
+                <input type="text" [(ngModel)]="identifier.value" [name]="'idValue-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Value" />
+                <input type="text" [(ngModel)]="identifier.issuer" [name]="'idIssuer-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 md:col-span-2" placeholder="Issuer" />
+                <label class="flex h-[38px] cursor-pointer items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 md:col-span-2">
+                    <span class="text-xs font-medium text-[var(--color-text2)]">Verified</span>
+                    <span class="relative inline-flex items-center">
+                        <input type="checkbox" [(ngModel)]="identifier.verified" [name]="'idVerified-' + controlPrefix + '-' + i" class="sr-only peer" aria-label="Identifier verified" />
+                        <span class="relative h-[18px] w-[32px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] transition-colors duration-300 peer-checked:bg-sky-500/70">
+                            <span class="absolute left-[1px] top-0 mt-[1px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="identifier.verified ? 'translate-x-[14px]' : 'translate-x-0'"></span>
+                        </span>
+                    </span>
+                </label>
+            </div>
+            @if (getIdentifierError(identifier)) {
+            <p class="case-form-error mt-2 text-xs text-red-400">{{ getIdentifierError(identifier) }}</p>
+            }
+        </div>
+        }
+    </div>
+
+    <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)]" [ngClass]="entity.attributes.length ? 'p-4' : 'px-3 py-2.5'">
+        <div class="flex items-center justify-between gap-3" [ngClass]="entity.attributes.length ? 'mb-4' : ''">
+            <div class="min-w-0">
+                <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Attributes</label>
+                @if (entity.attributes.length) {
+                <p class="mt-1 text-xs text-[var(--color-text4)]">{{ entity.attributes.length }} attribute{{ entity.attributes.length === 1 ? '' : 's' }}</p>
+                } @else {
+                <p class="mt-1 text-xs text-[var(--color-text4)]">None added</p>
+                }
+            </div>
+            <button type="button" (click)="addAttribute()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
+                <i class="bi bi-plus-lg"></i> Add
+            </button>
+        </div>
+        @for (attribute of entity.attributes; track $index; let i = $index) {
+        <div class="mb-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] p-3 last:mb-0">
+            <div class="mb-2 flex items-center justify-between gap-3">
+                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Attribute {{ i + 1 }}</span>
+                <button type="button" (click)="removeAttribute(i)" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text3)] transition hover:bg-red-500/10 hover:text-red-300" aria-label="Remove attribute">
                     <i class="bi bi-trash3"></i>
                 </button>
             </div>
-            @if (getIdentifierError(identifier)) {
-            <p class="case-form-error text-red-400 text-xs ml-0">{{ getIdentifierError(identifier) }}</p>
+            <div class="grid gap-2 md:grid-cols-[180px_minmax(0,1fr)]">
+                <select [(ngModel)]="attribute.type" [name]="'attributeType-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                    <option value="">Select Attribute</option>
+                    @for (type of attributeTypes; track type.value) {
+                    <option [value]="type.value">{{ type.label }}</option>
+                    }
+                </select>
+                <input type="text" [(ngModel)]="attribute.value" [name]="'attributeValue-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Value" />
+            </div>
+            @if (getAttributeError(attribute)) {
+            <p class="case-form-error mt-2 text-xs text-red-400">{{ getAttributeError(attribute) }}</p>
             }
         </div>
         }
