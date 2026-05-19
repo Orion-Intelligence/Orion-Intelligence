@@ -63,7 +63,7 @@ STEALER_LOG_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_requ
 STIX_MEMBER_DEPS = [Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER]))]
 GENERAL_MODULE_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:general"))]
 SCANNING_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("scanning"))]
-SATELLITE_INTEL_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("osint_advanced"))]
+SATELLITE_INTEL_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("osint_advanced", bypass_roles=[user_role.ADMIN]))]
 STIX_KIND_VALUES = {"general", "leak", "defacement", "exploit", "chat", "social"}
 
 
