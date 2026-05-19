@@ -56,7 +56,7 @@ class FeederManager:
             ]
         )
 
-    async def list_scripts(self, current_user, rule_key: str | None = None, page: int = 1, limit: int = 1000, entry_type: str | None = None) -> FeederScriptListResponse:
+    async def list_scripts(self, current_user, rule_key: str | None = None, page: int = 1, limit: int = 1000,entry_type: str | None = None) -> FeederScriptListResponse:
         safe_page = max(1, int(page or 1))
         safe_limit = max(1, min(int(limit or 1000), 1000))
         safe_entry_type = entry_type if entry_type in {"values", "scripts"} else "all"
@@ -81,7 +81,8 @@ class FeederManager:
             has_more=(skip + len(scripts)) < total,
         )
 
-    async def upload_script(self, rule_key: str, mode: str, file: UploadFile | None, values_text: str | None, session_file: UploadFile | None, current_user) -> FeederUploadResponse:
+    async def upload_script(self, rule_key: str, mode: str, file: UploadFile | None, values_text: str | None,
+                            session_file: UploadFile | None, current_user) -> FeederUploadResponse:
         rule = constant.url_rules.get(rule_key)
         if not rule:
             raise HTTPException(status_code=400, detail="Invalid rule")
@@ -112,6 +113,11 @@ class FeederManager:
             raise HTTPException(status_code=400, detail="Invalid upload mode")
         if rule_type == "generic":
             raise HTTPException(status_code=400, detail="Generic rules only support URL value uploads")
+
+        if session_file:
+            if not session_file.filename or not session_file.filename.lower().endswith(".zip"):
+                raise HTTPException(status_code=400, detail="Only .zip files are allowed for session uploads")
+
         if session_file and not file:
             records = await self._engine.find(
                 self._helper.model,
@@ -127,7 +133,8 @@ class FeederManager:
             target_dir = target_path.parent if target_path.is_file() else self._helper.resolve_target_dir(*self._helper.rule_path_parts(rule.get("path")))
             script_name = target_path.name if target_path.is_file() else scripts[0].name
             (target_dir / self._helper.sanitize_support_file_name(script_name, session_file.filename or "session")).write_bytes(content)
-            return FeederUploadResponse(message="Session file uploaded successfully", script=await self._helper.to_script_item(scripts[0]))
+            return FeederUploadResponse(message="Session file uploaded successfully",script=await self._helper.to_script_item(scripts[0]))
+
         if not file or not file.filename or not file.filename.lower().endswith(".py"):
             raise HTTPException(status_code=400, detail="Only Python files are allowed")
 

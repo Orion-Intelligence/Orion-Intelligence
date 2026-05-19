@@ -168,6 +168,13 @@ export class SidebarUserFeederAddComponent implements OnChanges {
       }
     }
 
+    if (this.selectedSessionFile) {
+      if (!this.selectedSessionFile.name.toLowerCase().endsWith('.zip')) {
+        this.formError = 'Only .zip files are allowed for session uploads';
+        return;
+      }
+    }
+
     this.feederService.getScripts({
       ruleKey: this.selectedRuleKey,
       entryType: 'scripts',
