@@ -86,6 +86,15 @@ class EntityType(str, Enum):
     USERNAME = "username"
     PHONE = "phone"
     WALLET = "wallet"
+    FINANCIAL_INSTITUTION = "financial_institution"
+    PAYMENT_PROCESSOR = "payment_processor"
+    BANK_ACCOUNT = "bank_account"
+    CARD = "card"
+    IBAN = "iban"
+    SWIFT_BIC = "swift_bic"
+    MERCHANT_ACCOUNT = "merchant_account"
+    TRANSACTION = "transaction"
+    CRYPTO_EXCHANGE = "crypto_exchange"
     DEVICE = "device"
     CLOUD_ASSET = "cloud_asset"
     CREDENTIAL = "credential"
@@ -158,6 +167,13 @@ class IdentifierType(str, Enum):
     PASSPORT = "passport"
     EMPLOYEE_ID = "employee_id"
     CUSTOMER_ID = "customer_id"
+    BANK_ACCOUNT_NUMBER = "bank_account_number"
+    IBAN = "iban"
+    SWIFT_BIC = "swift_bic"
+    CARD_BIN = "card_bin"
+    CARD_LAST4 = "card_last4"
+    MERCHANT_ID = "merchant_id"
+    TRANSACTION_ID = "transaction_id"
     DEVICE_ID = "device_id"
     HOSTNAME = "hostname"
     MAC_ADDRESS = "mac_address"
@@ -393,4 +409,3 @@ class db_case_model(Model):
     closure: Optional[CaseClosure] = None
 
     model_config = {"collection": "cases"}
-
