@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdditionalIdentifier, CaseEntity, CaseEntityAttribute, CaseTag, SocialMediaProfile } from '../../../../../shared/model/case-management/case.model';
@@ -10,7 +10,11 @@ import { TooltipDirective } from '../../../../../shared/directive/tooltip-direct
   imports: [CommonModule, FormsModule, TooltipDirective],
   templateUrl: './entity-details.html'
 })
-export class EntityDetailsComponent {
+export class EntityDetailsComponent implements OnChanges {
+  private initialSocialProfileCount = 0;
+  private initialIdentifierCount = 0;
+  private initialAttributeCount = 0;
+
   entityTypes = ENTITY_TYPE_OPTIONS;
   entityRoles = ENTITY_ROLE_OPTIONS;
   entityRelationships = ENTITY_RELATIONSHIP_OPTIONS;
@@ -29,6 +33,15 @@ export class EntityDetailsComponent {
   @Input() showRoleRelationshipFields = true;
 
   @Output() remove = new EventEmitter<void>();
+  @Output() save = new EventEmitter<void>();
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['entity'] && this.entity) {
+      this.initialSocialProfileCount = this.entity.socialProfiles?.length || 0;
+      this.initialIdentifierCount = this.entity.identifiers?.length || 0;
+      this.initialAttributeCount = this.entity.attributes?.length || 0;
+    }
+  }
 
   get controlPrefix(): string {
     return `${this.isMainEntity ? 'primary' : 'related'}-${this.entityIndex}`;
@@ -97,6 +110,22 @@ export class EntityDetailsComponent {
 
   addSocialMedia(): void {
     this.entity.socialProfiles.push({ platform: '', username: '', profileUrl: '', displayName: '' });
+  }
+
+  onSave(): void {
+    this.save.emit();
+  }
+
+  hasSocialProfilesChanged(): boolean {
+    return (this.entity.socialProfiles?.length || 0) !== this.initialSocialProfileCount;
+  }
+
+  hasIdentifiersChanged(): boolean {
+    return (this.entity.identifiers?.length || 0) !== this.initialIdentifierCount;
+  }
+
+  hasAttributesChanged(): boolean {
+    return (this.entity.attributes?.length || 0) !== this.initialAttributeCount;
   }
 
   removeSocialMedia(index: number): void {

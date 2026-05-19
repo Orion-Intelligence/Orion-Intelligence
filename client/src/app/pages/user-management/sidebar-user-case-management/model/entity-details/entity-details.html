@@ -6,8 +6,8 @@
             {{ isMainEntity ? 'Primary Entity' : 'Entity ' + (entityIndex + 1) }}
         </h3>
         @if (!isMainEntity) {
-        <button type="button" (click)="onRemove()" class="text-red-400 hover:text-red-300 text-sm flex items-center gap-1">
-            <i class="bi bi-trash3"></i> Delete
+        <button type="button" (click)="onRemove()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200">
+            <i class="bi bi-x-lg"></i> Remove
         </button>
         }
     </div>
@@ -111,16 +111,21 @@
                 <p class="mt-1 text-xs text-[var(--color-text4)]">None added</p>
                 }
             </div>
-            <button type="button" (click)="addSocialMedia()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
-                <i class="bi bi-plus-lg"></i> Add
-            </button>
+            <div class="flex items-center gap-2">
+                <button type="button" (click)="onSave()" [disabled]="!hasSocialProfilesChanged()" [class.hidden]="!hasSocialProfilesChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30">
+                    <i class="bi bi-check-lg"></i> Save
+                </button>
+                <button type="button" (click)="addSocialMedia()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
+                    <i class="bi bi-plus-lg"></i> Add
+                </button>
+            </div>
         </div>
         @for (profile of entity.socialProfiles; track $index; let i = $index) {
         <div class="mb-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] p-3 last:mb-0">
             <div class="mb-2 flex items-center justify-between gap-3">
                 <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Profile {{ i + 1 }}</span>
-                <button type="button" (click)="removeSocialMedia(i)" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text3)] transition hover:bg-red-500/10 hover:text-red-300" aria-label="Remove social profile">
-                    <i class="bi bi-trash3"></i>
+                <button type="button" (click)="removeSocialMedia(i)" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" aria-label="Remove social profile">
+                    <i class="bi bi-x-lg"></i> Remove
                 </button>
             </div>
             <div class="grid gap-2 md:grid-cols-2">
@@ -154,16 +159,21 @@
                 <p class="mt-1 text-xs text-[var(--color-text4)]">None added</p>
                 }
             </div>
-            <button type="button" (click)="addIdentifier()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
-                <i class="bi bi-plus-lg"></i> Add
-            </button>
+            <div class="flex items-center gap-2">
+                <button type="button" (click)="onSave()" [disabled]="!hasIdentifiersChanged()" [class.hidden]="!hasIdentifiersChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30">
+                    <i class="bi bi-check-lg"></i> Save
+                </button>
+                <button type="button" (click)="addIdentifier()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
+                    <i class="bi bi-plus-lg"></i> Add
+                </button>
+            </div>
         </div>
         @for (identifier of entity.identifiers; track $index; let i = $index) {
         <div class="mb-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] p-3 last:mb-0">
             <div class="mb-2 flex items-center justify-between gap-3">
                 <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Identifier {{ i + 1 }}</span>
-                <button type="button" (click)="removeIdentifier(i)" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text3)] transition hover:bg-red-500/10 hover:text-red-300" aria-label="Remove identifier">
-                    <i class="bi bi-trash3"></i>
+                <button type="button" (click)="removeIdentifier(i)" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" aria-label="Remove identifier">
+                    <i class="bi bi-x-lg"></i> Remove
                 </button>
             </div>
             <div class="grid gap-2 md:grid-cols-2">
@@ -205,16 +215,21 @@
                 <p class="mt-1 text-xs text-[var(--color-text4)]">None added</p>
                 }
             </div>
-            <button type="button" (click)="addAttribute()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
-                <i class="bi bi-plus-lg"></i> Add
-            </button>
+            <div class="flex items-center gap-2">
+                <button type="button" (click)="onSave()" [disabled]="!hasAttributesChanged()" [class.hidden]="!hasAttributesChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30">
+                    <i class="bi bi-check-lg"></i> Save
+                </button>
+                <button type="button" (click)="addAttribute()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
+                    <i class="bi bi-plus-lg"></i> Add
+                </button>
+            </div>
         </div>
         @for (attribute of entity.attributes; track $index; let i = $index) {
         <div class="mb-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] p-3 last:mb-0">
             <div class="mb-2 flex items-center justify-between gap-3">
                 <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Attribute {{ i + 1 }}</span>
-                <button type="button" (click)="removeAttribute(i)" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text3)] transition hover:bg-red-500/10 hover:text-red-300" aria-label="Remove attribute">
-                    <i class="bi bi-trash3"></i>
+                <button type="button" (click)="removeAttribute(i)" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" aria-label="Remove attribute">
+                    <i class="bi bi-x-lg"></i> Remove
                 </button>
             </div>
             <div class="grid gap-2 md:grid-cols-[180px_minmax(0,1fr)]">

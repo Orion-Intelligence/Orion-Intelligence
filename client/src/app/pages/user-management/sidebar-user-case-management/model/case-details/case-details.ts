@@ -392,6 +392,33 @@ export class CaseDetails implements OnInit {
     }
   }
 
+  hasCaseChanged(): boolean {
+    if (!this.editedCase || !this.caseData) {
+      return false;
+    }
+    return this.getCaseSaveSignature(this.editedCase) !== this.getCaseSaveSignature(this.caseData);
+  }
+
+  hasClosureChanged(): boolean {
+    return Boolean(this.editedCase?.closure) !== Boolean(this.caseData?.closure);
+  }
+
+  hasRelatedEntitiesChanged(): boolean {
+    return this.getRelatedEntities(this.editedCase).length !== this.getRelatedEntities(this.caseData).length;
+  }
+
+  hasArtifactsChanged(): boolean {
+    return (this.editedCase?.artifacts?.length || 0) !== (this.caseData?.artifacts?.length || 0);
+  }
+
+  hasTasksChanged(): boolean {
+    return (this.editedCase?.tasks?.length || 0) !== (this.caseData?.tasks?.length || 0);
+  }
+
+  hasLinkedCasesChanged(): boolean {
+    return (this.editedCase?.linkedCases?.length || 0) !== (this.caseData?.linkedCases?.length || 0);
+  }
+
   getLinkableCases(caseItem: Case | null = this.editedCase || this.caseData): Case[] {
     const currentCaseId = caseItem?.caseId;
     return this.accessibleCases.filter(item => item.caseId !== currentCaseId);
@@ -602,6 +629,10 @@ export class CaseDetails implements OnInit {
       })).filter(link => link.targetCaseId && link.reason),
       closure: caseItem.closure ? this.cleanClosure(caseItem.closure) : null
     };
+  }
+
+  private getCaseSaveSignature(caseItem: Case): string {
+    return JSON.stringify(this.cleanCaseForSave(JSON.parse(JSON.stringify(caseItem))));
   }
 
   private ensureArtifactDefaults(artifact: CaseArtifact): CaseArtifact {

@@ -121,7 +121,7 @@
                 <button (click)="cancelEditing()" type="button" aria-label="Cancel edit" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-details-cancel">
                     <i class="bi bi-x-lg text-sm"></i>
                 </button>
-                <button (click)="saveChanges()" type="button" aria-label="Save case" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-details-save">
+                <button (click)="saveChanges()" type="button" aria-label="Save case" [class.hidden]="!hasCaseChanged()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-details-save">
                     <i class="bi bi-check-lg text-sm"></i>
                 </button>
                 }
@@ -143,6 +143,10 @@
                         <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Closure records the final case outcome, reason, summary, and resolution details." class="h-4 w-4 shrink-0 ui-action-icon">
                     </div>
                     @if (isEditing && editedCase) {
+                    <div class="flex items-center gap-2">
+                    <button type="button" (click)="saveChanges()" [disabled]="!hasClosureChanged()" [class.hidden]="!hasClosureChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30" data-testid="case-closure-save">
+                        <i class="bi bi-check-lg"></i> Save
+                    </button>
                     @if (editedCase.closure) {
                     <button type="button" (click)="removeClosure()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" data-testid="case-closure-remove">
                         <i class="bi bi-x-lg"></i> Remove
@@ -152,6 +156,7 @@
                         <i class="bi bi-plus-lg"></i> Add
                     </button>
                     }
+                    </div>
                     }
                 </div>
 
@@ -423,7 +428,7 @@
                     </div>
                 </div>
                 <div class="p-4">
-                    <app-entity-details [entity]="editablePrimaryEntity" [isMainEntity]="true" [showTitle]="false" [showTopDivider]="false" [showRoleRelationshipFields]="false" [entityIndex]="0"></app-entity-details>
+                    <app-entity-details [entity]="editablePrimaryEntity" [isMainEntity]="true" [showTitle]="false" [showTopDivider]="false" [showRoleRelationshipFields]="false" [entityIndex]="0" (save)="saveChanges()"></app-entity-details>
                 </div>
                 } @else if (getPrimaryEntity(); as primaryEntity) {
                 <div class="flex flex-col gap-1 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
@@ -574,15 +579,20 @@
                         <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Related Entities</h2>
                         <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Other entities connected to the case, such as affected assets, accounts, indicators, sources, or linked actors." class="h-4 w-4 shrink-0 ui-action-icon">
                     </div>
-                    <button type="button" (click)="addRelatedEntity()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
-                        <i class="bi bi-plus-lg"></i> Add
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button type="button" (click)="saveChanges()" [disabled]="!hasRelatedEntitiesChanged()" [class.hidden]="!hasRelatedEntitiesChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30">
+                            <i class="bi bi-check-lg"></i> Save
+                        </button>
+                        <button type="button" (click)="addRelatedEntity()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
+                            <i class="bi bi-plus-lg"></i> Add
+                        </button>
+                    </div>
                 </div>
 
                 @if (getRelatedEntities(editedCase).length > 0) {
                 <div class="space-y-4 p-4">
                     @for (entity of getRelatedEntities(editedCase); track entity.entityId; let i = $index) {
-                    <app-entity-details [entity]="entity" [entityIndex]="i" (remove)="removeRelatedEntity(i)"></app-entity-details>
+                    <app-entity-details [entity]="entity" [entityIndex]="i" (remove)="removeRelatedEntity(i)" (save)="saveChanges()"></app-entity-details>
                     }
                 </div>
                 } @else {
@@ -748,9 +758,14 @@
                             <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Evidence or supporting material attached to the case, such as screenshots, files, URLs, raw alerts, logs, or reports." class="h-4 w-4 shrink-0 ui-action-icon">
                         </div>
                         @if (isEditing) {
-                        <button type="button" (click)="addArtifact()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200" data-testid="case-artifact-add">
-                            <i class="bi bi-plus-lg"></i> Add
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button type="button" (click)="saveChanges()" [disabled]="!hasArtifactsChanged()" [class.hidden]="!hasArtifactsChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30" data-testid="case-artifact-save">
+                                <i class="bi bi-check-lg"></i> Save
+                            </button>
+                            <button type="button" (click)="addArtifact()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200" data-testid="case-artifact-add">
+                                <i class="bi bi-plus-lg"></i> Add
+                            </button>
+                        </div>
                         }
                     </div>
 
@@ -760,8 +775,8 @@
                         <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
                             <div class="mb-3 flex items-center justify-between gap-3">
                                 <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Artifact {{ i + 1 }}</span>
-                                <button type="button" (click)="removeArtifact(i)" aria-label="Remove artifact" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text3)] transition hover:bg-red-500/10 hover:text-red-300" [attr.data-testid]="'case-artifact-remove-' + i">
-                                    <i class="bi bi-trash3"></i>
+                                <button type="button" (click)="removeArtifact(i)" aria-label="Remove artifact" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" [attr.data-testid]="'case-artifact-remove-' + i">
+                                    <i class="bi bi-x-lg"></i> Remove
                                 </button>
                             </div>
                             <div class="grid gap-3 md:grid-cols-2">
@@ -847,9 +862,14 @@
                             <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Investigation or follow-up work items that can be assigned to analysts on this case." class="h-4 w-4 shrink-0 ui-action-icon">
                         </div>
                         @if (isEditing) {
-                        <button type="button" (click)="addTask()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200" data-testid="case-task-add">
-                            <i class="bi bi-plus-lg"></i> Add
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button type="button" (click)="saveChanges()" [disabled]="!hasTasksChanged()" [class.hidden]="!hasTasksChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30" data-testid="case-task-save">
+                                <i class="bi bi-check-lg"></i> Save
+                            </button>
+                            <button type="button" (click)="addTask()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200" data-testid="case-task-add">
+                                <i class="bi bi-plus-lg"></i> Add
+                            </button>
+                        </div>
                         }
                     </div>
 
@@ -859,8 +879,8 @@
                         <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
                             <div class="mb-3 flex items-center justify-between gap-3">
                                 <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Task {{ i + 1 }}</span>
-                                <button type="button" (click)="removeTask(i)" aria-label="Remove task" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text3)] transition hover:bg-red-500/10 hover:text-red-300" [attr.data-testid]="'case-task-remove-' + i">
-                                    <i class="bi bi-trash3"></i>
+                                <button type="button" (click)="removeTask(i)" aria-label="Remove task" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" [attr.data-testid]="'case-task-remove-' + i">
+                                    <i class="bi bi-x-lg"></i> Remove
                                 </button>
                             </div>
                             <div class="grid gap-3 md:grid-cols-2">
@@ -946,9 +966,14 @@
                         <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Connections to other cases, such as duplicates, follow-ups, escalations, or cases sharing the same actor, victim, or infrastructure." class="h-4 w-4 shrink-0 ui-action-icon">
                     </div>
                     @if (isEditing) {
-                    <button type="button" (click)="addLinkedCase()" [disabled]="!hasLinkableCases(editedCase)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 disabled:pointer-events-none disabled:opacity-50" data-testid="case-linked-case-add">
-                        <i class="bi bi-plus-lg"></i> Add
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button type="button" (click)="saveChanges()" [disabled]="!hasLinkedCasesChanged()" [class.hidden]="!hasLinkedCasesChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30" data-testid="case-linked-case-save">
+                            <i class="bi bi-check-lg"></i> Save
+                        </button>
+                        <button type="button" (click)="addLinkedCase()" [disabled]="!hasLinkableCases(editedCase)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 disabled:pointer-events-none disabled:opacity-50" data-testid="case-linked-case-add">
+                            <i class="bi bi-plus-lg"></i> Add
+                        </button>
+                    </div>
                     }
                 </div>
 
@@ -958,8 +983,8 @@
                     <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
                         <div class="mb-3 flex items-center justify-between gap-3">
                             <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Link {{ i + 1 }}</span>
-                            <button type="button" (click)="removeLinkedCase(i)" aria-label="Remove linked case" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text3)] transition hover:bg-red-500/10 hover:text-red-300" [attr.data-testid]="'case-linked-case-remove-' + i">
-                                <i class="bi bi-trash3"></i>
+                            <button type="button" (click)="removeLinkedCase(i)" aria-label="Remove linked case" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" [attr.data-testid]="'case-linked-case-remove-' + i">
+                                <i class="bi bi-x-lg"></i> Remove
                             </button>
                         </div>
                         <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
