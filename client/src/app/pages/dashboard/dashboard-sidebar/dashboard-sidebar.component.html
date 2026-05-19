@@ -142,7 +142,7 @@
         <div class="mt-[20px] text-[13px] font-bold text-white">Data Collection</div>
         <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
       }
-      @if (canAccessNetworkIntel() || isDemo()) {
+      @if (canAccessNetworkIntel() ||  isDemo()) {
         <div id="sidebar-network-intel" class="my-[6px] rounded-[8px] select-none">
           <div (click)="requestStandaloneSubscription($event, canAccessNetworkIntel() && !appService.isMobileMode()); canAccessNetworkIntel() && !appService.isMobileMode() && onSectionSelected(category.NETINT)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.NETINT, 'opacity-20': (isDemo() && !canAccessNetworkIntel()) || appService.isMobileMode() }" [routerLink]="canAccessNetworkIntel() && !appService.isMobileMode() ? 'netint' : null" class="flex h-[46px] items-center gap-[8px] rounded-[8px] border border-transparent px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
             <img alt="Network Intel" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/dump.svg" width="20">
@@ -158,9 +158,9 @@
           </div>
         </div>
       }
-      @if (canAccessStandaloneDataCollection()) {
+      @if (canAccessThreatLens()) {
         <div class="my-[6px] rounded-[8px] select-none">
-          <div (click)="requestStandaloneSubscription($event, canAccessNetworkIntel()); canAccessNetworkIntel() && onSectionSelected(category.THREAT_LENS)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.THREAT_LENS, 'opacity-20': !canAccessNetworkIntel() }" [routerLink]="canAccessNetworkIntel() ? 'threat-lens' : null" class="flex h-[46px] items-center gap-[8px] rounded-[8px] border border-transparent px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
+          <div (click)="requestStandaloneSubscription($event, canAccessThreatLens()); canAccessThreatLens() && onSectionSelected(category.THREAT_LENS)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.THREAT_LENS, 'opacity-20': !canAccessThreatLens() }" [routerLink]="canAccessThreatLens() ? 'threat-lens' : null" class="flex h-[46px] items-center gap-[8px] rounded-[8px] border border-transparent px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
             <img alt="Threat Lens" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/theme/graph.svg" width="20">
             Threat Lens
           </div>
@@ -378,9 +378,9 @@
           </div>
         </li>
       }
-      @if (canAccessStandaloneDataCollection()) {
+      @if (canAccessThreatLens()) {
         <li class="my-[6px] rounded-[8px] select-none">
-          <div (click)="requestStandaloneSubscription($event, canAccessNetworkIntel()); canAccessNetworkIntel() && onSectionSelected(category.THREAT_LENS)" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.THREAT_LENS, 'opacity-20': !canAccessNetworkIntel() }" [routerLink]="canAccessNetworkIntel() ? 'threat-lens' : null" appTooltip="Threat Lens" class="flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-white focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]" queryParamsHandling="merge">
+          <div (click)="requestStandaloneSubscription($event, canAccessThreatLens()); canAccessThreatLens() && onSectionSelected(category.THREAT_LENS)" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.THREAT_LENS, 'opacity-20': !canAccessThreatLens() }" [routerLink]="canAccessThreatLens() ? 'threat-lens' : null" appTooltip="Threat Lens" class="flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-white focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]" queryParamsHandling="merge">
             <img alt="Threat Lens" class="h-[20px] w-[20px] shrink-0 opacity-100" height="20" ngSrc="/assets/images/sidebar/theme/graph.svg" width="20">
           </div>
         </li>
