@@ -127,7 +127,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   isMainLoading = false;
   mainLoadingTitle = 'Loading Satellite Intel';
   mainLoadingMessage = 'Please wait while the request completes...';
-  selectedTrackingTypes: ('aircraft' | 'ship')[] = ['aircraft'];
+  selectedTrackingTypes: ('aircraft' | 'ship')[] = [];
   isTrackingDropdownOpen = false;
   isPanelMenuOpen = false;
   isPanelPopupOpen = true;
@@ -332,26 +332,17 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   onTrackingSelectionChange(type: 'aircraft' | 'ship'): void {
-    let isEnabled = false;
-
     if (type === 'aircraft') {
       this.aircraftTrackingEnabled = !this.aircraftTrackingEnabled;
-      isEnabled = this.aircraftTrackingEnabled;
     }
     else if (type === 'ship') {
       this.shipsTrackingEnabled = !this.shipsTrackingEnabled;
-      isEnabled = this.shipsTrackingEnabled;
     }
 
-    if (isEnabled) {
-      if (!this.selectedTrackingTypes.includes(type)) {
-        this.selectedTrackingTypes.push(type);
-      }
-    }
-    else {
-      this.selectedTrackingTypes = this.selectedTrackingTypes.filter(t => t !== type);
-    }
-
+    this.selectedTrackingTypes = [
+      ...(this.aircraftTrackingEnabled ? ['aircraft' as const] : []),
+      ...(this.shipsTrackingEnabled ? ['ship' as const] : []),
+    ];
     this.handleTrackingSelection();
   }
 
@@ -802,6 +793,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.aircraftTrackSub?.unsubscribe();
     this.aircraftTrackSub = this.satelliteService.pollAircraftInBounds(lat, lon, delta).subscribe({
       next: (res) => {
+        if (!this.aircraftTrackingEnabled) {
+          return;
+        }
         const payload = (res?.result ?? res) as any;
         this.aircraftData = Array.isArray(payload?.aircraft) ? payload.aircraft : [];
         if (payload?.error) {
@@ -825,6 +819,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.aircraftTrackSub?.unsubscribe();
     this.aircraftTrackSub = this.satelliteService.pollAircraftGlobal().subscribe({
       next: (res) => {
+        if (!this.aircraftTrackingEnabled) {
+          return;
+        }
         const payload = (res?.result ?? res) as any;
         this.aircraftData = Array.isArray(payload?.aircraft) ? payload.aircraft : [];
         if (payload?.error) {
@@ -857,6 +854,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.shipTrackSub?.unsubscribe();
     this.shipTrackSub = this.satelliteService.pollShipsInBounds(lat, lon, delta).subscribe({
       next: (res) => {
+        if (!this.shipsTrackingEnabled) {
+          return;
+        }
         const payload = (res?.result ?? res) as any;
         this.shipsData = Array.isArray(payload?.ships) ? payload.ships : [];
         if (payload?.error) {
@@ -880,6 +880,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.shipTrackSub?.unsubscribe();
     this.shipTrackSub = this.satelliteService.pollShipsGlobal().subscribe({
       next: (res) => {
+        if (!this.shipsTrackingEnabled) {
+          return;
+        }
         const payload = (res?.result ?? res) as any;
         this.shipsData = Array.isArray(payload?.ships) ? payload.ships : [];
         if (payload?.error) {

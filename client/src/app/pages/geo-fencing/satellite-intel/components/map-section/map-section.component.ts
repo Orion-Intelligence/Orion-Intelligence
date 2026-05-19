@@ -39,6 +39,8 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private sidebarRequestToken = 0;
   private markerZoomBucket = 0;
   private aircraftRenderKey = '';
+  private aircraftRenderTimer: ReturnType<typeof setTimeout> | null = null;
+  private aircraftRenderVersion = 0;
   private shipRenderKey = '';
   private orionRenderKey = '';
   private orionRenderVersion = 0;
@@ -46,6 +48,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private shipCluster!: any;
   private worldCountryFeatures: any[] = [];
   private highlightedCountryFeature: any | null = null;
+  private locationBucketCache = new Map<string, string>();
 
   zoomLabel = 'zoom 2.5';
   isMapFeaturesHovered = false;
@@ -199,6 +202,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       clearTimeout(this.orionRenderTimer);
       this.orionRenderTimer = null;
     }
+    this.cancelAircraftRender();
     this.resizeObserver?.disconnect();
     this.leafletMap?.remove();
   }
@@ -518,6 +522,9 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       console.error('[Country Highlight] Error loading country data:', error);
       this.worldCountryFeatures = [];
     }
+    finally {
+      this.locationBucketCache.clear();
+    }
   }
 
   private getCountryBoundaryStyle(): Record<string, any> {
@@ -711,53 +718,89 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     }
     this.aircraftRenderKey = renderKey;
 
+    this.cancelAircraftRender();
     this.aircraftCluster.clearLayers();
 
-    const markers = this.getRenderableAircraft()
-      .filter(a => Number.isFinite(a.latitude) && Number.isFinite(a.longitude))
-      .map(a => {
-        const icaoId = this.normalizeEntityId(a.icao24);
-        const isSelected = !!icaoId && this.activeEntity?.type === 'aircraft' && this.activeEntity.id === icaoId;
-        const isLoading = !!icaoId && this.loadingEntity?.type === 'aircraft' && this.loadingEntity.id === icaoId;
-        const marker = this.L.marker([a.latitude, a.longitude], {
-          icon: this.createAircraftIcon(a, isSelected, isLoading),
-        });
-        if (a.icao24) {
-          marker.on('click', () => {
-            const markerId = this.normalizeEntityId(a.icao24);
-            if (!markerId) {
+    const aircraft = this.getRenderableAircraft().filter(a => Number.isFinite(a.latitude) && Number.isFinite(a.longitude));
+    this.renderAircraftMarkersInChunks(aircraft, ++this.aircraftRenderVersion);
+  }
+
+  private cancelAircraftRender(): void {
+    this.aircraftRenderVersion += 1;
+    if (this.aircraftRenderTimer) {
+      clearTimeout(this.aircraftRenderTimer);
+      this.aircraftRenderTimer = null;
+    }
+  }
+
+  private renderAircraftMarkersInChunks(aircraft: SatelliteLiveAircraft[], renderVersion: number, startIndex = 0): void {
+    if (!this.aircraftCluster || renderVersion !== this.aircraftRenderVersion) {
+      return;
+    }
+
+    const chunkSize = 140;
+    const endIndex = Math.min(startIndex + chunkSize, aircraft.length);
+    for (let index = startIndex; index < endIndex; index += 1) {
+      this.aircraftCluster.addLayer(this.createAircraftMarker(aircraft[index]));
+    }
+
+    if (endIndex < aircraft.length) {
+      this.aircraftRenderTimer = setTimeout(() => this.renderAircraftMarkersInChunks(aircraft, renderVersion, endIndex), 0);
+    }
+    else {
+      this.aircraftRenderTimer = null;
+    }
+  }
+
+  private createAircraftMarker(a: SatelliteLiveAircraft): any {
+    const icaoId = this.normalizeEntityId(a.icao24);
+    const isSelected = !!icaoId && this.activeEntity?.type === 'aircraft' && this.activeEntity.id === icaoId;
+    const isLoading = !!icaoId && this.loadingEntity?.type === 'aircraft' && this.loadingEntity.id === icaoId;
+    const marker = this.L.marker([a.latitude, a.longitude], {
+      icon: this.createAircraftIcon(a, isSelected, isLoading),
+    });
+    if (icaoId) {
+      marker.bindTooltip(`${this.escapeTooltipText(icaoId)}`, {
+        direction: 'top',
+        offset:    [0, -10],
+        opacity:   0.95,
+        sticky:    true,
+      });
+    }
+    if (a.icao24) {
+      marker.on('click', () => {
+        const markerId = this.normalizeEntityId(a.icao24);
+        if (!markerId) {
+          return;
+        }
+        const token = this.openSidebarLoading('aircraft', markerId, a);
+        this.satelliteService.pollAircraftByICAO(a.icao24).subscribe({
+          next: (res) => {
+            if (token !== this.sidebarRequestToken) {
+              return;
+            } // stale, discard
+            const aircraft = this.extractAircraftDetails(res);
+            const status = this.getResponseStatus(res);
+            if (aircraft) {
+              this.ngZone.run(() => this.openSidebar('aircraft', aircraft));
+            }
+            else if (this.isPendingStatus(status)) {
               return;
             }
-            const token = this.openSidebarLoading('aircraft', markerId, a);
-            this.satelliteService.pollAircraftByICAO(a.icao24).subscribe({
-              next: (res) => {
-                if (token !== this.sidebarRequestToken) {
-                  return;
-                } // stale, discard
-                const aircraft = this.extractAircraftDetails(res);
-                const status = this.getResponseStatus(res);
-                if (aircraft) {
-                  this.ngZone.run(() => this.openSidebar('aircraft', aircraft));
-                }
-                else if (this.isPendingStatus(status)) {
-                  return;
-                }
-                else {
-                  this.openSidebarError('aircraft', markerId, 'Unable to load aircraft details');
-                }
-              },
-              error: (err) => {
-                if (token !== this.sidebarRequestToken) {
-                  return;
-                } // stale, discard
-                this.openSidebarError('aircraft', markerId, err?.error?.detail || err?.message || 'Aircraft details request failed');
-              }
-            });
-          });
-        }
-        return marker;
+            else {
+              this.openSidebarError('aircraft', markerId, 'Unable to load aircraft details');
+            }
+          },
+          error: (err) => {
+            if (token !== this.sidebarRequestToken) {
+              return;
+            } // stale, discard
+            this.openSidebarError('aircraft', markerId, err?.error?.detail || err?.message || 'Aircraft details request failed');
+          }
+        });
       });
-    markers.forEach(marker => this.aircraftCluster.addLayer(marker));
+    }
+    return marker;
   }
 
   private renderShipCluster(): void {
@@ -825,11 +868,14 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     const size = this.getMarkerBaseSize('aircraft');
     const half = Math.round(size / 2);
     const iconSize = Math.round(size * 0.86);
-    const halo = isSelected ? 'drop-shadow(0 0 8px rgba(250,204,21,0.95)) drop-shadow(0 0 18px rgba(250,204,21,0.72))' : 'drop-shadow(0 1px 2px rgba(0,0,0,0.45))';
+    const iconFill = isSelected ? '#ef4444' : '#facc15';
+    const hoverFill = isSelected ? '#ef4444' : '#38bdf8';
+    const halo = isSelected ? 'drop-shadow(0 0 8px rgba(248,113,113,0.95)) drop-shadow(0 0 18px rgba(239,68,68,0.7))' : 'drop-shadow(0 1px 2px rgba(0,0,0,0.45))';
     const hoverHalo = isSelected
-      ? 'drop-shadow(0 0 8px rgba(250,204,21,0.95)) drop-shadow(0 0 18px rgba(250,204,21,0.72))'
+      ? 'drop-shadow(0 0 8px rgba(248,113,113,0.95)) drop-shadow(0 0 18px rgba(239,68,68,0.7))'
       : 'drop-shadow(0 0 7px rgba(56,189,248,0.9)) drop-shadow(0 0 16px rgba(56,189,248,0.55))';
-    const strokeColor = isSelected ? '#fff7bf' : '#eab308';
+    const strokeColor = isSelected ? '#fee2e2' : '#eab308';
+    const hoverStrokeColor = isSelected ? '#fee2e2' : '#dbeafe';
     const badge = isLoading
       ? `<div style="position:absolute;top:-1px;right:-1px;width:12px;height:12px;border-radius:9999px;background:#fde68a;border:2px solid #081421;"></div>`
       : '';
@@ -837,11 +883,11 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       html: `
         <style>
           .aircraft-marker:hover .aircraft-icon-wrap { filter:${hoverHalo} !important; }
-          .aircraft-marker:hover .aircraft-icon { fill:#38bdf8 !important; stroke:#dbeafe !important; }
+          .aircraft-marker:hover .aircraft-icon { fill:${hoverFill} !important; stroke:${hoverStrokeColor} !important; }
         </style>
         <div class="aircraft-marker" style="position:relative;width:${size}px;height:${size}px;">
           <div class="aircraft-icon-wrap" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(${a.true_track ?? 0}deg);filter:${halo};">
-            <svg class="aircraft-icon" viewBox="0 0 24 24" style="width:${iconSize}px;height:${iconSize}px;fill:#facc15;stroke:${strokeColor};stroke-width:0.65;transition:fill 120ms ease,stroke 120ms ease;">
+            <svg class="aircraft-icon" viewBox="0 0 24 24" style="width:${iconSize}px;height:${iconSize}px;fill:${iconFill};stroke:${strokeColor};stroke-width:0.65;transition:fill 120ms ease,stroke 120ms ease;">
               <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9L2 14v2l8-2.5V19l-2 1.5V22l3-1 3 1v-1.5L12 19v-5.5L21 16z"/>
             </svg>
           </div>
@@ -897,6 +943,10 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     }
     const normalized = String(value).trim();
     return normalized ? normalized : null;
+  }
+
+  private escapeTooltipText(value: string): string {
+    return value.replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' }[character] ?? character));
   }
 
   private getMarkerBaseSize(type: 'aircraft' | 'ship'): number {
@@ -977,7 +1027,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     if (sampleRatio >= 1) {
       return visible;
     }
-    return visible.filter(a => this.shouldKeepAircraftSample(a, sampleRatio));
+    return this.sampleByBucket(visible, sampleRatio, a => this.getAircraftSampleBucketKey(a), a => this.normalizeEntityId(a.icao24) ?? `${a.latitude}:${a.longitude}`);
   }
 
   private getAircraftSampleRatio(zoom: number): number {
@@ -997,18 +1047,9 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       return 0.15;
     }
     if (zoom >= 3) {
-      return 0.08;
+      return 0.1;
     }
-    return 0.05;
-  }
-
-  private shouldKeepAircraftSample(a: SatelliteLiveAircraft, ratio: number): boolean {
-    const key = this.normalizeEntityId(a.icao24) ?? `${a.latitude}:${a.longitude}`;
-    let hash = 0;
-    for (let i = 0; i < key.length; i++) {
-      hash = ((hash << 5) - hash + key.charCodeAt(i)) | 0;
-    }
-    return (Math.abs(hash) % 100) < Math.round(ratio * 100);
+    return 0.1;
   }
 
   private getRenderableShips(): SatelliteLiveShip[] {
@@ -1027,7 +1068,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     if (sampleRatio >= 1) {
       return visible;
     }
-    return visible.filter(s => this.shouldKeepShipSample(s, sampleRatio));
+    return this.sampleByBucket(visible, sampleRatio, s => this.getLocationBucketKey(s.latitude!, s.longitude!), s => this.normalizeEntityId(s.mmsi) ?? `${s.latitude}:${s.longitude}`);
   }
 
   private getShipSampleRatio(zoom: number): number {
@@ -1047,18 +1088,98 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       return 0.12;
     }
     if (zoom >= 3) {
-      return 0.07;
+      return 0.1;
     }
-    return 0.04;
+    return 0.1;
   }
 
-  private shouldKeepShipSample(s: SatelliteLiveShip, ratio: number): boolean {
-    const key = this.normalizeEntityId(s.mmsi) ?? `${s.latitude}:${s.longitude}`;
-    let hash = 0;
-    for (let i = 0; i < key.length; i++) {
-      hash = ((hash << 5) - hash + key.charCodeAt(i)) | 0;
+  private sampleByBucket<T>(items: T[], ratio: number, getBucketKey: (item: T) => string, getStableKey: (item: T) => string): T[] {
+    const buckets = new Map<string, T[]>();
+
+    items.forEach(item => {
+      const bucketKey = getBucketKey(item);
+      const bucketItems = buckets.get(bucketKey) ?? [];
+      bucketItems.push(item);
+      buckets.set(bucketKey, bucketItems);
+    });
+
+    const sampled: T[] = [];
+    buckets.forEach(bucketItems => {
+      const keepCount = this.getLocationBucketSampleCount(bucketItems.length, ratio);
+      if (keepCount >= bucketItems.length) {
+        sampled.push(...bucketItems);
+        return;
+      }
+
+      sampled.push(...bucketItems.slice().sort((left, right) => this.stableHash(getStableKey(left)) - this.stableHash(getStableKey(right))).slice(0, keepCount));
+    });
+
+    return sampled;
+  }
+
+  private getLocationBucketSampleCount(count: number, ratio: number): number {
+    if (count <= 0) {
+      return 0;
     }
-    return (Math.abs(hash) % 100) < Math.round(ratio * 100);
+
+    return Math.max(1, Math.ceil(count * ratio));
+  }
+
+  private getAircraftSampleBucketKey(aircraft: SatelliteLiveAircraft): string {
+    const originCountry = aircraft.origin_country?.trim();
+    if (originCountry) {
+      return `origin:${originCountry.toLowerCase()}`;
+    }
+
+    if (Number.isFinite(aircraft.latitude) && Number.isFinite(aircraft.longitude)) {
+      return this.getGridBucketKey(aircraft.latitude as number, aircraft.longitude as number);
+    }
+
+    return 'origin:unknown';
+  }
+
+  private getLocationBucketKey(latitude: number, longitude: number): string {
+    const cacheKey = `${latitude.toFixed(3)},${longitude.toFixed(3)}`;
+    const cached = this.locationBucketCache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const countryFeature = this.findCountryFeatureAt(latitude, longitude);
+    const bucketKey = countryFeature
+      ? `country:${this.getCountryFeatureKey(countryFeature)}`
+      : this.getGridBucketKey(latitude, longitude);
+
+    if (this.locationBucketCache.size > 20000) {
+      this.locationBucketCache.clear();
+    }
+    this.locationBucketCache.set(cacheKey, bucketKey);
+
+    return bucketKey;
+  }
+
+  private getGridBucketKey(latitude: number, longitude: number): string {
+    return `grid:${Math.floor((latitude + 90) / 10)}:${Math.floor((longitude + 180) / 10)}`;
+  }
+
+  private findCountryFeatureAt(latitude: number, longitude: number): any | null {
+    if (!this.worldCountryFeatures.length) {
+      return null;
+    }
+
+    return this.worldCountryFeatures.find((countryFeature: any) => {
+      try {
+        return geoContains(countryFeature, [longitude, latitude]);
+      }
+      catch {
+        return false;
+      }
+    }) ?? null;
+  }
+
+  private getCountryFeatureKey(feature: any): string {
+    const countryId = feature?.id ?? feature?.properties?.iso_a3 ?? feature?.properties?.adm0_a3 ?? feature?.properties?.name ?? feature?.properties?.admin ?? 'unknown';
+    return String(countryId);
   }
 
   private getShipRenderKey(): string {
