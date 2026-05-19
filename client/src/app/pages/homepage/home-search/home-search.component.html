@@ -1,5 +1,5 @@
 @if (app_service.userSessionData().user.role === 'admin' || licenseService.isMaintainer() ||
-  (app_service.userSessionData().user.role === 'analyst' && licenseService.getLicenses().includes('enterprise'))) {
+  (app_service.userSessionData().user.role === 'analyst' && licenseService.getLicenses().includes('enterprise')) || licenseService.getLicenses().includes('enterprise')) {
   <div class="flex flex-nowrap gap-2 overflow-x-auto max-w-full whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]" [ngClass]="compactLayout() ? 'mt-[4px] mx-[2px] mb-[15px] max-[1000px]:mx-0 max-[640px]:mt-0 max-[640px]:mx-[2px]' : 'mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[943px]:mx-[10px]'">
     @if (licenseService.canUseModule('ai') && app_service.configData().appSettings.ai_endpoint_enabled) {
       <button type="button" data-testid="ioc-basic-tag-AI" [routerLink]="['/dashboard/profile/ai']" [queryParams]="{ q: searchQuery || null }" queryParamsHandling="merge" class="ui-home-ai-button group flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border border-[rgba(87,165,235,0.18)] bg-[linear-gradient(180deg,rgba(87,165,235,0.14)_0%,rgba(87,165,235,0.08)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-200 hover:border-[rgba(87,165,235,0.3)] hover:bg-[linear-gradient(180deg,rgba(87,165,235,0.18)_0%,rgba(87,165,235,0.12)_100%)]" aria-label="Open AI workspace">
@@ -31,7 +31,7 @@
       }
 
       @if (app_service.userSessionData().user.role === 'admin' || licenseService.isMaintainer() ||
-        (app_service.userSessionData().user.role === 'analyst' && licenseService.getLicenses().includes('enterprise'))) {
+        (app_service.userSessionData().user.role === 'analyst' && licenseService.getLicenses().includes('enterprise')) || licenseService.getLicenses().includes('enterprise')) {
         <div class="relative">
           <div >
           <div id="homeSearch" class="mb-[8px] flex h-[42px] w-full max-w-[910px] flex-nowrap overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white" [ngClass]="{ 'max-[550px]:fixed max-[550px]:left-0 max-[550px]:w-full max-[550px]:px-[10px] max-[550px]:z-[2]': homeSearchService.showFiltersOverlay, 'max-[550px]:relative max-[550px]:left-auto max-[550px]:w-[calc(100vw-90px)] max-[550px]:px-0 max-[550px]:mr-0': !homeSearchService.showFiltersOverlay }">
@@ -99,7 +99,7 @@
       @if (!hideHeatmapAndAnalytics()) {
         @defer (on idle) {
           <div>
-            <app-world-heatmap [canOpenReports]="app_service.userSessionData().user.role === 'admin' || licenseService.isMaintainer() || (app_service.userSessionData().user.role === 'analyst' && licenseService.getLicenses().includes('enterprise'))"></app-world-heatmap>
+            <app-world-heatmap [canOpenReports]="app_service.userSessionData().user.role === 'admin' || licenseService.isMaintainer() || (app_service.userSessionData().user.role === 'analyst' && licenseService.getLicenses().includes('enterprise')) || licenseService.getLicenses().includes('enterprise')"></app-world-heatmap>
           </div>
           <div class="relative will-change-transform transition-transform duration-300 ease-out" [class.transition-none]="insightDragging" [ngClass]="'ui-translate-y-neg-' + insightTranslateY">
               <div class="absolute left-1/2 top-[-54px] z-[30] -translate-x-1/2 touch-none select-none" (click)="onInsightToggleClick($event)" (pointerdown)="onInsightPointerDown($event)">
