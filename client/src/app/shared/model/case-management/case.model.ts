@@ -56,6 +56,15 @@ export type EntityType =
     'username' |
     'phone' |
     'wallet' |
+    'financial_institution' |
+    'payment_processor' |
+    'bank_account' |
+    'card' |
+    'iban' |
+    'swift_bic' |
+    'merchant_account' |
+    'transaction' |
+    'crypto_exchange' |
     'device' |
     'cloud_asset' |
     'credential' |
@@ -126,6 +135,13 @@ export type IdentifierType =
     'passport' |
     'employee_id' |
     'customer_id' |
+    'bank_account_number' |
+    'iban' |
+    'swift_bic' |
+    'card_bin' |
+    'card_last4' |
+    'merchant_id' |
+    'transaction_id' |
     'device_id' |
     'hostname' |
     'mac_address' |
