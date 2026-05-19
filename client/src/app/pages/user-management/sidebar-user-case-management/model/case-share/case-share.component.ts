@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import type jsPDF from 'jspdf';
@@ -14,7 +14,9 @@ import { ApiService } from '../../../../../shared/services/api.service';
   imports: [CommonModule],
   templateUrl: './case-share.component.html',
 })
-export class CaseShareComponent implements OnInit {
+export class CaseShareComponent implements OnInit, OnDestroy {
+  private previousTheme: 'light-theme' | 'dark-theme' | null = null;
+
   report: SharedCaseReport | null = null;
   isLoading = true;
   errorMessage = '';
@@ -24,6 +26,7 @@ export class CaseShareComponent implements OnInit {
   constructor(private route: ActivatedRoute, private api: ApiService, public appService: AppService) { }
 
   ngOnInit(): void {
+    this.forceDarkTheme();
     this.appService.loadConfig().subscribe(() => {
       this.brandingResolved = true;
     });
@@ -46,6 +49,13 @@ export class CaseShareComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    document.body.classList.remove('light-theme', 'dark-theme');
+    if (this.previousTheme) {
+      document.body.classList.add(this.previousTheme);
+    }
   }
 
   toggleArtifact(artifactId: string): void {
@@ -111,6 +121,14 @@ export class CaseShareComponent implements OnInit {
 
   getLogoSrc(): string {
     return '/assets/images/shared/logo-wide-light.svg';
+  }
+
+  private forceDarkTheme(): void {
+    this.previousTheme = document.body.classList.contains('light-theme') ? 'light-theme'
+      : document.body.classList.contains('dark-theme') ? 'dark-theme'
+        : null;
+    document.body.classList.remove('light-theme');
+    document.body.classList.add('dark-theme');
   }
 
   getAppName(): string {
