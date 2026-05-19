@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdditionalIdentifier, CaseEntity, CaseEntityAttribute, CaseTag, SocialMediaProfile } from '../../../../../shared/model/case-management/case.model';
 import { CASE_TAG_OPTIONS, ENTITY_ATTRIBUTE_TYPE_OPTIONS, ENTITY_RELATIONSHIP_OPTIONS, ENTITY_ROLE_OPTIONS, ENTITY_TYPE_OPTIONS, IDENTIFIER_TYPE_OPTIONS, SOCIAL_PLATFORM_OPTIONS, SOURCE_TYPE_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
+import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-entity-details',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TooltipDirective],
   templateUrl: './entity-details.html'
 })
 export class EntityDetailsComponent {

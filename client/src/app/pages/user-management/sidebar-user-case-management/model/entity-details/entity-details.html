@@ -85,7 +85,10 @@
     </div>
 
     <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)] [body.light-theme_&]:![background:color-mix(in_srgb,var(--color-blue-820-light)_72%,white_28%)] p-4">
-        <label class="mb-3 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Tags</label>
+        <div class="mb-3 flex items-center gap-1.5">
+            <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Tags</label>
+            <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Labels used to classify the entity for triage, review, and reporting." class="h-4 w-4 shrink-0 ui-action-icon">
+        </div>
         <div class="flex gap-2 overflow-x-auto pb-1 pr-8 [mask-image:linear-gradient(to_right,black_calc(100%-32px),transparent)]">
             @for (tag of tagOptions; track tag.value) {
             <button type="button" (click)="toggleTag(tag.value)" class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isTagSelected(tag.value) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
@@ -98,7 +101,10 @@
     <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)] [body.light-theme_&]:![background:color-mix(in_srgb,var(--color-blue-820-light)_72%,white_28%)]" [ngClass]="entity.socialProfiles.length ? 'p-4' : 'px-3 py-2.5'">
         <div class="flex items-center justify-between gap-3" [ngClass]="entity.socialProfiles.length ? 'mb-4' : ''">
             <div class="min-w-0">
-                <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Social Profiles</label>
+                <div class="flex items-center gap-1.5">
+                    <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Social Profiles</label>
+                    <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Social accounts or profile URLs tied to this entity." class="h-4 w-4 shrink-0 ui-action-icon">
+                </div>
                 @if (entity.socialProfiles.length) {
                 <p class="mt-1 text-xs text-[var(--color-text4)]">{{ entity.socialProfiles.length }} profile{{ entity.socialProfiles.length === 1 ? '' : 's' }}</p>
                 } @else {
@@ -138,7 +144,10 @@
     <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)] [body.light-theme_&]:![background:color-mix(in_srgb,var(--color-blue-820-light)_72%,white_28%)]" [ngClass]="entity.identifiers.length ? 'p-4' : 'px-3 py-2.5'">
         <div class="flex items-center justify-between gap-3" [ngClass]="entity.identifiers.length ? 'mb-4' : ''">
             <div class="min-w-0">
-                <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Identifiers</label>
+                <div class="flex items-center gap-1.5">
+                    <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Identifiers</label>
+                    <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Stable values that identify this entity, such as email, phone, wallet, account, or document IDs." class="h-4 w-4 shrink-0 ui-action-icon">
+                </div>
                 @if (entity.identifiers.length) {
                 <p class="mt-1 text-xs text-[var(--color-text4)]">{{ entity.identifiers.length }} identifier{{ entity.identifiers.length === 1 ? '' : 's' }}</p>
                 } @else {
@@ -186,7 +195,10 @@
     <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)] [body.light-theme_&]:![background:color-mix(in_srgb,var(--color-blue-820-light)_72%,white_28%)]" [ngClass]="entity.attributes.length ? 'p-4' : 'px-3 py-2.5'">
         <div class="flex items-center justify-between gap-3" [ngClass]="entity.attributes.length ? 'mb-4' : ''">
             <div class="min-w-0">
-                <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Attributes</label>
+                <div class="flex items-center gap-1.5">
+                    <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Attributes</label>
+                    <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Additional context about this entity, such as owner, region, risk score, or source system." class="h-4 w-4 shrink-0 ui-action-icon">
+                </div>
                 @if (entity.attributes.length) {
                 <p class="mt-1 text-xs text-[var(--color-text4)]">{{ entity.attributes.length }} attribute{{ entity.attributes.length === 1 ? '' : 's' }}</p>
                 } @else {
