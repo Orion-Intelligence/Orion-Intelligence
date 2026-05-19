@@ -6,7 +6,8 @@ import {
   closeCreatedCase,
   editCreatedCase,
   openCaseManagement,
-  openCreatedCaseFromList
+  openCreatedCaseFromList,
+  shareAndRevokeCreatedCaseLink
 } from './controllers/20-case-management.controller';
 
 describe('Case Management - Add View Edit Flow', () => {
@@ -24,6 +25,7 @@ describe('Case Management - Add View Edit Flow', () => {
     editCreatedCase();
     addArtifactsAndTasksToCreatedCase();
     addCommentToCreatedCase();
+    shareAndRevokeCreatedCaseLink();
     closeCreatedCase();
   });
 });

@@ -10,10 +10,12 @@ import { Case, CaseAnalyst, CaseArtifact, CaseArtifactRequest, CaseClosure, Case
 import { ARTIFACT_TYPE_OPTIONS, CASE_LINK_RELATIONSHIP_OPTIONS, CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, CLOSURE_REASON_OPTIONS, DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS, SOURCE_TYPE_OPTIONS, TASK_STATUS_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
+import { ConfirmationPopupComponent } from '../../../../../shared/partials/confirmation-popup/confirmation-popup.component';
+import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-case-details',
-  imports: [CommonModule, FormsModule, EntityDetailsComponent, ReportFeedbackCommentsComponent, ReportUserSidebarComponent],
+  imports: [CommonModule, FormsModule, EntityDetailsComponent, ReportFeedbackCommentsComponent, ReportUserSidebarComponent, ConfirmationPopupComponent, TooltipDirective],
   templateUrl: './case-details.html',
 })
 export class CaseDetails implements OnInit {
@@ -27,6 +29,9 @@ export class CaseDetails implements OnInit {
   analysts: CaseAnalyst[] = [];
   accessibleCases: Case[] = [];
   isCommentSaving = false;
+  isShareCreating = false;
+  isShareRevoking = false;
+  pendingShareAction: 'create' | 'revoke' | null = null;
   commentErrorMessage = '';
   caseTypeOptions = CASE_TYPE_OPTIONS;
   intakeSourceOptions = INTAKE_SOURCE_OPTIONS;
@@ -125,6 +130,86 @@ export class CaseDetails implements OnInit {
   cancelEditing(): void {
     this.isEditing = false;
     this.editedCase = null;
+  }
+
+  openShareConfirmation(): void {
+    if (!this.caseData || this.isShareCreating) {
+      return;
+    }
+    this.pendingShareAction = 'create';
+  }
+
+  openRevokeShareConfirmation(): void {
+    if (!this.caseData || this.isShareRevoking) {
+      return;
+    }
+    this.pendingShareAction = 'revoke';
+  }
+
+  handleShareConfirmation(confirmed: boolean): void {
+    const action = this.pendingShareAction;
+    this.pendingShareAction = null;
+    if (!confirmed || !action) {
+      return;
+    }
+    if (action === 'create') {
+      this.shareCase();
+      return;
+    }
+    this.revokeShareLinks();
+  }
+
+  getShareConfirmationMessage(): string {
+    if (this.pendingShareAction === 'create') {
+      return 'Creating a share link will allow anyone with the link to access this case report until the link expires. Do you want to continue?';
+    }
+    if (this.pendingShareAction === 'revoke') {
+      return 'Revoking share links will expire all previously shared links for this case. Do you want to continue?';
+    }
+    return '';
+  }
+
+  private shareCase(): void {
+    if (!this.caseData || this.isShareCreating) {
+      return;
+    }
+    this.isShareCreating = true;
+    this.caseService.createCaseShare(this.caseData.caseId, {
+      expiresInHours: 168
+    }).subscribe({
+      next: share => {
+        let shareUrl = share.path;
+        try {
+          shareUrl = new URL(share.path, window.location.origin).toString();
+        }
+        catch {
+          shareUrl = share.path;
+        }
+        window.open(shareUrl, '_blank', 'noopener');
+        this.isShareCreating = false;
+      },
+      error: err => {
+        this.isShareCreating = false;
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to create share link');
+      }
+    });
+  }
+
+  private revokeShareLinks(): void {
+    if (!this.caseData || this.isShareRevoking) {
+      return;
+    }
+    this.isShareRevoking = true;
+    this.caseService.revokeCaseShares(this.caseData.caseId).subscribe({
+      next: result => {
+        this.isShareRevoking = false;
+        this.messageNotificationService.show(`${result.revokedCount || 0} share links revoked.`, 'success');
+      },
+      error: err => {
+        this.isShareRevoking = false;
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to revoke share links');
+      }
+    });
   }
 
   saveChanges(): void {
@@ -625,4 +710,5 @@ export class CaseDetails implements OnInit {
     }
     return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
+
 }

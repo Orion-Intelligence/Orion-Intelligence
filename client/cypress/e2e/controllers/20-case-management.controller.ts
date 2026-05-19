@@ -116,6 +116,22 @@ export function addCommentToCreatedCase() {
   cy.get(selector('report-feedback-comment-user-name')).should('exist');
 }
 
+export function shareAndRevokeCreatedCaseLink() {
+  cy.window().then((win) => {
+    cy.stub(win, 'open').as('caseShareWindowOpen');
+  });
+
+  clickHeaderAction('case-details-share');
+  cy.get(selector('confirmation-popup')).should('be.visible').and('contain.text', 'anyone with the link');
+  cy.get(selector('confirmation-yes-button')).should('be.visible').click();
+  cy.get('@caseShareWindowOpen').should('have.been.calledWithMatch', /\/case-share\/.+token=/, '_blank');
+
+  clickHeaderAction('case-details-revoke-shares');
+  cy.get(selector('confirmation-popup')).should('be.visible').and('contain.text', 'expire all previously shared links');
+  cy.get(selector('confirmation-yes-button')).should('be.visible').click();
+  cy.get(selector('message-notification-text')).should('contain.text', 'share links revoked');
+}
+
 export function closeCreatedCase() {
   clickHeaderAction('case-details-edit');
   cy.get(selector('case-closure-add')).scrollIntoView().should('be.visible').click();

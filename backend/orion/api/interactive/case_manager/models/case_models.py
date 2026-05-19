@@ -223,3 +223,14 @@ class CaseResponse(BaseModel):
     tasks: List[dict] = Field(default_factory=list)
     linkedCases: List[dict] = Field(default_factory=list)
     closure: Optional[dict] = None
+
+
+class CreateCaseShareRequest(CaseRequestModel):
+    expiresInHours: int = Field(default=168, ge=1, le=720)
+
+
+class CaseShareResponse(BaseModel):
+    shareId: str
+    token: str
+    path: str
+    expiresAt: datetime

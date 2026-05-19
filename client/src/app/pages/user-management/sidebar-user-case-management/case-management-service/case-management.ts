@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../../shared/services/api.service';
-import { Case, CaseAnalyst, CaseRequest, CaseUpdateRequest } from '../../../../shared/model/case-management/case.model';
+import { Case, CaseAnalyst, CaseRequest, CaseShareRequest, CaseShareResponse, CaseUpdateRequest } from '../../../../shared/model/case-management/case.model';
 
 @Injectable({ providedIn: 'root' })
 export class CaseManagement {
@@ -33,6 +33,14 @@ export class CaseManagement {
 
   deleteCase(caseId: string): Observable<{ success: boolean }> {
     return this.api.delete<{ success: boolean }>(`profile/cases/${caseId}`);
+  }
+
+  createCaseShare(caseId: string, payload: CaseShareRequest): Observable<CaseShareResponse> {
+    return this.api.post<CaseShareResponse>(`profile/cases/${caseId}/shares`, payload);
+  }
+
+  revokeCaseShares(caseId: string): Observable<{ success: boolean; revokedCount: number }> {
+    return this.api.delete<{ success: boolean; revokedCount: number }>(`profile/cases/${caseId}/shares`);
   }
 
 }

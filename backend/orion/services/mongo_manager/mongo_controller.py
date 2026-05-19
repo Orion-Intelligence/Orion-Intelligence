@@ -11,6 +11,7 @@ from orion.services.mongo_manager.shared_model.db_document_feedback_model import
 from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
 from orion.services.mongo_manager.shared_model.db_feeder_script_model import db_feeder_script_model
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
+from orion.services.mongo_manager.shared_model.db_case_model import db_case_model
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
@@ -125,4 +126,5 @@ class mongo_controller:
         admin.add_view(ModelView(db_feeder_script_model, icon="fa fa-file"))
         admin.add_view(ModelView(db_dump_record_model, icon="fa fa-link"))
         admin.add_view(ModelView(db_document_feedback_model, icon="fa fa-comments"))
+        admin.add_view(ModelView(db_case_model, icon="fa fa-folder-open", label="Cases", name="cases"))
         return admin

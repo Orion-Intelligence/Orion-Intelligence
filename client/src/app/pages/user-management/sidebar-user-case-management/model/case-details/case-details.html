@@ -105,8 +105,16 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2 sm:justify-end">
+                @if (!isEditing) {
+                <button (click)="openShareConfirmation()" type="button" aria-label="Create share link" appTooltip="Create share link" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-share" [disabled]="isShareCreating">
+                    <i class="bi text-[15px] leading-none [&_.ui-bootstrap-icon]:overflow-visible" [ngClass]="isShareCreating ? 'bi-arrow-repeat animate-spin' : 'bi-share-fill'"></i>
+                </button>
+                <button (click)="openRevokeShareConfirmation()" type="button" aria-label="Revoke all share links" appTooltip="Revoke all share links" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-revoke-shares" [disabled]="isShareRevoking">
+                    <i class="bi text-sm leading-none" [ngClass]="isShareRevoking ? 'bi-arrow-repeat animate-spin' : 'bi-trash3 text-red-300'"></i>
+                </button>
+                }
                 @if (!isEditing && !caseData.closure) {
-                <button (click)="enableEditing()" type="button" aria-label="Edit case" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-details-edit">
+                <button (click)="enableEditing()" type="button" aria-label="Edit case" appTooltip="Edit case" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-details-edit">
                     <img src="assets/images/shared/edit.svg" width="16" alt="edit" class="ui-action-icon" />
                 </button>
                 } @else if (isEditing) {
@@ -121,6 +129,10 @@
         </div>
 
         <div class="my-5 hidden h-px w-full bg-[var(--color-divider)] md:block"></div>
+
+        @if (pendingShareAction) {
+        <app-confirmation-popup [message]="getShareConfirmationMessage()" (confirmed)="handleShareConfirmation($event)"></app-confirmation-popup>
+        }
 
         <div class="space-y-5">
             @if (isEditing || caseData.closure) {

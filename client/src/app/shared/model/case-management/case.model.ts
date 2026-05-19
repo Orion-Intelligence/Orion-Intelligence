@@ -386,6 +386,117 @@ export interface CaseUpdateRequest {
     closure?: CaseClosureRequest | null;
 }
 
+export interface CaseShareRequest {
+    expiresInHours?: number;
+}
+
+export interface CaseShareResponse {
+    token: string;
+    path: string;
+    expiresAt: Date | string;
+}
+
+export interface SharedCaseArtifact {
+    artifactId: string;
+    type: string;
+    title: string;
+    description?: string;
+    source?: string;
+    url?: string;
+    fileName?: string;
+    fileType?: string;
+    tags?: string[];
+    capturedAt?: string;
+}
+
+export interface SharedSocialProfile {
+    platform: string;
+    username: string;
+    profileUrl?: string;
+    displayName?: string;
+}
+
+export interface SharedIdentifier {
+    type: string;
+    value: string;
+    issuer?: string;
+    verified?: boolean;
+}
+
+export interface SharedEntityAttribute {
+    type: string;
+    value: string;
+}
+
+export interface SharedCaseEntity {
+    entityId: string;
+    type: string;
+    value: string;
+    displayName?: string;
+    role?: string;
+    relationshipToCase?: string;
+    confidence?: number;
+    source?: string;
+    identifiers?: SharedIdentifier[];
+    socialProfiles?: SharedSocialProfile[];
+    tags?: string[];
+    attributes?: SharedEntityAttribute[];
+    createdBy?: string;
+    updatedBy?: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface SharedCaseTask {
+    taskId: string;
+    title: string;
+    description?: string;
+    status?: string;
+    priority?: string;
+    assignedTo?: string;
+    dueAt?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    completedAt?: string;
+}
+
+export interface SharedCaseLink {
+    targetCaseId: string;
+    relationship?: string;
+    reason?: string;
+    createdBy?: string;
+    createdAt?: string;
+}
+
+export interface SharedCaseClosure {
+    reason: string;
+    summary?: string;
+    resolution?: string;
+    closedAt?: string;
+}
+
+export interface SharedCaseReport {
+    shareId: string;
+    caseId: string;
+    title: string;
+    description?: string;
+    caseType: string;
+    status: string;
+    severity: string;
+    priority: string;
+    tags?: string[];
+    createdAt?: string;
+    updatedAt?: string;
+    expiresAt?: string;
+    primaryEntityId?: string | null;
+    entities?: SharedCaseEntity[];
+    closure?: SharedCaseClosure | null;
+    closedAt?: string;
+    artifacts?: SharedCaseArtifact[];
+    tasks?: SharedCaseTask[];
+    linkedCases?: SharedCaseLink[];
+}
+
 export interface Case {
     id?: string;
     caseId: string;

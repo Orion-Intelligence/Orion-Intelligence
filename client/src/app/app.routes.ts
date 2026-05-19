@@ -52,6 +52,7 @@ const loadNetworkIntelComponent = () => import('./pages/root-searches/network-in
 const loadSidebarUserCaseManagement = () => import('./pages/user-management/sidebar-user-case-management/sidebar-user-case-management').then(m => m.SidebarUserCaseManagement);
 const loadUserProfileActivityComponent = () => import('./pages/profile/user-profile-activity/user-profile-activity.component').then(m => m.UserProfileActivityComponent);
 const loadCaseDetailsComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-details/case-details').then(m => m.CaseDetails);
+const loadCaseShareComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-share/case-share.component').then(m => m.CaseShareComponent);
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
   data: { type: 'consolidated', animation: 'HashPage' }
@@ -114,6 +115,11 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: loadLoginComponent,
     data: { animation: 'LoginPage' }
+  },
+  {
+    path: 'case-share/:shareId',
+    loadComponent: loadCaseShareComponent,
+    data: { animation: 'CaseSharePage' }
   },
   {
     path: 'onboarding',

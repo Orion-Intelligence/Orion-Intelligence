@@ -351,6 +351,15 @@ class CaseClosure(BaseModel):
     closedAt: datetime = PydanticField(default_factory=utc_now)
 
 
+class CaseShare(EmbeddedModel):
+    shareId: str
+    tokenHash: str
+    createdBy: str = ""
+    createdAt: datetime = Field(default_factory=utc_now)
+    expiresAt: datetime
+    revokedAt: Optional[datetime] = None
+
+
 class db_case_model(Model):
     caseId: str = Field(index=True)
     tenant_uuid: str = Field(index=True)
@@ -379,7 +388,9 @@ class db_case_model(Model):
 
     comments: List[CaseComment] = Field(default_factory=list)
     linkedCases: List[CaseLink] = Field(default_factory=list)
+    shares: List[CaseShare] = Field(default_factory=list)
 
     closure: Optional[CaseClosure] = None
 
     model_config = {"collection": "cases"}
+
