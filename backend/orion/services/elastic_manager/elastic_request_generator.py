@@ -12,6 +12,36 @@ from orion.services.elastic_manager.elastic_semantic_controller import elastic_s
 
 
 class elastic_request_generator:
+    COUNTRY_ALIASES = {
+        "us": ["US", "USA", "U.S.", "U.S.A.", "United States", "United States of America"],
+        "usa": ["US", "USA", "U.S.", "U.S.A.", "United States", "United States of America"],
+        "unitedstates": ["US", "USA", "U.S.", "U.S.A.", "United States", "United States of America"],
+        "unitedstatesofamerica": ["US", "USA", "U.S.", "U.S.A.", "United States", "United States of America"],
+        "uk": ["UK", "GB", "GBR", "United Kingdom", "Great Britain"],
+        "gb": ["UK", "GB", "GBR", "United Kingdom", "Great Britain"],
+        "gbr": ["UK", "GB", "GBR", "United Kingdom", "Great Britain"],
+        "unitedkingdom": ["UK", "GB", "GBR", "United Kingdom", "Great Britain"],
+        "uae": ["UAE", "AE", "United Arab Emirates"],
+        "unitedarabemirates": ["UAE", "AE", "United Arab Emirates"],
+        "ksa": ["KSA", "SA", "Saudi Arabia"],
+        "saudiarabia": ["KSA", "SA", "Saudi Arabia"],
+        "southkorea": ["South Korea", "Korea, Republic of", "Republic of Korea", "KR", "KOR"],
+        "northkorea": ["North Korea", "Korea, Democratic People's Republic of", "KP", "PRK"],
+        "russia": ["Russia", "Russian Federation", "RU", "RUS"],
+    }
+
+    @staticmethod
+    def _country_alias_key(value):
+        return re.sub(r"[^a-z0-9]+", "", value.lower())
+
+    @staticmethod
+    def _expand_country_filter_values(value):
+        values = [value]
+        values.extend(elastic_request_generator.COUNTRY_ALIASES.get(
+            elastic_request_generator._country_alias_key(value),
+            []
+        ))
+        return list(dict.fromkeys(v for v in values if v))
 
     @staticmethod
     def build_es_from_tagged(parsed, mapping):
@@ -108,17 +138,30 @@ class elastic_request_generator:
                 if not val:
                     continue
 
+                filter_values = elastic_request_generator._expand_country_filter_values(val) if ioc_key == "m_country" else [val]
+
                 for field in es_fields:
                     term_field = field if str(field).endswith((".keyword", ".raw")) else f"{field}"
 
-                    shoulds.append({
-                        "term": {
-                            term_field: {
-                                "value": val,
-                                "case_insensitive": True
+                    for filter_value in filter_values:
+                        shoulds.append({
+                            "term": {
+                                term_field: {
+                                    "value": filter_value,
+                                    "case_insensitive": True
+                                }
                             }
-                        }
-                    })
+                        })
+
+                        if ioc_key == "m_country" and re.search(r"\s", filter_value):
+                            shoulds.append({
+                                "wildcard": {
+                                    term_field: {
+                                        "value": f"*{filter_value}*",
+                                        "case_insensitive": True
+                                    }
+                                }
+                            })
 
                     if ioc_key == "m_search_all":
                         shoulds.append({"match_phrase": {field: val}})
@@ -485,8 +528,8 @@ class elastic_request_generator:
         m_network = p_query_model.network
         m_page_number = getattr(p_query_model, "page", 1)
         m_content_type = p_query_model.content
-        m_platform = (p_query_model.platform or "").strip().lower()
         m_safe_search = p_query_model.safe
+        result_size = p_query_model.platform_result_count
         must_clauses = []
         must_not_clause = []
         index_set = set(base_index or [])
@@ -597,8 +640,8 @@ class elastic_request_generator:
             m_page_number=m_page_number,
             date_boost_fields=date_boost_fields)
 
-        unified_query["size"] = 15
-        unified_query["from"] = max(0, (m_page_number - 1) * 15)
+        unified_query["size"] = result_size
+        unified_query["from"] = max(0, (m_page_number - 1) * result_size)
 
         if channel_q:
             qb = unified_query["query"]["function_score"]["query"].setdefault("bool", {"must": []})

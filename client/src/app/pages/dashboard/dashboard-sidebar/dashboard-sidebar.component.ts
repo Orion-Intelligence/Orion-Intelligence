@@ -185,6 +185,16 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     return this.isAdmin() || this.licenseService.canUseModule('osint_advanced');
   }
 
+  canAccessSatelliteIntel(): boolean {
+    return this.isAdmin()
+      || this.licenseService.canUseModule('osint_advanced');
+  }
+
+  canAccessThreatLens(): boolean {
+    return this.isAdmin()
+      || this.licenseService.canUseModule('osint_advanced');
+  }
+
   canAccessSocialIntel(): boolean {
     return this.isAdmin() || (!this.isDemo() && this.licenseService.canUseModule('social_mapper'));
   }

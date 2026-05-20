@@ -31,11 +31,11 @@ import { DefacementCallbackModel } from '../../../shared/model/results/defacemen
 import { applyQueryAndPageFromParams, isRouteChanged } from '../../intel-panel/dashboard-manager.utils';
 import { NetworkIntel } from '../network-intel/network-intel';
 import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
-
+import { SatelliteIntel } from "../../geo-fencing/satellite-intel/satellite-intel";
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel, CrossSearchCardComponent],
+  imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel, CrossSearchCardComponent, SatelliteIntel],
   templateUrl: './dashboard-consolidated.component.html',
   animations: [scanAnimation, fadeInDashboardItem],
 })
@@ -53,6 +53,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   isGrouped = false;
   isIOC = true;
   isNetworkIntel = false;
+  isGeoFencing = false;
   query: string = '';
   isLoading = signal(false);
   isStealerLogLoading = signal(false);
@@ -358,6 +359,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.isNetworkIntel = false;
       this.isGrouped = true;
       this.isIOC = false;
+      this.isGeoFencing = false;
       if (skipConsolidatedBackFetchOnce) {
         sessionStorage.removeItem('skipConsolidatedBackFetchOnce');
         return;
@@ -368,17 +370,26 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.isNetworkIntel = false;
       this.isGrouped = false;
       this.isIOC = false;
+      this.isGeoFencing = false;
       this.fetchRanked();
     }
     else if (tab == "IOCs") {
       this.isNetworkIntel = false;
       this.isIOC = true;
       this.isGrouped = false;
+      this.isGeoFencing = false;
     }
     else if (tab == "Network Intelligence") {
       this.isNetworkIntel = true;
       this.isIOC = false;
       this.isGrouped = false;
+      this.isGeoFencing = false;
+    }
+    else if (tab == "Geo Fencing") {
+      this.isNetworkIntel = false;
+      this.isIOC = false;
+      this.isGrouped = false;
+      this.isGeoFencing = true;
     }
   }
 

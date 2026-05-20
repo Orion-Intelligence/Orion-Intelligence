@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 import asyncio
 from pathlib import Path
+import asyncio
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
@@ -52,7 +53,16 @@ async def lifespan(p_app: FastAPI):
     await service_manager_instance.init_services()
     setup_admin(mongo_controller.get_instance().get_engine()).mount_to(p_app)
     app.include_router(interface)
+
+    watch_task = asyncio.create_task(service_manager_instance.watch_wri_power_plants_file(ANGULAR_BUILD_DIR))
+
     yield
+
+    watch_task.cancel()
+    try:
+        await watch_task
+    except asyncio.CancelledError:
+        pass
 
 
 app = FastAPI(title="API Access", lifespan=lifespan, docs_url=None, redoc_url=None)

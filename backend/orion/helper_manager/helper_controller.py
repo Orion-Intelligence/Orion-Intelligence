@@ -202,6 +202,8 @@ class helper_controller:
         url_rules_template = url_rules_env.get_template("url_rules.json")
         url_rules_json_str = url_rules_template.render()
         constant.url_rules = json.loads(url_rules_json_str)
+        power_plant_env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "satellite"))
+        constant.power_plant_data = power_plant_env.get_template("wri_power_plantsv2.0.json").render()
 
     @staticmethod
     def clone_model(model):

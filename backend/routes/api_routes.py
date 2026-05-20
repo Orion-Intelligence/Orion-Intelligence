@@ -1,6 +1,7 @@
 import asyncio
 from typing import Optional
 from fastapi import APIRouter, Body, Depends, Query, UploadFile, File
+from fastapi.responses import StreamingResponse
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from configs.app_dependency import license_required, role_required, status_required, get_current_role, get_current_user, get_is_free_token
 from configs.limiter_dependency import limiter_dependency
@@ -15,8 +16,34 @@ from orion.api.interactive.hompage_manager.homepage_model import homepage_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_crack_model, search_dynamic_crypto_model, search_dynamic_onion_search, search_dynamic_param_model, search_dynamic_social_model
+from orion.api.interactive.search_manager.search_data_model.power_plants.search_power_plants_param_model import search_power_plants_param_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.interactive.siemlog_manager.siem_log_manager import SiemLogManager
+from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (
+    DomainScanRequest,
+    UrlVulnerabilityScanRequest,
+)
+from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (
+    GeoCameraDetectRangesRequest,
+    GeoCameraDetectRequest,
+    IPScanRequest,
+    NetIntelDeepScanRequest,
+    ResolveIPRequest,
+)
+from orion.api.server.geo_fencing_manager.class_model.satellite_request_models import (
+    SatelliteImageRequest,
+    SatelliteAnomalyRequest,
+    SatelliteCompareRequest,
+    SatelliteGeocodeRequest,
+    SatelliteFacilitiesRequest,
+    SatelliteSentinelSearchRequest,
+    SatelliteLiveTrackerBBoxRequest,
+    SatelliteLiveTrackerAircraftIcaoRequest,
+    SatelliteLiveTrackerAircraftTrackRequest,
+    SatelliteLiveTrackerShipMmsiRequest,
+    SatelliteLiveTrackerStatusRequest,
+)
+from orion.api.server.crawl_manager.class_model.social_scrape_request_model import (SocialScrapeRequest, )
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest, UrlVulnerabilityScanRequest
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import GeoCameraDetectRangesRequest, GeoCameraDetectRequest, IPScanRequest, NetIntelDeepScanRequest, ResolveIPRequest
 from orion.api.server.crawl_manager.class_model.log_model import InjectionBatchRequestModel, InjectionBatchResponseModel, SiemSearchRequestModel, SiemSearchResponseModel
@@ -24,6 +51,7 @@ from orion.api.server.crawl_manager.class_model.social_scrape_request_model impo
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
+from orion.api.server.geo_fencing_manager.geo_fencing_manager import geo_fencing_manager
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
 from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
@@ -37,6 +65,7 @@ STEALER_LOG_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_requ
 STIX_MEMBER_DEPS = [Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER]))]
 GENERAL_MODULE_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:general"))]
 SCANNING_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("scanning"))]
+SATELLITE_INTEL_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("osint_advanced", bypass_roles=[user_role.ADMIN]))]
 STIX_KIND_VALUES = {"general", "leak", "defacement", "exploit", "chat", "social"}
 
 
@@ -156,7 +185,6 @@ async def search_social(param: search_consolidated_param_model = Body(...), curr
 
 
 @api_routes.post(
-
     "/api/search/exploit",
     summary="Search exploit reports",
     description=SEARCH_DOCS["strategic"]["description"],
@@ -188,6 +216,25 @@ async def search_defacement(param: search_consolidated_param_model = Body(...), 
     base_index = [ELASTIC_INDEX.S_DEFACEMENT_INDEX]
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category],"defacement")
 
+@api_routes.post(
+    "/api/search/power-plants/stream",
+    summary="Stream power plant points",
+    tags=["Search"],
+    operation_id="streamPowerPlants",
+    status_code=200,
+    dependencies=GENERAL_MODULE_DEPS,
+)
+async def stream_power_plants(param: search_power_plants_param_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
+    stream = await search_model.getInstance().stream_power_plants_points(chunk_size=param.size)
+    return StreamingResponse(
+        stream,
+        media_type="application/x-ndjson",
+        headers={
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no",}
+    )
 
 @api_routes.post(
     "/api/feedback/comment/{doc_id}",
@@ -353,6 +400,18 @@ async def search_consolidated(param: search_consolidated_param_model = Body(...)
     _enforce_demo_safe_search(param, current_user)
     return await search_model.getInstance().search_consolidated_result(param)
 
+@api_routes.post(
+    "/api/threat/lens",
+    summary="Search threat lens reports",
+    description=SEARCH_DOCS["breach"]["description"],
+    tags=["Search"],
+    operation_id="searchThreatLens",
+    response_description=SEARCH_DOCS["consolidated"]["response_description"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,)
+async def search_threat_lens_news(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    _enforce_demo_safe_search(param, current_user)
+    return await search_model.getInstance().search_consolidated_result(param)
 
 @api_routes.post(
     "/api/search/consolidated/ioc",
@@ -433,6 +492,18 @@ async def get_news_document(doc_id: str, lang: Optional[str] = Query(
 async def get_exploit_document(doc_id: str, lang: Optional[str] = Query(
     None, alias="lang", description="Optional language code for localized report content.", ), ):
     return await search_model.getInstance().request_exploit_doc(doc_id, lang)
+
+
+@api_routes.post(
+    "/api/search/power-plants/by-ids",
+    summary="Get multiple power plants by IDs",
+    tags=["Reports"],
+    operation_id="getPowerPlantsByIds",
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
+        Depends(license_required("module:general", bypass_licenses=["maintainer"]))],)
+async def get_power_plants_by_ids(param: list[str] = Body(...),):
+    return await search_model.getInstance().request_power_plants_by_ids(param)
 
 
 @api_routes.get(
@@ -909,6 +980,136 @@ async def geo_camera_detect_ranges(param: GeoCameraDetectRangesRequest = Body(..
     await AuditLogManager.get_instance().search_audit(current_user, "camera_detect_ranges", ",".join(param.ip_ranges))
     return await search_model.getInstance().network_intel(param, "camera_detect_ranges", user_id=str(current_user.id))
 
+@api_routes.post(
+    "/api/satellite/geocode",
+    summary="Convert address to coordinates",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_geocode(payload: SatelliteGeocodeRequest = Body(...), current_user=Depends(get_current_user)):
+    return await geo_fencing_manager.get_instance().geocode(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/facilities",
+    summary="Detect facilities (ports, airports, military zones)",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_facilities(payload: SatelliteFacilitiesRequest = Body(...), current_user=Depends(get_current_user)):
+    return await geo_fencing_manager.get_instance().facilities(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/sentinel/search",
+    summary="Search Sentinel satellite data",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_sentinel_search(payload: SatelliteSentinelSearchRequest = Body(...), current_user=Depends(get_current_user)):
+    return await geo_fencing_manager.get_instance().sentinel_search(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/sentinel/image",
+    summary="Fetch Sentinel satellite image",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_sentinel_image(payload: SatelliteImageRequest = Body(...), current_user=Depends(get_current_user)):
+    return await geo_fencing_manager.get_instance().sentinel_image(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/anomaly",
+    summary="Detect anomalies in satellite imagery",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_anomaly(payload: SatelliteAnomalyRequest = Body(...), current_user=Depends(get_current_user)):
+    return await geo_fencing_manager.get_instance().anomaly(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/compare",
+    summary="Compare two satellite images",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_compare(payload: SatelliteCompareRequest = Body(...), current_user=Depends(get_current_user)):
+    return await geo_fencing_manager.get_instance().compare(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/livetrack/aircraft",
+    summary="Track aircraft in map bounds",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_livetrack_aircraft_bbox(payload: SatelliteLiveTrackerBBoxRequest = Body(...), current_user=Depends(get_current_user)):
+    return await geo_fencing_manager.get_instance().livetrack_aircraft_bbox(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/livetrack/aircraft/icao",
+    summary="Fetch aircraft by ICAO24",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_livetrack_aircraft_icao(payload: SatelliteLiveTrackerAircraftIcaoRequest = Body(...), current_user=Depends(get_current_user)):
+    return await geo_fencing_manager.get_instance().livetrack_aircraft_icao(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/livetrack/aircraft/track",
+    summary="Fetch aircraft track history",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_livetrack_aircraft_track(payload: SatelliteLiveTrackerAircraftTrackRequest = Body(...), current_user=Depends(get_current_user)):
+    return await geo_fencing_manager.get_instance().livetrack_aircraft_track(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/livetrack/ships",
+    summary="Track ships in map bounds",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_livetrack_ships_bbox(payload: SatelliteLiveTrackerBBoxRequest = Body(...), current_user=Depends(get_current_user)):
+    return await geo_fencing_manager.get_instance().livetrack_ships_bbox(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/livetrack/ships/mmsi",
+    summary="Fetch ship by MMSI",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_livetrack_ships_mmsi(payload: SatelliteLiveTrackerShipMmsiRequest = Body(...), current_user=Depends(get_current_user)):
+    return await geo_fencing_manager.get_instance().livetrack_ships_mmsi(payload, user_id=str(current_user.id))
+
+
+@api_routes.post(
+    "/api/satellite/livetrack/status",
+    summary="Live tracker health status",
+    tags=["Satellite Intelligence"],
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def satellite_livetrack_status(payload: SatelliteLiveTrackerStatusRequest = Body(...), current_user=Depends(get_current_user)):
+    return await geo_fencing_manager.get_instance().livetrack_status(payload, user_id=str(current_user.id))
 
 @api_routes.post(
     "/api/stix/convert/{kind}",

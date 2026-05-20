@@ -1,0 +1,101 @@
+<div class="flex h-full flex-col overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.58)] shadow-[0_10px_30px_rgba(2,6,23,.24)] backdrop-blur-md [body.light-theme_&]:bg-[rgba(255,255,255,0.25)]">
+  <div class="border-b border-[var(--color-border)] px-4 py-3" [ngClass]="{ '!border-b-0': collapsed }">
+    <div class="flex items-start justify-between gap-3">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">
+            {{ title }}
+          </p>
+
+          <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-[3px] text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text2)]">
+            {{ items.length }}
+          </span>
+        </div>
+
+        <p class="mt-1 text-[11px] text-[var(--color-text4)]">
+          {{ description }}
+        </p>
+      </div>
+
+      <button type="button" (click)="toggleClicked.emit()" [attr.aria-label]="collapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
+        <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 transition duration-200" [ngClass]="{ 'rotate-180': !collapsed }" />
+      </button>
+    </div>
+
+    @if (!collapsed) {
+      <div class="mt-3 flex items-center gap-2">
+        <input [ngModel]="searchTerm" (ngModelChange)="searchTermChange.emit($event)" type="text" [placeholder]="searchPlaceholder" class="h-9 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[12px] text-[var(--color-text1)] outline-none transition focus:border-[var(--color-blue-640)]" />
+      </div>
+
+      @if (searchTerm) {
+        <p class="mt-2 text-[10px] text-[var(--color-text4)]">
+          Local search active: "{{ searchTerm }}"
+        </p>
+      }
+
+      <div class="mt-3 flex flex-wrap gap-2">
+        @for (range of ranges; track range.key) {
+          <button type="button" (click)="rangeSelected.emit(range.key)" class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition" [ngClass]="selectedRange === range.key ? [ 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-790)]', 'text-[var(--color-text1)]' ] : [ 'border-[var(--color-border)]', 'bg-[var(--color-blue-780)]', 'text-[var(--color-text4)]', 'hover:text-[var(--color-text1)]', 'hover:bg-[var(--color-blue-790)]' ]">
+            {{ range.label }}
+          </button>
+        }
+      </div>
+
+      <p class="mt-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[10px] leading-4 text-[var(--color-text3)]">
+        Feed tabs filter loaded data. Use sidebar date filter to fetch new data.
+      </p>
+    }
+  </div>
+
+  @if (!collapsed) {
+    <div #feedScroller (mouseenter)="hoverChanged.emit(true)" (mouseleave)="hoverChanged.emit(false)" (wheel)="interacted.emit()" (touchstart)="interacted.emit()" class="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+      @if (items.length) {
+        <div class="space-y-2">
+          @for (item of items; track item.id) {
+            <button type="button" (click)="itemSelected.emit(item)" class="block w-full rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-3 text-left transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-780)]">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0 drop-shadow-[0_0_6px_currentColor]" [attr.color]="item.colorHex" aria-hidden="true">
+                      <circle cx="6" cy="6" r="5" [attr.fill]="item.colorHex"></circle>
+                    </svg>
+                    <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text2)]">{{ item.categoryLabel }}</span>
+                  </div>
+
+                  <p class="mt-2 line-clamp-2 text-[13px] font-semibold text-[var(--color-text1)]">
+                    {{ item.title }}
+                  </p>
+                </div>
+
+                <span class="shrink-0 text-[10px] uppercase tracking-[0.12em] text-[var(--color-text4)]">
+                  {{ item.displayDate }}
+                </span>
+              </div>
+
+              @if (item.summary) {
+                <p class="mt-2 line-clamp-3 text-[11px] leading-5 text-[var(--color-text3)]">
+                  {{ item.summary }}
+                </p>
+              }
+
+              @if (item.highlights.length) {
+                <div class="mt-3 flex flex-wrap gap-1.5">
+                  @for (highlight of item.highlights; track highlight) {
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-780)] px-2 py-1 text-[10px] text-[var(--color-text2)]">
+                      {{ highlight }}
+                    </span>
+                  }
+                </div>
+              }
+            </button>
+          }
+        </div>
+      }
+      @else {
+        <div class="flex h-full min-h-[140px] items-center justify-center rounded-[12px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-790)] px-4 text-center text-[12px] text-[var(--color-text4)]">
+          {{ emptyMessage }}
+        </div>
+      }
+    </div>
+  }
+</div>
