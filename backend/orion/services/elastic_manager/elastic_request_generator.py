@@ -1,9 +1,8 @@
-import hashlib
 import re
 from datetime import timedelta, timezone
 from datetime import datetime
+from typing import Any
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
-from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.constants.constant import CONSTANTS, allowed_keys
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
@@ -69,17 +68,12 @@ class elastic_request_generator:
 
         tag = parsed.get("tag")
         value = parsed.get("value")
-        fields = mapping.get(tag)
+        fields = mapping.get(tag, [])
 
         if tag in ("m_domain", "domain", "m_search_all", "all"):
-            def _as_list(x):
-                if not x:
-                    return []
-                return x if isinstance(x, list) else [x]
-
-            merged = _as_list(fields)
-            merged += _as_list(mapping.get("source_domain"))
-            merged += _as_list(mapping.get("m_source_domain"))
+            merged = fields.copy()
+            merged += mapping.get("source_domain", [])
+            merged += mapping.get("m_source_domain", [])
             merged += ["source_domain", "source_domain"]
             fields = list(dict.fromkeys([f for f in merged if f]))
 
@@ -89,12 +83,9 @@ class elastic_request_generator:
         if not fields:
             return {"match_none": {}}
 
-        if isinstance(fields, list):
-            if len(fields) == 1:
-                return {"term": {fields[0]: value}}
-            return {"bool": {"should": [{"term": {f: value}} for f in fields], "minimum_should_match": 1}}
-
-        return {"term": {fields: value}}
+        if len(fields) == 1:
+            return {"term": {fields[0]: value}}
+        return {"bool": {"should": [{"term": {f: value}} for f in fields], "minimum_should_match": 1}}
 
     @staticmethod
     def build_ioc_filter_clauses(pfilter):
@@ -313,7 +304,7 @@ class elastic_request_generator:
                 "weight": weight
             } for field, weight in date_boost_fields]
 
-        query_statement = {
+        query_statement: dict[str, Any] = {
             "min_score": 0,
             "query": {
                 "function_score": {
@@ -515,7 +506,7 @@ class elastic_request_generator:
         }
 
     def on_search_consolidated_ranked_data(self, p_query_model: search_consolidated_param_model, pfilter, base_index, blocked_categories, allowed_categories,search_type=""):
-        if p_query_model.matchtype:
+        if p_query_model.matchtype and p_query_model.q:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 
         channel_q = p_query_model.q if p_query_model.q and p_query_model.q != "*" else None
@@ -526,6 +517,7 @@ class elastic_request_generator:
 
         m_date_range = p_query_model.daterange
         m_network = p_query_model.network
+        m_platform = p_query_model.platform
         m_page_number = getattr(p_query_model, "page", 1)
         m_content_type = p_query_model.content
         m_safe_search = p_query_model.safe
@@ -713,130 +705,6 @@ class elastic_request_generator:
             ],
         )
 
-    # @staticmethod
-    # def on_search_stealerlogs_data(p_query_model: search_credential_param_model, pFilter, consolidated=False, alert=False):
-
-    #     extra_user_terms = []
-    #     extra_domains = []
-    #     if pFilter:
-    #         if pFilter.get('m_username'):
-    #             extra_user_terms.extend(
-    #                 [str(v).strip().lower() for v in pFilter['m_username'] if v and str(v).strip()])
-
-    #         for key in ('m_url', 'm_domain', 'm_search_all'):
-    #             vals = pFilter.get(key)
-    #             if vals:
-    #                 for v in vals:
-    #                     s = str(v).strip()
-    #                     if not s:
-    #                         continue
-    #                     extra_domains.append(s.lower())
-
-    #     if alert:
-    #         if extra_domains.__len__() > 0:
-    #             p_query_model.url = extra_domains[0]
-    #         elif extra_user_terms.__len__() > 0:
-    #             p_query_model.user = extra_user_terms[0]
-    #         p_query_model.entity_filter = {}
-    #         if not p_query_model.user and not p_query_model.url:
-    #             return None, None
-
-
-    #     url = helper_controller.extract_domains_from_text(p_query_model.q)
-    #     if len(url) > 0:
-    #         p_query_model.url = url[0]
-
-    #     user = helper_controller.extract_first_email(p_query_model.q)
-    #     if not user:
-    #         user = p_query_model.q
-
-    #     if not p_query_model.user and user:
-    #         p_query_model.user = user
-
-    #     if not p_query_model.url and not p_query_model.user and consolidated:
-    #         return None, None
-
-    #     user_query = p_query_model.user.strip() if p_query_model.user and p_query_model.user != "*" else ""
-
-    #     raw_url = p_query_model.url.strip() if p_query_model.url else ""
-    #     url_query = ""
-    #     if raw_url:
-    #         u = re.sub(r'^(?:[a-zA-Z0-9+.-]+://)?(?:www\.)?', '', raw_url)
-    #         url_query = re.split(r'[/:?#]', u)[0].lower()
-
-    #     category = (p_query_model.category or "").strip()
-    #     if category and category.lower().startswith("log"):
-    #         must_should = [{"term": {"type.keyword": "logs"}}]
-    #     else:
-    #         must_should = []
-
-    #     if not (user_query or url_query or extra_user_terms or extra_domains):
-    #         page = getattr(p_query_model, "page", 1) or 1
-    #         size = getattr(p_query_model, "size", 500) or 500
-    #         frm = (page - 1) * size
-    #         if frm < 0:
-    #             frm = 0
-
-    #         query = {"query": {"bool": {"must": must_should if must_should else [
-    #             {"match_all": {}}]}}, "from": frm, "size": size, "track_total_hits": False, "track_scores": False, "sort": [
-    #             {"_shard_doc": "asc"}], "_source": ["url", "username", "domain", "email", "password", "ip", "channel",
-    #             "type", "raw", "file"]}
-
-    #         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
-
-    #     date_range_filter = {}
-
-    #     should_clauses = []
-
-    #     if user_query:
-    #         terms = re.findall(r'"([^"]+)"|(\S+)', user_query.lower())
-    #         for quoted, unquoted in terms:
-    #             term = (quoted or unquoted).lower()
-    #             if '@' in term:
-    #                 must_should.append(
-    #                     {"bool": {"should": [{"term": {"email.keyword": term}}], "minimum_should_match": 1}})
-    #             else:
-    #                 must_should.append(
-    #                     {"bool": {"should": [
-    #                         {"wildcard": {"username.keyword": {"value": term.lower(), "case_insensitive": True}}}], "minimum_should_match": 1}})
-
-    #     for t in extra_user_terms:
-    #         t = t.lower()
-    #         must_should.append(
-    #             {"bool": {"should": [{"term": {"email.keyword": t}},
-    #                 {"wildcard": {"username.keyword": {"value": t.lower(), "case_insensitive": True}}},
-    #                 {"term": {"domain.keyword": t}}], "minimum_should_match": 1}})
-    #     if url_query:
-    #         should_clauses.append({"term": {"domain.keyword": url_query}})
-    #     for d in extra_domains:
-    #         should_clauses.append({"term": {"domain.keyword": d}})
-
-    #     bool_query = {}
-    #     if must_should:
-    #         bool_query["must"] = must_should
-    #     if should_clauses:
-    #         bool_query.setdefault("filter", []).append(
-    #             {"bool": {"should": should_clauses, "minimum_should_match": 1}})
-    #     if date_range_filter:
-    #         bool_query.setdefault("filter", []).append(date_range_filter)
-
-    #     page = getattr(p_query_model, "page", 1) or 1
-    #     size = getattr(p_query_model, "size", 500) or 500
-    #     frm = (page - 1) * size
-    #     if frm < 0:
-    #         frm = 0
-
-    #     if not bool_query:
-    #         return None, None
-
-    #     query = {"query": {"bool": bool_query}, "from": frm, "size": size, "sort": [
-    #         {"_shard_doc": "asc"}], "track_total_hits": False, "track_scores": False, "_source": ["url", "username",
-    #         "domain", "email", "password", "ip", "channel", "type", "raw", "_id", "file"]}
-
-    #     return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
-
-    # from datetime import datetime
-
     @staticmethod
     def on_search_stealer_iocs(p_query_model):
         is_match_all = not p_query_model.ioc
@@ -893,327 +761,11 @@ class elastic_request_generator:
         return {"query": {"range": {"m_update_date": {"lt": threshold_time.isoformat()}}}}
 
     @staticmethod
-    def index_query_general(p_index_data):
-        index_entries = []
-        utc_now = datetime.now(timezone.utc)
-        current_timestamp = utc_now.isoformat()
-
-        if isinstance(p_index_data, list):
-            pass
-        else:
-            if not p_index_data["m_important_content"] or not p_index_data["m_title"]:
-                return index_entries
-
-            p_index_data["m_update_date"] = current_timestamp
-            p_index_data["m_hash_content"] = hashlib.sha256(
-                (p_index_data["m_important_content"] + p_index_data["m_title"]).encode()).hexdigest()
-            p_index_data["m_hash_url"] = hashlib.sha256(
-                (p_index_data["m_url"] + p_index_data["m_title"]).encode()).hexdigest()
-            data_hash = helper_controller.generate_data_hash(p_index_data["m_url"])
-            p_index_data["m_hash"] = data_hash
-
-            index_entries.append(
-                {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_VALUE: p_index_data, })
-
-        return index_entries
-
-    @staticmethod
-    def index_query_chat(p_index_data):
-        index_entries = []
-        for chat in p_index_data.get("m_chat_data", []):
-            if not chat.get("m_message_id"):
-                continue
-
-            chat["m_hash"] = helper_controller.generate_data_hash(chat.get("m_message_id"))
-            index_entries.append({ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_KEYS.S_VALUE: chat})
-
-        return index_entries
-
-    @staticmethod
-    def index_query_social(p_index_data):
-        index_entries = []
-        for post in p_index_data.get("cards_data", []):
-            m_hash = ""
-            if post.get("m_message_id"):
-                m_hash = post.get("m_message_id")
-            if not m_hash:
-                m_hash = post.get("m_title") + "_" + post.get("m_channel_url")
-            if not m_hash:
-                continue
-
-            post["m_hash"] = helper_controller.generate_data_hash(m_hash)
-            index_entries.append({ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_SOCIAL_INDEX, ELASTIC_KEYS.S_VALUE: post})
-        return index_entries
-
-    @staticmethod
-    def index_query_siem_logs(logs, tenant_id: str):
-        index_entries = []
-
-        for index, item in enumerate(logs, start=1):
-            now = datetime.now(timezone.utc).isoformat()
-            raw = item["raw"].strip()
-            timestamp = item.get("timestamp") or now
-            ingested_at = item.get("ingested_at") or now
-            doc_id = hashlib.sha256(f"{tenant_id}:{raw}".encode("utf-8")).hexdigest()
-
-            document = dict(item)
-            document["tenant_id"] = tenant_id
-            document["raw"] = raw
-            document["timestamp"] = timestamp
-            document["ingested_at"] = ingested_at
-            document["hash"] = document.get("hash") or doc_id
-            document["event_id"] = document.get("event_id") or f"siem-event-{index:04d}"
-
-            index_entries.append({
-                "doc_id": doc_id,
-                ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_SIEM_INDEX,
-                ELASTIC_KEYS.S_VALUE: document,
-            })
-
-        return index_entries
-
-    @staticmethod
-    def search_query_siem_logs(query_text: str, tenant_id: str, from_: int = 0, size: int = 500, date_range: str | None = None):
-        must_clauses = [{"term": {"tenant_id": tenant_id}}]
-        normalized_query = (query_text or "").strip()
-
-        if not normalized_query:
-            must_clauses.append({"match_all": {}})
-        elif ":" in normalized_query and ("&&" in normalized_query or "||" in normalized_query or re.search(r"\b(?:all|domain|email|ip|event_type|source|host|user|severity):", normalized_query)) is not None:
-            parsed = helper_controller.parse_tagged_logic_query_for_iocs(normalized_query)
-            logic_query = elastic_request_generator.build_es_from_tagged(parsed, ELASTIC_ENUMS.mapping_siem_iocs)
-            must_clauses.append(logic_query)
-        else:
-            should_clauses = [{
-                "simple_query_string": {
-                    "query": normalized_query,
-                    "fields": [
-                        "raw^5",
-                        "event_type^4",
-                        "source^3",
-                        "severity^2",
-                        "host^3",
-                        "user^3",
-                        "tags^2",
-                        "hash^3",
-                        "event_id^3",
-                        "m_*^4",
-                        "m_domain^4",
-                        "m_email^4",
-                        "m_ip^4",
-                        "*"
-                    ],
-                    "default_operator": "and",
-                    "lenient": True
-                }
-            }]
-
-            exact_value = normalized_query
-            if exact_value:
-                escaped_exact_value = exact_value.replace("\\", "\\\\").replace('"', '\\"')
-                should_clauses.extend([
-                    {"term": {"m_ip": exact_value}},
-                    {"term": {"m_domain": exact_value}},
-                    {"term": {"m_email": exact_value}},
-                    {
-                        "query_string": {
-                            "query": f"\"{escaped_exact_value}\"",
-                            "fields": ["m_*"],
-                            "lenient": True
-                        }
-                    }
-                ])
-
-            must_clauses.append({
-                "bool": {
-                    "should": should_clauses,
-                    "minimum_should_match": 1
-                }
-            })
-
-        if date_range:
-            start_date, end_date = [part.strip() for part in date_range.split(",", 1)]
-            must_clauses.append({
-                "range": {
-                    "timestamp": {
-                        "gte": start_date,
-                        "lte": end_date
-                    }
-                }
-            })
-
-        query_body = {
-            "query": {
-                "bool": {
-                    "must": must_clauses
-                }
-            },
-            "from": from_,
-            "size": size,
-            "sort": [
-                {"timestamp": {"order": "desc", "missing": "_last"}},
-                {"ingested_at": {"order": "desc", "missing": "_last"}}
-            ]
-        }
-        return ELASTIC_INDEX.S_SIEM_INDEX, query_body
-
-    @staticmethod
-    def index_query_sanctions(p_index_data):
-        index_entries = []
-
-        if isinstance(p_index_data, list):
-            for item in p_index_data:
-                if not isinstance(item, dict):
-                    continue
-
-                data = {k: v for k, v in item.items() if v is not None}
-                schema_value = data.pop("schema_name", None)
-                if schema_value:
-                    data["schema"] = schema_value
-
-                identifier = data.get("id")
-                if not identifier:
-                    continue
-
-                data["m_hash"] = helper_controller.generate_data_hash(str(identifier))
-                index_entries.append({ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_OPENSANCTIONS_INDEX, ELASTIC_KEYS.S_VALUE: data})
-
-            return index_entries
-
-        if not isinstance(p_index_data, dict):
-            return index_entries
-
-        data = {k: v for k, v in p_index_data.items() if v is not None}
-        schema_value = data.pop("schema_name", None)
-        if schema_value:
-            data["schema"] = schema_value
-
-        identifier = data.get("id")
-        if not identifier:
-            return index_entries
-
-        data["m_hash"] = helper_controller.generate_data_hash(str(identifier))
-        index_entries.append({ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_OPENSANCTIONS_INDEX, ELASTIC_KEYS.S_VALUE: data})
-        return index_entries
-
-    @staticmethod
-    def index_query_stealerlog(p_index_data):
-        bulk_entries = []
-        # bf = bloom_controller(dirpath="bloom_data", capacity=1_000_000_000, error_rate=0.01)
-
-        for log in p_index_data["logs"]:
-
-            m_hash = log["m_hash"]
-            _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
-
-            # if bf.isduplicate(m_hash):
-            #     continue
-            #
-            doc = {}
-            for k in log:
-                if log[k] is not None:
-                    doc[k] = log[k]
-
-            bulk_entries.append({"create": {"_index": ELASTIC_INDEX.S_STEALERLOGS_INDEX, "_id": _id}})
-            bulk_entries.append(doc)
-
-        return bulk_entries
-
-    @staticmethod
-    def index_query_defacement(p_index_data):
-        index_entries = []
-        utc_now = datetime.now(timezone.utc)
-        current_timestamp = utc_now.isoformat()
-
-        for record in p_index_data.get("cards_data", []):
-            if not record["m_url"]:
-                continue
-
-            data_hash = helper_controller.generate_data_hash(record["m_url"])
-            record["m_hash"] = data_hash
-            record["m_update_date"] = current_timestamp
-            index_entries.append(
-                {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_KEYS.S_VALUE: record, })
-        return index_entries
-
-    @staticmethod
-    def index_query_leak(p_index_data):
-        contact_link = p_index_data.get("contact_link", "")
-        index_entries = []
-        current_timestamp = datetime.now(timezone.utc).isoformat()
-
-        for card in p_index_data.get("cards_data", []):
-            if not card["m_url"] or not card["m_title"]:
-                continue
-
-            card["m_hash"] = helper_controller.generate_data_hash(card["m_base_url"] + "_" + card["m_title"])
-            card["m_update_date"] = current_timestamp
-            card["m_contact_link"] = contact_link
-
-            cleaned_card = {k: v for k, v in card.items() if v is not None}
-
-            index_entries.append(
-                {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_VALUE: cleaned_card, })
-
-        return index_entries
-
-    @staticmethod
-    def index_query_exploit(p_index_data):
-        contact_link = p_index_data.get("contact_link", "")
-        index_entries = []
-        current_timestamp = datetime.now(timezone.utc).isoformat()
-
-        for card in p_index_data.get("cards_data", []):
-            if not card["m_url"] or not card["m_title"]:
-                continue
-
-            card["m_hash"] = helper_controller.generate_data_hash(card["m_url"] + "_" + card["m_title"])
-            card["m_update_date"] = current_timestamp
-            card["m_contact_link"] = contact_link
-
-            cleaned_card = {k: v for k, v in card.items() if v is not None}
-
-            index_entries.append(
-                {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_EXPLOIT_INDEX, ELASTIC_KEYS.S_VALUE: cleaned_card, })
-
-        return index_entries
-
-    @staticmethod
     def generate_graph_queries():
         queries = [
             {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "query": {"term": {"m_content_type": "leaks"}}, "aggs": {"Top Teams (Leak)": {"terms": {"field": "m_team", "size": 4}}}}},
             {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Top Teams (Defacement)": {"terms": {"field": "m_team", "size": 4}}}}},
             {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Top Locations (Defacement)": {"terms": {"field": "m_location", "size": 4}}}}},
             {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Top Hashtags (Social)": {"terms": {"field": "m_hashtags", "size": 4}}}}}]
-
-        return queries
-
-    @staticmethod
-    def generate_insight_queries():
-        queries = [
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Document Count": {"value_count": {"field": "m_hash"}}}}},
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Most Recent": {"max": {"field": "m_update_date"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Oldest Update": {"min": {"field": "m_update_date"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "query": {"range": {"m_update_date": {"gte": "now-5d/d"}}}, "aggs": {"Updated 5 Days ago": {"value_count": {"field": "m_hash"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "query": {"range": {"m_update_date": {"gte": "now-10d/d"}}}, "aggs": {"Updated 9 Days ago": {"value_count": {"field": "m_hash"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Average Score": {"avg": {"field": "m_validity_score"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"URL/Document": {"value_count": {"field": "m_sub_url"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Archive/Document": {"value_count": {"field": "m_archive_url"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Email/Document": {"value_count": {"field": "m_email"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Phone/Document": {"value_count": {"field": "m_phone_number"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Clearnet/Document": {"value_count": {"field": "m_clearnet_links"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Common Type": {"terms": {"field": "m_content_type", "size": 1}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Document Count": {"value_count": {"field": "m_hash"}}}}},
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Unique Base URLs": {"value_count": {"field": "m_base_url"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"URL/Documents": {"value_count": {"field": "m_weblink"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Dumps/Document": {"value_count": {"field": "m_dumplink"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "query": {"range": {"m_update_date": {"gte": "now-5d/d"}}}, "aggs": {"Updated 5 Days ago": {"value_count": {"field": "m_hash"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "query": {"range": {"m_update_date": {"gte": "now-10d/d"}}}, "aggs": {"Updated 9 Days ago": {"value_count": {"field": "m_hash"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Most Recent": {"max": {"field": "m_update_date"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Oldest Update": {"min": {"field": "m_update_date"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Document Count": {"value_count": {"field": "m_hash"}}}}},
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "query": {"range": {"m_leak_date": {"gte": "now-5d/d"}}}, "aggs": {"Updated 5 Days ago": {"value_count": {"field": "m_hash"}}}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Top Team": {"terms": {"field": "m_team", "size": 1}}}}},
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Common Server": {"terms": {"field": "m_web_server", "size": 1}}}}}]
 
         return queries

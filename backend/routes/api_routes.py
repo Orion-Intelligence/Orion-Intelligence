@@ -226,7 +226,7 @@ async def search_defacement(param: search_consolidated_param_model = Body(...), 
 )
 async def stream_power_plants(param: search_power_plants_param_model = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
-    stream = await search_model.getInstance().stream_power_plants_points(chunk_size=param.size)
+    stream = await geo_fencing_manager.get_instance().stream_power_plants_points(chunk_size=param.size)
     return StreamingResponse(
         stream,
         media_type="application/x-ndjson",
@@ -503,7 +503,7 @@ async def get_exploit_document(doc_id: str, lang: Optional[str] = Query(
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:general", bypass_licenses=["maintainer"]))],)
 async def get_power_plants_by_ids(param: list[str] = Body(...),):
-    return await search_model.getInstance().request_power_plants_by_ids(param)
+    return await geo_fencing_manager.get_instance().request_power_plants_by_ids(param)
 
 
 @api_routes.get(

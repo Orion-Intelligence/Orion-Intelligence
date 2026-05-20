@@ -19,9 +19,9 @@ from starlette.responses import JSONResponse
 from orion.api.server.crawl_manager.class_model import *
 from orion.helper_manager.helper_controller import helper_controller
 from orion.helper_manager.env_handler import env_handler
+from orion.api.server.crawl_manager.crawl_index_generator import crawl_index_generator
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
-from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
 from orion.services.mongo_manager.shared_model.db_feeder_script_model import db_feeder_script_model
@@ -252,7 +252,7 @@ class crawl_model:
 
     @staticmethod
     async def invoke_stealerlog_index(credential_index: LogBatchModel):
-        m_data = elastic_request_generator().index_query_stealerlog(credential_index.model_dump())
+        m_data = crawl_index_generator.index_query_stealerlog(credential_index.model_dump())
 
         if not m_data:
             return {"parsed": "empty unqiue"}
@@ -263,7 +263,7 @@ class crawl_model:
     async def invoke_social_index(self, social_index: social_data_model):
 
         m_bybass_embedding = social_index.cards_data[0].m_platform == "pastebin"
-        m_data = elastic_request_generator().index_query_social(social_index.model_dump())
+        m_data = crawl_index_generator.index_query_social(social_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data, m_bybass_embedding)
 
         return await self._update_or_create_model(
@@ -282,7 +282,7 @@ class crawl_model:
         else:
             payload = sanctions_index
 
-        m_data = elastic_request_generator().index_query_sanctions(payload)
+        m_data = crawl_index_generator.index_query_sanctions(payload)
         if not m_data:
             return {"message": "no valid sanctions records to index"}
 
@@ -290,7 +290,7 @@ class crawl_model:
         return {"message": "sanctions indexed successfully", "indexed": len(m_data)}
 
     async def invoke_chat_index(self, chat_index: chat_data_model):
-        m_data = elastic_request_generator().index_query_chat(chat_index.model_dump())
+        m_data = crawl_index_generator.index_query_chat(chat_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
 
         return await self._update_or_create_model(
@@ -302,7 +302,7 @@ class crawl_model:
             is_leak_update=False)
 
     async def invoke_generic_index(self, general_index: GeneralDataModel):
-        m_data = elastic_request_generator().index_query_general(general_index.model_dump())
+        m_data = crawl_index_generator.index_query_general(general_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(
             base_url=general_index.m_base_url,
@@ -312,7 +312,7 @@ class crawl_model:
             is_leak_update=False)
 
     async def invoke_exploit_index(self, exploit_index: ExploitDataModel):
-        m_data = elastic_request_generator().index_query_exploit(exploit_index.model_dump())
+        m_data = crawl_index_generator.index_query_exploit(exploit_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(
             base_url=exploit_index.base_url,
@@ -322,7 +322,7 @@ class crawl_model:
             is_leak_update=True)
 
     async def init_stealerlogs(self, leak_index: LeakDataModel):
-        m_data = elastic_request_generator().index_query_stealerlog(leak_index.model_dump())
+        m_data = crawl_index_generator.index_query_stealerlog(leak_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(
             base_url=leak_index.base_url,
@@ -332,7 +332,7 @@ class crawl_model:
             is_leak_update=True)
 
     async def invoke_leak_index(self, leak_index: LeakDataModel):
-        m_data = elastic_request_generator().index_query_leak(leak_index.model_dump())
+        m_data = crawl_index_generator.index_query_leak(leak_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(
             base_url=leak_index.base_url,
@@ -342,7 +342,7 @@ class crawl_model:
             is_leak_update=True)
 
     async def invoke_news_index(self, leak_index: LeakDataModel):
-        m_data = elastic_request_generator().index_query_leak(leak_index.model_dump())
+        m_data = crawl_index_generator.index_query_leak(leak_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(
             base_url=leak_index.base_url,
@@ -352,7 +352,7 @@ class crawl_model:
             is_leak_update=True)
 
     async def invoke_tracking_index(self, leak_index: LeakDataModel):
-        m_data = elastic_request_generator().index_query_leak(leak_index.model_dump())
+        m_data = crawl_index_generator.index_query_leak(leak_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(
             base_url=leak_index.base_url,
@@ -362,7 +362,7 @@ class crawl_model:
             is_leak_update=True)
 
     async def invoke_defacement_index(self, defacement_index: DefacementDataModel):
-        m_data = elastic_request_generator().index_query_defacement(defacement_index.model_dump())
+        m_data = crawl_index_generator.index_query_defacement(defacement_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data, True)
         return await self._update_or_create_model(
             base_url=defacement_index.base_url,

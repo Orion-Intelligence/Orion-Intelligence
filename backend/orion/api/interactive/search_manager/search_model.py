@@ -1,6 +1,4 @@
-import asyncio
 from typing import List, Optional
-import json
 import httpx
 from fastapi import HTTPException
 from starlette import status
@@ -10,7 +8,6 @@ from orion.api.interactive.search_manager.search_data_model.consolidated.search_
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_stealerlog_callback_model import search_stealerlog_callback_model
-from orion.api.interactive.search_manager.search_data_model.power_plants.search_power_plants_param_model import search_power_plants_param_model
 from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
@@ -151,144 +148,6 @@ class search_model:
 
     async def request_general_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
         return await self._request_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id, lang, ["m_content", "m_important_content"])
-
-    async def request_power_plants_by_ids(self, doc_ids: list[str]):
-        if not doc_ids:
-            return {"Result": [], "Count": 0}
-        body = {
-            "ids": doc_ids
-        }
-
-        res = await elastic_controller.get_instance().mget_docs(
-            ELASTIC_INDEX.S_WRI_POWER_PLANTS_INDEX,
-            body
-        )
-
-        if not res:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to fetch documents"
-            )
-
-        docs = res.get("docs", [])
-
-        results = []
-        for d in docs:
-            if not d.get("found"):
-                continue
-
-            src = d.get("_source", {}) or {}
-
-            results.append({
-                "id": d.get("_id"),
-                "name": src.get("name"),
-                "country": src.get("country"),
-                "type": src.get("type"),
-                "capacity": src.get("capacity_mw"),
-                "source": src.get("source"),
-                "location": src.get("location"),
-                "location_point": src.get("location_point"),
-            })
-
-        return {
-            "Result": results,
-            "Count": len(results)
-        }
-
-    async def stream_power_plants_points(self, chunk_size: int = 1000):
-        chunk_size = max(100, min(chunk_size, 5000))
-
-        async def generator():
-
-            search_after = None
-
-            while True:
-
-                query = {
-                    "size": chunk_size,
-                    "_source": [
-                        "name",
-                        "type",
-                        "country",
-                        "capacity_mw",
-                        "source",
-                        "aeroway",
-                        "building",
-                        "landuse",
-                        "man_made",
-                        "military",
-                        "power",
-                        "location.lat",
-                        "location.lon",
-                        "location_point.lat",
-                        "location_point.lon",
-                        "location",
-                        "location_point"
-                    ],
-                    "sort": ["_shard_doc"],
-                    "track_total_hits": False,
-                    "query": {
-                        "match_all": {}
-                    }
-                }
-
-                if search_after:
-                    query["search_after"] = search_after
-
-                m_status, docs = await elastic_controller.get_instance().search_query(
-                    ELASTIC_INDEX.S_WRI_POWER_PLANTS_INDEX,
-                    query
-                )
-
-                if not m_status:
-                    break
-
-                body = docs.body if hasattr(docs, "body") else docs
-
-                hits = body.get("hits", {}).get("hits", [])
-
-                if not hits:
-                    break
-
-                result = []
-
-                for hit in hits:
-                    src = hit.get("_source", {}) or {}
-                    loc = src.get("location", {}) or {}
-                    loc_point = src.get("location_point", {}) or {}
-
-                    lat = loc.get("lat") if isinstance(loc, dict) else None
-                    lon = loc.get("lon") if isinstance(loc, dict) else None
-                    if lat is None or lon is None:
-                        lat = loc_point.get("lat") if isinstance(loc_point, dict) else lat
-                        lon = loc_point.get("lon") if isinstance(loc_point, dict) else lon
-                    result.append({
-                        "id": hit.get("_id"),
-                        "name": src.get("name"),
-                        "type": src.get("type"),
-                        "country": src.get("country"),
-                        "capacity_mw": src.get("capacity_mw"),
-                        "source": src.get("source"),
-                        "aeroway": src.get("aeroway"),
-                        "building": src.get("building"),
-                        "landuse": src.get("landuse"),
-                        "man_made": src.get("man_made"),
-                        "military": src.get("military"),
-                        "power": src.get("power"),
-                        "location": src.get("location"),
-                        "location_point": src.get("location_point"),
-                        "lat": lat,
-                        "lon": lon,
-                    })
-                yield (json.dumps(result) + "\n")
-                await asyncio.sleep(0.01)
-                last_sort = hits[-1].get("sort")
-                if not last_sort:
-                    break
-                search_after = last_sort
-
-        return generator()
-    
 
     @staticmethod
     def _build_ranked_response(response, query, default_size: int, approximate_page_count: bool = False):
