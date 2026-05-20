@@ -12,11 +12,11 @@ import { MonthCompareSectionComponent } from './components/month-compare-section
 import { AnomalySectionComponent } from './components/anomaly-section/anomaly-section.component';
 import { SentinelSearchSectionComponent } from './components/sentinel-search-section/sentinel-search-section.component';
 import { SentinelImageSectionComponent } from './components/sentinel-image-section/sentinel-image-section.component';
-import { PowerPlantPopupComponent } from './components/power-plant-popup/power-plant-popup.component';
+import { MapEntityPopupComponent } from './components/map-entity-popup/map-entity-popup.component';
 import { SatelliteFacilitiesResponse, SatelliteAnomalyResponse, SatelliteCompareResponse, SatelliteSentinelImageResult, SatelliteSentinelSearchResponse, SatelliteGeocodeResult, SatelliteLiveAircraft, SatelliteLiveShip, } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
 import { ThreatLensComponent } from ".././threat-lens/threat-lens";
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { ORION_INFRASTRUCTURE_FILTERS, ORION_POWER_FILTERS, OrionSatelliteFeature, OrionSatelliteFeatureType, PowerPlantByIdItem } from './model/satellite-intel.model';
+import { ORION_INFRASTRUCTURE_FILTERS, ORION_POWER_FILTERS, OrionSatelliteFeature, OrionSatelliteFeatureType, MapEntityByIdItem } from './model/satellite-intel.model';
 
 type SatelliteIntelPanel = 'dashboard' | 'compare' | 'anomaly' | 'sentinel' | 'image';
 
@@ -36,7 +36,7 @@ type SatelliteIntelPanel = 'dashboard' | 'compare' | 'anomaly' | 'sentinel' | 'i
     AnomalySectionComponent,
     SentinelSearchSectionComponent,
     SentinelImageSectionComponent,
-    PowerPlantPopupComponent,
+    MapEntityPopupComponent,
     ThreatLensComponent
   ],
   animations: [fadeInDashboardItem],
@@ -54,15 +54,15 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private wriSub?: Subscription;
   private facilitiesSub?: Subscription;
   private dashboardSearchSub?: Subscription;
-  private powerPlantsSub?: Subscription;
-  private powerPlantDetailsSub?: Subscription;
+  private mapEntitiesSub?: Subscription;
+  private mapEntityDetailsSub?: Subscription;
   private readonly dashboardSearch$ = new Subject<string>();
-  private powerPlantChunkQueue: OrionSatelliteFeature[][] = [];
-  private powerPlantFlushTimer: ReturnType<typeof setTimeout> | null = null;
-  private isPowerPlantFlushing = false;
+  private mapEntityChunkQueue: OrionSatelliteFeature[][] = [];
+  private mapEntityFlushTimer: ReturnType<typeof setTimeout> | null = null;
+  private isMapEntityFlushing = false;
   private streamFinished = false;
-  private readonly powerPlantFlushIntervalMs = 80;
-  private readonly powerPlantBatchSize = 1000;
+  private readonly mapEntityFlushIntervalMs = 80;
+  private readonly mapEntityBatchSize = 1000;
   private typeFiltersInitialized = false;
   private typeFiltersTouched = false;
   private dashboardTypeFilterCache: Array<{ key: OrionSatelliteFeatureType; label: string; color: string; count: number }> = ORION_POWER_FILTERS.map((option) => ({
@@ -98,14 +98,14 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   dashboardSearchResults: OrionSatelliteFeature[] = [];
   wriData: OrionSatelliteFeature[] = [];
   facilitiesMapData: OrionSatelliteFeature[] = [];
-  powerPlantPage = 1;
-  powerPlantPageSize = 1000;
-  powerPlantPageCount = 1;
-  powerPlantTotalHits = 0;
-  isPowerPlantLoading = false;
-  isPowerPlantLoadingMore = false;
-  powerPlantPopupOpen = false;
-  powerPlantPopupData: PowerPlantByIdItem[] = [];
+  mapEntityPage = 1;
+  mapEntityPageSize = 1000;
+  mapEntityPageCount = 1;
+  mapEntityTotalHits = 0;
+  isMapEntityLoading = false;
+  isMapEntityLoadingMore = false;
+  mapEntityPopupOpen = false;
+  mapEntityPopupData: MapEntityByIdItem[] = [];
   mergedData: OrionSatelliteFeature[] = [];
   filteredData: OrionSatelliteFeature[] = [];
   selectedFilters: OrionSatelliteFeatureType[] = [];
@@ -136,7 +136,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     !!this.pendingRequest && !this.satelliteService.onError(),);
   isAircraftLoading: boolean = false;
   isShipsLoading: boolean = false;
-  isPowerPlantDetailsLoading = false;
+  isMapEntityDetailsLoading = false;
 
   @Input() toolbarMode: 'hidden' | 'geo' = 'hidden';
 
@@ -182,8 +182,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.satelliteService.resetState();
-    // this.loadPowerPlantsPage(1, false);
-    this.loadPowerPlants();
+    // this.loadMapEntitiesPage(1, false);
+    this.loadMapEntities();
     this.dashboardSearchSub = this.dashboardSearch$.pipe(debounceTime(300), distinctUntilChanged()).subscribe((query) => {
       this.updateDashboardSearchResults(query);
     });
@@ -209,12 +209,12 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     clearInterval(this.aircraftTimer);
     clearInterval(this.shipsTimer);
     this.wriSub?.unsubscribe();
-    this.powerPlantsSub?.unsubscribe();
-    this.powerPlantDetailsSub?.unsubscribe();
+    this.mapEntitiesSub?.unsubscribe();
+    this.mapEntityDetailsSub?.unsubscribe();
     this.facilitiesSub?.unsubscribe();
     this.dashboardSearchSub?.unsubscribe();
     this.satelliteService.cancelCurrentScan();
-    this.resetPowerPlantStreamState();
+    this.resetMapEntityStreamState();
   }
 
   get isMapView(): boolean {
@@ -660,41 +660,41 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.focusedFeature = feature;
   }
 
-  onPowerPlantFeatureIdsSelected(ids: string[]): void {
-    if (this.isPowerPlantDetailsLoading) {
+  onMapEntityFeatureIdsSelected(ids: string[]): void {
+    if (this.isMapEntityDetailsLoading) {
       return;
     }
     const normalizedIds = Array.from(new Set((ids || []).filter((id) => typeof id === 'string' && !!id.trim())));
     if (!normalizedIds.length) {
       return;
     }
-    this.isPowerPlantDetailsLoading = true;
-    this.powerPlantDetailsSub?.unsubscribe();
-    this.powerPlantDetailsSub = this.satelliteService.getPowerPlantsByIds(normalizedIds).subscribe({
+    this.isMapEntityDetailsLoading = true;
+    this.mapEntityDetailsSub?.unsubscribe();
+    this.mapEntityDetailsSub = this.satelliteService.getMapEntitiesByIds(normalizedIds).subscribe({
       next: (response) => {
-        this.powerPlantPopupData = Array.isArray(response?.Result) ? response.Result : [];
-        this.powerPlantPopupOpen = this.powerPlantPopupData.length > 0;
+        this.mapEntityPopupData = Array.isArray(response?.Result) ? response.Result : [];
+        this.mapEntityPopupOpen = this.mapEntityPopupData.length > 0;
       },
       error: () => {
-        this.powerPlantPopupData = [];
-        this.powerPlantPopupOpen = false;
+        this.mapEntityPopupData = [];
+        this.mapEntityPopupOpen = false;
       },
     });
-    this.powerPlantDetailsSub.add(() => {
-      this.isPowerPlantDetailsLoading = false;
+    this.mapEntityDetailsSub.add(() => {
+      this.isMapEntityDetailsLoading = false;
     });
   }
 
-  closePowerPlantPopup(): void {
-    this.powerPlantPopupOpen = false;
-    this.powerPlantPopupData = [];
+  closeMapEntityPopup(): void {
+    this.mapEntityPopupOpen = false;
+    this.mapEntityPopupData = [];
   }
 
-  hasMorePowerPlants(): boolean {
+  hasMoreMapEntities(): boolean {
     return false;
   }
 
-  loadMorePowerPlants(): void {
+  loadMoreMapEntities(): void {
     // No pagination for the streamed WRI dataset
   }
 
@@ -1015,10 +1015,10 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.visibleInfrastructureCountCache = infrastructureCount;
   }
 
-  async loadPowerPlants(): Promise<void> {
+  async loadMapEntities(): Promise<void> {
 
-    this.resetPowerPlantStreamState();
-    this.isPowerPlantLoading = true;
+    this.resetMapEntityStreamState();
+    this.isMapEntityLoading = true;
     this.typeFiltersInitialized = false;
     this.typeFiltersTouched = false;
     this.selectedFilters = [];
@@ -1027,48 +1027,48 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
     this.refreshMergedData();
 
-    await this.satelliteService.streamPowerPlants(100,
+    await this.satelliteService.streamMapEntities(100,
 
       // onChunk
       (chunk) => {
-        this.powerPlantChunkQueue.push(chunk);
-        this.schedulePowerPlantFlush();
+        this.mapEntityChunkQueue.push(chunk);
+        this.scheduleMapEntityFlush();
       },
 
       // onComplete
       () => {
         this.streamFinished = true;
-        this.schedulePowerPlantFlush();
+        this.scheduleMapEntityFlush();
       },
 
       // onError
       () => {
 
-        this.isPowerPlantLoading = false;
-        this.resetPowerPlantStreamState();
+        this.isMapEntityLoading = false;
+        this.resetMapEntityStreamState();
       });
   }
 
-  private schedulePowerPlantFlush(): void {
-    if (this.powerPlantFlushTimer) {
+  private scheduleMapEntityFlush(): void {
+    if (this.mapEntityFlushTimer) {
       return;
     }
-    this.powerPlantFlushTimer = setTimeout(() => {
-      this.powerPlantFlushTimer = null;
-      void this.flushPowerPlantQueue();
-    }, this.powerPlantFlushIntervalMs);
+    this.mapEntityFlushTimer = setTimeout(() => {
+      this.mapEntityFlushTimer = null;
+      void this.flushMapEntityQueue();
+    }, this.mapEntityFlushIntervalMs);
   }
 
-  private async flushPowerPlantQueue(): Promise<void> {
-    if (this.isPowerPlantFlushing) {
+  private async flushMapEntityQueue(): Promise<void> {
+    if (this.isMapEntityFlushing) {
       return;
     }
 
-    this.isPowerPlantFlushing = true;
+    this.isMapEntityFlushing = true;
     try {
       let added = 0;
-      while (this.powerPlantChunkQueue.length && added < this.powerPlantBatchSize) {
-        const chunk = this.powerPlantChunkQueue.shift();
+      while (this.mapEntityChunkQueue.length && added < this.mapEntityBatchSize) {
+        const chunk = this.mapEntityChunkQueue.shift();
         if (!chunk?.length) {
           continue;
         }
@@ -1080,29 +1080,29 @@ export class SatelliteIntel implements OnInit, OnDestroy {
         this.refreshMergedData();
       }
 
-      if (this.powerPlantChunkQueue.length > 0) {
-        this.schedulePowerPlantFlush();
+      if (this.mapEntityChunkQueue.length > 0) {
+        this.scheduleMapEntityFlush();
       }
       else if (this.streamFinished) {
-        this.isPowerPlantLoading = false;
-        this.resetPowerPlantStreamState(false);
+        this.isMapEntityLoading = false;
+        this.resetMapEntityStreamState(false);
       }
     }
     finally {
-      this.isPowerPlantFlushing = false;
+      this.isMapEntityFlushing = false;
     }
   }
 
-  private resetPowerPlantStreamState(resetLoading = true): void {
-    this.powerPlantChunkQueue = [];
-    if (this.powerPlantFlushTimer) {
-      clearTimeout(this.powerPlantFlushTimer);
-      this.powerPlantFlushTimer = null;
+  private resetMapEntityStreamState(resetLoading = true): void {
+    this.mapEntityChunkQueue = [];
+    if (this.mapEntityFlushTimer) {
+      clearTimeout(this.mapEntityFlushTimer);
+      this.mapEntityFlushTimer = null;
     }
-    this.isPowerPlantFlushing = false;
+    this.isMapEntityFlushing = false;
     this.streamFinished = false;
     if (resetLoading) {
-      this.isPowerPlantLoading = false;
+      this.isMapEntityLoading = false;
     }
   }
 

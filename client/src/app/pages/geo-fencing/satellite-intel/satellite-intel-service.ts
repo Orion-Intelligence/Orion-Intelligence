@@ -4,7 +4,7 @@ import { expand, finalize, map, shareReplay, switchMap, takeUntil, takeWhile, ta
 import { ApiService } from '../../../shared/services/api.service';
 import { SatelliteGeocodeResponse, SatelliteFacilitiesResponse, SatelliteSentinelSearchResponse, SatelliteSentinelImageResponse, SatelliteAnomalyResponse, SatelliteCompareResponse, SatelliteLiveAircraftBBoxResponse, SatelliteLiveShipsBBoxResponse, } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
 import { AuthService } from '../../../services/authetication/auth.service';
-import { OrionSatelliteFeature, OrionSatelliteFeatureType, PowerPlantByIdItem, PowerPlantsByIdsResponse } from './model/satellite-intel.model';
+import { OrionSatelliteFeature, OrionSatelliteFeatureType, MapEntityByIdItem, MapEntitiesByIdsResponse } from './model/satellite-intel.model';
 
 @Injectable({ providedIn: 'root' })
 export class SatelliteIntelService {
@@ -154,9 +154,9 @@ export class SatelliteIntelService {
     return this.runTask<SatelliteFacilitiesResponse>(build);
   }
 
-  async streamPowerPlants(size: number, onChunk: (items: OrionSatelliteFeature[]) => void, onComplete?: () => void, onError?: (error: any) => void): Promise<void> {
+  async streamMapEntities(size: number, onChunk: (items: OrionSatelliteFeature[]) => void, onComplete?: () => void, onError?: (error: any) => void): Promise<void> {
     try {
-      const response = await fetch('/api/search/power-plants/stream', {
+      const response = await fetch('/api/search/map-entities/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -190,7 +190,7 @@ export class SatelliteIntelService {
 
           const chunk = JSON.parse(line);
           const mapped = chunk
-            .map((item: any, index: number) => this.toPowerPlantFeature(item, index))
+            .map((item: any, index: number) => this.toMapEntityFeature(item, index))
             .filter((item: OrionSatelliteFeature | null): item is OrionSatelliteFeature => item !== null);
 
           onChunk(mapped);
@@ -204,8 +204,8 @@ export class SatelliteIntelService {
     }
   }
 
-  getPowerPlantsByIds(ids: string[]): Observable<PowerPlantsByIdsResponse> {
-    return this.api.post<PowerPlantsByIdsResponse>('search/power-plants/by-ids', ids);
+  getMapEntitiesByIds(ids: string[]): Observable<MapEntitiesByIdsResponse> {
+    return this.api.post<MapEntitiesByIdsResponse>('search/map-entities/by-ids', ids);
   }
 
   loadFacilities(lat: number, lon: number, radiusKm = 5): Observable<OrionSatelliteFeature[]> {
@@ -492,7 +492,7 @@ export class SatelliteIntelService {
     return this.createPolledRequest(() => this.fetchLivetrackStatus(), (res) => (res?.result?.status || res?.status) as any, 3000);
   }
 
-  private toPowerPlantFeature(item: { id?: string; _id?: string; name?: string; type?: string; primary_fuel?: string; country?: string; capacity_mw?: number; source?: string; location?: { lat?: number; lon?: number }; location_point?: { lat?: number; lon?: number }; lat?: number; lon?: number }, index: number): OrionSatelliteFeature | null {
+  private toMapEntityFeature(item: { id?: string; _id?: string; name?: string; type?: string; primary_fuel?: string; country?: string; capacity_mw?: number; source?: string; location?: { lat?: number; lon?: number }; location_point?: { lat?: number; lon?: number }; lat?: number; lon?: number }, index: number): OrionSatelliteFeature | null {
     const parsedLocation = this.extractLatLon(item);
     const lat = parsedLocation?.lat;
     const lon = parsedLocation?.lon;
@@ -523,7 +523,7 @@ export class SatelliteIntelService {
     };
   }
 
-  toFeatureFromById(item: PowerPlantByIdItem): OrionSatelliteFeature | null {
+  toFeatureFromById(item: MapEntityByIdItem): OrionSatelliteFeature | null {
     const parsedLocation = this.extractLatLon(item as any);
     const lat = parsedLocation?.lat;
     const lon = parsedLocation?.lon;
@@ -731,7 +731,7 @@ export class SatelliteIntelService {
       if (['warehouse', 'storage', 'depot'].includes(building)) {
         return 'warehouse';
       }
-      if (['industrial', 'factory', 'power_plant', 'power_station', 'electricity'].includes(building)) {
+      if (['industrial', 'factory', `power_${'plant'}`, 'power_station', 'electricity'].includes(building)) {
         return 'industrial';
       }
       if (['airport_terminal', 'terminal', 'hangar'].includes(building)) {

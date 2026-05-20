@@ -41,10 +41,10 @@
             [errorMessage]="satelliteService.onError()?.message || null"
             [hasSearched]="hasSearched"
             (featureSelected)="onMapFeatureSelected($event)"
-            (featureIdsSelected)="onPowerPlantFeatureIdsSelected($event)"
+            (featureIdsSelected)="onMapEntityFeatureIdsSelected($event)"
             (mapMoved)="onMapMoved($event)">
           </app-satellite-map-section>
-          @if (isAircraftLoading || isShipsLoading || isPowerPlantLoading || isPowerPlantDetailsLoading) {
+          @if (isAircraftLoading || isShipsLoading || isMapEntityLoading || isMapEntityDetailsLoading) {
               <div class="pointer-events-none absolute left-12 top-3 z-[920] flex flex-col gap-2">
                 @if (isAircraftLoading) {
                   <div class="inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.9)] px-3 py-2 text-[12px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)]">
@@ -58,13 +58,13 @@
                     Ships loading...
                   </div>
                 }
-                @if (isPowerPlantLoading) {
+                @if (isMapEntityLoading) {
                   <div class="inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.9)] px-3 py-2 text-[12px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)]">
                     <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
                     Facilities loading...
                   </div>
                 }
-                @if (isPowerPlantDetailsLoading) {
+                @if (isMapEntityDetailsLoading) {
                   <div class="inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.9)] px-3 py-2 text-[12px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)]">
                     <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
                     Loading Facility details...
@@ -72,7 +72,7 @@
                 }
               </div>
             }
-          @if (isPowerPlantDetailsLoading) {
+          @if (isMapEntityDetailsLoading) {
             <div class="absolute inset-0 z-[918] cursor-wait bg-transparent"></div>
           }
           }
@@ -130,11 +130,11 @@
         }
       </div>
       @if (isMapView) {
-        <app-power-plant-popup
-          [isOpen]="powerPlantPopupOpen"
-          [items]="powerPlantPopupData"
-          (close)="closePowerPlantPopup()">
-        </app-power-plant-popup>
+        <app-map-entity-popup
+          [isOpen]="mapEntityPopupOpen"
+          [items]="mapEntityPopupData"
+          (close)="closeMapEntityPopup()">
+        </app-map-entity-popup>
       }
         @if (isMapView && isPanelPopupOpen) {
   <div class="map-overlay-menu absolute right-3 top-16 bottom-3 z-[930] flex w-[min(380px,calc(100%-24px))] flex-col overflow-hidden rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md">
@@ -151,7 +151,7 @@
       <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Search</div>
       <div class="mt-2 flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2">
         <i class="bi bi-search text-[12px] text-[var(--color-text3)]"></i>
-        <input type="text" [ngModel]="dashboardSearch" (ngModelChange)="onDashboardSearchInput($event)" placeholder="Search power plants or facilities" class="w-full bg-transparent text-[13px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text3)]"/>
+        <input type="text" [ngModel]="dashboardSearch" (ngModelChange)="onDashboardSearchInput($event)" placeholder="Search map entities or facilities" class="w-full bg-transparent text-[13px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text3)]"/>
         @if (dashboardSearch) {
           <button type="button" class="text-[12px] text-[var(--color-text3)] hover:text-[var(--color-text1)]" (click)="clearDashboardSearch()">
             <i class="bi bi-x-lg"></i>

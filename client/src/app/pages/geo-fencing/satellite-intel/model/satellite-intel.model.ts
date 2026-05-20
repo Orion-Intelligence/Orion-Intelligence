@@ -59,12 +59,12 @@ export interface OrionSatelliteFeature {
   properties?: Record<string, unknown>;
 }
 
-export interface PowerPlantsSearchRequest {
+export interface MapEntitiesSearchRequest {
   page: number;
   size: number;
 }
 
-export interface PowerPlantsSearchItem {
+export interface MapEntitiesSearchItem {
   id?: string;
   _id?: string;
   name?: string;
@@ -80,9 +80,9 @@ export interface PowerPlantsSearchItem {
   lon?: number;
 }
 
-export interface PowerPlantsSearchResponse {
-  Result?: PowerPlantsSearchItem[];
-  result?: PowerPlantsSearchItem[];
+export interface MapEntitiesSearchResponse {
+  Result?: MapEntitiesSearchItem[];
+  result?: MapEntitiesSearchItem[];
   Page?: number;
   page?: number;
   Page_Count?: number;
@@ -91,7 +91,7 @@ export interface PowerPlantsSearchResponse {
   total_hits?: number;
 }
 
-export interface PowerPlantByIdItem {
+export interface MapEntityByIdItem {
   id: string;
   name?: string;
   country?: string;
@@ -105,8 +105,8 @@ export interface PowerPlantByIdItem {
   location_point?: string;
 }
 
-export interface PowerPlantsByIdsResponse {
-  Result: PowerPlantByIdItem[];
+export interface MapEntitiesByIdsResponse {
+  Result: MapEntityByIdItem[];
   Count: number;
 }
 

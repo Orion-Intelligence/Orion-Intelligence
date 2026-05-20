@@ -30,9 +30,11 @@ class CONSTANTS:
 
     BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
     IMAGE_DIR = BASE_DIR / "static" / "resource" / "tenant"
+    S_SATELLITE_ASSET_FILE_NAME = "satellite_assets.json"
 
 allowed_keys: set[str] = set()
 mail_template = None
 license_rules = {}
 url_rules = {}
-power_plant_data = {}
+map_entities_data = {}
+map_entities_version = 0

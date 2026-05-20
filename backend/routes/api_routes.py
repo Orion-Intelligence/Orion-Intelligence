@@ -16,7 +16,7 @@ from orion.api.interactive.hompage_manager.homepage_model import homepage_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_crack_model, search_dynamic_crypto_model, search_dynamic_onion_search, search_dynamic_param_model, search_dynamic_social_model
-from orion.api.interactive.search_manager.search_data_model.power_plants.search_power_plants_param_model import search_power_plants_param_model
+from orion.api.interactive.search_manager.search_data_model.map_entities.search_map_entities_param_model import search_map_entities_param_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.interactive.siemlog_manager.siem_log_manager import SiemLogManager
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (
@@ -217,16 +217,16 @@ async def search_defacement(param: search_consolidated_param_model = Body(...), 
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category],"defacement")
 
 @api_routes.post(
-    "/api/search/power-plants/stream",
-    summary="Stream power plant points",
+    "/api/search/map-entities/stream",
+    summary="Stream map entity points",
     tags=["Search"],
-    operation_id="streamPowerPlants",
+    operation_id="streamMapEntities",
     status_code=200,
     dependencies=GENERAL_MODULE_DEPS,
 )
-async def stream_power_plants(param: search_power_plants_param_model = Body(...), current_user=Depends(get_current_user)):
+async def stream_map_entities(param: search_map_entities_param_model = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
-    stream = await geo_fencing_manager.get_instance().stream_power_plants_points(chunk_size=param.size)
+    stream = await geo_fencing_manager.get_instance().stream_map_entities_points(chunk_size=param.size)
     return StreamingResponse(
         stream,
         media_type="application/x-ndjson",
@@ -495,15 +495,15 @@ async def get_exploit_document(doc_id: str, lang: Optional[str] = Query(
 
 
 @api_routes.post(
-    "/api/search/power-plants/by-ids",
-    summary="Get multiple power plants by IDs",
+    "/api/search/map-entities/by-ids",
+    summary="Get multiple map entities by IDs",
     tags=["Reports"],
-    operation_id="getPowerPlantsByIds",
+    operation_id="getMapEntitiesByIds",
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:general", bypass_licenses=["maintainer"]))],)
-async def get_power_plants_by_ids(param: list[str] = Body(...),):
-    return await geo_fencing_manager.get_instance().request_power_plants_by_ids(param)
+async def get_map_entities_by_ids(param: list[str] = Body(...),):
+    return await geo_fencing_manager.get_instance().request_map_entities_by_ids(param)
 
 
 @api_routes.get(

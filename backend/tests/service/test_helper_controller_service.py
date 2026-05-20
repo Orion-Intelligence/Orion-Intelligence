@@ -80,15 +80,18 @@ def test_build_assets_loads_templates_and_keys(tmp_path: Path):
     mail_dir = tmp_path / "assets" / "data" / "mail_template_data"
     license_dir = tmp_path / "assets" / "data" / "licenses"
     url_dir = tmp_path / "assets" / "data" / "url_rules"
+    satellite_dir = tmp_path / "assets" / "data" / "satellite"
     entities_dir.mkdir(parents=True)
     mail_dir.mkdir(parents=True)
     license_dir.mkdir(parents=True)
     url_dir.mkdir(parents=True)
+    satellite_dir.mkdir(parents=True)
 
     (entities_dir / "entities.json").write_text(json.dumps([{"key": "m_email"}, {"key": "m_domain"}]), encoding="utf-8")
     (mail_dir / "mail_template.html").write_text("<p>{{ name }}</p>", encoding="utf-8")
     (license_dir / "license_rules.json").write_text('{"free": {"modules": []}}', encoding="utf-8")
     (url_dir / "url_rules.json").write_text('{"allowed": ["example.com"]}', encoding="utf-8")
+    (satellite_dir / "satellite_assets.json").write_text('{"version": 1, "data": []}', encoding="utf-8")
 
     helper_controller.build_assets(tmp_path)
 

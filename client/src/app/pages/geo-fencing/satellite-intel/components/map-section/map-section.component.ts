@@ -1623,7 +1623,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     rows.push(this.popupRow(label, formatted));
   }
 
-  powerPlantDotClass(type: string): string {
+  mapEntityDotClass(type: string): string {
     const map: Record<string, string> = {
       hydro: 'bg-[#2563eb]',
       solar: 'bg-[#facc15]',

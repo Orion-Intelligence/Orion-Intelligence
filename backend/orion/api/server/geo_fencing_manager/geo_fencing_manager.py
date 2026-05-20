@@ -125,12 +125,12 @@ class geo_fencing_manager:
             fallback_path="livetrack/status/",
         )
 
-    async def request_power_plants_by_ids(self, doc_ids: list[str]):
+    async def request_map_entities_by_ids(self, doc_ids: list[str]):
         body = {
             "ids": doc_ids
         }
 
-        res = await elastic_controller.get_instance().mget_docs(ELASTIC_INDEX.S_WRI_POWER_PLANTS_INDEX,body)
+        res = await elastic_controller.get_instance().mget_docs(ELASTIC_INDEX.S_MAP_ENTITIES_INDEX, body)
 
         if not res:
             raise HTTPException(
@@ -163,11 +163,11 @@ class geo_fencing_manager:
             "Count": len(results)
         }
 
-    async def stream_power_plants_points(self, chunk_size: int = 1000):
+    async def stream_map_entities_points(self, chunk_size: int = 1000):
         chunk_size = max(100, min(chunk_size, 5000))
-        return self._stream_power_plants_points_generator(chunk_size)
+        return self._stream_map_entities_points_generator(chunk_size)
 
-    async def _stream_power_plants_points_generator(self, chunk_size: int):
+    async def _stream_map_entities_points_generator(self, chunk_size: int):
         search_after: list[Any] | None = None
 
         while True:
@@ -203,7 +203,7 @@ class geo_fencing_manager:
                 query["search_after"] = search_after
 
             m_status, docs = await elastic_controller.get_instance().search_query(
-                ELASTIC_INDEX.S_WRI_POWER_PLANTS_INDEX,
+                ELASTIC_INDEX.S_MAP_ENTITIES_INDEX,
                 query
             )
 

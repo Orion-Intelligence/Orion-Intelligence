@@ -63,7 +63,7 @@ class elastic_controller:
             mapping_stealer_model = ELASTIC_ENUMS.mapping_stealer_log_model
             mapping_social_model = ELASTIC_ENUMS.mapping_social_model
             mapping_saction_model = ELASTIC_ENUMS.mapping_opensanctions_model
-            mapping_power_plants_model = ELASTIC_ENUMS.mapping_power_plants_model
+            mapping_map_entities_model = ELASTIC_ENUMS.mapping_map_entities_model
 
             if not await self.__m_core_connection.indices.exists(index=ELASTIC_INDEX.S_LEAK_INDEX, request_timeout=220):
                 await self.__m_core_connection.indices.create(
@@ -150,13 +150,14 @@ class elastic_controller:
                     body={"index.blocks.read_only_allow_delete": False},
                     request_timeout=220)
 
-            await self.__initialize_power_plants_data(mapping_power_plants_model)
+            if env_handler.get_instance().env("TESTING_ENABLED", "0") != "1":
+                await self.__initialize_map_entities_data(mapping_map_entities_model)
 
         except Exception as ex:
             log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
 
     @staticmethod
-    def prepare_power_plants_document(document: dict) -> dict:
+    def prepare_map_entities_document(document: dict) -> dict:
         prepared = dict(document)
         location = prepared.get("location")
         if isinstance(location, dict) and "lat" in location and "lon" in location:
@@ -169,7 +170,7 @@ class elastic_controller:
         return prepared
 
     @staticmethod
-    def is_power_plant_document(document: dict) -> bool:
+    def is_map_entity_document(document: dict) -> bool:
         if not isinstance(document, dict):
             return False
 
@@ -181,7 +182,7 @@ class elastic_controller:
         return has_location and has_type and has_capacity
 
     @staticmethod
-    def power_plants_document_id(document: dict) -> str:
+    def map_entities_document_id(document: dict) -> str:
         location = document.get("location") if isinstance(document, dict) else None
         key_payload = {
             "name": document.get("name") if isinstance(document, dict) else None,
@@ -193,16 +194,16 @@ class elastic_controller:
         key_str = json.dumps(key_payload, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(key_str.encode("utf-8")).hexdigest()
 
-    async def __initialize_power_plants_data(self, mapping_power_plants_model):
-        index_name = ELASTIC_INDEX.S_WRI_POWER_PLANTS_INDEX
+    async def __initialize_map_entities_data(self, mapping_map_entities_model):
+        index_name = ELASTIC_INDEX.S_MAP_ENTITIES_INDEX
 
         if not await self.__m_core_connection.indices.exists(index=index_name, request_timeout=220):
-            await self.__m_core_connection.indices.create(index=index_name, body=mapping_power_plants_model, request_timeout=220)
+            await self.__m_core_connection.indices.create(index=index_name, body=mapping_map_entities_model, request_timeout=220)
         else:
             await self.__m_core_connection.indices.delete(index=index_name, request_timeout=220)
-            await self.__m_core_connection.indices.create(index=index_name, body=mapping_power_plants_model, request_timeout=220)
+            await self.__m_core_connection.indices.create(index=index_name, body=mapping_map_entities_model, request_timeout=220)
 
-        raw_data = constant.power_plant_data
+        raw_data = constant.map_entities_data
         raw_data = json.loads(raw_data)
 
         documents = [
@@ -213,11 +214,11 @@ class elastic_controller:
             for document in documents:
                 if not isinstance(document, dict):
                     continue
-                prepared = self.prepare_power_plants_document(document)
+                prepared = self.prepare_map_entities_document(document)
                 yield {
                     "_op_type": "index",
                     "_index": index_name,
-                    "_id": self.power_plants_document_id(document),
+                    "_id": self.map_entities_document_id(document),
                     "_source": prepared,
                 }
 
@@ -239,13 +240,13 @@ class elastic_controller:
         except Exception as ex:
             log.g().e(f"Failed to delete old records: {str(ex)}")
 
-    async def reindex_power_plants_data(self):
+    async def reindex_map_entities_data(self):
         try:
-            mapping_power_plants_model = ELASTIC_ENUMS.mapping_power_plants_model
-            await self.__initialize_power_plants_data(mapping_power_plants_model)
-            log.g().i("Power plants data re-indexed successfully")
+            mapping_map_entities_model = ELASTIC_ENUMS.mapping_map_entities_model
+            await self.__initialize_map_entities_data(mapping_map_entities_model)
+            log.g().i("Map entities data re-indexed successfully")
         except Exception as ex:
-            log.g().e(f"Failed to re-index power plants data: {str(ex)}")
+            log.g().e(f"Failed to re-index map entities data: {str(ex)}")
 
     async def get_doc(self, index, doc_id: str):
         try:

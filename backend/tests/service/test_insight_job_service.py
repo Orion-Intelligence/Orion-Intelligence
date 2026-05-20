@@ -36,10 +36,10 @@ async def test_update_trending_insights_reads_old_values_and_writes_day_snapshot
     new_insight = InsightData()
     new_insight.general.document_count = 7
 
-    monkeypatch.setattr(
-        "orion.management.jobs.insight_job.elastic_controller.get_instance",
-        staticmethod(lambda: type("Elastic", (), {"get_insight": staticmethod(lambda: asyncio.sleep(0, result=(True, new_insight)))})()),
-    )
+    async def _fake_fetch():
+        return new_insight
+
+    monkeypatch.setattr(insight_job, "_insight_job__fetch_elastic_insight", staticmethod(_fake_fetch))
     monkeypatch.setattr(
         "orion.management.jobs.insight_job.redis_controller.getInstance",
         staticmethod(lambda: fake_redis),
@@ -65,10 +65,10 @@ async def test_update_trending_insights_writes_week_snapshot_when_requested(monk
     new_insight = InsightData()
     new_insight.defacement.document_count = 3
 
-    monkeypatch.setattr(
-        "orion.management.jobs.insight_job.elastic_controller.get_instance",
-        staticmethod(lambda: type("Elastic", (), {"get_insight": staticmethod(lambda: asyncio.sleep(0, result=(True, new_insight)))})()),
-    )
+    async def _fake_fetch():
+        return new_insight
+
+    monkeypatch.setattr(insight_job, "_insight_job__fetch_elastic_insight", staticmethod(_fake_fetch))
     monkeypatch.setattr(
         "orion.management.jobs.insight_job.redis_controller.getInstance",
         staticmethod(lambda: fake_redis),

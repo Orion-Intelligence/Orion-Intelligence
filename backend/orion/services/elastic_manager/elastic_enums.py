@@ -20,7 +20,7 @@ class ELASTIC_INDEX:
     S_STEALERLOGS_INDEX = "stealer_model"
     S_SOCIAL_INDEX = "social_model"
     S_OPENSANCTIONS_INDEX = "sanction_model"
-    S_WRI_POWER_PLANTS_INDEX = "wri_power_plants_geo"
+    S_MAP_ENTITIES_INDEX = "geo_fencing_model"
 
 
 class ELASTIC_SEMANTIC:
@@ -127,7 +127,7 @@ class ELASTIC_ENUMS:
         },
     }
 
-    mapping_power_plants_model = {
+    mapping_map_entities_model = {
         "settings": {
             "number_of_shards": 1,
             "number_of_replicas": 0,
