@@ -16,6 +16,7 @@ export class ReportFeedbackCommentsComponent implements OnChanges {
   @Input() feedback: ReportFeedbackModel = new ReportFeedbackModel();
   @Input() isSaving = false;
   @Input() errorMessage = '';
+  @Input() flushSpacing = false;
 
   @Output() saveComment = new EventEmitter<string>();
   @Output() userSelected = new EventEmitter<string>();

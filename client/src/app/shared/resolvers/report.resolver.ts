@@ -38,7 +38,7 @@ export class ReportResolver implements Resolve<any> {
             apiUrl = hash ? `search/social/${hash}` : `search/social`;
           }
         }
-        else if (category_2 == "twitter" || category_2 == "reddit" || category_2 == "forum" || category_2 == "pastebin" || category_2 == "mastodon" || category_2 == "facebook") {
+        else if (category_2 == "twitter" || category_2 == "reddit" || category_2 == "forum" || category_2 == "pastebin" || category_2 == "mastodon" || category_2 == "facebook" || category_2 == "instagram" || category_2 == "tiktok" || category_2 == "youtube") {
           apiUrl = hash ? `search/social/${hash}` : `search/social`;
         }
         else {

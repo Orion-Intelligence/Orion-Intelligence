@@ -91,7 +91,8 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
         'Logged out due to multiple active sessions',
       ]);
       const isSilentLogout = silentLogoutMessages.has(message);
-      if (error instanceof HttpErrorResponse && error.status !== 400 && error.status !== 409 && error.status !== 429) {
+      const isPublicCaseShareRequest = error instanceof HttpErrorResponse && authReq.url.includes('public/case-shares/');
+      if (error instanceof HttpErrorResponse && !isPublicCaseShareRequest && error.status !== 400 && error.status !== 409 && error.status !== 429) {
         localStorage.clear();
         sessionStorage.clear();
         router.navigate(['/login']).then();

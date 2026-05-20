@@ -17,6 +17,10 @@ export class ProxyController {
       return;
     }
 
+    if (anchor.hasAttribute('data-no-proxy')) {
+      return;
+    }
+
     const href = anchor.href?.trim();
     if (!href || href.startsWith('javascript:')) {
       return;

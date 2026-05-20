@@ -12,11 +12,11 @@ import { AuthService } from '../../../../services/authetication/auth.service';
 import { SocialResultItem } from '../../../../shared/model/results/social/social.callback.model';
 import { ReportHeaderComponent } from '../../../../shared/partials/report-header/report-header.component';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
-import { ChatWidgetComponent } from '../../../../pages/intel-panel/ai-workspace/chat-widget/chat-widget.component';
+import { ChatWidgetComponent } from '../../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { AppService } from '../../../../services/core/app/app.service';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, isLikelyUrl as isLikelyUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
-import { ScanHelperMethodsService } from '../../../../pages/network-intel/network-intel-service.service';
+import { ScanHelperMethodsService } from '../../../../pages/root-searches/network-intel/network-intel-service.service';
 import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
 @Component({
   selector: 'app-report-chat',

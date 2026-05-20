@@ -2,6 +2,11 @@ let caseId = '';
 
 const selector = (testId: string) => `[data-testid="${testId}"]`;
 
+function clickHeaderAction(testId: string) {
+  cy.scrollTo('top', { ensureScrollable: false });
+  cy.get(selector(testId)).scrollIntoView().should('be.visible').click();
+}
+
 export function openCaseManagement() {
   cy.visit('/dashboard/profile/case-management');
   cy.get(selector('case-management-page')).should('be.visible');
@@ -15,12 +20,14 @@ export function addCase() {
     caseId = String(value || '');
     expect(caseId).to.not.equal('');
   });
-  cy.get(selector('case-add-owner-input')).should('be.visible').type('Cypress Officer');
-  cy.get(selector('case-add-intake-source-input')).should('be.visible').type('Cypress API Alert');
-  cy.get(selector('case-add-type-select')).should('be.visible').select('Fraud');
+  cy.get(selector('case-add-title-input')).should('be.visible').type('Cypress Case Title');
+  cy.get(selector('case-add-description-input')).should('be.visible').type('Cypress investigation context');
+  cy.get(selector('case-add-type-select')).should('be.visible').select('fraud');
+  cy.get(selector('case-add-intake-source-select')).should('be.visible').select('soc_alert');
+  cy.get(selector('case-add-status-select')).should('be.visible').select('investigating');
+  cy.get(selector('case-add-severity-select')).should('be.visible').select('high');
   cy.get(selector('case-add-priority-select')).should('be.visible').select('high');
-  cy.get(selector('case-add-status-select')).should('be.visible').select('open');
-  cy.get(selector('case-primary-entity-name-input')).scrollIntoView().should('be.visible').type('Cypress Entity');
+  cy.get(selector('case-primary-entity-value-input')).scrollIntoView().should('be.visible').type('Cypress Entity');
   cy.get(selector('case-add-save')).should('be.visible').click();
 
   cy.get(selector('message-notification-text')).should('contain.text', 'Case added successfully');
@@ -45,24 +52,99 @@ export function openCreatedCaseFromList() {
 
 export function assertCreatedCaseDetails() {
   cy.get(selector('case-details-case-id-value')).should('contain.text', caseId);
-  cy.get(selector('case-details-owner-value')).should('contain.text', 'Cypress Officer');
-  cy.get(selector('case-details-intake-source-value')).should('contain.text', 'Cypress API Alert');
-  cy.get(selector('case-details-entity-name-value')).should('contain.text', 'Cypress Entity');
+  cy.get(selector('case-details-title-value')).should('contain.text', 'Cypress Case Title');
+  cy.get(selector('case-details-description-value')).should('contain.text', 'Cypress investigation context');
+  cy.get(selector('case-details-type-value')).should('contain.text', 'Fraud');
+  cy.get(selector('case-details-intake-source-value')).should('contain.text', 'Soc Alert');
+  cy.get(selector('case-details-status-value')).should('contain.text', 'Investigating');
+  cy.get(selector('case-details-severity-value')).should('contain.text', 'high');
+  cy.get(selector('case-details-priority-value')).should('contain.text', 'high');
+  cy.get(selector('case-primary-entity-value')).should('contain.text', 'Cypress Entity');
 }
 
 export function editCreatedCase() {
-  cy.get(selector('case-details-edit')).should('be.visible').click();
-  cy.get(selector('case-details-owner-input')).should('be.visible').clear().type('Cypress Updated Officer');
-  cy.get(selector('case-details-intake-source-input')).should('be.visible').clear().type('Cypress Updated Intake');
-  cy.get(selector('case-details-status-select')).should('be.visible').select('in-progress');
-  cy.get(selector('case-details-priority-select')).should('be.visible').select('critical');
-  cy.get(selector('case-details-entity-name-input')).scrollIntoView().should('be.visible').clear().type('Cypress Updated Entity');
-  cy.get(selector('case-details-save')).should('be.visible').click();
+  clickHeaderAction('case-details-edit');
+  cy.get(selector('case-details-title-input')).should('be.visible').clear().type('Cypress Updated Case Title');
+  cy.get(selector('case-details-description-input')).should('be.visible').clear().type('Cypress updated investigation context');
+  cy.get(selector('case-details-intake-source-select')).scrollIntoView().should('be.visible').select('email_report');
+  cy.get(selector('case-details-status-select')).scrollIntoView().should('be.visible').select('review');
+  cy.get(selector('case-details-severity-select')).scrollIntoView().should('be.visible').select('critical');
+  cy.get(selector('case-details-priority-select')).scrollIntoView().should('be.visible').select('critical');
+  cy.get(selector('case-primary-entity-value-input')).scrollIntoView().should('be.visible').clear().type('Cypress Updated Entity');
+  clickHeaderAction('case-details-save');
 
   cy.get(selector('message-notification-text')).should('contain.text', 'Case updated successfully');
-  cy.get(selector('case-details-owner-value')).should('contain.text', 'Cypress Updated Officer');
-  cy.get(selector('case-details-intake-source-value')).should('contain.text', 'Cypress Updated Intake');
-  cy.get(selector('case-details-status-value')).should('contain.text', 'in-progress');
+  cy.get(selector('case-details-title-value')).should('contain.text', 'Cypress Updated Case Title');
+  cy.get(selector('case-details-description-value')).should('contain.text', 'Cypress updated investigation context');
+  cy.get(selector('case-details-intake-source-value')).should('contain.text', 'Email Report');
+  cy.get(selector('case-details-status-value')).should('contain.text', 'Review');
+  cy.get(selector('case-details-severity-value')).should('contain.text', 'critical');
   cy.get(selector('case-details-priority-value')).should('contain.text', 'critical');
-  cy.get(selector('case-details-entity-name-value')).should('contain.text', 'Cypress Updated Entity');
+  cy.get(selector('case-primary-entity-value')).should('contain.text', 'Cypress Updated Entity');
+}
+
+export function addArtifactsAndTasksToCreatedCase() {
+  clickHeaderAction('case-details-edit');
+
+  cy.get(selector('case-artifact-add')).scrollIntoView().should('be.visible').click();
+  cy.get(selector('case-artifact-title-input-0')).should('be.visible').type('Cypress Evidence Artifact');
+  cy.get(selector('case-artifact-type-select-0')).should('be.visible').select('evidence');
+  cy.get(selector('case-artifact-source-select-0')).should('be.visible').select('manual');
+  cy.get(selector('case-artifact-description-input-0')).should('be.visible').type('Artifact added by Cypress');
+  cy.get(selector('case-artifact-url-input-0')).should('be.visible').type('https://example.test/artifact');
+  cy.get(selector('case-artifact-file-input-0')).should('be.visible').type('artifact.txt');
+
+  cy.get(selector('case-task-add')).scrollIntoView().should('be.visible').click();
+  cy.get(selector('case-task-title-input-0')).should('be.visible').type('Cypress Review Task');
+  cy.get(selector('case-task-status-select-0')).should('be.visible').select('in_progress');
+  cy.get(selector('case-task-priority-select-0')).should('be.visible').select('high');
+  cy.get(selector('case-task-description-input-0')).should('be.visible').type('Task added by Cypress');
+
+  clickHeaderAction('case-details-save');
+
+  cy.get(selector('message-notification-text')).should('contain.text', 'Case updated successfully');
+  cy.get(selector('case-artifact-card-0')).scrollIntoView().should('be.visible');
+  cy.get(selector('case-artifact-title-value-0')).should('contain.text', 'Cypress Evidence Artifact');
+  cy.get(selector('case-task-card-0')).scrollIntoView().should('be.visible');
+  cy.get(selector('case-task-title-value-0')).should('contain.text', 'Cypress Review Task');
+}
+
+export function addCommentToCreatedCase() {
+  cy.get(selector('report-feedback-comment-input')).scrollIntoView().should('be.visible').type('Cypress analyst note');
+  cy.get(selector('report-feedback-comment-save')).should('be.visible').click();
+  cy.contains('p', 'Cypress analyst note').should('be.visible');
+  cy.get(selector('report-feedback-comment-user-name')).should('exist');
+}
+
+export function shareAndRevokeCreatedCaseLink() {
+  cy.window().then((win) => {
+    cy.stub(win, 'open').as('caseShareWindowOpen');
+  });
+
+  clickHeaderAction('case-details-share');
+  cy.get(selector('confirmation-popup')).should('be.visible').and('contain.text', 'anyone with the link');
+  cy.get(selector('confirmation-yes-button')).should('be.visible').click();
+  cy.get('@caseShareWindowOpen').should('have.been.calledWithMatch', /\/case-share\/.+token=/, '_blank');
+
+  clickHeaderAction('case-details-revoke-shares');
+  cy.get(selector('confirmation-popup')).should('be.visible').and('contain.text', 'expire all previously shared links');
+  cy.get(selector('confirmation-yes-button')).should('be.visible').click();
+  cy.get(selector('message-notification-text')).should('contain.text', 'share links revoked');
+}
+
+export function closeCreatedCase() {
+  clickHeaderAction('case-details-edit');
+  cy.get(selector('case-closure-add')).scrollIntoView().should('be.visible').click();
+  cy.get(selector('case-closure-reason-select')).should('be.visible').select('true_positive');
+  cy.get(selector('case-closure-summary-input')).should('be.visible').type('Cypress closure summary');
+  cy.get(selector('case-closure-resolution-input')).should('be.visible').type('Cypress resolution notes');
+  clickHeaderAction('case-details-save');
+
+  cy.get(selector('message-notification-text')).should('contain.text', 'Case updated successfully');
+  cy.get(selector('case-closure-reason-value')).should('contain.text', 'True Positive');
+  cy.get(selector('case-closure-summary-value')).should('contain.text', 'Cypress closure summary');
+  cy.get(selector('case-closure-resolution-value')).should('contain.text', 'Cypress resolution notes');
+  cy.get(selector('case-closure-closed-by-value')).should('not.be.empty');
+  cy.get(selector('case-closure-closed-at-value')).should('not.be.empty');
+  cy.get(selector('case-details-edit')).should('not.exist');
 }

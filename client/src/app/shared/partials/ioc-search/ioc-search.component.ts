@@ -7,7 +7,7 @@ import { advancedRowMotionAnimation } from '../../../shared/animations/advanced.
 import { StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
-import { ChatWidgetComponent } from '../../../pages/intel-panel/ai-workspace/chat-widget/chat-widget.component';
+import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { AppService } from '../../../services/core/app/app.service';
 

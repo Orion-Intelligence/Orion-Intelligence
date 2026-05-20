@@ -16,42 +16,43 @@ const loadSignupComponent = () => import('./pages/signup/signup.component').then
 const loadDashboardComponent = () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent);
 const loadHomepageComponent = () => import('./pages/homepage/homepage.component').then(m => m.HomepageComponent);
 const loadDirectoryComponent = () => import('./pages/directory/directory.component').then(m => m.DirectoryComponent);
-const loadDashboardApiComponent = () => import('./pages/intel-panel/dashboard-api/dashboard-api.component').then(m => m.DashboardApiComponent);
+const loadDashboardApiComponent = () => import('./sections/api/dashboard-api/dashboard-api.component').then(m => m.DashboardApiComponent);
 const loadDashboardResultContainer = () => import('./pages/intel-panel/dashboard-result-container/dashboard-result-container.component').then(m => m.DashboardResultContainer);
 const loadReportComponent = () => import('./sections/report/templates/report_general/report.component').then(m => m.ReportComponent);
 const loadReportDefacementComponent = () => import('./sections/report/templates/report-defacement/report-defacement.component').then(m => m.ReportDefacementComponent);
 const loadReportChatComponent = () => import('./sections/report/templates/report-chat/report-chat.component').then(m => m.ReportChatComponent);
 const loadDumpComponent = () => import('./pages/dump/dump.component').then(m => m.DumpComponent);
-const loadCredentialComponent = () => import('./pages/credentials/credential.component').then(m => m.CredentialComponent);
+const loadCredentialComponent = () => import('./pages/root-searches/credentials/credential.component').then(m => m.CredentialComponent);
 const loadErrorHandlerComponent = () => import('./shared/partials/error-handler/error-handler.component').then(m => m.ErrorHandlerComponent);
-const loadDashboardConsolidatedComponent = () => import('./pages/intel-panel/dashboard-consolidated/dashboard-consolidated.component').then(m => m.DashboardConsolidatedComponent);
-const loadAiWorkspaceComponent = () => import('./pages/intel-panel/ai-workspace/ai-workspace.component').then(m => m.AiWorkspaceComponent);
-const loadSecurityScanComponent = () => import('./pages/security-scan/security-scan.component').then(m => m.SecurityScanComponent);
+const loadDashboardConsolidatedComponent = () => import('./pages/root-searches/dashboard-consolidated/dashboard-consolidated.component').then(m => m.DashboardConsolidatedComponent);
+const loadAiWorkspaceComponent = () => import('./pages/root-searches/ai-workspace/ai-workspace.component').then(m => m.AiWorkspaceComponent);
+const loadSecurityScanComponent = () => import('./pages/root-searches/network-intel/security-scan/security-scan.component').then(m => m.SecurityScanComponent);
 const loadTenantComponent = () => import('./pages/tenant/tenant.component').then(m => m.TenantComponent);
 const loadWelcomeComponent = () => import('./pages/welcome/welcome.component').then(m => m.WelcomeComponent);
 const loadResetPasswordComponent = () => import('./shared/partials/forgot-password/reset-password.component').then(m => m.ResetPasswordComponent);
-const loadSidebarUserStatisticsComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-statistics/sidebar-user-statistics.component').then(m => m.SidebarUserStatisticsComponent);
-const loadSidebarUserIocComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-ioc/sidebar-user-ioc.component').then(m => m.SidebarUserIocComponent);
-const loadSidebarUserEventManagementComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-event-management/sidebar-user-event-management.component').then(m => m.SidebarUserEventManagementComponent);
-const loadAuditlogComponent = () => import('./pages/admin/auditlog/auditlog.component').then(m => m.AuditlogComponent);
+const loadSidebarUserStatisticsComponent = () => import('./pages/user-management/sidebar-user-statistics/sidebar-user-statistics.component').then(m => m.SidebarUserStatisticsComponent);
+const loadSidebarUserIocComponent = () => import('./pages/user-management/sidebar-user-ioc/sidebar-user-ioc.component').then(m => m.SidebarUserIocComponent);
+const loadSidebarUserEventManagementComponent = () => import('./pages/user-management/sidebar-user-event-management/sidebar-user-event-management.component').then(m => m.SidebarUserEventManagementComponent);
+const loadAuditlogComponent = () => import('./pages/user-management/auditlog/auditlog.component').then(m => m.AuditlogComponent);
 const loadNotificationComponent = () => import('./shared/partials/notification/notification.component').then(m => m.NotificationComponent);
 const loadTrailNotificationComponent = () => import('./shared/partials/trail-notification/trail-notification.component').then(m => m.TrailNotificationComponent);
-const loadAccountSettingsComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-settings/account-settings.component').then(m => m.AccountSettingsComponent);
-const loadSidebarUserFeederComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-feeder/sidebar-user-feeder.component').then(m => m.SidebarUserFeederComponent);
-const loadSidebarUserHomepageComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-homepage/sidebar-user-homepage.component').then(m => m.SidebarUserHomepageComponent);
-const loadCategoryAlertReportComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-homepage/category-alert-report/category-alert-report.component').then(m => m.CategoryAlertReportComponent);
-const loadAddCustomAlertComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-homepage/add-custom-alert/add-custom-alert.component').then(m => m.AddCustomAlertComponent);
+const loadAccountSettingsComponent = () => import('./pages/user-management/sidebar-user-settings/account-settings.component').then(m => m.AccountSettingsComponent);
+const loadSidebarUserFeederComponent = () => import('./pages/user-management/sidebar-user-feeder/sidebar-user-feeder.component').then(m => m.SidebarUserFeederComponent);
+const loadSidebarUserHomepageComponent = () => import('./pages/user-management/sidebar-user-homepage/sidebar-user-homepage.component').then(m => m.SidebarUserHomepageComponent);
+const loadCategoryAlertReportComponent = () => import('./pages/user-management/sidebar-user-homepage/category-alert-report/category-alert-report.component').then(m => m.CategoryAlertReportComponent);
+const loadAddCustomAlertComponent = () => import('./pages/user-management/sidebar-user-homepage/add-custom-alert/add-custom-alert.component').then(m => m.AddCustomAlertComponent);
 const loadManageProfileComponent = () => import('./pages/tenant/tenant-management/view-profile/manage-profile.component').then(m => m.ManageProfileComponent);
 const loadViewTenantComponent = () => import('./pages/tenant/tenant-management/view-tenant/view-tenant.component').then(m => m.ViewTenantComponent);
-const loadSidebarProfileSystemSettingsComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-system-settings/sidebar-user-system-settings.component').then(m => m.SidebarProfileSystemSettingsComponent);
-const loadTenantSettingsComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-settings/tenant-settings/tenant-settings.component').then(m => m.TenantSettingsComponent);
-const loadFileScannerComponent = () => import('./pages/intel-panel/ioc-extractor/file-scanner.component').then(m => m.FileScannerComponent);
-const loadTextAnalysisComponent = () => import('./pages/intel-panel/text-analysis/text-analysis.component').then(m => m.TextAnalysisComponent);
+const loadSidebarProfileSystemSettingsComponent = () => import('./pages/user-management/sidebar-user-system-settings/sidebar-user-system-settings.component').then(m => m.SidebarProfileSystemSettingsComponent);
+const loadTenantSettingsComponent = () => import('./pages/user-management/sidebar-user-settings/tenant-settings/tenant-settings.component').then(m => m.TenantSettingsComponent);
+const loadFileScannerComponent = () => import('./sections/api/ioc-extractor/file-scanner.component').then(m => m.FileScannerComponent);
+const loadTextAnalysisComponent = () => import('./sections/api/text-analysis/text-analysis.component').then(m => m.TextAnalysisComponent);
 const loadSocialMapperComponent = () => import('./pages/graphs/social-graph/social-mapper.component').then(m => m.SocialMapperComponent);
-const loadNetworkIntelComponent = () => import('./pages/network-intel/network-intel').then(m => m.NetworkIntel);
-const loadSidebarUserCaseManagement = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-case-management/sidebar-user-case-management').then(m => m.SidebarUserCaseManagement);
+const loadNetworkIntelComponent = () => import('./pages/root-searches/network-intel/network-intel').then(m => m.NetworkIntel);
+const loadSidebarUserCaseManagement = () => import('./pages/user-management/sidebar-user-case-management/sidebar-user-case-management').then(m => m.SidebarUserCaseManagement);
 const loadUserProfileActivityComponent = () => import('./pages/profile/user-profile-activity/user-profile-activity.component').then(m => m.UserProfileActivityComponent);
-const loadCaseDetailsComponent = () => import('./pages/dashboard/dashboard-sidebar/sidebar-user/sidebar-user-case-management/model/case-details/case-details').then(m => m.CaseDetails);
+const loadCaseDetailsComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-details/case-details').then(m => m.CaseDetails);
+const loadCaseShareComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-share/case-share.component').then(m => m.CaseShareComponent);
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
   data: { type: 'consolidated', animation: 'HashPage' }
@@ -114,6 +115,11 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: loadLoginComponent,
     data: { animation: 'LoginPage' }
+  },
+  {
+    path: 'case-share/:shareId',
+    loadComponent: loadCaseShareComponent,
+    data: { animation: 'CaseSharePage' }
   },
   {
     path: 'onboarding',

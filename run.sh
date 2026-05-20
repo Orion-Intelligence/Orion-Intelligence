@@ -7,6 +7,7 @@ ENV_FILE=".env"
 LOCAL_SSL_DIR="backend/.ssl"
 LOCAL_SSL_CERT="$LOCAL_SSL_DIR/localhost-cert.pem"
 LOCAL_SSL_KEY="$LOCAL_SSL_DIR/localhost-key.pem"
+MAINTENANCE_FLAG="backend/static/.maintenance"
 
 is_port_listening() {
     local port="$1"
@@ -143,14 +144,16 @@ client_build() {
     cd client || exit
         npm install
     npm run lint
-    mkdir -p build
-    find build -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+    rm -rf build-next
     if [ "$1" = "-t" ]; then
-        npx ng build --configuration instrumented
+        npx ng build --configuration instrumented --output-path build-next
     else
-        npx ng build --configuration production
+        npx ng build --configuration production --output-path build-next
     fi
-    test -d build
+    test -d build-next
+    mkdir -p build
+    rsync -a build-next/ build/
+    rm -rf build-next
     cd ..
     rm -rf backend/build
     mkdir -p backend/build
@@ -168,11 +171,21 @@ use_compose_file() {
 }
 
 wait_for_server() {
-    local url="https://try.orionintelligence.org"
-    until curl -s -o /dev/null "$url"; do
+    local url="http://127.0.0.1/"
+    local status
+    until status="$(curl -s -o /dev/null -w '%{http_code}' "$url" 2>/dev/null)" \
+        && { [ "$status" = "200" ] || [ "$status" = "301" ] || [ "$status" = "302" ] || [ "$status" = "503" ]; }; do
         sleep 2
     done
     sudo systemctl restart tor@default
+}
+
+enable_maintenance_mode() {
+    touch "$MAINTENANCE_FLAG"
+}
+
+disable_maintenance_mode() {
+    rm -f "$MAINTENANCE_FLAG"
 }
 
 wait_for_test_service() {
@@ -357,14 +370,21 @@ if [ "$1" = "dev" ]; then
     exit 0
 fi
 
-stop_docker
-
 COMMAND=$1
 FLAG=$2
+EXTRA_FLAG=$3
+
+if [ "$COMMAND" != "build" ] || [ "$FLAG" != "-p" ]; then
+    stop_docker
+fi
 
 set_testing_enabled "$FLAG"
 
 if [ "$COMMAND" = "build" ]; then
+    if [ "$FLAG" = "-p" ]; then
+        enable_maintenance_mode
+    fi
+
     docker pull python:3.11-slim
     npm --prefix client install
     npm --prefix client run lint
@@ -434,8 +454,18 @@ else
     docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
 fi
 
+if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && [ "$EXTRA_FLAG" = "-full" ]; then
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --force-recreate nginx
+fi
+
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
+    if ! docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" exec -T nginx test -f /client_build/assets/data/map/world.json; then
+        docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --force-recreate nginx
+    fi
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" exec -T nginx nginx -t
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload
     wait_for_server
+    disable_maintenance_mode
 fi
 
 if [ "$COMMAND" = "build" ] && { [ "$FLAG" = "-t" ] || [ "$FLAG" = "-tb" ]; }; then

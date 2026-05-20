@@ -1,0 +1,165 @@
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Output } from '@angular/core';
+import { Case, CaseEntity, CaseEntityRequest, CaseRequest, CaseTag } from '../../../../../shared/model/case-management/case.model';
+import { CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, DEFAULT_CASE_REQUEST_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_REQUEST_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { EntityDetailsComponent } from '../entity-details/entity-details';
+import { CaseManagement } from '../../case-management-service/case-management';
+import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
+
+@Component({
+  selector: 'app-add-new-case',
+  imports: [CommonModule, FormsModule, EntityDetailsComponent],
+  templateUrl: './add-new-case.html'
+})
+export class AddNewCase {
+  isOpen = false;
+  validationErrors: Record<string, string> = {};
+  caseTypeOptions = CASE_TYPE_OPTIONS;
+  intakeSourceOptions = INTAKE_SOURCE_OPTIONS;
+  statusOptions = CASE_STATUS_OPTIONS;
+  severityOptions = SEVERITY_OPTIONS;
+  priorityOptions = PRIORITY_OPTIONS;
+  tagOptions: { value: CaseTag; label: string }[] = CASE_TAG_OPTIONS;
+  primaryEntity: CaseEntity = structuredClone(DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE);
+  caseForm: CaseRequest = structuredClone(DEFAULT_CASE_REQUEST_TEMPLATE);
+
+  @Output() close = new EventEmitter<void>();
+  @Output() caseAdded = new EventEmitter<Case>();
+
+  constructor(private cdr: ChangeDetectorRef, private caseService: CaseManagement, private host: ElementRef<HTMLElement>, private messageNotificationService: MessageNotificationService) { }
+
+  ngOnInit(): void {
+    this.generateCaseId();
+    setTimeout(() => {
+      this.isOpen = true;
+      this.cdr.detectChanges();
+    }, 10);
+  }
+
+  generateCaseId(): void {
+    this.caseService.getNextCaseId().subscribe({
+      next: (res) => {
+        this.caseForm.caseId = res.nextCaseId;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  closePopup(): void {
+    this.isOpen = false;
+    setTimeout(() => {
+      this.close.emit();
+    }, 300);
+  }
+
+  toggleTag(tag: CaseTag): void {
+    if (this.caseForm.tags.includes(tag)) {
+      this.caseForm.tags = this.caseForm.tags.filter(item => item !== tag);
+      return;
+    }
+    this.caseForm.tags = [...this.caseForm.tags, tag];
+  }
+
+  isTagSelected(tag: CaseTag): boolean {
+    return this.caseForm.tags.includes(tag);
+  }
+
+  private createId(): string {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+      return crypto.randomUUID();
+    }
+    return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  private scrollToFirstError(): void {
+    setTimeout(() => {
+      this.host.nativeElement.querySelector('.case-form-error')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    });
+  }
+
+  private cleanPrimaryEntity(): CaseEntityRequest {
+    const entityId = this.primaryEntity.entityId || this.createId();
+    const value = this.primaryEntity.value.trim();
+    return {
+      ...structuredClone(DEFAULT_PRIMARY_CASE_ENTITY_REQUEST_TEMPLATE),
+      entityId,
+      type: this.primaryEntity.type,
+      value,
+      displayName: this.primaryEntity.displayName?.trim() || value,
+      confidence: this.primaryEntity.confidence,
+      identifiers: this.primaryEntity.identifiers.filter(identifier => identifier.type && identifier.value.trim()),
+      socialProfiles: this.primaryEntity.socialProfiles.filter(profile => profile.platform && profile.username.trim()),
+      tags: this.primaryEntity.tags || [],
+      attributes: this.primaryEntity.attributes || []
+    };
+  }
+
+  onSubmit(): void {
+    this.validationErrors = {};
+
+    if (!this.caseForm.title.trim()) {
+      this.validationErrors['title'] = 'Case title is required';
+    }
+    if (!this.caseForm.caseId.trim()) {
+      this.validationErrors['caseId'] = 'Case ID is required';
+    }
+    if (!this.primaryEntity.value.trim()) {
+      this.validationErrors['entityValue'] = 'Primary entity value is required';
+    }
+
+    const invalidIdentifier = this.primaryEntity.identifiers.find(identifier => {
+      return (identifier.type && !identifier.value.trim()) || (!identifier.type && identifier.value.trim());
+    });
+    if (invalidIdentifier) {
+      this.validationErrors['identifier'] = 'Identifiers require both type and value';
+    }
+
+    const invalidSocialProfile = this.primaryEntity.socialProfiles.find(profile => {
+      return (profile.platform && !profile.username.trim()) || (!profile.platform && profile.username.trim());
+    });
+    if (invalidSocialProfile) {
+      this.validationErrors['socialProfile'] = 'Social profiles require both platform and username';
+    }
+
+    if (Object.keys(this.validationErrors).length > 0) {
+      this.scrollToFirstError();
+      return;
+    }
+
+    const primaryEntity = this.cleanPrimaryEntity();
+    const request: CaseRequest = {
+      caseId: this.caseForm.caseId,
+      title: this.caseForm.title.trim(),
+      description: this.caseForm.description.trim(),
+      caseType: this.caseForm.caseType,
+      status: this.caseForm.status,
+      severity: this.caseForm.severity,
+      priority: this.caseForm.priority,
+      intakeSource: this.caseForm.intakeSource,
+      tags: this.caseForm.tags,
+      primaryEntityId: primaryEntity.entityId,
+      assignedAnalystIds: [],
+      entities: [primaryEntity],
+      artifacts: [],
+      comments: [],
+      tasks: [],
+      linkedCases: []
+    };
+
+    this.caseService.createCase(request).subscribe({
+      next: (savedCase) => {
+        this.messageNotificationService.show('Case added successfully', 'success');
+        this.caseAdded.emit(savedCase);
+        this.closePopup();
+      },
+      error: (err) => {
+        console.error('Failed to save case:', err);
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to save case');
+      }
+    });
+  }
+}

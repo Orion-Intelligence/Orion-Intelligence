@@ -15,7 +15,7 @@ import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { sidebarModeAnimation } from '../../../shared/animations/sidebar.mode.animation';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
-import { ChatWidgetComponent } from '../../intel-panel/ai-workspace/chat-widget/chat-widget.component';
+import { ChatWidgetComponent } from '../../root-searches/ai-workspace/chat-widget/chat-widget.component';
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
@@ -245,6 +245,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
           c !== ProfileSubCategory.USERS &&
           c !== ProfileSubCategory.AUDITLOG &&
           c !== ProfileSubCategory.IOC &&
+          c !== ProfileSubCategory.CASE_MANAGEMENT &&
           c !== ProfileSubCategory.STATISTICS &&
           c !== ProfileSubCategory.TENANT_SETTINGS);
   }
