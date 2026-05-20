@@ -553,20 +553,6 @@
                     </div>
                 </div>
                 }
-
-                @if ((primaryEntity.attributes?.length || 0) > 0) {
-                <div class="px-4 py-3">
-                    <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Attributes</div>
-                    <div class="flex flex-wrap gap-2">
-                        @for (attribute of primaryEntity.attributes; track $index) {
-                        <div class="max-w-full rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs break-words">
-                            <span class="font-semibold text-purple-300">{{ formatLabel(attribute.type) }}</span>
-                            <span class="ml-1 text-[var(--color-text2)]">{{ attribute.value }}</span>
-                        </div>
-                        }
-                    </div>
-                </div>
-                }
                 } @else {
                 <div class="p-4 text-sm text-[var(--color-text4)]">No entity attached.</div>
                 }
@@ -688,20 +674,6 @@
                                         </div>
                                     </div>
                                     }
-
-                                    @if ((entity.attributes?.length || 0) > 0) {
-                                    <div>
-                                        <div class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Attributes</div>
-                                        <div class="grid gap-2 sm:grid-cols-2">
-                                            @for (attribute of entity.attributes; track $index) {
-                                            <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2">
-                                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ formatLabel(attribute.type) }}</div>
-                                                <div class="mt-1 text-xs text-[var(--color-text2)] break-words">{{ attribute.value }}</div>
-                                            </div>
-                                            }
-                                        </div>
-                                    </div>
-                                    }
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
@@ -739,7 +711,7 @@
                                     }
                                 </div>
                             </div>
-                            @if ((entity.tags?.length || 0) === 0 && (entity.socialProfiles?.length || 0) === 0 && (entity.identifiers?.length || 0) === 0 && (entity.attributes?.length || 0) === 0) {
+                            @if ((entity.tags?.length || 0) === 0 && (entity.socialProfiles?.length || 0) === 0 && (entity.identifiers?.length || 0) === 0) {
                             <div class="mt-4 text-xs text-[var(--color-text4)]">No additional entity details.</div>
                             }
                         </div>

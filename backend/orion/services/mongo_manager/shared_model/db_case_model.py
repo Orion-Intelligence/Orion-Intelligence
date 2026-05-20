@@ -182,25 +182,6 @@ class IdentifierType(str, Enum):
     OTHER = "other"
 
 
-class EntityAttributeType(str, Enum):
-    OS = "os"
-    HOSTNAME = "hostname"
-    EDR_STATUS = "edr_status"
-    ASSET_CRITICALITY = "asset_criticality"
-    LAST_SEEN_IP = "last_seen_ip"
-    CLOUD_PROVIDER = "cloud_provider"
-    CLOUD_ACCOUNT_ID = "cloud_account_id"
-    CLOUD_RESOURCE_ID = "cloud_resource_id"
-    REGION = "region"
-    EXPOSURE = "exposure"
-    DEPARTMENT = "department"
-    COUNTRY = "country"
-    BUSINESS_UNIT = "business_unit"
-    OWNER = "owner"
-    SOURCE_SYSTEM = "source_system"
-    RISK_SCORE = "risk_score"
-
-
 class ArtifactType(str, Enum):
     EVIDENCE = "evidence"
     SCREENSHOT = "screenshot"
@@ -285,11 +266,6 @@ class AdditionalIdentifier(EmbeddedModel):
     verified: bool = False
 
 
-class CaseEntityAttribute(EmbeddedModel):
-    type: EntityAttributeType
-    value: str
-
-
 class CaseEntity(EmbeddedModel):
     entityId: str
     type: EntityType
@@ -302,7 +278,6 @@ class CaseEntity(EmbeddedModel):
     identifiers: List[AdditionalIdentifier] = Field(default_factory=list)
     socialProfiles: List[SocialMediaProfile] = Field(default_factory=list)
     tags: List[CaseTag] = Field(default_factory=list)
-    attributes: List[CaseEntityAttribute] = Field(default_factory=list)
     createdBy: str = ""
     updatedBy: str = ""
     createdAt: datetime = Field(default_factory=utc_now)

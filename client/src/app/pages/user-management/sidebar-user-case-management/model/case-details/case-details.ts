@@ -597,7 +597,6 @@ export class CaseDetails implements OnInit {
     entity.identifiers = entity.identifiers || [];
     entity.socialProfiles = entity.socialProfiles || [];
     entity.tags = entity.tags || [];
-    entity.attributes = entity.attributes || [];
     return entity;
   }
 
@@ -723,8 +722,7 @@ export class CaseDetails implements OnInit {
       source: entity.source,
       identifiers: (entity.identifiers || []).filter(identifier => identifier.type && identifier.value.trim()),
       socialProfiles: (entity.socialProfiles || []).filter(profile => profile.platform && profile.username.trim()),
-      tags: entity.tags || [],
-      attributes: (entity.attributes || []).filter(attribute => attribute.type && attribute.value.trim())
+      tags: entity.tags || []
     };
   }
 

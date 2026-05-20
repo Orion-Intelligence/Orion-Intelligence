@@ -127,5 +127,3 @@ def apply_sensitive_entity_values(entity: CaseEntity, transform) -> None:
         profile.username = transform(profile.username)
         profile.profileUrl = transform(profile.profileUrl)
         profile.displayName = transform(profile.displayName)
-    for attribute in entity.attributes or []:
-        attribute.value = transform(attribute.value)

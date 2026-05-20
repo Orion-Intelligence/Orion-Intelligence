@@ -149,24 +149,6 @@ export type IdentifierType =
     'cve' |
     'other';
 
-export type EntityAttributeType =
-    'os' |
-    'hostname' |
-    'edr_status' |
-    'asset_criticality' |
-    'last_seen_ip' |
-    'cloud_provider' |
-    'cloud_account_id' |
-    'cloud_resource_id' |
-    'region' |
-    'exposure' |
-    'department' |
-    'country' |
-    'business_unit' |
-    'owner' |
-    'source_system' |
-    'risk_score';
-
 export type CaseTag =
     'vip' |
     'executive' |
@@ -195,11 +177,6 @@ export interface AdditionalIdentifier {
     verified?: boolean;
 }
 
-export interface CaseEntityAttribute {
-    type: EntityAttributeType | '';
-    value: string;
-}
-
 export interface CaseEntity {
     entityId: string;
     type: EntityType;
@@ -212,7 +189,6 @@ export interface CaseEntity {
     identifiers: AdditionalIdentifier[];
     socialProfiles: SocialMediaProfile[];
     tags: CaseTag[];
-    attributes: CaseEntityAttribute[];
     createdBy?: string;
     updatedBy?: string;
     createdAt?: Date | string;
@@ -231,7 +207,6 @@ export interface CaseEntityRequest {
     identifiers: AdditionalIdentifier[];
     socialProfiles: SocialMediaProfile[];
     tags: CaseTag[];
-    attributes: CaseEntityAttribute[];
 }
 
 export interface CaseLink {
@@ -439,11 +414,6 @@ export interface SharedIdentifier {
     verified?: boolean;
 }
 
-export interface SharedEntityAttribute {
-    type: string;
-    value: string;
-}
-
 export interface SharedCaseEntity {
     entityId: string;
     type: string;
@@ -456,7 +426,6 @@ export interface SharedCaseEntity {
     identifiers?: SharedIdentifier[];
     socialProfiles?: SharedSocialProfile[];
     tags?: string[];
-    attributes?: SharedEntityAttribute[];
     createdBy?: string;
     updatedBy?: string;
     createdAt?: string;

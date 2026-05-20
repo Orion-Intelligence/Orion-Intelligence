@@ -16,7 +16,6 @@ from orion.services.mongo_manager.shared_model.db_case_model import CaseType
 from orion.services.mongo_manager.shared_model.db_case_model import ClosureReason
 from orion.services.mongo_manager.shared_model.db_case_model import EntityRelationship
 from orion.services.mongo_manager.shared_model.db_case_model import EntityRole
-from orion.services.mongo_manager.shared_model.db_case_model import EntityAttributeType
 from orion.services.mongo_manager.shared_model.db_case_model import EntityType
 from orion.services.mongo_manager.shared_model.db_case_model import IdentifierType
 from orion.services.mongo_manager.shared_model.db_case_model import IntakeSource
@@ -45,11 +44,6 @@ class AdditionalIdentifierModel(CaseRequestModel):
     verified: bool = False
 
 
-class CaseEntityAttributeModel(CaseRequestModel):
-    type: EntityAttributeType
-    value: str
-
-
 class CaseEntityModel(CaseRequestModel):
     entityId: str
     type: EntityType
@@ -62,7 +56,6 @@ class CaseEntityModel(CaseRequestModel):
     identifiers: List[AdditionalIdentifierModel] = Field(default_factory=list)
     socialProfiles: List[SocialMediaProfileModel] = Field(default_factory=list)
     tags: List[CaseTag] = Field(default_factory=list)
-    attributes: List[CaseEntityAttributeModel] = Field(default_factory=list)
 
     @field_validator("entityId", "value")
     @classmethod

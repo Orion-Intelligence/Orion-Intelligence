@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdditionalIdentifier, CaseEntity, CaseEntityAttribute, CaseTag, SocialMediaProfile } from '../../../../../shared/model/case-management/case.model';
-import { CASE_TAG_OPTIONS, ENTITY_ATTRIBUTE_TYPE_OPTIONS, ENTITY_RELATIONSHIP_OPTIONS, ENTITY_ROLE_OPTIONS, ENTITY_TYPE_OPTIONS, IDENTIFIER_TYPE_OPTIONS, SOCIAL_PLATFORM_OPTIONS, SOURCE_TYPE_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
+import { AdditionalIdentifier, CaseEntity, CaseTag, SocialMediaProfile } from '../../../../../shared/model/case-management/case.model';
+import { CASE_TAG_OPTIONS, ENTITY_RELATIONSHIP_OPTIONS, ENTITY_ROLE_OPTIONS, ENTITY_TYPE_OPTIONS, IDENTIFIER_TYPE_OPTIONS, SOCIAL_PLATFORM_OPTIONS, SOURCE_TYPE_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
 import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
 
 @Component({
@@ -13,7 +13,6 @@ import { TooltipDirective } from '../../../../../shared/directive/tooltip-direct
 export class EntityDetailsComponent implements OnChanges {
   private initialSocialProfileCount = 0;
   private initialIdentifierCount = 0;
-  private initialAttributeCount = 0;
 
   entityTypes = ENTITY_TYPE_OPTIONS;
   entityRoles = ENTITY_ROLE_OPTIONS;
@@ -22,7 +21,6 @@ export class EntityDetailsComponent implements OnChanges {
   socialMediaPlatforms = SOCIAL_PLATFORM_OPTIONS;
   identifierTypes = IDENTIFIER_TYPE_OPTIONS;
   tagOptions = CASE_TAG_OPTIONS;
-  attributeTypes = ENTITY_ATTRIBUTE_TYPE_OPTIONS;
 
   @Input() entity!: CaseEntity;
   @Input() isMainEntity = false;
@@ -39,7 +37,6 @@ export class EntityDetailsComponent implements OnChanges {
     if (changes['entity'] && this.entity) {
       this.initialSocialProfileCount = this.entity.socialProfiles?.length || 0;
       this.initialIdentifierCount = this.entity.identifiers?.length || 0;
-      this.initialAttributeCount = this.entity.attributes?.length || 0;
     }
   }
 
@@ -86,16 +83,6 @@ export class EntityDetailsComponent implements OnChanges {
     return null;
   }
 
-  getAttributeError(attribute: CaseEntityAttribute): string | null {
-    if (attribute.type && !attribute.value) {
-      return 'Value required';
-    }
-    if (!attribute.type && attribute.value) {
-      return 'Type required';
-    }
-    return null;
-  }
-
   toggleTag(tag: CaseTag): void {
     if (this.entity.tags.includes(tag)) {
       this.entity.tags = this.entity.tags.filter(item => item !== tag);
@@ -124,10 +111,6 @@ export class EntityDetailsComponent implements OnChanges {
     return (this.entity.identifiers?.length || 0) !== this.initialIdentifierCount;
   }
 
-  hasAttributesChanged(): boolean {
-    return (this.entity.attributes?.length || 0) !== this.initialAttributeCount;
-  }
-
   removeSocialMedia(index: number): void {
     this.entity.socialProfiles.splice(index, 1);
   }
@@ -138,14 +121,6 @@ export class EntityDetailsComponent implements OnChanges {
 
   removeIdentifier(index: number): void {
     this.entity.identifiers.splice(index, 1);
-  }
-
-  addAttribute(): void {
-    this.entity.attributes.push({ type: '', value: '' });
-  }
-
-  removeAttribute(index: number): void {
-    this.entity.attributes.splice(index, 1);
   }
 
   onRemove(): void {

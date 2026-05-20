@@ -180,7 +180,6 @@ export class CaseShareComponent implements OnInit, OnDestroy {
         ['Tags', (primaryEntity.tags || []).map(tag => this.formatLabel(tag)).join(', ') || '-'],
         ['Social Profiles', (primaryEntity.socialProfiles || []).map(profile => `${this.formatLabel(profile.platform)}: ${profile.username}${profile.displayName ? ` (${profile.displayName})` : ''}${profile.profileUrl ? ` - ${profile.profileUrl}` : ''}`).join('\n') || '-'],
         ['Identifiers', (primaryEntity.identifiers || []).map(identifier => `${this.formatLabel(identifier.type)}: ${identifier.value}${identifier.issuer ? `, Issuer: ${identifier.issuer}` : ''}${identifier.verified ? ', Verified' : ''}`).join('\n') || '-'],
-        ['Attributes', (primaryEntity.attributes || []).map(attribute => `${this.formatLabel(attribute.type)}: ${attribute.value}`).join('\n') || '-'],
       ], contentWidth);
     }
 

@@ -1,4 +1,4 @@
-import { ArtifactType, CaseArtifact, CaseEntity, CaseEntityRequest, CaseLink, CaseRequest, CaseStatus, CaseTag, CaseTask, CaseType, ClosureReason, EntityAttributeType, EntityRelationship, EntityRole, EntityType, IdentifierType, IntakeSource, Priority, Severity, SocialPlatform, SourceType, TaskStatus } from './case.model';
+import { ArtifactType, CaseArtifact, CaseEntity, CaseEntityRequest, CaseLink, CaseRequest, CaseStatus, CaseTag, CaseTask, CaseType, ClosureReason, EntityRelationship, EntityRole, EntityType, IdentifierType, IntakeSource, Priority, Severity, SocialPlatform, SourceType, TaskStatus } from './case.model';
 
 export interface CaseOption<T extends string> {
     value: T;
@@ -203,25 +203,6 @@ export const IDENTIFIER_TYPE_OPTIONS: CaseOption<IdentifierType>[] = [
   { value: 'other', label: 'Other' }
 ];
 
-export const ENTITY_ATTRIBUTE_TYPE_OPTIONS: CaseOption<EntityAttributeType>[] = [
-  { value: 'os', label: 'OS' },
-  { value: 'hostname', label: 'Hostname' },
-  { value: 'edr_status', label: 'EDR Status' },
-  { value: 'asset_criticality', label: 'Asset Criticality' },
-  { value: 'last_seen_ip', label: 'Last Seen IP' },
-  { value: 'cloud_provider', label: 'Cloud Provider' },
-  { value: 'cloud_account_id', label: 'Cloud Account ID' },
-  { value: 'cloud_resource_id', label: 'Cloud Resource ID' },
-  { value: 'region', label: 'Region' },
-  { value: 'exposure', label: 'Exposure' },
-  { value: 'department', label: 'Department' },
-  { value: 'country', label: 'Country' },
-  { value: 'business_unit', label: 'Business Unit' },
-  { value: 'owner', label: 'Owner' },
-  { value: 'source_system', label: 'Source System' },
-  { value: 'risk_score', label: 'Risk Score' }
-];
-
 export const DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE: CaseEntity = {
   entityId: '',
   type: 'person',
@@ -233,8 +214,7 @@ export const DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE: CaseEntity = {
   source: 'manual',
   identifiers: [],
   socialProfiles: [],
-  tags: [],
-  attributes: []
+  tags: []
 };
 
 export const DEFAULT_RELATED_CASE_ENTITY_TEMPLATE: CaseEntity = {
@@ -244,8 +224,7 @@ export const DEFAULT_RELATED_CASE_ENTITY_TEMPLATE: CaseEntity = {
   relationshipToCase: 'related_to',
   identifiers: [],
   socialProfiles: [],
-  tags: [],
-  attributes: []
+  tags: []
 };
 
 export const DEFAULT_PRIMARY_CASE_ENTITY_REQUEST_TEMPLATE: CaseEntityRequest = {
@@ -259,8 +238,7 @@ export const DEFAULT_PRIMARY_CASE_ENTITY_REQUEST_TEMPLATE: CaseEntityRequest = {
   source: 'manual',
   identifiers: [],
   socialProfiles: [],
-  tags: [],
-  attributes: []
+  tags: []
 };
 
 export const DEFAULT_CASE_ARTIFACT_TEMPLATE: CaseArtifact = {
