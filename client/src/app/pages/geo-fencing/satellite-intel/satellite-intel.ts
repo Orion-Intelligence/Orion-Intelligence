@@ -6,6 +6,8 @@ import { ActivatedRoute } from '@angular/router';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { SatelliteIntelService } from './satellite-intel-service';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
+import { sidebarAnimation } from '../../../shared/animations/sidebar.animations';
+import { popupAnimation } from '../../../shared/animations/popup.animations';
 import { GeocodeModalComponent } from './components/geocode-modal/geocode-modal.component';
 import { MapSectionComponent } from './components/map-section/map-section.component';
 import { MonthCompareSectionComponent } from './components/month-compare-section/month-compare-section.component';
@@ -14,7 +16,7 @@ import { SentinelSearchSectionComponent } from './components/sentinel-search-sec
 import { SentinelImageSectionComponent } from './components/sentinel-image-section/sentinel-image-section.component';
 import { MapEntityPopupComponent } from './components/map-entity-popup/map-entity-popup.component';
 import { SatelliteFacilitiesResponse, SatelliteAnomalyResponse, SatelliteCompareResponse, SatelliteSentinelImageResult, SatelliteSentinelSearchResponse, SatelliteGeocodeResult, SatelliteLiveAircraft, SatelliteLiveShip, } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
-import { ThreatLensComponent } from ".././threat-lens/threat-lens";
+import { ThreatLensComponent } from "../threat-lens/threat-lens";
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ORION_INFRASTRUCTURE_FILTERS, ORION_POWER_FILTERS, OrionSatelliteFeature, OrionSatelliteFeatureType, MapEntityByIdItem } from './model/satellite-intel.model';
 
@@ -39,14 +41,14 @@ type SatelliteIntelPanel = 'dashboard' | 'compare' | 'anomaly' | 'sentinel' | 'i
     MapEntityPopupComponent,
     ThreatLensComponent
   ],
-  animations: [fadeInDashboardItem],
+  animations: [fadeInDashboardItem, sidebarAnimation, popupAnimation],
 })
 export class SatelliteIntel implements OnInit, OnDestroy {
   private sub?: Subscription;
   private aircraftTrackSub?: Subscription;
   private shipTrackSub?: Subscription;
-  private aircraftTimer?: ReturnType<typeof setInterval>;
-  private shipsTimer?: ReturnType<typeof setInterval>;
+  private aircraftTimer?: ReturnType<typeof setTimeout>;
+  private shipsTimer?: ReturnType<typeof setTimeout>;
   private pendingRequest: 'facilities' | 'anomaly' | 'compare' | 'sentinel' | 'sentinel-image' | null = null;
   private skipNextMapMovedEvent = false;
   private mainLoadingSequence = 0;
@@ -63,6 +65,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private streamFinished = false;
   private readonly mapEntityFlushIntervalMs = 80;
   private readonly mapEntityBatchSize = 1000;
+  private readonly aircraftRefreshIntervalMs = 8000;
   private typeFiltersInitialized = false;
   private typeFiltersTouched = false;
   private dashboardTypeFilterCache: Array<{ key: OrionSatelliteFeatureType; label: string; color: string; count: number }> = ORION_POWER_FILTERS.map((option) => ({
@@ -206,8 +209,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
     this.aircraftTrackSub?.unsubscribe();
     this.shipTrackSub?.unsubscribe();
-    clearInterval(this.aircraftTimer);
-    clearInterval(this.shipsTimer);
+    clearTimeout(this.aircraftTimer);
+    clearTimeout(this.shipsTimer);
     this.wriSub?.unsubscribe();
     this.mapEntitiesSub?.unsubscribe();
     this.mapEntityDetailsSub?.unsubscribe();
@@ -351,24 +354,18 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
     this.aircraftTrackSub?.unsubscribe();
     this.shipTrackSub?.unsubscribe();
-    clearInterval(this.aircraftTimer);
-    clearInterval(this.shipsTimer);
+    clearTimeout(this.aircraftTimer);
+    clearTimeout(this.shipsTimer);
 
     this.aircraftData = [];
     this.shipsData = [];
 
     if (this.selectedTrackingTypes.includes('aircraft')) {
-      this.refreshGlobalAircraftTracking(false);
-      this.aircraftTimer = setInterval(() => {
-        this.refreshGlobalAircraftTracking(false);
-      }, 25000);
+      this.refreshGlobalAircraftTracking(false, true);
     }
 
     if (this.selectedTrackingTypes.includes('ship')) {
-      this.refreshGlobalShipsTracking(false);
-      this.shipsTimer = setInterval(() => {
-        this.refreshGlobalShipsTracking(false);
-      }, 8000);
+      this.refreshShipsTracking(false, true);
     }
   }
 
@@ -461,8 +458,11 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.coordsForm.value = `${center.lat.toFixed(5)}, ${center.lon.toFixed(5)}`;
     this.coordsForm.delta = this.inputDelta;
 
-    if (!this.aircraftTrackingEnabled && !this.shipsTrackingEnabled) {
-      this.refreshTracking();
+    if (this.shipsTrackingEnabled && !this.globalShipsTrackingEnabled) {
+      clearTimeout(this.shipsTimer);
+      this.shipsTimer = setTimeout(() => {
+        this.refreshShipsTracking(false, true);
+      }, 500);
     }
   }
 
@@ -522,7 +522,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       error: () => {
         this.endMainLoading(loadingId);
       }
-    });;
+    });
   }
 
   onRunSentinelImage(event: { imageType: string; month: string; size: number }): void {
@@ -813,7 +813,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     });
   }
 
-  private refreshGlobalAircraftTracking(showLoading = false): void {
+  private refreshGlobalAircraftTracking(showLoading = false, scheduleNext = false): void {
     this.isAircraftLoading = true;
     const loadingId = showLoading ? this.beginMainLoading('Loading Satellite Intel', 'Loading global aircraft tracking data...') : null;
     this.aircraftTrackSub?.unsubscribe();
@@ -837,12 +837,17 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       if (loadingId !== null) {
         this.endMainLoading(loadingId);
       }
+      if (scheduleNext && this.aircraftTrackingEnabled) {
+        this.aircraftTimer = setTimeout(() => {
+          this.refreshGlobalAircraftTracking(false, true);
+        }, this.aircraftRefreshIntervalMs);
+      }
     });
   }
 
-  private refreshShipsTracking(showLoading = false): void {
+  private refreshShipsTracking(showLoading = false, scheduleNext = false): void {
     if (this.globalShipsTrackingEnabled) {
-      this.refreshGlobalShipsTracking(showLoading);
+      this.refreshGlobalShipsTracking(showLoading, scheduleNext);
       return;
     }
 
@@ -871,10 +876,15 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       if (loadingId !== null) {
         this.endMainLoading(loadingId);
       }
+      if (scheduleNext && this.shipsTrackingEnabled) {
+        this.shipsTimer = setTimeout(() => {
+          this.refreshShipsTracking(false, true);
+        }, this.aircraftRefreshIntervalMs);
+      }
     });
   }
 
-  private refreshGlobalShipsTracking(showLoading = false): void {
+  private refreshGlobalShipsTracking(showLoading = false, scheduleNext = false): void {
     this.isShipsLoading=true;
     const loadingId = showLoading ? this.beginMainLoading('Loading Satellite Intel', 'Loading global ship tracking data...') : null;
     this.shipTrackSub?.unsubscribe();
@@ -897,6 +907,11 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       this.isShipsLoading= false;
       if (loadingId !== null) {
         this.endMainLoading(loadingId);
+      }
+      if (scheduleNext && this.shipsTrackingEnabled) {
+        this.shipsTimer = setTimeout(() => {
+          this.refreshGlobalShipsTracking(false, true);
+        }, this.aircraftRefreshIntervalMs);
       }
     });
   }

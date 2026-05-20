@@ -99,7 +99,7 @@
           </div>
 
           @if (isPanelMenuOpen) {
-            <div class="map-overlay-menu absolute right-3 top-16 z-[999] flex w-[230px] flex-col overflow-hidden rounded-[12px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_16px_40px_rgba(2,6,23,.45)] backdrop-blur-md">
+            <div class="map-overlay-menu absolute right-3 top-16 z-[999] flex w-[230px] flex-col overflow-hidden rounded-[12px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_16px_40px_rgba(2,6,23,.45)] backdrop-blur-md" @popupAnimation>
               @if (isTrackingView) {
                 <div class="tracking-dropdown border-b border-white/10 p-2">
                   <button (click)="toggleTrackingDropdown()" class="flex h-9 w-full items-center justify-between rounded-[8px] border border-white/15 bg-white/5 px-3 text-left text-[12px] font-medium text-[var(--color-text1)]">
@@ -137,7 +137,7 @@
         </app-map-entity-popup>
       }
         @if (isMapView && isPanelPopupOpen) {
-  <div class="map-overlay-menu absolute right-3 top-16 bottom-3 z-[930] flex w-[min(380px,calc(100%-24px))] flex-col overflow-hidden rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md">
+  <div class="map-overlay-menu absolute right-3 top-16 bottom-3 z-[930] flex w-[min(380px,calc(100%-24px))] flex-col overflow-hidden rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md" @sidebarAnimation>
     <div class="flex shrink-0 items-center justify-between border-b border-white/10 px-3 py-2">
       <div class="text-[18px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">{{ activePanelLabel }}</div>
       <button type="button" class="ui-popup-close right-5 top-5 h-[42px] w-[42px] rounded-[8px] border-none bg-transparent text-[28px] leading-none text-[#ccc] transition-[color,background-color] duration-200 hover:bg-[var(--color-blue-700)] hover:text-[var(--color-blue-640)]" (click)="closePanelPopup()" aria-label="Close popup">×</button>

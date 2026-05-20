@@ -3,6 +3,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, 
 import { geoContains } from 'd3-geo';
 import { feature as topojsonFeature } from 'topojson-client';
 import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { sidebarAnimation } from '../../../../../shared/animations/sidebar.animations';
 import { SatelliteIntelService } from '../../satellite-intel-service';
 import { ORION_POWER_FILTERS, OrionSatelliteFilterOption } from '../../model/satellite-intel.model';
 
@@ -14,6 +15,7 @@ import { ORION_POWER_FILTERS, OrionSatelliteFilterOption } from '../../model/sat
   host:        {
     'class': 'block h-full w-full',
   },
+  animations: [sidebarAnimation],
 })
 export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy {
   private static readonly WORLD_BOUNDS = [[-85.05112878, -180], [85.05112878, 180]] as const;
@@ -41,7 +43,20 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
   private aircraftRenderKey = '';
   private aircraftRenderTimer: ReturnType<typeof setTimeout> | null = null;
   private aircraftRenderVersion = 0;
+  private aircraftMarkers = new Map<string, any>();
+  private aircraftMarkerTargets = new Map<string, string>();
+  private aircraftTrackLine: any = null;
+  private aircraftAnimationFrames = new Map<string, { marker: any; startLat: number; startLon: number; targetLat: number; targetLon: number; startedAt: number }>();
+  private aircraftAnimationFrame: number | null = null;
+  private readonly aircraftAnimationDurationMs = 8000;
   private shipRenderKey = '';
+  private shipRenderTimer: ReturnType<typeof setTimeout> | null = null;
+  private shipRenderVersion = 0;
+  private shipMarkers = new Map<string, any>();
+  private shipMarkerTargets = new Map<string, string>();
+  private shipAnimationFrames = new Map<string, { marker: any; startLat: number; startLon: number; targetLat: number; targetLon: number; startedAt: number }>();
+  private shipAnimationFrame: number | null = null;
+  private readonly shipAnimationDurationMs = 8000;
   private orionRenderKey = '';
   private orionRenderVersion = 0;
   private orionRenderTimer: ReturnType<typeof setTimeout> | null = null;
@@ -133,6 +148,10 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     this.sidebarError = null;
     this.activeEntity = null;
     this.loadingEntity = null;
+    if (this.aircraftTrackLine) {
+      this.leafletMap?.removeLayer(this.aircraftTrackLine);
+      this.aircraftTrackLine = null;
+    }
     this.refreshSelectionState();
     this.cd.detectChanges();
   }
@@ -167,9 +186,11 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       this.renderAnomaly();
     }
     if (changes['aircraftData']) {
+      this.aircraftRenderKey = '';
       this.renderAircraftCluster();
     }
     if (changes['shipsData']) {
+      this.shipRenderKey = '';
       this.renderShipCluster();
     }
     if (changes['orionData'] || changes['facilitiesVisible']) {
@@ -203,6 +224,9 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       this.orionRenderTimer = null;
     }
     this.cancelAircraftRender();
+    this.cancelAllAircraftAnimations();
+    this.cancelShipRender();
+    this.cancelAllShipAnimations();
     this.resizeObserver?.disconnect();
     this.leafletMap?.remove();
   }
@@ -224,56 +248,75 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
         minZoom:  2,
         zoomSnap: 0.5,
         zoomControl: true,
+        attributionControl: false,
         maxBounds: this.L.latLngBounds(MapSectionComponent.WORLD_BOUNDS),
         maxBoundsViscosity: 1,
         worldCopyJump: false,
-        zoomAnimation: true,
+        zoomAnimation: false,
+        fadeAnimation: false,
+        scrollWheelZoom: true,
         markerZoomAnimation: false,
         preferCanvas: true,
       });
 
       this.esriLayer = this.L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         {
-          attribution: 'Tiles © Esri',
+          attribution: '',
           maxZoom: 20,
-          maxNativeZoom: 19,
+          maxNativeZoom: 10,
           noWrap: true,
           bounds: MapSectionComponent.WORLD_BOUNDS,
+          updateWhenIdle: true,
+          updateWhenZooming: false,
+          updateInterval: 500,
+          keepBuffer: 0,
+          detectRetina: false,
         },);
 
       this.esriLowResLayer = this.L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         {
-          attribution: 'Tiles © Esri',
+          attribution: '',
           maxZoom: 20,
-          maxNativeZoom: 8,
+          maxNativeZoom: 10,
           noWrap: true,
           bounds: MapSectionComponent.WORLD_BOUNDS,
           updateWhenIdle: true,
           updateWhenZooming: false,
-          updateInterval: 300,
-          keepBuffer: 1,
+          updateInterval: 500,
+          keepBuffer: 0,
+          detectRetina: false,
         },);
 
-      this.osmLayer = this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      this.osmLayer = this.L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
         {
-          attribution: '© OpenStreetMap',
+          attribution: '',
           maxZoom: 19,
-          maxNativeZoom: 19,
-          noWrap: true,
-          bounds: MapSectionComponent.WORLD_BOUNDS,
-        },);
-
-      this.osmLowResLayer = this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        {
-          attribution: '© OpenStreetMap',
-          maxZoom: 19,
-          maxNativeZoom: 8,
+          maxNativeZoom: 10,
+          subdomains: 'abcd',
+          opacity: 0.72,
           noWrap: true,
           bounds: MapSectionComponent.WORLD_BOUNDS,
           updateWhenIdle: true,
           updateWhenZooming: false,
-          updateInterval: 300,
-          keepBuffer: 1,
+          updateInterval: 500,
+          keepBuffer: 0,
+          detectRetina: false,
+        },);
+
+      this.osmLowResLayer = this.L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+        {
+          attribution: '',
+          maxZoom: 19,
+          maxNativeZoom: 10,
+          subdomains: 'abcd',
+          opacity: 0.72,
+          noWrap: true,
+          bounds: MapSectionComponent.WORLD_BOUNDS,
+          updateWhenIdle: true,
+          updateWhenZooming: false,
+          updateInterval: 500,
+          keepBuffer: 0,
+          detectRetina: false,
         },);
 
       this.refreshBaseLayerDetail();
@@ -323,7 +366,6 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
         const c = this.leafletMap.getCenter();
         const z = this.leafletMap.getZoom();
         this.zoomLabel = `zoom ${z.toFixed(1)}  ·  ${c.lat.toFixed(4)}°N  ${c.lng.toFixed(4)}°E`;
-        this.refreshBaseLayerDetail();
         this.refreshMarkerSizingForZoom(z);
         this.scheduleOrionRender();
       });
@@ -411,8 +453,6 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     if (!this.leafletMap) {
       return;
     }
-    const zoom = this.leafletMap.getZoom?.() ?? 3;
-    const useLowRes = zoom < 5;
 
     [this.esriLayer, this.esriLowResLayer, this.osmLayer, this.osmLowResLayer].forEach(layer => {
       if (layer && this.leafletMap.hasLayer(layer)) {
@@ -421,10 +461,10 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     });
 
     if (this.selectedLayer === 'osm') {
-      (useLowRes ? this.osmLowResLayer : this.osmLayer)?.addTo(this.leafletMap);
+      this.osmLayer?.addTo(this.leafletMap);
     }
     else {
-      (useLowRes ? this.esriLowResLayer : this.esriLayer)?.addTo(this.leafletMap);
+      this.esriLayer?.addTo(this.leafletMap);
     }
   }
 
@@ -529,9 +569,9 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
 
   private getCountryBoundaryStyle(): Record<string, any> {
     return {
-      color:       'rgba(34,34,34,0.9)',
-      weight:      1,
-      opacity:     0.9,
+      color:       'rgba(0,0,0,0.45)',
+      weight:      0.8,
+      opacity:     0.55,
       fillColor:   'rgba(0,0,0,0)',
       fillOpacity: 0,
       lineJoin:    'round',
@@ -718,10 +758,19 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     }
     this.aircraftRenderKey = renderKey;
 
-    this.cancelAircraftRender();
-    this.aircraftCluster.clearLayers();
-
     const aircraft = this.getRenderableAircraft().filter(a => Number.isFinite(a.latitude) && Number.isFinite(a.longitude));
+    const visibleIds = new Set(aircraft.map(a => this.getAircraftMarkerId(a)));
+    for (const [markerId, marker] of Array.from(this.aircraftMarkers.entries())) {
+      if (visibleIds.has(markerId)) {
+        continue;
+      }
+      this.stopAircraftAnimation(markerId);
+      this.aircraftCluster.removeLayer(marker);
+      this.aircraftMarkers.delete(markerId);
+      this.aircraftMarkerTargets.delete(markerId);
+    }
+
+    this.cancelAircraftRender();
     this.renderAircraftMarkersInChunks(aircraft, ++this.aircraftRenderVersion);
   }
 
@@ -741,7 +790,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     const chunkSize = 140;
     const endIndex = Math.min(startIndex + chunkSize, aircraft.length);
     for (let index = startIndex; index < endIndex; index += 1) {
-      this.aircraftCluster.addLayer(this.createAircraftMarker(aircraft[index]));
+      this.upsertAircraftMarker(aircraft[index]);
     }
 
     if (endIndex < aircraft.length) {
@@ -749,6 +798,199 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     }
     else {
       this.aircraftRenderTimer = null;
+    }
+  }
+
+  private getAircraftMarkerId(a: SatelliteLiveAircraft): string {
+    return this.normalizeEntityId(a.icao24) ?? `${a.latitude}:${a.longitude}`;
+  }
+
+  private upsertAircraftMarker(a: SatelliteLiveAircraft): void {
+    if (!this.aircraftCluster) {
+      return;
+    }
+    const markerId = this.getAircraftMarkerId(a);
+    const existing = this.aircraftMarkers.get(markerId);
+    if (!existing) {
+      const marker = this.createAircraftMarker(a);
+      const icaoId = this.normalizeEntityId(a.icao24);
+      const isSelected = !!icaoId && this.activeEntity?.type === 'aircraft' && this.activeEntity.id === icaoId;
+      const isLoading = !!icaoId && this.loadingEntity?.type === 'aircraft' && this.loadingEntity.id === icaoId;
+      marker.__orionAircraftIconState = `${this.markerZoomBucket}:${isSelected ? 1 : 0}:${isLoading ? 1 : 0}`;
+      this.aircraftMarkers.set(markerId, marker);
+      this.aircraftCluster.addLayer(marker);
+      this.updateAircraftMarkerMotion(markerId, marker, a);
+      if (isSelected && this.aircraftTrackLine && Number.isFinite(a.latitude) && Number.isFinite(a.longitude)) {
+        const points = this.aircraftTrackLine.getLatLngs?.() || [];
+        const last = points[points.length - 1];
+        if (!last || Math.abs(last.lat - (a.latitude as number)) > 0.00001 || Math.abs(last.lng - (a.longitude as number)) > 0.00001) {
+          this.aircraftTrackLine.addLatLng([a.latitude, a.longitude]);
+          this.aircraftTrackLine.bringToFront?.();
+        }
+      }
+      return;
+    }
+
+    const icaoId = this.normalizeEntityId(a.icao24);
+    const isSelected = !!icaoId && this.activeEntity?.type === 'aircraft' && this.activeEntity.id === icaoId;
+    const isLoading = !!icaoId && this.loadingEntity?.type === 'aircraft' && this.loadingEntity.id === icaoId;
+    const iconState = `${this.markerZoomBucket}:${isSelected ? 1 : 0}:${isLoading ? 1 : 0}`;
+    this.updateAircraftMarkerMotion(markerId, existing, a);
+    if (isSelected && this.aircraftTrackLine && Number.isFinite(a.latitude) && Number.isFinite(a.longitude)) {
+      const points = this.aircraftTrackLine.getLatLngs?.() || [];
+      const last = points[points.length - 1];
+      if (!last || Math.abs(last.lat - (a.latitude as number)) > 0.00001 || Math.abs(last.lng - (a.longitude as number)) > 0.00001) {
+        this.aircraftTrackLine.addLatLng([a.latitude, a.longitude]);
+        this.aircraftTrackLine.bringToFront?.();
+      }
+    }
+
+    const rotationDegrees = this.getAircraftMovementRotation(existing, a);
+    if (existing.__orionAircraftIconState !== iconState) {
+      existing.setIcon(this.createAircraftIcon(a, isSelected, isLoading, rotationDegrees));
+      existing.__orionAircraftIconState = iconState;
+      return;
+    }
+
+    const iconWrap = existing.getElement?.()?.querySelector?.('.aircraft-icon-wrap') as HTMLElement | null;
+    if (iconWrap) {
+      const currentStyle = iconWrap.getAttribute('style') || '';
+      const nextRotation = `transform:rotate(${rotationDegrees}deg)`;
+      iconWrap.setAttribute('style', currentStyle.includes('transform:rotate(')
+        ? currentStyle.replace(/transform:rotate\([^)]*\)/, nextRotation)
+        : `${currentStyle};${nextRotation}`);
+    }
+  }
+
+  private updateAircraftMarkerMotion(markerId: string, marker: any, aircraft: SatelliteLiveAircraft): void {
+    const lat = aircraft.latitude as number;
+    const lon = aircraft.longitude as number;
+    const motionKey = [
+      lat,
+      lon,
+      aircraft.velocity ?? '',
+      aircraft.true_track ?? '',
+      aircraft.on_ground ?? '',
+    ].join(':');
+
+    const isSameMotion = this.aircraftMarkerTargets.get(markerId) === motionKey;
+    if (isSameMotion && this.aircraftAnimationFrames.has(markerId)) {
+      return;
+    }
+    this.aircraftMarkerTargets.set(markerId, motionKey);
+
+    const current = marker.getLatLng?.();
+    const startLat = isSameMotion && Number.isFinite(current?.lat) ? current.lat : lat;
+    const startLon = isSameMotion && Number.isFinite(current?.lng) ? current.lng : lon;
+    const projectionSource = isSameMotion ? { ...aircraft, latitude: startLat, longitude: startLon } : aircraft;
+
+    this.stopAircraftAnimation(markerId);
+    marker.setLatLng([startLat, startLon]);
+    const projected = this.projectAircraftPosition(projectionSource, this.aircraftAnimationDurationMs / 1000);
+    if (!projected) {
+      return;
+    }
+
+    this.animateAircraftMarker(markerId, marker, projected.lat, projected.lon);
+  }
+
+  private projectAircraftPosition(aircraft: SatelliteLiveAircraft, seconds: number): { lat: number; lon: number } | null {
+    const lat = aircraft.latitude;
+    const lon = aircraft.longitude;
+    const velocity = aircraft.velocity;
+    const bearing = aircraft.true_track;
+    if (
+      aircraft.on_ground ||
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lon) ||
+      !Number.isFinite(velocity) ||
+      !Number.isFinite(bearing) ||
+      (velocity ?? 0) <= 0
+    ) {
+      return null;
+    }
+
+    const distanceMeters = (velocity as number) * seconds;
+    const bearingRadians = ((bearing as number) * Math.PI) / 180;
+    const latRadians = ((lat as number) * Math.PI) / 180;
+    const metersPerDegreeLat = 111320;
+    const metersPerDegreeLon = Math.max(1, metersPerDegreeLat * Math.cos(latRadians));
+
+    return {
+      lat: (lat as number) + (Math.cos(bearingRadians) * distanceMeters) / metersPerDegreeLat,
+      lon: (lon as number) + (Math.sin(bearingRadians) * distanceMeters) / metersPerDegreeLon,
+    };
+  }
+
+  private animateAircraftMarker(markerId: string, marker: any, targetLat: number, targetLon: number): void {
+    if (typeof window === 'undefined') {
+      marker.setLatLng([targetLat, targetLon]);
+      return;
+    }
+
+    this.stopAircraftAnimation(markerId);
+
+    const current = marker.getLatLng();
+    const startLat = current.lat;
+    const startLon = current.lng;
+    const deltaLat = targetLat - startLat;
+    const deltaLon = targetLon - startLon;
+
+    if (Math.abs(deltaLat) < 0.000001 && Math.abs(deltaLon) < 0.000001) {
+      marker.setLatLng([targetLat, targetLon]);
+      return;
+    }
+
+    this.aircraftAnimationFrames.set(markerId, {
+      marker,
+      startLat,
+      startLon,
+      targetLat,
+      targetLon,
+      startedAt: window.performance.now(),
+    });
+
+    if (this.aircraftAnimationFrame !== null) {
+      return;
+    }
+
+    const step = (timestamp: number) => {
+      for (const [id, animation] of Array.from(this.aircraftAnimationFrames.entries())) {
+        const progress = Math.min(1, (timestamp - animation.startedAt) / this.aircraftAnimationDurationMs);
+        animation.marker.setLatLng([
+          animation.startLat + (animation.targetLat - animation.startLat) * progress,
+          animation.startLon + (animation.targetLon - animation.startLon) * progress,
+        ]);
+
+        if (progress >= 1) {
+          this.aircraftAnimationFrames.delete(id);
+        }
+      }
+
+      if (this.aircraftAnimationFrames.size > 0) {
+        this.aircraftAnimationFrame = window.requestAnimationFrame(step);
+        return;
+      }
+
+      this.aircraftAnimationFrame = null;
+    };
+
+    this.aircraftAnimationFrame = window.requestAnimationFrame(step);
+  }
+
+  private stopAircraftAnimation(markerId: string): void {
+    this.aircraftAnimationFrames.delete(markerId);
+    if (this.aircraftAnimationFrames.size === 0 && this.aircraftAnimationFrame !== null && typeof window !== 'undefined') {
+      window.cancelAnimationFrame(this.aircraftAnimationFrame);
+      this.aircraftAnimationFrame = null;
+    }
+  }
+
+  private cancelAllAircraftAnimations(): void {
+    this.aircraftAnimationFrames.clear();
+    if (this.aircraftAnimationFrame !== null && typeof window !== 'undefined') {
+      window.cancelAnimationFrame(this.aircraftAnimationFrame);
+      this.aircraftAnimationFrame = null;
     }
   }
 
@@ -782,6 +1024,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
             const aircraft = this.extractAircraftDetails(res);
             const status = this.getResponseStatus(res);
             if (aircraft) {
+              this.renderAircraftTrack(aircraft);
               this.ngZone.run(() => this.openSidebar('aircraft', aircraft));
             }
             else if (this.isPendingStatus(status)) {
@@ -814,68 +1057,373 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     }
     this.shipRenderKey = renderKey;
 
-    this.shipCluster.clearLayers();
+    const ships = this.getRenderableShips().filter(s => Number.isFinite(s.latitude) && Number.isFinite(s.longitude));
+    const visibleIds = new Set(ships.map(s => this.getShipMarkerId(s)));
+    for (const [markerId, marker] of Array.from(this.shipMarkers.entries())) {
+      if (visibleIds.has(markerId)) {
+        continue;
+      }
+      this.stopShipAnimation(markerId);
+      this.shipCluster.removeLayer(marker);
+      this.shipMarkers.delete(markerId);
+      this.shipMarkerTargets.delete(markerId);
+    }
 
-    const markers = this.getRenderableShips()
-      .filter(s => Number.isFinite(s.latitude) && Number.isFinite(s.longitude))
-      .map(s => {
-        const mmsiId = this.normalizeEntityId(s.mmsi);
-        const isSelected = !!mmsiId && this.activeEntity?.type === 'ship' && this.activeEntity.id === mmsiId;
-        const isLoading = !!mmsiId && this.loadingEntity?.type === 'ship' && this.loadingEntity.id === mmsiId;
-        const marker = this.L.marker([s.latitude!, s.longitude!], {
-          icon: this.createShipIcon(s, isSelected, isLoading),
-        });
-        if (s.mmsi) {
-          marker.on('click', () => {
-            const markerId = this.normalizeEntityId(s.mmsi);
-            if (!markerId) {
-              return;
-            }
-            const token = this.openSidebarLoading('ship', markerId, s);
-            this.satelliteService.pollShipByMMSI(s.mmsi).subscribe({
-              next: (res) => {
-                if (token !== this.sidebarRequestToken) {
-                  return;
-                }
-                const ship = this.extractShipDetails(res);
-                const status = this.getResponseStatus(res);
-                if (ship) {
-                  this.ngZone.run(() => this.openSidebar('ship', ship));
-                }
-                else if (this.isPendingStatus(status)) {
-                  return;
-                }
-                else {
-                  this.openSidebarError('ship', markerId, 'Unable to load ship details');
-                }
-              },
-              error: (err) => {
-                if (token !== this.sidebarRequestToken) {
-                  return;
-                }
-                this.openSidebarError('ship', markerId, err?.error?.detail || err?.message || 'Ship details request failed');
-              }
-            });
-          });
-        }
-        return marker;
-      });
-
-    markers.forEach(marker => this.shipCluster.addLayer(marker));
+    this.cancelShipRender();
+    this.renderShipMarkersInChunks(ships, ++this.shipRenderVersion);
   }
 
-  private createAircraftIcon(a: SatelliteLiveAircraft, isSelected: boolean, isLoading: boolean): any {
+  private cancelShipRender(): void {
+    this.shipRenderVersion += 1;
+    if (this.shipRenderTimer) {
+      clearTimeout(this.shipRenderTimer);
+      this.shipRenderTimer = null;
+    }
+  }
+
+  private renderShipMarkersInChunks(ships: SatelliteLiveShip[], renderVersion: number, startIndex = 0): void {
+    if (!this.shipCluster || renderVersion !== this.shipRenderVersion) {
+      return;
+    }
+
+    const chunkSize = 160;
+    const endIndex = Math.min(startIndex + chunkSize, ships.length);
+    for (let index = startIndex; index < endIndex; index += 1) {
+      this.upsertShipMarker(ships[index]);
+    }
+
+    if (endIndex < ships.length) {
+      this.shipRenderTimer = setTimeout(() => this.renderShipMarkersInChunks(ships, renderVersion, endIndex), 0);
+    }
+    else {
+      this.shipRenderTimer = null;
+    }
+  }
+
+  private getShipMarkerId(s: SatelliteLiveShip): string {
+    return this.normalizeEntityId(s.mmsi) ?? `${s.latitude}:${s.longitude}`;
+  }
+
+  private upsertShipMarker(s: SatelliteLiveShip): void {
+    if (!this.shipCluster) {
+      return;
+    }
+    const markerId = this.getShipMarkerId(s);
+    const existing = this.shipMarkers.get(markerId);
+    if (!existing) {
+      const marker = this.createShipMarker(s);
+      const mmsiId = this.normalizeEntityId(s.mmsi);
+      const isSelected = !!mmsiId && this.activeEntity?.type === 'ship' && this.activeEntity.id === mmsiId;
+      const isLoading = !!mmsiId && this.loadingEntity?.type === 'ship' && this.loadingEntity.id === mmsiId;
+      marker.__orionShipIconState = `${this.markerZoomBucket}:${isSelected ? 1 : 0}:${isLoading ? 1 : 0}`;
+      this.shipMarkers.set(markerId, marker);
+      this.shipCluster.addLayer(marker);
+      this.updateShipMarkerMotion(markerId, marker, s);
+      return;
+    }
+
+    const mmsiId = this.normalizeEntityId(s.mmsi);
+    const isSelected = !!mmsiId && this.activeEntity?.type === 'ship' && this.activeEntity.id === mmsiId;
+    const isLoading = !!mmsiId && this.loadingEntity?.type === 'ship' && this.loadingEntity.id === mmsiId;
+    const iconState = `${this.markerZoomBucket}:${isSelected ? 1 : 0}:${isLoading ? 1 : 0}`;
+    this.updateShipMarkerMotion(markerId, existing, s);
+
+    const rotationDegrees = this.getShipMovementRotation(existing, s);
+    if (existing.__orionShipIconState !== iconState) {
+      existing.setIcon(this.createShipIcon(s, isSelected, isLoading, rotationDegrees));
+      existing.__orionShipIconState = iconState;
+      return;
+    }
+
+    const iconWrap = existing.getElement?.()?.querySelector?.('.ship-icon-wrap') as HTMLElement | null;
+    if (iconWrap) {
+      const currentStyle = iconWrap.getAttribute('style') || '';
+      const nextRotation = `transform:rotate(${rotationDegrees}deg)`;
+      iconWrap.setAttribute('style', currentStyle.includes('transform:rotate(')
+        ? currentStyle.replace(/transform:rotate\([^)]*\)/, nextRotation)
+        : `${currentStyle};${nextRotation}`);
+    }
+  }
+
+  private updateShipMarkerMotion(markerId: string, marker: any, ship: SatelliteLiveShip): void {
+    const lat = ship.latitude as number;
+    const lon = ship.longitude as number;
+    const motionKey = [
+      lat,
+      lon,
+      ship.speed ?? '',
+      ship.course ?? ship.true_heading ?? '',
+    ].join(':');
+
+    const isSameMotion = this.shipMarkerTargets.get(markerId) === motionKey;
+    if (isSameMotion && this.shipAnimationFrames.has(markerId)) {
+      return;
+    }
+    this.shipMarkerTargets.set(markerId, motionKey);
+
+    const current = marker.getLatLng?.();
+    const startLat = isSameMotion && Number.isFinite(current?.lat) ? current.lat : lat;
+    const startLon = isSameMotion && Number.isFinite(current?.lng) ? current.lng : lon;
+    const projectionSource = isSameMotion ? { ...ship, latitude: startLat, longitude: startLon } : ship;
+
+    this.stopShipAnimation(markerId);
+    marker.setLatLng([startLat, startLon]);
+    const projected = this.projectShipPosition(projectionSource, this.shipAnimationDurationMs / 1000);
+    if (!projected) {
+      return;
+    }
+
+    this.animateShipMarker(markerId, marker, projected.lat, projected.lon);
+  }
+
+  private projectShipPosition(ship: SatelliteLiveShip, seconds: number): { lat: number; lon: number } | null {
+    const lat = ship.latitude;
+    const lon = ship.longitude;
+    const speed = ship.speed;
+    const bearing = ship.course ?? ship.true_heading;
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lon) ||
+      !Number.isFinite(speed) ||
+      !Number.isFinite(bearing) ||
+      (speed ?? 0) <= 0
+    ) {
+      return null;
+    }
+
+    const distanceMeters = (speed as number) * 0.514444 * seconds;
+    const bearingRadians = ((bearing as number) * Math.PI) / 180;
+    const latRadians = ((lat as number) * Math.PI) / 180;
+    const metersPerDegreeLat = 111320;
+    const metersPerDegreeLon = Math.max(1, metersPerDegreeLat * Math.cos(latRadians));
+
+    return {
+      lat: (lat as number) + (Math.cos(bearingRadians) * distanceMeters) / metersPerDegreeLat,
+      lon: (lon as number) + (Math.sin(bearingRadians) * distanceMeters) / metersPerDegreeLon,
+    };
+  }
+
+  private animateShipMarker(markerId: string, marker: any, targetLat: number, targetLon: number): void {
+    if (typeof window === 'undefined') {
+      marker.setLatLng([targetLat, targetLon]);
+      return;
+    }
+
+    this.stopShipAnimation(markerId);
+
+    const current = marker.getLatLng();
+    const startLat = current.lat;
+    const startLon = current.lng;
+    const deltaLat = targetLat - startLat;
+    const deltaLon = targetLon - startLon;
+
+    if (Math.abs(deltaLat) < 0.000001 && Math.abs(deltaLon) < 0.000001) {
+      marker.setLatLng([targetLat, targetLon]);
+      return;
+    }
+
+    this.shipAnimationFrames.set(markerId, {
+      marker,
+      startLat,
+      startLon,
+      targetLat,
+      targetLon,
+      startedAt: window.performance.now(),
+    });
+
+    if (this.shipAnimationFrame !== null) {
+      return;
+    }
+
+    const step = (timestamp: number) => {
+      for (const [id, animation] of Array.from(this.shipAnimationFrames.entries())) {
+        const progress = Math.min(1, (timestamp - animation.startedAt) / this.shipAnimationDurationMs);
+        animation.marker.setLatLng([
+          animation.startLat + (animation.targetLat - animation.startLat) * progress,
+          animation.startLon + (animation.targetLon - animation.startLon) * progress,
+        ]);
+
+        if (progress >= 1) {
+          this.shipAnimationFrames.delete(id);
+        }
+      }
+
+      if (this.shipAnimationFrames.size > 0) {
+        this.shipAnimationFrame = window.requestAnimationFrame(step);
+        return;
+      }
+
+      this.shipAnimationFrame = null;
+    };
+
+    this.shipAnimationFrame = window.requestAnimationFrame(step);
+  }
+
+  private stopShipAnimation(markerId: string): void {
+    this.shipAnimationFrames.delete(markerId);
+    if (this.shipAnimationFrames.size === 0 && this.shipAnimationFrame !== null && typeof window !== 'undefined') {
+      window.cancelAnimationFrame(this.shipAnimationFrame);
+      this.shipAnimationFrame = null;
+    }
+  }
+
+  private cancelAllShipAnimations(): void {
+    this.shipAnimationFrames.clear();
+    if (this.shipAnimationFrame !== null && typeof window !== 'undefined') {
+      window.cancelAnimationFrame(this.shipAnimationFrame);
+      this.shipAnimationFrame = null;
+    }
+  }
+
+  private createShipMarker(s: SatelliteLiveShip): any {
+    const mmsiId = this.normalizeEntityId(s.mmsi);
+    const isSelected = !!mmsiId && this.activeEntity?.type === 'ship' && this.activeEntity.id === mmsiId;
+    const isLoading = !!mmsiId && this.loadingEntity?.type === 'ship' && this.loadingEntity.id === mmsiId;
+    const marker = this.L.marker([s.latitude!, s.longitude!], {
+      icon: this.createShipIcon(s, isSelected, isLoading),
+    });
+    if (mmsiId) {
+      marker.bindTooltip(`${this.escapeTooltipText(mmsiId)}`, {
+        direction: 'top',
+        offset:    [0, -10],
+        opacity:   0.95,
+        sticky:    true,
+      });
+    }
+    if (s.mmsi) {
+      marker.on('click', () => {
+        const markerId = this.normalizeEntityId(s.mmsi);
+        if (!markerId) {
+          return;
+        }
+        const token = this.openSidebarLoading('ship', markerId, s);
+        this.satelliteService.pollShipByMMSI(s.mmsi).subscribe({
+          next: (res) => {
+            if (token !== this.sidebarRequestToken) {
+              return;
+            }
+            const ship = this.extractShipDetails(res);
+            const status = this.getResponseStatus(res);
+            if (ship) {
+              this.ngZone.run(() => this.openSidebar('ship', ship));
+            }
+            else if (this.isPendingStatus(status)) {
+              return;
+            }
+            else {
+              this.openSidebarError('ship', markerId, 'Unable to load ship details');
+            }
+          },
+          error: (err) => {
+            if (token !== this.sidebarRequestToken) {
+              return;
+            }
+            this.openSidebarError('ship', markerId, err?.error?.detail || err?.message || 'Ship details request failed');
+          }
+        });
+      });
+    }
+    return marker;
+  }
+
+  private getAircraftMovementRotation(marker: any, aircraft: SatelliteLiveAircraft): number {
+    if (Number.isFinite(aircraft.true_track)) {
+      return this.toAircraftCssRotation(aircraft.true_track);
+    }
+
+    const current = marker.getLatLng?.();
+    const targetLat = aircraft.latitude;
+    const targetLon = aircraft.longitude;
+    if (
+      current &&
+      Number.isFinite(current.lat) &&
+      Number.isFinite(current.lng) &&
+      Number.isFinite(targetLat) &&
+      Number.isFinite(targetLon)
+    ) {
+      const bearing = this.getBearingDegrees(current.lat, current.lng, targetLat as number, targetLon as number);
+      if (bearing !== null) {
+        return this.toAircraftCssRotation(bearing);
+      }
+    }
+
+    return this.toAircraftCssRotation(aircraft.true_track);
+  }
+
+  private getBearingDegrees(fromLat: number, fromLon: number, toLat: number, toLon: number): number | null {
+    const deltaLat = toLat - fromLat;
+    const deltaLon = toLon - fromLon;
+    if (Math.abs(deltaLat) < 0.000001 && Math.abs(deltaLon) < 0.000001) {
+      return null;
+    }
+    const fromLatRad = (fromLat * Math.PI) / 180;
+    const toLatRad = (toLat * Math.PI) / 180;
+    const deltaLonRad = ((toLon - fromLon) * Math.PI) / 180;
+    const y = Math.sin(deltaLonRad) * Math.cos(toLatRad);
+    const x = Math.cos(fromLatRad) * Math.sin(toLatRad) -
+      Math.sin(fromLatRad) * Math.cos(toLatRad) * Math.cos(deltaLonRad);
+    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  }
+
+  private toAircraftCssRotation(track: number | null | undefined): number {
+    return Number.isFinite(track) ? track as number : 0;
+  }
+
+  private getShipMovementRotation(marker: any, ship: SatelliteLiveShip): number {
+    if (Number.isFinite(ship.course)) {
+      return ship.course as number;
+    }
+    if (Number.isFinite(ship.true_heading)) {
+      return ship.true_heading as number;
+    }
+
+    const current = marker.getLatLng?.();
+    const targetLat = ship.latitude;
+    const targetLon = ship.longitude;
+    if (
+      current &&
+      Number.isFinite(current.lat) &&
+      Number.isFinite(current.lng) &&
+      Number.isFinite(targetLat) &&
+      Number.isFinite(targetLon)
+    ) {
+      const bearing = this.getBearingDegrees(current.lat, current.lng, targetLat as number, targetLon as number);
+      if (bearing !== null) {
+        return bearing;
+      }
+    }
+
+    return 0;
+  }
+
+  private createAircraftIcon(a: SatelliteLiveAircraft, isSelected: boolean, isLoading: boolean, rotationDegrees = this.toAircraftCssRotation(a.true_track)): any {
     const size = this.getMarkerBaseSize('aircraft');
     const half = Math.round(size / 2);
-    const iconSize = Math.round(size * 0.86);
-    const iconFill = isSelected ? '#ef4444' : '#facc15';
-    const hoverFill = isSelected ? '#ef4444' : '#38bdf8';
+    const iconSize = Math.round(size * 1.02);
+    const altitudeFeet = ((a.baro_altitude ?? a.geo_altitude ?? 0) as number) * 3.28084;
+    const altitudeFill = a.on_ground
+      ? '#6b7280'
+      : altitudeFeet < 3000
+        ? '#f97316'
+        : altitudeFeet < 10000
+          ? '#facc15'
+          : altitudeFeet < 18000
+            ? '#22c55e'
+            : altitudeFeet < 25000
+              ? '#06b6d4'
+              : altitudeFeet < 35000
+                ? '#2563eb'
+                : altitudeFeet < 45000
+                  ? '#a855f7'
+                  : '#ef4444';
+    const iconFill = isSelected ? '#ef4444' : altitudeFill;
+    const hoverFill = iconFill;
     const halo = isSelected ? 'drop-shadow(0 0 8px rgba(248,113,113,0.95)) drop-shadow(0 0 18px rgba(239,68,68,0.7))' : 'drop-shadow(0 1px 2px rgba(0,0,0,0.45))';
     const hoverHalo = isSelected
       ? 'drop-shadow(0 0 8px rgba(248,113,113,0.95)) drop-shadow(0 0 18px rgba(239,68,68,0.7))'
       : 'drop-shadow(0 0 7px rgba(56,189,248,0.9)) drop-shadow(0 0 16px rgba(56,189,248,0.55))';
-    const strokeColor = isSelected ? '#fee2e2' : '#eab308';
-    const hoverStrokeColor = isSelected ? '#fee2e2' : '#dbeafe';
+    const strokeColor = isSelected ? '#fee2e2' : '#020617';
+    const hoverStrokeColor = strokeColor;
     const badge = isLoading
       ? `<div style="position:absolute;top:-1px;right:-1px;width:12px;height:12px;border-radius:9999px;background:#fde68a;border:2px solid #081421;"></div>`
       : '';
@@ -886,8 +1434,8 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
           .aircraft-marker:hover .aircraft-icon { fill:${hoverFill} !important; stroke:${hoverStrokeColor} !important; }
         </style>
         <div class="aircraft-marker" style="position:relative;width:${size}px;height:${size}px;">
-          <div class="aircraft-icon-wrap" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(${a.true_track ?? 0}deg);filter:${halo};">
-            <svg class="aircraft-icon" viewBox="0 0 24 24" style="width:${iconSize}px;height:${iconSize}px;fill:${iconFill};stroke:${strokeColor};stroke-width:0.65;transition:fill 120ms ease,stroke 120ms ease;">
+          <div class="aircraft-icon-wrap" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(${rotationDegrees}deg);filter:${halo};">
+            <svg class="aircraft-icon" viewBox="0 0 24 24" style="width:${iconSize}px;height:${iconSize}px;fill:${iconFill};stroke:${strokeColor};stroke-width:1.35;paint-order:stroke fill;transition:fill 120ms ease,stroke 120ms ease;">
               <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9L2 14v2l8-2.5V19l-2 1.5V22l3-1 3 1v-1.5L12 19v-5.5L21 16z"/>
             </svg>
           </div>
@@ -900,7 +1448,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     });
   }
 
-  private createShipIcon(s: SatelliteLiveShip, isSelected: boolean, isLoading: boolean): any {
+  private createShipIcon(s: SatelliteLiveShip, isSelected: boolean, isLoading: boolean, rotationDegrees = Number.isFinite(s.course) ? s.course as number : Number.isFinite(s.true_heading) ? s.true_heading as number : 0): any {
     const size = this.getMarkerBaseSize('ship');
     const half = Math.round(size / 2);
     const iconSize = Math.round(size * 0.8);
@@ -911,7 +1459,7 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
     return this.L.divIcon({
       html: `
         <div style="position:relative;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;">
-          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(${s.true_heading ?? s.course ?? 0}deg);filter:${glow};">
+          <div class="ship-icon-wrap" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(${rotationDegrees}deg);filter:${glow};">
             <svg viewBox="0 0 24 24" style="width:${iconSize}px;height:${iconSize}px;fill:#38bdf8;stroke:${isSelected ? '#dbeafe' : '#0ea5e9'};stroke-width:0.6;">
               <path d="M12 2L19 20L12 16L5 20L12 2Z"/>
             </svg>
@@ -1065,10 +1613,18 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       return bounds.pad(0.18).contains([s.latitude, s.longitude]);
     });
     const sampleRatio = this.getShipSampleRatio(zoom);
-    if (sampleRatio >= 1) {
-      return visible;
+    const sampled = sampleRatio >= 1
+      ? visible
+      : this.sampleByBucket(visible, sampleRatio, s => this.getGridBucketKey(s.latitude!, s.longitude!), s => this.normalizeEntityId(s.mmsi) ?? `${s.latitude}:${s.longitude}`);
+    const limit = this.getShipVisibleLimit(zoom);
+    if (sampled.length <= limit) {
+      return sampled;
     }
-    return this.sampleByBucket(visible, sampleRatio, s => this.getLocationBucketKey(s.latitude!, s.longitude!), s => this.normalizeEntityId(s.mmsi) ?? `${s.latitude}:${s.longitude}`);
+    return sampled.slice().sort((left, right) => {
+      const leftKey = this.normalizeEntityId(left.mmsi) ?? `${left.latitude}:${left.longitude}`;
+      const rightKey = this.normalizeEntityId(right.mmsi) ?? `${right.latitude}:${right.longitude}`;
+      return Math.abs(this.stableHash(leftKey)) - Math.abs(this.stableHash(rightKey));
+    }).slice(0, limit);
   }
 
   private getShipSampleRatio(zoom: number): number {
@@ -1076,21 +1632,43 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       return 1;
     }
     if (zoom >= 7) {
-      return 0.8;
+      return 0.5;
     }
     if (zoom >= 6) {
-      return 0.55;
+      return 0.28;
     }
     if (zoom >= 5) {
-      return 0.26;
-    }
-    if (zoom >= 4) {
       return 0.12;
     }
-    if (zoom >= 3) {
-      return 0.1;
+    if (zoom >= 4) {
+      return 0.05;
     }
-    return 0.1;
+    if (zoom >= 3) {
+      return 0.02;
+    }
+    return 0.02;
+  }
+
+  private getShipVisibleLimit(zoom: number): number {
+    if (zoom >= 10) {
+      return 3500;
+    }
+    if (zoom >= 8) {
+      return 2200;
+    }
+    if (zoom >= 7) {
+      return 1500;
+    }
+    if (zoom >= 6) {
+      return 1000;
+    }
+    if (zoom >= 5) {
+      return 650;
+    }
+    if (zoom >= 4) {
+      return 420;
+    }
+    return 260;
   }
 
   private sampleByBucket<T>(items: T[], ratio: number, getBucketKey: (item: T) => string, getStableKey: (item: T) => string): T[] {
@@ -1208,7 +1786,11 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       return payload.aircrafts[0] as SatelliteLiveAircraft;
     }
     if (payload?.aircraft && typeof payload.aircraft === 'object' && !Array.isArray(payload.aircraft)) {
-      return payload.aircraft as SatelliteLiveAircraft;
+      return {
+        ...payload.aircraft,
+        ...(payload.track ? { track: payload.track } : {}),
+        ...(payload.path ? { path: payload.path } : {}),
+      } as SatelliteLiveAircraft;
     }
     if (payload && typeof payload === 'object' && payload.icao24 != null) {
       return payload as SatelliteLiveAircraft;
@@ -1217,6 +1799,40 @@ export class MapSectionComponent implements AfterViewInit, OnChanges, OnDestroy 
       return res as SatelliteLiveAircraft;
     }
     return null;
+  }
+
+  private renderAircraftTrack(aircraft: any): void {
+    const path = aircraft?.track?.path || aircraft?.path;
+    if (this.aircraftTrackLine) {
+      this.leafletMap?.removeLayer(this.aircraftTrackLine);
+      this.aircraftTrackLine = null;
+    }
+    if (!this.leafletMap || !this.L || !Array.isArray(path) || path.length < 2) {
+      return;
+    }
+    let trackPane = this.leafletMap.getPane('aircraftTrackPane');
+    if (!trackPane && this.leafletMap.createPane) {
+      trackPane = this.leafletMap.createPane('aircraftTrackPane');
+    }
+    if (trackPane) {
+      (trackPane as HTMLElement).setAttribute('style', 'z-index: 620 !important; pointer-events: none;');
+    }
+    const points = path
+      .map((point: any) => Array.isArray(point) && Number.isFinite(point[1]) && Number.isFinite(point[2]) ? [point[1], point[2]] : null)
+      .filter(Boolean);
+    if (points.length < 2) {
+      return;
+    }
+    this.aircraftTrackLine = this.L.polyline(points, {
+      color: '#facc15',
+      weight: 4,
+      opacity: 0.95,
+      dashArray: '10 8',
+      lineCap: 'butt',
+      interactive: false,
+      pane: 'aircraftTrackPane',
+    }).addTo(this.leafletMap);
+    this.aircraftTrackLine.bringToFront?.();
   }
 
   private extractShipDetails(res: any): SatelliteLiveShip | null {
