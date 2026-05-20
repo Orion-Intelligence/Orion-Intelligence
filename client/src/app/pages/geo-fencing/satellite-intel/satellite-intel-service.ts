@@ -390,7 +390,7 @@ export class SatelliteIntelService {
     if (openskyClientSecret?.trim()) {
       payload['opensky_client_secret'] = openskyClientSecret.trim();
     }
-
+    console.log("22222222222222222222222222222222222222222222222222２２");
     return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft', payload);
   }
 
@@ -432,7 +432,7 @@ export class SatelliteIntelService {
     if (openskyClientSecret?.trim()) {
       payload['opensky_client_secret'] = openskyClientSecret.trim();
     }
-
+    console.log("11111111111111111111111111111111111111111111111111１１");
     return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft', payload);
   }
 
@@ -461,6 +461,7 @@ export class SatelliteIntelService {
   }
 
   fetchAircraftByICAO(icao: string): Observable<SatelliteLiveAircraftBBoxResponse> {
+    console.log("3333333333333333333333333333333333333333333333333333３３");
     return this.api.post<SatelliteLiveAircraftBBoxResponse>('satellite/livetrack/aircraft/icao', { icao24: icao });
   }
 
@@ -469,7 +470,8 @@ export class SatelliteIntelService {
   }
 
   fetchAircraftTrack(icao: string): Observable<any> {
-    return this.api.post<any>('satellite/livetrack/aircraft/track', { icao24: icao });
+    console.log("4444444444444444444444444444444444444444444444444444４");
+    return this.api.post<any>('satellite/livetrack/aircraft/track', { icao2４: icao });
   }
 
   pollAircraftTrack(icao: string): Observable<any> {
