@@ -175,7 +175,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   onToggleSidebar(mobile_menu_status: boolean = false) {
-    // TODO: The 'emit' function requires a mandatory void argument
     this.menuToggle.emit(undefined);
     this.sidebar_default = !this.sidebar_default;
     this.mobile_menu_status = mobile_menu_status;

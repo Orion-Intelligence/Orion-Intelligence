@@ -23,13 +23,6 @@
     }
   </div>
 }
-<div class="flex flex-nowrap gap-2 overflow-x-auto max-w-full whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]" [ngClass]="compactLayout() ? 'mt-[4px] mx-[2px] mb-[15px] max-[1000px]:mx-0 max-[640px]:mt-0 max-[640px]:mx-[2px]' : 'mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[943px]:mx-[10px]'">
-  @for (`; track tab) {
-    <div [attr.data-testid]="'ioc-basic-tag-' + tab" (click)="selectTab(tab)" [ngClass]="selectedTab === tab ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]'" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors">
-      {{ tab }}
-    </div>
-  }
-</div>
 <form (submit)="onSearchSubmit($event)" class="flex items-center max-[550px]:grid" [ngClass]="compactLayout() ? 'mt-[4px] mx-[2px] mb-[6px] max-[1000px]:mx-0 max-[640px]:mt-0 max-[640px]:mx-[2px]' : 'mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[943px]:mx-[10px]'">
   <div class="flex w-full flex-wrap items-start justify-between">
     <div class="w-full">
