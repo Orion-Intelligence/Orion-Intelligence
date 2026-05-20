@@ -589,7 +589,7 @@ export class CaseDetails implements OnInit {
     entity.entityId = entity.entityId || this.createId();
     entity.type = entity.type || 'person';
     entity.value = entity.value || '';
-    entity.displayName = entity.displayName || '';
+    entity.entityDescription = entity.entityDescription || '';
     entity.role = entity.role || 'related';
     entity.relationshipToCase = entity.relationshipToCase || 'related_to';
     entity.confidence = entity.confidence ?? 1;
@@ -715,7 +715,7 @@ export class CaseDetails implements OnInit {
       entityId: entity.entityId || this.createId(),
       type: entity.type,
       value,
-      displayName: entity.displayName?.trim() || value,
+      entityDescription: entity.entityDescription?.trim() || value,
       role: entity.role,
       relationshipToCase: entity.relationshipToCase,
       confidence: entity.confidence,

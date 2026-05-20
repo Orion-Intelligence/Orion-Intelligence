@@ -167,7 +167,7 @@ export class CaseShareComponent implements OnInit, OnDestroy {
     if (primaryEntity) {
       y = this.addPdfSection(doc, autoTable, y, 'Primary Entity', [
         ['Value', primaryEntity.value],
-        ['Display Name', primaryEntity.displayName || primaryEntity.value],
+        ['Display Name', primaryEntity.entityDescription || primaryEntity.value],
         ['Type', this.formatLabel(primaryEntity.type)],
         ['Role', this.formatLabel(primaryEntity.role)],
         ['Confidence', this.formatPercent(primaryEntity.confidence)],

@@ -38,9 +38,9 @@
 
     <div>
         <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
-            Display Name
+            Description
         </label>
-        <input type="text" [(ngModel)]="entity.displayName" [name]="'entityDisplayName-' + controlPrefix" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Optional display name" />
+        <input type="text" [(ngModel)]="entity.entityDescription" [name]="'entityDescription-' + controlPrefix" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Optional description" />
     </div>
 
     <div class="grid gap-3 md:grid-cols-2">

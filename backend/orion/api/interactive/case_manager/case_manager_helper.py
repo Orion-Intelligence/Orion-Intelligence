@@ -99,7 +99,7 @@ def apply_sensitive_case_values(record: db_case_model, transform) -> None:
     record.description = transform(record.description)
     for entity in record.entities or []:
         entity.value = transform(entity.value)
-        entity.displayName = transform(entity.displayName)
+        entity.entityDescription = transform(entity.entityDescription)
         apply_sensitive_entity_values(entity, transform)
     for artifact in record.artifacts or []:
         artifact.title = transform(artifact.title)

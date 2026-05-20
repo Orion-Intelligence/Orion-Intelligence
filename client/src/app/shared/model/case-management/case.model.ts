@@ -181,7 +181,7 @@ export interface CaseEntity {
     entityId: string;
     type: EntityType;
     value: string;
-    displayName?: string;
+    entityDescription?: string;
     role: EntityRole;
     relationshipToCase: EntityRelationship;
     confidence: number;
@@ -199,7 +199,7 @@ export interface CaseEntityRequest {
     entityId: string;
     type: EntityType;
     value: string;
-    displayName?: string;
+    entityDescription?: string;
     role: EntityRole;
     relationshipToCase: EntityRelationship;
     confidence: number;
@@ -418,7 +418,7 @@ export interface SharedCaseEntity {
     entityId: string;
     type: string;
     value: string;
-    displayName?: string;
+    entityDescription?: string;
     role?: string;
     relationshipToCase?: string;
     confidence?: number;

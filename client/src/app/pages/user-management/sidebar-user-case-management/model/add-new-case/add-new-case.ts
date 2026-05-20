@@ -89,7 +89,7 @@ export class AddNewCase {
       entityId,
       type: this.primaryEntity.type,
       value,
-      displayName: this.primaryEntity.displayName?.trim() || value,
+      entityDescription: this.primaryEntity.entityDescription?.trim() || value,
       confidence: this.primaryEntity.confidence,
       identifiers: this.primaryEntity.identifiers.filter(identifier => identifier.type && identifier.value.trim()),
       socialProfiles: this.primaryEntity.socialProfiles.filter(profile => profile.platform && profile.username.trim()),

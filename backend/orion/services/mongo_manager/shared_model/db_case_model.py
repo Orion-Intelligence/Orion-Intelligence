@@ -270,7 +270,7 @@ class CaseEntity(EmbeddedModel):
     entityId: str
     type: EntityType
     value: str
-    displayName: str = ""
+    entityDescription: str = ""
     role: EntityRole = Field(default=EntityRole.RELATED)
     relationshipToCase: EntityRelationship = Field(default=EntityRelationship.RELATED_TO)
     confidence: float = 1.0
