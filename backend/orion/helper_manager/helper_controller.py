@@ -338,3 +338,32 @@ class helper_controller:
                 return False
 
         return True
+
+    @staticmethod
+    def _country_alias_key(value):
+        return re.sub(r"[^a-z0-9]+", "", value.lower())
+
+    @staticmethod
+    def _expand_country_filter_values(value):
+        values = [value]
+        COUNTRY_ALIASES = {
+        "us": ["US", "USA", "U.S.", "U.S.A.", "United States", "United States of America"],
+        "usa": ["US", "USA", "U.S.", "U.S.A.", "United States", "United States of America"],
+        "unitedstates": ["US", "USA", "U.S.", "U.S.A.", "United States", "United States of America"],
+        "unitedstatesofamerica": ["US", "USA", "U.S.", "U.S.A.", "United States", "United States of America"],
+        "uk": ["UK", "GB", "GBR", "United Kingdom", "Great Britain"],
+        "gb": ["UK", "GB", "GBR", "United Kingdom", "Great Britain"],
+        "gbr": ["UK", "GB", "GBR", "United Kingdom", "Great Britain"],
+        "unitedkingdom": ["UK", "GB", "GBR", "United Kingdom", "Great Britain"],
+        "uae": ["UAE", "AE", "United Arab Emirates"],
+        "unitedarabemirates": ["UAE", "AE", "United Arab Emirates"],
+        "ksa": ["KSA", "SA", "Saudi Arabia"],
+        "saudiarabia": ["KSA", "SA", "Saudi Arabia"],
+        "southkorea": ["South Korea", "Korea, Republic of", "Republic of Korea", "KR", "KOR"],
+        "northkorea": ["North Korea", "Korea, Democratic People's Republic of", "KP", "PRK"],
+        "russia": ["Russia", "Russian Federation", "RU", "RUS"],
+        }
+        values.extend(COUNTRY_ALIASES.get(helper_controller._country_alias_key(value),
+            []
+        ))
+        return list(dict.fromkeys(v for v in values if v))
