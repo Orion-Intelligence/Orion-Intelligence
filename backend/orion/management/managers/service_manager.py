@@ -32,12 +32,13 @@ class service_manager:
         self.__url = url
         self._is_available = False
 
-    async def init_services(self):
+    async def init_services(self, build_dir=None):
         while not self._is_available:
             try:
                 _, writer = await asyncio.open_connection("elasticsearch", 9400)
                 writer.close()
                 await writer.wait_closed()
+                await self.init_map_entities_task(build_dir)
 
                 await elastic_controller.get_instance().initialize()
                 await mongo_controller.get_instance().link_connection()
@@ -79,7 +80,15 @@ class service_manager:
     async def build_assets(build_dir):
         helper_controller.build_assets(build_dir)
 
-    async def watch_wri_power_plants_file(self, build_dir):
+    async def init_map_entities_task(self, build_dir):
+        watch_task = asyncio.create_task(self.init_map_entities(build_dir))
+        watch_task.cancel()
+        try:
+            await watch_task
+        except asyncio.CancelledError:
+            pass
+
+    async def init_map_entities(self, build_dir):
         power_plant_file = None
         power_plant_candidates = [
             build_dir / "assets" / "data" / "satellite" / "wri_power_plantsv2.0.json",

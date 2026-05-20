@@ -1,13 +1,11 @@
-from contextlib import asynccontextmanager
-import asyncio
-from pathlib import Path
 import asyncio
 
+from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.staticfiles import StaticFiles
-
 from configs.token_auth_provider import setup_admin
 from configs.exception_handlers import global_exception_handler, validation_exception_handler
 from configs.swagger_config import configure_swagger
@@ -42,7 +40,7 @@ async def lifespan(p_app: FastAPI):
 
     if env_handler.get_instance().env("PRODUCTION", "0") != "1":
         async def start_services_in_background():
-            await service_manager_instance.init_services()
+            await service_manager_instance.init_services(ANGULAR_BUILD_DIR)
             setup_admin(mongo_controller.get_instance().get_engine()).mount_to(p_app)
 
         asyncio.create_task(start_services_in_background())
@@ -50,19 +48,10 @@ async def lifespan(p_app: FastAPI):
         yield
         return
 
-    await service_manager_instance.init_services()
+    await service_manager_instance.init_services(ANGULAR_BUILD_DIR)
     setup_admin(mongo_controller.get_instance().get_engine()).mount_to(p_app)
     app.include_router(interface)
-
-    watch_task = asyncio.create_task(service_manager_instance.watch_wri_power_plants_file(ANGULAR_BUILD_DIR))
-
     yield
-
-    watch_task.cancel()
-    try:
-        await watch_task
-    except asyncio.CancelledError:
-        pass
 
 
 app = FastAPI(title="API Access", lifespan=lifespan, docs_url=None, redoc_url=None)
@@ -74,8 +63,7 @@ app.mount("/swagger-static", StaticFiles(directory=SWAGGER_STATIC_DIR), name="sw
 
 @app.get("/docs", include_in_schema=False)
 def custom_swagger_ui():
-    return get_swagger_ui_html(
-        openapi_url=app.openapi_url, title="API Access", swagger_css_url="/swagger-static/swagger-code.css")
+    return get_swagger_ui_html(openapi_url=app.openapi_url or "/openapi.json", title="API Access", swagger_css_url="/swagger-static/swagger-code.css")
 
 
 configure_swagger(app)
@@ -83,8 +71,6 @@ app.include_router(auth_router, include_in_schema=False)
 app.include_router(crawl_routes, include_in_schema=False)
 app.include_router(admin_routes, include_in_schema=False)
 app.include_router(public_routes, include_in_schema=False)
-if env_handler.get_instance().env("TESTING_ENABLED", "0") == "1":
-    app.include_router(test_routes, include_in_schema=False)
 app.include_router(micro_routes, include_in_schema=False)
 app.include_router(ai_routes, include_in_schema=False)
 app.include_router(tenant_routes, include_in_schema=False)
@@ -94,3 +80,8 @@ app.include_router(case_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
+
+if env_handler.get_instance().env("TESTING_ENABLED", "0") == "1":
+    app.include_router(test_routes, include_in_schema=False)
+
+

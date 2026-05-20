@@ -10,7 +10,7 @@ from fastapi import HTTPException
 
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_ENUMS, ELASTIC_INDEX, ELASTIC_KEYS
-from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
+from orion.api.interactive.search_manager.search_query_generator import search_query_generator
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 
@@ -191,7 +191,7 @@ class SiemLogManager:
             must_clauses.append({"match_all": {}})
         elif ":" in normalized_query and ("&&" in normalized_query or "||" in normalized_query or re.search(r"\b(?:all|domain|email|ip|event_type|source|host|user|severity):", normalized_query)) is not None:
             parsed = helper_controller.parse_tagged_logic_query_for_iocs(normalized_query)
-            logic_query = elastic_request_generator.build_es_from_tagged(parsed, ELASTIC_ENUMS.mapping_siem_iocs)
+            logic_query = search_query_generator.build_es_from_tagged(parsed, ELASTIC_ENUMS.mapping_siem_iocs)
             must_clauses.append(logic_query)
         else:
             should_clauses: list[dict[str, Any]] = [{

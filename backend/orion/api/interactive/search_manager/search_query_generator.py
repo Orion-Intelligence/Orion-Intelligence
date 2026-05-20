@@ -6,11 +6,11 @@ from orion.api.interactive.search_manager.search_data_model.consolidated.search_
 from orion.constants.constant import CONSTANTS, allowed_keys
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
-from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_SEMANTIC, ELASTIC_ENUMS
-from orion.services.elastic_manager.elastic_semantic_controller import elastic_semantic_controller
+from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX, ELASTIC_SEMANTIC, ELASTIC_ENUMS
+from orion.api.interactive.search_manager.search_semantic_controller import search_semantic_controller
 
 
-class elastic_request_generator:
+class search_query_generator:
     COUNTRY_ALIASES = {
         "us": ["US", "USA", "U.S.", "U.S.A.", "United States", "United States of America"],
         "usa": ["US", "USA", "U.S.", "U.S.A.", "United States", "United States of America"],
@@ -36,8 +36,8 @@ class elastic_request_generator:
     @staticmethod
     def _expand_country_filter_values(value):
         values = [value]
-        values.extend(elastic_request_generator.COUNTRY_ALIASES.get(
-            elastic_request_generator._country_alias_key(value),
+        values.extend(search_query_generator.COUNTRY_ALIASES.get(
+            search_query_generator._country_alias_key(value),
             []
         ))
         return list(dict.fromkeys(v for v in values if v))
@@ -46,21 +46,21 @@ class elastic_request_generator:
     def build_es_from_tagged(parsed, mapping):
         if isinstance(parsed, dict):
             if "AND" in parsed:
-                must_clauses = [elastic_request_generator.build_es_from_tagged(x, mapping)
+                must_clauses = [search_query_generator.build_es_from_tagged(x, mapping)
                                 for x in parsed["AND"]]
                 if len(must_clauses) == 1:
                     return must_clauses[0]
                 return {"bool": {"must": must_clauses}}
 
             if "OR" in parsed:
-                should_clauses = [elastic_request_generator.build_es_from_tagged(x, mapping)
+                should_clauses = [search_query_generator.build_es_from_tagged(x, mapping)
                                   for x in parsed["OR"]]
                 if len(should_clauses) == 1:
                     return should_clauses[0]
                 return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
 
         if isinstance(parsed, list):
-            should_clauses = [elastic_request_generator.build_es_from_tagged(x, mapping)
+            should_clauses = [search_query_generator.build_es_from_tagged(x, mapping)
                               for x in parsed]
             if len(should_clauses) == 1:
                 return should_clauses[0]
@@ -129,7 +129,7 @@ class elastic_request_generator:
                 if not val:
                     continue
 
-                filter_values = elastic_request_generator._expand_country_filter_values(val) if ioc_key == "m_country" else [val]
+                filter_values = search_query_generator._expand_country_filter_values(val) if ioc_key == "m_country" else [val]
 
                 for field in es_fields:
                     term_field = field if str(field).endswith((".keyword", ".raw")) else f"{field}"
@@ -231,7 +231,7 @@ class elastic_request_generator:
                         }
                     }
 
-        must_filter_clauses = elastic_request_generator.build_ioc_filter_clauses(pfilter)
+        must_filter_clauses = search_query_generator.build_ioc_filter_clauses(pfilter)
         should_filter_clauses = []
 
         if pfilter and "m_url" in pfilter and pfilter["m_url"]:
@@ -326,7 +326,7 @@ class elastic_request_generator:
             and p_query_model.matchtype == "semantic"
         ):
             try:
-                qvec = elastic_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
+                qvec = search_semantic_controller.get_instance().embed_query_sync(p_query_model.q)
                 if qvec:
                     knn_clause = {
                         "knn": {
@@ -357,60 +357,6 @@ class elastic_request_generator:
                 pass
 
         return query_statement
-
-    @staticmethod
-    def on_bulk_domain_lookup(p_query_model, pFilter=None):
-
-        domain_aggs = {}
-        must_clauses = []
-        domains = helper_controller.extract_domains_from_text(p_query_model.q)
-
-        if pFilter:
-            if "m_url" in pFilter:
-                domains.extend(pFilter["m_url"])
-            if "m_domain" in pFilter:
-                domains.extend(pFilter["m_domain"])
-            if "m_ip" in pFilter:
-                domains.extend(pFilter["m_ip"])
-            if "m_search_all" in pFilter:
-                domains.extend(
-                    [v for v in pFilter["m_search_all"] if
-                        re.search(r'(https?://|[a-z0-9.-]+\.[a-z]{2,})', str(v), re.I)])
-
-        for idx, domain in enumerate(domains):
-            domain = domain.lower()
-            parts = domain.split('/')
-            valid_parts = [p for p in parts if '.' in p]
-
-            if not valid_parts:
-                continue
-            domain_part = valid_parts[-1]
-            agg_name = f"domain_{idx}"
-
-            domain_aggs[agg_name] = {"filter": {"bool": {"should": [
-                {"wildcard": {"m_url.raw": {"value": f"*{domain_part}*", "case_insensitive": True}}},
-                {"wildcard": {"m_domain.raw": {"value": f"*{domain_part}*", "case_insensitive": True}}},
-                {"wildcard": {"m_ip.raw": {"value": f"*{domain_part}*", "case_insensitive": True}}}]}}, "aggs": {"by_ioc_type": {"terms": {"field": "m_ioc_type", "size": 10}, "aggs": {"top_hits_per_type": {"top_hits": {"size": 4, "sort": [
-                {"m_leak_date": {"order": "desc"}}]}}}}}}
-
-        if p_query_model.daterange:
-            parts = p_query_model.daterange.split(',')
-            if len(parts) == 2:
-                try:
-                    from_date_obj = datetime.strptime(parts[0].strip(), "%Y-%m-%d")
-                    to_date_obj = datetime.strptime(parts[1].strip(), "%Y-%m-%d")
-
-                    must_clauses.append(
-                        {"range": {"m_leak_date": {"gte": from_date_obj.strftime(
-                            "%Y-%m-%d"), "lte": to_date_obj.strftime(
-                            "%Y-%m-%d")}}})
-                except ValueError:
-                    pass
-
-        query_statement = {"size": 0, "query": {"bool": {"must": must_clauses if must_clauses else [
-            {"match_all": {}}]}}, "aggs": domain_aggs, "track_total_hits": False}
-
-        return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 
     @staticmethod
     def on_search_persona(p_query_model):
@@ -448,26 +394,6 @@ class elastic_request_generator:
         }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
-
-    @staticmethod
-    def build_date_filter(from_date, to_date, date_fields):
-        return {
-            "bool": {
-                "should": [
-                    {
-                        "bool": {
-                            "filter": [
-                                {"exists": {"field": field}},
-                                {"range": {field: {"gte": from_date, "lte": to_date}}}
-                            ]
-                        }
-                    }
-                    for field in date_fields
-                ],
-                "minimum_should_match": 1
-            }
-        }
-
     @staticmethod
     def build_date_priority_filter(from_date, to_date, priority_field_names):
         formatted_ranges = {
@@ -545,13 +471,13 @@ class elastic_request_generator:
                 if len(parts) == 2:
                     from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT00:00:00+00:00")
                     to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT23:59:59+00:00")
-                    must_clauses.append(elastic_request_generator.build_date_priority_filter(from_date, to_date, date_priority_fields))
+                    must_clauses.append(search_query_generator.build_date_priority_filter(from_date, to_date, date_priority_fields))
             except ValueError:
                 pass
         elif m_date_range != "":
             to_date = datetime.now(timezone.utc).strftime("%Y-%m-%dT23:59:59+00:00")
             from_date = (datetime.now(timezone.utc) - timedelta(days=150)).strftime("%Y-%m-%dT00:00:00+00:00")
-            must_clauses.append(elastic_request_generator.build_date_priority_filter(from_date, to_date, date_priority_fields))
+            must_clauses.append(search_query_generator.build_date_priority_filter(from_date, to_date, date_priority_fields))
 
         if p_query_model.category:
             m_ctype = p_query_model.category
@@ -713,7 +639,7 @@ class elastic_request_generator:
             inner_query = {"match_all": {}}
         else:
             parsed = helper_controller.parse_tagged_logic_query_for_iocs(p_query_model.ioc)
-            inner_query = elastic_request_generator.build_es_from_tagged(
+            inner_query = search_query_generator.build_es_from_tagged(
                 parsed, ELASTIC_ENUMS.mapping_stealer_log_field
             )
 
@@ -752,20 +678,3 @@ class elastic_request_generator:
         }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query_body
-
-
-    @staticmethod
-    def clear_expire_index():
-        utc_now = datetime.now(timezone.utc)
-        threshold_time = utc_now - timedelta(seconds=CONSTANTS.S_SETTINGS_INDEX_EXPIRY)
-        return {"query": {"range": {"m_update_date": {"lt": threshold_time.isoformat()}}}}
-
-    @staticmethod
-    def generate_graph_queries():
-        queries = [
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "query": {"term": {"m_content_type": "leaks"}}, "aggs": {"Top Teams (Leak)": {"terms": {"field": "m_team", "size": 4}}}}},
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Top Teams (Defacement)": {"terms": {"field": "m_team", "size": 4}}}}},
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Top Locations (Defacement)": {"terms": {"field": "m_location", "size": 4}}}}},
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Top Hashtags (Social)": {"terms": {"field": "m_hashtags", "size": 4}}}}}]
-
-        return queries

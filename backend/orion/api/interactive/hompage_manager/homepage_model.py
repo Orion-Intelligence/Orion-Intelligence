@@ -7,7 +7,7 @@ from orion.management.models.insight_model_comparison import InsightComparisonMo
 from orion.services.log_manager.log_controller import log
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
-from orion.services.elastic_manager.elastic_insight_generator import elastic_insight_generator
+from orion.management.jobs.insight_generator import insight_generator
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 
 
@@ -47,7 +47,7 @@ class homepage_model:
             except json.JSONDecodeError:
                 pass
 
-        indices, queries = elastic_insight_generator().on_insight_consolidated_data()
+        indices, queries = insight_generator().on_insight_consolidated_data()
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
 
         leak_hits = []
@@ -96,7 +96,7 @@ class homepage_model:
             except json.JSONDecodeError:
                 pass
 
-        indices, query = elastic_insight_generator().on_insight_consolidated_country()
+        indices, query = insight_generator().on_insight_consolidated_country()
         queries = [query.copy() for _ in indices]
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
 

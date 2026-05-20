@@ -8,19 +8,21 @@ from orion.services.log_manager.log_controller import log
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_SEMANTIC, ELASTIC_SEMANTIC_INDEX
 
 
-class elastic_semantic_controller:
-    __instance: Optional["elastic_semantic_controller"] = None
+class search_semantic_controller:
+    __instance: Optional["search_semantic_controller"] = None
     __m_connection: Optional[AsyncElasticsearch] = None
     __indices: List[str] = []
 
     @staticmethod
-    def get_instance() -> "elastic_semantic_controller":
-        if elastic_semantic_controller.__instance is None:
-            elastic_semantic_controller()
-        return elastic_semantic_controller.__instance
+    def get_instance() -> "search_semantic_controller":
+        if search_semantic_controller.__instance is None:
+            search_semantic_controller()
+        if search_semantic_controller.__instance is None:
+            raise RuntimeError("search semantic controller is not initialized")
+        return search_semantic_controller.__instance
 
     def __init__(self) -> None:
-        elastic_semantic_controller.__instance = self
+        search_semantic_controller.__instance = self
 
     async def init(self, connection: AsyncElasticsearch, indices: Optional[List[str]] = None) -> None:
         self.__m_connection = connection
@@ -28,6 +30,8 @@ class elastic_semantic_controller:
         await self.__post_init_semantic()
 
     def get_connection(self) -> AsyncElasticsearch:
+        if self.__m_connection is None:
+            raise RuntimeError("search semantic connection is not initialized")
         return self.__m_connection
 
     async def close(self) -> None:
@@ -48,11 +52,12 @@ class elastic_semantic_controller:
 
     async def __ensure_vector_field(self, index_name: str) -> None:
         try:
-            mapping = await self.__m_connection.indices.get_mapping(index=index_name)
+            connection = self.get_connection()
+            mapping = await connection.indices.get_mapping(index=index_name)
             props = mapping.get(index_name, {}).get("mappings", {}).get("properties", {})
             if ELASTIC_SEMANTIC.S_EMBED_FIELD in props:
                 return
-            await self.__m_connection.indices.put_mapping(
+            await connection.indices.put_mapping(
                 index=index_name,
                 body={"properties": {ELASTIC_SEMANTIC.S_EMBED_FIELD: {"type": "dense_vector", "dims": ELASTIC_SEMANTIC.S_EMBED_DIMS, "similarity": "cosine", "index": True}}})
         except Exception as ex:

@@ -2,7 +2,7 @@ from orion.constants.constant import CONSTANTS
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 
 
-class elastic_insight_generator:
+class insight_generator:
     @staticmethod
     def _strip_query(query, size=4):
         query["size"] = size
@@ -80,11 +80,11 @@ class elastic_insight_generator:
 
     @staticmethod
     def on_insight_general_data():
-        return ELASTIC_INDEX.S_GENERIC_INDEX, elastic_insight_generator.on_shared_data_query()
+        return ELASTIC_INDEX.S_GENERIC_INDEX, insight_generator.on_shared_data_query()
 
     @staticmethod
     def on_insight_exploitdata():
-        return ELASTIC_INDEX.S_GENERIC_INDEX, elastic_insight_generator.on_shared_data_query()
+        return ELASTIC_INDEX.S_GENERIC_INDEX, insight_generator.on_shared_data_query()
 
     @staticmethod
     def on_insight_defacement_data():
@@ -110,16 +110,16 @@ class elastic_insight_generator:
         queries = []
         indices = []
 
-        i1, q1 = elastic_insight_generator.on_insight_leakdata()
-        queries.append(elastic_insight_generator._strip_query(q1))
+        i1, q1 = insight_generator.on_insight_leakdata()
+        queries.append(insight_generator._strip_query(q1))
         indices.append(i1)
 
-        i2, q2 = elastic_insight_generator.on_insight_general_data()
-        queries.append(elastic_insight_generator._strip_query(q2))
+        i2, q2 = insight_generator.on_insight_general_data()
+        queries.append(insight_generator._strip_query(q2))
         indices.append(i2)
 
-        i5, q5 = elastic_insight_generator.on_insight_defacement_data()
-        queries.append(elastic_insight_generator._strip_query(q5))
+        i5, q5 = insight_generator.on_insight_defacement_data()
+        queries.append(insight_generator._strip_query(q5))
         indices.append(i5)
 
         return indices, queries
