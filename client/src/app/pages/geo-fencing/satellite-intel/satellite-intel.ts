@@ -17,8 +17,15 @@ import { SatelliteFacilitiesResponse, SatelliteAnomalyResponse, SatelliteCompare
 import { ThreatLensComponent } from ".././threat-lens/threat-lens";
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ORION_INFRASTRUCTURE_FILTERS, ORION_POWER_FILTERS, OrionSatelliteFeature, OrionSatelliteFeatureType, PowerPlantByIdItem } from './model/satellite-intel.model';
+import { SATELLITE_IMAGE_TYPES, SatelliteImageType } from '../../../shared/model/satellite-intel/satellite-intel.model';
 
-type SatelliteIntelPanel = 'dashboard' | 'compare' | 'anomaly' | 'sentinel' | 'image';
+type SatelliteIntelPanel = 'dashboard' | 'analysis' | 'sentinel' | 'image';
+type SatelliteAnalysisMode = 'compare' | 'anomaly' | 'both';
+type SatelliteAnalysisState = {
+  isLoading: boolean;
+  hasRun: boolean;
+  errorMessage: string | null;
+};
 
 @Component({
   selector:    'app-satellite-intel',
@@ -45,6 +52,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private sub?: Subscription;
   private aircraftTrackSub?: Subscription;
   private shipTrackSub?: Subscription;
+  private analysisSub?: Subscription;
   private aircraftTimer?: ReturnType<typeof setInterval>;
   private shipsTimer?: ReturnType<typeof setInterval>;
   private pendingRequest: 'facilities' | 'anomaly' | 'compare' | 'sentinel' | 'sentinel-image' | null = null;
@@ -77,8 +85,14 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   readonly progressSegments = Array.from({ length: 20 }, (_, i) => i);
   readonly powerFilters = ORION_POWER_FILTERS;
   readonly infrastructureFilters = ORION_INFRASTRUCTURE_FILTERS;
-  readonly panelTabs: Array<{ id: SatelliteIntelPanel; label: string }> = [ { id: 'dashboard', label: 'Dashboard' },{ id: 'compare', label: 'Compare' }, { id: 'anomaly', label: 'Anomaly' }, { id: 'sentinel', label: 'Sentinel' }, { id: 'image', label: 'Image' }, ];
+  readonly panelTabs: Array<{ id: SatelliteIntelPanel; label: string }> = [ { id: 'dashboard', label: 'Dashboard' }, { id: 'analysis', label: 'Analysis' }, { id: 'sentinel', label: 'Sentinel' }, { id: 'image', label: 'Image' }, ];
+  readonly analysisModes: Array<{ id: SatelliteAnalysisMode; label: string }> = [ { id: 'compare', label: 'Compare Image only' }, { id: 'anomaly', label: 'Anomaly only' }, { id: 'both', label: 'Compare + Anomaly' }, ];
+  readonly imageTypes: SatelliteImageType[] = SATELLITE_IMAGE_TYPES;
   activePanel: SatelliteIntelPanel = 'dashboard';
+  analysisMode: SatelliteAnalysisMode = 'compare';
+  analysisImageType = 'true_colour';
+  compareAnalysisState: SatelliteAnalysisState = this.createAnalysisState();
+  anomalyAnalysisState: SatelliteAnalysisState = this.createAnalysisState();
   activeTab: 'map' | 'tracking' | 'threat' = 'map';
   coordsForm = { value: '', delta: 0.05 };
   formError:  string | null = null;
@@ -204,6 +218,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.analysisSub?.unsubscribe();
     this.aircraftTrackSub?.unsubscribe();
     this.shipTrackSub?.unsubscribe();
     clearInterval(this.aircraftTimer);
@@ -298,6 +313,31 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.isPanelMenuOpen = false;
   }
 
+  selectAnalysisMode(mode: SatelliteAnalysisMode): void {
+    this.analysisMode = mode;
+  }
+
+  selectAnalysisImageType(imageType: string): void {
+    this.analysisImageType = imageType;
+  }
+
+  get isCompareAnalysisSelected(): boolean {
+    return this.analysisMode === 'compare' || this.analysisMode === 'both';
+  }
+
+  get isAnomalyAnalysisSelected(): boolean {
+    return this.analysisMode === 'anomaly' || this.analysisMode === 'both';
+  }
+
+  get isAnalysisRunning(): boolean {
+    return this.compareAnalysisState.isLoading || this.anomalyAnalysisState.isLoading;
+  }
+
+  get selectedAnalysisLabel(): string {
+    const mode = this.analysisModes.find((entry) => entry.id === this.analysisMode);
+    return mode?.label ?? 'Analysis';
+  }
+
   closePanelPopup(): void {
     this.isPanelPopupOpen = false;
   }
@@ -389,32 +429,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   runAnomalyScan(): void {
-    this.syncAppliedViewport();
-    const lat = this.lat ?? this.inputLat;
-    const lon = this.lon ?? this.inputLon;
-    if (!lat || !lon) {
-      return;
-    }
-    this.lat = lat;
-    this.lon = lon;
-    this.setPanel('anomaly');
-    this.anomalyResult = null;
-    this.hasSearched = true;
-    this.pendingRequest = 'anomaly';
-    this.satelliteService.resetState();
-    this.sub?.unsubscribe();
-    const loadingId = this.beginMainLoading('Loading Satellite Intel', 'Running anomaly scan...');
-    this.sub = this.satelliteService.runAnomalyScan(this.lat, this.lon, this.delta).subscribe({
-      next: (res) => {
-        this.anomalyResult = res.result;
-        if(res.result){
-          this.endMainLoading(loadingId);
-        }
-      },
-      error: () => {
-        this.endMainLoading(loadingId);
-      }
-    });
+    this.analysisMode = 'anomaly';
+    this.runImageAnalysis();
   }
 
   copyCoords(): void {
@@ -467,34 +483,89 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   onRunCompare(event: { imageType: string }): void {
+    this.analysisMode = 'compare';
+    this.analysisImageType = event.imageType;
+    this.runImageAnalysis();
+  }
+
+  runImageAnalysis(): void {
     this.syncAppliedViewport();
     const lat = this.lat ?? this.inputLat;
     const lon = this.lon ?? this.inputLon;
-    if (!lat || !lon) {
+    if (lat === null || lat === undefined || lon === null || lon === undefined) {
       this.pendingRequest = null;
       return;
     }
     this.lat = lat;
     this.lon = lon;
-    this.compareResult = null;
     this.hasSearched = true;
-    this.pendingRequest = 'compare';
+    this.pendingRequest = null;
+    this.currentStep = '';
     this.satelliteService.resetState();
-    this.sub?.unsubscribe();
-    const loadingId = this.beginMainLoading('Loading Satellite Intel', 'Loading 3-month comparison...');
-    this.sub = this.satelliteService.runCompare(this.lat, this.lon, this.delta, event.imageType).subscribe({
+    this.analysisSub?.unsubscribe();
+    this.analysisSub = new Subscription();
+
+    if (this.isCompareAnalysisSelected) {
+      this.startCompareAnalysis(this.lat, this.lon);
+    }
+
+    if (this.isAnomalyAnalysisSelected) {
+      this.startAnomalyAnalysis(this.lat, this.lon);
+    }
+  }
+
+  private startCompareAnalysis(lat: number, lon: number): void {
+    this.compareResult = null;
+    this.compareAnalysisState = { isLoading: true, hasRun: true, errorMessage: null };
+
+    const compareSub = this.satelliteService.runCompare(lat, lon, this.delta, this.analysisImageType).subscribe({
       next: (res) => {
-        console.log("1")
-        this.compareResult = res.result;
-        if(res.result){
-          this.endMainLoading(loadingId);
+        if (Array.isArray(res.result?.months)) {
+          this.compareResult = res.result;
         }
       },
-      error: () => {
-        console.log("2")
-        this.endMainLoading(loadingId);
-      }
+      error: (err) => {
+        this.compareAnalysisState = {
+          ...this.compareAnalysisState,
+          errorMessage: this.getRequestErrorMessage(err, 'Compare analysis failed'),
+        };
+      },
     });
+
+    compareSub.add(() => {
+      this.compareAnalysisState = {
+        ...this.compareAnalysisState,
+        isLoading: false,
+      };
+    });
+    this.analysisSub?.add(compareSub);
+  }
+
+  private startAnomalyAnalysis(lat: number, lon: number): void {
+    this.anomalyResult = null;
+    this.anomalyAnalysisState = { isLoading: true, hasRun: true, errorMessage: null };
+
+    const anomalySub = this.satelliteService.runAnomalyScan(lat, lon, this.delta).subscribe({
+      next: (res) => {
+        if (Array.isArray(res.result?.months)) {
+          this.anomalyResult = res.result;
+        }
+      },
+      error: (err) => {
+        this.anomalyAnalysisState = {
+          ...this.anomalyAnalysisState,
+          errorMessage: this.getRequestErrorMessage(err, 'Anomaly analysis failed'),
+        };
+      },
+    });
+
+    anomalySub.add(() => {
+      this.anomalyAnalysisState = {
+        ...this.anomalyAnalysisState,
+        isLoading: false,
+      };
+    });
+    this.analysisSub?.add(anomalySub);
   }
 
   onRunSentinelSearch(): void {
@@ -711,6 +782,15 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   cancel(): void {
+    this.analysisSub?.unsubscribe();
+    this.compareAnalysisState = {
+      ...this.compareAnalysisState,
+      isLoading: false,
+    };
+    this.anomalyAnalysisState = {
+      ...this.anomalyAnalysisState,
+      isLoading: false,
+    };
     this.satelliteService.cancelCurrentScan();
     this.mainLoadingRequests.clear();
     this.syncMainLoadingState();
@@ -724,19 +804,17 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     if (this.activePanel === 'sentinel')   {
       return this.sentinelResults?.results?.length ?? 0;
     }
-    if (this.activePanel === 'anomaly')    {
-      return this.anomalyResult?.months?.filter((m: any) => m?.has_data).length ?? 0;
-    }
-    if (this.activePanel === 'compare')    {
-      return this.compareResult?.months?.length ?? 0;
+    if (this.activePanel === 'analysis')    {
+      const compareCount = this.compareResult?.months?.length ?? 0;
+      const anomalyCount = this.anomalyResult?.months?.filter((m: any) => m?.has_data).length ?? 0;
+      return compareCount + anomalyCount;
     }
     return 0;
   }
 
   private isPanelId(value: string | null): value is SatelliteIntelPanel {
     return value === 'dashboard' ||
-      value === 'compare' ||
-      value === 'anomaly' ||
+      value === 'analysis' ||
       value === 'sentinel' ||
       value === 'image';
   }
@@ -909,11 +987,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   private endMainLoading(id: number): void {
-    console.log("end1")
     if (!this.mainLoadingRequests.has(id)) {
       return;
     }
-    console.log("end2")
     this.mainLoadingRequests.delete(id);
     this.syncMainLoadingState();
   }
@@ -1121,6 +1197,18 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       counts[item.type] = (counts[item.type] || 0) + 1;
       return counts;
     }, {});
+  }
+
+  private createAnalysisState(): SatelliteAnalysisState {
+    return {
+      isLoading: false,
+      hasRun: false,
+      errorMessage: null,
+    };
+  }
+
+  private getRequestErrorMessage(err: any, fallback: string): string {
+    return err?.message || err?.error?.detail || err?.error?.message || fallback;
   }
 
   private looksLikeFacilitiesResult(result: any): boolean {

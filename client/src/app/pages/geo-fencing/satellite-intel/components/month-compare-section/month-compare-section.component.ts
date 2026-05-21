@@ -27,6 +27,7 @@ export class MonthCompareSectionComponent {
   @Input() errorMessage:     string | null = null;
   @Input() hasSearched      = false;
   @Input() compareResult:   SatelliteCompareResponse['result'] | null = null;
+  @Input() showControls     = true;
 
   @Output() runCompare = new EventEmitter<{ imageType: string }>();
 

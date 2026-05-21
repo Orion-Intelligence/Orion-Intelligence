@@ -18,28 +18,30 @@
     </div>
   }
 
-  <div class="mb-4 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
-    <div class="border-b border-[var(--color-divider)] px-4 py-3">
-      <div class="mb-2 text-[11px] font-bold uppercase tracking-widest text-[var(--color-text4)]">Image type</div>
-      <div class="flex flex-wrap gap-2">
-        @for (type of imageTypes; track type.key) {
-          <button type="button" class="rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors" [ngClass]="selectedType === type.key ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-640)]','text-white'] : ['border-[var(--color-border)]','bg-[var(--color-blue-720)]','text-[var(--color-text3)]','hover:bg-[var(--color-blue-710)]','hover:text-[var(--color-text1)]']" (click)="selectType(type.key)">
-            {{ type.label }}
-          </button>
-        }
+  @if (showControls) {
+    <div class="mb-4 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+      <div class="border-b border-[var(--color-divider)] px-4 py-3">
+        <div class="mb-2 text-[11px] font-bold uppercase tracking-widest text-[var(--color-text4)]">Image type</div>
+        <div class="flex flex-wrap gap-2">
+          @for (type of imageTypes; track type.key) {
+            <button type="button" class="rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors" [ngClass]="selectedType === type.key ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-640)]','text-white'] : ['border-[var(--color-border)]','bg-[var(--color-blue-720)]','text-[var(--color-text3)]','hover:bg-[var(--color-blue-710)]','hover:text-[var(--color-text1)]']" (click)="selectType(type.key)">
+              {{ type.label }}
+            </button>
+          }
+        </div>
+      </div>
+      <div class="px-4 py-3">
+        <button type="button" class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40" [disabled]="isScanning" (click)="onRunCompare()">
+          @if (isScanning && !useMainLoading) {
+            <span class="h-4 w-4 rounded-full border-2 border-white/25 border-t-white animate-spin"></span>
+          } @else {
+            <i class="bi bi-images text-[14px]"></i>
+          }
+          Load 3-month comparison
+        </button>
       </div>
     </div>
-    <div class="px-4 py-3">
-      <button type="button" class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40" [disabled]="isScanning" (click)="onRunCompare()">
-        @if (isScanning && !useMainLoading) {
-          <span class="h-4 w-4 rounded-full border-2 border-white/25 border-t-white animate-spin"></span>
-        } @else {
-          <i class="bi bi-images text-[14px]"></i>
-        }
-        Load 3-month comparison
-      </button>
-    </div>
-  </div>
+  }
 
   @if (showLoadingSkeleton) {
     <div class="grid grid-cols-3 gap-3">
