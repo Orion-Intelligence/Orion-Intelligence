@@ -509,6 +509,10 @@ export class ShipMapRenderer {
 
   private extractDetails(res: any): SatelliteLiveShip | null {
     const payload = res?.result ?? res;
+    const ships = this.service.extractItems(payload);
+    if (ships?.length) {
+      return ships[0];
+    }
     if (Array.isArray(payload?.ships) && payload.ships.length > 0) {
       return payload.ships[0] as SatelliteLiveShip;
     }

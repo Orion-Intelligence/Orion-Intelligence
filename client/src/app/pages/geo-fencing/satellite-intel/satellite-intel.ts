@@ -9,7 +9,7 @@ import { MonthCompareSectionComponent } from './ui-overlays/month-compare-sectio
 import { AnomalySectionComponent } from './ui-overlays/anomaly-section/anomaly-section.component';
 import { SentinelSearchSectionComponent } from './ui-overlays/sentinel-search-section/sentinel-search-section.component';
 import { SentinelImageSectionComponent } from './ui-overlays/sentinel-image-section/sentinel-image-section.component';
-import { MapEntityPopupComponent } from './ui-overlays/map-entity-popup/map-entity-popup.component';
+import { EntityDescriptionPopupComponent } from './ui-overlays/entity-description-popup/entity-description-popup.component';
 import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
 import { ThreatLensComponent } from "../threat-lens/threat-lens";
 import { OrionSatelliteDashboardFilter, OrionSatelliteFeature, OrionSatelliteFeatureType, SatelliteTrackingViewport } from '../models/geo-fencing.models';
@@ -44,7 +44,7 @@ import { SatelliteIntelPanelEnum } from '../enums/geo-fencing.enums';
     AnomalySectionComponent,
     SentinelSearchSectionComponent,
     SentinelImageSectionComponent,
-    MapEntityPopupComponent,
+    EntityDescriptionPopupComponent,
     MapEntitiesOverlayComponent,
     DashboardSectionComponent,
     PanelShellComponent,
@@ -160,11 +160,11 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     return this.loadingController.message;
   }
 
-  get mapEntityPopupOpen(): boolean {
+  get entityDescriptionPopupOpen(): boolean {
     return this.mapEntityDetails.isOpen;
   }
 
-  get mapEntityPopupData(): MapEntityDetailsController['data'] {
+  get entityDescriptionPopupData(): MapEntityDetailsController['data'] {
     return this.mapEntityDetails.data;
   }
 
@@ -441,6 +441,14 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.mapEntityDashboard.toggleFilter(type);
   }
 
+  selectAllDashboardFilters(): void {
+    this.mapEntityDashboard.selectAllFilters();
+  }
+
+  clearDashboardFilters(): void {
+    this.mapEntityDashboard.clearFilters();
+  }
+
   focusDashboardFeature(feature: OrionSatelliteFeature): void {
     this.selectedFeature = feature;
     this.focusedFeature = feature;
@@ -456,7 +464,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.mapEntityDetails.load(ids);
   }
 
-  closeMapEntityPopup(): void {
+  closeEntityDescriptionPopup(): void {
     this.mapEntityDetails.close();
   }
 

@@ -76,11 +76,11 @@
         }
       </div>
       @if (isMapView) {
-        <app-map-entity-popup
-          [isOpen]="mapEntityPopupOpen"
-          [items]="mapEntityPopupData"
-          (close)="closeMapEntityPopup()">
-        </app-map-entity-popup>
+        <app-entity-description-popup
+          [isOpen]="entityDescriptionPopupOpen"
+          [items]="entityDescriptionPopupData"
+          (close)="closeEntityDescriptionPopup()">
+        </app-entity-description-popup>
       }
       <app-satellite-panel-shell
         [isMapView]="isMapView"
@@ -117,6 +117,8 @@
     (clearDashboardSearch)="clearDashboardSearch()"
     (featureFocused)="focusDashboardFeature($event)"
     (filterToggled)="toggleDashboardFilter($event)"
+    (selectAllFilters)="selectAllDashboardFilters()"
+    (clearFilters)="clearDashboardFilters()"
     (locationOpened)="openGeocodeModal()"
     (aircraftTrackingToggled)="onAircraftTrackingSelectionChange()"
     (shipTrackingToggled)="onShipTrackingSelectionChange()">

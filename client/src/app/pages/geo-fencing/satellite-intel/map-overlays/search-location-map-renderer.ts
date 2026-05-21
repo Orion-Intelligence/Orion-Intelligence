@@ -4,7 +4,7 @@ export class SearchLocationMapRenderer {
   constructor(private L: any, private map: any) {}
 
   render(lat: number | null, lon: number | null): void {
-    if (!this.L || !this.map || !lat || !lon) {
+    if (!this.L || !this.map || !Number.isFinite(lat) || !Number.isFinite(lon)) {
       return;
     }
 

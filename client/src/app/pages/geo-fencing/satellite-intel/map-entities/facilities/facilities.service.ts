@@ -90,8 +90,9 @@ export class SatelliteFacilitiesService {
       return null;
     }
 
-    const rawKind = String(feature?.properties?.kind || feature?.properties?.type || '').trim().toLowerCase();
-    const type = this.normalizeType(rawKind);
+    const properties = feature?.properties || {};
+    const rawKind = this.getRawKind(properties);
+    const type = this.detectTypeFromRecord({ ...properties, type: rawKind });
 
     return {
       id: `osm-${feature?.properties?.osm_id ?? index}`,
@@ -109,7 +110,7 @@ export class SatelliteFacilitiesService {
   }
 
   private normalizeType(rawKind: string): OrionSatelliteFeatureType {
-    const value = rawKind.toLowerCase().trim();
+    const value = this.normalizeKindKey(rawKind);
     switch (value) {
       case 'airport':
       case 'aerodrome':
@@ -117,11 +118,32 @@ export class SatelliteFacilitiesService {
       case 'heliport':
         return 'airport';
       case 'port':
+      case 'ports':
       case 'harbour':
+      case 'harbours':
       case 'harbor':
+      case 'harbors':
       case 'seaport':
+      case 'sea_port':
       case 'dock':
+      case 'docks':
       case 'marina':
+      case 'pier':
+      case 'quay':
+      case 'jetty':
+      case 'wharf':
+      case 'shipyard':
+      case 'boatyard':
+      case 'ferry':
+      case 'ferry_terminal':
+      case 'harbour_master':
+      case 'port_terminal':
+      case 'container_terminal':
+      case 'cargo_terminal':
+      case 'breakwater':
+      case 'dolphin':
+      case 'mooring':
+      case 'anchorage':
         return 'port';
       case 'warehouse':
       case 'depot':
@@ -186,6 +208,7 @@ export class SatelliteFacilitiesService {
       case 'petcoke':
         return 'petcoke';
       case 'wave and tidal':
+      case 'wave_and_tidal':
       case 'wave':
       case 'tidal':
       case 'tidal_stream':
@@ -225,6 +248,20 @@ export class SatelliteFacilitiesService {
 
   private defaultLabel(type: OrionSatelliteFeatureType): string {
     return type.split('_').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+  }
+
+  private getRawKind(properties: Record<string, any>): string {
+    const rawKind = properties?.['kind'] ||
+      properties?.['type'] ||
+      properties?.['amenity'] ||
+      properties?.['man_made'] ||
+      properties?.['building'] ||
+      properties?.['landuse'] ||
+      properties?.['waterway'] ||
+      properties?.['seamark:type'] ||
+      properties?.['seamark_type'] ||
+      '';
+    return String(rawKind).trim().toLowerCase();
   }
 
   private toStreamedMapEntityFeature(item: { id?: string; _id?: string; name?: string; type?: string; primary_fuel?: string; country?: string; capacity_mw?: number; source?: string; location?: { lat?: number; lon?: number }; location_point?: { lat?: number; lon?: number }; lat?: number; lon?: number }, index: number): OrionSatelliteFeature | null {
@@ -268,19 +305,23 @@ export class SatelliteFacilitiesService {
   }
 
   private detectTypeFromRecord(record: any): OrionSatelliteFeatureType {
-    const landuse = String(record?.landuse || '').toLowerCase().trim();
-    const building = String(record?.building || '').toLowerCase().trim();
-    const manMade = String(record?.man_made || '').toLowerCase().trim();
+    const kind = this.normalizeKindKey(String(record?.kind || record?.type || record?.primary_fuel || ''));
+    const landuse = this.normalizeKindKey(String(record?.landuse || ''));
+    const building = this.normalizeKindKey(String(record?.building || ''));
+    const manMade = this.normalizeKindKey(String(record?.man_made || ''));
+    const amenity = this.normalizeKindKey(String(record?.amenity || ''));
+    const waterway = this.normalizeKindKey(String(record?.waterway || ''));
+    const seamarkType = this.normalizeKindKey(String(record?.['seamark:type'] || record?.seamark_type || ''));
 
-    if (record?.type) {
-      const detected = this.normalizeType(String(record.type));
+    if (kind) {
+      const detected = this.normalizeType(kind);
       if (detected !== 'other') {
         return detected;
       }
     }
 
     if (record?.aeroway) {
-      const aeroway = String(record.aeroway).toLowerCase().trim();
+      const aeroway = this.normalizeKindKey(String(record.aeroway));
       if (['aerodrome', 'airfield', 'airstrip', 'hangar', 'helipad', 'heliport', 'terminal'].includes(aeroway)) {
         return 'airport';
       }
@@ -289,18 +330,27 @@ export class SatelliteFacilitiesService {
     if (record?.port || record?.harbour || record?.harbor) {
       return 'port';
     }
-    if (['port', 'harbour', 'harbor', 'dock', 'marina'].includes(landuse)) {
+    if (['port', 'harbour', 'harbor', 'dock', 'marina', 'shipyard'].includes(landuse)) {
       return 'port';
     }
     if (['port', 'harbour', 'harbor', 'dock', 'pier', 'quay', 'jetty', 'wharf', 'shipyard'].includes(building)) {
       return 'port';
     }
-    if (['pier', 'quay', 'wharf', 'jetty', 'breakwater', 'dock', 'dolphin'].includes(manMade)) {
+    if (['pier', 'quay', 'wharf', 'jetty', 'breakwater', 'dock', 'dolphin', 'mooring', 'crane'].includes(manMade)) {
+      return 'port';
+    }
+    if (['ferry_terminal', 'boat_rental', 'boat_storage'].includes(amenity)) {
+      return 'port';
+    }
+    if (['dock', 'boatyard', 'fuel'].includes(waterway)) {
+      return 'port';
+    }
+    if (['harbour', 'harbor', 'pier', 'bridge', 'berth', 'mooring', 'anchorage', 'ferry_terminal'].includes(seamarkType)) {
       return 'port';
     }
 
     if (record?.military) {
-      const military = String(record.military).toLowerCase().trim();
+      const military = this.normalizeKindKey(String(record.military));
       if (military && military !== 'no') {
         return 'military';
       }
@@ -349,13 +399,17 @@ export class SatelliteFacilitiesService {
     }
 
     if (record?.power) {
-      const power = String(record.power).toLowerCase().trim();
+      const power = this.normalizeKindKey(String(record.power));
       if (power === 'plant') {
         return 'industrial';
       }
     }
 
     return 'other';
+  }
+
+  private normalizeKindKey(value: string): string {
+    return value.toLowerCase().trim().replace(/[\s-]+/g, '_');
   }
 
   private getNearbyFacilityColor(type: OrionSatelliteFeatureType): string {

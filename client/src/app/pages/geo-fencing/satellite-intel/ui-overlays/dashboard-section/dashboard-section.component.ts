@@ -34,6 +34,8 @@ export class DashboardSectionComponent {
   @Output() clearDashboardSearch = new EventEmitter<void>();
   @Output() featureFocused = new EventEmitter<OrionSatelliteFeature>();
   @Output() filterToggled = new EventEmitter<OrionSatelliteFeatureType>();
+  @Output() selectAllFilters = new EventEmitter<void>();
+  @Output() clearFilters = new EventEmitter<void>();
   @Output() locationOpened = new EventEmitter<void>();
   @Output() aircraftTrackingToggled = new EventEmitter<void>();
   @Output() shipTrackingToggled = new EventEmitter<void>();

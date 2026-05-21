@@ -297,7 +297,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         }, 500);
       });
 
-      if (this.lat && this.lon) {
+      if (Number.isFinite(this.lat) && Number.isFinite(this.lon)) {
         this.updateMapView();
       }
       if (this.facilityFeatures?.length) {
@@ -329,7 +329,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   }
 
   private updateMapView(): void {
-    if (!this.leafletMap || !this.lat || !this.lon) {
+    if (!this.leafletMap || !Number.isFinite(this.lat) || !Number.isFinite(this.lon)) {
       return;
     }
     this.leafletMap.setView([this.lat, this.lon], this.deltaToZoom(this.delta));

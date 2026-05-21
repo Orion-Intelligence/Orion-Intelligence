@@ -6,8 +6,6 @@ export class SatelliteMapEntityDashboardController {
   private mapEntityFlushTimer: ReturnType<typeof setTimeout> | null = null;
   private isMapEntityFlushing = false;
   private streamFinished = false;
-  private typeFiltersInitialized = false;
-  private typeFiltersTouched = false;
   private dashboardTypeFilterCache: OrionSatelliteDashboardFilter[] = ORION_POWER_FILTERS.map((option) => ({
     key: option.key as OrionSatelliteFeatureType,
     label: option.label,
@@ -46,8 +44,6 @@ export class SatelliteMapEntityDashboardController {
   async load(): Promise<void> {
     this.resetStreamState();
     this.isLoading = true;
-    this.typeFiltersInitialized = false;
-    this.typeFiltersTouched = false;
     this.selectedFilters = [];
     this.wriData = [];
     this.refresh();
@@ -71,25 +67,6 @@ export class SatelliteMapEntityDashboardController {
     this.mergedData = this.getFacilitiesVisible()
       ? [...this.wriData, ...this.getFacilitiesMapData()]
       : [...this.wriData];
-
-    const availableTypes = Array.from(new Set(this.mergedData.map((feature) => feature.type))) as OrionSatelliteFeatureType[];
-    if (!this.typeFiltersInitialized) {
-      this.selectedFilters = availableTypes;
-      this.typeFiltersInitialized = true;
-    }
-    else if (!this.typeFiltersTouched) {
-      const selected = new Set(this.selectedFilters);
-      let changed = false;
-      for (const type of availableTypes) {
-        if (!selected.has(type)) {
-          selected.add(type);
-          changed = true;
-        }
-      }
-      if (changed) {
-        this.selectedFilters = Array.from(selected);
-      }
-    }
 
     this.filteredData = this.mergedData.filter((feature) => this.selectedFilters.includes(feature.type));
     this.filteredWriData = this.filteredData.filter((feature) => feature.source === 'WRI');
@@ -115,11 +92,19 @@ export class SatelliteMapEntityDashboardController {
   }
 
   toggleFilter(type: OrionSatelliteFeatureType): void {
-    this.typeFiltersInitialized = true;
-    this.typeFiltersTouched = true;
     this.selectedFilters = this.selectedFilters.includes(type)
       ? this.selectedFilters.filter((entry) => entry !== type)
       : [...this.selectedFilters, type];
+    this.refresh();
+  }
+
+  selectAllFilters(): void {
+    this.selectedFilters = this.dashboardTypeFilterCache.map((option) => option.key);
+    this.refresh();
+  }
+
+  clearFilters(): void {
+    this.selectedFilters = [];
     this.refresh();
   }
 

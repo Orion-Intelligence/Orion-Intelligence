@@ -177,7 +177,7 @@ export class OrionFacilitiesMapRenderer {
         html: rendered.element,
         className: 'bg-transparent border-0',
         iconSize: [size, size],
-        iconAnchor: [Math.round(size / 2), Math.round(size / 2)],
+        iconAnchor: [Math.round(size / 2), size],
       }),
       componentRef: rendered.componentRef,
     };
