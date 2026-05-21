@@ -57,6 +57,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private loadingController = new SatelliteLoadingController();
   private scanController: SatelliteScanController;
   private mapEntityDetails: MapEntityDetailsController;
+  private initialMapEntityLoadTimer: ReturnType<typeof setTimeout> | null = null;
   private route: ActivatedRoute;
   private sidebarService: SidebarService;
   private geocodeService: GeocodeService;
@@ -104,7 +105,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.satelliteService.resetState();
-    this.loadMapEntities();
     this.setPanel(SatelliteIntelPanelEnum.Dashboard);
     const section = this.route.snapshot.queryParamMap.get('section');
     const q = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
@@ -118,9 +118,17 @@ export class SatelliteIntel implements OnInit, OnDestroy {
         this.inputLon = parsed.lon;
       }
     }
+    this.initialMapEntityLoadTimer = setTimeout(() => {
+      this.initialMapEntityLoadTimer = null;
+      this.loadMapEntities();
+    }, 0);
   }
 
   ngOnDestroy(): void {
+    if (this.initialMapEntityLoadTimer) {
+      clearTimeout(this.initialMapEntityLoadTimer);
+      this.initialMapEntityLoadTimer = null;
+    }
     this.entityLoader.destroy();
     this.mapEntityDashboard.destroy();
     this.mapEntityDetails.destroy();

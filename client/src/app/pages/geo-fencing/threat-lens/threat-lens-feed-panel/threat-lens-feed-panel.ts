@@ -1,13 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, HostBinding, Input, NgZone, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ThreatLensDisplayFeedItem, ThreatLensFeedRange, ThreatLensFeedRangeOption } from '../../models/geo-fencing.models';
-import { ThreatLensDisplayFeedItem, ThreatLensFeedItem, ThreatLensFeedRange } from '../threat.lens.model';
-
-export interface ThreatLensFeedRangeOption {
-  key: ThreatLensFeedRange;
-  label: string;
-}
+import { ThreatLensDisplayFeedItem, ThreatLensFeedItem, ThreatLensFeedRange, ThreatLensFeedRangeOption } from '../../models/geo-fencing.models';
 
 export type ThreatLensFeedPanelType = 'news' | 'archive';
 

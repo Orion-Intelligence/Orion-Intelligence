@@ -9,8 +9,7 @@ import { SidebarService } from '../../../shared/services/sidebar.service';
 import { FilterModel } from '../../../shared/model/filter/filter.model';
 import { FiltersComponent } from "../../../shared/partials/filters/filters.component";
 import { threat_lens_filters } from '../../../shared/constants/filters';
-import { AnimatedArcDescriptor, SelectedCountryCategoryCount, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensDisplayFeedItem, ThreatLensFeedItem, ThreatLensFeedRange, ThreatLensLegendItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
-import { AnimatedArcDescriptor, SelectedCountryCategoryCount, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensLegendItem, ThreatLensMapData, ThreatLensRequestPayload, } from './threat.lens.model';
+import { AnimatedArcDescriptor, SelectedCountryCategoryCount, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensLegendItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
 import { ThreatLensService } from './threat.lens.service';
 import { ThreatLensFeedPanelComponent } from './threat-lens-feed-panel/threat-lens-feed-panel';
 

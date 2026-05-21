@@ -14,6 +14,7 @@ export class SatelliteMapEntityDashboardController {
     color: option.color,
     count: 0,
   }));
+  private visibleDashboardTypeFilterCache: OrionSatelliteDashboardFilter[] = [];
   private visiblePowerCountCache = 0;
   private readonly mapEntityFlushIntervalMs = 80;
   private readonly mapEntityBatchSize = 1000;
@@ -35,8 +36,7 @@ export class SatelliteMapEntityDashboardController {
   }
 
   get visibleDashboardTypeFilters(): OrionSatelliteDashboardFilter[] {
-    const selected = new Set(this.selectedFilters);
-    return this.dashboardTypeFilters.filter((option) => selected.has(option.key));
+    return this.visibleDashboardTypeFilterCache;
   }
 
   get visiblePowerCount(): number {
@@ -95,6 +95,7 @@ export class SatelliteMapEntityDashboardController {
     this.filteredWriData = this.filteredData.filter((feature) => feature.source === 'WRI');
     this.filteredFacilitiesMapData = this.filteredData.filter((feature) => feature.source === 'OSM');
     this.refreshStats();
+    this.refreshVisibleTypeFilters();
     this.updateSearchResults(this.dashboardSearch.trim().toLowerCase());
   }
 
@@ -197,6 +198,11 @@ export class SatelliteMapEntityDashboardController {
     }));
 
     this.visiblePowerCountCache = this.filteredData.filter((feature) => feature.source === 'WRI').length;
+  }
+
+  private refreshVisibleTypeFilters(): void {
+    const selected = new Set(this.selectedFilters);
+    this.visibleDashboardTypeFilterCache = this.dashboardTypeFilterCache.filter((option) => selected.has(option.key));
   }
 
   private updateSearchResults(query: string): void {
