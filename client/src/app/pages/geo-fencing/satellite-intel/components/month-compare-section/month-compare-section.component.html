@@ -87,8 +87,10 @@
 </div>
 
 @if (lightboxSrc) {
-  <div class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90" (click)="closeLightbox()">
-    <img [src]="lightboxSrc" [alt]="lightboxLabel" class="max-h-[82vh] max-w-[92vw] rounded-lg object-contain"/>
-    <div class="mt-3 text-[13px] text-white/60">{{ lightboxLabel }}</div>
+  <div class="fixed inset-0 z-50 flex min-w-0 flex-col items-center justify-center overflow-hidden bg-black/90 px-3 py-4" (click)="closeLightbox()">
+    <div class="flex min-h-0 w-full max-w-full min-w-0 flex-col items-center">
+      <img [src]="lightboxSrc" [alt]="lightboxLabel" class="block h-auto max-h-[82vh] max-w-full rounded-lg object-contain"/>
+      <div class="mt-3 max-w-full truncate text-[13px] text-white/60">{{ lightboxLabel }}</div>
+    </div>
   </div>
 }
