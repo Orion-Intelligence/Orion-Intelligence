@@ -1,11 +1,11 @@
 import { Component, ChangeDetectionStrategy, input, output, computed, inject, signal } from '@angular/core';
 
-import { NetworkData, PlatformResult, CustomEntity, NetworkNode } from '../../../../shared/model/social/social-scan.models';
+import { NetworkData, PlatformResult, CustomEntity, NetworkNode, SocialPost } from '../../../../shared/model/social/social-scan.models';
 import { formatFollowers, formatKey, isUrl, isImageUrl } from '../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
 import { SocialEntityUiService } from '../services/social-entity-ui.service';
-import { getMetadataEntries } from '../utils/summary-view.util';
+import { getMetadataEntries, getProfileDetailEntries } from '../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
 import { getEntityRecordEntries, getEntityReportRecords, getScanResultsByUsername, parsePlatformNodeId } from '../utils/social-graph-view.util';
 @Component({
@@ -19,13 +19,14 @@ export class ListViewComponent {
   networkData = input.required<NetworkData>();
   scanResults = input.required<Map<string, PlatformResult[]>>();
   customEntities = input.required<CustomEntity[]>();
-  isSmallScreen = input.required<boolean>();
-  expandedPlatformNodeId = input.required<string | null>();
   nodeClicked = output<string>();
   platformNodeClicked = output<string>();
   deleteCustomEntity = output<string>();
+  addEntityRequested = output<CustomEntity['type']>();
   public state = inject(SocialMapperStateService);
   readonly socialEntityUiService = inject(SocialEntityUiService);
+  addSearchTerm = signal('');
+  entityAddOptions: { type: CustomEntity['type']; label: string; iconClass: string; }[] = [ { type: 'email-breach', label: 'Add Email Breach', iconClass: 'bi bi-person-badge text-indigo-400' }, { type: 'social-scanner', label: 'Add Social Scanner', iconClass: 'bi bi-people text-indigo-400' }, { type: 'wanted-list', label: 'Add Wanted List', iconClass: 'bi bi-person-exclamation text-indigo-400' }, { type: 'national-identity', label: 'Add National Identity', iconClass: 'bi bi-card-text text-indigo-400' }, { type: 'playstore-scanner', label: 'Add Playstore Scanner', iconClass: 'bi bi-google-play text-indigo-400' }, { type: 'software-scanner', label: 'Add Software Scanner', iconClass: 'bi bi-window text-indigo-400' }, { type: 'phone', label: 'Add Phone', iconClass: 'bi bi-telephone text-indigo-400' }, { type: 'crypto-scanner', label: 'Add Crypto Scanner', iconClass: 'bi bi-currency-bitcoin text-green-400' } ];
   expandedEntityIds = signal<Set<string>>(new Set<string>());
   public formatFollowers = formatFollowers;
   public formatKey = formatKey;
@@ -57,21 +58,6 @@ export class ListViewComponent {
     return following.slice(0, 3);
   }
 
-  getFollowerSummary(platformData: PlatformResult): string {
-    const followersCount = this.getFollowers(platformData).length;
-    const followingCount = this.getFollowing(platformData).length;
-    if (followersCount === 0 && followingCount === 0) {
-      return 'Followers and following not fetched';
-    }
-    if (followersCount > 0 && followingCount > 0) {
-      return `${followersCount} followers, ${followingCount} following`;
-    }
-    if (followersCount > 0) {
-      return `${followersCount} followers`;
-    }
-    return `${followingCount} following`;
-  }
-
   getProfileUrl(platformData: PlatformResult, username: string): string {
     return buildSocialProfileUrl(platformData.platform, username, platformData.url);
   }
@@ -85,6 +71,59 @@ export class ListViewComponent {
     return userResults?.find(p =>
       (p.platform || '').toLowerCase() === parsed.platformName.toLowerCase() &&
             (p.username || '').toLowerCase() === parsed.platformUsername.toLowerCase());
+  }
+
+  getProfileBio(platformData: PlatformResult): string {
+    return platformData.profileDetails?.bio
+      || platformData.description
+      || platformData.allMetadata?.['bio']
+      || platformData.allMetadata?.['description']
+      || '';
+  }
+
+  getRecentPosts(platformData: PlatformResult): SocialPost[] {
+    return (platformData.posts || []).filter(Boolean).slice(0, 3);
+  }
+
+  getPostCaption(post: SocialPost | null | undefined): string {
+    return post?.caption?.trim() || '';
+  }
+
+  hasPostMedia(post: SocialPost | null | undefined): boolean {
+    return !!post?.media_url;
+  }
+
+  isVideoPost(post: SocialPost | null | undefined): boolean {
+    const mediaType = (post?.media_type || '').toLowerCase();
+    const mediaUrl = (post?.media_url || '').toLowerCase();
+    return mediaType.includes('video') || mediaUrl.includes('.mp4') || mediaUrl.includes('.mov') || mediaUrl.includes('.webm');
+  }
+
+  getPostMediaTypeLabel(post: SocialPost | null | undefined): string {
+    return post?.media_type?.replace(/_/g, ' ') || 'Media';
+  }
+
+  formatPostMetric(value: string | number | null | undefined): string {
+    if (value === null || value === undefined || value === '') {
+      return '0';
+    }
+    const numericValue = typeof value === 'number' ? value : Number(String(value).replace(/,/g, ''));
+    return Number.isFinite(numericValue) ? formatFollowers(numericValue) : String(value);
+  }
+
+  getStatValue(platformData: PlatformResult, key: keyof NonNullable<PlatformResult['profileDetails']>): string {
+    const profileValue = platformData.profileDetails?.[key];
+    const metadataValue = platformData.allMetadata?.[key as string];
+    const rawValue = profileValue ?? metadataValue;
+    if (rawValue === null || rawValue === undefined || rawValue === '') {
+      return '--';
+    }
+    const numericValue = typeof rawValue === 'number' ? rawValue : Number(String(rawValue).replace(/,/g, ''));
+    return Number.isFinite(numericValue) ? formatFollowers(numericValue) : String(rawValue);
+  }
+
+  getProfileDetailEntries(platformData: PlatformResult): { key: string; value: any; }[] {
+    return getProfileDetailEntries(platformData);
   }
 
   getEntityData(entityNodeId: string): CustomEntity | undefined {
@@ -180,6 +219,19 @@ export class ListViewComponent {
       }
       return next;
     });
+  }
+
+  get filteredEntityAddOptions(): { type: CustomEntity['type']; label: string; iconClass: string; }[] {
+    const term = this.addSearchTerm().trim().toLowerCase();
+    if (!term) {
+      return this.entityAddOptions;
+    }
+    return this.entityAddOptions.filter(option => option.label.toLowerCase().includes(term));
+  }
+
+  onAddSearchInput(event: Event) {
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.addSearchTerm.set(nextValue);
   }
 
 }

@@ -84,6 +84,49 @@ export class SocialMapperStateService {
     this.manageProfilesModalData.set({ username, platforms: platformsWithSelection });
   }
 
+  openSummaryPopup(username: string) {
+    const allUserPlatforms = this.scanResults().get(username);
+    if (!allUserPlatforms) {
+      return;
+    }
+
+    const platformMapByIdentity = new Map<string, PlatformResult>(allUserPlatforms.map(platform => [this.fetchingState.getPlatformUniqueKey(platform), platform]));
+    const platformIdentitiesOnGraph = new Set<string>();
+    const centralNodeId = `user-${username}`;
+
+    this.networkData().edges.forEach(edge => {
+      const otherNodeId = edge.from === centralNodeId ? edge.to : (edge.to === centralNodeId ? edge.from : null);
+      if (!otherNodeId) {
+        return;
+      }
+
+      const connectedNode = this.networkData().nodes.find(node => node.id === otherNodeId);
+      if (!connectedNode) {
+        return;
+      }
+
+      if (connectedNode.id.toString().startsWith('group-')) {
+        connectedNode.groupedPlatforms?.forEach(platform => {
+          platformIdentitiesOnGraph.add(this.fetchingState.getPlatformUniqueKey(platform));
+        });
+        return;
+      }
+
+      if (connectedNode.id.toString().startsWith('platform-')) {
+        const platform = allUserPlatforms.find(item => this.fetchingState.getPlatformUniqueKey(item) === connectedNode.id.toString());
+        if (platform) {
+          platformIdentitiesOnGraph.add(this.fetchingState.getPlatformUniqueKey(platform));
+        }
+      }
+    });
+
+    const platformsToShow = Array.from(platformIdentitiesOnGraph)
+      .map(identity => platformMapByIdentity.get(identity))
+      .filter((platform): platform is PlatformResult => !!platform);
+    const email = platformsToShow.find(platform => platform.email)?.email;
+    this.summaryPopupData.set({ username, platforms: platformsToShow, email });
+  }
+
   closeManageProfilesModal() {
     this.manageProfilesModalData.set(null); 
   }

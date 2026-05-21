@@ -23,7 +23,6 @@ export class HomeMenuComponent implements OnDestroy {
   jobs = input.required<Job[]>();
   customEntities = input.required<CustomEntity[]>();
   activeUsernames = input.required<Set<string>>();
-  viewMode = input.required<'graph' | 'list'>();
   isSmallScreen = input.required<boolean>();
   toggle = output<undefined>();
   tabSelected = output<'history' | 'entities'>();

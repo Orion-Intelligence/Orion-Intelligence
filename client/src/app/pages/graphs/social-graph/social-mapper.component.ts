@@ -1,6 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal, computed, DestroyRef, OnDestroy, PLATFORM_ID, effect, OnInit, viewChild, ElementRef, Inject, inject, ViewEncapsulation } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { NetworkGraphComponent } from './network-graph/network-graph.component';
 import { MetadataPopupComponent } from './metadata-popup/metadata-popup.component';
 import { ProfileSummaryPopupComponent } from './profile-summary-popup/profile-summary-popup.component';
 import { CustomEntity, Job, PlatformResult, TabState } from '../../../shared/model/social/social-scan.models';
@@ -24,14 +23,12 @@ import { RelationshipConnectionItem } from './services/social-mapper-state.servi
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { MessagePopupComponent } from '../../../shared/partials/message-popup/message-popup.component';
 import { RelationshipDetailsPopupComponent } from './relationship-details-popup/relationship-details-popup.component';
-import { GraphToolbarComponent } from '../shared/graph-toolbar/graph-toolbar.component';
-import { GraphSearchTriggerComponent } from './graph-search-trigger/graph-search-trigger.component';
 import { SocialScanJobService } from './services/social-scan-job.service';
 import { PlatformFetchService } from './services/platform-fetch.service';
 import { RelationshipResolverService } from './services/relationship-resolver.service';
 import { GraphLoadingComponent } from '../shared/graph-loading/graph-loading.component';
 import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/utils/file-input.util';
-import { getEntityRecordEntries, getEntityReportRecords, getScanResultsByUsername, parsePlatformNodeId } from './utils/social-graph-view.util';
+import { getEntityRecordEntries, getEntityReportRecords } from './utils/social-graph-view.util';
 @Component({
   selector: 'app-social-graph',
   templateUrl: './social-mapper.component.html',
@@ -39,7 +36,6 @@ import { getEntityRecordEntries, getEntityReportRecords, getScanResultsByUsernam
   encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [
-    NetworkGraphComponent,
     MetadataPopupComponent,
     ProfileSummaryPopupComponent,
     HomeMenuComponent,
@@ -54,8 +50,6 @@ import { getEntityRecordEntries, getEntityReportRecords, getScanResultsByUsernam
     EntityManagerComponent,
     AddEntityModalComponent,
     RelationshipDetailsPopupComponent,
-    GraphToolbarComponent,
-    GraphSearchTriggerComponent,
     GraphLoadingComponent
   ]
 })
@@ -79,15 +73,10 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   scanResults = computed(() => this.activeTabState()?.scanResults() ?? new Map<string, PlatformResult[]>());
   activeUsernames = computed(() => this.activeTabState()?.activeUsernames() ?? new Set<string>());
   customEntities = computed(() => this.activeTabState()?.customEntities() ?? []);
-  isEditMode = computed(() => this.activeTabState()?.isEditMode() ?? false);
   isHomeMenuCollapsed = computed(() => this.activeTabState()?.isHomeMenuCollapsed() ?? false);
   isEntityMenuCollapsed = computed(() => this.activeTabState()?.isEntityMenuCollapsed() ?? false);
   activeHomeMenuTab = computed(() => this.activeTabState()?.activeHomeMenuTab() ?? 'history');
   isPhysicsEnabled = computed(() => this.activeTabState()?.isPhysicsEnabled() ?? false);
-  viewMode = computed(() => this.activeTabState()?.viewMode() ?? 'graph');
-  expandedPlatformNodeId = signal<string | null>(null);
-  graphSearchTerm = signal('');
-  isGraphSearchExpanded = signal(false);
   isSmallScreen = signal(false);
   userNodeAliases = signal<Record<string, string>>({});
   platformAliasModalData = signal<{
@@ -99,10 +88,6 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
   entityManager = viewChild(EntityManagerComponent);
   isSearchDisabled = computed(() => this.searchTerm().trim().length === 0);
-  canEditConnections = computed(() => {
-    const connectableNodesCount = this.networkData().nodes.filter(node => !node.id.toString().startsWith('relationship-node-')).length;
-    return connectableNodesCount >= 2;
-  });
   isUserScanInProgress = computed(() => {
     return this.isScanInProgressForUsername(this.state.summaryPopupData()?.username);
   });
@@ -219,20 +204,11 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     }
   }
 
-  onSearchChanged(term: string) {
+  onSearchChanged(termOrEvent: string | Event) {
+    const term = typeof termOrEvent === 'string'
+      ? termOrEvent
+      : (termOrEvent.target as HTMLInputElement | null)?.value ?? '';
     this.updateState(state => state.searchTerm.set(term), false);
-  }
-
-  onViewModeChanged(mode: 'graph' | 'list') {
-    this.updateState(state => state.viewMode.set(mode), false);
-  }
-
-  onPhysicsToggled() {
-    this.updateState(state => state.isPhysicsEnabled.update(v => !v), false);
-  }
-
-  onEditModeToggled() {
-    this.updateState(state => state.isEditMode.update(v => !v), false);
   }
 
   onHomeMenuSearchChanged(term: string) {
@@ -249,30 +225,6 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
 
   onHomeMenuTabSelected(tab: 'history' | 'entities') {
     this.updateState(state => state.activeHomeMenuTab.set(tab), false);
-  }
-
-  onGraphSearchChanged(event: Event) {
-    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
-    this.graphSearchTerm.set(nextValue);
-  }
-
-  toggleGraphSearch() {
-    this.isGraphSearchExpanded.update(v => !v);
-  }
-
-  expandGraphSearch() {
-    this.isGraphSearchExpanded.set(true);
-  }
-
-  collapseGraphSearch() {
-    if (!this.graphSearchTerm().trim()) {
-      this.isGraphSearchExpanded.set(false);
-    }
-  }
-
-  clearGraphSearch() {
-    this.graphSearchTerm.set('');
-    this.isGraphSearchExpanded.set(false);
   }
 
   onPlatformAliasInputChanged(event: Event) {
@@ -514,54 +466,11 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     });
   }
 
-  private getPlatformIdentityKey(platform: PlatformResult): string {
-    return `${platform.keyUsername}|${platform.platform.toLowerCase()}|${platform.username.toLowerCase()}`;
-  }
-
   onNodeClicked(nodeId: string) {
     if (!nodeId.startsWith('user-')) {
       return;
     }
-    const username = nodeId.replace('user-', '');
-    const allUserPlatforms = getScanResultsByUsername(this.scanResults(), username);
-    if (!allUserPlatforms) {
-      return;
-    }
-    const platformMapByIdentity = new Map<string, PlatformResult>(allUserPlatforms.map(p => [this.getPlatformIdentityKey(p), p]));
-    const platformIdentitiesOnGraph = new Set<string>();
-    this.networkData().edges.forEach(edge => {
-      let otherNodeId = edge.from === nodeId ? edge.to : (edge.to === nodeId ? edge.from : null);
-      if (otherNodeId) {
-        const connectedNode = this.networkData().nodes.find(n => n.id === otherNodeId);
-        if (connectedNode) {
-          if (connectedNode.id.toString().startsWith('group-')) {
-            connectedNode.groupedPlatforms?.forEach(platform => {
-              const identity = this.getPlatformIdentityKey(platform);
-              platformIdentitiesOnGraph.add(identity);
-            });
-          }
-          else if (connectedNode.id.toString().startsWith('platform-')) {
-            const parsed = parsePlatformNodeId(connectedNode.id.toString());
-            if (!parsed) {
-              return;
-            }
-            const normalizedUser = parsed.keyUsername.toLowerCase();
-            const normalizedPlatform = parsed.platformName.toLowerCase();
-            const normalizedPlatformUser = parsed.platformUsername.toLowerCase();
-            const platform = allUserPlatforms.find(p =>
-              (p.keyUsername || '').toLowerCase() === normalizedUser &&
-                            (p.platform || '').toLowerCase() === normalizedPlatform &&
-                            (p.username || '').toLowerCase() === normalizedPlatformUser);
-            if (platform) {
-              platformIdentitiesOnGraph.add(this.getPlatformIdentityKey(platform));
-            }
-          }
-        }
-      }
-    });
-    const platformsToShow = Array.from(platformIdentitiesOnGraph).map(identity => platformMapByIdentity.get(identity)).filter((platform): platform is PlatformResult => !!platform);
-    const email = platformsToShow.find(p => p.email)?.email;
-    this.state.summaryPopupData.set({ username, platforms: platformsToShow, email });
+    this.state.openSummaryPopup(nodeId.replace('user-', ''));
   }
 
   onPlatformNodeClicked(nodeId: string) {
@@ -571,10 +480,6 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       return;
     }
     if (!nodeId.startsWith('platform-')) {
-      return;
-    }
-    if (this.viewMode() === 'list') {
-      this.expandedPlatformNodeId.update(currentId => (currentId === nodeId ? null : nodeId));
       return;
     }
     this.state.openPlatformNodePopup(nodeId);

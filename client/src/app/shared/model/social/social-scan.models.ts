@@ -87,6 +87,7 @@ export interface PlatformResult {
     platform: string;
     username: string;
     url: string;
+    timestamp?: string;
     isSelected: boolean;
     status?: 'active' | 'suggested' | 'informational';
     description?: string;

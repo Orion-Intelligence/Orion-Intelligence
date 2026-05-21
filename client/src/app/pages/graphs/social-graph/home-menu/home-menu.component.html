@@ -1,229 +1,263 @@
-<div class="h-full flex flex-col transition-all duration-300 ease-in-out" [class.w-80]="!isCollapsed()" [class.w-20]="isCollapsed()">
+<div class="h-full flex flex-col transition-all duration-300 ease-in-out" [class.w-80]="!isCollapsed()" [class.w-16]="isCollapsed()">
   <app-graph-sidebar-shell [isCollapsed]="isCollapsed()" (toggleClicked)="toggle.emit(undefined)">
-    <div sidebar-expanded class="h-full flex flex-col">
-      <div class="p-3 border-b border-slate-800 shrink-0">
+
+    <!-- ── Expanded sidebar ── -->
+    <div sidebar-expanded class="h-full flex flex-col bg-white dark:bg-[#242526]">
+
+      <!-- Search filter -->
+      <div class="px-3 py-3 border-b border-gray-200 dark:border-[#3a3b3c] shrink-0">
         <div class="relative">
           <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <i class="bi bi-search w-5 h-5 text-slate-400"></i>
+            <i class="bi bi-search text-gray-400 text-sm"></i>
           </div>
-          <input type="text" placeholder="Filter items..." [value]="searchTerm()" (input)="onSearchInput($event)" class="block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-690)] py-1.5 pl-10 pr-3 text-[var(--color-text2)] placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6" />
+          <input type="text" placeholder="Filter items..." [value]="searchTerm()" (input)="onSearchInput($event)" class="block w-full rounded-full border border-gray-200 dark:border-[#3a3b3c] bg-gray-100 dark:bg-[#3a3b3c] py-1.5 pl-9 pr-3 text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1877f2]/30">
         </div>
       </div>
 
-      <div class="flex-grow p-3 flex flex-col overflow-y-auto">
-        <div class="border-b border-slate-700 shrink-0">
-          <nav class="-mb-px flex space-x-4" aria-label="Tabs">
-            <button data-testid="home-menu-tab-history" (click)="tabSelected.emit('history')" [class]="'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'history' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">Scan History</button>
-            @if (!isSmallScreen()) {
-              <button data-testid="home-menu-tab-entities" (click)="tabSelected.emit('entities')" [class]="'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'entities' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">Entities</button>
-            }
-          </nav>
-        </div>
+      <!-- Tabs -->
+      <div class="flex border-b border-gray-200 dark:border-[#3a3b3c] shrink-0">
+        <button data-testid="home-menu-tab-history" (click)="tabSelected.emit('history')" class="flex-1 py-2.5 text-sm font-semibold transition-colors border-b-2" [class.border-[#1877f2]]="activeTab() === 'history'" [class.text-[#1877f2]]="activeTab() === 'history'" [class.border-transparent]="activeTab() !== 'history'" [class.text-gray-500]="activeTab() !== 'history'" [class.dark:text-gray-400]="activeTab() !== 'history'" [class.hover:text-gray-700]="activeTab() !== 'history'" [class.dark:hover:text-gray-200]="activeTab() !== 'history'">
+          Scan History
+        </button>
+        @if (!isSmallScreen()) {
+          <button data-testid="home-menu-tab-entities" (click)="tabSelected.emit('entities')" class="flex-1 py-2.5 text-sm font-semibold transition-colors border-b-2" [class.border-[#1877f2]]="activeTab() === 'entities'" [class.text-[#1877f2]]="activeTab() === 'entities'" [class.border-transparent]="activeTab() !== 'entities'" [class.text-gray-500]="activeTab() !== 'entities'" [class.dark:text-gray-400]="activeTab() !== 'entities'" [class.hover:text-gray-700]="activeTab() !== 'entities'" [class.dark:hover:text-gray-200]="activeTab() !== 'entities'">
+            Entities
+          </button>
+        }
+      </div>
 
-        <div class="pt-4">
-          @if (activeTab() === 'history') {
-            <div>
-              <div class="flex flex-col gap-3">
-                @for (job of displayJobs(); track trackByJobId(i, job); let i = $index) {
-                  <div class="home-menu-created-item">
-                    <div class="home-menu-fade-row" [class.home-menu-fade-row-hidden]="!job.matches">
-                      <div [class]="getJobClasses(job)" (click)="jobClicked.emit(job)" class="transition-opacity duration-300">
-                        <div class="flex justify-between items-start gap-3">
-                          <div class="flex items-center gap-3 min-w-0 flex-1">
-                            <div>
-                              @switch (job.status) {
-                                @case ('queued') {
-                                  <i class="bi bi-hourglass-split w-4 h-4 text-orange-400"></i>
-                                }
-                                @case ('in_progress') {
-                                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-400" role="status"></div>
-                                }
-                                @case ('completed') {
-                                  <i class="bi bi-check-circle-fill w-4 h-4 text-green-500"></i>
-                                }
-                                @case ('failed') {
-                                  <i class="bi bi-x-circle-fill w-4 h-4 text-red-500"></i>
-                                }
-                              }
-                            </div>
-                            <p class="font-bold mb-0 truncate text-indigo-300">{{ job.displayName || job.username }}</p>
-                          </div>
-                          @if (job.status === 'in_progress' || job.status === 'queued') {
-                            <div class="flex items-center gap-2 shrink-0">
-                              <div class="font-mono text-xs text-slate-400">{{ getAnimatedProgress(job) }}%</div>
-                              <button (click)="$event.stopPropagation(); cancelScan.emit(job.id)" title="Cancel Scan" class="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors">
-                                <i class="bi bi-x-lg"></i>
-                              </button>
-                            </div>
-                          }
-                          @if (job.status !== 'in_progress' && job.status !== 'queued' && isUserBusy(job.username)) {
-                            <div class="flex items-center gap-2 shrink-0">
-                              <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
-                              <button (click)="$event.stopPropagation(); cancelAllFetches.emit(job.username)" title="Cancel active fetches" class="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors">
-                                <i class="bi bi-x-lg"></i>
-                              </button>
-                            </div>
+      <!-- Tab content -->
+      <div class="flex-grow overflow-y-auto px-3 py-3">
+
+        <!-- ── Scan History tab ── -->
+        @if (activeTab() === 'history') {
+          <div class="flex flex-col gap-2">
+
+            @for (job of displayJobs(); track trackByJobId(i, job); let i = $index) {
+              <div class="home-menu-created-item">
+                <div class="home-menu-fade-row" [class.home-menu-fade-row-hidden]="!job.matches">
+                  <div [class]="getJobClasses(job)" (click)="jobClicked.emit(job)" class="rounded-xl border border-gray-200 dark:border-[#3a3b3c] bg-white dark:bg-[#3a3b3c] p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#4a4b4c] transition-colors">
+                    <!-- Job header row -->
+                    <div class="flex justify-between items-start gap-2">
+                      <div class="flex items-center gap-2 min-w-0 flex-1">
+                        <!-- Status icon -->
+                        <div class="flex-shrink-0">
+                          @switch (job.status) {
+                            @case ('queued') {
+                              <i class="bi bi-hourglass-split text-amber-400 text-base leading-none"></i>
+                            }
+                            @case ('in_progress') {
+                              <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1877f2]"></div>
+                            }
+                            @case ('completed') {
+                              <i class="bi bi-check-circle-fill text-green-500 text-base leading-none"></i>
+                            }
+                            @case ('failed') {
+                              <i class="bi bi-x-circle-fill text-red-400 text-base leading-none"></i>
+                            }
                           }
                         </div>
-                        @if (job.status === 'queued' || job.status === 'in_progress' || shouldShowCompletionProgress(job)) {
-                          <progress class="home-menu-progress-track mt-2" max="100" [value]="getAnimatedProgress(job)"></progress>
-                        }
-                        <p class="text-sm text-slate-400 truncate mb-0 mt-1">{{ job.step }}</p>
-                        @if (job.status === 'completed' || job.status === 'failed') {
-                          <div class="flex justify-between items-center mt-3">
-                            @if (activeUsernames().has(job.username)) {
-                              <div>
-                                <div class="flex items-center gap-1.5 text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
-                                  <i class="bi bi-check-circle-fill"></i>
-                                  <span>On Graph</span>
-                                </div>
-                              </div>
-                            } @else {
-                              <div class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-500/10 px-2 py-0.5 rounded-full">
-                                <i class="bi bi-node-minus"></i>
-                                <span>Not on Graph</span>
-                              </div>
-                            }
-                            <div class="flex items-center gap-2">
-                              @if (activeUsernames().has(job.username) && viewMode() === 'graph') {
-                                <button (click)="$event.stopPropagation(); state.focusOnUser(job.username)" title="Focus on graph" class="w-8 h-8 flex items-center justify-center rounded-full text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors leading-none">
-                                  <i class="bi bi-bullseye text-base leading-none block"></i>
-                                </button>
-                              }
-                              <button (click)="$event.stopPropagation(); state.openDeleteConfirmation(job.username)" title="Delete Profile" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-500 bg-slate-700/50 hover:bg-red-500/20 hover:text-red-400 transition-colors">
-                                <i class="bi bi-trash3 w-4 h-4 leading-none block"></i>
-                              </button>
-                            </div>
-                          </div>
-                        }
+                        <p class="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate mb-0">
+                          {{ job.displayName || job.username }}
+                        </p>
                       </div>
+
+                      <!-- In-progress controls -->
+                      @if (job.status === 'in_progress' || job.status === 'queued') {
+                        <div class="flex items-center gap-1.5 shrink-0">
+                          <span class="font-mono text-xs text-gray-400">{{ getAnimatedProgress(job) }}%</span>
+                          <button (click)="$event.stopPropagation(); cancelScan.emit(job.id)" title="Cancel Scan" class="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors">
+                            <i class="bi bi-x-lg text-xs leading-none"></i>
+                          </button>
+                        </div>
+                      }
+
+                      <!-- Fetching controls -->
+                      @if (job.status !== 'in_progress' && job.status !== 'queued' && isUserBusy(job.username)) {
+                        <div class="flex items-center gap-1.5 shrink-0">
+                          <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
+                          <button (click)="$event.stopPropagation(); cancelAllFetches.emit(job.username)" title="Cancel active fetches" class="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors">
+                            <i class="bi bi-x-lg text-xs leading-none"></i>
+                          </button>
+                        </div>
+                      }
                     </div>
+
+                    <!-- Progress bar -->
+                    @if (job.status === 'queued' || job.status === 'in_progress' || shouldShowCompletionProgress(job)) {
+                      <progress class="home-menu-progress-track mt-2" max="100" [value]="getAnimatedProgress(job)"></progress>
+                    }
+
+                    <!-- Step text -->
+                    <p class="text-xs text-gray-400 dark:text-gray-500 truncate mt-1 mb-0">{{ job.step }}</p>
+
+                    <!-- Completed / failed footer -->
+                    @if (job.status === 'completed' || job.status === 'failed') {
+                      <div class="flex justify-between items-center mt-2.5">
+                        <!-- On feed badge -->
+                        @if (activeUsernames().has(job.username)) {
+                          <span class="inline-flex items-center gap-1 text-[11px] font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-2 py-0.5 rounded-full">
+                            <i class="bi bi-check-circle-fill text-[10px]"></i> On Feed
+                          </span>
+                        } @else {
+                          <span class="inline-flex items-center gap-1 text-[11px] font-medium text-gray-400 bg-gray-100 dark:bg-gray-700/30 px-2 py-0.5 rounded-full">
+                            <i class="bi bi-dash-circle text-[10px]"></i> Not on Feed
+                          </span>
+                        }
+
+                        <!-- Action buttons -->
+                        <div class="flex items-center gap-1">
+                          <button (click)="$event.stopPropagation(); state.openDeleteConfirmation(job.username)" title="Delete Profile" class="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors">
+                            <i class="bi bi-trash3 text-sm leading-none"></i>
+                          </button>
+                        </div>
+                      </div>
+                    }
                   </div>
-                }
+                </div>
               </div>
-              @if (displayJobs().length < jobsWithFilter().length) {
-                <div class="mt-4">
-                  <button (click)="loadMoreJobs()" class="w-full rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-indigo-400 transition-colors hover:bg-slate-700">Load More</button>
-                </div>
-              }
-              @if (jobs().length === 0) {
-                <div class="text-center text-slate-500 py-8 flex flex-col items-center opacity-50">
-                  <p class="text-sm">Scan history is empty.</p>
-                </div>
-              }
-              @if (!hasJobMatches() && jobs().length > 0) {
-                <div class="text-center text-slate-500 py-8 flex flex-col items-center">
-                  <i class="bi bi-search text-4xl text-slate-600"></i>
-                  <h3 class="mt-2 text-md font-semibold text-slate-300">No Results Found</h3>
-                  <p class="text-sm">Filter "{{ searchTerm() }}" did not match any scans.</p>
-                </div>
-              }
-            </div>
-          }
-          @if (activeTab() === 'entities') {
-            <div>
-              <div class="flex flex-col gap-2">
-                @for (entity of displayEntities(); track trackByEntityId(i, entity); let i = $index) {
-                  <div class="home-menu-created-item">
-                    <div class="home-menu-fade-row">
-                      <div [class]="getEntityClasses(entity)" (click)="entityClicked.emit(entity.id)" class="transition-opacity duration-300">
-                        <div class="flex justify-between items-start">
-                          <div class="flex items-center gap-3 min-w-0">
-                            <div>
-                              @switch (entity.status) {
-                                @case ('in_progress') {
-                                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-400" role="status"></div>
-                                }
-                                @case ('pending') {
-                                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-400" role="status"></div>
-                                }
-                                @case ('added') {
-                                  <i class="bi bi-check-circle-fill w-4 h-4 text-green-500"></i>
-                                }
-                                @case ('failed') {
-                                  <i class="bi bi-x-circle-fill w-4 h-4 text-red-500"></i>
-                                }
-                              }
-                            </div>
-                            <div class="min-w-0">
-                              <p class="font-bold mb-0 truncate text-indigo-300">{{ entity.label }}</p>
-                              <p class="text-[11px] uppercase tracking-wide text-slate-500 mb-0 truncate">{{ entity.type.replace('-', ' ') }}</p>
-                            </div>
-                          </div>
-                          @if (entity.status === 'in_progress' || entity.status === 'pending') {
-                            <div class="flex items-center gap-2 shrink-0">
-                              <div class="font-mono text-xs text-slate-400">{{ getAnimatedEntityProgress(entity) }}%</div>
-                              <button (click)="$event.stopPropagation(); cancelEntityScan.emit(entity.id)" title="Cancel Scan" class="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors">
-                                <i class="bi bi-x-lg"></i>
-                              </button>
-                            </div>
+            }
+
+            <!-- Load more -->
+            @if (displayJobs().length < jobsWithFilter().length) {
+              <button (click)="loadMoreJobs()" class="w-full mt-2 rounded-xl bg-gray-100 dark:bg-[#3a3b3c] px-4 py-2 text-sm font-semibold text-[#1877f2] hover:bg-gray-200 dark:hover:bg-[#4a4b4c] transition-colors">
+                Load More
+              </button>
+            }
+
+            <!-- Empty states -->
+            @if (jobs().length === 0) {
+              <div class="flex flex-col items-center text-center py-10 opacity-50">
+                <i class="bi bi-clock-history text-3xl text-gray-300 dark:text-gray-600"></i>
+                <p class="text-sm text-gray-400 mt-2">Scan history is empty.</p>
+              </div>
+            }
+            @if (!hasJobMatches() && jobs().length > 0) {
+              <div class="flex flex-col items-center text-center py-10">
+                <i class="bi bi-search text-3xl text-gray-300 dark:text-gray-600"></i>
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mt-2">No Results Found</p>
+                <p class="text-xs text-gray-400">No scans match "{{ searchTerm() }}"</p>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- ── Entities tab ── -->
+        @if (activeTab() === 'entities') {
+          <div class="flex flex-col gap-2">
+
+            @for (entity of displayEntities(); track trackByEntityId(i, entity); let i = $index) {
+              <div class="home-menu-created-item">
+                <div class="home-menu-fade-row">
+                  <div [class]="getEntityClasses(entity)" (click)="entityClicked.emit(entity.id)" class="rounded-xl border border-gray-200 dark:border-[#3a3b3c] bg-white dark:bg-[#3a3b3c] p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#4a4b4c] transition-colors">
+                    <!-- Entity header row -->
+                    <div class="flex justify-between items-start gap-2">
+                      <div class="flex items-center gap-2 min-w-0 flex-1">
+                        <div class="flex-shrink-0">
+                          @switch (entity.status) {
+                            @case ('in_progress') {
+                              <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1877f2]"></div>
+                            }
+                            @case ('pending') {
+                              <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1877f2]"></div>
+                            }
+                            @case ('added') {
+                              <i class="bi bi-check-circle-fill text-green-500 text-base leading-none"></i>
+                            }
+                            @case ('failed') {
+                              <i class="bi bi-x-circle-fill text-red-400 text-base leading-none"></i>
+                            }
                           }
                         </div>
-                        @if (showEntityProgress(entity)) {
-                          <progress class="home-menu-progress-track mt-2" max="100" [value]="getAnimatedEntityProgress(entity)"></progress>
-                        }
-                        <p class="text-sm text-slate-400 truncate mb-0 mt-1">{{ entity.step || (entity.status === 'added' ? 'Completed' : (entity.status === 'failed' ? 'Extraction failed' : 'Queued')) }}</p>
-                        @if (entity.status === 'added' || entity.status === 'failed') {
-                          <div class="flex justify-between items-center mt-3">
-                            @if (entity.onGraph) {
-                              <div>
-                                <div class="flex items-center gap-1.5 text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
-                                  <i class="bi bi-check-circle-fill"></i>
-                                  <span>On Graph</span>
-                                </div>
-                              </div>
-                            } @else {
-                              <div class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-500/10 px-2 py-0.5 rounded-full">
-                                <i class="bi bi-node-minus"></i>
-                                <span>Not on Graph</span>
-                              </div>
-                            }
-                            <div class="flex items-center gap-2">
-                              <button (click)="$event.stopPropagation(); deleteEntity.emit(entity.id)" title="Delete Entity" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-500 bg-slate-700/50 hover:bg-red-500/20 hover:text-red-400 transition-colors">
-                                <i class="bi bi-trash3 w-4 h-4 leading-none block"></i>
-                              </button>
-                            </div>
-                          </div>
-                        }
+                        <div class="min-w-0">
+                          <p class="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate mb-0">{{ entity.label }}</p>
+                          <p class="text-[11px] uppercase tracking-wide text-gray-400 mb-0 truncate">{{ entity.type.replace('-', ' ') }}</p>
+                        </div>
                       </div>
+
+                      <!-- In-progress cancel -->
+                      @if (entity.status === 'in_progress' || entity.status === 'pending') {
+                        <div class="flex items-center gap-1.5 shrink-0">
+                          <span class="font-mono text-xs text-gray-400">{{ getAnimatedEntityProgress(entity) }}%</span>
+                          <button (click)="$event.stopPropagation(); cancelEntityScan.emit(entity.id)" title="Cancel Scan" class="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors">
+                            <i class="bi bi-x-lg text-xs leading-none"></i>
+                          </button>
+                        </div>
+                      }
                     </div>
+
+                    <!-- Progress bar -->
+                    @if (showEntityProgress(entity)) {
+                      <progress class="home-menu-progress-track mt-2" max="100" [value]="getAnimatedEntityProgress(entity)"></progress>
+                    }
+
+                    <!-- Step text -->
+                    <p class="text-xs text-gray-400 dark:text-gray-500 truncate mt-1 mb-0">
+                      {{ entity.step || (entity.status === 'added' ? 'Completed' : (entity.status === 'failed' ? 'Extraction failed' : 'Queued')) }}
+                    </p>
+
+                    <!-- Completed / failed footer -->
+                    @if (entity.status === 'added' || entity.status === 'failed') {
+                      <div class="flex justify-between items-center mt-2.5">
+                        @if (entity.onGraph) {
+                          <span class="inline-flex items-center gap-1 text-[11px] font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-2 py-0.5 rounded-full">
+                            <i class="bi bi-check-circle-fill text-[10px]"></i> On Feed
+                          </span>
+                        } @else {
+                          <span class="inline-flex items-center gap-1 text-[11px] font-medium text-gray-400 bg-gray-100 dark:bg-gray-700/30 px-2 py-0.5 rounded-full">
+                            <i class="bi bi-dash-circle text-[10px]"></i> Not on Feed
+                          </span>
+                        }
+                        <button (click)="$event.stopPropagation(); deleteEntity.emit(entity.id)" title="Delete Entity" class="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors">
+                          <i class="bi bi-trash3 text-sm leading-none"></i>
+                        </button>
+                      </div>
+                    }
                   </div>
-                }
-                @if (displayEntities().length < filteredEntities().length) {
-                  <div class="mt-2">
-                    <button (click)="loadMoreEntities()" class="w-full rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-indigo-400 transition-colors hover:bg-slate-700">Load More</button>
-                  </div>
-                }
-                @if (customEntities().length === 0) {
-                  <div class="text-center text-slate-500 py-8 flex flex-col items-center opacity-50">
-                    <p class="text-sm">No custom entities added.</p>
-                  </div>
-                }
-                @if (filteredEntities().length === 0 && customEntities().length > 0) {
-                  <div class="text-center text-slate-500 py-8 flex flex-col items-center">
-                    <i class="bi bi-search text-4xl text-slate-600"></i>
-                    <h3 class="mt-2 text-md font-semibold text-slate-300">No Results Found</h3>
-                    <p class="text-sm">Filter "{{ searchTerm() }}" did not match any entities.</p>
-                  </div>
-                }
+                </div>
               </div>
-            </div>
-          }
-        </div>
+            }
+
+            <!-- Load more -->
+            @if (displayEntities().length < filteredEntities().length) {
+              <button (click)="loadMoreEntities()" class="w-full mt-2 rounded-xl bg-gray-100 dark:bg-[#3a3b3c] px-4 py-2 text-sm font-semibold text-[#1877f2] hover:bg-gray-200 dark:hover:bg-[#4a4b4c] transition-colors">
+                Load More
+              </button>
+            }
+
+            <!-- Empty states -->
+            @if (customEntities().length === 0) {
+              <div class="flex flex-col items-center text-center py-10 opacity-50">
+                <i class="bi bi-diagram-3 text-3xl text-gray-300 dark:text-gray-600"></i>
+                <p class="text-sm text-gray-400 mt-2">No custom entities added.</p>
+              </div>
+            }
+            @if (filteredEntities().length === 0 && customEntities().length > 0) {
+              <div class="flex flex-col items-center text-center py-10">
+                <i class="bi bi-search text-3xl text-gray-300 dark:text-gray-600"></i>
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mt-2">No Results Found</p>
+                <p class="text-xs text-gray-400">No entities match "{{ searchTerm() }}"</p>
+              </div>
+            }
+          </div>
+        }
+
       </div>
     </div>
 
-    <div sidebar-collapsed class="h-full flex flex-col items-center">
-      <div class="py-4 flex flex-col items-center gap-4">
-        <button data-testid="home-menu-tab-history-collapsed" (click)="tabSelected.emit('history')" [class]="'w-9 h-9 flex items-center justify-center rounded-lg transition-colors ' + (activeTab() === 'history' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" title="Scan History">
+    <!-- ── Collapsed sidebar ── -->
+    <div sidebar-collapsed class="h-full flex flex-col items-center bg-white dark:bg-[#242526]">
+      <div class="py-4 flex flex-col items-center gap-3">
+        <button data-testid="home-menu-tab-history-collapsed" (click)="tabSelected.emit('history')" title="Scan History" class="w-9 h-9 flex items-center justify-center rounded-xl transition-colors" [class.bg-[#1877f2]]="activeTab() === 'history'" [class.text-white]="activeTab() === 'history'" [class.text-gray-400]="activeTab() !== 'history'" [class.hover:bg-gray-100]="activeTab() !== 'history'" [class.dark:hover:bg-[#3a3b3c]]="activeTab() !== 'history'">
           <i class="bi bi-clock-history text-lg leading-none"></i>
         </button>
         @if (!isSmallScreen()) {
-          <button data-testid="home-menu-tab-entities-collapsed" (click)="tabSelected.emit('entities')" [class]="'w-9 h-9 flex items-center justify-center rounded-lg transition-colors ' + (activeTab() === 'entities' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" title="Entities">
+          <button data-testid="home-menu-tab-entities-collapsed" (click)="tabSelected.emit('entities')" title="Entities" class="w-9 h-9 flex items-center justify-center rounded-xl transition-colors" [class.bg-[#1877f2]]="activeTab() === 'entities'" [class.text-white]="activeTab() === 'entities'" [class.text-gray-400]="activeTab() !== 'entities'" [class.hover:bg-gray-100]="activeTab() !== 'entities'" [class.dark:hover:bg-[#3a3b3c]]="activeTab() !== 'entities'">
             <i class="bi bi-diagram-3 text-lg leading-none"></i>
           </button>
         }
       </div>
     </div>
+
   </app-graph-sidebar-shell>
 </div>
