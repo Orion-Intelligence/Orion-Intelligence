@@ -317,6 +317,14 @@ html:has(body.dark-theme) {
   font-weight: 700;
 }
 
+.threat-lens-map,
+.threat-lens-map .esri-view-root,
+.threat-lens-map .esri-view-surface {
+  height: 100% !important;
+  min-height: 0 !important;
+  width: 100% !important;
+}
+
 .ui-consolidated-theme {
   --ui-consolidated-main-bg: #f9fbff;
   --ui-consolidated-sub-bg: #ffffff;

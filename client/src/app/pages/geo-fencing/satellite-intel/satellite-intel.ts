@@ -50,7 +50,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private aircraftTimer?: ReturnType<typeof setTimeout>;
   private shipsTimer?: ReturnType<typeof setTimeout>;
   private pendingRequest: 'facilities' | 'anomaly' | 'compare' | 'sentinel' | 'sentinel-image' | null = null;
-  private skipNextMapMovedEvent = false;
   private mainLoadingSequence = 0;
   private mainLoadingRequests = new Map<number, { title: string; message: string }>();
   private wriSub?: Subscription;
@@ -357,8 +356,13 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     clearTimeout(this.aircraftTimer);
     clearTimeout(this.shipsTimer);
 
-    this.aircraftData = [];
-    this.shipsData = [];
+    if (!this.selectedTrackingTypes.includes('aircraft')) {
+      this.aircraftData = [];
+    }
+
+    if (!this.selectedTrackingTypes.includes('ship')) {
+      this.shipsData = [];
+    }
 
     if (this.selectedTrackingTypes.includes('aircraft')) {
       this.refreshGlobalAircraftTracking(false, true);
@@ -447,11 +451,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   onMapMoved(center: { lat: number; lon: number; zoom: number }): void {
-    if (this.skipNextMapMovedEvent) {
-      this.skipNextMapMovedEvent = false;
-      return;
-    }
-
     this.inputLat = center.lat;
     this.inputLon = center.lon;
     this.inputDelta = this.zoomToDelta(center.zoom);
@@ -797,7 +796,10 @@ export class SatelliteIntel implements OnInit, OnDestroy {
           return;
         }
         const payload = (res?.result ?? res) as any;
-        this.aircraftData = Array.isArray(payload?.aircraft) ? payload.aircraft : [];
+        const aircraft = this.extractTrackingItems<SatelliteLiveAircraft>(payload, 'aircraft');
+        if (aircraft !== null) {
+          this.aircraftData = aircraft;
+        }
         if (payload?.error) {
           this.trackingError = `Aircraft tracking: ${payload.error}`;
         }
@@ -823,7 +825,10 @@ export class SatelliteIntel implements OnInit, OnDestroy {
           return;
         }
         const payload = (res?.result ?? res) as any;
-        this.aircraftData = Array.isArray(payload?.aircraft) ? payload.aircraft : [];
+        const aircraft = this.extractTrackingItems<SatelliteLiveAircraft>(payload, 'aircraft');
+        if (aircraft !== null) {
+          this.aircraftData = aircraft;
+        }
         if (payload?.error) {
           this.trackingError = `Global aircraft tracking: ${payload.error}`;
         }
@@ -851,6 +856,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       return;
     }
 
+    const showSpinner = showLoading || this.shipsData.length === 0;
+    this.isShipsLoading = showSpinner;
     const lat = this.inputLat;
     const lon = this.inputLon;
     const delta = this.inputDelta;
@@ -863,9 +870,13 @@ export class SatelliteIntel implements OnInit, OnDestroy {
           return;
         }
         const payload = (res?.result ?? res) as any;
-        this.shipsData = Array.isArray(payload?.ships) ? payload.ships : [];
-        if (payload?.error) {
-          this.trackingError = `Ship tracking: ${payload.error}`;
+        const ships = this.extractTrackingItems<SatelliteLiveShip>(payload, 'ships');
+        if (ships !== null) {
+          this.applyShipsTrackingResult(ships, payload, 'Ship tracking');
+        }
+        const feedIssue = this.getShipFeedIssue(payload);
+        if (ships === null && feedIssue) {
+          this.trackingError = `Ship tracking: ${feedIssue}`;
         }
       },
       error: (err) => {
@@ -873,6 +884,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       },
     });
     this.shipTrackSub.add(() => {
+      this.isShipsLoading = false;
       if (loadingId !== null) {
         this.endMainLoading(loadingId);
       }
@@ -885,7 +897,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   private refreshGlobalShipsTracking(showLoading = false, scheduleNext = false): void {
-    this.isShipsLoading=true;
+    const showSpinner = showLoading || this.shipsData.length === 0;
+    this.isShipsLoading = showSpinner;
     const loadingId = showLoading ? this.beginMainLoading('Loading Satellite Intel', 'Loading global ship tracking data...') : null;
     this.shipTrackSub?.unsubscribe();
     this.shipTrackSub = this.satelliteService.pollShipsGlobal().subscribe({
@@ -894,9 +907,13 @@ export class SatelliteIntel implements OnInit, OnDestroy {
           return;
         }
         const payload = (res?.result ?? res) as any;
-        this.shipsData = Array.isArray(payload?.ships) ? payload.ships : [];
-        if (payload?.error) {
-          this.trackingError = `Global ship tracking: ${payload.error}`;
+        const ships = this.extractTrackingItems<SatelliteLiveShip>(payload, 'ships');
+        if (ships !== null) {
+          this.applyShipsTrackingResult(ships, payload, 'Global ship tracking');
+        }
+        const feedIssue = this.getShipFeedIssue(payload);
+        if (ships === null && feedIssue) {
+          this.trackingError = `Global ship tracking: ${feedIssue}`;
         }
       },
       error: (err) => {
@@ -904,7 +921,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       },
     });
     this.shipTrackSub.add(() => {
-      this.isShipsLoading= false;
+      this.isShipsLoading = false;
       if (loadingId !== null) {
         this.endMainLoading(loadingId);
       }
@@ -914,6 +931,85 @@ export class SatelliteIntel implements OnInit, OnDestroy {
         }, this.aircraftRefreshIntervalMs);
       }
     });
+  }
+
+  private applyShipsTrackingResult(ships: SatelliteLiveShip[], payload: any, label: string): void {
+    const feedIssue = this.getShipFeedIssue(payload);
+    if (ships.length > 0) {
+      if (feedIssue && this.shouldKeepLastShips() && ships.length < this.shipsData.length) {
+        this.trackingError = `${label}: ${feedIssue}; showing last known ${this.shipsData.length} ships`;
+        return;
+      }
+      this.shipsData = ships;
+      if (feedIssue) {
+        this.trackingError = `${label}: ${feedIssue}`;
+      }
+      else {
+        this.clearTrackingError('ship');
+      }
+      return;
+    }
+
+    if (feedIssue) {
+      if (this.shouldKeepLastShips()) {
+        this.trackingError = `${label}: ${feedIssue}; showing last known ${this.shipsData.length} ships`;
+        return;
+      }
+      this.trackingError = `${label}: ${feedIssue}`;
+      return;
+    }
+
+    if (this.shouldKeepLastShips()) {
+      this.trackingError = `${label}: live feed returned 0 ships; showing last known ${this.shipsData.length}`;
+      return;
+    }
+
+    this.shipsData = [];
+    this.trackingError = `${label}: no ships found in this map area`;
+  }
+
+  private shouldKeepLastShips(): boolean {
+    return this.shipsTrackingEnabled && this.shipsData.length > 0;
+  }
+
+  private clearTrackingError(scope: 'aircraft' | 'ship'): void {
+    const current = this.trackingError?.toLowerCase() || '';
+    if (scope === 'ship' && (current.includes('ship') || current.includes('ships'))) {
+      this.trackingError = null;
+    }
+    if (scope === 'aircraft' && current.includes('aircraft')) {
+      this.trackingError = null;
+    }
+  }
+
+  private getTrackingPayloadError(payload: any): string | null {
+    return payload?.error || payload?.error_message || payload?.last_error || null;
+  }
+
+  private getShipFeedIssue(payload: any): string | null {
+    const payloadError = this.getTrackingPayloadError(payload);
+    if (payloadError) {
+      return payloadError;
+    }
+
+    if (payload?.connected === false || payload?.aisstream?.connected === false) {
+      return 'ship feed disconnected';
+    }
+
+    return null;
+  }
+
+  private extractTrackingItems<T>(payload: any, key: 'aircraft' | 'ships'): T[] | null {
+    if (Array.isArray(payload?.[key])) {
+      return payload[key] as T[];
+    }
+
+    const status = String(payload?.status || '').toLowerCase();
+    if (status === 'pending' || status === 'busy') {
+      return null;
+    }
+
+    return payload?.count === 0 ? [] : null;
   }
 
   private beginMainLoading(title: string, message: string): number {

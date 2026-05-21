@@ -55,10 +55,10 @@ export class HomeSearchComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       const tab = params['tab'];
       if (typeof tab === 'string' && this.tabs.includes(tab)) {
-        this.selectTab(tab);
+        this.selectedTab = tab;
       }
       else{
-        this.selectTab("IOCs");
+        this.selectedTab = "IOCs";
       }
     });
   }

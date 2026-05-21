@@ -18,6 +18,7 @@ import { ThreatLensFeedPanelComponent } from './threat-lens-feed-panel/threat-le
   standalone: true,
   imports: [CommonModule, FormsModule, FiltersComponent, ThreatLensFeedPanelComponent],
   templateUrl: './threat-lens.html',
+  host: { class: 'block h-full min-h-0 w-full' },
 })
 export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   @ViewChild('mapViewNode', { static: true }) private mapViewNode?: ElementRef<HTMLDivElement>;
@@ -63,6 +64,8 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   private hoverHighlightHandle: { remove: () => void } | null = null;
   private hoverTooltipEl: HTMLDivElement | null = null;
   private hoveredCountryKey = '';
+  private mapResizeObserver: ResizeObserver | null = null;
+  private mapResizeFrame: number | null = null;
   private startMarkerGraphics: any[] = [];
   private endMarkerGraphics: any[] = [];
 
@@ -108,6 +111,13 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     this.mapClickHandle = null;
     this.clearHighlight();
     this.stopArcAnimation();
+    this.mapResizeObserver?.disconnect();
+    this.mapResizeObserver = null;
+
+    if (this.mapResizeFrame !== null) {
+      cancelAnimationFrame(this.mapResizeFrame);
+      this.mapResizeFrame = null;
+    }
 
     if (this.view) {
       this.view.destroy();
@@ -243,6 +253,9 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       });
 
       await this.view.when();
+      this.observeMapResize();
+      this.scheduleMapResize();
+      window.setTimeout(() => this.view?.resize?.(), 150);
       this.createTooltip();
       if (this.destroyed) {
         return;
@@ -266,6 +279,28 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
         this.statusMessage = 'Failed to initialize threat lens map.';
       });
     }
+  }
+
+  private observeMapResize(): void {
+    const element = this.mapViewNode?.nativeElement;
+    if (!element || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    this.mapResizeObserver?.disconnect();
+    this.mapResizeObserver = new ResizeObserver(() => this.scheduleMapResize());
+    this.mapResizeObserver.observe(element);
+  }
+
+  private scheduleMapResize(): void {
+    if (this.mapResizeFrame !== null || typeof requestAnimationFrame !== 'function') {
+      return;
+    }
+
+    this.mapResizeFrame = requestAnimationFrame(() => {
+      this.mapResizeFrame = null;
+      this.view?.resize?.();
+    });
   }
 
   private registerClickHandler(): void {

@@ -124,8 +124,8 @@
           }
 
         @if(isThreatView){
-          <div class="h-full min-h-0 w-full overflow-y-auto overflow-x-hidden">
-            <app-threat-lens class="block h-full w-full min-h-[560px]" [showFilterButton]="false" (loadingChange)="onThreatLensLoadingChange($event)"></app-threat-lens>
+          <div class="h-full min-h-0 w-full overflow-hidden">
+            <app-threat-lens class="block h-full min-h-0 w-full" [showFilterButton]="false" (loadingChange)="onThreatLensLoadingChange($event)"></app-threat-lens>
           </div>
         }
       </div>
@@ -244,15 +244,28 @@
           <span class="inline-flex items-center gap-2">
               <span>✈️</span>
                Aircrafts</span>
-            <span class="font-mono text-[11px]">{{ aircraftData.length }}</span>
+            @if (isAircraftLoading) {
+              <span class="h-3 w-3 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
+            } @else {
+              <span class="font-mono text-[11px]">{{ aircraftData.length }}</span>
+            }
         </button>
         <button type="button" class="flex items-center justify-between rounded-[10px] border px-3 py-2 text-[12px] transition-colors" [ngClass]="shipsTrackingEnabled ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-720)]','text-[var(--color-text1)]'] : ['border-[var(--color-border)]','bg-[var(--color-blue-790)]','text-[var(--color-text3)]']" (click)="onTrackingSelectionChange('ship')">
           <span class="inline-flex items-center gap-2">
               <span>🚢</span>
                Ships</span>
-          <span class="font-mono text-[11px]">{{ shipsData.length }}</span>
+          @if (isShipsLoading) {
+            <span class="h-3 w-3 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
+          } @else {
+            <span class="font-mono text-[11px]">{{ shipsData.length }}</span>
+          }
         </button>
       </div>
+      @if (trackingError) {
+        <div class="mt-2 rounded-[8px] border border-[rgba(245,158,11,.28)] bg-[rgba(245,158,11,.08)] px-2.5 py-2 text-[11px] leading-[1.45] text-[#fbbf24]">
+          {{ trackingError }}
+        </div>
+      }
     </div>
     <div class="mt-3 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3">
       <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Selection</div>
