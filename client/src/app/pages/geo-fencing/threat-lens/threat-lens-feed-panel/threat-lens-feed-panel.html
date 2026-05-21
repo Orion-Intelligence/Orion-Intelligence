@@ -8,7 +8,7 @@
           </p>
 
           <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-[3px] text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text2)]">
-            {{ items.length }}
+            {{ displayItems.length }}
           </span>
         </div>
 
@@ -17,14 +17,14 @@
         </p>
       </div>
 
-      <button type="button" (click)="toggleClicked.emit()" [attr.aria-label]="collapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
+      <button type="button" (click)="toggleCollapsed()" [attr.aria-label]="collapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
         <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 transition duration-200" [ngClass]="{ 'rotate-180': !collapsed }" />
       </button>
     </div>
 
     @if (!collapsed) {
       <div class="mt-3 flex items-center gap-2">
-        <input [ngModel]="searchTerm" (ngModelChange)="searchTermChange.emit($event)" type="text" [placeholder]="searchPlaceholder" class="h-9 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[12px] text-[var(--color-text1)] outline-none transition focus:border-[var(--color-blue-640)]" />
+        <input [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" type="text" [placeholder]="searchPlaceholder" class="h-9 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[12px] text-[var(--color-text1)] outline-none transition focus:border-[var(--color-blue-640)]" />
       </div>
 
       @if (searchTerm) {
@@ -35,7 +35,7 @@
 
       <div class="mt-3 flex flex-wrap gap-2">
         @for (range of ranges; track range.key) {
-          <button type="button" (click)="rangeSelected.emit(range.key)" class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition" [ngClass]="selectedRange === range.key ? [ 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-790)]', 'text-[var(--color-text1)]' ] : [ 'border-[var(--color-border)]', 'bg-[var(--color-blue-780)]', 'text-[var(--color-text4)]', 'hover:text-[var(--color-text1)]', 'hover:bg-[var(--color-blue-790)]' ]">
+          <button type="button" (click)="setRange(range.key)" class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition" [ngClass]="selectedRange === range.key ? [ 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-790)]', 'text-[var(--color-text1)]' ] : [ 'border-[var(--color-border)]', 'bg-[var(--color-blue-780)]', 'text-[var(--color-text4)]', 'hover:text-[var(--color-text1)]', 'hover:bg-[var(--color-blue-790)]' ]">
             {{ range.label }}
           </button>
         }
@@ -48,11 +48,11 @@
   </div>
 
   @if (!collapsed) {
-    <div #feedScroller (mouseenter)="hoverChanged.emit(true)" (mouseleave)="hoverChanged.emit(false)" (wheel)="interacted.emit()" (touchstart)="interacted.emit()" class="min-h-0 flex-1 overflow-y-auto px-3 py-3">
-      @if (items.length) {
+    <div #feedScroller (mouseenter)="setAutoScrollPaused(true)" (mouseleave)="setAutoScrollPaused(false)" (wheel)="pauseAutoScrollTemporarily()" (touchstart)="pauseAutoScrollTemporarily()" class="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+      @if (displayItems.length) {
         <div class="space-y-2">
-          @for (item of items; track item.id) {
-            <button type="button" (click)="itemSelected.emit(item)" class="block w-full rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-3 text-left transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-780)]">
+          @for (item of displayItems; track item.id) {
+            <button type="button" (click)="openFeedItem(item)" class="block w-full rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-3 text-left transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-780)]">
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                   <div class="flex items-center gap-2">
