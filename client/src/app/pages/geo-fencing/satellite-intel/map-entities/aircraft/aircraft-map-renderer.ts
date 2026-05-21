@@ -7,6 +7,13 @@ import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-rend
 import { escapeTooltipText, getBearingDegrees, getMarkerBaseSize, getResponseStatus, isPendingStatus, normalizeEntityId, stableHash } from '../../map-utils/renderer-utils';
 import { TrackingSidebarBridge } from '../../../models/geo-fencing.models';
 
+type AircraftDistributionCell = {
+  key: string;
+  row: number;
+  col: number;
+  items: SatelliteLiveAircraft[];
+};
+
 export class AircraftMapRenderer {
   private cluster: any = null;
   private renderKey = '';
@@ -19,10 +26,12 @@ export class AircraftMapRenderer {
   private animationFrame: number | null = null;
   private detailSub?: Subscription;
   private markerZoomBucket = 0;
+  private renderedAircraftCount = 0;
   private readonly animationDurationMs = 8000;
   private readonly sparseAircraftAreaThreshold = 15;
   private readonly crowdedAircraftAreaThreshold = 100;
-  private readonly minimumSampledAircraftPerArea = 8;
+  private readonly minimumSampledAircraftPerArea = 12;
+  private readonly maxAnimatedAircraft = 60;
   private readonly L: any;
   private readonly map: any;
   private readonly service: SatelliteAircraftTrackingService;
@@ -58,6 +67,11 @@ export class AircraftMapRenderer {
     this.renderKey = renderKey;
 
     const aircraft = this.getRenderableAircraft().filter(item => Number.isFinite(item.latitude) && Number.isFinite(item.longitude));
+    this.renderedAircraftCount = aircraft.length;
+    if (aircraft.length > this.maxAnimatedAircraft) {
+      this.cancelAllAnimations();
+    }
+
     const visibleIds = new Set(aircraft.map(item => this.getMarkerId(item)));
     for (const [markerId, marker] of Array.from(this.markers.entries())) {
       if (visibleIds.has(markerId)) {
@@ -126,7 +140,7 @@ export class AircraftMapRenderer {
       return;
     }
 
-    const chunkSize = 140;
+    const chunkSize = 80;
     const endIndex = Math.min(startIndex + chunkSize, aircraft.length);
     for (let index = startIndex; index < endIndex; index += 1) {
       this.upsertMarker(aircraft[index]);
@@ -180,7 +194,15 @@ export class AircraftMapRenderer {
       return;
     }
 
+    if (!this.shouldUpdateMarkerRotation(isSelected, isLoading)) {
+      return;
+    }
+
     this.updateMarkerRotation(existing, rotationDegrees);
+  }
+
+  private shouldUpdateMarkerRotation(isSelected: boolean, isLoading: boolean): boolean {
+    return this.renderedAircraftCount <= this.maxAnimatedAircraft || isSelected || isLoading;
   }
 
   private updateMarkerMotion(markerId: string, marker: any, aircraft: SatelliteLiveAircraft): void {
@@ -206,6 +228,11 @@ export class AircraftMapRenderer {
     const projectionSource = isSameMotion ? { ...aircraft, latitude: startLat, longitude: startLon } : aircraft;
 
     this.stopAnimation(markerId);
+    if (!this.shouldAnimateMarker(aircraft)) {
+      marker.setLatLng([lat, lon]);
+      return;
+    }
+
     marker.setLatLng([startLat, startLon]);
     const projected = this.projectPosition(projectionSource, this.animationDurationMs / 1000);
     if (!projected) {
@@ -241,6 +268,11 @@ export class AircraftMapRenderer {
       lat: (lat as number) + (Math.cos(bearingRadians) * distanceMeters) / metersPerDegreeLat,
       lon: (lon as number) + (Math.sin(bearingRadians) * distanceMeters) / metersPerDegreeLon,
     };
+  }
+
+  private shouldAnimateMarker(aircraft: SatelliteLiveAircraft): boolean {
+    const icaoId = normalizeEntityId(aircraft.icao24);
+    return this.renderedAircraftCount <= this.maxAnimatedAircraft || this.isSelected(icaoId);
   }
 
   private animateMarker(markerId: string, marker: any, targetLat: number, targetLon: number): void {
@@ -484,9 +516,9 @@ export class AircraftMapRenderer {
       if (!bounds) {
         return true;
       }
-      return bounds.pad(0.18).contains([aircraft.latitude, aircraft.longitude]);
+      return bounds.contains([aircraft.latitude, aircraft.longitude]);
     });
-    return this.sampleCrowdedAircraftAreas(visible, zoom);
+    return this.limitAircraftForViewport(this.sampleCrowdedAircraftAreas(visible, zoom), visible, zoom);
   }
 
   private sampleCrowdedAircraftAreas(aircraft: SatelliteLiveAircraft[], zoom: number): SatelliteLiveAircraft[] {
@@ -512,10 +544,7 @@ export class AircraftMapRenderer {
         return;
       }
 
-      const stableBucketItems = bucketItems
-        .slice()
-        .sort((left, right) => Math.abs(stableHash(this.getStableAircraftKey(left))) - Math.abs(stableHash(this.getStableAircraftKey(right))));
-      sampled.push(...stableBucketItems.slice(0, keepCount));
+      sampled.push(...this.takeSpatiallyDistributedAircraft(bucketItems, keepCount, zoom));
     });
 
     return sampled;
@@ -530,32 +559,278 @@ export class AircraftMapRenderer {
   }
 
   private getModerateAircraftSampleRatio(sampleRatio: number): number {
-    return Math.max(sampleRatio, 0.18);
+    return Math.max(sampleRatio, 0.264);
+  }
+
+  private limitAircraftForViewport(aircraft: SatelliteLiveAircraft[], sourceAircraft: SatelliteLiveAircraft[], zoom: number): SatelliteLiveAircraft[] {
+    const limit = this.getViewportAircraftLimit(zoom);
+    if (aircraft.length <= limit) {
+      return aircraft;
+    }
+
+    const sourceBucketCounts = this.getAircraftBucketCounts(sourceAircraft, zoom);
+    const activeEntity = this.sidebar.getActiveEntity();
+    const activeAircraftId = activeEntity?.type === 'aircraft' ? activeEntity.id : '';
+    const activeAircraft = activeAircraftId
+      ? aircraft.find(item => normalizeEntityId(item.icao24) === activeAircraftId) ?? null
+      : null;
+    const preserved: SatelliteLiveAircraft[] = [];
+    const denseCandidates: SatelliteLiveAircraft[] = [];
+
+    aircraft.forEach(item => {
+      const itemId = normalizeEntityId(item.icao24);
+      if (activeAircraft && itemId === activeAircraftId) {
+        return;
+      }
+
+      const bucketKey = this.getSampleBucketKey(item, zoom);
+      const sourceBucketCount = sourceBucketCounts.get(bucketKey) ?? 0;
+      if (sourceBucketCount <= this.sparseAircraftAreaThreshold) {
+        preserved.push(item);
+        return;
+      }
+
+      denseCandidates.push(item);
+    });
+
+    const remainingLimit = Math.max(0, limit - preserved.length - (activeAircraft ? 1 : 0));
+    const limited = this.takeSpatiallyDistributedAircraft(denseCandidates, remainingLimit, zoom);
+
+    return activeAircraft ? [activeAircraft, ...preserved, ...limited] : [...preserved, ...limited];
+  }
+
+  private getAircraftBucketCounts(aircraft: SatelliteLiveAircraft[], zoom: number): Map<string, number> {
+    const counts = new Map<string, number>();
+    aircraft.forEach(item => {
+      const bucketKey = this.getSampleBucketKey(item, zoom);
+      counts.set(bucketKey, (counts.get(bucketKey) ?? 0) + 1);
+    });
+    return counts;
+  }
+
+  private takeSpatiallyDistributedAircraft(aircraft: SatelliteLiveAircraft[], limit: number, zoom: number): SatelliteLiveAircraft[] {
+    if (limit <= 0) {
+      return [];
+    }
+    if (aircraft.length <= limit) {
+      return aircraft;
+    }
+
+    const cells = new Map<string, AircraftDistributionCell>();
+    aircraft.forEach(item => {
+      const cellRef = this.getDistributionCell(item, zoom);
+      const cell = cells.get(cellRef.key) ?? { ...cellRef, items: [] };
+      cell.items.push(item);
+      cells.set(cellRef.key, cell);
+    });
+
+    const orderedCells = this.orderDistributionCells(Array.from(cells.values()).map(cell => ({
+      ...cell,
+      items: cell.items.slice().sort((left, right) => Math.abs(stableHash(this.getStableAircraftKey(left))) - Math.abs(stableHash(this.getStableAircraftKey(right)))),
+    })), limit);
+    const selected: SatelliteLiveAircraft[] = [];
+    let round = 0;
+
+    while (selected.length < limit) {
+      let addedThisRound = false;
+      for (const cell of orderedCells) {
+        const item = cell.items[round];
+        if (!item) {
+          continue;
+        }
+        selected.push(item);
+        addedThisRound = true;
+        if (selected.length >= limit) {
+          break;
+        }
+      }
+      if (!addedThisRound) {
+        break;
+      }
+      round += 1;
+    }
+
+    return selected;
+  }
+
+  private orderDistributionCells(cells: AircraftDistributionCell[], limit: number): AircraftDistributionCell[] {
+    if (cells.length <= limit) {
+      return cells.slice().sort((left, right) => left.row - right.row || left.col - right.col);
+    }
+
+    const rowGroups = new Map<number, AircraftDistributionCell[]>();
+    cells.forEach(cell => {
+      const rowCells = rowGroups.get(cell.row) ?? [];
+      rowCells.push(cell);
+      rowGroups.set(cell.row, rowCells);
+    });
+
+    const quotas = Array.from(rowGroups.entries())
+      .map(([row, rowCells]) => {
+        const sortedCells = rowCells.slice().sort((left, right) => left.col - right.col);
+        const rawQuota = (limit * sortedCells.length) / cells.length;
+        return {
+          row,
+          cells: sortedCells,
+          quota: Math.min(sortedCells.length, Math.floor(rawQuota)),
+          remainder: rawQuota % 1,
+        };
+      })
+      .sort((left, right) => left.row - right.row);
+    let used = quotas.reduce((total, quota) => total + quota.quota, 0);
+
+    quotas
+      .slice()
+      .sort((left, right) => right.remainder - left.remainder || right.cells.length - left.cells.length)
+      .forEach(quota => {
+        if (used >= limit || quota.quota >= quota.cells.length) {
+          return;
+        }
+        quota.quota += 1;
+        used += 1;
+      });
+
+    while (used < limit) {
+      const nextQuota = quotas.find(quota => quota.quota < quota.cells.length);
+      if (!nextQuota) {
+        break;
+      }
+      nextQuota.quota += 1;
+      used += 1;
+    }
+
+    return quotas.flatMap(quota => this.takeEvenlySpacedCells(quota.cells, quota.quota));
+  }
+
+  private takeEvenlySpacedCells(cells: AircraftDistributionCell[], count: number): AircraftDistributionCell[] {
+    if (count <= 0) {
+      return [];
+    }
+    if (count >= cells.length) {
+      return cells;
+    }
+
+    const selected: AircraftDistributionCell[] = [];
+    const step = cells.length / count;
+    for (let index = 0; index < count; index += 1) {
+      selected.push(cells[Math.min(cells.length - 1, Math.floor((index + 0.5) * step))]);
+    }
+    return selected;
+  }
+
+  private getDistributionCell(aircraft: SatelliteLiveAircraft, zoom: number): { key: string; row: number; col: number } {
+    const screenCell = this.getScreenDistributionCell(aircraft, this.getDistributionScreenGridSize(zoom));
+    if (screenCell) {
+      return screenCell;
+    }
+
+    if (Number.isFinite(aircraft.latitude) && Number.isFinite(aircraft.longitude)) {
+      const gridSize = this.getDistributionGridSize(zoom);
+      const row = Math.floor(((aircraft.latitude as number) + 90) / gridSize);
+      const col = Math.floor(((aircraft.longitude as number) + 180) / gridSize);
+      return { key: `cell:${gridSize}:${row}:${col}`, row, col };
+    }
+
+    return { key: 'cell:unknown', row: 0, col: 0 };
+  }
+
+  private getScreenBucketKey(aircraft: SatelliteLiveAircraft, gridSize: number): string | null {
+    const cell = this.getScreenCell(aircraft, gridSize);
+    return cell ? `screen:${gridSize}:${cell.row}:${cell.col}` : null;
+  }
+
+  private getScreenDistributionCell(aircraft: SatelliteLiveAircraft, gridSize: number): { key: string; row: number; col: number } | null {
+    const cell = this.getScreenCell(aircraft, gridSize);
+    return cell ? { key: `screen-cell:${gridSize}:${cell.row}:${cell.col}`, row: cell.row, col: cell.col } : null;
+  }
+
+  private getScreenCell(aircraft: SatelliteLiveAircraft, gridSize: number): { row: number; col: number } | null {
+    if (!this.map?.latLngToContainerPoint || !Number.isFinite(aircraft.latitude) || !Number.isFinite(aircraft.longitude)) {
+      return null;
+    }
+
+    const point = this.map.latLngToContainerPoint([aircraft.latitude, aircraft.longitude]);
+    if (!Number.isFinite(point?.x) || !Number.isFinite(point?.y)) {
+      return null;
+    }
+
+    return {
+      row: Math.floor(point.y / gridSize),
+      col: Math.floor(point.x / gridSize),
+    };
+  }
+
+  private getSampleScreenGridSize(zoom: number): number {
+    if (zoom >= 7) {
+      return 96;
+    }
+    if (zoom >= 6) {
+      return 104;
+    }
+    if (zoom >= 5) {
+      return 112;
+    }
+    if (zoom >= 4) {
+      return 120;
+    }
+    return 128;
+  }
+
+  private getDistributionScreenGridSize(zoom: number): number {
+    return Math.max(32, Math.round(this.getSampleScreenGridSize(zoom) / 3));
+  }
+
+  private getDistributionGridSize(zoom: number): number {
+    return Math.max(0.25, this.getSampleGridSize(zoom) / 4);
+  }
+
+  private getViewportAircraftLimit(zoom: number): number {
+    if (zoom >= 8) {
+      return 984;
+    }
+    if (zoom >= 7) {
+      return 840;
+    }
+    if (zoom >= 6) {
+      return 732;
+    }
+    if (zoom >= 5) {
+      return 624;
+    }
+    if (zoom >= 4) {
+      return 516;
+    }
+    return 432;
   }
 
   private getSampleRatio(zoom: number): number {
     if (zoom >= 8) {
-      return 0.32;
+      return 0.456;
     }
     if (zoom >= 7) {
-      return 0.28;
+      return 0.396;
     }
     if (zoom >= 6) {
-      return 0.22;
+      return 0.324;
     }
     if (zoom >= 5) {
-      return 0.3;
+      return 0.408;
     }
     if (zoom >= 4) {
-      return 0.15;
+      return 0.24;
     }
     if (zoom >= 3) {
-      return 0.1;
+      return 0.168;
     }
-    return 0.1;
+    return 0.168;
   }
 
   private getSampleBucketKey(aircraft: SatelliteLiveAircraft, zoom: number): string {
+    const screenBucketKey = this.getScreenBucketKey(aircraft, this.getSampleScreenGridSize(zoom));
+    if (screenBucketKey) {
+      return screenBucketKey;
+    }
+
     if (Number.isFinite(aircraft.latitude) && Number.isFinite(aircraft.longitude)) {
       const gridSize = this.getSampleGridSize(zoom);
       const latBucket = Math.floor(((aircraft.latitude as number) + 90) / gridSize);
@@ -568,18 +843,18 @@ export class AircraftMapRenderer {
 
   private getSampleGridSize(zoom: number): number {
     if (zoom >= 7) {
-      return 3;
+      return 1;
     }
     if (zoom >= 6) {
-      return 5;
+      return 1.5;
     }
     if (zoom >= 5) {
-      return 7;
+      return 2;
     }
     if (zoom >= 4) {
-      return 10;
+      return 2.5;
     }
-    return 14;
+    return 3;
   }
 
   private getStableAircraftKey(aircraft: SatelliteLiveAircraft): string {

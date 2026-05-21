@@ -1,9 +1,19 @@
-<div id="dashboard-consolidated" class="flex h-full min-h-0 flex-col">
-  <app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [showNoResult]="false"
-  (reloadData)="fetchSearchResults(true)" (onToggleSwitch)="onToggleMenu($event)" (updateQuery)="onUpdateQuery($event)"
-  [activeTab]="isIOC ? 'IOCs' : (isNetworkIntel ? 'Network Intelligence' : (isGeoFencing ? 'Geo Fencing' : 'Deep Search'))" [isLoading]="isLoading()" [searchQuery]="query"
-  [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters"
-(reloadFilters)="reloadFilters($event)" [showSelectedFilters]="true"></app-result>
+<div id="dashboard-consolidated" class="relative flex h-full min-h-0 flex-col">
+  @if (!isGeoFencing) {
+    <app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [showNoResult]="false"
+    (reloadData)="fetchSearchResults(true)" (onToggleSwitch)="onToggleMenu($event)" (updateQuery)="onUpdateQuery($event)"
+    [activeTab]="isIOC ? 'IOCs' : (isNetworkIntel ? 'Network Intelligence' : 'Deep Search')" [isLoading]="isLoading()" [searchQuery]="query"
+    [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters"
+  (reloadFilters)="reloadFilters($event)" [showSelectedFilters]="true"></app-result>
+  }
+  @if (isGeoFencing) {
+    <div class="pointer-events-auto absolute left-3 top-3 z-[950] flex max-w-[calc(100%-24px)] flex-nowrap gap-2 overflow-x-auto whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)] max-[943px]:left-2 max-[943px]:top-2 max-[943px]:max-w-[calc(100%-16px)] [&::-webkit-scrollbar]:hidden">
+      <button type="button" data-testid="ioc-basic-tag-IOCs" class="cursor-pointer rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-1.5 text-[12px] font-semibold text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]" (click)="onToggleMenu('IOCs')">IOCs</button>
+      <button type="button" data-testid="ioc-basic-tag-Deep Search" class="cursor-pointer rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-1.5 text-[12px] font-semibold text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]" (click)="onToggleMenu('Deep Search')">Deep Search</button>
+      <button type="button" data-testid="ioc-basic-tag-Network Intelligence" class="cursor-pointer rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-1.5 text-[12px] font-semibold text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]" (click)="onToggleMenu('Network Intelligence')">Network Intelligence</button>
+      <button type="button" data-testid="ioc-basic-tag-Geo Fencing" class="cursor-pointer rounded-full border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-1.5 text-[12px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-colors" (click)="onToggleMenu('Geo Fencing')">Geo Fencing</button>
+    </div>
+  }
 
 <div [class]="isGeoFencing ? 'ui-consolidated-theme  w-auto min-h-0 flex-1 overflow-y-auto overflow-x-hidden max-[1200px]:mx-[20px] max-[1000px]:mx-[15px] max-[640px]:mx-[10px]' : 'ui-consolidated-theme mt-4 mx-[30px] w-auto space-y-4 pb-16 max-[1200px]:mx-[20px] max-[1000px]:mx-[15px] max-[640px]:mx-[10px]'">
   @if (isNetworkIntel) {

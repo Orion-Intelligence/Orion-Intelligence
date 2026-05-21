@@ -48,6 +48,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   @Input() shipsData:        SatelliteLiveShip[]     = [];
   @Input() orionData:        OrionSatelliteFeature[] = [];
   @Input() focusedFeature:   OrionSatelliteFeature | null = null;
+  @Input() topControlsInset = false;
 
   @Output() mapMoved  = new EventEmitter<{ lat: number; lon: number; zoom: number }>();
   @Output() featureSelected = new EventEmitter<any>();

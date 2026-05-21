@@ -24,6 +24,7 @@ export class MapEntitiesOverlayComponent {
   @Input() isMapEntityDetailsLoading = false;
   @Input() errorMessage: string | null = null;
   @Input() isScanning = false;
+  @Input() topControlsInset = false;
 
   @Output() closeSidebar = new EventEmitter<void>();
 }

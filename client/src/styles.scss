@@ -325,6 +325,10 @@ html:has(body.dark-theme) {
   width: 100% !important;
 }
 
+.geo-map-control-inset .leaflet-top.leaflet-left {
+  top: 64px;
+}
+
 .ui-consolidated-theme {
   --ui-consolidated-main-bg: #f9fbff;
   --ui-consolidated-sub-bg: #ffffff;
