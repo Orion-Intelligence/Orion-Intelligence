@@ -129,7 +129,7 @@ class search_query_generator:
                 if not val:
                     continue
 
-                filter_values = search_query_generator._expand_country_filter_values(val) if ioc_key == "m_country" else [val]
+                filter_values = helper_controller._expand_country_filter_values(val) if ioc_key == "m_country" else [val]
 
                 for field in es_fields:
                     term_field = field if str(field).endswith((".keyword", ".raw")) else f"{field}"
@@ -446,6 +446,7 @@ class search_query_generator:
         m_platform = p_query_model.platform
         m_page_number = getattr(p_query_model, "page", 1)
         m_content_type = p_query_model.content
+        m_platform = (p_query_model.platform or "").strip().lower()
         m_safe_search = p_query_model.safe
         result_size = p_query_model.platform_result_count
         must_clauses = []
