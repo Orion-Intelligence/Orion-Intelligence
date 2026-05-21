@@ -116,41 +116,21 @@
 		<div class="min-h-0 flex-1 space-y-3 max-[1100px]:min-h-[unset]">
       <div class="shrink-0 max-[1100px]:hidden" [ngClass]="{ 'h-[40px]': !showFilterButton }"></div>
 				<app-threat-lens-feed-panel
-					#newsFeedPanel
 					title="News Feed"
 					description="Live news stream from threat records."
 					searchPlaceholder="Search news feed..."
 					emptyMessage="No news records found for the selected time window."
-					[collapsed]="isNewsPanelCollapsed"
-					[items]="newsFeedItems"
-					[searchTerm]="newsSearchTerm"
-					[ranges]="feedRanges"
-					[selectedRange]="selectedFeedRange"
-					(toggleClicked)="togglePanel('news')"
-					(searchTermChange)="onNewsSearchInput($event)"
-					(rangeSelected)="setFeedRange($event)"
-					(hoverChanged)="onFeedHover('news', $event)"
-					(interacted)="onFeedInteract('news')"
-					(itemSelected)="openFeedItem($event)"
+					feedType="news"
+					[items]="feedItems"
 				></app-threat-lens-feed-panel>
 
 			<app-threat-lens-feed-panel
-				#archiveFeedPanel
 				title="Archive"
 				description="Defacement, social, exploit, leak and other activity."
 				searchPlaceholder="Search archive..."
 				emptyMessage="No archive activity found for the selected time window."
-				[collapsed]="isArchivePanelCollapsed"
-				[items]="archiveFeedItems"
-				[searchTerm]="archiveSearchTerm"
-				[ranges]="feedRanges"
-				[selectedRange]="selectedFeedRange"
-				(toggleClicked)="togglePanel('archive')"
-				(searchTermChange)="onArchiveSearchInput($event)"
-				(rangeSelected)="setFeedRange($event)"
-				(hoverChanged)="onFeedHover('archive', $event)"
-				(interacted)="onFeedInteract('archive')"
-				(itemSelected)="openFeedItem($event)"
+				feedType="archive"
+				[items]="feedItems"
 			></app-threat-lens-feed-panel>
 		</div>
 	</div>
