@@ -1,4 +1,4 @@
-<div class="relative flex h-full min-h-0 w-full flex-col overflow-hidden">
+<div class="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden">
   @if (isMainLoading) {
     <div class="absolute inset-0 z-[10000] flex items-center justify-center bg-[var(--color-blue-850)]">
       <div class="mx-4 flex min-w-[220px] max-w-[360px] flex-col items-center gap-3 rounded-[16px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-6 py-5 text-center shadow-[0_12px_30px_rgba(0,0,0,0.2)] [body.light-theme_&]:shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
@@ -12,69 +12,40 @@
   }
 
   <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
-    @if (isTrackingView && trackingError) {
-      <div class="border-b border-[rgba(239,68,68,.25)] bg-[rgba(239,68,68,.08)] px-[14px] py-[7px] text-[12px] text-[#fca5a5]">
-        <i class="bi bi-exclamation-triangle"></i> {{ trackingError }}
-      </div>
-    }
-
     <div class="relative grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden">
       <div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:min-h-[380px]">
         @if(isMapView) {
-          <app-satellite-map-section class="block h-full min-h-0 min-w-0 overflow-hidden"
+          <app-satellite-map-renderer #mapRenderer class="block h-full min-h-0 min-w-0 overflow-hidden"
             [lat]="lat"
             [lon]="lon"
             [delta]="delta"
             [selectedLayer]="selectedLayer"
             [facilitiesVisible]="facilitiesVisible"
-            [legendFilters]="visibleDashboardTypeFilters"
-            [facilitiesData]="facilitiesData"
-            [orionData]="filteredData"
+            [facilityFeatures]="filteredFacilitiesMapData"
+            [orionData]="filteredWriData"
             [focusedFeature]="focusedFeature"
             [anomalyData]="anomalyResult"
             [aircraftData]="aircraftData"
             [shipsData]="shipsData"
-            [isScanning]="isScanning()"
-            [progress]="satelliteService.progress()"
-            [currentStep]="currentStep"
-            [progressSegments]="progressSegments"
-            [errorMessage]="satelliteService.onError()?.message || null"
-            [hasSearched]="hasSearched"
             (featureSelected)="onMapFeatureSelected($event)"
             (featureIdsSelected)="onMapEntityFeatureIdsSelected($event)"
             (mapMoved)="onMapMoved($event)">
-          </app-satellite-map-section>
-          @if (isAircraftLoading || isShipsLoading || isMapEntityLoading || isMapEntityDetailsLoading) {
-              <div class="pointer-events-none absolute left-12 top-3 z-[920] flex flex-col gap-2">
-                @if (isAircraftLoading) {
-                  <div class="inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.9)] px-3 py-2 text-[12px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)]">
-                    <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
-                    Aircrafts loading...
-                  </div>
-                }
-                @if (isShipsLoading) {
-                  <div class="inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.9)] px-3 py-2 text-[12px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)]">
-                    <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
-                    Ships loading...
-                  </div>
-                }
-                @if (isMapEntityLoading) {
-                  <div class="inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.9)] px-3 py-2 text-[12px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)]">
-                    <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
-                    Facilities loading...
-                  </div>
-                }
-                @if (isMapEntityDetailsLoading) {
-                  <div class="inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.9)] px-3 py-2 text-[12px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)]">
-                    <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
-                    Loading Facility details...
-                  </div>
-                }
-              </div>
-            }
-          @if (isMapEntityDetailsLoading) {
-            <div class="absolute inset-0 z-[918] cursor-wait bg-transparent"></div>
-          }
+          </app-satellite-map-renderer>
+          <app-map-entities-overlay
+            [facilitiesVisible]="facilitiesVisible"
+            [legendFilters]="visibleDashboardTypeFilters"
+            [sidebarVisible]="mapRenderer.sidebarVisible"
+            [sidebarLoading]="mapRenderer.sidebarLoading"
+            [sidebarError]="mapRenderer.sidebarError"
+            [selectedEntity]="mapRenderer.selectedEntity"
+            [isAircraftLoading]="isAircraftLoading"
+            [isShipsLoading]="isShipsLoading"
+            [isMapEntityLoading]="isMapEntityLoading"
+            [isMapEntityDetailsLoading]="isMapEntityDetailsLoading"
+            [errorMessage]="satelliteService.onError()?.message || null"
+            [isScanning]="isScanning()"
+            (closeSidebar)="mapRenderer.closeSidebar()">
+          </app-map-entities-overlay>
           }
           <div class="absolute right-3 top-3 z-[920] flex items-center gap-2 map-overlay-menu">
             @if (showTopBar) {
@@ -98,31 +69,6 @@
           </div>
           </div>
 
-          @if (isPanelMenuOpen) {
-            <div class="map-overlay-menu absolute right-3 top-16 z-[999] flex w-[230px] flex-col overflow-hidden rounded-[12px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_16px_40px_rgba(2,6,23,.45)] backdrop-blur-md" @popupAnimation>
-              @if (isTrackingView) {
-                <div class="tracking-dropdown border-b border-white/10 p-2">
-                  <button (click)="toggleTrackingDropdown()" class="flex h-9 w-full items-center justify-between rounded-[8px] border border-white/15 bg-white/5 px-3 text-left text-[12px] font-medium text-[var(--color-text1)]">
-                    <span>{{ getTrackingLabel() }}</span>
-                    <i class="bi bi-chevron-down text-[10px] opacity-70"></i>
-                  </button>
-                  
-                </div>
-              }
-              @if (isThreatView) {
-                <button class="border-b border-white/10 px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text3)] transition-colors last:border-b-0 hover:bg-white/5 hover:text-[var(--color-text1)]" (click)="openThreatFilters()">
-                  Filter
-                </button>
-              } @else {
-                @for (tab of panelTabs; track tab.id) {
-                  <button class="border-b border-white/10 px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text3)] transition-colors last:border-b-0 hover:bg-white/5 hover:text-[var(--color-text1)]" (click)="openPanelPopup(tab.id)">
-                    {{ tab.label }}
-                  </button>
-                }
-              }
-            </div>
-          }
-
         @if(isThreatView){
           <div class="h-full min-h-0 w-full overflow-hidden">
             <app-threat-lens class="block h-full min-h-0 w-full" [showFilterButton]="false" (loadingChange)="onThreatLensLoadingChange($event)"></app-threat-lens>
@@ -136,177 +82,50 @@
           (close)="closeMapEntityPopup()">
         </app-map-entity-popup>
       }
-        @if (isMapView && isPanelPopupOpen) {
-  <div class="map-overlay-menu absolute right-3 top-16 bottom-3 z-[930] flex w-[min(380px,calc(100%-24px))] flex-col overflow-hidden rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md" @sidebarAnimation>
-    <div class="flex shrink-0 items-center justify-between border-b border-white/10 px-3 py-2">
-      <div class="text-[18px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">{{ activePanelLabel }}</div>
-      <button type="button" class="ui-popup-close right-5 top-5 h-[42px] w-[42px] rounded-[8px] border-none bg-transparent text-[28px] leading-none text-[#ccc] transition-[color,background-color] duration-200 hover:bg-[var(--color-blue-700)] hover:text-[var(--color-blue-640)]" (click)="closePanelPopup()" aria-label="Close popup">×</button>
-     
-    </div>
-    <div class="min-h-0 flex-1 overflow-y-auto">
+      <app-satellite-panel-shell
+        [isMapView]="isMapView"
+        [isThreatView]="isThreatView"
+        [isPanelMenuOpen]="isPanelMenuOpen"
+        [isPanelPopupOpen]="isPanelPopupOpen"
+        [activePanel]="activePanel"
+        (threatFiltersOpened)="openThreatFilters()"
+        (panelOpened)="openPanelPopup($event)"
+        (panelClosed)="closePanelPopup()">
 
-@if (activePanel === 'dashboard') {
-  <div class="px-[14px] py-3">
-    <div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3">
-      <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Search</div>
-      <div class="mt-2 flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2">
-        <i class="bi bi-search text-[12px] text-[var(--color-text3)]"></i>
-        <input type="text" [ngModel]="dashboardSearch" (ngModelChange)="onDashboardSearchInput($event)" placeholder="Search map entities or facilities" class="w-full bg-transparent text-[13px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text3)]"/>
-        @if (dashboardSearch) {
-          <button type="button" class="text-[12px] text-[var(--color-text3)] hover:text-[var(--color-text1)]" (click)="clearDashboardSearch()">
-            <i class="bi bi-x-lg"></i>
-          </button>
-        }
-      </div>
-      @if (dashboardSearchResults.length > 0) {
-        <div class="mt-2 overflow-hidden rounded-[10px] border border-[var(--color-border)]">
-          @for (feature of dashboardSearchResults; track feature.id) {
-            <button type="button" class="flex w-full items-start justify-between border-b border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-left transition-colors last:border-b-0 hover:bg-[var(--color-blue-710)]" (click)="focusDashboardFeature(feature)">
-              <div>
-                <div class="text-[12px] font-semibold text-[var(--color-text1)]">{{ feature.name }}</div>
-                <div class="mt-0.5 text-[11px] text-[var(--color-text3)]">{{ feature.type }} · {{ feature.source }}</div>
-              </div>
-              <span class="mt-0.5 h-2.5 w-2.5 rounded-full" [ngClass]="typeDotClass(feature.type)"></span>
-            </button>
-          }
-        </div>
-      }
-    </div>
-
-    <div class="mt-3 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3">
-      <div class="flex items-center justify-between">
-        <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">All Facilities</div>
-        <div class="text-[11px] text-[var(--color-text3)]">{{ visiblePowerCount }} visible</div>
-      </div>
-      <div class="mt-2 flex items-center justify-between text-[11px] text-[var(--color-text3)]">
-        <span>Loaded {{ wriData.length }} records</span>
-      </div>
-      <div class="mt-3 grid grid-cols-2 gap-2">
-        @for (filter of dashboardTypeFilters; track filter.key) {
-          <button type="button" class="flex items-center justify-between rounded-[10px] border px-3 py-2 text-[12px] transition-colors" [ngClass]="isFilterSelected(filter.key) ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-720)]','text-[var(--color-text1)]'] : ['border-[var(--color-border)]','bg-[var(--color-blue-790)]','text-[var(--color-text3)]']" (click)="toggleDashboardFilter(filter.key)">
-            <span class="inline-flex items-center gap-2">
-              <!-- eslint-disable-next-line @angular-eslint/template/no-inline-styles -->
-              <span class="h-2.5 w-2.5 rounded-full" [style.backgroundColor]="filter.color"></span>
-              {{ filter.label }}
-            </span>
-            <span class="font-mono text-[11px]">{{ filter.count }}</span>
-          </button>
-        }
-      </div>
-    </div>
-
-    <div class="mt-3 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3">
-      <div class="flex items-center justify-between px-[0px]">
-        <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Facilities</div>
-          <button class="rounded-[6px] border border-[#3a7bd5] bg-[#1a4a7a] px-3 py-1 text-[11px] font-medium text-[#7eb8f7] hover:bg-[#225d99] disabled:opacity-60" (click)="openGeocodeModal()">
-                  <i class="bi bi-geo-alt"></i>
-                  Location
-                </button>
-      </div>
-
-      <div class="flex-1 mt-3 overflow-auto">
-
-        @if (!hasSearched) {
-          <div class="px-[14px] py-6 text-center text-[12px] text-[var(--color-text3)]">
-            Select location to load facilities
-          </div>
-        }
-        @else if (isScanning()) {
-          <div class="px-[14px] py-6 text-center text-[12px] text-[var(--color-text3)]">
-            Loading facilities...
-          </div>
-        }
-        @else if (!facilitiesData || !facilitiesData.total) {
-          <div class="px-[14px] py-6 text-center text-[12px] text-[var(--color-text3)]">
-            No facilities found
-          </div>
-        }
-        @else {
-
-          <div class="border-b border-[var(--color-border)] px-[14px] py-2 text-[12px] font-semibold text-[var(--color-text1)]">
-            {{ facilitiesData.total }} facilities
-          </div>
-
-          @for (entry of facEntries(); track entry[0]) {
-            <div class="flex justify-between border-b border-[var(--color-border)] px-[14px] py-[7px] text-[12px]">
-              <span class="text-[var(--color-text3)]">{{ entry[0] }}</span>
-              <span class="font-mono font-semibold text-[var(--color-text1)]">{{ entry[1] }}</span>
-            </div>
-          }
-        }
-
-      </div>
-    </div>
-<div class="mt-3 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3">
-      <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Tracking</div>
-      <div class="mt-2 grid grid-cols-2 gap-2">
-        <button type="button" class="flex items-center justify-between rounded-[10px] border px-3 py-2 text-[12px] transition-colors" [ngClass]="aircraftTrackingEnabled ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-720)]','text-[var(--color-text1)]'] : ['border-[var(--color-border)]','bg-[var(--color-blue-790)]','text-[var(--color-text3)]']" (click)="onTrackingSelectionChange('aircraft')">
-          <span class="inline-flex items-center gap-2">
-              <span>✈️</span>
-               Aircrafts</span>
-            @if (isAircraftLoading) {
-              <span class="h-3 w-3 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
-            } @else {
-              <span class="font-mono text-[11px]">{{ aircraftData.length }}</span>
-            }
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-[10px] border px-3 py-2 text-[12px] transition-colors" [ngClass]="shipsTrackingEnabled ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-720)]','text-[var(--color-text1)]'] : ['border-[var(--color-border)]','bg-[var(--color-blue-790)]','text-[var(--color-text3)]']" (click)="onTrackingSelectionChange('ship')">
-          <span class="inline-flex items-center gap-2">
-              <span>🚢</span>
-               Ships</span>
-          @if (isShipsLoading) {
-            <span class="h-3 w-3 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
-          } @else {
-            <span class="font-mono text-[11px]">{{ shipsData.length }}</span>
-          }
-        </button>
-      </div>
-      @if (trackingError) {
-        <div class="mt-2 rounded-[8px] border border-[rgba(245,158,11,.28)] bg-[rgba(245,158,11,.08)] px-2.5 py-2 text-[11px] leading-[1.45] text-[#fbbf24]">
-          {{ trackingError }}
-        </div>
-      }
-    </div>
-    <div class="mt-3 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3">
-      <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Selection</div>
-      @if (selectedFeature) {
-        <div class="mt-2 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-3">
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <div class="text-[13px] font-semibold text-[var(--color-text1)]">{{ selectedFeature.name }}</div>
-              <div class="mt-1 text-[11px] text-[var(--color-text3)]">{{ selectedFeature.type }} · {{ selectedFeature.source }}</div>
-            </div>
-            <span class="mt-1 h-3 w-3 rounded-full" [ngClass]="typeDotClass(selectedFeature.type)"></span>
-          </div>
-          @if (selectedFeature.capacityMw !== null && selectedFeature.capacityMw !== undefined) {
-            <div class="mt-3 flex justify-between text-[12px]">
-              <span class="text-[var(--color-text3)]">Capacity</span>
-              <span class="font-mono font-semibold text-[var(--color-text1)]">{{ selectedFeature.capacityMw }} MW</span>
-            </div>
-          }
-          <div class="mt-2 flex justify-between text-[12px]">
-            <span class="text-[var(--color-text3)]">Coordinates</span>
-            <span class="font-mono font-semibold text-[var(--color-text1)]">
-              {{ selectedFeature.coordinates[1].toFixed(4) }}, {{ selectedFeature.coordinates[0].toFixed(4) }}
-            </span>
-          </div>
-        </div>
-      } @else {
-        <div class="mt-2 text-[12px] leading-[1.7] text-[var(--color-text3)]">
-          Click a map point or choose a search result to inspect capacity, source, and coordinates.
-        </div>
-      }
-    </div>
-  </div>
+@if (activePanel === panel.Dashboard) {
+  <app-satellite-dashboard-section
+    [dashboardSearch]="dashboardSearch"
+    [dashboardSearchResults]="dashboardSearchResults"
+    [dashboardTypeFilters]="dashboardTypeFilters"
+    [selectedFilters]="selectedDashboardFilters"
+    [visiblePowerCount]="visiblePowerCount"
+    [wriDataCount]="wriData.length"
+    [facilitiesData]="facilitiesData"
+    [facilityEntries]="facilityEntries"
+    [hasSearched]="hasSearched"
+    [isScanning]="isScanning()"
+    [aircraftTrackingEnabled]="aircraftTrackingEnabled"
+    [shipsTrackingEnabled]="shipsTrackingEnabled"
+    [isAircraftLoading]="isAircraftLoading"
+    [isShipsLoading]="isShipsLoading"
+    [aircraftCount]="aircraftData.length"
+    [shipsCount]="shipsData.length"
+    [aircraftTrackingError]="aircraftTrackingError"
+    [shipsTrackingError]="shipsTrackingError"
+    [selectedFeature]="selectedFeature"
+    (dashboardSearchInput)="onDashboardSearchInput($event)"
+    (clearDashboardSearch)="clearDashboardSearch()"
+    (featureFocused)="focusDashboardFeature($event)"
+    (filterToggled)="toggleDashboardFilter($event)"
+    (locationOpened)="openGeocodeModal()"
+    (aircraftTrackingToggled)="onAircraftTrackingSelectionChange()"
+    (shipTrackingToggled)="onShipTrackingSelectionChange()">
+  </app-satellite-dashboard-section>
 }
 
-      @if (activePanel === 'compare') {
+      @if (activePanel === panel.Compare) {
         <app-satellite-month-compare
           [isScanning]="isScanning()"
-          [useMainLoading]="true"
-          [progress]="satelliteService.progress()"
-          [currentStep]="currentStep"
-          [progressSegments]="progressSegments"
           [errorMessage]="satelliteService.onError()?.message || null"
           [hasSearched]="hasSearched"
           [compareResult]="compareResult"
@@ -314,7 +133,7 @@
         </app-satellite-month-compare>
       }
 
-      @if (activePanel === 'anomaly') {
+      @if (activePanel === panel.Anomaly) {
         <div class="flex flex-col h-full">
 
           <div class="flex items-center justify-between px-[14px] py-2 border-b border-[var(--color-border)]">
@@ -342,13 +161,6 @@
               </div>
             } @else {
               <app-satellite-anomaly-section
-                [isScanning]="false"
-                [useMainLoading]="true"
-                [progress]="satelliteService.progress()"
-                [currentStep]="currentStep"
-                [progressSegments]="progressSegments"
-                [errorMessage]="satelliteService.onError()?.message || null"
-                [hasSearched]="hasSearched"
                 [anomalyResult]="anomalyResult">
               </app-satellite-anomaly-section>
             }
@@ -356,13 +168,9 @@
         </div>
       }
 
-      @if (activePanel === 'sentinel') {
+      @if (activePanel === panel.Sentinel) {
         <app-satellite-sentinel-search
           [isScanning]="isScanning()"
-          [useMainLoading]="true"
-          [progress]="satelliteService.progress()"
-          [currentStep]="currentStep"
-          [progressSegments]="progressSegments"
           [errorMessage]="satelliteService.onError()?.message || null"
           [hasSearched]="hasSearched"
           [sentinelResults]="sentinelResults?.results || null"
@@ -370,13 +178,9 @@
         </app-satellite-sentinel-search>
       }
 
-      @if (activePanel === 'image') {
+      @if (activePanel === panel.Image) {
         <app-satellite-sentinel-image
           [isScanning]="isScanning()"
-          [useMainLoading]="true"
-          [progress]="satelliteService.progress()"
-          [currentStep]="currentStep"
-          [progressSegments]="progressSegments"
           [errorMessage]="satelliteService.onError()?.message || null"
           [hasSearched]="hasSearched"
           [imageResult]="sentinelImageResult"
@@ -384,9 +188,7 @@
         </app-satellite-sentinel-image>
       }
 
-    </div>
-  </div>
-}
+      </app-satellite-panel-shell>
     </div>
   </div>
 

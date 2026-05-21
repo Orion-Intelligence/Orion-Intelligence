@@ -1,12 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, EventEmitter, HostBinding, Input, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ThreatLensDisplayFeedItem, ThreatLensFeedRange } from '../threat.lens.model';
-
-export interface ThreatLensFeedRangeOption {
-  key: ThreatLensFeedRange;
-  label: string;
-}
+import { ThreatLensDisplayFeedItem, ThreatLensFeedRange, ThreatLensFeedRangeOption } from '../../models/geo-fencing.models';
 
 @Component({
   selector: 'app-threat-lens-feed-panel',

@@ -19,17 +19,6 @@ from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynam
 from orion.api.interactive.search_manager.search_data_model.map_entities.search_map_entities_param_model import search_map_entities_param_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.interactive.siemlog_manager.siem_log_manager import SiemLogManager
-from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (
-    DomainScanRequest,
-    UrlVulnerabilityScanRequest,
-)
-from orion.api.server.crawl_manager.class_model.ip_scan_request_model import (
-    GeoCameraDetectRangesRequest,
-    GeoCameraDetectRequest,
-    IPScanRequest,
-    NetIntelDeepScanRequest,
-    ResolveIPRequest,
-)
 from orion.api.server.geo_fencing_manager.class_model.satellite_request_models import (
     SatelliteImageRequest,
     SatelliteAnomalyRequest,
@@ -43,7 +32,6 @@ from orion.api.server.geo_fencing_manager.class_model.satellite_request_models i
     SatelliteLiveTrackerShipMmsiRequest,
     SatelliteLiveTrackerStatusRequest,
 )
-from orion.api.server.crawl_manager.class_model.social_scrape_request_model import (SocialScrapeRequest, )
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest, UrlVulnerabilityScanRequest
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import GeoCameraDetectRangesRequest, GeoCameraDetectRequest, IPScanRequest, NetIntelDeepScanRequest, ResolveIPRequest
 from orion.api.server.crawl_manager.class_model.log_model import InjectionBatchRequestModel, InjectionBatchResponseModel, SiemSearchRequestModel, SiemSearchResponseModel

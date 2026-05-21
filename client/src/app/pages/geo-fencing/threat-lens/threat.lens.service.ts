@@ -4,7 +4,7 @@ import { ConsolidatedCallbackModel } from '../../../shared/model/results/consoli
 import { ConsolidatedParamModel } from '../../../shared/model/results/consolidated/consolidated.param.model';
 import { ApiService } from '../../../shared/services/api.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
-import { THREAT_LENS_CATEGORY_CONFIG, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensMapData, ThreatLensRequestPayload, } from './threat.lens.model';
+import { THREAT_LENS_CATEGORY_CONFIG, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
 
 const COUNTRY_ALIAS: Record<string, string> = {
   usa: 'United States',

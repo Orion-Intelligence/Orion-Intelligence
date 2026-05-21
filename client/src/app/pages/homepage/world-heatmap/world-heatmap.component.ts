@@ -15,7 +15,6 @@ import { overlayFadeAnimation } from '../../../shared/animations/chat.overlay.an
   selector: 'app-world-heatmap',
   imports: [HeatmapReportComponent],
   standalone: true,
-  host: { class: 'block w-full' },
   templateUrl: './world-heatmap.component.html',
   animations: [overlayFadeAnimation]
 })

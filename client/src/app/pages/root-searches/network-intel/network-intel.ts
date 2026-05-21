@@ -19,9 +19,6 @@ import { VulnerabilitySectionComponent } from './vulnerability-section/vulnerabi
   selector:    'app-network-intel',
   templateUrl: './network-intel.html',
   standalone:  true,
-  host: {
-    'class': 'block h-full min-h-0 overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]'
-  },
   imports:     [CommonModule, FormsModule, EmptyQueryComponent, GeoCoordinatesModalComponent, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent],
   animations:  [fadeInDashboardItem],
 })

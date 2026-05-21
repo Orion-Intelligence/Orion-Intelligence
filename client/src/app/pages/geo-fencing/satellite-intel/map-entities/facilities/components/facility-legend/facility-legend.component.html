@@ -1,0 +1,11 @@
+@if (visible && filters.length) {
+  <div class="pointer-events-auto absolute bottom-7 left-1/2 z-[900] flex w-max max-w-[min(920px,calc(100%-24px))] -translate-x-1/2 items-center gap-3 overflow-x-auto overflow-y-hidden whitespace-nowrap rounded border border-white/10 bg-[rgba(13,21,37,.92)] px-[10px] py-[6px] font-mono text-[10px] text-white/70">
+    <span class="text-white/45">FACILITIES</span>
+    @for (entity of filters; track entity.key) {
+      <span class="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap">
+        <span class="h-2.5 w-2.5 rounded-full" [ngClass]="dotClass(entity.key)"></span>
+        <span>{{ entity.label }}</span>
+      </span>
+    }
+  </div>
+}

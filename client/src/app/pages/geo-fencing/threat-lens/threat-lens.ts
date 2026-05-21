@@ -9,7 +9,7 @@ import { SidebarService } from '../../../shared/services/sidebar.service';
 import { FilterModel } from '../../../shared/model/filter/filter.model';
 import { FiltersComponent } from "../../../shared/partials/filters/filters.component";
 import { threat_lens_filters } from '../../../shared/constants/filters';
-import { AnimatedArcDescriptor, SelectedCountryCategoryCount, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensDisplayFeedItem, ThreatLensFeedItem, ThreatLensFeedRange, ThreatLensLegendItem, ThreatLensMapData, ThreatLensRequestPayload, } from './threat.lens.model';
+import { AnimatedArcDescriptor, SelectedCountryCategoryCount, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensDisplayFeedItem, ThreatLensFeedItem, ThreatLensFeedRange, ThreatLensLegendItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
 import { ThreatLensService } from './threat.lens.service';
 import { ThreatLensFeedPanelComponent } from './threat-lens-feed-panel/threat-lens-feed-panel';
 
@@ -18,7 +18,6 @@ import { ThreatLensFeedPanelComponent } from './threat-lens-feed-panel/threat-le
   standalone: true,
   imports: [CommonModule, FormsModule, FiltersComponent, ThreatLensFeedPanelComponent],
   templateUrl: './threat-lens.html',
-  host: { class: 'block h-full min-h-0 w-full' },
 })
 export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   @ViewChild('mapViewNode', { static: true }) private mapViewNode?: ElementRef<HTMLDivElement>;
@@ -304,15 +303,12 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   }
 
   private registerClickHandler(): void {
-    console.log('Registering click handler');
     if (!this.view || !this.countryLayer) {
-      console.log('1st return');
       return;
     }
 
     this.mapClickHandle = this.view.on('click', async (event: any) => {
       if (!this.view || !this.countryLayer) {
-        console.log('2nd return');
         return;
       }
 
@@ -326,7 +322,6 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
           this.selectedCountryBreakdown = [];
           this.statusMessage = 'No country detected at clicked point.';
         });
-        console.log('3rd return');
         return;
       }
 
@@ -363,7 +358,6 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       }
 
       const hit = await this.view.hitTest(event, {
-        // include: [this.countryLayer]
         include: [
           this.animatedArcGraphicsLayer,
           this.arcGraphicsLayer,
@@ -391,7 +385,6 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       const countryName = this.extractCountryName(countryGraphic.attributes);
       const countryKey = this.toCountryKey(countryName);
 
-      // Prevent unnecessary rerender
       if (this.hoveredCountryKey === countryKey) {
         this.moveTooltip(event);
         return;
@@ -1112,10 +1105,6 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
         end_country: arc.countryBName,
 
         weight: arc.weight,
-        // category: arc.categoryKey,
-        // country_a: arc.countryAKey,
-        // country_b: arc.countryBKey,
-        // weight: arc.weight,
       },
       symbol: {
         type: 'line-3d',
@@ -1159,10 +1148,6 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
         end_country: arc.countryBName,
 
         weight: arc.weight,
-        // category: arc.categoryKey,
-        // country_a: arc.countryAKey,
-        // country_b: arc.countryBKey,
-        // weight: arc.weight,
       },
       symbol: {
         type: 'simple-line',
@@ -1283,7 +1268,6 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
     }
 
     this.animatedArcGraphicsLayer.removeAll();
-    // this.animatedArcGraphicsLayer.addMany(this.movingDotGraphics);
     this.animatedArcGraphicsLayer.addMany([
       ...this.startMarkerGraphics,
       ...this.endMarkerGraphics,

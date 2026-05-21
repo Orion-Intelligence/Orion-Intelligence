@@ -1,0 +1,49 @@
+<div class="px-4 py-4 md:px-6">
+  @if (anomalyResult) {
+    <div class="animate-[ui-overlay-fade-in_180ms_ease-out_both]">
+      <div class="mb-4 overflow-hidden rounded-xl border p-4" [ngClass]="alertClass">
+        <div class="mb-3 flex items-center justify-between">
+          <span class="text-[11px] font-bold uppercase tracking-widest" [ngClass]="alertTextClass">
+            {{ (anomalyResult.alert_level || 'unknown').toUpperCase() }}
+          </span>
+          <span class="rounded-md border px-2 py-0.5 text-[11px] font-semibold" [ngClass]="alertBadgeClass">
+            {{ anomalyResult.delta_score }}% NDVI delta
+          </span>
+        </div>
+        <div class="mb-3 text-[11px] text-[var(--color-text4)]">Vegetation index — 3-month window</div>
+
+        @for (month of anomalyResult.months; track month.month_key) {
+          <div class="flex items-center justify-between border-b border-white/5 py-2.5 last:border-b-0">
+            <div>
+              <span class="text-[13px] font-semibold text-[var(--color-text1)]">{{ month.month }}</span>
+              <span class="ml-2 text-[11px] text-[var(--color-text4)]">{{ month.date_from }} → {{ month.date_to }}</span>
+            </div>
+            @if (month.has_data) {
+              <span class="font-mono text-[13px] font-semibold text-[var(--color-text1)]">{{ month.ndvi_score }}%</span>
+            } @else {
+              <span class="text-[12px] text-[var(--color-text4)]">no data</span>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+        <div class="border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text4)]">
+          Scan details
+        </div>
+        <div class="flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 text-[13px]">
+          <span class="text-[var(--color-text3)]">Coordinates</span>
+          <span class="font-mono font-semibold text-[var(--color-text1)]">{{ anomalyResult.lat | number:'1.4-4' }}°N {{ anomalyResult.lon | number:'1.4-4' }}°E</span>
+        </div>
+        <div class="flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 text-[13px]">
+          <span class="text-[var(--color-text3)]">Bounding box</span>
+          <span class="font-mono text-[12px] text-[var(--color-text2)]">{{ anomalyResult.bbox[0] | number:'1.3-3' }}, {{ anomalyResult.bbox[1] | number:'1.3-3' }} → {{ anomalyResult.bbox[2] | number:'1.3-3' }}, {{ anomalyResult.bbox[3] | number:'1.3-3' }}</span>
+        </div>
+        <div class="flex items-center justify-between px-4 py-3 text-[13px]">
+          <span class="text-[var(--color-text3)]">Data points</span>
+          <span class="font-semibold text-[var(--color-text1)]">{{ anomalyResult.months?.length ?? 0 }} months</span>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,27 @@
+@if (isPanelMenuOpen) {
+  <div class="map-overlay-menu absolute right-3 top-16 z-[999] flex w-[230px] flex-col overflow-hidden rounded-[12px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_16px_40px_rgba(2,6,23,.45)] backdrop-blur-md animate-[ui-popup-flyout-in_160ms_ease-out_both]">
+    @if (isThreatView) {
+      <button class="border-b border-white/10 px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text3)] transition-colors last:border-b-0 hover:bg-white/5 hover:text-[var(--color-text1)]" (click)="threatFiltersOpened.emit()">
+        Filter
+      </button>
+    } @else {
+      @for (tab of panelTabs; track tab.id) {
+        <button class="border-b border-white/10 px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text3)] transition-colors last:border-b-0 hover:bg-white/5 hover:text-[var(--color-text1)]" (click)="panelOpened.emit(tab.id)">
+          {{ tab.label }}
+        </button>
+      }
+    }
+  </div>
+}
+
+@if (isMapView && isPanelPopupOpen) {
+  <div class="map-overlay-menu absolute bottom-3 right-3 top-16 z-[930] flex w-[min(380px,calc(100%-24px))] flex-col overflow-hidden rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md animate-[ui-popup-panel-in_180ms_ease-out_both]">
+    <div class="flex shrink-0 items-center justify-between border-b border-white/10 px-3 py-2">
+      <div class="text-[18px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">{{ activePanelLabel }}</div>
+      <button type="button" class="ui-popup-close right-5 top-5 h-[42px] w-[42px] rounded-[8px] border-none bg-transparent text-[28px] leading-none text-[#ccc] transition-[color,background-color] duration-200 hover:bg-[var(--color-blue-700)] hover:text-[var(--color-blue-640)]" (click)="panelClosed.emit()" aria-label="Close popup">×</button>
+    </div>
+    <div class="min-h-0 flex-1 overflow-y-auto">
+      <ng-content></ng-content>
+    </div>
+  </div>
+}
