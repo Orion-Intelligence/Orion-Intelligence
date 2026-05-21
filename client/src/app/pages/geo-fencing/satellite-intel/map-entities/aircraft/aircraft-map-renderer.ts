@@ -4,7 +4,7 @@ import { SatelliteLiveAircraft } from '../../../../../shared/model/satellite-int
 import { SatelliteAircraftTrackingService } from './aircraft-tracking.service';
 import { AircraftMarkerIconComponent } from './components/aircraft-marker-icon/aircraft-marker-icon.component';
 import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-renderer';
-import { escapeTooltipText, getBearingDegrees, getGridBucketKey, getMarkerBaseSize, getResponseStatus, isPendingStatus, normalizeEntityId, sampleByBucket } from '../../map-utils/renderer-utils';
+import { escapeTooltipText, getBearingDegrees, getMarkerBaseSize, getResponseStatus, isPendingStatus, normalizeEntityId, stableHash } from '../../map-utils/renderer-utils';
 import { TrackingSidebarBridge } from '../../../models/geo-fencing.models';
 
 export class AircraftMapRenderer {
@@ -20,6 +20,9 @@ export class AircraftMapRenderer {
   private detailSub?: Subscription;
   private markerZoomBucket = 0;
   private readonly animationDurationMs = 8000;
+  private readonly sparseAircraftAreaThreshold = 15;
+  private readonly crowdedAircraftAreaThreshold = 100;
+  private readonly minimumSampledAircraftPerArea = 8;
   private readonly L: any;
   private readonly map: any;
   private readonly service: SatelliteAircraftTrackingService;
@@ -483,22 +486,62 @@ export class AircraftMapRenderer {
       }
       return bounds.pad(0.18).contains([aircraft.latitude, aircraft.longitude]);
     });
+    return this.sampleCrowdedAircraftAreas(visible, zoom);
+  }
+
+  private sampleCrowdedAircraftAreas(aircraft: SatelliteLiveAircraft[], zoom: number): SatelliteLiveAircraft[] {
     const sampleRatio = this.getSampleRatio(zoom);
-    if (sampleRatio >= 1) {
-      return visible;
+    const buckets = new Map<string, SatelliteLiveAircraft[]>();
+    aircraft.forEach(item => {
+      const bucketKey = this.getSampleBucketKey(item, zoom);
+      const bucketItems = buckets.get(bucketKey) ?? [];
+      bucketItems.push(item);
+      buckets.set(bucketKey, bucketItems);
+    });
+
+    const sampled: SatelliteLiveAircraft[] = [];
+    buckets.forEach(bucketItems => {
+      if (bucketItems.length <= this.sparseAircraftAreaThreshold) {
+        sampled.push(...bucketItems);
+        return;
+      }
+
+      const keepCount = this.getAircraftAreaKeepCount(bucketItems.length, sampleRatio);
+      if (keepCount >= bucketItems.length) {
+        sampled.push(...bucketItems);
+        return;
+      }
+
+      const stableBucketItems = bucketItems
+        .slice()
+        .sort((left, right) => Math.abs(stableHash(this.getStableAircraftKey(left))) - Math.abs(stableHash(this.getStableAircraftKey(right))));
+      sampled.push(...stableBucketItems.slice(0, keepCount));
+    });
+
+    return sampled;
+  }
+
+  private getAircraftAreaKeepCount(count: number, sampleRatio: number): number {
+    if (count <= this.crowdedAircraftAreaThreshold) {
+      return Math.max(this.minimumSampledAircraftPerArea, Math.ceil(count * this.getModerateAircraftSampleRatio(sampleRatio)));
     }
-    return sampleByBucket(visible, sampleRatio, aircraft => this.getSampleBucketKey(aircraft), aircraft => normalizeEntityId(aircraft.icao24) ?? `${aircraft.latitude}:${aircraft.longitude}`);
+
+    return Math.max(this.minimumSampledAircraftPerArea, Math.ceil(count * sampleRatio));
+  }
+
+  private getModerateAircraftSampleRatio(sampleRatio: number): number {
+    return Math.max(sampleRatio, 0.18);
   }
 
   private getSampleRatio(zoom: number): number {
     if (zoom >= 8) {
-      return 1;
+      return 0.32;
     }
     if (zoom >= 7) {
-      return 0.82;
+      return 0.28;
     }
     if (zoom >= 6) {
-      return 0.58;
+      return 0.22;
     }
     if (zoom >= 5) {
       return 0.3;
@@ -512,17 +555,35 @@ export class AircraftMapRenderer {
     return 0.1;
   }
 
-  private getSampleBucketKey(aircraft: SatelliteLiveAircraft): string {
-    const originCountry = aircraft.origin_country?.trim();
-    if (originCountry) {
-      return `origin:${originCountry.toLowerCase()}`;
-    }
-
+  private getSampleBucketKey(aircraft: SatelliteLiveAircraft, zoom: number): string {
     if (Number.isFinite(aircraft.latitude) && Number.isFinite(aircraft.longitude)) {
-      return getGridBucketKey(aircraft.latitude as number, aircraft.longitude as number);
+      const gridSize = this.getSampleGridSize(zoom);
+      const latBucket = Math.floor(((aircraft.latitude as number) + 90) / gridSize);
+      const lonBucket = Math.floor(((aircraft.longitude as number) + 180) / gridSize);
+      return `grid:${gridSize}:${latBucket}:${lonBucket}`;
     }
 
-    return 'origin:unknown';
+    return 'grid:unknown';
+  }
+
+  private getSampleGridSize(zoom: number): number {
+    if (zoom >= 7) {
+      return 3;
+    }
+    if (zoom >= 6) {
+      return 5;
+    }
+    if (zoom >= 5) {
+      return 7;
+    }
+    if (zoom >= 4) {
+      return 10;
+    }
+    return 14;
+  }
+
+  private getStableAircraftKey(aircraft: SatelliteLiveAircraft): string {
+    return normalizeEntityId(aircraft.icao24) ?? `${aircraft.latitude}:${aircraft.longitude}`;
   }
 
   private extractDetails(res: any): SatelliteLiveAircraft | null {
