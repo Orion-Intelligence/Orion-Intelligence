@@ -69,16 +69,33 @@ export class EntityLoader {
     return this.facilitiesController.mapData;
   }
 
-  toggleAircraft(viewport: SatelliteTrackingViewport): void {
-    this.aircraftTracker.toggle(viewport);
+  get facilitiesLoading(): boolean {
+    return this.facilitiesController.isLoading;
+  }
+
+  toggleAircraft(viewport: SatelliteTrackingViewport, scoped = false): void {
+    this.aircraftTracker.toggle(viewport, scoped);
   }
 
   toggleShips(viewport: SatelliteTrackingViewport): void {
     this.shipTracker.toggle(viewport);
   }
 
-  loadFacilities(viewport: SatelliteTrackingViewport, onMapDataChanged: () => void): void {
-    this.facilitiesController.load(viewport, onMapDataChanged);
+  loadFacilities(viewport: SatelliteTrackingViewport, onMapDataChanged: () => void, showLoading = true): void {
+    this.facilitiesController.load(viewport, onMapDataChanged, showLoading);
+  }
+
+  clearFacilities(onMapDataChanged: () => void): void {
+    this.facilitiesController.clear(onMapDataChanged);
+  }
+
+  refreshTracking(viewport: SatelliteTrackingViewport): void {
+    this.aircraftTracker.refresh(viewport, false, true);
+    this.shipTracker.refresh(viewport, false, true);
+  }
+
+  refreshGlobalAircraft(): void {
+    this.aircraftTracker.refreshGlobalTracking(true);
   }
 
   scheduleShipViewportRefresh(viewport: SatelliteTrackingViewport): void {

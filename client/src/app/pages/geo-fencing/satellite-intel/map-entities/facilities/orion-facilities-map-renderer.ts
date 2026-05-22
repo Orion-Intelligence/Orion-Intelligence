@@ -3,6 +3,7 @@ import { OrionSatelliteFeature } from '../../../models/geo-fencing.models';
 import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-renderer';
 import { stableHash } from '../../map-utils/renderer-utils';
 import { OrionFacilityMarkerIconComponent } from './components/orion-facility-marker-icon/orion-facility-marker-icon.component';
+import { OrionFacilityPopupComponent } from './components/orion-facility-popup/orion-facility-popup.component';
 
 type OrionFacilitiesMapRendererConfig = {
   L: any;
@@ -145,13 +146,15 @@ export class OrionFacilitiesMapRenderer {
   private createMarker(feature: OrionSatelliteFeature): any {
     const [lon, lat] = feature.coordinates;
     const markerIcon = this.createIcon(feature);
-    const popupElement = this.createPopupElement(feature);
+    const popup = this.componentRenderer.create(OrionFacilityPopupComponent, {
+      feature,
+    });
     const marker = this.L.marker([lat, lon], {
       icon: markerIcon.icon,
     });
     marker.__orionFacilityIconRef = markerIcon.componentRef;
-    marker.__orionFacilityPopupElement = popupElement;
-    marker.bindPopup(popupElement, { className: 'orion-popup' });
+    marker.__orionFacilityPopupRef = popup.componentRef;
+    marker.bindPopup(popup.element, { className: 'orion-popup' });
     marker.orionFeature = feature;
     marker.on('click', () => {
       this.onFeatureSelected(feature);
@@ -187,107 +190,9 @@ export class OrionFacilitiesMapRenderer {
 
   private destroyMarkerComponents(marker: any): void {
     this.componentRenderer.destroy(marker.__orionFacilityIconRef);
+    this.componentRenderer.destroy(marker.__orionFacilityPopupRef);
     marker.__orionFacilityIconRef = null;
-    marker.__orionFacilityPopupElement = null;
-  }
-
-  private createPopupElement(feature: OrionSatelliteFeature): HTMLElement {
-    const element = document.createElement('div');
-    element.className = 'w-[178px] rounded-lg bg-slate-950 px-2.5 py-2 text-white';
-
-    const title = document.createElement('div');
-    title.className = 'mb-2 text-xs font-bold leading-snug';
-    title.textContent = feature.name?.trim() || 'Feature';
-    element.appendChild(title);
-
-    this.getPopupRows(feature).forEach((row) => {
-      const rowElement = document.createElement('div');
-      rowElement.className = [
-        'border-t border-white/10 py-1 text-[11px] leading-snug',
-        row.stacked ? 'flex flex-col items-start gap-1' : 'flex items-start justify-between gap-1',
-      ].join(' ');
-
-      const label = document.createElement('span');
-      label.className = 'text-[10px] font-semibold uppercase tracking-wide text-white/65';
-      label.textContent = row.label;
-
-      const value = document.createElement('span');
-      value.className = [
-        'font-semibold text-white',
-        row.stacked ? 'text-left' : 'text-right break-words',
-      ].join(' ');
-      value.textContent = row.value;
-
-      rowElement.appendChild(label);
-      rowElement.appendChild(value);
-      element.appendChild(rowElement);
-    });
-
-    return element;
-  }
-
-  private getPopupRows(feature: OrionSatelliteFeature): Array<{ label: string; value: string; stacked: boolean }> {
-    const properties = feature.properties && typeof feature.properties === 'object' ? feature.properties : {};
-    const rows = [
-      this.createPopupRow('Country', properties['country']),
-      this.createPopupRow('Fuel', properties['fuel'] ?? properties['primary_fuel']),
-      this.createPopupRow('Capacity', this.formatCapacityValue(properties['capacity_mw'] ?? feature.capacityMw)),
-      this.createPopupRow('Source', properties['source'] ?? feature.source),
-    ].filter((row): row is { label: string; value: string; stacked: boolean } => row !== null);
-
-    Object.entries(properties).forEach(([key, rawValue]) => {
-      if ([ 'name', 'country', 'fuel', 'primary_fuel', 'capacity_mw', 'source' ].includes(key)) {
-        return;
-      }
-      const row = this.createPopupRow(this.humanizeFieldLabel(key), rawValue);
-      if (row) {
-        rows.push(row);
-      }
-    });
-
-    const [lon, lat] = feature.coordinates;
-    rows.push({
-      label: 'Coordinates',
-      value: `${lat.toFixed(3)}, ${lon.toFixed(3)}`,
-      stacked: true,
-    });
-
-    return rows;
-  }
-
-  private createPopupRow(label: string, value: unknown, stacked = false): { label: string; value: string; stacked: boolean } | null {
-    const formatted = this.formatPopupValue(value);
-    return formatted ? { label, value: formatted, stacked } : null;
-  }
-
-  private humanizeFieldLabel(key: string): string {
-    return key
-      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-      .replace(/_/g, ' ')
-      .replace(/^./, (char) => char.toUpperCase());
-  }
-
-  private formatPopupValue(value: unknown): string {
-    if (value === null || value === undefined || value === '') {
-      return '';
-    }
-    if (typeof value === 'string') {
-      return value;
-    }
-    if (typeof value === 'number' || typeof value === 'boolean') {
-      return String(value);
-    }
-    if (Array.isArray(value)) {
-      return value.join(', ');
-    }
-    return JSON.stringify(value);
-  }
-
-  private formatCapacityValue(value: unknown): string {
-    if (typeof value !== 'number') {
-      return this.formatPopupValue(value);
-    }
-    return `${value} MW`;
+    marker.__orionFacilityPopupRef = null;
   }
 
   private getRenderableFeatures(): OrionSatelliteFeature[] {

@@ -6,6 +6,7 @@ import { SatelliteShipTrackingService } from './ship-tracking.service';
 export class SatelliteShipTrackingController {
   private trackSub?: Subscription;
   private timer?: ReturnType<typeof setTimeout>;
+  private viewportKey = '';
   private readonly refreshIntervalMs = 8000;
   private service: SatelliteShipTrackingService;
   private loading: MapEntityLoadingBridge;
@@ -39,6 +40,9 @@ export class SatelliteShipTrackingController {
   }
 
   scheduleViewportRefresh(viewport: SatelliteTrackingViewport, delayMs = 500): void {
+    if (!this.enabled || this.getViewportKey(viewport) === this.viewportKey) {
+      return;
+    }
     clearTimeout(this.timer);
     this.timer = setTimeout(() => {
       this.refresh(viewport, false, true);
@@ -52,15 +56,25 @@ export class SatelliteShipTrackingController {
   private stop(): void {
     this.trackSub?.unsubscribe();
     clearTimeout(this.timer);
+    this.viewportKey = '';
     this.isLoading = false;
   }
 
   private refreshInBounds(viewport: SatelliteTrackingViewport, showLoading = false, scheduleNext = false): void {
-    const showSpinner = showLoading || this.data.length === 0;
+    clearTimeout(this.timer);
+    const nextViewportKey = this.getViewportKey(viewport);
+    const isInitialLoad = !this.viewportKey;
+    const viewportChanged = this.viewportKey !== nextViewportKey;
+    this.viewportKey = nextViewportKey;
+    if (viewportChanged && showLoading) {
+      this.data = [];
+    }
+    const showSpinner = showLoading || (isInitialLoad && this.data.length === 0);
     this.isLoading = showSpinner;
     const loadingId = showLoading ? this.loading.begin('Loading Satellite Intel', 'Loading ship tracking data...') : null;
 
     this.trackSub?.unsubscribe();
+    clearTimeout(this.timer);
     this.trackSub = this.service.pollInBounds(viewport.lat, viewport.lon, viewport.delta).subscribe({
       next: (res) => {
         if (!this.enabled) {
@@ -69,7 +83,7 @@ export class SatelliteShipTrackingController {
         const payload = (res?.result ?? res) as any;
         const ships = this.service.extractItems(payload);
         if (ships !== null) {
-          this.applyResult(ships, payload, 'Ship tracking');
+          this.applyResult(this.filterShipsToViewport(ships, viewport), payload, 'Ship tracking', !viewportChanged);
         }
         const feedIssue = this.service.getFeedIssue(payload);
         if (ships === null && feedIssue) {
@@ -93,10 +107,10 @@ export class SatelliteShipTrackingController {
     });
   }
 
-  private applyResult(ships: SatelliteLiveShip[], payload: any, label: string): void {
+  private applyResult(ships: SatelliteLiveShip[], payload: any, label: string, keepLastAllowed = true): void {
     const feedIssue = this.service.getFeedIssue(payload);
     if (ships.length > 0) {
-      if (feedIssue && this.shouldKeepLastShips() && ships.length < this.data.length) {
+      if (feedIssue && keepLastAllowed && this.shouldKeepLastShips() && ships.length < this.data.length) {
         this.error = `${label}: ${feedIssue}; showing last known ${this.data.length} ships`;
         return;
       }
@@ -106,7 +120,7 @@ export class SatelliteShipTrackingController {
     }
 
     if (feedIssue) {
-      if (this.shouldKeepLastShips()) {
+      if (keepLastAllowed && this.shouldKeepLastShips()) {
         this.error = `${label}: ${feedIssue}; showing last known ${this.data.length} ships`;
         return;
       }
@@ -114,7 +128,7 @@ export class SatelliteShipTrackingController {
       return;
     }
 
-    if (this.shouldKeepLastShips()) {
+    if (keepLastAllowed && this.shouldKeepLastShips()) {
       this.error = `${label}: live feed returned 0 ships; showing last known ${this.data.length}`;
       return;
     }
@@ -125,5 +139,21 @@ export class SatelliteShipTrackingController {
 
   private shouldKeepLastShips(): boolean {
     return this.enabled && this.data.length > 0;
+  }
+
+  private filterShipsToViewport(ships: SatelliteLiveShip[], viewport: SatelliteTrackingViewport): SatelliteLiveShip[] {
+    return ships.filter((ship) => {
+      const latitude = ship.latitude;
+      const longitude = ship.longitude;
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+        return false;
+      }
+      const lonDistance = Math.min(Math.abs((longitude as number) - viewport.lon), 360 - Math.abs((longitude as number) - viewport.lon));
+      return Math.abs((latitude as number) - viewport.lat) <= viewport.delta && lonDistance <= viewport.delta;
+    });
+  }
+
+  private getViewportKey(viewport: SatelliteTrackingViewport): string {
+    return this.service.getBoundsRequestKey(viewport.lat, viewport.lon, viewport.delta);
   }
 }

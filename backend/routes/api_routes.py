@@ -25,7 +25,6 @@ from orion.api.server.geo_fencing_manager.class_model.satellite_request_models i
     SatelliteCompareRequest,
     SatelliteGeocodeRequest,
     SatelliteFacilitiesRequest,
-    SatelliteSentinelSearchRequest,
     SatelliteLiveTrackerBBoxRequest,
     SatelliteLiveTrackerAircraftIcaoRequest,
     SatelliteLiveTrackerAircraftTrackRequest,
@@ -989,17 +988,6 @@ async def satellite_geocode(payload: SatelliteGeocodeRequest = Body(...), curren
 )
 async def satellite_facilities(payload: SatelliteFacilitiesRequest = Body(...), current_user=Depends(get_current_user)):
     return await geo_fencing_manager.get_instance().facilities(payload, user_id=str(current_user.id))
-
-
-@api_routes.post(
-    "/api/satellite/sentinel/search",
-    summary="Search Sentinel satellite data",
-    tags=["Satellite Intelligence"],
-    status_code=200,
-    dependencies=SATELLITE_INTEL_DEPS,
-)
-async def satellite_sentinel_search(payload: SatelliteSentinelSearchRequest = Body(...), current_user=Depends(get_current_user)):
-    return await geo_fencing_manager.get_instance().sentinel_search(payload, user_id=str(current_user.id))
 
 
 @api_routes.post(

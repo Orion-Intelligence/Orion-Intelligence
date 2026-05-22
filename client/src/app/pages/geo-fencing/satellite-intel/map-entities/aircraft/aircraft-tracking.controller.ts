@@ -20,10 +20,15 @@ export class SatelliteAircraftTrackingController {
     this.loading = loading;
   }
 
-  toggle(_viewport: SatelliteTrackingViewport): void {
+  toggle(viewport: SatelliteTrackingViewport, scoped = false): void {
     this.enabled = !this.enabled;
     if (this.enabled) {
-      this.refreshGlobal(false, true);
+      if (scoped) {
+        this.refresh(viewport, false, true);
+      }
+      else {
+        this.refreshGlobal(false, true);
+      }
       return;
     }
     this.stop();
@@ -31,11 +36,18 @@ export class SatelliteAircraftTrackingController {
     this.error = null;
   }
 
-  refresh(viewport: SatelliteTrackingViewport, showLoading = false): void {
+  refresh(viewport: SatelliteTrackingViewport, showLoading = false, scheduleNext = false): void {
     if (!this.enabled) {
       return;
     }
-    this.refreshInBounds(viewport, showLoading);
+    this.refreshInBounds(viewport, showLoading, scheduleNext);
+  }
+
+  refreshGlobalTracking(scheduleNext = false): void {
+    if (!this.enabled) {
+      return;
+    }
+    this.refreshGlobal(false, scheduleNext);
   }
 
   destroy(): void {
@@ -48,12 +60,14 @@ export class SatelliteAircraftTrackingController {
     this.isLoading = false;
   }
 
-  private refreshInBounds(viewport: SatelliteTrackingViewport, showLoading = false): void {
+  private refreshInBounds(viewport: SatelliteTrackingViewport, showLoading = false, scheduleNext = false): void {
+    clearTimeout(this.timer);
     const showSpinner = showLoading || this.data.length === 0;
     this.isLoading = showSpinner;
     const loadingId = showLoading ? this.loading.begin('Loading Satellite Intel', 'Loading aircraft tracking data...') : null;
 
     this.trackSub?.unsubscribe();
+    clearTimeout(this.timer);
     this.trackSub = this.service.pollInBounds(viewport.lat, viewport.lon, viewport.delta).subscribe({
       next: (res) => {
         if (!this.enabled) {
@@ -78,14 +92,21 @@ export class SatelliteAircraftTrackingController {
       if (loadingId !== null) {
         this.loading.end(loadingId);
       }
+      if (scheduleNext && this.enabled) {
+        this.timer = setTimeout(() => {
+          this.refresh(viewport, false, true);
+        }, this.refreshIntervalMs);
+      }
     });
   }
 
   private refreshGlobal(showLoading = false, scheduleNext = false): void {
+    clearTimeout(this.timer);
     this.isLoading = true;
     const loadingId = showLoading ? this.loading.begin('Loading Satellite Intel', 'Loading global aircraft tracking data...') : null;
 
     this.trackSub?.unsubscribe();
+    clearTimeout(this.timer);
     this.trackSub = this.service.pollGlobal().subscribe({
       next: (res) => {
         if (!this.enabled) {

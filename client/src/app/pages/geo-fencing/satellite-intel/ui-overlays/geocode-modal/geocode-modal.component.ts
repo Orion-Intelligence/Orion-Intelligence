@@ -21,12 +21,14 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
   manualDelta      = 0.05;
   coordsError:     string | null = null;
   deltaError:      string | null = null;
-  activeInputMode: 'search' | 'manual' = 'search';
+  activeInputMode: 'search' | 'coordinates' = 'search';
 
   @Input()  isOpen      = false;
   @Input()  isScanning  = false;
   @Input()  coordinates = '';
   @Input()  delta       = 0.05;
+  @Input()  allowCoverage = true;
+  @Input()  title = 'Satellite Location';
 
   @Output() close              = new EventEmitter<void>();
   @Output() coordinatesChange  = new EventEmitter<string>();
@@ -55,6 +57,7 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
       this.searchError   = null;
       this.coordsError   = null;
       this.deltaError    = null;
+      this.activeInputMode = 'search';
     }
   }
 
@@ -101,11 +104,8 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
   selectResult(result: SatelliteGeocodeResult): void {
     const coords = `${result.lat}, ${result.lon}`;
     this.manualCoords  = coords;
-    this.manualDelta   = result.delta;
     this.searchQuery   = result.name;
     this.searchResults = [];
-    this.coordinatesChange.emit(coords);
-    this.deltaChange.emit(result.delta);
   }
 
   onManualCoordsChange(): void {
@@ -113,6 +113,10 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
   }
 
   onManualDeltaChange(): void {
+    if (!this.allowCoverage) {
+      this.deltaError = null;
+      return;
+    }
     this.deltaError = this.geocodeService.validateDeltaInput(this.manualDelta);
   }
 
@@ -126,7 +130,9 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
       return;
     }
     this.coordinatesChange.emit(this.manualCoords.trim());
-    this.deltaChange.emit(this.manualDelta);
+    if (this.allowCoverage) {
+      this.deltaChange.emit(this.manualDelta);
+    }
     this.search.emit();
   }
 

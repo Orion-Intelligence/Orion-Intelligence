@@ -1,4 +1,4 @@
-import { Component, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { SidebarService } from '../../../shared/services/sidebar.service';
@@ -6,13 +6,10 @@ import { SatelliteIntelService } from './satellite-intel-service';
 import { MapRendererComponent } from './map-renderer/map-renderer.component';
 import { GeocodeModalComponent } from './ui-overlays/geocode-modal/geocode-modal.component';
 import { MonthCompareSectionComponent } from './ui-overlays/month-compare-section/month-compare-section.component';
-import { AnomalySectionComponent } from './ui-overlays/anomaly-section/anomaly-section.component';
-import { SentinelSearchSectionComponent } from './ui-overlays/sentinel-search-section/sentinel-search-section.component';
-import { SentinelImageSectionComponent } from './ui-overlays/sentinel-image-section/sentinel-image-section.component';
 import { EntityDescriptionPopupComponent } from './ui-overlays/entity-description-popup/entity-description-popup.component';
 import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
-import { ThreatLensComponent } from "../threat-lens/threat-lens";
-import { OrionSatelliteDashboardFilter, OrionSatelliteFeature, OrionSatelliteFeatureType, SatelliteTrackingViewport } from '../models/geo-fencing.models';
+import { ThreatLensComponent } from '../threat-lens/threat-lens';
+import { OrionSatelliteDashboardFilter, OrionSatelliteFeature, OrionSatelliteFeatureType } from '../models/geo-fencing.models';
 import { SatelliteAircraftTrackingService } from './map-entities/aircraft/aircraft-tracking.service';
 import { SatelliteShipTrackingService } from './map-entities/ships/ship-tracking.service';
 import { SatelliteFacilitiesService } from './map-entities/facilities/facilities.service';
@@ -20,17 +17,14 @@ import { EntityLoader } from './map-entities/entity-loader';
 import { SatelliteMapEntityDashboardController } from './map-entities/facilities/map-entity-dashboard.controller';
 import { MapEntitiesOverlayComponent } from './ui-overlays/map-entities-overlay/map-entities-overlay.component';
 import { GeocodeService } from './ui-overlays/geocode-modal/geocode.service';
-import { AnomalyService } from './ui-overlays/anomaly-section/anomaly.service';
 import { MonthCompareService } from './ui-overlays/month-compare-section/month-compare.service';
-import { SentinelSearchService } from './ui-overlays/sentinel-search-section/sentinel-search.service';
-import { SentinelImageService } from './ui-overlays/sentinel-image-section/sentinel-image.service';
 import { DashboardSectionComponent } from './ui-overlays/dashboard-section/dashboard-section.component';
 import { PanelShellComponent } from './ui-overlays/panel-shell/panel-shell.component';
-import { SatelliteIntelPanel, SatelliteIntelViewport } from './satellite-intel.types';
-import { SatelliteLoadingController } from './controllers/satellite-loading.controller';
-import { SatelliteScanController } from './controllers/satellite-scan-controller';
-import { MapEntityDetailsController } from './controllers/map-entity-details.controller';
-import { SatelliteIntelPanelEnum } from '../enums/geo-fencing.enums';
+import { MapEntityDetailsState } from './state/map-entity-details.state';
+import { SatelliteLoadingState } from './state/satellite-loading.state';
+import { SatelliteLocationState } from './state/satellite-location.state';
+import { SatelliteScanState } from './state/satellite-scan.state';
+import { SatelliteIntelPanel, SatelliteIntelPanelEnum } from '../enums/geo-fencing.enums';
 
 @Component({
   selector:    'app-satellite-intel',
@@ -41,9 +35,6 @@ import { SatelliteIntelPanelEnum } from '../enums/geo-fencing.enums';
     GeocodeModalComponent,
     MapRendererComponent,
     MonthCompareSectionComponent,
-    AnomalySectionComponent,
-    SentinelSearchSectionComponent,
-    SentinelImageSectionComponent,
     EntityDescriptionPopupComponent,
     MapEntitiesOverlayComponent,
     DashboardSectionComponent,
@@ -54,11 +45,11 @@ import { SatelliteIntelPanelEnum } from '../enums/geo-fencing.enums';
 export class SatelliteIntel implements OnInit, OnDestroy {
   private entityLoader: EntityLoader;
   private mapEntityDashboard: SatelliteMapEntityDashboardController;
-  private loadingController = new SatelliteLoadingController();
-  private scanController: SatelliteScanController;
-  private mapEntityDetails: MapEntityDetailsController;
+  private loadingState = new SatelliteLoadingState();
+  private locationState = new SatelliteLocationState();
+  private scanState: SatelliteScanState;
+  private mapEntityDetailsState: MapEntityDetailsState;
   private initialMapEntityLoadTimer: ReturnType<typeof setTimeout> | null = null;
-  private shipTrackingViewport: SatelliteTrackingViewport | null = null;
   private route: ActivatedRoute;
   private sidebarService: SidebarService;
   private geocodeService: GeocodeService;
@@ -67,31 +58,24 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   readonly panel = SatelliteIntelPanelEnum;
   activePanel: SatelliteIntelPanel = SatelliteIntelPanelEnum.Dashboard;
   activeTab: 'map' | 'threat' = 'map';
-  coordsForm = { value: '', delta: 0.05 };
-  inputLat   = 50.0;
-  inputLon   = 8.5;
-  inputDelta = 2.5;
   selectedLayer: 'esri' | 'osm' = 'esri';
   focusedFeature: OrionSatelliteFeature | null = null;
   selectedFeature: OrionSatelliteFeature | null = null;
-  lat:   number | null = null;
-  lon:   number | null = null;
-  delta                = 0.05;
-  showGeocodeModal = false;
   isPanelMenuOpen = false;
   isPanelPopupOpen = true;
   isThreatLensLoading = false;
 
   @Input() toolbarMode: 'hidden' | 'geo' = 'hidden';
+  @ViewChild(MapRendererComponent) private mapRenderer?: MapRendererComponent;
 
-  constructor( satelliteService: SatelliteIntelService, route: ActivatedRoute, sidebarService: SidebarService, aircraftTrackingService: SatelliteAircraftTrackingService, shipTrackingService: SatelliteShipTrackingService, facilitiesService: SatelliteFacilitiesService, geocodeService: GeocodeService, anomalyService: AnomalyService, monthCompareService: MonthCompareService, sentinelSearchService: SentinelSearchService, sentinelImageService: SentinelImageService, ) {
+  constructor( satelliteService: SatelliteIntelService, route: ActivatedRoute, sidebarService: SidebarService, aircraftTrackingService: SatelliteAircraftTrackingService, shipTrackingService: SatelliteShipTrackingService, facilitiesService: SatelliteFacilitiesService, geocodeService: GeocodeService, monthCompareService: MonthCompareService, ) {
     this.satelliteService = satelliteService;
     this.route = route;
     this.sidebarService = sidebarService;
     this.geocodeService = geocodeService;
     const loadingBridge = {
-      begin: (title: string, message: string) => this.loadingController.begin(title, message),
-      end: (id: number) => this.loadingController.end(id),
+      begin: (title: string, message: string) => this.loadingState.begin(title, message),
+      end: (id: number) => this.loadingState.end(id),
     };
     this.entityLoader = new EntityLoader({
       aircraftService: aircraftTrackingService,
@@ -100,24 +84,18 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       loading: loadingBridge,
     });
     this.mapEntityDashboard = new SatelliteMapEntityDashboardController(facilitiesService, () => this.facilitiesVisible, () => this.facilitiesMapData);
-    this.mapEntityDetails = new MapEntityDetailsController(facilitiesService);
-    this.scanController = new SatelliteScanController(satelliteService, this.loadingController, anomalyService, monthCompareService, sentinelSearchService, sentinelImageService);
+    this.mapEntityDetailsState = new MapEntityDetailsState(facilitiesService);
+    this.scanState = new SatelliteScanState(satelliteService, monthCompareService);
   }
 
   ngOnInit(): void {
     this.satelliteService.resetState();
-    this.setPanel(SatelliteIntelPanelEnum.Dashboard);
     const section = this.route.snapshot.queryParamMap.get('section');
     const q = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
     this.setPanel(this.isPanelId(section) ? section : SatelliteIntelPanelEnum.Dashboard);
     this.isPanelPopupOpen = true;
     if (q) {
-      this.coordsForm.value = q;
-      const parsed = this.geocodeService.parseCoordinates(q);
-      if (parsed) {
-        this.inputLat = parsed.lat;
-        this.inputLon = parsed.lon;
-      }
+      this.locationState.setInitialQuery(q, this.geocodeService.parseCoordinates(q));
     }
     this.initialMapEntityLoadTimer = setTimeout(() => {
       this.initialMapEntityLoadTimer = null;
@@ -132,9 +110,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     }
     this.entityLoader.destroy();
     this.mapEntityDashboard.destroy();
-    this.mapEntityDetails.destroy();
-    this.scanController.destroy();
-    this.loadingController.clear();
+    this.mapEntityDetailsState.destroy();
+    this.scanState.destroy();
+    this.loadingState.clear();
   }
 
   get isMapView(): boolean {
@@ -150,51 +128,43 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   get isMainLoading(): boolean {
-    return this.loadingController.isLoading;
+    return this.loadingState.isLoading;
   }
 
   get mainLoadingTitle(): string {
-    return this.loadingController.title;
+    return this.loadingState.title;
   }
 
   get mainLoadingMessage(): string {
-    return this.loadingController.message;
+    return this.loadingState.message;
   }
 
   get entityDescriptionPopupOpen(): boolean {
-    return this.mapEntityDetails.isOpen;
+    return this.mapEntityDetailsState.isOpen;
   }
 
-  get entityDescriptionPopupData(): MapEntityDetailsController['data'] {
-    return this.mapEntityDetails.data;
+  get entityDescriptionPopupData(): MapEntityDetailsState['data'] {
+    return this.mapEntityDetailsState.data;
   }
 
-  get anomalyResult(): SatelliteScanController['anomalyResult'] {
-    return this.scanController.anomalyResult;
+  get anomalyResult(): SatelliteScanState['anomalyResult'] {
+    return this.scanState.anomalyResult;
   }
 
-  get compareResult(): SatelliteScanController['compareResult'] {
-    return this.scanController.compareResult;
-  }
-
-  get sentinelImageResult(): SatelliteScanController['sentinelImageResult'] {
-    return this.scanController.sentinelImageResult;
-  }
-
-  get sentinelResults(): SatelliteScanController['sentinelResults'] {
-    return this.scanController.sentinelResults;
+  get compareResult(): SatelliteScanState['compareResult'] {
+    return this.scanState.compareResult;
   }
 
   get hasSearched(): boolean {
-    return this.scanController.hasSearched;
+    return this.scanState.hasSearched;
   }
 
   get isMapEntityDetailsLoading(): boolean {
-    return this.mapEntityDetails.isLoading;
+    return this.mapEntityDetailsState.isLoading;
   }
 
   isScanning(): boolean {
-    return this.scanController.isScanning(this.satelliteService.onError()?.message ?? null);
+    return this.scanState.isScanning(this.satelliteService.onError()?.message ?? null);
   }
 
   get aircraftTrackingEnabled(): boolean {
@@ -249,8 +219,32 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     return this.mapEntityDashboard.dashboardSearchResults;
   }
 
-  get wriData(): OrionSatelliteFeature[] {
-    return this.mapEntityDashboard.wriData;
+  get scopedWriDataCount(): number {
+    return this.mapEntityDashboard.scopedWriDataCount;
+  }
+
+  get locationScoped(): boolean {
+    return this.locationState.isLocationScoped;
+  }
+
+  get geocodeAllowCoverage(): boolean {
+    return this.locationState.geocodeAllowCoverage;
+  }
+
+  get geocodeTitle(): string {
+    return this.locationState.geocodeTitle;
+  }
+
+  get geocodeCoordinates(): string {
+    return this.locationState.geocodeCoordinates;
+  }
+
+  get geocodeDelta(): number {
+    return this.locationState.geocodeDelta;
+  }
+
+  get compareLocationLabel(): string {
+    return this.locationState.compareLocationLabel;
   }
 
   get filteredWriData(): OrionSatelliteFeature[] {
@@ -262,7 +256,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   get isMapEntityLoading(): boolean {
-    return this.mapEntityDashboard.isLoading;
+    return this.mapEntityDashboard.isLoading || this.entityLoader.facilitiesLoading;
   }
 
   get dashboardTypeFilters(): OrionSatelliteDashboardFilter[] {
@@ -285,9 +279,25 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     return this.entityLoader.facilityEntries();
   }
 
+  get lat(): number | null {
+    return this.locationState.lat;
+  }
+
+  get lon(): number | null {
+    return this.locationState.lon;
+  }
+
+  get delta(): number {
+    return this.locationState.delta;
+  }
+
+  get showGeocodeModal(): boolean {
+    return this.locationState.showGeocodeModal;
+  }
+
   setPanel(id: SatelliteIntelPanel): void {
     this.activePanel = id;
-    this.scanController.resetRequestState();
+    this.scanState.resetRequestState();
   }
 
   setActiveView(view: 'map' | 'threat'): void {
@@ -333,11 +343,31 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   onAircraftTrackingSelectionChange(): void {
-    this.entityLoader.toggleAircraft(this.getTrackingViewport());
+    this.entityLoader.toggleAircraft(this.locationState.getTrackingViewport(), this.locationState.isLocationScoped);
   }
 
   onShipTrackingSelectionChange(): void {
-    this.entityLoader.toggleShips(this.getShipTrackingViewport());
+    this.entityLoader.toggleShips(this.locationState.getShipTrackingViewport());
+  }
+
+  focusSelectedLocation(): void {
+    const viewport = this.locationState.focusSelectedLocation();
+    if (!viewport) {
+      return;
+    }
+    this.mapRenderer?.focusLocation(viewport.lat, viewport.lon, viewport.delta);
+  }
+
+  clearSelectedLocation(): void {
+    this.locationState.clearSelectedLocation();
+    this.focusedFeature = null;
+    this.selectedFeature = null;
+    this.mapEntityDashboard.setViewport(null);
+    this.entityLoader.clearFacilities(() => this.refreshMergedData());
+    this.mapRenderer?.clearLocation();
+    if (this.aircraftTrackingEnabled) {
+      this.entityLoader.refreshGlobalAircraft();
+    }
   }
 
   @HostListener('document:click', ['$event'])
@@ -349,89 +379,67 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     }
   }
 
-  runAnomalyScan(): void {
-    const viewport = this.prepareRequestViewport();
-    if (!viewport) {
-      return;
-    }
-    this.setPanel(SatelliteIntelPanelEnum.Anomaly);
-    this.scanController.runAnomalyScan(viewport);
+  openGeocodeModal(): void {
+    this.locationState.openMapGeocode();
   }
 
-  openGeocodeModal(): void {
-    this.showGeocodeModal = true;
+  openCompareLocationModal(): void {
+    this.locationState.openCompareGeocode();
+  }
+
+  closeGeocodeModal(): void {
+    this.locationState.closeGeocodeModal();
   }
 
   onMapMoved(center: { lat: number; lon: number; zoom: number; trackingDelta?: number }): void {
-    this.inputLat = center.lat;
-    this.inputLon = center.lon;
-    this.inputDelta = this.zoomToDelta(center.zoom);
-    this.coordsForm.value = `${center.lat.toFixed(5)}, ${center.lon.toFixed(5)}`;
-    this.coordsForm.delta = this.inputDelta;
-    this.shipTrackingViewport = {
-      lat: center.lat,
-      lon: center.lon,
-      delta: center.trackingDelta ?? this.inputDelta,
-    };
-
+    this.locationState.updateFromMapMove(center);
     if (this.shipsTrackingEnabled) {
-      this.entityLoader.scheduleShipViewportRefresh(this.getShipTrackingViewport());
+      this.entityLoader.scheduleShipViewportRefresh(this.locationState.getShipTrackingViewport());
     }
   }
 
-  onRunCompare(event: { imageType: string }): void {
-    const viewport = this.prepareRequestViewport();
+  onRunCompare(event: { imageType: string; month: string }): void {
+    const viewport = this.locationState.getCompareViewport();
     if (!viewport) {
+      this.locationState.setPendingCompare(event.imageType, event.month);
+      this.openCompareLocationModal();
       return;
     }
-    this.scanController.runCompare(viewport, event.imageType);
-  }
-
-  onRunSentinelSearch(): void {
-    const viewport = this.prepareRequestViewport();
-    if (!viewport) {
-      return;
-    }
-    this.scanController.runSentinelSearch(viewport);
-  }
-
-  onRunSentinelImage(event: { imageType: string; month: string; size: number }): void {
-    const viewport = this.prepareRequestViewport();
-    if (!viewport) {
-      return;
-    }
-    this.scanController.runSentinelImage(viewport, event.imageType, event.month, event.size);
+    this.locationState.clearPendingCompare();
+    this.scanState.runCompare(viewport, event.imageType, event.month);
   }
 
   onCoordinatesChange(coords: string): void {
-    this.coordsForm.value = coords;
-    const parsed = this.geocodeService.parseCoordinates(coords);
-    if (parsed) {
-      this.inputLat = parsed.lat;
-      this.inputLon = parsed.lon;
-    }
+    this.locationState.setCoordinates(coords, this.geocodeService.parseCoordinates(coords));
   }
 
   onDeltaChangeModal(delta: number): void {
-    this.coordsForm.delta = delta;
-    this.inputDelta = delta;
-    this.delta = delta;
+    this.locationState.setDelta(delta);
   }
 
   onGeoSearch(): void {
-    this.showGeocodeModal = false;
-    const parsed = this.geocodeService.parseCoordinates(this.coordsForm.value);
+    const parsed = this.geocodeService.parseCoordinates(this.locationState.geocodeCoordinates);
     if (!parsed) {
+      this.locationState.showGeocodeModal = false;
       return;
     }
-    this.inputLat  = parsed.lat;
-    this.inputLon  = parsed.lon;
-    this.lat       = parsed.lat;
-    this.lon       = parsed.lon;
-    this.delta     = this.coordsForm.delta;
-    this.inputDelta = this.coordsForm.delta;
-    this.scanController.markSearched();
-    this.loadFacilities();
+    const result = this.locationState.applyGeocode(parsed);
+    if (result.pendingCompare) {
+      this.scanState.runCompare(result.viewport, result.pendingCompare.imageType, result.pendingCompare.month);
+      return;
+    }
+    if (result.isCompare) {
+      return;
+    }
+    if (!this.locationScoped) {
+      return;
+    }
+    this.focusedFeature = null;
+    this.selectedFeature = null;
+    this.scanState.markSearched();
+    this.mapEntityDashboard.setViewport(result.viewport);
+    this.loadFacilities(false);
+    this.entityLoader.refreshTracking(result.viewport);
   }
 
   onDashboardSearchInput(query: string): void {
@@ -467,88 +475,28 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   onMapEntityFeatureIdsSelected(ids: string[]): void {
-    this.mapEntityDetails.load(ids);
+    this.mapEntityDetailsState.load(ids);
   }
 
   closeEntityDescriptionPopup(): void {
-    this.mapEntityDetails.close();
+    this.mapEntityDetailsState.close();
   }
 
   private isPanelId(value: string | null): value is SatelliteIntelPanel {
     return Object.values(SatelliteIntelPanelEnum).includes(value as SatelliteIntelPanelEnum);
   }
 
-  public loadFacilities(): void {
-    this.syncAppliedViewport();
-    this.scanController.markSearched();
-    this.entityLoader.loadFacilities(this.getTrackingViewport(), () => this.refreshMergedData());
-  }
-
-  private syncAppliedViewport(): void {
-    this.lat = this.inputLat;
-    this.lon = this.inputLon;
-    this.delta = this.inputDelta;
-    this.coordsForm.value = `${this.inputLat}, ${this.inputLon}`;
-    this.coordsForm.delta = this.inputDelta;
-  }
-
-  private prepareRequestViewport(): SatelliteIntelViewport | null {
-    this.syncAppliedViewport();
-    const lat = this.lat ?? this.inputLat;
-    const lon = this.lon ?? this.inputLon;
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-      return null;
-    }
-    this.lat = lat;
-    this.lon = lon;
-    return { lat, lon, delta: this.delta };
-  }
-
-  private getTrackingViewport(): SatelliteTrackingViewport {
-    return {
-      lat: this.inputLat,
-      lon: this.inputLon,
-      delta: this.inputDelta,
-    };
-  }
-
-  private getShipTrackingViewport(): SatelliteTrackingViewport {
-    return this.shipTrackingViewport ?? this.getTrackingViewport();
-  }
-
-  private zoomToDelta(zoom: number): number {
-    if (zoom >= 17) {
-      return 0.005;
-    }
-    if (zoom >= 16) {
-      return 0.01;
-    }
-    if (zoom >= 15) {
-      return 0.02;
-    }
-    if (zoom >= 14) {
-      return 0.04;
-    }
-    if (zoom >= 13) {
-      return 0.08;
-    }
-    if (zoom >= 12) {
-      return 0.15;
-    }
-    if (zoom >= 11) {
-      return 0.3;
-    }
-    if (zoom >= 10) {
-      return 0.6;
-    }
-    return 1.2;
+  private loadFacilities(showLoading = true): void {
+    this.locationState.syncAppliedViewport();
+    this.scanState.markSearched();
+    this.entityLoader.loadFacilities(this.locationState.getTrackingViewport(), () => this.refreshMergedData(), showLoading);
   }
 
   private refreshMergedData(): void {
     this.mapEntityDashboard.refresh();
   }
 
-  async loadMapEntities(): Promise<void> {
+  private async loadMapEntities(): Promise<void> {
     await this.mapEntityDashboard.load();
   }
 }

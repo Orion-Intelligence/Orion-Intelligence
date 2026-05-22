@@ -43,29 +43,7 @@ export interface SatelliteFacilitiesResponse {
   };
 }
 
-export interface SatelliteSentinelPass {
-  month:       string;
-  month_key:   string;
-  collection:  string;
-  label:       string;
-  available:   number;
-  latest:      string | null;
-  dates:       string[];
-  error?:      string;
-}
-
-export interface SatelliteSentinelSearchResponse {
-  status?:  string;
-  result?: {
-    status:  string;
-    lat:     number;
-    lon:     number;
-    bbox:    number[];
-    results: SatelliteSentinelPass[];
-  };
-}
-
-export interface SatelliteSentinelImageResult {
+export interface SatelliteImageResult {
   status:        string;
   lat?:          number;
   lon?:          number;
@@ -82,9 +60,9 @@ export interface SatelliteSentinelImageResult {
   [key: string]: any;
 }
 
-export interface SatelliteSentinelImageResponse {
+export interface SatelliteImageResponse {
   status?: string;
-  result?: SatelliteSentinelImageResult;
+  result?: SatelliteImageResult;
 }
 
 export interface SatelliteMonthScore {

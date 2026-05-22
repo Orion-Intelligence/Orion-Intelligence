@@ -13,12 +13,6 @@ class SatelliteFacilitiesRequest(BaseModel):
     radius_km: Optional[float] = 5.0
 
 
-class SatelliteSentinelSearchRequest(BaseModel):
-    lat: float
-    lon: float
-    delta: Optional[float] = 0.05
-
-
 class SatelliteImageRequest(BaseModel):
     lat: float
     lon: float

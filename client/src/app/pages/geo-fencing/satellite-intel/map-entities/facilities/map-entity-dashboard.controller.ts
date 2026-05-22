@@ -1,4 +1,4 @@
-import { OrionSatelliteDashboardFilter, OrionSatelliteFeature, OrionSatelliteFeatureType, ORION_POWER_FILTERS } from '../../../models/geo-fencing.models';
+import { OrionSatelliteDashboardFilter, OrionSatelliteFeature, OrionSatelliteFeatureType, ORION_POWER_FILTERS, SatelliteTrackingViewport } from '../../../models/geo-fencing.models';
 import { SatelliteFacilitiesService } from './facilities.service';
 
 export class SatelliteMapEntityDashboardController {
@@ -16,6 +16,7 @@ export class SatelliteMapEntityDashboardController {
   private visiblePowerCountCache = 0;
   private readonly mapEntityFlushIntervalMs = 80;
   private readonly mapEntityBatchSize = 1000;
+  private viewport: SatelliteTrackingViewport | null = null;
 
   dashboardSearch = '';
   dashboardSearchResults: OrionSatelliteFeature[] = [];
@@ -24,6 +25,7 @@ export class SatelliteMapEntityDashboardController {
   filteredData: OrionSatelliteFeature[] = [];
   filteredWriData: OrionSatelliteFeature[] = [];
   filteredFacilitiesMapData: OrionSatelliteFeature[] = [];
+  scopedWriDataCount = 0;
   selectedFilters: OrionSatelliteFeatureType[] = [];
   isLoading = false;
 
@@ -68,12 +70,19 @@ export class SatelliteMapEntityDashboardController {
       ? [...this.wriData, ...this.getFacilitiesMapData()]
       : [...this.wriData];
 
-    this.filteredData = this.mergedData.filter((feature) => this.selectedFilters.includes(feature.type));
+    const scopedData = this.getViewportData(this.mergedData);
+    this.filteredData = scopedData.filter((feature) => this.selectedFilters.includes(feature.type));
     this.filteredWriData = this.filteredData.filter((feature) => feature.source === 'WRI');
     this.filteredFacilitiesMapData = this.filteredData.filter((feature) => feature.source === 'OSM');
-    this.refreshStats();
+    this.scopedWriDataCount = scopedData.filter((feature) => feature.source === 'WRI').length;
+    this.refreshStats(scopedData);
     this.refreshVisibleTypeFilters();
     this.updateSearchResults(this.dashboardSearch.trim().toLowerCase());
+  }
+
+  setViewport(viewport: SatelliteTrackingViewport | null): void {
+    this.viewport = viewport;
+    this.refresh();
   }
 
   setSearchQuery(query: string): void {
@@ -169,9 +178,9 @@ export class SatelliteMapEntityDashboardController {
     }
   }
 
-  private refreshStats(): void {
+  private refreshStats(data: OrionSatelliteFeature[]): void {
     const counts = new Map<OrionSatelliteFeatureType, number>();
-    for (const feature of this.mergedData) {
+    for (const feature of data) {
       counts.set(feature.type, (counts.get(feature.type) || 0) + 1);
     }
 
@@ -183,6 +192,28 @@ export class SatelliteMapEntityDashboardController {
     }));
 
     this.visiblePowerCountCache = this.filteredData.filter((feature) => feature.source === 'WRI').length;
+  }
+
+  private getViewportData(data: OrionSatelliteFeature[]): OrionSatelliteFeature[] {
+    const viewport = this.viewport;
+    if (!viewport) {
+      return data;
+    }
+    return data.filter((feature) => this.isFeatureInsideViewport(feature, viewport));
+  }
+
+  private isFeatureInsideViewport(feature: OrionSatelliteFeature, viewport: SatelliteTrackingViewport): boolean {
+    const coordinates = feature.coordinates;
+    if (!Array.isArray(coordinates) || coordinates.length < 2) {
+      return false;
+    }
+
+    const [lon, lat] = coordinates;
+    const lonDistance = Math.min(Math.abs(lon - viewport.lon), 360 - Math.abs(lon - viewport.lon));
+    return Number.isFinite(lat) &&
+      Number.isFinite(lon) &&
+      Math.abs(lat - viewport.lat) <= viewport.delta &&
+      lonDistance <= viewport.delta;
   }
 
   private refreshVisibleTypeFilters(): void {

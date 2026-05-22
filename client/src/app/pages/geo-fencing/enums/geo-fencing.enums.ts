@@ -29,14 +29,12 @@ export enum OrionSatelliteSourceEnum {
 export enum SatelliteIntelPanelEnum {
   Dashboard = 'dashboard',
   Compare = 'compare',
-  Anomaly = 'anomaly',
-  Sentinel = 'sentinel',
-  Image = 'image',
 }
 
-export enum SatelliteIntelRequestEnum {
-  Anomaly = 'anomaly',
-  Compare = 'compare',
-  Sentinel = 'sentinel',
-  SentinelImage = 'sentinel-image',
+export type SatelliteIntelPanel = SatelliteIntelPanelEnum;
+
+export interface SatelliteIntelViewport {
+  lat: number;
+  lon: number;
+  delta: number;
 }

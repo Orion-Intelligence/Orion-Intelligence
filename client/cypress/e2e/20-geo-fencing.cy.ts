@@ -80,7 +80,7 @@ const stubGeoFencingMicroApis = () => {
     },
   }).as('satelliteLiveTrack');
 
-  cy.intercept('POST', '**/api/satellite/sentinel/**', {
+  cy.intercept('POST', '**/api/satellite/sentinel/image', {
     statusCode: 200,
     body: {
       status: 'done',
@@ -89,7 +89,7 @@ const stubGeoFencingMicroApis = () => {
         results: [],
       },
     },
-  }).as('satelliteSentinel');
+  }).as('satelliteImagery');
 
   cy.intercept('POST', '**/api/satellite/anomaly', {
     statusCode: 200,

@@ -24,8 +24,9 @@ export class ShipMapRenderer {
   private detailSub?: Subscription;
   private markerZoomBucket = 0;
   private readonly animationDurationMs = 8000;
-  private readonly denseShipCellThreshold = 18;
+  private readonly denseShipCellThreshold = 120;
   private readonly denseShipScreenGridSize = 34;
+  private readonly maxAnimatedShips = 80;
   private readonly L: any;
   private readonly map: any;
   private readonly service: SatelliteShipTrackingService;
@@ -61,6 +62,9 @@ export class ShipMapRenderer {
     this.renderKey = renderKey;
 
     const ships = this.getRenderableShips().filter(ship => Number.isFinite(ship.latitude) && Number.isFinite(ship.longitude));
+    if (ships.length > this.maxAnimatedShips) {
+      this.cancelAllAnimations();
+    }
     const visibleIds = new Set(ships.map(ship => this.getMarkerId(ship)));
     for (const [markerId, marker] of Array.from(this.markers.entries())) {
       if (visibleIds.has(markerId)) {
@@ -198,6 +202,11 @@ export class ShipMapRenderer {
     const projectionSource = isSameMotion ? { ...ship, latitude: startLat, longitude: startLon } : ship;
 
     this.stopAnimation(markerId);
+    if (!this.shouldAnimateMarker(ship)) {
+      marker.setLatLng([lat, lon]);
+      return;
+    }
+
     marker.setLatLng([startLat, startLon]);
     const projected = this.projectPosition(projectionSource, this.animationDurationMs / 1000);
     if (!projected) {
@@ -232,6 +241,11 @@ export class ShipMapRenderer {
       lat: (lat as number) + (Math.cos(bearingRadians) * distanceMeters) / metersPerDegreeLat,
       lon: (lon as number) + (Math.sin(bearingRadians) * distanceMeters) / metersPerDegreeLon,
     };
+  }
+
+  private shouldAnimateMarker(ship: SatelliteLiveShip): boolean {
+    const shipId = normalizeEntityId(ship.mmsi);
+    return this.markers.size <= this.maxAnimatedShips || this.isSelected(shipId);
   }
 
   private animateMarker(markerId: string, marker: any, targetLat: number, targetLon: number): void {
@@ -445,6 +459,7 @@ export class ShipMapRenderer {
 
   private getRenderableShips(): SatelliteLiveShip[] {
     const bounds = this.map?.getBounds?.();
+    const zoom = this.map?.getZoom?.() ?? 3;
     const visible = this.getData().filter(ship => {
       if (!Number.isFinite(ship.latitude) || !Number.isFinite(ship.longitude)) {
         return false;
@@ -454,10 +469,60 @@ export class ShipMapRenderer {
       }
       return bounds.pad(0.18).contains([ship.latitude, ship.longitude]);
     });
-    return this.reduceVeryDenseShipCells(visible);
+    return this.limitShipsForZoom(this.reduceVeryDenseShipCells(visible), zoom);
+  }
+
+  private limitShipsForZoom(ships: SatelliteLiveShip[], zoom: number): SatelliteLiveShip[] {
+    const limit = this.getViewportShipLimit(zoom);
+    if (ships.length <= limit) {
+      return ships;
+    }
+
+    const activeEntity = this.sidebar.getActiveEntity();
+    const loadingEntity = this.sidebar.getLoadingEntity();
+    const activeShipId = activeEntity?.type === 'ship' ? activeEntity.id : '';
+    const loadingShipId = loadingEntity?.type === 'ship' ? loadingEntity.id : '';
+    const preserved = ships.filter(ship => {
+      const id = normalizeEntityId(ship.mmsi);
+      return !!id && (id === activeShipId || id === loadingShipId);
+    });
+    const preservedIds = new Set(preserved.map(ship => normalizeEntityId(ship.mmsi)).filter((id): id is string => !!id));
+    const selected = ships
+      .filter(ship => !preservedIds.has(normalizeEntityId(ship.mmsi) ?? ''))
+      .slice()
+      .sort((left, right) => Math.abs(stableHash(this.getStableShipKey(left))) - Math.abs(stableHash(this.getStableShipKey(right))))
+      .slice(0, Math.max(0, limit - preserved.length));
+
+    return [...preserved, ...selected];
+  }
+
+  private getViewportShipLimit(zoom: number): number {
+    if (zoom >= 9) {
+      return 1400;
+    }
+    if (zoom >= 8) {
+      return 1000;
+    }
+    if (zoom >= 7) {
+      return 760;
+    }
+    if (zoom >= 6) {
+      return 560;
+    }
+    if (zoom >= 5) {
+      return 400;
+    }
+    if (zoom >= 4) {
+      return 300;
+    }
+    return 220;
   }
 
   private reduceVeryDenseShipCells(ships: SatelliteLiveShip[]): SatelliteLiveShip[] {
+    if (ships.length <= 1200) {
+      return ships;
+    }
+
     const cells = new Map<string, ShipDenseCell>();
     ships.forEach(ship => {
       const key = this.getDenseShipCellKey(ship);

@@ -2,7 +2,7 @@ import { Subscription } from 'rxjs';
 import { MapEntityByIdItem } from '../../models/geo-fencing.models';
 import { SatelliteFacilitiesService } from '../map-entities/facilities/facilities.service';
 
-export class MapEntityDetailsController {
+export class MapEntityDetailsState {
   private sub?: Subscription;
 
   isLoading = false;

@@ -59,9 +59,6 @@ class geo_fencing_manager:
     async def facilities(self, model, user_id: str = "system"):
         return await self._post_to_micros("satellite/facilities", model, "satellite/facilities", user_id)
 
-    async def sentinel_search(self, model, user_id: str = "system"):
-        return await self._post_to_micros("satellite/sentinel/search", model, "satellite/sentinel/search", user_id)
-
     async def sentinel_image(self, model, user_id: str = "system"):
         return await self._post_to_micros("satellite/sentinel/image", model, "satellite/sentinel/image", user_id)
 

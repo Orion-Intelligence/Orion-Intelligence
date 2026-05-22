@@ -1,4 +1,4 @@
-export class SatelliteLoadingController {
+export class SatelliteLoadingState {
   private sequence = 0;
   private readonly requests = new Map<number, { title: string; message: string }>();
 

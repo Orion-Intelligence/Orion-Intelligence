@@ -102,17 +102,18 @@
     [dashboardTypeFilters]="dashboardTypeFilters"
     [selectedFilters]="selectedDashboardFilters"
     [visiblePowerCount]="visiblePowerCount"
-    [wriDataCount]="wriData.length"
+    [wriDataCount]="scopedWriDataCount"
     [facilitiesData]="facilitiesData"
     [facilityEntries]="facilityEntries"
     [hasSearched]="hasSearched"
-    [isScanning]="isScanning()"
+    [isScanning]="isScanning() || isMapEntityLoading"
     [aircraftTrackingEnabled]="aircraftTrackingEnabled"
     [shipsTrackingEnabled]="shipsTrackingEnabled"
     [isAircraftLoading]="isAircraftLoading"
     [isShipsLoading]="isShipsLoading"
     [aircraftCount]="aircraftData.length"
     [shipsCount]="shipsData.length"
+    [locationScoped]="locationScoped"
     [aircraftTrackingError]="aircraftTrackingError"
     [shipsTrackingError]="shipsTrackingError"
     [selectedFeature]="selectedFeature"
@@ -123,6 +124,8 @@
     (selectAllFilters)="selectAllDashboardFilters()"
     (clearFilters)="clearDashboardFilters()"
     (locationOpened)="openGeocodeModal()"
+    (locationTargeted)="focusSelectedLocation()"
+    (locationCleared)="clearSelectedLocation()"
     (aircraftTrackingToggled)="onAircraftTrackingSelectionChange()"
     (shipTrackingToggled)="onShipTrackingSelectionChange()">
   </app-satellite-dashboard-section>
@@ -134,63 +137,11 @@
           [errorMessage]="satelliteService.onError()?.message || null"
           [hasSearched]="hasSearched"
           [compareResult]="compareResult"
+          [anomalyResult]="anomalyResult"
+          [locationLabel]="compareLocationLabel"
+          (locationOpened)="openCompareLocationModal()"
           (runCompare)="onRunCompare($event)">
         </app-satellite-month-compare>
-      }
-
-      @if (activePanel === panel.Anomaly) {
-        <div class="flex flex-col h-full">
-
-          <div class="flex items-center justify-between px-[14px] py-2 border-b border-[var(--color-border)]">
-            <span class="text-[12px] font-semibold text-[var(--color-text1)]">
-              Anomaly Detection
-            </span>
-
-            <button class="rounded-[6px] border border-[rgba(245,158,11,.35)] bg-[rgba(245,158,11,.1)] px-3 py-1 text-[11px] font-medium text-[#f59e0b] hover:bg-[rgba(245,158,11,.18)] disabled:opacity-60" (click)="runAnomalyScan()" [disabled]="isScanning()">
-              Run Scan
-            </button>
-          </div>
-
-          <div class="flex-1 overflow-auto">
-            @if (!hasSearched) {
-              <div class="px-[14px] py-6 text-center text-[12px] text-[var(--color-text3)]">
-                Run scan to detect anomalies
-              </div>
-            } @else if (isScanning()) {
-              <div class="px-[14px] py-6 text-center text-[12px] text-[var(--color-text3)]">
-                Loading anomaly data...
-              </div>
-            } @else if (!anomalyResult) {
-              <div class="px-[14px] py-6 text-center text-[12px] text-[var(--color-text3)]">
-                No anomaly data found
-              </div>
-            } @else {
-              <app-satellite-anomaly-section
-                [anomalyResult]="anomalyResult">
-              </app-satellite-anomaly-section>
-            }
-          </div>
-        </div>
-      }
-
-      @if (activePanel === panel.Sentinel) {
-        <app-satellite-sentinel-search
-          [isScanning]="isScanning()"
-          [errorMessage]="satelliteService.onError()?.message || null"
-          [hasSearched]="hasSearched"
-          [sentinelResults]="sentinelResults?.results || null"
-          (runSearch)="onRunSentinelSearch()">
-        </app-satellite-sentinel-search>
-      }
-
-      @if (activePanel === panel.Image) {
-        <app-satellite-sentinel-image
-          [isScanning]="isScanning()"
-          [errorMessage]="satelliteService.onError()?.message || null"
-          [hasSearched]="hasSearched"
-          [imageResult]="sentinelImageResult"
-          (runFetch)="onRunSentinelImage($event)">
-        </app-satellite-sentinel-image>
       }
 
       </app-satellite-panel-shell>
@@ -202,9 +153,11 @@
 <app-satellite-geocode-modal
   [isOpen]="showGeocodeModal"
   [isScanning]="isScanning()"
-  [coordinates]="coordsForm.value"
-  [delta]="coordsForm.delta"
-  (close)="showGeocodeModal = false"
+  [coordinates]="geocodeCoordinates"
+  [delta]="geocodeDelta"
+  [allowCoverage]="geocodeAllowCoverage"
+  [title]="geocodeTitle"
+  (close)="closeGeocodeModal()"
   (coordinatesChange)="onCoordinatesChange($event)"
   (deltaChange)="onDeltaChangeModal($event)"
   (search)="onGeoSearch()">

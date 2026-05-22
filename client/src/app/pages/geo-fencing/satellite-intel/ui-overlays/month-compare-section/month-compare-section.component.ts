@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SATELLITE_IMAGE_TYPES, SatelliteImageType } from '../../../../../shared/model/satellite-intel/satellite-intel.model';
-import { SatelliteCompareResponse } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteAnomalyResponse, SatelliteCompareResponse } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
 
 @Component({
   selector:    'app-satellite-month-compare',
@@ -13,6 +13,8 @@ import { SatelliteCompareResponse } from '../../../../../shared/model/satellite-
 export class MonthCompareSectionComponent {
   readonly imageTypes: SatelliteImageType[] = SATELLITE_IMAGE_TYPES;
   selectedType = 'true_colour';
+  selectedMonth = this.currentDateKey();
+  isAdvancedOpen = false;
   lightboxSrc:   string | null = null;
   lightboxLabel  = '';
   brokenImages = new Set<string>();
@@ -21,19 +23,45 @@ export class MonthCompareSectionComponent {
   @Input() errorMessage:     string | null = null;
   @Input() hasSearched      = false;
   @Input() compareResult:   SatelliteCompareResponse['result'] | null = null;
+  @Input() anomalyResult:   SatelliteAnomalyResponse['result'] | null = null;
+  @Input() locationLabel = '';
 
-  @Output() runCompare = new EventEmitter<{ imageType: string }>();
+  @Output() runCompare = new EventEmitter<{ imageType: string; month: string }>();
+  @Output() locationOpened = new EventEmitter<void>();
 
   get showLoadingSkeleton(): boolean {
     return this.hasSearched && !this.compareResult && !this.errorMessage && this.isScanning;
   }
 
+  get anomalyAlertClass(): string {
+    const level = this.anomalyResult?.alert_level;
+    if (level === 'critical') {
+      return 'text-rose-300';
+    }
+    if (level === 'warning') {
+      return 'text-amber-300';
+    }
+    if (level === 'nominal') {
+      return 'text-emerald-300';
+    }
+    return 'text-sky-300';
+  }
+
   selectType(key: string): void {
-    this.selectedType = key; 
+    this.selectedType = key;
   }
 
   onRunCompare(): void {
-    this.runCompare.emit({ imageType: this.selectedType }); 
+    const selectedDate = this.selectedMonth.trim();
+    this.runCompare.emit({ imageType: this.selectedType, month: selectedDate.slice(0, 7) });
+  }
+
+  resetMonth(): void {
+    this.selectedMonth = this.currentDateKey();
+  }
+
+  toggleAdvanced(): void {
+    this.isAdvancedOpen = !this.isAdvancedOpen;
   }
 
   openLightbox(url: string, label: string): void {
@@ -42,7 +70,7 @@ export class MonthCompareSectionComponent {
   }
 
   closeLightbox(): void {
-    this.lightboxSrc = null; 
+    this.lightboxSrc = null;
   }
 
   markImageBroken(url: string): void {
@@ -55,8 +83,13 @@ export class MonthCompareSectionComponent {
 
   imageApiUrl(relativeUrl: string): string {
     if (relativeUrl.startsWith('http')) {
-      return relativeUrl; 
+      return relativeUrl;
     }
     return relativeUrl;
+  }
+
+  private currentDateKey(): string {
+    const date = new Date();
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   }
 }

@@ -4,11 +4,11 @@ export class SearchLocationMapRenderer {
   constructor(private L: any, private map: any) {}
 
   render(lat: number | null, lon: number | null): void {
+    this.clear();
     if (!this.L || !this.map || !Number.isFinite(lat) || !Number.isFinite(lon)) {
       return;
     }
 
-    this.clear();
     this.marker = this.L.circleMarker([lat, lon], {
       radius: 8,
       color: '#3b82f6',

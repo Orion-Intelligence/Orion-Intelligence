@@ -110,6 +110,23 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     this.cd.detectChanges();
   }
 
+  focusLocation(lat: number, lon: number, delta: number): void {
+    this.lat = lat;
+    this.lon = lon;
+    this.delta = delta;
+    this.ngZone.runOutsideAngular(() => this.updateMapView());
+  }
+
+  clearLocation(): void {
+    this.lat = null;
+    this.lon = null;
+    this.searchLocationRenderer?.render(null, null);
+    if (this.leafletMap && this.L) {
+      this.leafletMap.fitBounds(this.L.latLngBounds(MapRendererComponent.WORLD_BOUNDS));
+      this.updateZoomLabel();
+    }
+  }
+
   ngAfterViewInit(): void {
     this.ngZone.runOutsideAngular(() => {
       void this.initMap();

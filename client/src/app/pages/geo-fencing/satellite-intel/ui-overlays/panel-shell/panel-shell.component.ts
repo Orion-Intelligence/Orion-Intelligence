@@ -1,13 +1,9 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { SatelliteIntelPanel } from '../../satellite-intel.types';
-import { SatelliteIntelPanelEnum } from '../../../enums/geo-fencing.enums';
+import { SatelliteIntelPanel, SatelliteIntelPanelEnum } from '../../../enums/geo-fencing.enums';
 
 const PANEL_TABS: Array<{ id: SatelliteIntelPanel; label: string }> = [
   { id: SatelliteIntelPanelEnum.Dashboard, label: 'Dashboard' },
-  { id: SatelliteIntelPanelEnum.Compare, label: 'Compare' },
-  { id: SatelliteIntelPanelEnum.Anomaly, label: 'Anomaly' },
-  { id: SatelliteIntelPanelEnum.Sentinel, label: 'Sentinel' },
-  { id: SatelliteIntelPanelEnum.Image, label: 'Image' },
+  { id: SatelliteIntelPanelEnum.Compare, label: 'Imagery Analysis' },
 ];
 
 @Component({

@@ -6,7 +6,7 @@ import { SatelliteIntelService } from '../../satellite-intel-service';
 
 @Injectable({ providedIn: 'root' })
 export class SatelliteShipTrackingService {
-  private readonly minimumBoundsDelta = 2.5;
+  private readonly minimumBoundsDelta = 0.05;
 
   constructor(private api: ApiService, private satelliteIntelService: SatelliteIntelService) {}
 
@@ -24,6 +24,16 @@ export class SatelliteShipTrackingService {
 
   pollByMMSI(mmsi: string): Observable<SatelliteLiveShipsBBoxResponse> {
     return this.satelliteIntelService.createPolledRequest(() => this.fetchByMMSI(mmsi), (res) => this.getPollStatus(res));
+  }
+
+  getBoundsRequestKey(lat: number, lon: number, delta = 0.05): string {
+    const payload = this.buildBoundsPayload(lat, lon, delta);
+    return [
+      payload['lat_min'],
+      payload['lat_max'],
+      payload['lon_min'],
+      payload['lon_max'],
+    ].map(value => Number(value).toFixed(2)).join(':');
   }
 
   extractItems(payload: any): SatelliteLiveShip[] | null {

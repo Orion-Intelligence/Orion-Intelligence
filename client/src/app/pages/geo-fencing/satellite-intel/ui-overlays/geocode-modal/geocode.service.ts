@@ -29,7 +29,7 @@ export class GeocodeService {
   }
 
   isValidDelta(value: number): boolean {
-    return value > 0 && value <= 2;
+    return value > 0 && value <= 9;
   }
 
   parseCoordinates(value: string): { lat: number; lon: number } | null {
@@ -58,7 +58,7 @@ export class GeocodeService {
 
   validateDeltaInput(value: number): string | null {
     if (!this.isValidDelta(value)) {
-      return 'Delta must be between 0.001 and 2';
+      return 'Coverage size must be between 0.001 and 9 degrees (~1,000 km)';
     }
     return null;
   }

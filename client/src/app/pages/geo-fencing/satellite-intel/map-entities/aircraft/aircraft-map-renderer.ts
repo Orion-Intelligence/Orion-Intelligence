@@ -518,6 +518,9 @@ export class AircraftMapRenderer {
       }
       return bounds.contains([aircraft.latitude, aircraft.longitude]);
     });
+    if (visible.length <= 1200) {
+      return visible;
+    }
     return this.limitAircraftForViewport(this.sampleCrowdedAircraftAreas(visible, zoom), visible, zoom);
   }
 

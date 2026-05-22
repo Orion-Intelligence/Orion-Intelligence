@@ -9,7 +9,6 @@ from .satellite_request_models import (
     SatelliteLiveTrackerBBoxRequest,
     SatelliteLiveTrackerShipMmsiRequest,
     SatelliteLiveTrackerStatusRequest,
-    SatelliteSentinelSearchRequest,
 )
 
 __all__ = [
@@ -23,5 +22,4 @@ __all__ = [
     "SatelliteLiveTrackerBBoxRequest",
     "SatelliteLiveTrackerShipMmsiRequest",
     "SatelliteLiveTrackerStatusRequest",
-    "SatelliteSentinelSearchRequest",
 ]
