@@ -109,19 +109,30 @@
                 <button (click)="openShareConfirmation()" type="button" aria-label="Create share link" appTooltip="Create share link" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-share" [disabled]="isShareCreating">
                     <i class="bi text-[15px] leading-none [&_.ui-bootstrap-icon]:overflow-visible" [ngClass]="isShareCreating ? 'bi-arrow-repeat animate-spin' : 'bi-share-fill'"></i>
                 </button>
+
                 <button (click)="openRevokeShareConfirmation()" type="button" aria-label="Revoke all share links" appTooltip="Revoke all share links" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-revoke-shares" [disabled]="isShareRevoking">
                     <i class="bi text-sm leading-none" [ngClass]="isShareRevoking ? 'bi-arrow-repeat animate-spin' : 'bi-trash3 text-red-300'"></i>
                 </button>
                 }
+
                 @if (!isEditing && !caseData.closure) {
                 <button (click)="enableEditing()" type="button" aria-label="Edit case" appTooltip="Edit case" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-details-edit">
                     <img src="assets/images/shared/edit.svg" width="16" alt="edit" class="ui-action-icon" />
                 </button>
-                } @else if (isEditing) {
+                }
+
+                @if (!isEditing && !caseData.closure && caseData.status !== 'closed') {
+                <button type="button" (click)="openCloseCase()" class="inline-flex h-9 items-center gap-1.5 rounded-lg border border-red-400/20 bg-red-500/10 px-3 text-sm text-red-300">
+                    <i class="bi bi-lock-fill"></i> Close Case
+                </button>
+                }
+
+                @if (isEditing) {
                 <button (click)="cancelEditing()" type="button" aria-label="Cancel edit" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-details-cancel">
                     <i class="bi bi-x-lg text-sm"></i>
                 </button>
-                <button (click)="saveChanges()" type="button" aria-label="Save case" [class.hidden]="!hasCaseChanged()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-details-save">
+
+                <button (click)="saveCaseDetails()" type="button" aria-label="Save case" [class.hidden]="!hasCaseChanged()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-details-save">
                     <i class="bi bi-check-lg text-sm"></i>
                 </button>
                 }
@@ -136,34 +147,28 @@
         }
 
         <div class="space-y-5">
-            @if (isEditing || caseData.closure) {
+            @if (isClosingCase || caseData.closure) {
             <div class="overflow-hidden rounded-[8px] border" [ngClass]="!isEditing && caseData.closure ? 'border-emerald-400/20 bg-[color-mix(in_srgb,var(--tenant-expand-bg)_92%,#064e3b_8%)]' : 'border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]'">
                 <div class="flex h-12 items-center justify-between gap-3 px-4" [ngClass]="!isEditing && caseData.closure ? 'border-b border-emerald-400/15 bg-[color-mix(in_srgb,var(--color-blue-820-light)_90%,#064e3b_10%)]' : 'border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)]'">
                     <div class="flex items-center gap-1.5">
                         <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Closure</h2>
                         <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Closure records the final case outcome, reason, summary, and resolution details." class="h-4 w-4 shrink-0 ui-action-icon">
                     </div>
-                    @if (isEditing && editedCase) {
+                    @if (isClosingCase && newClosure) {
                     <div class="flex items-center gap-2">
-                        <button type="button" (click)="saveChanges()" [disabled]="!hasClosureChanged()" [class.hidden]="!hasClosureChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30" data-testid="case-closure-save">
+                        <button type="button" (click)="saveClosure()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300">
                             <i class="bi bi-check-lg"></i> Save
                         </button>
-                        @if (editedCase.closure) {
-                        <button type="button" (click)="removeClosure()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" data-testid="case-closure-remove">
-                            <i class="bi bi-x-lg"></i> Remove
+                        <button type="button" (click)="cancelSectionMode()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
+                            <i class="bi bi-x-lg"></i> Cancel
                         </button>
-                        } @else {
-                        <button type="button" (click)="addClosure()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200" data-testid="case-closure-add">
-                            <i class="bi bi-plus-lg"></i> Add
-                        </button>
-                        }
                     </div>
                     }
                 </div>
 
                 @if (isEditing && editedCase) {
                 <div class="p-4">
-                    @if (editedCase.closure; as closure) {
+                    @if (newClosure; as closure) {
                     <div class="grid gap-3 md:grid-cols-2">
                         <div>
                             <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Reason</label>
@@ -465,7 +470,7 @@
                 <div class="p-4">
                     <app-entity-details [entity]="editablePrimaryEntity" [isMainEntity]="true" [showTitle]="false"
                         [showTopDivider]="false" [showRoleRelationshipFields]="false" [entityIndex]="0"
-                        (save)="saveChanges()"></app-entity-details>
+                        (save)="savePrimaryEntity()"></app-entity-details>
                 </div>
                 } @else if (getPrimaryEntity(); as primaryEntity) {
                 <div class="flex flex-col gap-1 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
@@ -618,7 +623,7 @@
                 }
             </div>
 
-            @if (isEditing && editedCase) {
+            @if (!isAddingRelatedEntity || getRelatedEntities(caseData).length > 0) {
             <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
                 <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
                     <div class="flex items-center gap-1.5">
@@ -626,100 +631,161 @@
                         </h2>
                         <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Other entities connected to the case, such as affected assets, accounts, indicators, sources, or linked actors." class="h-4 w-4 shrink-0 ui-action-icon">
                     </div>
+
                     <div class="flex items-center gap-2">
-                        <button type="button" (click)="saveChanges()" [disabled]="!hasRelatedEntitiesChanged()" [class.hidden]="!hasRelatedEntitiesChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30">
-                            <i class="bi bi-check-lg"></i> Save
-                        </button>
-                        <button type="button" (click)="addRelatedEntity()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
+                        @if (!caseData.closure && !isEditing && !isAddingRelatedEntity) {
+                        <button type="button" (click)="openAddRelatedEntity()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
                             <i class="bi bi-plus-lg"></i> Add
                         </button>
+                        }
                     </div>
                 </div>
 
-                @if (getRelatedEntities(editedCase).length > 0) {
+                @if (getRelatedEntities(caseData).length > 0) {
                 <div class="space-y-4 p-4">
+                    @if (isEditing && editedCase) {
                     @for (entity of getRelatedEntities(editedCase); track entity.entityId; let i = $index) {
-                    <app-entity-details [entity]="entity" [entityIndex]="i" (remove)="removeRelatedEntity(i)"
-                        (save)="saveChanges()"></app-entity-details>
+                    <app-entity-details [entity]="entity" [isMainEntity]="false" [showTitle]="true"
+                        [showTopDivider]="false" [showRoleRelationshipFields]="true" [entityIndex]="i"
+                        (remove)="removeRelatedEntity(i)" (save)="saveRelatedEntities()">
+                    </app-entity-details>
                     }
-                </div>
-                } @else {
-                <button type="button" (click)="addRelatedEntity()" class="m-4 flex min-h-[76px] w-[calc(100%-2rem)] items-center justify-center rounded-[8px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-830)]/55 px-4 text-sm font-medium text-[var(--color-text4)] transition hover:border-sky-400/35 hover:bg-[var(--color-blue-700)]/35 hover:text-[var(--color-text1)]">
-                    Add related entity
-                </button>
-                }
-            </div>
-            } @else if (getRelatedEntities().length > 0) {
-            <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
-                <div class="flex items-center border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
-                    <div class="flex items-center gap-1.5">
-                        <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Related Entities
-                        </h2>
-                        <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Other entities connected to the case, such as affected assets, accounts, indicators, sources, or linked actors." class="h-4 w-4 shrink-0 ui-action-icon">
-                    </div>
-                </div>
+                    } @else {
+                    @for (entity of getRelatedEntities(caseData); track entity.entityId; let i = $index) {
+                    <div class="overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-expand-bg)]">
 
-                <div class="space-y-3 p-4">
-                    @for (entity of getRelatedEntities(); track entity.entityId; let i = $index) {
-                    <div class="overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]">
-                        <button type="button" (click)="toggleRelatedEntity(entity.entityId)" class="w-full p-3 text-left transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-expanded]="isRelatedEntityExpanded(entity.entityId)">
-                            <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                                <div class="min-w-0">
-                                    <div class="flex min-w-0 items-center gap-2">
-                                        <span class="min-w-0 truncate text-sm font-semibold text-[var(--color-text1)]">
-                                            {{ entity.entityDescription || entity.value }}
-                                        </span>
-                                        <i class="bi text-xs text-[var(--color-text4)]" [ngClass]="isRelatedEntityExpanded(entity.entityId) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
-                                    </div>
-                                    <div class="mt-1 text-xs text-[var(--color-text4)] break-all">
-                                        {{ getDisplayLabel(entity.type, entity.entityTypeOtherValue) }} · {{
-                                        getDisplayLabel(entity.source, entity.entitySourceOtherValue) }}
-                                    </div>
+                        <button type="button" (click)="toggleRelatedEntity(entity.entityId)" class="flex w-full flex-col gap-1 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3 text-left transition hover:bg-[var(--color-blue-810)]" [attr.aria-expanded]="isRelatedEntityExpanded(entity.entityId)">
+
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div class="flex items-center gap-1.5">
+                                    <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">
+                                        Related Entity {{ i + 1 }}
+                                    </h2>
+
+                                    <i class="bi text-xs text-[var(--color-text4)]" [ngClass]="isRelatedEntityExpanded(entity.entityId) ? 'bi-chevron-up' : 'bi-chevron-down'">
+                                    </i>
                                 </div>
-                                <div class="flex flex-wrap gap-2 md:justify-end">
-                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
-                                        formatLabel(entity.role) }}</span>
-                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
-                                        formatLabel(entity.relationshipToCase) }}</span>
-                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
-                                        (entity.confidence || 0) * 100 | number:'1.0-0' }}%</span>
-                                </div>
+
+                                <span class="w-fit rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text2)]">
+                                    {{ getDisplayLabel(entity.type, entity.entityTypeOtherValue) }}
+                                </span>
+                            </div>
+
+                            <div class="text-xs font-medium text-[var(--color-text4)]">
+                                {{ formatLabel(entity.relationshipToCase) }} ·
+                                {{ getDisplayLabel(entity.source, entity.entitySourceOtherValue) }}
                             </div>
                         </button>
 
                         @if (isRelatedEntityExpanded(entity.entityId)) {
-                        <div class="border-t border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-4">
-                            <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-                                <div class="min-w-0 space-y-4">
+                        <div>
+                            <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
+                                <div class="min-w-0 p-4">
+                                    <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                        Value
+                                    </div>
+
+                                    <div class="mt-1 text-[18px] font-semibold leading-snug text-[var(--color-text1)] break-all">
+                                        {{ entity.value }}
+                                    </div>
+
+                                    <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                        Description
+                                    </div>
+
+                                    <div class="mt-2 text-sm leading-6 text-[var(--color-text3)] break-words">
+                                        {{ entity.entityDescription || entity.value }}
+                                    </div>
+
                                     @if ((entity.tags?.length || 0) > 0) {
-                                    <div>
-                                        <div class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                            Tags</div>
-                                        <div class="flex flex-wrap gap-2">
-                                            @for (tag of entity.tags; track tag) {
-                                            <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
-                                                formatLabel(tag) }}</span>
-                                            }
-                                        </div>
+                                    <div class="mt-4 flex flex-wrap gap-2">
+                                        @for (tag of entity.tags; track tag) {
+                                        <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text2)]">
+                                            {{ formatLabel(tag) }}
+                                        </span>
+                                        }
                                     </div>
                                     }
+                                </div>
+
+                                <div class="border-t border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4 lg:border-l lg:border-t-0">
+                                    <div class="grid grid-cols-2 gap-x-5 gap-y-4">
+                                        <div>
+                                            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                                Type
+                                            </div>
+                                            <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
+                                                {{ getDisplayLabel(entity.type, entity.entityTypeOtherValue) }}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                                Source
+                                            </div>
+                                            <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
+                                                {{ getDisplayLabel(entity.source, entity.entitySourceOtherValue) }}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                                Role
+                                            </div>
+                                            <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
+                                                {{ formatLabel(entity.role) }}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                                Relationship
+                                            </div>
+                                            <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
+                                                {{ formatLabel(entity.relationshipToCase) }}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                                Confidence
+                                            </div>
+                                            <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
+                                                {{ (entity.confidence || 0) * 100 | number:'1.0-0' }}%
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if ((entity.socialProfiles?.length || 0) > 0 || (entity.identifiers?.length || 0) > 0) {
+                            <div class="border-t border-[var(--color-border)] p-4">
+                                <div class="grid gap-4 lg:grid-cols-2">
 
                                     @if ((entity.socialProfiles?.length || 0) > 0) {
                                     <div>
                                         <div class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                            Social Profiles</div>
+                                            Social Profiles
+                                        </div>
+
                                         <div class="space-y-2">
                                             @for (profile of entity.socialProfiles; track $index) {
                                             <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-xs text-[var(--color-text2)]">
-                                                <span class="font-semibold text-sky-300">{{
-                                                    formatLabel(profile.platform) }}</span>
+                                                <span class="font-semibold text-sky-300">
+                                                    {{ getDisplayLabel(profile.platform, profile.platformOtherValue) }}
+                                                </span>
                                                 <span class="ml-1">{{ profile.username }}</span>
+
                                                 @if (profile.displayName) {
-                                                <span class="ml-1 text-[var(--color-text4)]">({{ profile.displayName
-                                                    }})</span>
+                                                <span class="ml-1 text-[var(--color-text4)]">
+                                                    ({{ profile.displayName }})
+                                                </span>
                                                 }
+
                                                 @if (profile.profileUrl) {
-                                                <a [href]="profile.profileUrl" target="_blank" rel="noopener" class="ml-2 text-sky-300 hover:text-sky-200">Open</a>
+                                                <a [href]="profile.profileUrl" target="_blank" rel="noopener" class="ml-2 text-sky-300 hover:text-sky-200">
+                                                    Open
+                                                </a>
                                                 }
                                             </div>
                                             }
@@ -730,17 +796,24 @@
                                     @if ((entity.identifiers?.length || 0) > 0) {
                                     <div>
                                         <div class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                            Identifiers</div>
+                                            Identifiers
+                                        </div>
+
                                         <div class="space-y-2">
                                             @for (identifier of entity.identifiers; track $index) {
                                             <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-xs text-[var(--color-text2)]">
-                                                <span class="font-semibold text-green-300">{{
-                                                    formatLabel(identifier.type) }}</span>
+                                                <span class="font-semibold text-green-300">
+                                                    {{ getDisplayLabel(identifier.type,
+                                                    identifier.identifierTypeOtherValue) }}
+                                                </span>
                                                 <span class="ml-1 break-all">{{ identifier.value }}</span>
+
                                                 @if (identifier.issuer) {
-                                                <span class="ml-1 text-[var(--color-text4)]">Issuer: {{
-                                                    identifier.issuer }}</span>
+                                                <span class="ml-1 text-[var(--color-text4)]">
+                                                    Issuer: {{ identifier.issuer }}
+                                                </span>
                                                 }
+
                                                 @if (identifier.verified) {
                                                 <span class="ml-1 text-green-300">Verified</span>
                                                 }
@@ -749,63 +822,46 @@
                                         </div>
                                     </div>
                                     }
-                                </div>
 
-                                <div class="grid grid-cols-2 gap-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
-                                    <div>
-                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                            Type</div>
-                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{
-                                            formatLabel(entity.type) }}</div>
-                                    </div>
-                                    <div>
-                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                            Source</div>
-                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{
-                                            formatLabel(entity.source) }}</div>
-                                    </div>
-                                    @if (entity.createdBy) {
-                                    <div class="col-span-2">
-                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                            Created By</div>
-                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all">{{
-                                            entity.createdBy }}</div>
-                                    </div>
-                                    }
-                                    @if (entity.updatedBy) {
-                                    <div class="col-span-2">
-                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                            Updated By</div>
-                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all">{{
-                                            entity.updatedBy }}</div>
-                                    </div>
-                                    }
-                                    @if (entity.createdAt) {
-                                    <div>
-                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                            Created</div>
-                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{
-                                            getFormattedDateTime(entity.createdAt) }}</div>
-                                    </div>
-                                    }
-                                    @if (entity.updatedAt) {
-                                    <div>
-                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                            Updated</div>
-                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{
-                                            getFormattedDateTime(entity.updatedAt) }}</div>
-                                    </div>
-                                    }
                                 </div>
                             </div>
-                            @if ((entity.tags?.length || 0) === 0 && (entity.socialProfiles?.length || 0) === 0 &&
-                            (entity.identifiers?.length || 0) === 0) {
-                            <div class="mt-4 text-xs text-[var(--color-text4)]">No additional entity details.</div>
                             }
                         </div>
                         }
+
                     </div>
                     }
+                    }
+                </div>
+                } @else {
+                <div class="p-4 text-sm text-[var(--color-text4)]">No related entities added.</div>
+                }
+            </div>
+            }
+
+            @if (isAddingRelatedEntity && newRelatedEntity) {
+            <div class="mx-4 mb-4 overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]">
+                <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
+                    <h2 class="m-0 text-[16px] font-bold text-[var(--color-text1)]">
+                        Related Entity {{ getRelatedEntities(caseData).length + 1 }}
+                    </h2>
+
+                    <div class="flex items-center gap-2">
+                        <button type="button" (click)="saveNewRelatedEntity()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300">
+                            <i class="bi bi-check-lg"></i> Save
+                        </button>
+
+                        <button type="button" (click)="cancelSectionMode()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-4">
+                    <app-entity-details [entity]="newRelatedEntity" [isMainEntity]="false" [showTitle]="false"
+                        [showTopDivider]="false" [showRoleRelationshipFields]="true" [entityIndex]="0"
+                        (save)="saveNewRelatedEntity()">
+                    </app-entity-details>
                 </div>
             </div>
             }
@@ -817,12 +873,18 @@
                             <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Artifacts</h2>
                             <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Evidence or supporting material attached to the case, such as screenshots, files, URLs, raw alerts, logs, or reports." class="h-4 w-4 shrink-0 ui-action-icon">
                         </div>
+
                         @if (isEditing) {
                         <div class="flex items-center gap-2">
-                            <button type="button" (click)="saveChanges()" [disabled]="!hasArtifactsChanged()" [class.hidden]="!hasArtifactsChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30" data-testid="case-artifact-save">
+                            <button type="button" (click)="saveArtifacts()" [disabled]="!hasArtifactsChanged()" [class.hidden]="!hasArtifactsChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300" data-testid="case-artifact-save">
                                 <i class="bi bi-check-lg"></i> Save
                             </button>
-                            <button type="button" (click)="addArtifact()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200" data-testid="case-artifact-add">
+                        </div>
+                        }
+
+                        @if (!isEditing && !caseData.closure) {
+                        <div class="flex items-center gap-2">
+                            <button type="button" (click)="openAddArtifact()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300">
                                 <i class="bi bi-plus-lg"></i> Add
                             </button>
                         </div>
@@ -928,6 +990,78 @@
                         }
                     </div>
                     }
+
+                    @if (isAddingArtifact && newArtifact) {
+                    <div class="space-y-3 p-4 border-t border-[var(--color-border)]">
+                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
+                            <div class="mb-3 flex items-center justify-between gap-3">
+                                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">
+                                    Artifact {{ (caseData.artifacts || []).length + 1 }}
+                                </span>
+                                <div class="flex gap-2">
+                                    <button type="button" (click)="saveNewArtifact()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300">
+                                        <i class="bi bi-check-lg"></i> Save
+                                    </button>
+                                    <button type="button" (click)="cancelSectionMode()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
+                                        <i class="bi bi-x-lg"></i> Cancel
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="grid gap-3 md:grid-cols-2">
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
+                                    <input [(ngModel)]="newArtifact.title" name="new-artifact-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" />
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Type</label>
+                                    <select [(ngModel)]="newArtifact.type" name="new-artifact-type" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                                        @for (type of artifactTypeOptions; track type.value) {
+                                        <option [value]="type.value">{{ type.label }}</option>
+                                        }
+                                    </select>
+                                    @if (newArtifact.type === 'other') {
+                                    <input type="text" [(ngModel)]="newArtifact.artifactTypeOtherValue" name="new-artifact-type-other" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" placeholder="Specify other artifact type" />
+                                    }
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Source</label>
+                                    <select [(ngModel)]="newArtifact.source" name="new-artifact-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                                        @for (source of sourceTypeOptions; track source.value) {
+                                        <option [value]="source.value">{{ source.label }}</option>
+                                        }
+                                    </select>
+                                    @if (newArtifact.source === 'other') {
+                                    <input type="text" [(ngModel)]="newArtifact.artifactSourceOtherValue" name="new-artifact-source-other" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" placeholder="Specify other artifact source" />
+                                    }
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Captured</label>
+                                    <input [ngModel]="getDateInputValue(newArtifact.capturedAt)" (ngModelChange)="setDateInputValue(newArtifact, 'capturedAt', $event)" name="new-artifact-captured" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
+                                    <textarea [(ngModel)]="newArtifact.description" name="new-artifact-description" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]"></textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">URL</label>
+                                    <input [(ngModel)]="newArtifact.url" name="new-artifact-url" type="url" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">File
+                                        Name</label>
+                                    <input [(ngModel)]="newArtifact.fileName" name="new-artifact-file" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    }
                 </div>
 
                 <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
@@ -938,10 +1072,15 @@
                         </div>
                         @if (isEditing) {
                         <div class="flex items-center gap-2">
-                            <button type="button" (click)="saveChanges()" [disabled]="!hasTasksChanged()" [class.hidden]="!hasTasksChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30" data-testid="case-task-save">
+                            <button type="button" (click)="saveTasks()" [disabled]="!hasTasksChanged()" [class.hidden]="!hasTasksChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300" data-testid="case-task-save">
                                 <i class="bi bi-check-lg"></i> Save
                             </button>
-                            <button type="button" (click)="addTask()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200" data-testid="case-task-add">
+                        </div>
+                        }
+
+                        @if (!isEditing && !caseData.closure) {
+                        <div class="flex items-center gap-2">
+                            <button type="button" (click)="openAddTask()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
                                 <i class="bi bi-plus-lg"></i> Add
                             </button>
                         </div>
@@ -1043,6 +1182,74 @@
                         }
                     </div>
                     }
+
+                    @if (isAddingTask && newTask) {
+                    <div class="space-y-3 p-4 border-t border-[var(--color-border)]">
+                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
+                            <div class="mb-3 flex items-center justify-between gap-3">
+                                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">
+                                    Task {{ (caseData.tasks || []).length + 1 }}
+                                </span>
+                                <div class="flex gap-2">
+                                    <button type="button" (click)="saveNewTask()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300">
+                                        <i class="bi bi-check-lg"></i> Save
+                                    </button>
+                                    <button type="button" (click)="cancelSectionMode()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
+                                        <i class="bi bi-x-lg"></i> Cancel
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="grid gap-3 md:grid-cols-2">
+                                <div class="md:col-span-2">
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
+                                    <input [(ngModel)]="newTask.title" name="new-task-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
+                                    <select [(ngModel)]="newTask.status" name="new-task-status" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                                        @for (status of taskStatusOptions; track status.value) {
+                                        <option [value]="status.value">{{ status.label }}</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Priority</label>
+                                    <select [(ngModel)]="newTask.priority" name="new-task-priority" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                                        @for (priority of priorityOptions; track priority) {
+                                        <option [value]="priority">{{ priority }}</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Assign
+                                        To</label>
+                                    <select [(ngModel)]="newTask.assignedTo" name="new-task-assignee" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                                        <option value="">Unassigned</option>
+                                        @for (analyst of getCaseAnalysts(caseData); track analyst.id) {
+                                        <option [value]="analyst.id">{{ analyst.username || analyst.email || analyst.id
+                                            }}</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Due
+                                        Date</label>
+                                    <input [ngModel]="getDateInputValue(newTask.dueAt)" (ngModelChange)="setDateInputValue(newTask, 'dueAt', $event)" name="new-task-due" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
+                                    <textarea [(ngModel)]="newTask.description" name="new-task-description" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    }
                 </div>
             </div>
 
@@ -1054,10 +1261,14 @@
                     </div>
                     @if (isEditing) {
                     <div class="flex items-center gap-2">
-                        <button type="button" (click)="saveChanges()" [disabled]="!hasLinkedCasesChanged()" [class.hidden]="!hasLinkedCasesChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30" data-testid="case-linked-case-save">
+                        <button type="button" (click)="saveLinkedCases()" [disabled]="!hasLinkedCasesChanged()" [class.hidden]="!hasLinkedCasesChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30" data-testid="case-linked-case-save">
                             <i class="bi bi-check-lg"></i> Save
                         </button>
-                        <button type="button" (click)="addLinkedCase()" [disabled]="!hasLinkableCases(editedCase)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 disabled:pointer-events-none disabled:opacity-50" data-testid="case-linked-case-add">
+                    </div>
+                    }
+                    @if (!isEditing && !caseData.closure) {
+                    <div class="flex items-center gap-2">
+                        <button type="button" (click)="openAddLinkedCase()" [disabled]="!hasLinkableCases(caseData)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 disabled:pointer-events-none disabled:opacity-50">
                             <i class="bi bi-plus-lg"></i> Add
                         </button>
                     </div>
@@ -1119,6 +1330,53 @@
                     } @empty {
                     <div class="text-sm text-[var(--color-text4)]">No linked cases added.</div>
                     }
+                </div>
+                }
+
+                @if (isAddingLinkedCase && newLinkedCase) {
+                <div class="space-y-3 p-4 border-t border-[var(--color-border)]">
+                    <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
+                        <div class="mb-3 flex items-center justify-between gap-3">
+                            <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">
+                                Link {{ (caseData.linkedCases || []).length + 1 }}
+                            </span>
+                            <div class="flex gap-2">
+                                <button type="button" (click)="saveNewLinkedCase()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300">
+                                    <i class="bi bi-check-lg"></i> Save
+                                </button>
+                                <button type="button" (click)="cancelSectionMode()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
+                                    <i class="bi bi-x-lg"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
+                            <div>
+                                <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case</label>
+                                <select [(ngModel)]="newLinkedCase.targetCaseId" name="new-linked-case" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                                    <option value="">Select case</option>
+                                    @for (candidateCase of getLinkableCases(caseData); track candidateCase.caseId) {
+                                    <option [value]="candidateCase.caseId">{{ candidateCase.caseId }} · {{
+                                        candidateCase.title }}</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Relationship</label>
+                                <select [(ngModel)]="newLinkedCase.relationship" name="new-linked-relationship" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                                    @for (relationship of caseLinkRelationshipOptions; track relationship.value) {
+                                    <option [value]="relationship.value">{{ relationship.label }}</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Reason</label>
+                                <input [(ngModel)]="newLinkedCase.reason" name="new-linked-reason" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 }
             </div>
