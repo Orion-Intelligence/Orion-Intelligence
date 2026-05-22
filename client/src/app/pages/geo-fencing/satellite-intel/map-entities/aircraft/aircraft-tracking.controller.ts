@@ -54,6 +54,13 @@ export class SatelliteAircraftTrackingController {
     this.stop();
   }
 
+  clear(): void {
+    this.enabled = false;
+    this.stop();
+    this.data = [];
+    this.error = null;
+  }
+
   private stop(): void {
     this.trackSub?.unsubscribe();
     clearTimeout(this.timer);

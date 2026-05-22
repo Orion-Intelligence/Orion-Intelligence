@@ -89,6 +89,11 @@ export class EntityLoader {
     this.facilitiesController.clear(onMapDataChanged);
   }
 
+  clearTracking(): void {
+    this.aircraftTracker.clear();
+    this.shipTracker.clear();
+  }
+
   refreshTracking(viewport: SatelliteTrackingViewport): void {
     this.aircraftTracker.refresh(viewport, false, true);
     this.shipTracker.refresh(viewport, false, true, true);

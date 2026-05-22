@@ -363,11 +363,10 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.focusedFeature = null;
     this.selectedFeature = null;
     this.mapEntityDashboard.setViewport(null);
+    this.mapEntityDashboard.clearMapEntities();
     this.entityLoader.clearFacilities(() => this.refreshMergedData());
+    this.entityLoader.clearTracking();
     this.mapRenderer?.clearLocation();
-    if (this.aircraftTrackingEnabled) {
-      this.entityLoader.refreshGlobalAircraft();
-    }
   }
 
   @HostListener('document:click', ['$event'])
@@ -436,6 +435,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     }
     this.focusedFeature = null;
     this.selectedFeature = null;
+    this.mapEntityDashboard.showMapEntities();
     this.scanState.markSearched();
     this.mapEntityDashboard.setViewport(result.viewport);
     this.loadFacilities(false);

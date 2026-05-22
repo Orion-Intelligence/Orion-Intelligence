@@ -17,6 +17,7 @@ export class SatelliteMapEntityDashboardController {
   private readonly mapEntityFlushIntervalMs = 80;
   private readonly mapEntityBatchSize = 1000;
   private viewport: SatelliteTrackingViewport | null = null;
+  private mapEntitiesVisible = true;
 
   dashboardSearch = '';
   dashboardSearchResults: OrionSatelliteFeature[] = [];
@@ -72,8 +73,8 @@ export class SatelliteMapEntityDashboardController {
 
     const scopedData = this.getViewportData(this.mergedData);
     this.filteredData = scopedData.filter((feature) => this.selectedFilters.includes(feature.type));
-    this.filteredWriData = this.filteredData.filter((feature) => feature.source === 'WRI');
-    this.filteredFacilitiesMapData = this.filteredData.filter((feature) => feature.source === 'OSM');
+    this.filteredWriData = this.mapEntitiesVisible ? this.filteredData.filter((feature) => feature.source === 'WRI') : [];
+    this.filteredFacilitiesMapData = this.mapEntitiesVisible ? this.filteredData.filter((feature) => feature.source === 'OSM') : [];
     this.scopedWriDataCount = scopedData.filter((feature) => feature.source === 'WRI').length;
     this.refreshStats(scopedData);
     this.refreshVisibleTypeFilters();
@@ -82,6 +83,20 @@ export class SatelliteMapEntityDashboardController {
 
   setViewport(viewport: SatelliteTrackingViewport | null): void {
     this.viewport = viewport;
+    this.refresh();
+  }
+
+  showMapEntities(): void {
+    this.mapEntitiesVisible = true;
+    if (!this.selectedFilters.length) {
+      this.selectedFilters = this.dashboardTypeFilterCache.map((option) => option.key);
+    }
+    this.refresh();
+  }
+
+  clearMapEntities(): void {
+    this.mapEntitiesVisible = false;
+    this.selectedFilters = [];
     this.refresh();
   }
 
@@ -101,6 +116,7 @@ export class SatelliteMapEntityDashboardController {
   }
 
   toggleFilter(type: OrionSatelliteFeatureType): void {
+    this.mapEntitiesVisible = true;
     this.selectedFilters = this.selectedFilters.includes(type)
       ? this.selectedFilters.filter((entry) => entry !== type)
       : [...this.selectedFilters, type];
@@ -108,11 +124,13 @@ export class SatelliteMapEntityDashboardController {
   }
 
   selectAllFilters(): void {
+    this.mapEntitiesVisible = true;
     this.selectedFilters = this.dashboardTypeFilterCache.map((option) => option.key);
     this.refresh();
   }
 
   clearFilters(): void {
+    this.mapEntitiesVisible = true;
     this.selectedFilters = [];
     this.refresh();
   }
