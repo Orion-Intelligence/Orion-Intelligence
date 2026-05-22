@@ -222,21 +222,47 @@ export class CaseDetails implements OnInit {
       return;
     }
 
+    if (!this.validateOtherValue(this.editedCase.caseType, this.editedCase.caseTypeOtherValue, 'Other case type is required')) {
+      return;
+    }
+
+    if (!this.validateOtherValue(this.editedCase.intakeSource, this.editedCase.intakeSourceOtherValue, 'Other intake source is required')) {
+      return;
+    }
+
     const primaryEntity = this.ensurePrimaryEntity(this.editedCase);
     if (!primaryEntity.value.trim()) {
       this.messageNotificationService.show('Primary entity value is required');
       return;
     }
 
-    const invalidRelatedEntityIndex = this.getRelatedEntities(this.editedCase).findIndex(entity => !entity.value.trim());
-    if (invalidRelatedEntityIndex >= 0) {
-      this.messageNotificationService.show(`Related entity ${invalidRelatedEntityIndex + 1} value is required`);
+    if (!this.validateOtherValue(primaryEntity.type, primaryEntity.entityTypeOtherValue, 'Other primary entity type is required')) {
+      return;
+    }
+    if (!this.validateOtherValue(primaryEntity.source, primaryEntity.entitySourceOtherValue, 'Other primary entity source is required')) {
       return;
     }
 
-    const invalidArtifactIndex = (this.editedCase.artifacts || []).findIndex(artifact => !artifact.title.trim());
-    if (invalidArtifactIndex >= 0) {
-      this.messageNotificationService.show(`Artifact ${invalidArtifactIndex + 1} title is required`);
+    const invalidRelatedOtherIndex = this.getRelatedEntities(this.editedCase).findIndex(entity =>
+      (entity.type === 'other' && !entity.entityTypeOtherValue?.trim())
+      || (entity.source === 'other' && !entity.entitySourceOtherValue?.trim()));
+
+    if (invalidRelatedOtherIndex >= 0) {
+      this.messageNotificationService.show(`Related entity ${invalidRelatedOtherIndex + 1} other value is required`);
+      return;
+    }
+
+    const invalidArtifactOtherIndex = (this.editedCase.artifacts || []).findIndex(artifact =>
+      (artifact.type === 'other' && !artifact.artifactTypeOtherValue?.trim())
+      || (artifact.source === 'other' && !artifact.artifactSourceOtherValue?.trim()));
+
+    if (invalidArtifactOtherIndex >= 0) {
+      this.messageNotificationService.show(`Artifact ${invalidArtifactOtherIndex + 1} other value is required`);
+      return;
+    }
+
+    if (this.editedCase.closure?.reason === 'other' && !this.editedCase.closure.closureReasonOtherValue?.trim()) {
+      this.messageNotificationService.show('Other closure reason is required');
       return;
     }
 
@@ -604,14 +630,17 @@ export class CaseDetails implements OnInit {
     const primaryEntity = this.cleanEntity(this.ensurePrimaryEntity(caseItem));
     const relatedEntities = this.getRelatedEntities(caseItem)
       .map(entity => this.cleanEntity(this.ensureEntityDefaults(entity)));
+
     return {
       title: caseItem.title.trim(),
       description: caseItem.description?.trim() || '',
       caseType: caseItem.caseType,
+      caseTypeOtherValue: caseItem.caseTypeOtherValue?.trim() || '',
       status: caseItem.status,
       severity: caseItem.severity,
       priority: caseItem.priority,
       intakeSource: caseItem.intakeSource,
+      intakeSourceOtherValue: caseItem.intakeSourceOtherValue?.trim() || '',
       tags: caseItem.tags || [],
       primaryEntityId: primaryEntity.entityId,
       assignedAnalystIds: caseItem.assignedAnalystIds || [],
@@ -653,9 +682,11 @@ export class CaseDetails implements OnInit {
     return {
       artifactId: artifact.artifactId || this.createId(),
       type: artifact.type,
+      artifactTypeOtherValue: artifact.artifactTypeOtherValue?.trim() || '',
       title: artifact.title.trim(),
       description: artifact.description?.trim() || '',
       source: artifact.source || 'manual',
+      artifactSourceOtherValue: artifact.artifactSourceOtherValue?.trim() || '',
       url: artifact.url?.trim() || '',
       fileName: artifact.fileName?.trim() || '',
       fileType: artifact.fileType?.trim() || '',
@@ -704,6 +735,7 @@ export class CaseDetails implements OnInit {
   private cleanClosure(closure: CaseClosure | CaseClosureRequest): CaseClosureRequest {
     return {
       reason: closure.reason || 'other',
+      closureReasonOtherValue: closure.closureReasonOtherValue?.trim() || '',
       summary: closure.summary?.trim() || '',
       resolution: closure.resolution?.trim() || ''
     };
@@ -711,17 +743,36 @@ export class CaseDetails implements OnInit {
 
   private cleanEntity(entity: CaseEntity): CaseEntityRequest {
     const value = entity.value.trim();
+
     return {
       entityId: entity.entityId || this.createId(),
       type: entity.type,
+      entityTypeOtherValue: entity.entityTypeOtherValue?.trim() || '',
       value,
       entityDescription: entity.entityDescription?.trim() || value,
       role: entity.role,
       relationshipToCase: entity.relationshipToCase,
       confidence: entity.confidence,
       source: entity.source,
-      identifiers: (entity.identifiers || []).filter(identifier => identifier.type && identifier.value.trim()),
-      socialProfiles: (entity.socialProfiles || []).filter(profile => profile.platform && profile.username.trim()),
+      entitySourceOtherValue: entity.entitySourceOtherValue?.trim() || '',
+      identifiers: (entity.identifiers || [])
+        .filter(identifier => identifier.type && identifier.value.trim())
+        .map(identifier => ({
+          type: identifier.type,
+          identifierTypeOtherValue: identifier.identifierTypeOtherValue?.trim() || '',
+          value: identifier.value.trim(),
+          issuer: identifier.issuer?.trim() || '',
+          verified: !!identifier.verified
+        })),
+      socialProfiles: (entity.socialProfiles || [])
+        .filter(profile => profile.platform && profile.username.trim())
+        .map(profile => ({
+          platform: profile.platform,
+          platformOtherValue: profile.platformOtherValue?.trim() || '',
+          username: profile.username.trim(),
+          profileUrl: profile.profileUrl?.trim() || '',
+          displayName: profile.displayName?.trim() || ''
+        })),
       tags: entity.tags || []
     };
   }
@@ -740,4 +791,22 @@ export class CaseDetails implements OnInit {
     return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
 
+  requiresOther(value?: string | null): boolean {
+    return value === 'other';
+  }
+
+  getDisplayLabel(value?: string | null, otherValue?: string | null): string {
+    if (value === 'other' && otherValue?.trim()) {
+      return `Other: ${otherValue}`;
+    }
+    return this.formatLabel(value);
+  }
+
+  private validateOtherValue(value: string | undefined | null, otherValue: string | undefined | null, message: string): boolean {
+    if (value === 'other' && !otherValue?.trim()) {
+      this.messageNotificationService.show(message);
+      return false;
+    }
+    return true;
+  }
 }

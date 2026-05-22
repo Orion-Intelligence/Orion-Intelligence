@@ -38,7 +38,11 @@ def can_view_case(record: db_case_model, current_user) -> bool:
 
 
 def can_manage_case_assignments(record: db_case_model, current_user) -> bool:
-    return is_maintainer(current_user) or is_admin(current_user) or record.createdBy == actor_id(current_user)
+    return (
+        is_maintainer(current_user)
+        or is_admin(current_user)
+        or record.createdBy == actor_id(current_user)
+    )
 
 
 def can_comment(record: db_case_model, current_user) -> bool:
@@ -53,11 +57,19 @@ def can_comment(record: db_case_model, current_user) -> bool:
 
 def can_close_case(record: db_case_model, current_user) -> bool:
     current_actor_id = actor_id(current_user)
-    return is_maintainer(current_user) or is_admin(current_user) or current_actor_id in (record.assignedAnalystIds or [])
+    return (
+        is_maintainer(current_user)
+        or is_admin(current_user)
+        or current_actor_id in (record.assignedAnalystIds or [])
+    )
 
 
 def can_share_case(record: db_case_model, current_user) -> bool:
-    return is_maintainer(current_user) or is_admin(current_user) or record.createdBy == actor_id(current_user)
+    return (
+        is_maintainer(current_user)
+        or is_admin(current_user)
+        or record.createdBy == actor_id(current_user)
+    )
 
 
 def hash_share_token(token: str) -> str:
@@ -97,33 +109,53 @@ def decrypt_value(enc: Fernet, value: str) -> str:
 def apply_sensitive_case_values(record: db_case_model, transform) -> None:
     record.title = transform(record.title)
     record.description = transform(record.description)
+    record.caseTypeOtherValue = transform(record.caseTypeOtherValue)
+    record.intakeSourceOtherValue = transform(record.intakeSourceOtherValue)
+
     for entity in record.entities or []:
         entity.value = transform(entity.value)
         entity.entityDescription = transform(entity.entityDescription)
+        entity.entityTypeOtherValue = transform(entity.entityTypeOtherValue)
+        entity.entitySourceOtherValue = transform(entity.entitySourceOtherValue)
         apply_sensitive_entity_values(entity, transform)
+
     for artifact in record.artifacts or []:
         artifact.title = transform(artifact.title)
         artifact.description = transform(artifact.description)
         artifact.url = transform(artifact.url)
         artifact.fileName = transform(artifact.fileName)
         artifact.fileType = transform(artifact.fileType)
+        artifact.artifactTypeOtherValue = transform(artifact.artifactTypeOtherValue)
+        artifact.artifactSourceOtherValue = transform(artifact.artifactSourceOtherValue)
+
     for comment in record.comments or []:
         comment.body = transform(comment.body)
+
     for task in record.tasks or []:
         task.title = transform(task.title)
         task.description = transform(task.description)
+
     for linked_case in record.linkedCases or []:
         linked_case.reason = transform(linked_case.reason)
+
     if record.closure:
         record.closure.summary = transform(record.closure.summary)
         record.closure.resolution = transform(record.closure.resolution)
+        record.closure.closureReasonOtherValue = transform(
+            record.closure.closureReasonOtherValue
+        )
 
 
 def apply_sensitive_entity_values(entity: CaseEntity, transform) -> None:
     for identifier in entity.identifiers or []:
         identifier.value = transform(identifier.value)
         identifier.issuer = transform(identifier.issuer)
+        identifier.identifierTypeOtherValue = transform(
+            identifier.identifierTypeOtherValue
+        )
+
     for profile in entity.socialProfiles or []:
         profile.username = transform(profile.username)
         profile.profileUrl = transform(profile.profileUrl)
         profile.displayName = transform(profile.displayName)
+        profile.platformOtherValue = transform(profile.platformOtherValue)

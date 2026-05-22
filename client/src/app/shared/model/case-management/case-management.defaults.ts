@@ -1,8 +1,8 @@
 import { ArtifactType, CaseArtifact, CaseEntity, CaseEntityRequest, CaseLink, CaseRequest, CaseStatus, CaseTag, CaseTask, CaseType, ClosureReason, EntityRelationship, EntityRole, EntityType, IdentifierType, IntakeSource, Priority, Severity, SocialPlatform, SourceType, TaskStatus } from './case.model';
 
 export interface CaseOption<T extends string> {
-    value: T;
-    label: string;
+  value: T;
+  label: string;
 }
 
 export const CASE_TYPE_OPTIONS: CaseOption<CaseType>[] = [
@@ -214,7 +214,9 @@ export const DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE: CaseEntity = {
   source: 'manual',
   identifiers: [],
   socialProfiles: [],
-  tags: []
+  tags: [],
+  entityTypeOtherValue: '',
+  entitySourceOtherValue: ''
 };
 
 export const DEFAULT_RELATED_CASE_ENTITY_TEMPLATE: CaseEntity = {
@@ -238,7 +240,9 @@ export const DEFAULT_PRIMARY_CASE_ENTITY_REQUEST_TEMPLATE: CaseEntityRequest = {
   source: 'manual',
   identifiers: [],
   socialProfiles: [],
-  tags: []
+  tags: [],
+  entityTypeOtherValue: '',
+  entitySourceOtherValue: ''
 };
 
 export const DEFAULT_CASE_ARTIFACT_TEMPLATE: CaseArtifact = {
@@ -252,7 +256,9 @@ export const DEFAULT_CASE_ARTIFACT_TEMPLATE: CaseArtifact = {
   fileType: '',
   entityIds: [],
   tags: [],
-  capturedAt: null
+  capturedAt: null,
+  artifactTypeOtherValue: '',
+  artifactSourceOtherValue: ''
 };
 
 export const DEFAULT_CASE_TASK_TEMPLATE: CaseTask = {
@@ -306,5 +312,7 @@ export const DEFAULT_CASE_REQUEST_TEMPLATE: CaseRequest = {
   entities: [],
   comments: [],
   tasks: [],
-  linkedCases: []
+  linkedCases: [],
+  caseTypeOtherValue: '',
+  intakeSourceOtherValue: ''
 };

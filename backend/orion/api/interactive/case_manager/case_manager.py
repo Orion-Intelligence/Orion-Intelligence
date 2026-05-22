@@ -171,6 +171,8 @@ class CaseManager:
             severity=data.severity,
             priority=data.priority,
             intakeSource=data.intakeSource,
+            caseTypeOtherValue=data.caseTypeOtherValue,
+            intakeSourceOtherValue=data.intakeSourceOtherValue,
             tags=data.tags,
             createdBy=current_actor_id,
             assignedAnalystIds=data.assignedAnalystIds,
@@ -317,6 +319,8 @@ class CaseManager:
         record.severity = data.severity
         record.priority = data.priority
         record.intakeSource = data.intakeSource
+        record.caseTypeOtherValue = data.caseTypeOtherValue
+        record.intakeSourceOtherValue = data.intakeSourceOtherValue
         record.tags = data.tags
         record.assignedAnalystIds = data.assignedAnalystIds
         record.primaryEntityId = data.primaryEntityId

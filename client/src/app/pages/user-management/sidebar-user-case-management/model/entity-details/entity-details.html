@@ -34,6 +34,18 @@
             <p class="case-form-error mt-1 text-xs text-red-400">{{ entityValueError }}</p>
             }
         </div>
+
+        @if (entity.type === 'other') {
+        <div class="md:col-span-2">
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
+                Other Entity Type <span class="text-red-500">*</span>
+            </label>
+            <input type="text" [(ngModel)]="entity.entityTypeOtherValue" [name]="'entityTypeOtherValue-' + controlPrefix" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Specify other entity type" />
+            @if (getOtherError(entity.type, entity.entityTypeOtherValue)) {
+            <p class="case-form-error mt-1 text-xs text-red-400">{{ getOtherError(entity.type, entity.entityTypeOtherValue) }}</p>
+            }
+        </div>
+        }
     </div>
 
     <div>
@@ -57,6 +69,7 @@
             </select>
             }
         </div>
+
         <div>
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Relationship</label>
             @if (isMainEntity) {
@@ -70,6 +83,7 @@
             }
         </div>
         }
+
         <div>
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Source</label>
             <select [(ngModel)]="entity.source" [name]="'entitySource-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
@@ -78,10 +92,23 @@
                 }
             </select>
         </div>
+
         <div>
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Confidence</label>
             <input type="number" min="0" max="1" step="0.05" [(ngModel)]="entity.confidence" [name]="'entityConfidence-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40" />
         </div>
+
+        @if (entity.source === 'other') {
+        <div class="md:col-span-2">
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
+                Other Source <span class="text-red-500">*</span>
+            </label>
+            <input type="text" [(ngModel)]="entity.entitySourceOtherValue" [name]="'entitySourceOtherValue-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Specify other source" />
+            @if (getOtherError(entity.source, entity.entitySourceOtherValue)) {
+            <p class="case-form-error mt-1 text-xs text-red-400">{{ getOtherError(entity.source, entity.entitySourceOtherValue) }}</p>
+            }
+        </div>
+        }
     </div>
 
     <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)] [body.light-theme_&]:![background:color-mix(in_srgb,var(--color-blue-820-light)_72%,white_28%)] p-4">
@@ -111,6 +138,7 @@
                 <p class="mt-1 text-xs text-[var(--color-text4)]">None added</p>
                 }
             </div>
+
             <div class="flex items-center gap-2">
                 <button type="button" (click)="onSave()" [disabled]="!hasSocialProfilesChanged()" [class.hidden]="!hasSocialProfilesChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30">
                     <i class="bi bi-check-lg"></i> Save
@@ -120,6 +148,7 @@
                 </button>
             </div>
         </div>
+
         @for (profile of entity.socialProfiles; track $index; let i = $index) {
         <div class="mb-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] p-3 last:mb-0">
             <div class="mb-2 flex items-center justify-between gap-3">
@@ -128,6 +157,7 @@
                     <i class="bi bi-x-lg"></i> Remove
                 </button>
             </div>
+
             <div class="grid gap-2 md:grid-cols-2">
                 <select [(ngModel)]="profile.platform" [name]="'platform-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
                     <option value="">Select Platform</option>
@@ -135,10 +165,18 @@
                     <option [value]="platform.value">{{ platform.label }}</option>
                     }
                 </select>
+
                 <input type="text" [(ngModel)]="profile.username" [name]="'username-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Username / handle" />
+
+                @if (profile.platform === 'other') {
+                <input type="text" [(ngModel)]="profile.platformOtherValue" [name]="'platformOtherValue-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 md:col-span-2" placeholder="Specify other platform" />
+                }
+
                 <input type="text" [(ngModel)]="profile.displayName" [name]="'profileDisplayName-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 md:col-span-2" placeholder="Display name" />
+
                 <input type="url" [(ngModel)]="profile.profileUrl" [name]="'profileUrl-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 md:col-span-2" placeholder="Profile URL" />
             </div>
+
             @if (getSocialMediaError(profile)) {
             <p class="case-form-error mt-2 text-xs text-red-400">{{ getSocialMediaError(profile) }}</p>
             }
@@ -159,6 +197,7 @@
                 <p class="mt-1 text-xs text-[var(--color-text4)]">None added</p>
                 }
             </div>
+
             <div class="flex items-center gap-2">
                 <button type="button" (click)="onSave()" [disabled]="!hasIdentifiersChanged()" [class.hidden]="!hasIdentifiersChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30">
                     <i class="bi bi-check-lg"></i> Save
@@ -168,6 +207,7 @@
                 </button>
             </div>
         </div>
+
         @for (identifier of entity.identifiers; track $index; let i = $index) {
         <div class="mb-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] p-3 last:mb-0">
             <div class="mb-2 flex items-center justify-between gap-3">
@@ -176,6 +216,7 @@
                     <i class="bi bi-x-lg"></i> Remove
                 </button>
             </div>
+
             <div class="grid gap-2 md:grid-cols-2">
                 <select [(ngModel)]="identifier.type" [name]="'idType-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
                     <option value="">Select Type</option>
@@ -183,8 +224,15 @@
                     <option [value]="type.value">{{ type.label }}</option>
                     }
                 </select>
+
                 <input type="text" [(ngModel)]="identifier.value" [name]="'idValue-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Value" />
+
+                @if (identifier.type === 'other') {
+                <input type="text" [(ngModel)]="identifier.identifierTypeOtherValue" [name]="'identifierTypeOtherValue-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 md:col-span-2" placeholder="Specify other identifier type" />
+                }
+
                 <input type="text" [(ngModel)]="identifier.issuer" [name]="'idIssuer-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 md:col-span-2" placeholder="Issuer" />
+
                 <label class="flex h-[38px] cursor-pointer items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 md:col-span-2">
                     <span class="text-xs font-medium text-[var(--color-text2)]">Verified</span>
                     <span class="relative inline-flex items-center">
@@ -195,6 +243,7 @@
                     </span>
                 </label>
             </div>
+
             @if (getIdentifierError(identifier)) {
             <p class="case-form-error mt-2 text-xs text-red-400">{{ getIdentifierError(identifier) }}</p>
             }

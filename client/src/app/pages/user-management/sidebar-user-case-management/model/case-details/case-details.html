@@ -100,7 +100,7 @@
             <div class="min-w-0">
                 <h1 class="ui-page-title">{{ caseData.title || 'Case ' + caseData.caseId }}</h1>
                 <p class="ui-page-description">
-                    {{ caseData.caseId }} · {{ formatLabel(caseData.caseType) }}
+                    {{ caseData.caseId }} · {{ getDisplayLabel(caseData.caseType, caseData.caseTypeOtherValue) }}
                 </p>
             </div>
 
@@ -131,7 +131,8 @@
         <div class="my-5 hidden h-px w-full bg-[var(--color-divider)] md:block"></div>
 
         @if (pendingShareAction) {
-        <app-confirmation-popup [message]="getShareConfirmationMessage()" (confirmed)="handleShareConfirmation($event)"></app-confirmation-popup>
+        <app-confirmation-popup [message]="getShareConfirmationMessage()"
+            (confirmed)="handleShareConfirmation($event)"></app-confirmation-popup>
         }
 
         <div class="space-y-5">
@@ -144,18 +145,18 @@
                     </div>
                     @if (isEditing && editedCase) {
                     <div class="flex items-center gap-2">
-                    <button type="button" (click)="saveChanges()" [disabled]="!hasClosureChanged()" [class.hidden]="!hasClosureChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30" data-testid="case-closure-save">
-                        <i class="bi bi-check-lg"></i> Save
-                    </button>
-                    @if (editedCase.closure) {
-                    <button type="button" (click)="removeClosure()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" data-testid="case-closure-remove">
-                        <i class="bi bi-x-lg"></i> Remove
-                    </button>
-                    } @else {
-                    <button type="button" (click)="addClosure()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200" data-testid="case-closure-add">
-                        <i class="bi bi-plus-lg"></i> Add
-                    </button>
-                    }
+                        <button type="button" (click)="saveChanges()" [disabled]="!hasClosureChanged()" [class.hidden]="!hasClosureChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30" data-testid="case-closure-save">
+                            <i class="bi bi-check-lg"></i> Save
+                        </button>
+                        @if (editedCase.closure) {
+                        <button type="button" (click)="removeClosure()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" data-testid="case-closure-remove">
+                            <i class="bi bi-x-lg"></i> Remove
+                        </button>
+                        } @else {
+                        <button type="button" (click)="addClosure()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200" data-testid="case-closure-add">
+                            <i class="bi bi-plus-lg"></i> Add
+                        </button>
+                        }
                     </div>
                     }
                 </div>
@@ -171,6 +172,9 @@
                                 <option [value]="reason.value">{{ reason.label }}</option>
                                 }
                             </select>
+                            @if (closure.reason === 'other') {
+                            <input type="text" [(ngModel)]="closure.closureReasonOtherValue" name="closureReasonOtherValue" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" placeholder="Specify other closure reason" />
+                            }
                         </div>
                         <div class="flex items-end">
                             <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-xs text-[var(--color-text4)]">
@@ -196,20 +200,23 @@
                     <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
                         <div class="min-w-0 p-4">
                             <div>
-                                <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Closure Reason</div>
+                                <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Closure Reason</div>
                                 <div class="text-sm font-medium leading-6 text-[var(--color-text2)] break-words" data-testid="case-closure-reason-value">
-                                    {{ formatLabel(closure.reason) }}
+                                    {{ getDisplayLabel(closure.reason, closure.closureReasonOtherValue) }}
                                 </div>
                             </div>
                             <div class="mt-3">
-                                <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Closure Summary</div>
+                                <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Closure Summary</div>
                                 <div class="text-sm leading-6 text-[var(--color-text2)] break-words" data-testid="case-closure-summary-value">
                                     {{ closure.summary || 'No closure summary provided.' }}
                                 </div>
                             </div>
                             @if (closure.resolution) {
                             <div class="mt-3">
-                                <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Resolution Notes</div>
+                                <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Resolution Notes</div>
                                 <div class="text-sm leading-6 text-[var(--color-text2)] break-words" data-testid="case-closure-resolution-value">
                                     {{ closure.resolution }}
                                 </div>
@@ -219,12 +226,16 @@
                         <div class="border-t border-emerald-400/15 p-4 lg:border-l lg:border-t-0">
                             <div class="grid grid-cols-1 gap-x-5 gap-y-4 xl:grid-cols-2">
                                 <div>
-                                    <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Closed By</div>
-                                    <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all" data-testid="case-closure-closed-by-value">{{ getAnalystLabel(closure.closedBy) }}</div>
+                                    <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                        Closed By</div>
+                                    <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all" data-testid="case-closure-closed-by-value">{{ getAnalystLabel(closure.closedBy)
+                                        }}</div>
                                 </div>
                                 <div>
-                                    <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Closed At</div>
-                                    <div class="mt-1 text-xs font-medium text-[var(--color-text1)]" data-testid="case-closure-closed-at-value">{{ getFormattedDateTime(closure.closedAt) }}</div>
+                                    <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                        Closed At</div>
+                                    <div class="mt-1 text-xs font-medium text-[var(--color-text1)]" data-testid="case-closure-closed-at-value">{{
+                                        getFormattedDateTime(closure.closedAt) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -243,7 +254,9 @@
                         <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Case Details</h2>
                         @if (!isEditing) {
                         <div class="mt-1 text-xs font-medium text-[var(--color-text4)]">
-                            {{ caseData.caseId }} · {{ formatLabel(caseData.caseType) }} · {{ formatLabel(caseData.intakeSource) }}
+                            {{ caseData.caseId }} · {{ getDisplayLabel(caseData.caseType, caseData.caseTypeOtherValue)
+                            }} · {{
+                            getDisplayLabel(caseData.intakeSource, caseData.intakeSourceOtherValue) }}
                         </div>
                         }
                     </div>
@@ -253,21 +266,24 @@
                             <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">Status</div>
                             <div class="mt-1 flex items-center gap-1.5 truncate text-xs font-semibold text-[var(--color-text1)]">
                                 <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-current"></span>
-                                <span class="truncate" data-testid="case-details-status-value">{{ formatLabel(caseData.status) }}</span>
+                                <span class="truncate" data-testid="case-details-status-value">{{
+                                    formatLabel(caseData.status) }}</span>
                             </div>
                         </div>
                         <div class="min-w-0 border-r border-[var(--tenant-line)] px-3 py-2" [ngClass]="{ 'bg-red-500/10 text-red-300': caseData.severity === 'critical', 'bg-orange-500/10 text-orange-300': caseData.severity === 'high', 'bg-yellow-500/10 text-yellow-300': caseData.severity === 'medium', 'bg-green-500/10 text-green-300': caseData.severity !== 'critical' && caseData.severity !== 'high' && caseData.severity !== 'medium' }">
                             <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">Severity</div>
                             <div class="mt-1 flex items-center gap-1.5 truncate text-xs font-semibold capitalize text-[var(--color-text1)]">
                                 <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-current"></span>
-                                <span class="truncate" data-testid="case-details-severity-value">{{ caseData.severity }}</span>
+                                <span class="truncate" data-testid="case-details-severity-value">{{ caseData.severity
+                                    }}</span>
                             </div>
                         </div>
                         <div class="min-w-0 px-3 py-2" [ngClass]="{ 'bg-red-500/10 text-red-300': caseData.priority === 'critical', 'bg-orange-500/10 text-orange-300': caseData.priority === 'high', 'bg-yellow-500/10 text-yellow-300': caseData.priority === 'medium', 'bg-green-500/10 text-green-300': caseData.priority !== 'critical' && caseData.priority !== 'high' && caseData.priority !== 'medium' }">
                             <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">Priority</div>
                             <div class="mt-1 flex items-center gap-1.5 truncate text-xs font-semibold capitalize text-[var(--color-text1)]">
                                 <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-current"></span>
-                                <span class="truncate" data-testid="case-details-priority-value">{{ caseData.priority }}</span>
+                                <span class="truncate" data-testid="case-details-priority-value">{{ caseData.priority
+                                    }}</span>
                             </div>
                         </div>
                     </div>
@@ -299,7 +315,8 @@
                         </div>
 
                         <div class="space-y-2">
-                            <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case Analysts</label>
+                            <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case
+                                Analysts</label>
                             <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-3">
                                 @if (analysts.length > 0) {
                                 <div class="flex flex-wrap gap-2">
@@ -328,21 +345,29 @@
                             </div>
 
                             <div class="space-y-1">
-                                <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case Type</label>
+                                <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case
+                                    Type</label>
                                 <select [(ngModel)]="editedCase!.caseType" name="caseType" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-type-select">
                                     @for (type of caseTypeOptions; track type.value) {
                                     <option [value]="type.value">{{ type.label }}</option>
                                     }
                                 </select>
+                                @if (editedCase!.caseType === 'other') {
+                                <input type="text" [(ngModel)]="editedCase!.caseTypeOtherValue" name="caseTypeOther" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" placeholder="Specify other case type" />
+                                }
                             </div>
 
                             <div class="space-y-1">
-                                <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Intake Source</label>
+                                <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Intake
+                                    Source</label>
                                 <select [(ngModel)]="editedCase!.intakeSource" name="intakeSource" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-intake-source-select">
                                     @for (source of intakeSourceOptions; track source.value) {
                                     <option [value]="source.value">{{ source.label }}</option>
                                     }
                                 </select>
+                                @if (editedCase!.intakeSource === 'other') {
+                                <input type="text" [(ngModel)]="editedCase!.intakeSourceOtherValue" name="intakeSourceOther" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" placeholder="Specify other intake source" />
+                                }
                             </div>
 
                             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -370,14 +395,18 @@
                 } @else {
                 <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
                     <div class="min-w-0 p-4">
-                        <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case Title</div>
+                        <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Case Title</div>
                         <div class="text-[18px] font-semibold leading-snug text-[var(--color-text1)] break-words" data-testid="case-details-title-value">
                             {{ caseData.title }}
                         </div>
                         <span class="sr-only" data-testid="case-details-case-id-value">{{ caseData.caseId }}</span>
-                        <span class="sr-only" data-testid="case-details-type-value">{{ formatLabel(caseData.caseType) }}</span>
-                        <span class="sr-only" data-testid="case-details-intake-source-value">{{ formatLabel(caseData.intakeSource) }}</span>
-                        <div class="mt-4 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</div>
+                        <span class="sr-only" data-testid="case-details-type-value">{{
+                            getDisplayLabel(caseData.caseType, caseData.caseTypeOtherValue) }}</span>
+                        <span class="sr-only" data-testid="case-details-intake-source-value">{{
+                            getDisplayLabel(caseData.intakeSource, caseData.intakeSourceOtherValue) }}</span>
+                        <div class="mt-4 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Description</div>
                         <div class="mt-3 min-h-[44px] text-sm leading-6 text-[var(--color-text3)] break-words" data-testid="case-details-description-value">
                             {{ caseData.description || 'No description found' }}
                         </div>
@@ -392,7 +421,8 @@
                         }
                         @if ((caseData.assignedAnalystIds?.length || 0) > 0) {
                         <div class="mt-4">
-                            <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case Analysts</div>
+                            <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                Case Analysts</div>
                             <div class="flex flex-wrap gap-2">
                                 @for (analyst of getCaseAnalysts(); track analyst.id) {
                                 <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text2)]">
@@ -406,12 +436,16 @@
                     <div class="border-t border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4 lg:border-l lg:border-t-0">
                         <div class="grid grid-cols-1 gap-x-5 gap-y-4 xl:grid-cols-2">
                             <div>
-                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Created</div>
-                                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ getFormattedDateTime(caseData.createdAt) }}</div>
+                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Created</div>
+                                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{
+                                    getFormattedDateTime(caseData.createdAt) }}</div>
                             </div>
                             <div>
-                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Updated</div>
-                                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ getFormattedDateTime(caseData.updatedAt) }}</div>
+                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Updated</div>
+                                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{
+                                    getFormattedDateTime(caseData.updatedAt) }}</div>
                             </div>
                         </div>
                     </div>
@@ -423,18 +457,22 @@
                 @if (isEditing && editablePrimaryEntity) {
                 <div class="flex items-center border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
                     <div class="flex items-center gap-1.5">
-                        <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Primary Entity</h2>
+                        <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Primary Entity
+                        </h2>
                         <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="The main person, organization, asset, account, indicator, or object this case is about." class="h-4 w-4 shrink-0 ui-action-icon">
                     </div>
                 </div>
                 <div class="p-4">
-                    <app-entity-details [entity]="editablePrimaryEntity" [isMainEntity]="true" [showTitle]="false" [showTopDivider]="false" [showRoleRelationshipFields]="false" [entityIndex]="0" (save)="saveChanges()"></app-entity-details>
+                    <app-entity-details [entity]="editablePrimaryEntity" [isMainEntity]="true" [showTitle]="false"
+                        [showTopDivider]="false" [showRoleRelationshipFields]="false" [entityIndex]="0"
+                        (save)="saveChanges()"></app-entity-details>
                 </div>
                 } @else if (getPrimaryEntity(); as primaryEntity) {
                 <div class="flex flex-col gap-1 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <div class="flex items-center gap-1.5">
-                            <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Primary Entity</h2>
+                            <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Primary Entity
+                            </h2>
                             <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="The main person, organization, asset, account, indicator, or object this case is about." class="h-4 w-4 shrink-0 ui-action-icon">
                         </div>
                         <span class="w-fit rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text2)]">
@@ -448,9 +486,11 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
                     <div class="min-w-0 p-4">
-                        <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Value</div>
+                        <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Value
+                        </div>
                         <div class="mt-1 text-[18px] font-semibold leading-snug text-[var(--color-text1)] break-all" data-testid="case-primary-entity-value">{{ primaryEntity.value }}</div>
-                        <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</div>
+                        <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Description</div>
                         <div class="mt-2 text-sm leading-6 text-[var(--color-text3)] break-words" data-testid="case-primary-entity-description">
                             {{ primaryEntity.entityDescription || primaryEntity.value }}
                         </div>
@@ -467,47 +507,65 @@
                     <div class="border-t border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4 lg:border-l lg:border-t-0">
                         <div class="grid grid-cols-2 gap-x-5 gap-y-4">
                             <div>
-                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Type</div>
-                                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(primaryEntity.type) }}</div>
+                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Type</div>
+                                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{
+                                    formatLabel(primaryEntity.type) }}</div>
                             </div>
                             <div>
-                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Role</div>
-                                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(primaryEntity.role) }}</div>
+                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Role</div>
+                                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{
+                                    formatLabel(primaryEntity.role) }}</div>
                             </div>
                             <div>
-                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Confidence</div>
-                                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ (primaryEntity.confidence || 0) * 100 | number:'1.0-0' }}%</div>
+                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Confidence</div>
+                                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{
+                                    (primaryEntity.confidence || 0) * 100 | number:'1.0-0' }}%</div>
                             </div>
                             <div>
-                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Relationship</div>
-                                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(primaryEntity.relationshipToCase) }}</div>
+                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Relationship</div>
+                                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{
+                                    formatLabel(primaryEntity.relationshipToCase) }}</div>
                             </div>
                             <div>
-                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Source</div>
-                                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(primaryEntity.source) }}</div>
+                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Source</div>
+                                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{
+                                    formatLabel(primaryEntity.source) }}</div>
                             </div>
                             @if (primaryEntity.createdBy) {
                             <div>
-                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Created By</div>
-                                <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all">{{ primaryEntity.createdBy }}</div>
+                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Created By</div>
+                                <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all">{{
+                                    primaryEntity.createdBy }}</div>
                             </div>
                             }
                             @if (primaryEntity.updatedBy) {
                             <div>
-                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Updated By</div>
-                                <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all">{{ primaryEntity.updatedBy }}</div>
+                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Updated By</div>
+                                <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all">{{
+                                    primaryEntity.updatedBy }}</div>
                             </div>
                             }
                             @if (primaryEntity.createdAt) {
                             <div>
-                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Created At</div>
-                                <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{ getFormattedDateTime(primaryEntity.createdAt) }}</div>
+                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Created At</div>
+                                <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{
+                                    getFormattedDateTime(primaryEntity.createdAt) }}</div>
                             </div>
                             }
                             @if (primaryEntity.updatedAt) {
                             <div>
-                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Updated At</div>
-                                <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{ getFormattedDateTime(primaryEntity.updatedAt) }}</div>
+                                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                    Updated At</div>
+                                <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{
+                                    getFormattedDateTime(primaryEntity.updatedAt) }}</div>
                             </div>
                             }
                         </div>
@@ -516,7 +574,8 @@
 
                 @if ((primaryEntity.socialProfiles?.length || 0) > 0) {
                 <div class="px-4 py-3">
-                    <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Social Profiles</div>
+                    <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Social
+                        Profiles</div>
                     <div class="flex flex-wrap gap-2">
                         @for (profile of primaryEntity.socialProfiles; track $index) {
                         <div class="max-w-full rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs break-words">
@@ -536,7 +595,8 @@
 
                 @if ((primaryEntity.identifiers?.length || 0) > 0) {
                 <div class="px-4 py-3">
-                    <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Identifiers</div>
+                    <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                        Identifiers</div>
                     <div class="flex flex-wrap gap-2">
                         @for (identifier of primaryEntity.identifiers; track $index) {
                         <div class="max-w-full rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs break-words">
@@ -562,7 +622,8 @@
             <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
                 <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
                     <div class="flex items-center gap-1.5">
-                        <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Related Entities</h2>
+                        <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Related Entities
+                        </h2>
                         <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Other entities connected to the case, such as affected assets, accounts, indicators, sources, or linked actors." class="h-4 w-4 shrink-0 ui-action-icon">
                     </div>
                     <div class="flex items-center gap-2">
@@ -578,7 +639,8 @@
                 @if (getRelatedEntities(editedCase).length > 0) {
                 <div class="space-y-4 p-4">
                     @for (entity of getRelatedEntities(editedCase); track entity.entityId; let i = $index) {
-                    <app-entity-details [entity]="entity" [entityIndex]="i" (remove)="removeRelatedEntity(i)" (save)="saveChanges()"></app-entity-details>
+                    <app-entity-details [entity]="entity" [entityIndex]="i" (remove)="removeRelatedEntity(i)"
+                        (save)="saveChanges()"></app-entity-details>
                     }
                 </div>
                 } @else {
@@ -591,7 +653,8 @@
             <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
                 <div class="flex items-center border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
                     <div class="flex items-center gap-1.5">
-                        <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Related Entities</h2>
+                        <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Related Entities
+                        </h2>
                         <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Other entities connected to the case, such as affected assets, accounts, indicators, sources, or linked actors." class="h-4 w-4 shrink-0 ui-action-icon">
                     </div>
                 </div>
@@ -609,13 +672,17 @@
                                         <i class="bi text-xs text-[var(--color-text4)]" [ngClass]="isRelatedEntityExpanded(entity.entityId) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
                                     </div>
                                     <div class="mt-1 text-xs text-[var(--color-text4)] break-all">
-                                        {{ formatLabel(entity.type) }} · {{ entity.value }}
+                                        {{ getDisplayLabel(entity.type, entity.entityTypeOtherValue) }} · {{
+                                        getDisplayLabel(entity.source, entity.entitySourceOtherValue) }}
                                     </div>
                                 </div>
                                 <div class="flex flex-wrap gap-2 md:justify-end">
-                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{ formatLabel(entity.role) }}</span>
-                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{ formatLabel(entity.relationshipToCase) }}</span>
-                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{ (entity.confidence || 0) * 100 | number:'1.0-0' }}%</span>
+                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
+                                        formatLabel(entity.role) }}</span>
+                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
+                                        formatLabel(entity.relationshipToCase) }}</span>
+                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
+                                        (entity.confidence || 0) * 100 | number:'1.0-0' }}%</span>
                                 </div>
                             </div>
                         </button>
@@ -626,10 +693,12 @@
                                 <div class="min-w-0 space-y-4">
                                     @if ((entity.tags?.length || 0) > 0) {
                                     <div>
-                                        <div class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Tags</div>
+                                        <div class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                            Tags</div>
                                         <div class="flex flex-wrap gap-2">
                                             @for (tag of entity.tags; track tag) {
-                                            <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{ formatLabel(tag) }}</span>
+                                            <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
+                                                formatLabel(tag) }}</span>
                                             }
                                         </div>
                                     </div>
@@ -637,14 +706,17 @@
 
                                     @if ((entity.socialProfiles?.length || 0) > 0) {
                                     <div>
-                                        <div class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Social Profiles</div>
+                                        <div class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                            Social Profiles</div>
                                         <div class="space-y-2">
                                             @for (profile of entity.socialProfiles; track $index) {
                                             <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-xs text-[var(--color-text2)]">
-                                                <span class="font-semibold text-sky-300">{{ formatLabel(profile.platform) }}</span>
+                                                <span class="font-semibold text-sky-300">{{
+                                                    formatLabel(profile.platform) }}</span>
                                                 <span class="ml-1">{{ profile.username }}</span>
                                                 @if (profile.displayName) {
-                                                <span class="ml-1 text-[var(--color-text4)]">({{ profile.displayName }})</span>
+                                                <span class="ml-1 text-[var(--color-text4)]">({{ profile.displayName
+                                                    }})</span>
                                                 }
                                                 @if (profile.profileUrl) {
                                                 <a [href]="profile.profileUrl" target="_blank" rel="noopener" class="ml-2 text-sky-300 hover:text-sky-200">Open</a>
@@ -657,14 +729,17 @@
 
                                     @if ((entity.identifiers?.length || 0) > 0) {
                                     <div>
-                                        <div class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Identifiers</div>
+                                        <div class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                            Identifiers</div>
                                         <div class="space-y-2">
                                             @for (identifier of entity.identifiers; track $index) {
                                             <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-xs text-[var(--color-text2)]">
-                                                <span class="font-semibold text-green-300">{{ formatLabel(identifier.type) }}</span>
+                                                <span class="font-semibold text-green-300">{{
+                                                    formatLabel(identifier.type) }}</span>
                                                 <span class="ml-1 break-all">{{ identifier.value }}</span>
                                                 @if (identifier.issuer) {
-                                                <span class="ml-1 text-[var(--color-text4)]">Issuer: {{ identifier.issuer }}</span>
+                                                <span class="ml-1 text-[var(--color-text4)]">Issuer: {{
+                                                    identifier.issuer }}</span>
                                                 }
                                                 @if (identifier.verified) {
                                                 <span class="ml-1 text-green-300">Verified</span>
@@ -678,40 +753,53 @@
 
                                 <div class="grid grid-cols-2 gap-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
                                     <div>
-                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Type</div>
-                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{ formatLabel(entity.type) }}</div>
+                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                            Type</div>
+                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{
+                                            formatLabel(entity.type) }}</div>
                                     </div>
                                     <div>
-                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Source</div>
-                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{ formatLabel(entity.source) }}</div>
+                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                            Source</div>
+                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{
+                                            formatLabel(entity.source) }}</div>
                                     </div>
                                     @if (entity.createdBy) {
                                     <div class="col-span-2">
-                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Created By</div>
-                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all">{{ entity.createdBy }}</div>
+                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                            Created By</div>
+                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all">{{
+                                            entity.createdBy }}</div>
                                     </div>
                                     }
                                     @if (entity.updatedBy) {
                                     <div class="col-span-2">
-                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Updated By</div>
-                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all">{{ entity.updatedBy }}</div>
+                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                            Updated By</div>
+                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all">{{
+                                            entity.updatedBy }}</div>
                                     </div>
                                     }
                                     @if (entity.createdAt) {
                                     <div>
-                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Created</div>
-                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{ getFormattedDateTime(entity.createdAt) }}</div>
+                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                            Created</div>
+                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{
+                                            getFormattedDateTime(entity.createdAt) }}</div>
                                     </div>
                                     }
                                     @if (entity.updatedAt) {
                                     <div>
-                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Updated</div>
-                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{ getFormattedDateTime(entity.updatedAt) }}</div>
+                                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                            Updated</div>
+                                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{
+                                            getFormattedDateTime(entity.updatedAt) }}</div>
                                     </div>
                                     }
                                 </div>
                             </div>
-                            @if ((entity.tags?.length || 0) === 0 && (entity.socialProfiles?.length || 0) === 0 && (entity.identifiers?.length || 0) === 0) {
+                            @if ((entity.tags?.length || 0) === 0 && (entity.socialProfiles?.length || 0) === 0 &&
+                            (entity.identifiers?.length || 0) === 0) {
                             <div class="mt-4 text-xs text-[var(--color-text4)]">No additional entity details.</div>
                             }
                         </div>
@@ -746,7 +834,8 @@
                         @for (artifact of editedCase.artifacts; track artifact.artifactId; let i = $index) {
                         <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
                             <div class="mb-3 flex items-center justify-between gap-3">
-                                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Artifact {{ i + 1 }}</span>
+                                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Artifact
+                                    {{ i + 1 }}</span>
                                 <button type="button" (click)="removeArtifact(i)" aria-label="Remove artifact" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" [attr.data-testid]="'case-artifact-remove-' + i">
                                     <i class="bi bi-x-lg"></i> Remove
                                 </button>
@@ -763,6 +852,9 @@
                                         <option [value]="type.value">{{ type.label }}</option>
                                         }
                                     </select>
+                                    @if (artifact.type === 'other') {
+                                    <input type="text" [(ngModel)]="artifact.artifactTypeOtherValue" [name]="'artifact-type-other-' + i" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" placeholder="Specify other artifact type" />
+                                    }
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Source</label>
@@ -771,6 +863,9 @@
                                         <option [value]="source.value">{{ source.label }}</option>
                                         }
                                     </select>
+                                    @if (artifact.source === 'other') {
+                                    <input type="text" [(ngModel)]="artifact.artifactSourceOtherValue" [name]="'artifact-source-other-' + i" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" placeholder="Specify other artifact source" />
+                                    }
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Captured</label>
@@ -785,7 +880,8 @@
                                     <input [(ngModel)]="artifact.url" [name]="'artifact-url-' + i" type="url" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-url-input-' + i" />
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">File Name</label>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">File
+                                        Name</label>
                                     <input [(ngModel)]="artifact.fileName" [name]="'artifact-file-' + i" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-file-input-' + i" />
                                 </div>
                             </div>
@@ -800,13 +896,18 @@
                         <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3" [attr.data-testid]="'case-artifact-card-' + $index">
                             <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                 <div class="min-w-0">
-                                    <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Artifact Title</div>
-                                    <div class="text-sm font-semibold text-[var(--color-text1)] break-words" [attr.data-testid]="'case-artifact-title-value-' + $index">{{ artifact.title }}</div>
-                                    <div class="mt-1 text-xs text-[var(--color-text4)]">{{ formatLabel(artifact.type) }} · {{ formatLabel(artifact.source) }}</div>
+                                    <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                        Artifact Title</div>
+                                    <div class="text-sm font-semibold text-[var(--color-text1)] break-words" [attr.data-testid]="'case-artifact-title-value-' + $index">{{ artifact.title }}
+                                    </div>
+                                    <div class="mt-1 text-xs text-[var(--color-text4)]">{{
+                                        getDisplayLabel(artifact.type, artifact.artifactTypeOtherValue) }} · {{
+                                        getDisplayLabel(artifact.source, artifact.artifactSourceOtherValue) }}</div>
                                 </div>
                                 <div class="flex flex-wrap gap-2 sm:justify-end">
                                     @if (artifact.capturedAt) {
-                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{ getFormattedDateTime(artifact.capturedAt) }}</span>
+                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
+                                        getFormattedDateTime(artifact.capturedAt) }}</span>
                                     }
                                     @if (artifact.url) {
                                     <a [href]="artifact.url" target="_blank" rel="noopener" class="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-xs text-sky-300 hover:text-sky-200">Open</a>
@@ -815,8 +916,10 @@
                             </div>
                             @if (artifact.description || artifact.fileName) {
                             <div class="mt-3 grid gap-2 text-xs text-[var(--color-text2)] sm:grid-cols-2">
-                                @if (artifact.description) { <div class="sm:col-span-2"><span class="text-[var(--color-text4)]">Description:</span> {{ artifact.description }}</div> }
-                                @if (artifact.fileName) { <div><span class="text-[var(--color-text4)]">File:</span> {{ artifact.fileName }}</div> }
+                                @if (artifact.description) { <div class="sm:col-span-2"><span class="text-[var(--color-text4)]">Description:</span> {{ artifact.description }}
+                                </div> }
+                                @if (artifact.fileName) { <div><span class="text-[var(--color-text4)]">File:</span> {{
+                                    artifact.fileName }}</div> }
                             </div>
                             }
                         </div>
@@ -850,7 +953,8 @@
                         @for (task of editedCase.tasks; track task.taskId; let i = $index) {
                         <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
                             <div class="mb-3 flex items-center justify-between gap-3">
-                                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Task {{ i + 1 }}</span>
+                                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Task
+                                    {{ i + 1 }}</span>
                                 <button type="button" (click)="removeTask(i)" aria-label="Remove task" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" [attr.data-testid]="'case-task-remove-' + i">
                                     <i class="bi bi-x-lg"></i> Remove
                                 </button>
@@ -877,16 +981,19 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Assign To</label>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Assign
+                                        To</label>
                                     <select [(ngModel)]="task.assignedTo" [name]="'task-assignee-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-assignee-select-' + i">
                                         <option value="">Unassigned</option>
                                         @for (analyst of getCaseAnalysts(editedCase); track analyst.id) {
-                                        <option [value]="analyst.id">{{ analyst.username || analyst.email || analyst.id }}</option>
+                                        <option [value]="analyst.id">{{ analyst.username || analyst.email || analyst.id
+                                            }}</option>
                                         }
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Due Date</label>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Due
+                                        Date</label>
                                     <input [ngModel]="getDateInputValue(task.dueAt)" (ngModelChange)="setDateInputValue(task, 'dueAt', $event)" [name]="'task-due-' + i" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-due-input-' + i" />
                                 </div>
                                 <div class="md:col-span-2">
@@ -905,22 +1012,30 @@
                         <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3" [attr.data-testid]="'case-task-card-' + $index">
                             <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                 <div class="min-w-0">
-                                    <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Task Title</div>
+                                    <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                        Task Title</div>
                                     <div class="text-sm font-semibold text-[var(--color-text1)] break-words" [attr.data-testid]="'case-task-title-value-' + $index">{{ task.title }}</div>
                                     @if (task.description) {
-                                    <div class="mt-2 text-xs text-[var(--color-text4)] break-words"><span class="font-semibold uppercase tracking-wide">Description:</span> {{ task.description }}</div>
+                                    <div class="mt-2 text-xs text-[var(--color-text4)] break-words"><span class="font-semibold uppercase tracking-wide">Description:</span> {{
+                                        task.description }}</div>
                                     }
                                 </div>
                                 <div class="flex flex-wrap gap-2 sm:justify-end">
-                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{ formatLabel(task.status) }}</span>
-                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{ formatLabel(task.priority) }}</span>
+                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
+                                        formatLabel(task.status) }}</span>
+                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
+                                        formatLabel(task.priority) }}</span>
                                 </div>
                             </div>
                             <div class="mt-3 grid gap-2 text-xs text-[var(--color-text2)] sm:grid-cols-2">
-                                <div><span class="text-[var(--color-text4)]">Assigned:</span> {{ getAnalystLabel(task.assignedTo) }}</div>
-                                <div><span class="text-[var(--color-text4)]">Due:</span> {{ getFormattedDateTime(task.dueAt) }}</div>
-                                @if (task.createdAt) { <div><span class="text-[var(--color-text4)]">Created:</span> {{ getFormattedDateTime(task.createdAt) }}</div> }
-                                @if (task.updatedAt) { <div><span class="text-[var(--color-text4)]">Updated:</span> {{ getFormattedDateTime(task.updatedAt) }}</div> }
+                                <div><span class="text-[var(--color-text4)]">Assigned:</span> {{
+                                    getAnalystLabel(task.assignedTo) }}</div>
+                                <div><span class="text-[var(--color-text4)]">Due:</span> {{
+                                    getFormattedDateTime(task.dueAt) }}</div>
+                                @if (task.createdAt) { <div><span class="text-[var(--color-text4)]">Created:</span> {{
+                                    getFormattedDateTime(task.createdAt) }}</div> }
+                                @if (task.updatedAt) { <div><span class="text-[var(--color-text4)]">Updated:</span> {{
+                                    getFormattedDateTime(task.updatedAt) }}</div> }
                             </div>
                         </div>
                         } @empty {
@@ -954,7 +1069,8 @@
                     @for (linkedCase of editedCase.linkedCases; track $index; let i = $index) {
                     <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
                         <div class="mb-3 flex items-center justify-between gap-3">
-                            <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Link {{ i + 1 }}</span>
+                            <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Link
+                                {{ i + 1 }}</span>
                             <button type="button" (click)="removeLinkedCase(i)" aria-label="Remove linked case" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" [attr.data-testid]="'case-linked-case-remove-' + i">
                                 <i class="bi bi-x-lg"></i> Remove
                             </button>
@@ -965,7 +1081,8 @@
                                 <select [(ngModel)]="linkedCase.targetCaseId" [name]="'linked-case-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-linked-case-select-' + i">
                                     <option value="">Select case</option>
                                     @for (candidateCase of getLinkableCases(editedCase); track candidateCase.caseId) {
-                                    <option [value]="candidateCase.caseId">{{ candidateCase.caseId }} · {{ candidateCase.title }}</option>
+                                    <option [value]="candidateCase.caseId">{{ candidateCase.caseId }} · {{
+                                        candidateCase.title }}</option>
                                     }
                                 </select>
                             </div>
@@ -993,7 +1110,8 @@
                 <div class="space-y-3 p-4">
                     @for (linkedCase of caseData.linkedCases; track linkedCase.targetCaseId) {
                     <button type="button" (click)="goToLinkedCase(linkedCase.targetCaseId)" class="w-full rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3 text-left transition hover:bg-[var(--tenant-chip-hover)]" [attr.data-testid]="'case-linked-case-card-' + $index">
-                        <div class="text-sm font-semibold text-[var(--color-text1)]" [attr.data-testid]="'case-linked-case-target-value-' + $index">{{ linkedCase.targetCaseId }}</div>
+                        <div class="text-sm font-semibold text-[var(--color-text1)]" [attr.data-testid]="'case-linked-case-target-value-' + $index">{{ linkedCase.targetCaseId }}
+                        </div>
                         <div class="mt-1 text-xs text-[var(--color-text4)]">
                             {{ formatLabel(linkedCase.relationship) }} · {{ linkedCase.reason }}
                         </div>
@@ -1006,7 +1124,10 @@
             </div>
 
             @if (!isEditing) {
-            <app-report-feedback-comments [docId]="caseData.caseId" [feedback]="getCaseCommentsFeedback()" [isSaving]="isCommentSaving" [errorMessage]="commentErrorMessage" [flushSpacing]="true" (saveComment)="saveCaseComment($event)" (userSelected)="openUserSidebar($event)"></app-report-feedback-comments>
+            <app-report-feedback-comments [docId]="caseData.caseId" [feedback]="getCaseCommentsFeedback()"
+                [isSaving]="isCommentSaving" [errorMessage]="commentErrorMessage" [flushSpacing]="true"
+                (saveComment)="saveCaseComment($event)"
+                (userSelected)="openUserSidebar($event)"></app-report-feedback-comments>
             <app-report-user-sidebar></app-report-user-sidebar>
             }
         </div>

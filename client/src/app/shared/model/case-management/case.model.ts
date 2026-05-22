@@ -168,6 +168,7 @@ export interface SocialMediaProfile {
     username: string;
     profileUrl?: string;
     displayName?: string;
+    platformOtherValue?: string;
 }
 
 export interface AdditionalIdentifier {
@@ -175,12 +176,15 @@ export interface AdditionalIdentifier {
     value: string;
     issuer?: string;
     verified?: boolean;
+    identifierTypeOtherValue?: string;
 }
 
 export interface CaseEntity {
     entityId: string;
     type: EntityType;
     value: string;
+    entityTypeOtherValue?: string;
+    entitySourceOtherValue?: string;
     entityDescription?: string;
     role: EntityRole;
     relationshipToCase: EntityRelationship;
@@ -199,6 +203,8 @@ export interface CaseEntityRequest {
     entityId: string;
     type: EntityType;
     value: string;
+    entityTypeOtherValue?: string;
+    entitySourceOtherValue?: string;
     entityDescription?: string;
     role: EntityRole;
     relationshipToCase: EntityRelationship;
@@ -247,6 +253,8 @@ export interface CaseArtifact {
     title: string;
     description?: string;
     source: SourceType;
+    artifactTypeOtherValue?: string;
+    artifactSourceOtherValue?: string;
     url?: string;
     fileName?: string;
     fileType?: string;
@@ -263,6 +271,8 @@ export interface CaseArtifactRequest {
     title: string;
     description?: string;
     source: SourceType;
+    artifactTypeOtherValue?: string;
+    artifactSourceOtherValue?: string;
     url?: string;
     fileName?: string;
     fileType?: string;
@@ -325,6 +335,7 @@ export interface CaseAnalyst {
 }
 
 export interface CaseClosure {
+    closureReasonOtherValue?: string;
     reason: ClosureReason;
     summary?: string;
     resolution?: string;
@@ -333,6 +344,7 @@ export interface CaseClosure {
 }
 
 export interface CaseClosureRequest {
+    closureReasonOtherValue?: string;
     reason: ClosureReason;
     summary?: string;
     resolution?: string;
@@ -340,6 +352,8 @@ export interface CaseClosureRequest {
 
 export interface CaseRequest {
     caseId: string;
+    caseTypeOtherValue?: string;
+    intakeSourceOtherValue?: string;
     title: string;
     description: string;
     caseType: CaseType;
@@ -360,6 +374,8 @@ export interface CaseRequest {
 
 export interface CaseUpdateRequest {
     title: string;
+    caseTypeOtherValue?: string;
+    intakeSourceOtherValue?: string;
     description: string;
     caseType: CaseType;
     status: CaseStatus;
@@ -388,6 +404,8 @@ export interface CaseShareResponse {
 }
 
 export interface SharedCaseArtifact {
+    artifactTypeOtherValue?: string;
+    artifactSourceOtherValue?: string;
     artifactId: string;
     type: string;
     title: string;
@@ -401,6 +419,7 @@ export interface SharedCaseArtifact {
 }
 
 export interface SharedSocialProfile {
+    platformOtherValue?: string;
     platform: string;
     username: string;
     profileUrl?: string;
@@ -408,6 +427,7 @@ export interface SharedSocialProfile {
 }
 
 export interface SharedIdentifier {
+    identifierTypeOtherValue?: string;
     type: string;
     value: string;
     issuer?: string;
@@ -415,6 +435,8 @@ export interface SharedIdentifier {
 }
 
 export interface SharedCaseEntity {
+    entityTypeOtherValue?: string;
+    entitySourceOtherValue?: string;
     entityId: string;
     type: string;
     value: string;
@@ -454,6 +476,7 @@ export interface SharedCaseLink {
 }
 
 export interface SharedCaseClosure {
+    closureReasonOtherValue?: string;
     reason: string;
     summary?: string;
     resolution?: string;
@@ -461,6 +484,7 @@ export interface SharedCaseClosure {
 }
 
 export interface SharedCaseReport {
+    otherValue?: string;
     shareId: string;
     caseId: string;
     title: string;
@@ -485,6 +509,8 @@ export interface SharedCaseReport {
 export interface Case {
     id?: string;
     caseId: string;
+    caseTypeOtherValue?: string;
+    intakeSourceOtherValue?: string;
     tenant_uuid?: string;
     title: string;
     description: string;

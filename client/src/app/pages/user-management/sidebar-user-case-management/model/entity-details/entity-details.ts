@@ -35,8 +35,12 @@ export class EntityDetailsComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['entity'] && this.entity) {
-      this.initialSocialProfileCount = this.entity.socialProfiles?.length || 0;
-      this.initialIdentifierCount = this.entity.identifiers?.length || 0;
+      this.entity.identifiers = this.entity.identifiers || [];
+      this.entity.socialProfiles = this.entity.socialProfiles || [];
+      this.entity.tags = this.entity.tags || [];
+
+      this.initialSocialProfileCount = this.entity.socialProfiles.length;
+      this.initialIdentifierCount = this.entity.identifiers.length;
     }
   }
 
@@ -44,16 +48,34 @@ export class EntityDetailsComponent implements OnChanges {
     return `${this.isMainEntity ? 'primary' : 'related'}-${this.entityIndex}`;
   }
 
+  requiresOther(value?: string | null): boolean {
+    return value === 'other';
+  }
+
+  getOtherError(value?: string | null, otherValue?: string | null): string | null {
+    if (this.requiresOther(value) && !otherValue?.trim()) {
+      return 'Other value is required';
+    }
+    return null;
+  }
+
   getIdentifierError(identifier: AdditionalIdentifier): string | null {
-    if (identifier.type && !identifier.value) {
+    if (identifier.type && !identifier.value?.trim()) {
       return 'Value required';
     }
-    if (!identifier.type && identifier.value) {
+
+    if (!identifier.type && identifier.value?.trim()) {
       return 'Type required';
     }
+
+    if (identifier.type === 'other' && !identifier.identifierTypeOtherValue?.trim()) {
+      return 'Other identifier type is required';
+    }
+
     if (identifier.type === 'email' && identifier.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier.value)) {
       return 'Invalid email format';
     }
+
     if (identifier.type === 'url' && identifier.value) {
       try {
         new URL(identifier.value);
@@ -62,16 +84,23 @@ export class EntityDetailsComponent implements OnChanges {
         return 'Invalid URL format';
       }
     }
+
     return null;
   }
 
   getSocialMediaError(profile: SocialMediaProfile): string | null {
-    if (profile.platform && !profile.username) {
+    if (profile.platform && !profile.username?.trim()) {
       return 'Username required';
     }
-    if (!profile.platform && profile.username) {
+
+    if (!profile.platform && profile.username?.trim()) {
       return 'Platform required';
     }
+
+    if (profile.platform === 'other' && !profile.platformOtherValue?.trim()) {
+      return 'Other platform is required';
+    }
+
     if (profile.profileUrl) {
       try {
         new URL(profile.profileUrl);
@@ -80,23 +109,61 @@ export class EntityDetailsComponent implements OnChanges {
         return 'Invalid URL format';
       }
     }
+
     return null;
   }
 
+  getEntityTypeOtherError(): string | null {
+    return this.getOtherError(this.entity?.type, this.entity?.entityTypeOtherValue);
+  }
+
+  getEntitySourceOtherError(): string | null {
+    return this.getOtherError(this.entity?.source, this.entity?.entitySourceOtherValue);
+  }
+
   toggleTag(tag: CaseTag): void {
+    this.entity.tags = this.entity.tags || [];
+
     if (this.entity.tags.includes(tag)) {
       this.entity.tags = this.entity.tags.filter(item => item !== tag);
       return;
     }
+
     this.entity.tags = [...this.entity.tags, tag];
   }
 
   isTagSelected(tag: CaseTag): boolean {
-    return this.entity.tags.includes(tag);
+    return (this.entity.tags || []).includes(tag);
   }
 
   addSocialMedia(): void {
-    this.entity.socialProfiles.push({ platform: '', username: '', profileUrl: '', displayName: '' });
+    this.entity.socialProfiles = this.entity.socialProfiles || [];
+    this.entity.socialProfiles.push({
+      platform: '',
+      username: '',
+      profileUrl: '',
+      displayName: '',
+      platformOtherValue: ''
+    });
+  }
+
+  removeSocialMedia(index: number): void {
+    this.entity.socialProfiles.splice(index, 1);
+  }
+
+  addIdentifier(): void {
+    this.entity.identifiers = this.entity.identifiers || [];
+    this.entity.identifiers.push({
+      type: '',
+      value: '',
+      issuer: '',
+      verified: false,
+      identifierTypeOtherValue: ''
+    });
+  }
+
+  removeIdentifier(index: number): void {
+    this.entity.identifiers.splice(index, 1);
   }
 
   onSave(): void {
@@ -109,18 +176,6 @@ export class EntityDetailsComponent implements OnChanges {
 
   hasIdentifiersChanged(): boolean {
     return (this.entity.identifiers?.length || 0) !== this.initialIdentifierCount;
-  }
-
-  removeSocialMedia(index: number): void {
-    this.entity.socialProfiles.splice(index, 1);
-  }
-
-  addIdentifier(): void {
-    this.entity.identifiers.push({ type: '', value: '', issuer: '', verified: false });
-  }
-
-  removeIdentifier(index: number): void {
-    this.entity.identifiers.splice(index, 1);
   }
 
   onRemove(): void {

@@ -98,7 +98,10 @@ export class CaseShareComponent implements OnInit, OnDestroy {
     return `${Math.round(value * 100)}%`;
   }
 
-  formatLabel(value?: string | null): string {
+  formatLabel(value?: string | null, otherValue?: string | null): string {
+    if (value === 'other' && otherValue?.trim()) {
+      return `Other: ${otherValue}`;
+    }
     if (!value) {
       return '-';
     }
@@ -152,7 +155,7 @@ export class CaseShareComponent implements OnInit, OnDestroy {
     y = this.addPdfSection(doc, autoTable, y, 'Case Summary', [
       ['Case ID', report.caseId],
       ['Title', report.title],
-      ['Type', this.formatLabel(report.caseType)],
+      ['Type', this.formatLabel(report.caseType, report.otherValue)],
       ['Status', this.formatLabel(report.status)],
       ['Severity', this.formatLabel(report.severity)],
       ['Priority', this.formatLabel(report.priority)],
@@ -168,24 +171,24 @@ export class CaseShareComponent implements OnInit, OnDestroy {
       y = this.addPdfSection(doc, autoTable, y, 'Primary Entity', [
         ['Value', primaryEntity.value],
         ['Display Name', primaryEntity.entityDescription || primaryEntity.value],
-        ['Type', this.formatLabel(primaryEntity.type)],
+        ['Type', this.formatLabel(primaryEntity.type, primaryEntity.entityTypeOtherValue)],
         ['Role', this.formatLabel(primaryEntity.role)],
         ['Confidence', this.formatPercent(primaryEntity.confidence)],
         ['Relationship', this.formatLabel(primaryEntity.relationshipToCase)],
-        ['Source', this.formatLabel(primaryEntity.source)],
+        ['Source', this.formatLabel(primaryEntity.source, primaryEntity.entitySourceOtherValue)],
         ['Created By', primaryEntity.createdBy || '-'],
         ['Updated By', primaryEntity.updatedBy || '-'],
         ['Created At', this.formatDate(primaryEntity.createdAt)],
         ['Updated At', this.formatDate(primaryEntity.updatedAt)],
         ['Tags', (primaryEntity.tags || []).map(tag => this.formatLabel(tag)).join(', ') || '-'],
-        ['Social Profiles', (primaryEntity.socialProfiles || []).map(profile => `${this.formatLabel(profile.platform)}: ${profile.username}${profile.displayName ? ` (${profile.displayName})` : ''}${profile.profileUrl ? ` - ${profile.profileUrl}` : ''}`).join('\n') || '-'],
-        ['Identifiers', (primaryEntity.identifiers || []).map(identifier => `${this.formatLabel(identifier.type)}: ${identifier.value}${identifier.issuer ? `, Issuer: ${identifier.issuer}` : ''}${identifier.verified ? ', Verified' : ''}`).join('\n') || '-'],
+        ['Social Profiles', (primaryEntity.socialProfiles || []).map(profile => `${this.formatLabel(profile.platform, profile.platformOtherValue)}: ${profile.username}${profile.displayName ? ` (${profile.displayName})` : ''}${profile.profileUrl ? ` - ${profile.profileUrl}` : ''}`).join('\n') || '-'],
+        ['Identifiers', (primaryEntity.identifiers || []).map(identifier => `${this.formatLabel(identifier.type, identifier.identifierTypeOtherValue)}: ${identifier.value}${identifier.issuer ? `, Issuer: ${identifier.issuer}` : ''}${identifier.verified ? ', Verified' : ''}`).join('\n') || '-'],
       ], contentWidth);
     }
 
     if (report.closure || report.closedAt) {
       y = this.addPdfSection(doc, autoTable, y, 'Closure', [
-        ['Reason', this.formatLabel(report.closure?.reason)],
+        ['Reason', this.formatLabel(report.closure?.reason, report.closure?.closureReasonOtherValue)],
         ['Summary', report.closure?.summary || 'No closure summary provided.'],
         ['Resolution', report.closure?.resolution || '-'],
         ['Closed At', this.formatDate(report.closedAt || report.closure?.closedAt)],
@@ -258,7 +261,7 @@ export class CaseShareComponent implements OnInit, OnDestroy {
     }
     return artifacts.flatMap((artifact, index) => [
       [`Artifact ${index + 1}`, artifact.title || 'Untitled artifact'],
-      ['Type / Source', `${this.formatLabel(artifact.type)} · ${this.formatLabel(artifact.source)}`],
+      ['Type / Source', `${this.formatLabel(artifact.type, artifact.artifactTypeOtherValue)} · ${this.formatLabel(artifact.source, artifact.artifactSourceOtherValue)}`],
       ['Description', artifact.description || '-'],
       ['URL', artifact.url || '-'],
       ['File', artifact.fileName || '-'],
