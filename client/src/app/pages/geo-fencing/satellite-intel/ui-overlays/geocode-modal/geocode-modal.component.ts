@@ -19,9 +19,13 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
   searchError:     string | null = null;
   manualCoords     = '';
   manualDelta      = 0.05;
+  manualRadiusKm   = 100;
+  manualMaxIps     = 200;
   coordsError:     string | null = null;
   deltaError:      string | null = null;
   activeInputMode: 'search' | 'coordinates' = 'search';
+  radiusError:     string | null = null;
+  readonly maxIpsLimit = 500;
 
   @Input()  isOpen      = false;
   @Input()  isScanning  = false;
@@ -29,10 +33,16 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
   @Input()  delta       = 0.05;
   @Input()  allowCoverage = true;
   @Input()  title = 'Satellite Location';
+  @Input()  radiusKm    = 100;
+  @Input()  maxRadiusKm = 50000;
+  @Input()  maxIps      = 200;
+  @Input()  distanceMode: 'delta' | 'radius' = 'delta';
 
   @Output() close              = new EventEmitter<void>();
   @Output() coordinatesChange  = new EventEmitter<string>();
   @Output() deltaChange        = new EventEmitter<number>();
+  @Output() radiusKmChange     = new EventEmitter<number>();
+  @Output() maxIpsChange       = new EventEmitter<number>();
   @Output() search             = new EventEmitter<void>();
 
   constructor(private elementRef: ElementRef<HTMLElement>, private renderer: Renderer2, @Inject(DOCUMENT) private document: Document, private geocodeService: GeocodeService) {}
@@ -52,12 +62,15 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
     if (changes['isOpen']?.currentValue) {
       this.manualCoords = this.coordinates;
       this.manualDelta  = this.delta;
+      this.manualRadiusKm = Math.min(this.maxRadiusKm, this.radiusKm);
+      this.manualMaxIps = Math.min(this.maxIpsLimit, this.maxIps);
       this.searchQuery  = '';
       this.searchResults = [];
       this.searchError   = null;
       this.coordsError   = null;
       this.deltaError    = null;
       this.activeInputMode = 'search';
+      this.radiusError   = null;
     }
   }
 
@@ -106,6 +119,15 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
     this.manualCoords  = coords;
     this.searchQuery   = result.name;
     this.searchResults = [];
+    this.manualDelta   = result.delta;
+    this.manualRadiusKm = Math.min(this.maxRadiusKm, this.deltaToRadiusKm(result.delta));
+    this.searchQuery   = result.name;
+    this.searchResults = [];
+    this.coordinatesChange.emit(coords);
+    this.deltaChange.emit(result.delta);
+    if (this.distanceMode === 'radius') {
+      this.radiusKmChange.emit(this.manualRadiusKm);
+    }
   }
 
   onManualCoordsChange(): void {
@@ -120,10 +142,29 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
     this.deltaError = this.geocodeService.validateDeltaInput(this.manualDelta);
   }
 
+  onManualRadiusChange(): void {
+    const radius = Number(this.manualRadiusKm);
+    this.radiusError = Number.isFinite(radius) && radius >= 1 && radius <= this.maxRadiusKm
+      ? null
+      : `Radius must be between 1 and ${this.maxRadiusKm} km`;
+  }
+
+  onManualMaxIpsChange(): void {
+    const maxIps = Math.round(Number(this.manualMaxIps));
+    if (Number.isFinite(maxIps)) {
+      this.manualMaxIps = Math.min(this.maxIpsLimit, Math.max(1, maxIps));
+    }
+  }
+
   onSubmit(): void {
     this.onManualCoordsChange();
-    this.onManualDeltaChange();
-    if (this.coordsError || this.deltaError) {
+    if (this.distanceMode === 'radius') {
+      this.onManualRadiusChange();
+    }
+    else {
+      this.onManualDeltaChange();
+    }
+    if (this.coordsError || this.deltaError || this.radiusError) {
       return;
     }
     if (!this.manualCoords.trim()) {
@@ -131,14 +172,18 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
     }
     this.coordinatesChange.emit(this.manualCoords.trim());
     if (this.allowCoverage) {
+    if (this.distanceMode === 'radius') {
+      this.radiusKmChange.emit(Math.round(this.manualRadiusKm));
+      this.maxIpsChange.emit(Math.min(this.maxIpsLimit, Math.max(1, Math.round(this.manualMaxIps))));
+    }
+    else {
       this.deltaChange.emit(this.manualDelta);
     }
     this.search.emit();
   }
+  }
 
-  onBackdropClick(event: MouseEvent): void {
-    if ((event.target as HTMLElement).classList.contains('modal-backdrop')) {
-      this.close.emit();
-    }
+  private deltaToRadiusKm(delta: number): number {
+    return Math.max(1, Math.round(delta * 111.32));
   }
 }

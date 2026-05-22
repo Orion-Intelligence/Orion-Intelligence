@@ -91,6 +91,7 @@
         [isPanelMenuOpen]="isPanelMenuOpen"
         [isPanelPopupOpen]="isPanelPopupOpen"
         [activePanel]="activePanel"
+        (threatIpScanOpened)="openThreatIpScan()"
         (threatFiltersOpened)="openThreatFilters()"
         (panelOpened)="openPanelPopup($event)"
         (panelClosed)="closePanelPopup()">

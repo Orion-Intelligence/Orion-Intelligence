@@ -95,6 +95,7 @@
             }
           </div>
 
+<!-- <<<<<<< HEAD -->
           <div>
             @if (allowCoverage) {
             <div>
@@ -110,15 +111,50 @@
                 <div class="mt-1 text-[11px] text-red-400">{{ deltaError }}</div>
               }
             </div>
+<!-- ======= -->
+          <div class="mb-5 flex items-start gap-3 max-[420px]:flex-col">
+            @if (distanceMode === 'radius') {
+              <div class="flex-1">
+                <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">Radius <span class="text-sky-400">(km)</span></label>
+                <input type="number" [(ngModel)]="manualRadiusKm" name="radiusKm" (input)="onManualRadiusChange()" step="1" min="1" [attr.max]="maxRadiusKm" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)]" [ngClass]="radiusError ? 'border-red-400/60 ring-1 ring-red-400/40' : ''"/>
+                @if (radiusError) {
+                  <div class="mt-1 text-[11px] text-red-400">{{ radiusError }}</div>
+                }
+              </div>
+              <div class="pt-7 text-[11px] text-[var(--color-text4)] max-[420px]:pt-0">
+                Selected radius:
+                <span class="font-semibold text-[var(--color-text2)]">{{ manualRadiusKm | number:'1.0-0' }} km</span>
+              </div>
+            } @else {
+              <div class="flex-1">
+                <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">Delta <span class="text-sky-400">(bbox size °)</span></label>
+                <input type="number" [(ngModel)]="manualDelta" name="delta" (input)="onManualDeltaChange()" step="0.005" min="0.001" max="2" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)]" [ngClass]="deltaError ? 'border-red-400/60 ring-1 ring-red-400/40' : ''"/>
+                @if (deltaError) {
+                  <div class="mt-1 text-[11px] text-red-400">{{ deltaError }}</div>
+                }
+              </div>
+              <div class="pt-7 text-[11px] text-[var(--color-text4)] max-[420px]:pt-0">
+                <span class="font-mono text-sky-400">{{ manualDelta }}</span>° ≈
+                <span class="font-semibold text-[var(--color-text2)]">{{ (manualDelta * 111.32).toFixed(1) }} km</span>
+              </div>
+<!-- >>>>>>> ip_scan_implementations_in_threat_lens -->
             }
           </div>
 
-          <button type="submit" [disabled]="isScanning || !!coordsError || !!deltaError" class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
+          @if (distanceMode === 'radius') {
+            <div class="mb-5">
+              <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">Max IPs</label>
+              <input type="number" [(ngModel)]="manualMaxIps" name="maxIps" (input)="onManualMaxIpsChange()" step="1" min="1" [attr.max]="maxIpsLimit" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)]"/>
+            </div>
+          }
+        }</div>
+          <button type="submit" [disabled]="isScanning || !!coordsError || !!deltaError || !!radiusError" class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
             <i class="bi bi-crosshair text-[14px]"></i>
-            Apply location
+            Apply Location
           </button>
         </form>
         }
+      
         </div>
       </div>
     </div>
