@@ -1,7 +1,7 @@
-<app-facility-legend [visible]="facilitiesVisible" [filters]="legendFilters"></app-facility-legend>
+<app-facility-legend [visible]="facilitiesVisible" [filters]="legendFilters" [constrained]="legendConstrained"></app-facility-legend>
 
 @if (isAircraftLoading || isShipsLoading || isMapEntityLoading || isMapEntityDetailsLoading) {
-  <div class="pointer-events-none absolute left-12 z-[920] flex flex-col gap-2" [ngClass]="topControlsInset ? 'top-[76px]' : 'top-3'">
+  <div class="pointer-events-none absolute left-12 z-[920] flex flex-col gap-2 max-[943px]:left-auto max-[943px]:right-2 max-[943px]:top-[52px] max-[943px]:max-w-[min(300px,calc(100%-88px))] max-[943px]:items-end max-[520px]:top-[96px]" [ngClass]="topControlsInset ? 'top-[76px]' : 'top-3'">
     @if (isAircraftLoading) {
       <div class="inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.9)] px-3 py-2 text-[12px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)]">
         <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
@@ -34,19 +34,19 @@
 }
 
 @if (errorMessage && !isScanning) {
-  <div class="absolute left-3 right-3 z-[900] max-w-[min(520px,calc(100%-24px))] rounded-lg border border-red-500/30 bg-red-500/12 px-[14px] py-[10px] text-[12px] text-red-300" [ngClass]="topControlsInset ? 'top-[76px]' : 'top-3'">
+  <div class="absolute left-3 right-3 z-[900] max-w-[min(520px,calc(100%-24px))] rounded-lg border border-red-500/30 bg-red-500/12 px-[14px] py-[10px] text-[12px] text-red-300 max-[943px]:left-2 max-[943px]:right-2 max-[943px]:top-[52px] max-[943px]:max-w-none max-[520px]:top-[96px]" [ngClass]="topControlsInset ? 'top-[76px]' : 'top-3'">
     <i class="bi bi-exclamation-triangle-fill"></i>
     {{ errorMessage }}
   </div>
 }
 
 @if (sidebarVisible) {
-  <div class="map-overlay-menu absolute right-3 bottom-3 z-[1200] flex w-[min(380px,calc(100%-24px))] flex-col overflow-hidden rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] text-[14px] text-[var(--color-text2)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md animate-[ui-popup-panel-in_180ms_ease-out_both]" [ngClass]="topControlsInset ? 'top-[124px]' : 'top-16'">
+  <div class="map-overlay-menu absolute right-3 bottom-3 top-16 z-[1200] flex w-[min(380px,calc(100%-24px))] flex-col overflow-hidden rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] text-[14px] text-[var(--color-text2)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md animate-[ui-popup-panel-in_180ms_ease-out_both] max-[640px]:left-2 max-[640px]:right-2 max-[640px]:top-auto max-[640px]:bottom-2 max-[640px]:h-[72dvh] max-[640px]:w-auto max-[640px]:rounded-[12px]">
     <div class="flex h-full flex-col">
       <div class="border-b border-white/10 px-3 py-2">
         <div class="flex items-center justify-between gap-3">
           <div>
-            <div class="text-[18px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">
+            <div class="text-[18px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)] max-[420px]:text-[14px]">
               @if (selectedEntity?.type === 'aircraft') { Aircraft Details } @else { Ship Details }
             </div>
             <div class="mt-1 text-[12px] text-[var(--color-text4)]">
@@ -55,8 +55,8 @@
               @else { Live ship details and telemetry. }
             </div>
           </div>
-          <button type="button" aria-label="Close popup" class="ui-popup-close right-5 top-5 h-[42px] w-[42px] rounded-[8px] border-none bg-transparent text-[28px] leading-none text-[#ccc] transition-[color,background-color] duration-200 hover:bg-[var(--color-blue-700)] hover:text-[var(--color-blue-640)]" (click)="closeSidebar.emit()">
-            x
+          <button type="button" aria-label="Close popup" class="ui-popup-close right-5 top-5 h-[42px] w-[42px] rounded-[8px] border-none bg-transparent text-[28px] leading-none text-[#ccc] transition-[color,background-color] duration-200 hover:bg-[var(--color-blue-700)] hover:text-[var(--color-blue-640)] max-[420px]:h-9 max-[420px]:w-9" (click)="closeSidebar.emit()">
+            ×
           </button>
         </div>
         @if (sidebarLoading) {

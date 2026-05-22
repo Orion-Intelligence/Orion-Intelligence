@@ -1,6 +1,48 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
+type ShipDetailField = { label: string; value: string; mono?: boolean };
+
+const PRIMARY_SHIP_DETAIL_KEYS = new Set([
+  'mmsi',
+  'name',
+  'ship_name',
+  'vessel_name',
+  'VesselName',
+  'call_sign',
+  'callsign',
+  'CallSign',
+  'destination',
+  'Destination',
+  'speed',
+  'sog',
+  'SOG',
+  'Speed',
+  'course',
+  'cog',
+  'COG',
+  'Course',
+  'true_heading',
+  'heading',
+  'HDG',
+  'Heading',
+  'nav_status',
+  'navigational_status',
+  'status_code',
+  'ship_type',
+  'ShipType',
+  'type',
+  'latitude',
+  'lat',
+  'LAT',
+  'Latitude',
+  'longitude',
+  'lon',
+  'lng',
+  'LON',
+  'Longitude',
+]);
+
 @Component({
   selector: 'app-ship-details-panel',
   standalone: true,
@@ -10,7 +52,7 @@ import { Component, Input } from '@angular/core';
 export class ShipDetailsPanelComponent {
   @Input() ship: Record<string, any> | null = null;
 
-  get fields(): Array<{ label: string; value: string; mono?: boolean }> {
+  get fields(): ShipDetailField[] {
     return [
       { label: 'MMSI', value: this.display(this.pick('mmsi')), mono: true },
       { label: 'Name', value: this.display(this.pick('name')) },
@@ -21,6 +63,16 @@ export class ShipDetailsPanelComponent {
       { label: 'True Heading', value: this.display(this.pick('true_heading')) },
       { label: 'Nav Status', value: this.display(this.pick('nav_status')) },
     ];
+  }
+
+  get extraFields(): ShipDetailField[] {
+    if (!this.ship) {
+      return [];
+    }
+
+    return Object.entries(this.ship)
+      .filter(([key, value]) => !PRIMARY_SHIP_DETAIL_KEYS.has(key) && this.hasValue(value))
+      .flatMap(([key, value]) => this.toExtraFields(key, value));
   }
 
   get shipType(): string {
@@ -46,9 +98,45 @@ export class ShipDetailsPanelComponent {
     return null;
   }
 
+  private toExtraFields(key: string, value: unknown): ShipDetailField[] {
+    if (Array.isArray(value)) {
+      return [{ label: this.formatLabel(key), value: this.display(value), mono: true }];
+    }
+
+    if (this.isRecord(value)) {
+      return Object.entries(value)
+        .filter(([, nestedValue]) => this.hasValue(nestedValue))
+        .flatMap(([nestedKey, nestedValue]) => this.toExtraFields(`${key}.${nestedKey}`, nestedValue));
+    }
+
+    return [{ label: this.formatLabel(key), value: this.display(value), mono: this.isCodeLike(key) }];
+  }
+
+  private hasValue(value: unknown): boolean {
+    return value !== null && value !== undefined && value !== '';
+  }
+
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+  }
+
+  private formatLabel(key: string): string {
+    return key
+      .replace(/_/g, ' ')
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .replace(/\b\w/g, (character) => character.toUpperCase());
+  }
+
+  private isCodeLike(key: string): boolean {
+    return ['id', 'mmsi', 'timestamp', 'source', 'msg_type'].some((part) => key.toLowerCase().includes(part));
+  }
+
   private display(value: unknown): string {
     if (value === null || value === undefined || value === '') {
       return '-';
+    }
+    if (typeof value === 'object') {
+      return JSON.stringify(value);
     }
     return String(value);
   }

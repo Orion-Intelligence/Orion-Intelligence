@@ -4,7 +4,7 @@ import { RenderedLeafletComponent } from '../../models/geo-fencing.models';
 export class LeafletComponentRenderer {
   private refs = new Set<ComponentRef<any>>();
 
-  constructor(private appRef: ApplicationRef, private environmentInjector: EnvironmentInjector) {}
+  constructor(_appRef: ApplicationRef, private environmentInjector: EnvironmentInjector) {}
 
   create<T>(component: Type<T>, inputs: Partial<T>): RenderedLeafletComponent<T> {
     const componentRef = createComponent(component, {
@@ -12,8 +12,8 @@ export class LeafletComponentRenderer {
     });
 
     Object.assign(componentRef.instance as object, inputs);
-    this.appRef.attachView(componentRef.hostView);
     componentRef.changeDetectorRef.detectChanges();
+    componentRef.changeDetectorRef.detach();
     this.refs.add(componentRef);
 
     return {
@@ -27,7 +27,6 @@ export class LeafletComponentRenderer {
       return;
     }
     this.refs.delete(componentRef);
-    this.appRef.detachView(componentRef.hostView);
     componentRef.destroy();
   }
 

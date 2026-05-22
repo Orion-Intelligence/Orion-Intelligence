@@ -26,7 +26,7 @@
   </div>
 
   @if (showLoadingSkeleton) {
-    <div class="grid grid-cols-3 gap-3">
+    <div class="grid grid-cols-3 gap-3 max-[420px]:grid-cols-1">
       @for (_ of [1,2,3]; track $index) {
         <div class="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
           <div class="ui-shimmer aspect-square w-full rounded-none bg-[var(--color-blue-720)]"></div>

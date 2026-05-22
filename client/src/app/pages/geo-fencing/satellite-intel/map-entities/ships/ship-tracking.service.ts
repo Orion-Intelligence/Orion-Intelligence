@@ -103,25 +103,34 @@ export class SatelliteShipTrackingService {
       return null;
     }
 
-    const latitude = this.readNumber(item, ['latitude', 'lat', 'LAT', 'Latitude'], [['position', 'lat'], ['location', 'lat'], ['location_point', 'lat']]);
-    const longitude = this.readNumber(item, ['longitude', 'lon', 'lng', 'LON', 'Longitude'], [['position', 'lon'], ['position', 'lng'], ['location', 'lon'], ['location', 'lng'], ['location_point', 'lon']]);
-    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    let latitude = this.readNumber(item, ['latitude', 'lat', 'LAT', 'Latitude'], [['position', 'lat'], ['position', 'latitude'], ['location', 'lat'], ['location', 'latitude'], ['location_point', 'lat'], ['location_point', 'latitude'], ['MetaData', 'latitude'], ['MetaData', 'Latitude'], ['Message', 'PositionReport', 'Latitude'], ['message', 'position_report', 'latitude'], ['geometry', 'coordinates', '1'], ['coordinates', '1']]);
+    let longitude = this.readNumber(item, ['longitude', 'lon', 'lng', 'LON', 'Longitude'], [['position', 'lon'], ['position', 'lng'], ['position', 'longitude'], ['location', 'lon'], ['location', 'lng'], ['location', 'longitude'], ['location_point', 'lon'], ['location_point', 'lng'], ['location_point', 'longitude'], ['MetaData', 'longitude'], ['MetaData', 'Longitude'], ['Message', 'PositionReport', 'Longitude'], ['message', 'position_report', 'longitude'], ['geometry', 'coordinates', '0'], ['coordinates', '0']]);
+
+    if (!this.isValidLatitude(latitude) || !this.isValidLongitude(longitude)) {
+      if (this.isValidLatitude(longitude) && this.isValidLongitude(latitude)) {
+        const swappedLatitude = longitude;
+        longitude = latitude;
+        latitude = swappedLatitude;
+      }
+    }
+
+    if (!this.isValidLatitude(latitude) || !this.isValidLongitude(longitude)) {
       return null;
     }
 
-    const mmsi = this.readString(item, ['mmsi', 'MMSI', 'Mmsi', 'id', 'ship_id', 'vessel_id']) || `${latitude}:${longitude}`;
+    const mmsi = this.readString(item, ['mmsi', 'MMSI', 'Mmsi', 'id', 'ship_id', 'vessel_id'], [['MetaData', 'MMSI'], ['MetaData', 'mmsi'], ['Message', 'PositionReport', 'UserID']]) || `${latitude}:${longitude}`;
     return {
       ...item,
       mmsi,
-      name: this.readString(item, ['name', 'ship_name', 'vessel_name', 'VesselName']) ?? item.name ?? null,
+      name: this.readString(item, ['name', 'ship_name', 'vessel_name', 'VesselName'], [['MetaData', 'ShipName'], ['MetaData', 'ship_name']]) ?? item.name ?? null,
       latitude,
       longitude,
-      speed: this.readNumber(item, ['speed', 'sog', 'SOG', 'Speed']),
-      course: this.readNumber(item, ['course', 'cog', 'COG', 'Course']),
-      true_heading: this.readNumber(item, ['true_heading', 'heading', 'HDG', 'Heading']),
+      speed: this.readNumber(item, ['speed', 'sog', 'SOG', 'Speed'], [['Message', 'PositionReport', 'Sog'], ['Message', 'PositionReport', 'SpeedOverGround']]),
+      course: this.readNumber(item, ['course', 'cog', 'COG', 'Course'], [['Message', 'PositionReport', 'Cog'], ['Message', 'PositionReport', 'CourseOverGround']]),
+      true_heading: this.readNumber(item, ['true_heading', 'heading', 'HDG', 'Heading'], [['Message', 'PositionReport', 'TrueHeading']]),
       nav_status: this.readNumber(item, ['nav_status', 'navigational_status', 'status_code']),
-      call_sign: this.readString(item, ['call_sign', 'callsign', 'CallSign']) ?? item.call_sign ?? null,
-      destination: this.readString(item, ['destination', 'Destination']) ?? item.destination ?? null,
+      call_sign: this.readString(item, ['call_sign', 'callsign', 'CallSign'], [['MetaData', 'CallSign']]) ?? item.call_sign ?? null,
+      destination: this.readString(item, ['destination', 'Destination'], [['MetaData', 'Destination']]) ?? item.destination ?? null,
       ship_type: this.readNumber(item, ['ship_type', 'ShipType', 'type']),
     };
   }
@@ -169,8 +178,8 @@ export class SatelliteShipTrackingService {
     ].some((value) => value !== null && value !== undefined && value !== '');
   }
 
-  private readString(item: any, keys: string[]): string | null {
-    const value = this.readValue(item, keys);
+  private readString(item: any, keys: string[], paths: string[][] = []): string | null {
+    const value = this.readValue(item, keys, paths);
     if (value === null || value === undefined) {
       return null;
     }
@@ -196,6 +205,14 @@ export class SatelliteShipTrackingService {
     }
 
     return null;
+  }
+
+  private isValidLatitude(value: number | null): value is number {
+    return Number.isFinite(value) && (value as number) >= -90 && (value as number) <= 90;
+  }
+
+  private isValidLongitude(value: number | null): value is number {
+    return Number.isFinite(value) && (value as number) >= -180 && (value as number) <= 180;
   }
 
   private getPayloadCount(payload: any): number | null {

@@ -1,4 +1,4 @@
-<div class="px-[14px] py-3">
+<div class="px-[14px] py-3 max-[420px]:px-2">
   <div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3">
     <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Search</div>
     <div class="mt-2 flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2">
@@ -32,21 +32,21 @@
       <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">All Facilities</div>
       <div class="text-[11px] text-[var(--color-text3)]">{{ visiblePowerCount }} visible</div>
     </div>
-    <div class="mt-2 flex items-center justify-between text-[11px] text-[var(--color-text3)]">
+    <div class="mt-2 flex items-center justify-between gap-2 text-[11px] text-[var(--color-text3)] max-[420px]:items-start">
       <span>Loaded {{ wriDataCount }} records</span>
-      <span class="inline-flex gap-2">
+      <span class="inline-flex shrink-0 gap-2">
         <button type="button" class="font-semibold text-[var(--color-blue-640)] hover:text-[var(--color-text1)]" (click)="selectAllFilters.emit()">Select all</button>
         <button type="button" class="font-semibold text-[var(--color-text4)] hover:text-[var(--color-text1)]" (click)="clearFilters.emit()">Clear all</button>
       </span>
     </div>
-    <div class="mt-3 grid grid-cols-2 gap-2">
+    <div class="mt-3 grid grid-cols-2 gap-2 max-[380px]:grid-cols-1">
       @for (filter of dashboardTypeFilters; track filter.key) {
         <button type="button" class="flex items-center justify-between rounded-[10px] border px-3 py-2 text-[12px] transition-colors" [ngClass]="isFilterSelected(filter.key) ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-720)]','text-[var(--color-text1)]'] : ['border-[var(--color-border)]','bg-[var(--color-blue-790)]','text-[var(--color-text3)]']" (click)="filterToggled.emit(filter.key)">
-          <span class="inline-flex items-center gap-2">
+          <span class="inline-flex min-w-0 items-center gap-2">
             <svg class="h-2.5 w-2.5" viewBox="0 0 10 10" aria-hidden="true">
               <circle cx="5" cy="5" r="5" [attr.fill]="filter.color"></circle>
             </svg>
-            {{ filter.label }}
+            <span class="truncate">{{ filter.label }}</span>
           </span>
           <span class="font-mono text-[11px]">{{ filter.count }}</span>
         </button>
@@ -96,7 +96,7 @@
 
   <div class="mt-3 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3">
     <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Tracking</div>
-    <div class="mt-2 grid grid-cols-2 gap-2">
+    <div class="mt-2 grid grid-cols-2 gap-2 max-[380px]:grid-cols-1">
       <button type="button" class="flex items-center justify-between rounded-[10px] border px-3 py-2 text-[12px] transition-colors" [ngClass]="aircraftTrackingEnabled ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-720)]','text-[var(--color-text1)]'] : ['border-[var(--color-border)]','bg-[var(--color-blue-790)]','text-[var(--color-text3)]']" (click)="aircraftTrackingToggled.emit()">
         <span class="inline-flex items-center gap-2">
           <i class="bi bi-airplane"></i>
@@ -151,9 +151,9 @@
             <span class="font-mono font-semibold text-[var(--color-text1)]">{{ selectedFeature.capacityMw }} MW</span>
           </div>
         }
-        <div class="mt-2 flex justify-between text-[12px]">
+        <div class="mt-2 flex justify-between gap-3 text-[12px]">
           <span class="text-[var(--color-text3)]">Coordinates</span>
-          <span class="font-mono font-semibold text-[var(--color-text1)]">
+          <span class="break-all text-right font-mono font-semibold text-[var(--color-text1)]">
             {{ selectedFeature.coordinates[1].toFixed(4) }}, {{ selectedFeature.coordinates[0].toFixed(4) }}
           </span>
         </div>

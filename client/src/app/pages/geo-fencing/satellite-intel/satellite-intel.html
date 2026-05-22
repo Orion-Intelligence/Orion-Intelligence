@@ -34,6 +34,7 @@
           </app-satellite-map-renderer>
           <app-map-entities-overlay
             [facilitiesVisible]="facilitiesVisible"
+            [legendConstrained]="mapRenderer.sidebarVisible || isPanelPopupOpen || entityDescriptionPopupOpen"
             [legendFilters]="visibleDashboardTypeFilters"
             [sidebarVisible]="mapRenderer.sidebarVisible"
             [sidebarLoading]="mapRenderer.sidebarLoading"
@@ -49,23 +50,23 @@
             (closeSidebar)="mapRenderer.closeSidebar()">
           </app-map-entities-overlay>
           }
-          <div class="absolute right-3 z-[920] flex items-center gap-2 map-overlay-menu" [ngClass]="showTopBar ? 'top-[76px]' : 'top-3'">
+          <div class="absolute right-3 top-3 z-[920] flex max-w-[calc(100%-24px)] items-center gap-2 map-overlay-menu max-[943px]:right-2 max-[943px]:top-2 max-[943px]:max-w-[calc(100%-16px)] max-[520px]:flex-col max-[520px]:items-end">
             @if (showTopBar) {
               <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition-opacity" [ngClass]="isThreatToolbarDisabled ? 'opacity-50' : 'opacity-100'">
-                <button class="px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed" [disabled]="isThreatToolbarDisabled" [ngClass]="activeTab === 'map' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('map')">
+                <button class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="isThreatToolbarDisabled" [ngClass]="activeTab === 'map' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('map')">
                   Satellite Map
                 </button>
-                <button class="px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed" [disabled]="isThreatToolbarDisabled" [ngClass]="activeTab === 'threat' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('threat')">
+                <button class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="isThreatToolbarDisabled" [ngClass]="activeTab === 'threat' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('threat')">
                   Threat Lens
                 </button>
               </div>
             }
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 max-[520px]:justify-end">
             <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition-opacity" [ngClass]="showTopBar && activeTab === 'threat' ? 'pointer-events-none opacity-50' : 'opacity-100'">
-              <button class="px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed" [disabled]="showTopBar && activeTab === 'threat'" [ngClass]="selectedLayer === 'esri' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('esri')">Satellite</button>
-              <button class="px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed" [disabled]="showTopBar && activeTab === 'threat'" [ngClass]="selectedLayer === 'osm' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('osm')">Street</button>
+              <button class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="showTopBar && activeTab === 'threat'" [ngClass]="selectedLayer === 'esri' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('esri')">Satellite</button>
+              <button class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="showTopBar && activeTab === 'threat'" [ngClass]="selectedLayer === 'osm' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('osm')">Street</button>
             </div>
-            <button class="map-overlay-menu rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-3 py-2 text-[13px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)]" (click)="togglePanelMenu()">
+            <button class="map-overlay-menu rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-3 py-2 text-[13px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] max-[420px]:px-2" (click)="togglePanelMenu()">
               <i class="bi bi-list"></i>
             </button>
           </div>
@@ -90,7 +91,6 @@
         [isPanelMenuOpen]="isPanelMenuOpen"
         [isPanelPopupOpen]="isPanelPopupOpen"
         [activePanel]="activePanel"
-        [topControlsInset]="showTopBar"
         (threatFiltersOpened)="openThreatFilters()"
         (panelOpened)="openPanelPopup($event)"
         (panelClosed)="closePanelPopup()">

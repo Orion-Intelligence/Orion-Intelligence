@@ -13,6 +13,7 @@ import { ShipDetailsPanelComponent } from '../../map-entities/ships/components/s
 })
 export class MapEntitiesOverlayComponent {
   @Input() facilitiesVisible = true;
+  @Input() legendConstrained = false;
   @Input() legendFilters: OrionSatelliteFilterOption[] = [];
   @Input() sidebarVisible = false;
   @Input() sidebarLoading = false;

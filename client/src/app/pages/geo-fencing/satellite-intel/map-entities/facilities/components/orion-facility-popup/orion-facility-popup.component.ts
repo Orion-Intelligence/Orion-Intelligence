@@ -9,15 +9,25 @@ import { OrionSatelliteFeature } from '../../../../../models/geo-fencing.models'
   templateUrl: './orion-facility-popup.component.html',
 })
 export class OrionFacilityPopupComponent {
-  feature: OrionSatelliteFeature | null = null;
+  private currentFeature: OrionSatelliteFeature | null = null;
+
+  rows: Array<{ label: string; value: string; stacked: boolean }> = [];
+
+  set feature(value: OrionSatelliteFeature | null) {
+    this.currentFeature = value;
+    this.rows = this.buildRows(value);
+  }
+
+  get feature(): OrionSatelliteFeature | null {
+    return this.currentFeature;
+  }
 
   get title(): string {
     const name = this.feature?.name?.trim();
     return name || 'Feature';
   }
 
-  get rows(): Array<{ label: string; value: string; stacked: boolean }> {
-    const feature = this.feature;
+  private buildRows(feature: OrionSatelliteFeature | null): Array<{ label: string; value: string; stacked: boolean }> {
     if (!feature) {
       return [];
     }

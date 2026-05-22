@@ -134,6 +134,8 @@ export class SatelliteFacilitiesService {
       case 'wharf':
       case 'shipyard':
       case 'boatyard':
+      case 'crane':
+      case 'crane_rail':
       case 'ferry':
       case 'ferry_terminal':
       case 'harbour_master':
@@ -144,6 +146,7 @@ export class SatelliteFacilitiesService {
       case 'dolphin':
       case 'mooring':
       case 'anchorage':
+      case 'berth':
         return 'port';
       case 'warehouse':
       case 'depot':
@@ -228,6 +231,12 @@ export class SatelliteFacilitiesService {
     if (geometry?.type === 'Point' && Number.isFinite(coords[0]) && Number.isFinite(coords[1])) {
       return [coords[0], coords[1]];
     }
+    if (geometry?.type === 'LineString' && Array.isArray(coords[0])) {
+      return this.averageCoordinates(coords);
+    }
+    if (geometry?.type === 'MultiLineString' && Array.isArray(coords[0]?.[0])) {
+      return this.averageCoordinates(coords.flat());
+    }
     if (geometry?.type === 'Polygon' && Array.isArray(coords[0]?.[0])) {
       return this.averageCoordinates(coords[0]);
     }
@@ -296,12 +305,101 @@ export class SatelliteFacilitiesService {
   }
 
   private extractLatLon(item: any): { lat: number; lon: number } | null {
-    const lat = item?.location?.lat ?? item?.location_point?.lat ?? item?.lat;
-    const lon = item?.location?.lon ?? item?.location_point?.lon ?? item?.lon;
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+    const candidates = [
+      { lat: item?.location?.lat, lon: item?.location?.lon },
+      { lat: item?.location_point?.lat, lon: item?.location_point?.lon },
+      { lat: item?.lat, lon: item?.lon },
+    ];
+
+    for (const candidate of candidates) {
+      const scalar = this.toScalarLatLon(candidate.lat, candidate.lon);
+      if (scalar) {
+        return scalar;
+      }
+
+      const coordinatePairs = [
+        ...this.extractCoordinatePairs(candidate.lat),
+        ...this.extractCoordinatePairs(candidate.lon),
+      ];
+      const averagedPairs = this.averageLatLon(coordinatePairs);
+      if (averagedPairs) {
+        return averagedPairs;
+      }
+
+      const sequence = this.toLatLonSequence(candidate.lat, candidate.lon);
+      if (sequence) {
+        return sequence;
+      }
+    }
+
+    return null;
+  }
+
+  private toScalarLatLon(latValue: unknown, lonValue: unknown): { lat: number; lon: number } | null {
+    const lat = this.toFiniteNumber(latValue);
+    const lon = this.toFiniteNumber(lonValue);
+    return this.isValidLatLon(lat, lon) ? { lat: lat as number, lon: lon as number } : null;
+  }
+
+  private toLatLonSequence(latValue: unknown, lonValue: unknown): { lat: number; lon: number } | null {
+    if (!Array.isArray(latValue) || !Array.isArray(lonValue)) {
       return null;
     }
-    return { lat, lon };
+
+    const count = Math.min(latValue.length, lonValue.length);
+    const points: Array<{ lat: number; lon: number }> = [];
+    for (let index = 0; index < count; index += 1) {
+      const lat = this.toFiniteNumber(latValue[index]);
+      const lon = this.toFiniteNumber(lonValue[index]);
+      if (this.isValidLatLon(lat, lon)) {
+        points.push({ lat: lat as number, lon: lon as number });
+      }
+    }
+
+    return this.averageLatLon(points);
+  }
+
+  private extractCoordinatePairs(value: unknown): Array<{ lat: number; lon: number }> {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    if (value.length >= 2) {
+      const lon = this.toFiniteNumber(value[0]);
+      const lat = this.toFiniteNumber(value[1]);
+      if (this.isValidLatLon(lat, lon)) {
+        return [{ lat: lat as number, lon: lon as number }];
+      }
+    }
+
+    return value.flatMap((entry) => this.extractCoordinatePairs(entry));
+  }
+
+  private averageLatLon(points: Array<{ lat: number; lon: number }>): { lat: number; lon: number } | null {
+    if (!points.length) {
+      return null;
+    }
+
+    const total = points.reduce((sum, point) => ({ lat: sum.lat + point.lat, lon: sum.lon + point.lon }), { lat: 0, lon: 0 });
+    return {
+      lat: total.lat / points.length,
+      lon: total.lon / points.length,
+    };
+  }
+
+  private toFiniteNumber(value: unknown): number | null {
+    if (typeof value === 'number') {
+      return Number.isFinite(value) ? value : null;
+    }
+    if (typeof value === 'string' && value.trim()) {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+    return null;
+  }
+
+  private isValidLatLon(lat: number | null, lon: number | null): boolean {
+    return Number.isFinite(lat) && Number.isFinite(lon) && (lat as number) >= -90 && (lat as number) <= 90 && (lon as number) >= -180 && (lon as number) <= 180;
   }
 
   private detectTypeFromRecord(record: any): OrionSatelliteFeatureType {

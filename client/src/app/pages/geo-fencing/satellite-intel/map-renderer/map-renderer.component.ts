@@ -16,6 +16,7 @@ import { SearchLocationMapRenderer } from '../map-overlays/search-location-map-r
 export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy {
   private static readonly WORLD_BOUNDS = [[-85.05112878, -180], [85.05112878, 180]] as const;
   @ViewChild('mapContainer') private mapContainer?: ElementRef<HTMLDivElement>;
+  @ViewChild('zoomLabelElement') private zoomLabelElement?: ElementRef<HTMLDivElement>;
   private leafletMap: any   = null;
   private esriLayer: any    = null;
   private esriLowResLayer: any = null;
@@ -29,7 +30,6 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   private searchLocationRenderer?: SearchLocationMapRenderer;
   private sidebarRequestToken = 0;
 
-  zoomLabel = 'zoom 2.5';
   selectedEntity: { type: TrackingEntityType; data: any | null } | null = null;
   sidebarVisible = false;
   sidebarLoading = false;
@@ -50,7 +50,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   @Input() focusedFeature:   OrionSatelliteFeature | null = null;
   @Input() topControlsInset = false;
 
-  @Output() mapMoved  = new EventEmitter<{ lat: number; lon: number; zoom: number }>();
+  @Output() mapMoved  = new EventEmitter<{ lat: number; lon: number; zoom: number; trackingDelta: number }>();
   @Output() featureSelected = new EventEmitter<any>();
   @Output() featureIdsSelected = new EventEmitter<string[]>();
 
@@ -111,38 +111,42 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   }
 
   ngAfterViewInit(): void {
-    this.initMap().then();
+    this.ngZone.runOutsideAngular(() => {
+      void this.initMap();
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['lat'] || changes['lon'] || changes['delta']) {
-      this.updateMapView();
-    }
-    if (changes['facilityFeatures']) {
-      this.entityRenderer?.renderFacilities(this.facilityFeatures);
-    }
-    if (changes['anomalyData'])     {
-      this.entityRenderer?.renderAnomaly(this.anomalyData);
-    }
-    if (changes['aircraftData']) {
-      this.entityRenderer?.renderAircraft(true);
-    }
-    if (changes['shipsData']) {
-      this.entityRenderer?.renderShips(true);
-    }
-    if (changes['orionData']) {
-      this.entityRenderer?.renderOrionFacilities(true);
-    }
-    if (changes['focusedFeature']) {
-      this.focusOnFeature();
-      this.entityRenderer?.renderOrionFacilities(true);
-    }
-    if (changes['selectedLayer'])   {
-      this.switchLayer();
-    }
-    if (changes['facilitiesVisible']) {
-      this.entityRenderer?.setFacilitiesVisible(this.facilitiesVisible);
-    }
+    this.ngZone.runOutsideAngular(() => {
+      if (changes['lat'] || changes['lon'] || changes['delta']) {
+        this.updateMapView();
+      }
+      if (changes['facilityFeatures']) {
+        this.entityRenderer?.renderFacilities(this.facilityFeatures);
+      }
+      if (changes['anomalyData'])     {
+        this.entityRenderer?.renderAnomaly(this.anomalyData);
+      }
+      if (changes['aircraftData']) {
+        this.entityRenderer?.renderAircraft(true);
+      }
+      if (changes['shipsData']) {
+        this.entityRenderer?.renderShips(true);
+      }
+      if (changes['orionData']) {
+        this.entityRenderer?.renderOrionFacilities(true);
+      }
+      if (changes['focusedFeature']) {
+        this.focusOnFeature();
+        this.entityRenderer?.renderOrionFacilities(true);
+      }
+      if (changes['selectedLayer'])   {
+        this.switchLayer();
+      }
+      if (changes['facilitiesVisible']) {
+        this.entityRenderer?.setFacilitiesVisible(this.facilitiesVisible);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -243,6 +247,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         },);
 
       this.refreshBaseLayerDetail();
+      this.updateZoomLabel();
 
       this.countryBoundaryRenderer = new CountryBoundaryMapRenderer(this.L, this.leafletMap);
       await this.countryBoundaryRenderer.init();
@@ -270,8 +275,8 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         getShipsData: () => this.shipsData,
         getOrionData: () => this.orionData,
         getFocusedFeature: () => this.focusedFeature,
-        onFeatureSelected: (feature: OrionSatelliteFeature) => this.featureSelected.emit(feature),
-        onFeatureIdsSelected: (ids: string[]) => this.featureIdsSelected.emit(ids),
+        onFeatureSelected: (feature: OrionSatelliteFeature) => this.ngZone.run(() => this.featureSelected.emit(feature)),
+        onFeatureIdsSelected: (ids: string[]) => this.ngZone.run(() => this.featureIdsSelected.emit(ids)),
       });
       this.entityRenderer.init(this.facilitiesVisible);
 
@@ -280,22 +285,17 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
       });
 
       this.leafletMap.on('zoomend', () => {
-        const c = this.leafletMap.getCenter();
         const z = this.leafletMap.getZoom();
-        this.zoomLabel = `zoom ${z.toFixed(1)}  ·  ${c.lat.toFixed(4)}°N  ${c.lng.toFixed(4)}°E`;
+        this.updateZoomLabel();
         this.refreshMarkerSizingForZoom(z);
         this.entityRenderer?.renderViewport();
+        this.scheduleViewportEmit();
       });
 
       this.leafletMap.on('moveend', () => {
-        const c = this.leafletMap.getCenter();
-        const z = this.leafletMap.getZoom();
-        this.zoomLabel = `zoom ${z.toFixed(1)}  ·  ${c.lat.toFixed(4)}°N  ${c.lng.toFixed(4)}°E`;
+        this.updateZoomLabel();
         this.entityRenderer?.renderViewport();
-        clearTimeout(this.moveTimer);
-        this.moveTimer = setTimeout(() => {
-          this.mapMoved.emit({ lat: c.lat, lon: c.lng, zoom: z });
-        }, 500);
+        this.scheduleViewportEmit();
       });
 
       if (Number.isFinite(this.lat) && Number.isFinite(this.lon)) {
@@ -324,6 +324,8 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
       setTimeout(() => {
         this.leafletMap?.invalidateSize();
         this.updateMinZoomToFitContainer();
+        this.updateZoomLabel();
+        this.scheduleViewportEmit();
       }, 0);
     }
     catch { }
@@ -336,6 +338,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     this.leafletMap.setView([this.lat, this.lon], this.deltaToZoom(this.delta));
     this.leafletMap.invalidateSize();
     this.searchLocationRenderer?.render(this.lat, this.lon);
+    this.updateZoomLabel();
   }
 
   private updateMinZoomToFitContainer(): void {
@@ -350,6 +353,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     if (this.leafletMap.getZoom() < minZoom) {
       this.leafletMap.setZoom(minZoom);
     }
+    this.updateZoomLabel();
   }
 
   private switchLayer(): void {
@@ -389,6 +393,45 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   private refreshMarkerSizingForZoom(zoom: number): void {
     const bucket = Math.round(zoom * 2);
     this.entityRenderer?.setMarkerZoomBucket(bucket);
+  }
+
+  private updateZoomLabel(): void {
+    if (!this.leafletMap || !this.zoomLabelElement?.nativeElement) {
+      return;
+    }
+    const center = this.leafletMap.getCenter();
+    const zoom = this.leafletMap.getZoom();
+    this.zoomLabelElement.nativeElement.textContent = `zoom ${zoom.toFixed(1)}  ·  ${center.lat.toFixed(4)}°N  ${center.lng.toFixed(4)}°E`;
+  }
+
+  private scheduleViewportEmit(): void {
+    clearTimeout(this.moveTimer);
+    this.moveTimer = setTimeout(() => {
+      if (!this.leafletMap) {
+        return;
+      }
+      const center = this.leafletMap.getCenter();
+      const viewport = {
+        lat: center.lat,
+        lon: center.lng,
+        zoom: this.leafletMap.getZoom(),
+        trackingDelta: this.getVisibleBoundsDelta(),
+      };
+      this.ngZone.run(() => this.mapMoved.emit(viewport));
+    }, 500);
+  }
+
+  private getVisibleBoundsDelta(): number {
+    const bounds = this.leafletMap?.getBounds?.();
+    if (!bounds) {
+      return this.delta;
+    }
+    const latDelta = Math.abs(bounds.getNorth() - bounds.getSouth()) / 2;
+    const west = bounds.getWest();
+    const east = bounds.getEast();
+    const lonSpan = east >= west ? east - west : east + 360 - west;
+    const lonDelta = Math.min(180, Math.abs(lonSpan) / 2);
+    return Math.max(0.05, Math.min(180, Math.max(latDelta, lonDelta)));
   }
 
   private focusOnFeature(): void {

@@ -58,6 +58,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private scanController: SatelliteScanController;
   private mapEntityDetails: MapEntityDetailsController;
   private initialMapEntityLoadTimer: ReturnType<typeof setTimeout> | null = null;
+  private shipTrackingViewport: SatelliteTrackingViewport | null = null;
   private route: ActivatedRoute;
   private sidebarService: SidebarService;
   private geocodeService: GeocodeService;
@@ -336,7 +337,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   onShipTrackingSelectionChange(): void {
-    this.entityLoader.toggleShips(this.getTrackingViewport());
+    this.entityLoader.toggleShips(this.getShipTrackingViewport());
   }
 
   @HostListener('document:click', ['$event'])
@@ -361,15 +362,20 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.showGeocodeModal = true;
   }
 
-  onMapMoved(center: { lat: number; lon: number; zoom: number }): void {
+  onMapMoved(center: { lat: number; lon: number; zoom: number; trackingDelta?: number }): void {
     this.inputLat = center.lat;
     this.inputLon = center.lon;
     this.inputDelta = this.zoomToDelta(center.zoom);
     this.coordsForm.value = `${center.lat.toFixed(5)}, ${center.lon.toFixed(5)}`;
     this.coordsForm.delta = this.inputDelta;
+    this.shipTrackingViewport = {
+      lat: center.lat,
+      lon: center.lon,
+      delta: center.trackingDelta ?? this.inputDelta,
+    };
 
     if (this.shipsTrackingEnabled) {
-      this.entityLoader.scheduleShipViewportRefresh(this.getTrackingViewport());
+      this.entityLoader.scheduleShipViewportRefresh(this.getShipTrackingViewport());
     }
   }
 
@@ -504,6 +510,10 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       lon: this.inputLon,
       delta: this.inputDelta,
     };
+  }
+
+  private getShipTrackingViewport(): SatelliteTrackingViewport {
+    return this.shipTrackingViewport ?? this.getTrackingViewport();
   }
 
   private zoomToDelta(zoom: number): number {

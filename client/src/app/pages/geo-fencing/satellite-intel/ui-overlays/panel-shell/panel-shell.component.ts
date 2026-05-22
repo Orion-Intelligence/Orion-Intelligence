@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { SatelliteIntelPanel } from '../../satellite-intel.types';
 import { SatelliteIntelPanelEnum } from '../../../enums/geo-fencing.enums';
@@ -14,7 +13,6 @@ const PANEL_TABS: Array<{ id: SatelliteIntelPanel; label: string }> = [
 @Component({
   selector: 'app-satellite-panel-shell',
   standalone: true,
-  imports: [CommonModule],
   templateUrl: './panel-shell.component.html',
 })
 export class PanelShellComponent {
@@ -25,7 +23,6 @@ export class PanelShellComponent {
   @Input() isPanelMenuOpen = false;
   @Input() isPanelPopupOpen = false;
   @Input() activePanel: SatelliteIntelPanel = SatelliteIntelPanelEnum.Dashboard;
-  @Input() topControlsInset = false;
 
   @Output() threatFiltersOpened = new EventEmitter<void>();
   @Output() panelOpened = new EventEmitter<SatelliteIntelPanel>();

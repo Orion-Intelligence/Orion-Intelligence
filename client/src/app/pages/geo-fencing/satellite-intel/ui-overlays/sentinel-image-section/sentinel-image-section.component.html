@@ -72,9 +72,9 @@
             Image details
           </div>
           @for (entry of detailEntries; track entry.label; let last = $last) {
-            <div class="flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 text-[13px]" [class.border-b-0]="last">
+            <div class="flex items-center justify-between gap-3 border-b border-[var(--color-divider)] px-4 py-3 text-[13px]" [class.border-b-0]="last">
               <span class="text-[var(--color-text3)]">{{ entry.label }}</span>
-              <span class="font-mono text-[var(--color-text1)]">{{ entry.value }}</span>
+              <span class="break-all text-right font-mono text-[var(--color-text1)]">{{ entry.value }}</span>
             </div>
           }
         </div>

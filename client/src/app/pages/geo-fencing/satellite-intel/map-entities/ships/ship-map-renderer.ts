@@ -4,8 +4,13 @@ import { SatelliteLiveShip } from '../../../../../shared/model/satellite-intel/s
 import { SatelliteShipTrackingService } from './ship-tracking.service';
 import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-renderer';
 import { ShipMarkerIconComponent } from './components/ship-marker-icon/ship-marker-icon.component';
-import { escapeTooltipText, getBearingDegrees, getGridBucketKey, getMarkerBaseSize, getResponseStatus, isPendingStatus, normalizeEntityId, sampleByBucket, stableHash } from '../../map-utils/renderer-utils';
+import { escapeTooltipText, getBearingDegrees, getMarkerBaseSize, getResponseStatus, isPendingStatus, normalizeEntityId, stableHash } from '../../map-utils/renderer-utils';
 import { TrackingSidebarBridge } from '../../../models/geo-fencing.models';
+
+type ShipDenseCell = {
+  key: string;
+  items: SatelliteLiveShip[];
+};
 
 export class ShipMapRenderer {
   private cluster: any = null;
@@ -19,6 +24,8 @@ export class ShipMapRenderer {
   private detailSub?: Subscription;
   private markerZoomBucket = 0;
   private readonly animationDurationMs = 8000;
+  private readonly denseShipCellThreshold = 18;
+  private readonly denseShipScreenGridSize = 34;
   private readonly L: any;
   private readonly map: any;
   private readonly service: SatelliteShipTrackingService;
@@ -438,7 +445,6 @@ export class ShipMapRenderer {
 
   private getRenderableShips(): SatelliteLiveShip[] {
     const bounds = this.map?.getBounds?.();
-    const zoom = this.map?.getZoom?.() ?? 3;
     const visible = this.getData().filter(ship => {
       if (!Number.isFinite(ship.latitude) || !Number.isFinite(ship.longitude)) {
         return false;
@@ -448,63 +454,66 @@ export class ShipMapRenderer {
       }
       return bounds.pad(0.18).contains([ship.latitude, ship.longitude]);
     });
-    const sampleRatio = this.getSampleRatio(zoom);
-    const sampled = sampleRatio >= 1
-      ? visible
-      : sampleByBucket(visible, sampleRatio, ship => getGridBucketKey(ship.latitude!, ship.longitude!), ship => normalizeEntityId(ship.mmsi) ?? `${ship.latitude}:${ship.longitude}`);
-    const limit = this.getVisibleLimit(zoom);
-    if (sampled.length <= limit) {
-      return sampled;
-    }
-    return sampled.slice().sort((left, right) => {
-      const leftKey = normalizeEntityId(left.mmsi) ?? `${left.latitude}:${left.longitude}`;
-      const rightKey = normalizeEntityId(right.mmsi) ?? `${right.latitude}:${right.longitude}`;
-      return Math.abs(stableHash(leftKey)) - Math.abs(stableHash(rightKey));
-    }).slice(0, limit);
+    return this.reduceVeryDenseShipCells(visible);
   }
 
-  private getSampleRatio(zoom: number): number {
-    if (zoom >= 8) {
-      return 1;
-    }
-    if (zoom >= 7) {
-      return 0.5;
-    }
-    if (zoom >= 6) {
-      return 0.28;
-    }
-    if (zoom >= 5) {
-      return 0.12;
-    }
-    if (zoom >= 4) {
-      return 0.05;
-    }
-    if (zoom >= 3) {
-      return 0.02;
-    }
-    return 0.02;
+  private reduceVeryDenseShipCells(ships: SatelliteLiveShip[]): SatelliteLiveShip[] {
+    const cells = new Map<string, ShipDenseCell>();
+    ships.forEach(ship => {
+      const key = this.getDenseShipCellKey(ship);
+      const cell = cells.get(key) ?? { key, items: [] };
+      cell.items.push(ship);
+      cells.set(key, cell);
+    });
+
+    const reduced: SatelliteLiveShip[] = [];
+    cells.forEach(cell => {
+      if (cell.items.length <= this.denseShipCellThreshold) {
+        reduced.push(...cell.items);
+        return;
+      }
+
+      reduced.push(...this.takeDenseShipCellSubset(cell.items));
+    });
+
+    return reduced;
   }
 
-  private getVisibleLimit(zoom: number): number {
-    if (zoom >= 10) {
-      return 3500;
+  private takeDenseShipCellSubset(ships: SatelliteLiveShip[]): SatelliteLiveShip[] {
+    const activeEntity = this.sidebar.getActiveEntity();
+    const loadingEntity = this.sidebar.getLoadingEntity();
+    const activeShipId = activeEntity?.type === 'ship' ? activeEntity.id : '';
+    const loadingShipId = loadingEntity?.type === 'ship' ? loadingEntity.id : '';
+    const preserved = ships.filter(ship => {
+      const id = normalizeEntityId(ship.mmsi);
+      return !!id && (id === activeShipId || id === loadingShipId);
+    });
+    const preservedIds = new Set(preserved.map(ship => normalizeEntityId(ship.mmsi)).filter((id): id is string => !!id));
+    const keepCount = Math.max(this.denseShipCellThreshold, preserved.length);
+    const selected = ships
+      .filter(ship => !preservedIds.has(normalizeEntityId(ship.mmsi) ?? ''))
+      .slice()
+      .sort((left, right) => Math.abs(stableHash(this.getStableShipKey(left))) - Math.abs(stableHash(this.getStableShipKey(right))))
+      .slice(0, Math.max(0, keepCount - preserved.length));
+
+    return [...preserved, ...selected];
+  }
+
+  private getDenseShipCellKey(ship: SatelliteLiveShip): string {
+    if (this.map?.latLngToContainerPoint && Number.isFinite(ship.latitude) && Number.isFinite(ship.longitude)) {
+      const point = this.map.latLngToContainerPoint([ship.latitude, ship.longitude]);
+      if (Number.isFinite(point?.x) && Number.isFinite(point?.y)) {
+        const row = Math.floor(point.y / this.denseShipScreenGridSize);
+        const col = Math.floor(point.x / this.denseShipScreenGridSize);
+        return `screen:${this.denseShipScreenGridSize}:${row}:${col}`;
+      }
     }
-    if (zoom >= 8) {
-      return 2200;
-    }
-    if (zoom >= 7) {
-      return 1500;
-    }
-    if (zoom >= 6) {
-      return 1000;
-    }
-    if (zoom >= 5) {
-      return 650;
-    }
-    if (zoom >= 4) {
-      return 420;
-    }
-    return 260;
+
+    return `geo:${Math.floor(((ship.latitude as number) + 90) / 0.25)}:${Math.floor(((ship.longitude as number) + 180) / 0.25)}`;
+  }
+
+  private getStableShipKey(ship: SatelliteLiveShip): string {
+    return normalizeEntityId(ship.mmsi) ?? `${ship.latitude}:${ship.longitude}`;
   }
 
   private extractDetails(res: any): SatelliteLiveShip | null {
