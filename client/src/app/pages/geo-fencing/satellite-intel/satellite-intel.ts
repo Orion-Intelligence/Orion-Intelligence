@@ -54,6 +54,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private route: ActivatedRoute;
   private sidebarService: SidebarService;
   private geocodeService: GeocodeService;
+  @ViewChild(MapRendererComponent) private mapRenderer?: MapRendererComponent;
 
   satelliteService: SatelliteIntelService;
   readonly panel = SatelliteIntelPanelEnum;
@@ -67,7 +68,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   isThreatLensLoading = false;
 
   @Input() toolbarMode: 'hidden' | 'geo' = 'hidden';
-  @ViewChild(MapRendererComponent) private mapRenderer?: MapRendererComponent;
 
   constructor( satelliteService: SatelliteIntelService, route: ActivatedRoute, sidebarService: SidebarService, aircraftTrackingService: SatelliteAircraftTrackingService, shipTrackingService: SatelliteShipTrackingService, facilitiesService: SatelliteFacilitiesService, geocodeService: GeocodeService, monthCompareService: MonthCompareService, ) {
     this.satelliteService = satelliteService;

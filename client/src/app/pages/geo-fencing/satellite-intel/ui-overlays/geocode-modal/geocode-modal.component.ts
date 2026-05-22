@@ -172,15 +172,15 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
     }
     this.coordinatesChange.emit(this.manualCoords.trim());
     if (this.allowCoverage) {
-    if (this.distanceMode === 'radius') {
-      this.radiusKmChange.emit(Math.round(this.manualRadiusKm));
-      this.maxIpsChange.emit(Math.min(this.maxIpsLimit, Math.max(1, Math.round(this.manualMaxIps))));
+      if (this.distanceMode === 'radius') {
+        this.radiusKmChange.emit(Math.round(this.manualRadiusKm));
+        this.maxIpsChange.emit(Math.min(this.maxIpsLimit, Math.max(1, Math.round(this.manualMaxIps))));
+      }
+      else {
+        this.deltaChange.emit(this.manualDelta);
+      }
+      this.search.emit();
     }
-    else {
-      this.deltaChange.emit(this.manualDelta);
-    }
-    this.search.emit();
-  }
   }
 
   private deltaToRadiusKm(delta: number): number {

@@ -19,26 +19,26 @@ export class MonthCompareService {
       (res) => this.getPollStatus(res),
       3000,
       { trackState: true },).pipe(switchMap((response) => {
-        if (this.satelliteIntelService.isPendingResponse(response)) {
-          return of(response);
-        }
+      if (this.satelliteIntelService.isPendingResponse(response)) {
+        return of(response);
+      }
 
-        const result = response?.result;
-        const yearAgoMonth = this.getYearAgoMonthKey(result?.months?.[0]?.month_key);
-        return this.satelliteIntelService.createPolledRequest(() => this.api.post<SatelliteImageResponse>('satellite/sentinel/image', {
-          lat,
-          lon,
-          delta,
-          image_type: imageType,
-          month: yearAgoMonth,
-          size: 512,
-        }),
-        (res) => this.getPollStatus(res),
-        3000,)
-          .pipe(filter((imageResponse) => !this.satelliteIntelService.isPendingResponse(imageResponse)),
-            map((imageResponse) => this.withYearAgoImage(response, imageResponse, yearAgoMonth)),
-            catchError(() => of(response)),);
-      }),);
+      const result = response?.result;
+      const yearAgoMonth = this.getYearAgoMonthKey(result?.months?.[0]?.month_key);
+      return this.satelliteIntelService.createPolledRequest(() => this.api.post<SatelliteImageResponse>('satellite/sentinel/image', {
+        lat,
+        lon,
+        delta,
+        image_type: imageType,
+        month: yearAgoMonth,
+        size: 512,
+      }),
+      (res) => this.getPollStatus(res),
+      3000,)
+        .pipe(filter((imageResponse) => !this.satelliteIntelService.isPendingResponse(imageResponse)),
+          map((imageResponse) => this.withYearAgoImage(response, imageResponse, yearAgoMonth)),
+          catchError(() => of(response)),);
+    }),);
   }
 
   runAnomalyScan(lat: number, lon: number, delta = 0.05, shClientId?: string, shClientSecret?: string): Observable<SatelliteAnomalyResponse> {
