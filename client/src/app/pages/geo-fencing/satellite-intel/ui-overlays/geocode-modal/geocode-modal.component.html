@@ -95,8 +95,7 @@
             }
           </div>
 
-          <div>
-            @if (allowCoverage) {
+          @if (allowCoverage) {
             <div>
               <label class="mb-1.5 flex items-center justify-between gap-3 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">
                 <span>Coverage size</span>
@@ -110,10 +109,9 @@
                 <div class="mt-1 text-[11px] text-red-400">{{ deltaError }}</div>
               }
             </div>
-            }
-          </div>
+          }
 
-          <button type="submit" [disabled]="isScanning || !!coordsError || !!deltaError" class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
+          <button type="submit" [disabled]="isScanning || !manualCoords.trim() || !!coordsError || !!deltaError" class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
             <i class="bi bi-crosshair text-[14px]"></i>
             Apply location
           </button>
