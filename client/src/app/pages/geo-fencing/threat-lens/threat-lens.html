@@ -16,6 +16,18 @@
 		</div>
 	}
 
+	@if (iotIsScanning) {
+		<div class="pointer-events-none absolute left-1/2 top-4 z-30 flex -translate-x-1/2 items-center gap-2 rounded-[999px] border border-[rgba(34,211,238,0.22)] bg-[rgba(8,16,27,0.72)] px-3 py-2 text-[12px] font-semibold text-[var(--color-text1)] shadow-[0_10px_30px_rgba(2,6,23,.24)] backdrop-blur-md">
+			<span class="h-2 w-2 animate-pulse rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(34,211,238,0.78)]"></span>
+			<span>Scanning visible area...</span>
+		</div>
+	}
+
+	<div class="absolute left-4 top-4 z-30 inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] shadow-[0_8px_24px_rgba(2,6,23,.35)] max-[1100px]:left-3 max-[1100px]:top-3">
+		<button type="button" class="px-3 py-2 text-[11px] font-semibold transition-colors" [attr.aria-pressed]="!iotScanningEnabled" [ngClass]="!iotScanningEnabled ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setIotScanningEnabled(false)">Off</button>
+		<button type="button" class="px-3 py-2 text-[11px] font-semibold transition-colors" [attr.aria-pressed]="iotScanningEnabled" [ngClass]="iotScanningEnabled ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setIotScanningEnabled(true)">IP Scan</button>
+	</div>
+
 	<div class="absolute left-4 top-4 bottom-4 z-20 flex w-[min(24rem,calc(100%-5rem))] flex-col gap-3 max-[640px]:w-[calc(100%-2rem)] max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:top-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pt-3">
 		<div class="h-[40px] shrink-0 max-[1100px]:hidden"></div>
     <div class="rounded-[12px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.58)] p-3 shadow-[0_10px_30px_rgba(2,6,23,.24)] backdrop-blur-md [body.light-theme_&]:bg-[rgba(255,255,255,0.25)]">
@@ -97,10 +109,12 @@
 			@if (isLoading) {
 				<p class="mt-2 text-[12px] text-[var(--color-text2)]">Loading country highlights...</p>
 			}
-			<p class="mt-2 max-w-[420px] text-[12px] text-[var(--color-text3)]">{{ statusMessage }}</p>
-			<p class="mt-2 text-[11px] text-[var(--color-text4)]">Arcs currently visible: <span class="font-semibold text-[var(--color-text2)]">{{ arcCount }}</span></p>
-			}
-		</div>
+					<p class="mt-2 max-w-[420px] text-[12px] text-[var(--color-text3)]">{{ statusMessage }}</p>
+					<p class="mt-2 text-[11px] text-[var(--color-text4)]">Arcs currently visible: <span class="font-semibold text-[var(--color-text2)]">{{ arcCount }}</span></p>
+					<p class="mt-2 text-[11px] text-[var(--color-text4)]">IoT exposure: <span class="font-semibold text-[var(--color-text2)]">{{ iotResultCount }}</span></p>
+					<p class="mt-1 max-w-[420px] text-[11px] text-[var(--color-text3)]">{{ iotStatusMessage }}</p>
+					}
+			</div>
 	</div>
 
 	<div class="absolute right-4 top-4 bottom-4 z-20 flex w-[min(25rem,calc(100%-2rem))] flex-col gap-0 max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:right-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pb-3">
@@ -134,6 +148,13 @@
 			></app-threat-lens-feed-panel>
 		</div>
 	</div>
+
+	@if (selectedIotIp) {
+		<app-threat-lens-ip-detail-popup
+			[ip]="selectedIotIp"
+			(closePopup)="closeIotIpDetail()"
+		></app-threat-lens-ip-detail-popup>
+	}
 </section>
 
 

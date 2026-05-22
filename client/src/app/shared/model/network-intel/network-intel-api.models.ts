@@ -27,11 +27,20 @@ export interface GeoCameraResponse {
   status?:        string;
   progress?:      number;
   step?:          string;
+  job_id?:         string;
+  ips?:           string[];
+  count?:         number;
+  matched_blocks?: number;
+  blocks_used?:   number;
   ips_extracted?: number;
   ips_scanned?:   number;
   cameras_found?: number;
   result?: {
     status?:        string;
+    ips?:           string[];
+    count?:         number;
+    matched_blocks?: number;
+    blocks_used?:   number;
     cameras?:       any[];
     ips_extracted?: number;
     ips_scanned?:   number;

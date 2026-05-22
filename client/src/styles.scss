@@ -229,6 +229,16 @@ html:has(body.dark-theme) {
   min-width: 180px;
 }
 
+.threat-lens-tooltip__content--iot {
+  max-width: 280px;
+  min-width: 220px;
+}
+
+.threat-lens-tooltip__content--iot .threat-lens-tooltip__value {
+  max-width: 190px;
+  white-space: normal;
+}
+
 .threat-lens-tooltip__arc-title {
   margin-bottom: 10px;
   color: #00e0ff;

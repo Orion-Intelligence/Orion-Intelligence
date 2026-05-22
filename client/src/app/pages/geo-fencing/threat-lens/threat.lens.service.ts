@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
-import { firstValueFrom, from, map, Observable } from 'rxjs';
+import { EMPTY, firstValueFrom, from, map, Observable, timer } from 'rxjs';
+import { expand, filter, switchMap, take, takeWhile } from 'rxjs/operators';
+import { GeoCameraResponse, NetworkIntelScanResponse } from '../../../shared/model/network-intel/network-intel-api.models';
+import { IpDetail } from '../../../shared/model/network-intel/network-intel.model';
 import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
 import { ConsolidatedParamModel } from '../../../shared/model/results/consolidated/consolidated.param.model';
 import { ApiService } from '../../../shared/services/api.service';
@@ -20,6 +23,7 @@ const COUNTRY_ALIAS: Record<string, string> = {
 };
 
 const COUNTRY_FIELDS = ['m_country', 'm_country_name', 'm_location', 'country', 'location'];
+const IOT_POLL_DELAY_MS = 4000;
 
 @Injectable({ providedIn: 'root' })
 export class ThreatLensService {
@@ -35,6 +39,25 @@ export class ThreatLensService {
     }
 
     return from(this.fetchAllThreatLensData(payload)).pipe(map((responses) => this.buildMapDataFromResponses(responses)));
+  }
+
+  detectIotThreats(coordinates: string, radius_km: number, max_ips = 200): Observable<GeoCameraResponse> {
+    const call = () => this.api.post<GeoCameraResponse>('netintel/iot_detect', { coordinates, radius_km, max_ips });
+
+    return call().pipe(expand((response) => this.isPendingIotResponse(response) ? timer(IOT_POLL_DELAY_MS).pipe(switchMap(call)) : EMPTY),
+      takeWhile((response) => this.isPendingIotResponse(response), true),
+      filter((response) => !this.isPendingIotResponse(response)),
+      take(1));
+  }
+
+  scanIpDetail(ip: string): Observable<IpDetail> {
+    const call = () => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip });
+
+    return call().pipe(expand((response) => this.isPendingIotResponse(response) ? timer(IOT_POLL_DELAY_MS).pipe(switchMap(call)) : EMPTY),
+      takeWhile((response) => this.isPendingIotResponse(response), true),
+      filter((response) => !this.isPendingIotResponse(response)),
+      take(1),
+      map((response) => (response.result ?? response) as IpDetail));
   }
 
   toCountryKey(value: string): string {
@@ -59,6 +82,11 @@ export class ThreatLensService {
     }
 
     return this.resolveRegionCode(compact) || compact;
+  }
+
+  private isPendingIotResponse(response: any): boolean {
+    const status = String(response?.result?.status || response?.status || '').toLowerCase();
+    return status === 'pending' || status === 'busy' || status === 'queued';
   }
 
   private buildThreatLensPayload(payload?: Partial<ThreatLensRequestPayload>): ThreatLensRequestPayload {

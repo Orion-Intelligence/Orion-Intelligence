@@ -1,0 +1,32 @@
+<div class="absolute inset-0 z-40 flex items-center justify-center bg-[rgba(2,6,23,0.62)] px-4 py-5 backdrop-blur-sm">
+  <div class="flex max-h-[min(860px,calc(100vh-3rem))] w-[min(720px,calc(100vw-2rem))] flex-col overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-820)] shadow-[0_24px_70px_rgba(2,6,23,.5)]">
+    <div class="flex items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-790)] px-4 py-3">
+      <div class="min-w-0">
+        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-300">IP Detail</p>
+        <h3 class="truncate font-mono text-[16px] font-semibold text-[var(--color-text1)]">{{ ip }}</h3>
+      </div>
+      <button type="button" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-770)] text-[18px] leading-none text-[var(--color-text2)] transition hover:bg-[var(--color-blue-760)] hover:text-[var(--color-text1)]" aria-label="Close IP detail" (click)="close()">×</button>
+    </div>
+
+    <div class="max-h-[calc(100vh-11rem)] overflow-y-auto bg-[var(--color-blue-840)] py-2">
+      @if (isLoading) {
+        <div class="flex min-h-[260px] flex-col items-center justify-center gap-3 px-6 text-center">
+          <div class="h-10 w-10 animate-spin rounded-full border-4 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></div>
+          <div>
+            <p class="text-[13px] font-semibold text-[var(--color-text1)]">Scanning IP intelligence...</p>
+            <p class="mt-1 font-mono text-[12px] text-[var(--color-text3)]">{{ ip }}</p>
+          </div>
+        </div>
+      }
+      @else if (errorMessage) {
+        <div class="flex min-h-[260px] flex-col items-center justify-center gap-3 px-6 text-center">
+          <p class="max-w-[520px] text-[13px] text-[var(--color-text2)]">{{ errorMessage }}</p>
+          <button type="button" class="rounded-[10px] bg-[var(--color-blue-640)] px-4 py-2 text-[13px] font-semibold text-white transition hover:brightness-110" (click)="loadIpDetail()">Retry</button>
+        </div>
+      }
+      @else if (detail) {
+        <app-ip-detail [detail]="detail"></app-ip-detail>
+      }
+    </div>
+  </div>
+</div>
