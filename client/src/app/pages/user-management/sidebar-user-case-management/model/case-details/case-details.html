@@ -166,7 +166,7 @@
                     }
                 </div>
 
-                @if (isEditing && editedCase) {
+                @if ((isEditing && editedCase) || (isClosingCase && newClosure)) {
                 <div class="p-4">
                     @if (newClosure; as closure) {
                     <div class="grid gap-3 md:grid-cols-2">
