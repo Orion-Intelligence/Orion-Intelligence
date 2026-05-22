@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { SatelliteGeocodeResult } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
 import { GeocodeService } from './geocode.service';
 
+type GeocodeModalMode = 'satellite' | 'threatLens';
+
 @Component({
   selector:    'app-satellite-geocode-modal',
   standalone:  true,
@@ -22,16 +24,18 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
   manualRadiusKm   = 100;
   manualMaxIps     = 200;
   coordsError:     string | null = null;
-  deltaError:      string | null = null;
+  coverageError:   string | null = null;
   activeInputMode: 'search' | 'coordinates' = 'search';
-  radiusError:     string | null = null;
+  hasSelectedSearchLocation = false;
   readonly maxIpsLimit = 500;
+  readonly maxCoverageKmLimit = 1000;
 
   @Input()  isOpen      = false;
   @Input()  isScanning  = false;
   @Input()  coordinates = '';
   @Input()  delta       = 0.05;
   @Input()  allowCoverage = true;
+  @Input()  mode: GeocodeModalMode = 'satellite';
   @Input()  title = 'Satellite Location';
   @Input()  radiusKm    = 100;
   @Input()  maxRadiusKm = 50000;
@@ -61,16 +65,16 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen']?.currentValue) {
       this.manualCoords = this.coordinates;
-      this.manualDelta  = this.delta;
-      this.manualRadiusKm = Math.min(this.maxRadiusKm, this.radiusKm);
+      this.manualDelta = this.getInitialDelta();
+      this.manualRadiusKm = this.deltaToRadiusKm(this.manualDelta);
       this.manualMaxIps = Math.min(this.maxIpsLimit, this.maxIps);
       this.searchQuery  = '';
       this.searchResults = [];
       this.searchError   = null;
       this.coordsError   = null;
-      this.deltaError    = null;
+      this.coverageError = null;
       this.activeInputMode = 'search';
-      this.radiusError   = null;
+      this.hasSelectedSearchLocation = false;
     }
   }
 
@@ -81,10 +85,17 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
     }
   }
 
+  onBackdropClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.close.emit();
+    }
+  }
+
   onSearchInput(): void {
     clearTimeout(this.searchTimer);
     this.searchError   = null;
     this.searchResults = [];
+    this.hasSelectedSearchLocation = false;
     if (this.searchQuery.trim().length < 2) {
       return;
     }
@@ -119,14 +130,14 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
     this.manualCoords  = coords;
     this.searchQuery   = result.name;
     this.searchResults = [];
-    this.manualDelta   = result.delta;
-    this.manualRadiusKm = Math.min(this.maxRadiusKm, this.deltaToRadiusKm(result.delta));
-    this.searchQuery   = result.name;
-    this.searchResults = [];
+    this.hasSelectedSearchLocation = true;
+    this.setCoverageFromDelta(result.delta);
     this.coordinatesChange.emit(coords);
-    this.deltaChange.emit(result.delta);
-    if (this.distanceMode === 'radius') {
+    if (this.isThreatLensMode) {
       this.radiusKmChange.emit(this.manualRadiusKm);
+    }
+    else {
+      this.deltaChange.emit(this.manualDelta);
     }
   }
 
@@ -134,19 +145,16 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
     this.coordsError = this.geocodeService.validateCoordinatesInput(this.manualCoords);
   }
 
-  onManualDeltaChange(): void {
+  onManualCoverageChange(): void {
     if (!this.allowCoverage) {
-      this.deltaError = null;
+      this.coverageError = null;
       return;
     }
-    this.deltaError = this.geocodeService.validateDeltaInput(this.manualDelta);
-  }
-
-  onManualRadiusChange(): void {
-    const radius = Number(this.manualRadiusKm);
-    this.radiusError = Number.isFinite(radius) && radius >= 1 && radius <= this.maxRadiusKm
-      ? null
-      : `Radius must be between 1 and ${this.maxRadiusKm} km`;
+    const delta = Number(this.manualDelta);
+    this.coverageError = this.validateCoverageDelta(delta);
+    if (!this.coverageError) {
+      this.manualRadiusKm = this.deltaToRadiusKm(delta);
+    }
   }
 
   onManualMaxIpsChange(): void {
@@ -158,32 +166,108 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
 
   onSubmit(): void {
     this.onManualCoordsChange();
-    if (this.distanceMode === 'radius') {
-      this.onManualRadiusChange();
-    }
-    else {
-      this.onManualDeltaChange();
-    }
-    if (this.coordsError || this.deltaError || this.radiusError) {
+    this.onManualCoverageChange();
+    if (this.coordsError || this.coverageError) {
       return;
     }
     if (!this.manualCoords.trim()) {
       return;
     }
     this.coordinatesChange.emit(this.manualCoords.trim());
-    if (this.allowCoverage) {
-      if (this.distanceMode === 'radius') {
-        this.radiusKmChange.emit(Math.round(this.manualRadiusKm));
-        this.maxIpsChange.emit(Math.min(this.maxIpsLimit, Math.max(1, Math.round(this.manualMaxIps))));
-      }
-      else {
-        this.deltaChange.emit(this.manualDelta);
-      }
-      this.search.emit();
+    if (this.allowCoverage && this.isThreatLensMode) {
+      this.radiusKmChange.emit(this.deltaToRadiusKm(this.manualDelta));
+      this.maxIpsChange.emit(Math.min(this.maxIpsLimit, Math.max(1, Math.round(this.manualMaxIps))));
     }
+    if (this.allowCoverage && !this.isThreatLensMode) {
+      this.deltaChange.emit(this.manualDelta);
+    }
+    this.search.emit();
+  }
+
+  get isThreatLensMode(): boolean {
+    return this.mode === 'threatLens' || this.distanceMode === 'radius';
+  }
+
+  get showMaxIps(): boolean {
+    return this.isThreatLensMode;
+  }
+
+  get effectiveMaxCoverageKm(): number {
+    return this.isThreatLensMode ? Math.min(this.maxCoverageKmLimit, this.maxRadiusKm) : this.maxCoverageKmLimit;
+  }
+
+  get effectiveMaxDelta(): number {
+    return Number((this.effectiveMaxCoverageKm / 111.32).toFixed(4));
+  }
+
+  get minDelta(): number {
+    return 0.001;
+  }
+
+  get coverageLabelValue(): string {
+    const coverageKm = this.deltaToCoverageKm(this.manualDelta);
+    if (!Number.isFinite(coverageKm)) {
+      return '';
+    }
+    const rounded = Number(coverageKm.toFixed(1));
+    return `${Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toFixed(1)} km`;
+  }
+
+  get canApplyLocation(): boolean {
+    if (!this.manualCoords.trim()) {
+      return false;
+    }
+    return this.activeInputMode === 'coordinates' || this.hasSelectedSearchLocation;
+  }
+
+  private getInitialDelta(): number {
+    if (this.isThreatLensMode) {
+      return this.coverageKmToDelta(this.radiusKm);
+    }
+    return this.clampDelta(this.delta);
+  }
+
+  private setCoverageFromDelta(delta: number): void {
+    this.manualDelta = this.clampDelta(delta);
+    this.manualRadiusKm = this.deltaToRadiusKm(this.manualDelta);
   }
 
   private deltaToRadiusKm(delta: number): number {
-    return Math.max(1, Math.round(delta * 111.32));
+    const coverageKm = this.deltaToCoverageKm(delta);
+    if (!Number.isFinite(coverageKm)) {
+      return 0;
+    }
+    return Math.min(this.effectiveMaxCoverageKm, Math.max(0.1, Number(coverageKm.toFixed(3))));
+  }
+
+  private deltaToCoverageKm(delta: number): number {
+    return Number(delta) * 111.32;
+  }
+
+  private validateCoverageDelta(delta: number): string | null {
+    if (!Number.isFinite(delta) || delta < this.minDelta || delta > this.effectiveMaxDelta) {
+      return `Coverage size must be between ${this.minDelta} and ${this.effectiveMaxDelta.toFixed(3)} degrees (~${this.effectiveMaxCoverageKm.toLocaleString()} km)`;
+    }
+    return null;
+  }
+
+  private coverageKmToDelta(coverageKm: number): number {
+    return this.clampDelta(Number((this.clampCoverageKm(coverageKm) / 111.32).toFixed(4)));
+  }
+
+  private clampDelta(value: number): number {
+    const next = Number(value);
+    if (!Number.isFinite(next)) {
+      return this.minDelta;
+    }
+    return Math.min(this.effectiveMaxDelta, Math.max(this.minDelta, next));
+  }
+
+  private clampCoverageKm(value: number): number {
+    const next = Number(value);
+    if (!Number.isFinite(next)) {
+      return 1;
+    }
+    return Math.min(this.effectiveMaxCoverageKm, Math.max(1, next));
   }
 }

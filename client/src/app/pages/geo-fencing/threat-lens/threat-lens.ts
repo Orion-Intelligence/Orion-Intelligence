@@ -279,7 +279,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   }
 
   onIpScanRadiusKmChange(value: number): void {
-    const radius = Math.round(Number(value));
+    const radius = Number(value);
     if (Number.isFinite(radius)) {
       this.ipScanRadiusKm = Math.min(1000, Math.max(1, radius));
     }
@@ -300,8 +300,9 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
+    const radiusKm = Math.min(1000,Math.max(1, Math.round(this.ipScanRadiusKm)));
     this.showIpScanLocationModal = false;
-    this.runIpScan(coordinates, center, Math.min(1000, Math.max(1, this.ipScanRadiusKm)));
+    this.runIpScan(coordinates, center, radiusKm);
   }
 
   private runIpScan(coordinates: string, center: { lat: number; lon: number }, radiusKm: number): void {
