@@ -1,7 +1,7 @@
 @if (visible && filters.length) {
-  <div class="pointer-events-auto absolute bottom-7 z-[900] overflow-hidden rounded border border-white/10 bg-[rgba(13,21,37,.92)] font-mono text-[10px] text-white/70 max-[640px]:bottom-3" [ngClass]="constrained ? 'left-3 right-[404px] w-auto translate-x-0 max-[900px]:right-3 max-[640px]:left-2 max-[640px]:right-2' : 'left-1/2 w-max max-w-[min(920px,calc(100%-24px))] -translate-x-1/2 max-[640px]:max-w-[calc(100%-16px)]'">
+  <div class="pointer-events-auto absolute bottom-7 z-[900] overflow-hidden rounded border border-white/10 bg-[rgba(13,21,37,.92)] font-mono text-[10px] text-white/70 [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:text-[#20324b]/80 max-[640px]:bottom-3" [ngClass]="constrained ? 'left-3 right-[404px] w-auto translate-x-0 max-[900px]:right-3 max-[640px]:left-2 max-[640px]:right-2' : 'left-1/2 w-max max-w-[min(920px,calc(100%-24px))] -translate-x-1/2 max-[640px]:max-w-[calc(100%-16px)]'">
     <div #scrollArea class="flex max-w-full items-center gap-3 overflow-x-auto overflow-y-hidden whitespace-nowrap px-[10px] py-[6px] pr-10 [scrollbar-width:none] [-ms-overflow-style:none] max-[640px]:px-2 max-[640px]:pr-8 [&::-webkit-scrollbar]:hidden" (scroll)="updateOverflow()">
-      <span class="shrink-0 text-white/45">FACILITIES</span>
+      <span class="shrink-0 text-white/45 [body.light-theme_&]:text-[#5f738f]">FACILITIES</span>
       @for (entity of filters; track entity.key) {
         <span class="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap">
           <span class="h-2.5 w-2.5 rounded-full" [ngClass]="dotClass(entity.key)"></span>
@@ -10,7 +10,7 @@
       }
     </div>
     @if (showEndFade) {
-      <div class="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[rgba(13,21,37,.92)] via-[rgba(13,21,37,.72)] to-transparent max-[640px]:w-9"></div>
+      <div class="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[rgba(13,21,37,.92)] via-[rgba(13,21,37,.72)] to-transparent [body.light-theme_&]:from-[#f7fbff] [body.light-theme_&]:via-[#f7fbff]/80 max-[640px]:w-9"></div>
     }
   </div>
 }

@@ -1,9 +1,9 @@
-<div class="w-[178px] rounded-lg bg-slate-950 px-2.5 py-2 text-white">
+<div class="w-[178px] rounded-lg bg-slate-950 px-2.5 py-2 text-white [body.light-theme_&]:border [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff] [body.light-theme_&]:text-[var(--color-text1)] [body.light-theme_&]:shadow-[0_10px_28px_rgba(15,23,42,.14)]">
   <div class="mb-2 text-xs font-bold leading-snug">{{ title }}</div>
   @for (row of rows; track row.label) {
-    <div class="border-t border-white/10 py-1 text-[11px] leading-snug" [ngClass]="row.stacked ? 'flex flex-col items-start gap-1' : 'flex items-start justify-between gap-1'">
-      <span class="text-[10px] font-semibold uppercase tracking-wide text-white/65">{{ row.label }}</span>
-      <span class="font-semibold text-white" [ngClass]="row.stacked ? 'text-left' : 'text-right break-words'">{{ row.value }}</span>
+    <div class="border-t border-white/10 py-1 text-[11px] leading-snug [body.light-theme_&]:border-[#d8e3f0]" [ngClass]="row.stacked ? 'flex flex-col items-start gap-1' : 'flex items-start justify-between gap-1'">
+      <span class="text-[10px] font-semibold uppercase tracking-wide text-white/65 [body.light-theme_&]:text-[var(--color-text4)]">{{ row.label }}</span>
+      <span class="font-semibold text-white [body.light-theme_&]:text-[var(--color-text1)]" [ngClass]="row.stacked ? 'text-left' : 'text-right break-words'">{{ row.value }}</span>
     </div>
   }
 </div>

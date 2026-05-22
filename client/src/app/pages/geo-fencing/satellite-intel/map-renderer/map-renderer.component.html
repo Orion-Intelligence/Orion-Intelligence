@@ -1,9 +1,9 @@
 <div class="relative block h-full w-full overflow-hidden" [class.geo-map-control-inset]="topControlsInset">
-  <div #mapContainer class="h-full w-full bg-[#0a0e1a] [background-image:none!important]"></div>
-  <div class="pointer-events-none absolute inset-x-0 top-0 z-[850] h-16 bg-gradient-to-b from-[rgba(8,14,26,0.78)] via-[rgba(8,14,26,0.42)] to-transparent"></div>
-  <div class="pointer-events-none absolute inset-x-0 bottom-0 z-[850] h-16 bg-gradient-to-t from-[rgba(8,14,26,0.78)] via-[rgba(8,14,26,0.42)] to-transparent"></div>
+  <div #mapContainer class="h-full w-full bg-[#0a0e1a] [background-image:none!important] [body.light-theme_&]:bg-[#edf4fb]"></div>
+  <div class="pointer-events-none absolute inset-x-0 top-0 z-[850] h-16 bg-gradient-to-b from-[rgba(8,14,26,0.78)] via-[rgba(8,14,26,0.42)] to-transparent [body.light-theme_&]:hidden"></div>
+  <div class="pointer-events-none absolute inset-x-0 bottom-0 z-[850] h-16 bg-gradient-to-t from-[rgba(8,14,26,0.78)] via-[rgba(8,14,26,0.42)] to-transparent [body.light-theme_&]:hidden"></div>
 
-  <div #zoomLabelElement class="pointer-events-none absolute bottom-[68px] left-3 z-[900] max-w-[calc(100%-24px)] truncate rounded border border-white/10 bg-[rgba(13,21,37,.88)] px-[10px] py-1 font-mono text-[10px] text-white/35 max-[640px]:bottom-[54px] max-[640px]:left-2 max-[640px]:max-w-[calc(100%-16px)] max-[640px]:text-[9px]">
+  <div #zoomLabelElement class="pointer-events-none absolute bottom-[68px] left-3 z-[900] max-w-[calc(100%-24px)] truncate rounded border border-white/10 bg-[rgba(13,21,37,.88)] px-[10px] py-1 font-mono text-[10px] text-white/35 [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/90 [body.light-theme_&]:text-[#5f738f] max-[640px]:bottom-[54px] max-[640px]:left-2 max-[640px]:max-w-[calc(100%-16px)] max-[640px]:text-[9px]">
     zoom 2.5
   </div>
 </div>

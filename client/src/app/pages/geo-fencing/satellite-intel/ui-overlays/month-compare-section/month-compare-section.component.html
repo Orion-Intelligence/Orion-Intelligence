@@ -10,7 +10,7 @@
     <div class="border-b border-[var(--color-divider)] px-4 py-3">
       <div class="mb-2 text-[11px] font-bold uppercase tracking-widest text-[var(--color-text4)]">Location</div>
       <div class="flex items-center gap-2">
-        <button type="button" class="shrink-0 rounded-[6px] border border-[#3a7bd5] bg-[#1a4a7a] px-3 py-1.5 text-[11px] font-medium text-[#7eb8f7] hover:bg-[#225d99] disabled:opacity-60" (click)="locationOpened.emit()">
+        <button type="button" class="shrink-0 rounded-[6px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-3 py-1.5 text-[11px] font-medium text-white hover:opacity-90 disabled:opacity-60" (click)="locationOpened.emit()">
           <i class="bi bi-geo-alt"></i>
           Location
         </button>
@@ -44,7 +44,7 @@
             <span class="text-[10px] font-medium text-[var(--color-text4)]">Current date default</span>
           </div>
           <div class="flex items-center gap-2">
-            <input type="date" [(ngModel)]="selectedMonth" aria-label="Timeline date" class="min-w-0 flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none [color-scheme:dark] focus:border-[var(--color-blue-640)]"/>
+            <input type="date" [(ngModel)]="selectedMonth" aria-label="Timeline date" class="min-w-0 flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none [color-scheme:dark] [body.light-theme_&]:[color-scheme:light] focus:border-[var(--color-blue-640)]"/>
             <button type="button" class="shrink-0 rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-[11px] font-medium text-[var(--color-text3)] hover:text-[var(--color-text1)]" (click)="resetMonth()">
               Reset
             </button>
@@ -97,7 +97,7 @@
     <div class="grid grid-cols-1 gap-3 animate-[ui-overlay-fade-in_180ms_ease-out_both]">
       @for (month of compareResult.months; track month.month_key) {
         <div class="group cursor-zoom-in overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] transition-[border-color] hover:border-[var(--color-blue-640)]" (click)="openLightbox(imageApiUrl(month.image_url), month.label)">
-          <div class="relative aspect-square w-full overflow-hidden bg-[#060a12]">
+          <div class="relative aspect-square w-full overflow-hidden bg-[#060a12] [body.light-theme_&]:bg-[#eaf2fb]">
             @if (canRenderImage(imageApiUrl(month.image_url))) {
               <img [src]="imageApiUrl(month.image_url)" [alt]="month.label" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy" (error)="markImageBroken(imageApiUrl(month.image_url))"/>
             } @else {
