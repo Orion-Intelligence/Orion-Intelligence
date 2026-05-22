@@ -51,7 +51,7 @@
                 <div class="flex flex-1 items-center gap-2 bg-gray-100 dark:bg-[#3a3b3c] rounded-full px-4 h-9 max-w-sm border border-transparent focus-within:ring-2 focus-within:ring-[#1877f2]/40 transition-shadow">
                   <i class="bi bi-search text-gray-400 text-sm flex-shrink-0"></i>
                   <input type="text" placeholder="Enter username to scan..." [value]="searchTerm()" (input)="onSearchChanged($event)" (keydown.enter)="triggerScan()" class="flex-1 bg-transparent text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 outline-none min-w-0">
-                <button title="Search by image" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 relative z-10 flex-shrink-0">
+                <button type="button" title="Search by image" (click)="$event.stopPropagation(); triggerImageUpload()" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 relative z-10 flex-shrink-0">
   <i class="bi bi-camera text-lg leading-none"></i>
 </button>
                 </div>

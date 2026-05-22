@@ -317,7 +317,18 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
 
   handleCompletedJobClick(job: Job) {
     if (job.status === 'completed') {
-      this.state.openManageProfilesModal(job.username);
+      // ensure list view is visible
+      this.updateState(state => state.viewMode.set('list'), false);
+
+      // add the user's platforms to the graph so the left profile card + platforms appear
+      const platforms = this.scanResults().get(job.username) ?? [];
+      try {
+        this.graphOrchestrator.updateGraphFromModal(this.requireActiveTabState(), job.username, platforms);
+      }
+      catch (e) {
+        // fallback: open summary popup if graph update fails
+        this.state.openSummaryPopup(job.username);
+      }
     }
   }
 
