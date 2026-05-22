@@ -77,8 +77,8 @@ export class EntityLoader {
     this.aircraftTracker.toggle(viewport, scoped);
   }
 
-  toggleShips(viewport: SatelliteTrackingViewport): void {
-    this.shipTracker.toggle(viewport);
+  toggleShips(viewport: SatelliteTrackingViewport, scoped = false): void {
+    this.shipTracker.toggle(viewport, scoped);
   }
 
   loadFacilities(viewport: SatelliteTrackingViewport, onMapDataChanged: () => void, showLoading = true): void {
@@ -91,7 +91,7 @@ export class EntityLoader {
 
   refreshTracking(viewport: SatelliteTrackingViewport): void {
     this.aircraftTracker.refresh(viewport, false, true);
-    this.shipTracker.refresh(viewport, false, true);
+    this.shipTracker.refresh(viewport, false, true, true);
   }
 
   refreshGlobalAircraft(): void {

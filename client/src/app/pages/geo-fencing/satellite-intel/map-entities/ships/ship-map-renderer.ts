@@ -7,8 +7,10 @@ import { ShipMarkerIconComponent } from './components/ship-marker-icon/ship-mark
 import { escapeTooltipText, getBearingDegrees, getMarkerBaseSize, getResponseStatus, isPendingStatus, normalizeEntityId, stableHash } from '../../map-utils/renderer-utils';
 import { TrackingSidebarBridge } from '../../../models/geo-fencing.models';
 
-type ShipDenseCell = {
+type ShipDistributionCell = {
   key: string;
+  row: number;
+  col: number;
   items: SatelliteLiveShip[];
 };
 
@@ -24,8 +26,9 @@ export class ShipMapRenderer {
   private detailSub?: Subscription;
   private markerZoomBucket = 0;
   private readonly animationDurationMs = 8000;
-  private readonly denseShipCellThreshold = 120;
-  private readonly denseShipScreenGridSize = 34;
+  private readonly sparseShipAreaThreshold = 15;
+  private readonly crowdedShipAreaThreshold = 100;
+  private readonly minimumSampledShipsPerArea = 12;
   private readonly maxAnimatedShips = 80;
   private readonly L: any;
   private readonly map: any;
@@ -469,31 +472,148 @@ export class ShipMapRenderer {
       }
       return bounds.pad(0.18).contains([ship.latitude, ship.longitude]);
     });
-    return this.limitShipsForZoom(this.reduceVeryDenseShipCells(visible), zoom);
+    if (visible.length <= 1200) {
+      return visible;
+    }
+    return this.limitShipsForViewport(this.sampleCrowdedShipAreas(visible, zoom), visible, zoom);
   }
 
-  private limitShipsForZoom(ships: SatelliteLiveShip[], zoom: number): SatelliteLiveShip[] {
+  private sampleCrowdedShipAreas(ships: SatelliteLiveShip[], zoom: number): SatelliteLiveShip[] {
+    const sampleRatio = this.getSampleRatio(zoom);
+    const buckets = new Map<string, SatelliteLiveShip[]>();
+    ships.forEach(ship => {
+      const bucketKey = this.getSampleBucketKey(ship, zoom);
+      const bucketItems = buckets.get(bucketKey) ?? [];
+      bucketItems.push(ship);
+      buckets.set(bucketKey, bucketItems);
+    });
+
+    const sampled: SatelliteLiveShip[] = [];
+    buckets.forEach(bucketItems => {
+      if (bucketItems.length <= this.sparseShipAreaThreshold) {
+        sampled.push(...bucketItems);
+        return;
+      }
+
+      const keepCount = this.getShipAreaKeepCount(bucketItems.length, sampleRatio);
+      if (keepCount >= bucketItems.length) {
+        sampled.push(...bucketItems);
+        return;
+      }
+
+      sampled.push(...this.takeSpatiallyDistributedShips(bucketItems, keepCount, zoom));
+    });
+
+    return sampled;
+  }
+
+  private getShipAreaKeepCount(count: number, sampleRatio: number): number {
+    if (count <= this.crowdedShipAreaThreshold) {
+      return Math.max(this.minimumSampledShipsPerArea, Math.ceil(count * this.getModerateShipSampleRatio(sampleRatio)));
+    }
+
+    return Math.max(this.minimumSampledShipsPerArea, Math.ceil(count * sampleRatio));
+  }
+
+  private getModerateShipSampleRatio(sampleRatio: number): number {
+    return Math.max(sampleRatio, 0.264);
+  }
+
+  private limitShipsForViewport(ships: SatelliteLiveShip[], sourceShips: SatelliteLiveShip[], zoom: number): SatelliteLiveShip[] {
     const limit = this.getViewportShipLimit(zoom);
     if (ships.length <= limit) {
       return ships;
     }
 
+    const sourceBucketCounts = this.getShipBucketCounts(sourceShips, zoom);
     const activeEntity = this.sidebar.getActiveEntity();
     const loadingEntity = this.sidebar.getLoadingEntity();
     const activeShipId = activeEntity?.type === 'ship' ? activeEntity.id : '';
     const loadingShipId = loadingEntity?.type === 'ship' ? loadingEntity.id : '';
-    const preserved = ships.filter(ship => {
-      const id = normalizeEntityId(ship.mmsi);
-      return !!id && (id === activeShipId || id === loadingShipId);
-    });
-    const preservedIds = new Set(preserved.map(ship => normalizeEntityId(ship.mmsi)).filter((id): id is string => !!id));
-    const selected = ships
-      .filter(ship => !preservedIds.has(normalizeEntityId(ship.mmsi) ?? ''))
-      .slice()
-      .sort((left, right) => Math.abs(stableHash(this.getStableShipKey(left))) - Math.abs(stableHash(this.getStableShipKey(right))))
-      .slice(0, Math.max(0, limit - preserved.length));
+    const activeShip = activeShipId
+      ? ships.find(ship => normalizeEntityId(ship.mmsi) === activeShipId) ?? null
+      : null;
+    const loadingShip = loadingShipId
+      ? ships.find(ship => normalizeEntityId(ship.mmsi) === loadingShipId && normalizeEntityId(ship.mmsi) !== activeShipId) ?? null
+      : null;
+    const preserved: SatelliteLiveShip[] = [];
+    const denseCandidates: SatelliteLiveShip[] = [];
 
-    return [...preserved, ...selected];
+    ships.forEach(ship => {
+      const shipId = normalizeEntityId(ship.mmsi);
+      if ((activeShip && shipId === activeShipId) || (loadingShip && shipId === loadingShipId)) {
+        return;
+      }
+
+      const bucketKey = this.getSampleBucketKey(ship, zoom);
+      const sourceBucketCount = sourceBucketCounts.get(bucketKey) ?? 0;
+      if (sourceBucketCount <= this.sparseShipAreaThreshold) {
+        preserved.push(ship);
+        return;
+      }
+
+      denseCandidates.push(ship);
+    });
+
+    const pinned = [activeShip, loadingShip].filter((ship): ship is SatelliteLiveShip => !!ship);
+    const remainingLimit = Math.max(0, limit - preserved.length - pinned.length);
+    const limited = this.takeSpatiallyDistributedShips(denseCandidates, remainingLimit, zoom);
+
+    return [...pinned, ...preserved, ...limited];
+  }
+
+  private getShipBucketCounts(ships: SatelliteLiveShip[], zoom: number): Map<string, number> {
+    const counts = new Map<string, number>();
+    ships.forEach(ship => {
+      const bucketKey = this.getSampleBucketKey(ship, zoom);
+      counts.set(bucketKey, (counts.get(bucketKey) ?? 0) + 1);
+    });
+    return counts;
+  }
+
+  private takeSpatiallyDistributedShips(ships: SatelliteLiveShip[], limit: number, zoom: number): SatelliteLiveShip[] {
+    if (limit <= 0) {
+      return [];
+    }
+    if (ships.length <= limit) {
+      return ships;
+    }
+
+    const cells = new Map<string, ShipDistributionCell>();
+    ships.forEach(ship => {
+      const cellRef = this.getDistributionCell(ship, zoom);
+      const cell = cells.get(cellRef.key) ?? { ...cellRef, items: [] };
+      cell.items.push(ship);
+      cells.set(cellRef.key, cell);
+    });
+
+    const orderedCells = this.orderDistributionCells(Array.from(cells.values()).map(cell => ({
+      ...cell,
+      items: cell.items.slice().sort((left, right) => Math.abs(stableHash(this.getStableShipKey(left))) - Math.abs(stableHash(this.getStableShipKey(right)))),
+    })), limit);
+    const selected: SatelliteLiveShip[] = [];
+    let round = 0;
+
+    while (selected.length < limit) {
+      let addedThisRound = false;
+      for (const cell of orderedCells) {
+        const ship = cell.items[round];
+        if (!ship) {
+          continue;
+        }
+        selected.push(ship);
+        addedThisRound = true;
+        if (selected.length >= limit) {
+          break;
+        }
+      }
+      if (!addedThisRound) {
+        break;
+      }
+      round += 1;
+    }
+
+    return selected;
   }
 
   private getViewportShipLimit(zoom: number): number {
@@ -518,63 +638,189 @@ export class ShipMapRenderer {
     return 220;
   }
 
-  private reduceVeryDenseShipCells(ships: SatelliteLiveShip[]): SatelliteLiveShip[] {
-    if (ships.length <= 1200) {
-      return ships;
+  private orderDistributionCells(cells: ShipDistributionCell[], limit: number): ShipDistributionCell[] {
+    if (cells.length <= limit) {
+      return cells.slice().sort((left, right) => left.row - right.row || left.col - right.col);
     }
 
-    const cells = new Map<string, ShipDenseCell>();
-    ships.forEach(ship => {
-      const key = this.getDenseShipCellKey(ship);
-      const cell = cells.get(key) ?? { key, items: [] };
-      cell.items.push(ship);
-      cells.set(key, cell);
-    });
-
-    const reduced: SatelliteLiveShip[] = [];
+    const rowGroups = new Map<number, ShipDistributionCell[]>();
     cells.forEach(cell => {
-      if (cell.items.length <= this.denseShipCellThreshold) {
-        reduced.push(...cell.items);
-        return;
-      }
-
-      reduced.push(...this.takeDenseShipCellSubset(cell.items));
+      const rowCells = rowGroups.get(cell.row) ?? [];
+      rowCells.push(cell);
+      rowGroups.set(cell.row, rowCells);
     });
 
-    return reduced;
-  }
+    const quotas = Array.from(rowGroups.entries())
+      .map(([row, rowCells]) => {
+        const sortedCells = rowCells.slice().sort((left, right) => left.col - right.col);
+        const rawQuota = (limit * sortedCells.length) / cells.length;
+        return {
+          row,
+          cells: sortedCells,
+          quota: Math.min(sortedCells.length, Math.floor(rawQuota)),
+          remainder: rawQuota % 1,
+        };
+      })
+      .sort((left, right) => left.row - right.row);
+    let used = quotas.reduce((total, quota) => total + quota.quota, 0);
 
-  private takeDenseShipCellSubset(ships: SatelliteLiveShip[]): SatelliteLiveShip[] {
-    const activeEntity = this.sidebar.getActiveEntity();
-    const loadingEntity = this.sidebar.getLoadingEntity();
-    const activeShipId = activeEntity?.type === 'ship' ? activeEntity.id : '';
-    const loadingShipId = loadingEntity?.type === 'ship' ? loadingEntity.id : '';
-    const preserved = ships.filter(ship => {
-      const id = normalizeEntityId(ship.mmsi);
-      return !!id && (id === activeShipId || id === loadingShipId);
-    });
-    const preservedIds = new Set(preserved.map(ship => normalizeEntityId(ship.mmsi)).filter((id): id is string => !!id));
-    const keepCount = Math.max(this.denseShipCellThreshold, preserved.length);
-    const selected = ships
-      .filter(ship => !preservedIds.has(normalizeEntityId(ship.mmsi) ?? ''))
+    quotas
       .slice()
-      .sort((left, right) => Math.abs(stableHash(this.getStableShipKey(left))) - Math.abs(stableHash(this.getStableShipKey(right))))
-      .slice(0, Math.max(0, keepCount - preserved.length));
+      .sort((left, right) => right.remainder - left.remainder || right.cells.length - left.cells.length)
+      .forEach(quota => {
+        if (used >= limit || quota.quota >= quota.cells.length) {
+          return;
+        }
+        quota.quota += 1;
+        used += 1;
+      });
 
-    return [...preserved, ...selected];
-  }
-
-  private getDenseShipCellKey(ship: SatelliteLiveShip): string {
-    if (this.map?.latLngToContainerPoint && Number.isFinite(ship.latitude) && Number.isFinite(ship.longitude)) {
-      const point = this.map.latLngToContainerPoint([ship.latitude, ship.longitude]);
-      if (Number.isFinite(point?.x) && Number.isFinite(point?.y)) {
-        const row = Math.floor(point.y / this.denseShipScreenGridSize);
-        const col = Math.floor(point.x / this.denseShipScreenGridSize);
-        return `screen:${this.denseShipScreenGridSize}:${row}:${col}`;
+    while (used < limit) {
+      const nextQuota = quotas.find(quota => quota.quota < quota.cells.length);
+      if (!nextQuota) {
+        break;
       }
+      nextQuota.quota += 1;
+      used += 1;
     }
 
-    return `geo:${Math.floor(((ship.latitude as number) + 90) / 0.25)}:${Math.floor(((ship.longitude as number) + 180) / 0.25)}`;
+    return quotas.flatMap(quota => this.takeEvenlySpacedCells(quota.cells, quota.quota));
+  }
+
+  private takeEvenlySpacedCells(cells: ShipDistributionCell[], count: number): ShipDistributionCell[] {
+    if (count <= 0) {
+      return [];
+    }
+    if (count >= cells.length) {
+      return cells;
+    }
+
+    const selected: ShipDistributionCell[] = [];
+    const step = cells.length / count;
+    for (let index = 0; index < count; index += 1) {
+      selected.push(cells[Math.min(cells.length - 1, Math.floor((index + 0.5) * step))]);
+    }
+    return selected;
+  }
+
+  private getDistributionCell(ship: SatelliteLiveShip, zoom: number): { key: string; row: number; col: number } {
+    const screenCell = this.getScreenDistributionCell(ship, this.getDistributionScreenGridSize(zoom));
+    if (screenCell) {
+      return screenCell;
+    }
+
+    if (Number.isFinite(ship.latitude) && Number.isFinite(ship.longitude)) {
+      const gridSize = this.getDistributionGridSize(zoom);
+      const row = Math.floor(((ship.latitude as number) + 90) / gridSize);
+      const col = Math.floor(((ship.longitude as number) + 180) / gridSize);
+      return { key: `cell:${gridSize}:${row}:${col}`, row, col };
+    }
+
+    return { key: 'cell:unknown', row: 0, col: 0 };
+  }
+
+  private getScreenBucketKey(ship: SatelliteLiveShip, gridSize: number): string | null {
+    const cell = this.getScreenCell(ship, gridSize);
+    return cell ? `screen:${gridSize}:${cell.row}:${cell.col}` : null;
+  }
+
+  private getScreenDistributionCell(ship: SatelliteLiveShip, gridSize: number): { key: string; row: number; col: number } | null {
+    const cell = this.getScreenCell(ship, gridSize);
+    return cell ? { key: `screen-cell:${gridSize}:${cell.row}:${cell.col}`, row: cell.row, col: cell.col } : null;
+  }
+
+  private getScreenCell(ship: SatelliteLiveShip, gridSize: number): { row: number; col: number } | null {
+    if (!this.map?.latLngToContainerPoint || !Number.isFinite(ship.latitude) || !Number.isFinite(ship.longitude)) {
+      return null;
+    }
+
+    const point = this.map.latLngToContainerPoint([ship.latitude, ship.longitude]);
+    if (!Number.isFinite(point?.x) || !Number.isFinite(point?.y)) {
+      return null;
+    }
+
+    return {
+      row: Math.floor(point.y / gridSize),
+      col: Math.floor(point.x / gridSize),
+    };
+  }
+
+  private getSampleScreenGridSize(zoom: number): number {
+    if (zoom >= 7) {
+      return 96;
+    }
+    if (zoom >= 6) {
+      return 104;
+    }
+    if (zoom >= 5) {
+      return 112;
+    }
+    if (zoom >= 4) {
+      return 120;
+    }
+    return 128;
+  }
+
+  private getDistributionScreenGridSize(zoom: number): number {
+    return Math.max(32, Math.round(this.getSampleScreenGridSize(zoom) / 3));
+  }
+
+  private getDistributionGridSize(zoom: number): number {
+    return Math.max(0.25, this.getSampleGridSize(zoom) / 4);
+  }
+
+  private getSampleRatio(zoom: number): number {
+    if (zoom >= 8) {
+      return 0.456;
+    }
+    if (zoom >= 7) {
+      return 0.396;
+    }
+    if (zoom >= 6) {
+      return 0.324;
+    }
+    if (zoom >= 5) {
+      return 0.408;
+    }
+    if (zoom >= 4) {
+      return 0.24;
+    }
+    if (zoom >= 3) {
+      return 0.168;
+    }
+    return 0.168;
+  }
+
+  private getSampleBucketKey(ship: SatelliteLiveShip, zoom: number): string {
+    const screenBucketKey = this.getScreenBucketKey(ship, this.getSampleScreenGridSize(zoom));
+    if (screenBucketKey) {
+      return screenBucketKey;
+    }
+
+    if (Number.isFinite(ship.latitude) && Number.isFinite(ship.longitude)) {
+      const gridSize = this.getSampleGridSize(zoom);
+      const latBucket = Math.floor(((ship.latitude as number) + 90) / gridSize);
+      const lonBucket = Math.floor(((ship.longitude as number) + 180) / gridSize);
+      return `grid:${gridSize}:${latBucket}:${lonBucket}`;
+    }
+
+    return 'grid:unknown';
+  }
+
+  private getSampleGridSize(zoom: number): number {
+    if (zoom >= 7) {
+      return 1;
+    }
+    if (zoom >= 6) {
+      return 1.5;
+    }
+    if (zoom >= 5) {
+      return 2;
+    }
+    if (zoom >= 4) {
+      return 2.5;
+    }
+    return 3;
   }
 
   private getStableShipKey(ship: SatelliteLiveShip): string {

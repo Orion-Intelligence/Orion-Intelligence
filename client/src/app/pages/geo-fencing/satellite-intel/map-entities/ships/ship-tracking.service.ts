@@ -18,6 +18,14 @@ export class SatelliteShipTrackingService {
     return this.satelliteIntelService.createPolledRequest(() => this.fetchInBounds(lat, lon, delta, aisstreamApiKey), (res) => this.getPollStatus(res));
   }
 
+  fetchGlobal(aisstreamApiKey?: string): Observable<SatelliteLiveShipsBBoxResponse> {
+    return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships', this.buildGlobalPayload(aisstreamApiKey));
+  }
+
+  pollGlobal(aisstreamApiKey?: string): Observable<SatelliteLiveShipsBBoxResponse> {
+    return this.satelliteIntelService.createPolledRequest(() => this.fetchGlobal(aisstreamApiKey), (res) => this.getPollStatus(res));
+  }
+
   fetchByMMSI(mmsi: string): Observable<SatelliteLiveShipsBBoxResponse> {
     return this.api.post<SatelliteLiveShipsBBoxResponse>('satellite/livetrack/ships/mmsi', { mmsi: mmsi });
   }
@@ -72,6 +80,21 @@ export class SatelliteShipTrackingService {
       lat_max: this.clampLatitude(lat + boundsDelta),
       lon_min: this.clampLongitude(lon - boundsDelta),
       lon_max: this.clampLongitude(lon + boundsDelta),
+    };
+
+    if (aisstreamApiKey?.trim()) {
+      payload['aisstream_api_key'] = aisstreamApiKey.trim();
+    }
+
+    return payload;
+  }
+
+  private buildGlobalPayload(aisstreamApiKey?: string): Record<string, any> {
+    const payload: Record<string, any> = {
+      lat_min: -90,
+      lat_max: 90,
+      lon_min: -180,
+      lon_max: 180,
     };
 
     if (aisstreamApiKey?.trim()) {

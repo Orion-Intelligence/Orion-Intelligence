@@ -7,6 +7,7 @@ export class SatelliteShipTrackingController {
   private trackSub?: Subscription;
   private timer?: ReturnType<typeof setTimeout>;
   private viewportKey = '';
+  private scoped = false;
   private readonly refreshIntervalMs = 8000;
   private service: SatelliteShipTrackingService;
   private loading: MapEntityLoadingBridge;
@@ -21,10 +22,11 @@ export class SatelliteShipTrackingController {
     this.loading = loading;
   }
 
-  toggle(viewport: SatelliteTrackingViewport): void {
+  toggle(viewport: SatelliteTrackingViewport, scoped = false): void {
     this.enabled = !this.enabled;
+    this.scoped = scoped;
     if (this.enabled) {
-      this.refresh(viewport, false, true);
+      this.refresh(viewport, false, true, scoped);
       return;
     }
     this.stop();
@@ -32,15 +34,20 @@ export class SatelliteShipTrackingController {
     this.error = null;
   }
 
-  refresh(viewport: SatelliteTrackingViewport, showLoading = false, scheduleNext = false): void {
+  refresh(viewport: SatelliteTrackingViewport, showLoading = false, scheduleNext = false, scoped = this.scoped): void {
     if (!this.enabled) {
+      return;
+    }
+    this.scoped = scoped;
+    if (!this.scoped) {
+      this.refreshGlobal(showLoading, scheduleNext);
       return;
     }
     this.refreshInBounds(viewport, showLoading, scheduleNext);
   }
 
   scheduleViewportRefresh(viewport: SatelliteTrackingViewport, delayMs = 500): void {
-    if (!this.enabled || this.getViewportKey(viewport) === this.viewportKey) {
+    if (!this.enabled || !this.scoped || this.getViewportKey(viewport) === this.viewportKey) {
       return;
     }
     clearTimeout(this.timer);
@@ -57,7 +64,48 @@ export class SatelliteShipTrackingController {
     this.trackSub?.unsubscribe();
     clearTimeout(this.timer);
     this.viewportKey = '';
+    this.scoped = false;
     this.isLoading = false;
+  }
+
+  private refreshGlobal(showLoading = false, scheduleNext = false): void {
+    clearTimeout(this.timer);
+    const showSpinner = showLoading || this.data.length === 0;
+    this.isLoading = showSpinner;
+    const loadingId = showLoading ? this.loading.begin('Loading Satellite Intel', 'Loading global ship tracking data...') : null;
+
+    this.trackSub?.unsubscribe();
+    clearTimeout(this.timer);
+    this.trackSub = this.service.pollGlobal().subscribe({
+      next: (res) => {
+        if (!this.enabled) {
+          return;
+        }
+        const payload = (res?.result ?? res) as any;
+        const ships = this.service.extractItems(payload);
+        if (ships !== null) {
+          this.applyResult(ships, payload, 'Global ship tracking');
+        }
+        const feedIssue = this.service.getFeedIssue(payload);
+        if (ships === null && feedIssue) {
+          this.error = `Global ship tracking: ${feedIssue}`;
+        }
+      },
+      error: (err) => {
+        this.error = err?.error?.detail || err?.message || 'Global ship tracking failed';
+      },
+    });
+    this.trackSub.add(() => {
+      this.isLoading = false;
+      if (loadingId !== null) {
+        this.loading.end(loadingId);
+      }
+      if (scheduleNext && this.enabled && !this.scoped) {
+        this.timer = setTimeout(() => {
+          this.refreshGlobal(false, true);
+        }, this.refreshIntervalMs);
+      }
+    });
   }
 
   private refreshInBounds(viewport: SatelliteTrackingViewport, showLoading = false, scheduleNext = false): void {

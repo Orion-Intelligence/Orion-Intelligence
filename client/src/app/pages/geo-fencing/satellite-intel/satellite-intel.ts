@@ -347,7 +347,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   onShipTrackingSelectionChange(): void {
-    this.entityLoader.toggleShips(this.locationState.getShipTrackingViewport());
+    this.entityLoader.toggleShips(this.locationState.getShipTrackingViewport(), this.locationState.isLocationScoped);
   }
 
   focusSelectedLocation(): void {

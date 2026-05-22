@@ -65,11 +65,9 @@
           <i class="bi bi-geo-alt"></i>
           Location
         </button>
-        @if (locationScoped) {
-          <button type="button" class="rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2.5 py-1 text-[11px] font-medium text-[var(--color-text3)] hover:text-[var(--color-text1)]" (click)="locationCleared.emit()">
-            Clear all
-          </button>
-        }
+        <button type="button" class="rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2.5 py-1 text-[11px] font-medium text-[var(--color-text3)] hover:text-[var(--color-text1)]" (click)="locationCleared.emit()">
+          Clear all
+        </button>
       </div>
     </div>
 
@@ -86,7 +84,7 @@
           <span class="font-mono font-semibold text-[var(--color-text1)]">{{ shipsCount }}</span>
         </div>
       }
-      @if (!hasSearched) {
+      @if (!hasSearched && !visiblePowerCount && (!facilitiesData || !facilitiesData.total)) {
         <div class="px-[14px] py-6 text-center text-[12px] text-[var(--color-text3)]">
           Select location to load facilities
         </div>
@@ -102,8 +100,9 @@
         </div>
       }
       @else {
-        <div class="border-b border-[var(--color-border)] px-[14px] py-2 text-[12px] font-semibold text-[var(--color-text1)]">
-          {{ facilitiesData?.total || visiblePowerCount }} facilities
+        <div class="flex justify-between border-b border-[var(--color-border)] px-[14px] py-[7px] text-[12px]">
+          <span class="text-[var(--color-text3)]">facilities</span>
+          <span class="font-mono font-semibold text-[var(--color-text1)]">{{ facilitiesData?.total || visiblePowerCount }}</span>
         </div>
 
         @if (facilityEntries.length) {

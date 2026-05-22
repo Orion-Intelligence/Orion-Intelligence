@@ -5,7 +5,6 @@ type ParsedCoordinates = { lat: number; lon: number };
 
 export class SatelliteLocationState {
   private readonly compareNarrowDelta = 0.015;
-  private readonly maxUnscopedShipTrackingDelta = 10;
   private shipTrackingViewport: SatelliteTrackingViewport | null = null;
   private scopedViewport: SatelliteTrackingViewport | null = null;
   private compareViewport: SatelliteIntelViewport | null = null;
@@ -83,11 +82,10 @@ export class SatelliteLocationState {
     this.inputDelta = this.zoomToDelta(center.zoom);
     this.coordsForm.value = `${center.lat.toFixed(5)}, ${center.lon.toFixed(5)}`;
     this.coordsForm.delta = this.inputDelta;
-    const trackingDelta = Math.min(center.trackingDelta ?? this.inputDelta, this.maxUnscopedShipTrackingDelta);
     this.shipTrackingViewport = {
       lat: center.lat,
       lon: center.lon,
-      delta: trackingDelta,
+      delta: center.trackingDelta ?? this.inputDelta,
     };
   }
 
