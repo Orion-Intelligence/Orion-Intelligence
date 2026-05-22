@@ -1,4 +1,4 @@
-import { Component, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { SidebarService } from '../../../shared/services/sidebar.service';
@@ -52,6 +52,7 @@ import { SatelliteIntelPanelEnum } from '../enums/geo-fencing.enums';
   ],
 })
 export class SatelliteIntel implements OnInit, OnDestroy {
+  @ViewChild(ThreatLensComponent) private threatLensComponent?: ThreatLensComponent;
   private entityLoader: EntityLoader;
   private mapEntityDashboard: SatelliteMapEntityDashboardController;
   private loadingController = new SatelliteLoadingController();
@@ -319,6 +320,11 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   openThreatFilters(): void {
     this.sidebarService.openSidebar();
+    this.isPanelMenuOpen = false;
+  }
+
+  openThreatIpScan(): void {
+    this.threatLensComponent?.openIpScanLocation();
     this.isPanelMenuOpen = false;
   }
 
