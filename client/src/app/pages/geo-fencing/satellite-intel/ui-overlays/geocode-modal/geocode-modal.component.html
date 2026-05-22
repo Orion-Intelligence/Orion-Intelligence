@@ -12,8 +12,8 @@
         </button>
       </div>
 
-      <div class="p-5 max-[420px]:p-3">
-        <div class="mb-4 flex gap-2 max-[420px]:flex-col">
+      <form class="space-y-4 p-5 max-[420px]:p-3" (submit)="$event.preventDefault(); onSubmit()">
+        <div class="flex gap-2 max-[420px]:flex-col">
           <button type="button" class="flex-1 rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition-colors" [ngClass]="activeInputMode === 'search' ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-640)]','text-white'] : ['border-[var(--color-border)]','bg-[var(--color-blue-720)]','text-[var(--color-text3)]','hover:text-[var(--color-text1)]']" (click)="activeInputMode = 'search'">
             Search location
           </button>
@@ -21,72 +21,49 @@
             Coordinates
           </button>
         </div>
+
         @if (!allowCoverage) {
-          <div class="mb-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-[11px] text-[var(--color-text3)]">
+          <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-[11px] text-[var(--color-text3)]">
             Narrow area only
           </div>
         }
 
-        <div>
         @if (activeInputMode === 'search') {
-          <div class="space-y-3">
-            <div>
-              <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">Location</label>
-              <div class="relative">
-                <div class="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-white px-3 py-2" [ngClass]="searchError ? 'ring-1 ring-red-400/50' : ''">
-                  @if (isSearching) {
-                    <span class="h-4 w-4 flex-shrink-0 animate-spin rounded-full border-2 border-sky-400/25 border-t-sky-400"></span>
-                  } @else {
-                    <i class="bi bi-search flex-shrink-0 text-[13px] text-[#0e1626]/50"></i>
-                  }
-                  <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchInput()" placeholder="City, country, region…" class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/40" autocomplete="off"/>
-                </div>
-                @if (searchResults.length > 0) {
-                  <div class="absolute left-0 right-0 top-[calc(100%+4px)] z-20 max-h-60 overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-790)] shadow-xl">
-                    @for (result of searchResults; track result.lat + result.lon) {
-                      <button type="button" class="flex w-full flex-col gap-0.5 border-b border-[var(--color-border)] px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-[var(--color-blue-720)]" (click)="selectResult(result)">
-                        <span class="text-[13px] font-semibold text-[var(--color-text1)]">{{ result.name }}</span>
-                        <span class="truncate text-[11px] text-[var(--color-text4)]">{{ result.display_name }}</span>
-                        <span class="font-mono text-[10px] text-[var(--color-text4)]">
-                          {{ result.lat }}, {{ result.lon }}
-                          @if (allowCoverage) {
-                            <span> · {{ (result.delta * 111.32).toFixed(1) }} km coverage</span>
-                          }
-                        </span>
-                      </button>
-                    }
-                  </div>
+          <div>
+            <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">Location</label>
+            <div class="relative">
+              <div class="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-white px-3 py-2" [ngClass]="searchError ? 'ring-1 ring-red-400/50' : ''">
+                @if (isSearching) {
+                  <span class="h-4 w-4 flex-shrink-0 animate-spin rounded-full border-2 border-sky-400/25 border-t-sky-400"></span>
+                } @else {
+                  <i class="bi bi-search flex-shrink-0 text-[13px] text-[#0e1626]/50"></i>
                 }
+                <input type="text" [(ngModel)]="searchQuery" name="locationSearch" (ngModelChange)="onSearchInput()" placeholder="City, country, region..." class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/40" autocomplete="off"/>
               </div>
-              @if (searchError) {
-                <div class="mt-1.5 text-[12px] text-red-400">{{ searchError }}</div>
+              @if (searchResults.length > 0) {
+                <div class="absolute left-0 right-0 top-[calc(100%+4px)] z-20 max-h-60 overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-790)] shadow-xl">
+                  @for (result of searchResults; track result.lat + result.lon) {
+                    <button type="button" class="flex w-full flex-col gap-0.5 border-b border-[var(--color-border)] px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-[var(--color-blue-720)]" (click)="selectResult(result)">
+                      <span class="text-[13px] font-semibold text-[var(--color-text1)]">{{ result.name }}</span>
+                      <span class="truncate text-[11px] text-[var(--color-text4)]">{{ result.display_name }}</span>
+                      <span class="font-mono text-[10px] text-[var(--color-text4)]">
+                        {{ result.lat }}, {{ result.lon }}
+                        @if (allowCoverage) {
+                          <span> · {{ (result.delta * 111.32).toFixed(1) }} km coverage</span>
+                        }
+                      </span>
+                    </button>
+                  }
+                </div>
               }
             </div>
-
-          @if (allowCoverage) {
-          <div>
-            <label class="mb-1.5 flex items-center justify-between gap-3 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">
-              <span>Coverage size</span>
-              <span class="font-normal normal-case tracking-normal text-[var(--color-text4)]">
-                <span class="font-mono text-sky-400">{{ manualDelta }}</span>° ≈
-                <span class="font-semibold text-[var(--color-text2)]">{{ (manualDelta * 111.32).toFixed(1) }} km</span>
-              </span>
-            </label>
-            <input type="number" [(ngModel)]="manualDelta" name="searchDelta" (input)="onManualDeltaChange()" step="0.005" min="0.001" max="9" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)]" [ngClass]="deltaError ? 'border-red-400/60 ring-1 ring-red-400/40' : ''"/>
-            @if (deltaError) {
-              <div class="mt-1 text-[11px] text-red-400">{{ deltaError }}</div>
+            @if (searchError) {
+              <div class="mt-1.5 text-[12px] text-red-400">{{ searchError }}</div>
             }
           </div>
-          }
-          <button type="button" [disabled]="isScanning || !manualCoords.trim() || !!deltaError" class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40" (click)="onSubmit()">
-            <i class="bi bi-crosshair text-[14px]"></i>
-            Apply location
-          </button>
-        </div>
         }
 
         @if (activeInputMode === 'coordinates') {
-          <form class="space-y-3" (submit)="$event.preventDefault(); onSubmit()">
           <div>
             <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">Coordinates</label>
             <input type="text" [(ngModel)]="manualCoords" name="coords" (input)="onManualCoordsChange()" placeholder="31.48, 74.17" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/40 focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)]" [ngClass]="coordsError ? 'border-red-400/60 ring-1 ring-red-400/40' : ''"/>
@@ -94,31 +71,33 @@
               <div class="mt-1 text-[11px] text-red-400">{{ coordsError }}</div>
             }
           </div>
-
-          @if (allowCoverage) {
-            <div>
-              <label class="mb-1.5 flex items-center justify-between gap-3 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">
-                <span>Coverage size</span>
-                <span class="font-normal normal-case tracking-normal text-[var(--color-text4)]">
-                  <span class="font-mono text-sky-400">{{ manualDelta }}</span>° ≈
-                  <span class="font-semibold text-[var(--color-text2)]">{{ (manualDelta * 111.32).toFixed(1) }} km</span>
-                </span>
-              </label>
-              <input type="number" [(ngModel)]="manualDelta" name="delta" (input)="onManualDeltaChange()" step="0.005" min="0.001" max="9" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)]" [ngClass]="deltaError ? 'border-red-400/60 ring-1 ring-red-400/40' : ''"/>
-              @if (deltaError) {
-                <div class="mt-1 text-[11px] text-red-400">{{ deltaError }}</div>
-              }
-            </div>
-          }
-
-          <button type="submit" [disabled]="isScanning || !manualCoords.trim() || !!coordsError || !!deltaError" class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
-            <i class="bi bi-crosshair text-[14px]"></i>
-            Apply location
-          </button>
-        </form>
         }
-        </div>
-      </div>
+
+        @if (allowCoverage) {
+          <div>
+            <label class="mb-1.5 flex items-center justify-between gap-3 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">
+              <span>Coverage size</span>
+              <span class="font-mono text-sky-400">{{ coverageLabelValue }}</span>
+            </label>
+            <input type="number" [(ngModel)]="manualDelta" name="coverageDelta" (input)="onManualCoverageChange()" step="0.005" [attr.min]="minDelta" [attr.max]="effectiveMaxDelta" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)]" [ngClass]="coverageError ? 'border-red-400/60 ring-1 ring-red-400/40' : ''"/>
+            @if (coverageError) {
+              <div class="mt-1 text-[11px] text-red-400">{{ coverageError }}</div>
+            }
+          </div>
+        }
+
+        @if (showMaxIps) {
+          <div>
+            <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">Max IPs</label>
+            <input type="number" [(ngModel)]="manualMaxIps" name="maxIps" (input)="onManualMaxIpsChange()" step="1" min="1" [attr.max]="maxIpsLimit" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)]"/>
+          </div>
+        }
+
+        <button type="submit" [disabled]="isScanning || !canApplyLocation || !!coordsError || !!coverageError" class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
+          <i class="bi bi-crosshair text-[14px]"></i>
+          Apply Location
+        </button>
+      </form>
     </div>
   </div>
 }

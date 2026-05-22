@@ -43,6 +43,7 @@ import { SatelliteIntelPanel, SatelliteIntelPanelEnum } from '../enums/geo-fenci
   ],
 })
 export class SatelliteIntel implements OnInit, OnDestroy {
+  @ViewChild(ThreatLensComponent) private threatLensComponent?: ThreatLensComponent;
   private entityLoader: EntityLoader;
   private mapEntityDashboard: SatelliteMapEntityDashboardController;
   private loadingState = new SatelliteLoadingState();
@@ -329,6 +330,11 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   openThreatFilters(): void {
     this.sidebarService.openSidebar();
+    this.isPanelMenuOpen = false;
+  }
+
+  openThreatIpScan(): void {
+    this.threatLensComponent?.openIpScanLocation();
     this.isPanelMenuOpen = false;
   }
 

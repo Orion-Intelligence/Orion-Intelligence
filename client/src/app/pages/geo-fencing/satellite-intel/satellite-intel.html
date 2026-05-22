@@ -91,6 +91,7 @@
         [isPanelMenuOpen]="isPanelMenuOpen"
         [isPanelPopupOpen]="isPanelPopupOpen"
         [activePanel]="activePanel"
+        (threatIpScanOpened)="openThreatIpScan()"
         (threatFiltersOpened)="openThreatFilters()"
         (panelOpened)="openPanelPopup($event)"
         (panelClosed)="closePanelPopup()">
@@ -156,6 +157,7 @@
   [coordinates]="geocodeCoordinates"
   [delta]="geocodeDelta"
   [allowCoverage]="geocodeAllowCoverage"
+  mode="satellite"
   [title]="geocodeTitle"
   (close)="closeGeocodeModal()"
   (coordinatesChange)="onCoordinatesChange($event)"
