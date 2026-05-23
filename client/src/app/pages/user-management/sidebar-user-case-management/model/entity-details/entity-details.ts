@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdditionalIdentifier, CaseEntity, CaseTag, SocialMediaProfile } from '../../../../../shared/model/case-management/case.model';
-import { CASE_TAG_OPTIONS, ENTITY_RELATIONSHIP_OPTIONS, ENTITY_ROLE_OPTIONS, ENTITY_TYPE_OPTIONS, IDENTIFIER_TYPE_OPTIONS, SOCIAL_PLATFORM_OPTIONS, SOURCE_TYPE_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
+import { CASE_TAG_OPTIONS, ENTITY_ROLE_OPTIONS, ENTITY_TYPE_OPTIONS, IDENTIFIER_TYPE_OPTIONS, SOCIAL_PLATFORM_OPTIONS, SOURCE_TYPE_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
 import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
 
 @Component({
@@ -16,7 +16,6 @@ export class EntityDetailsComponent implements OnChanges {
 
   entityTypes = ENTITY_TYPE_OPTIONS;
   entityRoles = ENTITY_ROLE_OPTIONS;
-  entityRelationships = ENTITY_RELATIONSHIP_OPTIONS;
   sourceTypes = SOURCE_TYPE_OPTIONS;
   socialMediaPlatforms = SOCIAL_PLATFORM_OPTIONS;
   identifierTypes = IDENTIFIER_TYPE_OPTIONS;
@@ -29,6 +28,8 @@ export class EntityDetailsComponent implements OnChanges {
   @Input() showTitle = true;
   @Input() showTopDivider = true;
   @Input() showRoleRelationshipFields = true;
+  @Input() linkableEntities: CaseEntity[] = [];
+  @Input() allCaseEntities: CaseEntity[] = [];
 
   @Output() remove = new EventEmitter<void>();
   @Output() save = new EventEmitter<void>();
@@ -119,6 +120,19 @@ export class EntityDetailsComponent implements OnChanges {
 
   getEntitySourceOtherError(): string | null {
     return this.getOtherError(this.entity?.source, this.entity?.entitySourceOtherValue);
+  }
+
+  getLinkedEntityLabel(entity: CaseEntity): string {
+    const value = entity.value || entity.entityId;
+
+    if (entity.role === 'primary') {
+      return `Primary Entity - ${value}`;
+    }
+
+    const relatedEntities = this.allCaseEntities.filter(item => item.role !== 'primary');
+    const realIndex = relatedEntities.findIndex(item => item.entityId === entity.entityId);
+
+    return `Related Entity ${realIndex + 1} - ${value}`;
   }
 
   toggleTag(tag: CaseTag): void {

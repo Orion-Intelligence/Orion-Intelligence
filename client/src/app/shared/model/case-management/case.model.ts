@@ -187,12 +187,12 @@ export interface CaseEntity {
     entitySourceOtherValue?: string;
     entityDescription?: string;
     role: EntityRole;
-    relationshipToCase: EntityRelationship;
     confidence: number;
     source: SourceType;
     identifiers: AdditionalIdentifier[];
     socialProfiles: SocialMediaProfile[];
     tags: CaseTag[];
+    linkedEntityId?: string;
     createdBy?: string;
     updatedBy?: string;
     createdAt?: Date | string;
@@ -207,12 +207,12 @@ export interface CaseEntityRequest {
     entitySourceOtherValue?: string;
     entityDescription?: string;
     role: EntityRole;
-    relationshipToCase: EntityRelationship;
     confidence: number;
     source: SourceType;
     identifiers: AdditionalIdentifier[];
     socialProfiles: SocialMediaProfile[];
     tags: CaseTag[];
+    linkedEntityId?: string;
 }
 
 export interface CaseLink {

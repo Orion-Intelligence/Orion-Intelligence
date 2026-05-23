@@ -485,7 +485,8 @@
                         </span>
                     </div>
                     <div class="text-xs font-medium text-[var(--color-text4)]">
-                        {{ formatLabel(primaryEntity.relationshipToCase) }} · {{ formatLabel(primaryEntity.source) }}
+                        Primary Entity · {{ getDisplayLabel(primaryEntity.source, primaryEntity.entitySourceOtherValue)
+                        }}
                     </div>
                 </div>
 
@@ -532,8 +533,8 @@
                             <div>
                                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
                                     Relationship</div>
-                                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{
-                                    formatLabel(primaryEntity.relationshipToCase) }}</div>
+                                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
+                                    Primary Entity</div>
                             </div>
                             <div>
                                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
@@ -647,7 +648,9 @@
                     @for (entity of getRelatedEntities(editedCase); track entity.entityId; let i = $index) {
                     <app-entity-details [entity]="entity" [isMainEntity]="false" [showTitle]="true"
                         [showTopDivider]="false" [showRoleRelationshipFields]="true" [entityIndex]="i"
-                        (remove)="removeRelatedEntity(i)" (save)="saveRelatedEntities()">
+                        [linkableEntities]="getLinkableEntities(entity.entityId, editedCase)"
+                        [allCaseEntities]="editedCase.entities || []" (remove)="removeRelatedEntity(i)"
+                        (save)="saveRelatedEntities()">
                     </app-entity-details>
                     }
                     } @else {
@@ -672,7 +675,7 @@
                             </div>
 
                             <div class="text-xs font-medium text-[var(--color-text4)]">
-                                {{ formatLabel(entity.relationshipToCase) }} ·
+                                {{ getLinkedEntityDisplayLabel(entity.linkedEntityId) }} ·
                                 {{ getDisplayLabel(entity.source, entity.entitySourceOtherValue) }}
                             </div>
                         </button>
@@ -742,7 +745,7 @@
                                                 Relationship
                                             </div>
                                             <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
-                                                {{ formatLabel(entity.relationshipToCase) }}
+                                                {{ getLinkedEntityDisplayLabel(entity.linkedEntityId) }}
                                             </div>
                                         </div>
 
@@ -860,7 +863,8 @@
                 <div class="p-4">
                     <app-entity-details [entity]="newRelatedEntity" [isMainEntity]="false" [showTitle]="false"
                         [showTopDivider]="false" [showRoleRelationshipFields]="true" [entityIndex]="0"
-                        (save)="saveNewRelatedEntity()">
+                        [linkableEntities]="getLinkableEntities(newRelatedEntity.entityId, caseData)"
+                        [allCaseEntities]="caseData.entities || []" (save)="saveNewRelatedEntity()">
                     </app-entity-details>
                 </div>
             </div>

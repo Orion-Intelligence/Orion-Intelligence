@@ -1,4 +1,4 @@
-import { ArtifactType, CaseArtifact, CaseEntity, CaseEntityRequest, CaseLink, CaseRequest, CaseStatus, CaseTag, CaseTask, CaseType, ClosureReason, EntityRelationship, EntityRole, EntityType, IdentifierType, IntakeSource, Priority, Severity, SocialPlatform, SourceType, TaskStatus } from './case.model';
+import { ArtifactType, CaseArtifact, CaseEntity, CaseEntityRequest, CaseLink, CaseRequest, CaseStatus, CaseTag, CaseTask, CaseType, ClosureReason, EntityRole, EntityType, IdentifierType, IntakeSource, Priority, Severity, SocialPlatform, SourceType, TaskStatus } from './case.model';
 
 export interface CaseOption<T extends string> {
   value: T;
@@ -131,22 +131,6 @@ export const ENTITY_ROLE_OPTIONS: CaseOption<EntityRole>[] = [
   { value: 'owner', label: 'Owner' }
 ];
 
-export const ENTITY_RELATIONSHIP_OPTIONS: CaseOption<EntityRelationship>[] = [
-  { value: 'related_to', label: 'Related To' },
-  { value: 'affected_account', label: 'Affected Account' },
-  { value: 'affected_asset', label: 'Affected Asset' },
-  { value: 'contact_point', label: 'Contact Point' },
-  { value: 'owns', label: 'Owns' },
-  { value: 'uses', label: 'Uses' },
-  { value: 'hosts', label: 'Hosts' },
-  { value: 'resolves_to', label: 'Resolves To' },
-  { value: 'connected_to', label: 'Connected To' },
-  { value: 'created_by', label: 'Created By' },
-  { value: 'targeted_by', label: 'Targeted By' },
-  { value: 'observed_with', label: 'Observed With' },
-  { value: 'same_as', label: 'Same As' }
-];
-
 export const SOURCE_TYPE_OPTIONS: CaseOption<SourceType>[] = [
   { value: 'manual', label: 'Manual' },
   { value: 'orion_alert', label: 'Orion Alert' },
@@ -209,7 +193,6 @@ export const DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE: CaseEntity = {
   value: '',
   entityDescription: '',
   role: 'primary',
-  relationshipToCase: 'subject_of_case',
   confidence: 1,
   source: 'manual',
   identifiers: [],
@@ -223,7 +206,7 @@ export const DEFAULT_RELATED_CASE_ENTITY_TEMPLATE: CaseEntity = {
   ...structuredClone(DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE),
   entityId: '',
   role: 'related',
-  relationshipToCase: 'related_to',
+  linkedEntityId: '',
   identifiers: [],
   socialProfiles: [],
   tags: []
@@ -235,7 +218,6 @@ export const DEFAULT_PRIMARY_CASE_ENTITY_REQUEST_TEMPLATE: CaseEntityRequest = {
   value: '',
   entityDescription: '',
   role: 'primary',
-  relationshipToCase: 'subject_of_case',
   confidence: 1,
   source: 'manual',
   identifiers: [],

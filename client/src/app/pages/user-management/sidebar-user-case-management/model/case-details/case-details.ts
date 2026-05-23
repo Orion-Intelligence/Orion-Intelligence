@@ -332,6 +332,35 @@ export class CaseDetails implements OnInit {
     return caseItem?.entities?.filter(entity => entity.entityId !== primaryEntity?.entityId) || [];
   }
 
+  getLinkableEntities(currentEntityId?: string, caseItem: Case | null = this.editedCase || this.caseData): CaseEntity[] {
+    return (caseItem?.entities || []).filter(entity => entity.entityId !== currentEntityId);
+  }
+
+  getLinkedEntityDisplayLabel(entityId?: string): string {
+    if (!entityId) {
+      return 'Not linked';
+    }
+
+    const allEntities = this.caseData?.entities || this.editedCase?.entities || [];
+    const linkedEntity = allEntities.find(entity => entity.entityId === entityId);
+
+    if (!linkedEntity) {
+      return 'Linked entity not found';
+    }
+
+    const primaryEntity = this.getPrimaryEntity(this.caseData || this.editedCase);
+    const label = linkedEntity.value || linkedEntity.entityId;
+
+    if (linkedEntity.entityId === primaryEntity?.entityId || linkedEntity.role === 'primary') {
+      return `Primary Entity - ${label}`;
+    }
+
+    const relatedIndex = this.getRelatedEntities(this.caseData || this.editedCase)
+      .findIndex(entity => entity.entityId === linkedEntity.entityId);
+
+    return `Related Entity ${relatedIndex + 1} - ${label}`;
+  }
+
   toggleRelatedEntity(entityId: string): void {
     if (this.expandedRelatedEntityIds.has(entityId)) {
       this.expandedRelatedEntityIds.delete(entityId);
@@ -640,8 +669,8 @@ export class CaseDetails implements OnInit {
 
     const invalidIndex = this.getRelatedEntities(this.editedCase).findIndex(entity =>
       !entity.value.trim()
-          || (entity.type === 'other' && !entity.entityTypeOtherValue?.trim())
-          || (entity.source === 'other' && !entity.entitySourceOtherValue?.trim()));
+      || (entity.type === 'other' && !entity.entityTypeOtherValue?.trim())
+      || (entity.source === 'other' && !entity.entitySourceOtherValue?.trim()));
 
     if (invalidIndex >= 0) {
       this.messageNotificationService.show(`Related entity ${invalidIndex + 1} is invalid`);
@@ -682,8 +711,8 @@ export class CaseDetails implements OnInit {
 
     const invalidIndex = (this.editedCase.artifacts || []).findIndex(artifact =>
       !artifact.title.trim()
-          || (artifact.type === 'other' && !artifact.artifactTypeOtherValue?.trim())
-          || (artifact.source === 'other' && !artifact.artifactSourceOtherValue?.trim()));
+      || (artifact.type === 'other' && !artifact.artifactTypeOtherValue?.trim())
+      || (artifact.source === 'other' && !artifact.artifactSourceOtherValue?.trim()));
 
     if (invalidIndex >= 0) {
       this.messageNotificationService.show(`Artifact ${invalidIndex + 1} is invalid`);
@@ -933,7 +962,6 @@ export class CaseDetails implements OnInit {
     }
     this.ensureEntityDefaults(primaryEntity);
     primaryEntity.role = 'primary';
-    primaryEntity.relationshipToCase = 'subject_of_case';
     caseItem.primaryEntityId = primaryEntity.entityId;
     return primaryEntity;
   }
@@ -944,12 +972,12 @@ export class CaseDetails implements OnInit {
     entity.value = entity.value || '';
     entity.entityDescription = entity.entityDescription || '';
     entity.role = entity.role || 'related';
-    entity.relationshipToCase = entity.relationshipToCase || 'related_to';
     entity.confidence = entity.confidence ?? 1;
     entity.source = entity.source || 'manual';
     entity.identifiers = entity.identifiers || [];
     entity.socialProfiles = entity.socialProfiles || [];
     entity.tags = entity.tags || [];
+    entity.linkedEntityId = entity.linkedEntityId || '';
     return entity;
   }
 
@@ -1078,7 +1106,6 @@ export class CaseDetails implements OnInit {
       value,
       entityDescription: entity.entityDescription?.trim() || value,
       role: entity.role,
-      relationshipToCase: entity.relationshipToCase,
       confidence: entity.confidence,
       source: entity.source,
       entitySourceOtherValue: entity.entitySourceOtherValue?.trim() || '',
@@ -1100,7 +1127,8 @@ export class CaseDetails implements OnInit {
           profileUrl: profile.profileUrl?.trim() || '',
           displayName: profile.displayName?.trim() || ''
         })),
-      tags: entity.tags || []
+      tags: entity.tags || [],
+      linkedEntityId: entity.linkedEntityId || '',
     };
   }
 

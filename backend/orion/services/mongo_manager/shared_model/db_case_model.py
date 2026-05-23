@@ -119,23 +119,6 @@ class EntityRole(str, Enum):
     OWNER = "owner"
 
 
-class EntityRelationship(str, Enum):
-    SUBJECT_OF_CASE = "subject_of_case"
-    AFFECTED_ACCOUNT = "affected_account"
-    AFFECTED_ASSET = "affected_asset"
-    CONTACT_POINT = "contact_point"
-    OWNS = "owns"
-    USES = "uses"
-    HOSTS = "hosts"
-    RESOLVES_TO = "resolves_to"
-    CONNECTED_TO = "connected_to"
-    CREATED_BY = "created_by"
-    TARGETED_BY = "targeted_by"
-    OBSERVED_WITH = "observed_with"
-    SAME_AS = "same_as"
-    RELATED_TO = "related_to"
-
-
 class SocialPlatform(str, Enum):
     FACEBOOK = "facebook"
     INSTAGRAM = "instagram"
@@ -274,7 +257,7 @@ class CaseEntity(EmbeddedModel):
     value: str
     entityDescription: str = ""
     role: EntityRole = Field(default=EntityRole.RELATED)
-    relationshipToCase: EntityRelationship = Field(default=EntityRelationship.RELATED_TO)
+    linkedEntityId: str = ""
     confidence: float = 1.0
     source: SourceType = Field(default=SourceType.MANUAL)
     entitySourceOtherValue: str = ""

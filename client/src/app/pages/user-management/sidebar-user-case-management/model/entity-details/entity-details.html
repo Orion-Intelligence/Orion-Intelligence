@@ -42,7 +42,8 @@
             </label>
             <input type="text" [(ngModel)]="entity.entityTypeOtherValue" [name]="'entityTypeOtherValue-' + controlPrefix" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Specify other entity type" />
             @if (getOtherError(entity.type, entity.entityTypeOtherValue)) {
-            <p class="case-form-error mt-1 text-xs text-red-400">{{ getOtherError(entity.type, entity.entityTypeOtherValue) }}</p>
+            <p class="case-form-error mt-1 text-xs text-red-400">{{ getOtherError(entity.type,
+                entity.entityTypeOtherValue) }}</p>
             }
         </div>
         }
@@ -60,7 +61,8 @@
         <div>
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Role</label>
             @if (isMainEntity) {
-            <div class="mt-1 flex h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-sm font-medium text-[var(--color-text2)]">Primary</div>
+            <div class="mt-1 flex h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-sm font-medium text-[var(--color-text2)]">
+                Primary</div>
             } @else {
             <select [(ngModel)]="entity.role" [name]="'entityRole-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
                 @for (role of entityRoles; track role.value) {
@@ -70,18 +72,23 @@
             }
         </div>
 
+        @if (!isMainEntity && linkableEntities.length > 0) {
         <div>
-            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Relationship</label>
-            @if (isMainEntity) {
-            <div class="mt-1 flex h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-sm font-medium text-[var(--color-text2)]">Subject Of Case</div>
-            } @else {
-            <select [(ngModel)]="entity.relationshipToCase" [name]="'entityRelationship-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
-                @for (relationship of entityRelationships; track relationship.value) {
-                <option [value]="relationship.value">{{ relationship.label }}</option>
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
+                Relationship
+            </label>
+
+            <select [(ngModel)]="entity.linkedEntityId" [name]="'linkedEntityId-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                <option value="">Select linked entity</option>
+
+                @for (linkedEntity of linkableEntities; track linkedEntity.entityId) {
+                <option [value]="linkedEntity.entityId">
+                    {{ getLinkedEntityLabel(linkedEntity) }}
+                </option>
                 }
             </select>
-            }
         </div>
+        }
         }
 
         <div>
@@ -105,7 +112,8 @@
             </label>
             <input type="text" [(ngModel)]="entity.entitySourceOtherValue" [name]="'entitySourceOtherValue-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Specify other source" />
             @if (getOtherError(entity.source, entity.entitySourceOtherValue)) {
-            <p class="case-form-error mt-1 text-xs text-red-400">{{ getOtherError(entity.source, entity.entitySourceOtherValue) }}</p>
+            <p class="case-form-error mt-1 text-xs text-red-400">{{ getOtherError(entity.source,
+                entity.entitySourceOtherValue) }}</p>
             }
         </div>
         }
@@ -129,11 +137,13 @@
         <div class="flex items-center justify-between gap-3" [ngClass]="entity.socialProfiles.length ? 'mb-4' : ''">
             <div class="min-w-0">
                 <div class="flex items-center gap-1.5">
-                    <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Social Profiles</label>
+                    <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Social
+                        Profiles</label>
                     <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Social accounts or profile URLs tied to this entity." class="h-4 w-4 shrink-0 ui-action-icon">
                 </div>
                 @if (entity.socialProfiles.length) {
-                <p class="mt-1 text-xs text-[var(--color-text4)]">{{ entity.socialProfiles.length }} profile{{ entity.socialProfiles.length === 1 ? '' : 's' }}</p>
+                <p class="mt-1 text-xs text-[var(--color-text4)]">{{ entity.socialProfiles.length }} profile{{
+                    entity.socialProfiles.length === 1 ? '' : 's' }}</p>
                 } @else {
                 <p class="mt-1 text-xs text-[var(--color-text4)]">None added</p>
                 }
@@ -152,7 +162,8 @@
         @for (profile of entity.socialProfiles; track $index; let i = $index) {
         <div class="mb-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] p-3 last:mb-0">
             <div class="mb-2 flex items-center justify-between gap-3">
-                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Profile {{ i + 1 }}</span>
+                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Profile
+                    {{ i + 1 }}</span>
                 <button type="button" (click)="removeSocialMedia(i)" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" aria-label="Remove social profile">
                     <i class="bi bi-x-lg"></i> Remove
                 </button>
@@ -192,7 +203,8 @@
                     <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Stable values that identify this entity, such as email, phone, wallet, account, or document IDs." class="h-4 w-4 shrink-0 ui-action-icon">
                 </div>
                 @if (entity.identifiers.length) {
-                <p class="mt-1 text-xs text-[var(--color-text4)]">{{ entity.identifiers.length }} identifier{{ entity.identifiers.length === 1 ? '' : 's' }}</p>
+                <p class="mt-1 text-xs text-[var(--color-text4)]">{{ entity.identifiers.length }} identifier{{
+                    entity.identifiers.length === 1 ? '' : 's' }}</p>
                 } @else {
                 <p class="mt-1 text-xs text-[var(--color-text4)]">None added</p>
                 }
@@ -211,7 +223,8 @@
         @for (identifier of entity.identifiers; track $index; let i = $index) {
         <div class="mb-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] p-3 last:mb-0">
             <div class="mb-2 flex items-center justify-between gap-3">
-                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Identifier {{ i + 1 }}</span>
+                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Identifier
+                    {{ i + 1 }}</span>
                 <button type="button" (click)="removeIdentifier(i)" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" aria-label="Remove identifier">
                     <i class="bi bi-x-lg"></i> Remove
                 </button>

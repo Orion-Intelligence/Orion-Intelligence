@@ -14,7 +14,6 @@ from orion.services.mongo_manager.shared_model.db_case_model import CaseStatus
 from orion.services.mongo_manager.shared_model.db_case_model import CaseTag
 from orion.services.mongo_manager.shared_model.db_case_model import CaseType
 from orion.services.mongo_manager.shared_model.db_case_model import ClosureReason
-from orion.services.mongo_manager.shared_model.db_case_model import EntityRelationship
 from orion.services.mongo_manager.shared_model.db_case_model import EntityRole
 from orion.services.mongo_manager.shared_model.db_case_model import EntityType
 from orion.services.mongo_manager.shared_model.db_case_model import IdentifierType
@@ -73,9 +72,7 @@ class CaseEntityModel(CaseRequestModel):
     value: str
     entityDescription: str = ""
     role: EntityRole = Field(default=EntityRole.RELATED)
-    relationshipToCase: EntityRelationship = Field(
-        default=EntityRelationship.RELATED_TO
-    )
+    linkedEntityId: str = ""
     confidence: float = 1.0
     source: SourceType = Field(default=SourceType.MANUAL)
     entitySourceOtherValue: str = ""
@@ -212,8 +209,6 @@ class CreateCaseRequest(CaseRequestModel):
             raise ValueError("Primary entity ID must match one of the case entities")
         if primary_entity.role != EntityRole.PRIMARY:
             raise ValueError("Primary entity must have role primary")
-        if primary_entity.relationshipToCase != EntityRelationship.SUBJECT_OF_CASE:
-            raise ValueError("Primary entity must have subject_of_case relationship")
 
         return self
 
@@ -268,8 +263,6 @@ class UpdateCaseRequest(CaseRequestModel):
             raise ValueError("Primary entity ID must match one of the case entities")
         if primary_entity.role != EntityRole.PRIMARY:
             raise ValueError("Primary entity must have role primary")
-        if primary_entity.relationshipToCase != EntityRelationship.SUBJECT_OF_CASE:
-            raise ValueError("Primary entity must have subject_of_case relationship")
 
         return self
 
