@@ -281,6 +281,8 @@ class CaseArtifact(EmbeddedModel):
     url: str = ""
     fileName: str = ""
     fileType: str = ""
+    fileSize: int = 0
+    fileResourceId: str = ""
     entityIds: List[str] = Field(default_factory=list)
     tags: List[CaseTag] = Field(default_factory=list)
     capturedAt: Optional[datetime] = None

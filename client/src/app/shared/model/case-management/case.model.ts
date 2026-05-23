@@ -258,6 +258,8 @@ export interface CaseArtifact {
     url?: string;
     fileName?: string;
     fileType?: string;
+    fileSize?: number;
+    fileResourceId?: string;
     entityIds: string[];
     tags: CaseTag[];
     capturedAt?: Date | string | null;
@@ -276,6 +278,8 @@ export interface CaseArtifactRequest {
     url?: string;
     fileName?: string;
     fileType?: string;
+    fileSize?: number;
+    fileResourceId?: string;
     entityIds: string[];
     tags: CaseTag[];
     capturedAt?: Date | string | null;

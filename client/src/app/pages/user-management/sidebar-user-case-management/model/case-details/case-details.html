@@ -941,15 +941,47 @@
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
                                     <textarea [(ngModel)]="artifact.description" [name]="'artifact-description-' + i" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-description-input-' + i"></textarea>
                                 </div>
+                                @if (artifact.type === 'url_capture') {
                                 <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">URL</label>
-                                    <input [(ngModel)]="artifact.url" [name]="'artifact-url-' + i" type="url" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-url-input-' + i" />
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                        URL
+                                    </label>
+
+                                    <input [(ngModel)]="artifact.url" [name]="'artifact-url-' + i" type="url" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
                                 </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">File
-                                        Name</label>
-                                    <input [(ngModel)]="artifact.fileName" [name]="'artifact-file-' + i" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-file-input-' + i" />
+                                }
+
+                                @if (artifact.type === 'screenshot' || artifact.type === 'file') {
+                                <div class="md:col-span-2">
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                        {{ artifact.type === 'screenshot' ? 'Upload Screenshot PNG' : 'Upload File' }}
+                                    </label>
+
+                                    <input #artifactFileInput type="file" [accept]="getArtifactAccept(artifact)" (change)="uploadArtifactFile(artifact, artifactFileInput)" class="mt-1 block w-full text-sm text-[var(--color-text2)]" />
+
+                                    @if (artifact.fileName) {
+                                    <div class="mt-3 flex flex-wrap items-center gap-2 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
+
+                                        <span class="text-xs text-[var(--color-text2)] break-all">
+                                            {{ artifact.fileName }}
+                                        </span>
+
+                                        <button type="button" (click)="viewArtifactFile(artifact)" class="text-xs text-sky-300">
+                                            View
+                                        </button>
+
+                                        <button type="button" (click)="downloadArtifactFile(artifact)" class="text-xs text-emerald-300">
+                                            Download
+                                        </button>
+
+                                        <button type="button" (click)="deleteArtifactFile(artifact)" class="text-xs text-red-300">
+                                            Delete
+                                        </button>
+
+                                    </div>
+                                    }
                                 </div>
+                                }
                             </div>
                         </div>
                         } @empty {
@@ -1052,16 +1084,31 @@
                                     <textarea [(ngModel)]="newArtifact.description" name="new-artifact-description" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]"></textarea>
                                 </div>
 
+                                @if (newArtifact.type === 'url_capture') {
                                 <div>
                                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">URL</label>
-                                    <input [(ngModel)]="newArtifact.url" name="new-artifact-url" type="url" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+                                    <input [(ngModel)]="newArtifact.url" name="newArtifact-url" type="url" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
                                 </div>
+                                }
 
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">File
-                                        Name</label>
-                                    <input [(ngModel)]="newArtifact.fileName" name="new-artifact-file" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+                                @if (newArtifact.type === 'screenshot' || newArtifact.type === 'file') {
+                                <div class="md:col-span-2">
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                        {{ newArtifact.type === 'screenshot' ? 'Upload Screenshot PNG' : 'Upload File'
+                                        }}
+                                    </label>
+
+                                    <input #newArtifactFileInput type="file" [accept]="getArtifactAccept(newArtifact)" (change)="setPendingNewArtifactFile(newArtifactFileInput)" class="mt-1 block w-full text-sm text-[var(--color-text2)]" />
+
+                                    @if (getPendingNewArtifactFileName()) {
+                                    <div class="mt-3 flex flex-wrap items-center gap-2 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
+                                        <span class="text-xs text-[var(--color-text2)] break-all">
+                                            {{ getPendingNewArtifactFileName() }}
+                                        </span>
+                                    </div>
+                                    }
                                 </div>
+                                }
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -12,6 +12,7 @@ import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 import { ConfirmationPopupComponent } from '../../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-case-details',
@@ -54,8 +55,12 @@ export class CaseDetails implements OnInit {
   caseLinkRelationshipOptions = CASE_LINK_RELATIONSHIP_OPTIONS;
   closureReasonOptions = CLOSURE_REASON_OPTIONS;
   tagOptions: { value: CaseTag; label: string }[] = CASE_TAG_OPTIONS;
+  readonly screenshotAllowedTypes = ['image/png'];
+  readonly artifactAllowedFileTypes = ['application/pdf', 'image/jpeg', 'image/png', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  pendingNewArtifactFile: File | null = null;
+  pendingNewArtifactFileInput: HTMLInputElement | null = null;
 
-  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private messageNotificationService: MessageNotificationService) { }
+  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.loadCaseDetails();
@@ -141,6 +146,205 @@ export class CaseDetails implements OnInit {
     this.isEditing = false;
     this.editedCase = null;
     this.cancelAllSectionModes();
+  }
+
+  private patchArtifactFileMetadata(artifactId: string, patch: Partial<CaseArtifact>): void {
+    if (this.editedCase?.artifacts) {
+      this.editedCase = {
+        ...this.editedCase,
+        artifacts: this.editedCase.artifacts.map(artifact =>
+          artifact.artifactId === artifactId
+            ? { ...artifact, ...patch }
+            : artifact)
+      };
+    }
+
+    if (this.caseData?.artifacts) {
+      this.caseData = {
+        ...this.caseData,
+        artifacts: this.caseData.artifacts.map(artifact =>
+          artifact.artifactId === artifactId
+            ? { ...artifact, ...patch }
+            : artifact)
+      };
+    }
+
+    this.cdr.detectChanges();
+  }
+
+  getArtifactAccept(artifact: CaseArtifact): string {
+    if (artifact.type === 'screenshot') {
+      return '.png,image/png';
+    }
+
+    if (artifact.type === 'file') {
+      return '.pdf,.jpg,.jpeg,.png,.txt,.docx';
+    }
+
+    return '';
+  }
+
+  uploadArtifactFile(artifact: CaseArtifact, fileInput: HTMLInputElement): void {
+    if (!this.caseData || !artifact.artifactId) {
+      return;
+    }
+
+    const file = fileInput.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (artifact.type === 'screenshot' && file.type !== 'image/png') {
+      this.messageNotificationService.show('Screenshot must be a PNG image');
+      fileInput.value = '';
+      return;
+    }
+
+    if (artifact.type === 'file' && !this.artifactAllowedFileTypes.includes(file.type)) {
+      this.messageNotificationService.show('Allowed file types: PDF, JPG, PNG, TXT, DOCX');
+      fileInput.value = '';
+      return;
+    }
+
+    this.caseService.uploadArtifactFile(this.caseData.caseId, artifact.artifactId, file).subscribe({
+      next: uploaded => {
+        setTimeout(() => {
+          this.patchArtifactFileMetadata(artifact.artifactId, {
+            fileName: uploaded.fileName,
+            fileType: uploaded.fileType,
+            fileSize: uploaded.fileSize,
+            fileResourceId: uploaded.fileResourceId
+          });
+
+          fileInput.value = '';
+
+          setTimeout(() => {
+            this.messageNotificationService.show('File uploaded successfully', 'success');
+          });
+        }, 0);
+      },
+      error: err => {
+        fileInput.value = '';
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to upload file');
+      }
+    });
+  }
+
+  viewArtifactFile(artifact: CaseArtifact): void {
+    if (!this.caseData || !artifact.artifactId) {
+      return;
+    }
+
+    this.http.get(`/api/profile/cases/${this.caseData.caseId}/artifacts/${artifact.artifactId}/file/view`,
+      { responseType: 'blob' }).subscribe({
+      next: blob => {
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank', 'noopener');
+        setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+      },
+      error: err => {
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to view file');
+      }
+    });
+  }
+
+  downloadArtifactFile(artifact: CaseArtifact): void {
+    if (!this.caseData || !artifact.artifactId) {
+      return;
+    }
+
+    this.http.get(`/api/profile/cases/${this.caseData.caseId}/artifacts/${artifact.artifactId}/file/download`,
+      { responseType: 'blob' }).subscribe({
+      next: blob => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = artifact.fileName || 'artifact-file';
+        link.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: err => {
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to download file');
+      }
+    });
+  }
+
+  deleteArtifactFile(artifact: CaseArtifact): void {
+    if (!this.caseData || !artifact.artifactId) {
+      return;
+    }
+
+    this.caseService.deleteArtifactFile(this.caseData.caseId, artifact.artifactId).subscribe({
+      next: () => {
+        setTimeout(() => {
+          this.patchArtifactFileMetadata(artifact.artifactId, {
+            fileName: '',
+            fileType: '',
+            fileSize: 0,
+            fileResourceId: ''
+          });
+
+          setTimeout(() => {
+            this.messageNotificationService.show('File deleted successfully', 'success');
+          });
+        }, 0);
+      },
+      error: err => {
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to delete file');
+      }
+    });
+  }
+
+  setPendingNewArtifactFile(fileInput: HTMLInputElement): void {
+    if (!this.newArtifact) {
+      return;
+    }
+
+    const file = fileInput.files?.[0];
+
+    if (!file) {
+      this.pendingNewArtifactFile = null;
+      this.pendingNewArtifactFileInput = null;
+      this.newArtifact.fileName = '';
+      this.newArtifact.fileType = '';
+      this.newArtifact.fileSize = 0;
+      return;
+    }
+
+    if (this.newArtifact.type === 'screenshot' && file.type !== 'image/png') {
+      this.messageNotificationService.show('Screenshot must be a PNG image');
+      fileInput.value = '';
+      this.pendingNewArtifactFile = null;
+      this.pendingNewArtifactFileInput = null;
+      this.newArtifact.fileName = '';
+      this.newArtifact.fileType = '';
+      this.newArtifact.fileSize = 0;
+      return;
+    }
+
+    if (this.newArtifact.type === 'file' && !this.artifactAllowedFileTypes.includes(file.type)) {
+      this.messageNotificationService.show('Allowed file types: PDF, JPG, PNG, TXT, DOCX');
+      fileInput.value = '';
+      this.pendingNewArtifactFile = null;
+      this.pendingNewArtifactFileInput = null;
+      this.newArtifact.fileName = '';
+      this.newArtifact.fileType = '';
+      this.newArtifact.fileSize = 0;
+      return;
+    }
+
+    this.pendingNewArtifactFile = file;
+    this.pendingNewArtifactFileInput = fileInput;
+
+    this.newArtifact.fileName = '';
+    this.newArtifact.fileType = '';
+    this.newArtifact.fileSize = 0;
+    this.newArtifact.fileResourceId = '';
+  }
+
+  getPendingNewArtifactFileName(): string {
+    return this.pendingNewArtifactFile?.name || '';
   }
 
   openShareConfirmation(): void {
@@ -232,6 +436,8 @@ export class CaseDetails implements OnInit {
 
     this.newRelatedEntity = null;
     this.newArtifact = null;
+    this.pendingNewArtifactFile = null;
+    this.pendingNewArtifactFileInput = null;
     this.newTask = null;
     this.newLinkedCase = null;
     this.newClosure = null;
@@ -735,14 +941,79 @@ export class CaseDetails implements OnInit {
     if (!this.validateOtherValue(this.newArtifact.type, this.newArtifact.artifactTypeOtherValue, 'Other artifact type is required')) {
       return;
     }
+
     if (!this.validateOtherValue(this.newArtifact.source, this.newArtifact.artifactSourceOtherValue, 'Other artifact source is required')) {
       return;
     }
 
-    const draft: Case = JSON.parse(JSON.stringify(this.caseData));
-    draft.artifacts = [...(draft.artifacts || []), this.ensureArtifactDefaults(this.newArtifact)];
+    if (this.newArtifact.type === 'url_capture' && !this.newArtifact.url?.trim()) {
+      this.messageNotificationService.show('URL is required');
+      return;
+    }
 
-    this.saveCasePayload(this.cleanCaseForSave(draft), 'Artifact added successfully');
+    if ((this.newArtifact.type === 'screenshot' || this.newArtifact.type === 'file') && !this.pendingNewArtifactFile) {
+      this.messageNotificationService.show('Please select a file');
+      return;
+    }
+
+    const artifactToSave = this.ensureArtifactDefaults(this.newArtifact);
+    const draft: Case = JSON.parse(JSON.stringify(this.caseData));
+    draft.artifacts = [...(draft.artifacts || []), artifactToSave];
+
+    const payload = this.cleanCaseForSave(draft);
+
+    this.caseService.updateCase(this.caseData.caseId, payload).subscribe({
+      next: updated => {
+        updated.artifacts = updated.artifacts || [];
+        updated.tasks = updated.tasks || [];
+        updated.comments = updated.comments || [];
+        updated.linkedCases = updated.linkedCases || [];
+        updated.assignedAnalystIds = updated.assignedAnalystIds || [];
+        updated.closure = updated.closure || null;
+
+        this.caseData = updated;
+
+        const savedArtifact = updated.artifacts.find(item => item.artifactId === artifactToSave.artifactId);
+
+        if (savedArtifact && this.pendingNewArtifactFile && (savedArtifact.type === 'screenshot' || savedArtifact.type === 'file')) {
+          this.caseService.uploadArtifactFile(updated.caseId, savedArtifact.artifactId, this.pendingNewArtifactFile).subscribe({
+            next: uploaded => {
+              savedArtifact.fileName = uploaded.fileName;
+              savedArtifact.fileType = uploaded.fileType;
+              savedArtifact.fileSize = uploaded.fileSize;
+              savedArtifact.fileResourceId = uploaded.fileResourceId;
+
+              this.pendingNewArtifactFile = null;
+
+              if (this.pendingNewArtifactFileInput) {
+                this.pendingNewArtifactFileInput.value = '';
+              }
+
+              this.pendingNewArtifactFileInput = null;
+              this.cancelAllSectionModes();
+
+              this.messageNotificationService.show('Artifact added successfully', 'success');
+            },
+            error: err => {
+              this.pendingNewArtifactFile = null;
+              this.pendingNewArtifactFileInput = null;
+              this.messageNotificationService.show(err?.error?.detail || err?.message || 'Artifact saved, but file upload failed');
+            }
+          });
+
+          return;
+        }
+
+        this.pendingNewArtifactFile = null;
+        this.pendingNewArtifactFileInput = null;
+        this.cancelAllSectionModes();
+
+        this.messageNotificationService.show('Artifact added successfully', 'success');
+      },
+      error: err => {
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to add artifact');
+      }
+    });
   }
 
   saveTasks(): void {
@@ -1027,6 +1298,8 @@ export class CaseDetails implements OnInit {
     artifact.url = artifact.url || '';
     artifact.fileName = artifact.fileName || '';
     artifact.fileType = artifact.fileType || '';
+    artifact.fileSize = artifact.fileSize || 0;
+    artifact.fileResourceId = artifact.fileResourceId || '';
     artifact.entityIds = artifact.entityIds || [];
     artifact.tags = artifact.tags || [];
     artifact.capturedAt = artifact.capturedAt || null;
@@ -1045,6 +1318,8 @@ export class CaseDetails implements OnInit {
       url: artifact.url?.trim() || '',
       fileName: artifact.fileName?.trim() || '',
       fileType: artifact.fileType?.trim() || '',
+      fileSize: artifact.fileSize || 0,
+      fileResourceId: artifact.fileResourceId || '',
       entityIds: artifact.entityIds || [],
       tags: artifact.tags || [],
       capturedAt: artifact.capturedAt || null

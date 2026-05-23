@@ -236,6 +236,8 @@ export const DEFAULT_CASE_ARTIFACT_TEMPLATE: CaseArtifact = {
   url: '',
   fileName: '',
   fileType: '',
+  fileSize: 0,
+  fileResourceId: '',
   entityIds: [],
   tags: [],
   capturedAt: null,
