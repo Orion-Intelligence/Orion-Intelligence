@@ -12,6 +12,8 @@
 
 	<div class="pointer-events-none absolute inset-0 bg-[var(--color-mono)] opacity-25"></div>
 
+	<app-map-loading-badges [items]="loadingBadges" [topControlsInset]="!showFilterButton"></app-map-loading-badges>
+
 	@if (isLoading) {
 		<div class="absolute inset-0 z-30 flex items-center justify-center bg-[var(--color-blue-850)]/65 backdrop-blur-sm">
 			<div class="mx-4 flex min-w-[220px] max-w-[360px] flex-col items-center gap-3 rounded-[16px] bg-[var(--color-blue-790)] px-6 py-5 text-center shadow-lg">

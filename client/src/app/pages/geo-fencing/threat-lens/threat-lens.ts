@@ -9,6 +9,7 @@ import { threat_lens_filters } from '../../../shared/constants/filters';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { GeocodeModalComponent } from '../../../shared/partials/geocode-modal/geocode-modal.component';
 import { GeoFencingGeocodeService } from '../shared/geo-fencing-geocode.service';
+import { MapLoadingBadgesComponent } from '../shared/map-loading-badges/map-loading-badges.component';
 import { NetworkIntelScanService } from '../../../shared/services/network-intel/network-intel-scan.service';
 import { SelectedCountryCategoryCount, ThreatCountryCount, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensLegendItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
 import { IpDetailPopupComponent } from './ip-detail-popup/ip-detail-popup.component';
@@ -29,6 +30,7 @@ import { buildThreatLensCategoryCountryCounts, buildThreatLensLegend, extractThr
     GeocodeModalComponent,
     IpDetailPopupComponent,
     ThreatLensMapRendererComponent,
+    MapLoadingBadgesComponent,
   ],
   templateUrl: './threat-lens.html',
 })
@@ -133,6 +135,10 @@ export class ThreatLensComponent implements OnDestroy {
 
   get isIpScanRunning(): boolean {
     return this.networkIntelService.isRunning() && !this.networkIntelService.onError();
+  }
+
+  get loadingBadges(): string[] {
+    return !this.isLoading && this.isIpScanRunning ? ['IP scan loading...'] : [];
   }
 
   openIpScanLocation(): void {

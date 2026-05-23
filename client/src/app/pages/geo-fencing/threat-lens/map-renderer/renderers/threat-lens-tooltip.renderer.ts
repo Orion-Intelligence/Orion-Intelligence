@@ -141,19 +141,10 @@ export class ThreatLensTooltipRenderer {
     const labelWrap = document.createElement('div');
     labelWrap.className = 'threat-lens-tooltip__breakdown-label-wrap';
 
-    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    dot.setAttribute('viewBox', '0 0 12 12');
+    const dot = document.createElement('span');
     dot.setAttribute('aria-hidden', 'true');
-    dot.setAttribute('color', item.colorHex);
-    dot.classList.add('threat-lens-tooltip__breakdown-dot');
-
-    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('cx', '6');
-    circle.setAttribute('cy', '6');
-    circle.setAttribute('r', '5');
-    circle.setAttribute('fill', item.colorHex);
-
-    dot.append(circle);
+    dot.className = 'threat-lens-tooltip__breakdown-dot';
+    dot.style.setProperty('--threat-lens-dot-color', item.colorHex);
 
     const label = document.createElement('span');
     label.className = 'threat-lens-tooltip__breakdown-label';

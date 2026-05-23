@@ -1,33 +1,6 @@
 <app-facility-legend [visible]="facilitiesVisible" [filters]="legendFilters" [constrained]="legendConstrained"></app-facility-legend>
 
-@if (isAircraftLoading || isShipsLoading || isMapEntityLoading || isMapEntityDetailsLoading) {
-  <div class="pointer-events-none absolute left-12 z-[920] flex flex-col gap-2 max-[943px]:left-auto max-[943px]:right-2 max-[943px]:top-[52px] max-[943px]:max-w-[min(300px,calc(100%-88px))] max-[943px]:items-end max-[520px]:top-[96px]" [ngClass]="topControlsInset ? 'top-[76px]' : 'top-3'">
-    @if (isAircraftLoading) {
-      <div class="inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.9)] px-3 py-2 text-[12px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)]">
-        <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
-        Aircraft loading...
-      </div>
-    }
-    @if (isShipsLoading) {
-      <div class="inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.9)] px-3 py-2 text-[12px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)]">
-        <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
-        Ships loading...
-      </div>
-    }
-    @if (isMapEntityLoading) {
-      <div class="inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.9)] px-3 py-2 text-[12px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)]">
-        <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
-        Facilities loading...
-      </div>
-    }
-    @if (isMapEntityDetailsLoading) {
-      <div class="inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.9)] px-3 py-2 text-[12px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)]">
-        <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
-        Loading Facility details...
-      </div>
-    }
-  </div>
-}
+<app-map-loading-badges [items]="loadingBadges" [topControlsInset]="topControlsInset"></app-map-loading-badges>
 
 @if (isMapEntityDetailsLoading) {
   <div class="absolute inset-0 z-[918] cursor-wait bg-transparent"></div>

@@ -304,10 +304,13 @@ html:has(body.dark-theme) {
 }
 
 .threat-lens-tooltip__breakdown-dot {
+  display: inline-block;
+  flex: 0 0 8px;
   width: 8px;
   height: 8px;
-  overflow: visible;
-  filter: drop-shadow(0 0 8px currentColor);
+  border-radius: 50%;
+  background: var(--threat-lens-dot-color);
+  box-shadow: 0 0 8px var(--threat-lens-dot-color);
 }
 
 .threat-lens-tooltip__breakdown-label {

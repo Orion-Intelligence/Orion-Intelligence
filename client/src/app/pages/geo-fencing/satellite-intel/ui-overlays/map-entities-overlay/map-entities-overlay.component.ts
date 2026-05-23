@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { MapLoadingBadgesComponent } from '../../../shared/map-loading-badges/map-loading-badges.component';
 import { OrionSatelliteFilterOption, TrackingEntityType } from '../../../models/geo-fencing.models';
 import { AircraftDetailsPanelComponent } from '../../map-entities/aircraft/components/aircraft-details-panel/aircraft-details-panel.component';
 import { FacilityLegendComponent } from '../../map-entities/facilities/components/facility-legend/facility-legend.component';
@@ -8,7 +9,7 @@ import { ShipDetailsPanelComponent } from '../../map-entities/ships/components/s
 @Component({
   selector:    'app-map-entities-overlay',
   standalone:  true,
-  imports:     [CommonModule, AircraftDetailsPanelComponent, ShipDetailsPanelComponent, FacilityLegendComponent],
+  imports:     [CommonModule, AircraftDetailsPanelComponent, ShipDetailsPanelComponent, FacilityLegendComponent, MapLoadingBadgesComponent],
   templateUrl: './map-entities-overlay.component.html',
 })
 export class MapEntitiesOverlayComponent {
@@ -28,4 +29,23 @@ export class MapEntitiesOverlayComponent {
   @Input() topControlsInset = false;
 
   @Output() closeSidebar = new EventEmitter<void>();
+
+  get loadingBadges(): string[] {
+    const badges: string[] = [];
+
+    if (this.isAircraftLoading) {
+      badges.push('Aircraft loading...');
+    }
+    if (this.isShipsLoading) {
+      badges.push('Ships loading...');
+    }
+    if (this.isMapEntityLoading) {
+      badges.push('Facilities loading...');
+    }
+    if (this.isMapEntityDetailsLoading) {
+      badges.push('Loading Facility details...');
+    }
+
+    return badges;
+  }
 }
