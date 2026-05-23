@@ -509,6 +509,17 @@ export interface SharedCaseReport {
     artifacts?: SharedCaseArtifact[];
     tasks?: SharedCaseTask[];
     linkedCases?: SharedCaseLink[];
+    comments?: SharedCaseComment[];
+}
+
+export interface SharedCaseComment {
+    commentId: string;
+    body: string;
+    entityIds?: string[];
+    artifactIds?: string[];
+    createdBy?: string;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface Case {

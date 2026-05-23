@@ -6,7 +6,7 @@ import type jsPDF from 'jspdf';
 import type { RowInput } from 'jspdf-autotable';
 import { forkJoin, from } from 'rxjs';
 import { AppService } from '../../../../../services/core/app/app.service';
-import type { SharedCaseArtifact, SharedCaseEntity, SharedCaseLink, SharedCaseReport, SharedCaseTask } from '../../../../../shared/model/case-management/case.model';
+import type { SharedCaseArtifact, SharedCaseComment, SharedCaseEntity, SharedCaseLink, SharedCaseReport, SharedCaseTask } from '../../../../../shared/model/case-management/case.model';
 import { ApiService } from '../../../../../shared/services/api.service';
 
 @Component({
@@ -21,6 +21,7 @@ export class CaseShareComponent implements OnInit, OnDestroy {
   isLoading = true;
   errorMessage = '';
   expandedArtifactIds = new Set<string>();
+  expandedRelatedEntityIds = new Set<string>();
   brandingResolved = false;
 
   constructor(private route: ActivatedRoute, private api: ApiService, public appService: AppService) { }
@@ -41,6 +42,12 @@ export class CaseShareComponent implements OnInit, OnDestroy {
       params: new HttpParams().set('token', token)
     }).subscribe({
       next: report => {
+        report.entities = report.entities || [];
+        report.artifacts = report.artifacts || [];
+        report.comments = report.comments || [];
+        report.tasks = report.tasks || [];
+        report.linkedCases = report.linkedCases || [];
+
         this.report = report;
         this.isLoading = false;
       },
@@ -89,6 +96,32 @@ export class CaseShareComponent implements OnInit, OnDestroy {
     return entities.find(entity => entity.entityId === this.report?.primaryEntityId)
       || entities.find(entity => entity.role === 'primary')
       || null;
+  }
+
+  getRelatedEntities(): SharedCaseEntity[] {
+    const entities = this.report?.entities || [];
+    const primaryEntity = this.getPrimaryEntity();
+
+    return entities.filter(entity =>
+      entity.entityId !== primaryEntity?.entityId &&
+      entity.role !== 'primary');
+  }
+
+  getComments(): SharedCaseComment[] {
+    return this.report?.comments || [];
+  }
+
+  toggleRelatedEntity(entityId: string): void {
+    if (this.expandedRelatedEntityIds.has(entityId)) {
+      this.expandedRelatedEntityIds.delete(entityId);
+      return;
+    }
+
+    this.expandedRelatedEntityIds.add(entityId);
+  }
+
+  isRelatedEntityExpanded(entityId: string): boolean {
+    return this.expandedRelatedEntityIds.has(entityId);
   }
 
   formatConfidence(value?: string | null): string {
@@ -192,10 +225,41 @@ export class CaseShareComponent implements OnInit, OnDestroy {
       ], contentWidth);
     }
 
+    y = this.addPdfSection(doc, autoTable, y, 'Related Entities', this.buildRelatedEntityRows(this.getRelatedEntities()), contentWidth);
     y = this.addPdfSection(doc, autoTable, y, 'Artifacts', this.buildArtifactRows(report.artifacts || []), contentWidth);
+    y = this.addPdfSection(doc, autoTable, y, 'Comments', this.buildCommentRows(report.comments || []), contentWidth);
     y = this.addPdfSection(doc, autoTable, y, 'Tasks', this.buildTaskRows(report.tasks || []), contentWidth);
     this.addPdfSection(doc, autoTable, y, 'Linked Cases', this.buildLinkedCaseRows(report.linkedCases || []), contentWidth);
     this.addPdfFooters(doc);
+  }
+
+  private buildRelatedEntityRows(entities: SharedCaseEntity[]): RowInput[] {
+    if (!entities.length) {
+      return [['Related Entities', 'No related entities added.']];
+    }
+
+    return entities.flatMap((entity, index) => [
+      [`Related Entity ${index + 1}`, entity.entityDescription || entity.value],
+      ['Value', entity.value],
+      ['Type', this.formatLabel(entity.type, entity.entityTypeOtherValue)],
+      ['Role', this.formatLabel(entity.role)],
+      ['Confidence', this.formatLabel(entity.confidence)],
+      ['Source', this.formatLabel(entity.source, entity.entitySourceOtherValue)],
+      ['Tags', (entity.tags || []).map(tag => this.formatLabel(tag)).join(', ') || '-'],
+      ['Social Profiles', (entity.socialProfiles || []).map(profile => `${this.formatLabel(profile.platform, profile.platformOtherValue)}: ${profile.username}${profile.displayName ? ` (${profile.displayName})` : ''}${profile.profileUrl ? ` - ${profile.profileUrl}` : ''}`).join('\n') || '-'],
+      ['Identifiers', (entity.identifiers || []).map(identifier => `${this.formatLabel(identifier.type, identifier.identifierTypeOtherValue)}: ${identifier.value}${identifier.issuer ? `, Issuer: ${identifier.issuer}` : ''}${identifier.verified ? ', Verified' : ''}`).join('\n') || '-'],
+    ]);
+  }
+
+  private buildCommentRows(comments: SharedCaseComment[]): RowInput[] {
+    if (!comments.length) {
+      return [['Comments', 'No comments added.']];
+    }
+
+    return comments.flatMap((comment, index) => [
+      [`Comment ${index + 1}`, comment.body],
+      ['Created By / At', `${comment.createdBy || '-'} · ${this.formatDate(comment.createdAt)}`],
+    ]);
   }
 
   private drawPdfCover(doc: jsPDF, report: SharedCaseReport): void {

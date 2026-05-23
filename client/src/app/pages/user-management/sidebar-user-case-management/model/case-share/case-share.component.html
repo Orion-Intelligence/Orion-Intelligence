@@ -298,6 +298,135 @@
       </div>
       }
 
+      @if (getRelatedEntities().length > 0) {
+      <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+        <div class="flex items-center border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
+          <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Related Entities</h2>
+        </div>
+
+        <div class="space-y-3 p-4">
+          @for (entity of getRelatedEntities(); track entity.entityId) {
+          <div class="overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]">
+            <button type="button" (click)="toggleRelatedEntity(entity.entityId)" class="w-full p-3 text-left transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-expanded]="isRelatedEntityExpanded(entity.entityId)">
+              <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                <div class="min-w-0">
+                  <div class="flex min-w-0 items-center gap-2">
+                    <span class="min-w-0 truncate text-sm font-semibold text-[var(--color-text1)]">
+                      {{ entity.entityDescription || entity.value }}
+                    </span>
+                    <i class="bi text-xs text-[var(--color-text4)]" [ngClass]="isRelatedEntityExpanded(entity.entityId) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                  </div>
+                  <div class="mt-1 text-xs text-[var(--color-text4)] break-all">
+                    {{ formatLabel(entity.type, entity.entityTypeOtherValue) }} · {{ formatLabel(entity.source,
+                    entity.entitySourceOtherValue) }}
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                  <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-830)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text3)]">
+                    {{ formatLabel(entity.role) }}
+                  </span>
+                  <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-830)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text3)]">
+                    {{ formatLabel(entity.confidence) }}
+                  </span>
+                </div>
+              </div>
+            </button>
+
+            @if (isRelatedEntityExpanded(entity.entityId)) {
+            <div class="border-t border-[var(--tenant-line)] p-4">
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Value</div>
+                  <div class="mt-1 text-sm font-medium text-[var(--color-text1)] break-all">{{ entity.value }}</div>
+                </div>
+
+                <div>
+                  <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Type</div>
+                  <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(entity.type,
+                    entity.entityTypeOtherValue) }}</div>
+                </div>
+
+                <div>
+                  <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Role</div>
+                  <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(entity.role) }}</div>
+                </div>
+
+                <div>
+                  <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Source</div>
+                  <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(entity.source,
+                    entity.entitySourceOtherValue) }}</div>
+                </div>
+              </div>
+
+              @if (entity.entityDescription) {
+              <div class="mt-4">
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description
+                </div>
+                <div class="mt-1 text-sm leading-6 text-[var(--color-text3)] break-words">{{ entity.entityDescription }}
+                </div>
+              </div>
+              }
+
+              @if ((entity.socialProfiles?.length || 0) > 0) {
+              <div class="mt-4">
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Social Profiles
+                </div>
+                <div class="mt-2 space-y-2">
+                  @for (profile of entity.socialProfiles; track profile.platform + profile.username) {
+                  <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/45 p-3 text-sm text-[var(--color-text2)]">
+                    <div class="font-semibold">{{ formatLabel(profile.platform, profile.platformOtherValue) }} · {{
+                      profile.username }}</div>
+                    @if (profile.displayName) {
+                    <div class="mt-1 text-xs text-[var(--color-text4)]">{{ profile.displayName }}</div>
+                    }
+                    @if (profile.profileUrl) {
+                    <div class="mt-1 break-all text-xs text-sky-300">{{ profile.profileUrl }}</div>
+                    }
+                  </div>
+                  }
+                </div>
+              </div>
+              }
+
+              @if ((entity.identifiers?.length || 0) > 0) {
+              <div class="mt-4">
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Identifiers
+                </div>
+                <div class="mt-2 space-y-2">
+                  @for (identifier of entity.identifiers; track identifier.type + identifier.value) {
+                  <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/45 p-3 text-sm text-[var(--color-text2)]">
+                    <div class="font-semibold">{{ formatLabel(identifier.type, identifier.identifierTypeOtherValue) }} ·
+                      {{ identifier.value }}</div>
+                    @if (identifier.issuer) {
+                    <div class="mt-1 text-xs text-[var(--color-text4)]">Issuer: {{ identifier.issuer }}</div>
+                    }
+                    @if (identifier.verified) {
+                    <div class="mt-1 text-xs text-emerald-300">Verified</div>
+                    }
+                  </div>
+                  }
+                </div>
+              </div>
+              }
+
+              @if ((entity.tags?.length || 0) > 0) {
+              <div class="mt-4 flex flex-wrap gap-2">
+                @for (tag of entity.tags; track tag) {
+                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text2)]">
+                  {{ formatLabel(tag) }}
+                </span>
+                }
+              </div>
+              }
+            </div>
+            }
+          </div>
+          }
+        </div>
+      </div>
+      }
+
       @if (report.closure || report.closedAt) {
       <div class="overflow-hidden rounded-[8px] border border-emerald-400/20 bg-[color-mix(in_srgb,var(--tenant-expand-bg)_92%,#064e3b_8%)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
         <div class="border-b border-emerald-400/15 bg-[color-mix(in_srgb,var(--color-blue-820-light)_90%,#064e3b_10%)] px-4 py-3">
@@ -462,6 +591,35 @@
           <div class="text-sm text-[var(--color-text4)]">No linked cases added.</div>
           }
         </div>
+      </div>
+
+      <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+        <div class="flex items-center border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
+          <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Comments</h2>
+        </div>
+
+        @if (getComments().length > 0) {
+        <div class="space-y-3 p-4">
+          @for (comment of getComments(); track comment.commentId) {
+          <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-4">
+            <div class="text-sm leading-6 text-[var(--color-text2)] break-words">
+              {{ comment.body }}
+            </div>
+
+            <div class="mt-3 flex flex-wrap gap-2 text-[11px] font-medium text-[var(--color-text4)]">
+              @if (comment.createdBy) {
+              <span>By {{ comment.createdBy }}</span>
+              }
+              @if (comment.createdAt) {
+              <span>· {{ formatDate(comment.createdAt) }}</span>
+              }
+            </div>
+          </div>
+          }
+        </div>
+        } @else {
+        <div class="p-4 text-sm text-[var(--color-text4)]">No comments added.</div>
+        }
       </div>
     </div>
     }
