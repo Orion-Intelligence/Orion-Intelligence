@@ -137,7 +137,8 @@
                 </div>
 
                 <app-entity-details [entity]="primaryEntity" [isMainEntity]="true" [showRoleRelationshipFields]="false"
-                    [entityValueError]="validationErrors['entityValue'] || ''" [entityIndex]="0"></app-entity-details>
+                    [entityValueError]="validationErrors['entityValue'] || ''" [entityIndex]="0"
+                    [showInlineSaveButtons]="false"></app-entity-details>
 
                 @if (validationErrors['identifier']) {
                 <p class="case-form-error text-xs text-red-400">{{ validationErrors['identifier'] }}</p>

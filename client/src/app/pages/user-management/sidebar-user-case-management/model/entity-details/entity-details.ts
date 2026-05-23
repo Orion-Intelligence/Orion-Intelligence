@@ -31,6 +31,7 @@ export class EntityDetailsComponent implements OnChanges {
   @Input() showRoleRelationshipFields = true;
   @Input() linkableEntities: CaseEntity[] = [];
   @Input() allCaseEntities: CaseEntity[] = [];
+  @Input() showInlineSaveButtons = true;
 
   @Output() remove = new EventEmitter<void>();
   @Output() save = new EventEmitter<void>();

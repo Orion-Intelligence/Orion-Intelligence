@@ -154,9 +154,11 @@
             </div>
 
             <div class="flex items-center gap-2">
+                @if (showInlineSaveButtons) {
                 <button type="button" (click)="onSave()" [disabled]="!hasSocialProfilesChanged()" [class.hidden]="!hasSocialProfilesChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30">
                     <i class="bi bi-check-lg"></i> Save
                 </button>
+                }
                 <button type="button" (click)="addSocialMedia()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
                     <i class="bi bi-plus-lg"></i> Add
                 </button>
@@ -215,9 +217,11 @@
             </div>
 
             <div class="flex items-center gap-2">
+                @if (showInlineSaveButtons) {
                 <button type="button" (click)="onSave()" [disabled]="!hasIdentifiersChanged()" [class.hidden]="!hasIdentifiersChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30">
                     <i class="bi bi-check-lg"></i> Save
                 </button>
+                }
                 <button type="button" (click)="addIdentifier()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
                     <i class="bi bi-plus-lg"></i> Add
                 </button>
