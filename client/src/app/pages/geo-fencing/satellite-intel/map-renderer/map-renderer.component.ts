@@ -40,7 +40,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   @Input() lat:              number | null = null;
   @Input() lon:              number | null = null;
   @Input() delta             = 0.05;
-  @Input() selectedLayer:    'esri' | 'osm' = 'esri';
+  @Input() selectedLayer:    'esri' | 'osm' = 'osm';
   @Input() facilitiesVisible = true;
   @Input() facilityFeatures:  OrionSatelliteFeature[] = [];
   @Input() anomalyData:      any | null = null;

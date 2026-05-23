@@ -10,6 +10,7 @@ export class ThreatLensArcRenderer {
   private lastAnimationTick = 0;
   private batchAnimationStartTime = 0;
   private visibleBatchIndex = -1;
+  private animationPaused = false;
   private movingDotGraphics: any[] = [];
   private startMarkerGraphics: any[] = [];
   private endMarkerGraphics: any[] = [];
@@ -124,6 +125,10 @@ export class ThreatLensArcRenderer {
     return role === 'arc' || role === 'arc-surface' || role === 'arc-start' || role === 'arc-end' || role === 'arc-traveler';
   }
 
+  setAnimationPaused(paused: boolean): void {
+    this.animationPaused = paused;
+  }
+
   private start(): void {
     if (!this.animatedArcGraphicsLayer || !this.animatedArcs.length) {
       return;
@@ -138,6 +143,11 @@ export class ThreatLensArcRenderer {
 
         if (!this.batchAnimationStartTime) {
           this.batchAnimationStartTime = timestamp;
+        }
+
+        if (this.animationPaused) {
+          this.animationFrame = requestAnimationFrame(animate);
+          return;
         }
 
         if (this.lastAnimationTick && (timestamp - this.lastAnimationTick) < 40) {

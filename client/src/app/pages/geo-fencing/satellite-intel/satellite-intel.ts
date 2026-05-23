@@ -60,7 +60,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   readonly panel = SatelliteIntelPanelEnum;
   activePanel: SatelliteIntelPanel = SatelliteIntelPanelEnum.Dashboard;
   activeTab: 'map' | 'threat' = 'map';
-  selectedLayer: 'esri' | 'osm' = 'esri';
+  selectedLayer: 'esri' | 'osm' = 'osm';
   focusedFeature: OrionSatelliteFeature | null = null;
   selectedFeature: OrionSatelliteFeature | null = null;
   isPanelMenuOpen = false;

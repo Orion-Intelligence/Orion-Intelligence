@@ -30,8 +30,11 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private pointerMoveHandle: { remove: () => void } | null = null;
   private viewScaleWatchHandle: { remove: () => void } | null = null;
   private viewZoomWatchHandle: { remove: () => void } | null = null;
+  private viewInteractingWatchHandle: { remove: () => void } | null = null;
   private mapResizeObserver: ResizeObserver | null = null;
   private mapResizeFrame: number | null = null;
+  private hoverHitTestPending = false;
+  private lastHoverHitTestAt = 0;
   private hoveredCountryKey = '';
   private activeBasemapId = '';
   private destroyed = false;
@@ -41,6 +44,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private readonly threatBasemapId = 'dark-gray-vector';
   private readonly streetBasemapId = 'streets-night-vector';
   private readonly streetBasemapMinZoom = 6;
+  private readonly hoverHitTestMinIntervalMs = 80;
 
   @Output() mapReady = new EventEmitter<void>();
   @Output() mapError = new EventEmitter<string>();
@@ -63,6 +67,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.pointerMoveHandle?.remove();
     this.viewScaleWatchHandle?.remove();
     this.viewZoomWatchHandle?.remove();
+    this.viewInteractingWatchHandle?.remove();
     this.mapResizeObserver?.disconnect();
     this.arcRenderer?.destroy();
     this.ipMarkerRenderer?.clear();
@@ -171,7 +176,6 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
       const map = new EsriMap({
         basemap: this.threatBasemapId,
-        ground: 'world-elevation',
         layers: [
           countryLayer,
           this.newsGraphicsLayer,
@@ -230,6 +234,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       window.setTimeout(() => this.view?.resize?.(), 150);
       this.registerViewScaleWatcher();
       this.registerBasemapWatcher();
+      this.registerViewInteractingWatcher();
       this.registerClickHandler();
       this.registerHoverHandler();
       this.ngZone.run(() => this.mapReady.emit());
@@ -288,9 +293,18 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     }
 
     this.pointerMoveHandle = this.view.on('pointer-move', async (event: any) => {
-      if (!this.view || !this.countryRenderer.layer) {
+      if (!this.view || !this.countryRenderer.layer || this.view.interacting) {
         return;
       }
+
+      const now = performance.now();
+      if (this.hoverHitTestPending || now - this.lastHoverHitTestAt < this.hoverHitTestMinIntervalMs) {
+        this.tooltipRenderer.move(event);
+        return;
+      }
+
+      this.hoverHitTestPending = true;
+      this.lastHoverHitTestAt = now;
 
       const hit = await this.view.hitTest(event, {
         include: [
@@ -300,6 +314,8 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
           this.arcSurfaceGraphicsLayer,
           this.countryRenderer.layer,
         ].filter(Boolean),
+      }).finally(() => {
+        this.hoverHitTestPending = false;
       });
 
       const ipGraphic = hit.results.find((result: any) => this.ipMarkerRenderer?.isMarkerGraphic(result.graphic))?.graphic;
@@ -361,6 +377,27 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
     this.viewZoomWatchHandle?.remove();
     this.viewZoomWatchHandle = this.view.watch('zoom', () => this.updateBasemapForZoom());
+  }
+
+  private registerViewInteractingWatcher(): void {
+    if (!this.view?.watch) {
+      return;
+    }
+
+    this.viewInteractingWatchHandle?.remove();
+    this.viewInteractingWatchHandle = this.view.watch('interacting', (isInteracting: boolean) => {
+      const visible = !isInteracting;
+      this.arcRenderer?.setAnimationPaused(isInteracting);
+      if (this.arcGraphicsLayer) {
+        this.arcGraphicsLayer.visible = visible;
+      }
+      if (this.arcSurfaceGraphicsLayer) {
+        this.arcSurfaceGraphicsLayer.visible = visible;
+      }
+      if (this.animatedArcGraphicsLayer) {
+        this.animatedArcGraphicsLayer.visible = visible;
+      }
+    });
   }
 
   private updateBasemapForZoom(): void {
