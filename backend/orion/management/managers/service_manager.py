@@ -49,8 +49,7 @@ class service_manager:
                 await test_manager.get_instance().reset_test_elastic_and_import_mocks()
 
                 await redis_controller.getInstance().initialize()
-                if env_handler.get_instance().env("TESTING_ENABLED", "0") != "1":
-                    await self.build_map_assets(build_dir)
+                await self.build_map_assets(build_dir)
                 await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [config_controller.CONFIG_CACHE_KEY])
                 await config_controller.getInstance().load_config()
                 await asyncio.sleep(5)

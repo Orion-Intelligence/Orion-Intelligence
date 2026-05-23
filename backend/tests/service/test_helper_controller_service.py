@@ -10,6 +10,8 @@ from fastapi import HTTPException
 from orion.constants import constant
 from orion.constants.constant import allowed_keys
 from orion.helper_manager.helper_controller import helper_controller
+from orion.services.redis_manager.redis_enums import REDIS_KEYS
+from tests.fake_model.fakes import FakeElastic, FakeRedis
 
 
 def test_parse_filters_json_returns_mapping_and_invalid_input():
@@ -99,3 +101,29 @@ def test_build_assets_loads_templates_and_keys(tmp_path: Path):
     assert constant.mail_template.render(name="alice") == "<p>alice</p>"
     assert constant.license_rules["free"]["modules"] == []
     assert constant.url_rules["allowed"] == ["example.com"]
+
+
+@pytest.mark.anyio
+async def test_satellite_asset_reindex_uses_asset_version(tmp_path: Path, monkeypatch):
+    asset_file = tmp_path / "satellite_assets.json"
+    fake_redis = FakeRedis({REDIS_KEYS.SATELLITE_ASSET_VERSION: "2"})
+    fake_elastic = FakeElastic()
+
+    monkeypatch.setattr(
+        "orion.helper_manager.helper_controller.redis_controller.getInstance",
+        staticmethod(lambda: fake_redis),
+    )
+    monkeypatch.setattr(
+        "orion.helper_manager.helper_controller.elastic_controller.get_instance",
+        staticmethod(lambda: fake_elastic),
+    )
+
+    asset_file.write_text('{"version": 2, "data": []}', encoding="utf-8")
+    assert await helper_controller.build_satellite_asset_if_needed(asset_file) is False
+    assert fake_elastic.reindex_map_entities_calls == []
+
+    asset_file.write_text('{"version": 3, "data": [{"name": "new-map-entity"}]}', encoding="utf-8")
+    assert await helper_controller.build_satellite_asset_if_needed(asset_file) is True
+    assert fake_elastic.reindex_map_entities_calls == [True]
+    assert constant.map_entities_data == '[{"name": "new-map-entity"}]'
+    assert fake_redis.values[REDIS_KEYS.SATELLITE_ASSET_VERSION] == "3"
