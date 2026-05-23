@@ -161,21 +161,22 @@
     </div>
   }
 
-<app-satellite-geocode-modal
+<app-geocode-modal
 	[isOpen]="showIpScanLocationModal"
 	[isScanning]="isIpScanRunning"
 	[coordinates]="ipScanCoordinates"
 	[radiusKm]="ipScanRadiusKm"
 	[maxRadiusKm]="1000"
 	[maxIps]="ipScanMaxIps"
-	mode="threatLens"
+	distanceMode="radius"
 	title="Threat Lens IP Scan"
+	[searchProvider]="fetchGeocodeResults"
 	(close)="showIpScanLocationModal = false"
 	(coordinatesChange)="onIpScanCoordinatesChange($event)"
 	(radiusKmChange)="onIpScanRadiusKmChange($event)"
 	(maxIpsChange)="onIpScanMaxIpsChange($event)"
 	(search)="onIpScanLocationApply()">
-</app-satellite-geocode-modal>
+</app-geocode-modal>
 
 @if (selectedIp) {
 	<app-threat-lens-ip-detail-popup

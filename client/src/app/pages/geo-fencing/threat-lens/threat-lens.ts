@@ -6,6 +6,7 @@ import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { loadModules, setDefaultOptions } from 'esri-loader';
 import { buildArcPath, buildArcPathPoints, buildCountryFeatureIndex, buildSurfacePath, collectArcPairs, getFeatureAnchor, getArcPointAtProgress } from './threat-lens-map.utils';
 import { SidebarService } from '../../../shared/services/sidebar.service';
+import { parseCoordinates } from '../../../shared/utils/geo-coordinates.utils';
 import { FilterModel } from '../../../shared/model/filter/filter.model';
 import { FiltersComponent } from "../../../shared/partials/filters/filters.component";
 import { threat_lens_filters } from '../../../shared/constants/filters';
@@ -13,8 +14,9 @@ import { GeoCameraResponse } from '../../../shared/model/network-intel/network-i
 import { AnimatedArcDescriptor, SelectedCountryCategoryCount, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensLegendItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
 import { ThreatLensService } from './threat.lens.service';
 import { ThreatLensFeedPanelComponent } from './threat-lens-feed-panel/threat-lens-feed-panel';
-import { GeocodeModalComponent } from '../satellite-intel/ui-overlays/geocode-modal/geocode-modal.component';
-import { ScanHelperMethodsService as NetworkIntelService } from '../../root-searches/network-intel/network-intel-service.service';
+import { GeocodeModalComponent } from '../../../shared/partials/geocode-modal/geocode-modal.component';
+import { SatelliteIntelService } from '../satellite-intel/satellite-intel-service';
+import { NetworkIntelScanService } from '../../../shared/services/network-intel/network-intel-scan.service';
 import { IpDetailPopupComponent } from './ip-detail-popup/ip-detail-popup.component';
 
 @Component({
@@ -91,12 +93,13 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   ipScanErrorMessage: string | null = null;
   ipScanResultCount = 0;
   selectedIp = '';
+  fetchGeocodeResults = (query: string) => this.satelliteIntelService.fetchGeocodeResults(query);
 
   @Input() showFilterButton = true;
 
   @Output() loadingChange = new EventEmitter<boolean>();
 
-  constructor(private ngZone: NgZone, private cdr: ChangeDetectorRef, private threatLensService: ThreatLensService, private networkIntelService: NetworkIntelService, protected sidebarService: SidebarService) {
+  constructor(private ngZone: NgZone, private cdr: ChangeDetectorRef, private threatLensService: ThreatLensService, private networkIntelService: NetworkIntelScanService, private satelliteIntelService: SatelliteIntelService, protected sidebarService: SidebarService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -294,7 +297,7 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
 
   onIpScanLocationApply(): void {
     const coordinates = this.ipScanCoordinates.trim();
-    const center = this.parseCoordinates(coordinates);
+    const center = parseCoordinates(coordinates);
     if (!center) {
       this.ipScanErrorMessage = 'Enter coordinates as latitude, longitude before applying the location.';
       return;
@@ -1077,21 +1080,6 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
       },
       tilt: 0,
     }, { duration: 750, easing: 'ease-in-out' }).then(() => undefined, () => undefined);
-  }
-
-  private parseCoordinates(value: string): { lat: number; lon: number } | null {
-    const parts = value.trim().split(/[\s,]+/);
-    if (parts.length !== 2) {
-      return null;
-    }
-
-    const lat = Number(parts[0]);
-    const lon = Number(parts[1]);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
-      return null;
-    }
-
-    return { lat, lon };
   }
 
   private getDistanceKm(a: { lat: number; lon: number }, b: { lat: number; lon: number }): number {

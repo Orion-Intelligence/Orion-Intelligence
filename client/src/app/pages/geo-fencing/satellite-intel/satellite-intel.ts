@@ -2,9 +2,10 @@ import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@a
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { SidebarService } from '../../../shared/services/sidebar.service';
+import { parseCoordinates } from '../../../shared/utils/geo-coordinates.utils';
 import { SatelliteIntelService } from './satellite-intel-service';
 import { MapRendererComponent } from './map-renderer/map-renderer.component';
-import { GeocodeModalComponent } from './ui-overlays/geocode-modal/geocode-modal.component';
+import { GeocodeModalComponent } from '../../../shared/partials/geocode-modal/geocode-modal.component';
 import { MonthCompareSectionComponent } from './ui-overlays/month-compare-section/month-compare-section.component';
 import { EntityDescriptionPopupComponent } from './ui-overlays/entity-description-popup/entity-description-popup.component';
 import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
@@ -16,7 +17,6 @@ import { SatelliteFacilitiesService } from './map-entities/facilities/facilities
 import { EntityLoader } from './map-entities/entity-loader';
 import { SatelliteMapEntityDashboardController } from './map-entities/facilities/map-entity-dashboard.controller';
 import { MapEntitiesOverlayComponent } from './ui-overlays/map-entities-overlay/map-entities-overlay.component';
-import { GeocodeService } from './ui-overlays/geocode-modal/geocode.service';
 import { MonthCompareService } from './ui-overlays/month-compare-section/month-compare.service';
 import { DashboardSectionComponent } from './ui-overlays/dashboard-section/dashboard-section.component';
 import { PanelShellComponent } from './ui-overlays/panel-shell/panel-shell.component';
@@ -53,7 +53,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private initialMapEntityLoadTimer: ReturnType<typeof setTimeout> | null = null;
   private route: ActivatedRoute;
   private sidebarService: SidebarService;
-  private geocodeService: GeocodeService;
   @ViewChild(MapRendererComponent) private mapRenderer?: MapRendererComponent;
 
   satelliteService: SatelliteIntelService;
@@ -66,14 +65,14 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   isPanelMenuOpen = false;
   isPanelPopupOpen = true;
   isThreatLensLoading = false;
+  fetchGeocodeResults = (query: string) => this.satelliteService.fetchGeocodeResults(query);
 
   @Input() toolbarMode: 'hidden' | 'geo' = 'hidden';
 
-  constructor( satelliteService: SatelliteIntelService, route: ActivatedRoute, sidebarService: SidebarService, aircraftTrackingService: SatelliteAircraftTrackingService, shipTrackingService: SatelliteShipTrackingService, facilitiesService: SatelliteFacilitiesService, geocodeService: GeocodeService, monthCompareService: MonthCompareService, ) {
+  constructor( satelliteService: SatelliteIntelService, route: ActivatedRoute, sidebarService: SidebarService, aircraftTrackingService: SatelliteAircraftTrackingService, shipTrackingService: SatelliteShipTrackingService, facilitiesService: SatelliteFacilitiesService, monthCompareService: MonthCompareService, ) {
     this.satelliteService = satelliteService;
     this.route = route;
     this.sidebarService = sidebarService;
-    this.geocodeService = geocodeService;
     const loadingBridge = {
       begin: (title: string, message: string) => this.loadingState.begin(title, message),
       end: (id: number) => this.loadingState.end(id),
@@ -96,7 +95,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.setPanel(this.isPanelId(section) ? section : SatelliteIntelPanelEnum.Dashboard);
     this.isPanelPopupOpen = true;
     if (q) {
-      this.locationState.setInitialQuery(q, this.geocodeService.parseCoordinates(q));
+      this.locationState.setInitialQuery(q, parseCoordinates(q));
     }
     this.initialMapEntityLoadTimer = setTimeout(() => {
       this.initialMapEntityLoadTimer = null;
@@ -415,7 +414,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   onCoordinatesChange(coords: string): void {
-    this.locationState.setCoordinates(coords, this.geocodeService.parseCoordinates(coords));
+    this.locationState.setCoordinates(coords, parseCoordinates(coords));
   }
 
   onDeltaChangeModal(delta: number): void {
@@ -423,7 +422,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   onGeoSearch(): void {
-    const parsed = this.geocodeService.parseCoordinates(this.locationState.geocodeCoordinates);
+    const parsed = parseCoordinates(this.locationState.geocodeCoordinates);
     if (!parsed) {
       this.locationState.showGeocodeModal = false;
       return;

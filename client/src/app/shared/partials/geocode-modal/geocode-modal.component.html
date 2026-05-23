@@ -42,14 +42,16 @@
               </div>
               @if (searchResults.length > 0) {
                 <div class="absolute left-0 right-0 top-[calc(100%+4px)] z-20 max-h-60 overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-790)] shadow-xl [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_10px_28px_rgba(15,23,42,0.14)]">
-                  @for (result of searchResults; track result.lat + result.lon) {
+                  @for (result of searchResults; track result.name + ':' + result.lat + ':' + result.lon) {
                     <button type="button" class="flex w-full flex-col gap-0.5 border-b border-[var(--color-border)] px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-[var(--color-blue-720)] [body.light-theme_&]:hover:bg-[#eef5ff]" (click)="selectResult(result)">
                       <span class="text-[13px] font-semibold text-[var(--color-text1)]">{{ result.name }}</span>
-                      <span class="truncate text-[11px] text-[var(--color-text4)]">{{ result.display_name }}</span>
+                      @if (result.display_name) {
+                        <span class="truncate text-[11px] text-[var(--color-text4)]">{{ result.display_name }}</span>
+                      }
                       <span class="font-mono text-[10px] text-[var(--color-text4)]">
                         {{ result.lat }}, {{ result.lon }}
-                        @if (allowCoverage) {
-                          <span> · {{ (result.delta * 111.32).toFixed(1) }} km coverage</span>
+                        @if (allowCoverage && resultCoverageLabel(result); as coverageLabel) {
+                          <span> · {{ coverageLabel }} coverage</span>
                         }
                       </span>
                     </button>

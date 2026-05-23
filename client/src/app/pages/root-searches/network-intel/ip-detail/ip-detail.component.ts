@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, effect, input } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { IpDetail } from '../../../../shared/model/network-intel/network-intel.model';
-import { ScanHelperMethodsService } from '../network-intel-service.service';
+import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
 
 @Component({
   selector: 'app-ip-detail',
@@ -16,7 +16,7 @@ export class IpDetailComponent {
   readonly detailInput = input<IpDetail | undefined>(undefined, { alias: 'detail' });
   detail!: IpDetail;
 
-  constructor(public ui: ScanHelperMethodsService, private sanitizer: DomSanitizer) {
+  constructor(public ui: NetworkIntelScanService, private sanitizer: DomSanitizer) {
     effect(() => {
       const detail = this.detailInput();
       if (detail !== undefined) {

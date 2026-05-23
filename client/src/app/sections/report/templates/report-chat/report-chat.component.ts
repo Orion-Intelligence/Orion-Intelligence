@@ -16,7 +16,7 @@ import { ChatWidgetComponent } from '../../../../pages/root-searches/ai-workspac
 import { AppService } from '../../../../services/core/app/app.service';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, isLikelyUrl as isLikelyUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
-import { ScanHelperMethodsService } from '../../../../pages/root-searches/network-intel/network-intel-service.service';
+import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
 import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
 @Component({
   selector: 'app-report-chat',
@@ -47,7 +47,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
   summary = '';
   isExpandedMetadata = true;
 
-  constructor(protected appService: AppService, private route: ActivatedRoute, protected authService: AuthService, public dashboardService: DashboardService, private router: Router, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>, private scanHelperMethodsService: ScanHelperMethodsService) {
+  constructor(protected appService: AppService, private route: ActivatedRoute, protected authService: AuthService, public dashboardService: DashboardService, private router: Router, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>, private scanHelperMethodsService: NetworkIntelScanService) {
   }
 
   ngOnInit(): void {

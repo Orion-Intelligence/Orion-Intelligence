@@ -151,16 +151,16 @@
 
 </div>
 
-<app-satellite-geocode-modal
+<app-geocode-modal
   [isOpen]="showGeocodeModal"
   [isScanning]="isScanning()"
   [coordinates]="geocodeCoordinates"
   [delta]="geocodeDelta"
   [allowCoverage]="geocodeAllowCoverage"
-  mode="satellite"
   [title]="geocodeTitle"
+  [searchProvider]="fetchGeocodeResults"
   (close)="closeGeocodeModal()"
   (coordinatesChange)="onCoordinatesChange($event)"
   (deltaChange)="onDeltaChangeModal($event)"
   (search)="onGeoSearch()">
-</app-satellite-geocode-modal>
+</app-geocode-modal>

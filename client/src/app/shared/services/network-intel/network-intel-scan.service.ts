@@ -1,12 +1,12 @@
 import { Injectable, signal } from '@angular/core';
 import { lastValueFrom, Observable, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
-import { ResolveIpResponse, NetworkIntelScanResponse, GeoCameraResponse } from '../../../shared/model/network-intel/network-intel-api.models';
-import { IpPortData } from '../../../shared/model/network-intel/network-intel.model';
-import { ScanHelperMethodsService as SharedScanHelperMethodsService } from '../../../shared/partials/scan-helper-methods/scan-helper-methods-service.service';
+import { GeoCameraResponse, NetworkIntelScanResponse, ResolveIpResponse } from '../../model/network-intel/network-intel-api.models';
+import { IpPortData } from '../../model/network-intel/network-intel.model';
+import { ScanHelperMethodsService } from '../../partials/scan-helper-methods/scan-helper-methods-service.service';
 
 @Injectable({ providedIn: 'root' })
-export class ScanHelperMethodsService extends SharedScanHelperMethodsService {
+export class NetworkIntelScanService extends ScanHelperMethodsService {
   isRunning = signal(false);
 
   resetState(): void {
@@ -25,14 +25,6 @@ export class ScanHelperMethodsService extends SharedScanHelperMethodsService {
     this.isRunning.set(false);
   }
 
-  private getResponseError(value: any): { message: string } | null {
-    const status = this.getPendingStatus(value);
-    if (status !== 'error') {
-      return null;
-    }
-    return { message: value?.result?.message || value?.message || 'Request failed' };
-  }
-
   protected override handleTaskValue<T>(value: T): void {
     const responseError = this.getResponseError(value);
     if (responseError) {
@@ -41,37 +33,6 @@ export class ScanHelperMethodsService extends SharedScanHelperMethodsService {
       return;
     }
     super.handleTaskValue(value);
-  }
-
-  private runPolledTask<T extends { result?: { status?: string; progress?: number } | null; status?: string; progress?: number | null }>(call: () => Observable<T>): Subscription {
-    return this.runTask<T>((cancel$) => this.poll<T>(call, (response) => this.getPendingStatus(response), (response) => this.updateProgress(response?.result?.progress ?? response?.progress), cancel$, this.pollDelayMs));
-  }
-
-  private async fetchPolledResult<T extends { result?: { status?: string } | null; status?: string }>(call: () => Observable<T>, onEach?: (response: T) => void): Promise<any> {
-    const cancel$ = this.createCancelSubject();
-    try {
-      const response = await lastValueFrom(this.poll<T>(call, (value) => this.getPendingStatus(value), (value) => onEach?.(value), cancel$, this.pollDelayMs));
-      return this.unwrapPolledResult(response);
-    }
-    finally {
-      this.completeCancelSubject(cancel$);
-    }
-  }
-
-  private fetchPolledResult$<T extends { result?: { status?: string } | null; status?: string }>(call: () => Observable<T>, onEach?: (response: T) => void): Observable<any> {
-    const cancel$ = this.createCancelSubject();
-    return this.poll<T>(call, (value) => this.getPendingStatus(value), (value) => onEach?.(value), cancel$, this.pollDelayMs)
-      .pipe(map((response) => this.unwrapPolledResult(response)), finalize(() => {
-        this.completeCancelSubject(cancel$);
-      }));
-  }
-
-  private unwrapPolledResult<T>(response: T): any {
-    const responseError = this.getResponseError(response);
-    if (responseError) {
-      throw new Error(responseError.message);
-    }
-    return (response as any)?.result ?? response;
   }
 
   scanResolveIp(domain: string): Subscription {
@@ -100,33 +61,6 @@ export class ScanHelperMethodsService extends SharedScanHelperMethodsService {
 
   scanGeoCameraByRanges(ip_ranges: string[], max_ips = 200): Subscription {
     return this.runPolledTask<GeoCameraResponse>(() => this.api.post<GeoCameraResponse>('netintel/camera_detect_ranges', { ip_ranges, max_ips }));
-  }
-
-  isValidDomain(value: string): boolean {
-    const ipPattern = /^(\d{1,3}\.){3}\d{1,3}$/;
-    if (ipPattern.test(value)) {
-      return false;
-    }
-    const domainPattern = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
-    return domainPattern.test(value);
-  }
-
-  isValidIp(value: string): boolean {
-    const ipv4 = /^(\d{1,3}\.){3}\d{1,3}$/;
-    if (!ipv4.test(value)) {
-      return false;
-    }
-    return value.split('.').every(octet => parseInt(octet, 10) <= 255);
-  }
-
-  isValidCoordinates(value: string): boolean {
-    const parts = value.trim().split(/[\s,]+/);
-    if (parts.length !== 2) {
-      return false;
-    }
-    const lat = parseFloat(parts[0]);
-    const lon = parseFloat(parts[1]);
-    return !isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
   }
 
   hasRenderableValue(value: unknown): boolean {
@@ -167,24 +101,6 @@ export class ScanHelperMethodsService extends SharedScanHelperMethodsService {
 
   shouldShowLoadingSkeleton(hasSearched: boolean, result: unknown, errorMessage: string | null | undefined, isScanning: boolean, progress: number | null | undefined): boolean {
     return hasSearched && !result && !errorMessage && (isScanning || (progress || 0) > 0);
-  }
-
-  private getTrimmedInputOrNull(value: string): string | null {
-    const trimmed = value.trim();
-    return trimmed || null;
-  }
-
-  private getInputKind(value: string): 'ip' | 'domain' | 'coordinates' | 'other' {
-    if (this.isValidIp(value)) {
-      return 'ip';
-    }
-    if (this.isValidDomain(value)) {
-      return 'domain';
-    }
-    if (this.isValidCoordinates(value) || value.includes(',')) {
-      return 'coordinates';
-    }
-    return 'other';
   }
 
   validateDnsInput(value: string): string | null {
@@ -266,13 +182,11 @@ export class ScanHelperMethodsService extends SharedScanHelperMethodsService {
     const range = /^(\d{1,3}\.){3}\d{1,3}-(\d{1,3}\.){3}\d{1,3}$/;
     const single = /^(\d{1,3}\.){3}\d{1,3}$/;
     const isValidOctet = (ip: string) => ip.split('.').every(octet => parseInt(octet, 10) <= 255);
-
     const parsedRanges = lines.map(line => {
       const base = line.split('/')[0].split('-')[0];
       const valid = (cidr.test(line) || range.test(line) || single.test(line)) && isValidOctet(base);
       return { value: line, valid };
     });
-
     const invalid = parsedRanges.find(rangeItem => !rangeItem.valid);
     return {
       error: invalid ? 'Invalid format: use CIDR (x.x.x.x/n)' : null,
@@ -298,27 +212,8 @@ export class ScanHelperMethodsService extends SharedScanHelperMethodsService {
     });
   }
 
-  hasData(obj: Record<string, any> | undefined | null): boolean {
-    return this.safeEntries(obj).length > 0;
-  }
-
   hasItems(arr: any[] | undefined | null): boolean {
     return Array.isArray(arr) && arr.length > 0;
-  }
-
-  hasPortDetail(port: IpPortData | null | undefined): boolean {
-    if (!port) {
-      return false;
-    }
-    return Boolean(port.port ||
-      port.protocol ||
-      port.proto ||
-      port.service ||
-      port.state ||
-      port.banner ||
-      port.http ||
-      port.tls ||
-      (Array.isArray(port.risk_flags) && port.risk_flags.length));
   }
 
   renderablePorts(ports: IpPortData[] | undefined | null): IpPortData[] {
@@ -333,5 +228,104 @@ export class ScanHelperMethodsService extends SharedScanHelperMethodsService {
       return sec;
     }
     return Object.entries(sec).filter(([, value]) => value).map(([key]) => key);
+  }
+
+  private getResponseError(value: any): { message: string } | null {
+    const status = this.getPendingStatus(value);
+    if (status !== 'error') {
+      return null;
+    }
+    return { message: value?.result?.message || value?.message || 'Request failed' };
+  }
+
+  private runPolledTask<T extends { result?: { status?: string; progress?: number } | null; status?: string; progress?: number | null }>(call: () => Observable<T>): Subscription {
+    return this.runTask<T>((cancel$) => this.poll<T>(call, (response) => this.getPendingStatus(response), (response) => this.updateProgress(response?.result?.progress ?? response?.progress), cancel$, this.pollDelayMs));
+  }
+
+  private async fetchPolledResult<T extends { result?: { status?: string } | null; status?: string }>(call: () => Observable<T>, onEach?: (response: T) => void): Promise<any> {
+    const cancel$ = this.createCancelSubject();
+    try {
+      const response = await lastValueFrom(this.poll<T>(call, (value) => this.getPendingStatus(value), (value) => onEach?.(value), cancel$, this.pollDelayMs));
+      return this.unwrapPolledResult(response);
+    }
+    finally {
+      this.completeCancelSubject(cancel$);
+    }
+  }
+
+  private fetchPolledResult$<T extends { result?: { status?: string } | null; status?: string }>(call: () => Observable<T>, onEach?: (response: T) => void): Observable<any> {
+    const cancel$ = this.createCancelSubject();
+    return this.poll<T>(call, (value) => this.getPendingStatus(value), (value) => onEach?.(value), cancel$, this.pollDelayMs)
+      .pipe(map((response) => this.unwrapPolledResult(response)), finalize(() => {
+        this.completeCancelSubject(cancel$);
+      }));
+  }
+
+  private unwrapPolledResult<T>(response: T): any {
+    const responseError = this.getResponseError(response);
+    if (responseError) {
+      throw new Error(responseError.message);
+    }
+    return (response as any)?.result ?? response;
+  }
+
+  private isValidDomain(value: string): boolean {
+    const ipPattern = /^(\d{1,3}\.){3}\d{1,3}$/;
+    if (ipPattern.test(value)) {
+      return false;
+    }
+    const domainPattern = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+    return domainPattern.test(value);
+  }
+
+  private isValidIp(value: string): boolean {
+    const ipv4 = /^(\d{1,3}\.){3}\d{1,3}$/;
+    if (!ipv4.test(value)) {
+      return false;
+    }
+    return value.split('.').every(octet => parseInt(octet, 10) <= 255);
+  }
+
+  private isValidCoordinates(value: string): boolean {
+    const parts = value.trim().split(/[\s,]+/);
+    if (parts.length !== 2 || parts.some(part => part.trim() === '')) {
+      return false;
+    }
+    const lat = Number(parts[0]);
+    const lon = Number(parts[1]);
+    return Number.isFinite(lat) && Number.isFinite(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
+  }
+
+  private getTrimmedInputOrNull(value: string): string | null {
+    const trimmed = value.trim();
+    return trimmed || null;
+  }
+
+  private getInputKind(value: string): 'ip' | 'domain' | 'coordinates' | 'other' {
+    if (this.isValidIp(value)) {
+      return 'ip';
+    }
+    if (this.isValidDomain(value)) {
+      return 'domain';
+    }
+    if (this.isValidCoordinates(value) || value.includes(',')) {
+      return 'coordinates';
+    }
+    return 'other';
+  }
+
+  private hasPortDetail(port: IpPortData | null | undefined): boolean {
+    if (!port) {
+      return false;
+    }
+    return Boolean(port.port ||
+      port.protocol ||
+      port.proto ||
+      port.service ||
+      port.state ||
+      port.banner ||
+      port.http ||
+      port.tls ||
+      (Array.isArray(port.risk_flags) && port.risk_flags.length));
   }
 }
