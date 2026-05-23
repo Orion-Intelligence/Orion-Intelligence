@@ -91,11 +91,8 @@ export class CaseShareComponent implements OnInit, OnDestroy {
       || null;
   }
 
-  formatPercent(value?: number | null): string {
-    if (typeof value !== 'number') {
-      return '-';
-    }
-    return `${Math.round(value * 100)}%`;
+  formatConfidence(value?: string | null): string {
+    return this.formatLabel(value || 'high');
   }
 
   formatLabel(value?: string | null, otherValue?: string | null): string {
@@ -173,7 +170,7 @@ export class CaseShareComponent implements OnInit, OnDestroy {
         ['Display Name', primaryEntity.entityDescription || primaryEntity.value],
         ['Type', this.formatLabel(primaryEntity.type, primaryEntity.entityTypeOtherValue)],
         ['Role', this.formatLabel(primaryEntity.role)],
-        ['Confidence', this.formatPercent(primaryEntity.confidence)],
+        ['Confidence', this.formatConfidence(primaryEntity.confidence)],
         ['Relationship', this.formatLabel(primaryEntity.relationshipToCase)],
         ['Source', this.formatLabel(primaryEntity.source, primaryEntity.entitySourceOtherValue)],
         ['Created By', primaryEntity.createdBy || '-'],

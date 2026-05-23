@@ -1,9 +1,15 @@
-import { ArtifactType, CaseArtifact, CaseEntity, CaseEntityRequest, CaseLink, CaseRequest, CaseStatus, CaseTag, CaseTask, CaseType, ClosureReason, EntityRole, EntityType, IdentifierType, IntakeSource, Priority, Severity, SocialPlatform, SourceType, TaskStatus } from './case.model';
+import { ArtifactType, CaseArtifact, CaseEntity, CaseEntityRequest, CaseLink, CaseRequest, CaseStatus, CaseTag, CaseTask, CaseType, ClosureReason, EntityConfidence, EntityRole, EntityType, IdentifierType, IntakeSource, Priority, Severity, SocialPlatform, SourceType, TaskStatus } from './case.model';
 
 export interface CaseOption<T extends string> {
   value: T;
   label: string;
 }
+
+export const ENTITY_CONFIDENCE_OPTIONS: CaseOption<EntityConfidence>[] = [
+  { value: 'low', label: 'Low' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'high', label: 'High' }
+];
 
 export const CASE_TYPE_OPTIONS: CaseOption<CaseType>[] = [
   { value: 'data_leak', label: 'Data Leak' },
@@ -193,7 +199,7 @@ export const DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE: CaseEntity = {
   value: '',
   entityDescription: '',
   role: 'primary',
-  confidence: 1,
+  confidence: 'low',
   source: 'manual',
   identifiers: [],
   socialProfiles: [],
@@ -218,7 +224,7 @@ export const DEFAULT_PRIMARY_CASE_ENTITY_REQUEST_TEMPLATE: CaseEntityRequest = {
   value: '',
   entityDescription: '',
   role: 'primary',
-  confidence: 1,
+  confidence: 'low',
   source: 'manual',
   identifiers: [],
   socialProfiles: [],

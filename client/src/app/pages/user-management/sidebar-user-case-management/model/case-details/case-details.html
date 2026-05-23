@@ -528,7 +528,7 @@
                                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
                                     Confidence</div>
                                 <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{
-                                    (primaryEntity.confidence || 0) * 100 | number:'1.0-0' }}%</div>
+                                    formatConfidence(primaryEntity.confidence) }}</div>
                             </div>
                             <div>
                                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
@@ -754,7 +754,7 @@
                                                 Confidence
                                             </div>
                                             <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
-                                                {{ (entity.confidence || 0) * 100 | number:'1.0-0' }}%
+                                                formatConfidence(primaryEntity.confidence)
                                             </div>
                                         </div>
                                     </div>

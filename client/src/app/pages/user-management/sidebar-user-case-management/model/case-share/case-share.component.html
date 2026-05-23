@@ -163,7 +163,8 @@
             </span>
           </div>
           <div class="text-xs font-medium text-[var(--color-text4)]">
-            {{ formatLabel(primaryEntity.relationshipToCase) }} · {{ formatLabel(primaryEntity.type, primaryEntity.entityTypeOtherValue) }}
+            {{ formatLabel(primaryEntity.relationshipToCase) }} · {{ formatLabel(primaryEntity.type,
+            primaryEntity.entityTypeOtherValue) }}
           </div>
         </div>
 
@@ -189,7 +190,8 @@
             <div class="grid grid-cols-2 gap-x-5 gap-y-4">
               <div>
                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Type</div>
-                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(primaryEntity.type, primaryEntity.entityTypeOtherValue) }}</div>
+                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(primaryEntity.type,
+                  primaryEntity.entityTypeOtherValue) }}</div>
               </div>
               <div>
                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Role</div>
@@ -200,7 +202,7 @@
                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Confidence
                 </div>
                 <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{
-                  formatPercent(primaryEntity.confidence) }}</div>
+                  formatConfidence(primaryEntity.confidence) }}</div>
               </div>
               <div>
                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Relationship
@@ -210,7 +212,8 @@
               </div>
               <div>
                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Source</div>
-                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(primaryEntity.source, primaryEntity.entitySourceOtherValue) }}</div>
+                <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(primaryEntity.source,
+                  primaryEntity.entitySourceOtherValue) }}</div>
               </div>
               @if (primaryEntity.createdBy) {
               <div>
@@ -255,7 +258,8 @@
           <div class="flex flex-wrap gap-2">
             @for (profile of primaryEntity.socialProfiles; track $index) {
             <div class="max-w-full rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs break-words">
-              <span class="font-semibold text-sky-400">{{ formatLabel(profile.platform, profile.platformOtherValue) }}</span>
+              <span class="font-semibold text-sky-400">{{ formatLabel(profile.platform, profile.platformOtherValue)
+                }}</span>
               <span class="ml-1 text-[var(--color-text2)]">{{ profile.username }}</span>
               @if (profile.displayName) {
               <span class="ml-1 text-[var(--color-text4)]">({{ profile.displayName }})</span>
@@ -276,7 +280,8 @@
           <div class="flex flex-wrap gap-2">
             @for (identifier of primaryEntity.identifiers; track $index) {
             <div class="max-w-full rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs break-words">
-              <span class="font-semibold text-green-400">{{ formatLabel(identifier.type, identifier.identifierTypeOtherValue)
+              <span class="font-semibold text-green-400">{{ formatLabel(identifier.type,
+                identifier.identifierTypeOtherValue)
                 }}</span>
               <span class="ml-1 text-[var(--color-text2)]">{{ identifier.value }}</span>
               @if (identifier.issuer) {

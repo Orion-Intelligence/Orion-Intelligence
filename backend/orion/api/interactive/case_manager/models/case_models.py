@@ -23,6 +23,7 @@ from orion.services.mongo_manager.shared_model.db_case_model import Severity
 from orion.services.mongo_manager.shared_model.db_case_model import SocialPlatform
 from orion.services.mongo_manager.shared_model.db_case_model import SourceType
 from orion.services.mongo_manager.shared_model.db_case_model import TaskStatus
+from orion.services.mongo_manager.shared_model.db_case_model import EntityConfidence
 
 
 def validate_other_value(selected_value, other_value: str, field_name: str) -> None:
@@ -73,7 +74,7 @@ class CaseEntityModel(CaseRequestModel):
     entityDescription: str = ""
     role: EntityRole = Field(default=EntityRole.RELATED)
     linkedEntityId: str = ""
-    confidence: float = 1.0
+    confidence: EntityConfidence = Field(default=EntityConfidence.HIGH)
     source: SourceType = Field(default=SourceType.MANUAL)
     entitySourceOtherValue: str = ""
     identifiers: List[AdditionalIdentifierModel] = Field(default_factory=list)

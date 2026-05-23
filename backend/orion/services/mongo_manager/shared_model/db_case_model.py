@@ -119,6 +119,12 @@ class EntityRole(str, Enum):
     OWNER = "owner"
 
 
+class EntityConfidence(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
+
 class SocialPlatform(str, Enum):
     FACEBOOK = "facebook"
     INSTAGRAM = "instagram"
@@ -258,7 +264,7 @@ class CaseEntity(EmbeddedModel):
     entityDescription: str = ""
     role: EntityRole = Field(default=EntityRole.RELATED)
     linkedEntityId: str = ""
-    confidence: float = 1.0
+    confidence: EntityConfidence = Field(default=EntityConfidence.HIGH)
     source: SourceType = Field(default=SourceType.MANUAL)
     entitySourceOtherValue: str = ""
     identifiers: List[AdditionalIdentifier] = Field(default_factory=list)

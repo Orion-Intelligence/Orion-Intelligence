@@ -23,6 +23,7 @@ export type CaseStatus =
     'resolved' |
     'closed';
 
+export type EntityConfidence = 'low' | 'medium' | 'high';
 export type Severity = 'info' | 'low' | 'medium' | 'high' | 'critical';
 export type Priority = 'low' | 'medium' | 'high' | 'critical';
 export type TaskStatus = 'open' | 'in_progress' | 'blocked' | 'done' | 'cancelled';
@@ -187,7 +188,7 @@ export interface CaseEntity {
     entitySourceOtherValue?: string;
     entityDescription?: string;
     role: EntityRole;
-    confidence: number;
+    confidence: EntityConfidence;
     source: SourceType;
     identifiers: AdditionalIdentifier[];
     socialProfiles: SocialMediaProfile[];
@@ -207,7 +208,7 @@ export interface CaseEntityRequest {
     entitySourceOtherValue?: string;
     entityDescription?: string;
     role: EntityRole;
-    confidence: number;
+    confidence: EntityConfidence;
     source: SourceType;
     identifiers: AdditionalIdentifier[];
     socialProfiles: SocialMediaProfile[];
@@ -447,7 +448,7 @@ export interface SharedCaseEntity {
     entityDescription?: string;
     role?: string;
     relationshipToCase?: string;
-    confidence?: number;
+    confidence?: EntityConfidence;
     source?: string;
     identifiers?: SharedIdentifier[];
     socialProfiles?: SharedSocialProfile[];

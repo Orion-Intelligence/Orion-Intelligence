@@ -7,7 +7,7 @@ import { ReportFeedbackCommentsComponent } from '../../../../../sections/report/
 import { ReportUserSidebarComponent } from '../../../../../sections/report/social-interactions/report-user-sidebar/report-user-sidebar.component';
 import { ReportFeedbackModel } from '../../../../../sections/report/templates/report_general/models/report-feedback.model';
 import { Case, CaseAnalyst, CaseArtifact, CaseArtifactRequest, CaseClosure, CaseClosureRequest, CaseComment, CaseCommentRequest, CaseEntity, CaseEntityRequest, CaseTag, CaseTask, CaseTaskRequest, CaseUpdateRequest } from '../../../../../shared/model/case-management/case.model';
-import { ARTIFACT_TYPE_OPTIONS, CASE_LINK_RELATIONSHIP_OPTIONS, CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, CLOSURE_REASON_OPTIONS, DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS, SOURCE_TYPE_OPTIONS, TASK_STATUS_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
+import { ARTIFACT_TYPE_OPTIONS, CASE_LINK_RELATIONSHIP_OPTIONS, CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, CLOSURE_REASON_OPTIONS, DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE, ENTITY_CONFIDENCE_OPTIONS, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS, SOURCE_TYPE_OPTIONS, TASK_STATUS_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 import { ConfirmationPopupComponent } from '../../../../../shared/partials/confirmation-popup/confirmation-popup.component';
@@ -54,6 +54,7 @@ export class CaseDetails implements OnInit {
   sourceTypeOptions = SOURCE_TYPE_OPTIONS;
   caseLinkRelationshipOptions = CASE_LINK_RELATIONSHIP_OPTIONS;
   closureReasonOptions = CLOSURE_REASON_OPTIONS;
+  confidenceOptions = ENTITY_CONFIDENCE_OPTIONS;
   tagOptions: { value: CaseTag; label: string }[] = CASE_TAG_OPTIONS;
   readonly screenshotAllowedTypes = ['image/png'];
   readonly artifactAllowedFileTypes = ['application/pdf', 'image/jpeg', 'image/png', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
@@ -1222,6 +1223,10 @@ export class CaseDetails implements OnInit {
     }).then(() => this.loadCaseDetails());
   }
 
+  formatConfidence(value?: string | null): string {
+    return this.formatLabel(value || 'high');
+  }
+
   private ensurePrimaryEntity(caseItem: Case): CaseEntity {
     if (!caseItem.entities) {
       caseItem.entities = [];
@@ -1243,7 +1248,7 @@ export class CaseDetails implements OnInit {
     entity.value = entity.value || '';
     entity.entityDescription = entity.entityDescription || '';
     entity.role = entity.role || 'related';
-    entity.confidence = entity.confidence ?? 1;
+    entity.confidence = entity.confidence || 'high';
     entity.source = entity.source || 'manual';
     entity.identifiers = entity.identifiers || [];
     entity.socialProfiles = entity.socialProfiles || [];

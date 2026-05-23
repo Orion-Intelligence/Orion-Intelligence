@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdditionalIdentifier, CaseEntity, CaseTag, SocialMediaProfile } from '../../../../../shared/model/case-management/case.model';
-import { CASE_TAG_OPTIONS, ENTITY_ROLE_OPTIONS, ENTITY_TYPE_OPTIONS, IDENTIFIER_TYPE_OPTIONS, SOCIAL_PLATFORM_OPTIONS, SOURCE_TYPE_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
+import { CASE_TAG_OPTIONS, ENTITY_ROLE_OPTIONS, ENTITY_TYPE_OPTIONS, IDENTIFIER_TYPE_OPTIONS, SOCIAL_PLATFORM_OPTIONS, SOURCE_TYPE_OPTIONS, ENTITY_CONFIDENCE_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
 import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
 
 @Component({
@@ -20,6 +20,7 @@ export class EntityDetailsComponent implements OnChanges {
   socialMediaPlatforms = SOCIAL_PLATFORM_OPTIONS;
   identifierTypes = IDENTIFIER_TYPE_OPTIONS;
   tagOptions = CASE_TAG_OPTIONS;
+  confidenceOptions = ENTITY_CONFIDENCE_OPTIONS;
 
   @Input() entity!: CaseEntity;
   @Input() isMainEntity = false;
