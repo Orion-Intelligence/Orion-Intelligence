@@ -210,14 +210,14 @@ html:has(body.dark-theme) {
   position: fixed;
   z-index: 9999;
   padding: 6px 10px;
-  border: 1px solid rgba(0, 224, 255, 0.15);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: linear-gradient(180deg, rgba(7, 12, 22, 0.97), rgba(2, 6, 14, 0.98));
-  color: #fff;
+  background: var(--color-blue-770);
+  color: var(--color-text1);
   font-size: 12px;
   font-weight: 600;
   pointer-events: none;
-  box-shadow: 0 0 24px rgba(0, 224, 255, 0.18) !important;
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.45) !important;
   backdrop-filter: blur(8px);
 }
 
@@ -235,7 +235,7 @@ html:has(body.dark-theme) {
 
 .threat-lens-tooltip__arc-title {
   margin-bottom: 10px;
-  color: #00e0ff;
+  color: var(--color-blue-640);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -257,14 +257,14 @@ html:has(body.dark-theme) {
 
 .threat-lens-tooltip__label,
 .threat-lens-tooltip__total-label {
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-text3);
   font-size: 11px;
 }
 
 .threat-lens-tooltip__value {
   max-width: 140px;
   overflow: hidden;
-  color: white;
+  color: var(--color-text1);
   font-size: 12px;
   font-weight: 700;
   text-align: right;
@@ -274,7 +274,7 @@ html:has(body.dark-theme) {
 
 .threat-lens-tooltip__country-title {
   margin-bottom: 10px;
-  color: #ffffff;
+  color: var(--color-text1);
   font-size: 14px;
   font-weight: 700;
 }
@@ -282,14 +282,13 @@ html:has(body.dark-theme) {
 .threat-lens-tooltip__total-row {
   margin-bottom: 10px;
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .threat-lens-tooltip__total-value {
-  color: #00e0ff;
+  color: var(--color-blue-640);
   font-size: 14px;
   font-weight: 700;
-  text-shadow: 0 0 12px rgba(0, 224, 255, 0.7);
 }
 
 .threat-lens-tooltip__breakdown-row {
@@ -314,14 +313,20 @@ html:has(body.dark-theme) {
 }
 
 .threat-lens-tooltip__breakdown-label {
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--color-text2);
   font-size: 11px;
 }
 
 .threat-lens-tooltip__breakdown-count {
-  color: white;
+  color: var(--color-text1);
   font-size: 12px;
   font-weight: 700;
+}
+
+.threat-lens-tooltip__empty {
+  color: var(--color-text4);
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .threat-lens-map,

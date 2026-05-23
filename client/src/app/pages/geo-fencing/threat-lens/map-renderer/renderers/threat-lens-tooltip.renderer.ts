@@ -88,8 +88,16 @@ export class ThreatLensTooltipRenderer {
     totalRow.append(totalLabel, totalValue);
     tooltipContent.append(countryTitle, totalRow);
 
-    for (const item of breakdown) {
-      tooltipContent.append(this.buildBreakdownTooltipRow(item));
+    if (breakdown.length) {
+      for (const item of breakdown) {
+        tooltipContent.append(this.buildBreakdownTooltipRow(item));
+      }
+    }
+    else {
+      const emptyMessage = document.createElement('div');
+      emptyMessage.className = 'threat-lens-tooltip__empty';
+      emptyMessage.textContent = 'No data found';
+      tooltipContent.append(emptyMessage);
     }
 
     this.show(event, tooltipContent);
@@ -100,7 +108,7 @@ export class ThreatLensTooltipRenderer {
       return;
     }
 
-    this.tooltipEl.setAttribute('style', `left:${event.x - 16}px;top:${event.y - 16}px`);
+    this.tooltipEl.setAttribute('style', `left:${event.x + 10}px;top:${event.y + 10}px`);
   }
 
   hide(): void {

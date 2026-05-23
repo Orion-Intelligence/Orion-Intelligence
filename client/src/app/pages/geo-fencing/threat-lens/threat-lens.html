@@ -1,4 +1,4 @@
-<section class="ui-consolidated-theme relative block h-full min-h-0 w-full overflow-hidden border border-[var(--color-border)] bg-[var(--color-blue-850)]">
+<section class="ui-consolidated-theme relative block h-full min-h-0 w-full overflow-hidden bg-[var(--color-blue-850)]">
 
 	<app-threat-lens-map-renderer
 		class="absolute inset-0 block h-full w-full"
@@ -10,13 +10,13 @@
 		(arcCountChange)="onArcCountChange($event)">
 	</app-threat-lens-map-renderer>
 
-	<div class="pointer-events-none absolute inset-0 bg-[var(--color-mono)] opacity-25"></div>
+	<div class="pointer-events-none absolute inset-0 bg-[var(--color-mono)] opacity-15"></div>
 
 	<app-map-loading-badges [items]="loadingBadges" [topControlsInset]="!showFilterButton"></app-map-loading-badges>
 
 	@if (isLoading) {
 		<div class="absolute inset-0 z-30 flex items-center justify-center bg-[var(--color-blue-850)]/65 backdrop-blur-sm">
-			<div class="mx-4 flex min-w-[220px] max-w-[360px] flex-col items-center gap-3 rounded-[16px] bg-[var(--color-blue-790)] px-6 py-5 text-center shadow-lg">
+			<div class="mx-4 flex min-w-[220px] max-w-[360px] flex-col items-center gap-3 rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] px-6 py-5 text-center shadow-[0_20px_48px_rgba(2,6,23,.55)] [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)]">
 				<div class="h-11 w-11 animate-spin rounded-full border-4 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></div>
 				<div>
 					<p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">Loading Threat Lens</p>
@@ -28,17 +28,17 @@
 
 	<div class="absolute left-4 top-4 bottom-4 z-20 flex w-[min(24rem,calc(100%-5rem))] flex-col gap-3 max-[640px]:w-[calc(100%-2rem)] max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:top-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pt-3">
 		<div class="h-[40px] shrink-0 max-[1100px]:hidden"></div>
-    <div class="rounded-[12px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.58)] p-3 shadow-[0_10px_30px_rgba(2,6,23,.24)] backdrop-blur-md [body.light-theme_&]:bg-[rgba(255,255,255,0.25)]">
+    <div class="map-overlay-menu rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] p-3 shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[640px]:rounded-[12px]">
 			<div class="flex items-center justify-between gap-3">
-				<p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">Search</p>
-				<button type="button" (click)="togglePanel('search')" [attr.aria-label]="isSearchPanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
+				<p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Search</p>
+				<button type="button" (click)="togglePanel('search')" [attr.aria-label]="isSearchPanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
   <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 transition duration-200" [ngClass]="{ 'rotate-180': !isSearchPanelCollapsed }" />
 </button>
 			</div>
 			@if (!isSearchPanelCollapsed) {
 				<div class="mt-3 flex items-center gap-2">
-					<input [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" type="text" placeholder="Search keyword (e.g. pakistan database)" class="h-10 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[13px] text-[var(--color-text1)] outline-none ring-0 transition focus:border-[var(--color-blue-640)] [body.light-theme_&]:bg-[var(--color-white)] [body.light-theme_&]:text-[var(--color-gray-900)]" />
-					<button (click)="onSearch()" [disabled]="isLoading" class="h-10 rounded-[10px] bg-[var(--color-blue-640)] px-4 text-[13px] font-semibold text-[var(--color-white)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60">
+					<input [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" type="text" placeholder="Search keyword (e.g. pakistan database)" class="h-10 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[13px] text-[var(--color-text1)] outline-none ring-0 transition focus:border-[var(--color-blue-640)] placeholder:text-[var(--color-text3)] [body.light-theme_&]:bg-[var(--color-white)] [body.light-theme_&]:text-[var(--color-gray-900)]" />
+					<button (click)="onSearch()" [disabled]="isLoading" class="h-10 rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 text-[13px] font-semibold text-[var(--color-white)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60">
 						Search
 					</button>
 				</div>
@@ -48,10 +48,10 @@
 				}
 
 				@if (topCountries.length) {
-					<h3 class="mt-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">Top Highlighted Countries</h3>
+					<h3 class="mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Top Highlighted Countries</h3>
 					<div class="mt-2 max-h-[260px] space-y-1 overflow-auto pr-1">
 						@for (item of topCountries; track item.country) {
-							<button type="button" (click)="onTopCountrySelect(item.country)" class="flex w-full items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-1.5 text-left text-[12px] text-[var(--color-text2)] transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-780)]">
+							<button type="button" (click)="onTopCountrySelect(item.country)" class="flex w-full items-center justify-between rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-left text-[12px] text-[var(--color-text2)] transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]">
 								<span class="truncate pr-2">{{ item.country }}</span>
 								<span class="font-semibold text-[var(--color-text1)]">{{ item.count }}</span>
 							</button>
@@ -63,10 +63,10 @@
 				}
 
 				@if (categoryLegend.length) {
-					<h3 class="mt-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">Category Layers</h3>
+					<h3 class="mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Category Layers</h3>
 					<div class="mt-2 max-h-[220px] space-y-1 overflow-auto pr-1">
 						@for (item of categoryLegend; track item.categoryKey) {
-							<div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-1.5 text-[12px] text-[var(--color-text2)]">
+							<div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
 								<div class="flex items-center justify-between gap-3">
 									<span class="flex min-w-0 items-center gap-2">
 										<svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0 drop-shadow-[0_0_6px_currentColor]" [attr.color]="item.colorHex" aria-hidden="true">
@@ -84,10 +84,10 @@
 			}
 		</div>
 
-		<div class="w-full rounded-[12px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.58)] px-4 py-3 text-[var(--color-text1)] shadow-[0_10px_30px_rgba(2,6,23,.24)] backdrop-blur-md max-[1100px]:w-full [body.light-theme_&]:bg-[rgba(255,255,255,0.25)]">
+		<div class="map-overlay-menu w-full rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] px-4 py-3 text-[var(--color-text1)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md max-[1100px]:w-full [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[640px]:rounded-[12px]">
 			<div class="flex items-center justify-between gap-3">
-				<h2 class="text-[14px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text1)]">Threat Lens</h2>
-				<button type="button" (click)="togglePanel('threat')" [attr.aria-label]="isThreatPanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
+				<h2 class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Threat Lens</h2>
+				<button type="button" (click)="togglePanel('threat')" [attr.aria-label]="isThreatPanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
   <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 transition duration-200" [ngClass]="{ 'rotate-180': !isThreatPanelCollapsed }" />
 </button>
 			</div>
@@ -110,7 +110,7 @@
 			<p class="mt-2 max-w-[420px] text-[12px] text-[var(--color-text3)]">{{ statusMessage }}</p>
 			<p class="mt-2 text-[11px] text-[var(--color-text4)]">Arcs currently visible: <span class="font-semibold text-[var(--color-text2)]">{{ arcCount }}</span></p>
 			@if (ipScanResultCount || isIpScanRunning || ipScanErrorMessage) {
-				<div class="mt-3 rounded-[8px] border border-sky-400/20 bg-sky-400/10 px-3 py-2">
+				<div class="mt-3 rounded-[10px] border border-sky-400/20 bg-sky-400/10 px-3 py-2">
 					<div class="flex items-center justify-between gap-3">
 						<span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-300">IP Scan</span>
 						<span class="font-mono text-[11px] text-[var(--color-text2)]">{{ ipScanResultCount }}</span>
@@ -125,11 +125,11 @@
 	<div class="absolute right-4 top-4 bottom-4 z-20 flex w-[min(25rem,calc(100%-2rem))] flex-col gap-0 max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:right-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pb-3">
 		@if (showFilterButton) {
 		<div class="flex justify-end gap-2">
-			<button type="button" data-testid="threat-lens-ip-scan" (click)="openIpScanLocation()" [disabled]="isLoading || isIpScanRunning" class="inline-flex h-[40px] items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.24)] transition hover:bg-[var(--color-blue-810)] disabled:cursor-not-allowed disabled:opacity-60 max-[550px]:flex-1 max-[550px]:justify-center">
+			<button type="button" data-testid="threat-lens-ip-scan" (click)="openIpScanLocation()" [disabled]="isLoading || isIpScanRunning" class="map-overlay-menu inline-flex h-[40px] items-center gap-[8px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition hover:bg-[var(--color-blue-710)] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)] max-[550px]:flex-1 max-[550px]:justify-center">
 				<i class="bi bi-hdd-network text-[16px] leading-none text-sky-400"></i>
 				<span>IP Scan</span>
 			</button>
-				<label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)] max-[550px]:w-full max-[550px]:justify-center">
+				<label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="map-overlay-menu inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)] max-[550px]:w-full max-[550px]:justify-center">
 					<img alt="Filter Icon" height="20" src="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
 					<span>Filter</span>
 				</label>
