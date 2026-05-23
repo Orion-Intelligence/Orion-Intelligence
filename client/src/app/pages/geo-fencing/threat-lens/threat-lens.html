@@ -1,6 +1,14 @@
 <section class="ui-consolidated-theme relative block h-full min-h-0 w-full overflow-hidden border border-[var(--color-border)] bg-[var(--color-blue-850)]">
 
-	<div #mapViewNode class="threat-lens-map absolute inset-0 h-full w-full"></div>
+	<app-threat-lens-map-renderer
+		class="absolute inset-0 block h-full w-full"
+		(mapReady)="onMapReady()"
+		(mapError)="onMapError($event)"
+		(countrySelected)="onCountrySelected($event)"
+		(emptySelection)="onMapEmptySelection()"
+		(ipSelected)="onIpSelected($event)"
+		(arcCountChange)="onArcCountChange($event)">
+	</app-threat-lens-map-renderer>
 
 	<div class="pointer-events-none absolute inset-0 bg-[var(--color-mono)] opacity-25"></div>
 
