@@ -14,7 +14,7 @@
   <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
     <div class="relative grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden">
       <div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:min-h-[380px]">
-        @if(isMapView) {
+        <div class="absolute inset-0 transition-opacity duration-150" [ngClass]="isMapView ? 'opacity-100 animate-[slideUp_220ms_ease-out_both]' : 'pointer-events-none opacity-0'">
           <app-satellite-map-renderer #mapRenderer class="block h-full min-h-0 min-w-0 overflow-hidden"
             [lat]="lat"
             [lon]="lon"
@@ -49,7 +49,7 @@
             [isScanning]="isScanning()"
             (closeSidebar)="mapRenderer.closeSidebar()">
           </app-map-entities-overlay>
-          }
+        </div>
           <div class="absolute right-3 top-3 z-[920] flex max-w-[calc(100%-24px)] items-center gap-2 map-overlay-menu max-[943px]:right-2 max-[943px]:top-2 max-[943px]:max-w-[calc(100%-16px)] max-[520px]:flex-col max-[520px]:items-end">
             @if (showTopBar) {
               <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition-opacity [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)]" [ngClass]="isThreatToolbarDisabled ? 'opacity-50' : 'opacity-100'">
@@ -73,7 +73,7 @@
           </div>
 
         @if(isThreatView){
-          <div class="h-full min-h-0 w-full overflow-hidden">
+          <div class="h-full min-h-0 w-full overflow-hidden animate-[slideUp_220ms_ease-out_both]">
             <app-threat-lens class="block h-full min-h-0 w-full" [showFilterButton]="false" (loadingChange)="onThreatLensLoadingChange($event)"></app-threat-lens>
           </div>
         }

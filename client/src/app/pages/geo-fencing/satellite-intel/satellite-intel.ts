@@ -302,14 +302,20 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   setActiveView(view: 'map' | 'threat'): void {
-    if (this.isThreatToolbarDisabled) {
+    if (view === 'threat' && this.isThreatToolbarDisabled) {
       return;
     }
 
     this.activeTab = view;
+    if (view === 'map') {
+      this.activePanel = SatelliteIntelPanelEnum.Dashboard;
+      this.isPanelPopupOpen = true;
+    }
     this.isThreatLensLoading = view === 'threat';
     this.isPanelMenuOpen = false;
-    this.isPanelPopupOpen = false;
+    if (view === 'threat') {
+      this.isPanelPopupOpen = false;
+    }
   }
 
   get isThreatToolbarDisabled(): boolean {
