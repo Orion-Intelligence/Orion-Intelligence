@@ -2,33 +2,15 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnDestroy, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom, Observable, Subscription } from 'rxjs';
-// <<<<<<< HEAD
-// import { loadModules, setDefaultOptions } from 'esri-loader';
-// import { buildArcPath, buildArcPathPoints, buildCountryFeatureIndex, buildSurfacePath, collectArcPairs, getFeatureAnchor, getArcPointAtProgress } from './threat-lens-map.utils';
-// import { SidebarService } from '../../../shared/services/sidebar.service';
-// import { parseCoordinates } from '../../../shared/utils/geo-coordinates.utils';
-// =======
-// >>>>>>> threat_lens_code_refactoring
 import { FilterModel } from '../../../shared/model/filter/filter.model';
 import { GeoCameraResponse } from '../../../shared/model/network-intel/network-intel-api.models';
-// <<<<<<< HEAD
-// import { AnimatedArcDescriptor, SelectedCountryCategoryCount, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensLegendItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
-// import { ThreatLensService } from './threat.lens.service';
-// import { ThreatLensFeedPanelComponent } from './threat-lens-feed-panel/threat-lens-feed-panel';
-// import { GeocodeModalComponent } from '../../../shared/partials/geocode-modal/geocode-modal.component';
-// import { GeoFencingGeocodeService } from '../shared/geo-fencing-geocode.service';
-// import { NetworkIntelScanService } from '../../../shared/services/network-intel/network-intel-scan.service';
-// =======
 import { FiltersComponent } from '../../../shared/partials/filters/filters.component';
 import { threat_lens_filters } from '../../../shared/constants/filters';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { GeocodeModalComponent } from '../../../shared/partials/geocode-modal/geocode-modal.component';
 import { GeoFencingGeocodeService } from '../shared/geo-fencing-geocode.service';
 import { NetworkIntelScanService } from '../../../shared/services/network-intel/network-intel-scan.service';
-// import { ScanHelperMethodsService as NetworkIntelService } from '../../root-searches/network-intel/network-intel-service.service';
-// import { GeocodeModalComponent } from '../satellite-intel/ui-overlays/geocode-modal/geocode-modal.component';
 import { SelectedCountryCategoryCount, ThreatCountryCount, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensLegendItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
-// >>>>>>> threat_lens_code_refactoring
 import { IpDetailPopupComponent } from './ip-detail-popup/ip-detail-popup.component';
 import { ThreatLensFeedPanelComponent } from './threat-lens-feed-panel/threat-lens-feed-panel';
 import { ThreatLensMapRendererComponent } from './map-renderer/threat-lens-map-renderer.component';
@@ -91,11 +73,7 @@ export class ThreatLensComponent implements OnDestroy {
 
   @Output() loadingChange = new EventEmitter<boolean>();
 
-// <<<<<<< HEAD
-  // constructor(private ngZone: NgZone, private cdr: ChangeDetectorRef, private threatLensService: ThreatLensService, private networkIntelService: NetworkIntelService, private geocodeService: GeoFencingGeocodeService, protected sidebarService: SidebarService) {
-// =======
   constructor( private ngZone: NgZone, private cdr: ChangeDetectorRef, private threatLensService: ThreatLensService, private networkIntelService: NetworkIntelScanService, private geocodeService: GeoFencingGeocodeService, protected sidebarService: SidebarService, ) {
-// >>>>>>> threat_lens_code_refactoring
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -186,11 +164,7 @@ export class ThreatLensComponent implements OnDestroy {
 
   onIpScanLocationApply(): void {
     const coordinates = this.ipScanCoordinates.trim();
-// <<<<<<< HEAD
-//     const center = parseCoordinates(coordinates);
-// =======
     const center = parseThreatLensCoordinates(coordinates);
-// >>>>>>> threat_lens_code_refactoring
     if (!center) {
       this.ipScanErrorMessage = 'Enter coordinates as latitude, longitude before applying the location.';
       return;
@@ -421,293 +395,6 @@ export class ThreatLensComponent implements OnDestroy {
       this.selectedCountryBreakdown = this.getSelectedCountryBreakdown(countryKey);
       this.cdr.detectChanges();
     });
-// <<<<<<< HEAD
-
-//     return Array.from(records.values()).slice(0, 500);
-//   }
-
-//   private renderIpScanMarkers(records: { ip: string; lat?: number; lon?: number }[], center: { lat: number; lon: number }, radiusKm: number): void {
-//     if (!this.ipScanGraphicsLayer) {
-//       return;
-//     }
-
-//     this.clearIpScanGraphics();
-//     const markerGraphics = records.map((record, index) => {
-//       const point = this.resolveIpMarkerPoint(record, index, records.length, center, radiusKm);
-//       return {
-//         geometry: {
-//           type: 'point',
-//           longitude: point.lon,
-//           latitude: point.lat,
-//           spatialReference: { wkid: 4326 },
-//         },
-//         attributes: {
-//           role: 'ip-scan-marker',
-//           ip: record.ip,
-//         },
-//         symbol: this.buildIpMarkerSymbol(this.getIpMarkerSizeForView()),
-//       };
-//     });
-
-//     const radiusGraphic = {
-//       geometry: this.buildRadiusPolygon(center, radiusKm),
-//       attributes: {
-//         role: 'ip-scan-radius',
-//       },
-//       symbol: {
-//         type: 'simple-fill',
-//         color: [14, 165, 233, 0.08],
-//         outline: {
-//           color: [56, 189, 248, 0.72],
-//           width: 1.25,
-//         },
-//       },
-//     };
-
-//     this.ipScanMarkerGraphics = markerGraphics;
-//     this.ipScanGraphicsLayer.addMany([radiusGraphic, ...markerGraphics]);
-//     this.updateIpMarkerSymbols();
-//     this.focusIpScanArea(center, radiusKm);
-//   }
-
-//   private clearIpScanGraphics(): void {
-//     this.ipScanGraphicsLayer?.removeAll();
-//     this.ipScanMarkerGraphics = [];
-//   }
-
-//   private resolveIpMarkerPoint(record: { ip: string; lat?: number; lon?: number }, index: number, total: number, center: { lat: number; lon: number }, radiusKm: number): { lat: number; lon: number } {
-//     if (Number.isFinite(record.lat) && Number.isFinite(record.lon)) {
-//       const distance = this.getDistanceKm(center, { lat: record.lat as number, lon: record.lon as number });
-//       if (distance <= radiusKm * 1.05) {
-//         return { lat: record.lat as number, lon: record.lon as number };
-//       }
-//     }
-
-//     const hash = this.hashString(`${record.ip}:${index}:${total}`);
-//     const angle = ((hash % 36000) / 36000) * Math.PI * 2;
-//     const radialSeed = ((Math.floor(hash / 36000) % 10000) + 1) / 10001;
-//     const distanceKm = Math.max(0.35, radiusKm * 0.92 * Math.sqrt(radialSeed));
-//     const latOffset = (distanceKm * Math.cos(angle)) / 111.32;
-//     const lonScale = Math.max(0.12, Math.cos(center.lat * Math.PI / 180));
-//     const lonOffset = (distanceKm * Math.sin(angle)) / (111.32 * lonScale);
-
-//     return {
-//       lat: Math.max(-89.9, Math.min(89.9, center.lat + latOffset)),
-//       lon: this.normalizeLongitude(center.lon + lonOffset),
-//     };
-//   }
-
-//   private buildRadiusPolygon(center: { lat: number; lon: number }, radiusKm: number): any {
-//     const ring: number[][] = [];
-//     const latRad = center.lat * Math.PI / 180;
-//     const lonRad = center.lon * Math.PI / 180;
-//     const angularDistance = radiusKm / 6371.0088;
-
-//     for (let step = 0; step <= 96; step++) {
-//       const bearing = (step / 96) * Math.PI * 2;
-//       const pointLat = Math.asin(Math.sin(latRad) * Math.cos(angularDistance) + Math.cos(latRad) * Math.sin(angularDistance) * Math.cos(bearing));
-//       const pointLon = lonRad + Math.atan2(Math.sin(bearing) * Math.sin(angularDistance) * Math.cos(latRad), Math.cos(angularDistance) - Math.sin(latRad) * Math.sin(pointLat));
-//       ring.push([this.normalizeLongitude(pointLon * 180 / Math.PI), pointLat * 180 / Math.PI]);
-//     }
-
-//     return {
-//       type: 'polygon',
-//       rings: [ring],
-//       spatialReference: { wkid: 4326 },
-//     };
-//   }
-
-//   private updateIpMarkerSymbols(): void {
-//     if (!this.ipScanMarkerGraphics.length) {
-//       return;
-//     }
-
-//     const size = this.getIpMarkerSizeForView();
-//     for (const graphic of this.ipScanMarkerGraphics) {
-//       graphic.symbol = this.buildIpMarkerSymbol(size);
-//     }
-//   }
-
-//   private buildIpMarkerSymbol(size: number): any {
-//     return {
-//       type: 'simple-marker',
-//       style: 'circle',
-//       size,
-//       color: [56, 189, 248, 0.88],
-//       outline: {
-//         color: [255, 255, 255, 0.92],
-//         width: Math.max(1, Math.min(2.5, size * 0.16)),
-//       },
-//     };
-//   }
-
-//   private getIpMarkerSizeForView(): number {
-//     const scale = Number(this.view?.scale || 50000000);
-//     const logScale = Math.log10(Math.max(1, scale));
-//     const zoomFactor = Math.max(0, Math.min(1, (8.25 - logScale) / 4.5));
-//     return Math.round((6 + (zoomFactor * 9)) * 10) / 10;
-//   }
-
-//   private focusIpScanArea(center: { lat: number; lon: number }, radiusKm: number): void {
-//     if (!this.view) {
-//       return;
-//     }
-
-//     const altitude = Math.max(450000, Math.min(12000000, radiusKm * 12000));
-//     void this.view.goTo({
-//       position: {
-//         longitude: center.lon,
-//         latitude: center.lat,
-//         z: altitude,
-//       },
-//       tilt: 0,
-//     }, { duration: 750, easing: 'ease-in-out' }).then(() => undefined, () => undefined);
-//   }
-
-//   private getDistanceKm(a: { lat: number; lon: number }, b: { lat: number; lon: number }): number {
-//     const toRadians = (value: number) => value * Math.PI / 180;
-//     const dLat = toRadians(b.lat - a.lat);
-//     const dLon = toRadians(b.lon - a.lon);
-//     const lat1 = toRadians(a.lat);
-//     const lat2 = toRadians(b.lat);
-//     const h = Math.sin(dLat / 2) ** 2 + (Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2);
-//     return 6371.0088 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
-//   }
-
-//   private normalizeLongitude(value: number): number {
-//     return ((((value + 180) % 360) + 360) % 360) - 180;
-//   }
-
-//   private hashString(value: string): number {
-//     let hash = 2166136261;
-//     for (let index = 0; index < value.length; index++) {
-//       hash ^= value.charCodeAt(index);
-//       hash = Math.imul(hash, 16777619);
-//     }
-//     return hash >>> 0;
-//   }
-
-//   private setLoading(value: boolean): void {
-//     if (this.isLoading === value) {
-//       return;
-//     }
-
-//     this.isLoading = value;
-//     this.loadingChange.emit(value);
-//   }
-
-//   private async renderCountryArcs(categoryData: ThreatLensCategoryMapData[]): Promise<{
-//     totalArcCount: number;
-//     arcCountByCategory: Map<ThreatLensCategoryModelKey, number>;
-//   }> {
-//     if (!this.arcGraphicsLayer || !this.arcSurfaceGraphicsLayer || !this.animatedArcGraphicsLayer) {
-//       return { totalArcCount: 0, arcCountByCategory: new Map() };
-//     }
-
-//     this.stopArcAnimation();
-//     this.arcGraphicsLayer.removeAll();
-//     this.arcSurfaceGraphicsLayer.removeAll();
-//     this.animatedArcGraphicsLayer.removeAll();
-//     this.animatedArcs = [];
-//     this.visibleBatchIndex = -1;
-//     this.batchAnimationStartTime = 0;
-
-//     const arcCountByCategory = new Map<ThreatLensCategoryModelKey, number>();
-//     let totalArcCount = 0;
-
-//     for (const category of categoryData) {
-//       const pairs = collectArcPairs(category.documentCountryGroups, (value) => this.toCountryKey(value), this.countryFeatureIndex, this.maxArcCount, this.minArcWeight);
-//       const visiblePairs = this.activeArcCountryFilterKey
-//         ? pairs.filter((pair) => pair.countryAKey === this.activeArcCountryFilterKey || pair.countryBKey === this.activeArcCountryFilterKey)
-//         : pairs;
-
-//       let renderedArcCount = 0;
-
-//       for (const pair of visiblePairs) {
-//         const featureA = this.countryFeatureIndex.get(pair.countryAKey);
-//         const featureB = this.countryFeatureIndex.get(pair.countryBKey);
-//         const start = getFeatureAnchor(featureA, this.geometryEngine, this.webMercatorUtils);
-//         const end = getFeatureAnchor(featureB, this.geometryEngine, this.webMercatorUtils);
-
-//         if (!start || !end) {
-//           continue;
-//         }
-
-//         const arcPoints = buildArcPathPoints(start, end, pair.weight);
-//         const arcPaths = buildArcPath(start, end, pair.weight);
-//         const surfacePaths = buildSurfacePath(start, end);
-//         if (!arcPaths.length || !surfacePaths.length || arcPoints.length < 2) {
-//           continue;
-//         }
-
-//         this.animatedArcs.push({
-//           categoryKey: category.categoryKey,
-//           categoryLabel: category.categoryLabel,
-//           color: category.color,
-//           weight: pair.weight,
-//           arcPoints,
-//           arcPaths,
-//           surfacePaths,
-//           countryAKey: pair.countryAKey,
-//           countryBKey: pair.countryBKey,
-//           countryAName: this.extractCountryName(featureA.attributes),
-//           countryBName: this.extractCountryName(featureB.attributes),
-//           animationOffset: renderedArcCount * 0.11,
-//           animationDuration: Math.max(1800, 3300 - Math.min(1200, pair.weight * 110)),
-//         });
-
-//         renderedArcCount += 1;
-//       }
-
-//       arcCountByCategory.set(category.categoryKey, renderedArcCount);
-//       totalArcCount += renderedArcCount;
-//     }
-
-//     this.renderArcBatch(0);
-//     this.startArcAnimation();
-//     return {
-//       totalArcCount: Math.min(totalArcCount, this.arcBatchSize),
-//       arcCountByCategory,
-//     };
-//   }
-
-//   private async renderNewsIntensity(_countryCounts: ThreatCountryCount[], _maxCount: number): Promise<void> {
-//     if (!this.newsGraphicsLayer) {
-//       return;
-//     }
-
-//     this.newsGraphicsLayer.removeAll();
-//   }
-
-//   private toCountryKey(value: string): string {
-//     const normalized = this.threatLensService.normalizeCountryLabel(value);
-//     return this.threatLensService.toCountryKey(normalized);
-//   }
-
-//   private getSelectedCountryBreakdown(countryKey: string): SelectedCountryCategoryCount[] {
-//     return this.categoryLegend
-//       .map((category) => ({
-//         label: category.label,
-//         colorHex: category.colorHex,
-//         count: this.categoryCountryNewsCountByKey.get(category.categoryKey)?.get(countryKey) || 0,
-//       }))
-//       .filter((item) => item.count > 0)
-//       .sort((a, b) => b.count - a.count);
-//   }
-
-//   private toHexColor(color: [number, number, number]): string {
-//     return `#${color.map((value) => value.toString(16).padStart(2, '0')).join('')}`;
-//   }
-
-//   togglePanel(panel: 'search' | 'threat'): void {
-//     if (panel === 'search') {
-//       this.isSearchPanelCollapsed = !this.isSearchPanelCollapsed;
-//       return;
-//     }
-
-//     this.isThreatPanelCollapsed = !this.isThreatPanelCollapsed;
-// =======
-// >>>>>>> threat_lens_code_refactoring
   }
 
   private buildSearchPayload(query: string): Partial<ThreatLensRequestPayload> {
