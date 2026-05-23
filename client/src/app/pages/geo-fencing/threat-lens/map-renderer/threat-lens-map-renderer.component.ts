@@ -29,13 +29,18 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private mapClickHandle: { remove: () => void } | null = null;
   private pointerMoveHandle: { remove: () => void } | null = null;
   private viewScaleWatchHandle: { remove: () => void } | null = null;
+  private viewZoomWatchHandle: { remove: () => void } | null = null;
   private mapResizeObserver: ResizeObserver | null = null;
   private mapResizeFrame: number | null = null;
   private hoveredCountryKey = '';
+  private activeBasemapId = '';
   private destroyed = false;
   private categoryLegend: ThreatLensLegendItem[] = [];
   private countryNewsCountByKey = new Map<string, number>();
   private categoryCountryNewsCountByKey = new Map();
+  private readonly threatBasemapId = 'dark-gray-vector';
+  private readonly streetBasemapId = 'streets-night-vector';
+  private readonly streetBasemapMinZoom = 6;
 
   @Output() mapReady = new EventEmitter<void>();
   @Output() mapError = new EventEmitter<string>();
@@ -57,6 +62,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.mapClickHandle?.remove();
     this.pointerMoveHandle?.remove();
     this.viewScaleWatchHandle?.remove();
+    this.viewZoomWatchHandle?.remove();
     this.mapResizeObserver?.disconnect();
     this.arcRenderer?.destroy();
     this.ipMarkerRenderer?.clear();
@@ -164,7 +170,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       this.ipScanGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens IP Scan Markers' });
 
       const map = new EsriMap({
-        basemap: 'streets-vector',
+        basemap: this.threatBasemapId,
         ground: 'world-elevation',
         layers: [
           countryLayer,
@@ -196,7 +202,8 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         return;
       }
 
-      this.view.ui.components = [];
+      this.view.ui.components = ['zoom'];
+      this.updateBasemapForZoom();
       await this.countryRenderer.init(this.view,
         (value) => this.threatLensService.normalizeCountryLabel(value),
         (value) => this.toCountryKey(value),);
@@ -221,6 +228,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       this.scheduleMapResize();
       window.setTimeout(() => this.view?.resize?.(), 150);
       this.registerViewScaleWatcher();
+      this.registerBasemapWatcher();
       this.registerClickHandler();
       this.registerHoverHandler();
       this.ngZone.run(() => this.mapReady.emit());
@@ -345,6 +353,29 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
     this.viewScaleWatchHandle?.remove();
     this.viewScaleWatchHandle = this.view.watch('scale', () => this.ipMarkerRenderer?.updateSymbols());
+  }
+
+  private registerBasemapWatcher(): void {
+    if (!this.view?.watch) {
+      return;
+    }
+
+    this.viewZoomWatchHandle?.remove();
+    this.viewZoomWatchHandle = this.view.watch('zoom', () => this.updateBasemapForZoom());
+  }
+
+  private updateBasemapForZoom(): void {
+    if (!this.view?.map) {
+      return;
+    }
+
+    const nextBasemapId = (this.view.zoom ?? 0) >= this.streetBasemapMinZoom ? this.streetBasemapId : this.threatBasemapId;
+    if (nextBasemapId === this.activeBasemapId) {
+      return;
+    }
+
+    this.activeBasemapId = nextBasemapId;
+    this.view.map.basemap = nextBasemapId;
   }
 
   private observeMapResize(): void {
