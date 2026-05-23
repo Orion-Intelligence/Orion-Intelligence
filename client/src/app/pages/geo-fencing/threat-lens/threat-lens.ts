@@ -15,7 +15,7 @@ import { AnimatedArcDescriptor, SelectedCountryCategoryCount, ThreatCountryCount
 import { ThreatLensService } from './threat.lens.service';
 import { ThreatLensFeedPanelComponent } from './threat-lens-feed-panel/threat-lens-feed-panel';
 import { GeocodeModalComponent } from '../../../shared/partials/geocode-modal/geocode-modal.component';
-import { SatelliteIntelService } from '../satellite-intel/satellite-intel-service';
+import { GeoFencingGeocodeService } from '../shared/geo-fencing-geocode.service';
 import { NetworkIntelScanService } from '../../../shared/services/network-intel/network-intel-scan.service';
 import { IpDetailPopupComponent } from './ip-detail-popup/ip-detail-popup.component';
 
@@ -93,13 +93,13 @@ export class ThreatLensComponent implements AfterViewInit, OnDestroy {
   ipScanErrorMessage: string | null = null;
   ipScanResultCount = 0;
   selectedIp = '';
-  fetchGeocodeResults = (query: string) => this.satelliteIntelService.fetchGeocodeResults(query);
+  fetchGeocodeResults = (query: string) => this.geocodeService.fetchGeocodeResults(query);
 
   @Input() showFilterButton = true;
 
   @Output() loadingChange = new EventEmitter<boolean>();
 
-  constructor(private ngZone: NgZone, private cdr: ChangeDetectorRef, private threatLensService: ThreatLensService, private networkIntelService: NetworkIntelScanService, private satelliteIntelService: SatelliteIntelService, protected sidebarService: SidebarService) {
+  constructor(private ngZone: NgZone, private cdr: ChangeDetectorRef, private threatLensService: ThreatLensService, private networkIntelService: NetworkIntelScanService, private geocodeService: GeoFencingGeocodeService, protected sidebarService: SidebarService) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 

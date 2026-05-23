@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { parseCoordinates } from '../../../shared/utils/geo-coordinates.utils';
 import { SatelliteIntelService } from './satellite-intel-service';
+import { GeoFencingGeocodeService } from '../shared/geo-fencing-geocode.service';
 import { MapRendererComponent } from './map-renderer/map-renderer.component';
 import { GeocodeModalComponent } from '../../../shared/partials/geocode-modal/geocode-modal.component';
 import { MonthCompareSectionComponent } from './ui-overlays/month-compare-section/month-compare-section.component';
@@ -65,11 +66,11 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   isPanelMenuOpen = false;
   isPanelPopupOpen = true;
   isThreatLensLoading = false;
-  fetchGeocodeResults = (query: string) => this.satelliteService.fetchGeocodeResults(query);
+  fetchGeocodeResults = (query: string) => this.geocodeService.fetchGeocodeResults(query);
 
   @Input() toolbarMode: 'hidden' | 'geo' = 'hidden';
 
-  constructor( satelliteService: SatelliteIntelService, route: ActivatedRoute, sidebarService: SidebarService, aircraftTrackingService: SatelliteAircraftTrackingService, shipTrackingService: SatelliteShipTrackingService, facilitiesService: SatelliteFacilitiesService, monthCompareService: MonthCompareService, ) {
+  constructor( satelliteService: SatelliteIntelService, private geocodeService: GeoFencingGeocodeService, route: ActivatedRoute, sidebarService: SidebarService, aircraftTrackingService: SatelliteAircraftTrackingService, shipTrackingService: SatelliteShipTrackingService, facilitiesService: SatelliteFacilitiesService, monthCompareService: MonthCompareService, ) {
     this.satelliteService = satelliteService;
     this.route = route;
     this.sidebarService = sidebarService;

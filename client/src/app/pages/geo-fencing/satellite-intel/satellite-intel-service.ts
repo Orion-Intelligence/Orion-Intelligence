@@ -1,7 +1,6 @@
 import { Injectable, signal } from '@angular/core';
-import { defer, EMPTY, lastValueFrom, Observable, throwError, timer } from 'rxjs';
+import { defer, EMPTY, Observable, throwError, timer } from 'rxjs';
 import { catchError, expand, switchMap, takeWhile, tap } from 'rxjs/operators';
-import { SatelliteGeocodeResponse, SatelliteGeocodeResult } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
 import { ApiService } from '../../../shared/services/api.service';
 
 export type SatellitePollingOptions = {
@@ -55,16 +54,6 @@ export class SatelliteIntelService {
 
   getResponseResult(value: any): any {
     return value?.result !== undefined && value?.result !== null ? value.result : value;
-  }
-
-  async fetchGeocodeResults(query: string): Promise<SatelliteGeocodeResult[]> {
-    const call = () => this.api.post<SatelliteGeocodeResponse>('satellite/geocode', { query });
-    const response = await lastValueFrom(this.createPolledRequest(call, (value) => this.getResponseStatus(value), 2000));
-    const responseError = this.getResponseError(response);
-    if (responseError) {
-      throw new Error(responseError.message);
-    }
-    return this.getResponseResult(response)?.results ?? [];
   }
 
   private isPendingOrBusy(status: string | undefined): boolean {
