@@ -72,6 +72,8 @@ app.include_router(auth_router, include_in_schema=False)
 app.include_router(crawl_routes, include_in_schema=False)
 app.include_router(admin_routes, include_in_schema=False)
 app.include_router(public_routes, include_in_schema=False)
+if env_handler.get_instance().env("TESTING_ENABLED", "0") == "1":
+    app.include_router(test_routes, include_in_schema=False)
 app.include_router(micro_routes, include_in_schema=False)
 app.include_router(ai_routes, include_in_schema=False)
 app.include_router(tenant_routes, include_in_schema=False)
@@ -82,7 +84,4 @@ app.include_router(case_routes)
 
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
-
-if env_handler.get_instance().env("TESTING_ENABLED", "0") == "1":
-    app.include_router(test_routes, include_in_schema=False)
 
