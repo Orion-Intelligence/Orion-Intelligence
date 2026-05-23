@@ -1415,6 +1415,17 @@ body.demo-tour-scroll-locked {
   color: var(--color-text1) !important;
 }
 
+.light-theme #dashboard-consolidated .ui-geo-floating-tabs {
+  --color-border: #fcfcfc12;
+  --color-blue-760: linear-gradient(to right, #fcfcfc20 0%, #fcfcfc30 50%, #fcfcfc20 100%);
+  --color-blue-710: #172235;
+  --color-blue-640: #57a5eb;
+  --color-text1: #ffffff;
+  --color-text3: #d4d4d4;
+  background: var(--color-blue-760) !important;
+  border-color: rgb(252 252 252 / 7%) !important;
+}
+
 .light-theme app-ioc-search .ui-cred-toolbar-btn {
   background: #f9fbff !important;
   background-color: #f9fbff !important;
