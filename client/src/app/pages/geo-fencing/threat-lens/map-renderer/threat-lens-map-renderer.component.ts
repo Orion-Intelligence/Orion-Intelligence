@@ -203,6 +203,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       }
 
       this.view.ui.components = ['zoom'];
+      this.view.highlightOptions = { color: [96, 165, 250, 0.98], haloOpacity: 0.55, fillOpacity: 0.08 };
       this.updateBasemapForZoom();
       await this.countryRenderer.init(this.view,
         (value) => this.threatLensService.normalizeCountryLabel(value),
@@ -317,8 +318,6 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
       const countryGraphic = hit.results.find((result: any) => result.graphic?.layer === this.countryRenderer.layer)?.graphic;
       if (!countryGraphic) {
-        this.clearHoverHighlight();
-        this.tooltipRenderer.hide();
         return;
       }
 

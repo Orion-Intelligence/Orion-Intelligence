@@ -20,9 +20,9 @@ export class ThreatLensCountryLayerRenderer {
         type: 'simple',
         symbol: {
           type: 'simple-fill',
-          color: [29, 45, 71, 0],
+          color: [29, 45, 71, 0.01],
           outline: {
-            color: [255, 255, 255, 0.1],
+            color: [255, 255, 255, 0],
             width: 0.8,
           },
         },
