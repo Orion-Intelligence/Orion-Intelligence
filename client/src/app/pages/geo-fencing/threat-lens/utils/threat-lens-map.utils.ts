@@ -1,13 +1,5 @@
-export type LngLat = [number, number];
+import { ArcPair, ArcPoint2D, ArcPoint3D, LngLat } from "../map-renderer/threat-lens-map.types";
 
-export type ArcPair = {
-  countryAKey: string;
-  countryBKey: string;
-  weight: number;
-};
-
-type ArcPoint3D = [number, number, number];
-type ArcPoint2D = [number, number];
 
 export function buildCountryFeatureIndex(features: any[], countryNameFields: string[], normalizeCountryLabel: (value: string) => string, toCountryKey: (value: string) => string): Map<string, any> {
   const selected = new Map<string, { feature: any; priority: number; area: number }>();

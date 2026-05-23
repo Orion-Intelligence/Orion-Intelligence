@@ -1,4 +1,4 @@
-import { buildCountryFeatureIndex } from '../../threat-lens-map.utils';
+import { buildCountryFeatureIndex } from '../../utils/threat-lens-map.utils';
 
 export class ThreatLensCountryLayerRenderer {
   private static readonly COUNTRY_LAYER_URL = 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries_(Generalized)/FeatureServer/0';

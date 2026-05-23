@@ -1,6 +1,6 @@
 import { NgZone } from '@angular/core';
 import { AnimatedArcDescriptor, ThreatLensCategoryMapData } from '../../../models/geo-fencing.models';
-import { buildArcPath, buildArcPathPoints, buildSurfacePath, collectArcPairs, getArcPointAtProgress, getFeatureAnchor } from '../../threat-lens-map.utils';
+import { buildArcPath, buildArcPathPoints, buildSurfacePath, collectArcPairs, getArcPointAtProgress, getFeatureAnchor } from '../../utils/threat-lens-map.utils';
 import { ThreatLensArcRenderResult } from '../threat-lens-map.types';
 import { ThreatLensCountryLayerRenderer } from './threat-lens-country-layer.renderer';
 
