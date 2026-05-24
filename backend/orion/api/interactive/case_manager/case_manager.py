@@ -102,9 +102,23 @@ class CaseManager:
         return current_links != next_links
 
     async def _validate_linked_cases(self, case_id: str, linked_cases, current_user) -> None:
-        target_case_ids = {linked_case.targetCaseId for linked_case in linked_cases}
+        target_case_ids_list = [
+            linked_case.targetCaseId
+            for linked_case in linked_cases
+            if linked_case.targetCaseId
+        ]
+
+        target_case_ids = set(target_case_ids_list)
+
+        if len(target_case_ids_list) != len(target_case_ids):
+            raise HTTPException(
+                status_code=400,
+                detail="Same case cannot be linked more than once",
+            )
+
         if case_id in target_case_ids:
             raise HTTPException(status_code=400, detail="A case cannot be linked to itself")
+        
         for target_case_id in target_case_ids:
             target_record = await self._engine.find_one(
                 db_case_model,

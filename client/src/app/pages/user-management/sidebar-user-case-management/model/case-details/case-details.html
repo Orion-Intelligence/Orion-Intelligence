@@ -1317,7 +1317,7 @@
                         </button>
                     </div>
                     }
-                    @if (!isEditing && !caseData.closure) {
+                    @if (!isEditing && !caseData.closure && hasLinkableCases(caseData)) {
                     <div class="flex items-center gap-2">
                         <button type="button" (click)="openAddLinkedCase()" [disabled]="!hasLinkableCases(caseData)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 disabled:pointer-events-none disabled:opacity-50">
                             <i class="bi bi-plus-lg"></i> Add
@@ -1342,7 +1342,8 @@
                                 <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case</label>
                                 <select [(ngModel)]="linkedCase.targetCaseId" [name]="'linked-case-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-linked-case-select-' + i">
                                     <option value="">Select case</option>
-                                    @for (candidateCase of getLinkableCases(editedCase); track candidateCase.caseId) {
+                                    @for (candidateCase of getLinkableCases(editedCase, linkedCase.targetCaseId); track
+                                    candidateCase.caseId) {
                                     <option [value]="candidateCase.caseId">{{ candidateCase.caseId }} · {{
                                         candidateCase.title }}</option>
                                     }

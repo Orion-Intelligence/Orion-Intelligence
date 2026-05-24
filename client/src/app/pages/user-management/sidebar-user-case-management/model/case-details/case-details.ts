@@ -706,13 +706,20 @@ export class CaseDetails implements OnInit {
     return (this.editedCase?.linkedCases?.length || 0) !== (this.caseData?.linkedCases?.length || 0);
   }
 
-  getLinkableCases(caseItem: Case | null = this.editedCase || this.caseData): Case[] {
+  getLinkableCases( caseItem: Case | null = this.editedCase || this.caseData, currentSelectedCaseId = '' ): Case[] {
     const currentCaseId = caseItem?.caseId;
-    return this.accessibleCases.filter(item => item.caseId !== currentCaseId);
+
+    const alreadyLinkedCaseIds = new Set((caseItem?.linkedCases || [])
+      .map(linkedCase => linkedCase.targetCaseId)
+      .filter(caseId => caseId && caseId !== currentSelectedCaseId));
+
+    return this.accessibleCases.filter(item =>
+      item.caseId !== currentCaseId &&
+      !alreadyLinkedCaseIds.has(item.caseId));
   }
 
-  hasLinkableCases(caseItem: Case | null = this.editedCase || this.caseData): boolean {
-    return this.getLinkableCases(caseItem).length > 0;
+  hasLinkableCases( caseItem: Case | null = this.editedCase || this.caseData, currentSelectedCaseId = '' ): boolean {
+    return this.getLinkableCases(caseItem, currentSelectedCaseId).length > 0;
   }
 
   getCaseCommentsFeedback(): ReportFeedbackModel {
@@ -1053,10 +1060,17 @@ export class CaseDetails implements OnInit {
       return;
     }
 
-    const invalidIndex = (this.editedCase.linkedCases || []).findIndex(link => !link.targetCaseId);
+    const linkedCases = this.editedCase.linkedCases || [];
+
+    const invalidIndex = linkedCases.findIndex(link => !link.targetCaseId);
 
     if (invalidIndex >= 0) {
       this.messageNotificationService.show(`Linked case ${invalidIndex + 1} target case is required`);
+      return;
+    }
+
+    if (this.hasDuplicateLinkedCases(linkedCases)) {
+      this.messageNotificationService.show('Same case cannot be linked more than once');
       return;
     }
 
@@ -1070,6 +1084,14 @@ export class CaseDetails implements OnInit {
 
     if (!this.newLinkedCase.targetCaseId) {
       this.messageNotificationService.show('Target case is required');
+      return;
+    }
+
+    const alreadyLinked = (this.caseData.linkedCases || [])
+      .some(link => link.targetCaseId === this.newLinkedCase?.targetCaseId);
+
+    if (alreadyLinked) {
+      this.messageNotificationService.show('This case is already linked');
       return;
     }
 
@@ -1443,5 +1465,13 @@ export class CaseDetails implements OnInit {
       return false;
     }
     return true;
+  }
+
+  private hasDuplicateLinkedCases(linkedCases: { targetCaseId: string }[] = []): boolean {
+    const selectedCaseIds = linkedCases
+      .map(link => link.targetCaseId)
+      .filter(Boolean);
+
+    return new Set(selectedCaseIds).size !== selectedCaseIds.length;
   }
 }
