@@ -54,7 +54,7 @@
 			</div>
 			@if (!isSearchPanelCollapsed) {
 				<div class="mt-3 flex items-center gap-2 max-[520px]:flex-col">
-					<input [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" type="text" placeholder="Search keyword (e.g. pakistan database)" class="h-10 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[13px] text-[var(--color-text1)] outline-none ring-0 transition focus:border-[var(--color-blue-640)] placeholder:text-[var(--color-text3)] [body.light-theme_&]:bg-[var(--color-white)] [body.light-theme_&]:text-[var(--color-gray-900)]" />
+					<input [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" type="text" placeholder="Search keyword (e.g. china)" class="h-10 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[13px] text-[var(--color-text1)] outline-none ring-0 transition focus:border-[var(--color-blue-640)] placeholder:text-[var(--color-text3)] [body.light-theme_&]:bg-[var(--color-white)] [body.light-theme_&]:text-[var(--color-gray-900)]" />
 					<button (click)="onSearch()" [disabled]="isLoading" class="h-10 rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 text-[13px] font-semibold text-[var(--color-white)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 max-[520px]:w-full">
 						Search
 					</button>

@@ -130,7 +130,7 @@ export class ThreatLensService {
         const seenKeys = new Set<string>();
         const countriesForDoc: string[] = [];
 
-        for (const country of this.extractCountries(document)) { 
+        for (const country of this.extractCountries(document)) {
           const normalized = this.normalizeCountryLabel(country);
           const key = this.toCountryKey(normalized);
 
