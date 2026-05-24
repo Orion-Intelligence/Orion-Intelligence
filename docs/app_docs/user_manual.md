@@ -287,6 +287,7 @@ The exact menu depends on license and permissions, but the Orion UI commonly exp
 | Web Scans | Live web-target scanning | Basic Scan, Port Scan, Repository Scan, SEO Scan, APK Scan |
 | Entity API | Entity-based live lookups | Email Breach, Social Scanner, Wanted List, National Identity, Playstore Scanner, Software Scanner, File Scanner, Crypto Scanner |
 | Network Intel | Domain, IP, and vulnerability recon | Host Recon, IP Scan, Vulnerability Scan |
+| Satellite Intel | Geo-fencing, satellite map, facilities, aircraft, and ship tracking | Satellite Map, Threat Lens, Imagery Analysis |
 | Social Intel | Username and profile mapping | graph and list views |
 | CTI Graph | Cyber relationship mapping | cluster, document, property pivots |
 | Links | Link directory and monitored references | directory listing |
@@ -776,6 +777,201 @@ Geo support is especially relevant when working from host-oriented results and w
 
 Geo-assisted pivot modal used from network results.
 ```
+
+### Satellite Intel
+
+Satellite Intel is Orion's geo-fencing map workspace for infrastructure, facilities, transportation tracking, and satellite imagery review. It combines a Leaflet map, indexed map entities, nearby facility discovery, live aircraft and ship overlays, and comparison imagery in one operational view.
+
+Satellite Intel can be opened from the sidebar as `Satellite Intel`. It is also embedded inside the consolidated results `Geo Fencing` tab, where the top toolbar can switch between `Satellite Map` and `Threat Lens`.
+
+```{figure} ../screenshots/satellite-map-overview-20260326.png
+:alt: Satellite Map overview
+:width: 100%
+
+Satellite Map overview with indexed map entities, facility filters, search, tracking controls, selection state, and the map renderer.
+```
+
+#### Access and Licensing
+
+The sidebar entry is available to admins and users with the `osint_advanced` module. If the module is unavailable, the sidebar entry remains gated by the subscription prompt.
+
+The standalone route is `/dashboard/satellite-intel`. The embedded consolidated route opens the same component inside `/dashboard/profile/consolidated/all?tab=Geo%20Fencing`.
+
+The embedded route exposes the `Satellite Map` and `Threat Lens` toggle. The map view keeps its own panel menu, layer switcher, facility dashboard, imagery-analysis panel, location modal, and tracking overlays.
+
+#### Map Renderer and Layers
+
+The map renderer uses Leaflet. The `Street` layer uses the Carto Voyager tile set, while the `Satellite` layer uses ArcGIS World Imagery.
+
+Map behavior includes:
+
+- world-bounds limiting so the map does not wrap horizontally
+- dynamic minimum zoom based on the rendered container
+- map movement events that update the active viewport
+- feature focusing from search results
+- selected-location rendering after a geocode or coordinate lookup
+- marker sizing refresh after zoom changes
+- sidebars for aircraft and ship details
+
+```{figure} ../screenshots/satellite-map-satellite-layer-20260326.png
+:alt: Satellite Map satellite imagery layer
+:width: 100%
+
+Satellite imagery layer selected from the map layer control.
+```
+
+#### Indexed Map Entities
+
+On load, the dashboard requests indexed map entities from `/api/search/map-entities/stream`. The response is streamed in newline-delimited chunks and converted into map features with name, type, source, coordinates, optional capacity, and an internal feature id.
+
+The dashboard can show power and infrastructure facility categories, including:
+
+- hydro
+- solar
+- wind
+- gas
+- coal
+- oil
+- nuclear
+- geothermal
+- biomass
+- waste
+- storage
+- cogeneration
+- petcoke
+- wave and tidal
+- airport
+- port
+- warehouse
+- industrial
+- military
+- other
+
+The `All Facilities` panel shows loaded and visible counts. Users can select all categories, clear all categories, or toggle individual categories to control which indexed points render on the map.
+
+#### Search and Selection
+
+The dashboard search box filters loaded map entities and nearby facilities. Selecting a result focuses the map on that feature and updates the `Selection` panel.
+
+The selection panel can show:
+
+- facility or entity name
+- normalized type
+- source, such as `WRI` or `OSM`
+- capacity in megawatts when available
+- coordinates in latitude and longitude form
+
+```{figure} ../screenshots/satellite-map-search-selection-20260326.png
+:alt: Satellite Map search selection
+:width: 100%
+
+Satellite Map entity search with a selected facility highlighted in the dashboard and map state.
+```
+
+#### Location Search and Nearby Facilities
+
+The `Location` button opens the shared geocode modal. Users can search for a place, enter coordinates, adjust the map coverage delta, and apply the location to the Satellite Map.
+
+```{figure} ../screenshots/satellite-map-location-modal-20260326.png
+:alt: Satellite Map location modal
+:width: 100%
+
+Location modal used to scope Satellite Map facilities and tracking overlays.
+```
+
+After a location is applied, Satellite Intel:
+
+- focuses the map on the selected coordinates
+- records the active viewport
+- loads nearby facilities from `/api/satellite/facilities`
+- refreshes enabled aircraft and ship tracking against the scoped viewport
+- enables the location-target control so the user can return to the selected location
+
+Nearby facilities are normalized into the same map-feature shape used by indexed entities. Point, line, polygon, and multipolygon geometries are converted into renderable coordinates. Facility kinds are normalized into Orion map categories such as airport, port, warehouse, industrial, military, solar, wind, hydro, coal, gas, oil, storage, and other.
+
+```{figure} ../screenshots/satellite-map-location-facilities-20260326.png
+:alt: Satellite Map nearby facilities
+:width: 100%
+
+Nearby facilities loaded for a selected location, with facility counts and category breakdowns.
+```
+
+#### Aircraft and Ship Tracking
+
+The `Tracking` panel controls live transportation overlays.
+
+Aircraft tracking posts the active bounds to `/api/satellite/livetrack/aircraft`. The request uses `lat_min`, `lat_max`, `lon_min`, and `lon_max`, and can include OpenSky credentials when configured.
+
+Ship tracking posts the active bounds to `/api/satellite/livetrack/ships`. Bounds are clamped to valid latitude and longitude ranges, and the request can include an AISStream API key when configured.
+
+Tracking behavior includes:
+
+- separate toggles for `Aircraft` and `Ships`
+- loading indicators per tracking source
+- visible counts in the tracking buttons
+- matching aircraft and ship counts in the facilities summary
+- marker rendering on the map
+- detail sidebars when a tracking marker is selected
+- aircraft detail lookup by ICAO through `/api/satellite/livetrack/aircraft/icao`
+- aircraft track lookup through `/api/satellite/livetrack/aircraft/track`
+- ship detail lookup by MMSI through `/api/satellite/livetrack/ships/mmsi`
+- viewport refreshes for ships after the map moves
+
+If a tracking feed is pending or busy, the polling helper keeps waiting. If a feed returns an error, the dashboard shows the tracking-specific error while preserving the rest of the map context.
+
+```{figure} ../screenshots/satellite-map-tracking-20260326.png
+:alt: Satellite Map aircraft and ship tracking
+:width: 100%
+
+Aircraft and ship tracking enabled with counts shown in the dashboard panels.
+```
+
+#### Imagery Analysis
+
+The panel menu opens `Imagery Analysis`. This view is used for satellite image comparison and anomaly review at a selected location.
+
+The imagery workflow supports:
+
+- selecting or reusing a location
+- choosing an image type from the advanced controls
+- choosing a timeline date
+- resetting the date to the default
+- loading a comparison set
+- opening generated images in a lightbox
+
+When `Load comparison` is clicked, the view runs a combined comparison flow. The comparison request posts to `/api/satellite/compare`. If no explicit month is selected, the implementation can also request a year-ago image from `/api/satellite/sentinel/image`. Anomaly analysis posts to `/api/satellite/anomaly`.
+
+The result panel can show:
+
+- number of comparison images loaded
+- image labels for each returned month
+- anomaly alert level
+- NDVI delta score
+- scan coordinates
+- month count for the anomaly scan
+- empty-image and failed-request states
+
+```{figure} ../screenshots/satellite-map-imagery-analysis-20260326.png
+:alt: Satellite Map imagery analysis
+:width: 100%
+
+Imagery Analysis panel with comparison output and anomaly summary for the selected map location.
+```
+
+#### Empty and Error States
+
+Satellite Intel keeps map and dashboard state visible while individual data sources load or fail.
+
+Common states include:
+
+- the main loading overlay while large map or entity requests are in progress
+- `Select location to load facilities` before nearby facility lookup
+- `Loading facilities...` while a facility request is running
+- `No facilities found` when a scoped lookup returns no renderable records
+- request-failed messaging in Imagery Analysis
+- aircraft and ship feed warnings beside the affected tracking control
+
+Clearing the selected location resets the focused feature, selected feature, nearby facilities, tracking data, and location overlay while keeping the base indexed map entities available.
 
 ### Geo Fencing Threat Lens
 
@@ -2151,6 +2347,33 @@ The Geo IoT modal is also covered end to end, including:
 - switching back to map mode
 - starting a geo scan
 - reusing the selected coordinates as the active network-intel query
+
+### Satellite Map: Full Tested Behaviors
+
+The Satellite Map documentation flow covers the embedded Geo Fencing map workspace inside consolidated results.
+
+Covered behaviors include:
+
+- loading the Satellite Map through the authenticated dashboard shell
+- requesting indexed map entities from `/api/search/map-entities/stream`
+- rendering the Leaflet map before screenshots are captured
+- selecting all loaded map-entity categories
+- showing loaded and visible entity counts
+- switching from the street map layer to the satellite imagery layer
+- searching loaded map entities from the dashboard panel
+- selecting a search result and updating the selection panel
+- opening the geocode location modal
+- applying coordinates from the location modal
+- requesting nearby facilities from `/api/satellite/facilities`
+- showing nearby facility counts and type breakdowns
+- enabling aircraft tracking through `/api/satellite/livetrack/aircraft`
+- enabling ship tracking through `/api/satellite/livetrack/ships`
+- showing aircraft and ship counts in the tracking and facilities panels
+- opening the panel menu
+- switching to `Imagery Analysis`
+- loading comparison imagery from the satellite imagery flow
+- requesting anomaly analysis from `/api/satellite/anomaly`
+- rendering comparison and anomaly output before capture
 
 ### Threat Lens: Full Tested Behaviors
 

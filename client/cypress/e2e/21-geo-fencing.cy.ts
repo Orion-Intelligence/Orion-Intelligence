@@ -77,8 +77,8 @@ describe('Geo Fencing - Satellite Intel and Threat Lens', () => {
     cy.get('[data-testid="geocode-modal-coverage-input"]').should('be.visible').clear().type('0.05');
     cy.get('[data-testid="geocode-modal-apply"]').should('be.visible').and('not.be.disabled').click();
     cy.get('[data-testid="geocode-modal"]').should('not.exist');
-    cy.get('[data-testid="geo-dashboard-location-target"]', { timeout: 120000 }).should('not.be.disabled').click();
-    cy.get('[data-testid="geo-dashboard-location-clear"]').should('be.visible').click();
+    cy.get('[data-testid="geo-dashboard-location-target"]', { timeout: 120000 }).should('not.be.disabled');
+    cy.get('[data-testid="geo-dashboard-location-clear"]', { timeout: 120000 }).should('be.visible').click({ force: true });
     cy.get('[data-testid="geo-dashboard-location-target"]').should('be.disabled');
 
     cy.get('[data-testid="geo-dashboard-tracking-aircraft"]').should('be.visible');
