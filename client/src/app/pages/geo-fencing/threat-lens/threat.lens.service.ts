@@ -6,19 +6,6 @@ import { ApiService } from '../../../shared/services/api.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { THREAT_LENS_CATEGORY_CONFIG, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
 
-const COUNTRY_ALIAS: Record<string, string> = {
-  usa: 'United States',
-  us: 'United States',
-  'u.s.a': 'United States',
-  'u.s': 'United States',
-  uk: 'United Kingdom',
-  uae: 'United Arab Emirates',
-  ksa: 'Saudi Arabia',
-  russia: 'Russia',
-  southkorea: 'South Korea',
-  northkorea: 'North Korea',
-};
-
 const COUNTRY_FIELDS = ['m_country', 'm_country_name', 'm_location', 'country', 'location'];
 
 @Injectable({ providedIn: 'root' })
@@ -51,12 +38,7 @@ export class ThreatLensService {
       return '';
     }
 
-    const compact = value.replace(/[.]/g, '').replace(/\s+/g, ' ').trim();
-    const aliasKey = compact.toLowerCase().replace(/\s+/g, '');
-
-    if (COUNTRY_ALIAS[aliasKey]) {
-      return COUNTRY_ALIAS[aliasKey];
-    }
+    const compact = value.replace(/\s+/g, ' ').trim();
 
     return this.resolveRegionCode(compact) || compact;
   }
