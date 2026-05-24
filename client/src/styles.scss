@@ -347,9 +347,7 @@ app-satellite-map-renderer .leaflet-tooltip-pane {
   font-weight: 600;
 }
 
-.threat-lens-map,
-.threat-lens-map .esri-view-root,
-.threat-lens-map .esri-view-surface {
+.threat-lens-map {
   height: 100% !important;
   min-height: 0 !important;
   width: 100% !important;
