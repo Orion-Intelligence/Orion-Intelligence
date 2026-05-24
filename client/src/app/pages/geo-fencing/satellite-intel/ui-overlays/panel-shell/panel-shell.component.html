@@ -1,9 +1,6 @@
 @if (isPanelMenuOpen) {
   <div class="map-overlay-menu absolute right-3 top-16 z-[999] flex w-[230px] flex-col overflow-hidden rounded-[12px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_16px_40px_rgba(2,6,23,.45)] backdrop-blur-md animate-[ui-popup-flyout-in_160ms_ease-out_both] [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_16px_38px_rgba(15,23,42,.14)] max-[943px]:right-2 max-[943px]:top-[88px] max-[520px]:top-[136px] max-[520px]:w-[min(230px,calc(100%-16px))]">
     @if (isThreatView) {
-      <button class="border-b border-white/10 px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text3)] transition-colors last:border-b-0 hover:bg-white/5 hover:text-[var(--color-text1)] [body.light-theme_&]:border-[#d8e3f0] [body.light-theme_&]:hover:bg-[#eef5ff]" (click)="threatIpScanOpened.emit()">
-        IP Scan
-      </button>
       <button class="border-b border-white/10 px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text3)] transition-colors last:border-b-0 hover:bg-white/5 hover:text-[var(--color-text1)] [body.light-theme_&]:border-[#d8e3f0] [body.light-theme_&]:hover:bg-[#eef5ff]" (click)="threatFiltersOpened.emit()">
         Filter
       </button>

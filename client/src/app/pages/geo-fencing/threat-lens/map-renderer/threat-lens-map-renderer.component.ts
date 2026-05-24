@@ -1,13 +1,13 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, NgZone, OnDestroy, Output, ViewChild } from '@angular/core';
 import { loadModules, setDefaultOptions } from 'esri-loader';
 import { ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensLegendItem } from '../../models/geo-fencing.models';
-import { ThreatLensService } from '../threat.lens.service';
-import { buildThreatLensCategoryCountryCounts, buildThreatLensLegend, getThreatLensSelectedCountryBreakdown } from '../utils/threat-lens-geo.utils';
-import { ThreatLensArcRenderer } from './renderers/threat-lens-arc.renderer';
-import { ThreatLensCountryLayerRenderer } from './renderers/threat-lens-country-layer.renderer';
-import { ThreatLensIpMarkerRenderer } from './renderers/threat-lens-ip-marker.renderer';
-import { ThreatLensTooltipRenderer } from './renderers/threat-lens-tooltip.renderer';
-import { ThreatLensArcRenderResult, ThreatLensCoordinates, ThreatLensCountrySelection, ThreatLensIpRecord } from './threat-lens-map.types';
+import { ThreatLensService } from '../threat-lens.service';
+import { ThreatLensGeoUtils } from '../map-utils/threat-lens-geo.utils';
+import { ThreatLensArcRenderer } from '../map-overlays/threat-lens-arc.renderer';
+import { ThreatLensCountryLayerRenderer } from '../map-overlays/threat-lens-country-layer.renderer';
+import { ThreatLensIpMarkerRenderer } from '../map-overlays/threat-lens-ip-marker.renderer';
+import { ThreatLensTooltipRenderer } from '../map-overlays/threat-lens-tooltip.renderer';
+import { ThreatLensArcRenderResult, ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensCountrySelection, ThreatLensIpRecord, ThreatLensIpViewportScanRequest } from '../models/threat-lens-map.types';
 
 @Component({
   selector: 'app-threat-lens-map-renderer',
@@ -21,22 +21,29 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private tooltipRenderer = new ThreatLensTooltipRenderer();
   private arcRenderer: ThreatLensArcRenderer | null = null;
   private ipMarkerRenderer: ThreatLensIpMarkerRenderer | null = null;
-  private newsGraphicsLayer: any | null = null;
+  private webMercatorUtils: any | null = null;
   private arcGraphicsLayer: any | null = null;
   private arcSurfaceGraphicsLayer: any | null = null;
   private animatedArcGraphicsLayer: any | null = null;
   private ipScanGraphicsLayer: any | null = null;
   private mapClickHandle: { remove: () => void } | null = null;
   private pointerMoveHandle: { remove: () => void } | null = null;
+  private mapPointerLeaveHandle: { remove: () => void } | null = null;
+  private documentPointerMoveHandle: { remove: () => void } | null = null;
   private viewScaleWatchHandle: { remove: () => void } | null = null;
   private viewZoomWatchHandle: { remove: () => void } | null = null;
   private viewInteractingWatchHandle: { remove: () => void } | null = null;
+  private viewportDragHandle: { remove: () => void } | null = null;
+  private viewportWheelHandle: { remove: () => void } | null = null;
   private mapResizeObserver: ResizeObserver | null = null;
   private mapResizeFrame: number | null = null;
+  private viewportIpScanTimer: ReturnType<typeof setTimeout> | null = null;
   private hoverHitTestPending = false;
   private lastHoverHitTestAt = 0;
   private hoveredCountryKey = '';
   private activeBasemapId = '';
+  private lastViewportIpScanKey = '';
+  private hasPendingViewportNavigation = false;
   private destroyed = false;
   private categoryLegend: ThreatLensLegendItem[] = [];
   private countryNewsCountByKey = new Map<string, number>();
@@ -51,6 +58,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   @Output() countrySelected = new EventEmitter<ThreatLensCountrySelection>();
   @Output() emptySelection = new EventEmitter<void>();
   @Output() ipSelected = new EventEmitter<string>();
+  @Output() viewportIpScanRequested = new EventEmitter<ThreatLensIpViewportScanRequest>();
   @Output() arcCountChange = new EventEmitter<number>();
 
   constructor(private ngZone: NgZone, private threatLensService: ThreatLensService) {}
@@ -65,9 +73,13 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.destroyed = true;
     this.mapClickHandle?.remove();
     this.pointerMoveHandle?.remove();
+    this.mapPointerLeaveHandle?.remove();
+    this.documentPointerMoveHandle?.remove();
     this.viewScaleWatchHandle?.remove();
     this.viewZoomWatchHandle?.remove();
     this.viewInteractingWatchHandle?.remove();
+    this.viewportDragHandle?.remove();
+    this.viewportWheelHandle?.remove();
     this.mapResizeObserver?.disconnect();
     this.arcRenderer?.destroy();
     this.ipMarkerRenderer?.clear();
@@ -78,9 +90,11 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       cancelAnimationFrame(this.mapResizeFrame);
       this.mapResizeFrame = null;
     }
+    this.clearViewportIpScanTimer();
 
     this.view?.destroy();
     this.view = null;
+    this.webMercatorUtils = null;
   }
 
   hasCountryKey(countryKey: string): boolean {
@@ -93,15 +107,14 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
   renderThreatData(categoryData: ThreatLensCategoryMapData[], countryCounts: ThreatCountryCount[], activeCountryFilterKey: string): ThreatLensArcRenderResult {
     this.countryNewsCountByKey = new Map(countryCounts.map((item) => [this.toCountryKey(item.country), item.count]));
-    this.categoryCountryNewsCountByKey = buildThreatLensCategoryCountryCounts(categoryData, (value) => this.toCountryKey(value));
+    this.categoryCountryNewsCountByKey = ThreatLensGeoUtils.buildThreatLensCategoryCountryCounts(categoryData, (value) => this.toCountryKey(value));
     const arcResult = this.arcRenderer?.render(categoryData, activeCountryFilterKey) ?? { totalArcCount: 0, arcCountByCategory: new Map() };
-    this.categoryLegend = buildThreatLensLegend(categoryData, arcResult.arcCountByCategory);
-    this.renderNewsIntensity();
+    this.categoryLegend = ThreatLensGeoUtils.buildThreatLensLegend(categoryData, arcResult.arcCountByCategory);
     return arcResult;
   }
 
   getSelectedCountryBreakdown(countryKey: string): ThreatLensCountrySelection['breakdown'] {
-    return getThreatLensSelectedCountryBreakdown(countryKey, this.categoryLegend, this.categoryCountryNewsCountByKey);
+    return ThreatLensGeoUtils.getThreatLensSelectedCountryBreakdown(countryKey, this.categoryLegend, this.categoryCountryNewsCountByKey);
   }
 
   async focusCountryByKey(countryKey: string): Promise<ThreatLensCountrySelection | null> {
@@ -125,12 +138,16 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     return selection;
   }
 
-  renderIpScanMarkers(records: ThreatLensIpRecord[], center: ThreatLensCoordinates, radiusKm: number): void {
-    this.ipMarkerRenderer?.render(records, center, radiusKm);
+  renderIpScanMarkers(records: ThreatLensIpRecord[], center: ThreatLensCoordinates, radiusKm: number, boundary: ThreatLensCountryBoundary | null = null): boolean {
+    return this.ipMarkerRenderer?.render(records, center, radiusKm, boundary) ?? false;
   }
 
   clearIpScanMarkers(): void {
     this.ipMarkerRenderer?.clear();
+  }
+
+  requestViewportIpScan(): boolean {
+    return this.emitViewportIpScanRequest(true);
   }
 
   private async initializeMap(): Promise<void> {
@@ -161,8 +178,8 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         return;
       }
 
+      this.webMercatorUtils = webMercatorUtils;
       const countryLayer = this.countryRenderer.createLayer(FeatureLayer);
-      this.newsGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens Intensity' });
       this.arcGraphicsLayer = new GraphicsLayer({
         title: 'Threat Lens Country Arcs',
         elevationInfo: { mode: 'absolute-height' },
@@ -178,7 +195,6 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         basemap: this.threatBasemapId,
         layers: [
           countryLayer,
-          this.newsGraphicsLayer,
           this.arcSurfaceGraphicsLayer,
           this.arcGraphicsLayer,
           this.animatedArcGraphicsLayer,
@@ -194,6 +210,16 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         camera: {
           position: { longitude: -10, latitude: 30, z: 17000000 },
           tilt: 0,
+        },
+        constraints: {
+          tilt: { max: 0.5 },
+        },
+        navigation: {
+          actionMap: {
+            dragPrimary: 'pan',
+            dragSecondary: 'none',
+            dragTertiary: 'none',
+          },
         },
         environment: {
           atmosphereEnabled: false,
@@ -226,7 +252,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         webMercatorUtils,
         (value) => this.toCountryKey(value),
         (count) => this.arcCountChange.emit(count),);
-      this.ipMarkerRenderer = new ThreatLensIpMarkerRenderer(this.view, this.ipScanGraphicsLayer);
+      this.ipMarkerRenderer = new ThreatLensIpMarkerRenderer(this.view, this.ipScanGraphicsLayer, geometryEngine);
 
       this.tooltipRenderer.init();
       this.observeMapResize();
@@ -235,6 +261,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       this.registerViewScaleWatcher();
       this.registerBasemapWatcher();
       this.registerViewInteractingWatcher();
+      this.registerViewportNavigationHandler();
       this.registerClickHandler();
       this.registerHoverHandler();
       this.ngZone.run(() => this.mapReady.emit());
@@ -292,8 +319,10 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       return;
     }
 
+    this.registerTooltipDismissHandlers();
     this.pointerMoveHandle = this.view.on('pointer-move', async (event: any) => {
       if (!this.view || !this.countryRenderer.layer || this.view.interacting) {
+        this.hideHoverTooltip();
         return;
       }
 
@@ -339,7 +368,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         return;
       }
 
-      const selection = this.buildCountrySelection(countryGraphic);
+      const selection = this.buildCountrySelection(countryGraphic, false);
       if (this.hoveredCountryKey === selection.key) {
         this.tooltipRenderer.move(event);
         return;
@@ -352,7 +381,44 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     });
   }
 
-  private buildCountrySelection(countryGraphic: any): ThreatLensCountrySelection {
+  private registerTooltipDismissHandlers(): void {
+    const mapElement = this.mapContainer?.nativeElement;
+    if (!mapElement || typeof document === 'undefined') {
+      return;
+    }
+
+    this.mapPointerLeaveHandle?.remove();
+    this.documentPointerMoveHandle?.remove();
+
+    const hide = () => this.hideHoverTooltip();
+    const handleDocumentPointerMove = (event: PointerEvent) => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (!target) {
+        return;
+      }
+
+      if (!mapElement.contains(target) || this.isMapUiElement(target)) {
+        hide();
+      }
+    };
+
+    mapElement.addEventListener('pointerleave', hide);
+    document.addEventListener('pointermove', handleDocumentPointerMove, true);
+
+    this.mapPointerLeaveHandle = { remove: () => mapElement.removeEventListener('pointerleave', hide) };
+    this.documentPointerMoveHandle = { remove: () => document.removeEventListener('pointermove', handleDocumentPointerMove, true) };
+  }
+
+  private isMapUiElement(target: Element): boolean {
+    return Boolean(target.closest('.map-overlay-menu, .esri-ui, .ui-filter-sidebar-panel, app-threat-lens-ip-detail-popup'));
+  }
+
+  private hideHoverTooltip(): void {
+    this.clearHoverHighlight();
+    this.tooltipRenderer.hide();
+  }
+
+  private buildCountrySelection(countryGraphic: any, includeIpScanRequest = true): ThreatLensCountrySelection {
     const name = this.countryRenderer.extractCountryName(countryGraphic?.attributes);
     const key = this.toCountryKey(name);
     return {
@@ -360,6 +426,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       key,
       count: this.countryNewsCountByKey.get(key) || 0,
       breakdown: this.getSelectedCountryBreakdown(key),
+      ipScanRequest: includeIpScanRequest ? this.getCountryIpScanRequest(countryGraphic) : null,
     };
   }
 
@@ -369,7 +436,12 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     }
 
     this.viewScaleWatchHandle?.remove();
-    this.viewScaleWatchHandle = this.view.watch('scale', () => this.ipMarkerRenderer?.updateSymbols());
+    this.viewScaleWatchHandle = this.view.watch('scale', () => {
+      this.ipMarkerRenderer?.updateSymbols();
+      if (this.view?.interacting) {
+        this.markViewportNavigation();
+      }
+    });
   }
 
   private registerBasemapWatcher(): void {
@@ -378,7 +450,13 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     }
 
     this.viewZoomWatchHandle?.remove();
-    this.viewZoomWatchHandle = this.view.watch('zoom', () => this.updateBasemapForZoom());
+    this.viewZoomWatchHandle = this.view.watch('zoom', () => {
+      this.updateBasemapForZoom();
+      this.ipMarkerRenderer?.updateSymbols();
+      if (this.view?.interacting) {
+        this.markViewportNavigation();
+      }
+    });
   }
 
   private registerViewInteractingWatcher(): void {
@@ -389,7 +467,273 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.viewInteractingWatchHandle?.remove();
     this.viewInteractingWatchHandle = this.view.watch('interacting', (isInteracting: boolean) => {
       this.arcRenderer?.setAnimationPaused(isInteracting);
+      if (isInteracting) {
+        this.hasPendingViewportNavigation = true;
+        this.clearViewportIpScanTimer();
+        return;
+      }
+      if (this.hasPendingViewportNavigation) {
+        this.scheduleViewportIpScanRequest();
+      }
     });
+  }
+
+  private registerViewportNavigationHandler(): void {
+    if (!this.view?.on) {
+      return;
+    }
+
+    this.viewportDragHandle?.remove();
+    this.viewportWheelHandle?.remove();
+    this.viewportDragHandle = this.view.on('drag', () => this.markViewportNavigation());
+    this.viewportWheelHandle = this.view.on('mouse-wheel', () => this.markViewportNavigation());
+  }
+
+  private markViewportNavigation(): void {
+    this.hasPendingViewportNavigation = true;
+    this.scheduleViewportIpScanRequest();
+  }
+
+  private scheduleViewportIpScanRequest(): void {
+    if (this.destroyed) {
+      return;
+    }
+
+    this.clearViewportIpScanTimer();
+
+    this.viewportIpScanTimer = setTimeout(() => {
+      this.viewportIpScanTimer = null;
+      this.hasPendingViewportNavigation = false;
+      this.emitViewportIpScanRequest();
+    }, 1000);
+  }
+
+  private clearViewportIpScanTimer(): void {
+    if (this.viewportIpScanTimer !== null) {
+      clearTimeout(this.viewportIpScanTimer);
+      this.viewportIpScanTimer = null;
+    }
+  }
+
+  private emitViewportIpScanRequest(force = false): boolean {
+    const viewport = this.getIpScanViewport();
+    if (!viewport) {
+      return false;
+    }
+
+    const key = `${viewport.center.lat.toFixed(2)}:${viewport.center.lon.toFixed(2)}:${Math.round(viewport.radiusKm / 25)}`;
+    if (!force && key === this.lastViewportIpScanKey) {
+      return false;
+    }
+
+    this.lastViewportIpScanKey = key;
+    this.ngZone.run(() => this.viewportIpScanRequested.emit(viewport));
+    return true;
+  }
+
+  private getIpScanViewport(): ThreatLensIpViewportScanRequest | null {
+    const center = this.getViewportCenterCoordinates();
+    if (!center) {
+      return null;
+    }
+
+    return {
+      center,
+      radiusKm: this.getViewportRadiusKm(center),
+    };
+  }
+
+  private getCountryIpScanRequest(countryGraphic: any): ThreatLensIpViewportScanRequest | null {
+    const extent = countryGraphic?.geometry?.extent ?? countryGraphic?.geometry;
+    const center = this.toThreatLensCoordinates(extent?.center) ?? this.getExtentCenterCoordinates(extent);
+    if (!center) {
+      return null;
+    }
+
+    const corners = this.getExtentCornerCoordinates(extent);
+    const distances = corners.map((point) => ThreatLensGeoUtils.getThreatLensDistanceKm(center, point)).filter((value) => Number.isFinite(value) && value > 0);
+    const radiusKm = distances.length ? Math.max(...distances) : 250;
+
+    return {
+      center,
+      radiusKm: Math.round(Math.max(25, Math.min(12000, radiusKm))),
+      boundary: this.getCountryBoundary(countryGraphic),
+    };
+  }
+
+  private getCountryBoundary(countryGraphic: any): ThreatLensCountryBoundary | null {
+    const rings = countryGraphic?.geometry?.rings;
+    if (!Array.isArray(rings) || !rings.length) {
+      return null;
+    }
+
+    const convertedRings = rings
+      .map((ring: any[]) => Array.isArray(ring)
+        ? ring.map((point) => this.toRingCoordinates(point)).filter((point): point is ThreatLensCoordinates => Boolean(point))
+        : [])
+      .filter((ring: ThreatLensCoordinates[]) => ring.length >= 3);
+
+    if (!convertedRings.length) {
+      return null;
+    }
+
+    const extent = convertedRings.reduce((bounds, ring) => {
+      for (const point of ring) {
+        bounds.minLat = Math.min(bounds.minLat, point.lat);
+        bounds.maxLat = Math.max(bounds.maxLat, point.lat);
+        bounds.minLon = Math.min(bounds.minLon, point.lon);
+        bounds.maxLon = Math.max(bounds.maxLon, point.lon);
+      }
+      return bounds;
+    }, {
+      minLat: 90,
+      maxLat: -90,
+      minLon: 180,
+      maxLon: -180,
+    });
+
+    return {
+      rings: convertedRings,
+      extent,
+    };
+  }
+
+  private toRingCoordinates(point: any): ThreatLensCoordinates | null {
+    if (Array.isArray(point)) {
+      return this.toThreatLensCoordinates({ x: point[0], y: point[1] });
+    }
+
+    return this.toThreatLensCoordinates(point);
+  }
+
+  private getExtentCenterCoordinates(extent: any): ThreatLensCoordinates | null {
+    const xmin = Number(extent?.xmin);
+    const xmax = Number(extent?.xmax);
+    const ymin = Number(extent?.ymin);
+    const ymax = Number(extent?.ymax);
+    if (![xmin, xmax, ymin, ymax].every(Number.isFinite)) {
+      return null;
+    }
+
+    return this.toThreatLensCoordinates({ x: (xmin + xmax) / 2, y: (ymin + ymax) / 2 });
+  }
+
+  private getExtentCornerCoordinates(extent: any): ThreatLensCoordinates[] {
+    const xmin = Number(extent?.xmin);
+    const xmax = Number(extent?.xmax);
+    const ymin = Number(extent?.ymin);
+    const ymax = Number(extent?.ymax);
+    if (![xmin, xmax, ymin, ymax].every(Number.isFinite)) {
+      return [];
+    }
+
+    return [
+      this.toThreatLensCoordinates({ x: xmin, y: ymin }),
+      this.toThreatLensCoordinates({ x: xmax, y: ymin }),
+      this.toThreatLensCoordinates({ x: xmin, y: ymax }),
+      this.toThreatLensCoordinates({ x: xmax, y: ymax }),
+    ].filter((point): point is ThreatLensCoordinates => Boolean(point));
+  }
+
+  private getViewportCenterCoordinates(): ThreatLensCoordinates | null {
+    const width = Number(this.view?.width || 0);
+    const height = Number(this.view?.height || 0);
+    if (width > 0 && height > 0) {
+      const center = this.getMapCoordinatesAtScreen(width / 2, height / 2);
+      if (center) {
+        return center;
+      }
+    }
+
+    return this.toThreatLensCoordinates(this.view?.center) ?? this.toThreatLensCoordinates(this.view?.camera?.position);
+  }
+
+  private getViewportRadiusKm(center: ThreatLensCoordinates): number {
+    const width = Number(this.view?.width || 0);
+    const height = Number(this.view?.height || 0);
+    const edgePoints = width > 0 && height > 0
+      ? [
+          this.getMapCoordinatesAtScreen(width * 0.18, height / 2),
+          this.getMapCoordinatesAtScreen(width * 0.82, height / 2),
+          this.getMapCoordinatesAtScreen(width / 2, height * 0.18),
+          this.getMapCoordinatesAtScreen(width / 2, height * 0.82),
+        ].filter((point): point is ThreatLensCoordinates => Boolean(point))
+      : [];
+    const distances = edgePoints.map((point) => ThreatLensGeoUtils.getThreatLensDistanceKm(center, point)).filter((value) => Number.isFinite(value) && value > 0);
+    const radiusKm = distances.length ? Math.max(...distances) : this.defaultViewportRadiusKm();
+
+    return Math.round(Math.max(25, Math.min(12000, radiusKm)));
+  }
+
+  private getMapCoordinatesAtScreen(x: number, y: number): ThreatLensCoordinates | null {
+    if (!this.view?.toMap) {
+      return null;
+    }
+
+    try {
+      return this.toThreatLensCoordinates(this.view.toMap({ x, y }));
+    }
+    catch {
+      return null;
+    }
+  }
+
+  private toThreatLensCoordinates(point: any): ThreatLensCoordinates | null {
+    const lat = Number(point?.latitude ?? point?.lat);
+    const lon = Number(point?.longitude ?? point?.lon);
+    if (Number.isFinite(lat) && Number.isFinite(lon) && lat >= -90 && lat <= 90) {
+      return this.normalizeCoordinates(lat, lon);
+    }
+
+    const x = Number(point?.x);
+    const y = Number(point?.y);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+      return null;
+    }
+
+    if (Math.abs(x) <= 180 && Math.abs(y) <= 90) {
+      return this.normalizeCoordinates(y, x);
+    }
+
+    if (this.webMercatorUtils?.xyToLngLat) {
+      try {
+        const [convertedLon, convertedLat] = this.webMercatorUtils.xyToLngLat(x, y);
+        if (Number.isFinite(convertedLat) && Number.isFinite(convertedLon)) {
+          return this.normalizeCoordinates(convertedLat, convertedLon);
+        }
+      }
+      catch {
+      }
+    }
+
+    const convertedLon = (x / 20037508.34) * 180;
+    const mercatorLat = (y / 20037508.34) * 180;
+    const convertedLat = (180 / Math.PI) * (2 * Math.atan(Math.exp((mercatorLat * Math.PI) / 180)) - (Math.PI / 2));
+    if (!Number.isFinite(convertedLat) || !Number.isFinite(convertedLon)) {
+      return null;
+    }
+
+    return this.normalizeCoordinates(convertedLat, convertedLon);
+  }
+
+  private normalizeCoordinates(lat: number, lon: number): ThreatLensCoordinates | null {
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90) {
+      return null;
+    }
+
+    return {
+      lat: Math.round(lat * 1000000) / 1000000,
+      lon: Math.round(ThreatLensGeoUtils.normalizeThreatLensLongitude(lon) * 1000000) / 1000000,
+    };
+  }
+
+  private defaultViewportRadiusKm(): number {
+    const zoom = Number(this.view?.zoom);
+    if (Number.isFinite(zoom)) {
+      return Math.max(25, Math.min(12000, 12000 / Math.max(1, zoom)));
+    }
+
+    return 1000;
   }
 
   private updateBasemapForZoom(): void {
@@ -431,10 +775,6 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private clearHoverHighlight(): void {
     this.countryRenderer.clearHoverHighlight();
     this.hoveredCountryKey = '';
-  }
-
-  private renderNewsIntensity(): void {
-    this.newsGraphicsLayer?.removeAll();
   }
 
   private toCountryKey(value: string): string {

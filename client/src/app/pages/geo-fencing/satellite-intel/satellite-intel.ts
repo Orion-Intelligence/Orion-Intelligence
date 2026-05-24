@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { parseCoordinates } from '../../../shared/utils/geo-coordinates.utils';
 import { SatelliteIntelService } from './satellite-intel-service';
-import { GeoFencingGeocodeService } from '../shared/geo-fencing-geocode.service';
+import { GeoFencingGeocodeService } from '../shared/services/geo-fencing-geocode.service';
 import { MapRendererComponent } from './map-renderer/map-renderer.component';
 import { GeocodeModalComponent } from '../../../shared/partials/geocode-modal/geocode-modal.component';
 import { MonthCompareSectionComponent } from './ui-overlays/month-compare-section/month-compare-section.component';
@@ -44,7 +44,6 @@ import { SatelliteIntelPanel, SatelliteIntelPanelEnum } from '../enums/geo-fenci
   ],
 })
 export class SatelliteIntel implements OnInit, OnDestroy {
-  @ViewChild(ThreatLensComponent) private threatLensComponent?: ThreatLensComponent;
   private entityLoader: EntityLoader;
   private mapEntityDashboard: SatelliteMapEntityDashboardController;
   private loadingState = new SatelliteLoadingState();
@@ -336,11 +335,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   openThreatFilters(): void {
     this.sidebarService.openSidebar();
-    this.isPanelMenuOpen = false;
-  }
-
-  openThreatIpScan(): void {
-    this.threatLensComponent?.openIpScanLocation();
     this.isPanelMenuOpen = false;
   }
 

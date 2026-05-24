@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { MapLoadingBadgesComponent } from '../../../shared/map-loading-badges/map-loading-badges.component';
+import { MapLoadingBadgesComponent } from '../../../shared/components/map-loading-badges/map-loading-badges.component';
 import { OrionSatelliteFilterOption, TrackingEntityType } from '../../../models/geo-fencing.models';
 import { AircraftDetailsPanelComponent } from '../../map-entities/aircraft/components/aircraft-details-panel/aircraft-details-panel.component';
 import { FacilityLegendComponent } from '../../map-entities/facilities/components/facility-legend/facility-legend.component';

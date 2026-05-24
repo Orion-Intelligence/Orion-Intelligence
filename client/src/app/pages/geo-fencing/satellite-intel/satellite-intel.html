@@ -91,12 +91,11 @@
         [isPanelMenuOpen]="isPanelMenuOpen"
         [isPanelPopupOpen]="isPanelPopupOpen"
         [activePanel]="activePanel"
-        (threatIpScanOpened)="openThreatIpScan()"
         (threatFiltersOpened)="openThreatFilters()"
         (panelOpened)="openPanelPopup($event)"
         (panelClosed)="closePanelPopup()">
 
-@if (activePanel === panel.Dashboard) {
+@if (isMapView && activePanel === panel.Dashboard) {
   <app-satellite-dashboard-section
     [dashboardSearch]="dashboardSearch"
     [dashboardSearchResults]="dashboardSearchResults"
@@ -132,7 +131,7 @@
   </app-satellite-dashboard-section>
 }
 
-      @if (activePanel === panel.Compare) {
+      @if (isMapView && activePanel === panel.Compare) {
         <app-satellite-month-compare
           [isScanning]="isScanning()"
           [errorMessage]="satelliteService.onError()?.message || null"

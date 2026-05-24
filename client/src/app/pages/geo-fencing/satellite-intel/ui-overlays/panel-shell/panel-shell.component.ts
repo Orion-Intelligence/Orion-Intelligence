@@ -21,7 +21,6 @@ export class PanelShellComponent {
   @Input() activePanel: SatelliteIntelPanel = SatelliteIntelPanelEnum.Dashboard;
 
   @Output() threatFiltersOpened = new EventEmitter<void>();
-  @Output() threatIpScanOpened = new EventEmitter<void>();
   @Output() panelOpened = new EventEmitter<SatelliteIntelPanel>();
   @Output() panelClosed = new EventEmitter<void>();
 
