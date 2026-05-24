@@ -4,7 +4,9 @@ import { ConsolidatedCallbackModel } from '../../../shared/model/results/consoli
 import { ConsolidatedParamModel } from '../../../shared/model/results/consolidated/consolidated.param.model';
 import { ApiService } from '../../../shared/services/api.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
-import { THREAT_LENS_CATEGORY_CONFIG, THREAT_LENS_COUNTRY_ALIAS, THREAT_LENS_COUNTRY_FIELDS, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
+import { THREAT_LENS_CATEGORY_CONFIG, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
+
+const COUNTRY_FIELDS = ['m_country', 'm_country_name', 'm_location', 'country', 'location'];
 
 @Injectable({ providedIn: 'root' })
 export class ThreatLensService {
@@ -36,12 +38,7 @@ export class ThreatLensService {
       return '';
     }
 
-    const compact = value.replace(/[.]/g, '').replace(/\s+/g, ' ').trim();
-    const aliasKey = compact.toLowerCase().replace(/\s+/g, '');
-
-    if (THREAT_LENS_COUNTRY_ALIAS[aliasKey]) {
-      return THREAT_LENS_COUNTRY_ALIAS[aliasKey];
-    }
+    const compact = value.replace(/\s+/g, ' ').trim();
 
     return this.resolveRegionCode(compact) || compact;
   }
@@ -238,7 +235,7 @@ export class ThreatLensService {
   private extractCountries(document: any): string[] {
     const countries: string[] = [];
 
-    for (const fieldName of THREAT_LENS_COUNTRY_FIELDS) {
+    for (const fieldName of COUNTRY_FIELDS) {
       const value = document?.[fieldName];
       if (Array.isArray(value)) {
         for (const item of value) {
