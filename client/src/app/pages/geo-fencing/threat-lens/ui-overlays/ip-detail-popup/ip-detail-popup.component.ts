@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { IpDetail } from '../../../../shared/model/network-intel/network-intel.model';
-import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
-import { IpDetailComponent } from '../../../root-searches/network-intel/ip-detail/ip-detail.component';
+import { IpDetail } from '../../../../../shared/model/network-intel/network-intel.model';
+import { NetworkIntelScanService } from '../../../../../shared/services/network-intel/network-intel-scan.service';
+import { IpDetailComponent } from '../../../../root-searches/network-intel/ip-detail/ip-detail.component';
 
 @Component({
   selector: 'app-threat-lens-ip-detail-popup',

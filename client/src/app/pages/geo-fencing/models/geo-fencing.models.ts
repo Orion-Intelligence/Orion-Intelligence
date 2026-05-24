@@ -1,9 +1,10 @@
 import type { ComponentRef } from '@angular/core';
 import { ConsolidatedParamModel } from '../../../shared/model/results/consolidated/consolidated.param.model';
-import { OrionSatelliteFeatureTypeEnum, OrionSatelliteSourceEnum } from '../enums/geo-fencing.enums';
+import { OrionSatelliteFeatureTypeEnum, OrionSatelliteSourceEnum, ThreatLensIpScanModeEnum } from '../enums/geo-fencing.enums';
 
 export type OrionSatelliteFeatureType = `${OrionSatelliteFeatureTypeEnum}`;
 export type OrionSatelliteSource = `${OrionSatelliteSourceEnum}`;
+export type ThreatLensIpScanMode = `${ThreatLensIpScanModeEnum}`;
 
 export interface SatelliteTrackingViewport {
   lat: number;
@@ -119,6 +120,21 @@ export const THREAT_LENS_CATEGORY_CONFIG = [
   { key: 'social_model', label: 'Social', color: [74, 222, 128] as [number, number, number] },
   { key: 'generic_model', label: 'Generic', color: [148, 163, 184] as [number, number, number] },
 ] as const;
+
+export const THREAT_LENS_COUNTRY_ALIAS: Record<string, string> = {
+  usa: 'United States',
+  us: 'United States',
+  'u.s.a': 'United States',
+  'u.s': 'United States',
+  uk: 'United Kingdom',
+  uae: 'United Arab Emirates',
+  ksa: 'Saudi Arabia',
+  russia: 'Russia',
+  southkorea: 'South Korea',
+  northkorea: 'North Korea',
+};
+
+export const THREAT_LENS_COUNTRY_FIELDS = ['m_country', 'm_country_name', 'm_location', 'country', 'location'] as const;
 
 export type ThreatLensCategoryModelKey = typeof THREAT_LENS_CATEGORY_CONFIG[number]['key'];
 export type ThreatLensRequestPayload = ConsolidatedParamModel;

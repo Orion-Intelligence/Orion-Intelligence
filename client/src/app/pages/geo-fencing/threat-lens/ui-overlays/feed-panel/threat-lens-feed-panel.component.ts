@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, HostBinding, Input, NgZone, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ThreatLensDisplayFeedItem, ThreatLensFeedItem, ThreatLensFeedRange, ThreatLensFeedRangeOption } from '../../models/geo-fencing.models';
+import { ThreatLensDisplayFeedItem, ThreatLensFeedItem, ThreatLensFeedRange, ThreatLensFeedRangeOption } from '../../../models/geo-fencing.models';
 
 export type ThreatLensFeedPanelType = 'news' | 'archive';
 
@@ -9,7 +9,7 @@ export type ThreatLensFeedPanelType = 'news' | 'archive';
   selector: 'app-threat-lens-feed-panel',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './threat-lens-feed-panel.html',
+  templateUrl: './threat-lens-feed-panel.component.html',
 })
 export class ThreatLensFeedPanelComponent implements AfterViewInit, OnChanges, OnDestroy {
   @ViewChild('feedScroller') private feedScroller?: ElementRef<HTMLDivElement>;

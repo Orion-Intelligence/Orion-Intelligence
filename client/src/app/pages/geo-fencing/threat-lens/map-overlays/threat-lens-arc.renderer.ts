@@ -1,7 +1,7 @@
 import { NgZone } from '@angular/core';
-import { AnimatedArcDescriptor, ThreatLensCategoryMapData } from '../../../models/geo-fencing.models';
-import { buildArcPath, buildArcPathPoints, buildSurfacePath, collectArcPairs, getArcPointAtProgress, getFeatureAnchor } from '../../utils/threat-lens-map.utils';
-import { ThreatLensArcRenderResult } from '../threat-lens-map.types';
+import { AnimatedArcDescriptor, ThreatLensCategoryMapData } from '../../models/geo-fencing.models';
+import { ThreatLensMapUtils } from '../map-utils/threat-lens-map.utils';
+import { ThreatLensArcRenderResult } from '../models/threat-lens-map.types';
 import { ThreatLensCountryLayerRenderer } from './threat-lens-country-layer.renderer';
 
 export class ThreatLensArcRenderer {
@@ -39,7 +39,7 @@ export class ThreatLensArcRenderer {
     let totalArcCount = 0;
 
     for (const category of categoryData) {
-      const pairs = collectArcPairs(category.documentCountryGroups,
+      const pairs = ThreatLensMapUtils.collectArcPairs(category.documentCountryGroups,
         this.toCountryKey,
         this.countryRenderer.featureIndex,
         this.maxArcCount,
@@ -53,16 +53,16 @@ export class ThreatLensArcRenderer {
       for (const pair of visiblePairs) {
         const featureA = this.countryRenderer.getFeature(pair.countryAKey);
         const featureB = this.countryRenderer.getFeature(pair.countryBKey);
-        const start = getFeatureAnchor(featureA, this.geometryEngine, this.webMercatorUtils);
-        const end = getFeatureAnchor(featureB, this.geometryEngine, this.webMercatorUtils);
+        const start = ThreatLensMapUtils.getFeatureAnchor(featureA, this.geometryEngine, this.webMercatorUtils);
+        const end = ThreatLensMapUtils.getFeatureAnchor(featureB, this.geometryEngine, this.webMercatorUtils);
 
         if (!start || !end) {
           continue;
         }
 
-        const arcPoints = buildArcPathPoints(start, end, pair.weight);
-        const arcPaths = buildArcPath(start, end, pair.weight);
-        const surfacePaths = buildSurfacePath(start, end);
+        const arcPoints = ThreatLensMapUtils.buildArcPathPoints(start, end, pair.weight);
+        const arcPaths = ThreatLensMapUtils.buildArcPath(start, end, pair.weight);
+        const surfacePaths = ThreatLensMapUtils.buildSurfacePath(start, end);
         if (!arcPaths.length || !surfacePaths.length || arcPoints.length < 2) {
           continue;
         }
@@ -165,7 +165,7 @@ export class ThreatLensArcRenderer {
         let index = 0;
         for (const arc of batch.items) {
           const progress = ((timestamp + (arc.animationOffset * arc.animationDuration)) % arc.animationDuration) / arc.animationDuration;
-          const point = getArcPointAtProgress(arc.arcPoints, progress);
+          const point = ThreatLensMapUtils.getArcPointAtProgress(arc.arcPoints, progress);
           const graphic = this.movingDotGraphics[index];
 
           if (point && graphic) {

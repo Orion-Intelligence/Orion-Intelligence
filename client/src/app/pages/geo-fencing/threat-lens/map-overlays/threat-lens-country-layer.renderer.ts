@@ -1,4 +1,4 @@
-import { buildCountryFeatureIndex } from '../../utils/threat-lens-map.utils';
+import { ThreatLensMapUtils } from '../map-utils/threat-lens-map.utils';
 
 export class ThreatLensCountryLayerRenderer {
   private static readonly COUNTRY_LAYER_URL = 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries_(Generalized)/FeatureServer/0';
@@ -116,6 +116,6 @@ export class ThreatLensCountryLayerRenderer {
     query.outFields = ['*'];
 
     const response = await this.layer.queryFeatures(query);
-    this.featureIndex = buildCountryFeatureIndex(response.features, this.countryNameFields, normalizeCountryLabel, toCountryKey);
+    this.featureIndex = ThreatLensMapUtils.buildCountryFeatureIndex(response.features, this.countryNameFields, normalizeCountryLabel, toCountryKey);
   }
 }

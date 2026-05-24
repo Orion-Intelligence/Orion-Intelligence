@@ -16,10 +16,24 @@ export interface ThreatLensCoordinates {
   lon: number;
 }
 
+export interface ThreatLensCountryBoundary {
+  rings: ThreatLensCoordinates[][];
+  extent: {
+    minLat: number;
+    maxLat: number;
+    minLon: number;
+    maxLon: number;
+  };
+}
+
+export interface ThreatLensIpViewportScanRequest {
+  center: ThreatLensCoordinates;
+  radiusKm: number;
+  boundary?: ThreatLensCountryBoundary | null;
+}
+
 export interface ThreatLensIpRecord {
   ip: string;
-  lat?: number;
-  lon?: number;
 }
 
 export interface ThreatLensCountrySelection {
@@ -27,6 +41,7 @@ export interface ThreatLensCountrySelection {
   key: string;
   count: number;
   breakdown: SelectedCountryCategoryCount[];
+  ipScanRequest?: ThreatLensIpViewportScanRequest | null;
 }
 
 export interface ThreatLensArcRenderResult {

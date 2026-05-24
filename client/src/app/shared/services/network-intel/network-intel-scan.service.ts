@@ -56,7 +56,7 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
   }
 
   scanGeoCamera(coordinates: string, radius_km = 25, max_ips = 200): Subscription {
-    return this.runPolledTask<GeoCameraResponse>(() => this.api.post<GeoCameraResponse>('netintel/iot_detect', { coordinates, radius_km, max_ips }));
+    return this.runPolledTask<GeoCameraResponse>(() => this.api.post<GeoCameraResponse>('netintel/iot_detect', { coordinates, radius_km, max_ips }), 250);
   }
 
   scanGeoCameraByRanges(ip_ranges: string[], max_ips = 200): Subscription {
@@ -238,8 +238,8 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
     return { message: value?.result?.message || value?.message || 'Request failed' };
   }
 
-  private runPolledTask<T extends { result?: { status?: string; progress?: number } | null; status?: string; progress?: number | null }>(call: () => Observable<T>): Subscription {
-    return this.runTask<T>((cancel$) => this.poll<T>(call, (response) => this.getPendingStatus(response), (response) => this.updateProgress(response?.result?.progress ?? response?.progress), cancel$, this.pollDelayMs));
+  private runPolledTask<T extends { result?: { status?: string; progress?: number } | null; status?: string; progress?: number | null }>(call: () => Observable<T>, pollDelayMs = this.pollDelayMs): Subscription {
+    return this.runTask<T>((cancel$) => this.poll<T>(call, (response) => this.getPendingStatus(response), (response) => this.updateProgress(response?.result?.progress ?? response?.progress), cancel$, pollDelayMs));
   }
 
   private async fetchPolledResult<T extends { result?: { status?: string } | null; status?: string }>(call: () => Observable<T>, onEach?: (response: T) => void): Promise<any> {

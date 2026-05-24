@@ -31,6 +31,11 @@ export enum SatelliteIntelPanelEnum {
   Compare = 'compare',
 }
 
+export enum ThreatLensIpScanModeEnum {
+  Default = 'default',
+  Country = 'country',
+}
+
 export type SatelliteIntelPanel = SatelliteIntelPanelEnum;
 
 export interface SatelliteIntelViewport {

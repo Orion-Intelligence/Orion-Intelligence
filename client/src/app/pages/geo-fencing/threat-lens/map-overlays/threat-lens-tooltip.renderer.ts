@@ -1,4 +1,4 @@
-import { SelectedCountryCategoryCount } from '../../../models/geo-fencing.models';
+import { SelectedCountryCategoryCount } from '../../models/geo-fencing.models';
 
 export class ThreatLensTooltipRenderer {
   private tooltipEl: HTMLDivElement | null = null;
