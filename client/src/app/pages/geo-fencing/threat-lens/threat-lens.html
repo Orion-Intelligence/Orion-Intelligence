@@ -1,7 +1,10 @@
-<section class="ui-consolidated-theme relative block h-full min-h-0 w-full overflow-hidden bg-[var(--color-blue-850)]">
+<section class="ui-consolidated-theme relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-black">
+	<div class="flex min-h-0 flex-1 flex-col overflow-hidden max-[1100px]:overflow-x-hidden max-[1100px]:overflow-y-auto max-[1100px]:pb-3">
+		<div class="relative grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden max-[1100px]:block max-[1100px]:overflow-visible">
+			<div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:min-h-[380px]">
 
 	<app-threat-lens-map-renderer
-		class="absolute inset-0 block h-full w-full"
+		class="absolute inset-0 block h-full min-h-0 min-w-0 overflow-hidden"
 		(mapReady)="onMapReady()"
 		(mapError)="onMapError($event)"
 		(countrySelected)="onCountrySelected($event)"
@@ -10,7 +13,7 @@
 		(arcCountChange)="onArcCountChange($event)">
 	</app-threat-lens-map-renderer>
 
-	<div class="pointer-events-none absolute inset-0 bg-[var(--color-mono)] opacity-15"></div>
+	<div class="pointer-events-none absolute inset-0 bg-[var(--color-mono)] opacity-15 max-[1100px]:hidden"></div>
 
 	<app-map-loading-badges [items]="loadingBadges" [topControlsInset]="!showFilterButton"></app-map-loading-badges>
 
@@ -32,8 +35,9 @@
 			</div>
 		</div>
 	}
+			</div>
 
-	<div class="absolute left-4 top-4 bottom-4 z-20 flex w-[min(24rem,calc(100%-5rem))] flex-col gap-3 max-[640px]:w-[calc(100%-2rem)] max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:top-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pt-3">
+	<div class="absolute left-4 top-4 bottom-4 z-20 flex w-[min(24rem,calc(100%-5rem))] flex-col gap-3 max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pt-3">
 		<div class="h-[40px] shrink-0 max-[1100px]:hidden"></div>
     <div class="map-overlay-menu rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] p-3 shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[640px]:rounded-[12px]">
 			<div class="flex items-center justify-between gap-3">
@@ -48,9 +52,9 @@
 </button>
 			</div>
 			@if (!isSearchPanelCollapsed) {
-				<div class="mt-3 flex items-center gap-2">
+				<div class="mt-3 flex items-center gap-2 max-[520px]:flex-col">
 					<input [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" type="text" placeholder="Search keyword (e.g. pakistan database)" class="h-10 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[13px] text-[var(--color-text1)] outline-none ring-0 transition focus:border-[var(--color-blue-640)] placeholder:text-[var(--color-text3)] [body.light-theme_&]:bg-[var(--color-white)] [body.light-theme_&]:text-[var(--color-gray-900)]" />
-					<button (click)="onSearch()" [disabled]="isLoading" class="h-10 rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 text-[13px] font-semibold text-[var(--color-white)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60">
+					<button (click)="onSearch()" [disabled]="isLoading" class="h-10 rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 text-[13px] font-semibold text-[var(--color-white)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 max-[520px]:w-full">
 						Search
 					</button>
 				</div>
@@ -61,7 +65,7 @@
 
 				@if (topCountries.length) {
 					<h3 class="mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Top Highlighted Countries</h3>
-					<div class="mt-2 max-h-[260px] space-y-1 overflow-auto pr-1">
+					<div class="mt-2 max-h-[260px] space-y-1 overflow-auto pr-1 max-[640px]:max-h-[180px]">
 						@for (item of topCountries; track item.country) {
 							<button type="button" (click)="onTopCountrySelect(item.country)" class="flex w-full items-center justify-between rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-left text-[12px] text-[var(--color-text2)] transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]">
 								<span class="truncate pr-2">{{ item.country }}</span>
@@ -76,7 +80,7 @@
 
 				@if (categoryLegend.length) {
 					<h3 class="mt-5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Category Layers</h3>
-					<div class="mt-2 max-h-[220px] space-y-1 overflow-auto pr-1">
+					<div class="mt-2 max-h-[220px] space-y-1 overflow-auto pr-1 max-[640px]:max-h-[160px]">
 						@for (item of categoryLegend; track item.categoryKey) {
 							<div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
 								<div class="flex items-center justify-between gap-3">
@@ -139,9 +143,9 @@
 		</div>
 	</div>
 
-	<div class="absolute right-4 top-4 bottom-4 z-20 flex w-[min(25rem,calc(100%-2rem))] flex-col gap-0 max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:right-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pb-3">
+	<div class="absolute right-4 top-4 bottom-4 z-20 flex w-[min(25rem,calc(100%-2rem))] flex-col gap-0 max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:right-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:mt-3 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pb-3">
 		@if (showFilterButton) {
-		<div class="flex justify-end gap-2">
+		<div class="flex justify-end gap-2 max-[550px]:flex-col">
 			<button type="button" data-testid="threat-lens-ip-scan" (click)="openIpScanLocation()" [disabled]="isLoading || isIpScanRunning" class="map-overlay-menu inline-flex h-[40px] items-center gap-[8px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition hover:bg-[var(--color-blue-710)] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)] max-[550px]:flex-1 max-[550px]:justify-center">
 				<i class="bi bi-hdd-network text-[16px] leading-none text-sky-400"></i>
 				<span>IP Scan</span>
@@ -172,6 +176,8 @@
 				feedType="archive"
 				[items]="feedItems"
 			></app-threat-lens-feed-panel>
+		</div>
+	</div>
 		</div>
 	</div>
 </section>

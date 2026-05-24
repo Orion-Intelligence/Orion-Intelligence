@@ -39,7 +39,7 @@ export class ThreatLensFeedPanelComponent implements AfterViewInit, OnChanges, O
   get hostClass(): string {
     const sizeClass = this.collapsed
       ? 'h-auto min-h-0'
-      : 'h-[calc(50%-0.375rem)] min-h-[250px] max-[1100px]:h-auto max-[1100px]:min-h-[280px]';
+      : 'h-[calc(50%-0.375rem)] min-h-[250px] max-[1100px]:h-[360px] max-[1100px]:min-h-[280px] max-[640px]:h-[320px] max-[640px]:min-h-[240px]';
 
     return `block w-full ${sizeClass}`;
   }
