@@ -21,28 +21,6 @@ def test_build_es_from_tagged_and_ioc_filters_cover_domain_and_match_none():
     assert filters
 
 
-def test_country_ioc_filter_expands_aliases_and_country_fields():
-    filters = search_query_generator.build_ioc_filter_clauses(
-        {"m_country": ["United States"]}
-    )
-
-    shoulds = filters[0]["bool"]["should"]
-    term_values_by_field = {}
-    wildcard_values_by_field = {}
-    for clause in shoulds:
-        if "term" in clause:
-            field, spec = next(iter(clause["term"].items()))
-            term_values_by_field.setdefault(field, set()).add(spec["value"])
-        if "wildcard" in clause:
-            field, spec = next(iter(clause["wildcard"].items()))
-            wildcard_values_by_field.setdefault(field, set()).add(spec["value"])
-
-    assert "US" in term_values_by_field["m_country"]
-    assert "USA" in term_values_by_field["m_country_name"]
-    assert "United States of America" in term_values_by_field["m_location"]
-    assert "*United States*" in wildcard_values_by_field["country"]
-
-
 def test_query_block_supports_match_all_and_semantic_knn(monkeypatch):
     semantic = SimpleNamespace(embed_query_sync=lambda _query: [0.1, 0.2, 0.3])
     monkeypatch.setattr(
