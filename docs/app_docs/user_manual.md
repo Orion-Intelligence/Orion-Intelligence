@@ -777,6 +777,185 @@ Geo support is especially relevant when working from host-oriented results and w
 Geo-assisted pivot modal used from network results.
 ```
 
+### Geo Fencing Threat Lens
+
+Threat Lens is the geo-fencing threat-intelligence workspace. It turns consolidated threat records into a country-oriented map, overlays category relationships as arcs, and runs an IP exposure scan for the active map scope.
+
+Threat Lens can be opened directly from the dashboard sidebar as `Threat Lens`. It is also available inside Satellite Intel as the `Threat Lens` tab, where it shares the geo-fencing map workspace without showing the standalone filter button.
+
+```{figure} ../screenshots/threat-lens-overview-20260326.png
+:alt: Threat Lens overview
+:width: 100%
+
+Threat Lens overview with map, country ranking, category layers, live feed, archive, and IP scan status.
+```
+
+#### Access and Licensing
+
+The sidebar entry is available to admins and users with the `osint_advanced` module. When the module is not available, the sidebar item remains visible but gated by the subscription prompt.
+
+The direct workspace route is `/dashboard/threat-lens`. The embedded geo-fencing route keeps the same Threat Lens implementation but opens it from the Satellite Intel tab switcher.
+
+#### Data Request and Filtering
+
+Threat Lens requests consolidated data from `/api/threat/lens`. The request is built from the shared consolidated-search parameter model and the currently selected dashboard filters.
+
+Before the request is sent, empty values, default values, empty arrays, and `all` selections are removed. The keyword field `q` and page field are kept so that an empty search can still load the complete Threat Lens dataset.
+
+The standalone filter drawer uses the Threat Lens filter model:
+
+- network type
+- date range
+- content type
+- platform
+- platform result count
+
+Changing filters refreshes the Threat Lens search. In the embedded Satellite Intel tab, the parent geo-fencing shell controls the surrounding map toolbar and opens the same filter behavior from its side panel.
+
+```{figure} ../screenshots/threat-lens-filters-20260326.png
+:alt: Threat Lens filters
+:width: 100%
+
+Threat Lens filter drawer for network, date, content, platform, and platform-count filtering.
+```
+
+#### Consolidated Category Coverage
+
+The implementation reads these consolidated result categories:
+
+- `Leak`
+- `Tracking`
+- `News`
+- `Exploit`
+- `Defacement`
+- `Chat`
+- `Social`
+- `Generic`
+
+Each category has its own map color. Result records are deduplicated by hash, document id, id, URL, title, and creation date. If those fields are missing, the raw document body is used as the fallback identity.
+
+Country labels are extracted from the available country and location fields, including `m_country`, `m_country_name`, `m_location`, `country`, and `location`. Comma, semicolon, and pipe-separated values are split into individual countries. Two and three letter region codes are normalized through browser region display names when possible.
+
+The map data builder then produces:
+
+- total result count
+- ranked country counts
+- per-category country counts
+- document country groups used for arc generation
+- feed items sorted by timestamp
+
+#### Search Panel
+
+The search panel supports free-text keyword searches and country pivots.
+
+Search actions:
+
+- type a keyword and press `Enter`
+- type a keyword and click `Search`
+- click a top highlighted country
+
+When the keyword matches a country known by the map layer, Threat Lens converts the search into a country-filtered request. In that case it sends an entity filter for `m_country`, enables strict matching, disables full search, and focuses the country on the map. For other keywords, the value is sent as `q`.
+
+```{figure} ../screenshots/threat-lens-search-20260326.png
+:alt: Threat Lens search
+:width: 100%
+
+Threat Lens keyword search with active keyword state and refreshed country/category context.
+```
+
+#### Map, Countries, and Arcs
+
+The map renderer uses ArcGIS SceneView with a global dark basemap. It loads a country feature layer, highlight styling, tooltip handling, arc graphics layers, and IP marker layers.
+
+The country layer provides the selectable geographic surface. Hovering a country shows the country name, total count, and category breakdown. Clicking a country selects it, focuses the map on the country geometry, updates the summary panel, and starts a country-scoped IP exposure scan when boundary data is available.
+
+Threat arcs are generated from records that mention more than one country. The renderer builds animated connections between country pairs, groups them by category color, and rotates visible arcs in batches of up to five. When a country search is active, the map shows only arc connections linked to the selected country.
+
+The renderer also watches zoom and interaction state:
+
+- close zoom switches to a street-oriented night basemap
+- map movement pauses arc animation while interacting
+- completed navigation can request a new viewport IP scan
+- resize handling keeps the scene stable inside dashboard layouts
+
+Automated documentation and test runs use a Cypress fallback map. The fallback emits the same map-ready event without loading ArcGIS, which keeps screenshot generation deterministic while preserving the real component flow.
+
+#### Summary Panel
+
+The summary panel reports the active Threat Lens state:
+
+- selected country, when one is selected
+- current status message
+- visible arc count
+- per-category selected-country breakdown
+- IP scan status, scope, range, and marker count
+
+Both the search panel and summary panel can be collapsed to clear map space.
+
+#### News Feed and Archive
+
+Threat Lens converts result documents into feed cards. Each card can include title, summary, source link, date, category label, category color, and up to four highlights such as platform, risk, channel, attacker, IOC, CVE, or content type.
+
+There are two feed panels:
+
+- `News Feed` shows only `News` category records
+- `Archive` shows leak, tracking, exploit, defacement, chat, social, and generic records
+
+Feed controls:
+
+- collapse or expand each feed
+- local text search inside the loaded feed records
+- range filtering for `1 Day`, `1 Week`, and `All Time`
+- auto-scroll while the pointer is away
+- temporary pause during hover, wheel, or touch interaction
+- safe link opening for HTTP and HTTPS source URLs
+
+The feed range buttons filter data already loaded into the browser. The side filter date range fetches new data from the backend.
+
+```{figure} ../screenshots/threat-lens-feeds-20260326.png
+:alt: Threat Lens feeds
+:width: 100%
+
+Threat Lens feed panels with local archive search and feed range filtering.
+```
+
+#### IP Exposure Scan Overlay
+
+Threat Lens automatically uses the Network Intel geo scanner to look for exposed IP-backed camera or IoT records near the active map scope.
+
+Default behavior:
+
+- initial coordinates are `20, 0`
+- default radius is `12,000 km`
+- default max IP count is `200`
+- the summary label is `Global view`
+
+Viewport and country behavior:
+
+- map movement can request a viewport-based scan
+- country selection changes the scope to the selected country
+- country boundary data is passed to marker rendering when available
+- repeated scans with the same scope, center, and radius are deduplicated
+
+The scan posts coordinates, radius, and max-IP count through the Network Intel geo-camera scan flow. Completed results are normalized from returned IP arrays or camera arrays, limited to renderable records, and displayed as map markers. Selecting an IP marker opens the Threat Lens IP detail popup.
+
+The IP scan panel shows:
+
+- running, ready, complete, or error state
+- marker count
+- scope label
+- radius label
+- progress/status text
+- previous markers kept when a later scan returns no renderable records
+
+#### Empty and Error States
+
+If the Threat Lens request fails, the map is cleared and the status message names `/api/threat/lens` as the failed source. If records load but no country metadata is present, the workspace reports the loaded record count and explains that no country highlights were found.
+
+If records contain countries but no multi-country co-occurrence, the country ranking still appears while the arc count remains zero.
+
+If an IP exposure scan fails, the IP scan panel changes to the error state and preserves the map context.
+
 ## Graph Investigation Modules
 
 ### CTI Graph
@@ -1972,6 +2151,27 @@ The Geo IoT modal is also covered end to end, including:
 - switching back to map mode
 - starting a geo scan
 - reusing the selected coordinates as the active network-intel query
+
+### Threat Lens: Full Tested Behaviors
+
+The Threat Lens documentation flow covers the standalone `/dashboard/threat-lens` workspace.
+
+Covered behaviors include:
+
+- loading the Threat Lens page through the authenticated dashboard shell
+- rendering the documentation-safe map fallback during Cypress runs
+- requesting consolidated data from `/api/threat/lens`
+- ranking top highlighted countries from consolidated country metadata
+- rendering category-layer rows for leak, tracking, news, exploit, defacement, chat, social, and generic records
+- rendering live news feed records
+- rendering archive feed records
+- running the default IP exposure scan through the Network Intel geo scanner
+- showing IP scan scope, radius, status, and marker count
+- searching Threat Lens with a keyword
+- showing the active keyword state
+- applying local archive-feed search
+- switching feed range filters
+- opening and capturing the Threat Lens filter drawer
 
 ### Directory: Full Tested Behaviors
 

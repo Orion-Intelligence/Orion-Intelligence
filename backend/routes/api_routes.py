@@ -54,6 +54,7 @@ def _enforce_demo_safe_search(param: search_consolidated_param_model, current_us
 @api_routes.post(
     "/api/profile/event-management/siem/search",
     status_code=200,
+    include_in_schema=False,
     response_model=SiemSearchResponseModel,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])), Depends(license_required("maintainer", bypass_roles=[user_role.ADMIN])), Depends(limiter_dependency)])
 async def search_siem_logs(payload: SiemSearchRequestModel = Body(...), current_user=Depends(get_current_user)):

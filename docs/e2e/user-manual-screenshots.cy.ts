@@ -63,6 +63,7 @@ describe('User Manual Screenshot Flow', () => {
         app-tenant-homepage,
         app-account,
         app-network-intel,
+        app-threat-lens,
         app-scans-management,
         app-dump-list,
         [data-testid="graph-toolbar-root"],
@@ -206,6 +207,151 @@ describe('User Manual Screenshot Flow', () => {
         },
       },
     }).as('vulnerabilityScan');
+  };
+
+  const stubThreatLensApis = () => {
+    const isoDate = (daysAgo: number) => new Date(Date.now() - (daysAgo * 24 * 60 * 60 * 1000)).toISOString();
+    const categoryResponse = (Result: any[]) => ({ Result, Page_Count: 1, Count: Result.length });
+
+    cy.intercept('POST', '**/api/threat/lens', {
+      statusCode: 200,
+      body: {
+        leak_model: categoryResponse([
+          {
+            m_hash: 'docs-leak-1',
+            m_title: 'Cloud credential exposure mentions regional suppliers',
+            m_important_content: 'Leaked supplier records connect exposed credentials with operators in North America and East Asia.',
+            m_country_name: 'United States, China',
+            m_content_type: ['credentials'],
+            m_url: 'https://example.com/leak',
+            m_creation_date: isoDate(1),
+          },
+          {
+            m_hash: 'docs-leak-2',
+            m_title: 'Marketplace dump references infrastructure vendors',
+            m_important_content: 'Archive material identifies technology vendors and login material tied to multiple countries.',
+            m_country_name: 'Germany, United Kingdom',
+            m_content_type: ['database'],
+            m_url: 'https://example.com/marketplace',
+            m_creation_date: isoDate(5),
+          },
+        ]),
+        tracking_model: categoryResponse([
+          {
+            m_hash: 'docs-tracking-1',
+            m_title: 'Tracking record links shipping routes to telecom activity',
+            m_important_content: 'Location references show repeated activity between Gulf logistics hubs and South Asia.',
+            m_country_name: 'United Arab Emirates, Pakistan',
+            m_platform: 'tracking',
+            m_url: 'https://example.com/tracking',
+            m_creation_date: isoDate(2),
+          },
+        ]),
+        news_model: categoryResponse([
+          {
+            m_hash: 'docs-news-1',
+            m_title: 'Energy-sector alert expands across regional operators',
+            m_important_content: 'Analysts report coordinated targeting of energy-sector operators and third-party suppliers.',
+            m_country_name: 'United States, India',
+            m_content_type: ['news'],
+            m_url: 'https://example.com/news/energy',
+            m_creation_date: isoDate(0),
+          },
+          {
+            m_hash: 'docs-news-2',
+            m_title: 'Telecom incident draws national response teams',
+            m_important_content: 'Public reporting links telecom incident handling across Europe and the Middle East.',
+            m_country_name: 'France, Saudi Arabia',
+            m_content_type: ['news'],
+            m_url: 'https://example.com/news/telecom',
+            m_creation_date: isoDate(3),
+          },
+        ]),
+        exploit_model: categoryResponse([
+          {
+            m_hash: 'docs-exploit-1',
+            m_title: 'Exploit proof-of-concept references border gateway devices',
+            m_important_content: 'Exploit notes mention exposed gateways and operational technology segments.',
+            m_country_name: 'Japan, Australia',
+            m_remote_type: 'rce',
+            m_risk: 'high',
+            m_cve: ['CVE-2026-1010'],
+            m_url: 'https://example.com/exploit',
+            m_creation_date: isoDate(4),
+          },
+        ]),
+        defacement_model: categoryResponse([
+          {
+            q: 'regional public service portal defaced',
+            m_hash: 'docs-defacement-1',
+            m_team: 'Demo actor',
+            m_attacker: ['Demo actor'],
+            ioc: ['198.51.100.10'],
+            m_location: 'Brazil, Argentina',
+            m_content: 'Defacement activity references municipal services and mirrored targets.',
+            m_url: 'https://example.com/defacement',
+            m_leak_date: isoDate(6),
+          },
+        ]),
+        chat_model: categoryResponse([
+          {
+            m_hash: 'docs-chat-1',
+            m_channel_name: 'critical-infra-watch',
+            m_sender_username: 'demo_operator',
+            m_content: 'Channel chatter mentions new access claims affecting transport operators.',
+            m_country_name: 'Turkey, Greece',
+            m_platform: 'telegram',
+            m_message_sharable_link: 'https://example.com/chat',
+            m_message_date: isoDate(1),
+          },
+        ]),
+        social_model: categoryResponse([
+          {
+            m_hash: 'docs-social-1',
+            m_title: 'Social post amplifies breach claim',
+            m_content: 'A social post amplifies an alleged breach and points to shared archive links.',
+            m_country_name: 'Canada, United States',
+            m_platform: 'x',
+            m_message_sharable_link: 'https://example.com/social',
+            m_message_date: isoDate(2),
+          },
+        ]),
+        generic_model: categoryResponse([
+          {
+            m_hash: 'docs-generic-1',
+            m_title: 'Open web report references exposed industrial services',
+            m_important_content: 'Open web report connects exposed industrial services with multiple hosting regions.',
+            m_country_name: 'Netherlands, Singapore',
+            m_content_type: ['web'],
+            m_url: 'https://example.com/report',
+            m_creation_date: isoDate(8),
+          },
+        ]),
+      },
+    }).as('threatLens');
+
+    cy.intercept('POST', '**/api/netintel/iot_detect', {
+      statusCode: 200,
+      body: {
+        status: 'done',
+        result: {
+          status: 'done',
+          cameras: [
+            { ip: '203.0.113.15', country: 'United States', product: 'Demo camera' },
+            { ip: '198.51.100.27', country: 'India', product: 'Demo gateway' },
+            { ip: '192.0.2.44', country: 'Singapore', product: 'Demo sensor' },
+          ],
+          ips_extracted: 14,
+          ips_scanned: 14,
+          cameras_found: 3,
+          query: {
+            coordinates: '20, 0',
+            radius_km: 12000,
+            max_ips: 200,
+          },
+        },
+      },
+    }).as('threatLensIpScan');
   };
 
   before(() => {
@@ -419,6 +565,36 @@ describe('User Manual Screenshot Flow', () => {
       timeout: 60000,
     }).should('be.visible');
     capture('network-intel-vulnerability-scan');
+
+    stubThreatLensApis();
+    cy.visit('/dashboard/threat-lens');
+    ensureDashboardReady();
+    cy.get('[data-testid="threat-lens-page"]', { timeout: 60000 }).should('be.visible');
+    cy.wait('@threatLens');
+    cy.get('[data-testid="threat-lens-loading"]', { timeout: 60000 }).should('not.exist');
+    cy.get('[data-testid="threat-lens-map-fallback"], [data-testid="threat-lens-map-renderer"]').should('exist');
+    cy.get('[data-testid="threat-lens-top-country"]').should('have.length.greaterThan', 0);
+    cy.get('[data-testid="threat-lens-feed-item-news"]').should('have.length.greaterThan', 0);
+    cy.wait('@threatLensIpScan');
+    cy.get('[data-testid="threat-lens-ip-scan-panel"]').should('be.visible');
+    cy.get('[data-testid="threat-lens-ip-scan-markers"]').should('contain.text', '3');
+    capture('threat-lens-overview');
+
+    cy.get('[data-testid="threat-lens-search-input"]').should('be.visible').click().type('{selectall}{backspace}china');
+    cy.get('[data-testid="threat-lens-search-submit"]').click();
+    cy.wait('@threatLens');
+    cy.get('[data-testid="threat-lens-active-keyword"]').should('contain.text', 'china');
+    capture('threat-lens-search');
+
+    cy.get('[data-testid="threat-lens-feed-search-archive"]').should('be.visible').click().type('exploit');
+    cy.get('[data-testid="threat-lens-feed-item-archive"]').should('have.length.greaterThan', 0);
+    cy.get('[data-testid="threat-lens-feed-range-news-7d"]').click();
+    capture('threat-lens-feeds');
+
+    cy.get('[data-testid="side-filter-open"]').should('be.visible').click();
+    cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().should('be.visible');
+    capture('threat-lens-filters');
+    cy.get('[data-testid="side-filter-close"]').filter(':visible').first().click();
 
     cy.intercept('GET', '**/api/directory*').as('getDirectory');
     cy.visit('/dashboard/directory');
