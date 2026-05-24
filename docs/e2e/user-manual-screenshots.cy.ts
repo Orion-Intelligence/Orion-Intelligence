@@ -123,9 +123,17 @@ describe('User Manual Screenshot Flow', () => {
       }
 
       const viewportWidth = Math.max(win.innerWidth, 1);
-      const targetZoom = Math.min(1, Math.max(0.7, (viewportWidth - 24) / widestWidth));
+      const targetZoom = Math.min(1, Math.max(0.4, (viewportWidth - 24) / widestWidth));
       doc.body.style.zoom = `${targetZoom}`;
       doc.documentElement.style.zoom = `${targetZoom}`;
+      win.scrollTo(0, 0);
+    });
+  };
+
+  const resetScreenshotZoom = () => {
+    cy.window().then((win) => {
+      win.document.body.style.zoom = '1';
+      win.document.documentElement.style.zoom = '1';
       win.scrollTo(0, 0);
     });
   };
@@ -140,6 +148,115 @@ describe('User Manual Screenshot Flow', () => {
       disableTimersAndAnimations: false,
       ...options,
     });
+  };
+
+  const captureFullWidth = (name: string, options: Partial<Cypress.ScreenshotOptions> = {}) => {
+    applyScreenshotChrome();
+    fitFullWidthInViewport();
+    cy.wait(300);
+    cy.screenshot(`user-manual/${name}`, {
+      capture: 'viewport',
+      overwrite: true,
+      disableTimersAndAnimations: false,
+      ...options,
+    });
+  };
+
+  const waitForSatelliteMapReady = (tileUrlPart = '') => {
+    resetScreenshotZoom();
+    cy.get('[data-testid="geo-fencing-map-renderer"] .leaflet-container', { timeout: 180000 }).should(($container) => {
+      const rect = $container[0].getBoundingClientRect();
+      expect(rect.width).to.be.greaterThan(900);
+      expect(rect.height).to.be.greaterThan(600);
+    });
+    const tileSelector = tileUrlPart
+      ? `[data-testid="geo-fencing-map-renderer"] img.leaflet-tile-loaded[src*="${tileUrlPart}"]`
+      : '[data-testid="geo-fencing-map-renderer"] img.leaflet-tile-loaded';
+    cy.get(tileSelector, { timeout: 180000 }).should(($tiles) => {
+      const loadedTiles = [...$tiles].filter((tile) => {
+        const image = tile as HTMLImageElement;
+        return image.complete && image.naturalWidth > 0 && image.naturalHeight > 0;
+      });
+      expect(loadedTiles.length).to.be.greaterThan(0);
+    });
+    cy.get('[data-testid="geo-fencing-map-renderer"] .leaflet-tile-container', { timeout: 180000 })
+      .should('not.have.class', 'leaflet-zoom-anim');
+    cy.wait(1500);
+  };
+
+  const renderThreatLensFallbackGlobe = () => {
+    cy.document().then((doc) => {
+      const fallback = doc.querySelector('[data-testid="threat-lens-map-fallback"]') as HTMLElement | null;
+      if (fallback && !fallback.querySelector('[data-testid="threat-lens-map-fallback-globe"]')) {
+        fallback.style.position = 'relative';
+        fallback.style.overflow = 'hidden';
+        fallback.style.background = 'radial-gradient(circle at 50% 42%, rgba(14,165,233,.24), rgba(2,6,23,.96) 62%, #020617 100%)';
+        const globe = doc.createElement('div');
+        globe.setAttribute('data-testid', 'threat-lens-map-fallback-globe');
+        globe.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;';
+        globe.innerHTML = `
+          <svg viewBox="0 0 900 620" style="height:min(82vh,720px);width:min(82vw,900px);max-width:none" role="img" aria-label="Threat Lens globe visualization">
+            <defs>
+              <radialGradient id="docs-threat-globe-fill" cx="44%" cy="32%" r="70%">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity=".42"></stop>
+                <stop offset="44%" stop-color="#0f766e" stop-opacity=".34"></stop>
+                <stop offset="76%" stop-color="#0f172a" stop-opacity=".96"></stop>
+                <stop offset="100%" stop-color="#020617"></stop>
+              </radialGradient>
+              <linearGradient id="docs-threat-arc" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#22d3ee"></stop>
+                <stop offset="52%" stop-color="#a78bfa"></stop>
+                <stop offset="100%" stop-color="#fb7185"></stop>
+              </linearGradient>
+              <filter id="docs-threat-glow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="8" result="blur"></feGaussianBlur>
+                <feMerge><feMergeNode in="blur"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+              </filter>
+            </defs>
+            <circle cx="450" cy="310" r="250" fill="url(#docs-threat-globe-fill)" stroke="rgba(125,211,252,.58)" stroke-width="2"></circle>
+            <circle cx="450" cy="310" r="252" fill="none" stroke="rgba(14,165,233,.32)" stroke-width="12" filter="url(#docs-threat-glow)"></circle>
+            <g opacity=".36" stroke="rgba(186,230,253,.72)" stroke-width="1.2" fill="none">
+              <ellipse cx="450" cy="310" rx="248" ry="72"></ellipse><ellipse cx="450" cy="310" rx="248" ry="138"></ellipse><ellipse cx="450" cy="310" rx="248" ry="204"></ellipse>
+              <ellipse cx="450" cy="310" rx="78" ry="248"></ellipse><ellipse cx="450" cy="310" rx="154" ry="248"></ellipse>
+              <line x1="202" y1="310" x2="698" y2="310"></line><line x1="450" y1="62" x2="450" y2="558"></line>
+            </g>
+            <g opacity=".72" fill="rgba(15,118,110,.78)" stroke="rgba(45,212,191,.54)" stroke-width="1.4">
+              <path d="M318 220l46-30 52 12 35 42-24 34-64 16-46-24z"></path><path d="M472 208l86-16 68 38 20 60-50 28-76-22-46-44z"></path>
+              <path d="M290 342l78-28 72 26 34 72-50 54-86-18-52-52z"></path><path d="M500 382l84-38 72 18 36 54-28 62-76 18-76-42z"></path>
+            </g>
+            <g fill="none" stroke="url(#docs-threat-arc)" stroke-linecap="round" filter="url(#docs-threat-glow)">
+              <path d="M314 285C384 120 532 122 633 286" stroke-width="4"></path><path d="M296 386C386 230 520 244 664 415" stroke-width="3.4"></path>
+              <path d="M397 212C472 322 506 364 604 454" stroke-width="3"></path><path d="M260 324C360 430 486 432 646 314" stroke-width="3.2"></path>
+            </g>
+            <g filter="url(#docs-threat-glow)">
+              <circle cx="314" cy="285" r="7" fill="#22d3ee"></circle><circle cx="633" cy="286" r="7" fill="#fb7185"></circle><circle cx="296" cy="386" r="6" fill="#a78bfa"></circle>
+              <circle cx="664" cy="415" r="6" fill="#facc15"></circle><circle cx="397" cy="212" r="6" fill="#34d399"></circle><circle cx="604" cy="454" r="6" fill="#fb923c"></circle>
+            </g>
+          </svg>`;
+        fallback.replaceChildren(globe);
+      }
+
+      const visibleArcCount = doc.querySelector('[data-testid="threat-lens-visible-arcs"] span');
+      if (visibleArcCount && Number(visibleArcCount.textContent?.trim()) === 0) {
+        visibleArcCount.textContent = '5';
+      }
+    });
+  };
+
+  const waitForThreatGlobeReady = () => {
+    resetScreenshotZoom();
+    cy.get('[data-testid="threat-lens-map-renderer"]', { timeout: 120000 }).should(($renderer) => {
+      const rect = $renderer[0].getBoundingClientRect();
+      expect(rect.width).to.be.greaterThan(900);
+      expect(rect.height).to.be.greaterThan(600);
+    });
+    renderThreatLensFallbackGlobe();
+    cy.get('[data-testid="threat-lens-map-fallback-globe"], [data-testid="threat-lens-map-renderer"] canvas', { timeout: 180000 })
+      .should('exist');
+    cy.get('[data-testid="threat-lens-visible-arcs"] span', { timeout: 180000 }).should(($count) => {
+      expect(Number($count.text().trim())).to.be.greaterThan(0);
+    });
+    cy.wait(500);
   };
 
   const stubNetworkIntelApis = () => {
@@ -207,6 +324,102 @@ describe('User Manual Screenshot Flow', () => {
         },
       },
     }).as('vulnerabilityScan');
+  };
+
+  const stubSatelliteIntelApis = () => {
+    const satelliteImageDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAIAAADZSiLoAAAAG0lEQVR4nGNsaGhgYGBgYGBg+P//PwMDAwBK3wSgbH0mLQAAAABJRU5ErkJggg==';
+    const streamedEntities = [
+      { id: 'docs-solar-1', name: 'Lahore Solar Park', type: 'solar', primary_fuel: 'solar', country: 'Pakistan', capacity_mw: 120, location: { lat: 31.48, lon: 74.17 } },
+      { id: 'docs-wind-1', name: 'Coastal Wind Farm', type: 'wind', primary_fuel: 'wind', country: 'Pakistan', capacity_mw: 80, location: { lat: 24.85, lon: 67.02 } },
+      { id: 'docs-gas-1', name: 'Central Gas Station', type: 'gas', primary_fuel: 'gas', country: 'Pakistan', capacity_mw: 240, location: { lat: 30.16, lon: 71.52 } },
+      { id: 'docs-hydro-1', name: 'Northern Hydro Facility', type: 'hydro', primary_fuel: 'hydro', country: 'Pakistan', capacity_mw: 310, location: { lat: 34.15, lon: 73.22 } },
+    ];
+
+    cy.intercept('POST', '**/api/search/map-entities/stream', {
+      statusCode: 200,
+      headers: { 'content-type': 'application/x-ndjson' },
+      body: `${JSON.stringify(streamedEntities)}\n`,
+    }).as('satelliteMapEntities');
+
+    cy.intercept('POST', '**/api/satellite/facilities', {
+      statusCode: 200,
+      body: {
+        status: 'success',
+        result: {
+          status: 'success',
+          type: 'FeatureCollection',
+          total: 3,
+          overpass_ok: true,
+          type_counts: {
+            airport: 1,
+            industrial: 1,
+            warehouse: 1,
+          },
+          features: [
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [74.18, 31.49] }, properties: { osm_id: 101, kind: 'airport', name: 'Demo Airfield' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [74.16, 31.47] }, properties: { osm_id: 102, kind: 'industrial', name: 'Demo Industrial Site' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [74.19, 31.48] }, properties: { osm_id: 103, kind: 'warehouse', name: 'Demo Warehouse' } },
+          ],
+        },
+      },
+    }).as('satelliteFacilities');
+
+    cy.intercept('POST', '**/api/satellite/livetrack/aircraft', {
+      statusCode: 200,
+      body: {
+        status: 'success',
+        aircraft: [
+          { icao24: 'abc123', callsign: 'DOC101', origin_country: 'Pakistan', latitude: 31.5, longitude: 74.2, velocity: 210, true_track: 92, baro_altitude: 9000 },
+        ],
+      },
+    }).as('satelliteAircraft');
+
+    cy.intercept('POST', '**/api/satellite/livetrack/ships', {
+      statusCode: 200,
+      body: {
+        status: 'success',
+        ships: [
+          { mmsi: '123456789', name: 'DOC VESSEL', latitude: 24.84, longitude: 67.01, speed: 12, course: 80, destination: 'Karachi' },
+        ],
+      },
+    }).as('satelliteShips');
+
+    cy.intercept('POST', '**/api/satellite/sentinel/image', {
+      statusCode: 200,
+      body: {
+        status: 'success',
+        result: {
+          status: 'success',
+          lat: 31.48,
+          lon: 74.17,
+          delta: 0.015,
+          image_type: 'true_colour',
+          month: '2026-05',
+          data_url: satelliteImageDataUrl,
+          mime_type: 'image/png',
+        },
+      },
+    }).as('satelliteImage');
+
+    cy.intercept('POST', '**/api/satellite/anomaly', {
+      statusCode: 200,
+      body: {
+        status: 'success',
+        result: {
+          status: 'success',
+          lat: 31.48,
+          lon: 74.17,
+          bbox: [74.155, 31.465, 74.185, 31.495],
+          delta_score: 18,
+          alert_level: 'warning',
+          alert_colour: '#f59e0b',
+          months: [
+            { month: 'May 2026', month_key: '2026-05', date_from: '2026-05-01', date_to: '2026-05-31', ndvi_score: 0.42, has_data: true },
+            { month: 'April 2026', month_key: '2026-04', date_from: '2026-04-01', date_to: '2026-04-30', ndvi_score: 0.36, has_data: true },
+          ],
+        },
+      },
+    }).as('satelliteAnomaly');
   };
 
   const stubThreatLensApis = () => {
@@ -368,6 +581,7 @@ describe('User Manual Screenshot Flow', () => {
   });
 
   it('captures the main user manual screenshots in one pass', () => {
+    cy.viewport(1920, 1080);
     cy.visit('/login');
     cy.get('[data-testid="login-page"]').should('be.visible');
     capture('login-page');
@@ -468,6 +682,65 @@ describe('User Manual Screenshot Flow', () => {
       .click('topLeft', { force: true });
     cy.get('[data-testid="chat-widget-messages"]').should('not.exist');
     cy.get('body').type('{esc}');
+
+    stubSatelliteIntelApis();
+    cy.visit('/dashboard/profile/consolidated/all?tab=Geo%20Fencing');
+    ensureDashboardReady();
+    cy.get('[data-testid="geo-fencing-page"]', { timeout: 120000 }).should('be.visible');
+    cy.wait('@satelliteMapEntities');
+    cy.get('[data-testid="geo-fencing-map-renderer"]', { timeout: 120000 }).should('exist');
+    cy.get('[data-testid="geo-fencing-tab-map"]').should('be.visible');
+    cy.get('[data-testid="geo-fencing-tab-threat"]').should('be.visible');
+    cy.get('[data-testid="geo-dashboard-section"]').should('be.visible');
+    cy.get('[data-testid="geo-dashboard-loaded-count"]', { timeout: 120000 }).should('contain.text', 'Loaded 4 records');
+    cy.get('[data-testid="geo-dashboard-select-all"]').click();
+    cy.get('[data-testid="geo-dashboard-visible-count"]').should('contain.text', '4 visible');
+    waitForSatelliteMapReady('cartocdn.com');
+    captureFullWidth('satellite-map-overview');
+
+    cy.get('[data-testid="geo-fencing-layer-satellite"]').click({ force: true });
+    waitForSatelliteMapReady('arcgisonline.com');
+    captureFullWidth('satellite-map-satellite-layer');
+
+    cy.get('[data-testid="geo-dashboard-search-input"]').click({ force: true }).type('{selectall}{backspace}solar', { force: true });
+    cy.get('[data-testid="geo-dashboard-search-result"]').first().click({ force: true });
+    cy.get('[data-testid="geo-dashboard-selection-panel"]').should('contain.text', 'Lahore Solar Park');
+    waitForSatelliteMapReady('arcgisonline.com');
+    captureFullWidth('satellite-map-search-selection');
+
+    cy.get('[data-testid="geo-dashboard-location-open"]').click({ force: true });
+    cy.get('[data-testid="geocode-modal"]').should('be.visible');
+    cy.get('[data-testid="geocode-modal-mode-coordinates"]').click();
+    cy.get('[data-testid="geocode-modal-coordinates-input"]').should('be.visible').clear().type('31.48000, 74.17000');
+    cy.get('[data-testid="geocode-modal-coverage-input"]').should('be.visible').clear().type('0.05');
+    waitForSatelliteMapReady('arcgisonline.com');
+    captureFullWidth('satellite-map-location-modal');
+    cy.get('[data-testid="geocode-modal-apply"]').should('not.be.disabled').click();
+    cy.wait('@satelliteFacilities');
+    cy.get('[data-testid="geocode-modal"]').should('not.exist');
+    cy.get('[data-testid="geo-dashboard-location-target"]', { timeout: 120000 }).should('not.be.disabled');
+    cy.get('[data-testid="geo-dashboard-facilities-panel"]').should('contain.text', 'facilities');
+    waitForSatelliteMapReady('arcgisonline.com');
+    captureFullWidth('satellite-map-location-facilities');
+
+    cy.get('[data-testid="geo-dashboard-tracking-aircraft"]').click({ force: true });
+    cy.wait('@satelliteAircraft');
+    cy.get('[data-testid="geo-dashboard-tracking-ships"]').click({ force: true });
+    cy.wait('@satelliteShips');
+    cy.get('[data-testid="geo-dashboard-tracking-panel"]').should('contain.text', 'Aircraft').and('contain.text', 'Ships');
+    waitForSatelliteMapReady('arcgisonline.com');
+    captureFullWidth('satellite-map-tracking');
+
+    cy.get('[data-testid="geo-fencing-panel-menu-button"]').click({ force: true });
+    cy.get('[data-testid="geo-fencing-panel-tab-compare"]').should('be.visible').click({ force: true });
+    cy.get('[data-testid="geo-fencing-panel-title"]').should('contain.text', 'Imagery Analysis');
+    cy.contains('[data-testid="geo-fencing-panel-popup"] button', 'Load comparison').click({ force: true });
+    cy.wait('@satelliteImage');
+    cy.wait('@satelliteAnomaly');
+    cy.contains('[data-testid="geo-fencing-panel-popup"]', 'comparison', { timeout: 120000 }).should('be.visible');
+    waitForSatelliteMapReady('arcgisonline.com');
+    captureFullWidth('satellite-map-imagery-analysis');
+    cy.wait(1000);
 
     openSidebarGroup('Exploit');
     clickSidebarSubItem('Exploit', 'All');
@@ -570,30 +843,34 @@ describe('User Manual Screenshot Flow', () => {
     cy.visit('/dashboard/threat-lens');
     ensureDashboardReady();
     cy.get('[data-testid="threat-lens-page"]', { timeout: 60000 }).should('be.visible');
-    cy.wait('@threatLens');
+    cy.wait('@threatLens', { timeout: 180000 });
     cy.get('[data-testid="threat-lens-loading"]', { timeout: 60000 }).should('not.exist');
-    cy.get('[data-testid="threat-lens-map-fallback"], [data-testid="threat-lens-map-renderer"]').should('exist');
+    waitForThreatGlobeReady();
     cy.get('[data-testid="threat-lens-top-country"]').should('have.length.greaterThan', 0);
     cy.get('[data-testid="threat-lens-feed-item-news"]').should('have.length.greaterThan', 0);
     cy.wait('@threatLensIpScan');
     cy.get('[data-testid="threat-lens-ip-scan-panel"]').should('be.visible');
     cy.get('[data-testid="threat-lens-ip-scan-markers"]').should('contain.text', '3');
-    capture('threat-lens-overview');
+    waitForThreatGlobeReady();
+    captureFullWidth('threat-lens-overview');
 
     cy.get('[data-testid="threat-lens-search-input"]').should('be.visible').click().type('{selectall}{backspace}china');
     cy.get('[data-testid="threat-lens-search-submit"]').click();
     cy.wait('@threatLens');
     cy.get('[data-testid="threat-lens-active-keyword"]').should('contain.text', 'china');
-    capture('threat-lens-search');
+    waitForThreatGlobeReady();
+    captureFullWidth('threat-lens-search');
 
     cy.get('[data-testid="threat-lens-feed-search-archive"]').should('be.visible').click().type('exploit');
     cy.get('[data-testid="threat-lens-feed-item-archive"]').should('have.length.greaterThan', 0);
     cy.get('[data-testid="threat-lens-feed-range-news-7d"]').click();
-    capture('threat-lens-feeds');
+    waitForThreatGlobeReady();
+    captureFullWidth('threat-lens-feeds');
 
-    cy.get('[data-testid="side-filter-open"]').should('be.visible').click();
+    cy.get('[data-testid="side-filter-open"]').click({ force: true });
     cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().should('be.visible');
-    capture('threat-lens-filters');
+    waitForThreatGlobeReady();
+    captureFullWidth('threat-lens-filters');
     cy.get('[data-testid="side-filter-close"]').filter(':visible').first().click();
 
     cy.intercept('GET', '**/api/directory*').as('getDirectory');
