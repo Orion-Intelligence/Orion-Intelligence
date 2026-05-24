@@ -227,8 +227,8 @@ export class ThreatLensArcRenderer {
     this.movingDotGraphics = [];
 
     for (const arc of items) {
-      this.startMarkerGraphics.push(this.buildEndpointGraphic(arc, arc.arcPoints[0], 'arc-start', 90000, 1));
-      this.endMarkerGraphics.push(this.buildEndpointGraphic(arc, arc.arcPoints[arc.arcPoints.length - 1], 'arc-end', 120000, 0.85));
+      this.startMarkerGraphics.push(this.buildEndpointGraphic(arc, arc.arcPoints[0], 'arc-start', 98000, 1));
+      this.endMarkerGraphics.push(this.buildEndpointGraphic(arc, arc.arcPoints[arc.arcPoints.length - 1], 'arc-end', 98000, 0.88));
       this.movingDotGraphics.push(this.buildMovingDotGraphic(arc));
     }
 
@@ -255,17 +255,25 @@ export class ThreatLensArcRenderer {
           {
             type: 'path',
             profile: 'quad',
-            width: Math.min(20, 12 + (arc.weight * 0.8)),
+            width: Math.min(22, 13 + (arc.weight * 0.9)),
             cap: 'round',
-            material: { color: [...arc.color, 0.18] },
+            material: { color: [...arc.color, 0.14] },
             anchor: 'center',
           },
           {
             type: 'path',
             profile: 'quad',
-            width: Math.min(11, 5 + (arc.weight * 0.48)),
+            width: Math.min(10, 4.6 + (arc.weight * 0.44)),
             cap: 'round',
-            material: { color: [...arc.color, 0.64] },
+            material: { color: [...arc.color, 0.62] },
+            anchor: 'center',
+          },
+          {
+            type: 'path',
+            profile: 'quad',
+            width: Math.min(3.6, 2.4 + (arc.weight * 0.12)),
+            cap: 'round',
+            material: { color: [...arc.color, 0.92] },
             anchor: 'center',
           },
         ],
@@ -283,8 +291,8 @@ export class ThreatLensArcRenderer {
       attributes: this.buildArcAttributes(arc, 'arc-surface'),
       symbol: {
         type: 'simple-line',
-        color: [...arc.color, 0.92],
-        width: Math.min(3.8, 1.8 + (arc.weight * 0.24)),
+        color: [...arc.color, 0.58],
+        width: Math.min(3.2, 1.5 + (arc.weight * 0.18)),
       },
     };
   }
@@ -305,9 +313,17 @@ export class ThreatLensArcRenderer {
           {
             type: 'object',
             resource: { primitive: 'sphere' },
-            width: size,
-            height: size,
-            depth: size,
+            width: size * 1.6,
+            height: size * 1.6,
+            depth: size * 1.6,
+            material: { color: [...arc.color, 0.18] },
+          },
+          {
+            type: 'object',
+            resource: { primitive: 'sphere' },
+            width: size * 0.72,
+            height: size * 0.72,
+            depth: size * 0.72,
             material: { color: [...arc.color, opacity] },
           },
         ],

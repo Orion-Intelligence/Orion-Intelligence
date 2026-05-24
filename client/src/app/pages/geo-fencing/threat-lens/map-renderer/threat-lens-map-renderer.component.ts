@@ -334,6 +334,8 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
       const countryGraphic = hit.results.find((result: any) => result.graphic?.layer === this.countryRenderer.layer)?.graphic;
       if (!countryGraphic) {
+        this.clearHoverHighlight();
+        this.tooltipRenderer.hide();
         return;
       }
 
@@ -386,17 +388,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
     this.viewInteractingWatchHandle?.remove();
     this.viewInteractingWatchHandle = this.view.watch('interacting', (isInteracting: boolean) => {
-      const visible = !isInteracting;
       this.arcRenderer?.setAnimationPaused(isInteracting);
-      if (this.arcGraphicsLayer) {
-        this.arcGraphicsLayer.visible = visible;
-      }
-      if (this.arcSurfaceGraphicsLayer) {
-        this.arcSurfaceGraphicsLayer.visible = visible;
-      }
-      if (this.animatedArcGraphicsLayer) {
-        this.animatedArcGraphicsLayer.visible = visible;
-      }
     });
   }
 

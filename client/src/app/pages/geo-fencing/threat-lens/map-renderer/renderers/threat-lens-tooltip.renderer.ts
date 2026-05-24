@@ -2,6 +2,7 @@ import { SelectedCountryCategoryCount } from '../../../models/geo-fencing.models
 
 export class ThreatLensTooltipRenderer {
   private tooltipEl: HTMLDivElement | null = null;
+  private tooltipPlacement: 'above' | 'below' = 'below';
 
   init(): void {
     if (typeof window === 'undefined' || this.tooltipEl) {
@@ -100,7 +101,7 @@ export class ThreatLensTooltipRenderer {
       tooltipContent.append(emptyMessage);
     }
 
-    this.show(event, tooltipContent);
+    this.show(event, tooltipContent, 'above');
   }
 
   move(event: any): void {
@@ -108,7 +109,15 @@ export class ThreatLensTooltipRenderer {
       return;
     }
 
-    this.tooltipEl.setAttribute('style', `left:${event.x + 10}px;top:${event.y + 10}px`);
+    const x = Number(event?.native?.clientX ?? event?.clientX ?? event?.touches?.[0]?.clientX ?? event?.x ?? 0);
+    const y = Number(event?.native?.clientY ?? event?.clientY ?? event?.touches?.[0]?.clientY ?? event?.y ?? 0);
+    const width = this.tooltipEl.offsetWidth;
+    const height = this.tooltipEl.offsetHeight;
+    const preferredLeft = this.tooltipPlacement === 'above' ? x - width / 2 : x + 10;
+    const preferredTop = this.tooltipPlacement === 'above' ? y - height - 10 : y + 10;
+    const left = Math.max(8, Math.min(preferredLeft, window.innerWidth - width - 8));
+    const top = Math.max(8, Math.min(preferredTop, window.innerHeight - height - 8));
+    this.tooltipEl.setAttribute('style', `left:${left}px;top:${top}px`);
   }
 
   hide(): void {
@@ -117,7 +126,8 @@ export class ThreatLensTooltipRenderer {
     }
   }
 
-  private show(event: any, content: HTMLDivElement): void {
+  private show(event: any, content: HTMLDivElement, placement: 'above' | 'below' = 'below'): void {
+    this.tooltipPlacement = placement;
     this.tooltipEl?.replaceChildren(content);
     if (this.tooltipEl) {
       this.tooltipEl.hidden = false;

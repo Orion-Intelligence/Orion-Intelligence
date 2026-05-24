@@ -1,5 +1,5 @@
 @if (items.length) {
-  <div class="pointer-events-none absolute z-[920] top-3 flex flex-col gap-2 max-[943px]:left-auto max-[943px]:right-2 max-[943px]:top-[52px] max-[943px]:max-w-[min(300px,calc(100%-88px))] max-[943px]:items-end max-[520px]:top-[96px]" [ngClass]="topControlsInset ? 'left-[180px]' : 'left-12'">
+  <div class="pointer-events-none absolute z-[920] top-3 flex flex-col gap-2 max-[943px]:left-auto max-[943px]:right-2 max-[943px]:top-[52px] max-[943px]:max-w-[min(300px,calc(100%-88px))] max-[943px]:items-end max-[520px]:top-[96px]" [ngClass]="topControlsInset ? 'left-[252px]' : 'left-12'">
     @for (item of items; track item) {
       <div class="inline-flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[rgba(8,16,27,0.9)] px-3 py-2 text-[12px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)]">
         <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>

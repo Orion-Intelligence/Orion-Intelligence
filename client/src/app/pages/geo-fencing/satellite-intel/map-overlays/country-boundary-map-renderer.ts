@@ -156,8 +156,8 @@ export class CountryBoundaryMapRenderer {
       color: 'rgba(96,165,250,0.98)',
       weight: 2.5,
       opacity: 1,
-      fillColor: 'rgba(96,165,250,0)',
-      fillOpacity: 0,
+      fillColor: 'rgba(96,165,250,0.08)',
+      fillOpacity: 0.08,
       lineJoin: 'round',
       lineCap: 'round',
     };
