@@ -497,9 +497,9 @@ export class ThreatLensComponent implements OnDestroy {
           : `Rendered ${records.length} IP marker(s) for the selected country.`
         : hadExistingResult
           ? 'No new IP markers returned. Keeping the previous scan visible.'
-        : mode === ThreatLensIpScanModeEnum.Default
-          ? 'Default IP exposure scan completed. No IPs returned.'
-          : 'Selected country IP scan completed. No IPs returned.';
+          : mode === ThreatLensIpScanModeEnum.Default
+            ? 'Default IP exposure scan completed. No IPs returned.'
+            : 'Selected country IP scan completed. No IPs returned.';
       this.cdr.detectChanges();
     });
 

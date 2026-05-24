@@ -1,9 +1,10 @@
-<section class="ui-consolidated-theme relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-black">
+<section data-testid="threat-lens-page" class="ui-consolidated-theme relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-black">
 	<div class="flex min-h-0 flex-1 flex-col overflow-hidden max-[1100px]:overflow-x-hidden max-[1100px]:overflow-y-auto max-[1100px]:pb-3">
 		<div class="relative grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden max-[1100px]:block max-[1100px]:overflow-visible">
 			<div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:min-h-[380px]">
 
 	<app-threat-lens-map-renderer
+		data-testid="threat-lens-map-renderer"
 		class="absolute inset-0 block h-full min-h-0 min-w-0 overflow-hidden"
 		(mapReady)="onMapReady()"
 		(mapError)="onMapError($event)"
@@ -19,7 +20,7 @@
 	<app-map-loading-badges [items]="loadingBadges" [topControlsInset]="!showFilterButton"></app-map-loading-badges>
 
 	@if (isLoading) {
-		<div class="absolute inset-0 z-[960] flex items-center justify-center bg-[rgba(8,16,27,0.58)] px-4 backdrop-blur-[2px] [body.light-theme_&]:bg-white/50">
+		<div data-testid="threat-lens-loading" class="absolute inset-0 z-[960] flex items-center justify-center bg-[rgba(8,16,27,0.58)] px-4 backdrop-blur-[2px] [body.light-theme_&]:bg-white/50">
 			<div class="map-overlay-menu w-[min(360px,calc(100%-2rem))] rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] p-4 shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)]">
 				<div class="flex items-center gap-3">
 					<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)]">
@@ -40,7 +41,7 @@
 
 	<div class="absolute left-4 top-4 bottom-4 z-20 flex w-[min(24rem,calc(100%-5rem))] flex-col gap-3 max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pt-3">
 		<div class="h-[40px] shrink-0 max-[1100px]:hidden"></div>
-    <div class="map-overlay-menu rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] p-3 shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[640px]:rounded-[12px]">
+    <div data-testid="threat-lens-search-panel" class="map-overlay-menu rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] p-3 shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[640px]:rounded-[12px]">
 			<div class="flex items-center justify-between gap-3">
 				<div class="min-w-0">
 					<p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Search</p>
@@ -48,27 +49,27 @@
 						@if (currentQuery) { Active keyword: {{ currentQuery }} } @else { All threat records }
 					</p>
 				</div>
-				<button type="button" (click)="togglePanel('search')" [attr.aria-label]="isSearchPanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
+				<button data-testid="threat-lens-search-toggle" type="button" (click)="togglePanel('search')" [attr.aria-label]="isSearchPanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
   <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 transition duration-200" [ngClass]="{ 'rotate-180': !isSearchPanelCollapsed }" />
 </button>
 			</div>
 			@if (!isSearchPanelCollapsed) {
 				<div class="mt-3 flex items-center gap-2 max-[520px]:flex-col">
-					<input [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" type="text" placeholder="Search keyword (e.g. china)" class="h-10 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[13px] text-[var(--color-text1)] outline-none ring-0 transition focus:border-[var(--color-blue-640)] placeholder:text-[var(--color-text3)] [body.light-theme_&]:bg-[var(--color-white)] [body.light-theme_&]:text-[var(--color-gray-900)]" />
-					<button (click)="onSearch()" [disabled]="isLoading" class="h-10 rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 text-[13px] font-semibold text-[var(--color-white)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 max-[520px]:w-full">
+					<input data-testid="threat-lens-search-input" [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" type="text" placeholder="Search keyword (e.g. china)" class="h-10 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[13px] text-[var(--color-text1)] outline-none ring-0 transition focus:border-[var(--color-blue-640)] placeholder:text-[var(--color-text3)] [body.light-theme_&]:bg-[var(--color-white)] [body.light-theme_&]:text-[var(--color-gray-900)]" />
+					<button data-testid="threat-lens-search-submit" (click)="onSearch()" [disabled]="isLoading" class="h-10 rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 text-[13px] font-semibold text-[var(--color-white)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 max-[520px]:w-full">
 						Search
 					</button>
 				</div>
 
 				@if (currentQuery) {
-					<p class="mt-2 text-[12px] text-[var(--color-text2)]">Active keyword: <span class="font-semibold">{{ currentQuery }}</span></p>
+					<p data-testid="threat-lens-active-keyword" class="mt-2 text-[12px] text-[var(--color-text2)]">Active keyword: <span class="font-semibold">{{ currentQuery }}</span></p>
 				}
 
 				@if (topCountries.length) {
 					<h3 class="mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Top Highlighted Countries</h3>
 					<div class="mt-2 max-h-[260px] space-y-1 overflow-auto pr-1 max-[640px]:max-h-[180px]">
 						@for (item of topCountries; track item.country) {
-							<button type="button" (click)="onTopCountrySelect(item.country)" class="flex w-full items-center justify-between rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-left text-[12px] text-[var(--color-text2)] transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]">
+							<button data-testid="threat-lens-top-country" type="button" (click)="onTopCountrySelect(item.country)" class="flex w-full items-center justify-between rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-left text-[12px] text-[var(--color-text2)] transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]">
 								<span class="truncate pr-2">{{ item.country }}</span>
 								<span class="font-semibold text-[var(--color-text1)]">{{ item.count }}</span>
 							</button>
@@ -80,12 +81,12 @@
 				}
 
 				@if (categoryLegend.length) {
-					<div class="mt-5 border-t border-[var(--color-border)] pt-3">
+					<div data-testid="threat-lens-category-layers" class="mt-5 border-t border-[var(--color-border)] pt-3">
 						<h3 class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Category Layers</h3>
 					</div>
 					<div class="mt-2 max-h-[220px] space-y-1 overflow-auto pr-1 max-[640px]:max-h-[160px]">
 						@for (item of categoryLegend; track item.categoryKey) {
-							<div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
+							<div data-testid="threat-lens-category-layer" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
 								<div class="flex items-center justify-between gap-3">
 									<span class="flex min-w-0 items-center gap-2">
 										<svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0 drop-shadow-[0_0_6px_currentColor]" [attr.color]="item.colorHex" aria-hidden="true">
@@ -103,7 +104,7 @@
 			}
 		</div>
 
-		<div class="map-overlay-menu w-full rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] px-4 py-3 text-[var(--color-text1)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md max-[1100px]:w-full [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[640px]:rounded-[12px]">
+		<div data-testid="threat-lens-summary-panel" class="map-overlay-menu w-full rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] px-4 py-3 text-[var(--color-text1)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md max-[1100px]:w-full [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[640px]:rounded-[12px]">
 			<div class="flex items-center justify-between gap-3">
 				<div class="min-w-0">
 					<h2 class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Threat Lens</h2>
@@ -111,13 +112,13 @@
 						@if (selectedCountryName) { Selected: {{ selectedCountryName }} } @else { {{ arcCount }} arcs visible }
 					</p>
 				</div>
-				<button type="button" (click)="togglePanel('threat')" [attr.aria-label]="isThreatPanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
+				<button data-testid="threat-lens-summary-toggle" type="button" (click)="togglePanel('threat')" [attr.aria-label]="isThreatPanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
   <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 transition duration-200" [ngClass]="{ 'rotate-180': !isThreatPanelCollapsed }" />
 </button>
 			</div>
 			@if (!isThreatPanelCollapsed) {
 			@if (selectedCountryName) {
-				<p class="mt-2 text-[13px] text-[var(--color-text2)]">Selected: <span class="font-semibold text-[var(--color-text1)]">{{ selectedCountryName }}</span></p>
+				<p data-testid="threat-lens-selected-country" class="mt-2 text-[13px] text-[var(--color-text2)]">Selected: <span class="font-semibold text-[var(--color-text1)]">{{ selectedCountryName }}</span></p>
 				@if (selectedCountryBreakdown.length) {
 					<div class="mt-2 space-y-1">
 						@for (item of selectedCountryBreakdown; track item.label) {
@@ -131,10 +132,10 @@
 			@if (isLoading) {
 				<p class="mt-2 text-[12px] text-[var(--color-text2)]">Loading country highlights...</p>
 			}
-			<p class="mt-2 max-w-[420px] text-[12px] text-[var(--color-text3)]">{{ statusMessage }}</p>
-			<p class="mt-2 text-[11px] text-[var(--color-text4)]">Arcs currently visible: <span class="font-semibold text-[var(--color-text2)]">{{ arcCount }}</span></p>
+			<p data-testid="threat-lens-status" class="mt-2 max-w-[420px] text-[12px] text-[var(--color-text3)]">{{ statusMessage }}</p>
+			<p data-testid="threat-lens-visible-arcs" class="mt-2 text-[11px] text-[var(--color-text4)]">Arcs currently visible: <span class="font-semibold text-[var(--color-text2)]">{{ arcCount }}</span></p>
 			@if (showIpScanPanel) {
-				<div class="mt-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
+				<div data-testid="threat-lens-ip-scan-panel" class="mt-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
 					<div class="flex items-start justify-between gap-3">
 						<div class="flex min-w-0 items-start gap-2">
 							@if (isIpScanRunning) {
@@ -144,22 +145,22 @@
 							}
 							<div class="min-w-0">
 								<p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">IP Scan</p>
-								<p class="mt-1 truncate text-[11px] text-[var(--color-text4)]">{{ ipScanScopeLabel }}</p>
+								<p data-testid="threat-lens-ip-scan-scope" class="mt-1 truncate text-[11px] text-[var(--color-text4)]">{{ ipScanScopeLabel }}</p>
 							</div>
 						</div>
-						<span class="shrink-0 rounded-full border px-2 py-[3px] text-[10px] font-semibold uppercase tracking-[0.12em]" [ngClass]="ipScanErrorMessage ? 'border-red-400/30 bg-red-500/10 text-red-300' : 'border-[var(--color-border)] bg-[var(--color-blue-790)] text-[var(--color-text2)]'">{{ ipScanStateLabel }}</span>
+						<span data-testid="threat-lens-ip-scan-state" class="shrink-0 rounded-full border px-2 py-[3px] text-[10px] font-semibold uppercase tracking-[0.12em]" [ngClass]="ipScanErrorMessage ? 'border-red-400/30 bg-red-500/10 text-red-300' : 'border-[var(--color-border)] bg-[var(--color-blue-790)] text-[var(--color-text2)]'">{{ ipScanStateLabel }}</span>
 					</div>
 					<div class="mt-3 grid grid-cols-2 gap-2 max-[360px]:grid-cols-1">
 						<div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2.5 py-2">
 							<p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text4)]">Markers</p>
-							<p class="mt-1 font-mono text-[13px] font-semibold tabular-nums text-[var(--color-text1)]">{{ ipScanResultCount }}</p>
+							<p data-testid="threat-lens-ip-scan-markers" class="mt-1 font-mono text-[13px] font-semibold tabular-nums text-[var(--color-text1)]">{{ ipScanResultCount }}</p>
 						</div>
 						<div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2.5 py-2">
 							<p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text4)]">Range</p>
-							<p class="mt-1 truncate text-[12px] font-semibold text-[var(--color-text1)]">{{ ipScanRangeLabel }}</p>
+							<p data-testid="threat-lens-ip-scan-range" class="mt-1 truncate text-[12px] font-semibold text-[var(--color-text1)]">{{ ipScanRangeLabel }}</p>
 						</div>
 					</div>
-					<p class="mt-2 text-[11px] leading-5" [ngClass]="ipScanErrorMessage ? 'text-red-300' : 'text-[var(--color-text3)]'">{{ ipScanErrorMessage || ipScanStatusMessage }}</p>
+					<p data-testid="threat-lens-ip-scan-status" class="mt-2 text-[11px] leading-5" [ngClass]="ipScanErrorMessage ? 'text-red-300' : 'text-[var(--color-text3)]'">{{ ipScanErrorMessage || ipScanStatusMessage }}</p>
 					@if (isIpScanRunning) {
 						<div class="ui-progress-track mt-2 h-[4px] overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)]">
 							<div class="ui-progress-indeterminate-bar"></div>

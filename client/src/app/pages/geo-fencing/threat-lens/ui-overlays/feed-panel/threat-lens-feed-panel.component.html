@@ -1,4 +1,4 @@
-<div class="map-overlay-menu flex h-full flex-col overflow-hidden rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[640px]:rounded-[12px]">
+<div [attr.data-testid]="'threat-lens-feed-panel-' + feedType" class="map-overlay-menu flex h-full flex-col overflow-hidden rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[640px]:rounded-[12px]">
   <div class="border-b border-white/10 px-3 py-2 [body.light-theme_&]:border-[#d8e3f0]" [ngClass]="{ '!border-b-0': collapsed }">
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0">
@@ -17,7 +17,7 @@
         </p>
       </div>
 
-      <button type="button" (click)="toggleCollapsed()" [attr.aria-label]="collapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
+      <button [attr.data-testid]="'threat-lens-feed-toggle-' + feedType" type="button" (click)="toggleCollapsed()" [attr.aria-label]="collapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
         <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 transition duration-200" [ngClass]="{ 'rotate-180': !collapsed }" />
       </button>
     </div>
@@ -25,7 +25,7 @@
     @if (!collapsed) {
       <div class="mt-3 flex items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2">
         <i class="bi bi-search text-[12px] text-[var(--color-text3)]"></i>
-        <input [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" type="text" [placeholder]="searchPlaceholder" class="w-full bg-transparent text-[12px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text3)]" />
+        <input [attr.data-testid]="'threat-lens-feed-search-' + feedType" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" type="text" [placeholder]="searchPlaceholder" class="w-full bg-transparent text-[12px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text3)]" />
       </div>
 
       @if (searchTerm) {
@@ -36,7 +36,7 @@
 
       <div class="mt-3 flex flex-wrap gap-2">
         @for (range of ranges; track range.key) {
-          <button type="button" (click)="setRange(range.key)" class="rounded-[8px] border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors" [ngClass]="selectedRange === range.key ? [ 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text1)]' ] : [ 'border-[var(--color-border)]', 'bg-[var(--color-blue-790)]', 'text-[var(--color-text4)]', 'hover:text-[var(--color-text1)]', 'hover:bg-[var(--color-blue-710)]' ]">
+          <button [attr.data-testid]="'threat-lens-feed-range-' + feedType + '-' + range.key" type="button" (click)="setRange(range.key)" class="rounded-[8px] border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors" [ngClass]="selectedRange === range.key ? [ 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text1)]' ] : [ 'border-[var(--color-border)]', 'bg-[var(--color-blue-790)]', 'text-[var(--color-text4)]', 'hover:text-[var(--color-text1)]', 'hover:bg-[var(--color-blue-710)]' ]">
             {{ range.label }}
           </button>
         }
@@ -49,11 +49,11 @@
   </div>
 
   @if (!collapsed) {
-    <div #feedScroller (mouseenter)="setAutoScrollPaused(true)" (mouseleave)="setAutoScrollPaused(false)" (wheel)="pauseAutoScrollTemporarily()" (touchstart)="pauseAutoScrollTemporarily()" class="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+    <div #feedScroller [attr.data-testid]="'threat-lens-feed-list-' + feedType" (mouseenter)="setAutoScrollPaused(true)" (mouseleave)="setAutoScrollPaused(false)" (wheel)="pauseAutoScrollTemporarily()" (touchstart)="pauseAutoScrollTemporarily()" class="min-h-0 flex-1 overflow-y-auto px-3 py-3">
       @if (displayItems.length) {
         <div class="space-y-2">
           @for (item of displayItems; track item.id) {
-            <button type="button" (click)="openFeedItem(item)" class="block w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3 text-left transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]">
+            <button [attr.data-testid]="'threat-lens-feed-item-' + feedType" type="button" (click)="openFeedItem(item)" class="block w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3 text-left transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]">
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                   <div class="flex items-center gap-2">
@@ -93,7 +93,7 @@
         </div>
       }
       @else {
-        <div class="flex h-full min-h-[140px] items-center justify-center rounded-[10px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-760)] px-4 text-center text-[12px] text-[var(--color-text4)]">
+        <div [attr.data-testid]="'threat-lens-feed-empty-' + feedType" class="flex h-full min-h-[140px] items-center justify-center rounded-[10px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-760)] px-4 text-center text-[12px] text-[var(--color-text4)]">
           {{ emptyMessage }}
         </div>
       }

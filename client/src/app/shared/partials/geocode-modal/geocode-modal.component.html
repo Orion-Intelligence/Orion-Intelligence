@@ -1,23 +1,23 @@
 @if (isOpen) {
-  <div class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 backdrop-blur-sm max-[520px]:items-end [body.light-theme_&]:bg-slate-900/25" (click)="onBackdropClick($event)">
-    <div class="relative w-full max-w-[520px] rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-790)] shadow-2xl max-[520px]:max-h-[88dvh] max-[520px]:overflow-y-auto max-[520px]:rounded-[16px] [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff] [body.light-theme_&]:shadow-[0_10px_28px_rgba(15,23,42,0.14)]">
+  <div data-testid="geocode-modal-backdrop" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 backdrop-blur-sm max-[520px]:items-end [body.light-theme_&]:bg-slate-900/25" (click)="onBackdropClick($event)">
+    <div data-testid="geocode-modal" class="relative w-full max-w-[520px] rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-790)] shadow-2xl max-[520px]:max-h-[88dvh] max-[520px]:overflow-y-auto max-[520px]:rounded-[16px] [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff] [body.light-theme_&]:shadow-[0_10px_28px_rgba(15,23,42,0.14)]">
 
       <div class="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
         <div class="flex items-center gap-2">
           <i class="bi bi-globe2 text-[15px] text-sky-400"></i>
           <span class="text-[14px] font-semibold text-[var(--color-text1)]">{{ title }}</span>
         </div>
-        <button type="button" class="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)] [body.light-theme_&]:text-[#667085] [body.light-theme_&]:hover:bg-[#eef5ff] [body.light-theme_&]:hover:text-[#1f2e47]" (click)="close.emit()">
+        <button data-testid="geocode-modal-close" type="button" class="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)] [body.light-theme_&]:text-[#667085] [body.light-theme_&]:hover:bg-[#eef5ff] [body.light-theme_&]:hover:text-[#1f2e47]" (click)="close.emit()">
           <i class="bi bi-x-lg text-[13px]"></i>
         </button>
       </div>
 
       <form class="space-y-4 p-5 max-[420px]:p-3" (submit)="$event.preventDefault(); onSubmit()">
         <div class="flex gap-2 max-[420px]:flex-col">
-          <button type="button" class="flex-1 rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition-colors" [ngClass]="activeInputMode === 'search' ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-640)]','text-white'] : ['border-[var(--color-border)]','bg-[var(--color-blue-720)]','text-[var(--color-text3)]','hover:text-[var(--color-text1)]']" (click)="activeInputMode = 'search'">
+          <button data-testid="geocode-modal-mode-search" type="button" class="flex-1 rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition-colors" [ngClass]="activeInputMode === 'search' ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-640)]','text-white'] : ['border-[var(--color-border)]','bg-[var(--color-blue-720)]','text-[var(--color-text3)]','hover:text-[var(--color-text1)]']" (click)="activeInputMode = 'search'">
             Search location
           </button>
-          <button type="button" class="flex-1 rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition-colors" [ngClass]="activeInputMode === 'coordinates' ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-640)]','text-white'] : ['border-[var(--color-border)]','bg-[var(--color-blue-720)]','text-[var(--color-text3)]','hover:text-[var(--color-text1)]']" (click)="activeInputMode = 'coordinates'">
+          <button data-testid="geocode-modal-mode-coordinates" type="button" class="flex-1 rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition-colors" [ngClass]="activeInputMode === 'coordinates' ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-640)]','text-white'] : ['border-[var(--color-border)]','bg-[var(--color-blue-720)]','text-[var(--color-text3)]','hover:text-[var(--color-text1)]']" (click)="activeInputMode = 'coordinates'">
             Coordinates
           </button>
         </div>
@@ -38,12 +38,12 @@
                 } @else {
                   <i class="bi bi-search flex-shrink-0 text-[13px] text-[#0e1626]/50"></i>
                 }
-                <input type="text" [(ngModel)]="searchQuery" name="locationSearch" (ngModelChange)="onSearchInput()" placeholder="City, country, region..." class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/40" autocomplete="off"/>
+                <input data-testid="geocode-modal-location-search" type="text" [(ngModel)]="searchQuery" name="locationSearch" (ngModelChange)="onSearchInput()" placeholder="City, country, region..." class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/40" autocomplete="off"/>
               </div>
               @if (searchResults.length > 0) {
                 <div class="absolute left-0 right-0 top-[calc(100%+4px)] z-20 max-h-60 overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-790)] shadow-xl [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_10px_28px_rgba(15,23,42,0.14)]">
                   @for (result of searchResults; track result.name + ':' + result.lat + ':' + result.lon) {
-                    <button type="button" class="flex w-full flex-col gap-0.5 border-b border-[var(--color-border)] px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-[var(--color-blue-720)] [body.light-theme_&]:hover:bg-[#eef5ff]" (click)="selectResult(result)">
+                    <button data-testid="geocode-modal-search-result" type="button" class="flex w-full flex-col gap-0.5 border-b border-[var(--color-border)] px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-[var(--color-blue-720)] [body.light-theme_&]:hover:bg-[#eef5ff]" (click)="selectResult(result)">
                       <span class="text-[13px] font-semibold text-[var(--color-text1)]">{{ result.name }}</span>
                       @if (result.display_name) {
                         <span class="truncate text-[11px] text-[var(--color-text4)]">{{ result.display_name }}</span>
@@ -68,7 +68,7 @@
         @if (activeInputMode === 'coordinates') {
           <div>
             <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">Coordinates</label>
-            <input type="text" [(ngModel)]="manualCoords" name="coords" (input)="onManualCoordsChange()" placeholder="31.48, 74.17" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/40 focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)] [body.light-theme_&]:border-[#c7d5e6]" [ngClass]="coordsError ? 'border-red-400/60 ring-1 ring-red-400/40' : ''"/>
+            <input data-testid="geocode-modal-coordinates-input" type="text" [(ngModel)]="manualCoords" name="coords" (input)="onManualCoordsChange()" placeholder="31.48, 74.17" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/40 focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)] [body.light-theme_&]:border-[#c7d5e6]" [ngClass]="coordsError ? 'border-red-400/60 ring-1 ring-red-400/40' : ''"/>
             @if (coordsError) {
               <div class="mt-1 text-[11px] text-red-400">{{ coordsError }}</div>
             }
@@ -81,7 +81,7 @@
               <span>Coverage size</span>
               <span class="font-mono text-sky-400">{{ coverageLabelValue }}</span>
             </label>
-            <input type="number" [(ngModel)]="manualDelta" name="coverageDelta" (input)="onManualCoverageChange()" step="0.005" [attr.min]="minDelta" [attr.max]="effectiveMaxDelta" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)] [body.light-theme_&]:border-[#c7d5e6]" [ngClass]="coverageError ? 'border-red-400/60 ring-1 ring-red-400/40' : ''"/>
+            <input data-testid="geocode-modal-coverage-input" type="number" [(ngModel)]="manualDelta" name="coverageDelta" (input)="onManualCoverageChange()" step="0.005" [attr.min]="minDelta" [attr.max]="effectiveMaxDelta" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)] [body.light-theme_&]:border-[#c7d5e6]" [ngClass]="coverageError ? 'border-red-400/60 ring-1 ring-red-400/40' : ''"/>
             @if (coverageError) {
               <div class="mt-1 text-[11px] text-red-400">{{ coverageError }}</div>
             }
@@ -91,11 +91,11 @@
         @if (showMaxIps) {
           <div>
             <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">Max IPs</label>
-            <input type="number" [(ngModel)]="manualMaxIps" name="maxIps" (input)="onManualMaxIpsChange()" step="1" min="1" [attr.max]="maxIpsLimit" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)] [body.light-theme_&]:border-[#c7d5e6]"/>
+            <input data-testid="geocode-modal-max-ips-input" type="number" [(ngModel)]="manualMaxIps" name="maxIps" (input)="onManualMaxIpsChange()" step="1" min="1" [attr.max]="maxIpsLimit" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)] [body.light-theme_&]:border-[#c7d5e6]"/>
           </div>
         }
 
-        <button type="submit" [disabled]="isScanning || !canApplyLocation || !!coordsError || !!coverageError" class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
+        <button data-testid="geocode-modal-apply" type="submit" [disabled]="isScanning || !canApplyLocation || !!coordsError || !!coverageError" class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
           <i class="bi bi-crosshair text-[14px]"></i>
           Apply Location
         </button>

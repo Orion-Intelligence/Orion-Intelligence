@@ -1,4 +1,4 @@
-<div class="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden">
+<div data-testid="geo-fencing-page" class="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden">
   @if (isMainLoading) {
     <div class="absolute inset-0 z-[10000] flex items-center justify-center bg-[var(--color-blue-850)]">
       <div class="mx-4 flex min-w-[220px] max-w-[360px] flex-col items-center gap-3 rounded-[16px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-6 py-5 text-center shadow-[0_12px_30px_rgba(0,0,0,0.2)] [body.light-theme_&]:shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
@@ -14,8 +14,8 @@
   <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
     <div class="relative grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden">
       <div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:min-h-[380px]">
-        <div class="absolute inset-0 transition-opacity duration-150" [ngClass]="isMapView ? 'opacity-100 animate-[slideUp_220ms_ease-out_both]' : 'pointer-events-none opacity-0'">
-          <app-satellite-map-renderer #mapRenderer class="block h-full min-h-0 min-w-0 overflow-hidden"
+        <div data-testid="geo-fencing-map-view" class="absolute inset-0 transition-opacity duration-150" [ngClass]="isMapView ? 'opacity-100 animate-[slideUp_220ms_ease-out_both]' : 'pointer-events-none opacity-0'">
+          <app-satellite-map-renderer #mapRenderer data-testid="geo-fencing-map-renderer" class="block h-full min-h-0 min-w-0 overflow-hidden"
             [lat]="lat"
             [lon]="lon"
             [delta]="delta"
@@ -53,27 +53,27 @@
           <div class="absolute right-3 top-3 z-[920] flex max-w-[calc(100%-24px)] items-center gap-2 map-overlay-menu max-[943px]:right-2 max-[943px]:top-2 max-[943px]:max-w-[calc(100%-16px)] max-[520px]:flex-col max-[520px]:items-end">
             @if (showTopBar) {
               <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition-opacity [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)]" [ngClass]="isThreatToolbarDisabled ? 'opacity-50' : 'opacity-100'">
-                <button class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors max-[420px]:px-2" [ngClass]="activeTab === 'map' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('map')">
+                <button data-testid="geo-fencing-tab-map" class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors max-[420px]:px-2" [ngClass]="activeTab === 'map' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('map')">
                   Satellite Map
                 </button>
-                <button class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="isThreatToolbarDisabled" [ngClass]="activeTab === 'threat' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('threat')">
+                <button data-testid="geo-fencing-tab-threat" class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="isThreatToolbarDisabled" [ngClass]="activeTab === 'threat' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('threat')">
                   Threat Lens
                 </button>
               </div>
             }
             <div class="flex items-center gap-2 max-[520px]:justify-end">
             <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition-opacity [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)]" [ngClass]="showTopBar && activeTab === 'threat' ? 'pointer-events-none opacity-50' : 'opacity-100'">
-              <button class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="showTopBar && activeTab === 'threat'" [ngClass]="selectedLayer === 'esri' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('esri')">Satellite</button>
-              <button class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="showTopBar && activeTab === 'threat'" [ngClass]="selectedLayer === 'osm' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('osm')">Street</button>
+              <button data-testid="geo-fencing-layer-satellite" class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="showTopBar && activeTab === 'threat'" [ngClass]="selectedLayer === 'esri' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('esri')">Satellite</button>
+              <button data-testid="geo-fencing-layer-street" class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="showTopBar && activeTab === 'threat'" [ngClass]="selectedLayer === 'osm' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('osm')">Street</button>
             </div>
-            <button class="map-overlay-menu rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-3 py-2 text-[13px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)] max-[420px]:px-2" (click)="togglePanelMenu()">
+            <button data-testid="geo-fencing-panel-menu-button" class="map-overlay-menu rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-3 py-2 text-[13px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)] max-[420px]:px-2" (click)="togglePanelMenu()">
               <i class="bi bi-list"></i>
             </button>
           </div>
           </div>
 
         @if(isThreatView){
-          <div class="h-full min-h-0 w-full overflow-hidden animate-[slideUp_220ms_ease-out_both]">
+          <div data-testid="geo-fencing-threat-view" class="h-full min-h-0 w-full overflow-hidden animate-[slideUp_220ms_ease-out_both]">
             <app-threat-lens class="block h-full min-h-0 w-full" [showFilterButton]="false" (loadingChange)="onThreatLensLoadingChange($event)"></app-threat-lens>
           </div>
         }
@@ -97,6 +97,7 @@
 
 @if (isMapView && activePanel === panel.Dashboard) {
   <app-satellite-dashboard-section
+    data-testid="geo-fencing-dashboard-panel"
     [dashboardSearch]="dashboardSearch"
     [dashboardSearchResults]="dashboardSearchResults"
     [dashboardTypeFilters]="dashboardTypeFilters"
