@@ -173,6 +173,7 @@ class CaseShareManager:
                 }
                 for artifact in artifacts
             ],
+            "comments": [comment.model_dump() for comment in (record.comments or [])],
             "tasks": [task.model_dump() for task in (record.tasks or [])],
             "linkedCases": [linked_case.model_dump() for linked_case in (record.linkedCases or [])],
         }

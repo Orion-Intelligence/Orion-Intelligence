@@ -1,5 +1,6 @@
 from uuid import uuid4
-
+from fastapi import UploadFile
+from fastapi.responses import Response
 from fastapi import HTTPException
 
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
@@ -29,6 +30,10 @@ from orion.services.mongo_manager.shared_model.db_case_model import CaseLink
 from orion.services.mongo_manager.shared_model.db_case_model import CaseTask
 from orion.services.mongo_manager.shared_model.db_case_model import db_case_model
 from orion.services.mongo_manager.shared_model.db_case_model import utc_now
+from orion.api.interactive.case_manager.case_artifact_file_helper import delete_artifact_file
+from orion.api.interactive.case_manager.case_artifact_file_helper import load_decrypted_artifact_file
+from orion.api.interactive.case_manager.case_artifact_file_helper import save_encrypted_artifact_file
+from orion.api.interactive.case_manager.case_artifact_file_helper import validate_artifact_file
 
 
 class CaseManager:
@@ -97,9 +102,23 @@ class CaseManager:
         return current_links != next_links
 
     async def _validate_linked_cases(self, case_id: str, linked_cases, current_user) -> None:
-        target_case_ids = {linked_case.targetCaseId for linked_case in linked_cases}
+        target_case_ids_list = [
+            linked_case.targetCaseId
+            for linked_case in linked_cases
+            if linked_case.targetCaseId
+        ]
+
+        target_case_ids = set(target_case_ids_list)
+
+        if len(target_case_ids_list) != len(target_case_ids):
+            raise HTTPException(
+                status_code=400,
+                detail="Same case cannot be linked more than once",
+            )
+
         if case_id in target_case_ids:
             raise HTTPException(status_code=400, detail="A case cannot be linked to itself")
+        
         for target_case_id in target_case_ids:
             target_record = await self._engine.find_one(
                 db_case_model,
@@ -171,6 +190,8 @@ class CaseManager:
             severity=data.severity,
             priority=data.priority,
             intakeSource=data.intakeSource,
+            caseTypeOtherValue=data.caseTypeOtherValue,
+            intakeSourceOtherValue=data.intakeSourceOtherValue,
             tags=data.tags,
             createdBy=current_actor_id,
             assignedAnalystIds=data.assignedAnalystIds,
@@ -317,6 +338,8 @@ class CaseManager:
         record.severity = data.severity
         record.priority = data.priority
         record.intakeSource = data.intakeSource
+        record.caseTypeOtherValue = data.caseTypeOtherValue
+        record.intakeSourceOtherValue = data.intakeSourceOtherValue
         record.tags = data.tags
         record.assignedAnalystIds = data.assignedAnalystIds
         record.primaryEntityId = data.primaryEntityId
@@ -421,3 +444,115 @@ class CaseManager:
         )
         next_id = str(len(records) + 1).zfill(5)
         return {"nextCaseId": next_id}
+    
+    async def upload_artifact_file(self, case_id: str, artifact_id: str, file: UploadFile, current_user) -> dict:
+        record = await self._engine.find_one(
+            db_case_model,
+            (db_case_model.caseId == case_id)
+            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
+        )
+        
+        if not record:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        if not can_view_case(record, current_user):
+            raise HTTPException(status_code=403, detail="Access forbidden")
+
+        enc = await get_case_cipher(current_user)
+        apply_sensitive_case_values(record, lambda value: decrypt_value(enc, value))
+
+        artifact = next((item for item in record.artifacts if item.artifactId == artifact_id), None)
+
+        if not artifact:
+            raise HTTPException(status_code=404, detail="Artifact not found")
+
+        validate_artifact_file(artifact.type.value, file)
+
+        if artifact.fileResourceId:
+            delete_artifact_file(artifact.fileResourceId)
+
+        resource_id, file_size = await save_encrypted_artifact_file(file, enc)
+
+        artifact.fileName = file.filename or ""
+        artifact.fileType = file.content_type or ""
+        artifact.fileSize = file_size
+        artifact.fileResourceId = resource_id
+        record.updatedAt = utc_now()
+
+        apply_sensitive_case_values(record, lambda value: encrypt_value(enc, value))
+        await self._engine.save(record)
+
+        return {
+            "fileName": file.filename or "",
+            "fileType": file.content_type or "",
+            "fileSize": file_size,
+            "fileResourceId": resource_id,
+        }
+    
+    async def get_artifact_file_response(self, case_id: str, artifact_id: str, current_user, download: bool = False) -> Response:
+        record = await self._engine.find_one(
+            db_case_model,
+            (db_case_model.caseId == case_id)
+            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
+        )
+
+        if not record:
+            raise HTTPException(status_code=404, detail="Case not found")
+
+        if not can_view_case(record, current_user):
+            raise HTTPException(status_code=403, detail="Access forbidden")
+
+        enc = await get_case_cipher(current_user)
+        apply_sensitive_case_values(record, lambda value: decrypt_value(enc, value))
+
+        artifact = next((item for item in record.artifacts if item.artifactId == artifact_id), None)
+
+        if not artifact or not artifact.fileResourceId:
+            raise HTTPException(status_code=404, detail="Artifact file not found")
+
+        file_data = load_decrypted_artifact_file(artifact.fileResourceId, enc)
+
+        disposition = "attachment" if download else "inline"
+        file_name = artifact.fileName or "artifact-file"
+
+        return Response(
+            content=file_data,
+            media_type=artifact.fileType or "application/octet-stream",
+            headers={
+                "Content-Disposition": f'{disposition}; filename="{file_name}"'
+            },
+        )
+    
+    async def delete_artifact_file_from_case(self, case_id: str, artifact_id: str, current_user) -> dict:
+        record = await self._engine.find_one(
+            db_case_model,
+            (db_case_model.caseId == case_id)
+            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
+        )
+
+        if not record:
+            raise HTTPException(status_code=404, detail="Case not found")
+
+        if not can_view_case(record, current_user):
+            raise HTTPException(status_code=403, detail="Access forbidden")
+
+        enc = await get_case_cipher(current_user)
+        apply_sensitive_case_values(record, lambda value: decrypt_value(enc, value))
+
+        artifact = next((item for item in record.artifacts if item.artifactId == artifact_id), None)
+
+        if not artifact:
+            raise HTTPException(status_code=404, detail="Artifact not found")
+
+        delete_artifact_file(artifact.fileResourceId)
+
+        artifact.fileName = ""
+        artifact.fileType = ""
+        artifact.fileSize = 0
+        artifact.fileResourceId = ""
+        record.updatedAt = utc_now()
+
+        apply_sensitive_case_values(record, lambda value: encrypt_value(enc, value))
+        await self._engine.save(record)
+
+        return {"success": True}

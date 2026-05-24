@@ -1,9 +1,15 @@
-import { ArtifactType, CaseArtifact, CaseEntity, CaseEntityRequest, CaseLink, CaseRequest, CaseStatus, CaseTag, CaseTask, CaseType, ClosureReason, EntityAttributeType, EntityRelationship, EntityRole, EntityType, IdentifierType, IntakeSource, Priority, Severity, SocialPlatform, SourceType, TaskStatus } from './case.model';
+import { ArtifactType, CaseArtifact, CaseEntity, CaseEntityRequest, CaseLink, CaseRequest, CaseStatus, CaseTag, CaseTask, CaseType, ClosureReason, EntityConfidence, EntityRole, EntityType, IdentifierType, IntakeSource, Priority, Severity, SocialPlatform, SourceType, TaskStatus } from './case.model';
 
 export interface CaseOption<T extends string> {
-    value: T;
-    label: string;
+  value: T;
+  label: string;
 }
+
+export const ENTITY_CONFIDENCE_OPTIONS: CaseOption<EntityConfidence>[] = [
+  { value: 'low', label: 'Low' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'high', label: 'High' }
+];
 
 export const CASE_TYPE_OPTIONS: CaseOption<CaseType>[] = [
   { value: 'data_leak', label: 'Data Leak' },
@@ -131,22 +137,6 @@ export const ENTITY_ROLE_OPTIONS: CaseOption<EntityRole>[] = [
   { value: 'owner', label: 'Owner' }
 ];
 
-export const ENTITY_RELATIONSHIP_OPTIONS: CaseOption<EntityRelationship>[] = [
-  { value: 'related_to', label: 'Related To' },
-  { value: 'affected_account', label: 'Affected Account' },
-  { value: 'affected_asset', label: 'Affected Asset' },
-  { value: 'contact_point', label: 'Contact Point' },
-  { value: 'owns', label: 'Owns' },
-  { value: 'uses', label: 'Uses' },
-  { value: 'hosts', label: 'Hosts' },
-  { value: 'resolves_to', label: 'Resolves To' },
-  { value: 'connected_to', label: 'Connected To' },
-  { value: 'created_by', label: 'Created By' },
-  { value: 'targeted_by', label: 'Targeted By' },
-  { value: 'observed_with', label: 'Observed With' },
-  { value: 'same_as', label: 'Same As' }
-];
-
 export const SOURCE_TYPE_OPTIONS: CaseOption<SourceType>[] = [
   { value: 'manual', label: 'Manual' },
   { value: 'orion_alert', label: 'Orion Alert' },
@@ -203,64 +193,44 @@ export const IDENTIFIER_TYPE_OPTIONS: CaseOption<IdentifierType>[] = [
   { value: 'other', label: 'Other' }
 ];
 
-export const ENTITY_ATTRIBUTE_TYPE_OPTIONS: CaseOption<EntityAttributeType>[] = [
-  { value: 'os', label: 'OS' },
-  { value: 'hostname', label: 'Hostname' },
-  { value: 'edr_status', label: 'EDR Status' },
-  { value: 'asset_criticality', label: 'Asset Criticality' },
-  { value: 'last_seen_ip', label: 'Last Seen IP' },
-  { value: 'cloud_provider', label: 'Cloud Provider' },
-  { value: 'cloud_account_id', label: 'Cloud Account ID' },
-  { value: 'cloud_resource_id', label: 'Cloud Resource ID' },
-  { value: 'region', label: 'Region' },
-  { value: 'exposure', label: 'Exposure' },
-  { value: 'department', label: 'Department' },
-  { value: 'country', label: 'Country' },
-  { value: 'business_unit', label: 'Business Unit' },
-  { value: 'owner', label: 'Owner' },
-  { value: 'source_system', label: 'Source System' },
-  { value: 'risk_score', label: 'Risk Score' }
-];
-
 export const DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE: CaseEntity = {
   entityId: '',
   type: 'person',
   value: '',
-  displayName: '',
+  entityDescription: '',
   role: 'primary',
-  relationshipToCase: 'subject_of_case',
-  confidence: 1,
+  confidence: 'low',
   source: 'manual',
   identifiers: [],
   socialProfiles: [],
   tags: [],
-  attributes: []
+  entityTypeOtherValue: '',
+  entitySourceOtherValue: ''
 };
 
 export const DEFAULT_RELATED_CASE_ENTITY_TEMPLATE: CaseEntity = {
   ...structuredClone(DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE),
   entityId: '',
   role: 'related',
-  relationshipToCase: 'related_to',
+  linkedEntityId: '',
   identifiers: [],
   socialProfiles: [],
-  tags: [],
-  attributes: []
+  tags: []
 };
 
 export const DEFAULT_PRIMARY_CASE_ENTITY_REQUEST_TEMPLATE: CaseEntityRequest = {
   entityId: '',
   type: 'person',
   value: '',
-  displayName: '',
+  entityDescription: '',
   role: 'primary',
-  relationshipToCase: 'subject_of_case',
-  confidence: 1,
+  confidence: 'low',
   source: 'manual',
   identifiers: [],
   socialProfiles: [],
   tags: [],
-  attributes: []
+  entityTypeOtherValue: '',
+  entitySourceOtherValue: ''
 };
 
 export const DEFAULT_CASE_ARTIFACT_TEMPLATE: CaseArtifact = {
@@ -272,9 +242,13 @@ export const DEFAULT_CASE_ARTIFACT_TEMPLATE: CaseArtifact = {
   url: '',
   fileName: '',
   fileType: '',
+  fileSize: 0,
+  fileResourceId: '',
   entityIds: [],
   tags: [],
-  capturedAt: null
+  capturedAt: null,
+  artifactTypeOtherValue: '',
+  artifactSourceOtherValue: ''
 };
 
 export const DEFAULT_CASE_TASK_TEMPLATE: CaseTask = {
@@ -328,5 +302,7 @@ export const DEFAULT_CASE_REQUEST_TEMPLATE: CaseRequest = {
   entities: [],
   comments: [],
   tasks: [],
-  linkedCases: []
+  linkedCases: [],
+  caseTypeOtherValue: '',
+  intakeSourceOtherValue: ''
 };

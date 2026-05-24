@@ -14,9 +14,7 @@ from orion.services.mongo_manager.shared_model.db_case_model import CaseStatus
 from orion.services.mongo_manager.shared_model.db_case_model import CaseTag
 from orion.services.mongo_manager.shared_model.db_case_model import CaseType
 from orion.services.mongo_manager.shared_model.db_case_model import ClosureReason
-from orion.services.mongo_manager.shared_model.db_case_model import EntityRelationship
 from orion.services.mongo_manager.shared_model.db_case_model import EntityRole
-from orion.services.mongo_manager.shared_model.db_case_model import EntityAttributeType
 from orion.services.mongo_manager.shared_model.db_case_model import EntityType
 from orion.services.mongo_manager.shared_model.db_case_model import IdentifierType
 from orion.services.mongo_manager.shared_model.db_case_model import IntakeSource
@@ -25,6 +23,15 @@ from orion.services.mongo_manager.shared_model.db_case_model import Severity
 from orion.services.mongo_manager.shared_model.db_case_model import SocialPlatform
 from orion.services.mongo_manager.shared_model.db_case_model import SourceType
 from orion.services.mongo_manager.shared_model.db_case_model import TaskStatus
+from orion.services.mongo_manager.shared_model.db_case_model import EntityConfidence
+
+
+def validate_other_value(selected_value, other_value: str, field_name: str) -> None:
+    if (
+        getattr(selected_value, "value", selected_value) == "other"
+        and not other_value.strip()
+    ):
+        raise ValueError(f"{field_name} other value is required")
 
 
 class CaseRequestModel(BaseModel):
@@ -33,36 +40,46 @@ class CaseRequestModel(BaseModel):
 
 class SocialMediaProfileModel(CaseRequestModel):
     platform: SocialPlatform
+    platformOtherValue: str = ""
     username: str
     profileUrl: str = ""
     displayName: str = ""
 
+    @model_validator(mode="after")
+    def validate_other_fields(self):
+        validate_other_value(self.platform, self.platformOtherValue, "Social platform")
+        return self
+
 
 class AdditionalIdentifierModel(CaseRequestModel):
     type: IdentifierType
+    identifierTypeOtherValue: str = ""
     value: str
     issuer: str = ""
     verified: bool = False
 
-
-class CaseEntityAttributeModel(CaseRequestModel):
-    type: EntityAttributeType
-    value: str
+    @model_validator(mode="after")
+    def validate_other_fields(self):
+        validate_other_value(
+            self.type, self.identifierTypeOtherValue, "Identifier type"
+        )
+        return self
 
 
 class CaseEntityModel(CaseRequestModel):
     entityId: str
     type: EntityType
+    entityTypeOtherValue: str = ""
     value: str
-    displayName: str = ""
+    entityDescription: str = ""
     role: EntityRole = Field(default=EntityRole.RELATED)
-    relationshipToCase: EntityRelationship = Field(default=EntityRelationship.RELATED_TO)
-    confidence: float = 1.0
+    linkedEntityId: str = ""
+    confidence: EntityConfidence = Field(default=EntityConfidence.HIGH)
     source: SourceType = Field(default=SourceType.MANUAL)
+    entitySourceOtherValue: str = ""
     identifiers: List[AdditionalIdentifierModel] = Field(default_factory=list)
     socialProfiles: List[SocialMediaProfileModel] = Field(default_factory=list)
     tags: List[CaseTag] = Field(default_factory=list)
-    attributes: List[CaseEntityAttributeModel] = Field(default_factory=list)
 
     @field_validator("entityId", "value")
     @classmethod
@@ -72,19 +89,37 @@ class CaseEntityModel(CaseRequestModel):
             raise ValueError("Entity ID and value are required")
         return value
 
+    @model_validator(mode="after")
+    def validate_other_fields(self):
+        validate_other_value(self.type, self.entityTypeOtherValue, "Entity type")
+        validate_other_value(self.source, self.entitySourceOtherValue, "Entity source")
+        return self
+
 
 class CaseArtifactModel(CaseRequestModel):
     artifactId: str = ""
     type: ArtifactType = Field(default=ArtifactType.EVIDENCE)
+    artifactTypeOtherValue: str = ""
     title: str = ""
     description: str = ""
     source: SourceType = Field(default=SourceType.MANUAL)
+    artifactSourceOtherValue: str = ""
     url: str = ""
     fileName: str = ""
     fileType: str = ""
+    fileSize: int = 0
+    fileResourceId: str = ""
     entityIds: List[str] = Field(default_factory=list)
     tags: List[CaseTag] = Field(default_factory=list)
     capturedAt: Optional[datetime] = None
+
+    @model_validator(mode="after")
+    def validate_other_fields(self):
+        validate_other_value(self.type, self.artifactTypeOtherValue, "Artifact type")
+        validate_other_value(
+            self.source, self.artifactSourceOtherValue, "Artifact source"
+        )
+        return self
 
 
 class CaseCommentModel(CaseRequestModel):
@@ -114,8 +149,16 @@ class CaseLinkModel(CaseRequestModel):
 
 class CaseClosureModel(CaseRequestModel):
     reason: ClosureReason
+    closureReasonOtherValue: str = ""
     summary: str = ""
     resolution: str = ""
+
+    @model_validator(mode="after")
+    def validate_other_fields(self):
+        validate_other_value(
+            self.reason, self.closureReasonOtherValue, "Closure reason"
+        )
+        return self
 
 
 class CreateCaseRequest(CaseRequestModel):
@@ -123,10 +166,12 @@ class CreateCaseRequest(CaseRequestModel):
     title: str
     description: str = ""
     caseType: CaseType = Field(default=CaseType.OTHER)
+    caseTypeOtherValue: str = ""
     status: CaseStatus = Field(default=CaseStatus.NEW)
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
     intakeSource: IntakeSource = Field(default=IntakeSource.MANUAL)
+    intakeSourceOtherValue: str = ""
     tags: List[CaseTag] = Field(default_factory=list)
     primaryEntityId: str
     assignedAnalystIds: List[str] = Field(default_factory=list)
@@ -147,15 +192,27 @@ class CreateCaseRequest(CaseRequestModel):
 
     @model_validator(mode="after")
     def validate_primary_entity(self):
+        validate_other_value(self.caseType, self.caseTypeOtherValue, "Case type")
+        validate_other_value(
+            self.intakeSource, self.intakeSourceOtherValue, "Intake source"
+        )
+
         if not self.entities:
             raise ValueError("At least one case entity is required")
-        primary_entity = next((entity for entity in self.entities if entity.entityId == self.primaryEntityId), None)
+
+        primary_entity = next(
+            (
+                entity
+                for entity in self.entities
+                if entity.entityId == self.primaryEntityId
+            ),
+            None,
+        )
         if not primary_entity:
             raise ValueError("Primary entity ID must match one of the case entities")
         if primary_entity.role != EntityRole.PRIMARY:
             raise ValueError("Primary entity must have role primary")
-        if primary_entity.relationshipToCase != EntityRelationship.SUBJECT_OF_CASE:
-            raise ValueError("Primary entity must have subject_of_case relationship")
+
         return self
 
 
@@ -163,10 +220,12 @@ class UpdateCaseRequest(CaseRequestModel):
     title: str
     description: str = ""
     caseType: CaseType = Field(default=CaseType.OTHER)
+    caseTypeOtherValue: str = ""
     status: CaseStatus = Field(default=CaseStatus.NEW)
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
     intakeSource: IntakeSource = Field(default=IntakeSource.MANUAL)
+    intakeSourceOtherValue: str = ""
     tags: List[CaseTag] = Field(default_factory=list)
     primaryEntityId: str
     assignedAnalystIds: List[str] = Field(default_factory=list)
@@ -187,15 +246,27 @@ class UpdateCaseRequest(CaseRequestModel):
 
     @model_validator(mode="after")
     def validate_primary_entity(self):
+        validate_other_value(self.caseType, self.caseTypeOtherValue, "Case type")
+        validate_other_value(
+            self.intakeSource, self.intakeSourceOtherValue, "Intake source"
+        )
+
         if not self.entities:
             raise ValueError("At least one case entity is required")
-        primary_entity = next((entity for entity in self.entities if entity.entityId == self.primaryEntityId), None)
+
+        primary_entity = next(
+            (
+                entity
+                for entity in self.entities
+                if entity.entityId == self.primaryEntityId
+            ),
+            None,
+        )
         if not primary_entity:
             raise ValueError("Primary entity ID must match one of the case entities")
         if primary_entity.role != EntityRole.PRIMARY:
             raise ValueError("Primary entity must have role primary")
-        if primary_entity.relationshipToCase != EntityRelationship.SUBJECT_OF_CASE:
-            raise ValueError("Primary entity must have subject_of_case relationship")
+
         return self
 
 
@@ -206,10 +277,12 @@ class CaseResponse(BaseModel):
     title: str
     description: str = ""
     caseType: CaseType = Field(default=CaseType.OTHER)
+    caseTypeOtherValue: str = ""
     status: CaseStatus = Field(default=CaseStatus.NEW)
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
     intakeSource: IntakeSource = Field(default=IntakeSource.MANUAL)
+    intakeSourceOtherValue: str = ""
     tags: List[CaseTag] = Field(default_factory=list)
     createdBy: str = ""
     assignedAnalystIds: List[str] = Field(default_factory=list)

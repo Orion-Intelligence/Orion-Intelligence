@@ -20,7 +20,6 @@ class CaseType(str, Enum):
     ACCOUNT_TAKEOVER = "account_takeover"
     PHISHING = "phishing"
     MALWARE = "malware"
-
     FRAUD = "fraud"
     DEFACEMENT = "defacement"
     SUSPICIOUS_INFRASTRUCTURE = "suspicious_infrastructure"
@@ -120,21 +119,10 @@ class EntityRole(str, Enum):
     OWNER = "owner"
 
 
-class EntityRelationship(str, Enum):
-    SUBJECT_OF_CASE = "subject_of_case"
-    AFFECTED_ACCOUNT = "affected_account"
-    AFFECTED_ASSET = "affected_asset"
-    CONTACT_POINT = "contact_point"
-    OWNS = "owns"
-    USES = "uses"
-    HOSTS = "hosts"
-    RESOLVES_TO = "resolves_to"
-    CONNECTED_TO = "connected_to"
-    CREATED_BY = "created_by"
-    TARGETED_BY = "targeted_by"
-    OBSERVED_WITH = "observed_with"
-    SAME_AS = "same_as"
-    RELATED_TO = "related_to"
+class EntityConfidence(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
 
 
 class SocialPlatform(str, Enum):
@@ -180,25 +168,6 @@ class IdentifierType(str, Enum):
     WALLET_ADDRESS = "wallet_address"
     CVE = "cve"
     OTHER = "other"
-
-
-class EntityAttributeType(str, Enum):
-    OS = "os"
-    HOSTNAME = "hostname"
-    EDR_STATUS = "edr_status"
-    ASSET_CRITICALITY = "asset_criticality"
-    LAST_SEEN_IP = "last_seen_ip"
-    CLOUD_PROVIDER = "cloud_provider"
-    CLOUD_ACCOUNT_ID = "cloud_account_id"
-    CLOUD_RESOURCE_ID = "cloud_resource_id"
-    REGION = "region"
-    EXPOSURE = "exposure"
-    DEPARTMENT = "department"
-    COUNTRY = "country"
-    BUSINESS_UNIT = "business_unit"
-    OWNER = "owner"
-    SOURCE_SYSTEM = "source_system"
-    RISK_SCORE = "risk_score"
 
 
 class ArtifactType(str, Enum):
@@ -274,6 +243,7 @@ class CaseTag(str, Enum):
 class SocialMediaProfile(EmbeddedModel):
     platform: SocialPlatform
     username: str
+    platformOtherValue: str = ""
     profileUrl: str = ""
     displayName: str = ""
 
@@ -281,28 +251,25 @@ class SocialMediaProfile(EmbeddedModel):
 class AdditionalIdentifier(EmbeddedModel):
     type: IdentifierType
     value: str
+    identifierTypeOtherValue: str = ""
     issuer: str = ""
     verified: bool = False
-
-
-class CaseEntityAttribute(EmbeddedModel):
-    type: EntityAttributeType
-    value: str
 
 
 class CaseEntity(EmbeddedModel):
     entityId: str
     type: EntityType
+    entityTypeOtherValue: str = ""
     value: str
-    displayName: str = ""
+    entityDescription: str = ""
     role: EntityRole = Field(default=EntityRole.RELATED)
-    relationshipToCase: EntityRelationship = Field(default=EntityRelationship.RELATED_TO)
-    confidence: float = 1.0
+    linkedEntityId: str = ""
+    confidence: EntityConfidence = Field(default=EntityConfidence.HIGH)
     source: SourceType = Field(default=SourceType.MANUAL)
+    entitySourceOtherValue: str = ""
     identifiers: List[AdditionalIdentifier] = Field(default_factory=list)
     socialProfiles: List[SocialMediaProfile] = Field(default_factory=list)
     tags: List[CaseTag] = Field(default_factory=list)
-    attributes: List[CaseEntityAttribute] = Field(default_factory=list)
     createdBy: str = ""
     updatedBy: str = ""
     createdAt: datetime = Field(default_factory=utc_now)
@@ -312,12 +279,16 @@ class CaseEntity(EmbeddedModel):
 class CaseArtifact(EmbeddedModel):
     artifactId: str
     type: ArtifactType = Field(default=ArtifactType.EVIDENCE)
+    artifactTypeOtherValue: str = ""
     title: str
     description: str = ""
     source: SourceType = Field(default=SourceType.MANUAL)
+    artifactSourceOtherValue: str = ""
     url: str = ""
     fileName: str = ""
     fileType: str = ""
+    fileSize: int = 0
+    fileResourceId: str = ""
     entityIds: List[str] = Field(default_factory=list)
     tags: List[CaseTag] = Field(default_factory=list)
     capturedAt: Optional[datetime] = None
@@ -361,6 +332,7 @@ class CaseLink(EmbeddedModel):
 
 class CaseClosure(BaseModel):
     reason: ClosureReason
+    closureReasonOtherValue: str = ""
     summary: str = ""
     resolution: str = ""
     closedBy: str = ""
@@ -383,11 +355,13 @@ class db_case_model(Model):
     title: str
     description: str = ""
     caseType: CaseType = Field(default=CaseType.OTHER)
+    caseTypeOtherValue: str = ""
     status: CaseStatus = Field(default=CaseStatus.NEW)
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
     tags: List[CaseTag] = Field(default_factory=list)
     intakeSource: IntakeSource = Field(default=IntakeSource.MANUAL)
+    intakeSourceOtherValue: str = ""
 
     createdBy: str = ""
     assignedAnalystIds: List[str] = Field(default_factory=list)
@@ -398,10 +372,8 @@ class db_case_model(Model):
     closedAt: Optional[datetime] = None
 
     entities: List[CaseEntity] = Field(default_factory=list)
-
     artifacts: List[CaseArtifact] = Field(default_factory=list)
     tasks: List[CaseTask] = Field(default_factory=list)
-
     comments: List[CaseComment] = Field(default_factory=list)
     linkedCases: List[CaseLink] = Field(default_factory=list)
     shares: List[CaseShare] = Field(default_factory=list)

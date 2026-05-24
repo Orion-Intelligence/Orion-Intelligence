@@ -43,4 +43,25 @@ export class CaseManagement {
     return this.api.delete<{ success: boolean; revokedCount: number }>(`profile/cases/${caseId}/shares`);
   }
 
+  uploadArtifactFile(caseId: string, artifactId: string, file: File): Observable<{
+    fileName: string;
+    fileType: string;
+    fileSize: number;
+    fileResourceId: string;
+  }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.api.post<{
+      fileName: string;
+      fileType: string;
+      fileSize: number;
+      fileResourceId: string;
+    }>(`profile/cases/${caseId}/artifacts/${artifactId}/file`, formData);
+  }
+
+  deleteArtifactFile(caseId: string, artifactId: string): Observable<{ success: boolean }> {
+    return this.api.delete<{ success: boolean }>(`profile/cases/${caseId}/artifacts/${artifactId}/file`);
+  }
+
 }
