@@ -85,6 +85,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     } | null>(null);
   platformAliasInput = signal('');
   selectedEntityReport = signal<CustomEntity | null>(null);
+  selectedJobPill = signal<Job | null>(null);
   imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
   entityManager = viewChild(EntityManagerComponent);
   isSearchDisabled = computed(() => this.searchTerm().trim().length === 0);
@@ -316,20 +317,43 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   handleCompletedJobClick(job: Job) {
-    if (job.status === 'completed') {
-      // ensure list view is visible
-      this.updateState(state => state.viewMode.set('list'), false);
-
-      // add the user's platforms to the graph so the left profile card + platforms appear
-      const platforms = this.scanResults().get(job.username) ?? [];
-      try {
-        this.graphOrchestrator.updateGraphFromModal(this.requireActiveTabState(), job.username, platforms);
-      }
-      catch (e) {
-        // fallback: open summary popup if graph update fails
-        this.state.openSummaryPopup(job.username);
-      }
+    if (job.status !== 'completed') {
+      return;
     }
+    this.selectedJobPill.update(current => current?.username === job.username ? null : job);
+    this.updateState(state => state.viewMode.set('list'), false);
+  }
+
+  openProfileIntelligenceFromPill(username: string) {
+    this.selectedJobPill.set(null);
+    this.state.openSummaryPopup(username);
+  }
+
+  openManageProfilesFromPill(username: string) {
+    this.selectedJobPill.set(null);
+    this.state.openManageProfilesModal(username);
+  }
+
+  getSelectedJobPlatformCount(username: string): number {
+    return this.scanResults().get(username)?.length ?? 0;
+  }
+
+  getSelectedJobScanDate(username: string): string {
+    const platforms = this.scanResults().get(username) ?? [];
+    const timestamps = platforms
+      .map(platform => platform.timestamp)
+      .filter((timestamp): timestamp is string => !!timestamp)
+      .map(timestamp => new Date(timestamp).getTime())
+      .filter(time => Number.isFinite(time));
+    if (timestamps.length === 0) {
+      return 'Scan date unavailable';
+    }
+    const latest = new Date(Math.max(...timestamps));
+    return new Intl.DateTimeFormat(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }).format(latest);
   }
 
   handleFollowerScan(usernames: string[]) {

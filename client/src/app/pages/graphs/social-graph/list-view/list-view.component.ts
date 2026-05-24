@@ -35,6 +35,44 @@ export class ListViewComponent {
   activeUserNodes = computed(() => this.networkData().nodes.filter(n => n.id.toString().startsWith('user-')));
   activeEntityNodesOnGraph = computed(() => this.networkData().nodes.filter(n => this.customEntities().some(e => e.id === n.id)));
 
+  activeUserIndex = signal<number>(0);
+
+setActiveUserIndex(index: number) {
+  this.activeUserIndex.set(index);
+}
+
+nextUser() {
+  this.activeUserIndex.update(i =>
+    i < this.activeUserNodes().length - 1 ? i + 1 : 0
+  );
+}
+
+prevUser() {
+  this.activeUserIndex.update(i =>
+    i > 0 ? i - 1 : this.activeUserNodes().length - 1
+  );
+}
+
+private readonly USER_COLORS = [
+  '#1877f2','#e03131','#2f9e44','#e67700','#7048e8','#0c8599'
+];
+
+getUserColor(index: number): string {
+  return this.USER_COLORS[index % this.USER_COLORS.length];
+}
+
+getUserColorLight(index: number): string {
+  const lights = ['#42a5f5','#ff6b6b','#69db7c','#ffa94d','#9775fa','#38d9a9'];
+  return lights[index % lights.length];
+}
+
+getUserColorAlpha(index: number, alpha: number): string {
+  const hex = this.getUserColor(index);
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
   getPlatformsForUserNode(userNodeId: string): NetworkNode[] {
     const username = userNodeId.replace('user-', '');
     return this.networkData().nodes.filter(n => n.id.toString().startsWith(`platform-${username}|`));
