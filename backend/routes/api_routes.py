@@ -19,7 +19,7 @@ from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.interactive.siemlog_manager.siem_log_manager import SiemLogManager
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest, UrlVulnerabilityScanRequest
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import IPScanRequest, NetIntelDeepScanRequest, ResolveIPRequest
-from orion.api.server.crawl_manager.class_model.log_model import InjectionBatchRequestModel, InjectionBatchResponseModel, SiemSearchRequestModel, SiemSearchResponseModel
+from orion.api.server.crawl_manager.class_model.log_model import SiemSearchRequestModel, SiemSearchResponseModel
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import SocialScrapeRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
@@ -37,7 +37,6 @@ STEALER_LOG_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_requ
 STIX_MEMBER_DEPS = [Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER]))]
 GENERAL_MODULE_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:general"))]
 SCANNING_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("scanning"))]
-SATELLITE_INTEL_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("osint_advanced", bypass_roles=[user_role.ADMIN]))]
 STIX_KIND_VALUES = {"general", "leak", "defacement", "exploit", "chat", "social"}
 
 
@@ -53,32 +52,25 @@ def _enforce_demo_safe_search(param: search_consolidated_param_model, current_us
 
 
 @api_routes.post(
-    "/api/index/injection",
-    summary="Batch inject SIEM logs",
-    description="Ingest multiple SIEM/raw log records into the SIEM index in a single request. Each item in `logs` becomes one upserted SIEM document keyed from the authenticated user's tenant and the raw log text. `tenant_id` is injected from the current user and is not accepted from the request body.",
-    tags=["Crawler"],
-    operation_id="batchInjectSiemLogs",
-    status_code=200,
-    response_model=InjectionBatchResponseModel,
-    response_description="Batch injection result with indexed record count, target index name, and generated document ids.",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
-async def index_injection(payload: InjectionBatchRequestModel = Body(...), current_user=Depends(get_current_user)):
-    return await SiemLogManager.get_instance().inject_logs(payload, current_user)
-
-
-@api_routes.post(
     "/api/profile/event-management/siem/search",
-    summary="Search SIEM logs",
-    description="Search SIEM log records for the authenticated user tenant. Admin and maintainer users can search events only within their own tenant scope.",
-    tags=["Profile"],
-    operation_id="searchProfileSiemLogs",
     status_code=200,
     response_model=SiemSearchResponseModel,
-    response_description="Matched SIEM log records, total hit count, page count, and active batch size.",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])), Depends(license_required("maintainer", bypass_roles=[user_role.ADMIN])), Depends(limiter_dependency)])
 async def search_siem_logs(payload: SiemSearchRequestModel = Body(...), current_user=Depends(get_current_user)):
     return await SiemLogManager.get_instance().search_logs(payload, current_user)
 
+@api_routes.get(
+    "/api/insight/country",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.DEMO, user_role.ANALYST]))])
+async def get_country_insight(category: str = Query(...), country: str = Query(...), page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=200)):
+    return await homepage_model.getInstance().get_country_specific_insights_paginated(
+        category=category,
+        country=country,
+        page=page,
+        limit=limit
+    )
 
 @api_routes.post(
     "/api/search/strategic",
@@ -302,25 +294,6 @@ async def get_insight():
     return {"insights": insights, "latestDocument": latestDocument, "country_insight": country_insight}
 
 
-@api_routes.get(
-    "/api/insight/country",
-    summary="Get paginated country insights",
-    tags=["System Info"],
-    operation_id="getCountryInsights",
-    status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.DEMO, user_role.ANALYST]))])
-async def get_country_insight(
-        category: str = Query(...),
-        country: str = Query(...),
-        page: int = Query(1, ge=1),
-        limit: int = Query(20, ge=1, le=200)):
-    return await homepage_model.getInstance().get_country_specific_insights_paginated(
-        category=category,
-        country=country,
-        page=page,
-        limit=limit
-    )
-
 
 @api_routes.post(
     "/api/search/stealer/ioc",
@@ -353,23 +326,7 @@ async def search_consolidated(param: search_consolidated_param_model = Body(...)
     return await search_model.getInstance().search_consolidated_result(param)
 
 @api_routes.post(
-    "/api/threat/lens",
-    summary="Search threat lens reports",
-    description=SEARCH_DOCS["breach"]["description"],
-    tags=["Search"],
-    operation_id="searchThreatLens",
-    response_description=SEARCH_DOCS["consolidated"]["response_description"],
-    status_code=200,
-    dependencies=SATELLITE_INTEL_DEPS,)
-async def search_threat_lens_news(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
-    _enforce_demo_safe_search(param, current_user)
-    return await search_model.getInstance().search_consolidated_result(param)
-
-@api_routes.post(
     "/api/search/consolidated/ioc",
-    summary="Search consolidated reports (ranked with operators)",
-    tags=["Search"],
-    operation_id="searchConsolidatedRankedLogic",
     include_in_schema=False,
     status_code=200,
     dependencies=[Depends(
@@ -378,7 +335,7 @@ async def search_threat_lens_news(param: search_consolidated_param_model = Body(
         )
     )],
 )
-async def search_consolidated_iocs( param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+async def search_consolidated_iocs(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     base_index = [
         ELASTIC_INDEX.S_LEAK_INDEX,
@@ -413,8 +370,7 @@ async def get_defacement_document(doc_id: str):
     response_description=REPORT_DOCS["breach"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:breach", bypass_licenses=["maintainer"]))], )
-async def get_leak_document(doc_id: str, lang: Optional[str] = Query(
-    None, alias="lang", description="Optional language code for localized report content.", ), ):
+async def get_leak_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await search_model.getInstance().request_leak_doc(doc_id, lang)
 
 
@@ -427,8 +383,7 @@ async def get_leak_document(doc_id: str, lang: Optional[str] = Query(
     response_description=REPORT_DOCS["news"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:news", bypass_licenses=["maintainer"]))], )
-async def get_news_document(doc_id: str, lang: Optional[str] = Query(
-    None, alias="lang", description="Optional language code for localized report content.", ), ):
+async def get_news_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await search_model.getInstance().request_leak_doc(doc_id, lang)
 
 
@@ -441,8 +396,7 @@ async def get_news_document(doc_id: str, lang: Optional[str] = Query(
     response_description=REPORT_DOCS["exploit"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:exploit", bypass_licenses=["maintainer"]))], )
-async def get_exploit_document(doc_id: str, lang: Optional[str] = Query(
-    None, alias="lang", description="Optional language code for localized report content.", ), ):
+async def get_exploit_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await search_model.getInstance().request_exploit_doc(doc_id, lang)
 
 
@@ -455,8 +409,7 @@ async def get_exploit_document(doc_id: str, lang: Optional[str] = Query(
     response_description=REPORT_DOCS["strategic"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:general", bypass_licenses=["maintainer"]))], )
-async def get_general_document(doc_id: str, lang: Optional[str] = Query(
-    None, alias="lang", description="Optional language code for localized report content.", ), ):
+async def get_general_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await search_model.getInstance().request_general_doc(doc_id, lang)
 
 
@@ -469,8 +422,7 @@ async def get_general_document(doc_id: str, lang: Optional[str] = Query(
     response_description=REPORT_DOCS["chat"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:chat", bypass_licenses=["maintainer"]))], )
-async def get_chat_document(doc_id: str, lang: Optional[str] = Query(
-    None, alias="lang", description="Optional language code for localized report content.", ), ):
+async def get_chat_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await search_model.getInstance().request_chat_doc(doc_id, lang)
 
 
@@ -483,8 +435,7 @@ async def get_chat_document(doc_id: str, lang: Optional[str] = Query(
     response_description=REPORT_DOCS["social_models"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:social", bypass_licenses=["maintainer"]))], )
-async def get_social_document(doc_id: str, lang: Optional[str] = Query(
-    None, alias="lang", description="Optional language code for localized report content.", ), ):
+async def get_social_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await search_model.getInstance().request_social_doc(doc_id, lang)
 
 
@@ -668,8 +619,7 @@ async def search_dynamic_national_identity(param: search_dynamic_crack_model = B
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])), ], )
-async def get_breach_stix_document(doc_id: str, lang: Optional[str] = Query(
-    None, alias="lang", description="Optional language code for localized report content.", ), ):
+async def get_breach_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_leak_stix(doc_id, lang)
 
 
@@ -684,8 +634,7 @@ async def get_breach_stix_document(doc_id: str, lang: Optional[str] = Query(
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])), ], )
-async def get_strategic_stix_document(doc_id: str, lang: Optional[str] = Query(
-    None, alias="lang", description="Optional language code for localized report content.", ), ):
+async def get_strategic_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_general_stix(doc_id, lang)
 
 
@@ -700,7 +649,7 @@ async def get_strategic_stix_document(doc_id: str, lang: Optional[str] = Query(
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])), ], )
-async def get_defacement_stix_document(doc_id: str, ):
+async def get_defacement_stix_document(doc_id: str):
     return await stix_manager.get_instance().get_defacement_stix(doc_id)
 
 
@@ -715,8 +664,7 @@ async def get_defacement_stix_document(doc_id: str, ):
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])), ], )
-async def get_exploit_stix_document(doc_id: str, lang: Optional[str] = Query(
-    None, alias="lang", description="Optional language code for localized report content.", ), ):
+async def get_exploit_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_exploit_stix(doc_id, lang)
 
 
@@ -729,8 +677,7 @@ async def get_exploit_stix_document(doc_id: str, lang: Optional[str] = Query(
     response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=STIX_MEMBER_DEPS, )
-async def get_social_stix_document(doc_id: str, lang: Optional[str] = Query(
-    None, alias="lang", description="Optional language code for localized report content.", ), ):
+async def get_social_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_social_stix(doc_id, lang)
 
 
@@ -743,18 +690,12 @@ async def get_social_stix_document(doc_id: str, lang: Optional[str] = Query(
     response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=STIX_MEMBER_DEPS, )
-async def get_chat_stix_document(doc_id: str, lang: Optional[str] = Query(
-    None, alias="lang", description="Optional language code for localized report content.", ), ):
+async def get_chat_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_chat_stix(doc_id, lang)
 
 
 @api_routes.get(
     "/api/graph",
-    summary="Get entity graph relationships",
-    description="Fetch graph relationships for a given entity based on its type and value.",
-    tags=["Graph", "Entities"],
-    operation_id="getEntityRelations",
-    response_description="Graph structure representing relationships for the requested entity.",
     status_code=200,
     include_in_schema=False,
     dependencies=[Depends(license_required("cti_graph"))], )
@@ -774,8 +715,7 @@ async def get_entity_relations(query: EntityQueryModel = Depends()):
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])), ], )
-async def get_news_stix_document(doc_id: str, lang: Optional[str] = Query(
-    None, alias="lang", description="Optional language code for localized report content.", ), ):
+async def get_news_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_leak_stix(doc_id, lang)
 
 
@@ -893,9 +833,6 @@ async def url_vulnerability_scan(param: UrlVulnerabilityScanRequest = Body(...),
 
 @api_routes.post(
     "/api/stix/convert/{kind}",
-    summary="Convert Orion document payload to STIX 2.1 bundle",
-    tags=["Stix"],
-    operation_id="convertPayloadToStix",
     status_code=200,
     include_in_schema=False,
     dependencies=STIX_MEMBER_DEPS,
@@ -909,9 +846,6 @@ async def convert_stix_single(kind: str, payload: dict = Body(...)):
 
 @api_routes.post(
     "/api/stix/convert/{kind}/batch",
-    summary="Convert multiple Orion payloads to STIX 2.1 bundles",
-    tags=["Stix"],
-    operation_id="convertPayloadBatchToStix",
     status_code=200,
     include_in_schema=False,
     dependencies=STIX_MEMBER_DEPS,

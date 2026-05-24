@@ -289,7 +289,11 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.cypressMapFallback = true;
     const container = this.mapContainer?.nativeElement;
     if (container) {
-      container.innerHTML = '<div data-testid="threat-lens-map-fallback" class="flex h-full w-full items-center justify-center bg-black text-[12px] text-[var(--color-text3)]">Threat Lens map fallback</div>';
+      const fallback = document.createElement('div');
+      fallback.setAttribute('data-testid', 'threat-lens-map-fallback');
+      fallback.className = 'flex h-full w-full items-center justify-center bg-black text-[12px] text-[var(--color-text3)]';
+      fallback.textContent = 'Threat Lens map fallback';
+      container.replaceChildren(fallback);
     }
     this.ngZone.run(() => this.mapReady.emit());
   }

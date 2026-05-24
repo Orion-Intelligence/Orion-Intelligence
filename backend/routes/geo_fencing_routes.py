@@ -2,6 +2,7 @@ from fastapi import APIRouter, Body, Depends
 from fastapi.responses import StreamingResponse
 from configs.app_dependency import get_current_user, license_required, role_required, status_required
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.map_entities.search_map_entities_param_model import search_map_entities_param_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import GeoCameraDetectRangesRequest, GeoCameraDetectRequest
@@ -19,7 +20,6 @@ from orion.api.server.geo_fencing_manager.class_model.satellite_request_models i
 )
 from orion.api.server.geo_fencing_manager.geo_fencing_manager import geo_fencing_manager
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
-from routes.docs.docs import DYNAMIC_DOCS
 
 geo_fencing_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 SCAN_ROLE_DEPS = [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
@@ -29,11 +29,13 @@ SATELLITE_INTEL_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_
 SATELLITE_INTEL_SHIPS_TEST_DEPS = [Depends(license_required("osint_advanced", bypass_roles=[user_role.ADMIN]))]
 
 
+def _enforce_demo_safe_search(param: search_consolidated_param_model, current_user, is_free: bool = False) -> None:
+    if current_user and getattr(current_user, "role", None) == user_role.DEMO and is_free:
+        param.safe = True
+
+
 @geo_fencing_routes.post(
     "/api/search/map-entities/stream",
-    summary="Stream map entity points",
-    tags=["Search"],
-    operation_id="streamMapEntities",
     status_code=200,
     dependencies=GENERAL_MODULE_DEPS,
 )
@@ -53,9 +55,6 @@ async def stream_map_entities(param: search_map_entities_param_model = Body(...)
 
 @geo_fencing_routes.post(
     "/api/search/map-entities/by-ids",
-    summary="Get multiple map entities by IDs",
-    tags=["Reports"],
-    operation_id="getMapEntitiesByIds",
     status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
@@ -67,12 +66,17 @@ async def get_map_entities_by_ids(param: list[str] = Body(...)):
 
 
 @geo_fencing_routes.post(
+    "/api/threat/lens",
+    status_code=200,
+    dependencies=SATELLITE_INTEL_DEPS,
+)
+async def search_threat_lens_news(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    _enforce_demo_safe_search(param, current_user)
+    return await search_model.getInstance().search_consolidated_result(param)
+
+
+@geo_fencing_routes.post(
     "/api/netintel/iot_detect",
-    summary="Scan a geographic area for exposed cameras",
-    description=DYNAMIC_DOCS["geo_camera"]["description"],
-    tags=["Network Intelligence"],
-    operation_id="geoIotDetect",
-    response_description=DYNAMIC_DOCS["geo_camera"]["response_description"],
     status_code=200,
     dependencies=SCANNING_DEPS,
 )
@@ -83,11 +87,6 @@ async def geo_camera_detect(param: GeoCameraDetectRequest = Body(...), current_u
 
 @geo_fencing_routes.post(
     "/api/netintel/camera_detect_ranges",
-    summary="Scan IP ranges for exposed cameras",
-    description=DYNAMIC_DOCS["geo_camera_ranges"]["description"],
-    tags=["Network Intelligence"],
-    operation_id="geoCameraDetectRanges",
-    response_description=DYNAMIC_DOCS["geo_camera_ranges"]["response_description"],
     status_code=200,
     dependencies=SCANNING_DEPS,
 )
@@ -98,8 +97,6 @@ async def geo_camera_detect_ranges(param: GeoCameraDetectRangesRequest = Body(..
 
 @geo_fencing_routes.post(
     "/api/satellite/geocode",
-    summary="Convert address to coordinates",
-    tags=["Satellite Intelligence"],
     status_code=200,
     dependencies=SATELLITE_INTEL_DEPS,
 )
@@ -109,8 +106,6 @@ async def satellite_geocode(payload: SatelliteGeocodeRequest = Body(...), curren
 
 @geo_fencing_routes.post(
     "/api/satellite/facilities",
-    summary="Detect facilities (ports, airports, military zones)",
-    tags=["Satellite Intelligence"],
     status_code=200,
     dependencies=SATELLITE_INTEL_DEPS,
 )
@@ -120,8 +115,6 @@ async def satellite_facilities(payload: SatelliteFacilitiesRequest = Body(...), 
 
 @geo_fencing_routes.post(
     "/api/satellite/sentinel/image",
-    summary="Fetch Sentinel satellite image",
-    tags=["Satellite Intelligence"],
     status_code=200,
     dependencies=SATELLITE_INTEL_DEPS,
 )
@@ -131,8 +124,6 @@ async def satellite_sentinel_image(payload: SatelliteImageRequest = Body(...), c
 
 @geo_fencing_routes.post(
     "/api/satellite/anomaly",
-    summary="Detect anomalies in satellite imagery",
-    tags=["Satellite Intelligence"],
     status_code=200,
     dependencies=SATELLITE_INTEL_DEPS,
 )
@@ -142,8 +133,6 @@ async def satellite_anomaly(payload: SatelliteAnomalyRequest = Body(...), curren
 
 @geo_fencing_routes.post(
     "/api/satellite/compare",
-    summary="Compare two satellite images",
-    tags=["Satellite Intelligence"],
     status_code=200,
     dependencies=SATELLITE_INTEL_DEPS,
 )
@@ -153,8 +142,6 @@ async def satellite_compare(payload: SatelliteCompareRequest = Body(...), curren
 
 @geo_fencing_routes.post(
     "/api/satellite/livetrack/aircraft",
-    summary="Track aircraft in map bounds",
-    tags=["Satellite Intelligence"],
     status_code=200,
     dependencies=SATELLITE_INTEL_DEPS,
 )
@@ -164,8 +151,6 @@ async def satellite_livetrack_aircraft_bbox(payload: SatelliteLiveTrackerBBoxReq
 
 @geo_fencing_routes.post(
     "/api/satellite/livetrack/aircraft/icao",
-    summary="Fetch aircraft by ICAO24",
-    tags=["Satellite Intelligence"],
     status_code=200,
     dependencies=SATELLITE_INTEL_DEPS,
 )
@@ -175,8 +160,6 @@ async def satellite_livetrack_aircraft_icao(payload: SatelliteLiveTrackerAircraf
 
 @geo_fencing_routes.post(
     "/api/satellite/livetrack/aircraft/track",
-    summary="Fetch aircraft track history",
-    tags=["Satellite Intelligence"],
     status_code=200,
     dependencies=SATELLITE_INTEL_DEPS,
 )
@@ -186,8 +169,6 @@ async def satellite_livetrack_aircraft_track(payload: SatelliteLiveTrackerAircra
 
 @geo_fencing_routes.post(
     "/api/satellite/livetrack/ships",
-    summary="Track ships in map bounds",
-    tags=["Satellite Intelligence"],
     status_code=200,
     dependencies=SATELLITE_INTEL_SHIPS_TEST_DEPS,
 )
@@ -197,8 +178,6 @@ async def satellite_livetrack_ships_bbox(payload: SatelliteLiveTrackerBBoxReques
 
 @geo_fencing_routes.post(
     "/api/satellite/livetrack/ships/mmsi",
-    summary="Fetch ship by MMSI",
-    tags=["Satellite Intelligence"],
     status_code=200,
     dependencies=SATELLITE_INTEL_SHIPS_TEST_DEPS,
 )
@@ -208,8 +187,6 @@ async def satellite_livetrack_ships_mmsi(payload: SatelliteLiveTrackerShipMmsiRe
 
 @geo_fencing_routes.post(
     "/api/satellite/livetrack/status",
-    summary="Live tracker health status",
-    tags=["Satellite Intelligence"],
     status_code=200,
     dependencies=SATELLITE_INTEL_DEPS,
 )

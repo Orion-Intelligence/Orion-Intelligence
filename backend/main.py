@@ -78,10 +78,9 @@ app.include_router(micro_routes, include_in_schema=False)
 app.include_router(ai_routes, include_in_schema=False)
 app.include_router(tenant_routes, include_in_schema=False)
 app.include_router(api_routes)
-app.include_router(geo_fencing_routes)
-app.include_router(social_routes)
-app.include_router(case_routes)
+app.include_router(geo_fencing_routes, include_in_schema=False)
+app.include_router(social_routes, include_in_schema=False)
+app.include_router(case_routes, include_in_schema=False)
 
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
-
