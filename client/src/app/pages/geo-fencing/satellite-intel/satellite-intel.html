@@ -1,11 +1,18 @@
 <div data-testid="geo-fencing-page" class="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden">
   @if (isMainLoading) {
-    <div class="absolute inset-0 z-[10000] flex items-center justify-center bg-[var(--color-blue-850)]">
-      <div class="mx-4 flex min-w-[220px] max-w-[360px] flex-col items-center gap-3 rounded-[16px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-6 py-5 text-center shadow-[0_12px_30px_rgba(0,0,0,0.2)] [body.light-theme_&]:shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
-        <div class="h-11 w-11 animate-spin rounded-full border-4 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></div>
-        <div>
-          <p class="text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text1)]">{{ mainLoadingTitle }}</p>
-          <p class="mt-1 text-[12px] text-[var(--color-text3)]">{{ mainLoadingMessage }}</p>
+    <div data-testid="geo-fencing-loading" class="absolute inset-0 z-[10000] flex items-center justify-center bg-[rgba(8,16,27,0.58)] px-4 backdrop-blur-[2px] [body.light-theme_&]:bg-white/50">
+      <div class="map-overlay-menu w-[min(360px,calc(100%-2rem))] rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] p-4 shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)]">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)]">
+            <div class="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></div>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text1)]">{{ mainLoadingTitle }}</p>
+            <p class="mt-1 truncate text-[12px] text-[var(--color-text3)]">{{ mainLoadingMessage }}</p>
+          </div>
+        </div>
+        <div class="ui-progress-track mt-4 h-[5px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)]">
+          <div class="ui-progress-indeterminate-bar"></div>
         </div>
       </div>
     </div>

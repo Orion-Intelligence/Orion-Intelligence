@@ -334,6 +334,10 @@ export class ThreatLensComponent implements OnDestroy {
     }
 
     this.hasStartedDefaultIpScan = true;
+    if (this.mapRenderer?.requestViewportIpScan()) {
+      return;
+    }
+
     this.lastAutomaticIpScanKey = this.getIpScanRequestKey(this.defaultIpScanCenter, this.defaultIpScanRadiusKm, 'default');
     this.runIpScan(this.defaultIpScanCoordinates,
       this.defaultIpScanCenter,
