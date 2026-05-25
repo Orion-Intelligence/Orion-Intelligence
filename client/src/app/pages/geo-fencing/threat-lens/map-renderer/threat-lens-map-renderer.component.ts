@@ -241,7 +241,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         return;
       }
 
-      this.view.ui.components = ['zoom'];
+      this.view.ui.components = [];
       this.view.highlightOptions = { color: [96, 165, 250, 0.98], haloOpacity: 0.55, fillOpacity: 0.08 };
       this.updateBasemapForZoom();
       await this.countryRenderer.init(this.view,

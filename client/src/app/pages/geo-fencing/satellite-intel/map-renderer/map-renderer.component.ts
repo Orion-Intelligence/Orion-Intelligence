@@ -191,7 +191,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         zoom:     2.5,
         minZoom:  2,
         zoomSnap: 0.5,
-        zoomControl: true,
+        zoomControl: false,
         attributionControl: false,
         maxBounds: this.L.latLngBounds(MapRendererComponent.WORLD_BOUNDS),
         maxBoundsViscosity: 1,
