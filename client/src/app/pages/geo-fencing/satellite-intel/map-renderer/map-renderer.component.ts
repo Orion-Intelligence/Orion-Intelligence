@@ -7,6 +7,7 @@ import { SatelliteShipTrackingService } from '../map-entities/ships/ship-trackin
 import { normalizeEntityId } from '../map-utils/renderer-utils';
 import { CountryBoundaryMapRenderer } from '../map-overlays/country-boundary-map-renderer';
 import { SearchLocationMapRenderer } from '../map-overlays/search-location-map-renderer';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector:    'app-satellite-map-renderer',
@@ -29,6 +30,8 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   private countryBoundaryRenderer?: CountryBoundaryMapRenderer;
   private searchLocationRenderer?: SearchLocationMapRenderer;
   private sidebarRequestToken = 0;
+  private mapReadyEmitted = false;
+  private mapReadySubscription?: Subscription;
 
   selectedEntity: { type: TrackingEntityType; data: any | null } | null = null;
   sidebarVisible = false;
@@ -53,6 +56,8 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   @Output() mapMoved  = new EventEmitter<{ lat: number; lon: number; zoom: number; trackingDelta: number }>();
   @Output() featureSelected = new EventEmitter<any>();
   @Output() featureIdsSelected = new EventEmitter<string[]>();
+  @Output() mapReady = new EventEmitter<void>();
+  @Output() mapError = new EventEmitter<void>();
 
   constructor(private appRef: ApplicationRef, private environmentInjector: EnvironmentInjector, private aircraftTrackingService: SatelliteAircraftTrackingService, private shipTrackingService: SatelliteShipTrackingService, private cd: ChangeDetectorRef, private ngZone: NgZone) {}
 
@@ -172,6 +177,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     this.countryBoundaryRenderer?.destroy();
     this.searchLocationRenderer?.destroy();
     this.resizeObserver?.disconnect();
+    this.mapReadySubscription?.unsubscribe();
     this.leafletMap?.remove();
   }
 
@@ -263,7 +269,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
           detectRetina: false,
         },);
 
-      this.refreshBaseLayerDetail();
+      const initialLayer = this.refreshBaseLayerDetail();
       this.updateZoomLabel();
 
       this.countryBoundaryRenderer = new CountryBoundaryMapRenderer(this.L, this.leafletMap);
@@ -344,8 +350,12 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         this.updateZoomLabel();
         this.scheduleViewportEmit();
       }, 0);
+      this.mapReadySubscription?.unsubscribe();
+      this.mapReadySubscription = this.waitForTileLayerLoad(initialLayer).subscribe(() => this.emitMapReady());
     }
-    catch { }
+    catch {
+      this.ngZone.run(() => this.mapError.emit());
+    }
   }
 
   private updateMapView(): void {
@@ -380,9 +390,9 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     this.refreshBaseLayerDetail();
   }
 
-  private refreshBaseLayerDetail(): void {
+  private refreshBaseLayerDetail(): any {
     if (!this.leafletMap) {
-      return;
+      return null;
     }
 
     [this.esriLayer, this.esriLowResLayer, this.osmLayer, this.osmLowResLayer].forEach(layer => {
@@ -393,10 +403,49 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
 
     if (this.selectedLayer === 'osm') {
       this.osmLayer?.addTo(this.leafletMap);
+      return this.osmLayer;
     }
     else {
       this.esriLayer?.addTo(this.leafletMap);
+      return this.esriLayer;
     }
+  }
+
+  private waitForTileLayerLoad(layer: any): Observable<void> {
+    return new Observable<void>((subscriber) => {
+      if (!layer || (typeof layer.isLoading === 'function' && !layer.isLoading())) {
+        subscriber.next();
+        subscriber.complete();
+        return;
+      }
+
+      const finish = () => {
+        if (subscriber.closed) {
+          return;
+        }
+        subscriber.next();
+        subscriber.complete();
+      };
+      const onLoad = () => {
+        window.clearTimeout(timeout);
+        finish();
+      };
+      const timeout = window.setTimeout(finish, 12000);
+      layer.once?.('load', onLoad);
+
+      return () => {
+        window.clearTimeout(timeout);
+        layer.off?.('load', onLoad);
+      };
+    });
+  }
+
+  private emitMapReady(): void {
+    if (this.mapReadyEmitted) {
+      return;
+    }
+    this.mapReadyEmitted = true;
+    this.ngZone.run(() => this.mapReady.emit());
   }
 
   private refreshSelectionState(): void {

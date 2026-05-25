@@ -353,6 +353,13 @@ app-satellite-map-renderer .leaflet-tooltip-pane {
   width: 100% !important;
 }
 
+.threat-lens-map .esri-view-root,
+.threat-lens-map .esri-view-surface,
+.threat-lens-map canvas {
+  height: 100% !important;
+  width: 100% !important;
+}
+
 .geo-map-control-inset .leaflet-top.leaflet-left {
   top: 64px;
 }

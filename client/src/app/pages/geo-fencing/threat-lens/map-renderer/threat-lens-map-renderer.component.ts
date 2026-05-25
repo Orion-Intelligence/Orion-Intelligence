@@ -217,7 +217,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         qualityProfile: 'high',
         viewingMode: 'global',
         camera: {
-          position: { longitude: -10, latitude: 30, z: 17000000 },
+          position: { longitude: 0, latitude: 0, z: 25000000 },
           tilt: 0,
         },
         constraints: {

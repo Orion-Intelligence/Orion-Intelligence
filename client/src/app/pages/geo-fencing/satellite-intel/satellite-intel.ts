@@ -51,6 +51,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private scanState: SatelliteScanState;
   private mapEntityDetailsState: MapEntityDetailsState;
   private initialMapEntityLoadTimer: ReturnType<typeof setTimeout> | null = null;
+  private initialMapLoadingId: number | null = null;
   private route: ActivatedRoute;
   private sidebarService: SidebarService;
   @ViewChild(MapRendererComponent) private mapRenderer?: MapRendererComponent;
@@ -90,6 +91,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.satelliteService.resetState();
+    this.initialMapLoadingId = this.loadingState.begin('Loading Satellite Map', 'Rendering satellite map...');
     const section = this.route.snapshot.queryParamMap.get('section');
     const q = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
     this.setPanel(this.isPanelId(section) ? section : SatelliteIntelPanelEnum.Dashboard);
@@ -325,6 +327,10 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.isThreatLensLoading = isLoading;
   }
 
+  onSatelliteMapReady(): void {
+    this.completeInitialMapLoad();
+  }
+
   setLayer(layer: 'esri' | 'osm'): void {
     this.selectedLayer = layer;
   }
@@ -504,5 +510,13 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   private async loadMapEntities(): Promise<void> {
     await this.mapEntityDashboard.load();
+  }
+
+  private completeInitialMapLoad(): void {
+    if (this.initialMapLoadingId === null) {
+      return;
+    }
+    this.loadingState.end(this.initialMapLoadingId);
+    this.initialMapLoadingId = null;
   }
 }

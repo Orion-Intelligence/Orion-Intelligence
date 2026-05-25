@@ -30,7 +30,9 @@
             [topControlsInset]="showTopBar"
             (featureSelected)="onMapFeatureSelected($event)"
             (featureIdsSelected)="onMapEntityFeatureIdsSelected($event)"
-            (mapMoved)="onMapMoved($event)">
+            (mapMoved)="onMapMoved($event)"
+            (mapReady)="onSatelliteMapReady()"
+            (mapError)="onSatelliteMapReady()">
           </app-satellite-map-renderer>
           <app-map-entities-overlay
             [facilitiesVisible]="facilitiesVisible"
