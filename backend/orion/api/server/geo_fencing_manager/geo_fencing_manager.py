@@ -7,7 +7,6 @@ import httpx
 from starlette import status
 from starlette.responses import JSONResponse
 
-from orion.helper_manager.env_handler import env_handler
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 
@@ -30,17 +29,15 @@ class geo_fencing_manager:
     @staticmethod
     async def _post_to_micros(path: str, model, detail_path: str, user_id: str = "system", fallback_path: str | None = None):
         try:
-            base_url = env_handler.get_instance().env("NETWORK_API_BASE", "http://trusted-micros-api:8010") or "http://trusted-micros-api:8010"
-            base_url = base_url.rstrip("/")
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    f"{base_url}/{path}/{user_id}",
+                    f"http://trusted-micros-api:8010/{path}/{user_id}",
                     json=model.model_dump(),
                     timeout=120,
                 )
                 if fallback_path and response.status_code in (404, 405):
                     response = await client.post(
-                        f"{base_url}/{fallback_path}",
+                        f"http://trusted-micros-api:8010/{fallback_path}",
                         json=model.model_dump(),
                         timeout=120,
                     )
