@@ -6,14 +6,14 @@ import { FormsModule } from '@angular/forms';
 import { EntityDetailsComponent } from '../entity-details/entity-details';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
+import { CaseEditDrawerComponent } from '../case-details/case-edit-drawer/case-edit-drawer';
 
 @Component({
   selector: 'app-add-new-case',
-  imports: [CommonModule, FormsModule, EntityDetailsComponent],
+  imports: [CommonModule, FormsModule, EntityDetailsComponent, CaseEditDrawerComponent],
   templateUrl: './add-new-case.html'
 })
 export class AddNewCase {
-  isOpen = false;
   validationErrors: Record<string, string> = {};
   caseTypeOptions = CASE_TYPE_OPTIONS;
   intakeSourceOptions = INTAKE_SOURCE_OPTIONS;
@@ -31,10 +31,6 @@ export class AddNewCase {
 
   ngOnInit(): void {
     this.generateCaseId();
-    setTimeout(() => {
-      this.isOpen = true;
-      this.cdr.detectChanges();
-    }, 10);
   }
 
   generateCaseId(): void {
@@ -47,10 +43,7 @@ export class AddNewCase {
   }
 
   closePopup(): void {
-    this.isOpen = false;
-    setTimeout(() => {
-      this.close.emit();
-    }, 300);
+    this.close.emit();
   }
 
   toggleTag(tag: CaseTag): void {

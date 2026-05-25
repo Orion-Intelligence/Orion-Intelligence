@@ -6,7 +6,7 @@ import { EntityDetailsComponent } from '../entity-details/entity-details';
 import { ReportFeedbackCommentsComponent } from '../../../../../sections/report/social-interactions/report-feedback-comments/report-feedback-comments.component';
 import { ReportUserSidebarComponent } from '../../../../../sections/report/social-interactions/report-user-sidebar/report-user-sidebar.component';
 import { ReportFeedbackModel } from '../../../../../sections/report/templates/report_general/models/report-feedback.model';
-import { Case, CaseAnalyst, CaseArtifact, CaseArtifactRequest, CaseClosure, CaseClosureRequest, CaseComment, CaseCommentRequest, CaseEntity, CaseEntityRequest, CaseLink, CaseTag, CaseTask, CaseTaskRequest, CaseUpdateRequest } from '../../../../../shared/model/case-management/case.model';
+import { Case, CaseAnalyst, CaseArtifact, CaseArtifactRequest, CaseClosure, CaseClosureRequest, CaseComment, CaseCommentRequest, CaseEntity, CaseEntityRequest, CaseLink, CaseTag, CaseTask, CaseTaskRequest, CaseUpdateRequest, SharedCaseReport } from '../../../../../shared/model/case-management/case.model';
 import { CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
@@ -20,6 +20,8 @@ import { CaseRelatedEntitiesSectionComponent } from './case-related-entities-sec
 import { CaseTasksSectionComponent } from './case-tasks-section/case-tasks-section';
 import { CaseDetailsEditSection, CaseDetailsStore } from './case-details.store';
 import { caseInlineMotion, caseModeSwapMotion, caseSectionMotion } from './case-details.animations';
+import { CaseEditDrawerComponent } from './case-edit-drawer/case-edit-drawer';
+import { CasePdfExportService } from '../../case-management-service/case-pdf-export.service';
 
 @Component({
   selector: 'app-case-details',
@@ -33,6 +35,7 @@ import { caseInlineMotion, caseModeSwapMotion, caseSectionMotion } from './case-
     TooltipDirective,
     CaseArtifactsSectionComponent,
     CaseClosureSectionComponent,
+    CaseEditDrawerComponent,
     CaseLinkedCasesSectionComponent,
     CaseRelatedEntitiesSectionComponent,
     CaseTasksSectionComponent
@@ -66,6 +69,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   isCommentSaving = false;
   isShareCreating = false;
   isShareRevoking = false;
+  isPdfExporting = false;
   pendingShareAction: 'create' | 'revoke' | null = null;
   commentErrorMessage = '';
   caseTypeOptions = CASE_TYPE_OPTIONS;
@@ -78,7 +82,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   pendingNewArtifactFile: File | null = null;
   pendingNewArtifactFileInput: HTMLInputElement | null = null;
 
-  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef) {
+  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef) {
     super();
   }
 
@@ -357,6 +361,25 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     return this.pendingNewArtifactFile?.name || '';
   }
 
+  exportPdf(): void {
+    if (!this.caseData || this.isPdfExporting) {
+      return;
+    }
+    this.isPdfExporting = true;
+    this.casePdfExportService.exportCaseReport(this.buildCasePdfReport(this.caseData), {
+      filenameSuffix: 'case-report',
+      reportLabel: 'Case Report'
+    }).subscribe({
+      next: () => {
+        this.isPdfExporting = false;
+      },
+      error: err => {
+        this.isPdfExporting = false;
+        this.messageNotificationService.show(err?.message || 'Failed to export PDF');
+      }
+    });
+  }
+
   openShareConfirmation(): void {
     if (!this.caseData || this.isShareCreating) {
       return;
@@ -435,6 +458,130 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to revoke share links');
       }
     });
+  }
+
+  private buildCasePdfReport(caseData: Case): SharedCaseReport {
+    const report: SharedCaseReport = {
+      shareId: '',
+      caseId: caseData.caseId,
+      title: caseData.title,
+      description: caseData.description,
+      caseType: caseData.caseType,
+      otherValue: caseData.caseTypeOtherValue,
+      status: caseData.status,
+      severity: caseData.severity,
+      priority: caseData.priority,
+      tags: caseData.tags || [],
+      primaryEntityId: caseData.primaryEntityId || null,
+      entities: (caseData.entities || []).map(entity => {
+        const createdAt = this.toPdfDate(entity.createdAt);
+        const updatedAt = this.toPdfDate(entity.updatedAt);
+        return {
+          entityId: entity.entityId,
+          type: entity.type,
+          value: entity.value,
+          entityTypeOtherValue: entity.entityTypeOtherValue,
+          entitySourceOtherValue: entity.entitySourceOtherValue,
+          entityDescription: entity.entityDescription,
+          role: entity.role,
+          confidence: entity.confidence,
+          source: entity.source,
+          identifiers: entity.identifiers || [],
+          socialProfiles: entity.socialProfiles || [],
+          tags: entity.tags || [],
+          createdBy: entity.createdBy,
+          updatedBy: entity.updatedBy,
+          ...(createdAt ? { createdAt } : {}),
+          ...(updatedAt ? { updatedAt } : {})
+        };
+      }),
+      artifacts: (caseData.artifacts || []).map(artifact => {
+        const capturedAt = this.toPdfDate(artifact.capturedAt);
+        return {
+          artifactId: artifact.artifactId,
+          type: artifact.type,
+          title: artifact.title,
+          description: artifact.description,
+          source: artifact.source,
+          artifactTypeOtherValue: artifact.artifactTypeOtherValue,
+          artifactSourceOtherValue: artifact.artifactSourceOtherValue,
+          url: artifact.url,
+          fileName: artifact.fileName,
+          fileType: artifact.fileType,
+          tags: artifact.tags || [],
+          ...(capturedAt ? { capturedAt } : {})
+        };
+      }),
+      tasks: (caseData.tasks || []).map(task => {
+        const dueAt = this.toPdfDate(task.dueAt);
+        const createdAt = this.toPdfDate(task.createdAt);
+        const updatedAt = this.toPdfDate(task.updatedAt);
+        const completedAt = this.toPdfDate(task.completedAt);
+        return {
+          taskId: task.taskId,
+          title: task.title,
+          description: task.description,
+          status: task.status,
+          priority: task.priority,
+          assignedTo: task.assignedTo ? this.getAnalystLabel(task.assignedTo) : '',
+          ...(dueAt ? { dueAt } : {}),
+          ...(createdAt ? { createdAt } : {}),
+          ...(updatedAt ? { updatedAt } : {}),
+          ...(completedAt ? { completedAt } : {})
+        };
+      }),
+      linkedCases: (caseData.linkedCases || []).map(linkedCase => {
+        const createdAt = this.toPdfDate(linkedCase.createdAt);
+        return {
+          targetCaseId: linkedCase.targetCaseId,
+          relationship: linkedCase.relationship,
+          reason: linkedCase.reason,
+          createdBy: linkedCase.createdBy,
+          ...(createdAt ? { createdAt } : {})
+        };
+      }),
+      comments: (caseData.comments || []).map(comment => {
+        const createdAt = this.toPdfDate(comment.createdAt);
+        const updatedAt = this.toPdfDate(comment.updatedAt);
+        return {
+          commentId: comment.commentId,
+          body: comment.body,
+          entityIds: comment.entityIds || [],
+          artifactIds: comment.artifactIds || [],
+          createdBy: comment.createdBy,
+          ...(createdAt ? { createdAt } : {}),
+          ...(updatedAt ? { updatedAt } : {})
+        };
+      }),
+      closure: caseData.closure ? {
+        reason: caseData.closure.reason,
+        closureReasonOtherValue: caseData.closure.closureReasonOtherValue,
+        summary: caseData.closure.summary,
+        resolution: caseData.closure.resolution,
+        ...((this.toPdfDate(caseData.closure.closedAt || caseData.closedAt)) ? { closedAt: this.toPdfDate(caseData.closure.closedAt || caseData.closedAt) } : {})
+      } : null
+    };
+
+    const createdAt = this.toPdfDate(caseData.createdAt);
+    const updatedAt = this.toPdfDate(caseData.updatedAt);
+    const closedAt = this.toPdfDate(caseData.closedAt);
+    if (createdAt) {
+      report.createdAt = createdAt;
+    }
+    if (updatedAt) {
+      report.updatedAt = updatedAt;
+    }
+    if (closedAt) {
+      report.closedAt = closedAt;
+    }
+    return report;
+  }
+
+  private toPdfDate(value?: Date | string | null): string | undefined {
+    if (!value) {
+      return undefined;
+    }
+    return value instanceof Date ? value.toISOString() : String(value);
   }
 
   private cancelAllSectionModes(): void {
@@ -597,7 +744,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   openCloseCase(): void {
-    if (!this.caseData || this.isEditing || this.caseData.closure || this.caseData.status === 'closed') {
+    if (!this.caseData || this.isEditing || this.caseData.closure) {
       return;
     }
 
@@ -608,6 +755,16 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       summary: '',
       resolution: ''
     };
+  }
+
+  openEditClosure(): void {
+    if (!this.caseData || this.isEditing || !this.caseData.closure) {
+      return;
+    }
+
+    this.cancelAllSectionModes();
+    this.isClosingCase = true;
+    this.newClosure = JSON.parse(JSON.stringify(this.caseData.closure));
   }
 
   cancelSectionMode(): void {

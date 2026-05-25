@@ -2,23 +2,10 @@
     <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
         <div class="flex items-center gap-1.5">
             <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Linked Cases</h2>
-            <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Connections to other cases, such as duplicates, follow-ups, escalations, or cases sharing the same actor, victim, or infrastructure." class="h-4 w-4 shrink-0 ui-action-icon">
+            <img src="/assets/images/shared/theme/info.svg" alt="" aria-hidden="true" appTooltip="Connections to other cases, such as duplicates, follow-ups, escalations, or cases sharing the same actor, victim, or infrastructure." class="h-4 w-4 shrink-0 ui-action-icon">
         </div>
-        @if (isEditing) {
+        @if (!caseData.closure) {
         <div class="flex items-center gap-2">
-            <button @caseModeSwapMotion type="button" (click)="store.saveLinkedCases()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30" data-testid="case-linked-case-save">
-                <i class="bi bi-check-lg"></i> Save
-            </button>
-            <button @caseModeSwapMotion type="button" (click)="store.cancelEditing()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
-                <i class="bi bi-x-lg"></i> Cancel
-            </button>
-        </div>
-        }
-        @if (!store.isEditing && !caseData.closure) {
-        <div class="flex items-center gap-2">
-            <button type="button" (click)="store.enableEditing('linkedCases')" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-sm font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
-                <i class="bi bi-pencil-square"></i> Edit
-            </button>
             @if (hasLinkableCases(caseData)) {
             <button type="button" (click)="store.openAddLinkedCase()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
                 <i class="bi bi-plus-lg"></i> Add
@@ -28,21 +15,21 @@
         }
     </div>
 
-    @if (isEditing && editedCase) {
-    <div @caseModeSwapMotion class="space-y-3 p-4">
-        @for (linkedCase of editedCase.linkedCases; track $index; let i = $index) {
-        <div @caseListItemMotion class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
+    @if (isEditing && selectedEditableLinkedCase; as linkedCase) {
+    <app-case-edit-drawer title="Edit Linked Case" [subtitle]="linkedCase.targetCaseId || caseData.caseId" saveLabel="Save Link" saveTestId="case-linked-case-save" cancelTestId="case-linked-case-cancel" (save)="store.saveLinkedCases()" (cancel)="cancelLinkedCaseEditing()">
+        <div class="space-y-4 p-6">
+        <div @caseListItemMotion class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
             <div class="mb-3 flex items-center justify-between gap-3">
                 <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Link
-                    {{ i + 1 }}</span>
-                <button type="button" (click)="store.removeLinkedCase(i)" aria-label="Remove linked case" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" [attr.data-testid]="'case-linked-case-remove-' + i">
+                    {{ (editingLinkedCaseIndex || 0) + 1 }}</span>
+                <button type="button" (click)="store.removeLinkedCase(editingLinkedCaseIndex || 0)" aria-label="Remove linked case" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" [attr.data-testid]="'case-linked-case-remove-' + (editingLinkedCaseIndex || 0)">
                     <i class="bi bi-x-lg"></i> Remove
                 </button>
             </div>
-            <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
                 <div>
                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case</label>
-                    <select [(ngModel)]="linkedCase.targetCaseId" [name]="'linked-case-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-linked-case-select-' + i">
+                    <select [(ngModel)]="linkedCase.targetCaseId" name="linked-case" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-linked-case-select">
                         <option value="">Select case</option>
                         @for (candidateCase of getLinkableCases(editedCase, linkedCase.targetCaseId); track
                         candidateCase.caseId) {
@@ -53,84 +40,75 @@
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Relationship</label>
-                    <select [(ngModel)]="linkedCase.relationship" [name]="'linked-relationship-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-linked-case-relationship-select-' + i">
+                    <select [(ngModel)]="linkedCase.relationship" name="linked-relationship" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-linked-case-relationship-select">
                         @for (relationship of caseLinkRelationshipOptions; track relationship.value) {
                         <option [value]="relationship.value">{{ relationship.label }}</option>
                         }
                     </select>
                 </div>
-                <div class="md:col-span-2">
+                <div class="sm:col-span-2">
                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Reason</label>
-                    <input [(ngModel)]="linkedCase.reason" [name]="'linked-reason-' + i" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-linked-case-reason-input-' + i" />
+                    <input [(ngModel)]="linkedCase.reason" name="linked-reason" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-linked-case-reason-input" />
                 </div>
             </div>
         </div>
-        } @empty {
-        <div class="text-sm text-[var(--color-text4)]">
-            {{ hasLinkableCases(editedCase) ? 'No linked cases added.' : 'No report to attach.' }}
         </div>
-        }
-    </div>
-    } @else {
+    </app-case-edit-drawer>
+    }
     <div @caseModeSwapMotion class="space-y-3 p-4">
         @for (linkedCase of caseData.linkedCases; track linkedCase.targetCaseId) {
-        <button @caseListItemMotion type="button" (click)="store.goToLinkedCase(linkedCase.targetCaseId)" class="w-full rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3 text-left transition hover:bg-[var(--tenant-chip-hover)]" [attr.data-testid]="'case-linked-case-card-' + $index">
-            <div class="text-sm font-semibold text-[var(--color-text1)]" [attr.data-testid]="'case-linked-case-target-value-' + $index">{{ linkedCase.targetCaseId }}
-            </div>
-            <div class="mt-1 text-xs text-[var(--color-text4)]">
-                {{ formatLabel(linkedCase.relationship) }} · {{ linkedCase.reason }}
-            </div>
-        </button>
+        <div @caseListItemMotion class="flex flex-col gap-2 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3 transition hover:bg-[var(--tenant-chip-hover)] sm:flex-row sm:items-start sm:justify-between" [attr.data-testid]="'case-linked-case-card-' + $index">
+            <button type="button" (click)="store.goToLinkedCase(linkedCase.targetCaseId)" class="min-w-0 flex-1 text-left">
+                <div class="text-sm font-semibold text-[var(--color-text1)]" [attr.data-testid]="'case-linked-case-target-value-' + $index">{{ linkedCase.targetCaseId }}
+                </div>
+                <div class="mt-1 text-xs text-[var(--color-text4)]">
+                    {{ formatLabel(linkedCase.relationship) }} · {{ linkedCase.reason }}
+                </div>
+            </button>
+
+            @if (!caseData.closure) {
+            <button type="button" (click)="openEditLinkedCase($index)" class="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-xs font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
+                <i class="bi bi-pencil-square"></i> Edit
+            </button>
+            }
+        </div>
         } @empty {
         <div class="text-sm text-[var(--color-text4)]">No linked cases added.</div>
         }
     </div>
-    }
 
     @if (isAddingLinkedCase && newLinkedCase) {
-    <div @caseSectionMotion class="space-y-3 p-4 border-t border-[var(--color-border)]">
-        <div @caseListItemMotion class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
-            <div class="mb-3 flex items-center justify-between gap-3">
-                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">
-                    Link {{ (caseData.linkedCases || []).length + 1 }}
-                </span>
-                <div class="flex gap-2">
-                    <button type="button" (click)="store.saveNewLinkedCase()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300">
-                        <i class="bi bi-check-lg"></i> Save
-                    </button>
-                    <button type="button" (click)="store.cancelSectionMode()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
-                        <i class="bi bi-x-lg"></i> Cancel
-                    </button>
-                </div>
-            </div>
+    <app-case-edit-drawer title="Add Linked Case" [subtitle]="caseData.caseId" saveLabel="Save Link" saveTestId="case-linked-case-add-save" cancelTestId="case-linked-case-add-cancel" (save)="store.saveNewLinkedCase()" (cancel)="store.cancelSectionMode()">
+        <div class="space-y-4 p-6">
+            <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case</label>
+                        <select [(ngModel)]="newLinkedCase.targetCaseId" name="new-linked-case" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                            <option value="">Select case</option>
+                            @for (candidateCase of getLinkableCases(caseData); track candidateCase.caseId) {
+                            <option [value]="candidateCase.caseId">{{ candidateCase.caseId }} · {{
+                                candidateCase.title }}</option>
+                            }
+                        </select>
+                    </div>
 
-            <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
-                <div>
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case</label>
-                    <select [(ngModel)]="newLinkedCase.targetCaseId" name="new-linked-case" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
-                        <option value="">Select case</option>
-                        @for (candidateCase of getLinkableCases(caseData); track candidateCase.caseId) {
-                        <option [value]="candidateCase.caseId">{{ candidateCase.caseId }} · {{
-                            candidateCase.title }}</option>
-                        }
-                    </select>
-                </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Relationship</label>
+                        <select [(ngModel)]="newLinkedCase.relationship" name="new-linked-relationship" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                            @for (relationship of caseLinkRelationshipOptions; track relationship.value) {
+                            <option [value]="relationship.value">{{ relationship.label }}</option>
+                            }
+                        </select>
+                    </div>
 
-                <div>
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Relationship</label>
-                    <select [(ngModel)]="newLinkedCase.relationship" name="new-linked-relationship" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
-                        @for (relationship of caseLinkRelationshipOptions; track relationship.value) {
-                        <option [value]="relationship.value">{{ relationship.label }}</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="md:col-span-2">
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Reason</label>
-                    <input [(ngModel)]="newLinkedCase.reason" name="new-linked-reason" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+                    <div class="sm:col-span-2">
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Reason</label>
+                        <input [(ngModel)]="newLinkedCase.reason" name="new-linked-reason" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </app-case-edit-drawer>
     }
 </div>

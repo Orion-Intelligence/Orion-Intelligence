@@ -44,3 +44,23 @@ export const caseInlineMotion = trigger('caseInlineMotion', [
     animate(`80ms ${leaveEase}`, style({ opacity: 0 }))
   ])
 ]);
+
+export const caseDrawerOverlayMotion = trigger('caseDrawerOverlayMotion', [
+  transition(':enter', [
+    style({ opacity: 0 }),
+    animate(`120ms ${enterEase}`, style({ opacity: 1 }))
+  ]),
+  transition(':leave', [
+    animate(`100ms ${leaveEase}`, style({ opacity: 0 }))
+  ])
+]);
+
+export const caseDrawerMotion = trigger('caseDrawerMotion', [
+  transition(':enter', [
+    style({ transform: 'translateX(102%)' }),
+    animate(`240ms ${enterEase}`, style({ transform: 'translateX(0)' }))
+  ]),
+  transition(':leave', [
+    animate(`170ms ${leaveEase}`, style({ transform: 'translateX(102%)' }))
+  ])
+]);

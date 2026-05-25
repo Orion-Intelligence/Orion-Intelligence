@@ -1,25 +1,13 @@
-@if (!isAddingRelatedEntity || getRelatedEntities(caseData).length > 0) {
 <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
     <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
         <div class="flex items-center gap-1.5">
             <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Related Entities
             </h2>
-            <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Other entities connected to the case, such as affected assets, accounts, indicators, sources, or linked actors." class="h-4 w-4 shrink-0 ui-action-icon">
+            <img src="/assets/images/shared/theme/info.svg" alt="" aria-hidden="true" appTooltip="Other entities connected to the case, such as affected assets, accounts, indicators, sources, or linked actors." class="h-4 w-4 shrink-0 ui-action-icon">
         </div>
 
         <div class="flex items-center gap-2">
-            @if (isEditing) {
-            <button type="button" (click)="store.saveRelatedEntities()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300">
-                <i class="bi bi-check-lg"></i> Save
-            </button>
-            <button type="button" (click)="store.cancelEditing()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
-                <i class="bi bi-x-lg"></i> Cancel
-            </button>
-            }
-            @if (!caseData.closure && !store.isEditing && !isAddingRelatedEntity) {
-            <button type="button" (click)="store.enableEditing('relatedEntities')" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-sm font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
-                <i class="bi bi-pencil-square"></i> Edit
-            </button>
+            @if (!caseData.closure) {
             <button type="button" (click)="store.openAddRelatedEntity()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
                 <i class="bi bi-plus-lg"></i> Add
             </button>
@@ -27,48 +15,62 @@
         </div>
     </div>
 
+    @if (isEditing && selectedEditableRelatedEntity; as editableEntity) {
+    <app-case-edit-drawer title="Edit Related Entity" [subtitle]="editableEntity.value || 'Related Entity'" saveLabel="Save Entity" saveTestId="case-related-entity-save" cancelTestId="case-related-entity-cancel" (save)="store.saveRelatedEntities()" (cancel)="cancelRelatedEntityEditing()">
+        <div class="p-6">
+            <app-entity-details @caseListItemMotion [entity]="editableEntity" [isMainEntity]="false" [showTitle]="false"
+                [showTopDivider]="false" [showRoleRelationshipFields]="true" [showInlineSaveButtons]="false" [entityIndex]="selectedEditableRelatedEntityIndex"
+                [linkableEntities]="getLinkableEntities(editableEntity.entityId, editedCase)"
+                [allCaseEntities]="editedCase?.entities || []" (remove)="store.removeRelatedEntity(selectedEditableRelatedEntityIndex)"
+                (save)="store.saveRelatedEntities()">
+            </app-entity-details>
+        </div>
+    </app-case-edit-drawer>
+    }
+
     @if (getRelatedEntities(caseData).length > 0) {
     <div @caseModeSwapMotion class="space-y-4 p-4">
-        @if (isEditing && editedCase) {
-        @for (entity of getRelatedEntities(editedCase); track entity.entityId; let i = $index) {
-        <app-entity-details @caseListItemMotion [entity]="entity" [isMainEntity]="false" [showTitle]="true"
-            [showTopDivider]="false" [showRoleRelationshipFields]="true" [entityIndex]="i"
-            [linkableEntities]="getLinkableEntities(entity.entityId, editedCase)"
-            [allCaseEntities]="editedCase.entities || []" (remove)="store.removeRelatedEntity(i)"
-            (save)="store.saveRelatedEntities()">
-        </app-entity-details>
-        }
-        } @else {
         @for (entity of getRelatedEntities(caseData); track entity.entityId; let i = $index) {
-        <div @caseListItemMotion class="overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-expand-bg)]">
+        <div @caseListItemMotion class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
 
-            <button type="button" (click)="toggleRelatedEntity(entity.entityId)" class="flex w-full flex-col gap-1 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3 text-left transition hover:bg-[var(--color-blue-810)]" [attr.aria-expanded]="isRelatedEntityExpanded(entity.entityId)">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <button type="button" (click)="toggleRelatedEntity(entity.entityId)" class="min-w-0 flex-1 text-left" [attr.aria-expanded]="isRelatedEntityExpanded(entity.entityId)">
+                    <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                        Related Entity {{ i + 1 }}
+                    </div>
 
-                <div class="flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-1.5">
-                        <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">
-                            Related Entity {{ i + 1 }}
-                        </h2>
+                        <div class="text-sm font-semibold text-[var(--color-text1)] break-words">
+                            {{ entity.value || 'Untitled entity' }}
+                        </div>
 
                         <i class="bi text-xs text-[var(--color-text4)]" [ngClass]="isRelatedEntityExpanded(entity.entityId) ? 'bi-chevron-up' : 'bi-chevron-down'">
                         </i>
                     </div>
 
-                    <span class="w-fit rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text2)]">
+                    <div class="mt-1 text-xs text-[var(--color-text4)]">
+                        {{ getLinkedEntityDisplayLabel(entity.linkedEntityId, caseData) }} ·
+                        {{ getDisplayLabel(entity.source, entity.entitySourceOtherValue) }}
+                    </div>
+                </button>
+
+                <div class="flex flex-wrap gap-2 sm:justify-end">
+                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">
                         {{ getDisplayLabel(entity.type, entity.entityTypeOtherValue) }}
                     </span>
-                </div>
 
-                <div class="text-xs font-medium text-[var(--color-text4)]">
-                    {{ getLinkedEntityDisplayLabel(entity.linkedEntityId, caseData) }} ·
-                    {{ getDisplayLabel(entity.source, entity.entitySourceOtherValue) }}
+                    @if (!caseData.closure) {
+                    <button type="button" (click)="openEditRelatedEntity(entity.entityId)" class="inline-flex h-7 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-xs font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
+                        <i class="bi bi-pencil-square"></i> Edit
+                    </button>
+                    }
                 </div>
-            </button>
+            </div>
 
             @if (isRelatedEntityExpanded(entity.entityId)) {
-            <div @caseModeSwapMotion>
+            <div @caseModeSwapMotion class="mt-3 border-t border-[var(--tenant-line)] pt-3">
                 <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
-                    <div class="min-w-0 p-4">
+                    <div class="min-w-0 pb-4 lg:pb-0 lg:pr-4">
                         <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
                             Value
                         </div>
@@ -96,7 +98,7 @@
                         }
                     </div>
 
-                    <div class="border-t border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4 lg:border-l lg:border-t-0">
+                    <div class="border-t border-[var(--tenant-line)] pt-4 lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
                         <div class="grid grid-cols-2 gap-x-5 gap-y-4">
                             <div>
                                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
@@ -219,38 +221,20 @@
 
         </div>
         }
-        }
     </div>
     } @else {
     <div @caseModeSwapMotion class="p-4 text-sm text-[var(--color-text4)]">No related entities added.</div>
     }
 </div>
-}
 
 @if (isAddingRelatedEntity && newRelatedEntity) {
-<div @caseSectionMotion class="mx-4 mb-4 overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]">
-    <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
-        <h2 class="m-0 text-[16px] font-bold text-[var(--color-text1)]">
-            Related Entity {{ getRelatedEntities(caseData).length + 1 }}
-        </h2>
-
-        <div class="flex items-center gap-2">
-            <button type="button" (click)="store.saveNewRelatedEntity()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300">
-                <i class="bi bi-check-lg"></i> Save
-            </button>
-
-            <button type="button" (click)="store.cancelSectionMode()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
-                <i class="bi bi-x-lg"></i> Cancel
-            </button>
-        </div>
-    </div>
-
-    <div class="p-4">
+<app-case-edit-drawer title="Add Related Entity" [subtitle]="caseData.caseId" saveLabel="Save Entity" saveTestId="case-related-entity-add-save" cancelTestId="case-related-entity-add-cancel" (save)="store.saveNewRelatedEntity()" (cancel)="store.cancelSectionMode()">
+    <div class="p-6">
         <app-entity-details [entity]="newRelatedEntity" [isMainEntity]="false" [showTitle]="false"
-            [showTopDivider]="false" [showRoleRelationshipFields]="true" [entityIndex]="0"
+            [showTopDivider]="false" [showRoleRelationshipFields]="true" [showInlineSaveButtons]="false" [entityIndex]="0"
             [linkableEntities]="getLinkableEntities(newRelatedEntity.entityId, caseData)"
             [allCaseEntities]="caseData.entities || []" (save)="store.saveNewRelatedEntity()">
         </app-entity-details>
     </div>
-</div>
+</app-case-edit-drawer>
 }

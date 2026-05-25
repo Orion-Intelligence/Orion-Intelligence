@@ -6,10 +6,11 @@ import { EntityDetailsComponent } from '../../entity-details/entity-details';
 import { caseListItemMotion, caseModeSwapMotion, caseSectionMotion } from '../case-details.animations';
 import { formatCaseConfidence, formatCaseLabel, getCaseDisplayLabel, getFormattedCaseDateTime, getLinkableCaseEntities, getLinkedCaseEntityDisplayLabel, getRelatedCaseEntities } from '../case-details-formatters';
 import { CaseDetailsStore } from '../case-details.store';
+import { CaseEditDrawerComponent } from '../case-edit-drawer/case-edit-drawer';
 
 @Component({
   selector: 'app-case-related-entities-section',
-  imports: [CommonModule, EntityDetailsComponent, TooltipDirective],
+  imports: [CommonModule, EntityDetailsComponent, TooltipDirective, CaseEditDrawerComponent],
   animations: [caseListItemMotion, caseModeSwapMotion, caseSectionMotion],
   host: { class: 'block' },
   templateUrl: './case-related-entities-section.html'
@@ -17,6 +18,7 @@ import { CaseDetailsStore } from '../case-details.store';
 export class CaseRelatedEntitiesSectionComponent {
   private expandedRelatedEntityIds = new Set<string>();
 
+  editingRelatedEntityId: string | null = null;
   readonly store = inject(CaseDetailsStore);
 
   get caseData(): Case {
@@ -37,6 +39,16 @@ export class CaseRelatedEntitiesSectionComponent {
 
   get newRelatedEntity(): CaseEntity | null {
     return this.store.newRelatedEntity;
+  }
+
+  get selectedEditableRelatedEntity(): CaseEntity | null {
+    const relatedEntities = this.getRelatedEntities(this.editedCase);
+    return relatedEntities.find(entity => entity.entityId === this.editingRelatedEntityId) || null;
+  }
+
+  get selectedEditableRelatedEntityIndex(): number {
+    return this.getRelatedEntities(this.editedCase)
+      .findIndex(entity => entity.entityId === this.editingRelatedEntityId);
   }
 
   getRelatedEntities(caseItem: Case | null = this.caseData): CaseEntity[] {
@@ -61,6 +73,16 @@ export class CaseRelatedEntitiesSectionComponent {
 
   isRelatedEntityExpanded(entityId: string): boolean {
     return this.expandedRelatedEntityIds.has(entityId);
+  }
+
+  openEditRelatedEntity(entityId: string): void {
+    this.editingRelatedEntityId = entityId;
+    this.store.enableEditing('relatedEntities');
+  }
+
+  cancelRelatedEntityEditing(): void {
+    this.editingRelatedEntityId = null;
+    this.store.cancelEditing();
   }
 
   getDisplayLabel(value?: string | null, otherValue?: string | null): string {

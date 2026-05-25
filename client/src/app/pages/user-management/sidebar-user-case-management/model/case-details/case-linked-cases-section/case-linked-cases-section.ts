@@ -7,10 +7,11 @@ import { TooltipDirective } from '../../../../../../shared/directive/tooltip-dir
 import { caseListItemMotion, caseModeSwapMotion, caseSectionMotion } from '../case-details.animations';
 import { formatCaseLabel } from '../case-details-formatters';
 import { CaseDetailsStore } from '../case-details.store';
+import { CaseEditDrawerComponent } from '../case-edit-drawer/case-edit-drawer';
 
 @Component({
   selector: 'app-case-linked-cases-section',
-  imports: [CommonModule, FormsModule, TooltipDirective],
+  imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent],
   animations: [caseListItemMotion, caseModeSwapMotion, caseSectionMotion],
   host: { class: 'block' },
   templateUrl: './case-linked-cases-section.html'
@@ -18,6 +19,7 @@ import { CaseDetailsStore } from '../case-details.store';
 export class CaseLinkedCasesSectionComponent {
   readonly store = inject(CaseDetailsStore);
   caseLinkRelationshipOptions = CASE_LINK_RELATIONSHIP_OPTIONS;
+  editingLinkedCaseIndex: number | null = null;
 
   get caseData(): Case {
     return this.store.caseData as Case;
@@ -41,6 +43,24 @@ export class CaseLinkedCasesSectionComponent {
 
   get accessibleCases(): Case[] {
     return this.store.accessibleCases;
+  }
+
+  get selectedEditableLinkedCase(): CaseLink | null {
+    if (this.editingLinkedCaseIndex === null) {
+      return null;
+    }
+
+    return this.editedCase?.linkedCases?.[this.editingLinkedCaseIndex] || null;
+  }
+
+  openEditLinkedCase(index: number): void {
+    this.editingLinkedCaseIndex = index;
+    this.store.enableEditing('linkedCases');
+  }
+
+  cancelLinkedCaseEditing(): void {
+    this.editingLinkedCaseIndex = null;
+    this.store.cancelEditing();
   }
 
   hasLinkedCasesChanged(): boolean {

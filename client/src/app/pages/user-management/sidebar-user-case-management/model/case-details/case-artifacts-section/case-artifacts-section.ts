@@ -7,10 +7,11 @@ import { TooltipDirective } from '../../../../../../shared/directive/tooltip-dir
 import { caseInlineMotion, caseListItemMotion, caseModeSwapMotion, caseSectionMotion } from '../case-details.animations';
 import { CaseDateField, CaseDateTarget, formatCaseLabel, getCaseDateInputValue, getCaseDisplayLabel, getFormattedCaseDateTime, setCaseDateInputValue } from '../case-details-formatters';
 import { CaseDetailsStore } from '../case-details.store';
+import { CaseEditDrawerComponent } from '../case-edit-drawer/case-edit-drawer';
 
 @Component({
   selector: 'app-case-artifacts-section',
-  imports: [CommonModule, FormsModule, TooltipDirective],
+  imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent],
   animations: [caseInlineMotion, caseListItemMotion, caseModeSwapMotion, caseSectionMotion],
   host: { class: 'block' },
   templateUrl: './case-artifacts-section.html'
@@ -19,6 +20,7 @@ export class CaseArtifactsSectionComponent {
   readonly store = inject(CaseDetailsStore);
   artifactTypeOptions = ARTIFACT_TYPE_OPTIONS;
   sourceTypeOptions = SOURCE_TYPE_OPTIONS;
+  editingArtifactIndex: number | null = null;
 
   get caseData(): Case {
     return this.store.caseData as Case;
@@ -42,6 +44,24 @@ export class CaseArtifactsSectionComponent {
 
   get pendingNewArtifactFileName(): string {
     return this.store.getPendingNewArtifactFileName();
+  }
+
+  get selectedEditableArtifact(): CaseArtifact | null {
+    if (this.editingArtifactIndex === null) {
+      return null;
+    }
+
+    return this.editedCase?.artifacts?.[this.editingArtifactIndex] || null;
+  }
+
+  openEditArtifact(index: number): void {
+    this.editingArtifactIndex = index;
+    this.store.enableEditing('artifacts');
+  }
+
+  cancelArtifactEditing(): void {
+    this.editingArtifactIndex = null;
+    this.store.cancelEditing();
   }
 
   hasArtifactsChanged(): boolean {

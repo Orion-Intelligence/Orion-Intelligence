@@ -1,4 +1,4 @@
-<div [ngClass]="isMainEntity ? (showTopDivider ? 'mt-7 space-y-4 border-t border-[var(--color-border)] pt-7' : 'space-y-4') : 'mb-6 space-y-4 rounded-[8px] border border-[var(--color-border)] p-4'">
+<div [ngClass]="isMainEntity ? (showTopDivider ? 'mt-7 space-y-5 border-t border-[var(--color-border)] pt-7' : 'space-y-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4') : 'mb-6 space-y-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4'">
 
     @if (showTitle) {
     <div class="flex items-center justify-between gap-3">
@@ -13,7 +13,7 @@
     </div>
     }
 
-    <div class="grid gap-3 md:grid-cols-2">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
                 Entity Type <span class="text-red-500">*</span>
@@ -36,7 +36,7 @@
         </div>
 
         @if (entity.type === 'other') {
-        <div class="md:col-span-2">
+        <div class="sm:col-span-2">
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
                 Other Entity Type <span class="text-red-500">*</span>
             </label>
@@ -56,7 +56,7 @@
         <input type="text" [(ngModel)]="entity.entityDescription" [name]="'entityDescription-' + controlPrefix" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Optional description" />
     </div>
 
-    <div class="grid gap-3 md:grid-cols-2">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         @if (showRoleRelationshipFields) {
         <div>
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Role</label>
@@ -110,7 +110,7 @@
         </div>
 
         @if (entity.source === 'other') {
-        <div class="md:col-span-2">
+        <div class="sm:col-span-2">
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
                 Other Source <span class="text-red-500">*</span>
             </label>
@@ -128,7 +128,7 @@
             <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Tags</label>
             <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Labels used to classify the entity for triage, review, and reporting." class="h-4 w-4 shrink-0 ui-action-icon">
         </div>
-        <div class="flex gap-2 overflow-x-auto pb-1 pr-8 [mask-image:linear-gradient(to_right,black_calc(100%-32px),transparent)]">
+        <div class="flex flex-wrap gap-2">
             @for (tag of tagOptions; track tag.value) {
             <button type="button" (click)="toggleTag(tag.value)" class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isTagSelected(tag.value) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
                 {{ tag.label }}
@@ -175,7 +175,7 @@
                 </button>
             </div>
 
-            <div class="grid gap-2 md:grid-cols-2">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <select [(ngModel)]="profile.platform" [name]="'platform-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
                     <option value="">Select Platform</option>
                     @for (platform of socialMediaPlatforms; track platform.value) {
@@ -186,12 +186,12 @@
                 <input type="text" [(ngModel)]="profile.username" [name]="'username-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Username / handle" />
 
                 @if (profile.platform === 'other') {
-                <input type="text" [(ngModel)]="profile.platformOtherValue" [name]="'platformOtherValue-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 md:col-span-2" placeholder="Specify other platform" />
+                <input type="text" [(ngModel)]="profile.platformOtherValue" [name]="'platformOtherValue-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 sm:col-span-2" placeholder="Specify other platform" />
                 }
 
-                <input type="text" [(ngModel)]="profile.displayName" [name]="'profileDisplayName-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 md:col-span-2" placeholder="Display name" />
+                <input type="text" [(ngModel)]="profile.displayName" [name]="'profileDisplayName-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 sm:col-span-2" placeholder="Display name" />
 
-                <input type="url" [(ngModel)]="profile.profileUrl" [name]="'profileUrl-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 md:col-span-2" placeholder="Profile URL" />
+                <input type="url" [(ngModel)]="profile.profileUrl" [name]="'profileUrl-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 sm:col-span-2" placeholder="Profile URL" />
             </div>
 
             @if (getSocialMediaError(profile)) {
@@ -238,7 +238,7 @@
                 </button>
             </div>
 
-            <div class="grid gap-2 md:grid-cols-2">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <select [(ngModel)]="identifier.type" [name]="'idType-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
                     <option value="">Select Type</option>
                     @for (type of identifierTypes; track type.value) {
@@ -249,12 +249,12 @@
                 <input type="text" [(ngModel)]="identifier.value" [name]="'idValue-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Value" />
 
                 @if (identifier.type === 'other') {
-                <input type="text" [(ngModel)]="identifier.identifierTypeOtherValue" [name]="'identifierTypeOtherValue-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 md:col-span-2" placeholder="Specify other identifier type" />
+                <input type="text" [(ngModel)]="identifier.identifierTypeOtherValue" [name]="'identifierTypeOtherValue-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 sm:col-span-2" placeholder="Specify other identifier type" />
                 }
 
-                <input type="text" [(ngModel)]="identifier.issuer" [name]="'idIssuer-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 md:col-span-2" placeholder="Issuer" />
+                <input type="text" [(ngModel)]="identifier.issuer" [name]="'idIssuer-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 sm:col-span-2" placeholder="Issuer" />
 
-                <label class="flex h-[38px] cursor-pointer items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 md:col-span-2">
+                <label class="flex h-[38px] cursor-pointer items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 sm:col-span-2">
                     <span class="text-xs font-medium text-[var(--color-text2)]">Verified</span>
                     <span class="relative inline-flex items-center">
                         <input type="checkbox" [(ngModel)]="identifier.verified" [name]="'idVerified-' + controlPrefix + '-' + i" class="sr-only peer" aria-label="Identifier verified" />

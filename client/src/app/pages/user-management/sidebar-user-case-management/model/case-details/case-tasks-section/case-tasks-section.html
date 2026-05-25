@@ -2,24 +2,10 @@
     <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
         <div class="flex items-center gap-1.5">
             <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Tasks</h2>
-            <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Investigation or follow-up work items that can be assigned to analysts on this case." class="h-4 w-4 shrink-0 ui-action-icon">
+            <img src="/assets/images/shared/theme/info.svg" alt="" aria-hidden="true" appTooltip="Investigation or follow-up work items that can be assigned to analysts on this case." class="h-4 w-4 shrink-0 ui-action-icon">
         </div>
-        @if (isEditing) {
+        @if (!caseData.closure) {
         <div class="flex items-center gap-2">
-            <button @caseModeSwapMotion type="button" (click)="store.saveTasks()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300" data-testid="case-task-save">
-                <i class="bi bi-check-lg"></i> Save
-            </button>
-            <button @caseModeSwapMotion type="button" (click)="store.cancelEditing()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
-                <i class="bi bi-x-lg"></i> Cancel
-            </button>
-        </div>
-        }
-
-        @if (!store.isEditing && !caseData.closure) {
-        <div class="flex items-center gap-2">
-            <button type="button" (click)="store.enableEditing('tasks')" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-sm font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
-                <i class="bi bi-pencil-square"></i> Edit
-            </button>
             <button type="button" (click)="store.openAddTask()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
                 <i class="bi bi-plus-lg"></i> Add
             </button>
@@ -27,25 +13,25 @@
         }
     </div>
 
-    @if (isEditing && editedCase) {
-    <div @caseModeSwapMotion class="space-y-3 p-4">
-        @for (task of editedCase.tasks; track task.taskId; let i = $index) {
-        <div @caseListItemMotion class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
+    @if (isEditing && selectedEditableTask; as task) {
+    <app-case-edit-drawer title="Edit Task" [subtitle]="task.title || 'Task'" saveLabel="Save Task" saveTestId="case-task-save" cancelTestId="case-task-cancel" (save)="store.saveTasks()" (cancel)="cancelTaskEditing()">
+        <div class="space-y-4 p-6">
+        <div @caseListItemMotion class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
             <div class="mb-3 flex items-center justify-between gap-3">
                 <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Task
-                    {{ i + 1 }}</span>
-                <button type="button" (click)="store.removeTask(i)" aria-label="Remove task" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" [attr.data-testid]="'case-task-remove-' + i">
+                    {{ (editingTaskIndex || 0) + 1 }}</span>
+                <button type="button" (click)="store.removeTask(editingTaskIndex || 0)" aria-label="Remove task" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" [attr.data-testid]="'case-task-remove-' + (editingTaskIndex || 0)">
                     <i class="bi bi-x-lg"></i> Remove
                 </button>
             </div>
-            <div class="grid gap-3 md:grid-cols-2">
-                <div class="md:col-span-2">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div class="sm:col-span-2">
                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
-                    <input [(ngModel)]="task.title" [name]="'task-title-' + i" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-title-input-' + i" />
+                    <input [(ngModel)]="task.title" name="task-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-title-input" />
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
-                    <select [(ngModel)]="task.status" [name]="'task-status-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-status-select-' + i">
+                    <select [(ngModel)]="task.status" name="task-status" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-status-select">
                         @for (status of taskStatusOptions; track status.value) {
                         <option [value]="status.value">{{ status.label }}</option>
                         }
@@ -53,7 +39,7 @@
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Priority</label>
-                    <select [(ngModel)]="task.priority" [name]="'task-priority-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-priority-select-' + i">
+                    <select [(ngModel)]="task.priority" name="task-priority" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-priority-select">
                         @for (priority of priorityOptions; track priority) {
                         <option [value]="priority" class="capitalize">{{ priority }}</option>
                         }
@@ -62,7 +48,7 @@
                 <div>
                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Assign
                         To</label>
-                    <select [(ngModel)]="task.assignedTo" [name]="'task-assignee-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-assignee-select-' + i">
+                    <select [(ngModel)]="task.assignedTo" name="task-assignee" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-assignee-select">
                         <option value="">Unassigned</option>
                         @for (analyst of getCaseAnalysts(editedCase); track analyst.id) {
                         <option [value]="analyst.id">{{ analyst.username || analyst.email || analyst.id
@@ -73,19 +59,17 @@
                 <div>
                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Due
                         Date</label>
-                    <input [ngModel]="getDateInputValue(task.dueAt)" (ngModelChange)="setDateInputValue(task, 'dueAt', $event)" [name]="'task-due-' + i" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-due-input-' + i" />
+                    <input [ngModel]="getDateInputValue(task.dueAt)" (ngModelChange)="setDateInputValue(task, 'dueAt', $event)" name="task-due" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-due-input" />
                 </div>
-                <div class="md:col-span-2">
+                <div class="sm:col-span-2">
                     <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
-                    <textarea [(ngModel)]="task.description" [name]="'task-description-' + i" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-description-input-' + i"></textarea>
+                    <textarea [(ngModel)]="task.description" name="task-description" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-description-input"></textarea>
                 </div>
             </div>
         </div>
-        } @empty {
-        <div class="text-sm text-[var(--color-text4)]">No tasks added.</div>
-        }
-    </div>
-    } @else {
+        </div>
+    </app-case-edit-drawer>
+    }
     <div @caseModeSwapMotion class="space-y-3 p-4">
         @for (task of (caseData.tasks || []); track task.taskId) {
         <div @caseListItemMotion class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3" [attr.data-testid]="'case-task-card-' + $index">
@@ -104,6 +88,11 @@
                         formatLabel(task.status) }}</span>
                     <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
                         formatLabel(task.priority) }}</span>
+                    @if (!caseData.closure) {
+                    <button type="button" (click)="openEditTask($index)" class="inline-flex h-7 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-xs font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
+                        <i class="bi bi-pencil-square"></i> Edit
+                    </button>
+                    }
                 </div>
             </div>
             <div class="mt-3 grid gap-2 text-xs text-[var(--color-text2)] sm:grid-cols-2">
@@ -121,73 +110,60 @@
         <div class="text-sm text-[var(--color-text4)]">No tasks added.</div>
         }
     </div>
-    }
 
     @if (isAddingTask && newTask) {
-    <div @caseSectionMotion class="space-y-3 p-4 border-t border-[var(--color-border)]">
-        <div @caseListItemMotion class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
-            <div class="mb-3 flex items-center justify-between gap-3">
-                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">
-                    Task {{ (caseData.tasks || []).length + 1 }}
-                </span>
-                <div class="flex gap-2">
-                    <button type="button" (click)="store.saveNewTask()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300">
-                        <i class="bi bi-check-lg"></i> Save
-                    </button>
-                    <button type="button" (click)="store.cancelSectionMode()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
-                        <i class="bi bi-x-lg"></i> Cancel
-                    </button>
-                </div>
-            </div>
+    <app-case-edit-drawer title="Add Task" [subtitle]="caseData.caseId" saveLabel="Save Task" saveTestId="case-task-add-save" cancelTestId="case-task-add-cancel" (save)="store.saveNewTask()" (cancel)="store.cancelSectionMode()">
+        <div class="space-y-4 p-6">
+            <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="sm:col-span-2">
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
+                        <input [(ngModel)]="newTask.title" name="new-task-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+                    </div>
 
-            <div class="grid gap-3 md:grid-cols-2">
-                <div class="md:col-span-2">
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
-                    <input [(ngModel)]="newTask.title" name="new-task-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
-                </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
+                        <select [(ngModel)]="newTask.status" name="new-task-status" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                            @for (status of taskStatusOptions; track status.value) {
+                            <option [value]="status.value">{{ status.label }}</option>
+                            }
+                        </select>
+                    </div>
 
-                <div>
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
-                    <select [(ngModel)]="newTask.status" name="new-task-status" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
-                        @for (status of taskStatusOptions; track status.value) {
-                        <option [value]="status.value">{{ status.label }}</option>
-                        }
-                    </select>
-                </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Priority</label>
+                        <select [(ngModel)]="newTask.priority" name="new-task-priority" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                            @for (priority of priorityOptions; track priority) {
+                            <option [value]="priority">{{ priority }}</option>
+                            }
+                        </select>
+                    </div>
 
-                <div>
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Priority</label>
-                    <select [(ngModel)]="newTask.priority" name="new-task-priority" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
-                        @for (priority of priorityOptions; track priority) {
-                        <option [value]="priority">{{ priority }}</option>
-                        }
-                    </select>
-                </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Assign
+                            To</label>
+                        <select [(ngModel)]="newTask.assignedTo" name="new-task-assignee" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                            <option value="">Unassigned</option>
+                            @for (analyst of getCaseAnalysts(caseData); track analyst.id) {
+                            <option [value]="analyst.id">{{ analyst.username || analyst.email || analyst.id
+                                }}</option>
+                            }
+                        </select>
+                    </div>
 
-                <div>
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Assign
-                        To</label>
-                    <select [(ngModel)]="newTask.assignedTo" name="new-task-assignee" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
-                        <option value="">Unassigned</option>
-                        @for (analyst of getCaseAnalysts(caseData); track analyst.id) {
-                        <option [value]="analyst.id">{{ analyst.username || analyst.email || analyst.id
-                            }}</option>
-                        }
-                    </select>
-                </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Due
+                            Date</label>
+                        <input [ngModel]="getDateInputValue(newTask.dueAt)" (ngModelChange)="setDateInputValue(newTask, 'dueAt', $event)" name="new-task-due" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+                    </div>
 
-                <div>
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Due
-                        Date</label>
-                    <input [ngModel]="getDateInputValue(newTask.dueAt)" (ngModelChange)="setDateInputValue(newTask, 'dueAt', $event)" name="new-task-due" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
-                </div>
-
-                <div class="md:col-span-2">
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
-                    <textarea [(ngModel)]="newTask.description" name="new-task-description" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]"></textarea>
+                    <div class="sm:col-span-2">
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
+                        <textarea [(ngModel)]="newTask.description" name="new-task-description" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]"></textarea>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </app-case-edit-drawer>
     }
 </div>

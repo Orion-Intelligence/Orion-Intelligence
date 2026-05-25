@@ -7,10 +7,11 @@ import { TooltipDirective } from '../../../../../../shared/directive/tooltip-dir
 import { caseListItemMotion, caseModeSwapMotion, caseSectionMotion } from '../case-details.animations';
 import { CaseDateField, CaseDateTarget, formatCaseLabel, getAssignedCaseAnalysts, getCaseAnalystLabel, getCaseDateInputValue, getFormattedCaseDateTime, setCaseDateInputValue } from '../case-details-formatters';
 import { CaseDetailsStore } from '../case-details.store';
+import { CaseEditDrawerComponent } from '../case-edit-drawer/case-edit-drawer';
 
 @Component({
   selector: 'app-case-tasks-section',
-  imports: [CommonModule, FormsModule, TooltipDirective],
+  imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent],
   animations: [caseListItemMotion, caseModeSwapMotion, caseSectionMotion],
   host: { class: 'block' },
   templateUrl: './case-tasks-section.html'
@@ -19,6 +20,7 @@ export class CaseTasksSectionComponent {
   readonly store = inject(CaseDetailsStore);
   taskStatusOptions = TASK_STATUS_OPTIONS;
   priorityOptions = PRIORITY_OPTIONS;
+  editingTaskIndex: number | null = null;
 
   get caseData(): Case {
     return this.store.caseData as Case;
@@ -42,6 +44,24 @@ export class CaseTasksSectionComponent {
 
   get analysts(): CaseAnalyst[] {
     return this.store.analysts;
+  }
+
+  get selectedEditableTask(): CaseTask | null {
+    if (this.editingTaskIndex === null) {
+      return null;
+    }
+
+    return this.editedCase?.tasks?.[this.editingTaskIndex] || null;
+  }
+
+  openEditTask(index: number): void {
+    this.editingTaskIndex = index;
+    this.store.enableEditing('tasks');
+  }
+
+  cancelTaskEditing(): void {
+    this.editingTaskIndex = null;
+    this.store.cancelEditing();
   }
 
   hasTasksChanged(): boolean {

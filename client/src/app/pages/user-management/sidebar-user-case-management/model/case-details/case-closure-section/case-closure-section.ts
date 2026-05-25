@@ -7,10 +7,11 @@ import { TooltipDirective } from '../../../../../../shared/directive/tooltip-dir
 import { caseInlineMotion, caseModeSwapMotion } from '../case-details.animations';
 import { getCaseAnalystLabel, getCaseDisplayLabel, getFormattedCaseDateTime } from '../case-details-formatters';
 import { CaseDetailsStore } from '../case-details.store';
+import { CaseEditDrawerComponent } from '../case-edit-drawer/case-edit-drawer';
 
 @Component({
   selector: 'app-case-closure-section',
-  imports: [CommonModule, FormsModule, TooltipDirective],
+  imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent],
   animations: [caseInlineMotion, caseModeSwapMotion],
   host: { class: 'block' },
   templateUrl: './case-closure-section.html'

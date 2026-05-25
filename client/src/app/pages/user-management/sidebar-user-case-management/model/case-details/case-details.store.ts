@@ -45,6 +45,8 @@ export abstract class CaseDetailsStore {
   abstract removeLinkedCase(index: number): void;
   abstract saveNewLinkedCase(): void;
   abstract goToLinkedCase(caseId: string): void;
+  abstract openCloseCase(): void;
+  abstract openEditClosure(): void;
   abstract saveClosure(): void;
   abstract cancelSectionMode(): void;
 }

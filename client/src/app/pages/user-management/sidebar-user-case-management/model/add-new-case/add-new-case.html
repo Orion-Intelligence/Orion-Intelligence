@@ -1,29 +1,11 @@
-<div class="fixed inset-0 z-[1301]">
-
-    <div class="absolute inset-0 bg-black/50 transition-opacity duration-300" [ngClass]="isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'" (click)="closePopup()">
-    </div>
-
-    <div class="absolute right-0 top-0 flex h-full w-full max-w-2xl transform-gpu flex-col overflow-y-auto border-l border-[var(--color-border)] bg-[var(--color-blue-830)] shadow-[-18px_0_40px_rgba(0,0,0,0.34)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]" [class.translate-x-0]="isOpen" [class.translate-x-[102%]]="!isOpen" data-testid="case-add-drawer">
-
-        <div class="flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-blue-830)]/95 px-6 py-3 backdrop-blur">
-            <div class="min-w-0">
-                <h2 class="text-[16px] font-semibold leading-tight text-[var(--color-text1)]">Add New Case</h2>
-                <p class="mt-1 text-[11px] font-medium text-[var(--color-text4)]">Create case details and primary
-                    entity.</p>
-            </div>
-
-            <button type="button" (click)="closePopup()" class="ml-4 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] text-[14px] text-[var(--color-text4)] transition hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]" data-testid="case-add-close">
-                ✕
-            </button>
-        </div>
-
-        <div class="p-6 bg-[var(--color-blue-830)]">
+<app-case-edit-drawer title="Add New Case" subtitle="Create case details and primary entity." saveLabel="Save Case" saveTestId="case-add-save" cancelTestId="case-add-cancel" drawerTestId="case-add-drawer" (save)="onSubmit()" (cancel)="closePopup()">
+        <div class="bg-[var(--color-blue-830)] p-6">
             <form (ngSubmit)="onSubmit()" class="space-y-5">
 
-                <div>
+                <div class="space-y-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
                     <h3 class="text-[15px] font-bold leading-tight text-[var(--color-text1)] mb-4">Case Details</h3>
 
-                    <div class="mb-5">
+                    <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Case
                             ID</label>
                         <input type="text" [value]="caseForm.caseId" disabled class="mt-1 w-full cursor-not-allowed rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[var(--color-text4)] outline-none" data-testid="case-add-id-input" />
@@ -32,7 +14,7 @@
                         }
                     </div>
 
-                    <div class="mb-5">
+                    <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
                             Title <span class="text-red-500">*</span>
                         </label>
@@ -42,12 +24,12 @@
                         }
                     </div>
 
-                    <div class="mb-5">
+                    <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Description</label>
                         <textarea [(ngModel)]="caseForm.description" name="description" class="mt-1 min-h-24 w-full resize-y rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Optional investigation context" data-testid="case-add-description-input"></textarea>
                     </div>
 
-                    <div class="mb-5">
+                    <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Case
                             Type <span class="text-red-500">*</span></label>
                         <select [(ngModel)]="caseForm.caseType" name="caseType" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-type-select">
@@ -69,7 +51,7 @@
                     </div>
                     }
 
-                    <div class="mb-5">
+                    <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Intake
                             Source <span class="text-red-500">*</span></label>
                         <select [(ngModel)]="caseForm.intakeSource" name="intakeSource" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-intake-source-select">
@@ -92,7 +74,7 @@
                     </div>
                     }
 
-                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Status
                                 <span class="text-red-500">*</span></label>
@@ -124,9 +106,9 @@
                         </div>
                     </div>
 
-                    <div class="mt-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+                    <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/40 p-4">
                         <label class="mb-3 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Tags</label>
-                        <div class="flex gap-2 overflow-x-auto pb-1 pr-8 [mask-image:linear-gradient(to_right,black_calc(100%-32px),transparent)]">
+                        <div class="flex flex-wrap gap-2">
                             @for (tag of tagOptions; track tag.value) {
                             <button type="button" (click)="toggleTag(tag.value)" class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isTagSelected(tag.value) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
                                 {{ tag.label }}
@@ -148,14 +130,4 @@
                 }
             </form>
         </div>
-
-        <div class="sticky bottom-0 flex justify-end gap-3 border-t border-[var(--color-border)] bg-[var(--color-blue-830)]/95 px-6 py-4 backdrop-blur">
-            <button type="button" (click)="closePopup()" class="ui-btn text-[var(--color-text1)] border border-[var(--color-border)]" data-testid="case-add-cancel">
-                Cancel
-            </button>
-            <button type="button" (click)="onSubmit()" class="ui-btn ui-btn-primary" data-testid="case-add-save">
-                Save Case
-            </button>
-        </div>
-    </div>
-</div>
+</app-case-edit-drawer>
