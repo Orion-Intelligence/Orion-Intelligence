@@ -13,7 +13,6 @@ import { AppService } from '../../../services/core/app/app.service';
 import { ScrollService } from '../../../shared/services/scroll.service';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { sidebarModeAnimation } from '../../../shared/animations/sidebar.mode.animation';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ChatWidgetComponent } from '../../root-searches/ai-workspace/chat-widget/chat-widget.component';
 @Component({
@@ -21,7 +20,6 @@ import { ChatWidgetComponent } from '../../root-searches/ai-workspace/chat-widge
   standalone: true,
   imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective, ChatWidgetComponent],
   templateUrl: './dashboard-sidebar.component.html',
-  animations: [sidebarModeAnimation],
 })
 export class DashboardSidebarComponent implements OnInit, OnDestroy {
   private readonly closeForSubscriptionHandler = () => {
@@ -33,7 +31,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   sidebar_default = true;
   min_detected = false;
   mobile_menu_status = false;
-  animationsDisabled = false;
   apiCategories = Object.values(ApiSubCategory);
   exploitCategories = Object.values(ExploitSubCategory);
   dumpCategories = Object.values(DumpSubCategory);
@@ -45,7 +42,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   stealerlogsCategories = Object.values(StealerlogsSubCategory);
   scannerCategories = Object.values(ScannerSubCategory);
   tenantCategories = Object.values(TenantSubCategory);
-  profileCategories = Object.values(ProfileSubCategory);
   category = Category;
   readonly menuToggle = output<undefined>();
 
@@ -88,8 +84,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   checkScreenWidth() {
     const shouldStartCollapsed = window.innerWidth < 800;
-    const isMobile = window.innerWidth < 600;
-    this.animationsDisabled = isMobile;
     if (shouldStartCollapsed && !this.min_detected && this.sidebar_default) {
       this.min_detected = true;
       this.onToggleSidebar();
@@ -175,30 +169,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   onToggleSidebar(mobile_menu_status: boolean = false) {
-    // TODO: The 'emit' function requires a mandatory void argument
     this.menuToggle.emit(undefined);
     this.sidebar_default = !this.sidebar_default;
     this.mobile_menu_status = mobile_menu_status;
-  }
-
-  canAccessNetworkIntel(): boolean {
-    return this.isAdmin() || this.licenseService.canUseModule('osint_advanced');
-  }
-
-  canAccessSocialIntel(): boolean {
-    return this.isAdmin() || (!this.isDemo() && this.licenseService.canUseModule('social_mapper'));
-  }
-
-  canAccessStandaloneDataCollection(): boolean {
-    return this.canAccessNetworkIntel() || this.licenseService.canUseCtiGraph() || this.canAccessSocialIntel() || this.shouldShowWhistleBlowing() || this.isDemo();
-  }
-
-  canAccessWhistleBlowing(): boolean {
-    return this.isAdmin() || !this.authService.getIsMobileDemo();
-  }
-
-  shouldShowWhistleBlowing(): boolean {
-    return !!this.appService.getConfig().appSettings.home_header_whistle_blowing_allowed;
   }
 
   requestStandaloneSubscription(event: Event, accessAllowed: boolean) {

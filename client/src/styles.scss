@@ -7,6 +7,9 @@
 @use "./app/shared/styles/alert-stagger-animations.scss";
 @use "./app/pages/demo-tour/demo-tour/demo-tour.component.css";
 
+@import "leaflet/dist/leaflet.css";
+@import "maplibre-gl/dist/maplibre-gl.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -201,6 +204,164 @@ html:has(body.dark-theme) {
 .ui-see-more-btn:hover {
   background: var(--color-blue-710);
   border-color: var(--color-blue-640);
+}
+
+.threat-lens-tooltip {
+  position: fixed;
+  z-index: 9999;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-blue-770);
+  color: var(--color-text1);
+  font-size: 12px;
+  font-weight: 600;
+  max-width: calc(100vw - 16px);
+  pointer-events: none;
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.45) !important;
+  backdrop-filter: blur(8px);
+}
+
+.country-hover-tooltip.leaflet-tooltip {
+  padding: 6px 10px !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 8px !important;
+  background: var(--color-blue-770) !important;
+  background-color: var(--color-blue-770) !important;
+  color: var(--color-text1) !important;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.45) !important;
+  backdrop-filter: blur(8px);
+}
+
+app-satellite-map-renderer .leaflet-tooltip-pane {
+  z-index: 9999;
+}
+
+.threat-lens-tooltip__content--arc {
+  min-width: 220px;
+}
+
+.threat-lens-tooltip__content--country {
+  min-width: 180px;
+}
+
+.threat-lens-tooltip__content--ip {
+  min-width: 190px;
+}
+
+.threat-lens-tooltip__arc-title {
+  margin-bottom: 10px;
+  color: var(--color-blue-640);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.threat-lens-tooltip__row,
+.threat-lens-tooltip__breakdown-row,
+.threat-lens-tooltip__total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.threat-lens-tooltip__row {
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.threat-lens-tooltip__label,
+.threat-lens-tooltip__total-label {
+  color: var(--color-text3);
+  font-size: 11px;
+}
+
+.threat-lens-tooltip__value {
+  max-width: 140px;
+  overflow: hidden;
+  color: var(--color-text1);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.threat-lens-tooltip__country-title {
+  margin-bottom: 10px;
+  color: var(--color-text1);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.threat-lens-tooltip__total-row {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.threat-lens-tooltip__total-value {
+  color: var(--color-blue-640);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.threat-lens-tooltip__breakdown-row {
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.threat-lens-tooltip__breakdown-label-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.threat-lens-tooltip__breakdown-dot {
+  display: inline-block;
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--threat-lens-dot-color);
+  box-shadow: 0 0 8px var(--threat-lens-dot-color);
+}
+
+.threat-lens-tooltip__breakdown-label {
+  color: var(--color-text2);
+  font-size: 11px;
+}
+
+.threat-lens-tooltip__breakdown-count {
+  color: var(--color-text1);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.threat-lens-tooltip__empty {
+  color: var(--color-text4);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.threat-lens-map {
+  height: 100% !important;
+  min-height: 0 !important;
+  width: 100% !important;
+}
+
+.threat-lens-map .esri-view-root,
+.threat-lens-map .esri-view-surface,
+.threat-lens-map canvas {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.geo-map-control-inset .leaflet-top.leaflet-left {
+  top: 64px;
 }
 
 .ui-consolidated-theme {
@@ -1283,6 +1444,17 @@ body.demo-tour-scroll-locked {
   background-color: var(--color-blue-710) !important;
   border-color: var(--color-border) !important;
   color: var(--color-text1) !important;
+}
+
+.light-theme #dashboard-consolidated .ui-geo-floating-tabs {
+  --color-border: #fcfcfc12;
+  --color-blue-760: linear-gradient(to right, #fcfcfc20 0%, #fcfcfc30 50%, #fcfcfc20 100%);
+  --color-blue-710: #172235;
+  --color-blue-640: #57a5eb;
+  --color-text1: #ffffff;
+  --color-text3: #d4d4d4;
+  background: var(--color-blue-760) !important;
+  border-color: rgb(252 252 252 / 7%) !important;
 }
 
 .light-theme app-ioc-search .ui-cred-toolbar-btn {
@@ -3832,4 +4004,24 @@ app-demo-tour .demo-tour-active {
 .light-theme .ui-home-ai-button:hover {
   border-color: color-mix(in srgb, var(--color-blue-640) 18%, var(--color-border)) !important;
   background: color-mix(in srgb, var(--color-blue-640) 8%, var(--color-blue-720)) !important;
+}
+
+.orion-popup .leaflet-popup-content-wrapper {
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.orion-popup .leaflet-popup-content {
+  margin: 0 !important;
+}
+
+.orion-popup .leaflet-popup-tip {
+  background: #0d1627 !important;
+  box-shadow: none !important;
+}
+
+.orion-popup .leaflet-popup-close-button {
+  color: #ffffff !important;
 }

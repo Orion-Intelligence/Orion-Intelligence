@@ -1,4 +1,4 @@
-<div class="w-full">
+<div class="block w-full">
   <div #mapContainer data-testid="world-heatmap-map" class="map-container relative aspect-[100/52] max-h-[80vh] min-h-[400px] w-[calc(100%+60px)] -ml-[30px] -mr-[30px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_12%,black_88%,transparent_100%)] max-[768px]:w-screen max-[768px]:max-w-screen [body.light-theme_&]:[mask-image:none]">
     @if (isMapLoading) {
       <div @overlayFade class="absolute inset-0 z-[2] grid place-items-center bg-[rgba(18,26,42,0.72)] bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px),rgba(18,26,42,0.72)] bg-[size:32px_32px] [body.light-theme_&]:bg-[linear-gradient(rgba(15,23,42,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.035)_1px,transparent_1px),rgba(248,250,252,0.88)] [body.light-theme_&]:bg-[size:32px_32px]">

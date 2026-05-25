@@ -63,6 +63,32 @@ export class FiltersComponent implements OnInit {
     }
   }
 
+  onNumberInputChange(key: string, rawValue: string | null) {
+    const filter = this.filterModel.filters[key];
+    const digitsOnly = String(rawValue ?? '').replace(/\D+/g, '');
+
+    if (!digitsOnly) {
+      this.onSelectionChange(key, null);
+      return;
+    }
+
+    let numericValue = Number.parseInt(digitsOnly, 10);
+    if (Number.isNaN(numericValue)) {
+      this.onSelectionChange(key, null);
+      return;
+    }
+
+    if (typeof filter.min === 'number') {
+      numericValue = Math.max(filter.min, numericValue);
+    }
+
+    if (typeof filter.max === 'number') {
+      numericValue = Math.min(filter.max, numericValue);
+    }
+
+    this.onSelectionChange(key, String(numericValue));
+  }
+
   applyFilters() {
     this.scrollService.clearSavedPosition();
     this.dashboard.selectedFilters.set(this.selectedFilters);

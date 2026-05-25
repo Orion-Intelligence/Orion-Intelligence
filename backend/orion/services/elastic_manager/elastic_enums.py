@@ -20,6 +20,7 @@ class ELASTIC_INDEX:
     S_STEALERLOGS_INDEX = "stealer_model"
     S_SOCIAL_INDEX = "social_model"
     S_OPENSANCTIONS_INDEX = "sanction_model"
+    S_MAP_ENTITIES_INDEX = "geo_fencing_model"
 
 
 class ELASTIC_SEMANTIC:
@@ -126,12 +127,42 @@ class ELASTIC_ENUMS:
         },
     }
 
+    mapping_map_entities_model = {
+        "settings": {
+            "number_of_shards": 1,
+            "number_of_replicas": 0,
+            "max_result_window": 1000000,
+        },
+        "mappings": {
+            "dynamic": True,
+            "properties": {
+                "name": {"type": "text", "fields": {"keyword": {"type": "keyword", "ignore_above": 256}}},
+                "country": {"type": "keyword"},
+                "type": {"type": "keyword"},
+                "capacity_mw": {"type": "float"},
+                "source": {"type": "keyword"},
+                "location": {
+                    "properties": {
+                        "lat": {"type": "float"},
+                        "lon": {"type": "float"},
+                    }
+                },
+                "location_point": {"type": "geo_point"},
+                "aeroway": {"type": "keyword"},
+                "military": {"type": "keyword"},
+                "operator": {"type": "text", "fields": {"keyword": {"type": "keyword", "ignore_above": 256}}},
+                "fuel": {"type": "keyword"},
+                "primary_fuel": {"type": "keyword"},
+            }
+        },
+    }
+
     mapping_stealer_log_field = {
-        "m_domain": "domain.keyword",
-        "m_url": "url.keyword",
-        "m_username": "username.keyword",
-        "m_email": "email.keyword",
-        "m_ip": "ip.keyword",
+        "m_domain": ["domain.keyword"],
+        "m_url": ["url.keyword"],
+        "m_username": ["username.keyword"],
+        "m_email": ["email.keyword"],
+        "m_ip": ["ip.keyword"],
         "m_creditcard": ["credit_card.keyword", "bin.keyword"],
         "m_search_all": ["domain.keyword", "username.keyword", "email.keyword", "bin.keyword"]
     }
@@ -216,7 +247,7 @@ class ELASTIC_ENUMS:
         "m_phone_number": ["m_phone_number"],
         "m_email": ["m_email"],
         "m_domain": ["m_domain", "m_domain.raw"],
-        "m_country": ["m_country"],
+        "m_country": ["m_country", "m_country_name", "m_location", "country", "location"],
         "m_url": ["m_url", "m_url.raw"],
         "m_cve": ["m_cve", "m_cwe"],
         "m_ip": ["m_ip"],

@@ -6,7 +6,7 @@ from orion.api.interactive.search_manager.search_data_model.dump.search_credenti
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.config_manager.config_controller import config_controller
 
-public_routes = APIRouter(tags=["Public"])
+public_routes = APIRouter()
 
 
 def cookie_required(request: Request):
@@ -17,11 +17,7 @@ def cookie_required(request: Request):
 @public_routes.get(
     "/api/public",
     dependencies=[],
-    summary="Get public configuration",
-    description="Get public configuration values used for frontend initialization.",
-    tags=["Public", "Config"],
-    operation_id="getPublicConfig",
-    response_description="Public configuration values used at frontend startup.", )
+)
 async def get_public_config():
     return await config_controller.getInstance().get_system_info()
 

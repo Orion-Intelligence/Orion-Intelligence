@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { EMPTY, Subject, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, concatMap, tap } from 'rxjs/operators';
-import { ScanHelperMethodsService } from './network-intel-service.service';
+import { NetworkIntelScanService } from '../../../shared/services/network-intel/network-intel-scan.service';
 import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats } from '../../../shared/model/network-intel/network-intel.model';
 import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
@@ -19,9 +19,6 @@ import { VulnerabilitySectionComponent } from './vulnerability-section/vulnerabi
   selector:    'app-network-intel',
   templateUrl: './network-intel.html',
   standalone:  true,
-  host: {
-    'class': 'block h-full min-h-0 overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]'
-  },
   imports:     [CommonModule, FormsModule, EmptyQueryComponent, GeoCoordinatesModalComponent, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent],
   animations:  [fadeInDashboardItem],
 })
@@ -78,7 +75,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     return '-';
   }
 
-  constructor( public scanHelper: ScanHelperMethodsService, private route: ActivatedRoute, private router: Router, private reportExport: ReportExportService, ) {}
+  constructor( public scanHelper: NetworkIntelScanService, private route: ActivatedRoute, private router: Router, private reportExport: ReportExportService, ) {}
 
   ngOnInit(): void {
     this.scanHelper.resetState();

@@ -1,0 +1,175 @@
+<div data-testid="geo-fencing-page" class="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden">
+  @if (isMainLoading) {
+    <div data-testid="geo-fencing-loading" class="absolute inset-0 z-[10000] flex items-center justify-center bg-[rgba(8,16,27,0.58)] px-4 backdrop-blur-[2px] [body.light-theme_&]:bg-white/50">
+      <div class="map-overlay-menu w-[min(360px,calc(100%-2rem))] rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] p-4 shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)]">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)]">
+            <div class="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></div>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text1)]">{{ mainLoadingTitle }}</p>
+            <p class="mt-1 truncate text-[12px] text-[var(--color-text3)]">{{ mainLoadingMessage }}</p>
+          </div>
+        </div>
+        <div class="ui-progress-track mt-4 h-[5px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)]">
+          <div class="ui-progress-indeterminate-bar"></div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div class="relative grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden">
+      <div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:min-h-[380px]">
+        <div data-testid="geo-fencing-map-view" class="absolute inset-0 transition-opacity duration-150" [ngClass]="isMapView ? 'opacity-100 animate-[slideUp_220ms_ease-out_both]' : 'pointer-events-none opacity-0'">
+          <app-satellite-map-renderer #mapRenderer data-testid="geo-fencing-map-renderer" class="block h-full min-h-0 min-w-0 overflow-hidden"
+            [lat]="lat"
+            [lon]="lon"
+            [delta]="delta"
+            [selectedLayer]="selectedLayer"
+            [facilitiesVisible]="facilitiesVisible"
+            [facilityFeatures]="filteredFacilitiesMapData"
+            [orionData]="filteredWriData"
+            [focusedFeature]="focusedFeature"
+            [anomalyData]="anomalyResult"
+            [aircraftData]="aircraftData"
+            [shipsData]="shipsData"
+            [topControlsInset]="showTopBar"
+            (featureSelected)="onMapFeatureSelected($event)"
+            (featureIdsSelected)="onMapEntityFeatureIdsSelected($event)"
+            (mapMoved)="onMapMoved($event)"
+            (mapReady)="onSatelliteMapReady()"
+            (mapError)="onSatelliteMapReady()">
+          </app-satellite-map-renderer>
+          <app-map-entities-overlay
+            [facilitiesVisible]="facilitiesVisible"
+            [legendConstrained]="mapRenderer.sidebarVisible || isPanelPopupOpen || entityDescriptionPopupOpen"
+            [legendFilters]="visibleDashboardTypeFilters"
+            [sidebarVisible]="mapRenderer.sidebarVisible"
+            [sidebarLoading]="mapRenderer.sidebarLoading"
+            [sidebarError]="mapRenderer.sidebarError"
+            [selectedEntity]="mapRenderer.selectedEntity"
+            [isAircraftLoading]="isAircraftLoading"
+            [isShipsLoading]="isShipsLoading"
+            [isMapEntityLoading]="isMapEntityLoading"
+            [isMapEntityDetailsLoading]="isMapEntityDetailsLoading"
+            [topControlsInset]="showTopBar"
+            [errorMessage]="satelliteService.onError()?.message || null"
+            [isScanning]="isScanning()"
+            (closeSidebar)="mapRenderer.closeSidebar()">
+          </app-map-entities-overlay>
+        </div>
+          <div class="absolute right-3 top-3 z-[920] flex max-w-[calc(100%-24px)] items-center gap-2 map-overlay-menu max-[943px]:right-2 max-[943px]:top-2 max-[943px]:max-w-[calc(100%-16px)] max-[520px]:flex-col max-[520px]:items-end">
+            @if (showTopBar) {
+              <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition-opacity [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)]" [ngClass]="isThreatToolbarDisabled ? 'opacity-50' : 'opacity-100'">
+                <button data-testid="geo-fencing-tab-map" class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors max-[420px]:px-2" [ngClass]="activeTab === 'map' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('map')">
+                  Satellite Map
+                </button>
+                <button data-testid="geo-fencing-tab-threat" class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="isThreatToolbarDisabled" [ngClass]="activeTab === 'threat' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('threat')">
+                  Threat Lens
+                </button>
+              </div>
+            }
+            <div class="flex items-center gap-2 max-[520px]:justify-end">
+            <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition-opacity [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)]" [ngClass]="showTopBar && activeTab === 'threat' ? 'pointer-events-none opacity-50' : 'opacity-100'">
+              <button data-testid="geo-fencing-layer-satellite" class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="showTopBar && activeTab === 'threat'" [ngClass]="selectedLayer === 'esri' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('esri')">Satellite</button>
+              <button data-testid="geo-fencing-layer-street" class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="showTopBar && activeTab === 'threat'" [ngClass]="selectedLayer === 'osm' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('osm')">Street</button>
+            </div>
+            <button data-testid="geo-fencing-panel-menu-button" class="map-overlay-menu rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-3 py-2 text-[13px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)] max-[420px]:px-2" (click)="togglePanelMenu()">
+              <i class="bi bi-list"></i>
+            </button>
+          </div>
+          </div>
+
+        @if(isThreatView){
+          <div data-testid="geo-fencing-threat-view" class="h-full min-h-0 w-full overflow-hidden animate-[slideUp_220ms_ease-out_both]">
+            <app-threat-lens class="block h-full min-h-0 w-full" [showFilterButton]="false" (loadingChange)="onThreatLensLoadingChange($event)"></app-threat-lens>
+          </div>
+        }
+      </div>
+      @if (isMapView) {
+        <app-entity-description-popup
+          [isOpen]="entityDescriptionPopupOpen"
+          [items]="entityDescriptionPopupData"
+          (close)="closeEntityDescriptionPopup()">
+        </app-entity-description-popup>
+      }
+      <app-satellite-panel-shell
+        [isMapView]="isMapView"
+        [isThreatView]="isThreatView"
+        [isPanelMenuOpen]="isPanelMenuOpen"
+        [isPanelPopupOpen]="isPanelPopupOpen"
+        [activePanel]="activePanel"
+        (threatFiltersOpened)="openThreatFilters()"
+        (panelOpened)="openPanelPopup($event)"
+        (panelClosed)="closePanelPopup()">
+
+@if (isMapView && activePanel === panel.Dashboard) {
+  <app-satellite-dashboard-section
+    data-testid="geo-fencing-dashboard-panel"
+    [dashboardSearch]="dashboardSearch"
+    [dashboardSearchResults]="dashboardSearchResults"
+    [dashboardTypeFilters]="dashboardTypeFilters"
+    [selectedFilters]="selectedDashboardFilters"
+    [visiblePowerCount]="visiblePowerCount"
+    [wriDataCount]="scopedWriDataCount"
+    [facilitiesData]="facilitiesData"
+    [facilityEntries]="facilityEntries"
+    [hasSearched]="hasSearched"
+    [isScanning]="isScanning() || isMapEntityLoading"
+    [aircraftTrackingEnabled]="aircraftTrackingEnabled"
+    [shipsTrackingEnabled]="shipsTrackingEnabled"
+    [isAircraftLoading]="isAircraftLoading"
+    [isShipsLoading]="isShipsLoading"
+    [aircraftCount]="aircraftData.length"
+    [shipsCount]="shipsData.length"
+    [locationScoped]="locationScoped"
+    [aircraftTrackingError]="aircraftTrackingError"
+    [shipsTrackingError]="shipsTrackingError"
+    [selectedFeature]="selectedFeature"
+    (dashboardSearchInput)="onDashboardSearchInput($event)"
+    (clearDashboardSearch)="clearDashboardSearch()"
+    (featureFocused)="focusDashboardFeature($event)"
+    (filterToggled)="toggleDashboardFilter($event)"
+    (selectAllFilters)="selectAllDashboardFilters()"
+    (clearFilters)="clearDashboardFilters()"
+    (locationOpened)="openGeocodeModal()"
+    (locationTargeted)="focusSelectedLocation()"
+    (locationCleared)="clearSelectedLocation()"
+    (aircraftTrackingToggled)="onAircraftTrackingSelectionChange()"
+    (shipTrackingToggled)="onShipTrackingSelectionChange()">
+  </app-satellite-dashboard-section>
+}
+
+      @if (isMapView && activePanel === panel.Compare) {
+        <app-satellite-month-compare
+          [isScanning]="isScanning()"
+          [errorMessage]="satelliteService.onError()?.message || null"
+          [hasSearched]="hasSearched"
+          [compareResult]="compareResult"
+          [anomalyResult]="anomalyResult"
+          [locationLabel]="compareLocationLabel"
+          (locationOpened)="openCompareLocationModal()"
+          (runCompare)="onRunCompare($event)">
+        </app-satellite-month-compare>
+      }
+
+      </app-satellite-panel-shell>
+    </div>
+  </div>
+
+</div>
+
+<app-geocode-modal
+  [isOpen]="showGeocodeModal"
+  [isScanning]="isScanning()"
+  [coordinates]="geocodeCoordinates"
+  [delta]="geocodeDelta"
+  [allowCoverage]="geocodeAllowCoverage"
+  [title]="geocodeTitle"
+  [searchProvider]="fetchGeocodeResults"
+  (close)="closeGeocodeModal()"
+  (coordinatesChange)="onCoordinatesChange($event)"
+  (deltaChange)="onDeltaChangeModal($event)"
+  (search)="onGeoSearch()">
+</app-geocode-modal>

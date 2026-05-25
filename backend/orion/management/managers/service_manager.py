@@ -30,7 +30,7 @@ class service_manager:
         self.__url = url
         self._is_available = False
 
-    async def init_services(self):
+    async def init_services(self, build_dir=None):
         while not self._is_available:
             try:
                 _, writer = await asyncio.open_connection("elasticsearch", 9400)
@@ -49,6 +49,7 @@ class service_manager:
                 await test_manager.get_instance().reset_test_elastic_and_import_mocks()
 
                 await redis_controller.getInstance().initialize()
+                await self.build_map_assets(build_dir)
                 await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [config_controller.CONFIG_CACHE_KEY])
                 await config_controller.getInstance().load_config()
                 await asyncio.sleep(5)
@@ -76,3 +77,6 @@ class service_manager:
     @staticmethod
     async def build_assets(build_dir):
         helper_controller.build_assets(build_dir)
+
+    async def build_map_assets(self, build_dir):
+        await helper_controller.init_map_entities_task(build_dir)

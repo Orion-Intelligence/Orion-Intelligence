@@ -13,7 +13,6 @@ case_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE
 @case_routes.get(
     "/api/profile/cases",
     status_code=200,
-    tags=["Case Management"],
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
     ],
@@ -25,7 +24,6 @@ async def get_cases(current_user=Depends(get_current_user)):
 @case_routes.post(
     "/api/profile/cases",
     status_code=201,
-    tags=["Case Management"],
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
     ],
@@ -37,7 +35,6 @@ async def create_case(payload: CreateCaseRequest = Body(...), current_user=Depen
 @case_routes.get(
     "/api/profile/cases/next-id",
     status_code=200,
-    tags=["Case Management"],
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
     ],
@@ -49,7 +46,6 @@ async def get_next_case_id(current_user=Depends(get_current_user)):
 @case_routes.get(
     "/api/profile/cases/analysts",
     status_code=200,
-    tags=["Case Management"],
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
     ],
@@ -61,7 +57,6 @@ async def get_case_analysts(current_user=Depends(get_current_user)):
 @case_routes.post(
     "/api/profile/cases/{case_id}/shares",
     status_code=201,
-    tags=["Case Management"],
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
     ],
@@ -73,7 +68,6 @@ async def create_case_share(case_id: str, payload: CreateCaseShareRequest = Body
 @case_routes.delete(
     "/api/profile/cases/{case_id}/shares",
     status_code=200,
-    tags=["Case Management"],
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
     ],
@@ -85,7 +79,6 @@ async def revoke_case_shares(case_id: str, current_user=Depends(get_current_user
 @case_routes.get(
     "/api/profile/cases/{case_id}",
     status_code=200,
-    tags=["Case Management"],
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
     ],
@@ -97,7 +90,6 @@ async def get_case(case_id: str, current_user=Depends(get_current_user)):
 @case_routes.put(
     "/api/profile/cases/{case_id}",
     status_code=200,
-    tags=["Case Management"],
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
     ],
@@ -182,7 +174,6 @@ async def delete_artifact_file(
 @case_routes.delete(
     "/api/profile/cases/{case_id}",
     status_code=200,
-    tags=["Case Management"],
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
     ],

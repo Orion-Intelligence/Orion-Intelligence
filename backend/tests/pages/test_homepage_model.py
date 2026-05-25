@@ -73,7 +73,7 @@ def test_insight_consolidated_result_builds_and_caches_display_data(monkeypatch)
         staticmethod(lambda: fake_redis),
     )
     monkeypatch.setattr(
-        "orion.api.interactive.hompage_manager.homepage_model.elastic_insight_generator.on_insight_consolidated_data",
+        "orion.api.interactive.hompage_manager.homepage_model.insight_generator.on_insight_consolidated_data",
         lambda self: (["leak_model", "chat_model", "exploit_model", "generic_model", "defacement_model"], [{"q": 1}] * 5),
     )
     monkeypatch.setattr(
@@ -111,7 +111,7 @@ def test_country_specific_insights_and_pagination_resolve_hashes(monkeypatch):
         staticmethod(lambda: fake_redis),
     )
     monkeypatch.setattr(
-        "orion.api.interactive.hompage_manager.homepage_model.elastic_insight_generator.on_insight_consolidated_country",
+        "orion.api.interactive.hompage_manager.homepage_model.insight_generator.on_insight_consolidated_country",
         lambda self: (["leak_model", "generic_model", "exploit_model", "chat_model", "social_model", "defacement_model"], {"q": 1}),
     )
     monkeypatch.setattr(

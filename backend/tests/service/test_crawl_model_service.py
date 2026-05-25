@@ -259,32 +259,19 @@ def test_index_wrappers_cover_generator_and_elastic_paths(monkeypatch):
         staticmethod(lambda: fake_elastic),
     )
 
-    class _Generator:
-        def index_query_stealerlog(self, payload):
-            return [] if payload.get("empty") else [{"type": "stealer"}]
-
-        def index_query_sanctions(self, payload):
-            return payload.get("records", [])
-
-        def index_query_social(self, payload):
-            return [{"type": "social", "payload": payload}]
-
-        def index_query_chat(self, payload):
-            return [{"type": "chat", "payload": payload}]
-
-        def index_query_general(self, payload):
-            return [{"type": "general", "payload": payload}]
-
-        def index_query_exploit(self, payload):
-            return [{"type": "exploit", "payload": payload}]
-
-        def index_query_leak(self, payload):
-            return [{"type": "leak", "payload": payload}]
-
-        def index_query_defacement(self, payload):
-            return [{"type": "defacement", "payload": payload}]
-
-    monkeypatch.setattr("orion.api.server.crawl_manager.crawl_model.elastic_request_generator", lambda: _Generator())
+    monkeypatch.setattr(
+        "orion.api.server.crawl_manager.crawl_model.crawl_index_generator",
+        SimpleNamespace(
+            index_query_stealerlog=lambda payload: [] if payload.get("empty") else [{"type": "stealer"}],
+            index_query_sanctions=lambda payload: payload.get("records", []),
+            index_query_social=lambda payload: [{"type": "social", "payload": payload}],
+            index_query_chat=lambda payload: [{"type": "chat", "payload": payload}],
+            index_query_general=lambda payload: [{"type": "general", "payload": payload}],
+            index_query_exploit=lambda payload: [{"type": "exploit", "payload": payload}],
+            index_query_leak=lambda payload: [{"type": "leak", "payload": payload}],
+            index_query_defacement=lambda payload: [{"type": "defacement", "payload": payload}],
+        ),
+    )
 
     empty = _run(
         crawl_model.invoke_stealerlog_index(cast(Any, SimpleNamespace(model_dump=lambda: {"empty": True})))
@@ -447,6 +434,7 @@ def test_build_parser_payload_decrypts_files_and_embeds_feeders(monkeypatch, tmp
     parser_root = tmp_path / "parser_files"
     parser_root.mkdir()
     (parser_root / "plain.py").write_bytes(b"print('plain')")
+    monkeypatch.setattr(CONSTANTS, "S_ENCRYPTION_KEY", Fernet.generate_key().decode())
     encrypted = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode()).encrypt(b"secret = 1")
     (parser_root / "secret.py").write_bytes(encrypted)
     (parser_root / "disabled.py").write_text("skip", encoding="utf-8")

@@ -15,10 +15,11 @@ export const SEARCH_FIXTURES = {
   },
   defacement_by_team: {
     search_query: 'CarlyGriggs13',
-    base_url: ['eng-victory-hub.com', 'joindarkside.pro', 'fitcoin-events.com'],
+    base_url: ['magiceden-ntf.com', 'eng-victory-hub.com', 'joindarkside.pro', 'fitcoin-events.com'],
     team: 'CarlyGriggs13',
     date: 'Jan 24, 2026',
     web_url: [
+      'https://x.com/CarlyGriggs13/status/2015019171218927764',
       'https://x.com/CarlyGriggs13/status/2014897534108319933',
       'https://x.com/CarlyGriggs13/status/2014897336539844898',
       'https://x.com/CarlyGriggs13/status/2015050781804875946',

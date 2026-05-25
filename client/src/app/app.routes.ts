@@ -10,7 +10,7 @@ import { IocResolver } from './shared/resolvers/ioc.resolver';
 import { ConfigResolver } from './shared/resolvers/config.resolver';
 import { OnboardingGuard } from './shared/guards/onboarding-guar';
 import { NotificationGuard } from './shared/guards/notification.guard';
-
+import { ThreatLensComponent } from './pages/geo-fencing/threat-lens/threat-lens';
 const loadLoginComponent = () => import('./pages/login/login.component').then(m => m.LoginComponent);
 const loadSignupComponent = () => import('./pages/signup/signup.component').then(m => m.SignupComponent);
 const loadDashboardComponent = () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent);
@@ -53,6 +53,7 @@ const loadSidebarUserCaseManagement = () => import('./pages/user-management/side
 const loadUserProfileActivityComponent = () => import('./pages/profile/user-profile-activity/user-profile-activity.component').then(m => m.UserProfileActivityComponent);
 const loadCaseDetailsComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-details/case-details').then(m => m.CaseDetails);
 const loadCaseShareComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-share/case-share.component').then(m => m.CaseShareComponent);
+const loadSatelliteIntelComponent =()=>import('./pages/geo-fencing/satellite-intel/satellite-intel').then(m=>m.SatelliteIntel);
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
   data: { type: 'consolidated', animation: 'HashPage' }
@@ -708,6 +709,17 @@ export const routes: Routes = [
         path: 'netint',
         canActivate: [subscriptionGuard],
         loadComponent: loadNetworkIntelComponent,
+        data: { animation: 'CategoryPage' }
+      },
+      {
+        path: 'satellite-intel',
+        canActivate: [subscriptionGuard],
+        loadComponent: loadSatelliteIntelComponent
+      },
+      {
+        path: 'threat-lens',
+        canActivate: [subscriptionGuard],
+        component: ThreatLensComponent,
         data: { animation: 'CategoryPage' }
       },
       {

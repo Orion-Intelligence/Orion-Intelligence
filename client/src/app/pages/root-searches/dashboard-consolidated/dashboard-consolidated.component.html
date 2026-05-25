@@ -1,14 +1,28 @@
-<div id="dashboard-consolidated">
-  <app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [showNoResult]="false"
-  (reloadData)="fetchSearchResults(true)" (onToggleSwitch)="onToggleMenu($event)" (updateQuery)="onUpdateQuery($event)"
-  [activeTab]="isIOC ? 'IOCs' : (isNetworkIntel ? 'Network Intelligence' : 'Deep Search')" [isLoading]="isLoading()" [searchQuery]="query"
-  [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters"
-(reloadFilters)="reloadFilters($event)" [showSelectedFilters]="true"></app-result>
+<div id="dashboard-consolidated" class="relative flex h-full min-h-0 flex-col">
+  @if (!isGeoFencing) {
+    <app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [showNoResult]="false"
+    (reloadData)="fetchSearchResults(true)" (onToggleSwitch)="onToggleMenu($event)" (updateQuery)="onUpdateQuery($event)"
+    [activeTab]="isIOC ? 'IOCs' : (isNetworkIntel ? 'Network Intelligence' : 'Deep Search')" [isLoading]="isLoading()" [searchQuery]="query"
+    [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters"
+  (reloadFilters)="reloadFilters($event)" [showSelectedFilters]="true"></app-result>
+  }
+  @if (isGeoFencing) {
+    <div class="ui-geo-floating-tabs map-overlay-menu pointer-events-auto absolute left-3 top-3 z-[950] flex max-w-[calc(100%-1.5rem)] flex-nowrap gap-1 overflow-x-auto whitespace-nowrap rounded-[10px] border border-white/15 bg-[rgba(8,16,27,0.94)] p-1 shadow-[0_12px_30px_rgba(2,6,23,.45)] backdrop-blur-md [scrollbar-width:none] [-ms-overflow-style:none] [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_12px_28px_rgba(15,23,42,.12)] max-[943px]:hidden [&::-webkit-scrollbar]:hidden">
+      <button type="button" data-testid="ioc-basic-tag-IOCs" class="shrink-0 cursor-pointer whitespace-nowrap rounded-[8px] border border-transparent px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text4)] transition-colors hover:bg-white/5 hover:text-[var(--color-text1)] [body.light-theme_&]:hover:bg-[#eef5ff]" (click)="onToggleMenu('IOCs')">IOCs</button>
+      <button type="button" data-testid="ioc-basic-tag-Deep Search" class="shrink-0 cursor-pointer whitespace-nowrap rounded-[8px] border border-transparent px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text4)] transition-colors hover:bg-white/5 hover:text-[var(--color-text1)] [body.light-theme_&]:hover:bg-[#eef5ff]" (click)="onToggleMenu('Deep Search')">Search</button>
+      <button type="button" data-testid="ioc-basic-tag-Network Intelligence" class="shrink-0 cursor-pointer whitespace-nowrap rounded-[8px] border border-transparent px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text4)] transition-colors hover:bg-white/5 hover:text-[var(--color-text1)] [body.light-theme_&]:hover:bg-[#eef5ff]" (click)="onToggleMenu('Network Intelligence')">Network</button>
+      <button type="button" data-testid="ioc-basic-tag-Geo Fencing" class="shrink-0 cursor-pointer whitespace-nowrap rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-2.5 py-1 text-[11px] font-semibold text-white shadow-[0_0_0_1px_rgba(87,165,235,0.22),inset_0_1px_0_rgba(255,255,255,0.15)] transition-colors" (click)="onToggleMenu('Geo Fencing')">Geo</button>
+    </div>
+  }
 
-<div class="ui-consolidated-theme mt-4 mx-[30px] w-auto space-y-4 pb-16 max-[1200px]:mx-[20px] max-[1000px]:mx-[15px] max-[640px]:mx-[10px]">
+<div [class]="isGeoFencing ? 'ui-consolidated-theme mx-0 min-h-0 min-w-0 w-full flex-1 overflow-hidden max-[1200px]:mx-[20px] max-[1000px]:mx-[15px] max-[943px]:!mx-0' : 'ui-consolidated-theme mt-4 mx-[30px] w-auto space-y-4 pb-16 max-[1200px]:mx-[20px] max-[1000px]:mx-[15px] max-[640px]:mx-[10px]'">
   @if (isNetworkIntel) {
     <app-network-intel></app-network-intel>
-  } @else if (!isIOC) {
+  } @else if(isGeoFencing) {
+    <div class="flex h-full min-h-0 w-full">
+      <app-satellite-intel class="block h-full min-h-0 w-full" [toolbarMode]="'geo'"></app-satellite-intel>
+    </div>
+  }@else if (!isIOC) {
     @if (licenseService.canUseScanning()) {
       <app-consolidated-scan [isLoading]="isLoading()" #domainScan></app-consolidated-scan>
     }

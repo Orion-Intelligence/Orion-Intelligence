@@ -282,7 +282,7 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
 
     loginAsUser(enterpriseUser.username, enterpriseUser.password);
     cy.wait('@enterpriseTenantNode');
-    waitForTourStep(5);
+    waitForTourStep(1);
 
     cy.get('html').should('have.class', 'no-scroll');
     cy.get('body').should('have.class', 'no-scroll');
@@ -300,8 +300,10 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
       expect(clickEvent.defaultPrevented).to.eq(true);
     });
 
-    cy.get('[data-testid="demo-tour-next"]').should('be.visible').click();
-    waitForTourStep(6);
+    for (let stepNumber = 1; stepNumber < 6; stepNumber += 1) {
+      cy.get('[data-testid="demo-tour-next"]').should('be.visible').click();
+      waitForTourStep(stepNumber + 1);
+    }
 
     cy.get('[data-testid="demo-tour-tooltip"]').should('be.visible');
   });
@@ -313,9 +315,9 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
 
     loginAsUser(enterpriseUser.username, enterpriseUser.password);
     cy.wait('@enterpriseTenantNode');
-    waitForTourStep(5);
+    waitForTourStep(1);
 
-    for (let stepNumber = 5; stepNumber <= 6; stepNumber += 1) {
+    for (let stepNumber = 1; stepNumber <= 6; stepNumber += 1) {
       cy.get('[data-testid="demo-tour-next"]').should('be.visible').click();
 
       if (stepNumber < 6) {

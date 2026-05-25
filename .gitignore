@@ -17,6 +17,7 @@ __pycache__/
 .idea/
 
 env/
+client/build-next/*
 backend/env/
 client/node_modules/
 client/.angular/cache/

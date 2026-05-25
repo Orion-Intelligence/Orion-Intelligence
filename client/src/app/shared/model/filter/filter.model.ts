@@ -7,6 +7,9 @@ export interface FilterOption {
     title: string;
     tooltip: string;
     selected: string | string[];
+    min?: number;
+    max?: number;
+    placeholder?: string;
 }
 export interface FilterModel {
     filters: Record<string, FilterOption>;
