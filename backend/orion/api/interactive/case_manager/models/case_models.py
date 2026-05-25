@@ -27,10 +27,7 @@ from orion.services.mongo_manager.shared_model.db_case_model import EntityConfid
 
 
 def validate_other_value(selected_value, other_value: str, field_name: str) -> None:
-    if (
-        getattr(selected_value, "value", selected_value) == "other"
-        and not other_value.strip()
-    ):
+    if getattr(selected_value, "value", selected_value) == "other" and not other_value.strip():
         raise ValueError(f"{field_name} other value is required")
 
 
@@ -60,9 +57,7 @@ class AdditionalIdentifierModel(CaseRequestModel):
 
     @model_validator(mode="after")
     def validate_other_fields(self):
-        validate_other_value(
-            self.type, self.identifierTypeOtherValue, "Identifier type"
-        )
+        validate_other_value(self.type, self.identifierTypeOtherValue, "Identifier type")
         return self
 
 

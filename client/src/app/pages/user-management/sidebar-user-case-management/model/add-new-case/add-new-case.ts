@@ -81,12 +81,8 @@ export class AddNewCase {
     });
   }
 
-  private requiresOther(value?: string | null): boolean {
-    return value === 'other';
-  }
-
   private validateOther(value: string | undefined | null, otherValue: string | undefined | null, key: string, message: string): void {
-    if (this.requiresOther(value) && !otherValue?.trim()) {
+    if (value === 'other' && !otherValue?.trim()) {
       this.validationErrors[key] = message;
     }
   }
@@ -141,25 +137,10 @@ export class AddNewCase {
       this.validationErrors['entityValue'] = 'Primary entity value is required';
     }
 
-    this.validateOther(this.caseForm.caseType,
-      this.caseForm.caseTypeOtherValue,
-      'caseTypeOther',
-      'Other case type is required');
-
-    this.validateOther(this.caseForm.intakeSource,
-      this.caseForm.intakeSourceOtherValue,
-      'intakeSourceOther',
-      'Other intake source is required');
-
-    this.validateOther(this.primaryEntity.type,
-      this.primaryEntity.entityTypeOtherValue,
-      'entityTypeOther',
-      'Other entity type is required');
-
-    this.validateOther(this.primaryEntity.source,
-      this.primaryEntity.entitySourceOtherValue,
-      'entitySourceOther',
-      'Other entity source is required');
+    this.validateOther(this.caseForm.caseType, this.caseForm.caseTypeOtherValue, 'caseTypeOther', 'Other case type is required');
+    this.validateOther(this.caseForm.intakeSource, this.caseForm.intakeSourceOtherValue, 'intakeSourceOther', 'Other intake source is required');
+    this.validateOther(this.primaryEntity.type, this.primaryEntity.entityTypeOtherValue, 'entityTypeOther', 'Other entity type is required');
+    this.validateOther(this.primaryEntity.source, this.primaryEntity.entitySourceOtherValue, 'entitySourceOther', 'Other entity source is required');
 
     const invalidIdentifier = this.primaryEntity.identifiers.find(identifier => {
       return (identifier.type && !identifier.value.trim())

@@ -5,13 +5,7 @@ from fastapi import HTTPException
 import jwt
 
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
-from orion.api.interactive.case_manager.case_manager_helper import actor_id
-from orion.api.interactive.case_manager.case_manager_helper import apply_sensitive_case_values
-from orion.api.interactive.case_manager.case_manager_helper import as_aware_utc
-from orion.api.interactive.case_manager.case_manager_helper import can_share_case
-from orion.api.interactive.case_manager.case_manager_helper import decrypt_value
-from orion.api.interactive.case_manager.case_manager_helper import get_case_cipher_by_tenant_id
-from orion.api.interactive.case_manager.case_manager_helper import hash_share_token
+from orion.api.interactive.case_manager.case_manager_helper import CaseHelperMethods
 from orion.api.interactive.case_manager.models.case_models import CaseShareResponse
 from orion.api.interactive.case_manager.models.case_models import CreateCaseShareRequest
 from orion.constants.constant import CONSTANTS
@@ -44,7 +38,7 @@ class CaseShareManager:
         )
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
-        if not can_share_case(record, current_user):
+        if not CaseHelperMethods.can_share_case(record, current_user):
             raise HTTPException(status_code=403, detail="Only admins, maintainers, or the case creator can share cases")
 
         share_id = str(uuid4())
@@ -65,8 +59,8 @@ class CaseShareManager:
         record.shares = record.shares or []
         record.shares.append(CaseShare(
             shareId=share_id,
-            tokenHash=hash_share_token(token),
-            createdBy=actor_id(current_user),
+            tokenHash=CaseHelperMethods.hash_share_token(token),
+            createdBy=CaseHelperMethods.actor_id(current_user),
             expiresAt=expires_at,
         ))
         await self._engine.save(record)
@@ -90,7 +84,7 @@ class CaseShareManager:
         )
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
-        if not can_share_case(record, current_user):
+        if not CaseHelperMethods.can_share_case(record, current_user):
             raise HTTPException(status_code=403, detail="Only admins, maintainers, or the case creator can revoke case shares")
 
         revoked_at = utc_now()
@@ -127,17 +121,17 @@ class CaseShareManager:
         if not record:
             raise HTTPException(status_code=404, detail="Share link not found")
         share = next((item for item in (record.shares or []) if item.shareId == share_id), None)
-        if not share or share.tokenHash != hash_share_token(token):
+        if not share or share.tokenHash != CaseHelperMethods.hash_share_token(token):
             raise HTTPException(status_code=404, detail="Share link not found")
         if payload.get("caseId") != record.caseId or payload.get("tenant_uuid") != record.tenant_uuid:
             raise HTTPException(status_code=401, detail="Invalid share token")
         if share.revokedAt is not None:
             raise HTTPException(status_code=403, detail="Share link has been revoked")
-        if as_aware_utc(share.expiresAt) < utc_now():
+        if CaseHelperMethods.as_aware_utc(share.expiresAt) < utc_now():
             raise HTTPException(status_code=401, detail="Share link has expired")
 
-        enc = await get_case_cipher_by_tenant_id(record.tenant_uuid)
-        apply_sensitive_case_values(record, lambda value: decrypt_value(enc, value))
+        enc = await CaseHelperMethods.get_case_cipher_by_tenant_id(record.tenant_uuid)
+        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.decrypt_value(enc, value))
 
         artifacts = record.artifacts or []
         return {

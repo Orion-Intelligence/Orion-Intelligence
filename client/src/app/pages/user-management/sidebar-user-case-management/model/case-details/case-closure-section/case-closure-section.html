@@ -1,0 +1,99 @@
+<div class="overflow-hidden rounded-[8px] border" [ngClass]="!isEditing && caseData.closure ? 'border-emerald-400/20 bg-[color-mix(in_srgb,var(--tenant-expand-bg)_92%,#064e3b_8%)]' : 'border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]'">
+    <div class="flex h-12 items-center justify-between gap-3 px-4" [ngClass]="!isEditing && caseData.closure ? 'border-b border-emerald-400/15 bg-[color-mix(in_srgb,var(--color-blue-820-light)_90%,#064e3b_10%)]' : 'border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)]'">
+        <div class="flex items-center gap-1.5">
+            <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Closure</h2>
+            <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Closure records the final case outcome, reason, summary, and resolution details." class="h-4 w-4 shrink-0 ui-action-icon">
+        </div>
+        @if (isClosingCase && newClosure) {
+        <div class="flex items-center gap-2">
+            <button type="button" (click)="store.saveClosure()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300">
+                <i class="bi bi-check-lg"></i> Save
+            </button>
+            <button type="button" (click)="store.cancelSectionMode()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
+                <i class="bi bi-x-lg"></i> Cancel
+            </button>
+        </div>
+        }
+    </div>
+
+    @if (isClosingCase && newClosure) {
+    <div @caseModeSwapMotion class="p-4">
+        <div class="grid gap-3 md:grid-cols-2">
+            <div>
+                <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Reason</label>
+                <select [(ngModel)]="newClosure.reason" name="closureReason" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-closure-reason-select">
+                    @for (reason of closureReasonOptions; track reason.value) {
+                    <option [value]="reason.value">{{ reason.label }}</option>
+                    }
+                </select>
+                @if (newClosure.reason === 'other') {
+                <input @caseInlineMotion type="text" [(ngModel)]="newClosure.closureReasonOtherValue" name="closureReasonOtherValue" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" placeholder="Specify other closure reason" />
+                }
+            </div>
+            <div class="flex items-end">
+                <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-xs text-[var(--color-text4)]">
+                    Saving closure will mark who closed it and the close time.
+                </div>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Summary</label>
+                <textarea [(ngModel)]="newClosure.summary" name="closureSummary" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-closure-summary-input"></textarea>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Resolution</label>
+                <textarea [(ngModel)]="newClosure.resolution" name="closureResolution" rows="3" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-closure-resolution-input"></textarea>
+            </div>
+        </div>
+    </div>
+    } @else {
+    <div @caseModeSwapMotion class="bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+        @if (caseData.closure; as closure) {
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
+            <div class="min-w-0 p-4">
+                <div>
+                    <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                        Closure Reason</div>
+                    <div class="text-sm font-medium leading-6 text-[var(--color-text2)] break-words" data-testid="case-closure-reason-value">
+                        {{ getDisplayLabel(closure.reason, closure.closureReasonOtherValue) }}
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                        Closure Summary</div>
+                    <div class="text-sm leading-6 text-[var(--color-text2)] break-words" data-testid="case-closure-summary-value">
+                        {{ closure.summary || 'No closure summary provided.' }}
+                    </div>
+                </div>
+                @if (closure.resolution) {
+                <div @caseInlineMotion class="mt-3">
+                    <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                        Resolution Notes</div>
+                    <div class="text-sm leading-6 text-[var(--color-text2)] break-words" data-testid="case-closure-resolution-value">
+                        {{ closure.resolution }}
+                    </div>
+                </div>
+                }
+            </div>
+            <div class="border-t border-emerald-400/15 p-4 lg:border-l lg:border-t-0">
+                <div class="grid grid-cols-1 gap-x-5 gap-y-4 xl:grid-cols-2">
+                    <div>
+                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Closed By</div>
+                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all" data-testid="case-closure-closed-by-value">{{ getAnalystLabel(closure.closedBy)
+                            }}</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Closed At</div>
+                        <div class="mt-1 text-xs font-medium text-[var(--color-text1)]" data-testid="case-closure-closed-at-value">{{
+                            getFormattedDateTime(closure.closedAt) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        } @else {
+        <div class="p-4 text-sm text-[var(--color-text4)]">No closure recorded.</div>
+        }
+    </div>
+    }
+</div>

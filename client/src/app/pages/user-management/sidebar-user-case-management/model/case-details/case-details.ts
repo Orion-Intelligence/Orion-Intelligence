@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, forwardRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -6,25 +6,50 @@ import { EntityDetailsComponent } from '../entity-details/entity-details';
 import { ReportFeedbackCommentsComponent } from '../../../../../sections/report/social-interactions/report-feedback-comments/report-feedback-comments.component';
 import { ReportUserSidebarComponent } from '../../../../../sections/report/social-interactions/report-user-sidebar/report-user-sidebar.component';
 import { ReportFeedbackModel } from '../../../../../sections/report/templates/report_general/models/report-feedback.model';
-import { Case, CaseAnalyst, CaseArtifact, CaseArtifactRequest, CaseClosure, CaseClosureRequest, CaseComment, CaseCommentRequest, CaseEntity, CaseEntityRequest, CaseTag, CaseTask, CaseTaskRequest, CaseUpdateRequest } from '../../../../../shared/model/case-management/case.model';
-import { ARTIFACT_TYPE_OPTIONS, CASE_LINK_RELATIONSHIP_OPTIONS, CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, CLOSURE_REASON_OPTIONS, DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE, ENTITY_CONFIDENCE_OPTIONS, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS, SOURCE_TYPE_OPTIONS, TASK_STATUS_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
+import { Case, CaseAnalyst, CaseArtifact, CaseArtifactRequest, CaseClosure, CaseClosureRequest, CaseComment, CaseCommentRequest, CaseEntity, CaseEntityRequest, CaseLink, CaseTag, CaseTask, CaseTaskRequest, CaseUpdateRequest } from '../../../../../shared/model/case-management/case.model';
+import { CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 import { ConfirmationPopupComponent } from '../../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
 import { HttpClient } from '@angular/common/http';
+import { CaseArtifactsSectionComponent } from './case-artifacts-section/case-artifacts-section';
+import { CaseClosureSectionComponent } from './case-closure-section/case-closure-section';
+import { CaseLinkedCasesSectionComponent } from './case-linked-cases-section/case-linked-cases-section';
+import { CaseRelatedEntitiesSectionComponent } from './case-related-entities-section/case-related-entities-section';
+import { CaseTasksSectionComponent } from './case-tasks-section/case-tasks-section';
+import { CaseDetailsEditSection, CaseDetailsStore } from './case-details.store';
+import { caseInlineMotion, caseModeSwapMotion, caseSectionMotion } from './case-details.animations';
 
 @Component({
   selector: 'app-case-details',
-  imports: [CommonModule, FormsModule, EntityDetailsComponent, ReportFeedbackCommentsComponent, ReportUserSidebarComponent, ConfirmationPopupComponent, TooltipDirective],
+  imports: [
+    CommonModule,
+    FormsModule,
+    EntityDetailsComponent,
+    ReportFeedbackCommentsComponent,
+    ReportUserSidebarComponent,
+    ConfirmationPopupComponent,
+    TooltipDirective,
+    CaseArtifactsSectionComponent,
+    CaseClosureSectionComponent,
+    CaseLinkedCasesSectionComponent,
+    CaseRelatedEntitiesSectionComponent,
+    CaseTasksSectionComponent
+  ],
+  providers: [
+    { provide: CaseDetailsStore, useExisting: forwardRef(() => CaseDetails) }
+  ],
+  animations: [caseInlineMotion, caseModeSwapMotion, caseSectionMotion],
   templateUrl: './case-details.html',
 })
-export class CaseDetails implements OnInit {
+export class CaseDetails extends CaseDetailsStore implements OnInit {
   @ViewChild(ReportUserSidebarComponent) private userSidebar?: ReportUserSidebarComponent;
 
   caseData: Case | null = null;
   isLoading = true;
   isEditing = false;
+  activeEditSection: CaseDetailsEditSection | null = null;
   editedCase: Case | null = null;
   isAddingRelatedEntity = false;
   isAddingArtifact = false;
@@ -34,9 +59,8 @@ export class CaseDetails implements OnInit {
   newRelatedEntity: CaseEntity | null = null;
   newArtifact: CaseArtifact | null = null;
   newTask: CaseTask | null = null;
-  newLinkedCase: { targetCaseId: string; relationship: 'duplicate' | 'related' | 'parent' | 'child' | 'follow_up' | 'escalation' | 'same_actor' | 'same_victim' | 'same_infrastructure'; reason: string; } | null = null;
+  newLinkedCase: CaseLink | null = null;
   newClosure: CaseClosure | null = null;
-  expandedRelatedEntityIds = new Set<string>();
   analysts: CaseAnalyst[] = [];
   accessibleCases: Case[] = [];
   isCommentSaving = false;
@@ -49,19 +73,14 @@ export class CaseDetails implements OnInit {
   statusOptions = CASE_STATUS_OPTIONS;
   severityOptions = SEVERITY_OPTIONS;
   priorityOptions = PRIORITY_OPTIONS;
-  taskStatusOptions = TASK_STATUS_OPTIONS;
-  artifactTypeOptions = ARTIFACT_TYPE_OPTIONS;
-  sourceTypeOptions = SOURCE_TYPE_OPTIONS;
-  caseLinkRelationshipOptions = CASE_LINK_RELATIONSHIP_OPTIONS;
-  closureReasonOptions = CLOSURE_REASON_OPTIONS;
-  confidenceOptions = ENTITY_CONFIDENCE_OPTIONS;
   tagOptions: { value: CaseTag; label: string }[] = CASE_TAG_OPTIONS;
-  readonly screenshotAllowedTypes = ['image/png'];
   readonly artifactAllowedFileTypes = ['application/pdf', 'image/jpeg', 'image/png', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
   pendingNewArtifactFile: File | null = null;
   pendingNewArtifactFileInput: HTMLInputElement | null = null;
 
-  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef) { }
+  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef) {
+    super();
+  }
 
   ngOnInit(): void {
     this.loadCaseDetails();
@@ -121,7 +140,7 @@ export class CaseDetails implements OnInit {
     });
   }
 
-  enableEditing(): void {
+  enableEditing(section: CaseDetailsEditSection = 'caseDetails'): void {
     if (!this.caseData) {
       return;
     }
@@ -140,11 +159,13 @@ export class CaseDetails implements OnInit {
     editedCase.tasks = (editedCase.tasks || []).map(task => this.ensureTaskDefaults(task));
     this.ensurePrimaryEntity(editedCase);
     this.editedCase = editedCase;
+    this.activeEditSection = section;
     this.isEditing = true;
   }
 
   cancelEditing(): void {
     this.isEditing = false;
+    this.activeEditSection = null;
     this.editedCase = null;
     this.cancelAllSectionModes();
   }
@@ -171,18 +192,6 @@ export class CaseDetails implements OnInit {
     }
 
     this.cdr.detectChanges();
-  }
-
-  getArtifactAccept(artifact: CaseArtifact): string {
-    if (artifact.type === 'screenshot') {
-      return '.png,image/png';
-    }
-
-    if (artifact.type === 'file') {
-      return '.pdf,.jpg,.jpeg,.png,.txt,.docx';
-    }
-
-    return '';
   }
 
   uploadArtifactFile(artifact: CaseArtifact, fileInput: HTMLInputElement): void {
@@ -444,80 +453,6 @@ export class CaseDetails implements OnInit {
     this.newClosure = null;
   }
 
-  saveChanges(): void {
-    if (!this.editedCase) {
-      return;
-    }
-
-    if (!this.editedCase.title.trim()) {
-      this.messageNotificationService.show('Case title is required');
-      return;
-    }
-
-    if (!this.validateOtherValue(this.editedCase.caseType, this.editedCase.caseTypeOtherValue, 'Other case type is required')) {
-      return;
-    }
-
-    if (!this.validateOtherValue(this.editedCase.intakeSource, this.editedCase.intakeSourceOtherValue, 'Other intake source is required')) {
-      return;
-    }
-
-    const primaryEntity = this.ensurePrimaryEntity(this.editedCase);
-    if (!primaryEntity.value.trim()) {
-      this.messageNotificationService.show('Primary entity value is required');
-      return;
-    }
-
-    if (!this.validateOtherValue(primaryEntity.type, primaryEntity.entityTypeOtherValue, 'Other primary entity type is required')) {
-      return;
-    }
-    if (!this.validateOtherValue(primaryEntity.source, primaryEntity.entitySourceOtherValue, 'Other primary entity source is required')) {
-      return;
-    }
-
-    const invalidRelatedOtherIndex = this.getRelatedEntities(this.editedCase).findIndex(entity =>
-      (entity.type === 'other' && !entity.entityTypeOtherValue?.trim())
-      || (entity.source === 'other' && !entity.entitySourceOtherValue?.trim()));
-
-    if (invalidRelatedOtherIndex >= 0) {
-      this.messageNotificationService.show(`Related entity ${invalidRelatedOtherIndex + 1} other value is required`);
-      return;
-    }
-
-    const invalidArtifactOtherIndex = (this.editedCase.artifacts || []).findIndex(artifact =>
-      (artifact.type === 'other' && !artifact.artifactTypeOtherValue?.trim())
-      || (artifact.source === 'other' && !artifact.artifactSourceOtherValue?.trim()));
-
-    if (invalidArtifactOtherIndex >= 0) {
-      this.messageNotificationService.show(`Artifact ${invalidArtifactOtherIndex + 1} other value is required`);
-      return;
-    }
-
-    if (this.editedCase.closure?.reason === 'other' && !this.editedCase.closure.closureReasonOtherValue?.trim()) {
-      this.messageNotificationService.show('Other closure reason is required');
-      return;
-    }
-
-    const invalidTaskIndex = (this.editedCase.tasks || []).findIndex(task => !task.title.trim());
-    if (invalidTaskIndex >= 0) {
-      this.messageNotificationService.show(`Task ${invalidTaskIndex + 1} title is required`);
-      return;
-    }
-
-    const payload = this.cleanCaseForSave(this.editedCase);
-    this.caseService.updateCase(this.editedCase.caseId, payload).subscribe({
-      next: (updated) => {
-        this.caseData = updated;
-        this.isEditing = false;
-        this.editedCase = null;
-        this.messageNotificationService.show('Case updated successfully', 'success');
-      },
-      error: (err) => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to update case');
-      }
-    });
-  }
-
   get editablePrimaryEntity(): CaseEntity | null {
     if (!this.editedCase) {
       return null;
@@ -539,58 +474,6 @@ export class CaseDetails implements OnInit {
     return caseItem?.entities?.filter(entity => entity.entityId !== primaryEntity?.entityId) || [];
   }
 
-  getLinkableEntities(currentEntityId?: string, caseItem: Case | null = this.editedCase || this.caseData): CaseEntity[] {
-    return (caseItem?.entities || []).filter(entity => entity.entityId !== currentEntityId);
-  }
-
-  getLinkedEntityDisplayLabel(entityId?: string): string {
-    if (!entityId) {
-      return 'Not linked';
-    }
-
-    const allEntities = this.caseData?.entities || this.editedCase?.entities || [];
-    const linkedEntity = allEntities.find(entity => entity.entityId === entityId);
-
-    if (!linkedEntity) {
-      return 'Linked entity not found';
-    }
-
-    const primaryEntity = this.getPrimaryEntity(this.caseData || this.editedCase);
-    const label = linkedEntity.value || linkedEntity.entityId;
-
-    if (linkedEntity.entityId === primaryEntity?.entityId || linkedEntity.role === 'primary') {
-      return `Primary Entity - ${label}`;
-    }
-
-    const relatedIndex = this.getRelatedEntities(this.caseData || this.editedCase)
-      .findIndex(entity => entity.entityId === linkedEntity.entityId);
-
-    return `Related Entity ${relatedIndex + 1} - ${label}`;
-  }
-
-  toggleRelatedEntity(entityId: string): void {
-    if (this.expandedRelatedEntityIds.has(entityId)) {
-      this.expandedRelatedEntityIds.delete(entityId);
-      return;
-    }
-    this.expandedRelatedEntityIds.add(entityId);
-  }
-
-  isRelatedEntityExpanded(entityId: string): boolean {
-    return this.expandedRelatedEntityIds.has(entityId);
-  }
-
-  addRelatedEntity(): void {
-    if (!this.editedCase) {
-      return;
-    }
-    this.editedCase.entities = this.editedCase.entities || [];
-    this.editedCase.entities.push({
-      ...structuredClone(DEFAULT_RELATED_CASE_ENTITY_TEMPLATE),
-      entityId: this.createId()
-    });
-  }
-
   removeRelatedEntity(index: number): void {
     if (!this.editedCase) {
       return;
@@ -602,33 +485,11 @@ export class CaseDetails implements OnInit {
     this.editedCase.entities = this.editedCase.entities.filter(entity => entity.entityId !== relatedEntity.entityId);
   }
 
-  addArtifact(): void {
-    if (!this.editedCase) {
-      return;
-    }
-    this.editedCase.artifacts = this.editedCase.artifacts || [];
-    this.editedCase.artifacts.push({
-      ...structuredClone(DEFAULT_CASE_ARTIFACT_TEMPLATE),
-      artifactId: this.createId()
-    });
-  }
-
   removeArtifact(index: number): void {
     if (!this.editedCase?.artifacts) {
       return;
     }
     this.editedCase.artifacts.splice(index, 1);
-  }
-
-  addTask(): void {
-    if (!this.editedCase) {
-      return;
-    }
-    this.editedCase.tasks = this.editedCase.tasks || [];
-    this.editedCase.tasks.push({
-      ...structuredClone(DEFAULT_CASE_TASK_TEMPLATE),
-      taskId: this.createId()
-    });
   }
 
   removeTask(index: number): void {
@@ -638,18 +499,6 @@ export class CaseDetails implements OnInit {
     this.editedCase.tasks.splice(index, 1);
   }
 
-  addLinkedCase(): void {
-    if (!this.editedCase || !this.hasLinkableCases(this.editedCase)) {
-      return;
-    }
-    this.editedCase.linkedCases = this.editedCase.linkedCases || [];
-    this.editedCase.linkedCases.push({
-      targetCaseId: '',
-      relationship: 'related',
-      reason: ''
-    });
-  }
-
   removeLinkedCase(index: number): void {
     if (!this.editedCase?.linkedCases) {
       return;
@@ -657,53 +506,11 @@ export class CaseDetails implements OnInit {
     this.editedCase.linkedCases.splice(index, 1);
   }
 
-  addClosure(): void {
-    if (!this.editedCase) {
-      return;
-    }
-    this.editedCase.closure = {
-      reason: 'remediated',
-      summary: '',
-      resolution: ''
-    };
-    this.editedCase.status = 'closed';
-  }
-
-  removeClosure(): void {
-    if (!this.editedCase) {
-      return;
-    }
-    this.editedCase.closure = null;
-    if (this.editedCase.status === 'closed') {
-      this.editedCase.status = 'review';
-    }
-  }
-
   hasCaseChanged(): boolean {
     if (!this.editedCase || !this.caseData) {
       return false;
     }
     return this.getCaseSaveSignature(this.editedCase) !== this.getCaseSaveSignature(this.caseData);
-  }
-
-  hasClosureChanged(): boolean {
-    return Boolean(this.editedCase?.closure) !== Boolean(this.caseData?.closure);
-  }
-
-  hasRelatedEntitiesChanged(): boolean {
-    return this.getRelatedEntities(this.editedCase).length !== this.getRelatedEntities(this.caseData).length;
-  }
-
-  hasArtifactsChanged(): boolean {
-    return (this.editedCase?.artifacts?.length || 0) !== (this.caseData?.artifacts?.length || 0);
-  }
-
-  hasTasksChanged(): boolean {
-    return (this.editedCase?.tasks?.length || 0) !== (this.caseData?.tasks?.length || 0);
-  }
-
-  hasLinkedCasesChanged(): boolean {
-    return (this.editedCase?.linkedCases?.length || 0) !== (this.caseData?.linkedCases?.length || 0);
   }
 
   getLinkableCases( caseItem: Case | null = this.editedCase || this.caseData, currentSelectedCaseId = '' ): Case[] {
@@ -823,6 +630,7 @@ export class CaseDetails implements OnInit {
 
         this.caseData = updated;
         this.isEditing = false;
+        this.activeEditSection = null;
         this.editedCase = null;
         this.cancelAllSectionModes();
 
@@ -1217,17 +1025,6 @@ export class CaseDetails implements OnInit {
     });
   }
 
-  getDateInputValue(date?: Date | string | null): string {
-    if (!date) {
-      return '';
-    }
-    return new Date(date).toISOString().slice(0, 10);
-  }
-
-  setDateInputValue(target: { dueAt?: Date | string | null; capturedAt?: Date | string | null }, field: 'dueAt' | 'capturedAt', value: string): void {
-    target[field] = value ? new Date(`${value}T00:00:00`).toISOString() : null;
-  }
-
   formatLabel(value?: string | null): string {
     if (!value) {
       return '-';
@@ -1446,10 +1243,6 @@ export class CaseDetails implements OnInit {
       return crypto.randomUUID();
     }
     return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  }
-
-  requiresOther(value?: string | null): boolean {
-    return value === 'other';
   }
 
   getDisplayLabel(value?: string | null, otherValue?: string | null): string {

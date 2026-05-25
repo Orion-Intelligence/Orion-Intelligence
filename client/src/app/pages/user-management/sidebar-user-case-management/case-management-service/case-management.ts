@@ -3,6 +3,8 @@ import { Observable } from 'rxjs';
 import { ApiService } from '../../../../shared/services/api.service';
 import { Case, CaseAnalyst, CaseRequest, CaseShareRequest, CaseShareResponse, CaseUpdateRequest } from '../../../../shared/model/case-management/case.model';
 
+type ArtifactFileUploadResponse = { fileName: string; fileType: string; fileSize: number; fileResourceId: string };
+
 @Injectable({ providedIn: 'root' })
 export class CaseManagement {
   constructor(private api: ApiService) { }
@@ -43,21 +45,11 @@ export class CaseManagement {
     return this.api.delete<{ success: boolean; revokedCount: number }>(`profile/cases/${caseId}/shares`);
   }
 
-  uploadArtifactFile(caseId: string, artifactId: string, file: File): Observable<{
-    fileName: string;
-    fileType: string;
-    fileSize: number;
-    fileResourceId: string;
-  }> {
+  uploadArtifactFile(caseId: string, artifactId: string, file: File): Observable<ArtifactFileUploadResponse> {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.api.post<{
-      fileName: string;
-      fileType: string;
-      fileSize: number;
-      fileResourceId: string;
-    }>(`profile/cases/${caseId}/artifacts/${artifactId}/file`, formData);
+    return this.api.post<ArtifactFileUploadResponse>(`profile/cases/${caseId}/artifacts/${artifactId}/file`, formData);
   }
 
   deleteArtifactFile(caseId: string, artifactId: string): Observable<{ success: boolean }> {

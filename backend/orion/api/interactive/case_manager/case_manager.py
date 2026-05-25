@@ -4,17 +4,7 @@ from fastapi.responses import Response
 from fastapi import HTTPException
 
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
-from orion.api.interactive.case_manager.case_manager_helper import actor_id
-from orion.api.interactive.case_manager.case_manager_helper import apply_sensitive_case_values
-from orion.api.interactive.case_manager.case_manager_helper import can_close_case
-from orion.api.interactive.case_manager.case_manager_helper import can_comment
-from orion.api.interactive.case_manager.case_manager_helper import can_manage_case_assignments
-from orion.api.interactive.case_manager.case_manager_helper import can_view_case
-from orion.api.interactive.case_manager.case_manager_helper import decrypt_value
-from orion.api.interactive.case_manager.case_manager_helper import encrypt_value
-from orion.api.interactive.case_manager.case_manager_helper import get_case_cipher
-from orion.api.interactive.case_manager.case_manager_helper import is_admin
-from orion.api.interactive.case_manager.case_manager_helper import is_maintainer
+from orion.api.interactive.case_manager.case_manager_helper import CaseHelperMethods
 from orion.api.interactive.case_manager.models.case_models import CaseResponse
 from orion.api.interactive.case_manager.models.case_models import CreateCaseRequest
 from orion.api.interactive.case_manager.models.case_models import UpdateCaseRequest
@@ -30,10 +20,7 @@ from orion.services.mongo_manager.shared_model.db_case_model import CaseLink
 from orion.services.mongo_manager.shared_model.db_case_model import CaseTask
 from orion.services.mongo_manager.shared_model.db_case_model import db_case_model
 from orion.services.mongo_manager.shared_model.db_case_model import utc_now
-from orion.api.interactive.case_manager.case_artifact_file_helper import delete_artifact_file
-from orion.api.interactive.case_manager.case_artifact_file_helper import load_decrypted_artifact_file
-from orion.api.interactive.case_manager.case_artifact_file_helper import save_encrypted_artifact_file
-from orion.api.interactive.case_manager.case_artifact_file_helper import validate_artifact_file
+from orion.api.interactive.case_manager.case_artifact_helper import CaseArtifactHelper
 
 
 class CaseManager:
@@ -43,6 +30,7 @@ class CaseManager:
         self._engine = mongo_controller.get_instance().get_engine()
         if CaseManager.__instance is not None:
             raise Exception("Singleton!")
+        self._artifact_file_helper = CaseArtifactHelper()
         CaseManager.__instance = self
 
     @staticmethod
@@ -52,8 +40,8 @@ class CaseManager:
         return CaseManager.__instance
 
     async def _to_response(self, record: db_case_model, current_user) -> CaseResponse:
-        enc = await get_case_cipher(current_user)
-        apply_sensitive_case_values(record, lambda value: decrypt_value(enc, value))
+        enc = await CaseHelperMethods.get_case_cipher(current_user)
+        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.decrypt_value(enc, value))
         data = record.model_dump()
         data["id"] = str(record.id)
         return CaseResponse(**data)
@@ -125,16 +113,16 @@ class CaseManager:
                 (db_case_model.caseId == target_case_id)
                 & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
             )
-            if not target_record or not can_view_case(target_record, current_user):
+            if not target_record or not CaseHelperMethods.can_view_case(target_record, current_user):
                 raise HTTPException(status_code=400, detail="Linked cases must be cases you can access")
 
     async def get_cases(self, current_user) -> list[CaseResponse]:
-        if is_maintainer(current_user):
+        if CaseHelperMethods.is_maintainer(current_user):
             records = await self._engine.find(
                 db_case_model, db_case_model.tenant_uuid == str(current_user.tenant_uuid)
             )
         else:
-            current_actor_id = actor_id(current_user)
+            current_actor_id = CaseHelperMethods.actor_id(current_user)
             records = await self._engine.find(
                 db_case_model,
                 {
@@ -163,12 +151,12 @@ class CaseManager:
         if existing:
             raise HTTPException(status_code=400, detail="Case ID already exists")
 
-        current_actor_id = actor_id(current_user)
+        current_actor_id = CaseHelperMethods.actor_id(current_user)
         server_now = utc_now()
         await self._validate_case_analysts(data.assignedAnalystIds, current_user)
         self._validate_work_assignments(data.tasks, data.assignedAnalystIds)
         await self._validate_linked_cases(data.caseId, data.linkedCases, current_user)
-        if data.closure and not (is_maintainer(current_user) or is_admin(current_user) or current_actor_id in data.assignedAnalystIds):
+        if data.closure and not (CaseHelperMethods.is_maintainer(current_user) or CaseHelperMethods.is_admin(current_user) or current_actor_id in data.assignedAnalystIds):
             raise HTTPException(status_code=403, detail="Only assigned analysts, admins, or maintainers can close cases")
         entities = [
             CaseEntity(
@@ -227,8 +215,8 @@ class CaseManager:
             closure=CaseClosure(**data.closure.model_dump(), closedBy=current_actor_id, closedAt=server_now) if data.closure else None,
             closedAt=server_now if data.closure else None,
         )
-        enc = await get_case_cipher(current_user)
-        apply_sensitive_case_values(record, lambda value: encrypt_value(enc, value))
+        enc = await CaseHelperMethods.get_case_cipher(current_user)
+        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.encrypt_value(enc, value))
         await self._engine.save(record)
 
         await AuditLogManager.get_instance().register(
@@ -270,7 +258,7 @@ class CaseManager:
                 f"Case retrieval failed: caseId={case_id}, case_not_found",
             )
             raise HTTPException(status_code=404, detail="Case not found")
-        if not can_view_case(record, current_user):
+        if not CaseHelperMethods.can_view_case(record, current_user):
             raise HTTPException(status_code=403, detail="Access forbidden")
 
         await AuditLogManager.get_instance().register(
@@ -295,27 +283,27 @@ class CaseManager:
             )
             raise HTTPException(status_code=404, detail="Case not found")
 
-        current_actor_id = actor_id(current_user)
+        current_actor_id = CaseHelperMethods.actor_id(current_user)
         server_now = utc_now()
-        if not can_view_case(record, current_user):
+        if not CaseHelperMethods.can_view_case(record, current_user):
             raise HTTPException(status_code=403, detail="Access forbidden")
-        enc = await get_case_cipher(current_user)
-        apply_sensitive_case_values(record, lambda value: decrypt_value(enc, value))
+        enc = await CaseHelperMethods.get_case_cipher(current_user)
+        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.decrypt_value(enc, value))
         if record.closure is not None:
             raise HTTPException(status_code=403, detail="Closed cases cannot be edited")
-        if data.assignedAnalystIds != (record.assignedAnalystIds or []) and not can_manage_case_assignments(record, current_user):
+        if data.assignedAnalystIds != (record.assignedAnalystIds or []) and not CaseHelperMethods.can_manage_case_assignments(record, current_user):
             raise HTTPException(status_code=403, detail="Only admins, maintainers, or the case creator can update case analysts")
-        if self._task_assignments_changed(record, data.tasks) and not can_manage_case_assignments(record, current_user):
+        if self._task_assignments_changed(record, data.tasks) and not CaseHelperMethods.can_manage_case_assignments(record, current_user):
             raise HTTPException(status_code=403, detail="Only admins, maintainers, or the case creator can assign tasks")
-        if self._linked_cases_changed(record, data.linkedCases) and not can_manage_case_assignments(record, current_user):
+        if self._linked_cases_changed(record, data.linkedCases) and not CaseHelperMethods.can_manage_case_assignments(record, current_user):
             raise HTTPException(status_code=403, detail="Only admins, maintainers, or the case creator can link cases")
         await self._validate_case_analysts(data.assignedAnalystIds, current_user)
         self._validate_work_assignments(data.tasks, data.assignedAnalystIds)
         await self._validate_linked_cases(case_id, data.linkedCases, current_user)
-        if data.comments is not None and not can_comment(record, current_user):
+        if data.comments is not None and not CaseHelperMethods.can_comment(record, current_user):
             raise HTTPException(status_code=403, detail="Only assigned analysts, admins, maintainers, or the case creator can comment on cases")
         closure_provided = "closure" in data.model_fields_set
-        if closure_provided and (data.closure is not None or record.closure is not None) and not can_close_case(record, current_user):
+        if closure_provided and (data.closure is not None or record.closure is not None) and not CaseHelperMethods.can_close_case(record, current_user):
             raise HTTPException(status_code=403, detail="Only assigned analysts, admins, or maintainers can close cases")
         existing_entities = {
             entity.entityId: entity
@@ -406,7 +394,7 @@ class CaseManager:
             record.closedAt = None
         record.updatedAt = utc_now()
 
-        apply_sensitive_case_values(record, lambda value: encrypt_value(enc, value))
+        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.encrypt_value(enc, value))
         await self._engine.save(record)
 
         await AuditLogManager.get_instance().register(
@@ -427,7 +415,7 @@ class CaseManager:
             raise HTTPException(status_code=404, detail="Case not found")
         if record.closure is not None:
             raise HTTPException(status_code=403, detail="Closed cases cannot be deleted")
-        if not is_maintainer(current_user):
+        if not CaseHelperMethods.is_maintainer(current_user):
             raise HTTPException(status_code=403, detail="Only maintainers can delete cases")
 
         await self._engine.delete(record)
@@ -455,23 +443,23 @@ class CaseManager:
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
         
-        if not can_view_case(record, current_user):
+        if not CaseHelperMethods.can_view_case(record, current_user):
             raise HTTPException(status_code=403, detail="Access forbidden")
 
-        enc = await get_case_cipher(current_user)
-        apply_sensitive_case_values(record, lambda value: decrypt_value(enc, value))
+        enc = await CaseHelperMethods.get_case_cipher(current_user)
+        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.decrypt_value(enc, value))
 
         artifact = next((item for item in record.artifacts if item.artifactId == artifact_id), None)
 
         if not artifact:
             raise HTTPException(status_code=404, detail="Artifact not found")
 
-        validate_artifact_file(artifact.type.value, file)
+        self._artifact_file_helper.validate_artifact_file(artifact.type.value, file)
 
         if artifact.fileResourceId:
-            delete_artifact_file(artifact.fileResourceId)
+            self._artifact_file_helper.delete_artifact_file(artifact.fileResourceId)
 
-        resource_id, file_size = await save_encrypted_artifact_file(file, enc)
+        resource_id, file_size = await self._artifact_file_helper.save_encrypted_artifact_file(file, enc)
 
         artifact.fileName = file.filename or ""
         artifact.fileType = file.content_type or ""
@@ -479,7 +467,7 @@ class CaseManager:
         artifact.fileResourceId = resource_id
         record.updatedAt = utc_now()
 
-        apply_sensitive_case_values(record, lambda value: encrypt_value(enc, value))
+        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.encrypt_value(enc, value))
         await self._engine.save(record)
 
         return {
@@ -499,18 +487,18 @@ class CaseManager:
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
 
-        if not can_view_case(record, current_user):
+        if not CaseHelperMethods.can_view_case(record, current_user):
             raise HTTPException(status_code=403, detail="Access forbidden")
 
-        enc = await get_case_cipher(current_user)
-        apply_sensitive_case_values(record, lambda value: decrypt_value(enc, value))
+        enc = await CaseHelperMethods.get_case_cipher(current_user)
+        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.decrypt_value(enc, value))
 
         artifact = next((item for item in record.artifacts if item.artifactId == artifact_id), None)
 
         if not artifact or not artifact.fileResourceId:
             raise HTTPException(status_code=404, detail="Artifact file not found")
 
-        file_data = load_decrypted_artifact_file(artifact.fileResourceId, enc)
+        file_data = self._artifact_file_helper.load_decrypted_artifact_file(artifact.fileResourceId, enc)
 
         disposition = "attachment" if download else "inline"
         file_name = artifact.fileName or "artifact-file"
@@ -533,18 +521,18 @@ class CaseManager:
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
 
-        if not can_view_case(record, current_user):
+        if not CaseHelperMethods.can_view_case(record, current_user):
             raise HTTPException(status_code=403, detail="Access forbidden")
 
-        enc = await get_case_cipher(current_user)
-        apply_sensitive_case_values(record, lambda value: decrypt_value(enc, value))
+        enc = await CaseHelperMethods.get_case_cipher(current_user)
+        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.decrypt_value(enc, value))
 
         artifact = next((item for item in record.artifacts if item.artifactId == artifact_id), None)
 
         if not artifact:
             raise HTTPException(status_code=404, detail="Artifact not found")
 
-        delete_artifact_file(artifact.fileResourceId)
+        self._artifact_file_helper.delete_artifact_file(artifact.fileResourceId)
 
         artifact.fileName = ""
         artifact.fileType = ""
@@ -552,7 +540,7 @@ class CaseManager:
         artifact.fileResourceId = ""
         record.updatedAt = utc_now()
 
-        apply_sensitive_case_values(record, lambda value: encrypt_value(enc, value))
+        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.encrypt_value(enc, value))
         await self._engine.save(record)
 
         return {"success": True}

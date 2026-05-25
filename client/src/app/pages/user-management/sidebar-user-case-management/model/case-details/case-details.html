@@ -1,6 +1,6 @@
 <div class="w-full max-w-[2400px] p-0 sm:p-5">
     @if (isLoading) {
-    <div class="ui-page-container p-3 sm:p-5" data-testid="case-details-page">
+    <div @caseSectionMotion class="ui-page-container p-3 sm:p-5" data-testid="case-details-page">
         <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="min-w-0 flex-1">
                 <div class="ui-shimmer h-7 w-56 max-w-full rounded bg-[var(--color-blue-720)]"></div>
@@ -106,34 +106,18 @@
 
             <div class="flex flex-wrap items-center gap-2 sm:justify-end">
                 @if (!isEditing) {
-                <button (click)="openShareConfirmation()" type="button" aria-label="Create share link" appTooltip="Create share link" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-share" [disabled]="isShareCreating">
+                <button @caseInlineMotion (click)="openShareConfirmation()" type="button" aria-label="Create share link" appTooltip="Create share link" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-share" [disabled]="isShareCreating">
                     <i class="bi text-[15px] leading-none [&_.ui-bootstrap-icon]:overflow-visible" [ngClass]="isShareCreating ? 'bi-arrow-repeat animate-spin' : 'bi-share-fill'"></i>
                 </button>
 
-                <button (click)="openRevokeShareConfirmation()" type="button" aria-label="Revoke all share links" appTooltip="Revoke all share links" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-revoke-shares" [disabled]="isShareRevoking">
+                <button @caseInlineMotion (click)="openRevokeShareConfirmation()" type="button" aria-label="Revoke all share links" appTooltip="Revoke all share links" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-revoke-shares" [disabled]="isShareRevoking">
                     <i class="bi text-sm leading-none" [ngClass]="isShareRevoking ? 'bi-arrow-repeat animate-spin' : 'bi-trash3 text-red-300'"></i>
                 </button>
                 }
 
-                @if (!isEditing && !caseData.closure) {
-                <button (click)="enableEditing()" type="button" aria-label="Edit case" appTooltip="Edit case" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-details-edit">
-                    <img src="assets/images/shared/edit.svg" width="16" alt="edit" class="ui-action-icon" />
-                </button>
-                }
-
                 @if (!isEditing && !caseData.closure && caseData.status !== 'closed') {
-                <button type="button" (click)="openCloseCase()" class="inline-flex h-9 items-center gap-1.5 rounded-lg border border-red-400/20 bg-red-500/10 px-3 text-sm text-red-300">
+                <button @caseInlineMotion type="button" (click)="openCloseCase()" class="inline-flex h-9 items-center gap-1.5 rounded-lg border border-red-400/20 bg-red-500/10 px-3 text-sm text-red-300">
                     <i class="bi bi-lock-fill"></i> Close Case
-                </button>
-                }
-
-                @if (isEditing) {
-                <button (click)="cancelEditing()" type="button" aria-label="Cancel edit" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-details-cancel">
-                    <i class="bi bi-x-lg text-sm"></i>
-                </button>
-
-                <button (click)="saveCaseDetails()" type="button" aria-label="Save case" [class.hidden]="!hasCaseChanged()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-details-save">
-                    <i class="bi bi-check-lg text-sm"></i>
                 </button>
                 }
             </div>
@@ -148,116 +132,14 @@
 
         <div class="space-y-5">
             @if (isClosingCase || caseData.closure) {
-            <div class="overflow-hidden rounded-[8px] border" [ngClass]="!isEditing && caseData.closure ? 'border-emerald-400/20 bg-[color-mix(in_srgb,var(--tenant-expand-bg)_92%,#064e3b_8%)]' : 'border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]'">
-                <div class="flex h-12 items-center justify-between gap-3 px-4" [ngClass]="!isEditing && caseData.closure ? 'border-b border-emerald-400/15 bg-[color-mix(in_srgb,var(--color-blue-820-light)_90%,#064e3b_10%)]' : 'border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)]'">
-                    <div class="flex items-center gap-1.5">
-                        <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Closure</h2>
-                        <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Closure records the final case outcome, reason, summary, and resolution details." class="h-4 w-4 shrink-0 ui-action-icon">
-                    </div>
-                    @if (isClosingCase && newClosure) {
-                    <div class="flex items-center gap-2">
-                        <button type="button" (click)="saveClosure()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300">
-                            <i class="bi bi-check-lg"></i> Save
-                        </button>
-                        <button type="button" (click)="cancelSectionMode()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
-                            <i class="bi bi-x-lg"></i> Cancel
-                        </button>
-                    </div>
-                    }
-                </div>
-
-                @if ((isEditing && editedCase) || (isClosingCase && newClosure)) {
-                <div class="p-4">
-                    @if (newClosure; as closure) {
-                    <div class="grid gap-3 md:grid-cols-2">
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Reason</label>
-                            <select [(ngModel)]="closure.reason" name="closureReason" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-closure-reason-select">
-                                @for (reason of closureReasonOptions; track reason.value) {
-                                <option [value]="reason.value">{{ reason.label }}</option>
-                                }
-                            </select>
-                            @if (closure.reason === 'other') {
-                            <input type="text" [(ngModel)]="closure.closureReasonOtherValue" name="closureReasonOtherValue" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" placeholder="Specify other closure reason" />
-                            }
-                        </div>
-                        <div class="flex items-end">
-                            <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-xs text-[var(--color-text4)]">
-                                Saving closure will mark who closed it and the close time.
-                            </div>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Summary</label>
-                            <textarea [(ngModel)]="closure.summary" name="closureSummary" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-closure-summary-input"></textarea>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Resolution</label>
-                            <textarea [(ngModel)]="closure.resolution" name="closureResolution" rows="3" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-closure-resolution-input"></textarea>
-                        </div>
-                    </div>
-                    } @else {
-                    <div class="text-sm text-[var(--color-text4)]">No closure recorded.</div>
-                    }
-                </div>
-                } @else {
-                <div class="bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
-                    @if (caseData.closure; as closure) {
-                    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
-                        <div class="min-w-0 p-4">
-                            <div>
-                                <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                    Closure Reason</div>
-                                <div class="text-sm font-medium leading-6 text-[var(--color-text2)] break-words" data-testid="case-closure-reason-value">
-                                    {{ getDisplayLabel(closure.reason, closure.closureReasonOtherValue) }}
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                    Closure Summary</div>
-                                <div class="text-sm leading-6 text-[var(--color-text2)] break-words" data-testid="case-closure-summary-value">
-                                    {{ closure.summary || 'No closure summary provided.' }}
-                                </div>
-                            </div>
-                            @if (closure.resolution) {
-                            <div class="mt-3">
-                                <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                    Resolution Notes</div>
-                                <div class="text-sm leading-6 text-[var(--color-text2)] break-words" data-testid="case-closure-resolution-value">
-                                    {{ closure.resolution }}
-                                </div>
-                            </div>
-                            }
-                        </div>
-                        <div class="border-t border-emerald-400/15 p-4 lg:border-l lg:border-t-0">
-                            <div class="grid grid-cols-1 gap-x-5 gap-y-4 xl:grid-cols-2">
-                                <div>
-                                    <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                        Closed By</div>
-                                    <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all" data-testid="case-closure-closed-by-value">{{ getAnalystLabel(closure.closedBy)
-                                        }}</div>
-                                </div>
-                                <div>
-                                    <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                        Closed At</div>
-                                    <div class="mt-1 text-xs font-medium text-[var(--color-text1)]" data-testid="case-closure-closed-at-value">{{
-                                        getFormattedDateTime(closure.closedAt) }}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    } @else {
-                    <div class="p-4 text-sm text-[var(--color-text4)]">No closure recorded.</div>
-                    }
-                </div>
-                }
-            </div>
+            <app-case-closure-section @caseSectionMotion></app-case-closure-section>
             }
 
             <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
                 <div class="flex flex-col gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-3 lg:flex-row lg:items-center lg:justify-between">
                     <div class="min-w-0">
                         <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Case Details</h2>
-                        @if (!isEditing) {
+                        @if (activeEditSection !== 'caseDetails') {
                         <div class="mt-1 text-xs font-medium text-[var(--color-text4)]">
                             {{ caseData.caseId }} · {{ getDisplayLabel(caseData.caseType, caseData.caseTypeOtherValue)
                             }} · {{
@@ -265,7 +147,21 @@
                         </div>
                         }
                     </div>
-                    @if (!isEditing) {
+                    @if (activeEditSection === 'caseDetails') {
+                    <div class="flex items-center gap-2">
+                        <button @caseInlineMotion (click)="saveCaseDetails()" type="button" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300" data-testid="case-details-save">
+                            <i class="bi bi-check-lg"></i> Save
+                        </button>
+                        <button @caseInlineMotion (click)="cancelEditing()" type="button" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300" data-testid="case-details-cancel">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </button>
+                    </div>
+                    } @else if (!isEditing && !caseData.closure) {
+                    <button @caseInlineMotion (click)="enableEditing('caseDetails')" type="button" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-sm font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-details-edit">
+                        <i class="bi bi-pencil-square"></i> Edit
+                    </button>
+                    }
+                    @if (activeEditSection !== 'caseDetails') {
                     <div class="grid w-full grid-cols-3 overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/60 lg:w-[420px] xl:w-[480px]">
                         <div class="min-w-0 border-r border-[var(--tenant-line)] px-3 py-2" [ngClass]="{ 'bg-blue-500/10 text-blue-300': caseData.status === 'new' || caseData.status === 'triaged' || caseData.status === 'assigned', 'bg-yellow-500/10 text-yellow-300': caseData.status === 'investigating' || caseData.status === 'waiting_on_response' || caseData.status === 'remediating' || caseData.status === 'review', 'bg-emerald-500/10 text-emerald-300': caseData.status === 'resolved', 'bg-slate-500/10 text-slate-300': caseData.status !== 'new' && caseData.status !== 'triaged' && caseData.status !== 'assigned' && caseData.status !== 'investigating' && caseData.status !== 'waiting_on_response' && caseData.status !== 'remediating' && caseData.status !== 'review' && caseData.status !== 'resolved' }">
                             <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">Status</div>
@@ -295,8 +191,8 @@
                     }
                 </div>
 
-                @if (isEditing) {
-                <div class="grid grid-cols-1 gap-4 p-4 xl:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
+                @if (activeEditSection === 'caseDetails') {
+                <div @caseModeSwapMotion class="grid grid-cols-1 gap-4 p-4 xl:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
                     <div class="space-y-4">
                         <div class="space-y-1">
                             <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
@@ -358,7 +254,7 @@
                                     }
                                 </select>
                                 @if (editedCase!.caseType === 'other') {
-                                <input type="text" [(ngModel)]="editedCase!.caseTypeOtherValue" name="caseTypeOther" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" placeholder="Specify other case type" />
+                                <input @caseInlineMotion type="text" [(ngModel)]="editedCase!.caseTypeOtherValue" name="caseTypeOther" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" placeholder="Specify other case type" />
                                 }
                             </div>
 
@@ -371,7 +267,7 @@
                                     }
                                 </select>
                                 @if (editedCase!.intakeSource === 'other') {
-                                <input type="text" [(ngModel)]="editedCase!.intakeSourceOtherValue" name="intakeSourceOther" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" placeholder="Specify other intake source" />
+                                <input @caseInlineMotion type="text" [(ngModel)]="editedCase!.intakeSourceOtherValue" name="intakeSourceOther" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" placeholder="Specify other intake source" />
                                 }
                             </div>
 
@@ -398,7 +294,7 @@
                     </div>
                 </div>
                 } @else {
-                <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
+                <div @caseModeSwapMotion class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
                     <div class="min-w-0 p-4">
                         <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
                             Case Title</div>
@@ -459,30 +355,45 @@
             </div>
 
             <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
-                @if (isEditing && editablePrimaryEntity) {
-                <div class="flex items-center border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
+                @if (activeEditSection === 'primaryEntity' && editablePrimaryEntity) {
+                <div @caseModeSwapMotion class="flex items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
                     <div class="flex items-center gap-1.5">
                         <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Primary Entity
                         </h2>
                         <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="The main person, organization, asset, account, indicator, or object this case is about." class="h-4 w-4 shrink-0 ui-action-icon">
                     </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" (click)="savePrimaryEntity()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300">
+                            <i class="bi bi-check-lg"></i> Save
+                        </button>
+                        <button type="button" (click)="cancelEditing()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </button>
+                    </div>
                 </div>
-                <div class="p-4">
+                <div @caseModeSwapMotion class="p-4">
                     <app-entity-details [entity]="editablePrimaryEntity" [isMainEntity]="true" [showTitle]="false"
                         [showTopDivider]="false" [showRoleRelationshipFields]="false" [entityIndex]="0"
                         (save)="savePrimaryEntity()"></app-entity-details>
                 </div>
                 } @else if (getPrimaryEntity(); as primaryEntity) {
-                <div class="flex flex-col gap-1 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
+                <div @caseModeSwapMotion class="flex flex-col gap-1 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <div class="flex items-center gap-1.5">
                             <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Primary Entity
                             </h2>
                             <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="The main person, organization, asset, account, indicator, or object this case is about." class="h-4 w-4 shrink-0 ui-action-icon">
                         </div>
-                        <span class="w-fit rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text2)]">
-                            {{ formatLabel(primaryEntity.type) }}
-                        </span>
+                        <div class="flex items-center gap-2">
+                            <span class="w-fit rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text2)]">
+                                {{ formatLabel(primaryEntity.type) }}
+                            </span>
+                            @if (!isEditing && !caseData.closure) {
+                            <button type="button" (click)="enableEditing('primaryEntity')" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-sm font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </button>
+                            }
+                        </div>
                     </div>
                     <div class="text-xs font-medium text-[var(--color-text4)]">
                         Primary Entity · {{ getDisplayLabel(primaryEntity.source, primaryEntity.entitySourceOtherValue)
@@ -490,7 +401,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
+                <div @caseModeSwapMotion class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
                     <div class="min-w-0 p-4">
                         <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Value
                         </div>
@@ -579,7 +490,7 @@
                 </div>
 
                 @if ((primaryEntity.socialProfiles?.length || 0) > 0) {
-                <div class="px-4 py-3">
+                <div @caseSectionMotion class="px-4 py-3">
                     <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Social
                         Profiles</div>
                     <div class="flex flex-wrap gap-2">
@@ -600,7 +511,7 @@
                 }
 
                 @if ((primaryEntity.identifiers?.length || 0) > 0) {
-                <div class="px-4 py-3">
+                <div @caseSectionMotion class="px-4 py-3">
                     <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
                         Identifiers</div>
                     <div class="flex flex-wrap gap-2">
@@ -620,825 +531,28 @@
                 </div>
                 }
                 } @else {
-                <div class="p-4 text-sm text-[var(--color-text4)]">No entity attached.</div>
+                <div @caseModeSwapMotion class="p-4 text-sm text-[var(--color-text4)]">No entity attached.</div>
                 }
             </div>
 
-            @if (!isAddingRelatedEntity || getRelatedEntities(caseData).length > 0) {
-            <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
-                <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
-                    <div class="flex items-center gap-1.5">
-                        <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Related Entities
-                        </h2>
-                        <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Other entities connected to the case, such as affected assets, accounts, indicators, sources, or linked actors." class="h-4 w-4 shrink-0 ui-action-icon">
-                    </div>
+            <app-case-related-entities-section @caseSectionMotion></app-case-related-entities-section>
 
-                    <div class="flex items-center gap-2">
-                        @if (!caseData.closure && !isEditing && !isAddingRelatedEntity) {
-                        <button type="button" (click)="openAddRelatedEntity()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
-                            <i class="bi bi-plus-lg"></i> Add
-                        </button>
-                        }
-                    </div>
-                </div>
+            <div @caseSectionMotion class="grid grid-cols-1 gap-5 xl:grid-cols-2">
+                <app-case-artifacts-section></app-case-artifacts-section>
 
-                @if (getRelatedEntities(caseData).length > 0) {
-                <div class="space-y-4 p-4">
-                    @if (isEditing && editedCase) {
-                    @for (entity of getRelatedEntities(editedCase); track entity.entityId; let i = $index) {
-                    <app-entity-details [entity]="entity" [isMainEntity]="false" [showTitle]="true"
-                        [showTopDivider]="false" [showRoleRelationshipFields]="true" [entityIndex]="i"
-                        [linkableEntities]="getLinkableEntities(entity.entityId, editedCase)"
-                        [allCaseEntities]="editedCase.entities || []" (remove)="removeRelatedEntity(i)"
-                        (save)="saveRelatedEntities()">
-                    </app-entity-details>
-                    }
-                    } @else {
-                    @for (entity of getRelatedEntities(caseData); track entity.entityId; let i = $index) {
-                    <div class="overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-expand-bg)]">
-
-                        <button type="button" (click)="toggleRelatedEntity(entity.entityId)" class="flex w-full flex-col gap-1 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3 text-left transition hover:bg-[var(--color-blue-810)]" [attr.aria-expanded]="isRelatedEntityExpanded(entity.entityId)">
-
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <div class="flex items-center gap-1.5">
-                                    <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">
-                                        Related Entity {{ i + 1 }}
-                                    </h2>
-
-                                    <i class="bi text-xs text-[var(--color-text4)]" [ngClass]="isRelatedEntityExpanded(entity.entityId) ? 'bi-chevron-up' : 'bi-chevron-down'">
-                                    </i>
-                                </div>
-
-                                <span class="w-fit rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text2)]">
-                                    {{ getDisplayLabel(entity.type, entity.entityTypeOtherValue) }}
-                                </span>
-                            </div>
-
-                            <div class="text-xs font-medium text-[var(--color-text4)]">
-                                {{ getLinkedEntityDisplayLabel(entity.linkedEntityId) }} ·
-                                {{ getDisplayLabel(entity.source, entity.entitySourceOtherValue) }}
-                            </div>
-                        </button>
-
-                        @if (isRelatedEntityExpanded(entity.entityId)) {
-                        <div>
-                            <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
-                                <div class="min-w-0 p-4">
-                                    <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                        Value
-                                    </div>
-
-                                    <div class="mt-1 text-[18px] font-semibold leading-snug text-[var(--color-text1)] break-all">
-                                        {{ entity.value }}
-                                    </div>
-
-                                    <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                        Description
-                                    </div>
-
-                                    <div class="mt-2 text-sm leading-6 text-[var(--color-text3)] break-words">
-                                        {{ entity.entityDescription || entity.value }}
-                                    </div>
-
-                                    @if ((entity.tags?.length || 0) > 0) {
-                                    <div class="mt-4 flex flex-wrap gap-2">
-                                        @for (tag of entity.tags; track tag) {
-                                        <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text2)]">
-                                            {{ formatLabel(tag) }}
-                                        </span>
-                                        }
-                                    </div>
-                                    }
-                                </div>
-
-                                <div class="border-t border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4 lg:border-l lg:border-t-0">
-                                    <div class="grid grid-cols-2 gap-x-5 gap-y-4">
-                                        <div>
-                                            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                                Type
-                                            </div>
-                                            <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
-                                                {{ getDisplayLabel(entity.type, entity.entityTypeOtherValue) }}
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                                Source
-                                            </div>
-                                            <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
-                                                {{ getDisplayLabel(entity.source, entity.entitySourceOtherValue) }}
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                                Role
-                                            </div>
-                                            <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
-                                                {{ formatLabel(entity.role) }}
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                                Relationship
-                                            </div>
-                                            <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
-                                                {{ getLinkedEntityDisplayLabel(entity.linkedEntityId) }}
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                                Confidence
-                                            </div>
-                                            <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
-                                                formatConfidence(primaryEntity.confidence)
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            @if ((entity.socialProfiles?.length || 0) > 0 || (entity.identifiers?.length || 0) > 0) {
-                            <div class="border-t border-[var(--color-border)] p-4">
-                                <div class="grid gap-4 lg:grid-cols-2">
-
-                                    @if ((entity.socialProfiles?.length || 0) > 0) {
-                                    <div>
-                                        <div class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                            Social Profiles
-                                        </div>
-
-                                        <div class="space-y-2">
-                                            @for (profile of entity.socialProfiles; track $index) {
-                                            <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-xs text-[var(--color-text2)]">
-                                                <span class="font-semibold text-sky-300">
-                                                    {{ getDisplayLabel(profile.platform, profile.platformOtherValue) }}
-                                                </span>
-                                                <span class="ml-1">{{ profile.username }}</span>
-
-                                                @if (profile.displayName) {
-                                                <span class="ml-1 text-[var(--color-text4)]">
-                                                    ({{ profile.displayName }})
-                                                </span>
-                                                }
-
-                                                @if (profile.profileUrl) {
-                                                <a [href]="profile.profileUrl" target="_blank" rel="noopener" class="ml-2 text-sky-300 hover:text-sky-200">
-                                                    Open
-                                                </a>
-                                                }
-                                            </div>
-                                            }
-                                        </div>
-                                    </div>
-                                    }
-
-                                    @if ((entity.identifiers?.length || 0) > 0) {
-                                    <div>
-                                        <div class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                            Identifiers
-                                        </div>
-
-                                        <div class="space-y-2">
-                                            @for (identifier of entity.identifiers; track $index) {
-                                            <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-xs text-[var(--color-text2)]">
-                                                <span class="font-semibold text-green-300">
-                                                    {{ getDisplayLabel(identifier.type,
-                                                    identifier.identifierTypeOtherValue) }}
-                                                </span>
-                                                <span class="ml-1 break-all">{{ identifier.value }}</span>
-
-                                                @if (identifier.issuer) {
-                                                <span class="ml-1 text-[var(--color-text4)]">
-                                                    Issuer: {{ identifier.issuer }}
-                                                </span>
-                                                }
-
-                                                @if (identifier.verified) {
-                                                <span class="ml-1 text-green-300">Verified</span>
-                                                }
-                                            </div>
-                                            }
-                                        </div>
-                                    </div>
-                                    }
-
-                                </div>
-                            </div>
-                            }
-                        </div>
-                        }
-
-                    </div>
-                    }
-                    }
-                </div>
-                } @else {
-                <div class="p-4 text-sm text-[var(--color-text4)]">No related entities added.</div>
-                }
-            </div>
-            }
-
-            @if (isAddingRelatedEntity && newRelatedEntity) {
-            <div class="mx-4 mb-4 overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]">
-                <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
-                    <h2 class="m-0 text-[16px] font-bold text-[var(--color-text1)]">
-                        Related Entity {{ getRelatedEntities(caseData).length + 1 }}
-                    </h2>
-
-                    <div class="flex items-center gap-2">
-                        <button type="button" (click)="saveNewRelatedEntity()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300">
-                            <i class="bi bi-check-lg"></i> Save
-                        </button>
-
-                        <button type="button" (click)="cancelSectionMode()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
-                            <i class="bi bi-x-lg"></i> Cancel
-                        </button>
-                    </div>
-                </div>
-
-                <div class="p-4">
-                    <app-entity-details [entity]="newRelatedEntity" [isMainEntity]="false" [showTitle]="false"
-                        [showTopDivider]="false" [showRoleRelationshipFields]="true" [entityIndex]="0"
-                        [linkableEntities]="getLinkableEntities(newRelatedEntity.entityId, caseData)"
-                        [allCaseEntities]="caseData.entities || []" (save)="saveNewRelatedEntity()">
-                    </app-entity-details>
-                </div>
-            </div>
-            }
-
-            <div class="grid grid-cols-1 gap-5 xl:grid-cols-2">
-                <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
-                    <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
-                        <div class="flex items-center gap-1.5">
-                            <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Artifacts</h2>
-                            <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Evidence or supporting material attached to the case, such as screenshots, files, URLs, raw alerts, logs, or reports." class="h-4 w-4 shrink-0 ui-action-icon">
-                        </div>
-
-                        @if (isEditing) {
-                        <div class="flex items-center gap-2">
-                            <button type="button" (click)="saveArtifacts()" [disabled]="!hasArtifactsChanged()" [class.hidden]="!hasArtifactsChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300" data-testid="case-artifact-save">
-                                <i class="bi bi-check-lg"></i> Save
-                            </button>
-                        </div>
-                        }
-
-                        @if (!isEditing && !caseData.closure) {
-                        <div class="flex items-center gap-2">
-                            <button type="button" (click)="openAddArtifact()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300">
-                                <i class="bi bi-plus-lg"></i> Add
-                            </button>
-                        </div>
-                        }
-                    </div>
-
-                    @if (isEditing && editedCase) {
-                    <div class="space-y-3 p-4">
-                        @for (artifact of editedCase.artifacts; track artifact.artifactId; let i = $index) {
-                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
-                            <div class="mb-3 flex items-center justify-between gap-3">
-                                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Artifact
-                                    {{ i + 1 }}</span>
-                                <button type="button" (click)="removeArtifact(i)" aria-label="Remove artifact" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" [attr.data-testid]="'case-artifact-remove-' + i">
-                                    <i class="bi bi-x-lg"></i> Remove
-                                </button>
-                            </div>
-                            <div class="grid gap-3 md:grid-cols-2">
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
-                                    <input [(ngModel)]="artifact.title" [name]="'artifact-title-' + i" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-title-input-' + i" />
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Type</label>
-                                    <select [(ngModel)]="artifact.type" [name]="'artifact-type-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-type-select-' + i">
-                                        @for (type of artifactTypeOptions; track type.value) {
-                                        <option [value]="type.value">{{ type.label }}</option>
-                                        }
-                                    </select>
-                                    @if (artifact.type === 'other') {
-                                    <input type="text" [(ngModel)]="artifact.artifactTypeOtherValue" [name]="'artifact-type-other-' + i" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" placeholder="Specify other artifact type" />
-                                    }
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Source</label>
-                                    <select [(ngModel)]="artifact.source" [name]="'artifact-source-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-source-select-' + i">
-                                        @for (source of sourceTypeOptions; track source.value) {
-                                        <option [value]="source.value">{{ source.label }}</option>
-                                        }
-                                    </select>
-                                    @if (artifact.source === 'other') {
-                                    <input type="text" [(ngModel)]="artifact.artifactSourceOtherValue" [name]="'artifact-source-other-' + i" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" placeholder="Specify other artifact source" />
-                                    }
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Captured</label>
-                                    <input [ngModel]="getDateInputValue(artifact.capturedAt)" (ngModelChange)="setDateInputValue(artifact, 'capturedAt', $event)" [name]="'artifact-captured-' + i" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-captured-input-' + i" />
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
-                                    <textarea [(ngModel)]="artifact.description" [name]="'artifact-description-' + i" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-artifact-description-input-' + i"></textarea>
-                                </div>
-                                @if (artifact.type === 'url_capture') {
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                        URL
-                                    </label>
-
-                                    <input [(ngModel)]="artifact.url" [name]="'artifact-url-' + i" type="url" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
-                                </div>
-                                }
-
-                                @if (artifact.type === 'screenshot' || artifact.type === 'file') {
-                                <div class="md:col-span-2">
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                        {{ artifact.type === 'screenshot' ? 'Upload Screenshot PNG' : 'Upload File' }}
-                                    </label>
-
-                                    <input #artifactFileInput type="file" [accept]="getArtifactAccept(artifact)" (change)="uploadArtifactFile(artifact, artifactFileInput)" class="mt-1 block w-full text-sm text-[var(--color-text2)]" />
-
-                                    @if (artifact.fileName) {
-                                    <div class="mt-3 flex flex-wrap items-center gap-2 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
-
-                                        <span class="text-xs text-[var(--color-text2)] break-all">
-                                            {{ artifact.fileName }}
-                                        </span>
-
-                                        <button type="button" (click)="viewArtifactFile(artifact)" class="text-xs text-sky-300">
-                                            View
-                                        </button>
-
-                                        <button type="button" (click)="downloadArtifactFile(artifact)" class="text-xs text-emerald-300">
-                                            Download
-                                        </button>
-
-                                        <button type="button" (click)="deleteArtifactFile(artifact)" class="text-xs text-red-300">
-                                            Delete
-                                        </button>
-
-                                    </div>
-                                    }
-                                </div>
-                                }
-                            </div>
-                        </div>
-                        } @empty {
-                        <div class="text-sm text-[var(--color-text4)]">No artifacts added.</div>
-                        }
-                    </div>
-                    } @else {
-                    <div class="space-y-3 p-4">
-                        @for (artifact of (caseData.artifacts || []); track artifact.artifactId) {
-                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3" [attr.data-testid]="'case-artifact-card-' + $index">
-                            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                                <div class="min-w-0">
-                                    <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                        Artifact Title</div>
-                                    <div class="text-sm font-semibold text-[var(--color-text1)] break-words" [attr.data-testid]="'case-artifact-title-value-' + $index">{{ artifact.title }}
-                                    </div>
-                                    <div class="mt-1 text-xs text-[var(--color-text4)]">{{
-                                        getDisplayLabel(artifact.type, artifact.artifactTypeOtherValue) }} · {{
-                                        getDisplayLabel(artifact.source, artifact.artifactSourceOtherValue) }}</div>
-                                </div>
-                                <div class="flex flex-wrap gap-2 sm:justify-end">
-                                    @if (artifact.capturedAt) {
-                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
-                                        getFormattedDateTime(artifact.capturedAt) }}</span>
-                                    }
-                                    @if (artifact.url) {
-                                    <a [href]="artifact.url" target="_blank" rel="noopener" class="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-xs text-sky-300 hover:text-sky-200">Open</a>
-                                    }
-                                </div>
-                            </div>
-                            @if (artifact.description || artifact.fileName) {
-                            <div class="mt-3 grid gap-2 text-xs text-[var(--color-text2)] sm:grid-cols-2">
-                                @if (artifact.description) { <div class="sm:col-span-2"><span class="text-[var(--color-text4)]">Description:</span> {{ artifact.description }}
-                                </div> }
-                                @if (artifact.fileName) { <div><span class="text-[var(--color-text4)]">File:</span> {{
-                                    artifact.fileName }}</div> }
-                            </div>
-                            }
-                        </div>
-                        } @empty {
-                        <div class="text-sm text-[var(--color-text4)]">No artifacts added.</div>
-                        }
-                    </div>
-                    }
-
-                    @if (isAddingArtifact && newArtifact) {
-                    <div class="space-y-3 p-4 border-t border-[var(--color-border)]">
-                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
-                            <div class="mb-3 flex items-center justify-between gap-3">
-                                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">
-                                    Artifact {{ (caseData.artifacts || []).length + 1 }}
-                                </span>
-                                <div class="flex gap-2">
-                                    <button type="button" (click)="saveNewArtifact()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300">
-                                        <i class="bi bi-check-lg"></i> Save
-                                    </button>
-                                    <button type="button" (click)="cancelSectionMode()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
-                                        <i class="bi bi-x-lg"></i> Cancel
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="grid gap-3 md:grid-cols-2">
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
-                                    <input [(ngModel)]="newArtifact.title" name="new-artifact-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" />
-                                </div>
-
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Type</label>
-                                    <select [(ngModel)]="newArtifact.type" name="new-artifact-type" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
-                                        @for (type of artifactTypeOptions; track type.value) {
-                                        <option [value]="type.value">{{ type.label }}</option>
-                                        }
-                                    </select>
-                                    @if (newArtifact.type === 'other') {
-                                    <input type="text" [(ngModel)]="newArtifact.artifactTypeOtherValue" name="new-artifact-type-other" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" placeholder="Specify other artifact type" />
-                                    }
-                                </div>
-
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Source</label>
-                                    <select [(ngModel)]="newArtifact.source" name="new-artifact-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
-                                        @for (source of sourceTypeOptions; track source.value) {
-                                        <option [value]="source.value">{{ source.label }}</option>
-                                        }
-                                    </select>
-                                    @if (newArtifact.source === 'other') {
-                                    <input type="text" [(ngModel)]="newArtifact.artifactSourceOtherValue" name="new-artifact-source-other" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" placeholder="Specify other artifact source" />
-                                    }
-                                </div>
-
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Captured</label>
-                                    <input [ngModel]="getDateInputValue(newArtifact.capturedAt)" (ngModelChange)="setDateInputValue(newArtifact, 'capturedAt', $event)" name="new-artifact-captured" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
-                                </div>
-
-                                <div class="md:col-span-2">
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
-                                    <textarea [(ngModel)]="newArtifact.description" name="new-artifact-description" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]"></textarea>
-                                </div>
-
-                                @if (newArtifact.type === 'url_capture') {
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">URL</label>
-                                    <input [(ngModel)]="newArtifact.url" name="newArtifact-url" type="url" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
-                                </div>
-                                }
-
-                                @if (newArtifact.type === 'screenshot' || newArtifact.type === 'file') {
-                                <div class="md:col-span-2">
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                        {{ newArtifact.type === 'screenshot' ? 'Upload Screenshot PNG' : 'Upload File'
-                                        }}
-                                    </label>
-
-                                    <input #newArtifactFileInput type="file" [accept]="getArtifactAccept(newArtifact)" (change)="setPendingNewArtifactFile(newArtifactFileInput)" class="mt-1 block w-full text-sm text-[var(--color-text2)]" />
-
-                                    @if (getPendingNewArtifactFileName()) {
-                                    <div class="mt-3 flex flex-wrap items-center gap-2 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
-                                        <span class="text-xs text-[var(--color-text2)] break-all">
-                                            {{ getPendingNewArtifactFileName() }}
-                                        </span>
-                                    </div>
-                                    }
-                                </div>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                    }
-                </div>
-
-                <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
-                    <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
-                        <div class="flex items-center gap-1.5">
-                            <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Tasks</h2>
-                            <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Investigation or follow-up work items that can be assigned to analysts on this case." class="h-4 w-4 shrink-0 ui-action-icon">
-                        </div>
-                        @if (isEditing) {
-                        <div class="flex items-center gap-2">
-                            <button type="button" (click)="saveTasks()" [disabled]="!hasTasksChanged()" [class.hidden]="!hasTasksChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300" data-testid="case-task-save">
-                                <i class="bi bi-check-lg"></i> Save
-                            </button>
-                        </div>
-                        }
-
-                        @if (!isEditing && !caseData.closure) {
-                        <div class="flex items-center gap-2">
-                            <button type="button" (click)="openAddTask()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
-                                <i class="bi bi-plus-lg"></i> Add
-                            </button>
-                        </div>
-                        }
-                    </div>
-
-                    @if (isEditing && editedCase) {
-                    <div class="space-y-3 p-4">
-                        @for (task of editedCase.tasks; track task.taskId; let i = $index) {
-                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
-                            <div class="mb-3 flex items-center justify-between gap-3">
-                                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Task
-                                    {{ i + 1 }}</span>
-                                <button type="button" (click)="removeTask(i)" aria-label="Remove task" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" [attr.data-testid]="'case-task-remove-' + i">
-                                    <i class="bi bi-x-lg"></i> Remove
-                                </button>
-                            </div>
-                            <div class="grid gap-3 md:grid-cols-2">
-                                <div class="md:col-span-2">
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
-                                    <input [(ngModel)]="task.title" [name]="'task-title-' + i" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-title-input-' + i" />
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
-                                    <select [(ngModel)]="task.status" [name]="'task-status-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-status-select-' + i">
-                                        @for (status of taskStatusOptions; track status.value) {
-                                        <option [value]="status.value">{{ status.label }}</option>
-                                        }
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Priority</label>
-                                    <select [(ngModel)]="task.priority" [name]="'task-priority-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-priority-select-' + i">
-                                        @for (priority of priorityOptions; track priority) {
-                                        <option [value]="priority" class="capitalize">{{ priority }}</option>
-                                        }
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Assign
-                                        To</label>
-                                    <select [(ngModel)]="task.assignedTo" [name]="'task-assignee-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-assignee-select-' + i">
-                                        <option value="">Unassigned</option>
-                                        @for (analyst of getCaseAnalysts(editedCase); track analyst.id) {
-                                        <option [value]="analyst.id">{{ analyst.username || analyst.email || analyst.id
-                                            }}</option>
-                                        }
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Due
-                                        Date</label>
-                                    <input [ngModel]="getDateInputValue(task.dueAt)" (ngModelChange)="setDateInputValue(task, 'dueAt', $event)" [name]="'task-due-' + i" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-due-input-' + i" />
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
-                                    <textarea [(ngModel)]="task.description" [name]="'task-description-' + i" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-task-description-input-' + i"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        } @empty {
-                        <div class="text-sm text-[var(--color-text4)]">No tasks added.</div>
-                        }
-                    </div>
-                    } @else {
-                    <div class="space-y-3 p-4">
-                        @for (task of (caseData.tasks || []); track task.taskId) {
-                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3" [attr.data-testid]="'case-task-card-' + $index">
-                            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                                <div class="min-w-0">
-                                    <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                        Task Title</div>
-                                    <div class="text-sm font-semibold text-[var(--color-text1)] break-words" [attr.data-testid]="'case-task-title-value-' + $index">{{ task.title }}</div>
-                                    @if (task.description) {
-                                    <div class="mt-2 text-xs text-[var(--color-text4)] break-words"><span class="font-semibold uppercase tracking-wide">Description:</span> {{
-                                        task.description }}</div>
-                                    }
-                                </div>
-                                <div class="flex flex-wrap gap-2 sm:justify-end">
-                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
-                                        formatLabel(task.status) }}</span>
-                                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
-                                        formatLabel(task.priority) }}</span>
-                                </div>
-                            </div>
-                            <div class="mt-3 grid gap-2 text-xs text-[var(--color-text2)] sm:grid-cols-2">
-                                <div><span class="text-[var(--color-text4)]">Assigned:</span> {{
-                                    getAnalystLabel(task.assignedTo) }}</div>
-                                <div><span class="text-[var(--color-text4)]">Due:</span> {{
-                                    getFormattedDateTime(task.dueAt) }}</div>
-                                @if (task.createdAt) { <div><span class="text-[var(--color-text4)]">Created:</span> {{
-                                    getFormattedDateTime(task.createdAt) }}</div> }
-                                @if (task.updatedAt) { <div><span class="text-[var(--color-text4)]">Updated:</span> {{
-                                    getFormattedDateTime(task.updatedAt) }}</div> }
-                            </div>
-                        </div>
-                        } @empty {
-                        <div class="text-sm text-[var(--color-text4)]">No tasks added.</div>
-                        }
-                    </div>
-                    }
-
-                    @if (isAddingTask && newTask) {
-                    <div class="space-y-3 p-4 border-t border-[var(--color-border)]">
-                        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
-                            <div class="mb-3 flex items-center justify-between gap-3">
-                                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">
-                                    Task {{ (caseData.tasks || []).length + 1 }}
-                                </span>
-                                <div class="flex gap-2">
-                                    <button type="button" (click)="saveNewTask()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300">
-                                        <i class="bi bi-check-lg"></i> Save
-                                    </button>
-                                    <button type="button" (click)="cancelSectionMode()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
-                                        <i class="bi bi-x-lg"></i> Cancel
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="grid gap-3 md:grid-cols-2">
-                                <div class="md:col-span-2">
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
-                                    <input [(ngModel)]="newTask.title" name="new-task-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
-                                </div>
-
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
-                                    <select [(ngModel)]="newTask.status" name="new-task-status" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
-                                        @for (status of taskStatusOptions; track status.value) {
-                                        <option [value]="status.value">{{ status.label }}</option>
-                                        }
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Priority</label>
-                                    <select [(ngModel)]="newTask.priority" name="new-task-priority" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
-                                        @for (priority of priorityOptions; track priority) {
-                                        <option [value]="priority">{{ priority }}</option>
-                                        }
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Assign
-                                        To</label>
-                                    <select [(ngModel)]="newTask.assignedTo" name="new-task-assignee" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
-                                        <option value="">Unassigned</option>
-                                        @for (analyst of getCaseAnalysts(caseData); track analyst.id) {
-                                        <option [value]="analyst.id">{{ analyst.username || analyst.email || analyst.id
-                                            }}</option>
-                                        }
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Due
-                                        Date</label>
-                                    <input [ngModel]="getDateInputValue(newTask.dueAt)" (ngModelChange)="setDateInputValue(newTask, 'dueAt', $event)" name="new-task-due" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
-                                </div>
-
-                                <div class="md:col-span-2">
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
-                                    <textarea [(ngModel)]="newTask.description" name="new-task-description" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    }
-                </div>
+                <app-case-tasks-section></app-case-tasks-section>
             </div>
 
-            <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
-                <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
-                    <div class="flex items-center gap-1.5">
-                        <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Linked Cases</h2>
-                        <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Connections to other cases, such as duplicates, follow-ups, escalations, or cases sharing the same actor, victim, or infrastructure." class="h-4 w-4 shrink-0 ui-action-icon">
-                    </div>
-                    @if (isEditing) {
-                    <div class="flex items-center gap-2">
-                        <button type="button" (click)="saveLinkedCases()" [disabled]="!hasLinkedCasesChanged()" [class.hidden]="!hasLinkedCasesChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30" data-testid="case-linked-case-save">
-                            <i class="bi bi-check-lg"></i> Save
-                        </button>
-                    </div>
-                    }
-                    @if (!isEditing && !caseData.closure && hasLinkableCases(caseData)) {
-                    <div class="flex items-center gap-2">
-                        <button type="button" (click)="openAddLinkedCase()" [disabled]="!hasLinkableCases(caseData)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 disabled:pointer-events-none disabled:opacity-50">
-                            <i class="bi bi-plus-lg"></i> Add
-                        </button>
-                    </div>
-                    }
-                </div>
-
-                @if (isEditing && editedCase) {
-                <div class="space-y-3 p-4">
-                    @for (linkedCase of editedCase.linkedCases; track $index; let i = $index) {
-                    <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
-                        <div class="mb-3 flex items-center justify-between gap-3">
-                            <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Link
-                                {{ i + 1 }}</span>
-                            <button type="button" (click)="removeLinkedCase(i)" aria-label="Remove linked case" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200" [attr.data-testid]="'case-linked-case-remove-' + i">
-                                <i class="bi bi-x-lg"></i> Remove
-                            </button>
-                        </div>
-                        <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
-                            <div>
-                                <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case</label>
-                                <select [(ngModel)]="linkedCase.targetCaseId" [name]="'linked-case-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-linked-case-select-' + i">
-                                    <option value="">Select case</option>
-                                    @for (candidateCase of getLinkableCases(editedCase, linkedCase.targetCaseId); track
-                                    candidateCase.caseId) {
-                                    <option [value]="candidateCase.caseId">{{ candidateCase.caseId }} · {{
-                                        candidateCase.title }}</option>
-                                    }
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Relationship</label>
-                                <select [(ngModel)]="linkedCase.relationship" [name]="'linked-relationship-' + i" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-linked-case-relationship-select-' + i">
-                                    @for (relationship of caseLinkRelationshipOptions; track relationship.value) {
-                                    <option [value]="relationship.value">{{ relationship.label }}</option>
-                                    }
-                                </select>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Reason</label>
-                                <input [(ngModel)]="linkedCase.reason" [name]="'linked-reason-' + i" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" [attr.data-testid]="'case-linked-case-reason-input-' + i" />
-                            </div>
-                        </div>
-                    </div>
-                    } @empty {
-                    <div class="text-sm text-[var(--color-text4)]">
-                        {{ hasLinkableCases(editedCase) ? 'No linked cases added.' : 'No report to attach.' }}
-                    </div>
-                    }
-                </div>
-                } @else {
-                <div class="space-y-3 p-4">
-                    @for (linkedCase of caseData.linkedCases; track linkedCase.targetCaseId) {
-                    <button type="button" (click)="goToLinkedCase(linkedCase.targetCaseId)" class="w-full rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3 text-left transition hover:bg-[var(--tenant-chip-hover)]" [attr.data-testid]="'case-linked-case-card-' + $index">
-                        <div class="text-sm font-semibold text-[var(--color-text1)]" [attr.data-testid]="'case-linked-case-target-value-' + $index">{{ linkedCase.targetCaseId }}
-                        </div>
-                        <div class="mt-1 text-xs text-[var(--color-text4)]">
-                            {{ formatLabel(linkedCase.relationship) }} · {{ linkedCase.reason }}
-                        </div>
-                    </button>
-                    } @empty {
-                    <div class="text-sm text-[var(--color-text4)]">No linked cases added.</div>
-                    }
-                </div>
-                }
-
-                @if (isAddingLinkedCase && newLinkedCase) {
-                <div class="space-y-3 p-4 border-t border-[var(--color-border)]">
-                    <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-3">
-                        <div class="mb-3 flex items-center justify-between gap-3">
-                            <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">
-                                Link {{ (caseData.linkedCases || []).length + 1 }}
-                            </span>
-                            <div class="flex gap-2">
-                                <button type="button" (click)="saveNewLinkedCase()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300">
-                                    <i class="bi bi-check-lg"></i> Save
-                                </button>
-                                <button type="button" (click)="cancelSectionMode()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300">
-                                    <i class="bi bi-x-lg"></i> Cancel
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
-                            <div>
-                                <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case</label>
-                                <select [(ngModel)]="newLinkedCase.targetCaseId" name="new-linked-case" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
-                                    <option value="">Select case</option>
-                                    @for (candidateCase of getLinkableCases(caseData); track candidateCase.caseId) {
-                                    <option [value]="candidateCase.caseId">{{ candidateCase.caseId }} · {{
-                                        candidateCase.title }}</option>
-                                    }
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Relationship</label>
-                                <select [(ngModel)]="newLinkedCase.relationship" name="new-linked-relationship" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
-                                    @for (relationship of caseLinkRelationshipOptions; track relationship.value) {
-                                    <option [value]="relationship.value">{{ relationship.label }}</option>
-                                    }
-                                </select>
-                            </div>
-
-                            <div class="md:col-span-2">
-                                <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Reason</label>
-                                <input [(ngModel)]="newLinkedCase.reason" name="new-linked-reason" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                }
-            </div>
+            <app-case-linked-cases-section @caseSectionMotion></app-case-linked-cases-section>
 
             @if (!isEditing) {
-            <app-report-feedback-comments [docId]="caseData.caseId" [feedback]="getCaseCommentsFeedback()"
-                [isSaving]="isCommentSaving" [errorMessage]="commentErrorMessage" [flushSpacing]="true"
-                (saveComment)="saveCaseComment($event)"
-                (userSelected)="openUserSidebar($event)"></app-report-feedback-comments>
-            <app-report-user-sidebar></app-report-user-sidebar>
+            <div @caseSectionMotion>
+                <app-report-feedback-comments [docId]="caseData.caseId" [feedback]="getCaseCommentsFeedback()"
+                    [isSaving]="isCommentSaving" [errorMessage]="commentErrorMessage" [flushSpacing]="true"
+                    (saveComment)="saveCaseComment($event)"
+                    (userSelected)="openUserSidebar($event)"></app-report-feedback-comments>
+                <app-report-user-sidebar></app-report-user-sidebar>
+            </div>
             }
         </div>
     </div>
