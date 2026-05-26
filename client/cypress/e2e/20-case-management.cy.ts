@@ -1,10 +1,14 @@
 import {
-  addArtifactsAndTasksToCreatedCase,
+  addAndEditArtifactAndTask,
+  addAndEditLinkedCase,
+  addAndEditRelatedEntity,
   addCase,
   addCommentToCreatedCase,
+  addLinkTargetCase,
   assertCreatedCaseDetails,
   closeCreatedCase,
   editCreatedCase,
+  exportCreatedCasePdf,
   openCaseManagement,
   openCreatedCaseFromList,
   shareAndRevokeCreatedCaseLink
@@ -20,11 +24,15 @@ describe('Case Management - Add View Edit Flow', () => {
 
     openCaseManagement();
     addCase();
+    addLinkTargetCase();
     openCreatedCaseFromList();
     assertCreatedCaseDetails();
     editCreatedCase();
-    addArtifactsAndTasksToCreatedCase();
+    addAndEditRelatedEntity();
+    addAndEditArtifactAndTask();
+    addAndEditLinkedCase();
     addCommentToCreatedCase();
+    exportCreatedCasePdf();
     shareAndRevokeCreatedCaseLink();
     closeCreatedCase();
   });

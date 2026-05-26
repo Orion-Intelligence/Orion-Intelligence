@@ -65,6 +65,8 @@ describe('User Manual Screenshot Flow', () => {
         app-network-intel,
         app-threat-lens,
         app-scans-management,
+        [data-testid="case-management-page"],
+        [data-testid="case-details-page"],
         app-dump-list,
         [data-testid="graph-toolbar-root"],
         [data-testid="cti-network-container"],
@@ -160,6 +162,97 @@ describe('User Manual Screenshot Flow', () => {
       disableTimersAndAnimations: false,
       ...options,
     });
+  };
+
+  const byTestId = (testId: string) => `[data-testid="${testId}"]`;
+
+  const visibleByTestId = (testId: string) => cy.get(byTestId(testId)).filter(':visible').first();
+
+  const clickByTestId = (testId: string) => {
+    visibleByTestId(testId).scrollIntoView().should('be.visible').click({ force: true });
+  };
+
+  const typeByTestId = (testId: string, value: string) => {
+    visibleByTestId(testId).scrollIntoView().should('be.visible').clear().type(value, { force: true });
+  };
+
+  const selectByTestId = (testId: string, value: string) => {
+    visibleByTestId(testId).scrollIntoView().should('be.visible').select(value, { force: true });
+  };
+
+  const captureCaseManagementScreenshots = () => {
+    let docsCaseId = '';
+    let docsCaseTitle = 'Docs Exposure Review';
+
+    cy.visit('/dashboard/profile/case-management');
+    ensureDashboardReady();
+    visibleByTestId('case-management-page').should('be.visible');
+    clickByTestId('add-case-button');
+    visibleByTestId('case-add-drawer').should('be.visible');
+
+    cy.get(byTestId('case-add-id-input'))
+      .should(($input) => expect(String($input.val() || '')).not.to.equal(''))
+      .invoke('val')
+      .then((value) => {
+        docsCaseId = String(value || '');
+        docsCaseTitle = `Docs Exposure Review ${docsCaseId}`;
+      });
+
+    cy.then(() => typeByTestId('case-add-title-input', docsCaseTitle));
+    typeByTestId('case-add-description-input', 'Documentation sample case used to demonstrate case intake, evidence, notes, and closure.');
+    selectByTestId('case-add-type-select', 'data_leak');
+    selectByTestId('case-add-intake-source-select', 'breach_search');
+    selectByTestId('case-add-status-select', 'investigating');
+    selectByTestId('case-add-severity-select', 'high');
+    selectByTestId('case-add-priority-select', 'high');
+    typeByTestId('case-primary-entity-value-input', 'docs.example.com');
+    capture('case-management-add');
+    resetScreenshotZoom();
+    clickByTestId('case-add-save');
+    cy.get(byTestId('case-add-drawer')).should('not.exist');
+
+    cy.then(() => {
+      cy.get(byTestId(`case-row-${docsCaseId}`), { timeout: 60000 })
+        .should('be.visible')
+        .and('contain.text', docsCaseTitle);
+      cy.visit(`/dashboard/profile/case-management/case-details?caseId=${docsCaseId}`);
+    });
+    cy.then(() => {
+      cy.get(byTestId('case-details-title-value'), { timeout: 60000 }).should('contain.text', docsCaseTitle);
+      cy.get(byTestId('case-details-case-id-value')).should('contain.text', docsCaseId);
+    });
+    cy.get(byTestId('case-closure-add'), { timeout: 60000 }).should('exist');
+
+    cy.get(byTestId('case-artifact-add'), { timeout: 60000 })
+      .scrollIntoView()
+      .should('be.visible')
+      .click({ force: true });
+    visibleByTestId('case-artifact-add-drawer').should('be.visible');
+    typeByTestId('case-artifact-title-input', 'Credential Exposure Evidence');
+    selectByTestId('case-artifact-type-select', 'url_capture');
+    selectByTestId('case-artifact-source-select', 'manual');
+    typeByTestId('case-artifact-captured-input', '2026-05-26');
+    typeByTestId('case-artifact-description-input', 'Reference URL captured for the documentation case evidence trail.');
+    typeByTestId('case-artifact-url-input', 'https://example.com/intel/case-evidence');
+    clickByTestId('case-artifact-add-save');
+    cy.get(byTestId('case-artifact-add-drawer')).should('not.exist');
+    visibleByTestId('case-artifact-card-0').should('contain.text', 'Credential Exposure Evidence');
+
+    typeByTestId('report-feedback-comment-input', 'Documentation analyst note for case review.');
+    clickByTestId('report-feedback-comment-save');
+    cy.contains('p', 'Documentation analyst note for case review.').should('be.visible');
+
+    cy.scrollTo('top', { ensureScrollable: false });
+    clickByTestId('case-closure-add');
+    visibleByTestId('case-closure-drawer').should('be.visible');
+    selectByTestId('case-closure-reason-select', 'remediated');
+    typeByTestId('case-closure-summary-input', 'Exposure reviewed and remediation ownership recorded.');
+    typeByTestId('case-closure-resolution-input', 'Evidence was captured, analyst context was added, and the case outcome was recorded for reporting.');
+    clickByTestId('case-closure-save');
+    cy.get(byTestId('case-closure-drawer')).should('not.exist');
+    visibleByTestId('case-closure-summary-value').should('contain.text', 'Exposure reviewed');
+    cy.scrollTo('top', { ensureScrollable: false });
+    capture('case-management-view');
   };
 
   const waitForSatelliteMapReady = (tileUrlPart = '') => {
@@ -883,6 +976,8 @@ describe('User Manual Screenshot Flow', () => {
     ensureDashboardReady();
     cy.get('[data-testid="account-settings-form"]').should('be.visible');
     capture('account-settings');
+
+    captureCaseManagementScreenshots();
 
     visitCtiGraph();
     cy.get('[data-testid="cti-filter-type-select"]').select('Cluster');

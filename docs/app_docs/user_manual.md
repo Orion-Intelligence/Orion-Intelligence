@@ -1764,6 +1764,48 @@ The `Statistics` page in the profile area reuses the insight-oriented summary ex
 
 The profile area also contains a consolidated-search route. Functionally, it behaves like the main consolidated workspace but sits within profile and tenant-oriented workflows.
 
+### Case Management
+
+Case Management is the investigation workspace for turning alerts, findings, and analyst leads into tracked cases. It is available from the profile area when the user has the required case-management access.
+
+```{figure} ../screenshots/case-management-add-20260326.png
+:alt: Add case drawer
+:width: 100%
+
+Case creation drawer with the core case fields and primary entity form.
+```
+
+When adding a case, users define:
+
+- case title and investigation description
+- case type and intake source
+- status, severity, and priority
+- tags for triage and reporting
+- primary entity, such as a person, organization, email, domain, IP, URL, account, credential, or infrastructure indicator
+
+The case details page keeps the case record organized into independent sections. Each section has its own add or edit action, and side drawers are used for focused data entry.
+
+```{figure} ../screenshots/case-management-view-20260326.png
+:alt: Case detail view
+:width: 100%
+
+Case detail view with closure, case metadata, entity context, evidence, and analyst workflow sections.
+```
+
+The main case details section shows the title, description, case ID, type, intake source, status, severity, priority, tags, assigned analysts, PDF export, and share-link actions.
+
+Primary Entity stores the main subject of the investigation. Related Entities are additional people, domains, accounts, assets, indicators, sources, or actors connected to the case.
+
+Artifacts store evidence and supporting material. Common artifact types include screenshots, uploaded files, URL captures, raw alerts, log excerpts, email headers, chat transcripts, reports, and generic evidence. Artifact cards show the title, type, source, captured date, description, URL, and file actions such as view, download, and delete when a file is attached.
+
+Tasks track follow-up work for analysts. A task can hold status, priority, assignee, due date, description, and links to relevant entities or artifacts.
+
+Linked Cases connect the current case to other case records. Links can mark duplicates, parent or child cases, follow-ups, escalations, shared actors, shared victims, shared infrastructure, or general related cases.
+
+Comments provide the analyst discussion thread for the case. Use comments for review notes, handoff context, evidence interpretation, or follow-up decisions. Comment authors can be opened through the user sidebar where supported.
+
+Closure records the final outcome. It includes the closure reason, summary, resolution notes, who closed the case, and the close time. Closing a case is the point where the investigation outcome becomes part of the case report and exported PDF.
+
 ### Tenant Settings
 
 Tenant Settings stores tenant-level identity and contact information.

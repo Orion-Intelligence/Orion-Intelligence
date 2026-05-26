@@ -181,7 +181,7 @@
                 </div>
 
                 @if (activeEditSection === 'caseDetails') {
-                <app-case-edit-drawer title="Edit Case Details" [subtitle]="caseData.caseId" saveLabel="Save Case" saveTestId="case-details-save" cancelTestId="case-details-cancel" (save)="saveCaseDetails()" (cancel)="cancelEditing()">
+                <app-case-edit-drawer title="Edit Case Details" [subtitle]="caseData.caseId" saveLabel="Save Case" saveTestId="case-details-save" cancelTestId="case-details-cancel" drawerTestId="case-details-edit-drawer" (save)="saveCaseDetails()" (cancel)="cancelEditing()">
                     <div class="space-y-5 p-6">
                     <div class="space-y-4 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
                         <div class="space-y-1">
@@ -346,7 +346,7 @@
 
             <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
                 @if (activeEditSection === 'primaryEntity' && editablePrimaryEntity) {
-                <app-case-edit-drawer title="Edit Primary Entity" [subtitle]="editablePrimaryEntity.value || 'Primary Entity'" saveLabel="Save Entity" saveTestId="case-primary-entity-save" cancelTestId="case-primary-entity-cancel" (save)="savePrimaryEntity()" (cancel)="cancelEditing()">
+                <app-case-edit-drawer title="Edit Primary Entity" [subtitle]="editablePrimaryEntity.value || 'Primary Entity'" saveLabel="Save Entity" saveTestId="case-primary-entity-save" cancelTestId="case-primary-entity-cancel" drawerTestId="case-primary-entity-edit-drawer" (save)="savePrimaryEntity()" (cancel)="cancelEditing()">
                     <div class="p-6">
                         <app-entity-details [entity]="editablePrimaryEntity" [isMainEntity]="true" [showTitle]="false"
                             [showTopDivider]="false" [showRoleRelationshipFields]="false" [showInlineSaveButtons]="false" [entityIndex]="0"
@@ -367,7 +367,7 @@
                                 {{ formatLabel(primaryEntity.type) }}
                             </span>
                             @if (!caseData.closure) {
-                            <button type="button" (click)="enableEditing('primaryEntity')" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-sm font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
+                            <button type="button" (click)="enableEditing('primaryEntity')" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-sm font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-primary-entity-edit">
                                 <i class="bi bi-pencil-square"></i> Edit
                             </button>
                             }

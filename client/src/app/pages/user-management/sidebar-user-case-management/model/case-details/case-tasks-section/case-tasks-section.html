@@ -6,7 +6,7 @@
         </div>
         @if (!caseData.closure) {
         <div class="flex items-center gap-2">
-            <button type="button" (click)="store.openAddTask()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
+            <button type="button" (click)="store.openAddTask()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200" data-testid="case-task-add">
                 <i class="bi bi-plus-lg"></i> Add
             </button>
         </div>
@@ -14,7 +14,7 @@
     </div>
 
     @if (isEditing && selectedEditableTask; as task) {
-    <app-case-edit-drawer title="Edit Task" [subtitle]="task.title || 'Task'" saveLabel="Save Task" saveTestId="case-task-save" cancelTestId="case-task-cancel" (save)="store.saveTasks()" (cancel)="cancelTaskEditing()">
+    <app-case-edit-drawer title="Edit Task" [subtitle]="task.title || 'Task'" saveLabel="Save Task" saveTestId="case-task-save" cancelTestId="case-task-cancel" drawerTestId="case-task-edit-drawer" (save)="store.saveTasks()" (cancel)="cancelTaskEditing()">
         <div class="space-y-4 p-6">
         <div @caseListItemMotion class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
             <div class="mb-3 flex items-center justify-between gap-3">
@@ -89,7 +89,7 @@
                     <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
                         formatLabel(task.priority) }}</span>
                     @if (!caseData.closure) {
-                    <button type="button" (click)="openEditTask($index)" class="inline-flex h-7 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-xs font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
+                    <button type="button" (click)="openEditTask($index)" class="inline-flex h-7 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-xs font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.data-testid]="'case-task-edit-' + $index">
                         <i class="bi bi-pencil-square"></i> Edit
                     </button>
                     }
@@ -112,18 +112,18 @@
     </div>
 
     @if (isAddingTask && newTask) {
-    <app-case-edit-drawer title="Add Task" [subtitle]="caseData.caseId" saveLabel="Save Task" saveTestId="case-task-add-save" cancelTestId="case-task-add-cancel" (save)="store.saveNewTask()" (cancel)="store.cancelSectionMode()">
+    <app-case-edit-drawer title="Add Task" [subtitle]="caseData.caseId" saveLabel="Save Task" saveTestId="case-task-add-save" cancelTestId="case-task-add-cancel" drawerTestId="case-task-add-drawer" (save)="store.saveNewTask()" (cancel)="store.cancelSectionMode()">
         <div class="space-y-4 p-6">
             <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="sm:col-span-2">
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
-                        <input [(ngModel)]="newTask.title" name="new-task-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+                        <input [(ngModel)]="newTask.title" name="new-task-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-task-title-input" />
                     </div>
 
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
-                        <select [(ngModel)]="newTask.status" name="new-task-status" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                        <select [(ngModel)]="newTask.status" name="new-task-status" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-task-status-select">
                             @for (status of taskStatusOptions; track status.value) {
                             <option [value]="status.value">{{ status.label }}</option>
                             }
@@ -132,7 +132,7 @@
 
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Priority</label>
-                        <select [(ngModel)]="newTask.priority" name="new-task-priority" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                        <select [(ngModel)]="newTask.priority" name="new-task-priority" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-task-priority-select">
                             @for (priority of priorityOptions; track priority) {
                             <option [value]="priority">{{ priority }}</option>
                             }
@@ -142,7 +142,7 @@
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Assign
                             To</label>
-                        <select [(ngModel)]="newTask.assignedTo" name="new-task-assignee" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                        <select [(ngModel)]="newTask.assignedTo" name="new-task-assignee" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-task-assignee-select">
                             <option value="">Unassigned</option>
                             @for (analyst of getCaseAnalysts(caseData); track analyst.id) {
                             <option [value]="analyst.id">{{ analyst.username || analyst.email || analyst.id
@@ -154,12 +154,12 @@
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Due
                             Date</label>
-                        <input [ngModel]="getDateInputValue(newTask.dueAt)" (ngModelChange)="setDateInputValue(newTask, 'dueAt', $event)" name="new-task-due" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+                        <input [ngModel]="getDateInputValue(newTask.dueAt)" (ngModelChange)="setDateInputValue(newTask, 'dueAt', $event)" name="new-task-due" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-task-due-input" />
                     </div>
 
                     <div class="sm:col-span-2">
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
-                        <textarea [(ngModel)]="newTask.description" name="new-task-description" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]"></textarea>
+                        <textarea [(ngModel)]="newTask.description" name="new-task-description" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]" data-testid="case-task-description-input"></textarea>
                     </div>
                 </div>
             </div>

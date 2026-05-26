@@ -7,7 +7,7 @@
         @if (!caseData.closure) {
         <div class="flex items-center gap-2">
             @if (hasLinkableCases(caseData)) {
-            <button type="button" (click)="store.openAddLinkedCase()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
+            <button type="button" (click)="store.openAddLinkedCase()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200" data-testid="case-linked-case-add">
                 <i class="bi bi-plus-lg"></i> Add
             </button>
             }
@@ -16,7 +16,7 @@
     </div>
 
     @if (isEditing && selectedEditableLinkedCase; as linkedCase) {
-    <app-case-edit-drawer title="Edit Linked Case" [subtitle]="linkedCase.targetCaseId || caseData.caseId" saveLabel="Save Link" saveTestId="case-linked-case-save" cancelTestId="case-linked-case-cancel" (save)="store.saveLinkedCases()" (cancel)="cancelLinkedCaseEditing()">
+    <app-case-edit-drawer title="Edit Linked Case" [subtitle]="linkedCase.targetCaseId || caseData.caseId" saveLabel="Save Link" saveTestId="case-linked-case-save" cancelTestId="case-linked-case-cancel" drawerTestId="case-linked-case-edit-drawer" (save)="store.saveLinkedCases()" (cancel)="cancelLinkedCaseEditing()">
         <div class="space-y-4 p-6">
         <div @caseListItemMotion class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
             <div class="mb-3 flex items-center justify-between gap-3">
@@ -67,7 +67,7 @@
             </button>
 
             @if (!caseData.closure) {
-            <button type="button" (click)="openEditLinkedCase($index)" class="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-xs font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
+            <button type="button" (click)="openEditLinkedCase($index)" class="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-xs font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.data-testid]="'case-linked-case-edit-' + $index">
                 <i class="bi bi-pencil-square"></i> Edit
             </button>
             }
@@ -78,13 +78,13 @@
     </div>
 
     @if (isAddingLinkedCase && newLinkedCase) {
-    <app-case-edit-drawer title="Add Linked Case" [subtitle]="caseData.caseId" saveLabel="Save Link" saveTestId="case-linked-case-add-save" cancelTestId="case-linked-case-add-cancel" (save)="store.saveNewLinkedCase()" (cancel)="store.cancelSectionMode()">
+    <app-case-edit-drawer title="Add Linked Case" [subtitle]="caseData.caseId" saveLabel="Save Link" saveTestId="case-linked-case-add-save" cancelTestId="case-linked-case-add-cancel" drawerTestId="case-linked-case-add-drawer" (save)="store.saveNewLinkedCase()" (cancel)="store.cancelSectionMode()">
         <div class="space-y-4 p-6">
             <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case</label>
-                        <select [(ngModel)]="newLinkedCase.targetCaseId" name="new-linked-case" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                        <select [(ngModel)]="newLinkedCase.targetCaseId" name="new-linked-case" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-linked-case-select">
                             <option value="">Select case</option>
                             @for (candidateCase of getLinkableCases(caseData); track candidateCase.caseId) {
                             <option [value]="candidateCase.caseId">{{ candidateCase.caseId }} · {{
@@ -95,7 +95,7 @@
 
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Relationship</label>
-                        <select [(ngModel)]="newLinkedCase.relationship" name="new-linked-relationship" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                        <select [(ngModel)]="newLinkedCase.relationship" name="new-linked-relationship" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-linked-case-relationship-select">
                             @for (relationship of caseLinkRelationshipOptions; track relationship.value) {
                             <option [value]="relationship.value">{{ relationship.label }}</option>
                             }
@@ -104,7 +104,7 @@
 
                     <div class="sm:col-span-2">
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Reason</label>
-                        <input [(ngModel)]="newLinkedCase.reason" name="new-linked-reason" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+                        <input [(ngModel)]="newLinkedCase.reason" name="new-linked-reason" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-linked-case-reason-input" />
                     </div>
                 </div>
             </div>

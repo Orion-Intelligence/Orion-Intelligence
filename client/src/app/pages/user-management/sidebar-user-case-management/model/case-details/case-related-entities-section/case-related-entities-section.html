@@ -8,7 +8,7 @@
 
         <div class="flex items-center gap-2">
             @if (!caseData.closure) {
-            <button type="button" (click)="store.openAddRelatedEntity()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
+            <button type="button" (click)="store.openAddRelatedEntity()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200" data-testid="case-related-entity-add">
                 <i class="bi bi-plus-lg"></i> Add
             </button>
             }
@@ -16,7 +16,7 @@
     </div>
 
     @if (isEditing && selectedEditableRelatedEntity; as editableEntity) {
-    <app-case-edit-drawer title="Edit Related Entity" [subtitle]="editableEntity.value || 'Related Entity'" saveLabel="Save Entity" saveTestId="case-related-entity-save" cancelTestId="case-related-entity-cancel" (save)="store.saveRelatedEntities()" (cancel)="cancelRelatedEntityEditing()">
+    <app-case-edit-drawer title="Edit Related Entity" [subtitle]="editableEntity.value || 'Related Entity'" saveLabel="Save Entity" saveTestId="case-related-entity-save" cancelTestId="case-related-entity-cancel" drawerTestId="case-related-entity-edit-drawer" (save)="store.saveRelatedEntities()" (cancel)="cancelRelatedEntityEditing()">
         <div class="p-6">
             <app-entity-details @caseListItemMotion [entity]="editableEntity" [isMainEntity]="false" [showTitle]="false"
                 [showTopDivider]="false" [showRoleRelationshipFields]="true" [showInlineSaveButtons]="false" [entityIndex]="selectedEditableRelatedEntityIndex"
@@ -31,7 +31,7 @@
     @if (getRelatedEntities(caseData).length > 0) {
     <div @caseModeSwapMotion class="space-y-4 p-4">
         @for (entity of getRelatedEntities(caseData); track entity.entityId; let i = $index) {
-        <div @caseListItemMotion class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
+        <div @caseListItemMotion class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3" [attr.data-testid]="'case-related-entity-card-' + i">
 
             <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <button type="button" (click)="toggleRelatedEntity(entity.entityId)" class="min-w-0 flex-1 text-left" [attr.aria-expanded]="isRelatedEntityExpanded(entity.entityId)">
@@ -40,7 +40,7 @@
                     </div>
 
                     <div class="flex items-center gap-1.5">
-                        <div class="text-sm font-semibold text-[var(--color-text1)] break-words">
+                        <div class="text-sm font-semibold text-[var(--color-text1)] break-words" [attr.data-testid]="'case-related-entity-value-' + i">
                             {{ entity.value || 'Untitled entity' }}
                         </div>
 
@@ -60,7 +60,7 @@
                     </span>
 
                     @if (!caseData.closure) {
-                    <button type="button" (click)="openEditRelatedEntity(entity.entityId)" class="inline-flex h-7 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-xs font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
+                    <button type="button" (click)="openEditRelatedEntity(entity.entityId)" class="inline-flex h-7 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-xs font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.data-testid]="'case-related-entity-edit-' + i">
                         <i class="bi bi-pencil-square"></i> Edit
                     </button>
                     }
@@ -228,7 +228,7 @@
 </div>
 
 @if (isAddingRelatedEntity && newRelatedEntity) {
-<app-case-edit-drawer title="Add Related Entity" [subtitle]="caseData.caseId" saveLabel="Save Entity" saveTestId="case-related-entity-add-save" cancelTestId="case-related-entity-add-cancel" (save)="store.saveNewRelatedEntity()" (cancel)="store.cancelSectionMode()">
+<app-case-edit-drawer title="Add Related Entity" [subtitle]="caseData.caseId" saveLabel="Save Entity" saveTestId="case-related-entity-add-save" cancelTestId="case-related-entity-add-cancel" drawerTestId="case-related-entity-add-drawer" (save)="store.saveNewRelatedEntity()" (cancel)="store.cancelSectionMode()">
     <div class="p-6">
         <app-entity-details [entity]="newRelatedEntity" [isMainEntity]="false" [showTitle]="false"
             [showTopDivider]="false" [showRoleRelationshipFields]="true" [showInlineSaveButtons]="false" [entityIndex]="0"
