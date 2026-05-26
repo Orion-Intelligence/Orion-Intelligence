@@ -26,7 +26,7 @@ SCAN_ROLE_DEPS = [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.A
 GENERAL_MODULE_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:general"))]
 SCANNING_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("scanning"))]
 SATELLITE_INTEL_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("osint_advanced", bypass_roles=[user_role.ADMIN]))]
-SATELLITE_INTEL_SHIPS_TEST_DEPS = [Depends(license_required("osint_advanced", bypass_roles=[user_role.ADMIN]))]
+SATELLITE_INTEL_SHIPS_TEST_DEPS = SATELLITE_INTEL_DEPS
 
 
 def _enforce_demo_safe_search(param: search_consolidated_param_model, current_user, is_free: bool = False) -> None:
