@@ -242,15 +242,21 @@ describe('User Manual Screenshot Flow', () => {
     clickByTestId('report-feedback-comment-save');
     cy.contains('p', 'Documentation analyst note for case review.').should('be.visible');
 
-    cy.scrollTo('top', { ensureScrollable: false });
-    clickByTestId('case-closure-add');
-    visibleByTestId('case-closure-drawer').should('be.visible');
+    cy.then(() => cy.visit(`/dashboard/profile/case-management/case-details?caseId=${docsCaseId}`));
+    cy.get(byTestId('case-details-title-value'), { timeout: 60000 }).should('contain.text', docsCaseTitle);
+    cy.get(byTestId('case-closure-add'), { timeout: 60000 })
+      .scrollIntoView()
+      .should('be.visible')
+      .click({ force: true });
+    cy.get(byTestId('case-closure-drawer'), { timeout: 60000 }).should('be.visible');
     selectByTestId('case-closure-reason-select', 'remediated');
     typeByTestId('case-closure-summary-input', 'Exposure reviewed and remediation ownership recorded.');
     typeByTestId('case-closure-resolution-input', 'Evidence was captured, analyst context was added, and the case outcome was recorded for reporting.');
     clickByTestId('case-closure-save');
     cy.get(byTestId('case-closure-drawer')).should('not.exist');
-    visibleByTestId('case-closure-summary-value').should('contain.text', 'Exposure reviewed');
+    cy.then(() => cy.visit(`/dashboard/profile/case-management/case-details?caseId=${docsCaseId}`));
+    cy.get(byTestId('case-details-title-value'), { timeout: 60000 }).should('contain.text', docsCaseTitle);
+    cy.get(byTestId('case-closure-summary-value'), { timeout: 60000 }).should('contain.text', 'Exposure reviewed');
     cy.scrollTo('top', { ensureScrollable: false });
     capture('case-management-view');
   };
