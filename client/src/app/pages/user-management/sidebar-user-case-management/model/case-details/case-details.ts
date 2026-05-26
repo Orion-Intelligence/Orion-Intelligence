@@ -51,6 +51,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
   caseData: Case | null = null;
   isLoading = true;
+  caseMotionDisabled = false;
   isEditing = false;
   activeEditSection: CaseDetailsEditSection | null = null;
   editedCase: Case | null = null;
@@ -123,7 +124,11 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         caseData.closure = caseData.closure || null;
         caseData.assignedAnalystIds = caseData.assignedAnalystIds || [];
         this.caseData = caseData;
+        this.caseMotionDisabled = true;
         this.isLoading = false;
+        setTimeout(() => {
+          this.caseMotionDisabled = false;
+        });
       },
       error: () => {
         this.messageNotificationService.show('Case not found');

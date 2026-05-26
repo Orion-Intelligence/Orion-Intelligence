@@ -141,44 +141,44 @@
                 </div>
                 } @else {
                 <div class="relative hidden overflow-x-auto overflow-y-visible md:block">
-                    <table class="w-full min-w-[1120px] text-left text-sm">
-                        <thead class="border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
+                    <table class="w-full min-w-[1120px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]">
+                        <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
                             <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
-                                <th class="overflow-clip align-middle px-4 py-3.5">Case ID</th>
-                                <th class="overflow-clip align-middle px-4 py-3.5">Title</th>
-                                <th class="overflow-clip align-middle px-4 py-3.5">Case Type</th>
-                                <th class="overflow-clip align-middle px-4 py-3.5">Status</th>
-                                <th class="overflow-clip align-middle px-4 py-3.5">Severity</th>
-                                <th class="overflow-clip align-middle px-4 py-3.5">Priority</th>
-                                <th class="overflow-clip align-middle px-4 py-3.5">Updated</th>
-                                <th class="overflow-clip align-middle px-4 py-3.5">Action</th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">Case ID</th>
+                                <th class="w-[220px] overflow-clip align-middle px-4 py-3.5">Title</th>
+                                <th class="w-[160px] overflow-clip align-middle px-4 py-3.5">Case Type</th>
+                                <th class="w-[120px] overflow-clip align-middle px-4 py-3.5">Status</th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">Severity</th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">Priority</th>
+                                <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">Updated</th>
+                                <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-expand-bg)]">
-                                <td class="px-4 py-3">
-                                    <div class="ui-shimmer h-3 w-12 rounded bg-[var(--color-blue-760)]"></div>
+                        <tbody class="text-[15px] font-normal text-[var(--color-text3)]">
+                            <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)]">
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                                    <div class="ui-shimmer h-3 w-12 rounded bg-[var(--color-blue-720)]"></div>
                                 </td>
-                                <td class="px-4 py-3">
-                                    <div class="ui-shimmer h-3 w-24 rounded bg-[var(--color-blue-760)]"></div>
+                                <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5">
+                                    <div class="ui-shimmer h-3 w-24 rounded bg-[var(--color-blue-720)]"></div>
                                 </td>
-                                <td class="px-4 py-3">
-                                    <div class="ui-shimmer h-3 w-32 rounded bg-[var(--color-blue-760)]"></div>
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                                    <div class="ui-shimmer h-3 w-32 rounded bg-[var(--color-blue-720)]"></div>
                                 </td>
-                                <td class="px-4 py-3">
-                                    <div class="ui-shimmer h-3 w-24 rounded bg-[var(--color-blue-760)]"></div>
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                                    <div class="ui-shimmer h-6 w-20 rounded-full bg-[var(--color-blue-720)]"></div>
                                 </td>
-                                <td class="px-4 py-3">
-                                    <div class="ui-shimmer h-3 w-16 rounded bg-[var(--color-blue-760)]"></div>
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                                    <div class="ui-shimmer h-6 w-16 rounded-full bg-[var(--color-blue-720)]"></div>
                                 </td>
-                                <td class="px-4 py-3">
-                                    <div class="ui-shimmer h-3 w-24 rounded bg-[var(--color-blue-760)]"></div>
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                                    <div class="ui-shimmer h-6 w-16 rounded-full bg-[var(--color-blue-720)]"></div>
                                 </td>
-                                <td class="px-4 py-3">
-                                    <div class="ui-shimmer h-3 w-16 rounded bg-[var(--color-blue-760)]"></div>
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                                    <div class="ui-shimmer h-3 w-16 rounded bg-[var(--color-blue-720)]"></div>
                                 </td>
-                                <td class="px-4 py-3">
-                                    <div class="ui-shimmer h-3 w-10 rounded bg-[var(--color-blue-760)]"></div>
+                                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
+                                    <div class="ui-shimmer mx-auto h-8 w-8 rounded-lg bg-[var(--color-blue-720)]"></div>
                                 </td>
                             </tr>
                         </tbody>
@@ -188,13 +188,13 @@
                     @for (_ of [1,2,3]; track _) {
                     <div class="overflow-hidden rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)]">
                         <div class="border-b border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] px-3 py-3">
-                            <div class="ui-shimmer h-3 w-2/3 rounded bg-[var(--color-blue-760)]"></div>
-                            <div class="ui-shimmer mt-2 h-3 w-1/3 rounded bg-[var(--color-blue-760)]"></div>
+                            <div class="ui-shimmer h-3 w-2/3 rounded bg-[var(--color-blue-720)]"></div>
+                            <div class="ui-shimmer mt-2 h-3 w-1/3 rounded bg-[var(--color-blue-720)]"></div>
                         </div>
                         <div class="space-y-2 p-3">
-                            <div class="ui-shimmer h-3 w-full rounded bg-[var(--color-blue-760)]"></div>
-                            <div class="ui-shimmer h-3 w-4/5 rounded bg-[var(--color-blue-760)]"></div>
-                            <div class="ui-shimmer h-3 w-3/5 rounded bg-[var(--color-blue-760)]"></div>
+                            <div class="ui-shimmer h-3 w-full rounded bg-[var(--color-blue-720)]"></div>
+                            <div class="ui-shimmer h-3 w-4/5 rounded bg-[var(--color-blue-720)]"></div>
+                            <div class="ui-shimmer h-3 w-3/5 rounded bg-[var(--color-blue-720)]"></div>
                         </div>
                     </div>
                     }
