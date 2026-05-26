@@ -107,15 +107,15 @@
             <div class="flex flex-wrap items-center gap-2 sm:justify-end">
                 @if (!isEditing) {
                 <button @caseInlineMotion (click)="exportPdf()" type="button" aria-label="Export PDF" appTooltip="Export PDF" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-export-pdf" [disabled]="isPdfExporting">
-                    <i class="bi text-sm leading-none" [ngClass]="isPdfExporting ? 'bi-arrow-repeat animate-spin' : 'bi-download text-emerald-300'"></i>
+                    <i class="bi text-sm leading-none [body.light-theme_&]:text-emerald-700" [ngClass]="isPdfExporting ? 'bi-arrow-repeat animate-spin' : 'bi-download text-emerald-300'"></i>
                 </button>
 
                 <button @caseInlineMotion (click)="openShareConfirmation()" type="button" aria-label="Create share link" appTooltip="Create share link" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-share" [disabled]="isShareCreating">
-                    <i class="bi text-[15px] leading-none [&_.ui-bootstrap-icon]:overflow-visible" [ngClass]="isShareCreating ? 'bi-arrow-repeat animate-spin' : 'bi-share-fill'"></i>
+                    <i class="bi text-[15px] leading-none [body.light-theme_&]:text-slate-700 [&_.ui-bootstrap-icon]:overflow-visible" [ngClass]="isShareCreating ? 'bi-arrow-repeat animate-spin' : 'bi-share-fill'"></i>
                 </button>
 
                 <button @caseInlineMotion (click)="openRevokeShareConfirmation()" type="button" aria-label="Revoke all share links" appTooltip="Revoke all share links" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-revoke-shares" [disabled]="isShareRevoking">
-                    <i class="bi text-sm leading-none" [ngClass]="isShareRevoking ? 'bi-arrow-repeat animate-spin' : 'bi-trash3 text-red-300'"></i>
+                    <i class="bi text-sm leading-none [body.light-theme_&]:text-red-700" [ngClass]="isShareRevoking ? 'bi-arrow-repeat animate-spin' : 'bi-trash3 text-red-300'"></i>
                 </button>
                 }
             </div>
@@ -198,7 +198,7 @@
                             <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Tags</label>
                             <div class="flex flex-wrap gap-2">
                                 @for (tag of tagOptions; track tag.value) {
-                                <button type="button" (click)="toggleTag(tag.value)" class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isTagSelected(tag.value) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
+                                <button type="button" (click)="toggleTag(tag.value)" class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isTagSelected(tag.value) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200 [body.light-theme_&]:border-sky-600/40 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
                                     {{ tag.label }}
                                 </button>
                                 }
@@ -212,7 +212,7 @@
                                 @if (analysts.length > 0) {
                                 <div class="flex flex-wrap gap-2">
                                     @for (analyst of analysts; track analyst.id) {
-                                    <button type="button" (click)="toggleAssignedAnalyst(analyst.id)" class="rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isAnalystAssignedToCase(analyst.id) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
+                                    <button type="button" (click)="toggleAssignedAnalyst(analyst.id)" class="rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isAnalystAssignedToCase(analyst.id) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200 [body.light-theme_&]:border-sky-600/40 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
                                         {{ analyst.username || analyst.email || analyst.id }}
                                     </button>
                                     }

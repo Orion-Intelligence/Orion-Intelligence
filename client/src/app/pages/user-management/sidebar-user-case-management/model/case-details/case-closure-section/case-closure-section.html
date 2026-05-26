@@ -10,7 +10,7 @@
                 <i class="bi bi-pencil-square"></i> Edit
             </button>
             } @else {
-            <button type="button" (click)="store.openCloseCase()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/30 bg-emerald-500/15 px-2.5 text-sm font-semibold text-emerald-200 transition hover:border-emerald-400/50 hover:bg-emerald-500/20" data-testid="case-closure-add">
+            <button type="button" (click)="store.openCloseCase()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/30 bg-emerald-500/15 px-2.5 text-sm font-semibold text-emerald-200 transition hover:border-emerald-400/50 hover:bg-emerald-500/20 [body.light-theme_&]:border-emerald-600/40 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800 [body.light-theme_&]:hover:border-emerald-700/45 [body.light-theme_&]:hover:bg-emerald-200/70" data-testid="case-closure-add">
                 <i class="bi bi-lock-fill"></i> Closure
             </button>
             }

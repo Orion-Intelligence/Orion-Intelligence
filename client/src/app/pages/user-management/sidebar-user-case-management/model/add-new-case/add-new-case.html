@@ -110,7 +110,7 @@
                         <label class="mb-3 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Tags</label>
                         <div class="flex flex-wrap gap-2">
                             @for (tag of tagOptions; track tag.value) {
-                            <button type="button" (click)="toggleTag(tag.value)" class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isTagSelected(tag.value) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
+                            <button type="button" (click)="toggleTag(tag.value)" class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isTagSelected(tag.value) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200 [body.light-theme_&]:border-sky-600/40 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
                                 {{ tag.label }}
                             </button>
                             }
