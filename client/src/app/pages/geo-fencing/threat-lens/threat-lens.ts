@@ -7,7 +7,7 @@ import { GeoCameraResponse } from '../../../shared/model/network-intel/network-i
 import { FiltersComponent } from '../../../shared/partials/filters/filters.component';
 import { threat_lens_filters } from '../../../shared/constants/filters';
 import { SidebarService } from '../../../shared/services/sidebar.service';
-import { MapLoadingBadgesComponent } from '../shared/components/map-loading-badges/map-loading-badges.component';
+import { MapLoadingBadgesComponent } from '../../../shared/partials/map-loading-badges/map-loading-badges.component';
 import { NetworkIntelScanService } from '../../../shared/services/network-intel/network-intel-scan.service';
 import { SelectedCountryCategoryCount, ThreatCountryCount, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensIpScanMode, ThreatLensLegendItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
 import { ThreatLensIpScanModeEnum } from '../enums/geo-fencing.enums';

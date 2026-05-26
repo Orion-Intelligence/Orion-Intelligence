@@ -1,4 +1,5 @@
 .env
+/.codex
 .DS_Store
 **/.DS_Store
 backend/static/.well-known/parser_files/*
