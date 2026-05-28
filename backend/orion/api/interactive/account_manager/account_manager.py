@@ -249,7 +249,8 @@ class AccountManager:
         user = await self._engine.find_one(db_user_account, db_user_account.username == current_user.username)
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
-        return {"chat_history": getattr(user, "chat_history", []) or []}
+        history = getattr(user, "chat_history", []) or []
+        return {"history": history, "chat_history": history}
 
     async def update_current_user_chat_history(self, chat_history, current_user):
         user = await self._engine.find_one(db_user_account, db_user_account.username == current_user.username)

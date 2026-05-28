@@ -27,14 +27,14 @@ class nexus_manager:
 
     async def parse_chat(self, model: ReportChatRequest, user_id: str = "system", current_user=None):
         try:
-            chat_history = await self.stream_manager.get_recent_chat_history(current_user) if current_user is not None else []
+            history = await self.stream_manager.get_recent_history(current_user) if current_user is not None else []
             return StreamingResponse(
                 self.stream_manager.stream_response(
                     model.message,
                     user_id,
                     tool=model.tool or "open_chat",
                     type_name=model.type or "default",
-                    chat_history=chat_history,
+                    history=history,
                 ),
                 media_type="application/x-ndjson",
                 headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},

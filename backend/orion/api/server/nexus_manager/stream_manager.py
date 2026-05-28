@@ -76,23 +76,14 @@ class NexusStreamManager:
 
         return turns[-limit:]
 
-    async def get_recent_chat_history(self, current_user) -> list[dict[str, str]]:
+    async def get_recent_history(self, current_user) -> list[dict[str, str]]:
         try:
-            history = await AccountManager.get_instance().get_current_user_chat_history(current_user)
+            stored_history = await AccountManager.get_instance().get_current_user_chat_history(current_user)
         except Exception:
             return []
-        return self._build_history_turns(history.get("chat_history") or [])
+        return self._build_history_turns(stored_history.get("history") or [])
 
-    async def _stream(
-        self,
-        client: httpx.AsyncClient,
-        endpoint: str,
-        prompt: str,
-        user_id: str,
-        tool: str = "open_chat",
-        type_name: str = "default",
-        chat_history: list[dict[str, str]] | None = None,
-    ):
+    async def _stream(self,client: httpx.AsyncClient,endpoint: str,prompt: str,user_id: str,tool: str = "open_chat",type_name: str = "default",history: list[dict[str, str]] | None = None):
         response = None
         answer = ""
         try:
@@ -107,8 +98,8 @@ class NexusStreamManager:
             }
             if selected_tool == "api_payload":
                 arguments["api_name"] = type_name or "default"
-            if chat_history:
-                arguments["chat_history"] = chat_history
+            if history:
+                arguments["history"] = history
             request = client.build_request(
                 "POST",
                 endpoint,
@@ -159,25 +150,18 @@ class NexusStreamManager:
             if response is not None:
                 await response.aclose()
 
-    async def stream_response(self, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", chat_history: list[dict[str, str]] | None = None):
+    async def stream_response(self, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", history: list[dict[str, str]] | None = None):
         endpoint = f"{self.base_url}/mcp"
         client = httpx.AsyncClient(timeout=None)
         current_task = asyncio.current_task()
         if current_task is not None:
             self.active_chat_tasks[user_id] = current_task
         try:
-            async for line, answer, failed, tool_request in self._stream(client, endpoint, prompt, user_id, tool=tool, type_name=type_name, chat_history=chat_history):
-                print("::::::::::::::::::::::::::::::::", flush=True)
-                print(line, flush=True)
-                print(line, flush=True)
-                print("::::::::::::::::::::::::::::::::", flush=True)
+            async for line, answer, failed, tool_request in self._stream(client, endpoint, prompt, user_id, tool=tool, type_name=type_name, history=history):
                 if line:
                     yield line
                 if failed:
                     return
-                print("::::::::::::::::::::::::::::::::", flush=True)
-                print(tool_request, flush=True)
-                print("::::::::::::::::::::::::::::::::", flush=True)
                 if tool_request:
                     tool_request = json.loads(tool_request)
                     tool_response = await self.tool_router.request(tool_request["api_name"], tool_request.get("payload") or {}, user_id=user_id)
@@ -198,7 +182,7 @@ class NexusStreamManager:
                         summary_prompt,
                         user_id,
                         tool="summarizer",
-                        chat_history=chat_history,
+                        history=history,
                     ):
                         if summary_line:
                             yield summary_line
