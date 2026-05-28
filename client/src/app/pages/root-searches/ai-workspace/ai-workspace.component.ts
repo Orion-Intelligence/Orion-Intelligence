@@ -93,6 +93,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     const payload = {
       message: text,
       report: this.contextQuery() || '',
+      tool: 'open_chat',
     };
 
     const requestId = ++this.chatRequestId;

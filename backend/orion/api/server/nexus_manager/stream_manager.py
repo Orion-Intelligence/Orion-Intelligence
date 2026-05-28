@@ -89,19 +89,24 @@ class NexusStreamManager:
         endpoint: str,
         prompt: str,
         user_id: str,
-        tool: str = "default",
+        tool: str = "open_chat",
         type_name: str = "default",
         chat_history: list[dict[str, str]] | None = None,
     ):
         response = None
         answer = ""
         try:
+            selected_tool = tool or "open_chat"
+            if selected_tool == "default":
+                selected_tool = "open_chat"
             arguments: dict[str, Any] = {
                 "prompt": prompt,
                 "user_id": user_id,
-                "tool": tool or "default",
+                "tool": selected_tool,
                 "type": type_name or "default",
             }
+            if selected_tool == "api_payload":
+                arguments["api_name"] = type_name or "default"
             if chat_history:
                 arguments["chat_history"] = chat_history
             request = client.build_request(
@@ -109,7 +114,7 @@ class NexusStreamManager:
                 endpoint,
                 json=NexusRpcPayloadModel.tool_call(
                     request_id="nexus-chat",
-                    name="ai_chat",
+                    name=selected_tool,
                     arguments=arguments,
                 ).model_dump(),
             )
@@ -154,33 +159,25 @@ class NexusStreamManager:
             if response is not None:
                 await response.aclose()
 
-    async def stream_response(
-        self,
-        prompt: str,
-        user_id: str,
-        tool: str = "default",
-        type_name: str = "default",
-        chat_history: list[dict[str, str]] | None = None,
-    ):
+    async def stream_response(self, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", chat_history: list[dict[str, str]] | None = None):
         endpoint = f"{self.base_url}/mcp"
         client = httpx.AsyncClient(timeout=None)
         current_task = asyncio.current_task()
         if current_task is not None:
             self.active_chat_tasks[user_id] = current_task
         try:
-            async for line, answer, failed, tool_request in self._stream(
-                client,
-                endpoint,
-                prompt,
-                user_id,
-                tool=tool,
-                type_name=type_name,
-                chat_history=chat_history,
-            ):
+            async for line, answer, failed, tool_request in self._stream(client, endpoint, prompt, user_id, tool=tool, type_name=type_name, chat_history=chat_history):
+                print("::::::::::::::::::::::::::::::::", flush=True)
+                print(line, flush=True)
+                print(line, flush=True)
+                print("::::::::::::::::::::::::::::::::", flush=True)
                 if line:
                     yield line
                 if failed:
                     return
+                print("::::::::::::::::::::::::::::::::", flush=True)
+                print(tool_request, flush=True)
+                print("::::::::::::::::::::::::::::::::", flush=True)
                 if tool_request:
                     tool_request = json.loads(tool_request)
                     tool_response = await self.tool_router.request(tool_request["api_name"], tool_request.get("payload") or {}, user_id=user_id)
@@ -200,7 +197,7 @@ class NexusStreamManager:
                         endpoint,
                         summary_prompt,
                         user_id,
-                        tool="final_summary",
+                        tool="summarizer",
                         chat_history=chat_history,
                     ):
                         if summary_line:

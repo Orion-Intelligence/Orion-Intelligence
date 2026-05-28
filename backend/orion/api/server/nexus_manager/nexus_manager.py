@@ -32,7 +32,7 @@ class nexus_manager:
                 self.stream_manager.stream_response(
                     model.message,
                     user_id,
-                    tool=model.tool or "default",
+                    tool=model.tool or "open_chat",
                     type_name=model.type or "default",
                     chat_history=chat_history,
                 ),

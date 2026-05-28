@@ -34,7 +34,7 @@
 <div class="mt-4">
   @if (!isAdvanced) {
     <div class="w-full">
-      <app-chat-widget #iocChatWidget [showLauncher]="false" tool="orion_api_docs" type="/api/search/stealer/ioc"></app-chat-widget>
+      <app-chat-widget #iocChatWidget [showLauncher]="false" tool="api_payload" type="/api/search/stealer/ioc"></app-chat-widget>
       <form (submit)="$event.preventDefault(); triggerSearch()" @fadeInDashboardItem class="relative flex w-full items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-white px-3 py-2" [ngClass]="isBasicInvalid() ? 'ring-1 ring-[var(--color-border-red)]' : ''">
         @if (licenseService.canUseModule('ai') && appService.configData().appSettings.ai_endpoint_enabled) {
           <button type="button" data-testid="ioc-basic-tag-AI" class="ui-home-ai-button group flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-[rgba(87,165,235,0.24)] bg-[linear-gradient(180deg,rgba(87,165,235,0.14)_0%,rgba(87,165,235,0.07)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-200 hover:border-[rgba(87,165,235,0.38)] hover:bg-[linear-gradient(180deg,rgba(87,165,235,0.2)_0%,rgba(87,165,235,0.1)_100%)] hover:shadow-[0_0_0_2px_rgba(87,165,235,0.08),inset_0_1px_0_rgba(255,255,255,0.12)]" aria-label="Open AI workspace" (click)="iocChatWidget.openChat()">

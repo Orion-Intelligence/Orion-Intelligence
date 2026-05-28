@@ -41,7 +41,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly reportText = input<string>();
   readonly report = input<string>();
   readonly showLauncher = input(true);
-  readonly tool = input('default');
+  readonly tool = input('open_chat');
   readonly type = input('default');
 
   constructor(public appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService, private nexusChatService: NexusChatService) { }
@@ -294,8 +294,8 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private resolveTool(report: string): string {
-    const tool = this.tool() || 'default';
-    return report && tool === 'default' ? 'final_summary' : tool;
+    const tool = this.tool() || 'open_chat';
+    return report && tool === 'open_chat' ? 'summarizer' : tool;
   }
 
   private resetChatView(): void {

@@ -170,7 +170,7 @@
   <app-json-api-viewer [jsonData]="resultItem"></app-json-api-viewer>
   <app-report-mapping></app-report-mapping>
   @if (appService.getConfig().appSettings.ai_endpoint_enabled) {
-    <app-chat-widget [reportText]="resultItem?.m_content" tool="final_summary"></app-chat-widget>
+    <app-chat-widget [reportText]="resultItem?.m_content" tool="summarizer"></app-chat-widget>
   }
 </div>
 </app-report-interaction-host>

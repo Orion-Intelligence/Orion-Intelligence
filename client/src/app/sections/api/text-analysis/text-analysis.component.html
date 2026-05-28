@@ -1,4 +1,8 @@
 <div class="mx-auto w-full max-w-[2400px] px-5 pb-[200px] lg:px-8">
+  @if (appService.getConfig().appSettings.ai_endpoint_enabled) {
+    <app-chat-widget tool="api_payload" type="/api/nexus/analyze-text"></app-chat-widget>
+  }
+
   <form #analysisForm="ngForm" (submit)="analyzeText($event)" class="mt-6">
     <div class="text-analysis-input-panel overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)]">
         <div class="text-analysis-input-bar flex items-center justify-between gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-790)] px-4 py-3 max-[640px]:flex-col max-[640px]:items-start">

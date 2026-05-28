@@ -7,6 +7,8 @@ import { finalize } from 'rxjs/operators';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { ValuePresentationBase } from '../../../shared/utils/value-presentation.base';
+import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
+import { AppService } from '../../../services/core/app/app.service';
 
 type TextAnalysisResult = {
   title: string;
@@ -34,7 +36,7 @@ type TextAnalysisResult = {
 @Component({
   selector: 'app-text-analysis',
   standalone: true,
-  imports: [FormsModule, NgClass, EmptyQueryComponent],
+  imports: [FormsModule, NgClass, EmptyQueryComponent, ChatWidgetComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './text-analysis.component.html'
 })
@@ -48,7 +50,7 @@ export class TextAnalysisComponent extends ValuePresentationBase implements OnIn
   errorMessage = '';
   trackByIndex = (index: number) => index;
 
-  constructor(private http: HttpClient, private route: ActivatedRoute, private router: Router) {
+  constructor(private http: HttpClient, private route: ActivatedRoute, private router: Router, protected appService: AppService) {
     super();
   }
 

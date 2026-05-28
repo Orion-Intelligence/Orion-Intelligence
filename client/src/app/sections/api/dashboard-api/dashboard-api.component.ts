@@ -11,9 +11,22 @@ import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.a
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { ValuePresentationBase } from '../../../shared/utils/value-presentation.base';
+import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
+import { AppService } from '../../../services/core/app/app.service';
+
+const API_CHAT_TOOL_TYPES: Record<string, string> = {
+  user: '/api/dynamic/user',
+  social: '/api/dynamic/social',
+  wanted: '/api/dynamic/wanted',
+  'national-identity': '/api/dynamic/national-identity',
+  cracked: '/api/dynamic/cracked',
+  software: '/api/dynamic/software',
+  crypto: '/api/crypto/scan'
+};
+
 @Component({
   selector: 'app-dashboard-api',
-  imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass, UpperCasePipe],
+  imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass, UpperCasePipe, ChatWidgetComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './dashboard-api.component.html'
 })
@@ -40,8 +53,12 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   cryptoSummaryExpanded = false;
   trackByIndex = (index: number) => index;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: ReportExportService) {
+  constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: ReportExportService, protected appService: AppService) {
     super();
+  }
+
+  get aiToolApiName(): string {
+    return API_CHAT_TOOL_TYPES[this.apiType || ''] || 'default';
   }
 
   get cardsData(): any[] {
