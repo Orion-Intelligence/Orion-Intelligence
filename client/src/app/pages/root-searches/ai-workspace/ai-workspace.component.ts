@@ -2,6 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ApiService } from '../../../shared/services/api.service';
@@ -506,15 +507,18 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 })
 export class ChatShareComponent implements OnInit, OnDestroy {
   private previousTheme: 'light-theme' | 'dark-theme' | null = null;
+  private previousTitle = '';
 
   messages: SharedChatMessage[] = [];
   expiresAt: Date | null = null;
   isLoading = true;
   errorMessage = '';
 
-  constructor(private readonly route: ActivatedRoute, private readonly api: ApiService) { }
+  constructor(private readonly route: ActivatedRoute, private readonly api: ApiService, private readonly title: Title) { }
 
   ngOnInit(): void {
+    this.previousTitle = this.title.getTitle();
+    this.title.setTitle('Shared Chat');
     this.forceDarkTheme();
     const shareId = this.route.snapshot.paramMap.get('shareId') || '';
     const token = this.route.snapshot.queryParamMap.get('token') || '';
@@ -544,6 +548,9 @@ export class ChatShareComponent implements OnInit, OnDestroy {
     document.body.classList.remove('light-theme', 'dark-theme');
     if (this.previousTheme) {
       document.body.classList.add(this.previousTheme);
+    }
+    if (this.previousTitle) {
+      this.title.setTitle(this.previousTitle);
     }
   }
 

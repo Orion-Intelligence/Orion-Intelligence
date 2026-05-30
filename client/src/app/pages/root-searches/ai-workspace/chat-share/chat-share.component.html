@@ -1,4 +1,4 @@
-<div class="ui-dashboard-grid-bg min-h-screen text-[var(--color-text1)]">
+<div class="ui-dashboard-grid-bg text-[var(--color-text1)]">
   <header class="border-b border-[var(--color-border)] bg-[var(--color-blue-850)]/80 backdrop-blur">
     <div class="mx-auto flex h-[64px] w-full max-w-[980px] items-center justify-between gap-4 px-4">
       <div class="min-w-0">
@@ -15,7 +15,7 @@
     } @else if (errorMessage) {
       <div class="rounded-[8px] border border-red-400/20 bg-red-950/30 p-4 text-sm font-medium text-red-200">{{ errorMessage }}</div>
     } @else {
-      <div class="space-y-5">
+      <div class="space-y-5 pb-[400px]">
         @for (message of messages; track trackMessage($index)) {
           <div class="flex" [ngClass]="message.sender === 'user' ? 'justify-end' : 'justify-start'">
             <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-full">
