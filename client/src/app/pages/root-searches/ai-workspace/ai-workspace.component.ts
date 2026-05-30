@@ -1,4 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
+import { HttpParams } from '@angular/common/http';
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -16,6 +17,12 @@ type ChatHistoryMessage = {
   sender: 'user' | 'bot';
   text: string;
   time: string;
+};
+
+type SharedChatMessage = {
+  sender: 'user' | 'bot';
+  text: string;
+  time: Date;
 };
 
 @Component({
@@ -36,6 +43,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   protected readonly isSending = signal(false);
   protected readonly isLoadingHistory = signal(true);
   protected readonly isStreamingReply = signal(false);
+  protected readonly isChatShareCreating = signal(false);
   protected readonly streamingMessageId = signal<string | null>(null);
   protected readonly copiedMessageId = signal<string | null>(null);
   protected readonly nexusStep = signal('');
@@ -230,6 +238,25 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
+  shareChat(): void {
+    const messages = this.buildChatHistoryPayload();
+    if (this.isChatShareCreating() || !messages.length) {
+      return;
+    }
+    this.isChatShareCreating.set(true);
+    this.api.post<{ path: string; }>('profile/chat-shares', {
+      messages,
+      expiresInHours: 168,
+    }).subscribe({
+      next: (share) => {
+        this.isChatShareCreating.set(false);
+        const url = new URL(share.path, window.location.origin).toString();
+        window.open(url, '_blank', 'noopener');
+      },
+      error: () => this.isChatShareCreating.set(false),
+    });
+  }
+
   private clearChatView(): void {
     this.messages = [];
     this.messageDraft = '';
@@ -292,12 +319,11 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.isStreamingReply.set(false);
     this.streamingMessageId.set(null);
     this.nexusStep.set('');
-    this.messages = this.messages
-      .slice(0, index + 1)
-      .map((item, itemIndex) => itemIndex === index ? { ...item, text } : item);
+    this.messages = this.messages.slice(0, index);
+    this.messageDraft = text;
     this.cancelMessageEdit();
-    this.persistChatHistory();
-    this.scrollToBottom();
+    this.queueComposerResize();
+    this.sendMessage();
   }
 
   onEditKeydown(event: KeyboardEvent, message: AiWorkspaceMessage): void {
@@ -470,4 +496,66 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     return Math.max(1, lines.reduce((total, line) => total + Math.max(1, Math.ceil(line.length / charsPerLine)), 0));
   }
 
+}
+
+@Component({
+  selector: 'app-chat-share',
+  standalone: true,
+  imports: [CommonModule, DatePipe],
+  templateUrl: './chat-share/chat-share.component.html',
+})
+export class ChatShareComponent implements OnInit, OnDestroy {
+  private previousTheme: 'light-theme' | 'dark-theme' | null = null;
+
+  messages: SharedChatMessage[] = [];
+  expiresAt: Date | null = null;
+  isLoading = true;
+  errorMessage = '';
+
+  constructor(private readonly route: ActivatedRoute, private readonly api: ApiService) { }
+
+  ngOnInit(): void {
+    this.forceDarkTheme();
+    const shareId = this.route.snapshot.paramMap.get('shareId') || '';
+    const token = this.route.snapshot.queryParamMap.get('token') || '';
+    if (!shareId || !token) {
+      this.errorMessage = 'Invalid share link.';
+      this.isLoading = false;
+      return;
+    }
+    this.api.get<{ messages: Array<Omit<SharedChatMessage, 'time'> & { time: string; }>; expiresAt: string; }>(`public/chat-shares/${shareId}`, {
+      params: new HttpParams().set('token', token)
+    }).subscribe({
+      next: response => {
+        this.messages = (response.messages || [])
+          .filter(message => message.sender === 'user' || message.sender === 'bot')
+          .map(message => ({ ...message, time: new Date(message.time) }));
+        this.expiresAt = response.expiresAt ? new Date(response.expiresAt) : null;
+        this.isLoading = false;
+      },
+      error: err => {
+        this.errorMessage = err?.error?.detail || 'This share link is unavailable.';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    document.body.classList.remove('light-theme', 'dark-theme');
+    if (this.previousTheme) {
+      document.body.classList.add(this.previousTheme);
+    }
+  }
+
+  trackMessage(index: number): number {
+    return index;
+  }
+
+  private forceDarkTheme(): void {
+    this.previousTheme = document.body.classList.contains('light-theme') ? 'light-theme'
+      : document.body.classList.contains('dark-theme') ? 'dark-theme'
+        : null;
+    document.body.classList.remove('light-theme');
+    document.body.classList.add('dark-theme');
+  }
 }

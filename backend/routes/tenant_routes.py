@@ -5,6 +5,8 @@ from fastapi import Depends, UploadFile
 
 from configs.app_dependency import license_required, role_required, status_required, get_current_user
 from orion.api.interactive.account_manager.account_manager import AccountManager
+from orion.api.interactive.account_manager.chat_share_manager import ChatShareManager
+from orion.api.interactive.account_manager.models.chat_history_model import CreateChatShareRequest
 from orion.api.interactive.account_manager.models.chat_history_model import chat_history_model
 from orion.api.interactive.account_manager.models.user_meta_model import user_meta_model
 from orion.api.interactive.account_manager.models.user_param_model import user_param_model
@@ -90,6 +92,14 @@ async def get_current_user_chat_history(current_user=Depends(get_current_user)):
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
 async def update_current_user_chat_history(data: chat_history_model, current_user=Depends(get_current_user)):
     return await AccountManager.get_instance().update_current_user_chat_history(data, current_user)
+
+
+@tenant_routes.post(
+    "/api/profile/chat-shares",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
+async def create_chat_share(data: CreateChatShareRequest, current_user=Depends(get_current_user)):
+    return await ChatShareManager.get_instance().create_chat_share(data, current_user)
 
 
 @tenant_routes.delete(

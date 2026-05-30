@@ -15,9 +15,15 @@
   <div class="flex h-full min-h-0 items-stretch overflow-hidden">
     <div class="chat-support__window ui-ai-chat-surface-pattern flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl bg-[var(--color-blue-700)] shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
       <div class="shrink-0 px-5 pt-4 max-[640px]:px-4">
-        <button type="button" (click)="startNewChat()" class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
-          New Chat
-        </button>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" (click)="startNewChat()" class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
+            New Chat
+          </button>
+          <button type="button" (click)="shareChat()" [disabled]="isChatShareCreating() || !messages.length" class="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-50">
+            <i [ngClass]="isChatShareCreating() ? 'bi-arrow-repeat animate-spin' : 'bi-share-fill'" class="bi text-[12px] leading-none"></i>
+            Share
+          </button>
+        </div>
       </div>
       <div #messagesContainer data-testid="chat-widget-messages" [class]="messages.length ? 'min-h-0 flex-1 space-y-5 overflow-y-auto scroll-smooth px-5 pt-5 pb-[300px] [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-4 max-[640px]:px-4 max-[640px]:pb-[300px] max-[640px]:[mask-image:none]' : 'min-h-0 flex-1 space-y-5 overflow-y-auto scroll-smooth px-5 pt-5 pb-6 [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-4 max-[640px]:px-4 max-[640px]:pb-0 max-[640px]:[mask-image:none]'">
         @if (isLoadingHistory()) {
@@ -106,14 +112,14 @@
                       </button>
                       @if (canEditMessage(message)) {
                         <button type="button" (click)="startMessageEdit(message)" aria-label="Edit message" title="Edit message" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white">
-                          <i class="bi bi-pencil-square text-[12px] leading-none"></i>
+                          <i class="bi bi-pencil-fill text-[12px] leading-none"></i>
                         </button>
                       }
                     }
                   </div>
                 </div>
                 <div class="mt-1 ml-3.5 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
-                  <img alt="user avatar" [src]="appService.userSessionData().user.image || '/api/s/static/user/default.png'" class="block h-full w-full rounded-full object-cover">
+                  <a href="/dashboard/profile/account" target="_blank" rel="noopener noreferrer" class="block h-full w-full cursor-pointer rounded-full"><img alt="user avatar" [src]="appService.userSessionData().user.image || '/api/s/static/user/default.png'" class="block h-full w-full rounded-full object-cover"></a>
                 </div>
               </div>
             } @else {
