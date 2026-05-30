@@ -9,6 +9,7 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { SubscriptionService } from '../../../services/dashboard/subscription.service';
 import { AiWorkspaceMessage } from '../../../shared/model/chat/ai-workspace-message.model';
 import { AiWorkspacePrompt } from '../../../shared/constants/shared-enums';
+import { ResultRowHelperService } from '../../../shared/services/result-row-helper.service';
 import { NexusChatService } from './nexus-chat.service';
 import { BotMessageActionsComponent } from './bot-message-actions/bot-message-actions.component';
 type ChatHistoryMessage = {
@@ -36,17 +37,20 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   protected readonly isLoadingHistory = signal(true);
   protected readonly isStreamingReply = signal(false);
   protected readonly streamingMessageId = signal<string | null>(null);
+  protected readonly copiedMessageId = signal<string | null>(null);
   protected readonly nexusStep = signal('');
   protected readonly contextQuery = computed(() => this.queryContext);
   protected readonly canUseNexusChat = computed(() => this.licenseService.canUseModule('ai'));
 
   messageDraft = '';
+  editingMessageId: string | null = null;
+  editDraft = '';
   messages: AiWorkspaceMessage[] = [];
   composerExpanded = false;
   composerRows = 1;
   composerScrollable = false;
 
-  constructor(private readonly api: ApiService, protected readonly appService: AppService, private readonly route: ActivatedRoute, private readonly router: Router, private readonly subscriptionService: SubscriptionService, protected readonly licenseService: LicenseService, private readonly nexusChatService: NexusChatService) {
+  constructor(private readonly api: ApiService, protected readonly appService: AppService, private readonly route: ActivatedRoute, private readonly router: Router, private readonly subscriptionService: SubscriptionService, protected readonly licenseService: LicenseService, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService) {
     this.queryContext = (this.route.snapshot.queryParamMap.get('q') || '').trim();
   }
 
@@ -74,6 +78,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.cancelMessageEdit();
     this.cancelActiveNexusRequest();
     this.messages = [...this.messages, this.createMessage('user', text)];
     this.persistChatHistory();
@@ -195,6 +200,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   retryMessage(prompt: string): void {
+    this.cancelMessageEdit();
     this.messageDraft = prompt;
     this.sendMessage();
   }
@@ -227,6 +233,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   private clearChatView(): void {
     this.messages = [];
     this.messageDraft = '';
+    this.cancelMessageEdit();
     this.queueComposerResize();
     this.router.navigate(['/dashboard/profile/ai'], {
       queryParams: { q: this.contextQuery() || null },
@@ -236,6 +243,77 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   trackMessage(_index: number, message: AiWorkspaceMessage): string {
     return message.id;
+  }
+
+  canEditMessage(message: AiWorkspaceMessage): boolean {
+    return !this.isSending() && message.sender === 'user';
+  }
+
+  copyMessage(message: AiWorkspaceMessage, event?: MouseEvent): void {
+    event?.stopPropagation();
+    const text = message.text.trim();
+    if (!text) {
+      return;
+    }
+    this.resultRowHelper.copyToClipboard(text).subscribe((ok) => {
+      this.copiedMessageId.set(ok ? message.id : null);
+      setTimeout(() => this.copiedMessageId.set(null), 1200);
+    });
+  }
+
+  startMessageEdit(message: AiWorkspaceMessage): void {
+    if (!this.canEditMessage(message)) {
+      return;
+    }
+    this.editingMessageId = message.id;
+    this.editDraft = message.text;
+    requestAnimationFrame(() => {
+      const textarea = document.getElementById(`ai-message-edit-${message.id}`) as HTMLTextAreaElement | null;
+      textarea?.focus();
+      textarea?.setSelectionRange(textarea.value.length, textarea.value.length);
+    });
+  }
+
+  cancelMessageEdit(): void {
+    this.editingMessageId = null;
+    this.editDraft = '';
+  }
+
+  saveMessageEdit(message: AiWorkspaceMessage): void {
+    const text = this.editDraft.trim();
+    const index = this.messages.findIndex(item => item.id === message.id);
+    if (!text || index === -1) {
+      return;
+    }
+
+    this.chatRequestId += 1;
+    this.cancelActiveNexusRequest();
+    this.isSending.set(false);
+    this.isStreamingReply.set(false);
+    this.streamingMessageId.set(null);
+    this.nexusStep.set('');
+    this.messages = this.messages
+      .slice(0, index + 1)
+      .map((item, itemIndex) => itemIndex === index ? { ...item, text } : item);
+    this.cancelMessageEdit();
+    this.persistChatHistory();
+    this.scrollToBottom();
+  }
+
+  onEditKeydown(event: KeyboardEvent, message: AiWorkspaceMessage): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.cancelMessageEdit();
+      return;
+    }
+    if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      this.saveMessageEdit(message);
+    }
+  }
+
+  getEditReserveText(message: AiWorkspaceMessage): string {
+    return this.editDraft.length > message.text.length ? this.editDraft : message.text;
   }
 
   private createMessage(sender: AiWorkspaceMessage['sender'], text: string): AiWorkspaceMessage {
@@ -312,7 +390,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     const result: AiWorkspaceMessage[] = [];
     messages.forEach((message, index) => {
       result.push(message);
-      if (message.sender === 'user' && messages[index + 1]?.sender !== 'bot') {
+      if (message.sender === 'user' && index < messages.length - 1 && messages[index + 1]?.sender !== 'bot') {
         result.push(this.createErrorMessage(message.text));
       }
     });
@@ -391,4 +469,5 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
     return Math.max(1, lines.reduce((total, line) => total + Math.max(1, Math.ceil(line.length / charsPerLine)), 0));
   }
+
 }

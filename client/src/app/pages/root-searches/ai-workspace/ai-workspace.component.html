@@ -58,7 +58,7 @@
                     <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
                     <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
                   </div>
-                  <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot relative rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3.5 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full" [class.pb-12]="streamingMessageId() !== message.id && !!message.text.trim()" [class.pr-28]="streamingMessageId() !== message.id && !!message.text.trim()">
+                  <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot relative rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3.5 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
                     <p class="whitespace-pre-wrap text-[14px] leading-7 text-[var(--color-text1)]">
                       {{ message.text }}@if (streamingMessageId() === message.id) {
                         <span class="ml-1 inline-flex translate-y-[-1px] items-center gap-1 align-middle">
@@ -68,10 +68,10 @@
                         </span>
                       }
                     </p>
-                    @if (streamingMessageId() !== message.id && message.text.trim()) {
-                      <app-bot-message-actions [message]="message"></app-bot-message-actions>
-                    }
                   </div>
+                  @if (streamingMessageId() !== message.id && message.text.trim()) {
+                    <app-bot-message-actions [message]="message"></app-bot-message-actions>
+                  }
                 </div>
               </div>
             } @else if (message.sender === 'user') {
@@ -81,8 +81,35 @@
                     <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
                     <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text1)]">Analyst</span>
                   </div>
-                  <div class="ui-ai-chat-bubble ui-ai-chat-bubble-user rounded-[22px] rounded-tr-[10px] border border-[var(--color-border)] px-4 py-2.5 text-sm text-[var(--color-text1)] shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
-                    <p class="whitespace-pre-wrap leading-7 text-[var(--color-text1)]">{{ message.text }}</p>
+                  <div class="ui-ai-chat-bubble ui-ai-chat-bubble-user relative rounded-[22px] rounded-tr-[10px] border border-[var(--color-border)] px-4 py-2.5 text-sm text-[var(--color-text1)] shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full" [ngClass]="editingMessageId === message.id ? 'border-sky-400/45 bg-white/15 ring-2 ring-sky-400/15' : ''">
+                    @if (editingMessageId === message.id) {
+                      <p aria-hidden="true" class="invisible min-h-[28px] whitespace-pre-wrap leading-7 text-[var(--color-text1)]">{{ getEditReserveText(message) }}</p>
+                      <textarea [(ngModel)]="editDraft" [id]="'ai-message-edit-' + message.id" [name]="'message-edit-' + message.id" (keydown)="onEditKeydown($event, message)" class="absolute inset-0 block h-full w-full resize-none overflow-y-auto rounded-[22px] rounded-tr-[10px] border-0 bg-transparent px-4 py-2.5 text-sm leading-7 text-[var(--color-text1)] outline-none placeholder:text-white/50"></textarea>
+                    } @else {
+                      <p class="whitespace-pre-wrap leading-7 text-[var(--color-text1)]">{{ message.text }}</p>
+                    }
+                  </div>
+                  <div class="flex justify-end gap-2 px-1 pt-1.5">
+                    @if (editingMessageId === message.id) {
+                      <button type="button" (click)="saveMessageEdit(message)" [disabled]="!editDraft.trim()" aria-label="Save edit" title="Save edit" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#57A5EB] text-white transition hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50">
+                        <i class="bi bi-check-lg text-[13px] leading-none"></i>
+                      </button>
+                      <button type="button" (click)="cancelMessageEdit()" aria-label="Cancel edit" title="Cancel edit" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 transition hover:bg-white/15 hover:text-white">
+                        <i class="bi bi-x-lg text-[12px] leading-none"></i>
+                      </button>
+                    } @else {
+                      <button type="button" (click)="copyMessage(message, $event)" class="relative inline-flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 transition hover:bg-white/15 hover:text-white" aria-label="Copy message" title="Copy message">
+                        <i class="bi bi-copy text-[12px] leading-none"></i>
+                        @if (copiedMessageId() === message.id) {
+                          <span class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--color-blue-640)] px-2 py-1 text-[10px] font-semibold text-white">Copied!</span>
+                        }
+                      </button>
+                      @if (canEditMessage(message)) {
+                        <button type="button" (click)="startMessageEdit(message)" aria-label="Edit message" title="Edit message" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 transition hover:bg-white/15 hover:text-white">
+                          <i class="bi bi-pencil-square text-[12px] leading-none"></i>
+                        </button>
+                      }
+                    }
                   </div>
                 </div>
                 <div class="mt-1 ml-3.5 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
