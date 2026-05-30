@@ -23,7 +23,7 @@
           <p class="max-h-[96px] overflow-y-auto whitespace-pre-wrap break-words text-[12px] leading-5 text-[var(--color-text3)]">{{ shareText }}</p>
         </div>
 
-        <div class="grid grid-cols-5 gap-3 border-b border-[var(--color-border)] pb-5">
+        <div class="grid grid-cols-3 gap-3 border-b border-[var(--color-border)] pb-5 sm:grid-cols-6">
           @if (canNativeShare()) {
             <button type="button" (click)="shareViaNative()" class="group flex min-w-0 flex-col items-center gap-2 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#57A5EB]/45">
               <span class="inline-flex h-12 w-12 items-center justify-center rounded-full border border-[#57A5EB]/25 bg-[#57A5EB]/15 text-[#A7D5FF] transition group-hover:bg-[#57A5EB]/25 group-active:scale-95">
@@ -43,18 +43,6 @@
           }
         </div>
 
-        <button type="button" (click)="copyText()" class="mt-4 flex min-h-[56px] w-full items-center justify-between gap-3 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3.5 py-2.5 text-left transition hover:bg-[var(--color-blue-760)] active:scale-[0.99]">
-          <span class="flex min-w-0 items-center gap-3">
-            <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-[var(--color-text2)]">
-              <i class="bi text-[14px] leading-none" [ngClass]="copied() ? 'bi-check-lg text-emerald-300' : 'bi-copy'"></i>
-            </span>
-            <span class="min-w-0">
-              <span class="block truncate text-[13px] font-semibold leading-5 text-[var(--color-text1)]">{{ copied() ? 'Copied' : 'Copy text' }}</span>
-              <span class="block truncate text-[11px] leading-4 text-[var(--color-text5)]">Clipboard</span>
-            </span>
-          </span>
-          <i class="bi bi-chevron-right shrink-0 text-[13px] leading-none text-[var(--color-text5)]"></i>
-        </button>
       </div>
     </section>
   </div>

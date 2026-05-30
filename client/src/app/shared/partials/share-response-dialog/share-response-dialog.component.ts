@@ -3,7 +3,7 @@ import { AfterViewInit, Component, ElementRef, Inject, Input, OnDestroy, signal 
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { ResultRowHelperService } from '../../services/result-row-helper.service';
 
-type ShareTarget = 'whatsapp' | 'telegram' | 'x' | 'email';
+type ShareTarget = 'whatsapp' | 'telegram' | 'x' | 'linkedin' | 'reddit' | 'email';
 
 interface ShareDestination {
   target: ShareTarget;
@@ -16,6 +16,8 @@ const SHARE_DESTINATIONS: ShareDestination[] = [
   { target: 'whatsapp', label: 'WhatsApp', icon: 'bi-whatsapp', iconShellClass: 'border-emerald-400/30 bg-emerald-500/15 text-emerald-200 group-hover:bg-emerald-500/25' },
   { target: 'telegram', label: 'Telegram', icon: 'bi-telegram', iconShellClass: 'border-sky-400/30 bg-sky-500/15 text-sky-200 group-hover:bg-sky-500/25' },
   { target: 'x', label: 'X', icon: 'bi-twitter-x', iconShellClass: 'border-white/15 bg-white/10 text-white group-hover:bg-white/15' },
+  { target: 'linkedin', label: 'LinkedIn', icon: 'bi-linkedin', iconShellClass: 'border-blue-400/30 bg-blue-500/15 text-blue-200 group-hover:bg-blue-500/25' },
+  { target: 'reddit', label: 'Reddit', icon: 'bi-reddit', iconShellClass: 'border-orange-300/30 bg-orange-400/15 text-orange-100 group-hover:bg-orange-400/25' },
   { target: 'email', label: 'Email', icon: 'bi-envelope-fill', iconShellClass: 'border-amber-300/30 bg-amber-400/15 text-amber-100 group-hover:bg-amber-400/25' },
 ];
 
@@ -103,6 +105,12 @@ export class ShareResponseDialogComponent implements AfterViewInit, OnDestroy {
     }
     if (target === 'x') {
       return `https://twitter.com/intent/tweet?text=${encoded}`;
+    }
+    if (target === 'linkedin') {
+      return `https://www.linkedin.com/feed/?shareActive=true&text=${encoded}`;
+    }
+    if (target === 'reddit') {
+      return `https://www.reddit.com/submit?title=${encodeURIComponent(this.emailSubject)}&text=${encoded}`;
     }
     return `mailto:?subject=${encodeURIComponent(this.emailSubject)}&body=${encoded}`;
   }
