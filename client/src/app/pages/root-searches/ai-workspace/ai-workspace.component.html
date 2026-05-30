@@ -91,21 +91,21 @@
                   </div>
                   <div class="flex justify-end gap-2 px-1 pt-1.5">
                     @if (editingMessageId === message.id) {
-                      <button type="button" (click)="saveMessageEdit(message)" [disabled]="!editDraft.trim()" aria-label="Save edit" title="Save edit" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#57A5EB] text-white transition hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50">
+                      <button type="button" (click)="saveMessageEdit(message)" [disabled]="!editDraft.trim()" aria-label="Save edit" title="Save edit" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#57A5EB] text-white hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50">
                         <i class="bi bi-check-lg text-[13px] leading-none"></i>
                       </button>
-                      <button type="button" (click)="cancelMessageEdit()" aria-label="Cancel edit" title="Cancel edit" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 transition hover:bg-white/15 hover:text-white">
+                      <button type="button" (click)="cancelMessageEdit()" aria-label="Cancel edit" title="Cancel edit" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white">
                         <i class="bi bi-x-lg text-[12px] leading-none"></i>
                       </button>
                     } @else {
-                      <button type="button" (click)="copyMessage(message, $event)" class="relative inline-flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 transition hover:bg-white/15 hover:text-white" aria-label="Copy message" title="Copy message">
+                      <button type="button" (click)="copyMessage(message, $event)" class="ui-ai-action-button relative inline-flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white" aria-label="Copy message" title="Copy message">
                         <i class="bi bi-copy text-[12px] leading-none"></i>
                         @if (copiedMessageId() === message.id) {
                           <span class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--color-blue-640)] px-2 py-1 text-[10px] font-semibold text-white">Copied!</span>
                         }
                       </button>
                       @if (canEditMessage(message)) {
-                        <button type="button" (click)="startMessageEdit(message)" aria-label="Edit message" title="Edit message" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 transition hover:bg-white/15 hover:text-white">
+                        <button type="button" (click)="startMessageEdit(message)" aria-label="Edit message" title="Edit message" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white">
                           <i class="bi bi-pencil-square text-[12px] leading-none"></i>
                         </button>
                       }
@@ -181,7 +181,7 @@
         <form novalidate class="border border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-800)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded">
           <div class="flex items-end gap-2">
             <textarea #composerInput [(ngModel)]="messageDraft" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" data-testid="chat-widget-input" [rows]="composerRows" name="message" placeholder="Ask a cybersecurity question" class="block min-h-8 max-h-[120px] flex-1 resize-none whitespace-pre-wrap break-words bg-[var(--color-blue-800)] px-3 py-1.5 text-sm leading-5 text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" [class.overflow-y-hidden]="!composerScrollable" [class.overflow-y-auto]="composerScrollable" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded"></textarea>
-            <button data-testid="chat-widget-send" type="button" (click)="isSending() ? stopMessageGeneration() : sendMessage()" [disabled]="!isSending() && !messageDraft.trim()" [attr.aria-label]="isSending() ? 'Stop generation' : 'Send message'" [class]="isSending() ? 'flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 bg-red-950/70 text-red-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_1px_rgba(248,113,113,0.08)] transition hover:bg-red-900/80 hover:text-white disabled:cursor-not-allowed disabled:opacity-50' : 'flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] text-white transition hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:border disabled:border-[#57A5EB]/25 disabled:bg-[#57A5EB]/15 disabled:text-[#A7D5FF] disabled:opacity-100'">
+            <button data-testid="chat-widget-send" type="button" (click)="isSending() ? stopMessageGeneration() : sendMessage()" [disabled]="!isSending() && !messageDraft.trim()" [attr.aria-label]="isSending() ? 'Stop generation' : 'Send message'" [class]="isSending() ? 'ui-ai-action-button flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 bg-red-950/70 text-red-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_1px_rgba(248,113,113,0.08)] hover:bg-red-900/80 hover:text-white disabled:cursor-not-allowed disabled:opacity-50' : 'ui-ai-action-button flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] text-white hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:border disabled:border-[#57A5EB]/25 disabled:bg-[#57A5EB]/15 disabled:text-[#A7D5FF] disabled:opacity-100'">
               @if (isSending()) {
                 <span class="h-3 w-3 rounded-[3px] bg-current shadow-[0_0_10px_rgba(248,113,113,0.28)]" aria-hidden="true"></span>
                 <span class="sr-only">Stop generation</span>
