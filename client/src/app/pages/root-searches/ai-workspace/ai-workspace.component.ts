@@ -14,6 +14,7 @@ import { AiWorkspacePrompt } from '../../../shared/constants/shared-enums';
 import { ResultRowHelperService } from '../../../shared/services/result-row-helper.service';
 import { NexusChatService } from './nexus-chat.service';
 import { BotMessageActionsComponent } from './bot-message-actions/bot-message-actions.component';
+import { MessageScrollRailComponent } from './message-scroll-rail/message-scroll-rail.component';
 type ChatHistoryMessage = {
   sender: 'user' | 'bot';
   text: string;
@@ -29,7 +30,7 @@ type SharedChatMessage = {
 @Component({
   selector: 'app-ai-workspace',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, RouterLink, BotMessageActionsComponent],
+  imports: [CommonModule, DatePipe, FormsModule, RouterLink, BotMessageActionsComponent, MessageScrollRailComponent],
   templateUrl: './ai-workspace.component.html',
 })
 export class AiWorkspaceComponent implements OnInit, OnDestroy {
@@ -502,7 +503,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 @Component({
   selector: 'app-chat-share',
   standalone: true,
-  imports: [CommonModule, DatePipe],
+  imports: [CommonModule, DatePipe, MessageScrollRailComponent],
   templateUrl: './chat-share/chat-share.component.html',
 })
 export class ChatShareComponent implements OnInit, OnDestroy {

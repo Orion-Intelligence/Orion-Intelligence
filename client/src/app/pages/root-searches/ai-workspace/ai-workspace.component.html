@@ -25,6 +25,7 @@
           </button>
         </div>
       </div>
+      <app-message-scroll-rail [messages]="messages"></app-message-scroll-rail>
       <div #messagesContainer data-testid="chat-widget-messages" [class]="messages.length ? 'min-h-0 flex-1 space-y-5 overflow-y-auto scroll-smooth px-5 pt-5 pb-[300px] [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-4 max-[640px]:px-4 max-[640px]:pb-[300px] max-[640px]:[mask-image:none]' : 'min-h-0 flex-1 space-y-5 overflow-y-auto scroll-smooth px-5 pt-5 pb-6 [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-4 max-[640px]:px-4 max-[640px]:pb-0 max-[640px]:[mask-image:none]'">
         @if (isLoadingHistory()) {
           <div class="flex min-h-full items-start justify-center pt-8 max-[640px]:pt-5">
@@ -55,7 +56,7 @@
         } @else {
           @for (message of messages; track trackMessage($index, message)) {
             @if (message.sender === 'bot') {
-              <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
+              <div [attr.data-ai-message-index]="$index" class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
                 <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
                   <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
                 </div>
@@ -81,7 +82,7 @@
                 </div>
               </div>
             } @else if (message.sender === 'user') {
-              <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] justify-end">
+              <div [attr.data-ai-message-index]="$index" class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] justify-end">
                 <div class="max-w-[72%] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
                   <div class="flex min-h-[20px] items-center justify-end gap-2 px-1">
                     <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
@@ -123,7 +124,7 @@
                 </div>
               </div>
             } @else {
-              <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
+              <div [attr.data-ai-message-index]="$index" class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
                 <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border-red)] bg-[var(--color-red-100)] box-border max-[640px]:hidden">
                   <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
                 </div>

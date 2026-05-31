@@ -1,0 +1,33 @@
+@if (prompts.length > 1) {
+  <div class="fixed right-10 top-1/2 z-30 hidden -translate-y-1/2 max-[640px]:hidden md:block">
+    <div class="group relative flex items-center justify-end">
+      <div class="pointer-events-none absolute right-9 top-1/2 max-h-[min(70lvh,520px)] w-[310px] origin-right -translate-y-1/2 translate-x-2 scale-[0.98] overflow-y-auto overscroll-contain rounded-[12px] border border-white/10 bg-[#101a2b] p-2 opacity-0 shadow-[0_22px_56px_rgba(2,6,23,0.48),inset_0_1px_0_rgba(255,255,255,0.05)] ring-1 ring-white/5 backdrop-blur-xl transition-[opacity,transform] duration-150 [scrollbar-width:none] [-ms-overflow-style:none] group-hover:pointer-events-auto group-hover:translate-x-0 group-hover:scale-100 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-x-0 group-focus-within:scale-100 group-focus-within:opacity-100 [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,0.16),inset_0_1px_0_rgba(255,255,255,0.8)] [&::-webkit-scrollbar]:hidden">
+        <div class="mb-1 flex h-9 items-center justify-between rounded-[9px] border border-white/5 bg-[#101a2b]/95 px-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text5)] backdrop-blur [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-white/95">
+          <span>Jump to Prompt</span>
+          <span class="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-[var(--color-text4)] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#edf4fb]">{{ prompts.length }}</span>
+        </div>
+        @for (prompt of prompts; track prompt.messageIndex) {
+          <button type="button" class="flex h-9 w-full items-center border-b border-white/[0.06] px-2.5 text-left text-[12px] leading-5 text-[var(--color-text3)] transition last:border-b-0 hover:rounded-[8px] hover:bg-[#1d2d47] hover:text-[var(--color-text1)] focus-visible:rounded-[8px] focus-visible:bg-[#1d2d47] focus-visible:text-[var(--color-text1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)]/45 data-[active=true]:rounded-[8px] data-[active=true]:bg-[#22385a] data-[active=true]:text-[var(--color-text1)] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:hover:bg-[#edf4fb] [body.light-theme_&]:focus-visible:bg-[#edf4fb] [body.light-theme_&]:data-[active=true]:bg-[#dcefff]" [attr.aria-current]="isActive(prompt) ? 'true' : null" [attr.data-active]="isActive(prompt) ? 'true' : null" [attr.title]="prompt.title" (click)="scrollToPrompt(prompt)">
+            <span class="min-w-0 flex-1 truncate">{{ prompt.title }}</span>
+          </button>
+        }
+      </div>
+      <div class="relative h-[190px] w-9 overflow-hidden py-1">
+        @if (visibleMarkers.length) {
+          <button type="button" class="absolute inset-x-0 top-0 h-1/2" tabindex="-1" aria-hidden="true" (click)="scrollToMarker(visibleMarkers[0])">
+          </button>
+          <button type="button" class="absolute inset-x-0 bottom-0 h-1/2" tabindex="-1" aria-hidden="true" (click)="scrollToMarker(visibleMarkers[visibleMarkers.length - 1])">
+          </button>
+        }
+        <div class="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-px py-1">
+          @for (marker of visibleMarkers; track marker.markerIndex) {
+            <button type="button" class="pointer-events-auto flex h-3 w-9 shrink-0 items-center justify-center rounded-[4px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue-700)]" [attr.aria-label]="marker.title" [attr.aria-current]="isMarkerActive(marker) ? 'true' : null" [attr.title]="marker.title" (click)="scrollToMarker(marker)">
+              <span [class]="isMarkerActive(marker) ? 'h-[3px] w-[24px] rounded-full bg-[var(--color-blue-640)] opacity-100 shadow-[0_0_10px_rgba(87,165,235,0.34)] transition-all' : 'h-[3px] w-[18px] rounded-full bg-[var(--color-text5)] opacity-60 transition-all hover:bg-[var(--color-text2)] hover:opacity-100'" [attr.data-active]="isMarkerActive(marker) ? 'true' : null">
+              </span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}

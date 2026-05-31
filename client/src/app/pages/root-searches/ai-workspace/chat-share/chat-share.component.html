@@ -9,6 +9,8 @@
     </div>
   </header>
 
+  <app-message-scroll-rail [messages]="messages"></app-message-scroll-rail>
+
   <main class="mx-auto w-full max-w-[980px] px-4 py-6">
     @if (isLoading) {
       <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 text-sm text-[var(--color-text3)]">Loading shared chat...</div>
@@ -17,7 +19,7 @@
     } @else {
       <div class="space-y-5 pb-[400px]">
         @for (message of messages; track trackMessage($index)) {
-          <div class="flex" [ngClass]="message.sender === 'user' ? 'justify-end' : 'justify-start'">
+          <div class="flex" [attr.data-ai-message-index]="$index" [ngClass]="message.sender === 'user' ? 'justify-end' : 'justify-start'">
             <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-full">
               <div class="flex items-center gap-2 px-1" [ngClass]="message.sender === 'user' ? 'justify-end' : 'justify-start'">
                 <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{ message.sender === 'user' ? 'Analyst' : 'Nexus' }}</span>
