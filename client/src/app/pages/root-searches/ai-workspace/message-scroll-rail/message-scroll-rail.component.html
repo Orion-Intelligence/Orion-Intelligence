@@ -13,12 +13,6 @@
         }
       </div>
       <div class="relative h-[190px] w-9 overflow-hidden py-1">
-        @if (visibleMarkers.length) {
-          <button type="button" class="absolute inset-x-0 top-0 h-1/2" tabindex="-1" aria-hidden="true" (click)="scrollToMarker(visibleMarkers[0])">
-          </button>
-          <button type="button" class="absolute inset-x-0 bottom-0 h-1/2" tabindex="-1" aria-hidden="true" (click)="scrollToMarker(visibleMarkers[visibleMarkers.length - 1])">
-          </button>
-        }
         <div class="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-px py-1">
           @for (marker of visibleMarkers; track marker.markerIndex) {
             <button type="button" class="pointer-events-auto flex h-3 w-9 shrink-0 items-center justify-center rounded-[4px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue-700)]" [attr.aria-label]="marker.title" [attr.aria-current]="isMarkerActive(marker) ? 'true' : null" [attr.title]="marker.title" (click)="scrollToMarker(marker)">

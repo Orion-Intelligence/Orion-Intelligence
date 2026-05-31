@@ -11,7 +11,9 @@ export interface ScrollRailPrompt {
 
 export interface ScrollRailMarker {
   endPromptNumber: number;
+  endMessageIndex: number;
   markerIndex: number;
+  startMessageIndex: number;
   startPromptNumber: number;
   targetPrompt: ScrollRailPrompt;
   title: string;
