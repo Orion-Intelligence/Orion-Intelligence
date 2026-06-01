@@ -139,50 +139,50 @@
           <div class="flex-1 min-w-0 flex flex-col gap-3">
 
             <!-- User section header (synced border color) -->
-            <div class="flex items-center gap-3 px-4 py-3 rounded-2xl border-2 border-[#1877f2]/25 bg-[#1877f2]/[0.03] dark:bg-[#1877f2]/[0.05]">
-              <div class="w-10 h-10 rounded-full bg-[#1877f2] flex items-center justify-center text-white font-bold text-base flex-shrink-0">
-                {{ userNode.label.charAt(0).toUpperCase() }}
-              </div>
-              <div class="flex-1 min-w-0">
-                <p
-                  class="text-sm font-bold text-[#1877f2] mb-0 cursor-pointer hover:underline"
-                  (click)="nodeClicked.emit(userNode.id.toString())"
-                  data-testid="social-list-user-summary-trigger"
-                >{{ userNode.label }}</p>
-                <p class="text-[11px] text-gray-400 mb-0">
-                  {{ getPlatformsForUserNode(userNode.id.toString()).length }} platforms · Social Intelligence Feed
-                </p>
-              </div>
-              <!-- Prev/next arrows when multiple users -->
-              @if (activeUserNodes().length > 1) {
-                <div class="flex items-center gap-1 flex-shrink-0">
-                  <button
-                    (click)="activeUserIndex.update(i => i > 0 ? i - 1 : activeUserNodes().length - 1)"
-                    class="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:bg-white dark:hover:bg-[#3a3b3c] border border-gray-200 dark:border-[#3a3b3c] transition-colors"
-                  ><i class="bi bi-chevron-left text-xs leading-none"></i></button>
-                  <span class="text-xs text-gray-400 px-1 tabular-nums">{{ activeUserIndex() + 1 }}/{{ activeUserNodes().length }}</span>
-                  <button
-                    (click)="activeUserIndex.update(i => i < activeUserNodes().length - 1 ? i + 1 : 0)"
-                    class="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:bg-white dark:hover:bg-[#3a3b3c] border border-gray-200 dark:border-[#3a3b3c] transition-colors"
-                  ><i class="bi bi-chevron-right text-xs leading-none"></i></button>
-                </div>
-              }
+<!--            <div class="flex items-center gap-3 px-4 py-3 rounded-2xl border-2 border-[#1877f2]/25 bg-[#1877f2]/[0.03] dark:bg-[#1877f2]/[0.05]">-->
+<!--              <div class="w-10 h-10 rounded-full bg-[#1877f2] flex items-center justify-center text-white font-bold text-base flex-shrink-0">-->
+<!--                {{ userNode.label.charAt(0).toUpperCase() }}-->
+<!--              </div>-->
+<!--              <div class="flex-1 min-w-0">-->
+<!--                <p-->
+<!--                  class="text-sm font-bold text-[#1877f2] mb-0 cursor-pointer hover:underline"-->
+<!--                  (click)="nodeClicked.emit(userNode.id.toString())"-->
+<!--                  data-testid="social-list-user-summary-trigger"-->
+<!--                >{{ userNode.label }}</p>-->
+<!--                <p class="text-[11px] text-gray-400 mb-0">-->
+<!--                  {{ getPlatformsForUserNode(userNode.id.toString()).length }} platforms · Social Intelligence Feed-->
+<!--                </p>-->
+<!--              </div>-->
+<!--              &lt;!&ndash; Prev/next arrows when multiple users &ndash;&gt;-->
+<!--              @if (activeUserNodes().length > 1) {-->
+<!--                <div class="flex items-center gap-1 flex-shrink-0">-->
+<!--                  <button-->
+<!--                    (click)="activeUserIndex.update(i => i > 0 ? i - 1 : activeUserNodes().length - 1)"-->
+<!--                    class="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:bg-white dark:hover:bg-[#3a3b3c] border border-gray-200 dark:border-[#3a3b3c] transition-colors"-->
+<!--                  ><i class="bi bi-chevron-left text-xs leading-none"></i></button>-->
+<!--                  <span class="text-xs text-gray-400 px-1 tabular-nums">{{ activeUserIndex() + 1 }}/{{ activeUserNodes().length }}</span>-->
+<!--                  <button-->
+<!--                    (click)="activeUserIndex.update(i => i < activeUserNodes().length - 1 ? i + 1 : 0)"-->
+<!--                    class="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:bg-white dark:hover:bg-[#3a3b3c] border border-gray-200 dark:border-[#3a3b3c] transition-colors"-->
+<!--                  ><i class="bi bi-chevron-right text-xs leading-none"></i></button>-->
+<!--                </div>-->
+<!--              }-->
 <!--              <button-->
 <!--                data-testid="social-list-manage-profiles"-->
 <!--                (click)="state.openManageProfilesModal(userNode.label)"-->
 <!--                class="flex-shrink-0 h-8 px-3 rounded-full text-xs font-semibold bg-[#1877f2] text-white hover:bg-blue-600 transition-colors"-->
 <!--              >Manage</button>-->
-            </div>
+<!--            </div>-->
 
             <!-- Composer bar -->
-            <div class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] px-4 py-3 flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-[#1877f2] flex items-center justify-center text-white font-bold text-base flex-shrink-0">
-                {{ userNode.label.charAt(0).toUpperCase() }}
-              </div>
-              <div class="flex-1 bg-gray-100 dark:bg-[#3a3b3c] rounded-full px-4 py-2 text-sm text-gray-400 dark:text-gray-500">
-                What's happening on your platforms, {{ userNode.label }}?
-              </div>
-            </div>
+<!--            <div class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] px-4 py-3 flex items-center gap-3">-->
+<!--              <div class="w-10 h-10 rounded-full bg-[#1877f2] flex items-center justify-center text-white font-bold text-base flex-shrink-0">-->
+<!--                {{ userNode.label.charAt(0).toUpperCase() }}-->
+<!--              </div>-->
+<!--              <div class="flex-1 bg-gray-100 dark:bg-[#3a3b3c] rounded-full px-4 py-2 text-sm text-gray-400 dark:text-gray-500">-->
+<!--                What's happening on your platforms, {{ userNode.label }}?-->
+<!--              </div>-->
+<!--            </div>-->
 
             <!-- Platform post cards (only for active user) -->
             @for (platformNode of getPlatformsForUserNode(userNode.id.toString()); track trackById($index, platformNode)) {
@@ -480,46 +480,46 @@
 
           <!-- ── RIGHT: Quick actions widget ── -->
           <aside class="hidden xl:flex w-[200px] flex-shrink-0 flex-col gap-3 sticky top-4">
-            <div class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] p-4">
-              <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Quick Actions</p>
-              <div class="flex flex-col gap-2">
-                <button (click)="state.openManageProfilesModal(userNode.label)" class="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-xl bg-gray-50 dark:bg-[#3a3b3c] border border-gray-100 dark:border-[#3a3b3c] text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#4a4b4c] transition-colors">
-                  <i class="bi bi-sliders text-base text-[#1877f2]"></i> Manage Profiles
-                </button>
-                <button (click)="state.openInfoModal('info', 'Start New Scan', 'Use the search bar at the top to start a new social scan.', 'OK')" class="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-xl bg-gray-50 dark:bg-[#3a3b3c] border border-gray-100 dark:border-[#3a3b3c] text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#4a4b4c] transition-colors">
-                  <i class="bi bi-plus-circle text-base text-[#1877f2]"></i> New Scan
-                </button>
-                <!-- All users jump list (only when multiple) -->
-                @if (activeUserNodes().length > 1) {
-                  <div class="h-px bg-gray-200 dark:bg-[#3a3b3c] my-1"></div>
-                  <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">All Users</p>
-                  @for (u of activeUserNodes(); track trackById(j, u); let j = $index) {
-                    <button
-                      (click)="activeUserIndex.set(j)"
-                      class="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-xl border text-sm transition-colors"
-                      [class.bg-[#e7f0fd]]="activeUserIndex() === j"
-                      [class.dark:bg-blue-900/20]="activeUserIndex() === j"
-                      [class.border-[#1877f2]/30]="activeUserIndex() === j"
-                      [class.text-[#1877f2]]="activeUserIndex() === j"
-                      [class.font-semibold]="activeUserIndex() === j"
-                      [class.bg-gray-50]="activeUserIndex() !== j"
-                      [class.dark:bg-[#3a3b3c]]="activeUserIndex() !== j"
-                      [class.border-gray-100]="activeUserIndex() !== j"
-                      [class.dark:border-[#3a3b3c]]="activeUserIndex() !== j"
-                      [class.text-gray-700]="activeUserIndex() !== j"
-                      [class.dark:text-gray-300]="activeUserIndex() !== j"
-                      [class.hover:bg-gray-100]="activeUserIndex() !== j"
-                      [class.dark:hover:bg-[#4a4b4c]]="activeUserIndex() !== j"
-                    >
-                      <div class="w-5 h-5 rounded-full bg-[#1877f2] flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0">
-                        {{ u.label.charAt(0).toUpperCase() }}
-                      </div>
-                      <span class="truncate">{{ u.label }}</span>
-                    </button>
-                  }
-                }
-              </div>
-            </div>
+<!--            <div class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] p-4">-->
+<!--              <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Quick Actions</p>-->
+<!--              <div class="flex flex-col gap-2">-->
+<!--                <button (click)="state.openManageProfilesModal(userNode.label)" class="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-xl bg-gray-50 dark:bg-[#3a3b3c] border border-gray-100 dark:border-[#3a3b3c] text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#4a4b4c] transition-colors">-->
+<!--                  <i class="bi bi-sliders text-base text-[#1877f2]"></i> Manage Profiles-->
+<!--                </button>-->
+<!--                <button (click)="state.openInfoModal('info', 'Start New Scan', 'Use the search bar at the top to start a new social scan.', 'OK')" class="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-xl bg-gray-50 dark:bg-[#3a3b3c] border border-gray-100 dark:border-[#3a3b3c] text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#4a4b4c] transition-colors">-->
+<!--                  <i class="bi bi-plus-circle text-base text-[#1877f2]"></i> New Scan-->
+<!--                </button>-->
+<!--                &lt;!&ndash; All users jump list (only when multiple) &ndash;&gt;-->
+<!--                @if (activeUserNodes().length > 1) {-->
+<!--                  <div class="h-px bg-gray-200 dark:bg-[#3a3b3c] my-1"></div>-->
+<!--                  <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">All Users</p>-->
+<!--                  @for (u of activeUserNodes(); track trackById(j, u); let j = $index) {-->
+<!--                    <button-->
+<!--                      (click)="activeUserIndex.set(j)"-->
+<!--                      class="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-xl border text-sm transition-colors"-->
+<!--                      [class.bg-[#e7f0fd]]="activeUserIndex() === j"-->
+<!--                      [class.dark:bg-blue-900/20]="activeUserIndex() === j"-->
+<!--                      [class.border-[#1877f2]/30]="activeUserIndex() === j"-->
+<!--                      [class.text-[#1877f2]]="activeUserIndex() === j"-->
+<!--                      [class.font-semibold]="activeUserIndex() === j"-->
+<!--                      [class.bg-gray-50]="activeUserIndex() !== j"-->
+<!--                      [class.dark:bg-[#3a3b3c]]="activeUserIndex() !== j"-->
+<!--                      [class.border-gray-100]="activeUserIndex() !== j"-->
+<!--                      [class.dark:border-[#3a3b3c]]="activeUserIndex() !== j"-->
+<!--                      [class.text-gray-700]="activeUserIndex() !== j"-->
+<!--                      [class.dark:text-gray-300]="activeUserIndex() !== j"-->
+<!--                      [class.hover:bg-gray-100]="activeUserIndex() !== j"-->
+<!--                      [class.dark:hover:bg-[#4a4b4c]]="activeUserIndex() !== j"-->
+<!--                    >-->
+<!--                      <div class="w-5 h-5 rounded-full bg-[#1877f2] flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0">-->
+<!--                        {{ u.label.charAt(0).toUpperCase() }}-->
+<!--                      </div>-->
+<!--                      <span class="truncate">{{ u.label }}</span>-->
+<!--                    </button>-->
+<!--                  }-->
+<!--                }-->
+<!--              </div>-->
+<!--            </div>-->
 
             <!-- Entity panel -->
             <div class="mt-0 bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] p-4">
@@ -536,27 +536,27 @@
                 }
               </div>
               <div class="my-3 h-px bg-gray-200 dark:bg-[#3a3b3c]"></div>
-              <div class="px-1 text-xs uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">Saved Entities</div>
-              @if (customEntities().length === 0) {
-                <div class="px-1 py-1 text-xs text-gray-400 dark:text-gray-500">No entities added yet.</div>
-              } @else {
-                <div class="flex flex-col gap-2 max-h-40 overflow-y-auto">
-                  @for (entity of customEntities(); track entity.id) {
-                    <div class="w-full rounded-lg border border-gray-200 dark:border-[#3a3b3c] bg-gray-50 dark:bg-[#3a3b3c] p-2">
-                      <div class="flex items-center justify-between gap-2">
-                        <button (click)="nodeClicked.emit(entity.id)" class="flex min-w-0 flex-grow items-center gap-2 text-left text-sm text-gray-700 dark:text-gray-300 transition-colors hover:text-gray-900 dark:hover:text-gray-100">
-                          <i [class]="socialEntityUiService.getIconForEntityType(entity.type)"></i>
-                          <span class="truncate">{{ entity.label }}</span>
-                          <span class="ml-1 text-[11px] uppercase tracking-wide text-gray-400 dark:text-gray-500">{{ entity.type.replace('-', ' ') }}</span>
-                        </button>
-                        <button (click)="deleteCustomEntity.emit(entity.id)" title="Delete Entity" class="flex h-6 w-6 items-center justify-center rounded-full text-gray-400 dark:text-gray-500 transition-colors hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500">
-                          <i class="bi bi-trash3 text-xs"></i>
-                        </button>
-                      </div>
-                    </div>
-                  }
-                </div>
-              }
+<!--              <div class="px-1 text-xs uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">Saved Entities</div>-->
+<!--              @if (customEntities().length === 0) {-->
+<!--                <div class="px-1 py-1 text-xs text-gray-400 dark:text-gray-500">No entities added yet.</div>-->
+<!--              } @else {-->
+<!--                <div class="flex flex-col gap-2 max-h-40 overflow-y-auto">-->
+<!--                  @for (entity of customEntities(); track entity.id) {-->
+<!--                    <div class="w-full rounded-lg border border-gray-200 dark:border-[#3a3b3c] bg-gray-50 dark:bg-[#3a3b3c] p-2">-->
+<!--                      <div class="flex items-center justify-between gap-2">-->
+<!--                        <button (click)="nodeClicked.emit(entity.id)" class="flex min-w-0 flex-grow items-center gap-2 text-left text-sm text-gray-700 dark:text-gray-300 transition-colors hover:text-gray-900 dark:hover:text-gray-100">-->
+<!--                          <i [class]="socialEntityUiService.getIconForEntityType(entity.type)"></i>-->
+<!--                          <span class="truncate">{{ entity.label }}</span>-->
+<!--                          <span class="ml-1 text-[11px] uppercase tracking-wide text-gray-400 dark:text-gray-500">{{ entity.type.replace('-', ' ') }}</span>-->
+<!--                        </button>-->
+<!--                        <button (click)="deleteCustomEntity.emit(entity.id)" title="Delete Entity" class="flex h-6 w-6 items-center justify-center rounded-full text-gray-400 dark:text-gray-500 transition-colors hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500">-->
+<!--                          <i class="bi bi-trash3 text-xs"></i>-->
+<!--                        </button>-->
+<!--                      </div>-->
+<!--                    </div>-->
+<!--                  }-->
+<!--                </div>-->
+<!--              }-->
             </div>
           </aside>
 
