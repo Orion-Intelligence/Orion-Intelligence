@@ -21,10 +21,12 @@
         @for (message of messages; track trackMessage($index)) {
           <div class="flex" [attr.data-ai-message-index]="$index" [ngClass]="message.sender === 'user' ? 'justify-end' : 'justify-start'">
             <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-full">
-              <div class="flex items-center gap-2" [ngClass]="message.sender === 'user' ? 'justify-end px-1' : 'justify-start px-4'">
-                <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{ message.sender === 'user' ? 'Analyst' : 'Nexus' }}</span>
-                <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
-              </div>
+              @if ($index === 0 || messages[$index - 1].sender !== message.sender) {
+                <div class="flex items-center gap-2" [ngClass]="message.sender === 'user' ? 'justify-end px-1' : 'justify-start px-4'">
+                  <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{ message.sender === 'user' ? 'Analyst' : 'Nexus' }}</span>
+                  <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
+                </div>
+              }
               <div class="rounded-[20px] border border-[var(--color-border)] px-4 py-3 shadow-[0_10px_28px_var(--color-shadow-medium)]" [class.ui-ai-chat-share-bubble-bot]="message.sender === 'bot'" [ngClass]="message.sender === 'user' ? 'rounded-tr-[8px] bg-[#57A5EB]/20 text-[var(--color-text1)]' : 'rounded-tl-[8px] bg-[var(--color-blue-820-light)] text-[var(--color-text1)]'">
                 @if (message.sender === 'bot') {
                   <div class="ui-ai-markdown text-[15px] leading-7" [innerHTML]="message.text | markdown"></div>
