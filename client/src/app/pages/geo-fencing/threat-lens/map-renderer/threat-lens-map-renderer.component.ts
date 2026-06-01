@@ -805,6 +805,6 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
   private toCountryKey(value: string): string {
     const normalized = this.threatLensService.normalizeCountryLabel(value);
-    return this.threatLensService.toCountryKey(normalized);
+    return this.threatLensService._toCountryKey(normalized);
   }
 }
