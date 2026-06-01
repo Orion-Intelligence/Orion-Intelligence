@@ -15,6 +15,7 @@ import { ResultRowHelperService } from '../../../shared/services/result-row-help
 import { NexusChatService } from './nexus-chat.service';
 import { BotMessageActionsComponent } from './bot-message-actions/bot-message-actions.component';
 import { MessageScrollRailComponent } from './message-scroll-rail/message-scroll-rail.component';
+import { MarkdownPipe } from '../../../shared/pipes/markdown.pipe';
 type ChatHistoryMessage = {
   sender: 'user' | 'bot';
   text: string;
@@ -30,7 +31,7 @@ type SharedChatMessage = {
 @Component({
   selector: 'app-ai-workspace',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, RouterLink, BotMessageActionsComponent, MessageScrollRailComponent],
+  imports: [CommonModule, DatePipe, FormsModule, RouterLink, BotMessageActionsComponent, MessageScrollRailComponent, MarkdownPipe],
   templateUrl: './ai-workspace.component.html',
 })
 export class AiWorkspaceComponent implements OnInit, OnDestroy {
@@ -51,6 +52,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   protected readonly nexusStep = signal('');
   protected readonly contextQuery = computed(() => this.queryContext);
   protected readonly canUseNexusChat = computed(() => this.licenseService.canUseModule('ai'));
+  protected readonly maxComposerTokens = 300;
 
   messageDraft = '';
   editingMessageId: string | null = null;
@@ -84,7 +86,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     }
 
     const text = this.messageDraft.trim();
-    if (!text) {
+    if (!text || this.countMessageTokens(text) > this.maxComposerTokens) {
       return;
     }
 
@@ -311,7 +313,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   saveMessageEdit(message: AiWorkspaceMessage): void {
     const text = this.editDraft.trim();
     const index = this.messages.findIndex(item => item.id === message.id);
-    if (!text || index === -1) {
+    if (!text || index === -1 || this.countMessageTokens(text) > this.maxComposerTokens) {
       return;
     }
 
@@ -342,6 +344,30 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   getEditReserveText(message: AiWorkspaceMessage): string {
     return this.editDraft.length > message.text.length ? this.editDraft : message.text;
+  }
+
+  protected get messageDraftTokenCount(): number {
+    return this.countMessageTokens(this.messageDraft);
+  }
+
+  protected get messageDraftTokenOverflow(): number {
+    return Math.max(0, this.messageDraftTokenCount - this.maxComposerTokens);
+  }
+
+  protected get isMessageDraftOverLimit(): boolean {
+    return this.messageDraftTokenOverflow > 0;
+  }
+
+  protected get editDraftTokenCount(): number {
+    return this.countMessageTokens(this.editDraft);
+  }
+
+  protected get editDraftTokenOverflow(): number {
+    return Math.max(0, this.editDraftTokenCount - this.maxComposerTokens);
+  }
+
+  protected get isEditDraftOverLimit(): boolean {
+    return this.editDraftTokenOverflow > 0;
   }
 
   private createMessage(sender: AiWorkspaceMessage['sender'], text: string): AiWorkspaceMessage {
@@ -498,12 +524,16 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     return Math.max(1, lines.reduce((total, line) => total + Math.max(1, Math.ceil(line.length / charsPerLine)), 0));
   }
 
+  private countMessageTokens(value: string): number {
+    return value.trim().match(/[A-Za-z0-9_]+|[^\sA-Za-z0-9_]/g)?.length ?? 0;
+  }
+
 }
 
 @Component({
   selector: 'app-chat-share',
   standalone: true,
-  imports: [CommonModule, DatePipe, MessageScrollRailComponent],
+  imports: [CommonModule, DatePipe, MessageScrollRailComponent, MarkdownPipe],
   templateUrl: './chat-share/chat-share.component.html',
 })
 export class ChatShareComponent implements OnInit, OnDestroy {

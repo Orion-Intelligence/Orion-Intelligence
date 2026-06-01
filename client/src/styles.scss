@@ -3960,6 +3960,166 @@ app-demo-tour .demo-tour-active {
   background: color-mix(in srgb, var(--color-text1) 4%, transparent);
 }
 
+.ui-ai-chat-agent-turn {
+  width: min(100%, 760px);
+  margin-right: auto;
+}
+
+.ui-ai-chat-bubble.ui-ai-chat-bubble-bot {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin-right: auto;
+  overflow-wrap: anywhere;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+div.ui-ai-chat-share-bubble-bot {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ui-ai-markdown {
+  margin: 0;
+  padding: 0;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
+.ui-ai-markdown > :first-child {
+  margin-top: 0;
+}
+
+.ui-ai-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.ui-ai-markdown > * + * {
+  margin-top: 0.85em;
+}
+
+.ui-ai-markdown p,
+.ui-ai-markdown h1,
+.ui-ai-markdown h2,
+.ui-ai-markdown h3,
+.ui-ai-markdown h4,
+.ui-ai-markdown h5,
+.ui-ai-markdown h6 {
+  margin-left: 0;
+  padding-left: 0;
+  text-align: left;
+}
+
+.ui-ai-markdown h1,
+.ui-ai-markdown h2,
+.ui-ai-markdown h3,
+.ui-ai-markdown h4,
+.ui-ai-markdown h5,
+.ui-ai-markdown h6 {
+  color: var(--color-text1);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.ui-ai-markdown h1 {
+  font-size: 1.3em;
+}
+
+.ui-ai-markdown h2 {
+  font-size: 1.18em;
+}
+
+.ui-ai-markdown h3,
+.ui-ai-markdown h4,
+.ui-ai-markdown h5,
+.ui-ai-markdown h6 {
+  font-size: 1.06em;
+}
+
+.ui-ai-markdown ul,
+.ui-ai-markdown ol {
+  margin-left: 0;
+  padding-left: 1.35rem;
+  list-style-position: outside;
+  text-align: left;
+}
+
+.ui-ai-markdown ul {
+  list-style: disc;
+}
+
+.ui-ai-markdown ol {
+  list-style: decimal;
+}
+
+.ui-ai-markdown li + li {
+  margin-top: 0.25em;
+}
+
+.ui-ai-markdown blockquote {
+  border-left: 0;
+  padding-left: 0;
+  color: var(--color-text3);
+}
+
+.ui-ai-markdown pre {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-blue-850) 72%, transparent);
+  padding: 0.85rem;
+  line-height: 1.55;
+}
+
+.ui-ai-markdown code {
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--color-blue-850) 62%, transparent);
+  padding: 0.1rem 0.3rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.92em;
+}
+
+.ui-ai-markdown pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.ui-ai-markdown a {
+  color: var(--color-blue-640);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ui-ai-markdown hr {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.ui-ai-markdown table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+.ui-ai-markdown th,
+.ui-ai-markdown td {
+  border: 1px solid var(--color-border);
+  padding: 0.45rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.ui-ai-markdown th {
+  background: color-mix(in srgb, var(--color-blue-720) 72%, transparent);
+  font-weight: 700;
+}
+
 .ui-ai-chat-surface-pattern {
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.011) 1px, transparent 1px),
@@ -3968,6 +4128,11 @@ app-demo-tour .demo-tour-active {
 }
 
 .ui-ai-chat-bubble-cancel {
+  box-sizing: border-box;
+  width: 680px;
+  max-width: 100%;
+  margin-right: auto;
+  overflow-wrap: anywhere;
   border-color: color-mix(in srgb, var(--color-border) 86%, var(--color-border-red));
   background: #6a4b4b;
 }
@@ -3985,6 +4150,23 @@ app-demo-tour .demo-tour-active {
 
 .ui-ai-chat-row {
   animation: ui-ai-chat-row-in 180ms ease-out;
+}
+
+.ui-ai-user-message-actions {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.ui-ai-user-message-turn:hover .ui-ai-user-message-actions,
+.ui-ai-user-message-turn:focus-within .ui-ai-user-message-actions,
+.ui-ai-user-message-actions[data-visible='true'] {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 .ui-ai-action-button {
@@ -4014,7 +4196,9 @@ app-demo-tour .demo-tour-active {
 }
 
 .light-theme .ui-ai-chat-bubble-bot {
-  background: color-mix(in srgb, var(--color-blue-640) 10%, var(--color-blue-720));
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .light-theme .ui-ai-chat-bubble-user {

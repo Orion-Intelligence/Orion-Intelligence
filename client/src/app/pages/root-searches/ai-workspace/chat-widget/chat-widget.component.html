@@ -42,21 +42,18 @@
               </div>
             }
             @case ('bot') {
-              <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
-                <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
-                  <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
-                </div>
-                <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
-                  <div class="flex min-h-[20px] items-center gap-2 px-1">
+              <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] justify-start">
+                <div class="ui-ai-chat-agent-turn space-y-1.5">
+                  <div class="flex min-h-[20px] items-center gap-2 px-4">
                     <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
                     <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ msg.time | date : 'h:mm a' }}</span>
                   </div>
-                  <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot relative rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3.5 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full" [class.pb-12]="!!msg.text.trim()">
-                    <p class="whitespace-pre-wrap text-[14px] leading-7 text-[var(--color-text1)]">{{ msg.text }}</p>
-                    @if (msg.text.trim()) {
-                      <app-bot-message-actions [message]="msg"></app-bot-message-actions>
-                    }
+                  <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot relative rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3.5 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
+                    <div class="ui-ai-markdown text-[15px] leading-7 text-[var(--color-text1)]" [innerHTML]="msg.text | markdown"></div>
                   </div>
+                  @if (msg.text.trim()) {
+                    <app-bot-message-actions [message]="msg"></app-bot-message-actions>
+                  }
                 </div>
               </div>
             }
@@ -86,12 +83,9 @@
           }
         }
         @if (isBotTyping) {
-          <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
-            <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
-              <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
-            </div>
-            <div class="max-w-[300px] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
-              <div class="flex min-h-[20px] items-center gap-2 px-1">
+          <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] justify-start">
+            <div class="ui-ai-chat-agent-turn space-y-1.5">
+              <div class="flex min-h-[20px] items-center gap-2 px-4">
                 <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
                 <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">Thinking</span>
               </div>
@@ -117,7 +111,7 @@
         <form novalidate class="border border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-800)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded" (submit)="sendMessage($event)">
           <div class="flex items-end gap-2">
             <textarea #composerInput data-testid="chat-widget-input" [rows]="composerRows" [(ngModel)]="newMessage" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" name="message" placeholder="Write a message" class="block min-h-8 max-h-[120px] flex-1 resize-none whitespace-pre-wrap break-words bg-[var(--color-blue-800)] px-3 py-1.5 text-sm leading-5 text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" [class.overflow-y-hidden]="!composerScrollable" [class.overflow-y-auto]="composerScrollable" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded" required></textarea>
-            <button data-testid="chat-widget-send" #submitBtn type="button" (click)="pushButton(submitBtn); isBotTyping ? stopMessageGeneration() : sendMessage($event)" [disabled]="!isBotTyping && !newMessage.trim()" [attr.aria-label]="isBotTyping ? 'Stop generation' : 'Send message'" [class]="isBotTyping ? 'flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 bg-red-950/70 text-red-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_1px_rgba(248,113,113,0.08)] transition hover:bg-red-900/80 hover:text-white disabled:cursor-not-allowed disabled:opacity-50' : 'ui-chat-send-btn flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] transition hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50'">
+            <button data-testid="chat-widget-send" #submitBtn type="button" (click)="pushButton(submitBtn); isBotTyping ? stopMessageGeneration() : sendMessage($event)" [disabled]="!isBotTyping && (!newMessage.trim() || isNewMessageOverLimit)" [attr.aria-label]="isBotTyping ? 'Stop generation' : 'Send message'" [class]="isBotTyping ? 'flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 bg-red-950/70 text-red-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_1px_rgba(248,113,113,0.08)] transition hover:bg-red-900/80 hover:text-white disabled:cursor-not-allowed disabled:opacity-50' : 'ui-chat-send-btn flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] transition hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50'">
               @if (isBotTyping) {
                 <span class="h-3 w-3 rounded-[3px] bg-current shadow-[0_0_10px_rgba(248,113,113,0.28)]" aria-hidden="true"></span>
                 <span class="sr-only">Stop generation</span>
@@ -126,6 +120,9 @@
               }
             </button>
           </div>
+          @if (isNewMessageOverLimit) {
+            <p class="mt-2 px-1 text-[11px] font-medium text-amber-300">300 token max. Remove {{ newMessageTokenOverflow }} tokens before sending.</p>
+          }
         </form>
         <div class="mt-2 flex flex-wrap items-center justify-between gap-2 px-1 text-[11px] text-[var(--color-text6)] max-[640px]:hidden">
           <p>Enter sends. Shift + Enter adds a new line.</p>

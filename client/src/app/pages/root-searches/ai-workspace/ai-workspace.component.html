@@ -56,25 +56,21 @@
         } @else {
           @for (message of messages; track trackMessage($index, message)) {
             @if (message.sender === 'bot') {
-              <div [attr.data-ai-message-index]="$index" class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
-                <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
-                  <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
-                </div>
-                <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
-                  <div class="flex min-h-[20px] items-center gap-2 px-1">
+              <div [attr.data-ai-message-index]="$index" class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] justify-start">
+                <div class="ui-ai-chat-agent-turn space-y-1.5">
+                  <div class="flex min-h-[20px] items-center gap-2 px-4">
                     <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
                     <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
                   </div>
                   <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot relative rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3.5 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
-                    <p class="whitespace-pre-wrap text-[14px] leading-7 text-[var(--color-text1)]">
-                      {{ message.text }}@if (streamingMessageId() === message.id) {
-                        <span class="ml-1 inline-flex translate-y-[-1px] items-center gap-1 align-middle">
-                          <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
-                          <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:140ms]"></span>
-                          <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:280ms]"></span>
-                        </span>
-                      }
-                    </p>
+                    <div class="ui-ai-markdown text-[15px] leading-7 text-[var(--color-text1)]" [innerHTML]="message.text | markdown"></div>
+                    @if (streamingMessageId() === message.id) {
+                      <span class="mt-2 inline-flex translate-y-[-1px] items-center gap-1 align-middle">
+                        <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
+                        <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:140ms]"></span>
+                        <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:280ms]"></span>
+                      </span>
+                    }
                   </div>
                   @if (streamingMessageId() !== message.id && message.text.trim()) {
                     <app-bot-message-actions [message]="message"></app-bot-message-actions>
@@ -82,7 +78,7 @@
                 </div>
               </div>
             } @else if (message.sender === 'user') {
-              <div [attr.data-ai-message-index]="$index" class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] justify-end">
+              <div [attr.data-ai-message-index]="$index" class="ui-ai-chat-row ui-ai-user-message-turn mx-auto flex w-full max-w-[980px] justify-end">
                 <div class="max-w-[72%] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
                   <div class="flex min-h-[20px] items-center justify-end gap-2 px-1">
                     <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
@@ -96,9 +92,12 @@
                       <p class="whitespace-pre-wrap leading-7 text-[var(--color-text1)]">{{ message.text }}</p>
                     }
                   </div>
-                  <div class="flex justify-end gap-2 px-1 pt-1.5">
+                  @if (editingMessageId === message.id && isEditDraftOverLimit) {
+                    <p class="px-1 text-right text-[11px] font-medium text-amber-300">300 token max. Remove {{ editDraftTokenOverflow }} tokens.</p>
+                  }
+                  <div class="ui-ai-user-message-actions flex justify-end gap-2 px-1 pt-1.5" [attr.data-visible]="editingMessageId === message.id ? 'true' : null">
                     @if (editingMessageId === message.id) {
-                      <button type="button" (click)="saveMessageEdit(message)" [disabled]="!editDraft.trim()" aria-label="Save edit" title="Save edit" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#57A5EB] text-white hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50">
+                      <button type="button" (click)="saveMessageEdit(message)" [disabled]="!editDraft.trim() || isEditDraftOverLimit" aria-label="Save edit" title="Save edit" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#57A5EB] text-white hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50">
                         <i class="bi bi-check-lg text-[13px] leading-none"></i>
                       </button>
                       <button type="button" (click)="cancelMessageEdit()" aria-label="Cancel edit" title="Cancel edit" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white">
@@ -150,12 +149,9 @@
         }
 
         @if (isSending() && !isStreamingReply()) {
-          <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
-            <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
-              <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
-            </div>
-            <div class="max-w-[300px] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
-              <div class="flex min-h-[20px] items-center gap-2 px-1">
+          <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] justify-start">
+            <div class="ui-ai-chat-agent-turn space-y-1.5">
+              <div class="flex min-h-[20px] items-center gap-2 px-4">
                 <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
                 <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">Thinking</span>
               </div>
@@ -188,7 +184,7 @@
         <form novalidate class="border border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-800)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded">
           <div class="flex items-end gap-2">
             <textarea #composerInput [(ngModel)]="messageDraft" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" data-testid="chat-widget-input" [rows]="composerRows" name="message" placeholder="Ask a cybersecurity question" class="block min-h-8 max-h-[120px] flex-1 resize-none whitespace-pre-wrap break-words bg-[var(--color-blue-800)] px-3 py-1.5 text-sm leading-5 text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" [class.overflow-y-hidden]="!composerScrollable" [class.overflow-y-auto]="composerScrollable" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded"></textarea>
-            <button data-testid="chat-widget-send" type="button" (click)="isSending() ? stopMessageGeneration() : sendMessage()" [disabled]="!isSending() && !messageDraft.trim()" [attr.aria-label]="isSending() ? 'Stop generation' : 'Send message'" [class]="isSending() ? 'ui-ai-action-button flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 bg-red-950/70 text-red-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_1px_rgba(248,113,113,0.08)] hover:bg-red-900/80 hover:text-white disabled:cursor-not-allowed disabled:opacity-50' : 'ui-ai-action-button flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] text-white hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:border disabled:border-[#57A5EB]/25 disabled:bg-[#57A5EB]/15 disabled:text-[#A7D5FF] disabled:opacity-100'">
+            <button data-testid="chat-widget-send" type="button" (click)="isSending() ? stopMessageGeneration() : sendMessage()" [disabled]="!isSending() && (!messageDraft.trim() || isMessageDraftOverLimit)" [attr.aria-label]="isSending() ? 'Stop generation' : 'Send message'" [class]="isSending() ? 'ui-ai-action-button flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 bg-red-950/70 text-red-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_1px_rgba(248,113,113,0.08)] hover:bg-red-900/80 hover:text-white disabled:cursor-not-allowed disabled:opacity-50' : 'ui-ai-action-button flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] text-white hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:border disabled:border-[#57A5EB]/25 disabled:bg-[#57A5EB]/15 disabled:text-[#A7D5FF] disabled:opacity-100'">
               @if (isSending()) {
                 <span class="h-3 w-3 rounded-[3px] bg-current shadow-[0_0_10px_rgba(248,113,113,0.28)]" aria-hidden="true"></span>
                 <span class="sr-only">Stop generation</span>
@@ -197,6 +193,9 @@
               }
             </button>
           </div>
+          @if (isMessageDraftOverLimit) {
+            <p class="mt-2 px-1 text-[11px] font-medium text-amber-300">300 token max. Remove {{ messageDraftTokenOverflow }} tokens before sending.</p>
+          }
         </form>
 
         <div class="mt-2 flex flex-wrap items-center justify-between gap-2 px-1 text-[11px] text-[var(--color-text6)] max-[640px]:hidden">
