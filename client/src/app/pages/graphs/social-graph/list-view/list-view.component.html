@@ -79,23 +79,72 @@
               </div>
             </div>
 
-            <!-- Entities -->
-            @if (activeEntityNodesOnGraph().length > 0) {
-              <div class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] p-4">
-                <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Entities</p>
-                @for (entityNode of activeEntityNodesOnGraph(); track trackById(i, entityNode); let i = $index) {
-                  @if (getEntityData(entityNode.id.toString()); as entity) {
-                    <div (click)="toggleEntity(entity.id)" class="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors">
-                      <i [class]="socialEntityUiService.getIconForEntityType(entity.type) + ' text-base text-[#1877f2] flex-shrink-0'"></i>
-                      <span class="text-xs font-medium text-gray-800 dark:text-gray-200 truncate flex-1">{{ entity.label }}</span>
-                      <button (click)="$event.stopPropagation(); deleteCustomEntity.emit(entity.id)" class="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors flex-shrink-0">
-                        <i class="bi bi-trash3 text-xs leading-none"></i>
-                      </button>
+            <!-- Saved Entities -->
+            <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/10 p-4">
+              <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Saved Entities</p>
+              @if (customEntities().length === 0) {
+                <p class="text-[10px] text-gray-400">No entities added yet.</p>
+              } @else {
+                <div class="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
+                  @for (entity of customEntities(); track entity.id) {
+                    <div class="w-full rounded-xl border border-gray-200 dark:border-[#3a3b3c] bg-gray-50 dark:bg-[#3a3b3c] p-2.5 transition-all">
+                      <div class="flex items-center justify-between gap-2 mb-1">
+                        <div class="flex items-center gap-2 min-w-0">
+                          <div class="flex-shrink-0">
+                            @switch (entity.status) {
+                              @case ('in_progress') {
+                                <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-[#1877f2]"></div>
+                              }
+                              @case ('pending') {
+                                <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-[#1877f2]"></div>
+                              }
+                              @case ('added') {
+                                <i class="bi bi-check-circle-fill text-green-500 text-[10px]"></i>
+                              }
+                              @case ('failed') {
+                                <i class="bi bi-x-circle-fill text-red-400 text-[10px]"></i>
+                              }
+                            }
+                          </div>
+                          <button (click)="platformNodeClicked.emit(entity.id)" class="text-left min-w-0 hover:text-[#1877f2] transition-colors">
+                            <p class="text-[11px] font-bold text-gray-900 dark:text-gray-100 truncate mb-0">{{ entity.label }}</p>
+                          </button>
+                        </div>
+                        <div class="flex items-center gap-1">
+                          @if (entity.status === 'in_progress' || entity.status === 'pending') {
+                            <button (click)="cancelEntityScan.emit(entity.id)" title="Cancel Scan" class="w-5 h-5 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors">
+                              <i class="bi bi-x-lg text-[9px]"></i>
+                            </button>
+                          }
+                          <button (click)="deleteCustomEntity.emit(entity.id)" title="Delete Entity" class="w-5 h-5 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors">
+                            <i class="bi bi-trash3 text-[9px]"></i>
+                          </button>
+                        </div>
+                      </div>
+
+                      @if (showEntityProgress(entity)) {
+                        <div class="flex items-center gap-2 mb-1">
+                          <progress class="home-menu-progress-track flex-1" max="100" [value]="getAnimatedEntityProgress(entity)"></progress>
+                          <span class="text-[9px] font-mono text-gray-400">{{ getAnimatedEntityProgress(entity) }}%</span>
+                        </div>
+                      }
+
+                      <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-1 min-w-0">
+                          <i [class]="socialEntityUiService.getIconForEntityType(entity.type) + ' text-[9px]'"></i>
+                          <span class="text-[9px] uppercase tracking-wide text-gray-400 dark:text-gray-500 truncate">{{ entity.type.replace('-', ' ') }}</span>
+                        </div>
+                        @if (entity.onGraph) {
+                          <span class="flex-shrink-0 inline-flex items-center gap-0.5 text-[8px] font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-1 py-0.5 rounded-full">
+                            <i class="bi bi-check-circle-fill text-[7px]"></i> Feed
+                          </span>
+                        }
+                      </div>
                     </div>
                   }
-                }
-              </div>
-            }
+                </div>
+              }
+            </div>
 
           </aside>
 
@@ -152,7 +201,7 @@
             @for (platformNode of getPlatformsForUserNode(userNode.id.toString()); track trackById($index, platformNode)) {
               @if (getPlatformData(platformNode.id.toString()); as platformData) {
 
-                <article class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] overflow-hidden animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
+                <article [id]="platformNode.id" class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] overflow-hidden animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
 
                   <!-- Post header -->
                   <div class="flex items-start gap-3 px-4 pt-4">
@@ -378,65 +427,69 @@
             }
 
             <!-- Entities in feed -->
-            @if (activeEntityNodesOnGraph().length > 0) {
+            @if (displayEntitiesInFeed().length > 0) {
               <div class="flex items-center gap-3 py-1 text-xs font-semibold uppercase tracking-widest text-gray-400">
                 <div class="flex-1 h-px bg-gray-200 dark:bg-[#3a3b3c]"></div>
-                <span>Active Entities</span>
+                <span>Saved Entities</span>
                 <div class="flex-1 h-px bg-gray-200 dark:bg-[#3a3b3c]"></div>
               </div>
 
-              @for (entityNode of activeEntityNodesOnGraph(); track trackById(i, entityNode); let i = $index) {
-                @if (getEntityData(entityNode.id.toString()); as entity) {
-                  <article class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] overflow-hidden animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
-                    <div class="flex items-center gap-3 px-4 py-3.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#3a3b3c] transition-colors" (click)="toggleEntity(entity.id)">
-                      <i [class]="socialEntityUiService.getIconForEntityType(entity.type) + ' text-2xl text-[#1877f2] flex-shrink-0'"></i>
-                      <div class="flex-1 min-w-0">
-                        <p class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-0">{{ entity.label }}</p>
-                        <p class="text-xs text-gray-400 capitalize mb-0">{{ entity.type }}</p>
-                      </div>
-                      <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
-                        <i class="bi bi-chevron-down text-gray-400 text-sm transition-transform duration-300" [class.rotate-180]="isEntityExpanded(entity.id)"></i>
-                        <button (click)="deleteCustomEntity.emit(entity.id)" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors">
-                          <i class="bi bi-trash3 text-sm leading-none"></i>
-                        </button>
-                      </div>
+              @for (entity of displayEntitiesInFeed(); track entity.id) {
+                <article [id]="entity.id" class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] overflow-hidden animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
+                  <div class="flex items-center gap-3 px-4 py-3.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#3a3b3c] transition-colors" (click)="toggleEntity(entity.id)">
+                    <i [class]="socialEntityUiService.getIconForEntityType(entity.type) + ' text-2xl text-[#1877f2] flex-shrink-0'"></i>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-0">{{ entity.label }}</p>
+                      <p class="text-xs text-gray-400 capitalize mb-0">{{ entity.type.replace('-', ' ') }}</p>
                     </div>
-                    <div class="grid transition-all duration-300 ease-in-out" [class.grid-rows-[1fr]]="isEntityExpanded(entity.id)" [class.grid-rows-[0fr]]="!isEntityExpanded(entity.id)">
-                      <div class="overflow-hidden">
-                        <div class="border-t border-gray-100 dark:border-[#3a3b3c] px-4 py-4 flex flex-col gap-3">
-                          @if (getConnectionsForNode(entityNode.id.toString()).length > 0) {
-                            <div class="flex items-center flex-wrap gap-2">
-                              <span class="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mr-1">Connections</span>
-                              @for (connection of getConnectionsForNode(entityNode.id.toString()); track trackConnectionById($index, connection)) {
-                                <div class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-[#3a3b3c] border border-gray-200 dark:border-[#3a3b3c] rounded-full px-3 py-1">
-                                  <i [class]="getNodeIcon(connection.node) + ' text-sm'"></i>
-                                  {{ connection.node.label }}
+                    <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                      <i class="bi bi-chevron-down text-gray-400 text-sm transition-transform duration-300" [class.rotate-180]="isEntityExpanded(entity.id)"></i>
+                      <button (click)="deleteCustomEntity.emit(entity.id)" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors">
+                        <i class="bi bi-trash3 text-sm leading-none"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="grid transition-all duration-300 ease-in-out" [class.grid-rows-[1fr]]="isEntityExpanded(entity.id)" [class.grid-rows-[0fr]]="!isEntityExpanded(entity.id)">
+                    <div class="overflow-hidden">
+                      <div class="border-t border-gray-100 dark:border-[#3a3b3c] px-4 py-4 flex flex-col gap-3">
+                        @if (getConnectionsForNode(entity.id).length > 0) {
+                          <div class="flex items-center flex-wrap gap-2">
+                            <span class="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mr-1">Connections</span>
+                            @for (connection of getConnectionsForNode(entity.id); track trackConnectionById($index, connection)) {
+                              <div class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-[#3a3b3c] border border-gray-200 dark:border-[#3a3b3c] rounded-full px-3 py-1">
+                                <i [class]="getNodeIcon(connection.node) + ' text-sm'"></i>
+                                {{ connection.node.label }}
+                              </div>
+                            }
+                          </div>
+                          }
+                          @if (getEntityReportRecords(entity).length === 0 && entity.status !== 'in_progress' && entity.status !== 'pending') {
+                          <div class="flex flex-col items-center justify-center py-6 text-center opacity-60">
+                            <i class="bi bi-file-earmark-x text-2xl text-gray-300 mb-1"></i>
+                            <p class="text-sm text-gray-400">No records found</p>
+                          </div>
+                          }
+                          @for (record of getEntityReportRecords(entity); track $index; let recordIndex = $index) {
+                          <div class="rounded-xl border border-gray-100 dark:border-[#3a3b3c] bg-gray-50 dark:bg-[#3a3b3c] p-3">
+                            @if (getEntityReportRecords(entity).length > 1) {
+                              <div class="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-2">Record {{ recordIndex + 1 }}</div>
+                            }
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                              @for (item of getEntityRecordEntries(record); track $index) {
+                                <div class="bg-white dark:bg-[#242526] border border-gray-100 dark:border-[#3a3b3c] rounded-lg px-3 py-2">
+                                  <div class="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-1">{{ item.label }}</div>
+                                  @for (valueItem of item.values; track $index) {
+                                    <div class="text-sm text-gray-800 dark:text-gray-200 break-words">{{ valueItem }}</div>
+                                  }
                                 </div>
                               }
                             </div>
-                          }
-                          @for (record of getEntityReportRecords(entity); track $index; let recordIndex = $index) {
-                            <div class="rounded-xl border border-gray-100 dark:border-[#3a3b3c] bg-gray-50 dark:bg-[#3a3b3c] p-3">
-                              @if (getEntityReportRecords(entity).length > 1) {
-                                <div class="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-2">Record {{ recordIndex + 1 }}</div>
-                              }
-                              <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
-                                @for (item of getEntityRecordEntries(record); track $index) {
-                                  <div class="bg-white dark:bg-[#242526] border border-gray-100 dark:border-[#3a3b3c] rounded-lg px-3 py-2">
-                                    <div class="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-1">{{ item.label }}</div>
-                                    @for (valueItem of item.values; track $index) {
-                                      <div class="text-sm text-gray-800 dark:text-gray-200 break-words">{{ valueItem }}</div>
-                                    }
-                                  </div>
-                                }
-                              </div>
-                            </div>
-                          }
-                        </div>
+                          </div>
+                        }
                       </div>
                     </div>
-                  </article>
-                }
+                  </div>
+                </article>
               }
             }
 
@@ -500,69 +553,6 @@
                 }
               </div>
               <div class="my-3 h-px bg-gray-200 dark:bg-[#3a3b3c]"></div>
-              <div class="px-1 text-xs uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">Saved Entities</div>
-              @if (customEntities().length === 0) {
-                <div class="px-1 py-1 text-xs text-gray-400 dark:text-gray-500">No entities added yet.</div>
-              } @else {
-                <div class="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-1">
-                  @for (entity of customEntities(); track entity.id) {
-                    <div class="w-full rounded-xl border border-gray-200 dark:border-[#3a3b3c] bg-gray-50 dark:bg-[#3a3b3c] p-3 transition-all">
-                      <div class="flex items-center justify-between gap-2 mb-1.5">
-                        <div class="flex items-center gap-2 min-w-0">
-                          <div class="flex-shrink-0">
-                            @switch (entity.status) {
-                              @case ('in_progress') {
-                                <div class="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-[#1877f2]"></div>
-                              }
-                              @case ('pending') {
-                                <div class="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-[#1877f2]"></div>
-                              }
-                              @case ('added') {
-                                <i class="bi bi-check-circle-fill text-green-500 text-xs"></i>
-                              }
-                              @case ('failed') {
-                                <i class="bi bi-x-circle-fill text-red-400 text-xs"></i>
-                              }
-                            }
-                          </div>
-                          <button (click)="platformNodeClicked.emit(entity.id)" class="text-left min-w-0 hover:text-[#1877f2] transition-colors">
-                            <p class="text-xs font-bold text-gray-900 dark:text-gray-100 truncate mb-0">{{ entity.label }}</p>
-                          </button>
-                        </div>
-                        <div class="flex items-center gap-1">
-                          @if (entity.status === 'in_progress' || entity.status === 'pending') {
-                            <button (click)="cancelEntityScan.emit(entity.id)" title="Cancel Scan" class="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors">
-                              <i class="bi bi-x-lg text-[10px]"></i>
-                            </button>
-                          }
-                          <button (click)="deleteCustomEntity.emit(entity.id)" title="Delete Entity" class="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors">
-                            <i class="bi bi-trash3 text-[10px]"></i>
-                          </button>
-                        </div>
-                      </div>
-
-                      @if (showEntityProgress(entity)) {
-                        <div class="flex items-center gap-2 mb-1.5">
-                          <progress class="home-menu-progress-track flex-1" max="100" [value]="getAnimatedEntityProgress(entity)"></progress>
-                          <span class="text-[10px] font-mono text-gray-400">{{ getAnimatedEntityProgress(entity) }}%</span>
-                        </div>
-                      }
-
-                      <div class="flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-1.5 min-w-0">
-                          <i [class]="socialEntityUiService.getIconForEntityType(entity.type) + ' text-[10px]'"></i>
-                          <span class="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500 truncate">{{ entity.type.replace('-', ' ') }}</span>
-                        </div>
-                        @if (entity.onGraph) {
-                          <span class="flex-shrink-0 inline-flex items-center gap-0.5 text-[9px] font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-1.5 py-0.5 rounded-full">
-                            <i class="bi bi-check-circle-fill text-[8px]"></i> Feed
-                          </span>
-                        }
-                      </div>
-                    </div>
-                  }
-                </div>
-              }
             </div>
           </aside>
 

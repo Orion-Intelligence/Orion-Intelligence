@@ -38,7 +38,7 @@ export class ListViewComponent implements OnDestroy {
   public isUrl = isUrl;
   public isImageUrl = isImageUrl;
   activeUserNodes = computed(() => this.networkData().nodes.filter(n => n.id.toString().startsWith('user-')));
-  activeEntityNodesOnGraph = computed(() => this.networkData().nodes.filter(n => this.customEntities().some(e => e.id === n.id)));
+  displayEntitiesInFeed = computed(() => this.customEntities());
   activeUserIndex = signal<number>(0);
 
   constructor() {
@@ -300,7 +300,14 @@ export class ListViewComponent implements OnDestroy {
   }
 
   showEntityProgress(entity: CustomEntity): boolean {
-    return entity.status === 'in_progress' || entity.status === 'pending' || entity.status === 'failed' || this.getAnimatedEntityProgress(entity) > 0;
+    const progress = this.getAnimatedEntityProgress(entity);
+    if (entity.status === 'added') {
+      return progress > 0 && progress < 100;
+    }
+    if (entity.status === 'failed') {
+      return progress > 0;
+    }
+    return true;
   }
 
   private pruneAnimatedEntityProgress(entities: CustomEntity[]) {
