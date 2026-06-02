@@ -93,21 +93,18 @@
     </div>
 
     <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-      <div class="flex items-center justify-between gap-3">
-        <div>
-          <div class="ui-section-title">Change Password</div>
-          <div class="ui-section-description">Set a new password for your account.</div>
-        </div>
-        <button data-testid="account-settings-password-toggle" type="button" class="ui-btn ui-btn-secondary shrink-0" (click)="togglePasswordSection()">
-          {{ isPasswordSectionOpen ? 'Cancel' : 'Change Password' }}
-        </button>
-      </div>
+      <button data-testid="account-settings-password-toggle" type="button" class="flex w-full items-center justify-between gap-3 text-left" [attr.aria-expanded]="isPasswordSectionOpen" (click)="togglePasswordSection()">
+        <span class="min-w-0">
+          <span class="ui-section-title block">Change Password</span>
+          <span class="ui-section-description block">Set a new password for your account.</span>
+        </span>
+        <i class="bi bi-chevron-down mr-3 shrink-0 text-[14px] leading-none text-[var(--color-text4)] transition-transform duration-200" [class.rotate-180]="isPasswordSectionOpen" aria-hidden="true"></i>
+      </button>
 
       @if (isPasswordSectionOpen) {
         <div class="mt-4 border-[var(--color-border)]">
-          <div class="grid gap-3 sm:grid-cols-2">
+          <div class="grid gap-3">
             <div>
-              <label for="account-settings-new-password" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">New Password</label>
               <input id="account-settings-new-password" data-testid="account-settings-new-password" type="password" [(ngModel)]="newPassword" (input)="onPasswordInput(newPassword)" name="newPassword" placeholder="Enter new password" autocomplete="new-password" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" />
               @if (showPasswordMeter) {
                 <div class="mt-2">
@@ -122,7 +119,6 @@
             </div>
 
             <div>
-              <label for="account-settings-confirm-password" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Confirm Password</label>
               <input id="account-settings-confirm-password" data-testid="account-settings-confirm-password" type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Confirm new password" autocomplete="new-password" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" />
               @if (newPassword && confirmPassword && newPassword !== confirmPassword) {
                 <p class="mt-2 text-xs text-red-400">Password and confirm password do not match.</p>
