@@ -1,6 +1,5 @@
 <div data-testid="social-graph-root" class="flex h-screen w-screen flex-col overflow-hidden bg-gray-100 dark:bg-[#18191a]">
   @if (isTailwindReady()) {
-    <app-tab-bar></app-tab-bar>
     @if (tabManager.activeTab(); as activeTab) {
       <main class="flex-grow min-h-0 relative">
         <input type="file" #imageInput class="hidden" (change)="onImageSelected($event)" accept="image/png, image/jpeg, image/webp, image/gif">
@@ -79,7 +78,7 @@
               </div>
 
               <!-- Feed view (always list, no graph) -->
-              <div class="flex-grow min-h-0 overflow-y-auto">
+              <div class="flex-grow min-h-0">
                 <app-list-view
                   [networkData]="networkData()"
                   [scanResults]="scanResults()"

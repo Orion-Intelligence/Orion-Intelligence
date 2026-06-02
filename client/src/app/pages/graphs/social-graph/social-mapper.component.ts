@@ -8,7 +8,6 @@ import { TabManagerService } from '../shared/services/tab-manager.service';
 import { HomeMenuComponent } from './home-menu/home-menu.component';
 import { ListViewComponent } from './list-view/list-view.component';
 import { Subject } from 'rxjs';
-import { TabBarComponent } from '../shared/tab-bar/tab-bar.component';
 import { Position } from 'vis-network';
 import { FollowerScanPopupComponent } from './follower-scan-popup/follower-scan-popup.component';
 import { FetchingStateService } from './services/fetching-state.service';
@@ -40,7 +39,6 @@ import { getEntityRecordEntries, getEntityReportRecords } from './utils/social-g
     ProfileSummaryPopupComponent,
     HomeMenuComponent,
     ListViewComponent,
-    TabBarComponent,
     FollowerScanPopupComponent,
     ManageProfilesModalComponent,
     ConfirmationPopupComponent,

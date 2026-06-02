@@ -25,17 +25,16 @@
       </div>
     }
 
-    <!-- ── Main layout (driven by state.activeUserIndex) ── -->
-    @if (activeUserNodes()[state.activeUserIndex()]; as userNode) {
+    <!-- ── Main layout ── -->
+    <div class="flex-1 min-h-0 overflow-y-auto">
+      <div class="flex gap-4 p-4 max-w-6xl mx-auto items-start">
 
-      <div class="flex-1 min-h-0 overflow-y-auto">
-        <div class="flex gap-4 p-4 max-w-6xl mx-auto items-start">
+        <!-- ── LEFT: Profile + Platforms (synced to active user) ── -->
+        <aside class="hidden lg:flex w-[240px] flex-shrink-0 flex-col gap-3">
 
-          <!-- ── LEFT: Profile + Platforms (synced to active user) ── -->
-          <aside class="hidden lg:flex w-[240px] flex-shrink-0 flex-col gap-3 sticky top-4 max-h-[calc(100vh-3.5rem)] overflow-y-auto pr-3 custom-scrollbar">
-
-            <!-- Profile card -->
-            <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/30 overflow-hidden">
+          @if (activeUserNodes()[state.activeUserIndex()]; as userNode) {
+            <!-- Profile card (Scrolls with page) -->
+            <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/30 overflow-hidden flex-shrink-0">
               <div class="h-16 bg-gradient-to-r from-[#1877f2] to-[#42a5f5]"></div>
               <div class="px-4 pb-4 flex flex-col items-center text-center -mt-7">
                 <div class="w-14 h-14 rounded-full border-[3px] border-white dark:border-[#242526] bg-[#1877f2] flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
@@ -51,36 +50,42 @@
                 </button>
               </div>
             </div>
+          }
 
-            <!-- Platforms list (synced to active user) -->
-            <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/20 p-4">
-              <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Platforms</p>
-              <div class="flex flex-col gap-1">
-                @for (platformNode of getPlatformsForUserNode(userNode.id.toString()); track trackById($index, platformNode)) {
-                  @if (getPlatformData(platformNode.id.toString()); as platformData) {
-                    <div (click)="platformNodeClicked.emit(platformNode.id.toString())" class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors">
-                      <div class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-[#3a3b3c] flex items-center justify-center flex-shrink-0 overflow-hidden text-sm">
-                        <app-social-icon [platformName]="platformNode.label"></app-social-icon>
+          <!-- Sticky container for Lists -->
+          <div class="sticky top-4 flex flex-col gap-3 max-h-[calc(100vh-5rem)] overflow-y-auto pr-3 custom-scrollbar">
+
+            @if (activeUserNodes()[state.activeUserIndex()]; as userNode) {
+              <!-- Platforms list (synced to active user) -->
+              <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/20 p-4 flex-shrink-0">
+                <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Platforms</p>
+                <div class="flex flex-col gap-1">
+                  @for (platformNode of getPlatformsForUserNode(userNode.id.toString()); track trackById($index, platformNode)) {
+                    @if (getPlatformData(platformNode.id.toString()); as platformData) {
+                      <div (click)="platformNodeClicked.emit(platformNode.id.toString())" class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors">
+                        <div class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-[#3a3b3c] flex items-center justify-center flex-shrink-0 overflow-hidden text-sm">
+                          <app-social-icon [platformName]="platformNode.label"></app-social-icon>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <p class="text-xs font-medium text-gray-800 dark:text-gray-200 truncate mb-0">{{ platformNode.label }}</p>
+                          <p class="text-[10px] text-gray-400 truncate mb-0">
+                            @if (getStatValue(platformData, 'total_followers') !== '--') {
+                              {{ getStatValue(platformData, 'total_followers') }} followers
+                            } @else {
+                              &#64;{{ platformData.username }}
+                            }
+                          </p>
+                        </div>
+                        <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0"></div>
                       </div>
-                      <div class="flex-1 min-w-0">
-                        <p class="text-xs font-medium text-gray-800 dark:text-gray-200 truncate mb-0">{{ platformNode.label }}</p>
-                        <p class="text-[10px] text-gray-400 truncate mb-0">
-                          @if (getStatValue(platformData, 'total_followers') !== '--') {
-                            {{ getStatValue(platformData, 'total_followers') }} followers
-                          } @else {
-                            &#64;{{ platformData.username }}
-                          }
-                        </p>
-                      </div>
-                      <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0"></div>
-                    </div>
+                    }
                   }
-                }
+                </div>
               </div>
-            </div>
+            }
 
             <!-- Saved Entities -->
-            <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/10 p-4">
+            <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/10 p-4 flex-shrink-0">
               <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Saved Entities</p>
               @if (customEntities().length === 0) {
                 <p class="text-[10px] text-gray-400">No entities added yet.</p>
@@ -146,7 +151,9 @@
               }
             </div>
 
-          </aside>
+          </div>
+
+        </aside>
 
           <!-- ── CENTER: Feed for active user only ── -->
           <div class="flex-1 min-w-0 flex flex-col gap-3">
@@ -198,7 +205,8 @@
 <!--            </div>-->
 
             <!-- Platform post cards (only for active user) -->
-            @for (platformNode of getPlatformsForUserNode(userNode.id.toString()); track trackById($index, platformNode)) {
+            @if (activeUserNodes()[state.activeUserIndex()]; as userNode) {
+              @for (platformNode of getPlatformsForUserNode(userNode.id.toString()); track trackById($index, platformNode)) {
               @if (getPlatformData(platformNode.id.toString()); as platformData) {
 
                 <article [id]="platformNode.id" class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] overflow-hidden animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
@@ -423,10 +431,11 @@
 
                 </article>
 
-              }
-            }
+                }
+                }
+                }
 
-            <!-- Entities in feed -->
+                <!-- Entities in feed -->
             @if (displayEntitiesInFeed().length > 0) {
               <div class="flex items-center gap-3 py-1 text-xs font-semibold uppercase tracking-widest text-gray-400">
                 <div class="flex-1 h-px bg-gray-200 dark:bg-[#3a3b3c]"></div>
@@ -558,8 +567,6 @@
 
         </div>
       </div>
-
-    }
 
   }
 
