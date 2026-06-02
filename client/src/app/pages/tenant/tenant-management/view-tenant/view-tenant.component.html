@@ -163,6 +163,13 @@
                                     <option [ngValue]="TenantStatus.DISABLE">Disable</option>
                                   </select>
                                 </div>
+                                <label data-testid="tenant-password-reset-required-toggle" class="flex cursor-pointer items-center justify-between gap-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2.5 transition hover:border-sky-400/35">
+                                    <span class="text-[12px] font-semibold text-[var(--color-text2)]">Require password reset on next login</span>
+                                    <span class="pointer-events-none relative h-5 w-9 shrink-0">
+                                      <input type="checkbox" class="peer h-0 w-0 opacity-0" [(ngModel)]="tenant.password_reset_required" />
+                                      <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-200 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[2px] before:left-[2px] before:h-4 before:w-4 before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-200 peer-checked:before:translate-x-4"></span>
+                                    </span>
+                                  </label>
                                 <div>
                                   <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
                                   <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
@@ -265,6 +272,13 @@
                             <option [ngValue]="TenantStatus.ACTIVE">Active</option>
                             <option [ngValue]="TenantStatus.DISABLE">Disable</option>
                           </select>
+                          <label data-testid="tenant-password-reset-required-toggle" class="flex cursor-pointer items-center justify-between gap-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2.5 transition hover:border-sky-400/35">
+                                    <span class="text-[12px] font-semibold text-[var(--color-text2)]">Require password reset on next login</span>
+                                    <span class="pointer-events-none relative h-5 w-9 shrink-0">
+                                      <input type="checkbox" class="peer h-0 w-0 opacity-0" [(ngModel)]="tenant.password_reset_required" />
+                                      <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-200 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[2px] before:left-[2px] before:h-4 before:w-4 before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-200 peer-checked:before:translate-x-4"></span>
+                                    </span>
+                                  </label>
                           <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
                           <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
                             @for (license of licenseList; track license) {

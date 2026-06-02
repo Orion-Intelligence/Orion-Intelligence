@@ -96,11 +96,6 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
     this.router.navigate(['/dashboard/profile/system-settings']).then();
   }
 
-  changePassword() {
-    this.logout();
-    this.router.navigate(['/reset']).then();
-  }
-
   logout() {
     this.dashboardService.resetParams();
     this.dashboardService.clearCallback();

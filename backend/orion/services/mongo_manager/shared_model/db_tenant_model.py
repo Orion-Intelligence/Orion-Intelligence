@@ -52,3 +52,4 @@ class TenantRequest(BaseModel):
     licenses: List[str] = []
     profile_visibility_enabled: Optional[bool] = None
     event_management_enabled: Optional[bool] = None
+    password_reset_required: Optional[bool] = None
