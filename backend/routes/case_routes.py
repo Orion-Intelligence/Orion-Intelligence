@@ -1,6 +1,7 @@
 from fastapi import Body, Depends, APIRouter
 from fastapi import File
 from fastapi import UploadFile
+from fastapi import Query
 from configs.app_dependency import role_required, get_current_user, status_required
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
 from orion.api.interactive.case_manager.case_manager import CaseManager
@@ -75,6 +76,26 @@ async def create_case_share(case_id: str, payload: CreateCaseShareRequest = Body
 async def revoke_case_shares(case_id: str, current_user=Depends(get_current_user)):
     return await CaseShareManager.get_instance().revoke_case_shares(case_id, current_user)
 
+
+@case_routes.get(
+    "/api/profile/cases/artifact-reports",
+    status_code=200,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+    ],
+)
+async def get_artifact_reports(
+    source: str = Query(...),
+    q: str = Query(""),
+    limit: int = Query(10, ge=1, le=50),
+    current_user=Depends(get_current_user),
+):
+    return await CaseManager.get_instance().get_artifact_reports(
+        source,
+        current_user,
+        q=q,
+        limit=limit,
+    )
 
 @case_routes.get(
     "/api/profile/cases/{case_id}",

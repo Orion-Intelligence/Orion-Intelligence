@@ -23,6 +23,16 @@ export type CaseStatus =
     'resolved' |
     'closed';
 
+export type ArtifactReportSource =
+    'strategic' |
+    'breach' |
+    'defacement' |
+    'social' |
+    'feed' |
+    'dump' |
+    'stealerlogs' |
+    'scanner';
+
 export type EntityConfidence = 'low' | 'medium' | 'high';
 export type Severity = 'info' | 'low' | 'medium' | 'high' | 'critical';
 export type Priority = 'low' | 'medium' | 'high' | 'critical';
@@ -263,9 +273,17 @@ export interface CaseArtifact {
     fileResourceId?: string;
     entityIds: string[];
     tags: CaseTag[];
+    linkedReportSource?: ArtifactReportSource | '';
+    linkedReportId?: string;
+    linkedReportTitle?: string;
     capturedAt?: Date | string | null;
     createdBy?: string;
     createdAt?: Date | string;
+}
+
+export interface ArtifactReportOption {
+    id: string;
+    title: string;
 }
 
 export interface CaseArtifactRequest {
@@ -283,6 +301,9 @@ export interface CaseArtifactRequest {
     fileResourceId?: string;
     entityIds: string[];
     tags: CaseTag[];
+    linkedReportSource?: ArtifactReportSource | '';
+    linkedReportId?: string;
+    linkedReportTitle?: string;
     capturedAt?: Date | string | null;
 }
 

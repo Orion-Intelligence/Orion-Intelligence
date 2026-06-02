@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../../shared/services/api.service';
-import { Case, CaseAnalyst, CaseRequest, CaseShareRequest, CaseShareResponse, CaseUpdateRequest } from '../../../../shared/model/case-management/case.model';
+import { ArtifactReportOption, Case, CaseAnalyst, CaseRequest, CaseShareRequest, CaseShareResponse, CaseUpdateRequest } from '../../../../shared/model/case-management/case.model';
 
 type ArtifactFileUploadResponse = { fileName: string; fileType: string; fileSize: number; fileResourceId: string };
 
@@ -54,6 +54,16 @@ export class CaseManagement {
 
   deleteArtifactFile(caseId: string, artifactId: string): Observable<{ success: boolean }> {
     return this.api.delete<{ success: boolean }>(`profile/cases/${caseId}/artifacts/${artifactId}/file`);
+  }
+
+  getArtifactReports(source: string, q: string = '', limit: number = 10): Observable<ArtifactReportOption[]> {
+    const params = new URLSearchParams();
+
+    params.set('source', source);
+    params.set('q', q);
+    params.set('limit', String(limit));
+
+    return this.api.get<ArtifactReportOption[]>(`profile/cases/artifact-reports?${params.toString()}`);
   }
 
 }

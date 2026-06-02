@@ -289,6 +289,9 @@ class CaseArtifact(EmbeddedModel):
     fileType: str = ""
     fileSize: int = 0
     fileResourceId: str = ""
+    linkedReportSource: str = ""
+    linkedReportId: str = ""
+    linkedReportTitle: str = ""
     entityIds: List[str] = Field(default_factory=list)
     tags: List[CaseTag] = Field(default_factory=list)
     capturedAt: Optional[datetime] = None

@@ -1,4 +1,4 @@
-import { ArtifactType, CaseArtifact, CaseEntity, CaseEntityRequest, CaseLink, CaseRequest, CaseStatus, CaseTag, CaseTask, CaseType, ClosureReason, EntityConfidence, EntityRole, EntityType, IdentifierType, IntakeSource, Priority, Severity, SocialPlatform, SourceType, TaskStatus } from './case.model';
+import { ArtifactReportSource, ArtifactType, CaseArtifact, CaseEntity, CaseEntityRequest, CaseLink, CaseRequest, CaseStatus, CaseTag, CaseTask, CaseType, ClosureReason, EntityConfidence, EntityRole, EntityType, IdentifierType, IntakeSource, Priority, Severity, SocialPlatform, SourceType, TaskStatus } from './case.model';
 
 export interface CaseOption<T extends string> {
   value: T;
@@ -248,8 +248,22 @@ export const DEFAULT_CASE_ARTIFACT_TEMPLATE: CaseArtifact = {
   tags: [],
   capturedAt: null,
   artifactTypeOtherValue: '',
-  artifactSourceOtherValue: ''
+  artifactSourceOtherValue: '',
+  linkedReportSource: '',
+  linkedReportId: '',
+  linkedReportTitle: ''
 };
+
+export const ARTIFACT_REPORT_SOURCE_OPTIONS: CaseOption<ArtifactReportSource>[] = [
+  { value: 'strategic', label: 'General Intelligence' },
+  { value: 'breach', label: 'Data Breach' },
+  { value: 'defacement', label: 'Defacement' },
+  { value: 'social', label: 'Social' },
+  { value: 'feed', label: 'Feed' },
+  { value: 'dump', label: 'Dump' },
+  { value: 'stealerlogs', label: 'Stealer Logs' },
+  { value: 'scanner', label: 'Web Scans' }
+];
 
 export const DEFAULT_CASE_TASK_TEMPLATE: CaseTask = {
   taskId: '',

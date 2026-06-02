@@ -21,6 +21,9 @@ from orion.services.mongo_manager.shared_model.db_case_model import CaseTask
 from orion.services.mongo_manager.shared_model.db_case_model import db_case_model
 from orion.services.mongo_manager.shared_model.db_case_model import utc_now
 from orion.api.interactive.case_manager.case_artifact_helper import CaseArtifactHelper
+from orion.api.interactive.search_manager.search_model import search_model
+from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
+from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 
 
 class CaseManager:
@@ -544,3 +547,131 @@ class CaseManager:
         await self._engine.save(record)
 
         return {"success": True}
+    
+    def _extract_report_id(self, row: dict) -> str:
+        if not isinstance(row, dict):
+            return ""
+
+        return str(
+            row.get("_id")
+            or row.get("m_id")
+            or row.get("id")
+            or row.get("m_hash")
+            or row.get("doc_id")
+            or ""
+        )
+
+
+    def _extract_report_title(self, row: dict) -> str:
+        if not isinstance(row, dict):
+            return ""
+
+        return str(
+            row.get("m_title")
+            or row.get("title")
+            or row.get("m_name")
+            or row.get("name")
+            or row.get("m_url")
+            or row.get("m_domain")
+            or "Untitled Report"
+        )
+    
+    async def get_artifact_reports(
+        self,
+        source: str,
+        current_user,
+        q: str = "",
+        limit: int = 10,
+    ) -> list[dict]:
+        source = (source or "").strip().lower()
+        q = (q or "").strip()
+        limit = max(1, min(limit or 10, 50))
+
+        param = search_consolidated_param_model(
+            q=q,
+            category="all",
+            page=1,
+            fullsearch=False,
+            safe=False,
+            network="all",
+            matchtype="",
+            content="all",
+            platform_result_count=limit,
+        )
+
+        if source == "strategic":
+            result = await search_model.getInstance().search_consolidated_ranked_result(
+                param,
+                [ELASTIC_INDEX.S_GENERIC_INDEX],
+                [],
+                [],
+            )
+
+        elif source == "breach":
+            result = await search_model.getInstance().search_consolidated_ranked_result(
+                param,
+                [ELASTIC_INDEX.S_LEAK_INDEX],
+                ["news"],
+                ["leaks", "tracking"],
+            )
+
+        elif source == "defacement":
+            param.content = "all"
+            result = await search_model.getInstance().search_consolidated_ranked_result(
+                param,
+                [ELASTIC_INDEX.S_DEFACEMENT_INDEX],
+                [],
+                ["all"],
+                "defacement",
+            )
+
+        elif source == "social":
+            result = await search_model.getInstance().search_consolidated_ranked_result(
+                param,
+                [ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX],
+                [],
+                [],
+            )
+
+        elif source == "exploit":
+            result = await search_model.getInstance().search_consolidated_ranked_result(
+                param,
+                [ELASTIC_INDEX.S_EXPLOIT_INDEX],
+                [],
+                ["all"],
+            )
+
+        elif source == "feed":
+            result = await search_model.getInstance().search_consolidated_ranked_result(
+                param,
+                [ELASTIC_INDEX.S_LEAK_INDEX],
+                [],
+                ["news"],
+            )
+
+        else:
+            raise HTTPException(status_code=400, detail="Invalid report source")
+
+        rows = result.get("Result", []) if isinstance(result, dict) else []
+
+        items = []
+        seen_ids = set()
+
+        for row in rows:
+            report_id = self._extract_report_id(row)
+            report_title = self._extract_report_title(row)
+
+            if not report_id or not report_title or report_id in seen_ids:
+                continue
+
+            seen_ids.add(report_id)
+
+            items.append({
+                "id": report_id,
+                "title": report_title,
+            })
+
+            if len(items) >= limit:
+                break
+
+        return items
