@@ -80,36 +80,6 @@
 
               <!-- Feed view (always list, no graph) -->
               <div class="flex-grow min-h-0 overflow-y-auto">
-                @if (selectedJobPill(); as selectedJob) {
-                  <div class="border-b border-gray-200 bg-white px-4 py-3 dark:border-[#3a3b3c] dark:bg-[#242526]">
-                    <div class="mx-auto flex w-full max-w-4xl items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 shadow-sm dark:border-[#3a3b3c] dark:bg-[#1f2021]">
-                      <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#1877f2] text-base font-bold text-white">
-                        {{ selectedJob.username.charAt(0).toUpperCase() }}
-                      </div>
-                      <div class="min-w-0 flex-1">
-                        <p class="truncate text-base font-semibold text-gray-900 dark:text-gray-100">
-                          {{ selectedJob.displayName || selectedJob.username }}
-                        </p>
-                        <p class="truncate text-sm text-gray-500 dark:text-gray-400">
-                          {{ getSelectedJobPlatformCount(selectedJob.username) }} platforms found · {{ getSelectedJobScanDate(selectedJob.username) }}
-                        </p>
-                      </div>
-                      <div class="flex flex-shrink-0 flex-wrap items-center gap-2">
-<!--                        <button type="button" (click)="openProfileIntelligenceFromPill(selectedJob.username)" class="inline-flex h-9 items-center gap-2 rounded-full border border-gray-200 bg-white px-3.5 text-sm font-semibold text-gray-700 transition-colors hover:border-[#1877f2] hover:text-[#1877f2] dark:border-[#3a3b3c] dark:bg-[#242526] dark:text-gray-200">-->
-<!--                          <i class="bi bi-person-badge"></i>-->
-<!--                          Profile Intelligence-->
-<!--                        </button>-->
-                        <button type="button" (click)="openManageProfilesFromPill(selectedJob.username)" class="inline-flex h-9 items-center gap-2 rounded-full bg-[#1877f2] px-3.5 text-sm font-semibold text-white transition-colors hover:bg-blue-600">
-                          <i class="bi bi-sliders"></i>
-                          Manage Profiles
-                        </button>
-                        <button type="button" (click)="selectedJobPill.set(null)" class="inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-[#3a3b3c] dark:hover:text-gray-200" title="Close">
-                          <i class="bi bi-x-lg text-sm leading-none"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                }
                 <app-list-view
                   [networkData]="networkData()"
                   [scanResults]="scanResults()"

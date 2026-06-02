@@ -13,26 +13,26 @@
       <div class="flex-shrink-0 bg-white dark:bg-[#242526] border-b border-gray-200 dark:border-[#3a3b3c] px-4">
         <div class="flex gap-0 overflow-x-auto scrollbar-none">
           @for (userNode of activeUserNodes(); track trackById(i, userNode); let i = $index) {
-            <button (click)="activeUserIndex.set(i)" class="flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors flex-shrink-0 whitespace-nowrap" [class.border-[#1877f2]]="activeUserIndex() === i" [class.text-[#1877f2]]="activeUserIndex() === i" [class.border-transparent]="activeUserIndex() !== i" [class.text-gray-500]="activeUserIndex() !== i" [class.dark:text-gray-400]="activeUserIndex() !== i">
+            <button (click)="setActiveUserIndex(i)" class="flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors flex-shrink-0 whitespace-nowrap" [class.border-[#1877f2]]="state.activeUserIndex() === i" [class.text-[#1877f2]]="state.activeUserIndex() === i" [class.border-transparent]="state.activeUserIndex() !== i" [class.text-gray-500]="state.activeUserIndex() !== i" [class.dark:text-gray-400]="state.activeUserIndex() !== i">
               <div class="w-6 h-6 rounded-full bg-[#1877f2] flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
                 {{ userNode.label.charAt(0).toUpperCase() }}
               </div>
               {{ userNode.label }}
-              <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full" [class.bg-[#1877f2]]="activeUserIndex() === i" [class.text-white]="activeUserIndex() === i" [class.bg-gray-100]="activeUserIndex() !== i" [class.dark:bg-[#3a3b3c]]="activeUserIndex() !== i" [class.text-gray-500]="activeUserIndex() !== i">{{ getPlatformsForUserNode(userNode.id.toString()).length }}</span>
+              <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full" [class.bg-[#1877f2]]="state.activeUserIndex() === i" [class.text-white]="state.activeUserIndex() === i" [class.bg-gray-100]="state.activeUserIndex() !== i" [class.dark:bg-[#3a3b3c]]="state.activeUserIndex() !== i" [class.text-gray-500]="state.activeUserIndex() !== i">{{ getPlatformsForUserNode(userNode.id.toString()).length }}</span>
             </button>
           }
         </div>
       </div>
     }
 
-    <!-- ── Main layout (driven by activeUserIndex) ── -->
-    @if (activeUserNodes()[activeUserIndex()]; as userNode) {
+    <!-- ── Main layout (driven by state.activeUserIndex) ── -->
+    @if (activeUserNodes()[state.activeUserIndex()]; as userNode) {
 
       <div class="flex-1 min-h-0 overflow-y-auto">
         <div class="flex gap-4 p-4 max-w-6xl mx-auto items-start">
 
           <!-- ── LEFT: Profile + Platforms (synced to active user) ── -->
-          <aside class="hidden lg:flex w-[240px] flex-shrink-0 flex-col gap-3 sticky top-4">
+          <aside class="hidden lg:flex w-[240px] flex-shrink-0 flex-col gap-3 sticky top-4 max-h-[calc(100vh-3.5rem)] overflow-y-auto pr-3 custom-scrollbar">
 
             <!-- Profile card -->
             <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/30 overflow-hidden">

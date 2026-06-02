@@ -39,7 +39,6 @@ export class ListViewComponent implements OnDestroy {
   public isImageUrl = isImageUrl;
   activeUserNodes = computed(() => this.networkData().nodes.filter(n => n.id.toString().startsWith('user-')));
   displayEntitiesInFeed = computed(() => this.customEntities());
-  activeUserIndex = signal<number>(0);
 
   constructor() {
     effect(() => {
@@ -57,16 +56,16 @@ export class ListViewComponent implements OnDestroy {
   }
 
   setActiveUserIndex(index: number) {
-    this.activeUserIndex.set(index);
+    this.state.activeUserIndex.set(index);
   }
 
   nextUser() {
-    this.activeUserIndex.update(i =>
+    this.state.activeUserIndex.update(i =>
       i < this.activeUserNodes().length - 1 ? i + 1 : 0);
   }
 
   prevUser() {
-    this.activeUserIndex.update(i =>
+    this.state.activeUserIndex.update(i =>
       i > 0 ? i - 1 : this.activeUserNodes().length - 1);
   }
 

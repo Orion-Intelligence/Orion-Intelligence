@@ -58,6 +58,15 @@ export class SocialMapperStateService {
         platform: PlatformResult;
     } | null>(null);
   relationshipPopupData = signal<RelationshipPopupData | null>(null);
+  activeUserIndex = signal<number>(0);
+
+  setActiveUserByUsername(username: string) {
+    const userNodes = this.networkData().nodes.filter(n => n.id.toString().startsWith('user-'));
+    const index = userNodes.findIndex(n => n.id === `user-${username}`);
+    if (index !== -1) {
+      this.activeUserIndex.set(index);
+    }
+  }
 
   openManageProfilesModal(username: string) {
     const results = this.scanResults().get(username);

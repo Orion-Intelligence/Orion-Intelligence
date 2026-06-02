@@ -85,7 +85,6 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     } | null>(null);
   platformAliasInput = signal('');
   selectedEntityReport = signal<CustomEntity | null>(null);
-  selectedJobPill = signal<Job | null>(null);
   imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
   entityManager = viewChild(EntityManagerComponent);
   isSearchDisabled = computed(() => this.searchTerm().trim().length === 0);
@@ -312,44 +311,19 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.state.closeInfoModal();
   }
 
-  handleCompletedJobClick(job: Job) {
+  async handleCompletedJobClick(job: Job) {
     if (job.status !== 'completed') {
       return;
     }
-    this.selectedJobPill.update(current => current?.username === job.username ? null : job);
-    this.updateState(state => state.viewMode.set('list'), false);
-  }
-
-  openProfileIntelligenceFromPill(username: string) {
-    this.selectedJobPill.set(null);
-    this.state.openSummaryPopup(username);
-  }
-
-  openManageProfilesFromPill(username: string) {
-    this.selectedJobPill.set(null);
-    this.state.openManageProfilesModal(username);
-  }
-
-  getSelectedJobPlatformCount(username: string): number {
-    return this.scanResults().get(username)?.length ?? 0;
-  }
-
-  getSelectedJobScanDate(username: string): string {
-    const platforms = this.scanResults().get(username) ?? [];
-    const timestamps = platforms
-      .map(platform => platform.timestamp)
-      .filter((timestamp): timestamp is string => !!timestamp)
-      .map(timestamp => new Date(timestamp).getTime())
-      .filter(time => Number.isFinite(time));
-    if (timestamps.length === 0) {
-      return 'Scan date unavailable';
+    const username = job.username;
+    if (!this.activeUsernames().has(username)) {
+      const results = this.scanResults().get(username);
+      if (results && results.length > 0) {
+        await this.graphOrchestrator.updateGraphFromModal(this.requireActiveTabState(), username, results);
+      }
     }
-    const latest = new Date(Math.max(...timestamps));
-    return new Intl.DateTimeFormat(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }).format(latest);
+    this.state.setActiveUserByUsername(username);
+    this.updateState(state => state.viewMode.set('list'), false);
   }
 
   handleFollowerScan(usernames: string[]) {
