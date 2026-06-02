@@ -215,10 +215,14 @@ class AccountManager:
                 user.twofa_secret = None
         if getattr(request, "demo_tour", None) is not None:
             user.demo_tour = request.demo_tour
+        if request.password is not None:
+            if CONSTANTS.S_AUTH_PWD_CONTEXT.verify(request.password, user.password):
+                raise HTTPException(status_code=400, detail="New password must be different from the old one.")
+            user.password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(request.password)
 
         await self._engine.save(user)
         await AuditLogManager.get_instance().register(
-            str(user.tenant_uuid), str(user.id), "Self profile updated")
+            str(user.tenant_uuid), str(user.id), "Password updated" if request.password is not None else "Self profile updated")
 
         return {"message": "User updated successfully"}
 

@@ -10,6 +10,7 @@ import { MessageNotificationService } from '../../../services/message_notificati
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { LicenseName } from '../../../shared/model/licenses/license.rules';
 import { getTenantLocationDisplay } from './sidebar-settings.util';
+import { areAllPasswordRequirementsMet, createEmptyPasswordChecks, evaluatePasswordInput, PasswordChecks, PasswordStrength } from '../../../shared/utils/auth-form.util';
 
 @Component({
   selector: 'app-sidebar-profile-settings',
@@ -23,6 +24,13 @@ export class AccountSettingsComponent implements OnInit {
   isDarkMode = true;
   isProfileVisible = true;
   editableUsername = '';
+  isPasswordSectionOpen = false;
+  newPassword = '';
+  confirmPassword = '';
+  passwordStrength: PasswordStrength = null;
+  showPasswordMeter = false;
+  passwordChecks: PasswordChecks = createEmptyPasswordChecks();
+  currentUnmetCheck: string | null = null;
 
   constructor(protected apiService: ApiService, protected appService: AppService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService) {
     this.userSessionData = this.appService.userSessionData();
@@ -127,6 +135,51 @@ export class AccountSettingsComponent implements OnInit {
       next: () => void 0,
       error: (_err) => void 0,
     });
+  }
+
+  togglePasswordSection() {
+    this.isPasswordSectionOpen = !this.isPasswordSectionOpen;
+    if (!this.isPasswordSectionOpen) {
+      this.resetPasswordForm();
+    }
+  }
+
+  onPasswordInput(password: string) {
+    const evaluation = evaluatePasswordInput(password);
+    this.showPasswordMeter = evaluation.showPasswordMeter;
+    this.passwordChecks = evaluation.passwordChecks;
+    this.currentUnmetCheck = evaluation.currentUnmetCheck;
+    this.passwordStrength = evaluation.passwordStrength;
+  }
+
+  get allPasswordRequirementsMet(): boolean {
+    return areAllPasswordRequirementsMet(this.passwordChecks);
+  }
+
+  updatePassword() {
+    const userMeta: userMetaData = {
+      username: this.userSessionData.user.username,
+      password: this.newPassword
+    };
+    this.apiService.post<{ message?: string }>('update/current/user', userMeta).subscribe({
+      next: () => {
+        this.messageNotificationService.show('Password updated successfully', 'success');
+        this.resetPasswordForm();
+        this.isPasswordSectionOpen = false;
+      },
+      error: (err) => {
+        this.messageNotificationService.show(err?.error?.detail || 'Failed to update password');
+      }
+    });
+  }
+
+  private resetPasswordForm() {
+    this.newPassword = '';
+    this.confirmPassword = '';
+    this.passwordStrength = null;
+    this.showPasswordMeter = false;
+    this.passwordChecks = createEmptyPasswordChecks();
+    this.currentUnmetCheck = null;
   }
 
   updateUserResource(file: File) {
