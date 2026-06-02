@@ -559,7 +559,7 @@ export class ThreatLensComponent implements OnDestroy {
 
   private toCountryKey(value: string): string {
     const normalized = this.threatLensService.normalizeCountryLabel(value);
-    return this.threatLensService.toCountryKey(normalized);
+    return this.threatLensService._toCountryKey(normalized);
   }
 
   private setLoading(value: boolean): void {

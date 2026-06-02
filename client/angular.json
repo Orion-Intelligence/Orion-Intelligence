@@ -43,6 +43,7 @@
               "raf",
               "rgbcolor",
               "html2canvas",
+              "i18n-iso-countries",
               "jspdf",
               "vis-data",
               "vis-network",

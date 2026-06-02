@@ -32,3 +32,4 @@ coverage==7.13.5
 pytest==9.0.2
 pytest-cov==7.0.0
 pytest-forked==1.6.0
+pycountry==26.2.16

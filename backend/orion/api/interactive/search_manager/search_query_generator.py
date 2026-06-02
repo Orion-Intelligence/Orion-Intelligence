@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Any
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.constants.constant import CONSTANTS, allowed_keys
+from orion.helper_manager.country_normalization import expand_country_filter_values
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX, ELASTIC_SEMANTIC, ELASTIC_ENUMS
@@ -69,6 +70,9 @@ class search_query_generator:
 
             if not isinstance(values, list):
                 values = [values]
+
+            if ioc_key == "m_country":
+                values = expand_country_filter_values(values)
 
             if ioc_key == "m_search_all":
                 es_fields = []

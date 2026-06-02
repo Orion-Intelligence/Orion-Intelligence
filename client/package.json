@@ -35,6 +35,7 @@
     "esri-loader": "^3.7.0",
     "franc-min": "6.2.0",
     "glob": "13.0.6",
+    "i18n-iso-countries": "7.14.0",
     "jspdf": "4.2.1",
     "jspdf-autotable": "^5.0.8",
     "leaflet": "^1.9.4",
