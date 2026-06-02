@@ -27,7 +27,11 @@ class nexus_manager:
 
     async def parse_chat(self, model: ReportChatRequest, user_id: str = "system", current_user=None, recoverable: bool = False):
         try:
-            history = await self.stream_manager.get_recent_history(current_user) if current_user is not None else []
+            history = await self.stream_manager.get_recent_history(
+                current_user,
+                model.message,
+                session_id=model.session_id or None,
+            ) if current_user is not None else []
             return StreamingResponse(
                 self.stream_manager.stream_response(
                     model.message,
@@ -44,10 +48,10 @@ class nexus_manager:
             return JSONResponse(status_code=500, content={"detail": "Something happened while calling api/chat"})
 
     async def cancel_chat(self, user_id: str = "system"):
-        return await self.stream_manager.cancel_chat(user_id=user_id)
+        return await self.stream_manager.chat_manager.cancel_chat(user_id=user_id)
 
     async def resume_chat(self, user_id: str = "system"):
-        stream = self.stream_manager.resume_chat(user_id=user_id)
+        stream = self.stream_manager.chat_manager.resume_chat(user_id=user_id)
         return StreamingResponse(
             stream,
             media_type="application/x-ndjson",
@@ -55,7 +59,7 @@ class nexus_manager:
         )
 
     async def clear_chat_session(self, current_user):
-        return await self.stream_manager.clear_chat_session(current_user)
+        return await self.stream_manager.chat_manager.clear_chat_session(current_user)
 
     async def analyze_text(self, model: NexusTextAnalysisRequest, user_id: str = "system"):
         try:

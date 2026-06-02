@@ -20,10 +20,17 @@ from orion.services.encryption_manager.key_manager import KeyManager
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantStatus, db_tenant_model
+from orion.services.mongo_manager.shared_model.db_chat_session_model import ChatHistoryMessage
+from orion.services.mongo_manager.shared_model.db_chat_session_model import ChatSession
+from orion.services.mongo_manager.shared_model.db_chat_session_model import ChatSessionHistory
+from orion.services.mongo_manager.shared_model.db_chat_session_model import db_chat_session_model
+from orion.services.mongo_manager.shared_model.db_chat_session_model import utc_now
+from orion.api.server.nexus_manager.history_embeddings.history_embedding_manager import HistoryEmbeddingManager
 
 
 class AccountManager:
     __instance = None
+    DEFAULT_CHAT_SESSION_ID = "default"
 
     def __init__(self):
         from orion.services.mongo_manager.mongo_controller import mongo_controller
@@ -245,28 +252,86 @@ class AccountManager:
         except Exception:
             return ""
 
-    async def get_current_user_chat_history(self, current_user):
+    async def get_current_user_chat_history(
+        self,
+        current_user,
+        include_embeddings: bool = False,
+        session_id: str | None = None,
+    ):
         user = await self._engine.find_one(db_user_account, db_user_account.username == current_user.username)
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
-        history = getattr(user, "chat_history", []) or []
+        chat_store = await self._engine.find_one(db_chat_session_model, db_chat_session_model.user_id == str(user.id))
+        session_id = session_id or self.DEFAULT_CHAT_SESSION_ID
+        session = self._find_chat_session(chat_store, session_id)
+        history = self._session_messages(session) if session else []
+        if not include_embeddings:
+            history = HistoryEmbeddingManager.strip_embeddings(history)
         return {"history": history, "chat_history": history}
 
     async def update_current_user_chat_history(self, chat_history, current_user):
         user = await self._engine.find_one(db_user_account, db_user_account.username == current_user.username)
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
-        user.chat_history = [message.model_dump() for message in chat_history.chat_history]
-        await self._engine.save(user)
+        session_id = str(getattr(chat_history, "session_id", None) or self.DEFAULT_CHAT_SESSION_ID)
+        chat_store = await self._engine.find_one(db_chat_session_model, db_chat_session_model.user_id == str(user.id))
+        if not chat_store:
+            chat_store = db_chat_session_model(user_id=str(user.id), chat_sessions=[])
+
+        session = self._find_chat_session(chat_store, session_id)
+        existing_history = self._session_messages(session) if session else []
+        stored_messages = await HistoryEmbeddingManager.prepare_for_storage(
+            chat_history,
+            existing_history,
+            user_name=user.username,
+        )
+        message_models = [ChatHistoryMessage(**message) for message in stored_messages]
+        now = utc_now()
+
+        if session:
+            if session.chat_history:
+                session.chat_history.messages = message_models
+            else:
+                session.chat_history = ChatSessionHistory(messages=message_models)
+            session.updated_at = now
+        else:
+            chat_store.chat_sessions.append(
+                ChatSession(
+                    session_id=session_id,
+                    created_at=now,
+                    updated_at=now,
+                    chat_history=ChatSessionHistory(messages=message_models),
+                )
+            )
+
+        await self._engine.save(chat_store)
         return {"message": "Chat history updated successfully"}
 
     async def clear_current_user_chat_history(self, current_user):
         user = await self._engine.find_one(db_user_account, db_user_account.username == current_user.username)
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
-        user.chat_history = []
-        await self._engine.save(user)
+        chat_store = await self._engine.find_one(db_chat_session_model, db_chat_session_model.user_id == str(user.id))
+        if chat_store:
+            chat_store.chat_sessions = []
+            await self._engine.save(chat_store)
         return {"cleared": True}
+
+    @staticmethod
+    def _find_chat_session(chat_store, session_id: str):
+        if not chat_store:
+            return None
+        for session in chat_store.chat_sessions or []:
+            if session.session_id == session_id:
+                return session
+        return None
+
+    @staticmethod
+    def _session_messages(session) -> list[dict]:
+        if not session:
+            return []
+        messages = session.chat_history.messages if session.chat_history else []
+        return [message.model_dump() for message in messages]
 
     async def get_node(self, current_user) -> NodeCallbackModel:
         user = current_user
