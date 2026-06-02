@@ -11,21 +11,17 @@
             <app-home-menu
               class="hidden flex-shrink-0 flex-col overflow-hidden border-r border-gray-200 dark:border-[#3a3b3c] bg-white dark:bg-[#242526] lg:flex"
               [isCollapsed]="isHomeMenuCollapsed()"
-              [activeTab]="activeHomeMenuTab()"
               [searchTerm]="homeMenuSearchTerm()"
               [jobs]="jobs()"
-              [customEntities]="customEntities()"
               [activeUsernames]="activeUsernames()"
               [isSmallScreen]="isSmallScreen()"
               (toggle)="onHomeMenuToggled()"
-              (tabSelected)="onHomeMenuTabSelected($event)"
               (searchChanged)="onHomeMenuSearchChanged($event)"
               (jobClicked)="handleCompletedJobClick($event)"
-              (entityClicked)="addEntityToGraph($event)"
-              (deleteEntity)="deleteCustomEntity($event)"
-              (cancelEntityScan)="entityManager()?.cancelEntityScan($event)"
               (cancelScan)="cancelScan($event)"
-              (cancelAllFetches)="cancelAllFetchesForUser($event)">
+              (cancelAllFetches)="cancelAllFetchesForUser($event)"
+              (scanRequested)="triggerScan()"
+              (imageUploadRequested)="triggerImageUpload()">
             </app-home-menu>
 
             <!-- Main content -->
@@ -121,6 +117,7 @@
                   (nodeClicked)="onNodeClicked($event)"
                   (platformNodeClicked)="onPlatformNodeClicked($event)"
                   (deleteCustomEntity)="deleteCustomEntity($event)"
+                  (cancelEntityScan)="entityManager()?.cancelEntityScan($event)"
                    (addEntityRequested)="entityManager()?.openAddEntityModal($event)">
                 </app-list-view>
               </div>

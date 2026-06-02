@@ -13,27 +13,12 @@
       <div class="flex-shrink-0 bg-white dark:bg-[#242526] border-b border-gray-200 dark:border-[#3a3b3c] px-4">
         <div class="flex gap-0 overflow-x-auto scrollbar-none">
           @for (userNode of activeUserNodes(); track trackById(i, userNode); let i = $index) {
-            <button
-              (click)="activeUserIndex.set(i)"
-              class="flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors flex-shrink-0 whitespace-nowrap"
-              [class.border-[#1877f2]]="activeUserIndex() === i"
-              [class.text-[#1877f2]]="activeUserIndex() === i"
-              [class.border-transparent]="activeUserIndex() !== i"
-              [class.text-gray-500]="activeUserIndex() !== i"
-              [class.dark:text-gray-400]="activeUserIndex() !== i"
-            >
+            <button (click)="activeUserIndex.set(i)" class="flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors flex-shrink-0 whitespace-nowrap" [class.border-[#1877f2]]="activeUserIndex() === i" [class.text-[#1877f2]]="activeUserIndex() === i" [class.border-transparent]="activeUserIndex() !== i" [class.text-gray-500]="activeUserIndex() !== i" [class.dark:text-gray-400]="activeUserIndex() !== i">
               <div class="w-6 h-6 rounded-full bg-[#1877f2] flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
                 {{ userNode.label.charAt(0).toUpperCase() }}
               </div>
               {{ userNode.label }}
-              <span
-                class="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
-                [class.bg-[#1877f2]]="activeUserIndex() === i"
-                [class.text-white]="activeUserIndex() === i"
-                [class.bg-gray-100]="activeUserIndex() !== i"
-                [class.dark:bg-[#3a3b3c]]="activeUserIndex() !== i"
-                [class.text-gray-500]="activeUserIndex() !== i"
-              >{{ getPlatformsForUserNode(userNode.id.toString()).length }}</span>
+              <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full" [class.bg-[#1877f2]]="activeUserIndex() === i" [class.text-white]="activeUserIndex() === i" [class.bg-gray-100]="activeUserIndex() !== i" [class.dark:bg-[#3a3b3c]]="activeUserIndex() !== i" [class.text-gray-500]="activeUserIndex() !== i">{{ getPlatformsForUserNode(userNode.id.toString()).length }}</span>
             </button>
           }
         </div>
@@ -56,24 +41,12 @@
                 <div class="w-14 h-14 rounded-full border-[3px] border-white dark:border-[#242526] bg-[#1877f2] flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
                   {{ userNode.label.charAt(0).toUpperCase() }}
                 </div>
-                <h3
-                  data-testid="social-list-user-summary-trigger"
-                  class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100 cursor-pointer hover:underline"
-                  (click)="nodeClicked.emit(userNode.id.toString())"
-                >{{ userNode.label }}</h3>
+                <h3 data-testid="social-list-user-summary-trigger" class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100 cursor-pointer hover:underline" (click)="nodeClicked.emit(userNode.id.toString())">{{ userNode.label }}</h3>
                 <p class="text-xs text-gray-400 mt-0.5">{{ getPlatformsForUserNode(userNode.id.toString()).length }} platforms active</p>
-                <button
-                  data-testid="social-list-manage-profiles"
-                  (click)="state.openManageProfilesModal(userNode.label)"
-                  class="mt-3 w-full py-1.5 rounded-lg text-xs font-semibold bg-[#1877f2] text-white hover:bg-blue-600 transition-colors"
-                >
+                <button data-testid="social-list-manage-profiles" (click)="state.openManageProfilesModal(userNode.label)" class="mt-3 w-full py-1.5 rounded-lg text-xs font-semibold bg-[#1877f2] text-white hover:bg-blue-600 transition-colors">
                   Manage Profiles
                 </button>
-                <button
-                  data-testid="social-list-profile-intelligence"
-                  (click)="state.openSummaryPopup(userNode.label)"
-                  class="mt-2 w-full py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 dark:bg-[#3a3b3c] dark:hover:bg-[#4a4b4c] transition-colors"
-                >
+                <button data-testid="social-list-profile-intelligence" (click)="state.openSummaryPopup(userNode.label)" class="mt-2 w-full py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 dark:bg-[#3a3b3c] dark:hover:bg-[#4a4b4c] transition-colors">
                   Profile Intelligence
                 </button>
               </div>
@@ -85,10 +58,7 @@
               <div class="flex flex-col gap-1">
                 @for (platformNode of getPlatformsForUserNode(userNode.id.toString()); track trackById($index, platformNode)) {
                   @if (getPlatformData(platformNode.id.toString()); as platformData) {
-                    <div
-                      (click)="platformNodeClicked.emit(platformNode.id.toString())"
-                      class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors"
-                    >
+                    <div (click)="platformNodeClicked.emit(platformNode.id.toString())" class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors">
                       <div class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-[#3a3b3c] flex items-center justify-center flex-shrink-0 overflow-hidden text-sm">
                         <app-social-icon [platformName]="platformNode.label"></app-social-icon>
                       </div>
@@ -115,16 +85,10 @@
                 <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Entities</p>
                 @for (entityNode of activeEntityNodesOnGraph(); track trackById(i, entityNode); let i = $index) {
                   @if (getEntityData(entityNode.id.toString()); as entity) {
-                    <div
-                      (click)="toggleEntity(entity.id)"
-                      class="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors"
-                    >
+                    <div (click)="toggleEntity(entity.id)" class="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors">
                       <i [class]="socialEntityUiService.getIconForEntityType(entity.type) + ' text-base text-[#1877f2] flex-shrink-0'"></i>
                       <span class="text-xs font-medium text-gray-800 dark:text-gray-200 truncate flex-1">{{ entity.label }}</span>
-                      <button
-                        (click)="$event.stopPropagation(); deleteCustomEntity.emit(entity.id)"
-                        class="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors flex-shrink-0"
-                      >
+                      <button (click)="$event.stopPropagation(); deleteCustomEntity.emit(entity.id)" class="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors flex-shrink-0">
                         <i class="bi bi-trash3 text-xs leading-none"></i>
                       </button>
                     </div>
@@ -536,27 +500,69 @@
                 }
               </div>
               <div class="my-3 h-px bg-gray-200 dark:bg-[#3a3b3c]"></div>
-<!--              <div class="px-1 text-xs uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">Saved Entities</div>-->
-<!--              @if (customEntities().length === 0) {-->
-<!--                <div class="px-1 py-1 text-xs text-gray-400 dark:text-gray-500">No entities added yet.</div>-->
-<!--              } @else {-->
-<!--                <div class="flex flex-col gap-2 max-h-40 overflow-y-auto">-->
-<!--                  @for (entity of customEntities(); track entity.id) {-->
-<!--                    <div class="w-full rounded-lg border border-gray-200 dark:border-[#3a3b3c] bg-gray-50 dark:bg-[#3a3b3c] p-2">-->
-<!--                      <div class="flex items-center justify-between gap-2">-->
-<!--                        <button (click)="nodeClicked.emit(entity.id)" class="flex min-w-0 flex-grow items-center gap-2 text-left text-sm text-gray-700 dark:text-gray-300 transition-colors hover:text-gray-900 dark:hover:text-gray-100">-->
-<!--                          <i [class]="socialEntityUiService.getIconForEntityType(entity.type)"></i>-->
-<!--                          <span class="truncate">{{ entity.label }}</span>-->
-<!--                          <span class="ml-1 text-[11px] uppercase tracking-wide text-gray-400 dark:text-gray-500">{{ entity.type.replace('-', ' ') }}</span>-->
-<!--                        </button>-->
-<!--                        <button (click)="deleteCustomEntity.emit(entity.id)" title="Delete Entity" class="flex h-6 w-6 items-center justify-center rounded-full text-gray-400 dark:text-gray-500 transition-colors hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500">-->
-<!--                          <i class="bi bi-trash3 text-xs"></i>-->
-<!--                        </button>-->
-<!--                      </div>-->
-<!--                    </div>-->
-<!--                  }-->
-<!--                </div>-->
-<!--              }-->
+              <div class="px-1 text-xs uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">Saved Entities</div>
+              @if (customEntities().length === 0) {
+                <div class="px-1 py-1 text-xs text-gray-400 dark:text-gray-500">No entities added yet.</div>
+              } @else {
+                <div class="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-1">
+                  @for (entity of customEntities(); track entity.id) {
+                    <div class="w-full rounded-xl border border-gray-200 dark:border-[#3a3b3c] bg-gray-50 dark:bg-[#3a3b3c] p-3 transition-all">
+                      <div class="flex items-center justify-between gap-2 mb-1.5">
+                        <div class="flex items-center gap-2 min-w-0">
+                          <div class="flex-shrink-0">
+                            @switch (entity.status) {
+                              @case ('in_progress') {
+                                <div class="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-[#1877f2]"></div>
+                              }
+                              @case ('pending') {
+                                <div class="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-[#1877f2]"></div>
+                              }
+                              @case ('added') {
+                                <i class="bi bi-check-circle-fill text-green-500 text-xs"></i>
+                              }
+                              @case ('failed') {
+                                <i class="bi bi-x-circle-fill text-red-400 text-xs"></i>
+                              }
+                            }
+                          </div>
+                          <button (click)="platformNodeClicked.emit(entity.id)" class="text-left min-w-0 hover:text-[#1877f2] transition-colors">
+                            <p class="text-xs font-bold text-gray-900 dark:text-gray-100 truncate mb-0">{{ entity.label }}</p>
+                          </button>
+                        </div>
+                        <div class="flex items-center gap-1">
+                          @if (entity.status === 'in_progress' || entity.status === 'pending') {
+                            <button (click)="cancelEntityScan.emit(entity.id)" title="Cancel Scan" class="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors">
+                              <i class="bi bi-x-lg text-[10px]"></i>
+                            </button>
+                          }
+                          <button (click)="deleteCustomEntity.emit(entity.id)" title="Delete Entity" class="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors">
+                            <i class="bi bi-trash3 text-[10px]"></i>
+                          </button>
+                        </div>
+                      </div>
+
+                      @if (showEntityProgress(entity)) {
+                        <div class="flex items-center gap-2 mb-1.5">
+                          <progress class="home-menu-progress-track flex-1" max="100" [value]="getAnimatedEntityProgress(entity)"></progress>
+                          <span class="text-[10px] font-mono text-gray-400">{{ getAnimatedEntityProgress(entity) }}%</span>
+                        </div>
+                      }
+
+                      <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                          <i [class]="socialEntityUiService.getIconForEntityType(entity.type) + ' text-[10px]'"></i>
+                          <span class="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500 truncate">{{ entity.type.replace('-', ' ') }}</span>
+                        </div>
+                        @if (entity.onGraph) {
+                          <span class="flex-shrink-0 inline-flex items-center gap-0.5 text-[9px] font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-1.5 py-0.5 rounded-full">
+                            <i class="bi bi-check-circle-fill text-[8px]"></i> Feed
+                          </span>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
             </div>
           </aside>
 

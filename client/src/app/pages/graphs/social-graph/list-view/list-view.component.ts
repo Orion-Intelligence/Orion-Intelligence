@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, computed, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed, inject, signal, effect, OnDestroy } from '@angular/core';
 
 import { NetworkData, PlatformResult, CustomEntity, NetworkNode, SocialPost } from '../../../../shared/model/social/social-scan.models';
 import { formatFollowers, formatKey, isUrl, isImageUrl } from '../../../../shared/utils/formatters';
@@ -15,64 +15,78 @@ import { getEntityRecordEntries, getEntityReportRecords, getScanResultsByUsernam
   imports: [SocialIconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ListViewComponent {
+export class ListViewComponent implements OnDestroy {
+  private readonly USER_COLORS = [ '#1877f2','#e03131','#2f9e44','#e67700','#7048e8','#0c8599' ];
+  private animationFrameId: number | null = null;
+
   networkData = input.required<NetworkData>();
   scanResults = input.required<Map<string, PlatformResult[]>>();
   customEntities = input.required<CustomEntity[]>();
   nodeClicked = output<string>();
   platformNodeClicked = output<string>();
   deleteCustomEntity = output<string>();
+  cancelEntityScan = output<string>();
   addEntityRequested = output<CustomEntity['type']>();
   public state = inject(SocialMapperStateService);
   readonly socialEntityUiService = inject(SocialEntityUiService);
   addSearchTerm = signal('');
   entityAddOptions: { type: CustomEntity['type']; label: string; iconClass: string; }[] = [ { type: 'email-breach', label: 'Add Email Breach', iconClass: 'bi bi-person-badge text-indigo-400' }, { type: 'social-scanner', label: 'Add Social Scanner', iconClass: 'bi bi-people text-indigo-400' }, { type: 'wanted-list', label: 'Add Wanted List', iconClass: 'bi bi-person-exclamation text-indigo-400' }, { type: 'national-identity', label: 'Add National Identity', iconClass: 'bi bi-card-text text-indigo-400' }, { type: 'playstore-scanner', label: 'Add Playstore Scanner', iconClass: 'bi bi-google-play text-indigo-400' }, { type: 'software-scanner', label: 'Add Software Scanner', iconClass: 'bi bi-window text-indigo-400' }, { type: 'phone', label: 'Add Phone', iconClass: 'bi bi-telephone text-indigo-400' }, { type: 'crypto-scanner', label: 'Add Crypto Scanner', iconClass: 'bi bi-currency-bitcoin text-green-400' } ];
   expandedEntityIds = signal<Set<string>>(new Set<string>());
+  animatedProgressByEntityId = signal<Record<string, number>>({});
   public formatFollowers = formatFollowers;
   public formatKey = formatKey;
   public isUrl = isUrl;
   public isImageUrl = isImageUrl;
   activeUserNodes = computed(() => this.networkData().nodes.filter(n => n.id.toString().startsWith('user-')));
   activeEntityNodesOnGraph = computed(() => this.networkData().nodes.filter(n => this.customEntities().some(e => e.id === n.id)));
-
   activeUserIndex = signal<number>(0);
 
-setActiveUserIndex(index: number) {
-  this.activeUserIndex.set(index);
-}
+  constructor() {
+    effect(() => {
+      const entities = this.customEntities();
+      this.pruneAnimatedEntityProgress(entities);
+      this.startProgressAnimation();
+    });
+  }
 
-nextUser() {
-  this.activeUserIndex.update(i =>
-    i < this.activeUserNodes().length - 1 ? i + 1 : 0
-  );
-}
+  ngOnDestroy() {
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+  }
 
-prevUser() {
-  this.activeUserIndex.update(i =>
-    i > 0 ? i - 1 : this.activeUserNodes().length - 1
-  );
-}
+  setActiveUserIndex(index: number) {
+    this.activeUserIndex.set(index);
+  }
 
-private readonly USER_COLORS = [
-  '#1877f2','#e03131','#2f9e44','#e67700','#7048e8','#0c8599'
-];
+  nextUser() {
+    this.activeUserIndex.update(i =>
+      i < this.activeUserNodes().length - 1 ? i + 1 : 0);
+  }
 
-getUserColor(index: number): string {
-  return this.USER_COLORS[index % this.USER_COLORS.length];
-}
+  prevUser() {
+    this.activeUserIndex.update(i =>
+      i > 0 ? i - 1 : this.activeUserNodes().length - 1);
+  }
 
-getUserColorLight(index: number): string {
-  const lights = ['#42a5f5','#ff6b6b','#69db7c','#ffa94d','#9775fa','#38d9a9'];
-  return lights[index % lights.length];
-}
+  getUserColor(index: number): string {
+    return this.USER_COLORS[index % this.USER_COLORS.length];
+  }
 
-getUserColorAlpha(index: number, alpha: number): string {
-  const hex = this.getUserColor(index);
-  const r = parseInt(hex.slice(1,3), 16);
-  const g = parseInt(hex.slice(3,5), 16);
-  const b = parseInt(hex.slice(5,7), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
-}
+  getUserColorLight(index: number): string {
+    const lights = ['#42a5f5','#ff6b6b','#69db7c','#ffa94d','#9775fa','#38d9a9'];
+    return lights[index % lights.length];
+  }
+
+  getUserColorAlpha(index: number, alpha: number): string {
+    const hex = this.getUserColor(index);
+    const r = parseInt(hex.slice(1,3), 16);
+    const g = parseInt(hex.slice(3,5), 16);
+    const b = parseInt(hex.slice(5,7), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
   getPlatformsForUserNode(userNodeId: string): NetworkNode[] {
     const username = userNodeId.replace('user-', '');
     return this.networkData().nodes.filter(n => n.id.toString().startsWith(`platform-${username}|`));
@@ -272,4 +286,69 @@ getUserColorAlpha(index: number, alpha: number): string {
     this.addSearchTerm.set(nextValue);
   }
 
+  getEntityProgress(entity: CustomEntity): number {
+    const value = entity.progress ?? (entity.status === 'added' ? 100 : 0);
+    return Math.max(0, Math.min(100, Math.round(value)));
+  }
+
+  getAnimatedEntityProgress(entity: CustomEntity): number {
+    const current = this.animatedProgressByEntityId()[entity.id];
+    if (current !== undefined) {
+      return Math.round(current);
+    }
+    return this.getEntityProgress(entity);
+  }
+
+  showEntityProgress(entity: CustomEntity): boolean {
+    return entity.status === 'in_progress' || entity.status === 'pending' || entity.status === 'failed' || this.getAnimatedEntityProgress(entity) > 0;
+  }
+
+  private pruneAnimatedEntityProgress(entities: CustomEntity[]) {
+    const next = this.socialEntityUiService.pruneAnimatedProgressMap(entities, this.animatedProgressByEntityId());
+    if (next) {
+      this.animatedProgressByEntityId.set(next);
+    }
+  }
+
+  private startProgressAnimation() {
+    if (this.animationFrameId !== null) {
+      return;
+    }
+    const tick = () => {
+      const currentEntityMap = this.animatedProgressByEntityId();
+      const nextEntityMap: Record<string, number> = { ...currentEntityMap };
+      let hasPendingAnimation = false;
+      let hasChanges = false;
+      for (const entity of this.customEntities()) {
+        if (entity.status === 'failed') {
+          continue;
+        }
+        const target = this.getEntityProgress(entity);
+        const current = nextEntityMap[entity.id] ?? target;
+        const diff = target - current;
+        if (Math.abs(diff) < 0.2) {
+          if (nextEntityMap[entity.id] !== target) {
+            nextEntityMap[entity.id] = target;
+            hasChanges = true;
+          }
+        }
+        else {
+          const easedStep = diff * 0.16;
+          nextEntityMap[entity.id] = current + easedStep;
+          hasPendingAnimation = true;
+          hasChanges = true;
+        }
+      }
+      if (hasChanges) {
+        this.animatedProgressByEntityId.set(nextEntityMap);
+      }
+      if (hasPendingAnimation) {
+        this.animationFrameId = requestAnimationFrame(tick);
+      }
+      else {
+        this.animationFrameId = null;
+      }
+    };
+    this.animationFrameId = requestAnimationFrame(tick);
+  }
 }

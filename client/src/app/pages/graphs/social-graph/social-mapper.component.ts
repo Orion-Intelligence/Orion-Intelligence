@@ -224,10 +224,6 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.updateState(state => state.isEntityMenuCollapsed.update(v => !v), false);
   }
 
-  onHomeMenuTabSelected(tab: 'history' | 'entities') {
-    this.updateState(state => state.activeHomeMenuTab.set(tab), false);
-  }
-
   onPlatformAliasInputChanged(event: Event) {
     const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
     this.platformAliasInput.set(nextValue);
@@ -258,13 +254,13 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   triggerScan() {
-    let username = this.searchTerm().trim();
+    let username = this.homeMenuSearchTerm().trim();
     if (username.startsWith('@')) {
       username = username.substring(1);
     }
     if (username) {
       this.initiateScan(username);
-      this.updateState(state => state.searchTerm.set(''), false);
+      this.updateState(state => state.homeMenuSearchTerm.set(''), false);
     }
   }
 
