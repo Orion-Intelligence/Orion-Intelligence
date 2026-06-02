@@ -1,7 +1,11 @@
 import re
 import unicodedata
 from collections.abc import Iterable
-import pycountry
+
+try:
+    import pycountry
+except ModuleNotFoundError:
+    pycountry = None
 
 _CONVENTIONAL_ALIASES = {
     "AE": ("UAE",),
@@ -49,9 +53,10 @@ def _country_values(country) -> list[str]:
 def _build_country_index() -> dict[str, str]:
     country_index = {}
 
-    for country in pycountry.countries:
-        for value in _country_values(country):
-            country_index[_lookup_key(value)] = country.alpha_2
+    if pycountry:
+        for country in pycountry.countries:
+            for value in _country_values(country):
+                country_index[_lookup_key(value)] = country.alpha_2
 
     for alpha_2, aliases in _CONVENTIONAL_ALIASES.items():
         for alias in aliases:
@@ -80,7 +85,7 @@ def expand_country_filter_values(values: Iterable[object]) -> list[str]:
             continue
 
         alpha_2 = resolve_country_alpha2(compact_value)
-        country = pycountry.countries.get(alpha_2=alpha_2) if alpha_2 else None
+        country = pycountry.countries.get(alpha_2=alpha_2) if pycountry and alpha_2 else None
         candidates = [compact_value]
 
         if country:
