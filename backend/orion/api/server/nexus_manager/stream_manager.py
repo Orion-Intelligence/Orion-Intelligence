@@ -2,7 +2,7 @@ import asyncio
 import ast
 import json
 import re
-from typing import Any
+from typing import Any, AsyncGenerator
 
 import httpx
 
@@ -83,31 +83,35 @@ class NexusStreamManager:
             return []
         return self._build_history_turns(stored_history.get("history") or [])
 
-    async def _stream(self,client: httpx.AsyncClient,endpoint: str,prompt: str,user_id: str,tool: str = "open_chat",type_name: str = "default",history: list[dict[str, str]] | None = None):
+    async def _stream(self,client: httpx.AsyncClient,endpoint: str,prompt: str,user_id: str,tool: str = "open_chat",type_name: str = "default",history: list[dict[str, str]] | None = None,payload: NexusRpcPayloadModel | None = None,recoverable: bool = False) -> AsyncGenerator[tuple[str, str, bool, Any], None]:
         response = None
         answer = ""
         try:
-            selected_tool = tool or "open_chat"
-            if selected_tool == "default":
-                selected_tool = "open_chat"
-            arguments: dict[str, Any] = {
-                "prompt": prompt,
-                "user_id": user_id,
-                "tool": selected_tool,
-                "type": type_name or "default",
-            }
-            if selected_tool == "api_payload":
-                arguments["api_name"] = type_name or "default"
-            if history:
-                arguments["history"] = history
+            if payload is None:
+                selected_tool = tool or "open_chat"
+                if selected_tool == "default":
+                    selected_tool = "open_chat"
+                arguments: dict[str, Any] = {
+                    "prompt": prompt,
+                    "user_id": user_id,
+                    "tool": selected_tool,
+                    "type": type_name or "default",
+                }
+                if recoverable:
+                    arguments["recoverable"] = True
+                if selected_tool == "api_payload":
+                    arguments["api_name"] = type_name or "default"
+                if history:
+                    arguments["history"] = history
+                payload = NexusRpcPayloadModel.tool_call(
+                    request_id=user_id if recoverable else "nexus-chat",
+                    name=selected_tool,
+                    arguments=arguments,
+                )
             request = client.build_request(
                 "POST",
                 endpoint,
-                json=NexusRpcPayloadModel.tool_call(
-                    request_id="nexus-chat",
-                    name=selected_tool,
-                    arguments=arguments,
-                ).model_dump(),
+                json=payload.model_dump(),
             )
             response = await client.send(request, stream=True)
             if response.status_code != 200:
@@ -150,14 +154,14 @@ class NexusStreamManager:
             if response is not None:
                 await response.aclose()
 
-    async def stream_response(self, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", history: list[dict[str, str]] | None = None):
+    async def stream_response(self, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", history: list[dict[str, str]] | None = None, recoverable: bool = False) -> AsyncGenerator[str, None]:
         endpoint = f"{self.base_url}/mcp"
         client = httpx.AsyncClient(timeout=None)
         current_task = asyncio.current_task()
         if current_task is not None:
             self.active_chat_tasks[user_id] = current_task
         try:
-            async for line, answer, failed, tool_request in self._stream(client, endpoint, prompt, user_id, tool=tool, type_name=type_name, history=history):
+            async for line, answer, failed, tool_request in self._stream(client, endpoint, prompt, user_id, tool=tool, type_name=type_name, history=history, recoverable=recoverable):
                 if line:
                     yield line
                 if failed:
@@ -183,6 +187,7 @@ class NexusStreamManager:
                         user_id,
                         tool="summarizer",
                         history=history,
+                        recoverable=recoverable,
                     ):
                         if summary_line:
                             yield summary_line
@@ -202,11 +207,40 @@ class NexusStreamManager:
                 self.active_chat_tasks.pop(user_id, None)
             await client.aclose()
 
-    async def cancel_chat(self, user_id: str = "system"):
+    async def resume_chat(self, user_id: str = "system") -> AsyncGenerator[str, None]:
+        endpoint = f"{self.base_url}/mcp"
+        client = httpx.AsyncClient(timeout=None)
+        try:
+            payload = NexusRpcPayloadModel.tool_resume(request_id=user_id, user_id=user_id)
+            async for line, answer, failed, _ in self._stream(client, endpoint, "", user_id, payload=payload):
+                if line:
+                    yield line
+                if failed:
+                    return
+                if answer:
+                    yield json.dumps({"output": {"response": answer.strip()}, "done": True, "error": False}, ensure_ascii=True) + "\n"
+                    return
+        except Exception as _:
+            yield json.dumps({"output": {"response": "Something happened while calling api/chat"}, "done": True, "error": True}, ensure_ascii=True) + "\n"
+        finally:
+            await client.aclose()
+
+    async def cancel_chat(self, user_id: str = "system") -> dict[str, bool]:
         local_task = self.active_chat_tasks.pop(user_id, None)
         if local_task is not None and not local_task.done():
             local_task.cancel()
-        return {"cancelled": local_task is not None}
+        try:
+            async with httpx.AsyncClient(timeout=30) as client:
+                response = await client.post(
+                    f"{self.base_url}/mcp",
+                    json=NexusRpcPayloadModel.tool_cancel(request_id=user_id, user_id=user_id).model_dump(),
+                )
+                payload = response.json() if response.status_code == 200 else {}
+                result = payload.get("result") if isinstance(payload, dict) else {}
+                nexus_cancelled = bool(result.get("cancelled")) if isinstance(result, dict) else False
+        except Exception:
+            nexus_cancelled = False
+        return {"cancelled": local_task is not None or nexus_cancelled}
 
     async def clear_chat_session(self, current_user):
         return await AccountManager.get_instance().clear_current_user_chat_history(current_user)

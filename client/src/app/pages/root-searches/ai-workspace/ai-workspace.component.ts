@@ -17,7 +17,7 @@ import { BotMessageActionsComponent } from './bot-message-actions/bot-message-ac
 import { MessageScrollRailComponent } from './message-scroll-rail/message-scroll-rail.component';
 import { MarkdownPipe } from '../../../shared/pipes/markdown.pipe';
 type ChatHistoryMessage = {
-  sender: 'user' | 'bot';
+  sender: AiWorkspaceMessage['sender'];
   text: string;
   time: string;
 };
@@ -71,13 +71,13 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.cancelActiveNexusRequest();
+    this.detachActiveNexusRequest();
     this.stoppedRequestIds.clear();
   }
 
   @HostListener('window:beforeunload')
   onBeforeUnload(): void {
-    this.cancelActiveNexusRequest();
+    this.detachActiveNexusRequest();
   }
 
   sendMessage(): void {
@@ -91,7 +91,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     }
 
     this.cancelMessageEdit();
-    this.cancelActiveNexusRequest();
+    this.detachActiveNexusRequest();
     this.messages = [...this.messages, this.createMessage('user', text)];
     this.persistChatHistory();
     this.messageDraft = '';
@@ -148,7 +148,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       this.scrollToBottom();
     };
 
-    this.activeChatRequest = this.nexusChatService.streamNexusChat(payload).subscribe({
+    this.activeChatRequest = this.nexusChatService.streamNexusChat(payload, { recoverable: true }).subscribe({
       next: (chunk) => {
         if (requestId !== this.chatRequestId) {
           return;
@@ -226,13 +226,17 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.isStreamingReply.set(false);
     this.streamingMessageId.set(null);
     this.nexusStep.set('');
+    this.persistChatHistory();
     this.scrollToBottom();
   }
 
   startNewChat(): void {
+    if (this.isSending() || this.isStreamingReply()) {
+      return;
+    }
     this.chatRequestId += 1;
     this.stoppedRequestIds.clear();
-    this.cancelActiveNexusRequest();
+    this.detachActiveNexusRequest();
     this.isSending.set(false);
     this.isStreamingReply.set(false);
     this.streamingMessageId.set(null);
@@ -318,7 +322,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     }
 
     this.chatRequestId += 1;
-    this.cancelActiveNexusRequest();
+    this.detachActiveNexusRequest();
     this.isSending.set(false);
     this.isStreamingReply.set(false);
     this.streamingMessageId.set(null);
@@ -387,6 +391,11 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.activeChatRequest = undefined;
   }
 
+  private detachActiveNexusRequest(): void {
+    this.activeChatRequest?.unsubscribe();
+    this.activeChatRequest = undefined;
+  }
+
   private createErrorMessage(text: string): AiWorkspaceMessage {
     return {
       id: crypto.randomUUID(),
@@ -422,7 +431,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       next: (response) => {
         const history = response?.chat_history || [];
         const messages = history
-          .filter((message) => message.sender === 'user' || message.sender === 'bot')
+          .filter((message) => message.sender === 'user' || message.sender === 'bot' || message.sender === 'error')
           .map((message) => ({
             id: crypto.randomUUID(),
             sender: message.sender,
@@ -432,6 +441,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         this.messages = this.addMissingAiFailureMessages(messages);
         this.isLoadingHistory.set(false);
         this.scrollToBottom();
+        this.resumeActiveNexusStream();
       },
       error: () => {
         this.isLoadingHistory.set(false);
@@ -444,7 +454,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     const result: AiWorkspaceMessage[] = [];
     messages.forEach((message, index) => {
       result.push(message);
-      if (message.sender === 'user' && index < messages.length - 1 && messages[index + 1]?.sender !== 'bot') {
+      const nextSender = messages[index + 1]?.sender;
+      if (message.sender === 'user' && index < messages.length - 1 && nextSender !== 'bot' && nextSender !== 'error') {
         result.push(this.createErrorMessage(message.text));
       }
     });
@@ -452,7 +463,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   private buildChatHistoryPayload(): ChatHistoryMessage[] {
-    const filtered = this.messages.filter((message): message is AiWorkspaceMessage & { sender: 'user' | 'bot'; } => message.sender === 'user' || message.sender === 'bot');
+    const filtered = this.messages.filter((message) => this.shouldPersistHistoryMessage(message));
     let userOverflow = 0;
     let botOverflow = 0;
 
@@ -460,7 +471,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       if (message.sender === 'user') {
         userOverflow += 1;
       }
-      else {
+      else if (message.sender === 'bot') {
         botOverflow += 1;
       }
     }
@@ -468,7 +479,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     userOverflow = Math.max(0, userOverflow - 100);
     botOverflow = Math.max(0, botOverflow - 100);
 
-    const kept: Array<AiWorkspaceMessage & { sender: 'user' | 'bot'; }> = [];
+    const kept: AiWorkspaceMessage[] = [];
     for (const message of filtered) {
       if (message.sender === 'user' && userOverflow > 0) {
         userOverflow -= 1;
@@ -486,6 +497,13 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       text: message.text,
       time: message.time.toISOString(),
     }));
+  }
+
+  private shouldPersistHistoryMessage(message: AiWorkspaceMessage): boolean {
+    if (message.sender === 'user' || message.sender === 'bot') {
+      return true;
+    }
+    return message.sender === 'error' && message.text.trim() === 'Message canceled.';
   }
 
   private scrollToBottom(): void {
@@ -507,6 +525,79 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       }
 
       container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    });
+  }
+
+  private resumeActiveNexusStream(): void {
+    if (this.activeChatRequest || this.messages.at(-1)?.sender !== 'user') {
+      return;
+    }
+
+    const requestId = ++this.chatRequestId;
+    let reply = '';
+    let receivedReply = false;
+    let botMessage: AiWorkspaceMessage | undefined;
+    this.isSending.set(true);
+    this.isStreamingReply.set(false);
+    this.streamingMessageId.set(null);
+    this.nexusStep.set('');
+
+    const updateReply = (value: string) => {
+      if (requestId !== this.chatRequestId) {
+        return;
+      }
+      receivedReply = true;
+      if (!botMessage) {
+        botMessage = this.createMessage('bot', '');
+        this.messages = [...this.messages, botMessage];
+        this.isStreamingReply.set(true);
+        this.streamingMessageId.set(botMessage.id);
+      }
+      this.messages = this.messages.map(message => message.id === botMessage?.id ? { ...message, text: value } : message);
+    };
+
+    this.activeChatRequest = this.nexusChatService.resumeNexusChat().subscribe({
+      next: (chunk) => {
+        if (requestId !== this.chatRequestId) {
+          return;
+        }
+        if (chunk.status) {
+          this.nexusStep.set(chunk.status);
+        }
+        if (chunk.delta) {
+          reply += chunk.delta;
+          updateReply(reply);
+        }
+        if (chunk.response) {
+          reply = chunk.response;
+          updateReply(reply);
+        }
+      },
+      complete: () => {
+        if (requestId !== this.chatRequestId) {
+          return;
+        }
+        this.activeChatRequest = undefined;
+        this.isSending.set(false);
+        this.isStreamingReply.set(false);
+        this.streamingMessageId.set(null);
+        this.nexusStep.set('');
+        if (receivedReply && reply.trim()) {
+          this.persistChatHistory();
+        }
+        this.scrollToBottom();
+      },
+      error: () => {
+        if (requestId !== this.chatRequestId) {
+          return;
+        }
+        this.activeChatRequest = undefined;
+        this.isSending.set(false);
+        this.isStreamingReply.set(false);
+        this.streamingMessageId.set(null);
+        this.nexusStep.set('');
+        this.scrollToBottom();
+      },
     });
   }
 

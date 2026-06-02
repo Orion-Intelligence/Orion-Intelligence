@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 
 class ChatHistoryMessageModel(BaseModel):
-    sender: Literal["user", "bot"]
+    sender: Literal["user", "bot", "error"]
     text: str
     time: str
 

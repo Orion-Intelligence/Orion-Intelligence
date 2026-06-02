@@ -25,7 +25,7 @@ class nexus_manager:
         if type(self).__instance is None:
             type(self).__instance = self
 
-    async def parse_chat(self, model: ReportChatRequest, user_id: str = "system", current_user=None):
+    async def parse_chat(self, model: ReportChatRequest, user_id: str = "system", current_user=None, recoverable: bool = False):
         try:
             history = await self.stream_manager.get_recent_history(current_user) if current_user is not None else []
             return StreamingResponse(
@@ -35,6 +35,7 @@ class nexus_manager:
                     tool=model.tool or "open_chat",
                     type_name=model.type or "default",
                     history=history,
+                    recoverable=recoverable,
                 ),
                 media_type="application/x-ndjson",
                 headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
@@ -44,6 +45,14 @@ class nexus_manager:
 
     async def cancel_chat(self, user_id: str = "system"):
         return await self.stream_manager.cancel_chat(user_id=user_id)
+
+    async def resume_chat(self, user_id: str = "system"):
+        stream = self.stream_manager.resume_chat(user_id=user_id)
+        return StreamingResponse(
+            stream,
+            media_type="application/x-ndjson",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        )
 
     async def clear_chat_session(self, current_user):
         return await self.stream_manager.clear_chat_session(current_user)
