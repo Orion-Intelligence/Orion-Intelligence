@@ -148,6 +148,13 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
           this.botStep = chunk.status;
           this.cdr.detectChanges();
         }
+        if (chunk.error) {
+          reply = chunk.response || chunk.delta || 'Something went wrong. try again.';
+          this.chatMessages = botMessage ? this.chatMessages.filter(message => message.id !== botMessage?.id) : this.chatMessages;
+          this.showErrorMessage(userMessage, reply);
+          this.scrollToNewMessage();
+          return;
+        }
         if (chunk.delta) {
           reply += chunk.delta;
           updateReply(reply);
@@ -174,11 +181,11 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private showErrorMessage(originalMessage: string): void {
+  private showErrorMessage(originalMessage: string, errorText = 'Something went wrong. try again.'): void {
     this.chatMessages.push({
       id: crypto.randomUUID(),
       sender: 'error',
-      text: 'Something went wrong. try again.',
+      text: errorText.trim() || 'Something went wrong. try again.',
       time: new Date(),
       retryPayload: originalMessage
     });

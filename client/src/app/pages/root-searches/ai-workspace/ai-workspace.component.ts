@@ -1,8 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { HttpParams } from '@angular/common/http';
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ApiService } from '../../../shared/services/api.service';
@@ -20,12 +18,6 @@ type ChatHistoryMessage = {
   sender: AiWorkspaceMessage['sender'];
   text: string;
   time: string;
-};
-
-type SharedChatMessage = {
-  sender: 'user' | 'bot';
-  text: string;
-  time: Date;
 };
 
 @Component({
@@ -155,6 +147,14 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         }
         if (chunk.status) {
           this.nexusStep.set(chunk.status);
+        }
+        if (chunk.error) {
+          reply = chunk.response || chunk.delta || 'Something went wrong. Try again.';
+          this.isStreamingReply.set(false);
+          this.streamingMessageId.set(null);
+          this.messages = botMessage ? this.messages.filter(message => message.id !== botMessage?.id) : this.messages;
+          this.messages = [...this.messages, this.createErrorMessage(text, reply)];
+          return;
         }
         if (chunk.delta) {
           reply += chunk.delta;
@@ -396,11 +396,11 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.activeChatRequest = undefined;
   }
 
-  private createErrorMessage(text: string): AiWorkspaceMessage {
+  private createErrorMessage(text: string, errorText = 'Something went wrong. Try again.'): AiWorkspaceMessage {
     return {
       id: crypto.randomUUID(),
       sender: 'error',
-      text: 'Something went wrong. Try again.',
+      text: errorText.trim() || 'Something went wrong. Try again.',
       time: new Date(),
       retryPayload: text,
     };
@@ -536,6 +536,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     const requestId = ++this.chatRequestId;
     let reply = '';
     let receivedReply = false;
+    const retryPayload = this.messages.at(-1)?.sender === 'user' ? this.messages.at(-1)!.text : '';
     let botMessage: AiWorkspaceMessage | undefined;
     this.isSending.set(true);
     this.isStreamingReply.set(false);
@@ -555,7 +556,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       }
       this.messages = this.messages.map(message => message.id === botMessage?.id ? { ...message, text: value } : message);
     };
-
     this.activeChatRequest = this.nexusChatService.resumeNexusChat().subscribe({
       next: (chunk) => {
         if (requestId !== this.chatRequestId) {
@@ -563,6 +563,16 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         }
         if (chunk.status) {
           this.nexusStep.set(chunk.status);
+        }
+        if (chunk.error) {
+          reply = chunk.response || chunk.delta || 'Something went wrong. Try again.';
+          this.isStreamingReply.set(false);
+          this.streamingMessageId.set(null);
+          this.messages = botMessage ? this.messages.filter(message => message.id !== botMessage?.id) : this.messages;
+          if (retryPayload) {
+            this.messages = [...this.messages, this.createErrorMessage(retryPayload, reply)];
+          }
+          return;
         }
         if (chunk.delta) {
           reply += chunk.delta;
@@ -619,72 +629,4 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     return value.trim().match(/[A-Za-z0-9_]+|[^\sA-Za-z0-9_]/g)?.length ?? 0;
   }
 
-}
-
-@Component({
-  selector: 'app-chat-share',
-  standalone: true,
-  imports: [CommonModule, DatePipe, MessageScrollRailComponent, MarkdownPipe],
-  templateUrl: './chat-share/chat-share.component.html',
-})
-export class ChatShareComponent implements OnInit, OnDestroy {
-  private previousTheme: 'light-theme' | 'dark-theme' | null = null;
-  private previousTitle = '';
-
-  messages: SharedChatMessage[] = [];
-  expiresAt: Date | null = null;
-  isLoading = true;
-  errorMessage = '';
-
-  constructor(private readonly route: ActivatedRoute, private readonly api: ApiService, private readonly title: Title) { }
-
-  ngOnInit(): void {
-    this.previousTitle = this.title.getTitle();
-    this.title.setTitle('Shared Chat');
-    this.forceDarkTheme();
-    const shareId = this.route.snapshot.paramMap.get('shareId') || '';
-    const token = this.route.snapshot.queryParamMap.get('token') || '';
-    if (!shareId || !token) {
-      this.errorMessage = 'Invalid share link.';
-      this.isLoading = false;
-      return;
-    }
-    this.api.get<{ messages: Array<Omit<SharedChatMessage, 'time'> & { time: string; }>; expiresAt: string; }>(`public/chat-shares/${shareId}`, {
-      params: new HttpParams().set('token', token)
-    }).subscribe({
-      next: response => {
-        this.messages = (response.messages || [])
-          .filter(message => message.sender === 'user' || message.sender === 'bot')
-          .map(message => ({ ...message, time: new Date(message.time) }));
-        this.expiresAt = response.expiresAt ? new Date(response.expiresAt) : null;
-        this.isLoading = false;
-      },
-      error: err => {
-        this.errorMessage = err?.error?.detail || 'This share link is unavailable.';
-        this.isLoading = false;
-      }
-    });
-  }
-
-  ngOnDestroy(): void {
-    document.body.classList.remove('light-theme', 'dark-theme');
-    if (this.previousTheme) {
-      document.body.classList.add(this.previousTheme);
-    }
-    if (this.previousTitle) {
-      this.title.setTitle(this.previousTitle);
-    }
-  }
-
-  trackMessage(index: number): number {
-    return index;
-  }
-
-  private forceDarkTheme(): void {
-    this.previousTheme = document.body.classList.contains('light-theme') ? 'light-theme'
-      : document.body.classList.contains('dark-theme') ? 'dark-theme'
-        : null;
-    document.body.classList.remove('light-theme');
-    document.body.classList.add('dark-theme');
-  }
 }

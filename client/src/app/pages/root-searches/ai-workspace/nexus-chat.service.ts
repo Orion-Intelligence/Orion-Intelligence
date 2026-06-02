@@ -335,6 +335,7 @@ export class NexusChatService {
       const response = output?.['response'];
       const status = this.asRecord(parsed?.status);
       const statusMessage = status?.['message'] ?? parsed?.status_message;
+      const isError = Boolean(parsed?.error);
       const error = this.asRecord(parsed?.error);
       let detail = parsed?.detail ?? error?.['message'];
       if (typeof detail === 'string' && detail.toLowerCase().includes('stream is already active')) {
@@ -347,10 +348,10 @@ export class NexusChatService {
         observer.next({ delta: this.streamValueToText(delta) });
       }
       if (response !== undefined) {
-        observer.next({ response: this.streamValueToText(response) });
+        observer.next({ response: this.streamValueToText(response), error: isError || undefined });
       }
       else if (detail !== undefined) {
-        observer.next({ response: this.streamValueToText(detail) });
+        observer.next({ response: this.streamValueToText(detail), error: isError || undefined });
       }
     }
     return rest;
