@@ -8,7 +8,7 @@
     </div>
   } @else {
 
-    
+
     @if (activeUserNodes().length > 1) {
       <div class="flex-shrink-0 bg-white dark:bg-[#242526] border-b border-gray-200 dark:border-[#3a3b3c] px-4">
         <div class="flex gap-0 overflow-x-auto scrollbar-none">
@@ -25,15 +25,15 @@
       </div>
     }
 
-    
+
     <div class="flex-1 min-h-0 overflow-y-auto">
       <div class="flex gap-4 p-4 max-w-6xl mx-auto items-start">
 
-        
+
         <aside class="hidden lg:flex w-[240px] flex-shrink-0 flex-col gap-3">
 
           @if (activeUserNodes()[state.activeUserIndex()]; as userNode) {
-            
+
             <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/30 overflow-hidden flex-shrink-0">
               <div class="h-16 bg-gradient-to-r from-[#1877f2] to-[#42a5f5]"></div>
               <div class="px-4 pb-4 flex flex-col items-center text-center -mt-7">
@@ -51,9 +51,9 @@
               </div>
             </div>
 
-            
+
             <div class="sticky top-4 flex flex-col gap-3 max-h-[calc(100vh-5rem)] overflow-y-auto pr-3">
-              
+
               <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/20 p-4 flex-shrink-0">
                 <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Platforms</p>
                 <div class="flex flex-col gap-1">
@@ -84,17 +84,17 @@
 
         </aside>
 
-        
+
         <div class="flex-1 min-w-0 flex flex-col gap-3">
 
           @if (activeUserNodes()[state.activeUserIndex()]; as userNode) {
-            
+
             @for (platformNode of getPlatformsForUserNode(userNode.id.toString()); track trackById($index, platformNode)) {
               @if (getPlatformData(platformNode.id.toString()); as platformData) {
 
                 <article [id]="platformNode.id" class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] overflow-hidden animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
 
-                  
+
                   <div class="flex items-start gap-3 px-4 pt-4">
                     <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-[#3a3b3c] flex items-center justify-center flex-shrink-0 overflow-hidden text-lg">
                       <app-social-icon [platformName]="platformNode.label"></app-social-icon>
@@ -121,12 +121,21 @@
                     </div>
                   </div>
 
-                  
+
                   @if (getProfileBio(platformData)) {
                     <p class="px-4 pt-3 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{{ getProfileBio(platformData) }}</p>
                   }
 
-                  
+                       <div class="flex items-center gap-3 px-4 py-3 mt-3 border-t border-gray-100 dark:border-[#3a3b3c]">
+                    <button data-testid="social-list-followers-following" (click)="state.openFollowerScanPopup(platformNode.id.toString())" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-[#1877f2] text-white hover:bg-blue-600 transition-colors">
+                      <i class="bi bi-people-fill"></i> Followers &amp; Following
+                    </button>
+                    <a data-testid="social-list-platform-visit-profile" [href]="platformData.url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 ml-auto text-sm font-semibold text-[#1877f2] hover:underline">
+                      Visit Profile <i class="bi bi-link-45deg"></i>
+                    </a>
+                  </div>
+
+                  <!--
                   <div class="px-4 pt-3 grid grid-cols-4 gap-2">
                     <div class="flex flex-col items-center gap-0.5 bg-gray-50 dark:bg-[#3a3b3c] rounded-xl py-2.5">
                       <i class="bi bi-grid-3x3-gap-fill text-amber-400 text-base"></i>
@@ -149,8 +158,9 @@
                       <span class="text-[10px] text-gray-400">Likes</span>
                     </div>
                   </div>
+                  -->
 
-                  
+
                   @if (getRecentPosts(platformData).length > 0) {
                     <div class="px-4 pt-4">
                       <div class="flex items-center justify-between mb-2">
@@ -220,49 +230,44 @@
                     </div>
                   }
 
-                  
+
                   @if (getFollowers(platformData).length > 0 || getFollowing(platformData).length > 0) {
-                    <div class="px-4 pt-3">
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        @if (getFollowers(platformData).length > 0) {
-                          <div class="bg-gray-50 dark:bg-[#3a3b3c] rounded-xl p-3 border border-gray-200 dark:border-[#3a3b3c]">
-                            <div class="flex items-center justify-between mb-2">
-                              <span class="text-[11px] font-bold uppercase tracking-wide text-[#1877f2]">Followers</span>
-                              <span class="text-[10px] font-mono bg-blue-50 dark:bg-blue-500/10 text-[#1877f2] border border-blue-200 dark:border-blue-500/20 px-2 py-0.5 rounded-full">{{ getFollowers(platformData).length }}</span>
-                            </div>
-                            @for (username of getFollowerPreview(platformData); track trackByUsername($index, username)) {
-                              <div class="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-[#4a4b4c] transition-colors">
-                                <span class="text-xs font-mono text-gray-700 dark:text-gray-300 truncate">&#64;{{ username }}</span>
-                                <a [href]="getProfileUrl(platformData, username)" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="w-5 h-5 flex-shrink-0 rounded-full flex items-center justify-center text-[#1877f2] bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors">
-                                  <i class="bi bi-link-45deg text-[10px] leading-none"></i>
-                                </a>
+                    <div class="px-4 pt-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                      @if (getFollowers(platformData).length > 0) {
+                        <div class="flex items-center gap-2 cursor-pointer hover:underline" (click)="state.openFollowerScanPopup(platformNode.id.toString())">
+                          <div class="flex -space-x-1.5">
+                            @for (username of getFollowerPreview(platformData).slice(0, 3); track trackByUsername($index, username)) {
+                              <div class="w-5 h-5 rounded-full bg-blue-100 dark:bg-[#4a4b4c] border border-white dark:border-[#242526] flex items-center justify-center text-[8px] font-bold text-[#1877f2] dark:text-gray-300 relative z-10" [title]="username">
+                                {{ username.charAt(0).toUpperCase() }}
                               </div>
                             }
                           </div>
-                        }
-                        @if (getFollowing(platformData).length > 0) {
-                          <div class="bg-gray-50 dark:bg-[#3a3b3c] rounded-xl p-3 border border-gray-200 dark:border-[#3a3b3c]">
-                            <div class="flex items-center justify-between mb-2">
-                              <span class="text-[11px] font-bold uppercase tracking-wide text-cyan-500">Following</span>
-                              <span class="text-[10px] font-mono bg-cyan-50 dark:bg-cyan-500/10 text-cyan-500 border border-cyan-200 dark:border-cyan-500/20 px-2 py-0.5 rounded-full">{{ getFollowing(platformData).length }}</span>
-                            </div>
-                            @for (username of getFollowingPreview(platformData); track trackByUsername($index, username)) {
-                              <div class="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-[#4a4b4c] transition-colors">
-                                <span class="text-xs font-mono text-gray-700 dark:text-gray-300 truncate">&#64;{{ username }}</span>
-                                <a [href]="getProfileUrl(platformData, username)" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="w-5 h-5 flex-shrink-0 rounded-full flex items-center justify-center text-cyan-500 bg-cyan-50 dark:bg-cyan-500/10 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition-colors">
-                                  <i class="bi bi-link-45deg text-[10px] leading-none"></i>
-                                </a>
+                          <span>{{ getFollowers(platformData).length }} followers</span>
+                        </div>
+                      } @else {
+                        <div></div>
+                      }
+
+                      @if (getFollowing(platformData).length > 0) {
+                        <div class="flex items-center gap-2 cursor-pointer hover:underline" (click)="state.openFollowerScanPopup(platformNode.id.toString())">
+                          <span>{{ getFollowing(platformData).length }} following</span>
+                          <div class="flex -space-x-1.5 flex-row-reverse">
+                            @for (username of getFollowingPreview(platformData).slice(0, 3); track trackByUsername($index, username)) {
+                              <div class="w-5 h-5 rounded-full bg-cyan-100 dark:bg-[#4a4b4c] border border-white dark:border-[#242526] flex items-center justify-center text-[8px] font-bold text-cyan-600 dark:text-gray-300 relative z-10" [title]="username">
+                                {{ username.charAt(0).toUpperCase() }}
                               </div>
                             }
                           </div>
-                        }
-                      </div>
+                        </div>
+                      } @else {
+                        <div></div>
+                      }
                     </div>
                   }
 
-                  
+
                   @if (getProfileDetailEntries(platformData).length > 0) {
-                    <div class="px-4 pt-3">
+                    <div class="px-4 py-3">
                       <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Profile Details</p>
                       <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
                         @for (item of getProfileDetailEntries(platformData); track trackByKey($index, item)) {
@@ -275,10 +280,11 @@
                     </div>
                   }
 
-                  
+
+                  <!-- Raw metadata -->
                   @if (getMetadataEntries(platformNode.id.toString()); as metadataEntries) {
                     @if (metadataEntries.length > 0) {
-                      <div class="px-4 pt-3">
+                      <div class="px-4 py-3">
                         <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Raw API Metadata</p>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
                           @for (item of metadataEntries; track trackByKey($index, item)) {
@@ -302,23 +308,38 @@
                     }
                   }
 
-                  
-                  <div class="flex items-center gap-3 px-4 py-3 mt-3 border-t border-gray-100 dark:border-[#3a3b3c]">
-                    <button data-testid="social-list-followers-following" (click)="state.openFollowerScanPopup(platformNode.id.toString())" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-[#1877f2] text-white hover:bg-blue-600 transition-colors">
-                      <i class="bi bi-people-fill"></i> Followers &amp; Following
-                    </button>
-                    <a data-testid="social-list-platform-visit-profile" [href]="platformData.url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 ml-auto text-sm font-semibold text-[#1877f2] hover:underline">
-                      Visit Profile <i class="bi bi-link-45deg"></i>
-                    </a>
+                  <div class="px-4 py-3 flex items-center justify-between text-gray-800 dark:text-gray-200 border-t border-gray-100 dark:border-[#3a3b3c]">
+                    <div class="flex items-center gap-1.5 flex-1 justify-center">
+                      <i class="bi bi-grid-3x3-gap-fill text-amber-400 text-sm"></i>
+                      <span class="text-sm font-bold tabular-nums">{{ getStatValue(platformData, 'total_posts') }}</span>
+                      <span class="text-[11px] text-gray-400 font-medium">Posts</span>
+                    </div>
+                    <div class="h-6 w-px bg-gray-200 dark:bg-[#4a4b4c]"></div>
+                    <div class="flex items-center gap-1.5 flex-1 justify-center">
+                      <i class="bi bi-people-fill text-[#1877f2] text-sm"></i>
+                      <span class="text-sm font-bold tabular-nums">{{ getStatValue(platformData, 'total_followers') }}</span>
+                      <span class="text-[11px] text-gray-400 font-medium">Followers</span>
+                    </div>
+                    <div class="h-6 w-px bg-gray-200 dark:bg-[#4a4b4c]"></div>
+                    <div class="flex items-center gap-1.5 flex-1 justify-center">
+                      <i class="bi bi-person-plus-fill text-cyan-400 text-sm"></i>
+                      <span class="text-sm font-bold tabular-nums">{{ getStatValue(platformData, 'total_following') }}</span>
+                      <span class="text-[11px] text-gray-400 font-medium">Following</span>
+                    </div>
+                    <div class="h-6 w-px bg-gray-200 dark:bg-[#4a4b4c]"></div>
+                    <div class="flex items-center gap-1.5 flex-1 justify-center">
+                      <i class="bi bi-heart-fill text-rose-400 text-sm"></i>
+                      <span class="text-sm font-bold tabular-nums">{{ getStatValue(platformData, 'total_likes') }}</span>
+                      <span class="text-[11px] text-gray-400 font-medium">Likes</span>
+                    </div>
                   </div>
-
                 </article>
 
               }
             }
           }
 
-          
+
           @if (displayEntitiesInFeed().length > 0) {
             <div class="flex items-center gap-3 py-1 text-xs font-semibold uppercase tracking-widest text-gray-400">
               <div class="flex-1 h-px bg-gray-200 dark:bg-[#3a3b3c]"></div>
@@ -387,9 +408,9 @@
 
         </div>
 
-        
+
         <aside class="hidden xl:flex w-[240px] flex-shrink-0 flex-col gap-3 sticky top-4">
-          
+
           <div class="mt-0 bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/10 p-4 flex-shrink-0">
             <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Add Entity</p>
             <div class="mb-3">
@@ -405,7 +426,7 @@
             </div>
           </div>
 
-          
+
           <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/10 p-4 flex-shrink-0">
             <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Saved Entities</p>
             @if (customEntities().length === 0) {
