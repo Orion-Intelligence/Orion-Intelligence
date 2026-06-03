@@ -61,4 +61,9 @@ async def robots_txt():
 )
 async def search_stealerlog(q: str = Query(...)):
     param = search_credential_param_model(q=q)
-    return await search_model.getInstance().search_stealerlogs_persona_breach(param)
+    try:
+        return await search_model.getInstance().search_stealerlogs_persona_breach(param)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Failed to search stealer logs") from exc
