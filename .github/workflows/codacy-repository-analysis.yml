@@ -1,15 +1,7 @@
 name: Codacy Repository Analysis
 
 on:
-  push:
-    branches:
-      - trusted-main
-      - devel
-  pull_request:
-    branches:
-      - trusted-main
-  schedule:
-    - cron: '47 6 * * 2'
+  workflow_dispatch:
 
 permissions:
   contents: read
