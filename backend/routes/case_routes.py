@@ -18,8 +18,8 @@ case_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
     ],
 )
-async def get_cases(current_user=Depends(get_current_user)):
-    return await CaseManager.get_instance().get_cases(current_user)
+async def get_cases(archived: bool = Query(False), current_user=Depends(get_current_user)):
+    return await CaseManager.get_instance().get_cases(current_user, archived)
 
 
 @case_routes.post(
@@ -96,6 +96,16 @@ async def get_artifact_reports(
         q=q,
         limit=limit,
     )
+
+@case_routes.put(
+    "/api/profile/cases/{case_id}/archive",
+    status_code=200,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+    ],
+)
+async def archive_case(case_id: str, current_user=Depends(get_current_user)):
+    return await CaseManager.get_instance().archive_case(case_id, current_user)
 
 @case_routes.get(
     "/api/profile/cases/{case_id}",

@@ -293,6 +293,9 @@ class CaseResponse(BaseModel):
     createdAt: datetime
     updatedAt: datetime
     closedAt: Optional[datetime] = None
+    isArchived: bool = False
+    archivedAt: Optional[datetime] = None
+    archivedBy: str = ""
     artifacts: List[dict] = Field(default_factory=list)
     entities: List[dict] = Field(default_factory=list)
     comments: List[dict] = Field(default_factory=list)

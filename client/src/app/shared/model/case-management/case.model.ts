@@ -569,4 +569,7 @@ export interface Case {
     tasks: CaseTask[];
     linkedCases: CaseLink[];
     closure?: CaseClosure | null;
+    isArchived?: boolean;
+    archivedAt?: Date | string | null;
+    archivedBy?: string;
 }

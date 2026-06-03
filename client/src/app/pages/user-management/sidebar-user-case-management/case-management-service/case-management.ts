@@ -9,8 +9,8 @@ type ArtifactFileUploadResponse = { fileName: string; fileType: string; fileSize
 export class CaseManagement {
   constructor(private api: ApiService) { }
 
-  getCases(): Observable<Case[]> {
-    return this.api.get<Case[]>('profile/cases');
+  getCases(archived = false): Observable<Case[]> {
+    return this.api.get<Case[]>(`profile/cases?archived=${archived}`);
   }
 
   createCase(caseData: CaseRequest): Observable<Case> {
@@ -64,6 +64,11 @@ export class CaseManagement {
     params.set('limit', String(limit));
 
     return this.api.get<ArtifactReportOption[]>(`profile/cases/artifact-reports?${params.toString()}`);
+  }
+
+  archiveCase(caseId: string): Observable<{ success: boolean; message?: string }> {
+    return this.api.put<{ success: boolean; message?: string }>(`profile/cases/${caseId}/archive`,
+      {});
   }
 
 }
