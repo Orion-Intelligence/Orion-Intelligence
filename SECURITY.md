@@ -5,7 +5,7 @@ We kindly ask that you follow responsible disclosure guidelines, keeping in mind
 To report a vulnerability, please contact us privately via one of the following methods:
 
     Reporting form: Submit a security advisory
-    Email: support@orionintelligence.org
+    Email: Use the private reporting form above
 
 We aim to acknowledge reports within 8 hours and address any critical issues with short-term fixes within 2 days,
 whenever possible.

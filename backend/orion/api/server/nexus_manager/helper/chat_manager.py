@@ -16,7 +16,7 @@ class ChatManager:
 
     async def resume_chat(self, user_id: str = "system") -> AsyncGenerator[str, None]:
         endpoint = f"{self.base_url}/mcp"
-        client = httpx.AsyncClient(timeout=None)
+        client = httpx.AsyncClient(timeout=30 * 60)
         try:
             payload = NexusRpcPayloadModel.tool_resume(request_id=user_id, user_id=user_id)
             async for line, answer, failed, _ in self._stream(client, endpoint, "", user_id, payload=payload):

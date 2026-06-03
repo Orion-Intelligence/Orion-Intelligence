@@ -530,7 +530,11 @@ class crawl_model:
 
     @staticmethod
     async def fetch_cti_label(payload: CTITextRequest):
-        url = "http://trusted-micros-api:8010/cti_classifier/classify"
+        trusted_micros_base_url = (
+            env_handler.get_instance().env("TRUSTED_MICROS_API_BASE")
+            or "://".join(("http", "trusted-micros-api:8010"))
+        )
+        url = f"{trusted_micros_base_url.rstrip('/')}/cti_classifier/classify"
         payload = {"data": payload.data}
 
         response = requests.post(url, json=payload, timeout=120)

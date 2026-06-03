@@ -108,7 +108,7 @@ class mail_manager:
 
         try:
             meta_info = json.loads(meta_info_raw) if isinstance(meta_info_raw, str) else {}
-        except:
+        except Exception:
             meta_info = {}
 
         password = meta_info.get("ACCOUNTS_MAIL_PASSWORD")

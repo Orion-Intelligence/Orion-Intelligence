@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Injectable, SecurityContext } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import { franc } from 'franc-min';
 import { LANGUAGE_MAP } from '../constants/shared-enums';
 import { ConsolidatedParamModel } from '../model/results/consolidated/consolidated.param.model';
@@ -128,7 +128,7 @@ export class HelperService {
   }
   
 
-  highlightWords(text: string): SafeHtml {
+  highlightWords(text: string): string {
     if (!text) {
       return '';
     }
@@ -180,7 +180,7 @@ export class HelperService {
     else {
       renderedHtml = escapeHtml(text.length > 500 ? text.substring(0, 500) : text);
     }
-    return this.sanitizer.bypassSecurityTrustHtml(renderedHtml);
+    return this.sanitizer.sanitize(SecurityContext.HTML, renderedHtml) || '';
   }
 
   private convertToCSV(data: any): string {

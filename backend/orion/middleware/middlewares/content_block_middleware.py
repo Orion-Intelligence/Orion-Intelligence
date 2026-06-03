@@ -29,7 +29,7 @@ class content_block_middleware(BaseHTTPMiddleware):
         if token:
             try:
                 user = await session_manager.get_instance().get_current_user(token)
-            except:
+            except Exception:
                 user = None
 
         if not user:

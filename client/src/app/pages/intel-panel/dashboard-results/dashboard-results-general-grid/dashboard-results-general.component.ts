@@ -1,6 +1,5 @@
 import { AfterViewInit, Component, OnInit, inject, input } from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
-import { SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HelperService } from '../../../../shared/services/helper.service';
 import { GeneralResultItem } from '../../../../shared/model/results/general/general.callback.model';
@@ -18,7 +17,7 @@ import { ProxyController } from '../../../../shared/services/proxy-controller';
   standalone: true
 })
 export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
-  private highlightCache = new Map<string, SafeHtml>();
+  private highlightCache = new Map<string, string>();
   private readonly proxied_resource = inject(ProxyController);
 
   protected readonly window = window;
@@ -40,7 +39,7 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
     this.scrollService.scrollToSavedPosition();
   }
 
-  highlightWords(text: any): SafeHtml {
+  highlightWords(text: any): string {
     const key = JSON.stringify(text);
     if (this.highlightCache.has(key)) {
       return this.highlightCache.get(key)!;

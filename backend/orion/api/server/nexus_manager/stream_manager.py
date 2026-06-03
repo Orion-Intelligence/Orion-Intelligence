@@ -146,7 +146,7 @@ class NexusStreamManager:
 
     async def stream_response(self, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", history: list[dict[str, str]] | None = None, recoverable: bool = False) -> AsyncGenerator[str, None]:
         endpoint = f"{self.base_url}/mcp"
-        client = httpx.AsyncClient(timeout=None)
+        client = httpx.AsyncClient(timeout=30 * 60)
         current_task = asyncio.current_task()
         if current_task is not None:
             self.active_chat_tasks[user_id] = current_task
