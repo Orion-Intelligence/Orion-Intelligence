@@ -148,7 +148,7 @@ def test_create_user_saves_new_user_when_inputs_are_valid(tmp_path, monkeypatch)
     }
     assert len(engine.saved) == 1
     assert engine.saved[0].username == "valid_user"
-    assert engine.saved[0].password_reset_required is False
+    assert engine.saved[0].password_reset_required is True
 
 
 def test_create_user_rejects_invalid_username_before_save(tmp_path, monkeypatch):

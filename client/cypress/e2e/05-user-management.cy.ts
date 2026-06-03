@@ -63,9 +63,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
 
     createUsers.forEach((u) => addUser(u));
     createUsers.forEach((u) => {
-      if (u.username !== testUsers[forcedResetUserKey]?.username) {
-        setPasswordResetRequired(u.username, false);
-      }
+      setPasswordResetRequired(u.username, u.username === testUsers[forcedResetUserKey]?.username);
     });
     cy.logout();
   });

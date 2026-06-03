@@ -116,7 +116,7 @@ class AccountManager:
                 status=data.status,
                 subscription=data.subscription,
                 licenses=data.licenses,
-                password_reset_required=False, )
+                password_reset_required=True, )
 
             await engine.save(user)
             return {"message": "User created successfully", "username": username, "email": email}
