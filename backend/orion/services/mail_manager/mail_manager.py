@@ -151,7 +151,7 @@ class mail_manager:
 
             return True
 
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=400,
                 detail=f"Invalid network configuration in system settings"

@@ -66,11 +66,11 @@ create_parser_zip() {
 }
 
 stop_local_frontend_server() {
-    local pids
-    pids="$(get_port_pids 4200)"
-    if [ -n "$pids" ]; then
-        echo "Stopping local frontend process on port 4200: $pids"
-        kill $pids 2>/dev/null || true
+    local pids=()
+    readarray -t pids < <(get_port_pids 4200)
+    if [ "${#pids[@]}" -gt 0 ]; then
+        echo "Stopping local frontend process on port 4200: ${pids[*]}"
+        kill "${pids[@]}" 2>/dev/null || true
         sleep 2
     fi
 }

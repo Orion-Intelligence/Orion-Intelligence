@@ -7,6 +7,7 @@
   outline: none;
   box-shadow: 0 0 0 2px rgb(87 165 235 / 32%);
 }
+
 .dashboard-scanner-collapsed-icon {
   filter: brightness(0) saturate(100%) invert(100%) !important;
   opacity: 1 !important;

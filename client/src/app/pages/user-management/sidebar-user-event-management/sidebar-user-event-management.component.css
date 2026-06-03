@@ -1,6 +1,6 @@
 .ui-event-management-expand-side {
   scrollbar-width: thin;
-  scrollbar-color: rgba(148, 163, 184, 0.55) transparent;
+  scrollbar-color: rgb(148 163 184 / 55%) transparent;
   padding-bottom: 12px;
 }
 
@@ -9,6 +9,6 @@
 }
 
 .ui-event-management-expand-side::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.45);
+  background: rgb(148 163 184 / 45%);
   border-radius: 999px;
 }

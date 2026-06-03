@@ -11,8 +11,6 @@
   box-shadow: none !important;
   background-color: transparent !important;
   appearance: textfield;
-  -webkit-appearance: none;
-  -moz-appearance: textfield;
 }
 
 .light-theme .ui-graph-popup-panel input.geo-stepper-input:focus,
@@ -36,6 +34,5 @@
 
 .geo-stepper-input::-webkit-outer-spin-button,
 .geo-stepper-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
   margin: 0;
 }

@@ -1,12 +1,12 @@
 /*
  Popup UI Reference (reuse in other popups)
  1) Overlay:
-    - background: rgba(0, 0, 0, 0.55)
+    - background: rgb(0 0 0 / 55%)
     - no backdrop blur
  2) Container:
     - border: 1px solid var(--color-border)
     - background: var(--color-blue-830)
-    - shadow: 0 0 30px rgba(0, 0, 0, 0.3)
+    - shadow: 0 0 30px rgb(0 0 0 / 30%)
  3) Header/Footer separators:
     - border-bottom/top: 1px solid var(--color-border)
  4) Close button:
@@ -26,7 +26,7 @@
 .add-tenant_wrapper {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.55);
+    background: rgb(0 0 0 / 55%);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -44,7 +44,7 @@
     position: relative;
     overflow-y: auto;
     color: var(--color-text1);
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 30px rgb(0 0 0 / 30%);
 }
 
 .add-tenant_header .add-tenant_heading {
@@ -150,7 +150,7 @@
 }
 
 .add-tenant_btn-outline:hover {
-    background: rgba(160, 184, 209, 0.14);
+    background: rgb(160 184 209 / 14%);
     border-color: #c3d4e6;
 }
 
@@ -165,5 +165,5 @@
 
 
 .light-theme .add-tenant_container {
-    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.2);
+    box-shadow: 0 16px 40px rgb(15 23 42 / 20%);
 }

@@ -11,6 +11,11 @@ from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX, ELASTIC_
 from orion.api.interactive.search_manager.search_semantic_controller import search_semantic_controller
 
 
+DATE_ONLY_FORMAT = "%Y-%m-%d"
+DATE_START_UTC_FORMAT = "%Y-%m-%dT00:00:00+00:00"
+DATE_END_UTC_FORMAT = "%Y-%m-%dT23:59:59+00:00"
+
+
 class search_query_generator:
     @staticmethod
     def build_es_from_tagged(parsed, mapping):
@@ -443,14 +448,14 @@ class search_query_generator:
             try:
                 parts = m_date_range.split(",")
                 if len(parts) == 2:
-                    from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT00:00:00+00:00")
-                    to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT23:59:59+00:00")
+                    from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_START_UTC_FORMAT)
+                    to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_END_UTC_FORMAT)
                     must_clauses.append(search_query_generator.build_date_priority_filter(from_date, to_date, date_priority_fields))
             except ValueError:
                 pass
         elif m_date_range != "":
-            to_date = datetime.now(timezone.utc).strftime("%Y-%m-%dT23:59:59+00:00")
-            from_date = (datetime.now(timezone.utc) - timedelta(days=150)).strftime("%Y-%m-%dT00:00:00+00:00")
+            to_date = datetime.now(timezone.utc).strftime(DATE_END_UTC_FORMAT)
+            from_date = (datetime.now(timezone.utc) - timedelta(days=150)).strftime(DATE_START_UTC_FORMAT)
             must_clauses.append(search_query_generator.build_date_priority_filter(from_date, to_date, date_priority_fields))
 
         if p_query_model.category:
@@ -561,8 +566,8 @@ class search_query_generator:
         if p_query_model.daterange:
             parts = p_query_model.daterange.split(",")
             if len(parts) == 2:
-                from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT00:00:00+00:00")
-                to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT23:59:59+00:00")
+                from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_START_UTC_FORMAT)
+                to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_END_UTC_FORMAT)
 
                 must_clauses.append({
                     "bool": {
@@ -631,8 +636,8 @@ class search_query_generator:
             parts = date_range.split(',')
             if len(parts) == 2:
                 try:
-                    from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
-                    to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+                    from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_ONLY_FORMAT)
+                    to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_ONLY_FORMAT)
                     date_should_clauses = [
                         {"range": {date_field: {"gte": from_date, "lte": to_date}}}
                     ]

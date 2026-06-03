@@ -222,7 +222,7 @@ class elastic_controller:
                     "_source": prepared,
                 }
 
-        success_count, errors = await es_helpers.async_bulk(
+        await es_helpers.async_bulk(
             self.__m_core_connection,
             action_generator(),
             chunk_size=2000,
