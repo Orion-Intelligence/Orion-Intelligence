@@ -1,3 +1,4 @@
+---
 exclude_paths:
   - "client/build/**"
   - "client/coverage/**"
@@ -7,6 +8,7 @@ exclude_paths:
   - "client/src/assets/**"
   - "client/*.config.*"
   - "client/cypress/**"
+  - "README.md"
   - "**/*.html"
   - "**/*.md"
   - "**/*.sh"
@@ -41,6 +43,7 @@ engines:
       - "client/src/assets/**"
       - "client/*.config.*"
       - "client/cypress/**"
+      - "README.md"
       - "**/*.html"
       - "**/__init__.py"
       - "**/eslint.config.js"
