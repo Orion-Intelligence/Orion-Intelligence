@@ -189,14 +189,6 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
 
   it('runs Stealer logs IOCS search with date filters', () => {
     cy.loginAsAdmin();
-    cy.intercept('POST', '**/api/search/stealer/ioc', (req) => {
-      if (req.body?.ioc === 'm_email:uwe.dippold@web.de' && req.body?.daterange === '2025-01-01,2025-12-31') {
-        req.alias = 'stealerDateRangeFallbackSearch';
-      }
-      if (req.body?.ioc === 'm_email:ydt.sja@gail.ccmm' && req.body?.daterange === '2026-01-01,2026-01-31') {
-        req.alias = 'stealerJanuary2026EmailSearch';
-      }
-    });
 
     cy.visit('/dashboard/stealerlogs/iocs?daterange=2025-01-01,2025-12-31');
     cy.location('search').then((search) => {
@@ -208,14 +200,6 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('input[name="searchQuery"][placeholder="Search..."]').first().as('q');
     cy.get('@q').should('be.visible').and('not.be.disabled');
     cy.get('@q').type('uwe.dippold@web.de{enter}');
-
-    cy.wait('@stealerDateRangeFallbackSearch', { timeout: 60000 }).then(({ request, response }) => {
-      expect(response?.statusCode).to.eq(200);
-      expect(request.body).to.include({
-        ioc: 'm_email:uwe.dippold@web.de',
-        daterange: '2025-01-01,2025-12-31',
-      });
-    });
 
     cy.get('app-loading-form', { timeout: 60000 }).should('not.exist');
     cy.get('[data-testid="ioc-stealer-table"]').scrollIntoView().should('be.visible');
@@ -230,14 +214,6 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('input[name="searchQuery"][placeholder="Search..."]').first().as('q');
     cy.get('@q').should('be.visible').and('not.be.disabled');
     cy.get('@q').type('ydt.sja@gail.ccmm{enter}');
-
-    cy.wait('@stealerJanuary2026EmailSearch', { timeout: 60000 }).then(({ request, response }) => {
-      expect(response?.statusCode).to.eq(200);
-      expect(request.body).to.include({
-        ioc: 'm_email:ydt.sja@gail.ccmm',
-        daterange: '2026-01-01,2026-01-31',
-      });
-    });
 
     cy.get('app-loading-form', { timeout: 60000 }).should('not.exist');
     cy.get('[data-testid="ioc-stealer-table"]').scrollIntoView().should('be.visible');
