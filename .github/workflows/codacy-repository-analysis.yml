@@ -1,4 +1,4 @@
-name: Codacy Security Scan
+name: Codacy Repository Analysis
 
 on:
   push:
@@ -9,18 +9,15 @@ on:
     branches:
       - trusted-main
   schedule:
-    - cron: '33 6 * * 2'
+    - cron: '47 6 * * 2'
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
-  codacy-security-scan:
+  codacy-repository-analysis:
     runs-on: ubuntu-latest
-    name: Codacy Security Scan
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
+    name: Codacy Repository Analysis
 
     steps:
       - name: Checkout repository
@@ -32,17 +29,10 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      - name: Run Codacy Analysis for GitHub Code Scanning
+      - name: Upload Codacy repository analysis results
         uses: codacy/codacy-analysis-cli-action@v4
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           verbose: true
-          output: results.sarif
-          format: sarif
-          gh-code-scanning-compat: true
+          upload: true
           max-allowed-issues: 2147483647
-
-      - name: Upload SARIF results to GitHub
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: results.sarif
