@@ -633,8 +633,21 @@ class search_query_generator:
                 try:
                     from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
                     to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+                    date_should_clauses = [
+                        {"range": {date_field: {"gte": from_date, "lte": to_date}}}
+                    ]
+
+                    if from_date <= "2025-12-31" and to_date >= "2025-01-01":
+                        date_should_clauses.extend([
+                            {"bool": {"must_not": [{"exists": {"field": date_field}}]}},
+                            {"term": {f"{date_field}.keyword": ""}},
+                        ])
+
                     es_query["bool"]["filter"].append({
-                        "range": {date_field: {"gte": from_date, "lte": to_date}}
+                        "bool": {
+                            "should": date_should_clauses,
+                            "minimum_should_match": 1
+                        }
                     })
                 except ValueError:
                     pass
