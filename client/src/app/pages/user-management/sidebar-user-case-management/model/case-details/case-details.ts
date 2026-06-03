@@ -85,6 +85,8 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   pendingNewArtifactFileInput: HTMLInputElement | null = null;
   artifactReports: ArtifactReportOption[] = [];
   isArtifactReportsLoading = false;
+  isArchiveConfirmationOpen = false;
+  isArchivingCase = false;
 
   constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef) {
     super();
@@ -436,6 +438,14 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     });
   }
 
+  openArchiveConfirmation(): void {
+    if (!this.caseData?.closure || this.caseData.isArchived || this.isArchivingCase) {
+      return;
+    }
+
+    this.isArchiveConfirmationOpen = true;
+  }
+
   openShareConfirmation(): void {
     if (!this.caseData || this.isShareCreating) {
       return;
@@ -471,6 +481,30 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return 'Revoking share links will expire all previously shared links for this case. Do you want to continue?';
     }
     return '';
+  }
+
+  archiveCase(confirmed: boolean): void {
+    this.isArchiveConfirmationOpen = false;
+
+    if (!confirmed || !this.caseData || this.isArchivingCase) {
+      return;
+    }
+
+    this.isArchivingCase = true;
+
+    this.caseService.archiveCase(this.caseData.caseId).subscribe({
+      next: () => {
+        this.isArchivingCase = false;
+        if (this.caseData) {
+          this.caseData.isArchived = true;
+        }
+        this.messageNotificationService.show('Case archived successfully', 'success');
+      },
+      error: err => {
+        this.isArchivingCase = false;
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to archive case');
+      }
+    });
   }
 
   private shareCase(): void {
@@ -681,32 +715,50 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     if (!this.editedCase) {
       return;
     }
+
     const relatedEntity = this.getRelatedEntities(this.editedCase)[index];
+
     if (!relatedEntity) {
       return;
     }
+
     this.editedCase.entities = this.editedCase.entities.filter(entity => entity.entityId !== relatedEntity.entityId);
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase),
+      'Related entity removed successfully');
   }
 
   removeArtifact(index: number): void {
     if (!this.editedCase?.artifacts) {
       return;
     }
-    this.editedCase.artifacts.splice(index, 1);
+
+    this.editedCase.artifacts = this.editedCase.artifacts.filter((_, i) => i !== index);
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase),
+      'Artifact removed successfully');
   }
 
   removeTask(index: number): void {
     if (!this.editedCase?.tasks) {
       return;
     }
-    this.editedCase.tasks.splice(index, 1);
+
+    this.editedCase.tasks = this.editedCase.tasks.filter((_, i) => i !== index);
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase),
+      'Task removed successfully');
   }
 
   removeLinkedCase(index: number): void {
     if (!this.editedCase?.linkedCases) {
       return;
     }
-    this.editedCase.linkedCases.splice(index, 1);
+
+    this.editedCase.linkedCases = this.editedCase.linkedCases.filter((_, i) => i !== index);
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase),
+      'Linked case removed successfully');
   }
 
   hasCaseChanged(): boolean {

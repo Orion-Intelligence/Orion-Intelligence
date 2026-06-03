@@ -119,10 +119,11 @@ class CaseManager:
             if not target_record or not CaseHelperMethods.can_view_case(target_record, current_user):
                 raise HTTPException(status_code=400, detail="Linked cases must be cases you can access")
 
-    async def get_cases(self, current_user) -> list[CaseResponse]:
+    async def get_cases(self, current_user, archived: bool = False) -> list[CaseResponse]:
         if CaseHelperMethods.is_maintainer(current_user):
             records = await self._engine.find(
-                db_case_model, db_case_model.tenant_uuid == str(current_user.tenant_uuid)
+                db_case_model, (db_case_model.tenant_uuid == str(current_user.tenant_uuid)) 
+                & (db_case_model.isArchived == archived)
             )
         else:
             current_actor_id = CaseHelperMethods.actor_id(current_user)
@@ -130,6 +131,7 @@ class CaseManager:
                 db_case_model,
                 {
                     "tenant_uuid": str(current_user.tenant_uuid),
+                    "isArchived": archived,
                     "$or": [
                         {"createdBy": current_actor_id},
                         {"assignedAnalystIds": {"$elemMatch": {"$eq": current_actor_id}}},
@@ -285,6 +287,9 @@ class CaseManager:
                 f"Case update failed: caseId={case_id}, case_not_found",
             )
             raise HTTPException(status_code=404, detail="Case not found")
+        
+        if record.isArchived:
+            raise HTTPException(status_code=403, detail="Archived cases cannot be edited")
 
         current_actor_id = CaseHelperMethods.actor_id(current_user)
         server_now = utc_now()
@@ -416,6 +421,8 @@ class CaseManager:
         )
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
+        if record.isArchived:
+            raise HTTPException(status_code=403, detail="Archived cases cannot be deleted")     
         if record.closure is not None:
             raise HTTPException(status_code=403, detail="Closed cases cannot be deleted")
         if not CaseHelperMethods.is_maintainer(current_user):
@@ -675,3 +682,37 @@ class CaseManager:
                 break
 
         return items
+    
+    async def archive_case(self, case_id: str, current_user) -> dict:
+        record = await self._engine.find_one(
+            db_case_model,
+            (db_case_model.caseId == case_id)
+            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
+        )
+
+        if not record:
+            raise HTTPException(status_code=404, detail="Case not found")
+
+        if not CaseHelperMethods.can_view_case(record, current_user):
+            raise HTTPException(status_code=403, detail="Access forbidden")
+
+        if record.closure is None:
+            raise HTTPException(status_code=400, detail="Only closed cases can be archived")
+
+        if record.isArchived:
+            return {"success": True, "message": "Case is already archived"}
+
+        record.isArchived = True
+        record.archivedAt = utc_now()
+        record.archivedBy = CaseHelperMethods.actor_id(current_user)
+        record.updatedAt = utc_now()
+
+        await self._engine.save(record)
+
+        await AuditLogManager.get_instance().register(
+            str(current_user.tenant_uuid),
+            str(current_user.id),
+            f"Case archived: caseId={case_id}",
+        )
+
+        return {"success": True}

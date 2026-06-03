@@ -19,6 +19,7 @@ export class SidebarUserCaseManagement implements OnInit {
   showAddCasePopup = false;
   isDeleteConfirmationOpen = false;
   selectedDeleteCaseId = '';
+  showArchivedCases = false;
 
   constructor(private router: Router, private caseService: CaseManagement, private licenseService: LicenseService) { }
 
@@ -28,7 +29,7 @@ export class SidebarUserCaseManagement implements OnInit {
 
   loadCases(): void {
     this.isLoading = true;
-    this.caseService.getCases().subscribe({
+    this.caseService.getCases(this.showArchivedCases).subscribe({
       next: (cases) => {
         this.cases = cases;
         this.isLoading = false;
@@ -113,5 +114,10 @@ export class SidebarUserCaseManagement implements OnInit {
     return value
       .replace(/[_-]/g, ' ')
       .replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  toggleArchivedCases(): void {
+    this.showArchivedCases = !this.showArchivedCases;
+    this.loadCases();
   }
 }
