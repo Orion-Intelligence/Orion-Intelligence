@@ -210,6 +210,25 @@ async def test_nexus_workspace_chat(_payload: dict | None = Body(default=None)):
 
 
 @test_routes.post(
+    "/api/get/current/user/chat-history",
+    include_in_schema=False,
+    dependencies=ANALYST_DEPS,
+)
+async def test_get_current_user_chat_history():
+    return {"history": [], "chat_history": []}
+
+
+@test_routes.post(
+    "/api/update/current/user/chat-history",
+    include_in_schema=False,
+    dependencies=ANALYST_DEPS,
+)
+async def test_update_current_user_chat_history(data: dict = Body(...)):
+    history = data.get("chat_history", [])
+    return {"history": history, "chat_history": history}
+
+
+@test_routes.post(
     "/api/cross/search",
     include_in_schema=False,
     dependencies=ANALYST_SCAN_DEPS,
