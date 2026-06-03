@@ -162,7 +162,7 @@
                                   <label data-testid="tenant-status-toggle" class="mt-1 flex cursor-pointer items-center justify-between gap-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2.5 transition hover:border-sky-400/35">
                                     <span class="text-[12px] font-semibold text-[var(--color-text2)]">Active</span>
                                     <span class="pointer-events-none relative h-5 w-9 shrink-0">
-                                      <input type="checkbox" class="peer h-0 w-0 opacity-0" [ngModel]="tenant.status === TenantStatus.ACTIVE" (ngModelChange)="tenant.status = $event ? TenantStatus.ACTIVE : TenantStatus.DISABLE" />
+                                      <input type="checkbox" class="peer h-0 w-0 opacity-0" [ngModel]="tenant.status !== TenantStatus.DISABLE" (ngModelChange)="tenant.status = $event ? (tenant.status === TenantStatus.ONBOARDING ? TenantStatus.ONBOARDING : TenantStatus.ACTIVE) : TenantStatus.DISABLE" />
                                       <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-200 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[2px] before:left-[2px] before:h-4 before:w-4 before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-200 peer-checked:before:translate-x-4"></span>
                                     </span>
                                   </label>
@@ -275,7 +275,7 @@
                           <label data-testid="tenant-status-toggle" class="mt-1 flex cursor-pointer items-center justify-between gap-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2.5 transition hover:border-sky-400/35">
                             <span class="text-[12px] font-semibold text-[var(--color-text2)]">Active</span>
                             <span class="pointer-events-none relative h-5 w-9 shrink-0">
-                              <input type="checkbox" class="peer h-0 w-0 opacity-0" [ngModel]="tenant.status === TenantStatus.ACTIVE" (ngModelChange)="tenant.status = $event ? TenantStatus.ACTIVE : TenantStatus.DISABLE" />
+                              <input type="checkbox" class="peer h-0 w-0 opacity-0" [ngModel]="tenant.status !== TenantStatus.DISABLE" (ngModelChange)="tenant.status = $event ? (tenant.status === TenantStatus.ONBOARDING ? TenantStatus.ONBOARDING : TenantStatus.ACTIVE) : TenantStatus.DISABLE" />
                               <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-200 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[2px] before:left-[2px] before:h-4 before:w-4 before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-200 peer-checked:before:translate-x-4"></span>
                             </span>
                           </label>
