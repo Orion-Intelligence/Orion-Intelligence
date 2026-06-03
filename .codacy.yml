@@ -34,6 +34,12 @@ exclude_paths:
   - "backend/orion/services/elastic_manager/elastic_request_generator.py"
 
 engines:
+  metric:
+    config:
+      languages:
+        - "python"
+        - "typescript"
+        - "javascript"
   duplication:
     exclude_paths:
       - "client/build/**"
