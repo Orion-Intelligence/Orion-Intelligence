@@ -44,8 +44,8 @@ class config_controller:
                 REDIS_COMMANDS.S_SET_STRING,
                 [self.CONFIG_CACHE_KEY, json.dumps(self._config), None]
             )
-        except Exception:
-            pass
+        except Exception as ex:
+            log.g().w(f"Redis config cache save skipped: {str(ex)}")
 
     async def load_config(self, force_db: bool = False):
         try:
@@ -62,8 +62,8 @@ class config_controller:
                         if isinstance(config, dict):
                             self._config = config
                             return
-                except Exception:
-                    pass
+                except Exception as ex:
+                    log.g().w(f"Redis config cache read skipped: {str(ex)}")
 
             records = await self._engine.find(db_system_model)
             self._config = {record.key.value: record.value for record in records}

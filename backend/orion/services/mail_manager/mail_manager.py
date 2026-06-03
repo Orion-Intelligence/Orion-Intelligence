@@ -7,6 +7,7 @@ from email.mime.multipart import MIMEMultipart
 import ssl
 
 from orion.helper_manager.env_handler import env_handler
+from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 
 
@@ -146,8 +147,8 @@ class mail_manager:
                     try:
                         server.starttls(context=context)
                         server.login(sender_email, password)
-                    except Exception:
-                        pass
+                    except Exception as ex:
+                        log.g().w(f"SMTP validation fallback failed: {str(ex)}")
 
             return True
 

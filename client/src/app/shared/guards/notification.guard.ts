@@ -5,7 +5,7 @@ import { AppService } from '../../services/core/app/app.service';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationGuard implements CanActivate {
-  private readonly welcomeAccessKey = 'allow_welcome_once';
+  private readonly welcomeSessionFlag = 'allow_welcome_once';
 
   constructor(private authService: AuthService, private router: Router, private appService: AppService) {}
 
@@ -20,12 +20,12 @@ export class NotificationGuard implements CanActivate {
     }
 
     if (state.url.startsWith('/welcome') && !route.paramMap.get('token')) {
-      const allowWelcome = sessionStorage.getItem(this.welcomeAccessKey) === '1';
+      const allowWelcome = sessionStorage.getItem(this.welcomeSessionFlag) === '1';
       if (!allowWelcome) {
         this.router.navigate(['/login'], { replaceUrl: true }).then();
         return false;
       }
-      sessionStorage.removeItem(this.welcomeAccessKey);
+      sessionStorage.removeItem(this.welcomeSessionFlag);
     }
 
     return true;

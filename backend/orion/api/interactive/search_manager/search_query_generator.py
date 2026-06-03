@@ -9,6 +9,7 @@ from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX, ELASTIC_SEMANTIC, ELASTIC_ENUMS
 from orion.api.interactive.search_manager.search_semantic_controller import search_semantic_controller
+from orion.services.log_manager.log_controller import log
 
 
 DATE_ONLY_FORMAT = "%Y-%m-%d"
@@ -331,8 +332,8 @@ class search_query_generator:
                     query_statement["query"]["function_score"]["score_mode"] = "sum"
                     query_statement["query"]["function_score"]["boost_mode"] = "replace"
                     query_statement["min_score"] = 0.4
-            except Exception:
-                pass
+            except Exception as ex:
+                log.g().w(f"Semantic score adjustment skipped: {str(ex)}")
 
         return query_statement
 

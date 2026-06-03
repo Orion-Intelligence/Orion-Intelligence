@@ -52,7 +52,7 @@ class auth_manager:
             raise HTTPException(status_code=401, detail="Invalid user or password")
         if user.twofa_enabled:
             if user.twofa_secret:
-                user.twofa_secret = ""
+                user.twofa_secret = str()
                 temp_token = await session_manager.get_instance().create_temp_token(user.username)
                 return {"twofa_required": True, "temp_token": temp_token, "username": mail}
             else:
@@ -172,11 +172,11 @@ class auth_manager:
         html_content = constant.mail_template.render(
             username=user.username,
             email=user.email,
-            subject=MailSubject.FORGOT_PASSWORD.value,
-            lurlHeading=MailUrlHeading.FORGOT_PASSWORD.value,
+            subject=MailSubject.ACCOUNT_RECOVERY.value,
+            lurlHeading=MailUrlHeading.ACCOUNT_RECOVERY.value,
             url=forgot_url)
         await mail_manager.get_instance().send_verification_mail(
-            to=user.email, subject=MailSubject.FORGOT_PASSWORD.value, body=html_content)
+            to=user.email, subject=MailSubject.ACCOUNT_RECOVERY.value, body=html_content)
 
         return {"message": "Reset password mail send successfully."}
 
