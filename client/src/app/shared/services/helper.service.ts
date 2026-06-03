@@ -155,14 +155,13 @@ export class HelperService {
           const prevEnd = end;
           const nextStart = matches[j].index;
           const betweenText = text.slice(prevEnd, nextStart);
-          const wordGap = betweenText
-            .replace(/<[^>]+>/g, '')
+          const cleanBetween = new DOMParser().parseFromString(betweenText, 'text/html').body.textContent || '';
+          const wordGap = cleanBetween
             .trim()
             .split(/\s+/)
             .filter(Boolean).length;
           if (wordGap <= 2) {
-            const cleanBetween = betweenText.replace(/<[^>]+>/g, '').trim();
-            merged += ` ${cleanBetween} ${matches[j][1]}`;
+            merged += ` ${cleanBetween.trim()} ${matches[j][1]}`;
             end = matches[j].index + matches[j][0].length;
             j++;
           }

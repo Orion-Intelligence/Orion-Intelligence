@@ -71,7 +71,7 @@ export class ConsolidatedScanComponent {
     if (!isDomain) {
       return;
     }
-    const isRepo = input.includes('github.com/');
+    const isRepo = input.includes('github');
     this.expectedTypes = (isRepo ? ['repo', 'liveapi'] : ['basic', 'seo', 'liveapi']) as ScanKey[];
     this.resultsByType = {};
     this.progressByType = {};

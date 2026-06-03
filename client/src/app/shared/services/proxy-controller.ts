@@ -22,7 +22,7 @@ export class ProxyController {
     }
 
     const href = anchor.href?.trim();
-    if (!href || href.startsWith('javascript:')) {
+    if (!href || href.startsWith('javascript')) {
       return;
     }
 
