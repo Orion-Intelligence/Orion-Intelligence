@@ -59,6 +59,7 @@ export class SocialMapperStateService {
     } | null>(null);
   relationshipPopupData = signal<RelationshipPopupData | null>(null);
   activeUserIndex = signal<number>(0);
+  highlightedNodeId = signal<string | null>(null);
 
   setActiveUserByUsername(username: string) {
     const userNodes = this.networkData().nodes.filter(n => n.id.toString().startsWith('user-'));

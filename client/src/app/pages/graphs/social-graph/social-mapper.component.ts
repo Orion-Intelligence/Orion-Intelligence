@@ -481,22 +481,21 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   onPlatformNodeClicked(nodeId: string) {
-    if (this.isCustomEntityNode(nodeId)) {
-      const element = document.getElementById(nodeId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    this.state.highlightedNodeId.set(nodeId);
+    setTimeout(() => {
+      if (this.state.highlightedNodeId() === nodeId) {
+        this.state.highlightedNodeId.set(null);
       }
-      return;
-    }
-    if (!nodeId.startsWith('platform-')) {
-      return;
-    }
+    }, 3500);
+
     const element = document.getElementById(nodeId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return;
     }
-    this.state.openPlatformNodePopup(nodeId);
+
+    if (!this.isCustomEntityNode(nodeId) && nodeId.startsWith('platform-')) {
+      this.state.openPlatformNodePopup(nodeId);
+    }
   }
 
   closeEntityReportPopup() {
