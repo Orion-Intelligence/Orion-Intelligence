@@ -198,33 +198,28 @@ class helper_controller:
             if "key" in item:
                 allowed_keys.add(item["key"])
 
-        template_autoescape = select_autoescape(
-            enabled_extensions=("html", "htm", "xml", "json"),
-            default_for_string=True,
-        )
-
         mail_templete_env = Environment(
             loader=FileSystemLoader(build_dir / "assets" / "data" / "mail_template_data"),
-            autoescape=template_autoescape
+            autoescape=select_autoescape(("html", "htm", "xml", "json"))
         )
         constant.mail_template = mail_templete_env.get_template("mail_template.html")
         license_rules_env = Environment(
             loader=FileSystemLoader(build_dir / "assets" / "data" / "licenses"),
-            autoescape=template_autoescape
+            autoescape=select_autoescape(("html", "htm", "xml", "json"))
         )
         license_rules_template = license_rules_env.get_template("license_rules.json")
         license_rules_json_str = license_rules_template.render()
         constant.license_rules = json.loads(license_rules_json_str)
         url_rules_env = Environment(
             loader=FileSystemLoader(build_dir / "assets" / "data" / "url_rules"),
-            autoescape=template_autoescape
+            autoescape=select_autoescape(("html", "htm", "xml", "json"))
         )
         url_rules_template = url_rules_env.get_template("url_rules.json")
         url_rules_json_str = url_rules_template.render()
         constant.url_rules = json.loads(url_rules_json_str)
         map_entities_env = Environment(
             loader=FileSystemLoader(build_dir / "assets" / "data" / "satellite"),
-            autoescape=template_autoescape
+            autoescape=select_autoescape(("html", "htm", "xml", "json"))
         )
         satellite_asset = map_entities_env.get_template(CONSTANTS.S_SATELLITE_ASSET_FILE_NAME).render()
         version, data = helper_controller.parse_satellite_asset(satellite_asset)
