@@ -1,5 +1,9 @@
 {
   "extends": "stylelint-config-standard",
+  "customSyntax": "postcss-scss",
+  "plugins": [
+    "stylelint-scss"
+  ],
   "rules": {
     "selector-id-pattern": null,
     "selector-class-pattern": null,
@@ -11,7 +15,8 @@
     "declaration-property-value-no-unknown": null,
     "selector-pseudo-class-no-unknown": null,
     "at-rule-descriptor-no-unknown": null,
-    "at-rule-no-unknown": [true, {
+    "at-rule-no-unknown": null,
+    "scss/at-rule-no-unknown": [true, {
       "ignoreAtRules": ["tailwind", "use"]
     }]
   }
