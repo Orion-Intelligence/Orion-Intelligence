@@ -42,7 +42,47 @@ jobs:
           gh-code-scanning-compat: true
           max-allowed-issues: 2147483647
 
+      - name: Split SARIF runs into unique categories
+        run: |
+          python3 - <<'PY'
+          import copy
+          import json
+          import re
+          from pathlib import Path
+
+          source = Path("results.sarif")
+          output_dir = Path("sarif-results")
+          sarif = json.loads(source.read_text())
+          runs = sarif.get("runs") or []
+
+          if not runs:
+              raise SystemExit("results.sarif does not contain any SARIF runs")
+
+          output_dir.mkdir(exist_ok=True)
+
+          def slug(value):
+              value = re.sub(r"[^A-Za-z0-9_.-]+", "-", value or "codacy").strip("-").lower()
+              return value or "codacy"
+
+          for index, run in enumerate(runs, 1):
+              tool_name = (
+                  run.get("tool", {})
+                  .get("driver", {})
+                  .get("name")
+                  or f"run-{index}"
+              )
+              run_sarif = copy.deepcopy(sarif)
+              run_sarif["runs"] = [copy.deepcopy(run)]
+              run_output = run_sarif["runs"][0]
+              automation = run_output.setdefault("automationDetails", {})
+              automation["id"] = f"codacy/{slug(tool_name)}/{index}"
+
+              target = output_dir / f"{index:02d}-{slug(tool_name)}.sarif"
+              target.write_text(json.dumps(run_sarif), encoding="utf-8")
+              print(f"Wrote {target} with category {automation['id']}")
+          PY
+
       - name: Upload SARIF results to GitHub
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: results.sarif
+          sarif_file: sarif-results
