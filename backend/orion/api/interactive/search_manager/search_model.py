@@ -13,7 +13,7 @@ from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
-from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
+from orion.api.interactive.search_manager.search_query_generator import search_query_generator
 from orion.api.interactive.search_manager.search_enums import SEARCH_CONFIG
 
 
@@ -180,7 +180,7 @@ class search_model:
     @staticmethod
     async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, blocked_categories, allowed_categories,search_type=""):
         filter_dict = param.entity_filter if param.entity_filter else {}
-        indices, query, indices_boost = elastic_request_generator().on_search_consolidated_ranked_data(
+        indices, query, indices_boost = search_query_generator().on_search_consolidated_ranked_data(
             param, filter_dict, base_index, blocked_categories, allowed_categories,search_type)
 
         response = await elastic_controller.get_instance().search_consolidated_ranked_query(
@@ -193,7 +193,7 @@ class search_model:
         filter_dict = {}
 
         indices, query, indices_boost = (
-            elastic_request_generator()
+            search_query_generator()
             .on_search_consolidated_iocs(
                 param, filter_dict, base_index
             )
@@ -207,7 +207,7 @@ class search_model:
 
 
     async def search_stealerlogs_persona_breach(self, param: search_credential_param_model):
-        document, data_filter = elastic_request_generator().on_search_persona(param)
+        document, data_filter = search_query_generator().on_search_persona(param)
         _, m_documents = await elastic_controller.get_instance().search_query(document, data_filter)
 
         body = m_documents.body if hasattr(m_documents, "body") else m_documents
@@ -269,7 +269,7 @@ class search_model:
             config = SEARCH_CONFIG[label]
 
             indices, query, indices_boost = \
-                elastic_request_generator().on_search_consolidated_ranked_data(
+                search_query_generator().on_search_consolidated_ranked_data(
                     param,
                     filter_dict,
                     config["base_index"],
@@ -283,7 +283,7 @@ class search_model:
 
     async def search_stealer_iocs(self, param: search_credential_param_model):
 
-        document, data_filter  = elastic_request_generator().on_search_stealer_iocs(param)
+        document, data_filter  = search_query_generator().on_search_stealer_iocs(param)
 
         if not data_filter:
             return False, []

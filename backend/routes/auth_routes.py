@@ -58,9 +58,7 @@ async def token_demo(response: Response = None):
 
 
 @auth_router.post("/api/token/2fa/verify")
-async def verify_2fa(code: str = Body(..., embed=True),
-        ptoken: str = Depends(oauth2_scheme),
-        response: Response = None):
+async def verify_2fa(code: str = Body(..., embed=True), ptoken: str = Depends(oauth2_scheme), response: Response = None):
     result = await session_manager.get_instance().verify_2fa_and_issue(ptoken, code)
     access_token = result.get("access_token")
     if access_token:

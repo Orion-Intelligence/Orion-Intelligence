@@ -1,6 +1,9 @@
 .env
+/.codex
 .DS_Store
 **/.DS_Store
+**/.ssl/
+**/package-lock.json
 backend/static/.well-known/parser_files/*
 backend/backend_cov_app/*
 *.bak
@@ -17,6 +20,7 @@ __pycache__/
 .idea/
 
 env/
+client/build-next/*
 backend/env/
 client/node_modules/
 client/.angular/cache/

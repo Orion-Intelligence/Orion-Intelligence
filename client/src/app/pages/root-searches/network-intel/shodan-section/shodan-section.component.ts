@@ -1,0 +1,61 @@
+import { CommonModule } from '@angular/common';
+import { Component, effect, input } from '@angular/core';
+import { Router } from '@angular/router';
+import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
+import { IpDetail } from '../../../../shared/model/network-intel/network-intel.model';
+import { IpDetailComponent } from '../ip-detail/ip-detail.component';
+import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
+
+@Component({
+  selector: 'app-network-intel-shodan-section',
+  standalone: true,
+  imports: [CommonModule, IpDetailComponent],
+  templateUrl: './shodan-section.component.html',
+  animations: [fadeInDashboardItem],
+})
+export class ShodanSectionComponent {
+  readonly errorMessageInput = input<string | null>(null, { alias: 'errorMessage' });
+  readonly shodanResultInput = input<IpDetail | null>(null, { alias: 'shodanResult' });
+  readonly isScanning = input(false);
+  readonly progress = input(0);
+  readonly currentStep = input('');
+  readonly progressSegments = input<number[]>([]);
+  errorMessage: string | null = null;
+  readonly hasSearched = input(false);
+  shodanResult: IpDetail | null = null;
+
+  constructor(private router: Router, private ui: NetworkIntelScanService) {
+    effect(() => {
+      this.errorMessage = this.errorMessageInput();
+      this.shodanResult = this.shodanResultInput();
+    });
+  }
+
+  get isEmbeddedInConsolidated(): boolean {
+    return this.ui.isEmbeddedInConsolidated(this.router.url);
+  }
+
+  get progressValue(): number {
+    return this.ui.getProgressValue(this.progress());
+  }
+
+  get loadingStepLabel(): string {
+    return this.ui.getLoadingStepLabel(this.currentStep());
+  }
+
+  get showLoadingSkeleton(): boolean {
+    return this.ui.shouldShowLoadingSkeleton(this.hasSearched(), this.shodanResult, this.errorMessage, this.isScanning(), this.progress());
+  }
+
+  get cameraPortCount(): number {
+    return (this.shodanResult?.ports || []).filter((port: any) => port && (port.is_camera || port.device_type === 'camera')).length;
+  }
+
+  get hasCameraSignals(): boolean {
+    return !!this.shodanResult?.is_camera || this.cameraPortCount > 0 || (this.shodanResult?.cameras?.length ?? 0) > 0;
+  }
+
+  isProgressSegmentActive(index: number): boolean {
+    return index < Math.ceil(this.progress() / 5);
+  }
+}

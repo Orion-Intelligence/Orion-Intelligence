@@ -3,7 +3,7 @@
   @if (!twofaRequired && !autoDemoLogin) {
     <div id="content">
       <div class="flex min-h-[750px] h-screen font-['Roboto',sans-serif]" data-testid="login-page">
-        <div class="min-w-[500px] bg-white p-8 flex flex-col justify-between items-stretch max-[943px]:flex-[0_0_100vw] max-[943px]:min-w-[350px]">
+        <div class="w-[500px] min-w-[500px] max-w-[500px] flex-none bg-white p-8 flex flex-col justify-between items-stretch max-[943px]:w-screen max-[943px]:min-w-0 max-[943px]:max-w-none max-[943px]:flex-[0_0_100vw]">
           <div class="w-full flex justify-center gap-6">
             <a [href]="appService.getConfig().appSettings.home_header_data_sources" target="_blank" rel="noopener noreferrer" class="text-[#5a6f85] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Data Sources</a>
             <a [href]="appService.getConfig().appSettings.home_header_adversaries" target="_blank" rel="noopener noreferrer" class="text-[#5a6f85] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Adversaries</a>
@@ -51,7 +51,7 @@
                   </div>
                 }
                 @if (errorMessage && errorMessage != 'verification pending') {
-                  <div class="inline-block mt-2 px-3 py-2 rounded-lg bg-[#dc3545] bg-opacity-75 text-white shadow-sm text-center">
+                  <div class="mt-2 w-full max-w-full box-border break-words px-3 py-2 rounded-lg bg-[#dc3545] bg-opacity-75 text-white shadow-sm text-center">
                     <i class="bi bi-exclamation-diamond-fill mr-2"></i>
                     {{ errorMessage }}
                   </div>

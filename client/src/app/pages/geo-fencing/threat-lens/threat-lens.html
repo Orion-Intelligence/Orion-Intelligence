@@ -1,0 +1,227 @@
+<section data-testid="threat-lens-page" class="ui-consolidated-theme relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-black">
+	<div class="flex min-h-0 flex-1 flex-col overflow-hidden max-[1100px]:overflow-x-hidden max-[1100px]:overflow-y-auto max-[1100px]:pb-3">
+		<div class="relative grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden max-[1100px]:block max-[1100px]:overflow-visible">
+			<div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:min-h-[380px]">
+
+	<app-threat-lens-map-renderer
+		data-testid="threat-lens-map-renderer"
+		class="absolute inset-0 block h-full min-h-0 min-w-0 overflow-hidden"
+		(mapReady)="onMapReady()"
+		(mapError)="onMapError($event)"
+		(countrySelected)="onCountrySelected($event)"
+		(emptySelection)="onMapEmptySelection()"
+		(ipSelected)="onIpSelected($event)"
+		(viewportIpScanRequested)="onViewportIpScanRequested($event)"
+		(arcCountChange)="onArcCountChange($event)">
+	</app-threat-lens-map-renderer>
+
+	<div class="pointer-events-none absolute inset-0 bg-[var(--color-mono)] opacity-15 max-[1100px]:hidden"></div>
+
+	<app-map-loading-badges [items]="loadingBadges" [topControlsInset]="!showFilterButton"></app-map-loading-badges>
+
+	@if (isLoading) {
+		<div data-testid="threat-lens-loading" class="absolute inset-0 z-[960] flex items-center justify-center bg-[rgba(8,16,27,0.58)] px-4 backdrop-blur-[2px] [body.light-theme_&]:bg-white/50">
+			<div class="map-overlay-menu w-[min(360px,calc(100%-2rem))] rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] p-4 shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)]">
+				<div class="flex items-center gap-3">
+					<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)]">
+						<div class="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></div>
+					</div>
+					<div class="min-w-0">
+						<p class="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text1)]">Loading Threat Lens</p>
+						<p class="mt-1 truncate text-[12px] text-[var(--color-text3)]">{{ statusMessage }}</p>
+					</div>
+				</div>
+				<div class="ui-progress-track mt-4 h-[5px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)]">
+					<div class="ui-progress-indeterminate-bar"></div>
+				</div>
+			</div>
+		</div>
+	}
+			</div>
+
+	<div class="absolute left-4 top-4 bottom-4 z-20 flex w-[min(24rem,calc(100%-5rem))] flex-col gap-3 max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pt-3">
+		<div class="h-[40px] shrink-0 max-[1100px]:hidden"></div>
+    <div data-testid="threat-lens-search-panel" class="map-overlay-menu rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] p-3 shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[640px]:rounded-[12px]">
+			<div class="flex items-center justify-between gap-3">
+				<div class="min-w-0">
+					<p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Search</p>
+					<p class="mt-1 truncate text-[11px] text-[var(--color-text4)]">
+						@if (currentQuery) { Active keyword: {{ currentQuery }} } @else { All threat records }
+					</p>
+				</div>
+				<button data-testid="threat-lens-search-toggle" type="button" (click)="togglePanel('search')" [attr.aria-label]="isSearchPanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
+  <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 transition duration-200" [ngClass]="{ 'rotate-180': !isSearchPanelCollapsed }" />
+</button>
+			</div>
+			@if (!isSearchPanelCollapsed) {
+				<div class="mt-3 flex items-center gap-2 max-[520px]:flex-col">
+					<input data-testid="threat-lens-search-input" [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" type="text" placeholder="Search keyword (e.g. china)" class="h-10 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[13px] text-[var(--color-text1)] outline-none ring-0 transition focus:border-[var(--color-blue-640)] placeholder:text-[var(--color-text3)] [body.light-theme_&]:bg-[var(--color-white)] [body.light-theme_&]:text-[var(--color-gray-900)]" />
+					<button data-testid="threat-lens-search-submit" (click)="onSearch()" [disabled]="isLoading" class="h-10 rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 text-[13px] font-semibold text-[var(--color-white)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 max-[520px]:w-full">
+						Search
+					</button>
+				</div>
+
+				@if (currentQuery) {
+					<p data-testid="threat-lens-active-keyword" class="mt-2 text-[12px] text-[var(--color-text2)]">Active keyword: <span class="font-semibold">{{ currentQuery }}</span></p>
+				}
+
+				@if (topCountries.length) {
+					<h3 class="mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Top Highlighted Countries</h3>
+					<div class="mt-2 max-h-[260px] space-y-1 overflow-auto pr-1 max-[640px]:max-h-[180px]">
+						@for (item of topCountries; track item.country) {
+							<button data-testid="threat-lens-top-country" type="button" (click)="onTopCountrySelect(item.country)" class="flex w-full items-center justify-between rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-left text-[12px] text-[var(--color-text2)] transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]">
+								<span class="truncate pr-2">{{ item.country }}</span>
+								<span class="font-semibold text-[var(--color-text1)]">{{ item.count }}</span>
+							</button>
+						}
+					</div>
+				}
+				@else {
+					<p class="mt-3 text-[12px] text-[var(--color-text3)]">No country matches found for the current keyword.</p>
+				}
+
+				@if (categoryLegend.length) {
+					<div data-testid="threat-lens-category-layers" class="mt-5 border-t border-[var(--color-border)] pt-3">
+						<h3 class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Category Layers</h3>
+					</div>
+					<div class="mt-2 max-h-[220px] space-y-1 overflow-auto pr-1 max-[640px]:max-h-[160px]">
+						@for (item of categoryLegend; track item.categoryKey) {
+							<div data-testid="threat-lens-category-layer" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
+								<div class="flex items-center justify-between gap-3">
+									<span class="flex min-w-0 items-center gap-2">
+										<svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0 drop-shadow-[0_0_6px_currentColor]" [attr.color]="item.colorHex" aria-hidden="true">
+											<circle cx="6" cy="6" r="5" [attr.fill]="item.colorHex"></circle>
+										</svg>
+										<span class="truncate font-semibold text-[var(--color-text1)]">{{ item.label }}</span>
+									</span>
+									<span>{{ item.arcCount }} arcs</span>
+								</div>
+								<p class="mt-1 text-[11px] text-[var(--color-text4)]">{{ item.totalResults }} results, {{ item.countryCount }} countries</p>
+							</div>
+						}
+					</div>
+				}
+			}
+		</div>
+
+		<div data-testid="threat-lens-summary-panel" class="map-overlay-menu w-full rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] px-4 py-3 text-[var(--color-text1)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md max-[1100px]:w-full [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[640px]:rounded-[12px]">
+			<div class="flex items-center justify-between gap-3">
+				<div class="min-w-0">
+					<h2 class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">Threat Lens</h2>
+					<p class="mt-1 truncate text-[11px] text-[var(--color-text4)]">
+						@if (selectedCountryName) { Selected: {{ selectedCountryName }} } @else { {{ arcCount }} arcs visible }
+					</p>
+				</div>
+				<button data-testid="threat-lens-summary-toggle" type="button" (click)="togglePanel('threat')" [attr.aria-label]="isThreatPanelCollapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
+  <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 transition duration-200" [ngClass]="{ 'rotate-180': !isThreatPanelCollapsed }" />
+</button>
+			</div>
+			@if (!isThreatPanelCollapsed) {
+			@if (selectedCountryName) {
+				<p data-testid="threat-lens-selected-country" class="mt-2 text-[13px] text-[var(--color-text2)]">Selected: <span class="font-semibold text-[var(--color-text1)]">{{ selectedCountryName }}</span></p>
+				@if (selectedCountryBreakdown.length) {
+					<div class="mt-2 space-y-1">
+						@for (item of selectedCountryBreakdown; track item.label) {
+							<p class="text-[11px] text-[var(--color-text3)]">
+								<span class="font-semibold text-[var(--color-text2)]">{{ item.label }}</span>: {{ item.count }}
+							</p>
+						}
+					</div>
+				}
+			}
+			@if (isLoading) {
+				<p class="mt-2 text-[12px] text-[var(--color-text2)]">Loading country highlights...</p>
+			}
+			<p data-testid="threat-lens-status" class="mt-2 max-w-[420px] text-[12px] text-[var(--color-text3)]">{{ statusMessage }}</p>
+			<p data-testid="threat-lens-visible-arcs" class="mt-2 text-[11px] text-[var(--color-text4)]">Arcs currently visible: <span class="font-semibold text-[var(--color-text2)]">{{ arcCount }}</span></p>
+			@if (showIpScanPanel) {
+				<div data-testid="threat-lens-ip-scan-panel" class="mt-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
+					<div class="flex items-start justify-between gap-3">
+						<div class="flex min-w-0 items-start gap-2">
+							@if (isIpScanRunning) {
+								<span class="mt-[3px] h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
+							} @else {
+								<span class="mt-[5px] h-2.5 w-2.5 shrink-0 rounded-full" [ngClass]="ipScanErrorMessage ? 'bg-red-300' : 'bg-[var(--color-blue-640)]'"></span>
+							}
+							<div class="min-w-0">
+								<p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">IP Scan</p>
+								<p data-testid="threat-lens-ip-scan-scope" class="mt-1 truncate text-[11px] text-[var(--color-text4)]">{{ ipScanScopeLabel }}</p>
+							</div>
+						</div>
+						<span data-testid="threat-lens-ip-scan-state" class="shrink-0 rounded-full border px-2 py-[3px] text-[10px] font-semibold uppercase tracking-[0.12em]" [ngClass]="ipScanErrorMessage ? 'border-red-400/30 bg-red-500/10 text-red-300' : 'border-[var(--color-border)] bg-[var(--color-blue-790)] text-[var(--color-text2)]'">{{ ipScanStateLabel }}</span>
+					</div>
+					<div class="mt-3 grid grid-cols-2 gap-2 max-[360px]:grid-cols-1">
+						<div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2.5 py-2">
+							<p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text4)]">Markers</p>
+							<p data-testid="threat-lens-ip-scan-markers" class="mt-1 font-mono text-[13px] font-semibold tabular-nums text-[var(--color-text1)]">{{ ipScanResultCount }}</p>
+						</div>
+						<div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2.5 py-2">
+							<p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text4)]">Range</p>
+							<p data-testid="threat-lens-ip-scan-range" class="mt-1 truncate text-[12px] font-semibold text-[var(--color-text1)]">{{ ipScanRangeLabel }}</p>
+						</div>
+					</div>
+					<p data-testid="threat-lens-ip-scan-status" class="mt-2 text-[11px] leading-5" [ngClass]="ipScanErrorMessage ? 'text-red-300' : 'text-[var(--color-text3)]'">{{ ipScanErrorMessage || ipScanStatusMessage }}</p>
+					@if (isIpScanRunning) {
+						<div class="ui-progress-track mt-2 h-[4px] overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)]">
+							<div class="ui-progress-indeterminate-bar"></div>
+						</div>
+					}
+				</div>
+			}
+			}
+		</div>
+	</div>
+
+	<div class="absolute right-4 top-4 bottom-4 z-20 flex w-[min(25rem,calc(100%-2rem))] flex-col gap-0 max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:right-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:mt-3 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pb-3">
+		@if (showFilterButton) {
+		<div class="flex justify-end gap-2 max-[550px]:flex-col">
+				<label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="map-overlay-menu inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)] max-[550px]:w-full max-[550px]:justify-center">
+					<img alt="Filter Icon" height="20" src="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
+					<span>Filter</span>
+				</label>
+		</div>
+		}
+
+		<div class="min-h-0 flex-1 space-y-3 max-[1100px]:min-h-[unset]">
+      <div class="shrink-0 max-[1100px]:hidden" [ngClass]="{ 'h-[40px]': !showFilterButton }"></div>
+				<app-threat-lens-feed-panel
+					title="News Feed"
+					description="Live news stream from threat records."
+					searchPlaceholder="Search news feed..."
+					emptyMessage="No news records found for the selected time window."
+					feedType="news"
+					[items]="feedItems"
+				></app-threat-lens-feed-panel>
+
+			<app-threat-lens-feed-panel
+				title="Archive"
+				description="Defacement, social, exploit, leak and other activity."
+				searchPlaceholder="Search archive..."
+				emptyMessage="No archive activity found for the selected time window."
+				feedType="archive"
+				[items]="feedItems"
+			></app-threat-lens-feed-panel>
+		</div>
+	</div>
+		</div>
+	</div>
+</section>
+
+
+ @if (filterModel && (isFilterOpen$ | async)) {
+    <div class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()">
+    </div>
+  }
+
+  @if (filterModel) {
+    <div class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[var(--color-border)] bg-[var(--color-blue-700)] shadow-lg transition-transform duration-200 max-[450px]:w-full" [ngClass]="{ 'translate-x-full': !(isFilterOpen$ | async), 'translate-x-0': (isFilterOpen$ | async) }">
+      <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="onSearch()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
+    </div>
+  }
+
+@if (selectedIp) {
+	<app-threat-lens-ip-detail-popup
+		[ip]="selectedIp"
+		(close)="onIpDetailPopupClose()">
+	</app-threat-lens-ip-detail-popup>
+}

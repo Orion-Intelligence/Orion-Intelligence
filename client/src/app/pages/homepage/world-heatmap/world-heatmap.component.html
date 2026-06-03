@@ -1,15 +1,8 @@
-<div class="w-full">
-  <div #mapContainer data-testid="world-heatmap-map" class="map-container relative aspect-[100/52] max-h-[80vh] min-h-[400px] w-[calc(100%+60px)] -ml-[30px] -mr-[30px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_12%,black_88%,transparent_100%)] max-[768px]:w-screen max-[768px]:max-w-screen [body.light-theme_&]:[mask-image:none]">
+<div class="block w-full">
+  <div data-testid="world-heatmap-map" class="map-container relative aspect-[100/52] max-h-[80vh] min-h-[400px] w-[calc(100%+60px)] -ml-[30px] -mr-[30px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_12%,black_88%,transparent_100%)] max-[768px]:w-screen max-[768px]:max-w-screen [body.light-theme_&]:[mask-image:none]">
+    <div #mapContainer class="absolute inset-0"></div>
     @if (isMapLoading) {
-      <div @overlayFade class="absolute inset-0 z-[2] grid place-items-center bg-[rgba(18,26,42,0.72)] bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px),rgba(18,26,42,0.72)] bg-[size:32px_32px] [body.light-theme_&]:bg-[linear-gradient(rgba(15,23,42,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.035)_1px,transparent_1px),rgba(248,250,252,0.88)] [body.light-theme_&]:bg-[size:32px_32px]">
-        <div role="status" aria-live="polite" class="flex min-w-[180px] flex-col items-center gap-3 rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[rgba(7,12,22,0.42)] px-6 py-5 text-center shadow-[0_10px_24px_rgba(0,0,0,0.16)] backdrop-blur-[6px] [body.light-theme_&]:border-[rgba(15,23,42,0.08)] [body.light-theme_&]:bg-[rgba(255,255,255,0.72)] [body.light-theme_&]:shadow-[0_8px_20px_rgba(15,23,42,0.06)]">
-          <div class="h-9 w-9 animate-spin rounded-full border-[5px] border-[rgba(255,255,255,0.14)] border-t-[var(--color-blue-640)] border-r-[rgba(87,165,235,0.5)] [body.light-theme_&]:border-[rgba(15,23,42,0.12)]"></div>
-          <div class="space-y-1">
-            <p class="m-0 text-sm font-semibold text-[var(--color-text1)]">Rendering Heatmap...</p>
-            <p class="m-0 text-xs text-[var(--color-text4)]">Loading map data</p>
-          </div>
-        </div>
-      </div>
+      <app-map-loading-badges [items]="['Map loading...']"></app-map-loading-badges>
     }
   </div>
 

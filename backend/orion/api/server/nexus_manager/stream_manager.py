@@ -2,11 +2,13 @@ import asyncio
 import ast
 import json
 import re
-from typing import Any
+from typing import Any, AsyncGenerator
 
 import httpx
 
 from orion.api.interactive.account_manager.account_manager import AccountManager
+from orion.api.server.nexus_manager.history_embeddings.history_embedding_manager import HistoryEmbeddingManager
+from orion.api.server.nexus_manager.helper.chat_manager import ChatManager
 from orion.api.server.nexus_manager.helper.tool_router import ToolRouter
 from orion.api.server.nexus_manager.model.rpc_payload_model import NexusRpcPayloadModel
 
@@ -18,6 +20,7 @@ class NexusStreamManager:
         self.base_url = base_url
         self.tool_router = ToolRouter()
         self.active_chat_tasks: dict[str, asyncio.Task] = {}
+        self.chat_manager = ChatManager(self.base_url, self.active_chat_tasks, self._stream)
 
     @staticmethod
     def _has_results(tool_response) -> bool:
@@ -54,64 +57,51 @@ class NexusStreamManager:
         answer = re.sub(r"^(?:it appears that|the result matches(?: the original user query)?[:,]?)\s*", "", answer, flags=re.IGNORECASE)
         return answer.strip()
 
-    @staticmethod
-    def _clean_history_text(value: Any) -> str:
-        return re.sub(r"\s+", " ", str(value or "")).strip()[:2000]
-
-    @classmethod
-    def _build_history_turns(cls, history: list[dict[str, Any]], limit: int = 4) -> list[dict[str, str]]:
-        turns: list[dict[str, str]] = []
-        pending_message = ""
-
-        for item in history:
-            sender = item.get("sender")
-            if sender == "user":
-                pending_message = cls._clean_history_text(item.get("text"))
-                continue
-            if sender == "bot" and pending_message:
-                response = cls._clean_history_text(item.get("text"))
-                if response:
-                    turns.append({"message": pending_message, "response": response})
-                pending_message = ""
-
-        return turns[-limit:]
-
-    async def get_recent_chat_history(self, current_user) -> list[dict[str, str]]:
+    async def get_recent_history(
+        self,
+        current_user,
+        prompt: str = "",
+        session_id: str | None = None,
+    ) -> list[dict[str, str]]:
         try:
-            history = await AccountManager.get_instance().get_current_user_chat_history(current_user)
+            stored_history = await AccountManager.get_instance().get_current_user_chat_history(
+                current_user,
+                include_embeddings=True,
+                session_id=session_id,
+            )
+            return await HistoryEmbeddingManager.select_turns(prompt, stored_history.get("history") or [])
         except Exception:
             return []
-        return self._build_history_turns(history.get("chat_history") or [])
 
-    async def _stream(
-        self,
-        client: httpx.AsyncClient,
-        endpoint: str,
-        prompt: str,
-        user_id: str,
-        tool: str = "default",
-        type_name: str = "default",
-        chat_history: list[dict[str, str]] | None = None,
-    ):
+    async def _stream(self,client: httpx.AsyncClient,endpoint: str,prompt: str,user_id: str,tool: str = "open_chat",type_name: str = "default",history: list[dict[str, str]] | None = None,payload: NexusRpcPayloadModel | None = None,recoverable: bool = False) -> AsyncGenerator[tuple[str, str, bool, Any], None]:
         response = None
         answer = ""
         try:
-            arguments: dict[str, Any] = {
-                "prompt": prompt,
-                "user_id": user_id,
-                "tool": tool or "default",
-                "type": type_name or "default",
-            }
-            if chat_history:
-                arguments["chat_history"] = chat_history
+            if payload is None:
+                selected_tool = tool or "open_chat"
+                if selected_tool == "default":
+                    selected_tool = "open_chat"
+                arguments: dict[str, Any] = {
+                    "prompt": prompt,
+                    "user_id": user_id,
+                    "tool": selected_tool,
+                    "type": type_name or "default",
+                }
+                if recoverable:
+                    arguments["recoverable"] = True
+                if selected_tool == "api_payload":
+                    arguments["api_name"] = type_name or "default"
+                if history:
+                    arguments["history"] = history
+                payload = NexusRpcPayloadModel.tool_call(
+                    request_id=user_id if recoverable else "nexus-chat",
+                    name=selected_tool,
+                    arguments=arguments,
+                )
             request = client.build_request(
                 "POST",
                 endpoint,
-                json=NexusRpcPayloadModel.tool_call(
-                    request_id="nexus-chat",
-                    name="ai_chat",
-                    arguments=arguments,
-                ).model_dump(),
+                json=payload.model_dump(),
             )
             response = await client.send(request, stream=True)
             if response.status_code != 200:
@@ -154,29 +144,14 @@ class NexusStreamManager:
             if response is not None:
                 await response.aclose()
 
-    async def stream_response(
-        self,
-        prompt: str,
-        user_id: str,
-        tool: str = "default",
-        type_name: str = "default",
-        chat_history: list[dict[str, str]] | None = None,
-    ):
+    async def stream_response(self, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", history: list[dict[str, str]] | None = None, recoverable: bool = False) -> AsyncGenerator[str, None]:
         endpoint = f"{self.base_url}/mcp"
         client = httpx.AsyncClient(timeout=None)
         current_task = asyncio.current_task()
         if current_task is not None:
             self.active_chat_tasks[user_id] = current_task
         try:
-            async for line, answer, failed, tool_request in self._stream(
-                client,
-                endpoint,
-                prompt,
-                user_id,
-                tool=tool,
-                type_name=type_name,
-                chat_history=chat_history,
-            ):
+            async for line, answer, failed, tool_request in self._stream(client, endpoint, prompt, user_id, tool=tool, type_name=type_name, history=history, recoverable=recoverable):
                 if line:
                     yield line
                 if failed:
@@ -200,8 +175,9 @@ class NexusStreamManager:
                         endpoint,
                         summary_prompt,
                         user_id,
-                        tool="final_summary",
-                        chat_history=chat_history,
+                        tool="summarizer",
+                        history=history,
+                        recoverable=recoverable,
                     ):
                         if summary_line:
                             yield summary_line
@@ -220,12 +196,3 @@ class NexusStreamManager:
             if self.active_chat_tasks.get(user_id) is current_task:
                 self.active_chat_tasks.pop(user_id, None)
             await client.aclose()
-
-    async def cancel_chat(self, user_id: str = "system"):
-        local_task = self.active_chat_tasks.pop(user_id, None)
-        if local_task is not None and not local_task.done():
-            local_task.cancel()
-        return {"cancelled": local_task is not None}
-
-    async def clear_chat_session(self, current_user):
-        return await AccountManager.get_instance().clear_current_user_chat_history(current_user)

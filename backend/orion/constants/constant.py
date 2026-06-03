@@ -30,8 +30,20 @@ class CONSTANTS:
 
     BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
     IMAGE_DIR = BASE_DIR / "static" / "resource" / "tenant"
+    S_SATELLITE_ASSET_FILE_NAME = "satellite_assets.json"
+    S_CASE_ARTIFACT_RESOURCE_DIR = Path("backend/static/resource/case_artifacts")
+    S_CASE_ARTIFACT_SCREENSHOT_ALLOWED = {"image/png"}
+    S_CASE_ARTIFACT_FILE_ALLOWED = {
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "text/plain",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    }
 
 allowed_keys: set[str] = set()
 mail_template = None
 license_rules = {}
 url_rules = {}
+map_entities_data = {}
+map_entities_version = 0

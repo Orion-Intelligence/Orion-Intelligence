@@ -5,11 +5,8 @@ import { IconService } from '../../services/icon.service';
   selector: 'app-social-icon',
   standalone: true,
   imports: [],
-  template: `@if (iconDataUrl()) { <img [src]="iconDataUrl()" [alt]="platformName()" class="w-full h-full object-contain"> }`,
+  template: `<span class="block h-full w-full">@if (iconDataUrl()) { <img [src]="iconDataUrl()" [alt]="platformName()" class="h-full w-full object-contain"> }</span>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    'class': 'block w-full h-full'
-  }
 })
 export class SocialIconComponent {
   private iconService = inject(IconService);

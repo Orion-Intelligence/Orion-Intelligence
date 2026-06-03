@@ -32,9 +32,6 @@ interface NetworkInstance {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [],
-  host: {
-    '[class.manipulation-active]': 'isManipulating()',
-  }
 })
 export class NetworkGraphComponent implements OnInit, OnDestroy {
   private fetchingState = inject(FetchingStateService);

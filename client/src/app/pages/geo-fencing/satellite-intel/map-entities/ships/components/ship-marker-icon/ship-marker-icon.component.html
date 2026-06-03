@@ -1,0 +1,13 @@
+<div class="ship-marker relative flex h-full w-full items-center justify-center">
+  <div class="ship-icon-wrap absolute inset-0 flex items-center justify-center">
+    <svg class="h-4/5 w-4/5" [class.drop-shadow]="!isSelected" [class.drop-shadow-lg]="isSelected" viewBox="0 0 24 24" fill="#38bdf8" [attr.stroke]="strokeColor" stroke-width="0.6" aria-hidden="true">
+      <g [attr.transform]="rotationTransform">
+      <path d="M12 2L19 20L12 16L5 20L12 2Z" />
+      </g>
+    </svg>
+  </div>
+
+  @if (isLoading) {
+    <div class="absolute right-px top-px h-3 w-3 rounded-full border-2 border-[#081421] bg-[#fde68a] [body.light-theme_&]:border-white"></div>
+  }
+</div>

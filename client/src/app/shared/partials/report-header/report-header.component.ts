@@ -14,7 +14,7 @@ import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice
 import { REPORT_EXPORT_OPTIONS } from '../../model/report/export-choice.model';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { ProxyController } from '../../services/proxy-controller';
-import { AiSummaryComponent } from '../../../pages/intel-panel/ai-workspace/ai-summary/ai-summary.component';
+import { AiSummaryComponent } from '../../../pages/root-searches/ai-workspace/ai-summary/ai-summary.component';
 @Component({
   selector: 'app-report-header',
   standalone: true,

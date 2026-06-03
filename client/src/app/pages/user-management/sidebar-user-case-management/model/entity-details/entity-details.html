@@ -1,0 +1,274 @@
+<div [ngClass]="isMainEntity ? (showTopDivider ? 'mt-7 space-y-5 border-t border-[var(--color-border)] pt-7' : 'space-y-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4') : 'mb-6 space-y-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4'">
+
+    @if (showTitle) {
+    <div class="flex items-center justify-between gap-3">
+        <h3 [ngClass]="isMainEntity ? 'm-0 text-[15px] font-bold leading-tight text-[var(--color-text1)]' : 'm-0 text-sm font-bold text-[var(--color-text1)]'">
+            {{ isMainEntity ? 'Primary Entity' : 'Entity ' + (entityIndex + 1) }}
+        </h3>
+        @if (!isMainEntity) {
+        <button type="button" (click)="onRemove()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70 [body.light-theme_&]:hover:text-red-900">
+            <i class="bi bi-x-lg"></i> Remove
+        </button>
+        }
+    </div>
+    }
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
+                Entity Type <span class="text-red-500">*</span>
+            </label>
+            <select [(ngModel)]="entity.type" [name]="'entityType-' + controlPrefix" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-primary-entity-type-select">
+                @for (type of entityTypes; track type.value) {
+                <option [value]="type.value">{{ type.label }}</option>
+                }
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
+                Entity Value <span class="text-red-500">*</span>
+            </label>
+            <input type="text" [(ngModel)]="entity.value" [name]="'entityValue-' + controlPrefix" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Name, email, domain, IP, URL, etc." [attr.data-testid]="isMainEntity ? 'case-primary-entity-value-input' : 'case-related-entity-value-input-' + entityIndex" />
+            @if (entityValueError) {
+            <p class="case-form-error mt-1 text-xs text-red-400">{{ entityValueError }}</p>
+            }
+        </div>
+
+        @if (entity.type === 'other') {
+        <div class="sm:col-span-2">
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
+                Other Entity Type <span class="text-red-500">*</span>
+            </label>
+            <input type="text" [(ngModel)]="entity.entityTypeOtherValue" [name]="'entityTypeOtherValue-' + controlPrefix" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Specify other entity type" />
+            @if (getOtherError(entity.type, entity.entityTypeOtherValue)) {
+            <p class="case-form-error mt-1 text-xs text-red-400">{{ getOtherError(entity.type,
+                entity.entityTypeOtherValue) }}</p>
+            }
+        </div>
+        }
+    </div>
+
+    <div>
+        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
+            Description
+        </label>
+        <input type="text" [(ngModel)]="entity.entityDescription" [name]="'entityDescription-' + controlPrefix" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Optional description" />
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        @if (showRoleRelationshipFields) {
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Role</label>
+            @if (isMainEntity) {
+            <div class="mt-1 flex h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-sm font-medium text-[var(--color-text2)]">
+                Primary</div>
+            } @else {
+            <select [(ngModel)]="entity.role" [name]="'entityRole-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                @for (role of entityRoles; track role.value) {
+                <option [value]="role.value">{{ role.label }}</option>
+                }
+            </select>
+            }
+        </div>
+
+        @if (!isMainEntity && linkableEntities.length > 0) {
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
+                Relationship
+            </label>
+
+            <select [(ngModel)]="entity.linkedEntityId" [name]="'linkedEntityId-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                <option value="">Select linked entity</option>
+
+                @for (linkedEntity of linkableEntities; track linkedEntity.entityId) {
+                <option [value]="linkedEntity.entityId">
+                    {{ getLinkedEntityLabel(linkedEntity) }}
+                </option>
+                }
+            </select>
+        </div>
+        }
+        }
+
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Source</label>
+            <select [(ngModel)]="entity.source" [name]="'entitySource-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                @for (source of sourceTypes; track source.value) {
+                <option [value]="source.value">{{ source.label }}</option>
+                }
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Confidence</label>
+            <select [(ngModel)]="entity.confidence" [name]="'entityConfidence-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                @for (confidence of confidenceOptions; track confidence.value) {
+                <option [value]="confidence.value">{{ confidence.label }}</option>
+                }
+            </select>
+        </div>
+
+        @if (entity.source === 'other') {
+        <div class="sm:col-span-2">
+            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
+                Other Source <span class="text-red-500">*</span>
+            </label>
+            <input type="text" [(ngModel)]="entity.entitySourceOtherValue" [name]="'entitySourceOtherValue-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Specify other source" />
+            @if (getOtherError(entity.source, entity.entitySourceOtherValue)) {
+            <p class="case-form-error mt-1 text-xs text-red-400">{{ getOtherError(entity.source,
+                entity.entitySourceOtherValue) }}</p>
+            }
+        </div>
+        }
+    </div>
+
+    <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)] [body.light-theme_&]:![background:color-mix(in_srgb,var(--color-blue-820-light)_72%,white_28%)] p-4">
+        <div class="mb-3 flex items-center gap-1.5">
+            <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Tags</label>
+            <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Labels used to classify the entity for triage, review, and reporting." class="h-4 w-4 shrink-0 ui-action-icon">
+        </div>
+        <div class="flex flex-wrap gap-2">
+            @for (tag of tagOptions; track tag.value) {
+            <button type="button" (click)="toggleTag(tag.value)" class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isTagSelected(tag.value) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200 [body.light-theme_&]:border-sky-600/40 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
+                {{ tag.label }}
+            </button>
+            }
+        </div>
+    </div>
+
+    <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)] [body.light-theme_&]:![background:color-mix(in_srgb,var(--color-blue-820-light)_72%,white_28%)]" [ngClass]="entity.socialProfiles.length ? 'p-4' : 'px-3 py-2.5'">
+        <div class="flex items-center justify-between gap-3" [ngClass]="entity.socialProfiles.length ? 'mb-4' : ''">
+            <div class="min-w-0">
+                <div class="flex items-center gap-1.5">
+                    <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Social
+                        Profiles</label>
+                    <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Social accounts or profile URLs tied to this entity." class="h-4 w-4 shrink-0 ui-action-icon">
+                </div>
+                @if (entity.socialProfiles.length) {
+                <p class="mt-1 text-xs text-[var(--color-text4)]">{{ entity.socialProfiles.length }} profile{{
+                    entity.socialProfiles.length === 1 ? '' : 's' }}</p>
+                } @else {
+                <p class="mt-1 text-xs text-[var(--color-text4)]">None added</p>
+                }
+            </div>
+
+            <div class="flex items-center gap-2">
+                @if (showInlineSaveButtons) {
+                <button type="button" (click)="onSave()" [disabled]="!hasSocialProfilesChanged()" [class.hidden]="!hasSocialProfilesChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30">
+                    <i class="bi bi-check-lg"></i> Save
+                </button>
+                }
+                <button type="button" (click)="addSocialMedia()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
+                    <i class="bi bi-plus-lg"></i> Add
+                </button>
+            </div>
+        </div>
+
+        @for (profile of entity.socialProfiles; track $index; let i = $index) {
+        <div class="mb-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] p-3 last:mb-0">
+            <div class="mb-2 flex items-center justify-between gap-3">
+                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Profile
+                    {{ i + 1 }}</span>
+                <button type="button" (click)="removeSocialMedia(i)" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70 [body.light-theme_&]:hover:text-red-900" aria-label="Remove social profile">
+                    <i class="bi bi-x-lg"></i> Remove
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <select [(ngModel)]="profile.platform" [name]="'platform-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                    <option value="">Select Platform</option>
+                    @for (platform of socialMediaPlatforms; track platform.value) {
+                    <option [value]="platform.value">{{ platform.label }}</option>
+                    }
+                </select>
+
+                <input type="text" [(ngModel)]="profile.username" [name]="'username-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Username / handle" />
+
+                @if (profile.platform === 'other') {
+                <input type="text" [(ngModel)]="profile.platformOtherValue" [name]="'platformOtherValue-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 sm:col-span-2" placeholder="Specify other platform" />
+                }
+
+                <input type="text" [(ngModel)]="profile.displayName" [name]="'profileDisplayName-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 sm:col-span-2" placeholder="Display name" />
+
+                <input type="url" [(ngModel)]="profile.profileUrl" [name]="'profileUrl-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 sm:col-span-2" placeholder="Profile URL" />
+            </div>
+
+            @if (getSocialMediaError(profile)) {
+            <p class="case-form-error mt-2 text-xs text-red-400">{{ getSocialMediaError(profile) }}</p>
+            }
+        </div>
+        }
+    </div>
+
+    <div class="rounded-[8px] border border-[var(--color-border)] ![background:color-mix(in_srgb,color-mix(in_srgb,#172235_78%,#101a2b)_86%,transparent)] [body.light-theme_&]:![background:color-mix(in_srgb,var(--color-blue-820-light)_72%,white_28%)]" [ngClass]="entity.identifiers.length ? 'p-4' : 'px-3 py-2.5'">
+        <div class="flex items-center justify-between gap-3" [ngClass]="entity.identifiers.length ? 'mb-4' : ''">
+            <div class="min-w-0">
+                <div class="flex items-center gap-1.5">
+                    <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Identifiers</label>
+                    <img src="/assets/images/shared/theme/info.svg" alt="Icon" appTooltip="Stable values that identify this entity, such as email, phone, wallet, account, or document IDs." class="h-4 w-4 shrink-0 ui-action-icon">
+                </div>
+                @if (entity.identifiers.length) {
+                <p class="mt-1 text-xs text-[var(--color-text4)]">{{ entity.identifiers.length }} identifier{{
+                    entity.identifiers.length === 1 ? '' : 's' }}</p>
+                } @else {
+                <p class="mt-1 text-xs text-[var(--color-text4)]">None added</p>
+                }
+            </div>
+
+            <div class="flex items-center gap-2">
+                @if (showInlineSaveButtons) {
+                <button type="button" (click)="onSave()" [disabled]="!hasIdentifiersChanged()" [class.hidden]="!hasIdentifiersChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30">
+                    <i class="bi bi-check-lg"></i> Save
+                </button>
+                }
+                <button type="button" (click)="addIdentifier()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
+                    <i class="bi bi-plus-lg"></i> Add
+                </button>
+            </div>
+        </div>
+
+        @for (identifier of entity.identifiers; track $index; let i = $index) {
+        <div class="mb-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] p-3 last:mb-0">
+            <div class="mb-2 flex items-center justify-between gap-3">
+                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Identifier
+                    {{ i + 1 }}</span>
+                <button type="button" (click)="removeIdentifier(i)" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70 [body.light-theme_&]:hover:text-red-900" aria-label="Remove identifier">
+                    <i class="bi bi-x-lg"></i> Remove
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <select [(ngModel)]="identifier.type" [name]="'idType-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40">
+                    <option value="">Select Type</option>
+                    @for (type of identifierTypes; track type.value) {
+                    <option [value]="type.value">{{ type.label }}</option>
+                    }
+                </select>
+
+                <input type="text" [(ngModel)]="identifier.value" [name]="'idValue-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40" placeholder="Value" />
+
+                @if (identifier.type === 'other') {
+                <input type="text" [(ngModel)]="identifier.identifierTypeOtherValue" [name]="'identifierTypeOtherValue-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 sm:col-span-2" placeholder="Specify other identifier type" />
+                }
+
+                <input type="text" [(ngModel)]="identifier.issuer" [name]="'idIssuer-' + controlPrefix + '-' + i" class="h-[38px] min-w-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-0 text-[var(--color-text1)] outline-none focus:border-sky-400/40 sm:col-span-2" placeholder="Issuer" />
+
+                <label class="flex h-[38px] cursor-pointer items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 sm:col-span-2">
+                    <span class="text-xs font-medium text-[var(--color-text2)]">Verified</span>
+                    <span class="relative inline-flex items-center">
+                        <input type="checkbox" [(ngModel)]="identifier.verified" [name]="'idVerified-' + controlPrefix + '-' + i" class="sr-only peer" aria-label="Identifier verified" />
+                        <span class="relative h-[18px] w-[32px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] transition-colors duration-300 peer-checked:bg-sky-500/70">
+                            <span class="absolute left-[1px] top-0 mt-[1px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="identifier.verified ? 'translate-x-[14px]' : 'translate-x-0'"></span>
+                        </span>
+                    </span>
+                </label>
+            </div>
+
+            @if (getIdentifierError(identifier)) {
+            <p class="case-form-error mt-2 text-xs text-red-400">{{ getIdentifierError(identifier) }}</p>
+            }
+        </div>
+        }
+    </div>
+</div>

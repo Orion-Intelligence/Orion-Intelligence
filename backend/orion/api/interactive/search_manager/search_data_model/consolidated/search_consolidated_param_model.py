@@ -20,6 +20,7 @@ class search_consolidated_param_model(BaseModel):
     url: Optional[str] = ""
     user: Optional[str] = ""
     ioc: Optional[str] = ""
+    platform_result_count: Optional[int] = 15
     daterange: Annotated[str, StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")] = ""
     entity_filter: Optional[Dict[str, List[str]]] = Field(
         default=None, examples=[{"m_country": ["pakistan"]}])

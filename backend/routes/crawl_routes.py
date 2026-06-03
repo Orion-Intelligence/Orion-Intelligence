@@ -2,15 +2,16 @@ from typing import List
 
 from fastapi import APIRouter, Body, Depends, File, Form, Request, UploadFile
 
-from configs.app_dependency import role_required, license_required, get_current_user
+from configs.app_dependency import get_current_user, license_required, role_required, status_required
 from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.feeder_manager.feeder_manager import FeederManager
 from orion.api.interactive.feeder_manager.models.feeder_models import FeederOwnerTransferRequest, FeederScriptStatusUpdateRequest, FeederValueDeleteRequest
+from orion.api.interactive.siemlog_manager.siem_log_manager import SiemLogManager
 from orion.api.server.crawl_manager.class_model.__init__ import *
 from orion.api.server.crawl_manager.class_model.entity_model import entity_model
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
-from orion.services.mongo_manager.shared_model.db_auth_models import user_role
+from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
 
 crawl_routes = APIRouter()
 
@@ -18,6 +19,16 @@ _leak_deps = [
     Depends(role_required([user_role.ADMIN, user_role.CRAWLER])),
     Depends(limiter_dependency),
 ]
+
+
+@crawl_routes.post(
+    "/api/index/injection",
+    status_code=200,
+    response_model=InjectionBatchResponseModel,
+    dependencies=[Depends(status_required([UserStatus.ACTIVE])), Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
+async def index_injection(payload: InjectionBatchRequestModel = Body(...), current_user=Depends(get_current_user)):
+    return await SiemLogManager.get_instance().inject_logs(payload, current_user)
+
 
 @crawl_routes.get(
     "/api/feeder/{index_type}")
@@ -42,12 +53,7 @@ async def get_feeder_catalog(current_user=Depends(get_current_user)):
     "/api/profile/feeder/scripts",
     include_in_schema=False,
     dependencies=[Depends(license_required("module:feeder"))], )
-async def get_feeder_scripts(
-        rule_key: str | None = None,
-        entry_type: str | None = None,
-        page: int = 1,
-        limit: int = 1000,
-        current_user=Depends(get_current_user)):
+async def get_feeder_scripts(rule_key: str | None = None, entry_type: str | None = None, page: int = 1, limit: int = 1000, current_user=Depends(get_current_user)):
     return await FeederManager.get_instance().list_scripts(current_user, rule_key=rule_key, page=page, limit=limit, entry_type=entry_type)
 
 
@@ -119,13 +125,7 @@ async def transfer_feeder_script_owner(script_id: str, data: FeederOwnerTransfer
     "/api/profile/feeder/upload",
     include_in_schema=False,
     dependencies=[Depends(license_required("module:feeder"))], )
-async def upload_feeder_script(
-        rule_key: str = Form(...),
-        mode: str = Form(...),
-        values_text: str | None = Form(None),
-        file: UploadFile | None = File(None),
-        session_file: UploadFile | None = File(None),
-        current_user=Depends(get_current_user)):
+async def upload_feeder_script(rule_key: str = Form(...), mode: str = Form(...), values_text: str | None = Form(None), file: UploadFile | None = File(None), session_file: UploadFile | None = File(None), current_user=Depends(get_current_user)):
     return await FeederManager.get_instance().upload_script(rule_key, mode, file, values_text, session_file, current_user)
 
 

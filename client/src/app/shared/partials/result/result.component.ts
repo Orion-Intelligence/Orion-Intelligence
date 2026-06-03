@@ -28,7 +28,7 @@ import { HomeSearchService } from '../../../services/home_search/home.search.ser
 import { normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../utils/intel-report.util';
 import { ProxyController } from '../../services/proxy-controller';
 import { CrossSearchCardComponent } from '../onion-search-engine/cross-search-card.component';
-import { ChatWidgetComponent } from '../../../pages/intel-panel/ai-workspace/chat-widget/chat-widget.component';
+import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { AiToolRoutingService } from '../../services/ai-tool-routing.service';
 
 @Component({

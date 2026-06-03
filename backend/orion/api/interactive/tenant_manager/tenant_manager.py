@@ -158,6 +158,11 @@ class TenantManager:
         if tenant.is_default:
             raise HTTPException(status_code=401, detail="Default account cant be updated")
 
+        if data.password_reset_required is not None:
+            maintainer = await self._engine.find_one(db_user_account,(db_user_account.tenant_uuid == tenant_id) & (db_user_account.licenses == LicenseName.MAINTAINER))
+            maintainer.password_reset_required = data.password_reset_required
+            await self._engine.save(maintainer)
+
         dek = await KeyManager.get_instance().get_profile_dek(str(tenant.id))
         enc = Fernet(dek)
 
@@ -258,8 +263,10 @@ class TenantManager:
         return {"message": "Tenant updated", "user": current_user.username, "company": tenant_data[
             "name"], "tenant": tenant_data, "alerts": alerts_data}
 
-    async def get_all_tenant(self) -> List[db_tenant_model]:
+    async def get_all_tenant(self) -> List[dict]:
         tenants = await self._engine.find(db_tenant_model, db_tenant_model.is_default == False)
+        maintainers = await self._engine.find(db_user_account, db_user_account.licenses == LicenseName.MAINTAINER)
+        maintainer_by_tenant_id = {str(maintainer.tenant_uuid): maintainer for maintainer in maintainers}
         result = []
         for tenant in tenants:
             dek = await KeyManager.get_instance().get_profile_dek(ObjectId(tenant.id))
@@ -281,7 +288,11 @@ class TenantManager:
                 name=enc.decrypt(ioc.name.encode()).decode(),
                 values=[enc.decrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in (tenant.iocs or [])]
 
-            result.append(tenant)
+            tenant_data = tenant.model_dump()
+            tenant_data["id"] = str(tenant.id)
+            maintainer = maintainer_by_tenant_id.get(str(tenant.id))
+            tenant_data["password_reset_required"] = getattr(maintainer, "password_reset_required", False)
+            result.append(tenant_data)
 
         return result
 
@@ -349,7 +360,7 @@ class TenantManager:
                 subscription=data.subscription,
                 licenses=data.licenses,
                 tenant_uuid=tenant_uuid,
-                password_reset_required=True, )
+                password_reset_required=False, )
             
             await mail_manager.get_instance().validate_mail_configuration()
             await engine.save(user)

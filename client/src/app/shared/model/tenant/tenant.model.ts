@@ -24,6 +24,7 @@ export interface TenantModel {
     licenses?: string[];
     quotaExceeded?: boolean;
     email?: string;
+    password_reset_required?: boolean;
     profile_visibility_enabled?: boolean;
     event_management_enabled?: boolean;
 }

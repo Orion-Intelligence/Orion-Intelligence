@@ -63,9 +63,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
 
     createUsers.forEach((u) => addUser(u));
     createUsers.forEach((u) => {
-      if (u.username !== testUsers[forcedResetUserKey]?.username) {
-        setPasswordResetRequired(u.username, false);
-      }
+      setPasswordResetRequired(u.username, u.username === testUsers[forcedResetUserKey]?.username);
     });
     cy.logout();
   });
@@ -300,8 +298,10 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
       expect(clickEvent.defaultPrevented).to.eq(true);
     });
 
-    cy.get('[data-testid="demo-tour-next"]').should('be.visible').click();
-    waitForTourStep(2);
+    for (let stepNumber = 1; stepNumber < 6; stepNumber += 1) {
+      cy.get('[data-testid="demo-tour-next"]').should('be.visible').click();
+      waitForTourStep(stepNumber + 1);
+    }
 
     cy.get('[data-testid="demo-tour-tooltip"]').should('be.visible');
   });

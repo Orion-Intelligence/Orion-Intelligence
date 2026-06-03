@@ -3,7 +3,8 @@
     <div class="inline-flex items-center gap-[2px] bg-transparent p-0">
       <button data-testid="consolidated-tab-iocs" type="button" data-tab="IOCs" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'IOCs', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'IOCs' }">IOCs</button>
       <button data-testid="consolidated-tab-deep-search" type="button" data-tab="Deep Search" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'Deep Search', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'Deep Search' }">Deep Search</button>
-      <button data-testid="consolidated-tab-network-intelligence" type="button" data-tab="Network Intelligence" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'Network Intelligence', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'Network Intelligence' }">Network Intel</button>
+      <button data-testid="consolidated-tab-network-intelligence" type="button" data-tab="Network Intelligence" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'Network Intelligence', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'Network Intelligence' }">Network Intel</button>
+      <button data-testid="consolidated-tab-geo-fencing" type="button" data-tab="Geo Fencing" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'Geo Fencing', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'Geo Fencing' }">Geo Fencing</button>
     </div>
   </div>
   @if (consolidated && activeTab === 'Deep Search') {
@@ -12,7 +13,7 @@
   }
 
   @if (!domain() && (!consolidated || activeTab === 'Deep Search')) {
-    <app-chat-widget #resultChatWidget [showLauncher]="false" tool="orion_api_docs" [type]="aiToolRoutingService.getType()"></app-chat-widget>
+    <app-chat-widget #resultChatWidget [showLauncher]="false" tool="api_payload" [type]="aiToolRoutingService.getType()"></app-chat-widget>
     <form (submit)="onFormSubmit($event)" @fadeInDashboardItem class="mt-[24px] mx-[30px] flex items-center max-[1000px]:mx-[15px] max-[550px]:grid" [ngClass]="{ 'mt-0': consolidated }">
       <div class="flex w-full flex-wrap items-start justify-between">
         <div class="w-full">

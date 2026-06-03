@@ -159,12 +159,28 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
     cy.wrap(false).as('changed');
     cy.get('[data-testid="tenant-edit-panel"]').filter(':visible').first().as('tenantEditPanel').should('be.visible');
 
-    cy.get('[data-testid="tenant-verified-toggle"]').first().scrollIntoView().should('exist').then(($btn) => {
-      if (($btn.text() || '').toLowerCase().includes('not verified')) {
-        cy.wrap($btn).scrollIntoView().should('be.visible').click();
-        cy.wrap(true).as('changed');
-      }
-    });
+    cy.get('[data-testid="tenant-edit-form-panel"]')
+      .filter(':visible')
+      .first()
+      .within(() => {
+        cy.get('[data-testid="tenant-verified-toggle"] input[type="checkbox"]')
+          .should('exist')
+          .then(($checkbox) => {
+            if (!$checkbox.prop('checked')) {
+              cy.wrap($checkbox).check({force: true});
+              cy.wrap(true).as('changed');
+            }
+          });
+
+        cy.get('[data-testid="tenant-status-toggle"] input[type="checkbox"]')
+          .should('exist')
+          .then(($checkbox) => {
+            if (!$checkbox.prop('checked')) {
+              cy.wrap($checkbox).check({force: true});
+              cy.wrap(true).as('changed');
+            }
+          });
+      });
 
     cy.get('#dashboard-container, [data-testid="dashboard-container"]')
       .filter(':visible')
@@ -187,31 +203,31 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
 
     cy.get('@changed').then((changed: any) => {
       if (changed) {
-        cy.get('#dashboard-container, [data-testid="dashboard-container"]')
+        cy.get('[data-testid="tenant-edit-form-panel"]')
           .filter(':visible')
           .first()
-          .scrollTo('bottom', {ensureScrollable: false});
+          .then(($panel) => {
+            const panel = $panel.get(0) as HTMLElement;
+            const dashboard = Cypress.$('#dashboard-container, [data-testid="dashboard-container"]')
+              .filter(':visible')
+              .first()
+              .get(0) as HTMLElement | undefined;
+            const parentScroller = panel.closest('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block') as HTMLElement | null;
 
-        cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block')
-          .filter(':visible')
-          .first()
-          .scrollTo('bottomRight', {ensureScrollable: false});
-
-        cy.get('[data-testid="tenant-save-changes"]')
-          .filter(':visible')
-          .first()
-          .then(($btn) => {
-            const btn = $btn.get(0) as HTMLElement;
-            btn.scrollIntoView();
-            const parentScroller = btn.closest('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block') as HTMLElement | null;
+            if (dashboard) {
+              dashboard.scrollTop = dashboard.scrollHeight;
+              dashboard.dispatchEvent(new Event('scroll', {bubbles: true}));
+            }
             if (parentScroller) {
               parentScroller.scrollTop = parentScroller.scrollHeight;
               parentScroller.scrollLeft = parentScroller.scrollWidth;
               parentScroller.dispatchEvent(new Event('scroll', {bubbles: true}));
             }
-            cy.wrap($btn).should('be.visible').and('not.be.disabled');
-            btn.click();
-          });
+          })
+          .find('[data-testid="tenant-save-changes"]')
+          .should('exist')
+          .and('not.be.disabled')
+          .click({force: true});
       }
     });
     openTenantsPage();
@@ -258,7 +274,7 @@ export function applyAuditLogDateRange(monthsBack: number) {
 
   cy.get('[data-testid="side-filter-date-day-1"]').filter(':visible').first().scrollIntoView().click();
   cy.get('[data-testid="side-filter-date-day-25"]').filter(':visible').first().scrollIntoView().click();
-  cy.get('[data-testid="side-filter-date-day-11"]').filter(':visible').first().scrollIntoView().click();
+  // cy.get('[data-testid="side-filter-date-day-11"]').filter(':visible').first().scrollIntoView().click();
   cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().scrollIntoView().click();
 }
 

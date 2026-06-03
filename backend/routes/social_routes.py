@@ -14,18 +14,12 @@ from orion.api.interactive.graph_manager.graph_models.search_social_param_model 
 from orion.api.interactive.graph_manager.graphs_model import graphs_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
-from routes.docs.docs import (SOCIAL_DOCS)
 
 social_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 
 
 @social_routes.post(
     "/api/social/recon",
-    summary="Cross-platform identity search to locate a user's digital footprint",
-    description=SOCIAL_DOCS["profile_global_presence"]["description"],
-    tags=["Social Search"],
-    operation_id="getSocailProfileGlobalPresence",
-    response_description=SOCIAL_DOCS["profile_global_presence"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialReconRequest = Body(...)):
@@ -42,11 +36,6 @@ async def search_dynamic_phone_recon(param: SocialReconRequest = Body(...)):
 
 @social_routes.post(
     "/api/social/profile",
-    summary="Scrapes the profile of requested social account",
-    description=SOCIAL_DOCS["profile_search"]["description"],
-    tags=["Social Search"],
-    operation_id="getSocailProfiles",
-    response_description=SOCIAL_DOCS["profile_search"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_profile(param: SocialProfileRequest = Body(...)):
@@ -55,11 +44,6 @@ async def search_dynamic_profile(param: SocialProfileRequest = Body(...)):
 
 @social_routes.post(
     "/api/social/online/images",
-    summary="Scrapes the images of requested social account",
-    description=SOCIAL_DOCS["profile_images"]["description"],
-    tags=["Social Search"],
-    operation_id="getSocailProfileImages",
-    response_description=SOCIAL_DOCS["profile_images"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_online_images(param: SocialOnlineImages = Body(...)):
@@ -68,11 +52,6 @@ async def search_dynamic_online_images(param: SocialOnlineImages = Body(...)):
 
 @social_routes.post(
     "/api/social/recon/image",
-    summary="Reverse image search to identify associated social profiles",
-    description=SOCIAL_DOCS["recon_image_search"]["description"],
-    tags=["Social Search"],
-    operation_id="getSocailReconImageSearch",
-    response_description=SOCIAL_DOCS["recon_image_search"]["response_description"],
     status_code=200,
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
@@ -94,11 +73,6 @@ async def search_dynamic_image(payload: dict = Body(...)):
 
 @social_routes.post(
     "/api/social/followers",
-    summary="Scrapes the followers of requested social account",
-    description=SOCIAL_DOCS["profile_followers"]["description"],
-    tags=["Social Search"],
-    operation_id="getSocailProfileFollowers",
-    response_description=SOCIAL_DOCS["profile_followers"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_followers(param: SocialFollowersRequest = Body(...)):
@@ -107,11 +81,6 @@ async def search_dynamic_followers(param: SocialFollowersRequest = Body(...)):
 
 @social_routes.post(
     "/api/social/following",
-    summary="Scrapes the following of requested social account",
-    description=SOCIAL_DOCS["profile_following"]["description"],
-    tags=["Social Search"],
-    operation_id="getSocailProfileFollowing",
-    response_description=SOCIAL_DOCS["profile_following"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_following(param: SocialFollowingRequest = Body(...)):
@@ -120,11 +89,6 @@ async def search_dynamic_following(param: SocialFollowingRequest = Body(...)):
 
 @social_routes.post(
     "/api/social/posts",
-    summary="Scrapes the posts of requested social account",
-    description=SOCIAL_DOCS["profile_posts"]["description"],
-    tags=["Social Search"],
-    operation_id="getSocailProfilePosts",
-    response_description=SOCIAL_DOCS["profile_posts"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_posts(param: SocialProfileRequest = Body(...)):
@@ -141,11 +105,6 @@ async def search_dynamic_entity(param: SocialProfileRequest = Body(...)):
 
 @social_routes.post(
     "/api/social/metadata",
-    summary="Search for specific keyword combinations linked to a username across social platforms.",
-    description=SOCIAL_DOCS["profile_metadata"]["description"],
-    tags=["Social Search"],
-    operation_id="getSocailMetadata",
-    response_description=SOCIAL_DOCS["profile_metadata"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_social_metadata(param: SocialMetadataRequest = Body(...)):
