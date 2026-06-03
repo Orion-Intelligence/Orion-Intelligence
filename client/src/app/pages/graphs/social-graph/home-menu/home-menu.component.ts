@@ -23,10 +23,11 @@ export class HomeMenuComponent implements OnDestroy {
   jobs = input.required<Job[]>();
   activeUsernames = input.required<Set<string>>();
   isSmallScreen = input.required<boolean>();
-  toggle = output<undefined>();
+  toggle = output<void>();
+  historyTabClicked = output<void>();
   searchChanged = output<string>();
-  scanRequested = output<undefined>();
-  imageUploadRequested = output<undefined>();
+  scanRequested = output<void>();
+  imageUploadRequested = output<void>();
   jobClicked = output<Job>();
   cancelScan = output<string>();
   cancelAllFetches = output<string>();
@@ -74,11 +75,11 @@ export class HomeMenuComponent implements OnDestroy {
   }
 
   triggerScan() {
-    this.scanRequested.emit(undefined);
+    this.scanRequested.emit();
   }
 
   triggerImageUpload() {
-    this.imageUploadRequested.emit(undefined);
+    this.imageUploadRequested.emit();
   }
 
   getJobClasses(job: Job): string {

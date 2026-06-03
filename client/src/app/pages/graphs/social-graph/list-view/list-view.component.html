@@ -8,7 +8,7 @@
     </div>
   } @else {
 
-    <!-- ── User tab switcher (only when 2+ users) ── -->
+    
     @if (activeUserNodes().length > 1) {
       <div class="flex-shrink-0 bg-white dark:bg-[#242526] border-b border-gray-200 dark:border-[#3a3b3c] px-4">
         <div class="flex gap-0 overflow-x-auto scrollbar-none">
@@ -25,15 +25,15 @@
       </div>
     }
 
-    <!-- ── Main layout ── -->
+    
     <div class="flex-1 min-h-0 overflow-y-auto">
       <div class="flex gap-4 p-4 max-w-6xl mx-auto items-start">
 
-        <!-- ── LEFT: Profile + Platforms (synced to active user) ── -->
+        
         <aside class="hidden lg:flex w-[240px] flex-shrink-0 flex-col gap-3">
 
           @if (activeUserNodes()[state.activeUserIndex()]; as userNode) {
-            <!-- Profile card (Scrolls with page) -->
+            
             <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/30 overflow-hidden flex-shrink-0">
               <div class="h-16 bg-gradient-to-r from-[#1877f2] to-[#42a5f5]"></div>
               <div class="px-4 pb-4 flex flex-col items-center text-center -mt-7">
@@ -51,9 +51,9 @@
               </div>
             </div>
 
-            <!-- Sticky container for Platforms -->
+            
             <div class="sticky top-4 flex flex-col gap-3 max-h-[calc(100vh-5rem)] overflow-y-auto pr-3 custom-scrollbar">
-              <!-- Platforms list (synced to active user) -->
+              
               <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/20 p-4 flex-shrink-0">
                 <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Platforms</p>
                 <div class="flex flex-col gap-1">
@@ -84,17 +84,17 @@
 
         </aside>
 
-        <!-- ── CENTER: Feed ── -->
+        
         <div class="flex-1 min-w-0 flex flex-col gap-3">
 
           @if (activeUserNodes()[state.activeUserIndex()]; as userNode) {
-            <!-- Platform post cards (only for active user) -->
+            
             @for (platformNode of getPlatformsForUserNode(userNode.id.toString()); track trackById($index, platformNode)) {
               @if (getPlatformData(platformNode.id.toString()); as platformData) {
 
                 <article [id]="platformNode.id" class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] overflow-hidden animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
 
-                  <!-- Post header -->
+                  
                   <div class="flex items-start gap-3 px-4 pt-4">
                     <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-[#3a3b3c] flex items-center justify-center flex-shrink-0 overflow-hidden text-lg">
                       <app-social-icon [platformName]="platformNode.label"></app-social-icon>
@@ -121,12 +121,12 @@
                     </div>
                   </div>
 
-                  <!-- Bio -->
+                  
                   @if (getProfileBio(platformData)) {
                     <p class="px-4 pt-3 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{{ getProfileBio(platformData) }}</p>
                   }
 
-                  <!-- Stats row -->
+                  
                   <div class="px-4 pt-3 grid grid-cols-4 gap-2">
                     <div class="flex flex-col items-center gap-0.5 bg-gray-50 dark:bg-[#3a3b3c] rounded-xl py-2.5">
                       <i class="bi bi-grid-3x3-gap-fill text-amber-400 text-base"></i>
@@ -150,7 +150,7 @@
                     </div>
                   </div>
 
-                  <!-- Recent posts -->
+                  
                   @if (getRecentPosts(platformData).length > 0) {
                     <div class="px-4 pt-4">
                       <div class="flex items-center justify-between mb-2">
@@ -220,7 +220,7 @@
                     </div>
                   }
 
-                  <!-- Followers / Following -->
+                  
                   @if (getFollowers(platformData).length > 0 || getFollowing(platformData).length > 0) {
                     <div class="px-4 pt-3">
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -260,7 +260,7 @@
                     </div>
                   }
 
-                  <!-- Profile details -->
+                  
                   @if (getProfileDetailEntries(platformData).length > 0) {
                     <div class="px-4 pt-3">
                       <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Profile Details</p>
@@ -275,7 +275,7 @@
                     </div>
                   }
 
-                  <!-- Raw metadata -->
+                  
                   @if (getMetadataEntries(platformNode.id.toString()); as metadataEntries) {
                     @if (metadataEntries.length > 0) {
                       <div class="px-4 pt-3">
@@ -302,7 +302,7 @@
                     }
                   }
 
-                  <!-- Card action footer -->
+                  
                   <div class="flex items-center gap-3 px-4 py-3 mt-3 border-t border-gray-100 dark:border-[#3a3b3c]">
                     <button data-testid="social-list-followers-following" (click)="state.openFollowerScanPopup(platformNode.id.toString())" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-[#1877f2] text-white hover:bg-blue-600 transition-colors">
                       <i class="bi bi-people-fill"></i> Followers &amp; Following
@@ -318,7 +318,7 @@
             }
           }
 
-          <!-- Entities in feed -->
+          
           @if (displayEntitiesInFeed().length > 0) {
             <div class="flex items-center gap-3 py-1 text-xs font-semibold uppercase tracking-widest text-gray-400">
               <div class="flex-1 h-px bg-gray-200 dark:bg-[#3a3b3c]"></div>
@@ -387,9 +387,9 @@
 
         </div>
 
-        <!-- ── RIGHT: Quick actions widget ── -->
+        
         <aside class="hidden xl:flex w-[240px] flex-shrink-0 flex-col gap-3 sticky top-4">
-          <!-- Entity panel -->
+          
           <div class="mt-0 bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/10 p-4 flex-shrink-0">
             <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Add Entity</p>
             <div class="mb-3">
@@ -405,7 +405,7 @@
             </div>
           </div>
 
-          <!-- Saved Entities -->
+          
           <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/10 p-4 flex-shrink-0">
             <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Saved Entities</p>
             @if (customEntities().length === 0) {

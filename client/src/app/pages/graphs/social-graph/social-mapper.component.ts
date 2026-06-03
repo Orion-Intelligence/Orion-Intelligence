@@ -217,6 +217,10 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.updateState(state => state.isHomeMenuCollapsed.update(v => !v), false);
   }
 
+  onHomeMenuHistoryTabClicked() {
+    this.updateState(state => state.viewMode.set('list'), false);
+  }
+
   onEntityMenuToggled() {
     this.updateState(state => state.isEntityMenuCollapsed.update(v => !v), false);
   }
