@@ -263,7 +263,7 @@ class elastic_controller:
             return True, m_data
         except Exception as ex:
             log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
-            return False, str(ex)
+            return False, None
 
     @staticmethod
     def _read_index(i: str) -> str:
