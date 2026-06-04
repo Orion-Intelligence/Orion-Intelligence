@@ -129,7 +129,7 @@
       [activeTarget]="vulnerabilityActiveTarget"
       [searchDomain]="vulnForm.ip"
       [vulnerabilityResult]="vulnerabilityResult"
-      (selectTarget)="startVulnerabilityScanForTarget($event)"
+      (selectTarget)="startVulnerabilityScanForTarget($event.target, $event.depth)"
       @fadeInDashboardItem>
     </app-network-intel-vulnerability-section>
   }

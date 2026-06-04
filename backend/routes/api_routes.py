@@ -839,7 +839,7 @@ async def ipscanner(param: NetIntelDeepScanRequest = Body(...), current_user=Dep
     dependencies=SCAN_WITH_LIMITER_DEPS,
 )
 async def url_vulnerability_scan(param: UrlVulnerabilityScanRequest = Body(...), current_user=Depends(get_current_user)):
-    await AuditLogManager.get_instance().search_audit(current_user, "url_vulnerability_scan", param.domain)
+    await AuditLogManager.get_instance().search_audit(current_user, "url_vulnerability_scan", param.domain+", depth: "+param.depth)
     return await search_model.getInstance().network_intel(param, "url_vulnerability_scan", user_id=str(current_user.id))
 
 @api_routes.post(

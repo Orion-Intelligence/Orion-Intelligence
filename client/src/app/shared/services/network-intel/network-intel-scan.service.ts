@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { lastValueFrom, Observable, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { GeoCameraResponse, NetworkIntelScanResponse, ResolveIpResponse } from '../../model/network-intel/network-intel-api.models';
-import { IpPortData } from '../../model/network-intel/network-intel.model';
+import { IpPortData, VulnerabilityScanDepth } from '../../model/network-intel/network-intel.model';
 import { ScanHelperMethodsService } from '../../partials/scan-helper-methods/scan-helper-methods-service.service';
 
 @Injectable({ providedIn: 'root' })
@@ -43,8 +43,8 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
     return this.runPolledTask<NetworkIntelScanResponse>(() => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip }));
   }
 
-  scanUrlVulnerability(domain: string): Subscription {
-    return this.runPolledTask<any>(() => this.api.post<any>('netintel/url_vulnerability_scan', { domain }));
+  scanUrlVulnerability(domain: string, depth: VulnerabilityScanDepth): Subscription {
+    return this.runPolledTask<any>(() => this.api.post<any>('netintel/url_vulnerability_scan', { domain, depth }));
   }
 
   async fetchShodanIpDetail(ip: string, onEach?: (response: NetworkIntelScanResponse) => void): Promise<any> {

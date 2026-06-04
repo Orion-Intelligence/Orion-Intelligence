@@ -5,7 +5,7 @@ import { EMPTY, Subject, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, concatMap, tap } from 'rxjs/operators';
 import { NetworkIntelScanService } from '../../../shared/services/network-intel/network-intel-scan.service';
-import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats } from '../../../shared/model/network-intel/network-intel.model';
+import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats, VulnerabilityScanDepth } from '../../../shared/model/network-intel/network-intel.model';
 import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
@@ -444,7 +444,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.watchResult(this.parseVulnerabilityTargets.bind(this));
   }
 
-  startVulnerabilityScanForTarget(target: string): void {
+  startVulnerabilityScanForTarget(target: string, depth: VulnerabilityScanDepth): void {
     const normalizedTarget = target.trim();
     if (!normalizedTarget || this.isScanning()) {
       return;
@@ -460,7 +460,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.vulnerabilityResult = null;
     this.lastResultCount = this.vulnerabilityTargets.length;
     this.syncUrl();
-    this.sub = this.scanHelper.scanUrlVulnerability(normalizedTarget);
+    this.sub = this.scanHelper.scanUrlVulnerability(normalizedTarget, depth);
     this.watchResult(this.parseVulnerabilityResult.bind(this));
   }
 

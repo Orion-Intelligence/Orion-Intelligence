@@ -261,7 +261,7 @@ async def test_netintel_ipscanner(payload: NetIntelDeepScanRequest = Body(...)):
     dependencies=ANALYST_DEPS,
 )
 async def test_netintel_url_vulnerability_scan(payload: UrlVulnerabilityScanRequest = Body(...)):
-    return TestRouteHelper.pending_or_dynamic_scan("basic")
+    return TestRouteHelper.pending_or_dynamic_scan("vulnerability")
 
 
 @test_routes.post(
