@@ -129,6 +129,7 @@ class CaseHelperMethods:
             artifact.fileType = transform(artifact.fileType)
             artifact.artifactTypeOtherValue = transform(artifact.artifactTypeOtherValue)
             artifact.artifactSourceOtherValue = transform(artifact.artifactSourceOtherValue)
+            artifact.linkedReportTitle = transform(artifact.linkedReportTitle)
 
         for comment in record.comments or []:
             comment.body = transform(comment.body)

@@ -21,6 +21,9 @@ from orion.services.mongo_manager.shared_model.db_case_model import CaseTask
 from orion.services.mongo_manager.shared_model.db_case_model import db_case_model
 from orion.services.mongo_manager.shared_model.db_case_model import utc_now
 from orion.api.interactive.case_manager.case_artifact_helper import CaseArtifactHelper
+from orion.api.interactive.search_manager.search_model import search_model
+from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
+from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 
 
 class CaseManager:
@@ -116,10 +119,11 @@ class CaseManager:
             if not target_record or not CaseHelperMethods.can_view_case(target_record, current_user):
                 raise HTTPException(status_code=400, detail="Linked cases must be cases you can access")
 
-    async def get_cases(self, current_user) -> list[CaseResponse]:
+    async def get_cases(self, current_user, archived: bool = False) -> list[CaseResponse]:
         if CaseHelperMethods.is_maintainer(current_user):
             records = await self._engine.find(
-                db_case_model, db_case_model.tenant_uuid == str(current_user.tenant_uuid)
+                db_case_model, (db_case_model.tenant_uuid == str(current_user.tenant_uuid)) 
+                & (db_case_model.isArchived == archived)
             )
         else:
             current_actor_id = CaseHelperMethods.actor_id(current_user)
@@ -127,6 +131,7 @@ class CaseManager:
                 db_case_model,
                 {
                     "tenant_uuid": str(current_user.tenant_uuid),
+                    "isArchived": archived,
                     "$or": [
                         {"createdBy": current_actor_id},
                         {"assignedAnalystIds": {"$elemMatch": {"$eq": current_actor_id}}},
@@ -282,6 +287,9 @@ class CaseManager:
                 f"Case update failed: caseId={case_id}, case_not_found",
             )
             raise HTTPException(status_code=404, detail="Case not found")
+        
+        if record.isArchived:
+            raise HTTPException(status_code=403, detail="Archived cases cannot be edited")
 
         current_actor_id = CaseHelperMethods.actor_id(current_user)
         server_now = utc_now()
@@ -413,6 +421,8 @@ class CaseManager:
         )
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
+        if record.isArchived:
+            raise HTTPException(status_code=403, detail="Archived cases cannot be deleted")     
         if record.closure is not None:
             raise HTTPException(status_code=403, detail="Closed cases cannot be deleted")
         if not CaseHelperMethods.is_maintainer(current_user):
@@ -542,5 +552,161 @@ class CaseManager:
 
         CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.encrypt_value(enc, value))
         await self._engine.save(record)
+
+        return {"success": True}
+    
+    def _extract_report_id(self, row: dict) -> str:
+        if not isinstance(row, dict):
+            return ""
+
+        return str(
+            row.get("_id")
+            or row.get("m_id")
+            or row.get("id")
+            or row.get("m_hash")
+            or row.get("doc_id")
+            or ""
+        )
+
+
+    def _extract_report_title(self, row: dict) -> str:
+        if not isinstance(row, dict):
+            return ""
+
+        return str(
+            row.get("m_title")
+            or row.get("title")
+            or row.get("m_name")
+            or row.get("name")
+            or row.get("m_url")
+            or row.get("m_domain")
+            or "Untitled Report"
+        )
+    
+    async def get_artifact_reports(self, source: str, current_user, q: str = "", limit: int = 10) -> list[dict]:
+        source = (source or "").strip().lower()
+        q = (q or "").strip()
+        limit = max(1, min(limit or 10, 50))
+
+        param = search_consolidated_param_model(
+            q=q,
+            category="all",
+            page=1,
+            fullsearch=False,
+            safe=False,
+            network="all",
+            matchtype="",
+            content="all",
+            platform_result_count=limit,
+        )
+
+        if source == "strategic":
+            result = await search_model.getInstance().search_consolidated_ranked_result(
+                param,
+                [ELASTIC_INDEX.S_GENERIC_INDEX],
+                [],
+                [],
+            )
+
+        elif source == "breach":
+            result = await search_model.getInstance().search_consolidated_ranked_result(
+                param,
+                [ELASTIC_INDEX.S_LEAK_INDEX],
+                ["news"],
+                ["leaks", "tracking"],
+            )
+
+        elif source == "defacement":
+            param.content = "all"
+            result = await search_model.getInstance().search_consolidated_ranked_result(
+                param,
+                [ELASTIC_INDEX.S_DEFACEMENT_INDEX],
+                [],
+                ["all"],
+                "defacement",
+            )
+
+        elif source == "social":
+            result = await search_model.getInstance().search_consolidated_ranked_result(
+                param,
+                [ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX],
+                [],
+                [],
+            )
+
+        elif source == "exploit":
+            result = await search_model.getInstance().search_consolidated_ranked_result(
+                param,
+                [ELASTIC_INDEX.S_EXPLOIT_INDEX],
+                [],
+                ["all"],
+            )
+
+        elif source == "feed":
+            result = await search_model.getInstance().search_consolidated_ranked_result(
+                param,
+                [ELASTIC_INDEX.S_LEAK_INDEX],
+                [],
+                ["news"],
+            )
+
+        else:
+            raise HTTPException(status_code=400, detail="Invalid report source")
+
+        rows = result.get("Result", []) if isinstance(result, dict) else []
+
+        items = []
+        seen_ids = set()
+
+        for row in rows:
+            report_id = self._extract_report_id(row)
+            report_title = self._extract_report_title(row)
+
+            if not report_id or not report_title or report_id in seen_ids:
+                continue
+
+            seen_ids.add(report_id)
+
+            items.append({
+                "id": report_id,
+                "title": report_title,
+            })
+
+            if len(items) >= limit:
+                break
+
+        return items
+    
+    async def archive_case(self, case_id: str, current_user) -> dict:
+        record = await self._engine.find_one(
+            db_case_model,
+            (db_case_model.caseId == case_id)
+            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
+        )
+
+        if not record:
+            raise HTTPException(status_code=404, detail="Case not found")
+
+        if not CaseHelperMethods.can_view_case(record, current_user):
+            raise HTTPException(status_code=403, detail="Access forbidden")
+
+        if record.closure is None:
+            raise HTTPException(status_code=400, detail="Only closed cases can be archived")
+
+        if record.isArchived:
+            return {"success": True, "message": "Case is already archived"}
+
+        record.isArchived = True
+        record.archivedAt = utc_now()
+        record.archivedBy = CaseHelperMethods.actor_id(current_user)
+        record.updatedAt = utc_now()
+
+        await self._engine.save(record)
+
+        await AuditLogManager.get_instance().register(
+            str(current_user.tenant_uuid),
+            str(current_user.id),
+            f"Case archived: caseId={case_id}",
+        )
 
         return {"success": True}

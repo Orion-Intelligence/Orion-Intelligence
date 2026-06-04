@@ -289,6 +289,9 @@ class CaseArtifact(EmbeddedModel):
     fileType: str = ""
     fileSize: int = 0
     fileResourceId: str = ""
+    linkedReportSource: str = ""
+    linkedReportId: str = ""
+    linkedReportTitle: str = ""
     entityIds: List[str] = Field(default_factory=list)
     tags: List[CaseTag] = Field(default_factory=list)
     capturedAt: Optional[datetime] = None
@@ -370,6 +373,10 @@ class db_case_model(Model):
     createdAt: datetime = Field(default_factory=utc_now)
     updatedAt: datetime = Field(default_factory=utc_now)
     closedAt: Optional[datetime] = None
+    
+    isArchived: bool = Field(default=False, index=True)
+    archivedAt: Optional[datetime] = None
+    archivedBy: str = ""
 
     entities: List[CaseEntity] = Field(default_factory=list)
     artifacts: List[CaseArtifact] = Field(default_factory=list)

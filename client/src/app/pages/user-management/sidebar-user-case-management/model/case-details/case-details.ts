@@ -6,7 +6,7 @@ import { EntityDetailsComponent } from '../entity-details/entity-details';
 import { ReportFeedbackCommentsComponent } from '../../../../../sections/report/social-interactions/report-feedback-comments/report-feedback-comments.component';
 import { ReportUserSidebarComponent } from '../../../../../sections/report/social-interactions/report-user-sidebar/report-user-sidebar.component';
 import { ReportFeedbackModel } from '../../../../../sections/report/templates/report_general/models/report-feedback.model';
-import { Case, CaseAnalyst, CaseArtifact, CaseArtifactRequest, CaseClosure, CaseClosureRequest, CaseComment, CaseCommentRequest, CaseEntity, CaseEntityRequest, CaseLink, CaseTag, CaseTask, CaseTaskRequest, CaseUpdateRequest, SharedCaseReport } from '../../../../../shared/model/case-management/case.model';
+import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseArtifactRequest, CaseClosure, CaseClosureRequest, CaseComment, CaseCommentRequest, CaseEntity, CaseEntityRequest, CaseLink, CaseTag, CaseTask, CaseTaskRequest, CaseUpdateRequest, SharedCaseReport } from '../../../../../shared/model/case-management/case.model';
 import { CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
@@ -48,6 +48,7 @@ import { CasePdfExportService } from '../../case-management-service/case-pdf-exp
 })
 export class CaseDetails extends CaseDetailsStore implements OnInit {
   @ViewChild(ReportUserSidebarComponent) private userSidebar?: ReportUserSidebarComponent;
+  private artifactReportSearchTimer: ReturnType<typeof setTimeout> | null = null;
 
   caseData: Case | null = null;
   isLoading = true;
@@ -82,6 +83,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   readonly artifactAllowedFileTypes = ['application/pdf', 'image/jpeg', 'image/png', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
   pendingNewArtifactFile: File | null = null;
   pendingNewArtifactFileInput: HTMLInputElement | null = null;
+  artifactReports: ArtifactReportOption[] = [];
+  isArtifactReportsLoading = false;
+  isArchiveConfirmationOpen = false;
+  isArchivingCase = false;
 
   constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef) {
     super();
@@ -250,6 +255,54 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     });
   }
 
+  loadArtifactReports(source: string, q: string = ''): void {
+    this.artifactReports = [];
+
+    if (!source) {
+      return;
+    }
+
+    this.isArtifactReportsLoading = true;
+
+    this.caseService.getArtifactReports(source, q, 10).subscribe({
+      next: reports => {
+        this.artifactReports = reports || [];
+        this.isArtifactReportsLoading = false;
+      },
+      error: err => {
+        this.artifactReports = [];
+        this.isArtifactReportsLoading = false;
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to load reports');
+      }
+    });
+  }
+
+  scheduleArtifactReportSearch(artifact: CaseArtifact): void {
+    if (this.artifactReportSearchTimer) {
+      clearTimeout(this.artifactReportSearchTimer);
+    }
+
+    if (artifact.type !== 'report' || !artifact.linkedReportSource) {
+      this.artifactReports = [];
+      return;
+    }
+
+    this.artifactReportSearchTimer = setTimeout(() => {
+      this.loadArtifactReports(artifact.linkedReportSource || '', artifact.title || '');
+    }, 1000);
+  }
+
+  onArtifactReportSelected(artifact: CaseArtifact, reportId: string): void {
+    const report = this.artifactReports.find(item => item.id === reportId);
+
+    artifact.linkedReportId = reportId;
+    artifact.linkedReportTitle = report?.title || '';
+
+    if (report?.title) {
+      artifact.title = report.title;
+    }
+  }
+
   viewArtifactFile(artifact: CaseArtifact): void {
     if (!this.caseData || !artifact.artifactId) {
       return;
@@ -385,6 +438,14 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     });
   }
 
+  openArchiveConfirmation(): void {
+    if (!this.caseData?.closure || this.caseData.isArchived || this.isArchivingCase) {
+      return;
+    }
+
+    this.isArchiveConfirmationOpen = true;
+  }
+
   openShareConfirmation(): void {
     if (!this.caseData || this.isShareCreating) {
       return;
@@ -420,6 +481,30 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return 'Revoking share links will expire all previously shared links for this case. Do you want to continue?';
     }
     return '';
+  }
+
+  archiveCase(confirmed: boolean): void {
+    this.isArchiveConfirmationOpen = false;
+
+    if (!confirmed || !this.caseData || this.isArchivingCase) {
+      return;
+    }
+
+    this.isArchivingCase = true;
+
+    this.caseService.archiveCase(this.caseData.caseId).subscribe({
+      next: () => {
+        this.isArchivingCase = false;
+        if (this.caseData) {
+          this.caseData.isArchived = true;
+        }
+        this.messageNotificationService.show('Case archived successfully', 'success');
+      },
+      error: err => {
+        this.isArchivingCase = false;
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to archive case');
+      }
+    });
   }
 
   private shareCase(): void {
@@ -630,32 +715,50 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     if (!this.editedCase) {
       return;
     }
+
     const relatedEntity = this.getRelatedEntities(this.editedCase)[index];
+
     if (!relatedEntity) {
       return;
     }
+
     this.editedCase.entities = this.editedCase.entities.filter(entity => entity.entityId !== relatedEntity.entityId);
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase),
+      'Related entity removed successfully');
   }
 
   removeArtifact(index: number): void {
     if (!this.editedCase?.artifacts) {
       return;
     }
-    this.editedCase.artifacts.splice(index, 1);
+
+    this.editedCase.artifacts = this.editedCase.artifacts.filter((_, i) => i !== index);
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase),
+      'Artifact removed successfully');
   }
 
   removeTask(index: number): void {
     if (!this.editedCase?.tasks) {
       return;
     }
-    this.editedCase.tasks.splice(index, 1);
+
+    this.editedCase.tasks = this.editedCase.tasks.filter((_, i) => i !== index);
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase),
+      'Task removed successfully');
   }
 
   removeLinkedCase(index: number): void {
     if (!this.editedCase?.linkedCases) {
       return;
     }
-    this.editedCase.linkedCases.splice(index, 1);
+
+    this.editedCase.linkedCases = this.editedCase.linkedCases.filter((_, i) => i !== index);
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase),
+      'Linked case removed successfully');
   }
 
   hasCaseChanged(): boolean {
@@ -665,7 +768,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     return this.getCaseSaveSignature(this.editedCase) !== this.getCaseSaveSignature(this.caseData);
   }
 
-  getLinkableCases( caseItem: Case | null = this.editedCase || this.caseData, currentSelectedCaseId = '' ): Case[] {
+  getLinkableCases(caseItem: Case | null = this.editedCase || this.caseData, currentSelectedCaseId = ''): Case[] {
     const currentCaseId = caseItem?.caseId;
 
     const alreadyLinkedCaseIds = new Set((caseItem?.linkedCases || [])
@@ -677,7 +780,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       !alreadyLinkedCaseIds.has(item.caseId));
   }
 
-  hasLinkableCases( caseItem: Case | null = this.editedCase || this.caseData, currentSelectedCaseId = '' ): boolean {
+  hasLinkableCases(caseItem: Case | null = this.editedCase || this.caseData, currentSelectedCaseId = ''): boolean {
     return this.getLinkableCases(caseItem, currentSelectedCaseId).length > 0;
   }
 
@@ -896,7 +999,8 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     const invalidIndex = (this.editedCase.artifacts || []).findIndex(artifact =>
       !artifact.title.trim()
       || (artifact.type === 'other' && !artifact.artifactTypeOtherValue?.trim())
-      || (artifact.source === 'other' && !artifact.artifactSourceOtherValue?.trim()));
+      || (artifact.source === 'other' && !artifact.artifactSourceOtherValue?.trim())
+      || (artifact.type === 'report' && (!artifact.linkedReportSource || !artifact.linkedReportId)));
 
     if (invalidIndex >= 0) {
       this.messageNotificationService.show(`Artifact ${invalidIndex + 1} is invalid`);
@@ -926,6 +1030,11 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
     if (this.newArtifact.type === 'url_capture' && !this.newArtifact.url?.trim()) {
       this.messageNotificationService.show('URL is required');
+      return;
+    }
+
+    if (this.newArtifact.type === 'report' && (!this.newArtifact.linkedReportSource || !this.newArtifact.linkedReportId)) {
+      this.messageNotificationService.show('Please select a report');
       return;
     }
 
@@ -1288,6 +1397,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     artifact.fileResourceId = artifact.fileResourceId || '';
     artifact.entityIds = artifact.entityIds || [];
     artifact.tags = artifact.tags || [];
+    artifact.linkedReportSource = artifact.linkedReportSource || '';
+    artifact.linkedReportId = artifact.linkedReportId || '';
+    artifact.linkedReportTitle = artifact.linkedReportTitle || '';
     artifact.capturedAt = artifact.capturedAt || null;
     return artifact;
   }
@@ -1308,6 +1420,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       fileResourceId: artifact.fileResourceId || '',
       entityIds: artifact.entityIds || [],
       tags: artifact.tags || [],
+      linkedReportSource: artifact.linkedReportSource || '',
+      linkedReportId: artifact.linkedReportId || '',
+      linkedReportTitle: artifact.linkedReportTitle || '',
       capturedAt: artifact.capturedAt || null
     };
   }

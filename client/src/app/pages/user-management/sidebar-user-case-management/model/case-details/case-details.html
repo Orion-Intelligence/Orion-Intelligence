@@ -41,7 +41,8 @@
                             <div class="min-w-0 border-r border-[var(--tenant-line)] px-3 py-2 last:border-r-0">
                                 <div class="ui-shimmer h-2.5 w-12 rounded bg-[var(--color-blue-720)]"></div>
                                 <div class="mt-1 flex items-center gap-1.5">
-                                    <div class="ui-shimmer h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-blue-720)]"></div>
+                                    <div class="ui-shimmer h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-blue-720)]">
+                                    </div>
                                     <div class="ui-shimmer h-3 w-16 rounded bg-[var(--color-blue-720)]"></div>
                                 </div>
                             </div>
@@ -123,6 +124,11 @@
 
             <div class="flex flex-wrap items-center gap-2 sm:justify-end">
                 @if (!isEditing) {
+                @if (caseData.closure && !caseData.isArchived) {
+                <button @caseInlineMotion (click)="openArchiveConfirmation()" type="button" aria-label="Archive case" appTooltip="Archive case" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] hover:text-amber-300 disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-archive" [disabled]="isArchivingCase">
+                    <img src="assets/images/shared/archive-icon.svg" alt="Archive" class="h-4 w-4" />
+                </button>
+                }
                 <button @caseInlineMotion (click)="exportPdf()" type="button" aria-label="Export PDF" appTooltip="Export PDF" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-export-pdf" [disabled]="isPdfExporting">
                     <i class="bi text-sm leading-none [body.light-theme_&]:text-emerald-700" [ngClass]="isPdfExporting ? 'bi-arrow-repeat animate-spin' : 'bi-download text-emerald-300'"></i>
                 </button>
@@ -143,6 +149,12 @@
         @if (pendingShareAction) {
         <app-confirmation-popup [message]="getShareConfirmationMessage()"
             (confirmed)="handleShareConfirmation($event)"></app-confirmation-popup>
+        }
+
+        @if (isArchiveConfirmationOpen) {
+        <app-confirmation-popup [message]="'Are you sure you want to archive this case?'"
+            (confirmed)="archiveCase($event)">
+        </app-confirmation-popup>
         }
 
         <div class="space-y-5">
@@ -172,18 +184,22 @@
                                 </div>
                             </div>
                             <div class="min-w-0 border-r border-[var(--tenant-line)] px-3 py-2" [ngClass]="{ 'bg-red-500/10 text-red-300': caseData.severity === 'critical', 'bg-orange-500/10 text-orange-300': caseData.severity === 'high', 'bg-yellow-500/10 text-yellow-300': caseData.severity === 'medium', 'bg-green-500/10 text-green-300': caseData.severity !== 'critical' && caseData.severity !== 'high' && caseData.severity !== 'medium' }">
-                                <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">Severity</div>
+                                <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">Severity
+                                </div>
                                 <div class="mt-1 flex items-center gap-1.5 truncate text-xs font-semibold capitalize text-[var(--color-text1)]">
                                     <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-current"></span>
-                                    <span class="truncate" data-testid="case-details-severity-value">{{ caseData.severity
+                                    <span class="truncate" data-testid="case-details-severity-value">{{
+                                        caseData.severity
                                         }}</span>
                                 </div>
                             </div>
                             <div class="min-w-0 px-3 py-2" [ngClass]="{ 'bg-red-500/10 text-red-300': caseData.priority === 'critical', 'bg-orange-500/10 text-orange-300': caseData.priority === 'high', 'bg-yellow-500/10 text-yellow-300': caseData.priority === 'medium', 'bg-green-500/10 text-green-300': caseData.priority !== 'critical' && caseData.priority !== 'high' && caseData.priority !== 'medium' }">
-                                <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">Priority</div>
+                                <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">Priority
+                                </div>
                                 <div class="mt-1 flex items-center gap-1.5 truncate text-xs font-semibold capitalize text-[var(--color-text1)]">
                                     <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-current"></span>
-                                    <span class="truncate" data-testid="case-details-priority-value">{{ caseData.priority
+                                    <span class="truncate" data-testid="case-details-priority-value">{{
+                                        caseData.priority
                                         }}</span>
                                 </div>
                             </div>
@@ -198,107 +214,109 @@
                 </div>
 
                 @if (activeEditSection === 'caseDetails') {
-                <app-case-edit-drawer title="Edit Case Details" [subtitle]="caseData.caseId" saveLabel="Save Case" saveTestId="case-details-save" cancelTestId="case-details-cancel" drawerTestId="case-details-edit-drawer" (save)="saveCaseDetails()" (cancel)="cancelEditing()">
+                <app-case-edit-drawer title="Edit Case Details" [subtitle]="caseData.caseId" saveLabel="Save Case"
+                    saveTestId="case-details-save" cancelTestId="case-details-cancel"
+                    drawerTestId="case-details-edit-drawer" (save)="saveCaseDetails()" (cancel)="cancelEditing()">
                     <div class="space-y-5 p-6">
-                    <div class="space-y-4 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
-                        <div class="space-y-1">
-                            <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
-                            <input type="text" [(ngModel)]="editedCase!.title" name="title" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-title-input" />
-                        </div>
-
-                        <div class="space-y-1">
-                            <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
-                            <textarea [(ngModel)]="editedCase!.description" name="description" class="min-h-28 w-full resize-y rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-description-input"></textarea>
-                        </div>
-
-                        <div class="space-y-2">
-                            <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Tags</label>
-                            <div class="flex flex-wrap gap-2">
-                                @for (tag of tagOptions; track tag.value) {
-                                <button type="button" (click)="toggleTag(tag.value)" class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isTagSelected(tag.value) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200 [body.light-theme_&]:border-sky-600/40 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
-                                    {{ tag.label }}
-                                </button>
-                                }
+                        <div class="space-y-4 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
+                                <input type="text" [(ngModel)]="editedCase!.title" name="title" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-title-input" />
                             </div>
-                        </div>
 
-                        <div class="space-y-2">
-                            <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case
-                                Analysts</label>
-                            <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/40 p-3">
-                                @if (analysts.length > 0) {
+                            <div class="space-y-1">
+                                <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
+                                <textarea [(ngModel)]="editedCase!.description" name="description" class="min-h-28 w-full resize-y rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-description-input"></textarea>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Tags</label>
                                 <div class="flex flex-wrap gap-2">
-                                    @for (analyst of analysts; track analyst.id) {
-                                    <button type="button" (click)="toggleAssignedAnalyst(analyst.id)" class="rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isAnalystAssignedToCase(analyst.id) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200 [body.light-theme_&]:border-sky-600/40 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
-                                        {{ analyst.username || analyst.email || analyst.id }}
+                                    @for (tag of tagOptions; track tag.value) {
+                                    <button type="button" (click)="toggleTag(tag.value)" class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isTagSelected(tag.value) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200 [body.light-theme_&]:border-sky-600/40 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
+                                        {{ tag.label }}
                                     </button>
                                     }
                                 </div>
-                                } @else {
-                                <div class="text-sm text-[var(--color-text4)]">No active analysts found.</div>
-                                }
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
-                        <div class="grid grid-cols-1 gap-4">
-                            <div class="space-y-1">
-                                <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
-                                <select [(ngModel)]="editedCase!.status" name="status" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-status-select">
-                                    @for (s of statusOptions; track s.value) {
-                                    <option [value]="s.value">{{ s.label }}</option>
-                                    }
-                                </select>
                             </div>
 
-                            <div class="space-y-1">
+                            <div class="space-y-2">
                                 <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case
-                                    Type</label>
-                                <select [(ngModel)]="editedCase!.caseType" name="caseType" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-type-select">
-                                    @for (type of caseTypeOptions; track type.value) {
-                                    <option [value]="type.value">{{ type.label }}</option>
-                                    }
-                                </select>
-                                @if (editedCase!.caseType === 'other') {
-                                <input @caseInlineMotion type="text" [(ngModel)]="editedCase!.caseTypeOtherValue" name="caseTypeOther" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" placeholder="Specify other case type" />
-                                }
-                            </div>
-
-                            <div class="space-y-1">
-                                <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Intake
-                                    Source</label>
-                                <select [(ngModel)]="editedCase!.intakeSource" name="intakeSource" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-intake-source-select">
-                                    @for (source of intakeSourceOptions; track source.value) {
-                                    <option [value]="source.value">{{ source.label }}</option>
-                                    }
-                                </select>
-                                @if (editedCase!.intakeSource === 'other') {
-                                <input @caseInlineMotion type="text" [(ngModel)]="editedCase!.intakeSourceOtherValue" name="intakeSourceOther" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" placeholder="Specify other intake source" />
-                                }
-                            </div>
-
-                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                <div class="space-y-1">
-                                    <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Severity</label>
-                                    <select [(ngModel)]="editedCase!.severity" name="severity" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-severity-select">
-                                        @for (severity of severityOptions; track severity) {
-                                        <option [value]="severity" class="capitalize">{{ severity }}</option>
+                                    Analysts</label>
+                                <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/40 p-3">
+                                    @if (analysts.length > 0) {
+                                    <div class="flex flex-wrap gap-2">
+                                        @for (analyst of analysts; track analyst.id) {
+                                        <button type="button" (click)="toggleAssignedAnalyst(analyst.id)" class="rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isAnalystAssignedToCase(analyst.id) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200 [body.light-theme_&]:border-sky-600/40 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
+                                            {{ analyst.username || analyst.email || analyst.id }}
+                                        </button>
                                         }
-                                    </select>
-                                </div>
-
-                                <div class="space-y-1">
-                                    <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Priority</label>
-                                    <select [(ngModel)]="editedCase!.priority" name="priority" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-priority-select">
-                                        @for (p of priorityOptions; track p) {
-                                        <option [value]="p" class="capitalize">{{ p }}</option>
-                                        }
-                                    </select>
+                                    </div>
+                                    } @else {
+                                    <div class="text-sm text-[var(--color-text4)]">No active analysts found.</div>
+                                    }
                                 </div>
                             </div>
                         </div>
-                    </div>
+
+                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
+                            <div class="grid grid-cols-1 gap-4">
+                                <div class="space-y-1">
+                                    <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
+                                    <select [(ngModel)]="editedCase!.status" name="status" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-status-select">
+                                        @for (s of statusOptions; track s.value) {
+                                        <option [value]="s.value">{{ s.label }}</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="space-y-1">
+                                    <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Case
+                                        Type</label>
+                                    <select [(ngModel)]="editedCase!.caseType" name="caseType" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-type-select">
+                                        @for (type of caseTypeOptions; track type.value) {
+                                        <option [value]="type.value">{{ type.label }}</option>
+                                        }
+                                    </select>
+                                    @if (editedCase!.caseType === 'other') {
+                                    <input @caseInlineMotion type="text" [(ngModel)]="editedCase!.caseTypeOtherValue" name="caseTypeOther" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" placeholder="Specify other case type" />
+                                    }
+                                </div>
+
+                                <div class="space-y-1">
+                                    <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Intake
+                                        Source</label>
+                                    <select [(ngModel)]="editedCase!.intakeSource" name="intakeSource" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-intake-source-select">
+                                        @for (source of intakeSourceOptions; track source.value) {
+                                        <option [value]="source.value">{{ source.label }}</option>
+                                        }
+                                    </select>
+                                    @if (editedCase!.intakeSource === 'other') {
+                                    <input @caseInlineMotion type="text" [(ngModel)]="editedCase!.intakeSourceOtherValue" name="intakeSourceOther" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" placeholder="Specify other intake source" />
+                                    }
+                                </div>
+
+                                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                    <div class="space-y-1">
+                                        <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Severity</label>
+                                        <select [(ngModel)]="editedCase!.severity" name="severity" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-severity-select">
+                                            @for (severity of severityOptions; track severity) {
+                                            <option [value]="severity" class="capitalize">{{ severity }}</option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <label class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Priority</label>
+                                        <select [(ngModel)]="editedCase!.priority" name="priority" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" data-testid="case-details-priority-select">
+                                            @for (p of priorityOptions; track p) {
+                                            <option [value]="p" class="capitalize">{{ p }}</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </app-case-edit-drawer>
                 }
@@ -363,10 +381,15 @@
 
             <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
                 @if (activeEditSection === 'primaryEntity' && editablePrimaryEntity) {
-                <app-case-edit-drawer title="Edit Primary Entity" [subtitle]="editablePrimaryEntity.value || 'Primary Entity'" saveLabel="Save Entity" saveTestId="case-primary-entity-save" cancelTestId="case-primary-entity-cancel" drawerTestId="case-primary-entity-edit-drawer" (save)="savePrimaryEntity()" (cancel)="cancelEditing()">
+                <app-case-edit-drawer title="Edit Primary Entity"
+                    [subtitle]="editablePrimaryEntity.value || 'Primary Entity'" saveLabel="Save Entity"
+                    saveTestId="case-primary-entity-save" cancelTestId="case-primary-entity-cancel"
+                    drawerTestId="case-primary-entity-edit-drawer" (save)="savePrimaryEntity()"
+                    (cancel)="cancelEditing()">
                     <div class="p-6">
                         <app-entity-details [entity]="editablePrimaryEntity" [isMainEntity]="true" [showTitle]="false"
-                            [showTopDivider]="false" [showRoleRelationshipFields]="false" [showInlineSaveButtons]="false" [entityIndex]="0"
+                            [showTopDivider]="false" [showRoleRelationshipFields]="false"
+                            [showInlineSaveButtons]="false" [entityIndex]="0"
                             (save)="savePrimaryEntity()"></app-entity-details>
                     </div>
                 </app-case-edit-drawer>

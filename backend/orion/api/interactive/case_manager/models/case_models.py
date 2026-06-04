@@ -35,6 +35,11 @@ class CaseRequestModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class ArtifactReportOption(BaseModel):
+    id: str
+    title: str
+
+
 class SocialMediaProfileModel(CaseRequestModel):
     platform: SocialPlatform
     platformOtherValue: str = ""
@@ -104,6 +109,9 @@ class CaseArtifactModel(CaseRequestModel):
     fileType: str = ""
     fileSize: int = 0
     fileResourceId: str = ""
+    linkedReportSource: str = ""
+    linkedReportId: str = ""
+    linkedReportTitle: str = ""
     entityIds: List[str] = Field(default_factory=list)
     tags: List[CaseTag] = Field(default_factory=list)
     capturedAt: Optional[datetime] = None
@@ -285,6 +293,9 @@ class CaseResponse(BaseModel):
     createdAt: datetime
     updatedAt: datetime
     closedAt: Optional[datetime] = None
+    isArchived: bool = False
+    archivedAt: Optional[datetime] = None
+    archivedBy: str = ""
     artifacts: List[dict] = Field(default_factory=list)
     entities: List[dict] = Field(default_factory=list)
     comments: List[dict] = Field(default_factory=list)

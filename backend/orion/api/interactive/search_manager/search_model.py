@@ -155,6 +155,7 @@ class search_model:
         if response and "hits" in response and "hits" in response["hits"]:
             for rank, hit in enumerate(response["hits"]["hits"]):
                 source = hit.get("_source", {})
+                source["_id"] = hit.get("_id", "")
                 source.pop("m_embedding", None)
                 source["rank_index"] = hit.get("_index")
                 source["_score"] = hit.get("_score", 0)

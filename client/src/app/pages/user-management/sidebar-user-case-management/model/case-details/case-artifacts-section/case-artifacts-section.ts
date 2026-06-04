@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Case, CaseArtifact } from '../../../../../../shared/model/case-management/case.model';
-import { ARTIFACT_TYPE_OPTIONS, SOURCE_TYPE_OPTIONS } from '../../../../../../shared/model/case-management/case-management.defaults';
+import { ARTIFACT_REPORT_SOURCE_OPTIONS, ARTIFACT_TYPE_OPTIONS, SOURCE_TYPE_OPTIONS } from '../../../../../../shared/model/case-management/case-management.defaults';
 import { TooltipDirective } from '../../../../../../shared/directive/tooltip-directive.directive';
 import { caseInlineMotion, caseListItemMotion, caseModeSwapMotion, caseSectionMotion } from '../case-details.animations';
 import { CaseDateField, CaseDateTarget, formatCaseLabel, getCaseDateInputValue, getCaseDisplayLabel, getFormattedCaseDateTime, setCaseDateInputValue } from '../case-details-formatters';
@@ -21,6 +21,7 @@ export class CaseArtifactsSectionComponent {
   artifactTypeOptions = ARTIFACT_TYPE_OPTIONS;
   sourceTypeOptions = SOURCE_TYPE_OPTIONS;
   editingArtifactIndex: number | null = null;
+  reportSourceOptions = ARTIFACT_REPORT_SOURCE_OPTIONS;
 
   get caseData(): Case {
     return this.store.caseData as Case;
@@ -52,6 +53,14 @@ export class CaseArtifactsSectionComponent {
     }
 
     return this.editedCase?.artifacts?.[this.editingArtifactIndex] || null;
+  }
+
+  get artifactReports() {
+    return this.store.artifactReports;
+  }
+
+  get isArtifactReportsLoading() {
+    return this.store.isArtifactReportsLoading;
   }
 
   openEditArtifact(index: number): void {

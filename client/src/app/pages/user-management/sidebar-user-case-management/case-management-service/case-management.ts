@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../../shared/services/api.service';
-import { Case, CaseAnalyst, CaseRequest, CaseShareRequest, CaseShareResponse, CaseUpdateRequest } from '../../../../shared/model/case-management/case.model';
+import { ArtifactReportOption, Case, CaseAnalyst, CaseRequest, CaseShareRequest, CaseShareResponse, CaseUpdateRequest } from '../../../../shared/model/case-management/case.model';
 
 type ArtifactFileUploadResponse = { fileName: string; fileType: string; fileSize: number; fileResourceId: string };
 
@@ -9,8 +9,8 @@ type ArtifactFileUploadResponse = { fileName: string; fileType: string; fileSize
 export class CaseManagement {
   constructor(private api: ApiService) { }
 
-  getCases(): Observable<Case[]> {
-    return this.api.get<Case[]>('profile/cases');
+  getCases(archived = false): Observable<Case[]> {
+    return this.api.get<Case[]>(`profile/cases?archived=${archived}`);
   }
 
   createCase(caseData: CaseRequest): Observable<Case> {
@@ -54,6 +54,21 @@ export class CaseManagement {
 
   deleteArtifactFile(caseId: string, artifactId: string): Observable<{ success: boolean }> {
     return this.api.delete<{ success: boolean }>(`profile/cases/${caseId}/artifacts/${artifactId}/file`);
+  }
+
+  getArtifactReports(source: string, q: string = '', limit: number = 10): Observable<ArtifactReportOption[]> {
+    const params = new URLSearchParams();
+
+    params.set('source', source);
+    params.set('q', q);
+    params.set('limit', String(limit));
+
+    return this.api.get<ArtifactReportOption[]>(`profile/cases/artifact-reports?${params.toString()}`);
+  }
+
+  archiveCase(caseId: string): Observable<{ success: boolean; message?: string }> {
+    return this.api.put<{ success: boolean; message?: string }>(`profile/cases/${caseId}/archive`,
+      {});
   }
 
 }

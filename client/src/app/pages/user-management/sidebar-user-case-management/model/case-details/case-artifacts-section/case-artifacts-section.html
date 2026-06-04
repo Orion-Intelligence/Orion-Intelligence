@@ -15,88 +15,126 @@
     </div>
 
     @if (isEditing && selectedEditableArtifact; as artifact) {
-    <app-case-edit-drawer title="Edit Artifact" [subtitle]="artifact.title || 'Artifact'" saveLabel="Save Artifact" saveTestId="case-artifact-save" cancelTestId="case-artifact-cancel" drawerTestId="case-artifact-edit-drawer" (save)="store.saveArtifacts()" (cancel)="cancelArtifactEditing()">
+    <app-case-edit-drawer title="Edit Artifact" [subtitle]="artifact.title || 'Artifact'" saveLabel="Save Artifact"
+        saveTestId="case-artifact-save" cancelTestId="case-artifact-cancel" drawerTestId="case-artifact-edit-drawer"
+        (save)="store.saveArtifacts()" (cancel)="cancelArtifactEditing()">
         <div class="space-y-4 p-6">
-        <div @caseListItemMotion class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
-            <div class="mb-3 flex items-center justify-between gap-3">
-                <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Artifact
-                    {{ (editingArtifactIndex || 0) + 1 }}</span>
-                <button type="button" (click)="store.removeArtifact(editingArtifactIndex || 0)" aria-label="Remove artifact" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70 [body.light-theme_&]:hover:text-red-900" [attr.data-testid]="'case-artifact-remove-' + (editingArtifactIndex || 0)">
-                    <i class="bi bi-x-lg"></i> Remove
-                </button>
-            </div>
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
-                    <input [(ngModel)]="artifact.title" name="artifact-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-title-input" />
+            <div @caseListItemMotion class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
+                <div class="mb-3 flex items-center justify-between gap-3">
+                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Artifact
+                        {{ (editingArtifactIndex || 0) + 1 }}</span>
+                    <button type="button" (click)="store.removeArtifact(editingArtifactIndex || 0)" aria-label="Remove artifact" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70 [body.light-theme_&]:hover:text-red-900" [attr.data-testid]="'case-artifact-remove-' + (editingArtifactIndex || 0)">
+                        <i class="bi bi-x-lg"></i> Remove
+                    </button>
                 </div>
-                <div>
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Type</label>
-                    <select [(ngModel)]="artifact.type" name="artifact-type" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-type-select">
-                        @for (type of artifactTypeOptions; track type.value) {
-                        <option [value]="type.value">{{ type.label }}</option>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
+                        <input [(ngModel)]="artifact.title" (ngModelChange)="store.scheduleArtifactReportSearch(artifact)" name="artifact-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-title-input" />
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Type</label>
+                        <select [(ngModel)]="artifact.type" (ngModelChange)="artifact.linkedReportSource = ''; artifact.linkedReportId = ''; artifact.linkedReportTitle = ''" name="artifact-type" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-type-select">
+                            @for (type of artifactTypeOptions; track type.value) {
+                            <option [value]="type.value">{{ type.label }}</option>
+                            }
+                        </select>
+                        @if (artifact.type === 'other') {
+                        <input @caseInlineMotion type="text" [(ngModel)]="artifact.artifactTypeOtherValue" name="artifact-type-other" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" placeholder="Specify other artifact type" />
                         }
-                    </select>
-                    @if (artifact.type === 'other') {
-                    <input @caseInlineMotion type="text" [(ngModel)]="artifact.artifactTypeOtherValue" name="artifact-type-other" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" placeholder="Specify other artifact type" />
-                    }
-                </div>
-                <div>
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Source</label>
-                    <select [(ngModel)]="artifact.source" name="artifact-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-source-select">
-                        @for (source of sourceTypeOptions; track source.value) {
-                        <option [value]="source.value">{{ source.label }}</option>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Source</label>
+                        <select [(ngModel)]="artifact.source" name="artifact-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-source-select">
+                            @for (source of sourceTypeOptions; track source.value) {
+                            <option [value]="source.value">{{ source.label }}</option>
+                            }
+                        </select>
+                        @if (artifact.source === 'other') {
+                        <input @caseInlineMotion type="text" [(ngModel)]="artifact.artifactSourceOtherValue" name="artifact-source-other" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" placeholder="Specify other artifact source" />
                         }
-                    </select>
-                    @if (artifact.source === 'other') {
-                    <input @caseInlineMotion type="text" [(ngModel)]="artifact.artifactSourceOtherValue" name="artifact-source-other" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" placeholder="Specify other artifact source" />
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Captured</label>
+                        <input [ngModel]="getDateInputValue(artifact.capturedAt)" (ngModelChange)="setDateInputValue(artifact, 'capturedAt', $event)" name="artifact-captured" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-captured-input" />
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
+                        <textarea [(ngModel)]="artifact.description" name="artifact-description" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-description-input"></textarea>
+                    </div>
+                    @if (artifact.type === 'url_capture') {
+                    <div @caseInlineMotion>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            URL
+                        </label>
+
+                        <input [(ngModel)]="artifact.url" name="artifact-url" type="url" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-url-input" />
+                    </div>
                     }
-                </div>
-                <div>
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Captured</label>
-                    <input [ngModel]="getDateInputValue(artifact.capturedAt)" (ngModelChange)="setDateInputValue(artifact, 'capturedAt', $event)" name="artifact-captured" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-captured-input" />
-                </div>
-                <div class="sm:col-span-2">
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
-                    <textarea [(ngModel)]="artifact.description" name="artifact-description" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-description-input"></textarea>
-                </div>
-                @if (artifact.type === 'url_capture') {
-                <div @caseInlineMotion>
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                        URL
-                    </label>
 
-                    <input [(ngModel)]="artifact.url" name="artifact-url" type="url" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-url-input" />
-                </div>
-                }
+                    @if (artifact.type === 'report') {
+                    <div @caseInlineMotion class="sm:col-span-2">
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Report Source
+                        </label>
 
-                @if (artifact.type === 'screenshot' || artifact.type === 'file') {
-                <div @caseInlineMotion class="sm:col-span-2">
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                        {{ artifact.type === 'screenshot' ? 'Upload Screenshot PNG' : 'Upload File' }}
-                    </label>
+                        <select [(ngModel)]="artifact.linkedReportSource" (ngModelChange)="store.loadArtifactReports($event, artifact.title); artifact.linkedReportId = ''; artifact.linkedReportTitle = ''" name="artifact-report-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
 
-                    <div class="mt-2 rounded-[8px] border border-dashed border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-4 transition hover:border-sky-400/35 hover:bg-sky-500/5 [body.light-theme_&]:bg-sky-50/60">
-                        <input #artifactFileInput type="file" [accept]="getArtifactAccept(artifact)" (change)="store.uploadArtifactFile(artifact, artifactFileInput)" class="sr-only" data-testid="case-artifact-file-input" />
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div class="min-w-0">
-                                <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Selected file</div>
-                                <div class="mt-1 truncate rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm font-medium text-[var(--color-text2)]">
-                                    {{ artifact.fileName || 'No file selected' }}
+                            <option value="">Select report source</option>
+
+                            @for (source of reportSourceOptions; track source.value) {
+                            <option [value]="source.value">{{ source.label }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    @if (artifact.linkedReportSource) {
+                    <div @caseInlineMotion class="sm:col-span-2">
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Select Report
+                        </label>
+
+                        <select [(ngModel)]="artifact.linkedReportId" (ngModelChange)="store.onArtifactReportSelected(artifact, $event)" name="artifact-linked-report" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+
+                            <option value="">
+                                {{ isArtifactReportsLoading ? 'Loading reports...' : 'Select report' }}
+                            </option>
+
+                            @for (report of artifactReports; track report.id) {
+                            <option [value]="report.id">{{ report.title }}</option>
+                            }
+                        </select>
+                    </div>
+                    }
+                    }
+                    @if (artifact.type === 'screenshot' || artifact.type === 'file') {
+                    <div @caseInlineMotion class="sm:col-span-2">
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            {{ artifact.type === 'screenshot' ? 'Upload Screenshot PNG' : 'Upload File' }}
+                        </label>
+
+                        <div class="mt-2 rounded-[8px] border border-dashed border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-4 transition hover:border-sky-400/35 hover:bg-sky-500/5 [body.light-theme_&]:bg-sky-50/60">
+                            <input #artifactFileInput type="file" [accept]="getArtifactAccept(artifact)" (change)="store.uploadArtifactFile(artifact, artifactFileInput)" class="sr-only" data-testid="case-artifact-file-input" />
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div class="min-w-0">
+                                    <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                        Selected file</div>
+                                    <div class="mt-1 truncate rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm font-medium text-[var(--color-text2)]">
+                                        {{ artifact.fileName || 'No file selected' }}
+                                    </div>
                                 </div>
+                                <button type="button" (click)="artifactFileInput.click()" class="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-3 text-sm font-semibold text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800">
+                                    <i class="bi bi-upload"></i> Choose File
+                                </button>
                             </div>
-                            <button type="button" (click)="artifactFileInput.click()" class="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-3 text-sm font-semibold text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800">
-                                <i class="bi bi-upload"></i> Choose File
-                            </button>
-                        </div>
-                        <div class="mt-3 text-xs font-medium text-[var(--color-text4)]">
-                            {{ artifact.type === 'screenshot' ? 'PNG only.' : 'PDF, JPG, PNG, TXT, or DOCX.' }}
+                            <div class="mt-3 text-xs font-medium text-[var(--color-text4)]">
+                                {{ artifact.type === 'screenshot' ? 'PNG only.' : 'PDF, JPG, PNG, TXT, or DOCX.' }}
+                            </div>
                         </div>
                     </div>
+                    }
                 </div>
-                }
             </div>
-        </div>
         </div>
     </app-case-edit-drawer>
     }
@@ -154,6 +192,16 @@
                 }
             </div>
             }
+
+            @if (artifact.type === 'report' && artifact.linkedReportTitle) {
+            <div @caseInlineMotion class="mt-3 flex flex-wrap items-center gap-2 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
+                <span class="text-xs text-[var(--color-text4)]">Linked Report:</span>
+                <span class="text-xs font-semibold text-[var(--color-text2)]">
+                    {{ artifact.linkedReportTitle }}
+                </span>
+            </div>
+            }
+
         </div>
         } @empty {
         <div class="text-sm text-[var(--color-text4)]">No artifacts added.</div>
@@ -161,18 +209,20 @@
     </div>
 
     @if (isAddingArtifact && newArtifact) {
-    <app-case-edit-drawer title="Add Artifact" [subtitle]="caseData.caseId" saveLabel="Save Artifact" saveTestId="case-artifact-add-save" cancelTestId="case-artifact-add-cancel" drawerTestId="case-artifact-add-drawer" (save)="store.saveNewArtifact()" (cancel)="store.cancelSectionMode()">
+    <app-case-edit-drawer title="Add Artifact" [subtitle]="caseData.caseId" saveLabel="Save Artifact"
+        saveTestId="case-artifact-add-save" cancelTestId="case-artifact-add-cancel"
+        drawerTestId="case-artifact-add-drawer" (save)="store.saveNewArtifact()" (cancel)="store.cancelSectionMode()">
         <div class="space-y-4 p-6">
             <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
-                        <input [(ngModel)]="newArtifact.title" name="new-artifact-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" data-testid="case-artifact-title-input" />
+                        <input [(ngModel)]="newArtifact.title" (ngModelChange)="store.scheduleArtifactReportSearch(newArtifact)" name="new-artifact-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" data-testid="case-artifact-title-input" />
                     </div>
 
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Type</label>
-                        <select [(ngModel)]="newArtifact.type" name="new-artifact-type" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-artifact-type-select">
+                        <select [(ngModel)]="newArtifact.type" (ngModelChange)="newArtifact.linkedReportSource = ''; newArtifact.linkedReportId = ''; newArtifact.linkedReportTitle = ''" name="new-artifact-type" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-artifact-type-select">
                             @for (type of artifactTypeOptions; track type.value) {
                             <option [value]="type.value">{{ type.label }}</option>
                             }
@@ -211,6 +261,42 @@
                     </div>
                     }
 
+                    @if (newArtifact.type === 'report') {
+                    <div @caseInlineMotion class="sm:col-span-2">
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Report Source
+                        </label>
+
+                        <select [(ngModel)]="newArtifact.linkedReportSource" (ngModelChange)="store.loadArtifactReports($event, newArtifact.title); newArtifact.linkedReportId = ''; newArtifact.linkedReportTitle = ''" name="new-artifact-report-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+
+                            <option value="">Select report source</option>
+
+                            @for (source of reportSourceOptions; track source.value) {
+                            <option [value]="source.value">{{ source.label }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    @if (newArtifact.linkedReportSource) {
+                    <div @caseInlineMotion class="sm:col-span-2">
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                            Select Report
+                        </label>
+
+                        <select [(ngModel)]="newArtifact.linkedReportId" (ngModelChange)="store.onArtifactReportSelected(newArtifact, $event)" name="new-artifact-linked-report" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+
+                            <option value="">
+                                {{ isArtifactReportsLoading ? 'Loading reports...' : 'Select report' }}
+                            </option>
+
+                            @for (report of artifactReports; track report.id) {
+                            <option [value]="report.id">{{ report.title }}</option>
+                            }
+                        </select>
+                    </div>
+                    }
+                    }
+
                     @if (newArtifact.type === 'screenshot' || newArtifact.type === 'file') {
                     <div @caseInlineMotion class="sm:col-span-2">
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
@@ -222,7 +308,8 @@
                             <input #newArtifactFileInput type="file" [accept]="getArtifactAccept(newArtifact)" (change)="store.setPendingNewArtifactFile(newArtifactFileInput)" class="sr-only" data-testid="case-artifact-file-input" />
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <div class="min-w-0">
-                                    <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Selected file</div>
+                                    <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
+                                        Selected file</div>
                                     <div class="mt-1 truncate rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm font-medium text-[var(--color-text2)]">
                                         {{ pendingNewArtifactFileName || 'No file selected' }}
                                     </div>
