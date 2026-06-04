@@ -152,7 +152,7 @@
         }
 
         @if (isArchiveConfirmationOpen) {
-        <app-confirmation-popup [message]="'Are you sure you want to archive this case?'"
+        <app-confirmation-popup data-testid="case-details-archive-confirmation" [message]="'Are you sure you want to archive this case?'"
             (confirmed)="archiveCase($event)">
         </app-confirmation-popup>
         }
