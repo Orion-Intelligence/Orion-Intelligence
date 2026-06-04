@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import os
+import re
 import asyncio
 import json
 import secrets
@@ -398,30 +399,29 @@ class crawl_model:
     @staticmethod
     async def get_screenshot_file(filename: str):
         try:
-            screenshot_root = Path(CRAWL_PATHS.M_SCREENSHOT).resolve()
-            requested_path = (screenshot_root / filename).resolve()
-            try:
-                requested_path.relative_to(screenshot_root)
-            except ValueError:
+            if not re.fullmatch(r"[A-Za-z0-9_.-]+\.webp", filename):
                 return {"error": "File not found"}
+            screenshot_root = Path(CRAWL_PATHS.M_SCREENSHOT)
+            requested_path = next((path for path in screenshot_root.iterdir() if path.name == filename and path.is_file()), None)
 
-            if not requested_path.exists():
+            if not requested_path:
                 return {"error": "File not found"}
-            return FileResponse(path=str(requested_path), filename=filename, media_type="image/webp")
+            return FileResponse(path=requested_path, filename=filename, media_type="image/webp")
         except Exception:
             return {"error": "Failed to retrieve screenshot"}
 
     @staticmethod
     async def invoke_file_upload(payload: ScreenshotPayload):
         try:
+            filename = os.path.basename(payload.filename)
+            if filename != payload.filename or not re.fullmatch(r"[A-Za-z0-9_.-]+\.webp", filename):
+                return {"error": "Failed to save screenshot"}
             screenshot_root = Path(CRAWL_PATHS.M_SCREENSHOT).resolve()
             os.makedirs(screenshot_root, exist_ok=True)
-            file_path = (screenshot_root / payload.filename).resolve()
-            if not file_path.is_relative_to(screenshot_root):
-                return {"error": "Failed to save screenshot"}
+            file_path = screenshot_root / filename
             with open(file_path, "wb") as f:
                 f.write(base64.b64decode(payload.data))
-            return {"message": f"Screenshot saved successfully at {file_path}", "filename": payload.filename}
+            return {"message": f"Screenshot saved successfully at {file_path}", "filename": filename}
         except Exception:
             return {"error": "Failed to save screenshot"}
 

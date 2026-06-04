@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, Body, Response, Request, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from cryptography.fernet import Fernet, InvalidToken
 from starlette.responses import JSONResponse
 
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
+from orion.constants.constant import CONSTANTS
 from orion.api.interactive.payment_manager.model.payment_param_model import PaymentParamModel
 from orion.api.interactive.payment_manager.payment_manager import PaymentManager
 from orion.helper_manager.env_handler import env_handler
@@ -16,18 +18,25 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 ACCESS_COOKIE = "access_token"
 COOKIE_MAX_AGE = 30 * 60  # 30 minutes
+COOKIE_CIPHER = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode())
 
 
 def set_access_cookie(resp: Response, token: str) -> None:
     resp.set_cookie(
-        key=ACCESS_COOKIE, value=token, httponly=True, samesite="lax", secure=True, path="/", max_age=COOKIE_MAX_AGE, )
+        key=ACCESS_COOKIE, value=COOKIE_CIPHER.encrypt(token.encode()).decode(), httponly=True, samesite="lax", secure=True, path="/", max_age=COOKIE_MAX_AGE, )
 
 
 def token_from_request(request: Request) -> str | None:
     auth = request.headers.get("Authorization", "")
     parts = auth.split(" ", 1)
     bearer = parts[1] if len(parts) == 2 and parts[0] == "Bearer" else None
-    return bearer or request.cookies.get(ACCESS_COOKIE)
+    cookie_token = request.cookies.get(ACCESS_COOKIE)
+    if cookie_token:
+        try:
+            cookie_token = COOKIE_CIPHER.decrypt(cookie_token.encode()).decode()
+        except InvalidToken:
+            pass
+    return bearer or cookie_token
 
 
 @auth_router.post("/api/token")

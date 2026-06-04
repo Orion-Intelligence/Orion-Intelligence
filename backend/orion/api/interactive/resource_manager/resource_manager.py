@@ -33,9 +33,8 @@ class ResourceManager:
 
     async def get_tenant_image(self, id):
         default_path = self.TENANT_DIR / "logo_url_default.png"
-        tenant_root = self.TENANT_DIR.resolve()
-        image_path = (tenant_root / f"{id}.png").resolve()
-        return FileResponse(image_path if image_path.is_relative_to(tenant_root) and image_path.is_file() else default_path)
+        image_path = next((path for path in self.TENANT_DIR.iterdir() if path.name == f"{id}.png" and path.is_file()), None)
+        return FileResponse(image_path or default_path)
 
     async def uploadTenantImage(self, file: UploadFile, current_user):
         contents = await file.read()
@@ -61,16 +60,13 @@ class ResourceManager:
 
     async def get_user_image(self, user_id: str):
         default_path = self.USER_DIR / "default.png"
-        user_root = self.USER_DIR.resolve()
-        image_path = (user_root / f"{user_id}.png").resolve()
-        return FileResponse(image_path if image_path.is_relative_to(user_root) and image_path.is_file() else default_path)
+        image_path = next((path for path in self.USER_DIR.iterdir() if path.name == f"{user_id}.png" and path.is_file()), None)
+        return FileResponse(image_path or default_path)
 
     async def get_system_image(self, user_id: str):
         default_path = self.SYSTEM_DIR / "logo_url_default.png"
-        system_root = self.SYSTEM_DIR.resolve()
-        image_path = (system_root / user_id).resolve()
-
-        return FileResponse(image_path if image_path.is_relative_to(system_root) and image_path.is_file() else default_path)
+        image_path = next((path for path in self.SYSTEM_DIR.iterdir() if path.name == user_id and path.is_file()), None)
+        return FileResponse(image_path or default_path)
 
     async def get_favicon(self):
         custom_path = self.SYSTEM_DIR / "logo_url_custom.png"
