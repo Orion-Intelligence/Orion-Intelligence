@@ -398,10 +398,16 @@ class crawl_model:
     @staticmethod
     async def get_screenshot_file(filename: str):
         try:
-            file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, filename)
-            if not os.path.exists(file_path):
+            screenshot_root = Path(CRAWL_PATHS.M_SCREENSHOT).resolve()
+            requested_path = (screenshot_root / filename).resolve()
+            try:
+                requested_path.relative_to(screenshot_root)
+            except ValueError:
                 return {"error": "File not found"}
-            return FileResponse(path=file_path, filename=filename, media_type="image/webp")
+
+            if not requested_path.exists():
+                return {"error": "File not found"}
+            return FileResponse(path=str(requested_path), filename=filename, media_type="image/webp")
         except Exception:
             return {"error": "Failed to retrieve screenshot"}
 
