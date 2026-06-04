@@ -30,7 +30,7 @@
       <div class="flex gap-4 p-4 max-w-6xl mx-auto items-start">
 
 
-        <aside class="hidden lg:flex w-[240px] flex-shrink-0 flex-col gap-3">
+        <aside class="hidden lg:flex w-[240px] flex-shrink-0 flex-col gap-3 sticky top-4 max-h-[calc(100vh-5rem)] overflow-y-auto pr-2 custom-scrollbar">
 
           @if (activeUserNodes()[state.activeUserIndex()]; as userNode) {
 
@@ -52,7 +52,7 @@
             </div>
 
 
-            <div class="sticky top-4 flex flex-col gap-3 max-h-[calc(100vh-5rem)] overflow-y-auto pr-3">
+            <div class="flex flex-col gap-3">
 
               <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/20 p-4 flex-shrink-0">
                 <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Platforms</p>
@@ -409,14 +409,14 @@
         </div>
 
 
-        <aside class="hidden xl:flex w-[240px] flex-shrink-0 flex-col gap-3 sticky top-4">
+        <aside class="hidden xl:flex w-[240px] flex-shrink-0 flex-col gap-3 sticky top-4 max-h-[calc(100vh-5rem)] overflow-y-auto pr-2">
 
           <div class="mt-0 bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/10 p-4 flex-shrink-0">
             <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Add Entity</p>
             <div class="mb-3">
               <input type="text" [value]="addSearchTerm()" (input)="onAddSearchInput($event)" placeholder="Quick filter add options..." class="block h-9 w-full rounded-lg border border-gray-200 dark:border-[#3a3b3c] bg-gray-50 dark:bg-[#3a3b3c] px-3 text-sm text-gray-800 dark:text-gray-200 shadow-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1877f2]/30">
             </div>
-            <div class="flex flex-col gap-2 max-h-64 overflow-y-auto">
+            <div class="flex flex-col gap-2">
               @for (option of filteredEntityAddOptions; track option.type) {
                 <button (click)="addEntityRequested.emit(option.type)" class="flex w-full items-center gap-3 rounded-lg border border-gray-200 dark:border-[#3a3b3c] bg-gray-50 dark:bg-[#3a3b3c] px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-[#4a4b4c]">
                   <i [class]="option.iconClass"></i>
