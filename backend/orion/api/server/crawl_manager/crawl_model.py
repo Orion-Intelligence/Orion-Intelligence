@@ -1,7 +1,6 @@
 import base64
 import hashlib
 import os
-import re
 import asyncio
 import json
 import secrets
@@ -30,8 +29,6 @@ from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_d
 from orion.api.server.crawl_manager.class_model.CTITextRequest import CTITextRequest
 from orion.constants.constant import CONSTANTS
 from orion.constants import constant
-
-
 
 
 class crawl_model:
@@ -397,9 +394,20 @@ class crawl_model:
         )
 
     @staticmethod
+    def _is_valid_screenshot_filename(filename: str) -> bool:
+        allowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-"
+        return (
+            bool(filename)
+            and filename.endswith(".webp")
+            and filename != ".webp"
+            and Path(filename).name == filename
+            and all(char in allowed for char in filename)
+        )
+
+    @staticmethod
     async def get_screenshot_file(filename: str):
         try:
-            if not re.fullmatch(r"[A-Za-z0-9_.-]+\.webp", filename):
+            if not crawl_model._is_valid_screenshot_filename(filename):
                 return {"error": "File not found"}
             screenshot_root = Path(CRAWL_PATHS.M_SCREENSHOT)
             requested_path = next((path for path in screenshot_root.iterdir() if path.name == filename and path.is_file()), None)
@@ -414,11 +422,13 @@ class crawl_model:
     async def invoke_file_upload(payload: ScreenshotPayload):
         try:
             filename = os.path.basename(payload.filename)
-            if filename != payload.filename or not re.fullmatch(r"[A-Za-z0-9_.-]+\.webp", filename):
+            if filename != payload.filename or not crawl_model._is_valid_screenshot_filename(filename):
                 return {"error": "Failed to save screenshot"}
-            screenshot_root = Path(CRAWL_PATHS.M_SCREENSHOT).resolve()
+            screenshot_root = os.path.realpath(CRAWL_PATHS.M_SCREENSHOT)
             os.makedirs(screenshot_root, exist_ok=True)
-            file_path = screenshot_root / filename
+            file_path = os.path.realpath(os.path.join(screenshot_root, filename))
+            if not file_path.startswith(f"{screenshot_root}{os.sep}"):
+                return {"error": "Failed to save screenshot"}
             with open(file_path, "wb") as f:
                 f.write(base64.b64decode(payload.data))
             return {"message": f"Screenshot saved successfully at {file_path}", "filename": filename}
