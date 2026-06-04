@@ -184,16 +184,8 @@ export class EntityManagerComponent {
     switch (type) {
       case 'email-breach':
         return { endpoint: 'dynamic/user', payload: { text: { username: query } } };
-      case 'social-scanner':
-        return { endpoint: 'dynamic/social', payload: { text: { username: query } } };
       case 'wanted-list':
         return { endpoint: 'dynamic/wanted', payload: { text: { query } } };
-      case 'national-identity':
-        return { endpoint: 'dynamic/national-identity', payload: { text: { pak_query: query } } };
-      case 'playstore-scanner':
-        return { endpoint: 'dynamic/cracked', payload: { text: { playstore: query } } };
-      case 'software-scanner':
-        return { endpoint: 'dynamic/software', payload: { text: { name: query } } };
       case 'phone':
         return { endpoint: 'social/phone/recon', payload: { query } };
       case 'domain-scan':

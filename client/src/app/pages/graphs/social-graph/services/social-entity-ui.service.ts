@@ -19,11 +19,7 @@ export class SocialEntityUiService {
       case 'dns-scan': return 'bi bi-broadcast text-sky-400';
       case 'wayback-scan': return 'bi bi-clock-history text-sky-400';
       case 'email-breach': return 'bi bi-person-badge text-indigo-400';
-      case 'social-scanner': return 'bi bi-people text-indigo-400';
       case 'wanted-list': return 'bi bi-person-exclamation text-indigo-400';
-      case 'national-identity': return 'bi bi-card-text text-indigo-400';
-      case 'playstore-scanner': return 'bi bi-google-play text-indigo-400';
-      case 'software-scanner': return 'bi bi-window text-indigo-400';
       case 'phone': return 'bi bi-telephone text-indigo-400';
       case 'ioc-extract': return 'bi bi-file-earmark-code text-indigo-400';
       case 'apk-scan': return 'bi bi-android2 text-indigo-400';

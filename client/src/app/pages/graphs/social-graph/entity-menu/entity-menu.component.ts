@@ -4,11 +4,7 @@ import { CustomEntity } from '../../../../shared/model/social/social-scan.models
 import { SocialEntityUiService } from '../services/social-entity-ui.service';
 const ENTITY_ADD_OPTIONS: { type: CustomEntity['type']; label: string; iconClass: string; }[] = [
   { type: 'email-breach', label: 'Add Email Breach', iconClass: 'bi bi-person-badge text-indigo-400' },
-  { type: 'social-scanner', label: 'Add Social Scanner', iconClass: 'bi bi-people text-indigo-400' },
   { type: 'wanted-list', label: 'Add Wanted List', iconClass: 'bi bi-person-exclamation text-indigo-400' },
-  { type: 'national-identity', label: 'Add National Identity', iconClass: 'bi bi-card-text text-indigo-400' },
-  { type: 'playstore-scanner', label: 'Add Playstore Scanner', iconClass: 'bi bi-google-play text-indigo-400' },
-  { type: 'software-scanner', label: 'Add Software Scanner', iconClass: 'bi bi-window text-indigo-400' },
   { type: 'phone', label: 'Add Phone', iconClass: 'bi bi-telephone text-indigo-400' },
   { type: 'crypto-scanner', label: 'Add Crypto Scanner', iconClass: 'bi bi-currency-bitcoin text-green-400' }
 ];

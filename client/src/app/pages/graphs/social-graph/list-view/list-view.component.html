@@ -102,14 +102,16 @@
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-sm font-bold text-gray-900 dark:text-gray-100 cursor-pointer hover:underline" (click)="nodeClicked.emit(userNode.id.toString())">{{ platformData.username || userNode.label }}</span>
+                        <span class="inline-flex items-center gap-1 text-[11px] font-medium bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full">
+                          <i class="bi bi-check-circle-fill text-[10px]"></i> Scanned
+                        </span>
+                      </div>
+                      <div class="flex items-center gap-2 mt-0.5">
                         <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-gray-100 dark:bg-[#3a3b3c] text-gray-500 dark:text-gray-400">
                           <app-social-icon [platformName]="platformData.platform" class="text-[11px]"></app-social-icon>
                           <span class="ml-0.5">{{ platformData.platform }}</span>
                         </span>
                       </div>
-                      <span class="inline-flex items-center gap-1 text-[11px] font-medium bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full mt-0.5">
-                        <i class="bi bi-check-circle-fill text-[10px]"></i> Scanned
-                      </span>
                     </div>
                     <div class="flex items-center gap-1 flex-shrink-0 relative z-50">
                       @if (platformData.url) {
@@ -130,11 +132,11 @@
 
                        <div class="flex items-center gap-3 px-4 py-3 mt-3 border-t border-gray-100 dark:border-[#3a3b3c]">
                     <button data-testid="social-list-followers-following" (click)="state.openFollowerScanPopup(platformNode.id.toString())" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-[#1877f2] text-white hover:bg-blue-600 transition-colors">
-                      <i class="bi bi-people-fill"></i> Followers &amp; Following
+                      <i class="bi bi-people-fill"></i> Connections
                     </button>
-                    <a data-testid="social-list-platform-visit-profile" [href]="platformData.url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 ml-auto text-sm font-semibold text-[#1877f2] hover:underline">
-                      Visit Profile <i class="bi bi-link-45deg"></i>
-                    </a>
+<!--                    <a data-testid="social-list-platform-visit-profile" [href]="platformData.url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 ml-auto text-sm font-semibold text-[#1877f2] hover:underline">-->
+<!--                      Visit Profile <i class="bi bi-link-45deg"></i>-->
+<!--                    </a>-->
                   </div>
 
                   <!--
