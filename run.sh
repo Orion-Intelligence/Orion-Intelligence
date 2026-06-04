@@ -190,8 +190,17 @@ disable_maintenance_mode() {
 
 wait_for_test_service() {
     local url="https://127.0.0.1:8443/api/public"
+    local login_url="https://127.0.0.1:8443/api/token"
+    local admin_user="admin_test_username"
+    local admin_password='Zq9M#rX@e7W^B0T+f(ysG!kJc1d2mC&N%hAUEP)6Y4n$R8VbHS'
+    local login_status
     echo "Waiting for test service to become ready..."
-    until curl -fksS -o /dev/null "$url" >/dev/null 2>&1; do
+    until curl -fksS -o /dev/null "$url" >/dev/null 2>&1 \
+        && login_status="$(curl -sk -o /dev/null -w '%{http_code}' -X POST "$login_url" \
+            -H 'Content-Type: application/x-www-form-urlencoded' \
+            --data-urlencode "username=$admin_user" \
+            --data-urlencode "password=$admin_password")" \
+        && [ "$login_status" = "200" ]; do
         sleep 2
     done
 }
@@ -261,9 +270,12 @@ generate_docs() {
         browser="$chromium_binary"
     fi
 
+    start_local_frontend_server
+    wait_for_local_frontend_server
+
     cd client || exit
-    npm test -- run --browser electron --config baseUrl="http://127.0.0.1:8080" --spec cypress/e2e/05-user-management.cy.ts
-    npm test -- run --browser electron --config baseUrl="http://127.0.0.1:8080" --spec cypress/e2e/08-tenant-management.cy.ts
+    npm test -- run --browser electron --config baseUrl="http://127.0.0.1:4200" --spec cypress/e2e/05-user-management.cy.ts
+    npm test -- run --browser electron --config baseUrl="http://127.0.0.1:4200" --spec cypress/e2e/08-tenant-management.cy.ts
     mkdir -p "$target_dir"
     rm -rf "$nested_dir"
     rm -rf "$legacy_nested_dir"
@@ -274,7 +286,7 @@ EOF
 
     trap 'rm -f "$temp_spec"' EXIT
     npm test -- run --browser "$browser" \
-        --config 'baseUrl=http://127.0.0.1:8080,specPattern=["cypress/e2e/**/*.cy.ts","cypress/doc/**/*.cy.ts"]' \
+        --config 'baseUrl=http://127.0.0.1:4200,specPattern=["cypress/e2e/**/*.cy.ts","cypress/doc/**/*.cy.ts"]' \
         --spec "$temp_spec"
     rm -f "$temp_spec"
     trap - EXIT
