@@ -4,6 +4,7 @@ from fastapi import UploadFile, HTTPException
 from fastapi.responses import FileResponse
 
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys
 
 
 class ResourceManager:
@@ -32,8 +33,9 @@ class ResourceManager:
 
     async def get_tenant_image(self, id):
         default_path = self.TENANT_DIR / "logo_url_default.png"
-        image_path = self.TENANT_DIR / f"{id}.png"
-        return FileResponse(image_path if image_path.is_file() else default_path)
+        tenant_root = self.TENANT_DIR.resolve()
+        image_path = (tenant_root / f"{id}.png").resolve()
+        return FileResponse(image_path if image_path.is_relative_to(tenant_root) and image_path.is_file() else default_path)
 
     async def uploadTenantImage(self, file: UploadFile, current_user):
         contents = await file.read()
@@ -59,14 +61,16 @@ class ResourceManager:
 
     async def get_user_image(self, user_id: str):
         default_path = self.USER_DIR / "default.png"
-        image_path = self.USER_DIR / f"{user_id}.png"
-        return FileResponse(image_path if image_path.is_file() else default_path)
+        user_root = self.USER_DIR.resolve()
+        image_path = (user_root / f"{user_id}.png").resolve()
+        return FileResponse(image_path if image_path.is_relative_to(user_root) and image_path.is_file() else default_path)
 
     async def get_system_image(self, user_id: str):
         default_path = self.SYSTEM_DIR / "logo_url_default.png"
-        image_path = self.SYSTEM_DIR / f"{user_id}"
+        system_root = self.SYSTEM_DIR.resolve()
+        image_path = (system_root / user_id).resolve()
 
-        return FileResponse(image_path if image_path.is_file() else default_path)
+        return FileResponse(image_path if image_path.is_relative_to(system_root) and image_path.is_file() else default_path)
 
     async def get_favicon(self):
         custom_path = self.SYSTEM_DIR / "logo_url_custom.png"
@@ -118,9 +122,17 @@ class ResourceManager:
         return {"tenant_image": "deleted"}
 
     async def delete_system_image(self, current_user, key: str):
-        image_path = self.SYSTEM_DIR / f"{key}_custom.png"
         if current_user.role not in ["admin"]:
             return {"system_image deletion": "failed"}
+        file_name = {
+            AllowedKeys.LOGO_URL.value: "logo_url_custom.png",
+            AllowedKeys.LOGO_WIDE_LIGHT.value: "logo_wide_light_custom.png",
+            AllowedKeys.LOGO_WIDE_DARK.value: "logo_wide_dark_custom.png",
+            AllowedKeys.AUTH_DASHBOARD_ICON.value: "auth_dashboard_icon_custom.png",
+        }.get(key)
+        if file_name is None:
+            return {"system_image deletion": "failed"}
+        image_path = self.SYSTEM_DIR / file_name
 
         if image_path.is_file():
             image_path.unlink()

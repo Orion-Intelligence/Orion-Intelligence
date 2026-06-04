@@ -414,8 +414,11 @@ class crawl_model:
     @staticmethod
     async def invoke_file_upload(payload: ScreenshotPayload):
         try:
-            os.makedirs(CRAWL_PATHS.M_SCREENSHOT, exist_ok=True)
-            file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, payload.filename)
+            screenshot_root = Path(CRAWL_PATHS.M_SCREENSHOT).resolve()
+            os.makedirs(screenshot_root, exist_ok=True)
+            file_path = (screenshot_root / payload.filename).resolve()
+            if not file_path.is_relative_to(screenshot_root):
+                return {"error": "Failed to save screenshot"}
             with open(file_path, "wb") as f:
                 f.write(base64.b64decode(payload.data))
             return {"message": f"Screenshot saved successfully at {file_path}", "filename": payload.filename}

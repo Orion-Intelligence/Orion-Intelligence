@@ -192,6 +192,15 @@ class config_controller:
 
     async def uploadSystemResource(self, file: UploadFile, current_user, key: str):
         from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+        file_name = {
+            AllowedKeys.LOGO_URL.value: "logo_url_custom.png",
+            AllowedKeys.LOGO_WIDE_LIGHT.value: "logo_wide_light_custom.png",
+            AllowedKeys.LOGO_WIDE_DARK.value: "logo_wide_dark_custom.png",
+            AllowedKeys.AUTH_DASHBOARD_ICON.value: "auth_dashboard_icon_custom.png",
+        }.get(key)
+        if file_name is None:
+            raise HTTPException(status_code=400, detail="Invalid system resource")
+        key = AllowedKeys(key)
         contents = await file.read()
         MAX_FILE_SIZE = 1024 * 1024
 
@@ -201,7 +210,6 @@ class config_controller:
         if not file.content_type.startswith("image/"):
             raise HTTPException(status_code=415, detail="Invalid file type. Only image files are allowed.")
 
-        file_name = f"{key}_custom.png"
         file_path = self.SYSTEM_DIR / file_name
         with open(file_path, "wb") as f:
             f.write(contents)
