@@ -191,7 +191,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.loginAsAdmin();
 
     cy.visit('/dashboard/stealerlogs/iocs?daterange=2025-01-01,2025-12-31');
-    cy.location('search').then((search) => {
+    cy.location('search').should((search) => {
       expect(decodeURIComponent(search)).to.include('daterange=2025-01-01,2025-12-31');
     });
     waitForSearchReady();
@@ -205,7 +205,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('[data-testid="ioc-stealer-table"]').scrollIntoView().should('be.visible');
 
     cy.visit('/dashboard/stealerlogs/iocs?daterange=2026-01-01,2026-01-31');
-    cy.location('search').then((search) => {
+    cy.location('search').should((search) => {
       expect(decodeURIComponent(search)).to.include('daterange=2026-01-01,2026-01-31');
     });
     waitForSearchReady();
