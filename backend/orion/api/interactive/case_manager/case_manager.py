@@ -713,6 +713,30 @@ class CaseManager:
                 [],
                 ["news"],
             )
+        
+        elif source == "dump":
+            result = await search_model.getInstance().search_consolidated_ranked_result(
+                param,
+                [ELASTIC_INDEX.S_LEAK_INDEX],
+                [],
+                ["dump", "dumps", "listing"],
+            )
+
+        elif source == "stealerlogs":
+            result = await search_model.getInstance().search_consolidated_ranked_result(
+                param,
+                [ELASTIC_INDEX.S_LEAK_INDEX],
+                [],
+                ["stealerlogs", "stealer_logs", "tracking"],
+            )
+        
+        elif source == "scanner":
+            result = await search_model.getInstance().search_consolidated_ranked_result(
+                param,
+                [ELASTIC_INDEX.S_GENERIC_INDEX],
+                [],
+                ["scanner", "scan", "web_scan", "network_scan"],
+            )
 
         else:
             raise HTTPException(status_code=400, detail="Invalid report source")
