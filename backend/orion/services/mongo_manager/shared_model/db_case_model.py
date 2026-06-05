@@ -276,6 +276,15 @@ class CaseEntity(EmbeddedModel):
     updatedAt: datetime = Field(default_factory=utc_now)
 
 
+class CaseArtifactFile(EmbeddedModel):
+    fileId: str
+    fileName: str = ""
+    fileType: str = ""
+    fileSize: int = 0
+    fileResourceId: str = ""
+    uploadedAt: datetime = Field(default_factory=utc_now)
+
+
 class CaseArtifact(EmbeddedModel):
     artifactId: str
     type: ArtifactType = Field(default=ArtifactType.EVIDENCE)
@@ -285,10 +294,7 @@ class CaseArtifact(EmbeddedModel):
     source: SourceType = Field(default=SourceType.MANUAL)
     artifactSourceOtherValue: str = ""
     url: str = ""
-    fileName: str = ""
-    fileType: str = ""
-    fileSize: int = 0
-    fileResourceId: str = ""
+    files: List[CaseArtifactFile] = Field(default_factory=list)
     linkedReportSource: str = ""
     linkedReportId: str = ""
     linkedReportTitle: str = ""

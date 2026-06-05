@@ -12,6 +12,7 @@ from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
+from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifactFile
 from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifact
 from orion.services.mongo_manager.shared_model.db_case_model import CaseClosure
 from orion.services.mongo_manager.shared_model.db_case_model import CaseComment
@@ -443,51 +444,79 @@ class CaseManager:
         next_id = str(len(records) + 1).zfill(5)
         return {"nextCaseId": next_id}
     
-    async def upload_artifact_file(self, case_id: str, artifact_id: str, file: UploadFile, current_user) -> dict:
+    async def upload_artifact_files(self, case_id: str, artifact_id: str, files: list[UploadFile], current_user) -> dict:
         record = await self._engine.find_one(
             db_case_model,
             (db_case_model.caseId == case_id)
             & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
         )
-        
+
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
-        
+
         if not CaseHelperMethods.can_view_case(record, current_user):
             raise HTTPException(status_code=403, detail="Access forbidden")
 
+        if not files:
+            raise HTTPException(status_code=400, detail="No files selected")
+
         enc = await CaseHelperMethods.get_case_cipher(current_user)
-        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.decrypt_value(enc, value))
+        CaseHelperMethods.apply_sensitive_case_values(
+            record,
+            lambda value: CaseHelperMethods.decrypt_value(enc, value)
+        )
 
         artifact = next((item for item in record.artifacts if item.artifactId == artifact_id), None)
 
         if not artifact:
             raise HTTPException(status_code=404, detail="Artifact not found")
 
-        self._artifact_file_helper.validate_artifact_file(artifact.type.value, file)
+        for file in files:
+            self._artifact_file_helper.validate_artifact_file(artifact.type.value, file)
 
-        if artifact.fileResourceId:
-            self._artifact_file_helper.delete_artifact_file(artifact.fileResourceId)
+        uploaded_files = []
 
-        resource_id, file_size = await self._artifact_file_helper.save_encrypted_artifact_file(file, enc)
+        for file in files:
+            resource_id, file_size = await self._artifact_file_helper.save_encrypted_artifact_file(file, enc)
 
-        artifact.fileName = file.filename or ""
-        artifact.fileType = file.content_type or ""
-        artifact.fileSize = file_size
-        artifact.fileResourceId = resource_id
+            artifact_file = CaseArtifactFile(
+                fileId=str(uuid4()),
+                fileName=file.filename or "",
+                fileType=file.content_type or "",
+                fileSize=file_size,
+                fileResourceId=resource_id,
+                uploadedAt=utc_now(),
+            )
+
+            artifact.files.append(artifact_file)
+
+            uploaded_files.append({
+                "fileId": artifact_file.fileId,
+                "fileName": artifact_file.fileName,
+                "fileType": artifact_file.fileType,
+                "fileSize": artifact_file.fileSize,
+                "fileResourceId": artifact_file.fileResourceId,
+                "uploadedAt": artifact_file.uploadedAt,
+            })
+
         record.updatedAt = utc_now()
 
-        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.encrypt_value(enc, value))
+        CaseHelperMethods.apply_sensitive_case_values(
+            record,
+            lambda value: CaseHelperMethods.encrypt_value(enc, value)
+        )
         await self._engine.save(record)
 
-        return {
-            "fileName": file.filename or "",
-            "fileType": file.content_type or "",
-            "fileSize": file_size,
-            "fileResourceId": resource_id,
-        }
+        return {"files": uploaded_files}
     
-    async def get_artifact_file_response(self, case_id: str, artifact_id: str, current_user, download: bool = False) -> Response:
+    async def get_artifact_file_response(
+        self,
+        case_id: str,
+        artifact_id: str,
+        file_id: str,
+        current_user,
+        download: bool = False
+    ) -> Response:
         record = await self._engine.find_one(
             db_case_model,
             (db_case_model.caseId == case_id)
@@ -501,27 +530,44 @@ class CaseManager:
             raise HTTPException(status_code=403, detail="Access forbidden")
 
         enc = await CaseHelperMethods.get_case_cipher(current_user)
-        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.decrypt_value(enc, value))
+        CaseHelperMethods.apply_sensitive_case_values(
+            record,
+            lambda value: CaseHelperMethods.decrypt_value(enc, value)
+        )
 
         artifact = next((item for item in record.artifacts if item.artifactId == artifact_id), None)
 
-        if not artifact or not artifact.fileResourceId:
+        if not artifact:
+            raise HTTPException(status_code=404, detail="Artifact not found")
+
+        artifact_file = next((item for item in artifact.files if item.fileId == file_id), None)
+
+        if not artifact_file:
             raise HTTPException(status_code=404, detail="Artifact file not found")
 
-        file_data = self._artifact_file_helper.load_decrypted_artifact_file(artifact.fileResourceId, enc)
+        file_data = self._artifact_file_helper.load_decrypted_artifact_file(
+            artifact_file.fileResourceId,
+            enc
+        )
 
         disposition = "attachment" if download else "inline"
-        file_name = artifact.fileName or "artifact-file"
+        file_name = artifact_file.fileName or "artifact-file"
 
         return Response(
             content=file_data,
-            media_type=artifact.fileType or "application/octet-stream",
+            media_type=artifact_file.fileType or "application/octet-stream",
             headers={
                 "Content-Disposition": f'{disposition}; filename="{file_name}"'
             },
         )
     
-    async def delete_artifact_file_from_case(self, case_id: str, artifact_id: str, current_user) -> dict:
+    async def delete_artifact_file_from_case(
+        self,
+        case_id: str,
+        artifact_id: str,
+        file_id: str,
+        current_user
+    ) -> dict:
         record = await self._engine.find_one(
             db_case_model,
             (db_case_model.caseId == case_id)
@@ -535,22 +581,34 @@ class CaseManager:
             raise HTTPException(status_code=403, detail="Access forbidden")
 
         enc = await CaseHelperMethods.get_case_cipher(current_user)
-        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.decrypt_value(enc, value))
+        CaseHelperMethods.apply_sensitive_case_values(
+            record,
+            lambda value: CaseHelperMethods.decrypt_value(enc, value)
+        )
 
         artifact = next((item for item in record.artifacts if item.artifactId == artifact_id), None)
 
         if not artifact:
             raise HTTPException(status_code=404, detail="Artifact not found")
 
-        self._artifact_file_helper.delete_artifact_file(artifact.fileResourceId)
+        artifact_file = next((item for item in artifact.files if item.fileId == file_id), None)
 
-        artifact.fileName = ""
-        artifact.fileType = ""
-        artifact.fileSize = 0
-        artifact.fileResourceId = ""
+        if not artifact_file:
+            raise HTTPException(status_code=404, detail="Artifact file not found")
+
+        self._artifact_file_helper.delete_artifact_file(artifact_file.fileResourceId)
+
+        artifact.files = [
+            item for item in artifact.files
+            if item.fileId != file_id
+        ]
+
         record.updatedAt = utc_now()
 
-        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.encrypt_value(enc, value))
+        CaseHelperMethods.apply_sensitive_case_values(
+            record,
+            lambda value: CaseHelperMethods.encrypt_value(enc, value)
+        )
         await self._engine.save(record)
 
         return {"success": True}

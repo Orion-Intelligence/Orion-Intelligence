@@ -29,12 +29,12 @@ export abstract class CaseDetailsStore {
   abstract openAddArtifact(): void;
   abstract saveArtifacts(): void;
   abstract removeArtifact(index: number): void;
-  abstract uploadArtifactFile(artifact: CaseArtifact, fileInput: HTMLInputElement): void;
-  abstract viewArtifactFile(artifact: CaseArtifact): void;
-  abstract downloadArtifactFile(artifact: CaseArtifact): void;
-  abstract deleteArtifactFile(artifact: CaseArtifact): void;
-  abstract setPendingNewArtifactFile(fileInput: HTMLInputElement): void;
-  abstract getPendingNewArtifactFileName(): string;
+  abstract uploadArtifactFiles(artifact: CaseArtifact, fileInput: HTMLInputElement): void;
+  abstract viewArtifactFile(artifact: CaseArtifact, fileId: string): void;
+  abstract downloadArtifactFile(artifact: CaseArtifact, fileId: string): void;
+  abstract deleteArtifactFile(artifact: CaseArtifact, fileId: string): void;
+  abstract setPendingNewArtifactFiles(fileInput: HTMLInputElement): void;
+  abstract getPendingNewArtifactFileNames(): string;
   abstract saveNewArtifact(): void;
   abstract openAddTask(): void;
   abstract saveTasks(): void;
