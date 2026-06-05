@@ -3,7 +3,16 @@ import { Observable } from 'rxjs';
 import { ApiService } from '../../../../shared/services/api.service';
 import { ArtifactReportOption, Case, CaseAnalyst, CaseRequest, CaseShareRequest, CaseShareResponse, CaseUpdateRequest } from '../../../../shared/model/case-management/case.model';
 
-type ArtifactFileUploadResponse = { fileName: string; fileType: string; fileSize: number; fileResourceId: string };
+type ArtifactFileUploadResponse = {
+  files: {
+    fileId: string;
+    fileName: string;
+    fileType: string;
+    fileSize: number;
+    fileResourceId: string;
+    uploadedAt?: string;
+  }[];
+};
 
 @Injectable({ providedIn: 'root' })
 export class CaseManagement {
@@ -45,15 +54,19 @@ export class CaseManagement {
     return this.api.delete<{ success: boolean; revokedCount: number }>(`profile/cases/${caseId}/shares`);
   }
 
-  uploadArtifactFile(caseId: string, artifactId: string, file: File): Observable<ArtifactFileUploadResponse> {
+  uploadArtifactFiles(caseId: string, artifactId: string, files: File[]): Observable<ArtifactFileUploadResponse> {
     const formData = new FormData();
-    formData.append('file', file);
 
-    return this.api.post<ArtifactFileUploadResponse>(`profile/cases/${caseId}/artifacts/${artifactId}/file`, formData);
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+
+    return this.api.post<ArtifactFileUploadResponse>(`profile/cases/${caseId}/artifacts/${artifactId}/files`,
+      formData);
   }
 
-  deleteArtifactFile(caseId: string, artifactId: string): Observable<{ success: boolean }> {
-    return this.api.delete<{ success: boolean }>(`profile/cases/${caseId}/artifacts/${artifactId}/file`);
+  deleteArtifactFile(caseId: string, artifactId: string, fileId: string): Observable<{ success: boolean }> {
+    return this.api.delete<{ success: boolean }>(`profile/cases/${caseId}/artifacts/${artifactId}/files/${fileId}`);
   }
 
   getArtifactReports(source: string, q: string = '', limit: number = 10): Observable<ArtifactReportOption[]> {

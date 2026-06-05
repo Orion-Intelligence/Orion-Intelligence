@@ -2,6 +2,7 @@ from fastapi import Body, Depends, APIRouter
 from fastapi import File
 from fastapi import UploadFile
 from fastapi import Query
+from typing import List
 from configs.app_dependency import role_required, get_current_user, status_required
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
 from orion.api.interactive.case_manager.case_manager import CaseManager
@@ -130,26 +131,26 @@ async def update_case(case_id: str, payload: UpdateCaseRequest = Body(...), curr
 
 
 @case_routes.post(
-    "/api/profile/cases/{case_id}/artifacts/{artifact_id}/file",
+    "/api/profile/cases/{case_id}/artifacts/{artifact_id}/files",
     status_code=200,
     tags=["Case Management"],
     dependencies=[
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
     ],
 )
-async def upload_artifact_file(
+async def upload_artifact_files(
     case_id: str,
     artifact_id: str,
-    file: UploadFile = File(...),
+    files: List[UploadFile] = File(...),
     current_user=Depends(get_current_user),
 ):
-    return await CaseManager.get_instance().upload_artifact_file(
-        case_id, artifact_id, file, current_user
+    return await CaseManager.get_instance().upload_artifact_files(
+        case_id, artifact_id, files, current_user
     )
 
 
 @case_routes.get(
-    "/api/profile/cases/{case_id}/artifacts/{artifact_id}/file/view",
+    "/api/profile/cases/{case_id}/artifacts/{artifact_id}/files/{file_id}/view",
     status_code=200,
     tags=["Case Management"],
     dependencies=[
@@ -159,15 +160,16 @@ async def upload_artifact_file(
 async def view_artifact_file(
     case_id: str,
     artifact_id: str,
+    file_id: str,
     current_user=Depends(get_current_user),
 ):
     return await CaseManager.get_instance().get_artifact_file_response(
-        case_id, artifact_id, current_user, download=False
+        case_id, artifact_id, file_id, current_user, download=False
     )
 
 
 @case_routes.get(
-    "/api/profile/cases/{case_id}/artifacts/{artifact_id}/file/download",
+    "/api/profile/cases/{case_id}/artifacts/{artifact_id}/files/{file_id}/download",
     status_code=200,
     tags=["Case Management"],
     dependencies=[
@@ -177,15 +179,16 @@ async def view_artifact_file(
 async def download_artifact_file(
     case_id: str,
     artifact_id: str,
+    file_id: str,
     current_user=Depends(get_current_user),
 ):
     return await CaseManager.get_instance().get_artifact_file_response(
-        case_id, artifact_id, current_user, download=True
+        case_id, artifact_id, file_id, current_user, download=True
     )
 
 
 @case_routes.delete(
-    "/api/profile/cases/{case_id}/artifacts/{artifact_id}/file",
+    "/api/profile/cases/{case_id}/artifacts/{artifact_id}/files/{file_id}",
     status_code=200,
     tags=["Case Management"],
     dependencies=[
@@ -195,10 +198,11 @@ async def download_artifact_file(
 async def delete_artifact_file(
     case_id: str,
     artifact_id: str,
+    file_id: str,
     current_user=Depends(get_current_user),
 ):
     return await CaseManager.get_instance().delete_artifact_file_from_case(
-        case_id, artifact_id, current_user
+        case_id, artifact_id, file_id, current_user
     )
 
 

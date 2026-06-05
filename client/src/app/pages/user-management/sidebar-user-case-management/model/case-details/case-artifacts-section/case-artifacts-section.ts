@@ -43,8 +43,8 @@ export class CaseArtifactsSectionComponent {
     return this.store.newArtifact;
   }
 
-  get pendingNewArtifactFileName(): string {
-    return this.store.getPendingNewArtifactFileName();
+  get pendingNewArtifactFileNames(): string {
+    return this.store.getPendingNewArtifactFileNames();
   }
 
   get selectedEditableArtifact(): CaseArtifact | null {

@@ -125,11 +125,14 @@ class CaseHelperMethods:
             artifact.title = transform(artifact.title)
             artifact.description = transform(artifact.description)
             artifact.url = transform(artifact.url)
-            artifact.fileName = transform(artifact.fileName)
-            artifact.fileType = transform(artifact.fileType)
             artifact.artifactTypeOtherValue = transform(artifact.artifactTypeOtherValue)
             artifact.artifactSourceOtherValue = transform(artifact.artifactSourceOtherValue)
             artifact.linkedReportTitle = transform(artifact.linkedReportTitle)
+
+            for artifact_file in artifact.files or []:
+                artifact_file.fileName = transform(artifact_file.fileName)
+                artifact_file.fileType = transform(artifact_file.fileType)
+                artifact_file.fileResourceId = transform(artifact_file.fileResourceId)
 
         for comment in record.comments or []:
             comment.body = transform(comment.body)
