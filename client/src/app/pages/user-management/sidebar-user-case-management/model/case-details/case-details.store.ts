@@ -54,4 +54,5 @@ export abstract class CaseDetailsStore {
   abstract onArtifactReportSelected(artifact: CaseArtifact, reportId: string): void;
   abstract artifactReports: ArtifactReportOption[];
   abstract isArtifactReportsLoading: boolean;
+  abstract viewArtifactReport(artifact: CaseArtifact): void;
 }

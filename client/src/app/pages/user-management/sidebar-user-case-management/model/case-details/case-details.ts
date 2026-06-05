@@ -287,6 +287,50 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
   }
 
+  viewArtifactReport(artifact: CaseArtifact): void {
+    const url = this.getArtifactReportViewUrl(artifact);
+
+    if (!url) {
+      this.messageNotificationService.show('Report link is not available');
+      return;
+    }
+
+    window.open(url, '_blank', 'noopener');
+  }
+
+  private getArtifactReportViewUrl(artifact: CaseArtifact): string {
+    if (!artifact.linkedReportSource || !artifact.linkedReportId) {
+      return '';
+    }
+
+    const source = artifact.linkedReportSource;
+    const reportId = encodeURIComponent(artifact.linkedReportId);
+
+    const sourcePathMap: Record<string, { base: string; category: string }> = {
+      strategic: { base: 'strategic', category: 'all' },
+      breach: { base: 'breach', category: 'all' },
+      defacement: { base: 'defacement', category: 'all' },
+      social: { base: 'social', category: 'all' },
+      feed: { base: 'feed', category: 'news' },
+      exploit: { base: 'exploit', category: 'all' }
+    };
+
+    const config = sourcePathMap[source];
+
+    if (!config) {
+      return '';
+    }
+
+    const tree = this.router.createUrlTree([
+      '/dashboard',
+      config.base,
+      config.category,
+      reportId
+    ]);
+
+    return this.router.serializeUrl(tree);
+  }
+
   viewArtifactFile(artifact: CaseArtifact, fileId: string): void {
     if (!this.caseData || !artifact.artifactId) {
       return;

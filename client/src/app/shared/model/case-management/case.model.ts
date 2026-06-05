@@ -29,6 +29,7 @@ export type ArtifactReportSource =
     'defacement' |
     'social' |
     'feed' |
+    'exploit' |
     'dump' |
     'stealerlogs' |
     'scanner';
