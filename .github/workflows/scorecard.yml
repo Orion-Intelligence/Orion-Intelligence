@@ -6,7 +6,7 @@ on:
     - cron: '33 21 * * 4'
   push:
     branches:
-      - stable
+      - trusted-main
 
 permissions: read-all
 
@@ -15,6 +15,7 @@ jobs:
     name: Scorecard analysis
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       security-events: write
       id-token: write
 
@@ -27,6 +28,7 @@ jobs:
       - name: Run analysis
         uses: ossf/scorecard-action@4a0b87a20cc42672e6c80e82e63b5cd8f25f108a
         with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           results_file: results.sarif
           results_format: sarif
           publish_results: true

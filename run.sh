@@ -237,15 +237,10 @@ else
 fi
 
 docker network create --driver bridge shared_bridge 2>/dev/null || true
-compose_up_args=(-d)
 compose_up_services=()
 
 if [ "$COMPOSE_FILE" = "docker-compose.yml" ]; then
     compose_up_services=(web nginx)
-fi
-
-if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && [ "$EXTRA_FLAG" = "-full" ]; then
-    compose_up_args+=(--force-recreate)
 fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
@@ -255,7 +250,11 @@ if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     fi
 fi
 
-docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up "${compose_up_args[@]}" "${compose_up_services[@]}"
+if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && [ "$EXTRA_FLAG" = "-full" ]; then
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --force-recreate "${compose_up_services[@]}"
+else
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d "${compose_up_services[@]}"
+fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" exec -T nginx nginx -t
