@@ -30,7 +30,7 @@
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
-                        <input [(ngModel)]="artifact.title" (ngModelChange)="store.scheduleArtifactReportSearch(artifact)" name="artifact-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-title-input" />
+                        <input [(ngModel)]="artifact.title" name="artifact-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-title-input" />
                     </div>
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Type</label>
@@ -78,7 +78,7 @@
                             Report Source
                         </label>
 
-                        <select [(ngModel)]="artifact.linkedReportSource" (ngModelChange)="store.loadArtifactReports($event, artifact.title); artifact.linkedReportId = ''; artifact.linkedReportTitle = ''" name="artifact-report-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                        <select [(ngModel)]="artifact.linkedReportSource" (ngModelChange)="artifact.linkedReportId = ''; artifact.linkedReportTitle = ''; store.artifactReportSearchText = ''; store.isArtifactReportDropdownOpen = true; store.loadArtifactReports($event, '')" name="artifact-report-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
 
                             <option value="">Select report source</option>
 
@@ -94,24 +94,42 @@
                             Select Report
                         </label>
 
-                        <select [(ngModel)]="artifact.linkedReportId" (ngModelChange)="store.onArtifactReportSelected(artifact, $event)" name="artifact-linked-report" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                        <div class="relative mt-1">
+                            <input type="text" [ngModel]="store.artifactReportSearchText || artifact.linkedReportTitle || ''" (ngModelChange)="store.searchArtifactReports(artifact.linkedReportSource || '', $event)" (focus)="store.isArtifactReportDropdownOpen = true; store.loadArtifactReports(artifact.linkedReportSource || '', store.artifactReportSearchText || '')" name="artifact-report-search" placeholder="Search reports..." autocomplete="off" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
 
-                            <option value="">
-                                {{ isArtifactReportsLoading ? 'Loading reports...' : 'Select report' }}
-                            </option>
+                            @if (artifact.linkedReportId) {
+                            <div class="mt-2 flex items-center gap-2">
+                                <button type="button" (click)="store.viewArtifactReport(artifact)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-xs font-semibold text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                    View Report
+                                </button>
 
-                            @for (report of artifactReports; track report.id) {
-                            <option [value]="report.id">{{ report.title }}</option>
+                                <button type="button" (click)="store.clearArtifactReportSelection(artifact)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-xs font-semibold text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800">
+                                    Clear
+                                </button>
+                            </div>
                             }
-                        </select>
-                        @if (artifact.linkedReportId) {
-                        <div class="mt-2">
-                            <button type="button" (click)="store.viewArtifactReport(artifact)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-xs font-semibold text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800">
-                                <i class="bi bi-box-arrow-up-right"></i>
-                                View Report
-                            </button>
+
+                            @if (store.isArtifactReportDropdownOpen) {
+                            <div class="absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-lg">
+                                @if (isArtifactReportsLoading) {
+                                <div class="px-3 py-2 text-sm text-[var(--color-text4)]">
+                                    Loading reports...
+                                </div>
+                                } @else {
+                                @for (report of artifactReports; track report.id) {
+                                <button type="button" (click)="store.selectArtifactReport(artifact, report)" class="block w-full px-3 py-2 text-left text-sm text-[var(--color-text2)] hover:bg-sky-500/10 hover:text-sky-200">
+                                    {{ report.title }}
+                                </button>
+                                } @empty {
+                                <div class="px-3 py-2 text-sm text-[var(--color-text4)]">
+                                    No reports found
+                                </div>
+                                }
+                                }
+                            </div>
+                            }
                         </div>
-                        }
                     </div>
                     }
                     }
@@ -246,7 +264,7 @@
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
-                        <input [(ngModel)]="newArtifact.title" (ngModelChange)="store.scheduleArtifactReportSearch(newArtifact)" name="new-artifact-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" data-testid="case-artifact-title-input" />
+                        <input [(ngModel)]="newArtifact.title" name="new-artifact-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" data-testid="case-artifact-title-input" />
                     </div>
 
                     <div>
@@ -296,7 +314,7 @@
                             Report Source
                         </label>
 
-                        <select [(ngModel)]="newArtifact.linkedReportSource" (ngModelChange)="store.loadArtifactReports($event, newArtifact.title); newArtifact.linkedReportId = ''; newArtifact.linkedReportTitle = ''" name="new-artifact-report-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                        <select [(ngModel)]="newArtifact.linkedReportSource" (ngModelChange)="newArtifact.linkedReportId = ''; newArtifact.linkedReportTitle = ''; store.artifactReportSearchText = ''; store.isArtifactReportDropdownOpen = true; store.loadArtifactReports($event, '')" name="new-artifact-report-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
 
                             <option value="">Select report source</option>
 
@@ -312,24 +330,42 @@
                             Select Report
                         </label>
 
-                        <select [(ngModel)]="newArtifact.linkedReportId" (ngModelChange)="store.onArtifactReportSelected(newArtifact, $event)" name="new-artifact-linked-report" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                        <div class="relative mt-1">
+                            <input type="text" [ngModel]="store.artifactReportSearchText || newArtifact.linkedReportTitle || ''" (ngModelChange)="store.searchArtifactReports(newArtifact.linkedReportSource || '', $event)" (focus)="store.isArtifactReportDropdownOpen = true; store.loadArtifactReports(newArtifact.linkedReportSource || '', store.artifactReportSearchText || '')" name="new-artifact-report-search" placeholder="Search reports..." autocomplete="off" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
 
-                            <option value="">
-                                {{ isArtifactReportsLoading ? 'Loading reports...' : 'Select report' }}
-                            </option>
+                            @if (newArtifact.linkedReportId) {
+                            <div class="mt-2 flex items-center gap-2">
+                                <button type="button" (click)="store.viewArtifactReport(newArtifact)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-xs font-semibold text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                    View Report
+                                </button>
 
-                            @for (report of artifactReports; track report.id) {
-                            <option [value]="report.id">{{ report.title }}</option>
+                                <button type="button" (click)="store.clearArtifactReportSelection(newArtifact)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-xs font-semibold text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800">
+                                    Clear
+                                </button>
+                            </div>
                             }
-                        </select>
-                        @if (newArtifact.linkedReportId) {
-                        <div class="mt-2">
-                            <button type="button" (click)="store.viewArtifactReport(newArtifact)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-xs font-semibold text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800">
-                                <i class="bi bi-box-arrow-up-right"></i>
-                                View Report
-                            </button>
+
+                            @if (store.isArtifactReportDropdownOpen) {
+                            <div class="absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-lg">
+                                @if (isArtifactReportsLoading) {
+                                <div class="px-3 py-2 text-sm text-[var(--color-text4)]">
+                                    Loading reports...
+                                </div>
+                                } @else {
+                                @for (report of artifactReports; track report.id) {
+                                <button type="button" (click)="store.selectArtifactReport(newArtifact, report)" class="block w-full px-3 py-2 text-left text-sm text-[var(--color-text2)] hover:bg-sky-500/10 hover:text-sky-200">
+                                    {{ report.title }}
+                                </button>
+                                } @empty {
+                                <div class="px-3 py-2 text-sm text-[var(--color-text4)]">
+                                    No reports found
+                                </div>
+                                }
+                                }
+                            </div>
+                            }
                         </div>
-                        }
                     </div>
                     }
                     }
