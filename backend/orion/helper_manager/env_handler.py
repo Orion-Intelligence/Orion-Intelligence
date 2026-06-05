@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -17,7 +18,14 @@ class env_handler:
         if env_handler.__instance is not None:
             raise Exception("This class is a singleton!")
         else:
-            load_dotenv()
+            self._load_dotenv()
+
+    def _load_dotenv(self):
+        for parent in (Path.cwd(), *Path(__file__).resolve().parents):
+            env_path = parent / ".env"
+            if env_path.is_file():
+                load_dotenv(dotenv_path=env_path)
+                return
 
     def env(self, key, default=None):
         if key not in self._env_vars:
