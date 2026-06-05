@@ -1,5 +1,5 @@
 import json
-from typing import Dict
+from typing import Any, Dict
 
 from fastapi import HTTPException
 
@@ -88,4 +88,52 @@ class AlertSummaryHelper:
         except Exception as ex:
             raise HTTPException(status_code=500, detail=f"Redis cache write failed: {ex}")
 
+        return summary
+    
+    @staticmethod
+    def new_scan_summary() -> dict:
+        return {
+            "created": 0,
+            "updated": 0,
+            "total": 0,
+            "counts_by_category": {},
+            "ioc_values": [],
+        }
+
+    @staticmethod
+    def merge_scan_summary(target: dict, source: dict | None) -> dict:
+        if not source:
+            return target
+        target["created"] += int(source.get("created", 0) or 0)
+        target["updated"] += int(source.get("updated", 0) or 0)
+        target["total"] += int(source.get("total", 0) or 0)
+        for category, count in (source.get("counts_by_category", {}) or {}).items():
+            target["counts_by_category"][category] = target["counts_by_category"].get(category, 0) + int(count or 0)
+        for ioc_row in source.get("ioc_values", []) or []:
+            if ioc_row not in target["ioc_values"]:
+                target["ioc_values"].append(ioc_row)
+        return target
+
+    @staticmethod
+    def scan_result_summary(category: str, ioc_type: str, ioc_value: str, result: Any) -> dict:
+        summary = AlertSummaryHelper.new_scan_summary()
+        if isinstance(result, dict):
+            created = int(result.get("created", 0) or 0)
+            updated = int(result.get("updated", 0) or 0)
+        elif result == "Created":
+            created = 1
+            updated = 0
+        elif result == "Updated":
+            created = 0
+            updated = 1
+        else:
+            return summary
+
+        total = created
+        summary["created"] = created
+        summary["updated"] = updated
+        summary["total"] = total
+        if created > 0:
+            summary["counts_by_category"][category] = created
+            summary["ioc_values"].append({"type": ioc_type or "IOC", "value": ioc_value or ""})
         return summary

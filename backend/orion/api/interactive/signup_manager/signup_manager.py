@@ -22,6 +22,7 @@ from orion.helper_manager.env_handler import env_handler
 class SignupManager:
     @staticmethod
     async def signup_user(data: SignupRequest):
+        await mail_manager.get_instance().validate_mail_configuration()
         engine = mongo_controller.get_instance().get_engine()
         username, email, password = helper_controller.extract_user_mail_fields(data)
 

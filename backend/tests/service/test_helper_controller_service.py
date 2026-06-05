@@ -8,7 +8,7 @@ import pytest
 from fastapi import HTTPException
 
 from orion.constants import constant
-from orion.constants.constant import allowed_keys
+from orion.constants.constant import allowed_key_titles
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.redis_manager.redis_enums import REDIS_KEYS
 from tests.fake_model.fakes import FakeElastic, FakeRedis
@@ -97,7 +97,7 @@ def test_build_assets_loads_templates_and_keys(tmp_path: Path):
 
     helper_controller.build_assets(tmp_path)
 
-    assert "m_email" in allowed_keys
+    assert "m_email" in allowed_key_titles
     assert constant.mail_template.render(name="alice") == "<p>alice</p>"
     assert constant.license_rules["free"]["modules"] == []
     assert constant.url_rules["allowed"] == ["example.com"]
