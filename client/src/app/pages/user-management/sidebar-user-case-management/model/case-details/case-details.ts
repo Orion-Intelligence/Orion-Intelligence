@@ -85,6 +85,8 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   pendingNewArtifactFileInput: HTMLInputElement | null = null;
   artifactReports: ArtifactReportOption[] = [];
   isArtifactReportsLoading = false;
+  artifactReportSearchText = '';
+  isArtifactReportDropdownOpen = false;
   isArchiveConfirmationOpen = false;
   isArchivingCase = false;
 
@@ -261,29 +263,40 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     });
   }
 
-  scheduleArtifactReportSearch(artifact: CaseArtifact): void {
+  searchArtifactReports(source: string, q: string): void {
+    this.artifactReportSearchText = q;
+
     if (this.artifactReportSearchTimer) {
       clearTimeout(this.artifactReportSearchTimer);
     }
 
-    if (artifact.type !== 'report' || !artifact.linkedReportSource) {
+    if (!source) {
       this.artifactReports = [];
       return;
     }
 
     this.artifactReportSearchTimer = setTimeout(() => {
-      this.loadArtifactReports(artifact.linkedReportSource || '', artifact.title || '');
-    }, 1000);
+      this.loadArtifactReports(source, q);
+    }, 500);
   }
 
-  onArtifactReportSelected(artifact: CaseArtifact, reportId: string): void {
-    const report = this.artifactReports.find(item => item.id === reportId);
+  selectArtifactReport(artifact: CaseArtifact, report: ArtifactReportOption): void {
+    artifact.linkedReportId = report.id;
+    artifact.linkedReportTitle = report.title;
 
-    artifact.linkedReportId = reportId;
-    artifact.linkedReportTitle = report?.title || '';
+    this.artifactReportSearchText = report.title;
+    this.isArtifactReportDropdownOpen = false;
+  }
 
-    if (report?.title) {
-      artifact.title = report.title;
+  clearArtifactReportSelection(artifact: CaseArtifact): void {
+    artifact.linkedReportId = '';
+    artifact.linkedReportTitle = '';
+
+    this.artifactReportSearchText = '';
+    this.isArtifactReportDropdownOpen = true;
+
+    if (artifact.linkedReportSource) {
+      this.loadArtifactReports(artifact.linkedReportSource, '');
     }
   }
 
