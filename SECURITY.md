@@ -4,7 +4,7 @@ We kindly ask that you follow responsible disclosure guidelines, keeping in mind
 
 To report a vulnerability, please use the private reporting form:
 
-https://github.com/Orion-Intelligence/Orion-Intelligence/security/advisories/new
+[GitHub private vulnerability reporting form](https://github.com/Orion-Intelligence/Orion-Intelligence/security/advisories/new)
 
 We aim to acknowledge reports within 8 hours and address any critical issues with short-term fixes within 2 days,
 whenever possible.
