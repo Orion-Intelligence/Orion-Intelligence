@@ -17,6 +17,7 @@ from orion.middleware.middlewares.content_block_middleware import content_block_
 from orion.middleware.middlewares.content_security_policy_middleware import content_security_policy_middleware
 from orion.middleware.middlewares.security_headers_middleware import security_headers_middleware
 from orion.middleware.middlewares.service_ready_middleware import service_ready_middleware
+from routes.auth_routes import COOKIE_CIPHER
 
 
 async def _noop_app(_scope: Scope, _receive: Receive, _send: Send) -> None:
@@ -129,7 +130,7 @@ async def test_content_block_middleware_allows_dashboard_with_cookie_session(mon
     )
 
     async with _client_with_middleware(content_block_middleware, endpoint="/dashboard") as client:
-        client.cookies.set("access_token", "cookie-token")
+        client.cookies.set("access_token", COOKIE_CIPHER.encrypt(b"cookie-token").decode())
         response = await client.get("/dashboard")
 
     assert response.status_code == 200

@@ -12,12 +12,7 @@ TEMP_SPEC_DIR="$CLIENT_DIR/cypress/doc"
 TEMP_SPEC="$CLIENT_DIR/$TEMP_SPEC_REL"
 NESTED_DIR="$TARGET_DIR/tmp-user-manual-screenshots-docs-runner.cy.ts"
 LEGACY_NESTED_DIR="$TARGET_DIR/tmp-user-manual-screenshots-runner.cy.ts"
-FRONTEND_HOST="${DOC_FRONTEND_HOST:-127.0.0.1}"
-FRONTEND_PORT="${DOC_FRONTEND_PORT:-4200}"
-FRONTEND_URL="http://$FRONTEND_HOST:$FRONTEND_PORT"
-FRONTEND_LOG="$CLIENT_DIR/.ng-serve.log"
-FRONTEND_PID_FILE="$CLIENT_DIR/.ng-serve-docs.pid"
-STARTED_FRONTEND=0
+FRONTEND_URL="${DOC_FRONTEND_URL:-http://127.0.0.1:8080}"
 
 clear_docs_screenshots() {
     rm -f "$TARGET_DIR"/*.png
@@ -29,62 +24,8 @@ clear_docs_screenshots() {
     rm -rf "$TARGET_DIR"/tmp-user-manual-screenshots-runner.cy.ts
 }
 
-frontend_ready() {
-    curl -fsS "$FRONTEND_URL/" >/dev/null 2>&1
-}
-
-start_frontend_server() {
-    if frontend_ready; then
-        return 0
-    fi
-
-    if [ ! -x "$CLIENT_DIR/node_modules/.bin/ng" ]; then
-        npm --prefix "$CLIENT_DIR" install
-    fi
-
-    echo "Starting Angular dev server on $FRONTEND_URL"
-    (
-        cd "$CLIENT_DIR" || exit 1
-        if command -v setsid >/dev/null 2>&1; then
-            setsid npx ng serve --host "$FRONTEND_HOST" --port "$FRONTEND_PORT" --allowed-hosts all --proxy-config proxy.conf.json > "$FRONTEND_LOG" 2>&1 < /dev/null &
-        else
-            nohup npx ng serve --host "$FRONTEND_HOST" --port "$FRONTEND_PORT" --allowed-hosts all --proxy-config proxy.conf.json > "$FRONTEND_LOG" 2>&1 < /dev/null &
-        fi
-        echo "$!" > "$FRONTEND_PID_FILE"
-    )
-    STARTED_FRONTEND=1
-}
-
-wait_for_frontend_server() {
-    echo "Waiting for Angular dev server on $FRONTEND_URL"
-    for _ in $(seq 1 90); do
-        if frontend_ready; then
-            return 0
-        fi
-        sleep 2
-    done
-
-    echo "Angular dev server did not become ready. Last frontend log lines:"
-    tail -60 "$FRONTEND_LOG" 2>/dev/null || true
-    exit 1
-}
-
-stop_frontend_server() {
-    if [ "$STARTED_FRONTEND" != "1" ] || [ ! -f "$FRONTEND_PID_FILE" ]; then
-        return 0
-    fi
-
-    local pid
-    pid="$(cat "$FRONTEND_PID_FILE" 2>/dev/null || true)"
-    rm -f "$FRONTEND_PID_FILE"
-    if [ -n "$pid" ]; then
-        kill -TERM "-$pid" 2>/dev/null || kill "$pid" 2>/dev/null || true
-    fi
-}
-
 cleanup() {
     rm -f "$TEMP_SPEC"
-    stop_frontend_server
 }
 
 if [ "${1:-}" = "--clear" ]; then
@@ -142,8 +83,6 @@ if [ -n "$chromium_binary" ]; then
 fi
 
 trap cleanup EXIT
-start_frontend_server
-wait_for_frontend_server
 
 cd "$CLIENT_DIR" || exit 1
 npm test -- run --browser electron --config "baseUrl=$FRONTEND_URL" --spec cypress/e2e/05-user-management.cy.ts

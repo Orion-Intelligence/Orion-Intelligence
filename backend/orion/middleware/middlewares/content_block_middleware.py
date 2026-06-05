@@ -3,8 +3,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response, RedirectResponse
 
 from orion.services.session_manager.session_manager import session_manager
-
-ACCESS_COOKIE = "access_token"
+from routes.auth_routes import token_from_request
 
 
 class content_block_middleware(BaseHTTPMiddleware):
@@ -20,10 +19,7 @@ class content_block_middleware(BaseHTTPMiddleware):
         if not (path == "/dashboard" or path.startswith("/dashboard/")):
             return await call_next(request)
 
-        auth_header = request.headers.get("Authorization", "")
-        parts = auth_header.split(" ", 1)
-        bearer = parts[1] if len(parts) == 2 and parts[0] == "Bearer" else None
-        token = bearer or request.cookies.get(ACCESS_COOKIE)
+        token = token_from_request(request)
 
         user = None
         if token:
