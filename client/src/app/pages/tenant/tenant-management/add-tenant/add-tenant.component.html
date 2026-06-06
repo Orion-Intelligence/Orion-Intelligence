@@ -22,7 +22,9 @@
       <input data-testid="tenant-add-user-email" type="email" class="ui-popup-input ui-auth-input w-full bg-[var(--color-blue-700)] text-[var(--color-text1)] placeholder:text-[var(--color-text4)]" placeholder="Enter email" [(ngModel)]="model.email" name="email" />
 
       <label class="ui-auth-label mt-[18px] block">Password</label>
-      <input data-testid="tenant-add-user-password" type="password" class="ui-popup-input ui-auth-input w-full bg-[var(--color-blue-700)] text-[var(--color-text1)] placeholder:text-[var(--color-text4)]" placeholder="Enter password" [(ngModel)]="model.password" (input)="onPasswordInput(model.password)" name="password"/>
+      <div class="relative">
+        <input data-testid="tenant-add-user-password" type="password" class="ui-popup-input ui-auth-input !pr-10 w-full bg-[var(--color-blue-700)] text-[var(--color-text1)] placeholder:text-[var(--color-text4)]" placeholder="Enter password" [(ngModel)]="model.password" (input)="onPasswordInput(model.password)" name="password" appPasswordToggle="dark"/>
+      </div>
       @if (showPasswordMeter) {
         <div class="mt-2 space-y-2">
           <div class="ui-password-meter-track">
@@ -37,7 +39,9 @@
       }
 
       <label class="ui-auth-label mt-[18px] block">Confirm Password</label>
-      <input data-testid="tenant-add-user-confirm-password" type="password" class="ui-popup-input ui-auth-input w-full bg-[var(--color-blue-700)] text-[var(--color-text1)] placeholder:text-[var(--color-text4)]" placeholder="Confirm password" [(ngModel)]="confirmPassword" name="confirmPassword"/>
+      <div class="relative">
+        <input data-testid="tenant-add-user-confirm-password" type="password" class="ui-popup-input ui-auth-input !pr-10 w-full bg-[var(--color-blue-700)] text-[var(--color-text1)] placeholder:text-[var(--color-text4)]" placeholder="Confirm password" [(ngModel)]="confirmPassword" name="confirmPassword" appPasswordToggle="dark"/>
+      </div>
 
       @if (model.password && confirmPassword && model.password !== confirmPassword) {
         <div class="ui-auth-error text-[var(--color-text1)]">

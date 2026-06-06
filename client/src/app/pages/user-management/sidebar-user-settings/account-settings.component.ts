@@ -11,10 +11,11 @@ import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.a
 import { LicenseName } from '../../../shared/model/licenses/license.rules';
 import { getTenantLocationDisplay } from './sidebar-settings.util';
 import { areAllPasswordRequirementsMet, createEmptyPasswordChecks, evaluatePasswordInput, PasswordChecks, PasswordStrength } from '../../../shared/utils/auth-form.util';
+import { PasswordToggleDirective } from '../../../shared/directives/password-toggle.directive';
 
 @Component({
   selector: 'app-sidebar-profile-settings',
-  imports: [FormsModule, CommonModule, UserImagePickerComponent],
+  imports: [FormsModule, CommonModule, UserImagePickerComponent, PasswordToggleDirective],
   animations: [fadeInDashboardItem],
   templateUrl: './account-settings.component.html'
 })

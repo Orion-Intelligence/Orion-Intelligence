@@ -7,10 +7,11 @@ import { Subscription } from 'rxjs';
 import { AppService } from '../../../services/core/app/app.service';
 import QRCode from 'qrcode';
 import { HeaderComponent } from '../../../shared/partials/header/login-header/header.component';
+import { PasswordToggleDirective } from '../../../shared/directives/password-toggle.directive';
 @Component({
   selector: 'app-login-container',
   standalone: true,
-  imports: [FormsModule, CommonModule, HeaderComponent],
+  imports: [FormsModule, CommonModule, HeaderComponent, PasswordToggleDirective],
   templateUrl: './login-container.component.html',
 })
 export class LoginContainerComponent implements OnInit, OnDestroy {

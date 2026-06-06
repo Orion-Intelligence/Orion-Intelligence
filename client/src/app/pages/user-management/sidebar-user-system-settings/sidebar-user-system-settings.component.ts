@@ -8,12 +8,13 @@ import { AuthService } from '../../../services/authetication/auth.service';
 import { ConfigSettings } from '../../../shared/model/app/config';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
+import { PasswordToggleDirective } from '../../../shared/directives/password-toggle.directive';
 
 const DEFAULT_APP_NAME = 'Orion Intelligence';
 
 @Component({
   selector: 'app-sidebar-user-system-settings',
-  imports: [FormsModule, CommonModule, UserImagePickerComponent],
+  imports: [FormsModule, CommonModule, UserImagePickerComponent, PasswordToggleDirective],
   animations: [fadeInDashboardItem],
   templateUrl: './sidebar-user-system-settings.component.html'
 })
