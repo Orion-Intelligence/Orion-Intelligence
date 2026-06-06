@@ -8,7 +8,7 @@ from starlette.status import HTTP_303_SEE_OTHER
 from starlette_admin.auth import AdminConfig, AdminUser, AuthProvider
 from starlette_admin.contrib.odmantic import Admin, ModelView
 
-from orion.helper_manager.env_handler import env_handler
+from configs.auth_cookie import ACCESS_COOKIE, set_access_cookie, token_from_request
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.services.mongo_manager import *
 from orion.services.session_manager.session_manager import session_manager
@@ -22,7 +22,6 @@ class TokenAuthProvider(AuthProvider):
             request: Request = None,
             response: Response = None, ) -> Response:
         try:
-            IS_DEBUG = env_handler.get_instance().env("PRODUCTION", "0") != "1"
             user = await auth_manager.get_instance().authenticate_user(username, password)
             if not user:
                 raise HTTPException(status_code=401, detail="Invalid username or password")
@@ -34,14 +33,7 @@ class TokenAuthProvider(AuthProvider):
                 data={"sub": user.username}, expires_delta=access_token_expires)
 
             redirect = RedirectResponse(url="/admin/", status_code=HTTP_303_SEE_OTHER)
-            redirect.set_cookie(
-                key="access_token",
-                value=access_token,
-                httponly=True,
-                secure=not IS_DEBUG,
-                samesite="lax" if IS_DEBUG else "strict",
-                max_age=1800,
-                path="/admin", )
+            set_access_cookie(redirect, access_token)
             return redirect
         except Exception:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
@@ -50,7 +42,7 @@ class TokenAuthProvider(AuthProvider):
         if request.url.path == "/admin/login":
             return True
 
-        token = request.cookies.get("access_token")
+        token = token_from_request(request)
         if not token:
             return False
 
@@ -79,8 +71,11 @@ class TokenAuthProvider(AuthProvider):
             photo_url=user.profile_picture if user and hasattr(user, "profile_picture") else None)
 
     async def logout(self, request: Request, response: Response) -> Response:
+        token = token_from_request(request)
+        await session_manager.get_instance().invalidate_user_session(ptoken=token)
         redirect = RedirectResponse(url="/admin/login", status_code=HTTP_303_SEE_OTHER)
-        redirect.delete_cookie("access_token", path="/admin")
+        redirect.delete_cookie(ACCESS_COOKIE, path="/")
+        redirect.delete_cookie(ACCESS_COOKIE, path="/admin")
         return redirect
 
 

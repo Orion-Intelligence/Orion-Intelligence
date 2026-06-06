@@ -2,8 +2,8 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response, RedirectResponse
 
+from configs.auth_cookie import token_from_request
 from orion.services.session_manager.session_manager import session_manager
-from routes.auth_routes import token_from_request
 
 
 class content_block_middleware(BaseHTTPMiddleware):
@@ -14,6 +14,9 @@ class content_block_middleware(BaseHTTPMiddleware):
         path = request.url.path
 
         if path.startswith("/api/"):
+            return await call_next(request)
+
+        if path == "/dashboard/admin" or path.startswith("/dashboard/admin/"):
             return await call_next(request)
 
         if not (path == "/dashboard" or path.startswith("/dashboard/")):

@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, Body, Response, Request, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from cryptography.fernet import Fernet, InvalidToken
 from starlette.responses import JSONResponse
 
+from configs.auth_cookie import ACCESS_COOKIE, COOKIE_CIPHER, COOKIE_MAX_AGE, set_access_cookie, token_from_request
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
-from orion.constants.constant import CONSTANTS
 from orion.api.interactive.payment_manager.model.payment_param_model import PaymentParamModel
 from orion.api.interactive.payment_manager.payment_manager import PaymentManager
 from orion.helper_manager.env_handler import env_handler
@@ -15,28 +14,6 @@ from orion.api.interactive.auth_manager.models.forgot_password_request import Fo
 
 auth_router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-ACCESS_COOKIE = "access_token"
-COOKIE_MAX_AGE = 30 * 60  # 30 minutes
-COOKIE_CIPHER = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode())
-
-
-def set_access_cookie(resp: Response, token: str) -> None:
-    resp.set_cookie(
-        key=ACCESS_COOKIE, value=COOKIE_CIPHER.encrypt(token.encode()).decode(), httponly=True, samesite="lax", secure=True, path="/", max_age=COOKIE_MAX_AGE, )
-
-
-def token_from_request(request: Request) -> str | None:
-    auth = request.headers.get("Authorization", "")
-    parts = auth.split(" ", 1)
-    bearer = parts[1] if len(parts) == 2 and parts[0] == "Bearer" else None
-    cookie_token = request.cookies.get(ACCESS_COOKIE)
-    if cookie_token:
-        try:
-            cookie_token = COOKIE_CIPHER.decrypt(cookie_token.encode()).decode()
-        except InvalidToken:
-            pass
-    return bearer or cookie_token
 
 
 @auth_router.post("/api/token")
@@ -89,10 +66,11 @@ async def refresh_token(request: Request, response: Response = None):
 
 @auth_router.post("/api/logout")
 async def logout(request: Request):
-    token = request.cookies.get(ACCESS_COOKIE)
-    session_manager.logout_user(ptoken=token)
+    token = token_from_request(request)
+    await session_manager.get_instance().invalidate_user_session(ptoken=token)
     resp = JSONResponse(content={"detail": "Logged out"})
     resp.delete_cookie(ACCESS_COOKIE, path="/")
+    resp.delete_cookie(ACCESS_COOKIE, path="/admin")
     return resp
 
 
