@@ -204,7 +204,8 @@ class elastic_controller:
             await self.__m_core_connection.indices.create(index=index_name, body=mapping_map_entities_model, request_timeout=220)
 
         raw_data = constant.map_entities_data
-        raw_data = json.loads(raw_data)
+        if isinstance(raw_data, str):
+            raw_data = json.loads(raw_data)
 
         documents = [
             document for document in (raw_data if isinstance(raw_data, list) else [])
