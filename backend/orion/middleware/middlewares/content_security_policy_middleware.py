@@ -19,7 +19,22 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                     "/npm/swagger-ui-dist@5/swagger-ui-bundle.js"]):
             return response
 
-        if self.DEBUG:
+        if request.url.path.startswith("/admin"):
+            response.headers["Content-Security-Policy"] = ("default-src 'self' data: blob:; "
+                                                           "script-src 'self' 'unsafe-inline';"
+                                                           "style-src 'self' 'unsafe-inline' *; "
+                                                           "img-src 'self' data: *; "
+                                                           "font-src 'self' *; "
+                                                           "connect-src 'self' *; "
+                                                           "media-src 'self' *; "
+                                                           "frame-src *; "
+                                                           "frame-ancestors *; "
+                                                           "object-src *; "
+                                                           "form-action *; "
+                                                           "base-uri 'self'; "
+                                                           f"{'upgrade-insecure-requests; ' if not self.DEBUG else ''}"
+                                                           "report-to csp-endpoint;")
+        elif self.DEBUG:
             response.headers["Content-Security-Policy"] = ("default-src 'self' data: blob:; "
                                                            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
                                                            "script-src-elem 'self' 'unsafe-inline' https://js.arcgis.com; "
@@ -36,21 +51,6 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                                                            "object-src 'none'; "
                                                            "form-action 'self'; "
                                                            "base-uri 'self'; "
-                                                           "report-to csp-endpoint;")
-        elif request.url.path.startswith("/admin"):
-            response.headers["Content-Security-Policy"] = ("default-src 'self' data: blob:; "
-                                                           "script-src 'self' 'unsafe-inline';"
-                                                           "style-src 'self' 'unsafe-inline' *; "
-                                                           "img-src 'self' data: *; "
-                                                           "font-src 'self' *; "
-                                                           "connect-src 'self' *; "
-                                                           "media-src 'self' *; "
-                                                           "frame-src *; "
-                                                           "frame-ancestors *; "
-                                                           "object-src *; "
-                                                           "form-action *; "
-                                                           "base-uri 'self'; "
-                                                           "upgrade-insecure-requests; "
                                                            "report-to csp-endpoint;")
         elif request.url.path.startswith("/dashboard/social-mapper"):
             response.headers["Content-Security-Policy"] = ("default-src 'self'; "

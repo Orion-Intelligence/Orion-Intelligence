@@ -1,14 +1,15 @@
-import { AfterViewInit, Directive, ElementRef, inject, Input, OnDestroy, Renderer2 } from '@angular/core';
+import { AfterViewInit, Directive, DoCheck, ElementRef, inject, Input, OnDestroy, Renderer2 } from '@angular/core';
 
 @Directive({
   selector: 'input[appPasswordToggle]',
   standalone: true,
 })
-export class PasswordToggleDirective implements AfterViewInit, OnDestroy {
+export class PasswordToggleDirective implements AfterViewInit, DoCheck, OnDestroy {
   private readonly inputElementRef = inject(ElementRef) as ElementRef<HTMLInputElement>;
   private readonly renderer = inject(Renderer2);
   private buttonElement?: HTMLButtonElement;
   private iconElement?: SVGSVGElement;
+  private parentElement?: HTMLElement;
   private mutationObserver?: MutationObserver;
   private removeClickListener?: () => void;
   private removeInputListener?: () => void;
@@ -17,6 +18,8 @@ export class PasswordToggleDirective implements AfterViewInit, OnDestroy {
   private removeCopyListener?: () => void;
   private removeCutListener?: () => void;
   private isVisible = false;
+  private lastInputValue = '';
+  private lastDisabledState = false;
 
   @Input() appPasswordToggle: 'dark' | '' = '';
 
@@ -26,6 +29,7 @@ export class PasswordToggleDirective implements AfterViewInit, OnDestroy {
     if (!parentElement) {
       return;
     }
+    this.parentElement = parentElement;
 
     this.renderer.setAttribute(inputElement, 'type', 'password');
 
@@ -46,7 +50,6 @@ export class PasswordToggleDirective implements AfterViewInit, OnDestroy {
     this.renderer.setAttribute(iconElement, 'focusable', 'false');
     this.renderer.setAttribute(iconElement, 'class', 'block h-4 w-4 fill-current');
     this.renderer.appendChild(buttonElement, iconElement);
-    this.renderer.appendChild(parentElement, buttonElement);
 
     this.buttonElement = buttonElement;
     this.iconElement = iconElement;
@@ -67,6 +70,13 @@ export class PasswordToggleDirective implements AfterViewInit, OnDestroy {
     this.syncButtonState();
     this.mutationObserver = new MutationObserver(() => this.syncButtonState());
     this.mutationObserver.observe(inputElement, { attributes: true, attributeFilter: ['disabled'] });
+  }
+
+  ngDoCheck(): void {
+    const inputElement = this.inputElementRef.nativeElement;
+    if (inputElement.value !== this.lastInputValue || inputElement.disabled !== this.lastDisabledState) {
+      this.syncButtonState();
+    }
   }
 
   ngOnDestroy(): void {
@@ -103,7 +113,20 @@ export class PasswordToggleDirective implements AfterViewInit, OnDestroy {
     }
     const inputElement = this.inputElementRef.nativeElement;
     const isEmpty = inputElement.value.length === 0;
-    this.renderer.setProperty(this.buttonElement, 'hidden', isEmpty);
+    const isAttached = this.buttonElement.parentElement !== null;
+    this.lastInputValue = inputElement.value;
+    this.lastDisabledState = inputElement.disabled;
+    if (isEmpty && this.isVisible) {
+      this.isVisible = false;
+      this.renderer.setAttribute(inputElement, 'type', 'password');
+    }
+
+    if (isEmpty && isAttached) {
+      this.renderer.removeChild(this.buttonElement.parentElement, this.buttonElement);
+    } else if (!isEmpty && !isAttached && this.parentElement) {
+      this.renderer.appendChild(this.parentElement, this.buttonElement);
+    }
+
     this.renderer.setProperty(this.buttonElement, 'disabled', inputElement.disabled);
     this.updateIcon();
   }
