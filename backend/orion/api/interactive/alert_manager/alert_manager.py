@@ -5,10 +5,16 @@ from typing import Any, List
 
 from fastapi import HTTPException
 
+from orion.api.interactive.alert_manager.alert_mail_helper import AlertMailHelper
 from orion.api.interactive.alert_manager.alert_summary_helper import AlertSummaryHelper
 from orion.api.interactive.alert_manager.function_map.function_maping import MODULE_ALERT_TYPE_MAP, SCANNING_ALERT_TYPES
 
-from orion.services.mongo_manager.shared_model.db_alert_model import alert_all_ioc, alert_status, db_alert_model, AlertModel
+from orion.services.mongo_manager.shared_model.db_alert_model import (
+    AlertModel,
+    alert_all_ioc,
+    alert_status,
+    db_alert_model,
+)
 from orion.services.redis_manager.redis_controller import redis_controller
 from configs.app_dependency import get_user_permissions
 
@@ -31,6 +37,7 @@ class AlertManager:
         self._redis = redis_controller.getInstance()
         self._alert_summary_ttl_seconds = 300
         self._summary_helper = AlertSummaryHelper(self._engine, self._redis, self._alert_summary_ttl_seconds)
+        self._mail_helper = AlertMailHelper(self._engine)
         if AlertManager.__instance is not None:
             raise Exception("This class is a singleton!")
         AlertManager.__instance = self
@@ -49,6 +56,24 @@ class AlertManager:
 
     async def get_alert_summary(self, tenant_id: str):
         return await self._summary_helper.get_alert_summary(tenant_id)
+
+    async def send_scan_completed_mail(
+            self,
+            tenant_id: str,
+            scan_status: str,
+            summary: dict[str, Any],
+            current_user=None,
+            tenant=None):
+        _ = tenant
+        return await self._mail_helper.send_scan_completed_mail(
+            tenant_id=tenant_id,
+            scan_status=scan_status,
+            summary=summary,
+            current_user=current_user,
+        )
+
+    async def send_alert_change_mail(self, action: str, alert: AlertModel, current_user):
+        return await self._mail_helper.send_alert_change_mail(action, alert, current_user)
 
     async def upsert_alerts_bulk(self, tenantId: str, alerts_payload: list[dict], chunk_size: int = 200):
         if not alerts_payload:
@@ -129,7 +154,11 @@ class AlertManager:
 
         if existing_doc and existing_doc.alerts:
             for alert in existing_doc.alerts:
-                if (alert.data_hash or "") == data_hash and (alert.type or"")==category and (alert.ioc_value or"")==ioc_value:
+                if (
+                    (alert.data_hash or "") == data_hash
+                    and (alert.type or "") == category
+                    and (alert.ioc_value or "") == ioc_value
+                ):
                     alert.last_seen = datetime.now(timezone.utc)
 
                     alert_updated = True
@@ -207,6 +236,7 @@ class AlertManager:
                     alert.last_seen = datetime.now(timezone.utc)
                     await self._engine.save(existing_doc)
                     await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
+                    await self.send_alert_change_mail("updated", alert, current_user)
                     return {"message": "Updated"}
 
         if existing_doc:
@@ -217,6 +247,7 @@ class AlertManager:
 
         await self._engine.save(save_doc)
         await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
+        await self.send_alert_change_mail("created", new_alert, current_user)
         return {"message": "Created"}
 
     async def update_alert(self, alert_to_update: AlertModel, current_user):
@@ -231,6 +262,7 @@ class AlertManager:
         _iocType = alert_to_update.ioc_type
         _iocValue = alert_to_update.ioc_value
         updated = False
+        updated_alert = None
         for stored_alert in existing_doc.alerts:
             if stored_alert.data_hash == hash_to_find:
                 stored_alert.type = _type
@@ -238,11 +270,14 @@ class AlertManager:
                 stored_alert.ioc_value = _iocValue
                 stored_alert.last_seen = datetime.now(timezone.utc)
                 updated = True
+                updated_alert = stored_alert
                 break
         if not updated:
             raise HTTPException(status_code=404, detail="No matching alert found to update")
         await self._engine.save(existing_doc)
         await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
+        if updated_alert:
+            await self.send_alert_change_mail("updated", updated_alert, current_user)
         return {"message": "Alert updated successfully", "updated_hash": hash_to_find}
 
     async def set_alert_seen(self, alerts_to_update: list[AlertModel], current_user):

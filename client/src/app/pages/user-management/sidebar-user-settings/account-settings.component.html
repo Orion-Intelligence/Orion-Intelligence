@@ -106,7 +106,7 @@
           <div class="grid gap-3">
             <div>
               <div class="relative">
-                <input id="account-settings-new-password" data-testid="account-settings-new-password" type="password" [(ngModel)]="newPassword" (input)="onPasswordInput(newPassword)" name="newPassword" placeholder="Enter new password" autocomplete="new-password" class="!pr-10 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" appPasswordToggle="dark" />
+                <input id="account-settings-new-password" data-testid="account-settings-new-password" type="password" [(ngModel)]="newPassword" (input)="onPasswordInput(newPassword)" name="newPassword" placeholder="Enter new password" autocomplete="new-password" class="!pr-12 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" appPasswordToggle="dark" />
               </div>
               @if (showPasswordMeter) {
                 <div class="mt-2">
@@ -122,7 +122,7 @@
 
             <div>
               <div class="relative">
-                <input id="account-settings-confirm-password" data-testid="account-settings-confirm-password" type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Confirm new password" autocomplete="new-password" class="!pr-10 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" appPasswordToggle="dark" />
+                <input id="account-settings-confirm-password" data-testid="account-settings-confirm-password" type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Confirm new password" autocomplete="new-password" class="!pr-12 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" appPasswordToggle="dark" />
               </div>
               @if (newPassword && confirmPassword && newPassword !== confirmPassword) {
                 <p class="mt-2 text-xs text-red-400">Password and confirm password do not match.</p>

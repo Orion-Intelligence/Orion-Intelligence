@@ -21,3 +21,34 @@ class MailUrlHeading(str, Enum):
     PRO_SUBSCRIPTION = "Pro subscription details : "
     SUPPORT = "Message : "
     ACCOUNT_CREATED = "Verify your account : "
+
+
+class AlertMailSubject(str, Enum):
+    SCAN_COMPLETED = "Alert scan completed - {count} new {alert_word} found"
+    CUSTOM_CREATED = "Custom Alert Created"
+    ALERT_UPDATED = "Alert Updated"
+
+
+class AlertMailTitle(str, Enum):
+    SCAN_COMPLETED = "Alert Scan Completed"
+    CUSTOM_CREATED = "Custom Alert Created"
+    ALERT_UPDATED = "Alert Updated"
+
+
+class AlertMailMessage(str, Enum):
+    SCAN_COMPLETED = "Your alert scan has finished. We found {count} new {alert_word} across your monitored IOC values."
+    CUSTOM_CREATED = "A custom alert has been created for your workspace."
+    ALERT_UPDATED = "An alert in your workspace has been updated with the latest details."
+    DEFAULT_CLOSING = "Please review these alerts when you have a moment. The alert view contains the full context, source details, and IOC history."
+    ALERT_CHANGE_CLOSING = "You can open the alert view to review the latest IOC, source, and category details."
+    MODULE_COUNT = "In {category}, we found {count} new {alert_word}"
+    SINGLE_ALERT_COUNT = "In {category}, we found 1 alert"
+
+
+class AlertMailLabel(str, Enum):
+    ACTION_LABEL = "View Alerts"
+    CREATED_STATUS = "Created"
+    UPDATED_STATUS = "Updated"
+    NO_IOC_MATCH = "No IOC match"
+    IOC_FALLBACK = "IOC"
+    UNCATEGORIZED = "Uncategorized"

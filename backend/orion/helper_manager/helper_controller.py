@@ -16,7 +16,7 @@ from starlette.requests import Request
 from stopwords import get_stopwords
 
 from orion.constants import constant
-from orion.constants.constant import CONSTANTS, allowed_keys
+from orion.constants.constant import CONSTANTS, allowed_key_titles
 from orion.helper_manager.env_handler import env_handler
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.log_manager.log_controller import log
@@ -193,16 +193,17 @@ class helper_controller:
         with open(entities_file, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        allowed_keys.clear()
+        allowed_key_titles.clear()
         for item in data:
             if "key" in item:
-                allowed_keys.add(item["key"])
+                allowed_key_titles[item["key"]] = item.get("title") or item["key"]
 
         mail_templete_env = Environment(
             loader=FileSystemLoader(build_dir / "assets" / "data" / "mail_template_data"),
             autoescape=True
         )
         constant.mail_template = mail_templete_env.get_template("mail_template.html")
+        constant.alert_mail_template = mail_templete_env.get_template("alert_mail_template.html")
         license_rules_env = Environment(
             loader=FileSystemLoader(build_dir / "assets" / "data" / "licenses"),
             autoescape=True

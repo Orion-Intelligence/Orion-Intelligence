@@ -12,7 +12,7 @@ from orion.api.server.crawl_manager.class_model.domain_scan_request_model import
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
-from orion.api.interactive.alert_manager.alert_manager import AlertManager
+from orion.api.interactive.alert_manager.alert_manager import AlertManager, AlertSummaryHelper
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.helper_manager.helper_controller import helper_controller
@@ -48,6 +48,12 @@ class alert_job:
     @staticmethod
     def _tenant_key(tenant_id) -> str:
         return str(tenant_id)
+
+    @staticmethod
+    def _value(data: Any, field: str, default: Any = None) -> Any:
+        if isinstance(data, dict):
+            return data.get(field, default)
+        return getattr(data, field, default)
 
     async def _handle_scanning_alert(self, tenant_id: str, ioc_value: str, ioc_type: str, scan_type: str):
         try:
@@ -102,7 +108,7 @@ class alert_job:
 
             all_ioc_list = [alert_all_ioc(name=ioc_type, values=[ioc_value])]
 
-            await self._alert_manager.upsert_alert(
+            result = await self._alert_manager.upsert_alert(
                 tenantId=tenant_id,
                 category=f"{scan_type} scanning",
                 ioc_type=ioc_type,
@@ -113,10 +119,10 @@ class alert_job:
                 source=f"Orion Scanner ({scan_type})",
                 content_types=threat_categories,
                 all_ioc=all_ioc_list)
-            return True
+            return AlertSummaryHelper.scan_result_summary(f"{scan_type} scanning", ioc_type, ioc_value, result)
 
         except Exception:
-            return False
+            return AlertSummaryHelper.new_scan_summary()
 
     async def _handle_dynamic_scanning_alert(self,
             tenant_id: str,
@@ -126,11 +132,12 @@ class alert_job:
             result_list: List[Dict[str, Any]]):
 
         try:
+            summary = AlertSummaryHelper.new_scan_summary()
             if not result_list:
-                return False
+                return summary
             for result in result_list:
                 if self._cancel_scan_flags.get(tenant_id):
-                    return
+                    return summary
                 if scan_type in ["email-breach", "social-scanner"]:
                     _title = result.get("m_title", "Records for provided queries")
                     _description = result.get("m_important_content") or result.get("m_content", "A match was found.")
@@ -164,7 +171,7 @@ class alert_job:
                 triggering_ioc = alert_all_ioc(name=ioc_type, values=[ioc_value])
                 all_ioc_list.append(triggering_ioc)
 
-                await self._alert_manager.upsert_alert(
+                upsert_result = await self._alert_manager.upsert_alert(
                     tenantId=tenant_id,
                     category=scan_type,
                     ioc_type=ioc_type,
@@ -175,26 +182,30 @@ class alert_job:
                     source=f"Orion Dynamic Scanner ({scan_type})",
                     content_types=_content_types,
                     all_ioc=all_ioc_list)
-            return True
+                AlertSummaryHelper.merge_scan_summary(
+                    summary,
+                    AlertSummaryHelper.scan_result_summary(scan_type, ioc_type, ioc_value, upsert_result))
+            return summary
 
         except Exception:
-            return False
+            return AlertSummaryHelper.new_scan_summary()
 
     async def _process_tenant_alerts(self, tenant: db_tenant_model, category: str):
-        tenant_key = self._tenant_key(tenant.id)
+        tenant_key = self._tenant_key(self._value(tenant, "id", ""))
+        summary = AlertSummaryHelper.new_scan_summary()
         if tenant_key not in self._cancel_scan_flags:
             self._cancel_scan_flags[tenant_key] = False
         try:
-            iocs = tenant.iocs
+            iocs = self._value(tenant, "iocs", [])
             if not iocs:
-                return
+                return summary
             if category == "scanning":
                 for ioc in iocs:
                     if self._cancel_scan_flags.get(tenant_key):
-                        return
-                    ioc_type_name = ioc.ioc_id
+                        return summary
+                    ioc_type_name = self._value(ioc, "ioc_id", "")
                     if ioc_type_name in ["m_domain", "m_url"]:
-                        for ioc_value in ioc.values or []:
+                        for ioc_value in self._value(ioc, "values", []) or []:
                             scans_to_run = []
                             if ioc_type_name == "m_domain":
                                 scans_to_run = ["advanced", "seo"]
@@ -202,10 +213,11 @@ class alert_job:
                                 if "github" in ioc_value.lower():
                                     scans_to_run = ["repo"]
                             for scan_type in scans_to_run:
-                                await self._handle_scanning_alert(
+                                scan_summary = await self._handle_scanning_alert(
                                     tenant_key, ioc_value, ioc_type_name, scan_type)
+                                AlertSummaryHelper.merge_scan_summary(summary, scan_summary)
 
-                    for ioc_value in ioc.values or []:
+                    for ioc_value in self._value(ioc, "values", []) or []:
                         scans = []
                         if ioc_type_name == "m_email" and "@" in ioc_value:
                             scans.append(
@@ -245,12 +257,13 @@ class alert_job:
 
                             result_list = scan_result.get("result", [])
                             if result_list:
-                                await self._handle_dynamic_scanning_alert(
+                                scan_summary = await self._handle_dynamic_scanning_alert(
                                     tenant_key, ioc_type_name, ioc_value, scan_type, result_list)
+                                AlertSummaryHelper.merge_scan_summary(summary, scan_summary)
 
                         except Exception as _:
                             log.g().e(f"Dynamic alert scan failed for tenant={tenant_key}, category={dynamic_search_category}, ioc={ioc_type_name}:{ioc_value}")
-                return
+                return summary
 
             search_data_category = 'all'
             if category == "defacement":
@@ -286,13 +299,13 @@ class alert_job:
                 ParamModel = search_credential_param_model
                 search_func = self._search_model.search_stealer_iocs
             else:
-                return
+                return summary
 
             total_alerts_processed = 0
             for ioc in iocs:
-                ioc_type_name = ioc.ioc_id
+                ioc_type_name = self._value(ioc, "ioc_id", "")
 
-                for ioc_value in ioc.values or []:
+                for ioc_value in self._value(ioc, "values", []) or []:
 
                     search_data = {"entity_filter": {ioc_type_name: [
                         ioc_value]}, "category": search_data_category, "page": 1, "size": 100, "matchtype": 'or', "fullsearch": True, "must": True,"ioc":f"{ioc_type_name}:{ioc_value}" }
@@ -396,45 +409,62 @@ class alert_job:
                                 })
 
                                 if len(bulk_alerts) >= 200:
-                                    await self._alert_manager.upsert_alerts_bulk(
+                                    upsert_result = await self._alert_manager.upsert_alerts_bulk(
                                         tenantId=tenant_key,
                                         alerts_payload=bulk_alerts,
                                         chunk_size=200)
+                                    AlertSummaryHelper.merge_scan_summary(
+                                        summary,
+                                        AlertSummaryHelper.scan_result_summary(category, ioc_type_name, ioc_value, upsert_result))
                                     total_alerts_processed += len(bulk_alerts)
                                     bulk_alerts = []
 
                             if bulk_alerts:
-                                await self._alert_manager.upsert_alerts_bulk(
+                                upsert_result = await self._alert_manager.upsert_alerts_bulk(
                                     tenantId=tenant_key,
                                     alerts_payload=bulk_alerts,
                                     chunk_size=200)
+                                AlertSummaryHelper.merge_scan_summary(
+                                    summary,
+                                    AlertSummaryHelper.scan_result_summary(category, ioc_type_name, ioc_value, upsert_result))
                                 total_alerts_processed += len(bulk_alerts)
                     except Exception as _:
                         log.g().e(f"Alert processing failed for tenant={tenant_key}, category={category}, ioc={ioc_type_name}:{ioc_value}")
         except Exception as e:
             log.g().e(f"Tenant alert processing failed for tenant={tenant_key}, category={category}: {e}")
+        return summary
 
     async def run_all_categories(self):
         all_tenants = await self._tenant_manager.get_all_tenant()
         if not all_tenants:
             return
         for tenant in all_tenants:
-            if tenant.is_default:
+            tenant_id = self._tenant_key(self._value(tenant, "id", ""))
+            if self._value(tenant, "is_default", False):
                 continue
 
-            status = await self._alert_manager.getInstance().get_scan_status_by_tenant_id(tenant.id)
+            status = await self._alert_manager.getInstance().get_scan_status_by_tenant_id(tenant_id)
             if status.get("scan_running"):
                 continue
 
-            await self._alert_manager.getInstance().set_scan_running(tenant.id, True)
+            scan_summary = AlertSummaryHelper.new_scan_summary()
+            scan_status = "success"
+            await self._alert_manager.getInstance().set_scan_running(tenant_id, True)
             try:
                 for category in ALERT_CATEGORIES:
-                    await self._process_tenant_alerts(tenant, category)
+                    category_summary = await self._process_tenant_alerts(tenant, category)
+                    AlertSummaryHelper.merge_scan_summary(scan_summary, category_summary)
             except Exception as _:
-                log.g().e(f"Alert category run failed for tenant={tenant.id}")
+                scan_status = "completed_with_errors"
+                log.g().e(f"Alert category run failed for tenant={tenant_id}")
             finally:
-                self._cancel_scan_flags.pop(self._tenant_key(tenant.id), None)
-                await self._alert_manager.getInstance().set_scan_running(tenant.id, False)
+                self._cancel_scan_flags.pop(self._tenant_key(tenant_id), None)
+                await self._alert_manager.getInstance().set_scan_running(tenant_id, False)
+                await self._alert_manager.send_scan_completed_mail(
+                    tenant_id=tenant_id,
+                    scan_status=scan_status,
+                    summary=scan_summary,
+                    tenant=tenant)
 
     def get_additional_result_keys(self, result: any) -> list[tuple[str, any]]:
         EXCLUDED_KEYS = {"m_hash", "m_content_type", "m_title", "m_url", "m_content", "m_network", "m_code_snippet",
@@ -496,6 +526,7 @@ class alert_job:
             current_tenant.city = enc.decrypt(current_tenant.city.encode()).decode()
             current_tenant.postal_code = enc.decrypt(current_tenant.postal_code.encode()).decode()
             current_tenant.licenses = [enc.decrypt(l.encode()).decode() for l in (current_tenant.licenses or [])]
+            current_tenant.email = enc.decrypt(current_tenant.email.encode()).decode() if current_tenant.email else ""
 
             current_tenant.iocs = [IocCategory(
                 ioc_id=enc.decrypt(ioc.ioc_id.encode()).decode(),
@@ -505,11 +536,13 @@ class alert_job:
 
             category_statuses = []
             overall_success = True
+            scan_summary = AlertSummaryHelper.new_scan_summary()
 
             for category in ALERT_CATEGORIES:
                 category_start_time = datetime.now(timezone.utc)
                 try:
-                    await self._process_tenant_alerts(current_tenant, category)
+                    category_summary = await self._process_tenant_alerts(current_tenant, category)
+                    AlertSummaryHelper.merge_scan_summary(scan_summary, category_summary)
 
                     category_status = {"category": category, "status": "completed_successfully", "tenant_count": 1, "duration_seconds": (
                             datetime.now(timezone.utc) - category_start_time).total_seconds(), "error_count": 0}
@@ -521,7 +554,14 @@ class alert_job:
                 category_statuses.append(category_status)
 
             end_time = datetime.now(timezone.utc)
-            return {"status": "success" if overall_success else "completed_with_errors", "message": f"Alert generation job finished for tenant {tenant_id}.", "start_time": start_time.isoformat(), "end_time": end_time.isoformat(), "total_duration_seconds": (
+            response_status = "success" if overall_success else "completed_with_errors"
+            await self._alert_manager.send_scan_completed_mail(
+                tenant_id=str(tenant_id),
+                scan_status=response_status,
+                summary=scan_summary,
+                current_user=current_user,
+                tenant=current_tenant)
+            return {"status": response_status, "message": f"Alert generation job finished for tenant {tenant_id}.", "start_time": start_time.isoformat(), "end_time": end_time.isoformat(), "total_duration_seconds": (
                     end_time - start_time).total_seconds(), "results": category_statuses}
         except Exception as exc:
             log.error(f"Alert generation job failed for tenant {tenant_id}: {exc}")

@@ -41,8 +41,9 @@ class CONSTANTS:
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     }
 
-allowed_keys: set[str] = set()
+allowed_key_titles: dict[str, str] = {}
 mail_template = None
+alert_mail_template = None
 license_rules = {}
 url_rules = {}
 map_entities_data = {}

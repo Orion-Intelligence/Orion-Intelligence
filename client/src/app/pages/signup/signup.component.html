@@ -42,7 +42,7 @@
             <label class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0 mt-2">Password</label>
             <div class="relative w-full">
               <img src="/assets/images/shared/lock.svg" alt="lock icon" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
-              <input [(ngModel)]="user.password" data-testid="signup-password" (input)="onPasswordInput(user.password)" id="id_password" placeholder="Enter your password" class="!pr-10 w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="password" required type="password" appPasswordToggle />
+              <input [(ngModel)]="user.password" data-testid="signup-password" (input)="onPasswordInput(user.password)" id="id_password" placeholder="Enter your password" class="!pr-12 w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="password" required type="password" appPasswordToggle />
             </div>
 
             @if (showPasswordMeter) {

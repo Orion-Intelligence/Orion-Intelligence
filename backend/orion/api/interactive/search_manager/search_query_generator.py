@@ -3,7 +3,7 @@ from datetime import timedelta, timezone
 from datetime import datetime
 from typing import Any
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
-from orion.constants.constant import CONSTANTS, allowed_keys
+from orion.constants.constant import CONSTANTS, allowed_key_titles
 from orion.helper_manager.country_normalization import expand_country_filter_values
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
@@ -53,8 +53,8 @@ class search_query_generator:
             merged += ["source_domain", "source_domain"]
             fields = list(dict.fromkeys([f for f in merged if f]))
 
-            if tag in ("m_search_all", "all") and allowed_keys:
-                fields = list(dict.fromkeys(fields + list(allowed_keys)))
+            if tag in ("m_search_all", "all") and allowed_key_titles:
+                fields = list(dict.fromkeys(fields + list(allowed_key_titles.keys())))
 
         if not fields:
             return {"match_none": {}}
@@ -82,7 +82,7 @@ class search_query_generator:
 
             if ioc_key == "m_search_all":
                 es_fields = []
-                search_keys = allowed_keys or ELASTIC_ENUMS.ioc_field_mapping.keys()
+                search_keys = allowed_key_titles.keys() or ELASTIC_ENUMS.ioc_field_mapping.keys()
                 for key in search_keys:
                     mapped = ELASTIC_ENUMS.ioc_field_mapping.get(key)
                     if not mapped:

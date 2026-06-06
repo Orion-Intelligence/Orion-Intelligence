@@ -2,7 +2,7 @@ import asyncio
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from interface import BASE_DIR
-from orion.constants.constant import allowed_keys
+from orion.constants.constant import allowed_key_titles
 from orion.helper_manager.helper_controller import helper_controller
 from orion.management.jobs.insight_job import insight_job
 from orion.management.jobs.alert_job import alert_job
@@ -51,7 +51,7 @@ class cronjob_manager:
     async def iocs_alert_loop():
         tz = ZoneInfo("Australia/Sydney")
         while True:
-            if len(allowed_keys) <= 0:
+            if not allowed_key_titles:
                 await asyncio.sleep(60)
                 continue
 

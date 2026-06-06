@@ -1,4 +1,4 @@
-import { AfterViewInit, Directive, ElementRef, inject, Input, OnDestroy, Renderer2, RendererStyleFlags2 } from '@angular/core';
+import { AfterViewInit, Directive, ElementRef, inject, Input, OnDestroy, Renderer2 } from '@angular/core';
 
 @Directive({
   selector: 'input[appPasswordToggle]',
@@ -14,6 +14,8 @@ export class PasswordToggleDirective implements AfterViewInit, OnDestroy {
   private removeInputListener?: () => void;
   private removeChangeListener?: () => void;
   private removeFocusListener?: () => void;
+  private removeCopyListener?: () => void;
+  private removeCutListener?: () => void;
   private isVisible = false;
 
   @Input() appPasswordToggle: 'dark' | '' = '';
@@ -59,6 +61,8 @@ export class PasswordToggleDirective implements AfterViewInit, OnDestroy {
     this.removeInputListener = this.renderer.listen(inputElement, 'input', () => this.syncButtonState());
     this.removeChangeListener = this.renderer.listen(inputElement, 'change', () => this.syncButtonState());
     this.removeFocusListener = this.renderer.listen(inputElement, 'focus', () => this.syncButtonState());
+    this.removeCopyListener = this.renderer.listen(inputElement, 'copy', (event: ClipboardEvent) => event.preventDefault());
+    this.removeCutListener = this.renderer.listen(inputElement, 'cut', (event: ClipboardEvent) => event.preventDefault());
 
     this.syncButtonState();
     this.mutationObserver = new MutationObserver(() => this.syncButtonState());
@@ -70,6 +74,8 @@ export class PasswordToggleDirective implements AfterViewInit, OnDestroy {
     this.removeInputListener?.();
     this.removeChangeListener?.();
     this.removeFocusListener?.();
+    this.removeCopyListener?.();
+    this.removeCutListener?.();
     this.mutationObserver?.disconnect();
     if (this.buttonElement?.parentElement) {
       this.renderer.removeChild(this.buttonElement.parentElement, this.buttonElement);
@@ -98,12 +104,6 @@ export class PasswordToggleDirective implements AfterViewInit, OnDestroy {
     const inputElement = this.inputElementRef.nativeElement;
     const isEmpty = inputElement.value.length === 0;
     this.renderer.setProperty(this.buttonElement, 'hidden', isEmpty);
-    if (isEmpty) {
-      this.renderer.setStyle(this.buttonElement, 'display', 'none', RendererStyleFlags2.Important);
-    }
-    else {
-      this.renderer.removeStyle(this.buttonElement, 'display');
-    }
     this.renderer.setProperty(this.buttonElement, 'disabled', inputElement.disabled);
     this.updateIcon();
   }
