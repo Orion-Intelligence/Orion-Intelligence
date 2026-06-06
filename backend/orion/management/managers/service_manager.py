@@ -1,5 +1,6 @@
 import asyncio
 from asyncio import sleep
+from pathlib import Path
 from migrations.migration import migration_manager
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.helper_manager.env_handler import env_handler
@@ -31,6 +32,7 @@ class service_manager:
         self._is_available = False
 
     async def init_services(self, build_dir=None):
+        build_dir = build_dir or self.default_build_dir()
         while not self._is_available:
             try:
                 _, writer = await asyncio.open_connection("elasticsearch", 9400)
@@ -80,3 +82,7 @@ class service_manager:
 
     async def build_map_assets(self, build_dir):
         await helper_controller.init_map_entities_task(build_dir)
+
+    @staticmethod
+    def default_build_dir():
+        return Path(__file__).resolve().parents[3] / "build"

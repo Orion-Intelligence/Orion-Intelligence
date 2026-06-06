@@ -28,17 +28,15 @@ export class PasswordToggleDirective implements AfterViewInit, OnDestroy {
     this.renderer.setAttribute(inputElement, 'type', 'password');
 
     const buttonElement = this.renderer.createElement('button') as HTMLButtonElement;
+    const buttonClass = [
+      'absolute right-2.5 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center border-0 bg-transparent p-0 transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+      this.appPasswordToggle === 'dark'
+        ? 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'
+        : 'text-[#5d6f85] hover:text-[#172235]',
+    ].join(' ');
+
     this.renderer.setAttribute(buttonElement, 'type', 'button');
-    this.renderer.setAttribute(
-      buttonElement,
-      'class',
-      [
-        'absolute right-2.5 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center border-0 bg-transparent p-0 transition-colors disabled:cursor-not-allowed disabled:opacity-50',
-        this.appPasswordToggle === 'dark'
-          ? 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'
-          : 'text-[#5d6f85] hover:text-[#172235]',
-      ].join(' '),
-    );
+    this.renderer.setAttribute(buttonElement, 'class', buttonClass);
 
     const iconElement = this.renderer.createElement('svg', 'svg') as SVGSVGElement;
     this.renderer.setAttribute(iconElement, 'viewBox', '0 0 16 16');

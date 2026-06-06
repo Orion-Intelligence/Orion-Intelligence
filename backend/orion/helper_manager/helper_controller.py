@@ -4,6 +4,7 @@ import json
 import hashlib
 import locale
 import re
+from pathlib import Path
 
 from fastapi import HTTPException
 from jinja2 import Environment
@@ -265,6 +266,11 @@ class helper_controller:
 
     @staticmethod
     async def init_map_entities(build_dir):
+        if build_dir is None:
+            log.g().w("Map entities build directory not configured, file watching disabled")
+            return
+
+        build_dir = Path(build_dir)
         map_entities_file = None
         map_entities_candidates = [
             build_dir / "assets" / "data" / "satellite" / CONSTANTS.S_SATELLITE_ASSET_FILE_NAME,

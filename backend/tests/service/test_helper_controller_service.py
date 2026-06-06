@@ -104,6 +104,11 @@ def test_build_assets_loads_templates_and_keys(tmp_path: Path):
 
 
 @pytest.mark.anyio
+async def test_init_map_entities_without_build_dir_is_noop():
+    await helper_controller.init_map_entities(None)
+
+
+@pytest.mark.anyio
 async def test_satellite_asset_reindex_uses_asset_version(tmp_path: Path, monkeypatch):
     asset_file = tmp_path / "satellite_assets.json"
     fake_redis = FakeRedis({REDIS_KEYS.SATELLITE_ASSET_VERSION: "2"})
