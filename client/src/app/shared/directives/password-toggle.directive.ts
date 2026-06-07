@@ -123,7 +123,8 @@ export class PasswordToggleDirective implements AfterViewInit, DoCheck, OnDestro
 
     if (isEmpty && isAttached) {
       this.renderer.removeChild(this.buttonElement.parentElement, this.buttonElement);
-    } else if (!isEmpty && !isAttached && this.parentElement) {
+    }
+    else if (!isEmpty && !isAttached && this.parentElement) {
       this.renderer.appendChild(this.parentElement, this.buttonElement);
     }
 
