@@ -73,6 +73,19 @@ class mail_manager:
         sender_email, ACCOUNTS_MAIL_PASSWORD, smtp_server, smtp_port, msg = await self._prepare_verification_message(", ".join(to_list), subject, body)
         await asyncio.to_thread(self._send_sync_email_list, sender_email, ACCOUNTS_MAIL_PASSWORD, to_list, msg, smtp_server, smtp_port)
 
+    async def send_test_mail(self):
+        from orion.api.server.config_manager.config_controller import config_controller
+        config = config_controller.getInstance()._config
+        meta_info_raw = config.get("meta_info", "{}")
+        try:
+            meta_info = json.loads(meta_info_raw) if isinstance(meta_info_raw, str) else {}
+        except (TypeError, ValueError):
+            meta_info = {}
+        to = meta_info.get("ACCOUNTS_MAIL")
+        if not to:
+            raise HTTPException(status_code=400, detail="SMTP configuration is incomplete")
+        await self.send_verification_mail(to, "SMTP configuration test", "<p>SMTP configuration test email.</p>")
+
     @staticmethod
     def _send_sync_email(sender_email, password, to, msg, smtp_server, smtp_port):
         recipients = [to, sender_email]

@@ -7,6 +7,7 @@ from orion.api.interactive.resource_manager.resource_manager import ResourceMana
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.api.server.config_manager.model.config_data import config_data
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
+from orion.services.mail_manager.mail_manager import mail_manager
 
 admin_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 
@@ -51,3 +52,18 @@ async def update_user(key: str, current_user=Depends(get_current_user)):
 )
 async def upload_system_image(file: UploadFile,key: str = "logo_url",current_user=Depends(get_current_user)):
     return await config_controller.getInstance().uploadSystemResource(file, current_user, key)
+
+
+@admin_routes.post(
+    "/api/system/mail/verify",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def verify_mail_configuration():
+    try:
+        await mail_manager.get_instance().send_test_mail()
+        return {"status": "working"}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="Mail configuration is not working") from exc

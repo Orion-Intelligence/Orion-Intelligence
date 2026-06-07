@@ -15,6 +15,9 @@ from orion.services.session_manager.session_manager import session_manager
 
 
 class TokenAuthProvider(AuthProvider):
+    async def render_login(self, request: Request, admin) -> Response:
+        return RedirectResponse(url="/login", status_code=HTTP_303_SEE_OTHER)
+
     async def login(self,
             username: str = Form(...),
             password: str = Form(...),
@@ -73,7 +76,7 @@ class TokenAuthProvider(AuthProvider):
     async def logout(self, request: Request, response: Response) -> Response:
         token = token_from_request(request)
         await session_manager.get_instance().invalidate_user_session(ptoken=token)
-        redirect = RedirectResponse(url="/admin/login", status_code=HTTP_303_SEE_OTHER)
+        redirect = RedirectResponse(url="/login", status_code=HTTP_303_SEE_OTHER)
         redirect.delete_cookie(ACCESS_COOKIE, path="/")
         redirect.delete_cookie(ACCESS_COOKIE, path="/admin")
         return redirect

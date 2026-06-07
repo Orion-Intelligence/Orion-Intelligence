@@ -22,6 +22,8 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   isEditing = false;
   configurationError = '';
   networkConfigurationError = '';
+  isVerifyingMail = false;
+  mailConfigurationStatus = '';
   systemData = { ai_endpoint_enabled: true, language_allowed: '', version: '', app_name: '0', s_onion: '' };
   form = { language: '', version: '', app_name: '0', ai_endpoint_enabled: true, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
   languageOptions = [ 'en', 'fr', 'es', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko', 'ar', 'hi', 'bn', 'tr', 'nl', 'sv', 'pl', 'cs' ];
@@ -69,6 +71,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.accounts_smtp_port = typeof metaInfo['ACCOUNTS_SMTP_PORT'] === 'string' ? metaInfo['ACCOUNTS_SMTP_PORT'] : '';
     this.configurationError = '';
     this.networkConfigurationError = '';
+    this.mailConfigurationStatus = '';
   }
 
   toggleEdit() {
@@ -81,6 +84,26 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   cancelEdit() {
     this.loadSettings();
     this.isEditing = false;
+  }
+
+  verifyMailConfiguration() {
+    if (this.isVerifyingMail) {
+      return;
+    }
+    this.isVerifyingMail = true;
+    this.mailConfigurationStatus = '';
+    this.networkConfigurationError = '';
+    this.apiService.post<any>('system/mail/verify', {}).subscribe({
+      next: () => {
+        this.mailConfigurationStatus = 'working';
+        this.isVerifyingMail = false;
+      },
+      error: (err) => {
+        this.mailConfigurationStatus = 'not working';
+        this.networkConfigurationError = err?.error?.detail || 'Mail configuration is not working';
+        this.isVerifyingMail = false;
+      }
+    });
   }
 
   updateUserResource(file: File,key: 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
