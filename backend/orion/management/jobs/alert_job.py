@@ -124,20 +124,62 @@ class alert_job:
         except Exception:
             return AlertSummaryHelper.new_scan_summary()
 
-    async def _handle_dynamic_scanning_alert(self,
-            tenant_id: str,
-            ioc_type: str,
-            ioc_value: str,
-            scan_type: str,
-            result_list: List[Dict[str, Any]]):
-
+    async def _handle_dynamic_scanning_alert(
+        self,
+        tenant_id: str,
+        ioc_type: str,
+        ioc_value: str,
+        scan_type: str,
+        search_payload: dict,
+        dynamic_search_category: str,
+        model_cls
+    ):
         try:
             summary = AlertSummaryHelper.new_scan_summary()
+
+            param_model = model_cls(text=search_payload)
+
+            while True:
+                if self._cancel_scan_flags.get(tenant_id):
+                    return summary
+
+                response = await self._search_model.dynamic_search(
+                    param_model,
+                    dynamic_search_category
+                )
+
+                if isinstance(response, dict):
+                    scan_result = response
+                elif hasattr(response, "body"):
+                    scan_result = json.loads(response.body)
+                elif hasattr(response, "model_dump"):
+                    scan_result = response.model_dump()
+                else:
+                    return summary
+
+                status = scan_result.get("status")
+                if status == "pending":
+                    await asyncio.sleep(5)
+                    continue
+
+                # result_list = scan_result.get("result", [])
+                inner_result = scan_result.get("result", {})
+
+                if isinstance(inner_result, dict):
+                    result_list = inner_result.get("result", [])
+                elif isinstance(inner_result, list):
+                    result_list = inner_result
+                else:
+                    result_list = []
+                break
+
             if not result_list:
                 return summary
+
             for result in result_list:
                 if self._cancel_scan_flags.get(tenant_id):
                     return summary
+
                 if scan_type in ["email-breach", "social-scanner"]:
                     _title = result.get("m_title", "Records for provided queries")
                     _description = result.get("m_important_content") or result.get("m_content", "A match was found.")
@@ -147,12 +189,15 @@ class alert_job:
 
                 elif scan_type == "playstore-scanning":
                     _title = result.get("m_app_name", "Playstore App Found")
-                    _description = (f"Package ID: {result.get('m_package_id', 'N/A')}\n"
-                                    f"Mod Features: {result.get('m_mod_features', 'None')}\n"
-                                    f"Version: {result.get('m_version', 'N/A')}")
+                    _description = (
+                        f"Package ID: {result.get('m_package_id', 'N/A')}\n"
+                        f"Mod Features: {result.get('m_mod_features', 'None')}\n"
+                        f"Version: {result.get('m_version', 'N/A')}"
+                    )
                     _url = result.get("m_app_url", "-")
                     _source = result.get("m_network", "-")
                     _content_types = result.get("m_content_type") or []
+
                 elif scan_type == "software-scanning":
                     _title = result.get("m_app_name", "Software Match Found")
                     _description = (
@@ -167,9 +212,9 @@ class alert_job:
                 else:
                     continue
 
-                all_ioc_list = []
-                triggering_ioc = alert_all_ioc(name=ioc_type, values=[ioc_value])
-                all_ioc_list.append(triggering_ioc)
+                all_ioc_list = [
+                    alert_all_ioc(name=ioc_type, values=[ioc_value])
+                ]
 
                 upsert_result = await self._alert_manager.upsert_alert(
                     tenantId=tenant_id,
@@ -181,10 +226,19 @@ class alert_job:
                     url=_url,
                     source=f"Orion Dynamic Scanner ({scan_type})",
                     content_types=_content_types,
-                    all_ioc=all_ioc_list)
+                    all_ioc=all_ioc_list
+                )
+
                 AlertSummaryHelper.merge_scan_summary(
                     summary,
-                    AlertSummaryHelper.scan_result_summary(scan_type, ioc_type, ioc_value, upsert_result))
+                    AlertSummaryHelper.scan_result_summary(
+                        scan_type,
+                        ioc_type,
+                        ioc_value,
+                        upsert_result
+                    )
+                )
+
             return summary
 
         except Exception:
@@ -213,8 +267,7 @@ class alert_job:
                                 if "github" in ioc_value.lower():
                                     scans_to_run = ["repo"]
                             for scan_type in scans_to_run:
-                                scan_summary = await self._handle_scanning_alert(
-                                    tenant_key, ioc_value, ioc_type_name, scan_type)
+                                scan_summary = await self._handle_scanning_alert(tenant_key, ioc_value, ioc_type_name, scan_type)
                                 AlertSummaryHelper.merge_scan_summary(summary, scan_summary)
 
                     for ioc_value in self._value(ioc, "values", []) or []:
@@ -236,33 +289,17 @@ class alert_job:
                                 {"scan_type": "software-scanning", "payload": {"name": ioc_value}, "category": "software", "model": search_dynamic_crack_model, })
 
                     for scan in scans:
-                        scan_type = scan["scan_type"]
-                        search_payload = scan["payload"]
-                        dynamic_search_category = scan["category"]
-                        model_cls = scan["model"]
-                        try:
-                            param_model = model_cls(text=search_payload)
+                        scan_summary = await self._handle_dynamic_scanning_alert(
+                            tenant_key,
+                            ioc_type_name,
+                            ioc_value,
+                            scan["scan_type"],
+                            scan["payload"],
+                            scan["category"],
+                            scan["model"]
+                        )
+                        AlertSummaryHelper.merge_scan_summary(summary, scan_summary)
 
-                            response = await self._search_model.dynamic_search(
-                                param_model, dynamic_search_category)
-
-                            if isinstance(response, dict):
-                                scan_result = response
-                            elif hasattr(response, "body"):
-                                scan_result = json.loads(response.body)
-                            elif hasattr(response, "model_dump"):
-                                scan_result = response.model_dump()
-                            else:
-                                scan_result = {}
-
-                            result_list = scan_result.get("result", [])
-                            if result_list:
-                                scan_summary = await self._handle_dynamic_scanning_alert(
-                                    tenant_key, ioc_type_name, ioc_value, scan_type, result_list)
-                                AlertSummaryHelper.merge_scan_summary(summary, scan_summary)
-
-                        except Exception as _:
-                            log.g().e(f"Dynamic alert scan failed for tenant={tenant_key}, category={dynamic_search_category}, ioc={ioc_type_name}:{ioc_value}")
                 return summary
 
             search_data_category = 'all'
