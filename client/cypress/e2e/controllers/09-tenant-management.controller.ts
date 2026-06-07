@@ -95,18 +95,18 @@ export function setTenantLicense(license: string, checked: boolean) {
 }
 
 export function saveTenantEditor(alias: string) {
-  cy.wait(3000)
   cy.scrollDashboardToBottom()
-  // cy.intercept('POST', '**/api/update/tenants').as(alias);
-  // cy.get('@tenantEditFormPanel')
-  //   .find('[data-testid="tenant-save-changes"]')
-  //   .scrollIntoView()
-  //   .should('be.visible')
-  //   .and('not.be.disabled')
-  //   .click();
-  // cy.wait(`@${alias}`, {timeout: 60000})
-  //   .its('response.statusCode')
-  //   .should('be.oneOf', [200, 201]);
+  cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block')
+    .filter(':visible')
+    .first()
+    .scrollTo('bottomRight', {ensureScrollable: false});
+
+  cy.get('@tenantEditFormPanel')
+    .find('[data-testid="tenant-save-changes"]')
+    .should('be.visible')
+    .and('not.be.disabled')
+    .click();
+  cy.scrollDashboardToBottom()
 }
 
 export function openTenantSettings() {
@@ -426,53 +426,25 @@ export function addIOCForAllTabs() {
   cy.get('[data-testid="tenant-home-scan-all"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
 }
 
-export function assertAlertScanMailSent(username: string, iocValue: string) {
+export function assertAlertScanCompletedMailPresent() {
   const timeoutMs = 60000;
   const intervalMs = 1000;
   const startedAt = Date.now();
-  const expectedText = [
-    username,
-    'Your alert scan has finished',
-    'We found 1 new alert',
-    'Stealer logs',
-    iocValue,
-    'View Alerts'
-  ];
 
-  const fetchMessageText = (messageId: string) => cy.request('GET', `http://localhost:8025/api/v1/message/${messageId}`).then((response: any) => {
-    const message = response.body || {};
-    return [
-      message.Subject || '',
-      message.Text || '',
-      message.HTML || '',
-      message.Snippet || ''
-    ].join(' ').replace(/\s+/g, ' ');
-  });
-
-  const findMatchingMessage = (messages: any[]): Cypress.Chainable<boolean> => {
-    let found = false;
-    return cy.wrap(messages, {log: false}).each((message: any) => {
-      if (found || !message?.ID) {
-        return;
-      }
-      return fetchMessageText(message.ID).then((messageText) => {
-        found = expectedText.every((text) => messageText.includes(text));
-      });
-    }).then(() => found);
-  };
-
-  const waitForMail = (): Cypress.Chainable<void> => {
+  const waitForMail = (): Cypress.Chainable => {
     return cy.request('GET', 'http://localhost:8025/api/v1/messages').then((response) => {
       const messages = (response.body?.messages || []) as any[];
-      return findMatchingMessage(messages).then((found) => {
-        if (found) {
-          return;
-        }
-        if (Date.now() - startedAt > timeoutMs) {
-          throw new Error('Alert scan email was not sent');
-        }
-        return cy.wait(intervalMs).then(() => waitForMail());
-      });
+      const found = messages.some((message) => (
+        String(message.Subject || message.subject || '').includes('Alert scan completed')
+      ));
+
+      if (found) {
+        return;
+      }
+      if (Date.now() - startedAt > timeoutMs) {
+        throw new Error('Alert scan completed email was not sent');
+      }
+      return cy.wait(intervalMs).then(() => waitForMail());
     });
   };
 

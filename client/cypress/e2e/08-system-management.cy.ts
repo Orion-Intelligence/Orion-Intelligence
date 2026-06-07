@@ -81,6 +81,9 @@ describe('System Settings - Admin Update Flow', () => {
       expect(metaInfo.ACCOUNTS_SMTP_PORT).to.eq('1025');
     });
 
+    cy.contains('app-smtp-settings-block button', 'Verify Configuration').scrollIntoView().should('be.visible').click();
+    cy.contains('app-smtp-settings-block', 'Mail configuration is working', {timeout: 60000}).should('be.visible');
+
     cy.logout();
   });
 });

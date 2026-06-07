@@ -42,7 +42,7 @@ class AlertMailMessage(str, Enum):
     DEFAULT_CLOSING = "Please review these alerts when you have a moment. The alert view contains the full context, source details, and IOC history."
     ALERT_CHANGE_CLOSING = "You can open the alert view to review the latest IOC, source, and category details."
     MODULE_COUNT = "Alert found in {category} : count {count} : {alert_word}"
-    SINGLE_ALERT_COUNT = "Alert found in {category"
+    SINGLE_ALERT_COUNT = "Alert found in {category}"
 
 
 class AlertMailLabel(str, Enum):

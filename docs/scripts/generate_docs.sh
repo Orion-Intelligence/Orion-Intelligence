@@ -86,7 +86,7 @@ trap cleanup EXIT
 
 cd "$CLIENT_DIR" || exit 1
 npm test -- run --browser electron --config "baseUrl=$FRONTEND_URL" --spec cypress/e2e/05-user-management.cy.ts
-npm test -- run --browser electron --config "baseUrl=$FRONTEND_URL" --spec cypress/e2e/08-tenant-management.cy.ts
+npm test -- run --browser electron --config "baseUrl=$FRONTEND_URL" --spec cypress/e2e/09-tenant-management.cy.ts
 mkdir -p "$TARGET_DIR"
 rm -rf "$NESTED_DIR"
 rm -rf "$LEGACY_NESTED_DIR"
