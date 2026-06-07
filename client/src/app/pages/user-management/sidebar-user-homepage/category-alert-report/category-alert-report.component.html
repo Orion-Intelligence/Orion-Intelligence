@@ -3,9 +3,9 @@
   <div class="category_report_searchbar mb-[14px] flex w-full items-center justify-between gap-3">
     <div class="category_report_searchbar-input">
       <img src="assets/images/shared/theme/magnifyingglassblack.svg" alt="search" class="category_report_search-icon" />
-      <input type="text" placeholder="Search..." [(ngModel)]="searchText" />
+      <input type="text" placeholder="Search..." [ngModel]="searchText" (ngModelChange)="applySearch($event)" />
       @if (searchText) {
-        <button class="category_report_searchbar-clear" (click)="searchText = ''">
+        <button type="button" class="category_report_searchbar-clear" (click)="applySearch('')">
           <img src="assets/images/shared/cross-dark.svg" alt="close"></button>
         }
       </div>
@@ -43,13 +43,13 @@
       </div>
     </div>
 
-    @if (filteredAlerts.length>0) {
+    @if (!isInitialLoading && !(isLoadingMoreAlerts && visibleFilteredAlerts.length === 0)) {
       <div class="category_report_summary-header">
         <span class="category_report_summary-title">Summary</span>
       </div>
     }
 
-    @if (filteredAlerts.length>0) {
+    @if (!isInitialLoading && !(isLoadingMoreAlerts && visibleFilteredAlerts.length === 0)) {
       <div class="category_report_summary-row mb-4 grid grid-cols-4 gap-3">
         <div class="category_report_summary-card" [ngClass]="isLightTheme() ? '!bg-[#f7fbff] !border-[#cad8e8]' : ''">
           <div class="user-homepage_alerts-card-content">
@@ -83,28 +83,90 @@
     }
 
     @if (isLoadingMoreAlerts && visibleFilteredAlerts.length === 0) {
+      <div class="category_report_summary-header">
+        <span class="category_report_summary-title">Summary</span>
+      </div>
+      <div class="category_report_summary-row mb-4 grid grid-cols-4 gap-3">
+        <div class="category_report_summary-card">
+          <div class="user-homepage_alerts-card-content">
+            <div class="ui-shimmer h-[12px] w-[76px] rounded-[5px] bg-[var(--color-divider)]"></div>
+            <div class="ui-shimmer ml-auto h-[18px] w-[18px] rounded-full bg-[var(--color-divider)]"></div>
+          </div>
+          <div class="ui-shimmer mt-[7px] h-[23px] w-[44px] rounded-[5px] bg-[var(--color-divider)]"></div>
+        </div>
+        <div class="category_report_summary-card">
+          <div class="user-homepage_alerts-card-content">
+            <div class="ui-shimmer h-[12px] w-[82px] rounded-[5px] bg-[var(--color-divider)]"></div>
+            <div class="ui-shimmer ml-auto h-[18px] w-[18px] rounded-full bg-[var(--color-divider)]"></div>
+          </div>
+          <div class="ui-shimmer mt-[7px] h-[23px] w-[44px] rounded-[5px] bg-[var(--color-divider)]"></div>
+        </div>
+        <div class="category_report_summary-card">
+          <div class="user-homepage_alerts-card-content">
+            <div class="ui-shimmer h-[12px] w-[78px] rounded-[5px] bg-[var(--color-divider)]"></div>
+            <div class="ui-shimmer ml-auto h-[18px] w-[18px] rounded-full bg-[var(--color-divider)]"></div>
+          </div>
+          <div class="ui-shimmer mt-[7px] h-[23px] w-[132px] max-w-full rounded-[5px] bg-[var(--color-divider)]"></div>
+        </div>
+        <div class="category_report_summary-card">
+          <div class="user-homepage_alerts-card-content">
+            <div class="ui-shimmer h-[12px] w-[58px] rounded-[5px] bg-[var(--color-divider)]"></div>
+            <div class="ui-shimmer ml-auto h-[18px] w-[18px] rounded-full bg-[var(--color-divider)]"></div>
+          </div>
+          <div class="ui-shimmer mt-[7px] h-[23px] w-[44px] rounded-[5px] bg-[var(--color-divider)]"></div>
+        </div>
+      </div>
+    }
+
+    @if (isLoadingMoreAlerts && visibleFilteredAlerts.length === 0) {
       <div class="mt-3 grid grid-cols-[repeat(auto-fill,minmax(460px,1fr))] gap-[14px]">
         <div class="category_report_alert-card">
-          <div class="ui-shimmer h-[20px] w-[120px] rounded-[6px] bg-[var(--color-divider)]"></div>
-          <div class="mt-3 ui-shimmer h-[14px] w-[65%] rounded-[5px] bg-[var(--color-divider)]"></div>
-          <div class="mt-2 ui-shimmer h-[14px] w-[45%] rounded-[5px] bg-[var(--color-divider)]"></div>
-          <div class="mt-4 ui-shimmer h-[1px] w-full bg-[var(--color-divider)]"></div>
-          <div class="mt-3 ui-shimmer h-[12px] w-[90%] rounded-[5px] bg-[var(--color-divider)]"></div>
-          <div class="mt-4 ui-shimmer h-[34px] w-[130px] rounded-[8px] bg-[var(--color-divider)]"></div>
+          <div class="category_report_alert-header">
+            <div class="category_report_alert-card-top">
+              <div class="ui-shimmer h-[24px] w-[118px] rounded-full bg-[var(--color-divider)]"></div>
+              <div class="ui-shimmer h-[12px] w-[72px] rounded-[5px] bg-[var(--color-divider)]"></div>
+            </div>
+            <div class="category_report_alert-actions">
+              <div class="ui-shimmer h-[32px] w-[32px] rounded-[8px] bg-[var(--color-divider)]"></div>
+              <div class="ui-shimmer h-[32px] w-[32px] rounded-[8px] bg-[var(--color-divider)]"></div>
+            </div>
+          </div>
+          <div class="ui-shimmer h-[18px] w-[68%] rounded-[5px] bg-[var(--color-divider)]"></div>
+          <div class="ui-shimmer h-[14px] w-[78%] rounded-[5px] bg-[var(--color-divider)]"></div>
+          <div class="ui-shimmer h-[14px] w-[52%] rounded-[5px] bg-[var(--color-divider)]"></div>
+          <div class="category_report_alert-footer">
+            <div class="category_report_alert-divider"></div>
+            <div class="category_report_alert-footer-buttons">
+              <div class="ui-shimmer h-[34px] w-[118px] rounded-[8px] bg-[var(--color-divider)]"></div>
+            </div>
+          </div>
         </div>
         <div class="category_report_alert-card">
-          <div class="ui-shimmer h-[20px] w-[120px] rounded-[6px] bg-[var(--color-divider)]"></div>
-          <div class="mt-3 ui-shimmer h-[14px] w-[65%] rounded-[5px] bg-[var(--color-divider)]"></div>
-          <div class="mt-2 ui-shimmer h-[14px] w-[45%] rounded-[5px] bg-[var(--color-divider)]"></div>
-          <div class="mt-4 ui-shimmer h-[1px] w-full bg-[var(--color-divider)]"></div>
-          <div class="mt-3 ui-shimmer h-[12px] w-[90%] rounded-[5px] bg-[var(--color-divider)]"></div>
-          <div class="mt-4 ui-shimmer h-[34px] w-[130px] rounded-[8px] bg-[var(--color-divider)]"></div>
+          <div class="category_report_alert-header">
+            <div class="category_report_alert-card-top">
+              <div class="ui-shimmer h-[24px] w-[118px] rounded-full bg-[var(--color-divider)]"></div>
+              <div class="ui-shimmer h-[12px] w-[72px] rounded-[5px] bg-[var(--color-divider)]"></div>
+            </div>
+            <div class="category_report_alert-actions">
+              <div class="ui-shimmer h-[32px] w-[32px] rounded-[8px] bg-[var(--color-divider)]"></div>
+              <div class="ui-shimmer h-[32px] w-[32px] rounded-[8px] bg-[var(--color-divider)]"></div>
+            </div>
+          </div>
+          <div class="ui-shimmer h-[18px] w-[68%] rounded-[5px] bg-[var(--color-divider)]"></div>
+          <div class="ui-shimmer h-[14px] w-[78%] rounded-[5px] bg-[var(--color-divider)]"></div>
+          <div class="ui-shimmer h-[14px] w-[52%] rounded-[5px] bg-[var(--color-divider)]"></div>
+          <div class="category_report_alert-footer">
+            <div class="category_report_alert-divider"></div>
+            <div class="category_report_alert-footer-buttons">
+              <div class="ui-shimmer h-[34px] w-[118px] rounded-[8px] bg-[var(--color-divider)]"></div>
+            </div>
+          </div>
         </div>
       </div>
     }
 
     @if (!isLoadingMoreAlerts && !isInitialLoading && visibleFilteredAlerts.length==0) {
-      <app-empty-result class="p-0 m-0"></app-empty-result>
+      <app-empty-result class="category_report_empty-result p-0 m-0"></app-empty-result>
     }
 
     <div class="alert-card-stagger-list category_report_alerts mt-3 grid grid-cols-[repeat(auto-fill,minmax(460px,1fr))] gap-[14px]">
@@ -118,54 +180,33 @@
                 </div>
                 {{ item.risk }} Risk
               </span>
+              <span class="category_report_alert-date">{{ item.detectedOn| date:'MM/dd/yyyy' }}</span>
             </div>
-            @if (canExportstix()||licenseService.isMaintainer()) {
-              <div class="dropdown category_report_alert-dropdown" (click)="$event.stopPropagation()">
-                <button type="button" class="category_report_burger-icon category_report_burger-btn" [attr.id]="'dropdownMenu' + item.id" [attr.aria-expanded]="openedActionMenuId === item.id" aria-label="Alert actions" aria-haspopup="menu" (click)="toggleActionMenu(item.id, $event)">
-                  <img src="assets/images/shared/theme/burger_icon.svg" alt="menu">
-                </button>
-                @if (openedActionMenuId === item.id) {
-                  <ul class="dropdown-menu dropdown-menu-end category_report_alert_no-arrow category_report_dropdown-menu-animated" [attr.aria-labelledby]="'dropdownMenu' + item.id" role="menu" (click)="$event.stopPropagation()">
-                    @if (item.custom&&licenseService.isMaintainer()) {
-                      <li>
-                        <button type="button" class="dropdown-item" role="menuitem" (click)="showAlertPopup('edit', item.id); closeActionMenus()">Edit Alert</button>
-                      </li>
-                    }
-                    @if (item.custom &&licenseService.isMaintainer()) {
-                      <li>
-                        <hr class="dropdown-divider mx-3" />
-                      </li>
-                    }
-                    @if (canExportstix()) {
-                      <li><button type="button" class="dropdown-item" role="menuitem" (click)="exportAlert(item.hash); closeActionMenus()">Export Alert</button></li>
-                    }
-                    @if (canExportstix()&&licenseService.isMaintainer()) {
-                      <li>
-                        <hr class="dropdown-divider mx-3" />
-                      </li>
-                    }
-                    <li>
-                      @if (licenseService.isMaintainer()) {
-                        <button type="button" class="dropdown-item" role="menuitem" (click)="deleteAlertConfirmation(item.id); closeActionMenus()">Delete Alert</button>
-                      }
-                    </li>
-                  </ul>
+            @if (canExportstix() || licenseService.isMaintainer()) {
+              <div class="category_report_alert-actions">
+                @if (canExportstix()) {
+                  <button type="button" data-testid="tenant-alert-report-see-details" class="category_report_download-btn" aria-label="Download alert" appTooltip="download alert" (click)="seeDetailReprot(item.id)">
+                    <i class="bi bi-download" aria-hidden="true"></i>
+                  </button>
+                }
+                @if (licenseService.isMaintainer()) {
+                  <button type="button" data-testid="tenant-alert-delete-button" class="category_report_delete-btn" aria-label="Delete alert" appTooltip="delete alert" (click)="deleteAlertConfirmation(item.id)">
+                    <i class="bi bi-trash3" aria-hidden="true"></i>
+                  </button>
                 }
               </div>
             }
           </div>
           <span class="category_report_alert-title">{{ sliceString(item.title,54) }}</span>
           <span class="category_report_alert-subtitle">{{ sliceString(item.description,60) }}</span>
-          <div class="category_report_alert-divider"></div>
-          <div class="category_report_alert-field">
-            <span class="category_report_alert-field-heading">Url</span>
-            <span class="category_report_alert-field-value">{{ sliceString(item.url,70) }}</span>
-          </div>
-          <button type="button" class="category_report_alert-expand-btn" [class.is-expanded]="isAlertExpanded(item.id)" [attr.aria-expanded]="isAlertExpanded(item.id)" (click)="toggleAlertExpanded(item.id)">
-            {{ isAlertExpanded(item.id) ? 'Hide Details' : 'Show Details' }}
-          </button>
           @if (isAlertExpanded(item.id)) {
             <div class="category_report_alert-expand-content">
+              @if (hasAlertUrl(item.url)) {
+                <div class="category_report_alert-field category_report_alert-url">
+                  <span class="category_report_alert-field-heading">Url</span>
+                  <span class="category_report_alert-field-value">{{ sliceString(item.url,120) }}</span>
+                </div>
+              }
               <div class="category_report_alert-row">
                 <div class="category_report_alert-field">
                   <span class="category_report_alert-field-heading">Category</span>
@@ -199,12 +240,11 @@
           <div class="category_report_alert-footer">
             <div class="category_report_alert-divider"></div>
             <div class="category_report_alert-footer-buttons">
-              <div data-testid="tenant-alert-report-see-details" (click)="seeDetailReprot(item.id)" class="category_report_alert-btn">See Details</div>
+              <button type="button" class="category_report_alert-btn" [attr.aria-expanded]="isAlertExpanded(item.id)" (click)="toggleAlertExpanded(item.id)">
+                {{ isAlertExpanded(item.id) ? 'Hide Details' : 'See Details' }}
+              </button>
             </div>
           </div>
-          @if (isDeleteAlertConfirmationOpen() && selectedDeleteAlertId === item.id) {
-            <app-confirmation-popup (confirmed)="deleteCustomAlert($event, item.id)"></app-confirmation-popup>
-          }
         </div>
       }
     </div>
@@ -240,6 +280,10 @@
   @if (isFlushAllConfirmationOpen()) {
     <app-confirmation-popup [message]="'Are you sure you want to clear your scan history?'"
     (confirmed)="flushAllConfirmation($event)"></app-confirmation-popup>
+  }
+
+  @if (isDeleteAlertConfirmationOpen()) {
+    <app-confirmation-popup (confirmed)="deleteCustomAlert($event, selectedDeleteAlertId)"></app-confirmation-popup>
   }
 
   <app-export-choice-modal

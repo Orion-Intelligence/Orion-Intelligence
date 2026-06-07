@@ -92,10 +92,10 @@
     box-shadow: 0 0 0 3px rgb(87 165 235 / 20%);
 }
 
-.category_report_searchbar-input img {
-    width: 18px;
-    height: 18px;
-    margin-right: 8px;
+.category_report_search-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 7px;
 }
 
 .category_report_searchbar-input input {
@@ -112,14 +112,18 @@
     background: none;
     border: none;
     cursor: pointer;
-    width: 20px;
-    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    padding: 0;
 }
 
 .category_report_searchbar-clear img {
-    width: 12px;
-    height: 12px;
-    margin-top: -5px;
+    width: 10px;
+    height: 10px;
+    margin: 0;
 }
 
 .category_report_searchbar-btn {
@@ -216,6 +220,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    gap: 8px;
     background:
         linear-gradient(180deg, rgb(255 255 255 / 2%) 0%, transparent 18%),
         var(--color-blue-820-light);
@@ -228,7 +233,8 @@
 }
 
 .category_report_alert-card:hover {
-    border-color: rgb(255 255 255 / 30%);
+    border-color: rgb(87 165 235 / 42%);
+    box-shadow: 0 10px 24px rgb(0 0 0 / 16%);
 }
 
 .category_report_alert-header {
@@ -244,66 +250,57 @@
     gap: 6px;
 }
 
-.category_report_burger-icon {
+.category_report_alert-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+}
+
+.category_report_download-btn,
+.category_report_delete-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-}
-
-.category_report_burger-btn {
-    width: 30px;
-    height: 30px;
-    border: 0;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--color-border);
     border-radius: 8px;
-    background: transparent;
+    background: var(--color-blue-720);
+    color: var(--color-text3);
     padding: 0;
-    transition: background-color .16s ease, box-shadow .16s ease, transform .16s ease;
+    transition: background-color .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease;
 }
 
-.category_report_burger-btn:hover {
-    background: rgb(255 255 255 / 10%);
+.category_report_download-btn i,
+.category_report_delete-btn i {
+    font-size: 14px;
+    line-height: 1;
 }
 
-.category_report_burger-btn[aria-expanded="true"] {
-    background: rgb(255 255 255 / 12%);
-    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 10%);
+.category_report_download-btn:hover {
+    border-color: var(--color-blue-640);
+    background: rgb(87 165 235 / 14%);
+    color: #8dc4f5;
+    box-shadow: inset 0 0 0 1px rgb(87 165 235 / 18%);
 }
 
-.category_report_burger-btn:focus-visible {
+.category_report_delete-btn:hover {
+    border-color: rgb(255 107 107 / 28%);
+    background: rgb(239 68 68 / 12%);
+    color: #ff6b6b;
+    box-shadow: inset 0 0 0 1px rgb(239 68 68 / 20%);
+}
+
+.category_report_delete-btn:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px #57a5eb55;
+    box-shadow: 0 0 0 2px rgb(239 68 68 / 32%);
 }
 
-.category_report_alert-dropdown .dropdown-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    left: auto;
-    margin-top: 6px !important;
-    z-index: 1150;
-    display: block;
-}
-
-.category_report_alert-dropdown {
-    position: relative;
-}
-
-.category_report_dropdown-menu-animated {
-    transform-origin: top right;
-    animation: categoryReportDropdownIn 170ms ease-out;
-}
-
-@keyframes categoryReportDropdownIn {
-    0% {
-        opacity: 0;
-        transform: translateY(-4px) scale(.98);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+.category_report_download-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgb(87 165 235 / 32%);
 }
 
 .category_report_alert-card .dropdown-menu {
@@ -416,9 +413,17 @@
     display: flex;
     justify-content: flex-start;
     align-items: center;
+    gap: 8px;
     min-height: 22px;
     font-weight: 600;
     font-size: 12px;
+}
+
+.category_report_alert-date {
+    color: #8fa6c0;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .category_report_status-icon {
@@ -452,18 +457,14 @@
     color: #60a5fa;
 }
 
-.category_report_burger-icon img {
-    width: 14px;
-    height: 14px;
-}
-
 .category_report_alert-title {
     display: block;
     font-weight: 700;
     font-size: 15px;
     line-height: 1.35;
     color: #dbe8f8;
-    margin-top: 6px;
+    margin-top: 2px;
+    overflow-wrap: anywhere;
 }
 
 .category_report_alert-subtitle {
@@ -472,7 +473,8 @@
     font-size: 12px;
     line-height: 1.45;
     color: #8fa6c0;
-    margin-top: 4px;
+    margin-top: 0;
+    overflow-wrap: anywhere;
 }
 
 .category_report_alert-divider {
@@ -495,6 +497,7 @@
 
 .category_report_alert-field {
     margin-bottom: 10px;
+    min-width: 0;
 }
 
 .category_report_alert-expand-btn {
@@ -575,9 +578,9 @@
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
-
 
 .category_report_alert-iocs {
     margin-top: 6px;
@@ -606,6 +609,7 @@
     padding: 4px 10px;
     font-size: 11px;
     font-weight: 600;
+    line-height: 1.2;
     color: #cbdced;
 }
 
@@ -618,8 +622,9 @@
 .category_report_alert-footer-buttons {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    gap: 40px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
     margin-top: auto;
 }
 
@@ -634,6 +639,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 118px;
     min-width: 118px;
     height: 34px;
     padding: 0 12px;
@@ -645,10 +651,51 @@
     background: rgb(87 165 235 / 10%);
     cursor: pointer;
     margin-top: 4px;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease;
 }
 
 .category_report_alert-btn:hover {
     border-color: #7ec1ff;
+    background: rgb(87 165 235 / 16%);
+    color: #c8e6ff;
+}
+
+.category_report_empty-result {
+    display: block;
+    animation: category-report-empty-in 220ms ease-out both;
+}
+
+.category_report_empty-result .empty-result-card {
+    animation: category-report-empty-card-in 260ms ease-out both;
+}
+
+@keyframes category-report-empty-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes category-report-empty-card-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .category_report_empty-result,
+    .category_report_empty-result .empty-result-card {
+        animation: none;
+    }
 }
 
 .dropdown-menu.category_report_alert_no-arrow::before {
@@ -828,6 +875,7 @@
 .light-theme .category_report_alert-card:hover {
     border-color: #adc4dc;
     background: #f3f8ff;
+    box-shadow: 0 10px 24px rgb(15 23 42 / 12%);
 }
 
 .light-theme .category_report_alert-subtitle,
@@ -882,13 +930,8 @@
     color: #166534;
 }
 
-.light-theme .category_report_burger-btn:hover {
-    background: #eef4fb;
-}
-
-.light-theme .category_report_burger-icon img {
-    filter: brightness(0) saturate(100%) invert(28%) sepia(15%) saturate(1038%) hue-rotate(176deg) brightness(93%) contrast(90%);
-    opacity: .92;
+.light-theme .category_report_delete-btn:hover {
+    background: #fee2e2;
 }
 
 .light-theme .category_report_alert-card .dropdown-menu {
