@@ -11,7 +11,8 @@ import { TenantModel } from '../../../../shared/model/tenant/tenant.model';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { getTenantLocationDisplay, toggleEditState } from '../sidebar-settings.util';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
-import { SmtpSettingsBlockComponent, SmtpSettingsForm } from '../../../../shared/components/smtp-settings-block/smtp-settings-block.component';
+import { SmtpSettingsBlockComponent } from '../../../../shared/components/smtp-settings-block/smtp-settings-block.component';
+import { SmtpSettingsForm } from '../../../../shared/model/smtp-settings/smtp-settings.model';
 @Component({
   selector: 'app-tenant-settings',
   imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent],

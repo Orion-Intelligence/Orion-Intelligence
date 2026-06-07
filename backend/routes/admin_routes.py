@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query, Request, Depends, UploadFile
 from fastapi.responses import RedirectResponse
 
-from configs.app_dependency import status_required, role_required, get_current_user
+from configs.app_dependency import license_required, status_required, role_required, get_current_user
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
 from orion.api.server.config_manager.config_controller import config_controller
@@ -57,11 +57,13 @@ async def upload_system_image(file: UploadFile,key: str = "logo_url",current_use
 @admin_routes.post(
     "/api/system/mail/verify",
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
+        Depends(license_required("maintainer", bypass_roles=[user_role.ADMIN]))],
 )
-async def verify_mail_configuration():
+async def verify_mail_configuration(current_user=Depends(get_current_user)):
     try:
-        await mail_manager.get_instance().send_test_mail()
+        tenant_id = None if current_user.role == user_role.ADMIN else str(current_user.tenant_uuid)
+        await mail_manager.get_instance().send_test_mail(tenant_id=tenant_id)
         return {"status": "working"}
     except HTTPException:
         raise

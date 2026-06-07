@@ -207,12 +207,7 @@
       <app-smtp-settings-block
         [form]="form"
         [isEditing]="isEditing"
-        description="Set mail and app connectivity variables."
-        [showVerify]="true"
-        [isVerifying]="isVerifyingMail"
-        [status]="mailConfigurationStatus"
-        [error]="networkConfigurationError"
-        (verify)="verifyMailConfiguration()">
+        [error]="networkConfigurationError">
       </app-smtp-settings-block>
 
       <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 sm:col-span-2">
