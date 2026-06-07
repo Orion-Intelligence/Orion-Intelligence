@@ -174,7 +174,7 @@ class TenantManager:
         dek = await KeyManager.get_instance().get_profile_dek(str(tenant.id))
         enc = Fernet(dek)
 
-        if any(value is not None for value in [
+        if any((value or "").strip() for value in [
             data.accounts_mail_password,
             data.accounts_mail,
             data.accounts_smtp_server,

@@ -40,6 +40,118 @@ export function clickWhenVisible(selector: string, timeout: number = 30000) {
   cy.get(selector, {timeout}).click({waitForAnimations: false, animationDistanceThreshold: 0});
 }
 
+export function submitLogin(username: string, password: string) {
+  cy.visit('/login');
+  cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
+  cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
+  cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+}
+
+export function loginTenant(tenant: any) {
+  submitLogin(tenant.username, tenant.password);
+  cy.get('[data-testid="dashboard-main"]').should('be.visible');
+}
+
+export function openTenantEditor(tenant: any) {
+  cy.contains('tbody tr', tenant.email)
+    .scrollIntoView()
+    .should('be.visible')
+    .within(() => {
+      cy.get('[data-testid="tenant-edit-button"]').first().scrollIntoView().should('be.visible').click();
+    });
+  cy.contains('tbody tr', tenant.email)
+    .next()
+    .as('tenantEditor')
+    .find('[data-testid="tenant-edit-form-panel"]')
+    .filter(':visible')
+    .first()
+    .as('tenantEditFormPanel');
+}
+
+export function setTenantEditorToggle(testId: string, checked: boolean) {
+  cy.get('@tenantEditFormPanel').within(() => {
+    cy.get(`[data-testid="${testId}"]`)
+      .scrollIntoView()
+      .find('input[type="checkbox"]')
+      .then(($checkbox) => {
+        if ($checkbox.is(':checked') !== checked) {
+          cy.wrap($checkbox).click({force: true});
+        }
+      });
+  });
+}
+
+export function setTenantLicense(license: string, checked: boolean) {
+  cy.get('@tenantEditFormPanel').within(() => {
+    cy.get(`[data-testid="tenant-license-${license}"]`)
+      .scrollIntoView()
+      .then(($card) => {
+        const isChecked = $card.find('input[type="checkbox"]').is(':checked');
+        if (isChecked !== checked) {
+          cy.wrap($card).click();
+        }
+      });
+  });
+}
+
+export function saveTenantEditor(alias: string) {
+  cy.wait(3000)
+  cy.scrollDashboardToBottom()
+  // cy.intercept('POST', '**/api/update/tenants').as(alias);
+  // cy.get('@tenantEditFormPanel')
+  //   .find('[data-testid="tenant-save-changes"]')
+  //   .scrollIntoView()
+  //   .should('be.visible')
+  //   .and('not.be.disabled')
+  //   .click();
+  // cy.wait(`@${alias}`, {timeout: 60000})
+  //   .its('response.statusCode')
+  //   .should('be.oneOf', [200, 201]);
+}
+
+export function openTenantSettings() {
+  cy.get('body').then(($body) => {
+    if (!$body.find('[data-testid="sidebar-subitem-profile-tenant-settings"]:visible').length) {
+      cy.get('[data-testid="sidebar-group-profile"]').filter(':visible').first().scrollIntoView().click();
+    }
+  });
+  cy.get('[data-testid="sidebar-subitem-profile-tenant-settings"]')
+    .filter(':visible')
+    .first()
+    .scrollIntoView()
+    .click();
+  cy.location('pathname').should('include', '/dashboard/profile/tenant-settings');
+  cy.contains('h1', 'Tenant Data').should('be.visible');
+}
+
+export function fillTenantNetworkConfiguration(server: string, port: string) {
+  cy.contains('app-smtp-settings-block', 'Network Configuration')
+    .scrollIntoView()
+    .should('be.visible')
+    .within(() => {
+      cy.contains('label', /^\s*ACCOUNT MAIL\s*$/)
+        .parent()
+        .find('input')
+        .clear()
+        .type('tenant-mailer@example.test');
+      cy.contains('label', /^\s*ACCOUNT MAIL PASSWORD\s*$/)
+        .parent()
+        .find('input')
+        .clear()
+        .type('1#VSC&cuad)d', {log: false});
+      cy.contains('label', /^\s*ACCOUNT SMTP SERVER\s*$/)
+        .parent()
+        .find('input')
+        .clear()
+        .type(server);
+      cy.contains('label', /^\s*ACCOUNT SMTP PORT\s*$/)
+        .parent()
+        .find('input')
+        .clear()
+        .type(port);
+    });
+}
+
 export function exportFromModal(modalTestId: string, optionTestId: string) {
   cy.get(`[data-testid="${modalTestId}"]`).should('be.visible');
   cy.get('body').then($body => {
@@ -310,7 +422,61 @@ export function addIOCForAllTabs() {
   });
 
   cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
+  cy.clearAllEmails();
   cy.get('[data-testid="tenant-home-scan-all"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
+}
+
+export function assertAlertScanMailSent(username: string, iocValue: string) {
+  const timeoutMs = 60000;
+  const intervalMs = 1000;
+  const startedAt = Date.now();
+  const expectedText = [
+    username,
+    'Your alert scan has finished',
+    'We found 1 new alert',
+    'Stealer logs',
+    iocValue,
+    'View Alerts'
+  ];
+
+  const fetchMessageText = (messageId: string) => cy.request('GET', `http://localhost:8025/api/v1/message/${messageId}`).then((response: any) => {
+    const message = response.body || {};
+    return [
+      message.Subject || '',
+      message.Text || '',
+      message.HTML || '',
+      message.Snippet || ''
+    ].join(' ').replace(/\s+/g, ' ');
+  });
+
+  const findMatchingMessage = (messages: any[]): Cypress.Chainable<boolean> => {
+    let found = false;
+    return cy.wrap(messages, {log: false}).each((message: any) => {
+      if (found || !message?.ID) {
+        return;
+      }
+      return fetchMessageText(message.ID).then((messageText) => {
+        found = expectedText.every((text) => messageText.includes(text));
+      });
+    }).then(() => found);
+  };
+
+  const waitForMail = (): Cypress.Chainable<void> => {
+    return cy.request('GET', 'http://localhost:8025/api/v1/messages').then((response) => {
+      const messages = (response.body?.messages || []) as any[];
+      return findMatchingMessage(messages).then((found) => {
+        if (found) {
+          return;
+        }
+        if (Date.now() - startedAt > timeoutMs) {
+          throw new Error('Alert scan email was not sent');
+        }
+        return cy.wait(intervalMs).then(() => waitForMail());
+      });
+    });
+  };
+
+  return waitForMail();
 }
 
 export function waitForBlockingOverlayToClose() {

@@ -9,7 +9,7 @@
           <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
         }
       </label>
-      <input class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.accounts_mail" [disabled]="!isEditing" />
+      <input data-testid="system-settings-account-mail" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.accounts_mail" [disabled]="!isEditing" />
     </div>
 
     <div>
@@ -20,7 +20,7 @@
         }
       </label>
       <div class="relative">
-        <input class="!pr-12 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="password" [(ngModel)]="form.accounts_mail_password" [disabled]="!isEditing" placeholder="test" appPasswordToggle="dark" />
+        <input data-testid="system-settings-account-mail-password" class="!pr-12 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="password" [(ngModel)]="form.accounts_mail_password" [disabled]="!isEditing" placeholder="test" appPasswordToggle="dark" />
       </div>
     </div>
 
@@ -31,7 +31,7 @@
           <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
         }
       </label>
-      <input class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.accounts_smtp_server" [disabled]="!isEditing" placeholder="mailpit" />
+      <input data-testid="system-settings-account-smtp-server" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.accounts_smtp_server" [disabled]="!isEditing" placeholder="mailpit" />
     </div>
 
     <div>
@@ -41,7 +41,7 @@
           <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
         }
       </label>
-      <input class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.accounts_smtp_port" [disabled]="!isEditing" placeholder="1025" />
+      <input data-testid="system-settings-account-smtp-port" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.accounts_smtp_port" [disabled]="!isEditing" placeholder="1025" />
     </div>
 
     <div class="lg:col-span-2 flex flex-wrap items-center gap-3">
