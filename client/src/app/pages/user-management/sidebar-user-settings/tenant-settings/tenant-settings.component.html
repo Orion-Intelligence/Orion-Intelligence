@@ -154,6 +154,15 @@
     }
 
     @if (isMember() && !licenseService.getLicenses().includes('free')) {
+      <app-smtp-settings-block
+        class="mt-4"
+        [form]="mailForm"
+        [isEditing]="isEditing"
+        description="Tenant mail delivery settings.">
+      </app-smtp-settings-block>
+    }
+
+    @if (isMember() && !licenseService.getLicenses().includes('free')) {
       <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
         <div class="ui-section-title">Privacy & Access</div>
         <div class="ui-section-description">Manage profile visibility and tenant access to Event Management.</div>

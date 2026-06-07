@@ -127,6 +127,7 @@ class AlertMailHelper:
                 to=to_email,
                 subject=subject,
                 body=html_content,
+                tenant_id=tenant_id,
             )
             return True
         except Exception:

@@ -48,6 +48,10 @@ export interface TenantDataModel {
     image?: string;
     profileVisibilityEnabled?: boolean;
     eventManagementEnabled?: boolean;
+    accountsMailPassword?: string;
+    accountsMail?: string;
+    accountsSmtpServer?: string;
+    accountsSmtpPort?: string;
 }
 export interface userMetaData {
     username: string;
