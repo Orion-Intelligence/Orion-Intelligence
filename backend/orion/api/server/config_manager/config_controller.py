@@ -9,6 +9,7 @@ from orion.api.server.config_manager.model.config_data import config_data
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys, db_system_model
+from orion.services.mail_manager.mail_manager import mail_manager
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 
@@ -145,6 +146,15 @@ class config_controller:
     async def update_public_config(self, data: config_data):
         if self._engine is None:
             self._engine = mongo_controller.get_instance().get_engine()
+        meta_info_raw = data.settings.get("meta_info")
+        if meta_info_raw:
+            meta_info = json.loads(meta_info_raw)
+            await mail_manager.get_instance().send_test_mail(config={
+                "ACCOUNTS_MAIL_PASSWORD": meta_info.get("ACCOUNTS_MAIL_PASSWORD"),
+                "ACCOUNTS_MAIL": meta_info.get("ACCOUNTS_MAIL"),
+                "ACCOUNTS_SMTP_SERVER": meta_info.get("ACCOUNTS_SMTP_SERVER"),
+                "ACCOUNTS_SMTP_PORT": meta_info.get("ACCOUNTS_SMTP_PORT"),
+            })
         for key_str, value in data.settings.items():
             if key_str == "language":
                 key = AllowedKeys.LANGUAGE_ALLOWED

@@ -53,9 +53,9 @@
       </button>
     </div>
 
-    @if (error || verifyError || mailConfigurationStatus) {
-      <div class="lg:col-span-2 rounded-[8px] border px-3 py-2 text-sm" [ngClass]="mailConfigurationStatus === 'working' && !error && !verifyError ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' : 'border-rose-400/30 bg-rose-400/10 text-rose-300'">
-        {{ error || verifyError || (mailConfigurationStatus === 'working' ? 'Mail configuration is working' : 'Mail configuration is not working') }}
+    @if (errorState || verifyError || mailConfigurationStatus) {
+      <div class="lg:col-span-2 rounded-[8px] border px-3 py-2 text-sm" [ngClass]="mailConfigurationStatus === 'working' && !errorState && !verifyError ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' : 'border-rose-400/30 bg-rose-400/10 text-rose-300'">
+        {{ mailConfigurationStatus === 'working' && !errorState && !verifyError ? 'Mail configuration is working' : 'Mail configuration is not working' }}
       </div>
     }
   </div>

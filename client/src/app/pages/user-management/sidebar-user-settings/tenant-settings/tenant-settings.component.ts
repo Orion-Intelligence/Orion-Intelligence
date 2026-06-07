@@ -22,6 +22,7 @@ import { SmtpSettingsForm } from '../../../../shared/model/smtp-settings/smtp-se
 export class TenantSettingsComponent implements OnInit {
   isAccountSectionOpen = true;
   isEditing = false;
+  mailErrorState = false;
   userSessionData: userSessionData;
   userId: string = '';
   mailForm: SmtpSettingsForm = { accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
@@ -62,6 +63,7 @@ export class TenantSettingsComponent implements OnInit {
 
   updateUser() {
     let route = "update/tenants";
+    this.mailErrorState = false;
     const tenantData: TenantModel = {
       id: '',
       name: this.userSessionData.tenant.name,
@@ -77,7 +79,11 @@ export class TenantSettingsComponent implements OnInit {
     tenantData.accounts_mail = this.mailForm.accounts_mail;
     tenantData.accounts_smtp_server = this.mailForm.accounts_smtp_server;
     tenantData.accounts_smtp_port = this.mailForm.accounts_smtp_port;
-    this.apiService.post(route, tenantData).subscribe();
+    this.apiService.post(route, tenantData).subscribe({
+      error: () => {
+        this.mailErrorState = true;
+      }
+    });
   }
 
   cancelEdit(event: Event) {

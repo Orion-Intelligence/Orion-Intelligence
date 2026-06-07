@@ -10,6 +10,8 @@ from orion.helper_manager.env_handler import env_handler
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 
+MAIL_CONFIGURATION_FAILED_STATUS = 424
+
 
 class mail_manager:
     __instance = None
@@ -102,10 +104,10 @@ class mail_manager:
     async def _selected_mail_config(self, tenant_id: str | None):
         return await self._tenant_mail_config(tenant_id) or self._global_mail_config()
 
-    async def _prepare_verification_message(self, to_header: str, subject: str, body: str, tenant_id: str | None = None):
+    async def _prepare_verification_message(self, to_header: str, subject: str, body: str, tenant_id: str | None = None, config=None):
         subject, body = await self.process_app_variables(subject, body)
         sender_email, ACCOUNTS_MAIL_PASSWORD, smtp_server, smtp_port = self._normalize_mail_config(
-            await self._selected_mail_config(tenant_id))
+            config or await self._selected_mail_config(tenant_id))
         msg = MIMEMultipart("alternative")
         msg["From"] = sender_email
         msg["To"] = to_header
@@ -113,20 +115,32 @@ class mail_manager:
         msg.attach(MIMEText(body, "html"))
         return sender_email, ACCOUNTS_MAIL_PASSWORD, smtp_server, smtp_port, msg
 
-    async def send_verification_mail(self, to: str, subject: str, body: str, tenant_id: str | None = None):
-        sender_email, ACCOUNTS_MAIL_PASSWORD, smtp_server, smtp_port, msg = await self._prepare_verification_message(to, subject, body, tenant_id)
+    async def send_verification_mail(self, to: str, subject: str, body: str, tenant_id: str | None = None, config=None):
+        sender_email, ACCOUNTS_MAIL_PASSWORD, smtp_server, smtp_port, msg = await self._prepare_verification_message(to, subject, body, tenant_id, config)
         await asyncio.to_thread(self._send_sync_email, sender_email, ACCOUNTS_MAIL_PASSWORD, to, msg, smtp_server, smtp_port)
 
     async def send_verification_mail_list(self, to_list, subject: str, body: str, tenant_id: str | None = None):
         sender_email, ACCOUNTS_MAIL_PASSWORD, smtp_server, smtp_port, msg = await self._prepare_verification_message(", ".join(to_list), subject, body, tenant_id)
         await asyncio.to_thread(self._send_sync_email_list, sender_email, ACCOUNTS_MAIL_PASSWORD, to_list, msg, smtp_server, smtp_port)
 
-    async def send_test_mail(self, tenant_id: str | None = None):
-        meta_info = await self._selected_mail_config(tenant_id)
+    async def send_test_mail(self, tenant_id: str | None = None, config=None):
+        meta_info = config or await self._selected_mail_config(tenant_id)
         to = meta_info.get("ACCOUNTS_MAIL")
         if not to:
             raise HTTPException(status_code=400, detail="SMTP configuration is incomplete")
-        await self.send_verification_mail(to, "SMTP configuration test", "<p>SMTP configuration test email.</p>", tenant_id=tenant_id)
+        try:
+            await self.send_verification_mail(to, "SMTP configuration test", "<p>SMTP configuration test email.</p>", tenant_id=tenant_id, config=meta_info)
+        except HTTPException:
+            raise
+        except Exception as exc:
+            smtp_code = getattr(exc, "smtp_code", None)
+            smtp_error = getattr(exc, "smtp_error", None)
+            if isinstance(smtp_error, bytes):
+                smtp_error = smtp_error.decode(errors="ignore")
+            detail = f"SMTP error {smtp_code}" if smtp_code else "Mail configuration is not working"
+            if smtp_error:
+                detail = f"{detail}: {smtp_error}"
+            raise HTTPException(status_code=MAIL_CONFIGURATION_FAILED_STATUS, detail=detail) from exc
 
     @staticmethod
     def _send_sync_email(sender_email, password, to, msg, smtp_server, smtp_port):

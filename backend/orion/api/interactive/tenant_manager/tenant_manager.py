@@ -174,6 +174,19 @@ class TenantManager:
         dek = await KeyManager.get_instance().get_profile_dek(str(tenant.id))
         enc = Fernet(dek)
 
+        if any(value is not None for value in [
+            data.accounts_mail_password,
+            data.accounts_mail,
+            data.accounts_smtp_server,
+            data.accounts_smtp_port
+        ]):
+            await mail_manager.get_instance().send_test_mail(config={
+                "ACCOUNTS_MAIL_PASSWORD": data.accounts_mail_password,
+                "ACCOUNTS_MAIL": data.accounts_mail,
+                "ACCOUNTS_SMTP_SERVER": data.accounts_smtp_server,
+                "ACCOUNTS_SMTP_PORT": data.accounts_smtp_port,
+            })
+
         tenant.name = enc.encrypt((data.name or "").encode()).decode()
         tenant.phone = enc.encrypt((data.phone or "").encode()).decode()
         tenant.country = enc.encrypt((data.country or "").encode()).decode()

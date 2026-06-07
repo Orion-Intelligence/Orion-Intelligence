@@ -21,7 +21,7 @@ const DEFAULT_APP_NAME = 'Orion Intelligence';
 export class SidebarProfileSystemSettingsComponent implements OnInit {
   isEditing = false;
   configurationError = '';
-  networkConfigurationError = '';
+  mailErrorState = false;
   systemData = { ai_endpoint_enabled: true, language_allowed: '', version: '', app_name: '0', s_onion: '' };
   form = { language: '', version: '', app_name: '0', ai_endpoint_enabled: true, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
   languageOptions = [ 'en', 'fr', 'es', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko', 'ar', 'hi', 'bn', 'tr', 'nl', 'sv', 'pl', 'cs' ];
@@ -68,7 +68,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.accounts_smtp_server = typeof metaInfo['ACCOUNTS_SMTP_SERVER'] === 'string' ? metaInfo['ACCOUNTS_SMTP_SERVER'] : '';
     this.form.accounts_smtp_port = typeof metaInfo['ACCOUNTS_SMTP_PORT'] === 'string' ? metaInfo['ACCOUNTS_SMTP_PORT'] : '';
     this.configurationError = '';
-    this.networkConfigurationError = '';
+    this.mailErrorState = false;
   }
 
   toggleEdit() {
@@ -131,7 +131,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
 
   save() {
     this.configurationError = '';
-    this.networkConfigurationError = '';
+    this.mailErrorState = false;
     const requiredFields = [
       { key: 'app_name', label: 'App Name' },
       { key: 'language', label: 'Language' },
@@ -147,7 +147,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       const value = this.form[field.key];
       if (typeof value !== 'string' || !value.trim()) {
         if (String(field.key).startsWith('accounts_')) {
-          this.networkConfigurationError = `${field.label} is required`;
+          this.mailErrorState = true;
         }
         else {
           this.configurationError = `${field.label} is required`;
@@ -176,16 +176,16 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       return;
     }
     if (!this.emailPattern.test(this.form.accounts_mail)) {
-      this.networkConfigurationError = 'Account Mail must be a valid email address';
+      this.mailErrorState = true;
       return;
     }
     if (!this.smtpServerPattern.test(this.form.accounts_smtp_server)) {
-      this.networkConfigurationError = 'Account SMTP Server must be a valid hostname, localhost, or IPv4 address';
+      this.mailErrorState = true;
       return;
     }
     const smtpPort = Number(this.form.accounts_smtp_port);
     if (!Number.isInteger(smtpPort) || smtpPort < 1 || smtpPort > 65535) {
-      this.networkConfigurationError = 'Account SMTP Port must be a valid port number (1-65535)';
+      this.mailErrorState = true;
       return;
     }
     const settings = {
@@ -225,7 +225,9 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           }
         }
       },
-      error: () => void 0
+      error: () => {
+        this.mailErrorState = true;
+      }
     });
   }
 
