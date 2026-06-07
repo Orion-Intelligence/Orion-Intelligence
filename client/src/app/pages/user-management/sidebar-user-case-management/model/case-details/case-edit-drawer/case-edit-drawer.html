@@ -14,7 +14,7 @@
 
         <div class="sticky bottom-0 mt-auto flex justify-end gap-3 border-t border-[var(--color-border)] bg-[var(--color-blue-830)]/95 px-6 py-4 backdrop-blur">
             <button type="button" (click)="requestCancel()" [attr.data-testid]="cancelTestId || null" class="ui-btn border border-[var(--color-border)] text-[var(--color-text1)]">
-                Cancel
+                {{ 'common.actions.cancel' | translate }}
             </button>
             <button type="button" (click)="save.emit()" [attr.data-testid]="saveTestId || null" class="ui-btn ui-btn-primary">
                 {{ saveLabel }}

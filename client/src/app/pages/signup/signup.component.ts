@@ -6,11 +6,12 @@ import { AuthService } from '../../services/authetication/auth.service';
 import { AppService } from '../../services/core/app/app.service';
 import { areAllPasswordRequirementsMet, buildUsernameSuggestions, buildUsernameSuggestionText, createEmptyPasswordChecks, evaluatePasswordInput, PasswordChecks, PasswordStrength } from '../../shared/utils/auth-form.util';
 import { PasswordToggleDirective } from '../../shared/directives/password-toggle.directive';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [FormsModule, CommonModule, NgClass, PasswordToggleDirective],
+  imports: [FormsModule, CommonModule, NgClass, PasswordToggleDirective, TranslatePipe],
   templateUrl: './signup.component.html'
 })
 export class SignupComponent implements OnInit {

@@ -28,43 +28,43 @@
           </div>
           <div class="flex min-w-0 flex-col px-[10px]">
             <div class="max-w-[130px] overflow-hidden text-ellipsis whitespace-nowrap text-[14px] font-medium text-[#344054]">{{ username() }}</div>
-            <div class="max-w-[130px] overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-normal text-[#a0b8d1]" appTooltip="Active License">{{ licences }}</div>
+            <div class="max-w-[130px] overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-normal text-[#a0b8d1]" [appTooltip]="'Active License' | translate">{{ licences }}</div>
           </div>
         </li>
         @if (!this.appService.userSessionData().tenant.hasOnboarding && (licenseService.isMaintainer() || isAdmin())) {
           <li class="mt-[2px] flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]" (click)="auditlog();closeDropdown($event)">
             <img src="assets/images/shared/profile.svg" alt="Auditlog" class="h-[18px] w-[18px]" />
-            <span class="text-[14px] font-medium text-[#172235]">Auditlog</span>
+            <span class="text-[14px] font-medium text-[#172235]">{{ 'Auditlog' | translate }}</span>
           </li>
         }
         @if (!isAdmin() &&licenseService.isMaintainer() && !this.appService.userSessionData().tenant.hasOnboarding) {
           <li class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]" (click)="manageIocs();closeDropdown($event)">
             <img src="assets/images/shared/info-dark.svg" alt="Manage IOC’s" class="h-[18px] w-[18px]" />
-            <span class="text-[14px] font-medium text-[#172235]">Manage IOC’s</span>
+            <span class="text-[14px] font-medium text-[#172235]">{{ 'Manage IOC’s' | translate }}</span>
           </li>
         }
         @if (!this.appService.userSessionData().tenant.hasOnboarding && (licenseService.isMaintainer() ||isAdmin())) {
           <li class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]" (click)="openAccountSettings();closeDropdown($event)">
             <img src="assets/images/shared/settings.svg" alt="Account settings" class="h-[18px] w-[18px]" />
-            <span class="text-[14px] font-medium text-[#172235]">Account settings</span>
+            <span class="text-[14px] font-medium text-[#172235]">{{ 'Account settings' | translate }}</span>
           </li>
         }
         @if (isAdmin()) {
           <li class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]" (click)="openAccountSettings();closeDropdown($event)">
             <div class="flex items-center gap-[10px]">
               <img alt="Settings" height="15" ngSrc="assets/images/shared/settings.svg" priority width="15" class="h-[18px] w-[18px]">
-              <span class="text-[14px] font-medium text-[#172235]">Settings</span>
+              <span class="text-[14px] font-medium text-[#172235]">{{ 'Settings' | translate }}</span>
             </div>
           </li>
         }
         <li data-testid="profile-help-support" (click)="openSupportPopup();closeDropdown($event)" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#f5f7fa]">
           <img alt="Support" src="assets/images/shared/support.svg" class="h-[18px] w-[18px]">
-          <span class="text-[14px] font-medium text-[#172235]">Help & Support</span>
+          <span class="text-[14px] font-medium text-[#172235]">{{ 'Help & Support' | translate }}</span>
         </li>
         <li class="my-[6px] h-[1px] bg-[#e5e7eb]"></li>
         <li data-testid="signout-btn" class="flex cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] hover:bg-[#fff1f2]" (click)="logout();closeDropdown($event)">
           <img src="assets/images/shared/logout.svg" alt="Sign out" class="h-[18px] w-[18px]" />
-          <span class="text-[14px] font-medium text-[#172235]">Sign out</span>
+          <span class="text-[14px] font-medium text-[#172235]">{{ 'Sign out' | translate }}</span>
         </li>
       </ul>
     }

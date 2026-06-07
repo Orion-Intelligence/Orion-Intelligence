@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { SatelliteAnomalyResponse } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector:    'app-anomaly-map-popup',
   standalone:  true,
-  imports:     [CommonModule],
+  imports:     [CommonModule, TranslatePipe],
   templateUrl: './anomaly-map-popup.component.html',
 })
 export class AnomalyMapPopupComponent {

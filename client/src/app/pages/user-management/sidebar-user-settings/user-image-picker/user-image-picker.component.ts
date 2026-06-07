@@ -1,8 +1,10 @@
 import { Component, effect, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-user-image-picker',
-  imports: [NgClass],
+  imports: [NgClass, TranslatePipe],
   templateUrl: './user-image-picker.component.html'
 })
 export class UserImagePickerComponent {

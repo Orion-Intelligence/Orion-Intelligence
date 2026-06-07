@@ -13,7 +13,7 @@
 
   @if (errorMessage && !isScanning()) {
     <div class="mb-4 rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] shadow-[0_8px_22px_rgba(0,0,0,0.18)]">
-      <div class="text-[17px] font-semibold leading-tight text-[var(--color-text1)]">Request Failed</div>
+      <div class="text-[17px] font-semibold leading-tight text-[var(--color-text1)]">{{ 'Request Failed' | translate }}</div>
       <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)]">{{ errorMessage }}</div>
     </div>
   }
@@ -21,15 +21,15 @@
   @if (hasSearched()) {
     <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
       <div class="ui-ioc-table-head flex items-center justify-between border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text4)]">
-        <span>{{ resultLabel() }}</span><span>DETAILS</span>
+        <span>{{ resultLabel() }}</span><span>{{ 'DETAILS' | translate }}</span>
       </div>
       @if (ipRows.length > pageSize) {
         <div class="flex items-center justify-between gap-3 border-b border-[var(--color-divider)] px-4 py-3 text-[12px] text-[var(--color-text3)]">
-          <span>Showing {{ currentPageStart }}-{{ currentPageEnd }} of {{ ipRows.length }}</span>
+          <span>{{ 'Showing' | translate }} {{ currentPageStart }}-{{ currentPageEnd }} {{ 'of' | translate }} {{ ipRows.length }}</span>
           <div class="flex items-center gap-2">
-            <button type="button" class="inline-flex h-8 items-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[12px] font-medium text-[var(--color-text2)] disabled:cursor-not-allowed disabled:opacity-40" (click)="goToPreviousPage()" [disabled]="currentPage === 1">Prev</button>
-            <span>Page {{ currentPage }} / {{ totalPages }}</span>
-            <button type="button" class="inline-flex h-8 items-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[12px] font-medium text-[var(--color-text2)] disabled:cursor-not-allowed disabled:opacity-40" (click)="goToNextPage()" [disabled]="currentPage === totalPages">Next</button>
+            <button type="button" class="inline-flex h-8 items-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[12px] font-medium text-[var(--color-text2)] disabled:cursor-not-allowed disabled:opacity-40" (click)="goToPreviousPage()" [disabled]="currentPage === 1">{{ 'Prev' | translate }}</button>
+            <span>{{ 'Page' | translate }} {{ currentPage }} / {{ totalPages }}</span>
+            <button type="button" class="inline-flex h-8 items-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[12px] font-medium text-[var(--color-text2)] disabled:cursor-not-allowed disabled:opacity-40" (click)="goToNextPage()" [disabled]="currentPage === totalPages">{{ 'Next' | translate }}</button>
           </div>
         </div>
       }
@@ -44,8 +44,8 @@
         }
       } @else if (showNoResults) {
         <div class="px-4 py-6 text-center">
-          <div class="text-sm font-semibold text-[var(--color-text2)]">No results found</div>
-          <div class="mt-1 text-[12px] text-[var(--color-text4)]">The scan completed successfully, but no IPs were returned.</div>
+          <div class="text-sm font-semibold text-[var(--color-text2)]">{{ 'No results found' | translate }}</div>
+          <div class="mt-1 text-[12px] text-[var(--color-text4)]">{{ 'The scan completed successfully, but no IPs were returned.' | translate }}</div>
         </div>
       } @else if (dnsResult() && pagedRows.length) {
         <div @fadeInDashboardItem>
@@ -66,7 +66,7 @@
               @if (row.loading && !row.detail) {
                 <div class="px-4 py-4">
                   <div class="mb-[6px] flex items-center justify-between gap-3">
-                    <span class="truncate text-[12px] font-medium text-[var(--color-text1)]">{{ row.step || ('Loading details for ' + row.ip + '...') }}</span>
+                    <span class="truncate text-[12px] font-medium text-[var(--color-text1)]">{{ (row.step || ('Loading details for ' + row.ip + '...')) | translate }}</span>
                     <span class="text-[12px] font-semibold text-sky-400">{{ row.progress || 5 }}%</span>
                   </div>
                   <div class="ui-progress-track h-[8px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">

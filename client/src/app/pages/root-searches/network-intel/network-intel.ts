@@ -14,12 +14,13 @@ import { GeoCoordinatesModalComponent } from './modal/geo-coordinates-modal/geo-
 import { DnsSectionComponent } from './dns-section/dns-section.component';
 import { ShodanSectionComponent } from './shodan-section/shodan-section.component';
 import { VulnerabilitySectionComponent } from './vulnerability-section/vulnerability-section.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector:    'app-network-intel',
   templateUrl: './network-intel.html',
   standalone:  true,
-  imports:     [CommonModule, FormsModule, EmptyQueryComponent, GeoCoordinatesModalComponent, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent],
+  imports:     [CommonModule, FormsModule, EmptyQueryComponent, GeoCoordinatesModalComponent, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent, TranslatePipe],
   animations:  [fadeInDashboardItem],
 })
 export class NetworkIntel implements OnInit, OnDestroy {

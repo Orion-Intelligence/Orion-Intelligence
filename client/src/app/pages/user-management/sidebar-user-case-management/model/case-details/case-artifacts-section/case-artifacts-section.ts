@@ -8,10 +8,11 @@ import { caseInlineMotion, caseListItemMotion, caseModeSwapMotion, caseSectionMo
 import { CaseDateField, CaseDateTarget, formatCaseLabel, getCaseDateInputValue, getCaseDisplayLabel, getFormattedCaseDateTime, setCaseDateInputValue } from '../case-details-formatters';
 import { CaseDetailsStore } from '../case-details.store';
 import { CaseEditDrawerComponent } from '../case-edit-drawer/case-edit-drawer';
+import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-case-artifacts-section',
-  imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent],
+  imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent, TranslatePipe],
   animations: [caseInlineMotion, caseListItemMotion, caseModeSwapMotion, caseSectionMotion],
   host: { class: 'block' },
   templateUrl: './case-artifacts-section.html'

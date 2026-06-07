@@ -14,6 +14,8 @@ import { ScannerService } from './scanner-service.service';
 import { ReportExportService } from '../../../../shared/services/report-export.service';
 import { GraphReportPayload } from '../../../../shared/model/report/report-export.model';
 import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-security-scan',
   standalone: true,
@@ -28,8 +30,7 @@ import { NetworkIntelScanService } from '../../../../shared/services/network-int
     NgxPrintDirective,
     FormsModule,
     ReactiveFormsModule,
-    EmptyQueryComponent,
-  ],
+    EmptyQueryComponent, TranslatePipe],
   templateUrl: './security-scan.component.html',
   animations: [fadeInDashboardItem],
 })

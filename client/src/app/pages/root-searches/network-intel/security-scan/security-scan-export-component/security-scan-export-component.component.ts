@@ -3,10 +3,12 @@ import { ChangeDetectionStrategy, Component, OnChanges, SimpleChanges, input } f
 import { UrlScanMeta, UrlScanThreatItem } from '../../../../../shared/model/security-scan/security.scan.results.model';
 import { FindingRow } from '../../../../../shared/model/security-scan/finding-row.model';
 import { HelperService } from '../../../../../shared/services/helper.service';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-security-scan-export-component',
   standalone: true,
-  imports: [CommonModule, NgClass],
+  imports: [CommonModule, NgClass, TranslatePipe],
   templateUrl: './security-scan-export-component.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

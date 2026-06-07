@@ -1,6 +1,6 @@
 <form class="relative w-full overflow-visible">
   <button data-testid="side-filter-date-toggle" type="button" (click)="togglePicker()" class="flex h-10 w-full items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-white)] px-3 text-left text-sm font-medium text-[var(--color-text2)] shadow-sm transition hover:brightness-[0.98] outline-none focus:outline-none focus:ring-0">
-    <span class="truncate">{{ displayValue || (filterModel()?.filters?.[key()]?.placeholder || 'Select date range') }}</span>
+    <span class="truncate">{{ (displayValue || (filterModel()?.filters?.[key()]?.placeholder || 'Select date range')) | translate }}</span>
     <img alt="Calendar" class="h-4 w-4 shrink-0 opacity-70" src="assets/images/shared/theme/calendar.png" />
   </button>
 

@@ -8,9 +8,11 @@ import { normalizeEntityId } from '../map-utils/renderer-utils';
 import { CountryBoundaryMapRenderer } from '../map-overlays/country-boundary-map-renderer';
 import { SearchLocationMapRenderer } from '../map-overlays/search-location-map-renderer';
 import { Observable, Subscription } from 'rxjs';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector:    'app-satellite-map-renderer',
+  imports: [TranslatePipe],
   standalone:  true,
   templateUrl: './map-renderer.component.html',
 })

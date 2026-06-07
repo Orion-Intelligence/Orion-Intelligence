@@ -2,6 +2,8 @@ import { Component, ChangeDetectionStrategy, input, output, signal, inject } fro
 
 import { CustomEntity } from '../../../../shared/model/social/social-scan.models';
 import { SocialEntityUiService } from '../services/social-entity-ui.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 const ENTITY_ADD_OPTIONS: { type: CustomEntity['type']; label: string; iconClass: string; }[] = [
   { type: 'email-breach', label: 'Add Email Breach', iconClass: 'bi bi-person-badge text-indigo-400' },
   { type: 'social-scanner', label: 'Add Social Scanner', iconClass: 'bi bi-people text-indigo-400' },
@@ -16,7 +18,7 @@ const ENTITY_ADD_OPTIONS: { type: CustomEntity['type']; label: string; iconClass
   selector: 'app-entity-menu',
   templateUrl: './entity-menu.component.html',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EntityMenuComponent {

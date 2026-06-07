@@ -6,10 +6,10 @@
           <i [class]="socialEntityUiService.getIconForEntityType(data()!.type) + ' text-2xl w-8 text-center'"></i>
           <div>
             <h3 class="text-lg font-semibold leading-6 text-[var(--color-text1)]">{{ getModalTitle() }}</h3>
-            <p class="mt-1 text-sm text-[var(--color-text4)]">{{ data()?.mode === 'edit' ? 'Update existing entity details.' : 'Enter the details for the new entity.' }}</p>
+            <p class="mt-1 text-sm text-[var(--color-text4)]">{{ (data()?.mode === 'edit' ? 'Update existing entity details.' : 'Enter the details for the new entity.') | translate }}</p>
           </div>
         </div>
-        <button (click)="close.emit(undefined)" type="button" class="ui-social-popup-icon-btn" title="Close">
+        <button (click)="close.emit(undefined)" type="button" class="ui-social-popup-icon-btn" [title]="'common.actions.close' | translate">
           <i class="bi bi-x-lg text-[15px] leading-none"></i>
         </button>
       </div>
@@ -17,22 +17,22 @@
       <div class="p-5">
         @if (data()?.mode !== 'edit') {
           <div class="mb-4 flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)] p-1">
-            <button data-testid="add-entity-mode-api" type="button" (click)="setInputMode('api')" [ngClass]="inputMode() === 'api' ? 'bg-[var(--color-blue-700)] text-[var(--color-text1)]' : 'text-[var(--color-text4)]'" class="flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors">From API</button>
-            <button data-testid="add-entity-mode-manual" type="button" (click)="setInputMode('manual')" [ngClass]="inputMode() === 'manual' ? 'bg-[var(--color-blue-700)] text-[var(--color-text1)]' : 'text-[var(--color-text4)]'" class="flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors">Manual</button>
+            <button data-testid="add-entity-mode-api" type="button" (click)="setInputMode('api')" [ngClass]="inputMode() === 'api' ? 'bg-[var(--color-blue-700)] text-[var(--color-text1)]' : 'text-[var(--color-text4)]'" class="flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors">{{ 'From API' | translate }}</button>
+            <button data-testid="add-entity-mode-manual" type="button" (click)="setInputMode('manual')" [ngClass]="inputMode() === 'manual' ? 'bg-[var(--color-blue-700)] text-[var(--color-text1)]' : 'text-[var(--color-text4)]'" class="flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors">{{ 'Manual' | translate }}</button>
           </div>
         }
 
         @if (inputMode() === 'manual') {
           <div>
-            <label for="entityValue" class="block text-sm font-medium leading-6 text-[var(--color-text2)]">{{ data()?.type | titlecase }} Value</label>
+            <label for="entityValue" class="block text-sm font-medium leading-6 text-[var(--color-text2)]">{{ data()?.type | titlecase }} {{ 'Value' | translate }}</label>
             <div class="mt-2">
-              <input data-testid="add-entity-value-input" type="text" id="entityValue" name="entityValue" autocomplete="off" [placeholder]="'Enter ' + (data()?.type | titlecase)" [value]="entityValue()" (input)="onEntityValueChange($event)" (keyup.enter)="confirm()" [class]="'block w-full rounded-lg border py-1.5 px-3 text-[var(--color-text1)] shadow-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6 ' + ((isTouched() && validationError()) ? 'bg-red-950/30 border-red-500/60' : 'bg-[var(--color-blue-700)] border-[var(--color-border)]')">
+              <input data-testid="add-entity-value-input" type="text" id="entityValue" name="entityValue" autocomplete="off" [placeholder]="('Enter' | translate) + ' ' + (data()?.type | titlecase)" [value]="entityValue()" (input)="onEntityValueChange($event)" (keyup.enter)="confirm()" [class]="'block w-full rounded-lg border py-1.5 px-3 text-[var(--color-text1)] shadow-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6 ' + ((isTouched() && validationError()) ? 'bg-red-950/30 border-red-500/60' : 'bg-[var(--color-blue-700)] border-[var(--color-border)]')">
             </div>
           </div>
         } @else {
-          <label for="apiQuery" class="block text-sm font-medium leading-6 text-[var(--color-text2)]">{{ data()?.type | titlecase }} Value</label>
+          <label for="apiQuery" class="block text-sm font-medium leading-6 text-[var(--color-text2)]">{{ data()?.type | titlecase }} {{ 'Value' | translate }}</label>
           <div class="mt-2">
-            <input data-testid="add-entity-api-query-input" type="text" id="apiQuery" name="apiQuery" autocomplete="off" [placeholder]="'Enter ' + (data()?.type | titlecase)" [value]="apiQuery()" (input)="onApiQueryChange($event)" (keyup.enter)="confirm()" [class]="'block w-full rounded-lg border py-1.5 px-3 text-[var(--color-text1)] shadow-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6 ' + ((isTouched() && validationError()) ? 'bg-red-950/30 border-red-500/60' : 'bg-[var(--color-blue-700)] border-[var(--color-border)]')">
+            <input data-testid="add-entity-api-query-input" type="text" id="apiQuery" name="apiQuery" autocomplete="off" [placeholder]="('Enter' | translate) + ' ' + (data()?.type | titlecase)" [value]="apiQuery()" (input)="onApiQueryChange($event)" (keyup.enter)="confirm()" [class]="'block w-full rounded-lg border py-1.5 px-3 text-[var(--color-text1)] shadow-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6 ' + ((isTouched() && validationError()) ? 'bg-red-950/30 border-red-500/60' : 'bg-[var(--color-blue-700)] border-[var(--color-border)]')">
           </div>
         }
 
@@ -41,15 +41,15 @@
           <p class="mt-2 text-xs text-red-400">{{ validationError() }}</p>
         }
 
-        <label for="entityLabel" class="mt-4 block text-sm font-medium leading-6 text-[var(--color-text2)]">Label (Optional)</label>
+        <label for="entityLabel" class="mt-4 block text-sm font-medium leading-6 text-[var(--color-text2)]">{{ 'Label (Optional)' | translate }}</label>
         <div class="mt-2">
-          <input data-testid="add-entity-label-input" type="text" id="entityLabel" name="entityLabel" autocomplete="off" placeholder="Shown on graph and lists" [value]="entityLabel()" (input)="onEntityLabelChange($event)" (keyup.enter)="confirm()" class="block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-1.5 text-[var(--color-text1)] shadow-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6">
+          <input data-testid="add-entity-label-input" type="text" id="entityLabel" name="entityLabel" autocomplete="off" [placeholder]="'Shown on graph and lists' | translate" [value]="entityLabel()" (input)="onEntityLabelChange($event)" (keyup.enter)="confirm()" class="block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-1.5 text-[var(--color-text1)] shadow-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6">
         </div>
       </div>
 
       <div class="flex justify-end gap-3 rounded-b-lg border-t border-[var(--color-border)] bg-slate-850/80 p-4">
         <button (click)="close.emit(undefined)" type="button" class="rounded-lg bg-[var(--color-blue-720)] px-4 py-2 text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]">
-          Cancel
+          {{ 'common.actions.cancel' | translate }}
         </button>
         <button data-testid="add-entity-submit" type="button" (click)="confirm()" [disabled]="!isValidInput()" class="rounded-lg bg-sky-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-[var(--color-blue-710)] disabled:text-[var(--color-text4)]">
           {{ getSubmitLabel() }}

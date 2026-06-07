@@ -6,6 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../../shared/services/api.service';
 import { MarkdownPipe } from '../../../../shared/pipes/markdown.pipe';
 import { MessageScrollRailComponent } from '../message-scroll-rail/message-scroll-rail.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 type SharedChatMessage = {
   sender: 'user' | 'bot';
@@ -16,7 +17,7 @@ type SharedChatMessage = {
 @Component({
   selector: 'app-chat-share',
   standalone: true,
-  imports: [CommonModule, DatePipe, MessageScrollRailComponent, MarkdownPipe],
+  imports: [CommonModule, DatePipe, MessageScrollRailComponent, MarkdownPipe, TranslatePipe],
   templateUrl: './chat-share.component.html',
 })
 export class ChatShareComponent implements OnInit, OnDestroy {

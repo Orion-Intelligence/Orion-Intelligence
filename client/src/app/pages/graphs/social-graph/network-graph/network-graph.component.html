@@ -1,7 +1,7 @@
 <div class="relative h-full w-full" [class.manipulation-active]="isManipulating()">
   @if (deleteButtonState().visible && deleteButtonState().edgeId; as edgeId) {
     @for (renderedEdgeId of [edgeId]; track renderedEdgeId) {
-      <button (click)="deleteEdge(renderedEdgeId)" [attr.data-left]="deleteButtonState().x" [attr.data-top]="deleteButtonState().y" class="network-graph-delete-edge-button z-10 flex items-center justify-center w-6 h-6 rounded-full bg-red-600 text-white shadow-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-red-500" title="Remove connection">
+      <button (click)="deleteEdge(renderedEdgeId)" [attr.data-left]="deleteButtonState().x" [attr.data-top]="deleteButtonState().y" class="network-graph-delete-edge-button z-10 flex items-center justify-center w-6 h-6 rounded-full bg-red-600 text-white shadow-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-red-500" [title]="'Remove connection' | translate">
         <i class="bi bi-x-lg text-sm font-bold"></i>
       </button>
     }

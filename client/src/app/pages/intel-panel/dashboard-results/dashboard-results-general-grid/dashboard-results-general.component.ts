@@ -10,10 +10,12 @@ import { AuthService } from '../../../../services/authetication/auth.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { isWithinDays as isWithinDaysUtil } from '../../../../shared/utils/intel-report.util';
 import { ProxyController } from '../../../../shared/services/proxy-controller';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-dashboard-results-general-grid',
   templateUrl: './dashboard-results-general.component.html',
-  imports: [RouterLink, DatePipe, TooltipDirective, CommonModule, NgClass],
+  imports: [RouterLink, DatePipe, TooltipDirective, CommonModule, NgClass, TranslatePipe],
   standalone: true
 })
 export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {

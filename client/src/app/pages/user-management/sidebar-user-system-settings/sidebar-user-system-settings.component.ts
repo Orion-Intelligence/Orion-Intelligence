@@ -9,12 +9,13 @@ import { ConfigSettings } from '../../../shared/model/app/config';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { SmtpSettingsBlockComponent } from '../../../shared/components/smtp-settings-block/smtp-settings-block.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 const DEFAULT_APP_NAME = 'Orion Intelligence';
 
 @Component({
   selector: 'app-sidebar-user-system-settings',
-  imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent],
+  imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
   templateUrl: './sidebar-user-system-settings.component.html'
 })

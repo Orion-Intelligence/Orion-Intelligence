@@ -17,6 +17,7 @@ import { ThreatLensMapRendererComponent } from './map-renderer/threat-lens-map-r
 import { ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensCountrySelection, ThreatLensIpViewportScanRequest } from './models/threat-lens-map.types';
 import { ThreatLensService } from './threat-lens.service';
 import { ThreatLensGeoUtils } from './map-utils/threat-lens-geo.utils';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-threat-lens',
@@ -28,8 +29,7 @@ import { ThreatLensGeoUtils } from './map-utils/threat-lens-geo.utils';
     ThreatLensFeedPanelComponent,
     IpDetailPopupComponent,
     ThreatLensMapRendererComponent,
-    MapLoadingBadgesComponent,
-  ],
+    MapLoadingBadgesComponent, TranslatePipe],
   templateUrl: './threat-lens.html',
 })
 export class ThreatLensComponent implements OnDestroy {

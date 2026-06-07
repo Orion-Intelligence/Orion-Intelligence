@@ -5,11 +5,12 @@ import { EMPTY, Observable, of, timer } from 'rxjs';
 import { catchError, expand, finalize, switchMap, takeWhile } from 'rxjs/operators';
 import { ProxyController } from '../../services/proxy-controller';
 import { CrossSearchEntry, CrossSearchResponse } from '../../model/results/cross-search/cross-search.model';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-cross-search-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './cross-search-card.component.html',
 })
 export class CrossSearchCardComponent {

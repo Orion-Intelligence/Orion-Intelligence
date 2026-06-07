@@ -12,10 +12,11 @@ import { LicenseName } from '../../../shared/model/licenses/license.rules';
 import { getTenantLocationDisplay } from './sidebar-settings.util';
 import { areAllPasswordRequirementsMet, createEmptyPasswordChecks, evaluatePasswordInput, PasswordChecks, PasswordStrength } from '../../../shared/utils/auth-form.util';
 import { PasswordToggleDirective } from '../../../shared/directives/password-toggle.directive';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-sidebar-profile-settings',
-  imports: [FormsModule, CommonModule, UserImagePickerComponent, PasswordToggleDirective],
+  imports: [FormsModule, CommonModule, UserImagePickerComponent, PasswordToggleDirective, TranslatePipe],
   animations: [fadeInDashboardItem],
   templateUrl: './account-settings.component.html'
 })

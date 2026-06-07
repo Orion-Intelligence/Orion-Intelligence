@@ -5,11 +5,12 @@ import { OrionSatelliteFilterOption, TrackingEntityType } from '../../../models/
 import { AircraftDetailsPanelComponent } from '../../map-entities/aircraft/components/aircraft-details-panel/aircraft-details-panel.component';
 import { FacilityLegendComponent } from '../../map-entities/facilities/components/facility-legend/facility-legend.component';
 import { ShipDetailsPanelComponent } from '../../map-entities/ships/components/ship-details-panel/ship-details-panel.component';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector:    'app-map-entities-overlay',
   standalone:  true,
-  imports:     [CommonModule, AircraftDetailsPanelComponent, ShipDetailsPanelComponent, FacilityLegendComponent, MapLoadingBadgesComponent],
+  imports:     [CommonModule, AircraftDetailsPanelComponent, ShipDetailsPanelComponent, FacilityLegendComponent, MapLoadingBadgesComponent, TranslatePipe],
   templateUrl: './map-entities-overlay.component.html',
 })
 export class MapEntitiesOverlayComponent {

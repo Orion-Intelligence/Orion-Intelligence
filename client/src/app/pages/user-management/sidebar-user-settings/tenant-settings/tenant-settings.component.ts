@@ -13,9 +13,11 @@ import { getTenantLocationDisplay, toggleEditState } from '../sidebar-settings.u
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { SmtpSettingsBlockComponent } from '../../../../shared/components/smtp-settings-block/smtp-settings-block.component';
 import { SmtpSettingsForm } from '../../../../shared/model/smtp-settings/smtp-settings.model';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-tenant-settings',
-  imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent],
+  imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
   templateUrl: './tenant-settings.component.html'
 })

@@ -6,9 +6,11 @@ import { AuditlogService } from '../../../../services/auditlog/auditlog.service'
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { AppService } from '../../../../services/core/app/app.service';
 import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-auditlog-list',
-  imports: [AsyncPipe, DatePipe, ConfirmationPopupComponent],
+  imports: [AsyncPipe, DatePipe, ConfirmationPopupComponent, TranslatePipe],
   templateUrl: './auditlog-list.component.html',
   animations: [fadeInDashboardItem],
 })

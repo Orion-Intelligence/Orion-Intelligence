@@ -2,10 +2,10 @@
   <div [ngClass]="isEmbeddedInConsolidated ? 'pt-4' : 'px-4 pt-4 md:px-6'">
     <div class="flex w-full flex-wrap items-center gap-3 bg-[var(--color-blue-760)] py-[15px] max-[640px]:gap-2">
       <div class="flex max-w-full flex-nowrap gap-2 overflow-x-auto whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]">
-        <button data-testid="network-intel-tab-host-recon" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'dns' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('dns')">Host Recon</button>
-        <button data-testid="network-intel-tab-ip-scan" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'shodan' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('shodan')">IP Scan</button>
-        <button data-testid="network-intel-tab-vulnerability-scan" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'vuln' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('vuln')">Vulnerability Scan</button>
-        <button data-testid="network-intel-tab-geo-fencing" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'geo' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setGeoTab()">Geo Fencing</button>
+        <button data-testid="network-intel-tab-host-recon" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'dns' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('dns')">{{ 'Host Recon' | translate }}</button>
+        <button data-testid="network-intel-tab-ip-scan" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'shodan' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('shodan')">{{ 'IP Scan' | translate }}</button>
+        <button data-testid="network-intel-tab-vulnerability-scan" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'vuln' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('vuln')">{{ 'Vulnerability Scan' | translate }}</button>
+        <button data-testid="network-intel-tab-geo-fencing" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'geo' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setGeoTab()">{{ 'Geo Fencing' | translate }}</button>
       </div>
     </div>
 
@@ -15,7 +15,7 @@
           <i class="bi bi-search text-[14px] text-[#0e1626]/70"></i>
           <input data-testid="network-intel-search-input" [value]="getToolbarQuery()" (input)="setToolbarQuery($any($event.target).value)" (keyup.enter)="runToolbarSearch()" type="text" [placeholder]="getToolbarPlaceholder()" class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/45 disabled:cursor-pointer disabled:text-[#0e1626]/75" [ngClass]="formError ? 'pr-[250px] max-[900px]:pr-[170px] max-[640px]:pr-[36px]' : ''" [disabled]="activeTab === 'geo'" [readonly]="activeTab === 'geo'" />
           @if (activeTab === 'geo') {
-            <button type="button" class="absolute inset-0 z-[1] cursor-pointer rounded-[10px]" aria-label="Open geo coordinates picker" data-testid="network-intel-geo-search-trigger" (click)="openGeoCoordinatesModalFromStatus()"></button>
+            <button type="button" class="absolute inset-0 z-[1] cursor-pointer rounded-[10px]" [attr.aria-label]="'Open geo coordinates picker' | translate" data-testid="network-intel-geo-search-trigger" (click)="openGeoCoordinatesModalFromStatus()"></button>
           }
           @if (formError) {
             <div class="pointer-events-none absolute right-2 top-1/2 inline-flex max-w-[240px] -translate-y-1/2 items-center gap-1 rounded-md bg-red-500/85 px-2 py-[3px] text-[12px] font-semibold text-white max-[900px]:max-w-[160px] max-[640px]:max-w-[28px]">
@@ -31,15 +31,15 @@
       <div class="hidden items-center gap-2 md:flex">
         <img alt="Search" src="assets/images/shared/results_found.svg" class="h-5 w-5">
         <div class="text-sm font-semibold text-[var(--color-text1)]">{{ lastResultCount }}</div>
-        <div class="text-xs text-[var(--color-text4)]">Results</div>
+        <div class="text-xs text-[var(--color-text4)]">{{ 'Results' | translate }}</div>
       </div>
 
       <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
 
       <div class="hidden items-center gap-2 lg:flex">
         <img alt="Search" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
-        <div class="text-sm font-semibold text-[var(--color-text1)]">{{ isScanning() ? 'Scanning' : (scanHelper.onError() ? 'Error' : 'Idle') }}</div>
-        <div class="text-xs text-[var(--color-text4)]">Status</div>
+        <div class="text-sm font-semibold text-[var(--color-text1)]">{{ (isScanning() ? 'Scanning' : (scanHelper.onError() ? 'Error' : 'Idle')) | translate }}</div>
+        <div class="text-xs text-[var(--color-text4)]">{{ 'Status' | translate }}</div>
       </div>
 
       @if (activeTab === 'vuln') {
@@ -48,7 +48,7 @@
         <div class="hidden items-center gap-2 lg:flex">
           <img alt="Elapsed" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
           <div class="text-sm font-semibold text-[var(--color-text1)]">{{ vulnerabilityElapsedLabel }}</div>
-          <div class="text-xs text-[var(--color-text4)]">Elapsed</div>
+          <div class="text-xs text-[var(--color-text4)]">{{ 'Elapsed' | translate }}</div>
         </div>
       }
 
@@ -57,7 +57,7 @@
           @if (isExportingReport) {
             <span class="h-4 w-4 rounded-full border-2 border-sky-400/25 border-t-sky-400 animate-spin"></span>
           } @else {
-            <img alt="Download" src="assets/images/shared/theme/download.svg" class="h-4 w-4 ui-action-icon">
+            <img alt="common.actions.download" src="assets/images/shared/theme/download.svg" class="h-4 w-4 ui-action-icon">
           }
         </button>
         <div class="h-6 w-px bg-[var(--color-divider)]"></div>
@@ -99,7 +99,7 @@
       [hasSearched]="hasSearched"
       [dnsResult]="geoIpListResult"
       [ipRows]="geoIpRows"
-      [resultLabel]="'IP ADDRESS'"
+      [resultLabel]="'IP ADDRESS' | translate"
       @fadeInDashboardItem
       (toggleRow)="toggleIpRow($event)">
     </app-network-intel-dns-section>

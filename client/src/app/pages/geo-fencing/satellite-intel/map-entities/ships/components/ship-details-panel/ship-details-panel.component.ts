@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { TranslatePipe } from '../../../../../../../shared/pipes/translate.pipe';
 
 type ShipDetailField = { label: string; value: string; mono?: boolean };
 
@@ -46,7 +47,7 @@ const PRIMARY_SHIP_DETAIL_KEYS = new Set([
 @Component({
   selector: 'app-ship-details-panel',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './ship-details-panel.component.html',
 })
 export class ShipDetailsPanelComponent {

@@ -6,11 +6,12 @@ import { MessageNotificationService } from '../../../../services/message_notific
 import { finalize } from 'rxjs';
 import { FeederService } from '../feeder.service';
 import { supportsFileUploadForRuleType, supportsValueUploadForRuleType } from '../feeder-rule.utils';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-sidebar-user-feeder-add',
   standalone: true,
-  imports: [FormsModule, ConfirmationPopupComponent],
+  imports: [FormsModule, ConfirmationPopupComponent, TranslatePipe],
   templateUrl: './sidebar-user-feeder-add.component.html',
 })
 export class SidebarUserFeederAddComponent implements OnChanges {

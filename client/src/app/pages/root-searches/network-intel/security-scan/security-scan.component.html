@@ -4,9 +4,9 @@
       <div class="flex w-[45px] items-center justify-center bg-white">
         <img alt="Search" height="20" ngSrc="/client/src/assets/images/shared/domain.svg" priority width="20" class="brightness-0 opacity-80">
       </div>
-      <input data-testid="scan-primary-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]" maxlength="150" name="username" [placeholder]="scanType === 'repo' ? 'Repository' : 'Domain'" type="url" required pattern="^(?:https?:\/\/)?([a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}|localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?(\/[^\s]*)?$">
+      <input data-testid="scan-primary-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]" maxlength="150" name="username" [placeholder]="(scanType === 'repo' ? 'Repository' : 'Domain') | translate" type="url" required pattern="^(?:https?:\/\/)?([a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}|localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?(\/[^\s]*)?$">
       <input type="hidden" value="1">
-      <button data-testid="scan-search-button" class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40" [disabled]="!searchForm.valid">Search</button>
+      <button data-testid="scan-search-button" class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40" [disabled]="!searchForm.valid">{{ 'Search' | translate }}</button>
     </div>
   </form>
 
@@ -26,11 +26,11 @@
     @if (!hasError && !isLoading) {
       <div class="mt-[12px] flex justify-end">
         <div class="security-scan-action-menu inline-flex items-stretch overflow-hidden rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)]">
-          <button data-testid="scan-download-report" (click)="exportReport()" appTooltip="Download" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-            <img alt="Download" height="25" ngSrc="../../../../../assets/images/shared/theme/download.svg" width="25" class="ui-action-icon" />
+          <button data-testid="scan-download-report" (click)="exportReport()" [appTooltip]="'common.actions.download' | translate" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+            <img alt="common.actions.download" height="25" ngSrc="../../../../../assets/images/shared/theme/download.svg" width="25" class="ui-action-icon" />
           </button>
           <div class="security-scan-action-divider my-[10px] w-px bg-[var(--color-border)]"></div>
-          <button data-testid="scan-print-report" ngxPrint printSectionId="scanReport" [useExistingCss]="true" appTooltip="Print" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+          <button data-testid="scan-print-report" ngxPrint printSectionId="scanReport" [useExistingCss]="true" [appTooltip]="'Print' | translate" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
             <img alt="Print" height="25" ngSrc="../../../../../assets/images/shared/theme/print.svg" width="25" class="ui-action-icon" />
           </button>
         </div>
@@ -39,15 +39,15 @@
     <div class="mt-[12px] rounded-[10px] bg-[var(--color-blue-720)] p-0 text-[var(--color-text1)]">
       @if (hasError && !isLoading) {
         <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" @fadeInDashboardItem>
-          <div class="text-[18px] font-semibold text-[var(--color-text7)]">Scan Failed</div>
+          <div class="text-[18px] font-semibold text-[var(--color-text7)]">{{ 'Scan Failed' | translate }}</div>
           <div class="mt-[6px] text-[14px] text-[var(--color-text7)]">{{ errorMessage }}</div>
           <ul class="mt-[10px] list-disc pl-[18px] text-[13px] text-[var(--color-text7)]">
-            <li>The server may be temporarily unavailable</li>
-            <li>The target website may not be reachable</li>
-            <li>An unexpected error occurred during scanning</li>
+            <li>{{ 'The server may be temporarily unavailable' | translate }}</li>
+            <li>{{ 'The target website may not be reachable' | translate }}</li>
+            <li>{{ 'An unexpected error occurred during scanning' | translate }}</li>
           </ul>
           <div class="mt-[16px]">
-            <button class="ui-btn ui-btn-danger rounded-[8px] px-[14px] py-[8px] text-[14px]" (click)="retry()">Scan Again</button>
+            <button class="ui-btn ui-btn-danger rounded-[8px] px-[14px] py-[8px] text-[14px]" (click)="retry()">{{ 'Scan Again' | translate }}</button>
           </div>
         </div>
       }
@@ -58,17 +58,17 @@
             @if (!isLoading && meta) {
               <div class="flex flex-col gap-[14px] lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <div data-testid="scan-security-posture" class="inline-flex items-center rounded-full border px-[10px] py-[4px] text-[11px] font-semibold uppercase tracking-[0.08em]" [ngClass]="{ 'border-[var(--color-border-red)] bg-[var(--color-red-200)] text-[var(--color-text1)]': grade === 'D' || grade === 'F', 'border-[var(--color-border-orange)] bg-[var(--color-orange-200)] text-[var(--color-text1)]': grade === 'C', 'border-[var(--color-blue-640)]/45 bg-[var(--color-blue-640)]/15 text-[var(--color-text1)]': !(grade === 'D' || grade === 'F' || grade === 'C') }">Security Posture</div>
+                  <div data-testid="scan-security-posture" class="inline-flex items-center rounded-full border px-[10px] py-[4px] text-[11px] font-semibold uppercase tracking-[0.08em]" [ngClass]="{ 'border-[var(--color-border-red)] bg-[var(--color-red-200)] text-[var(--color-text1)]': grade === 'D' || grade === 'F', 'border-[var(--color-border-orange)] bg-[var(--color-orange-200)] text-[var(--color-text1)]': grade === 'C', 'border-[var(--color-blue-640)]/45 bg-[var(--color-blue-640)]/15 text-[var(--color-text1)]': !(grade === 'D' || grade === 'F' || grade === 'C') }">{{ 'Security Posture' | translate }}</div>
                   <h3 class="mt-[10px] text-[22px] font-semibold leading-tight sm:text-[24px]">
-                    Report for
+                    {{ 'Report for' | translate }}
                     <a class="ml-1 underline decoration-dotted underline-offset-4" [href]="meta.URL" target="_blank" rel="noopener noreferrer">{{ displayHost }}</a>
                   </h3>
-                  <p class="mt-[4px] text-[13px] text-[var(--color-text4)]">Snapshot of core endpoint metadata and scan context.</p>
+                  <p class="mt-[4px] text-[13px] text-[var(--color-text4)]">{{ 'Snapshot of core endpoint metadata and scan context.' | translate }}</p>
                 </div>
                 <div class="min-w-[140px] rounded-[12px] border px-[14px] py-[12px] text-center" [ngClass]="{ 'border-[var(--color-border-red)] bg-[var(--color-red-200)]': grade === 'D' || grade === 'F', 'border-[var(--color-border-orange)] bg-[var(--color-orange-200)]': grade === 'C', 'border-[var(--color-blue-640)]/45 bg-[var(--color-blue-640)]/15': !(grade === 'D' || grade === 'F' || grade === 'C') }">
                   <div class="text-[46px] font-bold leading-none text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">{{ grade || '—' }}</div>
                   <div class="mt-[6px] text-[12px] text-[var(--color-text4)]">
-                    {{ (grade === 'D' || grade === 'F') ? 'High Risk' : (grade === 'C' ? 'Needs Attention' : 'Good Posture') }}
+                    {{ (grade === 'D' || grade === 'F') ? 'High Risk' : (grade === 'C' ? 'Needs Attention' : 'Good Posture') | translate }}
                   </div>
                 </div>
               </div>
@@ -89,29 +89,29 @@
             @if (!isLoading && meta) {
               <div class="grid grid-cols-1 gap-[12px] sm:grid-cols-2 xl:grid-cols-12" @fadeInDashboardItem>
                 <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] sm:col-span-2 xl:col-span-8">
-                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">Target URL</p>
+                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">{{ 'Target URL' | translate }}</p>
                   <a class="block break-all text-[14px] font-medium text-[var(--color-text1)] underline decoration-[var(--color-border)] underline-offset-4 hover:text-[var(--color-text1)]" [href]="meta.URL" target="_blank" rel="noopener noreferrer">{{ meta.URL }}</a>
                 </div>
                 <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-4">
-                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">Host</p>
+                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">{{ 'Host' | translate }}</p>
                   <p class="text-[16px] font-semibold text-[var(--color-text1)]">{{ displayHost }}</p>
                 </div>
                 <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-3">
-                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">Port</p>
+                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">{{ 'Port' | translate }}</p>
                   <p class="text-[16px] font-semibold text-[var(--color-text1)]">{{ displayPort }}</p>
                 </div>
                 <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-3">
-                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">TLS Status</p>
+                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">{{ 'TLS Status' | translate }}</p>
                   <span class="security-scan-tls-pill mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="hasSSL ? 'bg-emerald-500/10 text-emerald-300 security-scan-tls-pill--ok' : 'bg-rose-500/10 text-rose-300 security-scan-tls-pill--bad'">
-                    {{ hasSSL ? 'ssl enabled' : 'no ssl detected' }}
+                    {{ (hasSSL ? 'ssl enabled' : 'no ssl detected') | translate }}
                   </span>
                 </div>
                 <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-3">
-                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">Scanned On</p>
+                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">{{ 'Scanned On' | translate }}</p>
                   <p class="text-[14px] font-medium text-[var(--color-text1)]">{{ meta.Scanned_on_date }}</p>
                 </div>
                 <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-890)]/85 p-[14px] xl:col-span-3">
-                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">Scanned By</p>
+                  <p class="mb-[7px] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">{{ 'Scanned By' | translate }}</p>
                   <p class="text-[14px] font-medium text-[var(--color-text1)]">{{ meta.Scanned_by }}</p>
                 </div>
               </div>
@@ -154,8 +154,8 @@
           @for (cat of categories; track trackByCategory($index, cat)) {
             <div class="security-scan-findings-section mt-[16px] rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[18px] shadow-[0_8px_22px_var(--color-shadow-light)]" @fadeInDashboardItem>
               <div class="flex flex-wrap items-center justify-between gap-[12px]">
-                <h3 data-testid="scan-findings-title" class="text-[17px] font-semibold tracking-[0.01em] text-[var(--color-text1)]">{{ cat.name }} Findings</h3>
-                <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-[10px] py-[3px] text-[12px] font-semibold text-[var(--color-text3)]">{{ cat.total }} findings</span>
+                <h3 data-testid="scan-findings-title" class="text-[17px] font-semibold tracking-[0.01em] text-[var(--color-text1)]">{{ cat.name }} {{ 'Findings' | translate }}</h3>
+                <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-[10px] py-[3px] text-[12px] font-semibold text-[var(--color-text3)]">{{ cat.total }} {{ 'findings' | translate }}</span>
               </div>
               <div class="my-[14px] h-px bg-[var(--color-divider)]"></div>
               <div class="flex flex-col gap-[15px]">
@@ -167,7 +167,7 @@
                         <h4 class="truncate text-[15px] font-semibold text-[var(--color-text1)]">{{ item.header }}</h4>
                       </div>
                       <span class="security-scan-risk-pill inline-flex shrink-0 items-center rounded-full border px-[11px] py-[3px] text-[12px] font-semibold" [ngClass]="{ 'border-red-400/20 bg-red-500/10 text-[var(--color-scan-red)]': item.risk.toLowerCase() === 'high', 'border-orange-400/20 bg-orange-500/10 text-[var(--color-scan-orange)]': item.risk.toLowerCase() === 'medium', 'border-emerald-400/20 bg-emerald-500/10 text-[var(--color-scan-green)]': item.risk.toLowerCase() === 'low', 'border-sky-400/20 bg-sky-500/10 text-[var(--color-blue-640)]': item.risk.toLowerCase() === 'informational' }">
-                        {{ item.risk }} Risk ({{ item.confidence }} Confidence)
+                        {{ item.risk }} {{ 'Risk (' | translate }}{{ item.confidence }} {{ 'Confidence' | translate }})
                       </span>
                     </div>
                     <p class="mt-[10px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-[12px] py-[9px] text-[14px] leading-6 text-[var(--color-text3)]">{{ item.description }}</p>
@@ -182,9 +182,9 @@
         }
         @if (!categories.length && meta) {
           <div class="mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[20px]" @fadeInDashboardItem>
-            <div class="text-[16px] font-semibold text-[var(--color-text1)]">No Findings</div>
-            <div class="mt-[6px] text-[14px] text-[var(--color-text4)]">No issues were detected for this target.</div>
-            <button class="mt-[12px] rounded-[8px] border border-[var(--color-border)] bg-transparent px-[12px] py-[6px] text-[14px] text-[var(--color-text4)] hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)]" (click)="retry()">Rescan</button>
+            <div class="text-[16px] font-semibold text-[var(--color-text1)]">{{ 'No Findings' | translate }}</div>
+            <div class="mt-[6px] text-[14px] text-[var(--color-text4)]">{{ 'No issues were detected for this target.' | translate }}</div>
+            <button class="mt-[12px] rounded-[8px] border border-[var(--color-border)] bg-transparent px-[12px] py-[6px] text-[14px] text-[var(--color-text4)] hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)]" (click)="retry()">{{ 'Rescan' | translate }}</button>
           </div>
         }
       } @else {

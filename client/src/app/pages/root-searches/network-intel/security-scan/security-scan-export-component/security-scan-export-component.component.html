@@ -1,24 +1,24 @@
 <div class="p-[24px] text-[#0f172a]">
-  <h1 class="text-[24px] font-semibold">Security Scan Report</h1>
+  <h1 class="text-[24px] font-semibold">{{ 'Security Scan Report' | translate }}</h1>
 
   <table class="mt-[12px] w-full border-collapse text-[13px]">
     <tbody>
       <tr>
         <th class="border px-[8px] py-[6px] text-left font-semibold">URL</th><td class="border px-[8px] py-[6px]">{{ meta().URL }}</td>
-        <th class="border px-[8px] py-[6px] text-left font-semibold">Host</th><td class="border px-[8px] py-[6px]">{{ meta().Host || '' }}</td>
+        <th class="border px-[8px] py-[6px] text-left font-semibold">{{ 'Host' | translate }}</th><td class="border px-[8px] py-[6px]">{{ meta().Host || '' }}</td>
       </tr>
       <tr>
-        <th class="border px-[8px] py-[6px] text-left font-semibold">Port</th><td class="border px-[8px] py-[6px]">{{ meta().Port || '' }}</td>
-        <th class="border px-[8px] py-[6px] text-left font-semibold">Scanned on</th><td class="border px-[8px] py-[6px]">{{ meta().Scanned_on_date || '' }}</td>
+        <th class="border px-[8px] py-[6px] text-left font-semibold">{{ 'Port' | translate }}</th><td class="border px-[8px] py-[6px]">{{ meta().Port || '' }}</td>
+        <th class="border px-[8px] py-[6px] text-left font-semibold">{{ 'Scanned on' | translate }}</th><td class="border px-[8px] py-[6px]">{{ meta().Scanned_on_date || '' }}</td>
       </tr>
       <tr>
-        <th class="border px-[8px] py-[6px] text-left font-semibold">Scanned by</th><td class="border px-[8px] py-[6px]">{{ meta().Scanned_by || '' }}</td>
-        <th class="border px-[8px] py-[6px] text-left font-semibold">Printed</th><td class="border px-[8px] py-[6px]">{{ printedNow }}</td>
+        <th class="border px-[8px] py-[6px] text-left font-semibold">{{ 'Scanned by' | translate }}</th><td class="border px-[8px] py-[6px]">{{ meta().Scanned_by || '' }}</td>
+        <th class="border px-[8px] py-[6px] text-left font-semibold">{{ 'categoryAlerts.export.printed' | translate }}</th><td class="border px-[8px] py-[6px]">{{ printedNow }}</td>
       </tr>
     </tbody>
   </table>
 
-  <h2 class="mt-[16px] text-[18px] font-semibold">Findings</h2>
+  <h2 class="mt-[16px] text-[18px] font-semibold">{{ 'Findings' | translate }}</h2>
 
   @if (viewFindings.length) {
     @for (item of viewFindings; track item.category + '|' + item.header + '|' + $index) {
@@ -34,22 +34,22 @@
           </div>
         </header>
         <div class="mt-[8px] text-[12px]">
-          <span class="font-semibold">Category:</span> {{ item.category }}
+          <span class="font-semibold">{{ 'categoryAlerts.fields.category' | translate }}:</span> {{ item.category }}
         </div>
         <div class="mt-[8px] text-[12px]">
-          <span class="font-semibold">Description:</span>
+          <span class="font-semibold">{{ 'categoryAlerts.form.description' | translate }}:</span>
           <div class="mt-[4px] whitespace-pre-wrap">{{ item.description }}</div>
         </div>
         @if (item.proof) {
           <div class="mt-[8px] text-[12px]">
-            <span class="font-semibold">Proof (first 15 lines):</span>
+            <span class="font-semibold">{{ 'Proof (first 15 lines)' | translate }}:</span>
             <pre class="mt-[4px] whitespace-pre-wrap rounded-[6px] border bg-white p-[8px]">{{ trimProof(item.proof) }}</pre>
           </div>
         }
       </section>
     }
   } @else {
-    <div class="mt-[12px] text-[13px]">No findings.</div>
+    <div class="mt-[12px] text-[13px]">{{ 'No findings.' | translate }}</div>
   }
 
 </div>

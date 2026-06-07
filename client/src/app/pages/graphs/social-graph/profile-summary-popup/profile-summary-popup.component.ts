@@ -6,12 +6,14 @@ import { FetchingStateService } from '../services/fetching-state.service';
 import { SummaryAllPlatformsViewComponent } from './summary-all-platforms-view/summary-all-platforms-view.component';
 import { SummaryPlatformViewComponent } from './summary-platform-view/summary-platform-view.component';
 import { PlatformIconBgDirective } from '../directives/platform-icon-bg.directive';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-profile-summary-popup',
   templateUrl: './profile-summary-popup.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [SocialIconComponent, SummaryAllPlatformsViewComponent, SummaryPlatformViewComponent, PlatformIconBgDirective],
+  imports: [SocialIconComponent, SummaryAllPlatformsViewComponent, SummaryPlatformViewComponent, PlatformIconBgDirective, TranslatePipe],
 })
 export class ProfileSummaryPopupComponent {
   private fetchingState: FetchingStateService;

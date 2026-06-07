@@ -8,10 +8,12 @@ import { AppService } from '../../../services/core/app/app.service';
 import QRCode from 'qrcode';
 import { HeaderComponent } from '../../../shared/partials/header/login-header/header.component';
 import { PasswordToggleDirective } from '../../../shared/directives/password-toggle.directive';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-login-container',
   standalone: true,
-  imports: [FormsModule, CommonModule, HeaderComponent, PasswordToggleDirective],
+  imports: [FormsModule, CommonModule, HeaderComponent, PasswordToggleDirective, TranslatePipe],
   templateUrl: './login-container.component.html',
 })
 export class LoginContainerComponent implements OnInit, OnDestroy {

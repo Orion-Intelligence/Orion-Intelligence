@@ -6,12 +6,14 @@ import { expandFadeRow } from '../../../../shared/animations/row.animations';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { RankedCallbackModel } from '../../../../shared/model/results/consolidated/ranked.callback.model';
 import { ExpandedRowComponent } from '../expanded-row/expanded-row.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-credential-list',
   standalone: true,
   templateUrl: './credential-list.component.html',
   animations: [fadeInDashboardItem, expandFadeRow],
-  imports: [ExpandedRowComponent, DatePipe]
+  imports: [ExpandedRowComponent, DatePipe, TranslatePipe]
 })
 export class CredentialListComponent {
   readonly rankedResultInput = input(new RankedCallbackModel(), { alias: 'rankedResult' });

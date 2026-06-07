@@ -1,5 +1,7 @@
 import { Component, ChangeDetectionStrategy, computed, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+
 export type ContextMenuType = 'user' | 'platform' | 'customEntity' | 'group' | 'relationship';
 export interface ContextMenuData {
     x: number;
@@ -11,7 +13,7 @@ export type ContextMenuAction = 'fetchLinks' | 'clearConnections' | 'deleteProfi
 @Component({
   selector: 'app-context-menu',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './context-menu.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

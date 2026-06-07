@@ -4,11 +4,13 @@ import { PlatformResult } from '../../../../shared/model/social/social-scan.mode
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
 import { PlatformIconBgDirective } from '../directives/platform-icon-bg.directive';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-follower-scan-popup',
   templateUrl: './follower-scan-popup.component.html',
   standalone: true,
-  imports: [SocialIconComponent, PlatformIconBgDirective],
+  imports: [SocialIconComponent, PlatformIconBgDirective, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FollowerScanPopupComponent {

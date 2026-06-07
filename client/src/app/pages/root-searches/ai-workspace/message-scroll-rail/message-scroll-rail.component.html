@@ -3,7 +3,7 @@
     <div class="group relative flex items-center justify-end">
       <div class="pointer-events-none absolute right-9 top-1/2 max-h-[min(70lvh,520px)] w-[310px] origin-right -translate-y-1/2 translate-x-2 scale-[0.98] overflow-y-auto overscroll-contain rounded-[12px] border border-white/10 bg-[#101a2b] p-2 opacity-0 shadow-[0_22px_56px_rgba(2,6,23,0.48),inset_0_1px_0_rgba(255,255,255,0.05)] ring-1 ring-white/5 backdrop-blur-xl transition-[opacity,transform] duration-150 [scrollbar-width:none] [-ms-overflow-style:none] group-hover:pointer-events-auto group-hover:translate-x-0 group-hover:scale-100 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-x-0 group-focus-within:scale-100 group-focus-within:opacity-100 [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,0.16),inset_0_1px_0_rgba(255,255,255,0.8)] [&::-webkit-scrollbar]:hidden">
         <div class="mb-1 flex h-9 items-center justify-between rounded-[9px] border border-white/5 bg-[#101a2b]/95 px-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text5)] backdrop-blur [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-white/95">
-          <span>Jump to Prompt</span>
+          <span>{{ 'Jump to Prompt' | translate }}</span>
           <span class="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-[var(--color-text4)] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#edf4fb]">{{ prompts.length }}</span>
         </div>
         @for (prompt of prompts; track prompt.messageIndex) {

@@ -23,10 +23,11 @@ import { ExportChoiceModalComponent } from '../../../../shared/partials/export-c
 import { ExportChoiceOption } from '../../../../shared/model/report/export-choice.model';
 import { AlertExportService } from '../../../../shared/services/export/alert-export.service';
 import { SidebarHomepageService } from '../../../../services/dashboard/sidebar.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-category-alert-report',
-  imports: [CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective, EmptyResultComponent, ExportChoiceModalComponent],
+  imports: [CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective, EmptyResultComponent, ExportChoiceModalComponent, TranslatePipe],
   templateUrl: './category-alert-report.component.html',
 })
 export class CategoryAlertReportComponent implements OnInit {

@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { PasswordToggleDirective } from '../../directives/password-toggle.directive';
 import { SmtpSettingsForm } from '../../model/smtp-settings/smtp-settings.model';
 import { ApiService } from '../../services/api.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-smtp-settings-block',
   standalone: true,
-  imports: [CommonModule, FormsModule, PasswordToggleDirective],
+  imports: [CommonModule, FormsModule, PasswordToggleDirective, TranslatePipe],
   host: { class: 'block sm:col-span-2' },
   templateUrl: './smtp-settings-block.component.html'
 })

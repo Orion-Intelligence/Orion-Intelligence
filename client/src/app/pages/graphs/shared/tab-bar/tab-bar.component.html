@@ -9,7 +9,7 @@
                 <input #renameInput [attr.data-testid]="testId('tab-rename-input')" appAutofocus type="text" [value]="tab.name" [attr.data-tab-id]="tab.id" (blur)="handleRename(tab.id, renameInput)" (keydown.enter)="handleRename(tab.id, renameInput)" (keydown.escape)="cancelRename()" (keydown.arrowleft)="$event.stopPropagation()" (keydown.arrowright)="$event.stopPropagation()" (keydown.home)="$event.stopPropagation()" (keydown.end)="$event.stopPropagation()" (click)="$event.stopPropagation()" class="w-32 rounded-md bg-[var(--color-blue-700)] p-1 text-[var(--color-text1)] outline-none ring-2 ring-indigo-500" />
               </div>
             } @else {
-              <span [attr.data-testid]="testId('tab-name')" (dblclick)="onTabNameDblClick($event, $index, tab.id)" class="py-1 pr-1" title="Double-click to rename">{{ displayTabName($index, tab.name) }}</span>
+              <span [attr.data-testid]="testId('tab-name')" (dblclick)="onTabNameDblClick($event, $index, tab.id)" class="py-1 pr-1" [title]="'Double-click to rename' | translate">{{ displayTabName($index, tab.name) }}</span>
             }
             @if (visibleTabs().length > 1 && !isPinnedPlaygroundTab($index)) {
               <button [attr.data-testid]="testId('tab-close')" (click)="$event.stopPropagation(); closeTab(tab.id)" class="ml-1 flex h-6 w-6 items-center justify-center rounded-full text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-white">
@@ -23,7 +23,7 @@
           <div class="mr-2 h-7 w-px bg-white/5"></div>
           <div class="relative">
             <input [attr.data-testid]="testId('tab-file-input')" type="file" class="hidden" [id]="fileInputIdValue()" (change)="onFileSelected($event)" accept=".json">
-            <button [attr.data-testid]="testId('tab-add-menu')" (click)="toggleAddMenu($event)" [disabled]="visibleTabs().length >= 4" [class]="isAddMenuVisible() ? 'flex h-8 w-8 items-center justify-center rounded-md bg-[#0f172a] text-white shadow-sm' : 'flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white disabled:cursor-not-allowed disabled:opacity-50'" title="New Session">
+            <button [attr.data-testid]="testId('tab-add-menu')" (click)="toggleAddMenu($event)" [disabled]="visibleTabs().length >= 4" [class]="isAddMenuVisible() ? 'flex h-8 w-8 items-center justify-center rounded-md bg-[#0f172a] text-white shadow-sm' : 'flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white disabled:cursor-not-allowed disabled:opacity-50'" [title]="'New Session' | translate">
               <i class="bi bi-plus-lg text-base leading-none"></i>
             </button>
 
@@ -31,12 +31,12 @@
               <div (click)="$event.stopPropagation()" class="absolute top-[calc(100%+5px)] left-0 z-20 w-48 rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] p-1 shadow-lg">
                 <button [attr.data-testid]="testId('tab-add-new-session')" (click)="createNewTab()" class="group flex w-full items-center gap-3 rounded px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
                   <i class="bi bi-plus-square h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
-                  <span>New Session</span>
+                  <span>{{ 'New Session' | translate }}</span>
                 </button>
                 <div class="mx-2 my-1 h-px bg-white/5"></div>
                 <label [attr.data-testid]="testId('tab-import-session-label')" [for]="fileInputIdValue()" class="group flex w-full cursor-pointer items-center gap-3 rounded px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
                   <i class="bi bi-upload h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
-                  <span>Import Session</span>
+                  <span>{{ 'Import Session' | translate }}</span>
                 </label>
               </div>
             }
@@ -45,27 +45,27 @@
       </nav>
       <div class="self-center flex items-center gap-1 pr-0">
         <div class="relative">
-          <button [attr.data-testid]="testId('tab-session-menu')" (click)="toggleHeaderMenu($event)" class="ui-cti-session-menu-btn flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" title="Session Menu">
+          <button [attr.data-testid]="testId('tab-session-menu')" (click)="toggleHeaderMenu($event)" class="ui-cti-session-menu-btn flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-white" [title]="'Session Menu' | translate">
             <i class="bi bi-three-dots-vertical text-lg"></i>
           </button>
           @if (isHeaderMenuVisible()) {
             <div (click)="$event.stopPropagation()" class="absolute top-full right-0 z-20 mt-2 w-56 rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] p-1 shadow-lg">
               <button [attr.data-testid]="testId('export-current-session')" (click)="exportCurrentSession()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
                 <i class="bi bi-download h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
-                <span>Export Current Session</span>
+                <span>{{ 'Export Current Session' | translate }}</span>
               </button>
               <button [attr.data-testid]="testId('export-report')" (click)="openReportExportModal(); closeMenus()" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
                 <i class="bi bi-file-earmark-arrow-down h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
-                <span>Export Report</span>
+                <span>{{ 'Export Report' | translate }}</span>
               </button>
               <label [attr.data-testid]="testId('import-session-label')" [for]="fileInputIdValue()" class="group flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white">
                 <i class="bi bi-upload h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
-                <span>Import Session</span>
+                <span>{{ 'Import Session' | translate }}</span>
               </label>
               <div class="my-1 h-px bg-[var(--color-blue-710)]"></div>
               <button [attr.data-testid]="testId('new-session')" (click)="createNewTab()" [disabled]="visibleTabs().length >= 4" class="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-sm text-[var(--color-text2)] transition-colors hover:bg-indigo-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50">
                 <i class="bi bi-plus-square h-5 w-5 text-[var(--color-text4)] group-hover:text-white"></i>
-                <span>New Session</span>
+                <span>{{ 'New Session' | translate }}</span>
               </button>
             </div>
           }
@@ -79,8 +79,8 @@
 @if (manageReportExportInternally()) {
   <app-export-choice-modal
     [visible]="isReportExportModalOpen()"
-    [title]="'Export Social Report'"
-    [subtitle]="'Choose report format:'"
+    [title]="('Export Social Report') | translate"
+    [subtitle]="('Choose report format:') | translate"
     [options]="graphExportOptions"
     (closed)="closeReportExportModal()"
     (optionSelected)="exportByType($event)">

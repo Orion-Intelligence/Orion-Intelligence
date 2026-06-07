@@ -8,52 +8,51 @@
         </app-user-image-picker>
       </div>
       <div class="pt-1">
-        <h1 data-testid="account-settings-title" class="ui-page-title">{{ isAdmin() ? 'Admin Profile' : 'User Profile Form' }}</h1>
-        <p class="ui-page-description">Account details and preferences.</p>
+        <h1 data-testid="account-settings-title" class="ui-page-title">{{ (isAdmin() ? 'Admin Profile' : 'User Profile Form') | translate }}</h1>
+        <p class="ui-page-description">{{ 'Account details and preferences.' | translate }}</p>
         <p class="mt-1 text-xs font-medium text-[var(--color-text4)]">
-          Version <span class="font-semibold text-[var(--color-text2)]">{{ displayVersion }}</span>
+          {{ 'Version' | translate }} <span class="font-semibold text-[var(--color-text2)]">{{ displayVersion }}</span>
         </p>
       </div>
     </div>
 
     <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-      <div class="ui-section-title">Profile</div>
-      <div class="ui-section-description">Manage profile identity and assigned access.</div>
+      <div class="ui-section-title">{{ 'Profile' | translate }}</div>
+      <div class="ui-section-description">{{ 'Manage profile identity and assigned access.' | translate }}</div>
 
       <div class="mt-3 grid gap-3 sm:grid-cols-2">
         <div>
-          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Username</label>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Username' | translate }}</label>
           <input type="text" [(ngModel)]="editableUsername" name="username" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" />
         </div>
 
         <div>
-          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Role</label>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Role' | translate }}</label>
           <input type="text" [value]="(appService.userSessionData().user.role | titlecase)" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
         </div>
 
         <div>
-          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Tenant /
-            Location</label>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Tenant /             Location' | translate }}</label>
           <input type="text" [value]="getLocationDisplay() || appService.userSessionData().user.username" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
         </div>
 
         <div>
-          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Licenses</label>
-          <input type="text" [value]="getUserLicensesLabel(userSessionData.user) || 'No licenses assigned'" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Licenses' | translate }}</label>
+          <input type="text" [value]="(getUserLicensesLabel(userSessionData.user) || 'No licenses assigned') | translate" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
         </div>
       </div>
     </div>
 
     <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-      <div class="ui-section-title">Preferences</div>
-      <div class="ui-section-description">Security and appearance settings.</div>
+      <div class="ui-section-title">{{ 'Preferences' | translate }}</div>
+      <div class="ui-section-description">{{ 'Security and appearance settings.' | translate }}</div>
       <div class="mt-3 space-y-3">
         <div data-testid="account-settings-twofa-toggle" class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="twoFactorEnabled = !twoFactorEnabled; toggleTwoFa()">
           <div class="flex items-center justify-between gap-3">
             <div>
-              <label class="block text-sm font-semibold text-[var(--color-text1)]">2 Factor Authentication</label>
-              <p class="mt-1 text-xs text-[var(--color-text4)]">{{ userSessionData.user.twofa_enabled ? 'Enabled' :
-                'Disabled' }}</p>
+              <label class="block text-sm font-semibold text-[var(--color-text1)]">{{ '2 Factor Authentication' | translate }}</label>
+              <p class="mt-1 text-xs text-[var(--color-text4)]">{{ (userSessionData.user.twofa_enabled ? 'Enabled' :
+                'Disabled') | translate }}</p>
             </div>
             <label class="pointer-events-none relative h-6 w-11 shrink-0">
               <input type="checkbox" class="peer h-0 w-0 opacity-0" [checked]="twoFactorEnabled" />
@@ -65,8 +64,8 @@
         <div data-testid="account-settings-theme-toggle" class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="isDarkMode = !isDarkMode; toggleTheme()">
           <div class="flex items-center justify-between gap-3">
             <div>
-              <label class="block text-sm font-semibold text-[var(--color-text1)]">Theme</label>
-              <p class="mt-1 text-xs text-[var(--color-text4)]">{{ isDarkMode ? 'Dark Mode' : 'Light Mode' }}</p>
+              <label class="block text-sm font-semibold text-[var(--color-text1)]">{{ 'Theme' | translate }}</label>
+              <p class="mt-1 text-xs text-[var(--color-text4)]">{{ (isDarkMode ? 'Dark Mode' : 'Light Mode') | translate }}</p>
             </div>
             <label class="pointer-events-none relative h-6 w-11 shrink-0">
               <input type="checkbox" class="peer h-0 w-0 opacity-0" [checked]="isDarkMode" />
@@ -79,8 +78,8 @@
           <div data-testid="account-settings-profile-visibility-toggle" class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="isProfileVisible = !isProfileVisible; toggleProfileVisibility()">
             <div class="flex items-center justify-between gap-3">
               <div>
-                <label class="block text-sm font-semibold text-[var(--color-text1)]">Profile Visibility</label>
-                <p class="mt-1 text-xs text-[var(--color-text4)]">{{ isProfileVisible ? 'Visible to other users' : 'Hidden from other users' }}</p>
+                <label class="block text-sm font-semibold text-[var(--color-text1)]">{{ 'Profile Visibility' | translate }}</label>
+                <p class="mt-1 text-xs text-[var(--color-text4)]">{{ (isProfileVisible ? 'Visible to other users' : 'Hidden from other users') | translate }}</p>
               </div>
               <label class="pointer-events-none relative h-6 w-11 shrink-0">
                 <input type="checkbox" class="peer h-0 w-0 opacity-0" [checked]="isProfileVisible" />
@@ -95,8 +94,8 @@
     <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
       <button data-testid="account-settings-password-toggle" type="button" class="flex w-full items-center justify-between gap-3 text-left" [attr.aria-expanded]="isPasswordSectionOpen" (click)="togglePasswordSection()">
         <span class="min-w-0">
-          <span class="ui-section-title block">Change Password</span>
-          <span class="ui-section-description block">Set a new password for your account.</span>
+          <span class="ui-section-title block">{{ 'Change Password' | translate }}</span>
+          <span class="ui-section-description block">{{ 'Set a new password for your account.' | translate }}</span>
         </span>
         <i class="bi bi-chevron-down mr-3 shrink-0 text-[14px] leading-none text-[var(--color-text4)] transition-transform duration-200" [class.rotate-180]="isPasswordSectionOpen" aria-hidden="true"></i>
       </button>
@@ -106,7 +105,7 @@
           <div class="grid gap-3">
             <div>
               <div class="relative">
-                <input id="account-settings-new-password" data-testid="account-settings-new-password" type="password" [(ngModel)]="newPassword" (input)="onPasswordInput(newPassword)" name="newPassword" placeholder="Enter new password" autocomplete="new-password" class="!pr-12 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" appPasswordToggle="dark" />
+                <input id="account-settings-new-password" data-testid="account-settings-new-password" type="password" [(ngModel)]="newPassword" (input)="onPasswordInput(newPassword)" name="newPassword" [placeholder]="'Enter new password' | translate" autocomplete="new-password" class="!pr-12 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" appPasswordToggle="dark" />
               </div>
               @if (showPasswordMeter) {
                 <div class="mt-2">
@@ -122,17 +121,17 @@
 
             <div>
               <div class="relative">
-                <input id="account-settings-confirm-password" data-testid="account-settings-confirm-password" type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Confirm new password" autocomplete="new-password" class="!pr-12 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" appPasswordToggle="dark" />
+                <input id="account-settings-confirm-password" data-testid="account-settings-confirm-password" type="password" [(ngModel)]="confirmPassword" name="confirmPassword" [placeholder]="'Confirm new password' | translate" autocomplete="new-password" class="!pr-12 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" appPasswordToggle="dark" />
               </div>
               @if (newPassword && confirmPassword && newPassword !== confirmPassword) {
-                <p class="mt-2 text-xs text-red-400">Password and confirm password do not match.</p>
+                <p class="mt-2 text-xs text-red-400">{{ 'Password and confirm password do not match.' | translate }}</p>
               }
             </div>
           </div>
 
           <div class="mt-4 flex justify-end">
             <button data-testid="account-settings-password-submit" type="button" class="ui-btn ui-btn-primary" [disabled]="!newPassword || !confirmPassword || newPassword !== confirmPassword || !allPasswordRequirementsMet" (click)="updatePassword()">
-              Update Password
+              {{ 'Update Password' | translate }}
             </button>
           </div>
         </div>

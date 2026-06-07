@@ -7,9 +7,11 @@ import { StealerLogCallbackModel } from '../../../../shared/model/results/creden
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { ResultRowHelperService } from '../../../../shared/services/result-row-helper.service';
 import { ProxyController } from '../../../../shared/services/proxy-controller';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-defacement-results',
-  imports: [CommonModule, TooltipDirective],
+  imports: [CommonModule, TooltipDirective, TranslatePipe],
   templateUrl: './threat-results.component.html',
 })
 export class ThreatResultsComponent implements OnInit, OnChanges {

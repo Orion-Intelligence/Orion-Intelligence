@@ -13,6 +13,7 @@ import { GraphReportPayload } from '../../../shared/model/report/report-export.m
 import { ValuePresentationBase } from '../../../shared/utils/value-presentation.base';
 import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { AppService } from '../../../services/core/app/app.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 const API_CHAT_TOOL_TYPES: Record<string, string> = {
   user: '/api/dynamic/user',
@@ -26,7 +27,7 @@ const API_CHAT_TOOL_TYPES: Record<string, string> = {
 
 @Component({
   selector: 'app-dashboard-api',
-  imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass, UpperCasePipe, ChatWidgetComponent],
+  imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass, UpperCasePipe, ChatWidgetComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
   templateUrl: './dashboard-api.component.html'
 })

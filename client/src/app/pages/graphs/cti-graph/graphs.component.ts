@@ -21,6 +21,7 @@ import { GraphReportExportType, GraphReportPayload } from '../../../shared/model
 import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 import { ensureStylesheet } from '../../../shared/utils/ensure-stylesheet.util';
 import { ProxyController } from '../../../shared/services/proxy-controller';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 type GraphNodeColor = NonNullable<ExtendedNode['color']>;
 @Component({
@@ -28,7 +29,7 @@ type GraphNodeColor = NonNullable<ExtendedNode['color']>;
   standalone: true,
   templateUrl: './graphs.component.html',
   animations: [fadeInDashboardItem],
-  imports: [CtiSidebarComponent, GraphContextMenuComponent, ProfileComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, NgClass, TabBarComponent, GraphLoadingComponent]
+  imports: [CtiSidebarComponent, GraphContextMenuComponent, ProfileComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, NgClass, TabBarComponent, GraphLoadingComponent, TranslatePipe]
 })
 export class GraphComponent implements OnInit, OnDestroy {
   private readonly playgroundTabName = 'Playground';

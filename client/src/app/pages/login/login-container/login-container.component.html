@@ -5,9 +5,9 @@
       <div class="flex min-h-[750px] h-screen font-['Roboto',sans-serif]" data-testid="login-page">
         <div class="w-[500px] min-w-[500px] max-w-[500px] flex-none bg-white p-8 flex flex-col justify-between items-stretch max-[943px]:w-screen max-[943px]:min-w-0 max-[943px]:max-w-none max-[943px]:flex-[0_0_100vw]">
           <div class="w-full flex justify-center gap-6">
-            <a [href]="appService.getConfig().appSettings.home_header_data_sources" target="_blank" rel="noopener noreferrer" class="text-[#5a6f85] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Data Sources</a>
-            <a [href]="appService.getConfig().appSettings.home_header_adversaries" target="_blank" rel="noopener noreferrer" class="text-[#5a6f85] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Adversaries</a>
-            <a [href]="appService.getConfig().appSettings.home_header_pricing" target="_blank" rel="noopener noreferrer" class="text-[#5a6f85] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">Pricing</a>
+            <a [href]="appService.getConfig().appSettings.home_header_data_sources" target="_blank" rel="noopener noreferrer" class="text-[#5a6f85] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">{{ 'Data Sources' | translate }}</a>
+            <a [href]="appService.getConfig().appSettings.home_header_adversaries" target="_blank" rel="noopener noreferrer" class="text-[#5a6f85] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">{{ 'Adversaries' | translate }}</a>
+            <a [href]="appService.getConfig().appSettings.home_header_pricing" target="_blank" rel="noopener noreferrer" class="text-[#5a6f85] font-['Roboto',sans-serif] font-normal text-[14px] no-underline">{{ 'Pricing' | translate }}</a>
           </div>
           <div class="flex flex-col mt-[100px] items-center flex-grow">
             <div class="w-full max-w-[500px] flex flex-col items-center">
@@ -20,33 +20,33 @@
                   }
                 </div>
               }
-              <div class="text-[#373637] font-['Roboto',sans-serif] font-normal text-[16px] text-center mb-8">Login to get started!</div>
+              <div class="text-[#373637] font-['Roboto',sans-serif] font-normal text-[16px] text-center mb-8">{{ 'Login to get started!' | translate }}</div>
 
               @if (isMobile) {
                 <div class="flex items-center gap-2 cursor-pointer text-[#373637] text-[14px]" (click)="demoLogin()">
                   <span class="flex items-center gap-2">
                     <img src="/assets/images/shared/theme/info.svg" class="mt-[-2px]" alt="Information">
-                    Want to explore first? <strong class="font-semibold">Try Demo</strong>
+                    {{ 'Want to explore first?' | translate }} <strong class="font-semibold">{{ 'Try Demo' | translate }}</strong>
                   </span>
                 </div>
               }
               <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" class="w-full flex flex-col gap-2">
-                <label for="username" class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0">Email</label>
+                <label for="username" class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0">{{ 'Email' | translate }}</label>
                 <div class="relative w-full">
                   <img src="/assets/images/shared/profile-icon-dark.svg" alt="profile icon" fetchpriority="high" decoding="async" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
-                  <input [(ngModel)]="user.mail" placeholder="Enter email" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="username" data-testid="login-user" required type="text" />
+                  <input [(ngModel)]="user.mail" [placeholder]="'Enter email' | translate" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="username" data-testid="login-user" required type="text" />
                 </div>
-                <label for=" word" class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0 mt-2">Password</label>
+                <label for=" word" class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0 mt-2">{{ 'Password' | translate }}</label>
                 <div class="relative w-full">
                   <img src="/assets/images/shared/lock.svg" alt="profile icon" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
-                  <input [(ngModel)]="user.password" placeholder="Enter password" class="!pr-16 w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="password" data-testid="login-pass" required type="password" appPasswordToggle />
+                  <input [(ngModel)]="user.password" [placeholder]="'Enter password' | translate" class="!pr-16 w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black" name="password" data-testid="login-pass" required type="password" appPasswordToggle />
                 </div>
-                <span (click)="goToForgot()" class="text-[#5a6f85] cursor-pointer font-['Inter',sans-serif] font-normal text-[14px] no-underline self-end mb-6" data-testid="reset-password-link">Reset password?</span>
+                <span (click)="goToForgot()" class="text-[#5a6f85] cursor-pointer font-['Inter',sans-serif] font-normal text-[14px] no-underline self-end mb-6" data-testid="reset-password-link">{{ 'Reset password?' | translate }}</span>
                 @if (errorMessage == 'verification pending') {
                   <div class="flex items-center justify-between mt-2 px-3 py-2 rounded-lg bg-[#dc3545] bg-opacity-75 text-white shadow-sm">
                     <span class="text-left"><b>{{ errorMessage }}</b></span>
                     <button (click)="resendMail()" class="ml-3 bg-[var(--color-blue-700)] text-[var(--color-text1)] text-[12px] font-medium px-3 py-1 rounded">
-                      Resend mail
+                      {{ 'Resend mail' | translate }}
                     </button>
                   </div>
                 }
@@ -57,16 +57,16 @@
                   </div>
                 }
                 <div>
-                  <input class="w-full h-[44px] bg-[#172235] text-white rounded-[8px] font-['Roboto',sans-serif] font-medium text-[14px] cursor-pointer mb-8" [class.cursor-not-allowed]="!loginForm.valid" data-testid="login-button" type="submit" value="Sign In" />
+                  <input class="w-full h-[44px] bg-[#172235] text-white rounded-[8px] font-['Roboto',sans-serif] font-medium text-[14px] cursor-pointer mb-8" [class.cursor-not-allowed]="!loginForm.valid" data-testid="login-button" type="submit" [value]="'Sign In' | translate" />
                 </div>
               </form>
               <p class="text-[#373637] font-['Roboto',sans-serif] font-normal text-[14px] mt-[-16px]">
-                Don't have an account? <span (click)="goToSignUp()" class="text-[#373637] font-bold no-underline cursor-pointer">Sign Up</span>
+                {{ 'Don\'t have an account?' | translate }} <span (click)="goToSignUp()" class="text-[#373637] font-bold no-underline cursor-pointer">{{ 'Sign Up' | translate }}</span>
               </p>
             </div>
           </div>
           <div class="text-center mt-auto">
-            <p class="text-[#5a6f85] font-['Roboto',sans-serif] font-normal text-[14px] leading-[1.2]">Copyright &copy; 2025. Powered by</p>
+            <p class="text-[#5a6f85] font-['Roboto',sans-serif] font-normal text-[14px] leading-[1.2]">{{ 'Copyright © 2025. Powered by' | translate }}</p>
             <p class="text-[#5a6f85] font-['Roboto',sans-serif] font-normal text-[14px] leading-[1.2]">{{ this.appService.getConfig().appSettings.app_name }}</p>
           </div>
         </div>
@@ -89,7 +89,7 @@
               <div class="flex items-center">
                 <a class="inline-flex items-center gap-2 rounded-[20px] border border-[rgba(255,255,255,0.35)] bg-[rgba(255,255,255,0.2)] px-[14px] py-[6px] text-[14px] font-bold text-white no-underline transition-colors hover:bg-[rgba(255,255,255,0.3)] hover:border-[rgba(255,255,255,0.6)]" href="/">
                   <img alt="back" src="assets/images/shared/theme/arrow.svg" class="h-[18px] w-[18px]">
-                  <span>Homepage</span>
+                  <span>{{ 'Homepage' | translate }}</span>
                 </a>
               </div>
               @if (errorMessage) {
@@ -98,12 +98,12 @@
               @if (otpDataUrl) {
                 <div class="grid justify-items-start text-left" data-testid="twofa-center">
                   <img [src]="otpDataUrl" alt="2FA QR" width="200" height="200">
-                  <div class="mt-[10px] text-[13px] font-semibold text-white/70">Scan QR in your authenticator app</div>
+                  <div class="mt-[10px] text-[13px] font-semibold text-white/70">{{ 'Scan QR in your authenticator app' | translate }}</div>
                 </div>
               }
               @if (otpSecret) {
                 <div class="space-y-[10px]">
-                  <p class="text-center text-white"><b>Backup key (tap to copy)</b></p>
+                  <p class="text-center text-white"><b>{{ 'Backup key (tap to copy)' | translate }}</b></p>
                   <div class="cursor-pointer rounded-md border border-[#ffecb5] bg-[#fff3cd] px-4 py-3 text-[#664d03]" role="alert" (click)="copyToClipboard(otpSecret)">
                     <div class="flex items-center justify-between gap-3">
                       <div class="flex items-center">
@@ -111,24 +111,24 @@
                         <strong class="ml-2">{{ otpSecret }}</strong>
                       </div>
                       @if (copied) {
-                        <span class="font-bold">Copied!</span>
+                        <span class="font-bold">{{ 'Copied!' | translate }}</span>
                       }
                     </div>
                   </div>
                 </div>
               }
               <div>
-                <div class="text-center text-[16px] font-extrabold text-white" data-testid="twofa-title">Enter 2FA code</div>
-                <div class="mt-[6px] text-center text-[13px] font-medium text-white/70">Type the 6-digit code from your authenticator app</div>
+                <div class="text-center text-[16px] font-extrabold text-white" data-testid="twofa-title">{{ 'Enter 2FA code' | translate }}</div>
+                <div class="mt-[6px] text-center text-[13px] font-medium text-white/70">{{ 'Type the 6-digit code from your authenticator app' | translate }}</div>
               </div>
               <form (ngSubmit)="submitOtp()" class="space-y-[14px]">
                 <div class="grid">
-                  <label class="hidden" for="id_otp">2FA Code</label>
+                  <label class="hidden" for="id_otp">{{ '2FA Code' | translate }}</label>
                   <input [(ngModel)]="otpCode" name="otpCode" class="h-[44px] rounded-[8px] border border-[rgba(0,0,0,0.15)] bg-[linear-gradient(180deg,#fff_0%,#f2f4f6_100%)] px-[14px] text-center text-[18px] font-bold tracking-[8px] text-black placeholder:tracking-[0] focus:outline-none focus:ring-[3px] focus:ring-[rgba(78,162,241,0.35)]" id="id_otp" placeholder="••••••" required minlength="6" maxlength="6" inputmode="numeric" autocomplete="one-time-code" type="text">
                 </div>
                 <div>
                   <button type="submit" class="w-full rounded-[8px] border-none bg-[linear-gradient(92.32deg,#4EA2F1_2.58%,#2C7AC5_66.77%,#1E6CB7_130.97%)] py-3 text-[14px] font-medium text-white transition-all duration-300 ease-in-out hover:brightness-90 disabled:cursor-not-allowed disabled:opacity-50" [disabled]="!otpCode || otpCode.length < 6">
-                    Verify 2FA
+                    {{ 'Verify 2FA' | translate }}
                   </button>
                 </div>
               </form>

@@ -1,7 +1,7 @@
 <div class="mb-[200px] w-full px-[32px] pt-[24px] max-[1200px]:px-[15px] max-[1200px]:pt-[18px] max-[943px]:px-[10px] max-[943px]:pt-[14px]" @fadeInDashboardItem>
   <div class="mb-5">
-    <h1 class="ui-page-title">Event Management</h1>
-    <p class="ui-page-description">Search SIEM events for your own tenant only. Admin and maintainer access is tenant-scoped.</p>
+    <h1 class="ui-page-title">{{ 'Event Management' | translate }}</h1>
+    <p class="ui-page-description">{{ 'Search SIEM events for your own tenant only. Admin and maintainer access is tenant-scoped.' | translate }}</p>
   </div>
 
   <div class="rounded-[14px] bg-[var(--color-blue-760)] py-[15px]" @fadeInDashboardItem>
@@ -14,16 +14,16 @@
       [valueValidators]="searchBuilderValueValidators"
       [tagValidators]="searchBuilderTagValidators"
       [useRouteQuery]="false"
-      [advancedTitle]="'Advanced Filter Builder'"
-      [advancedSubtitle]="'Combine multiple filters with AND/OR for precise SIEM results'"
+      [advancedTitle]="'Advanced Filter Builder' | translate"
+      [advancedSubtitle]="'Combine multiple filters with AND/OR for precise SIEM results' | translate"
       (searchTriggered)="triggerSearch($event)"
     ></app-ioc-search>
 
     @if (activeDateRange) {
       <div class="mt-3 flex flex-wrap gap-2">
         <div class="inline-flex items-center gap-[8px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-1.5 text-[12px] font-semibold text-[var(--color-text2)]">
-          Date: {{ activeDateRange }}
-          <button type="button" class="inline-flex h-4 w-4 items-center justify-center text-[var(--color-text3)] transition hover:text-[var(--color-text1)]" (click)="clearSidebarFilters()" aria-label="Clear date filter">
+          {{ 'Date' | translate }}: {{ activeDateRange }}
+          <button type="button" class="inline-flex h-4 w-4 items-center justify-center text-[var(--color-text3)] transition hover:text-[var(--color-text1)]" (click)="clearSidebarFilters()" [attr.aria-label]="'Clear date filter' | translate">
             <i class="bi bi-x-circle-fill text-[12px]"></i>
           </button>
         </div>
@@ -71,7 +71,7 @@
         <div class="flex items-center gap-2">
           <img alt="Search" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
           <div class="text-sm font-semibold text-[var(--color-text1)]">{{ getActorLabel() }}</div>
-          <div class="text-xs text-[var(--color-text4)]">Access</div>
+          <div class="text-xs text-[var(--color-text4)]">{{ 'Access' | translate }}</div>
         </div>
 
         <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
@@ -79,7 +79,7 @@
         <div class="hidden items-center gap-2 md:flex">
           <img alt="Search" src="assets/images/shared/results_found.svg" class="h-5 w-5">
           <div class="text-sm font-semibold text-[var(--color-text1)]">{{ totalHits }}</div>
-          <div class="text-xs text-[var(--color-text4)]">Total Hits</div>
+          <div class="text-xs text-[var(--color-text4)]">{{ 'Total Hits' | translate }}</div>
         </div>
 
         <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
@@ -87,7 +87,7 @@
         <div class="hidden items-center gap-2 lg:flex">
           <img alt="Search" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
           <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]" [title]="displayQuery || 'query'">{{ displayQuery || 'query' }}</div>
-          <div class="text-xs text-[var(--color-text4)]">Query</div>
+          <div class="text-xs text-[var(--color-text4)]">{{ 'Query' | translate }}</div>
         </div>
 
         <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
@@ -95,7 +95,7 @@
         <div class="hidden items-center gap-2 xl:flex">
           <img alt="Search" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
           <div class="text-sm font-semibold text-[var(--color-text1)]">{{ currentBatchSize }} / {{ pageCount }}</div>
-          <div class="text-xs text-[var(--color-text4)]">Batch / Pages</div>
+          <div class="text-xs text-[var(--color-text4)]">{{ 'Batch / Pages' | translate }}</div>
         </div>
       </div>
 
@@ -103,10 +103,10 @@
         <div class="ui-ioc-table-shell overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
           <div class="ui-ioc-table-head grid min-w-[980px] grid-cols-[70px_1.5fr_130px_180px_180px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[70px_1.5fr_130px_180px_48px]">
             <div>#</div>
-            <div>Event</div>
-            <div>Severity</div>
-            <div class="max-[900px]:hidden">Source / Host</div>
-            <div>Date</div>
+            <div>{{ 'Event' | translate }}</div>
+            <div>{{ 'Severity' | translate }}</div>
+            <div class="max-[900px]:hidden">{{ 'Source / Host' | translate }}</div>
+            <div>{{ 'Date' | translate }}</div>
             <div></div>
           </div>
 
@@ -134,7 +134,7 @@
                   <div class="mt-[2px] truncate text-xs text-[var(--color-text4)]" [title]="stringifyPrimitive(item?.host)">{{ stringifyPrimitive(item?.host) }}</div>
                 </div>
                 <div class="text-xs text-[var(--color-text4)]">{{ getEventTimestamp(item) }}</div>
-                <button data-testid="siem-log-row-toggle" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="$event.stopPropagation(); toggleResultItem(idx)" [attr.aria-label]="expandedResultIndex === idx ? 'Collapse row' : 'Expand row'" [attr.aria-pressed]="expandedResultIndex === idx">
+                <button data-testid="siem-log-row-toggle" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="$event.stopPropagation(); toggleResultItem(idx)" [attr.aria-label]="(expandedResultIndex === idx ? 'Collapse row' : 'Expand row') | translate" [attr.aria-pressed]="expandedResultIndex === idx">
                   <img [src]="expandedResultIndex === idx ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" [alt]="expandedResultIndex === idx ? 'Collapse row' : 'Expand row'" class="h-3 w-3 ui-action-icon" />
                 </button>
               </div>
@@ -155,7 +155,7 @@
                       <div class="my-4 h-px w-full bg-[var(--color-divider)]"></div>
 
                       <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">Extracted IOCs</div>
+                        <div class="text-[12px] text-[var(--color-text4)]">{{ 'Extracted IOCs' | translate }}</div>
                         @if (getExtractedIocs(item).length) {
                           <div class="mt-[8px] flex flex-wrap gap-3">
                             @for (ioc of getExtractedIocs(item); track ioc.name) {
@@ -168,7 +168,7 @@
                             }
                           </div>
                         } @else {
-                          <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">No extracted IOCs available</div>
+                          <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">{{ 'No extracted IOCs available' | translate }}</div>
                         }
                       </div>
                     </div>
@@ -176,23 +176,23 @@
                     <div class="ui-event-management-expand-side max-h-[320px] overflow-y-auto pr-1">
                       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                          <div class="text-[12px] text-[var(--color-text4)]">Event ID</div>
+                          <div class="text-[12px] text-[var(--color-text4)]">{{ 'Event ID' | translate }}</div>
                           <div class="mt-[4px] text-[13px] font-mono text-[var(--color-text1)]">{{ stringifyPrimitive(item?.event_id) }}</div>
                         </div>
                         <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                          <div class="text-[12px] text-[var(--color-text4)]">User</div>
+                          <div class="text-[12px] text-[var(--color-text4)]">{{ 'User' | translate }}</div>
                           <div class="mt-[4px] text-[13px] text-[var(--color-text1)]">{{ stringifyPrimitive(item?.user) }}</div>
                         </div>
                         <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                          <div class="text-[12px] text-[var(--color-text4)]">Timestamp</div>
+                          <div class="text-[12px] text-[var(--color-text4)]">{{ 'Timestamp' | translate }}</div>
                           <div class="mt-[4px] text-[13px] text-[var(--color-text1)]">{{ stringifyPrimitive(item?.timestamp) }}</div>
                         </div>
                         <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                          <div class="text-[12px] text-[var(--color-text4)]">Ingested At</div>
+                          <div class="text-[12px] text-[var(--color-text4)]">{{ 'Ingested At' | translate }}</div>
                           <div class="mt-[4px] text-[13px] text-[var(--color-text1)]">{{ stringifyPrimitive(item?.ingested_at) }}</div>
                         </div>
                         <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px] sm:col-span-2">
-                          <div class="text-[12px] text-[var(--color-text4)]">Hash</div>
+                          <div class="text-[12px] text-[var(--color-text4)]">{{ 'Hash' | translate }}</div>
                           <div class="mt-[4px] break-all text-[13px] font-mono text-[var(--color-text1)]">{{ stringifyPrimitive(item?.hash) }}</div>
                         </div>
                       </div>

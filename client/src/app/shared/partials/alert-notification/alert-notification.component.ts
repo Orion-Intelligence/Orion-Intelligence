@@ -9,9 +9,11 @@ import { overlayAnimation, sidebarAnimation } from '../../animations/sidebar.ani
 import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice-modal.component';
 import { ExportChoiceOption } from '../../model/report/export-choice.model';
 import { AlertExportService } from '../../services/export/alert-export.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
 @Component({
   selector: 'app-alert-notification',
-  imports: [CommonModule, NgClass, ExportChoiceModalComponent],
+  imports: [CommonModule, NgClass, ExportChoiceModalComponent, TranslatePipe],
   templateUrl: './alert-notification.component.html',
   animations: [sidebarAnimation, overlayAnimation],
 })
