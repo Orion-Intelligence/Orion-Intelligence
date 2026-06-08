@@ -64,8 +64,6 @@ class DynamicScanningProcessor:
                 if scan_result is None:
                     return summary
 
-                print("*"*90)
-                print(response)
                 status = scan_result.get("status")
                 if status == "pending":
                     await asyncio.sleep(5)
