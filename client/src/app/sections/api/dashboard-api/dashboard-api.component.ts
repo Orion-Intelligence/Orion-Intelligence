@@ -14,6 +14,7 @@ import { ValuePresentationBase } from '../../../shared/utils/value-presentation.
 import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { AppService } from '../../../services/core/app/app.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 
 const API_CHAT_TOOL_TYPES: Record<string, string> = {
   user: '/api/dynamic/user',
@@ -27,7 +28,7 @@ const API_CHAT_TOOL_TYPES: Record<string, string> = {
 
 @Component({
   selector: 'app-dashboard-api',
-  imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass, UpperCasePipe, ChatWidgetComponent, TranslatePipe],
+  imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass, UpperCasePipe, ChatWidgetComponent, TooltipDirective, TranslatePipe],
   animations: [fadeInDashboardItem],
   templateUrl: './dashboard-api.component.html'
 })
@@ -421,8 +422,8 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
 
   private isFailedPendingResponse(res: any): boolean {
     return (res?.status === 'pending' || res?.result?.status === 'pending') &&
-            ((res?.result?.progress ?? res?.progress) === 0) &&
-            ((res?.result?.step ?? res?.step) === 'failed');
+      ((res?.result?.progress ?? res?.progress) === 0) &&
+      ((res?.result?.step ?? res?.step) === 'failed');
   }
 
   private isFailedDoneResponse(res: any): boolean {

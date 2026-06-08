@@ -51,6 +51,7 @@ export abstract class CaseDetailsStore {
   abstract cancelSectionMode(): void;
   abstract loadArtifactReports(source: string, q?: string): void;
   abstract searchArtifactReports(source: string, q: string): void;
+  abstract scheduleArtifactReportSearch(artifact: CaseArtifact): void;
   abstract selectArtifactReport(artifact: CaseArtifact, report: ArtifactReportOption): void;
   abstract clearArtifactReportSelection(artifact: CaseArtifact): void;
   abstract artifactReports: ArtifactReportOption[];

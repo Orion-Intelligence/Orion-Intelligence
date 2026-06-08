@@ -18,6 +18,7 @@ import { ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensCountrySele
 import { ThreatLensService } from './threat-lens.service';
 import { ThreatLensGeoUtils } from './map-utils/threat-lens-geo.utils';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 
 @Component({
   selector: 'app-threat-lens',
@@ -29,7 +30,9 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
     ThreatLensFeedPanelComponent,
     IpDetailPopupComponent,
     ThreatLensMapRendererComponent,
-    MapLoadingBadgesComponent, TranslatePipe],
+    MapLoadingBadgesComponent,
+    TooltipDirective,
+    TranslatePipe],
   templateUrl: './threat-lens.html',
 })
 export class ThreatLensComponent implements OnDestroy {
@@ -79,7 +82,7 @@ export class ThreatLensComponent implements OnDestroy {
 
   @Output() loadingChange = new EventEmitter<boolean>();
 
-  constructor( private ngZone: NgZone, private cdr: ChangeDetectorRef, private threatLensService: ThreatLensService, private networkIntelService: NetworkIntelScanService, protected sidebarService: SidebarService, ) {
+  constructor(private ngZone: NgZone, private cdr: ChangeDetectorRef, private threatLensService: ThreatLensService, private networkIntelService: NetworkIntelScanService, protected sidebarService: SidebarService,) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 

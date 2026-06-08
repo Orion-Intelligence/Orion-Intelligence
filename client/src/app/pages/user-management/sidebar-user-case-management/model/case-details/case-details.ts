@@ -280,6 +280,14 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }, 500);
   }
 
+  scheduleArtifactReportSearch(artifact: CaseArtifact): void {
+    if (!artifact || artifact.type !== 'report' || !artifact.linkedReportSource) {
+      return;
+    }
+
+    this.searchArtifactReports(artifact.linkedReportSource, artifact.title || '');
+  }
+
   selectArtifactReport(artifact: CaseArtifact, report: ArtifactReportOption): void {
     artifact.linkedReportId = report.id;
     artifact.linkedReportTitle = report.title;

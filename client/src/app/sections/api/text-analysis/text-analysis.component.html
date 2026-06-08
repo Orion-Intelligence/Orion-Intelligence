@@ -1,188 +1,213 @@
 <div class="mx-auto w-full max-w-[2400px] px-5 pb-[200px] lg:px-8">
   @if (appService.getConfig().appSettings.ai_endpoint_enabled) {
-    <app-chat-widget tool="api_payload" type="/api/nexus/analyze-text"></app-chat-widget>
+  <app-chat-widget tool="api_payload" type="/api/nexus/analyze-text"></app-chat-widget>
   }
 
   <form #analysisForm="ngForm" (submit)="analyzeText($event)" class="mt-6">
     <div class="text-analysis-input-panel overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)]">
-        <div class="text-analysis-input-bar flex items-center justify-between gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-790)] px-4 py-3 max-[640px]:flex-col max-[640px]:items-start">
-          <div class="flex min-w-0 items-center gap-3">
-            <div class="min-w-0 flex-1">
-              <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ 'Text Analysis' | translate }}</div>
-              <div class="text-[12px] text-[var(--color-text4)]">{{ 'Paste message content, OCR text, or extracted page copy.' | translate }}</div>
-            </div>
+      <div class="text-analysis-input-bar flex items-center justify-between gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-790)] px-4 py-3 max-[640px]:flex-col max-[640px]:items-start">
+        <div class="flex min-w-0 items-center gap-3">
+          <div class="min-w-0 flex-1">
+            <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ 'Text Analysis' | translate }}</div>
+            <div class="text-[12px] text-[var(--color-text4)]">{{ 'Paste message content, OCR text, or extracted page
+              copy.' | translate }}</div>
           </div>
-          <div class="shrink-0 text-[12px] font-medium text-[var(--color-text4)]">{{ text.length }}/5000</div>
         </div>
-        <textarea data-testid="text-analysis-input" [(ngModel)]="text" name="text" required maxlength="5000" autocapitalize="none" autocomplete="off" [placeholder]="'Paste suspicious text here...' | translate" class="text-analysis-input-field block min-h-[180px] w-full resize-y bg-[var(--color-blue-700)] px-4 py-3 font-mono text-[13.5px] leading-6 text-[var(--color-text1)] outline-none placeholder:font-[Inter] placeholder:text-[14px] placeholder:text-[var(--color-text4)]"></textarea>
-        <div class="text-analysis-input-bar flex items-center justify-between gap-3 border-t border-[var(--color-divider)] bg-[var(--color-blue-790)] px-4 py-3 max-[640px]:flex-col max-[640px]:items-stretch">
-          <div class="text-[12px] text-[var(--color-text4)]">{{ 'Spam classification and URL reputation checks run together.' | translate }}</div>
-          <button data-testid="text-analysis-submit" type="submit" [disabled]="loading || !text.trim()" class="ui-btn ui-btn-primary inline-flex h-10 min-w-[132px] items-center justify-center gap-2 rounded-[8px] px-5 text-[14px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">
-            <i class="bi bi-shield-check text-[15px]"></i>
-            <span>{{ (loading ? 'Analyzing' : 'Analyze Text') | translate }}</span>
-          </button>
-        </div>
+        <div class="shrink-0 text-[12px] font-medium text-[var(--color-text4)]">{{ text.length }}/5000</div>
+      </div>
+      <textarea data-testid="text-analysis-input" [(ngModel)]="text" name="text" required maxlength="5000" autocapitalize="none" autocomplete="off" [placeholder]="'Paste suspicious text here...' | translate" class="text-analysis-input-field block min-h-[180px] w-full resize-y bg-[var(--color-blue-700)] px-4 py-3 font-mono text-[13.5px] leading-6 text-[var(--color-text1)] outline-none placeholder:font-[Inter] placeholder:text-[14px] placeholder:text-[var(--color-text4)]"></textarea>
+      <div class="text-analysis-input-bar flex items-center justify-between gap-3 border-t border-[var(--color-divider)] bg-[var(--color-blue-790)] px-4 py-3 max-[640px]:flex-col max-[640px]:items-stretch">
+        <div class="text-[12px] text-[var(--color-text4)]">{{ 'Spam classification and URL reputation checks run
+          together.' | translate }}</div>
+        <button data-testid="text-analysis-submit" type="submit" [disabled]="loading || !text.trim()" class="ui-btn ui-btn-primary inline-flex h-10 min-w-[132px] items-center justify-center gap-2 rounded-[8px] px-5 text-[14px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">
+          <i class="bi bi-shield-check text-[15px]"></i>
+          <span>{{ (loading ? 'Analyzing' : 'Analyze Text') | translate }}</span>
+        </button>
+      </div>
     </div>
   </form>
 
   @if (!queryTriggered && !loading) {
-    <app-empty-query></app-empty-query>
+  <app-empty-query></app-empty-query>
   }
 
   @if (queryTriggered && loading) {
-    <div class="mt-[12px] ml-0 max-w-[720px]">
-      <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text1)]">{{ 'Analyzing text...' | translate }}</div>
-      <div class="ui-progress-track h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
-        <div class="ui-progress-indeterminate-bar"></div>
-      </div>
+  <div class="mt-[12px] ml-0 max-w-[720px]">
+    <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text1)]">{{ 'Analyzing text...' | translate }}</div>
+    <div class="ui-progress-track h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+      <div class="ui-progress-indeterminate-bar"></div>
     </div>
-    <div data-testid="text-analysis-loading" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]" @fadeInDashboardItem>
-      <div class="ui-ioc-table-head grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[60px_1fr_120px_48px]">
-        <div>#</div>
-        <div>{{ 'Result' | translate }}</div>
-        <div>{{ 'Fields' | translate }}</div>
-        <div class="max-[640px]:hidden">{{ 'API Type' | translate }}</div>
-        <div></div>
-      </div>
-      <div class="space-y-2 px-4 py-3">
-        @for (i of [1,2,3]; track i) {
-          <div class="grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 max-[900px]:grid-cols-[60px_1fr_120px_48px]">
-            <div class="ui-shimmer h-3 w-8 rounded bg-[var(--color-blue-720)]"></div>
-            <div class="ui-shimmer h-3 w-44 rounded bg-[var(--color-blue-720)]"></div>
-            <div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-blue-720)]"></div>
-            <div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-blue-720)] max-[640px]:hidden"></div>
-            <div class="ui-shimmer h-7 w-7 rounded-md bg-[var(--color-blue-720)]"></div>
-          </div>
-        }
-      </div>
+  </div>
+  <div data-testid="text-analysis-loading" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]" @fadeInDashboardItem>
+    <div class="ui-ioc-table-head grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[60px_1fr_120px_48px]">
+      <div>#</div>
+      <div>{{ 'Result' | translate }}</div>
+      <div>{{ 'Fields' | translate }}</div>
+      <div class="max-[640px]:hidden">{{ 'API Type' | translate }}</div>
+      <div></div>
     </div>
+    <div class="space-y-2 px-4 py-3">
+      @for (i of [1,2,3]; track i) {
+      <div class="grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 max-[900px]:grid-cols-[60px_1fr_120px_48px]">
+        <div class="ui-shimmer h-3 w-8 rounded bg-[var(--color-blue-720)]"></div>
+        <div class="ui-shimmer h-3 w-44 rounded bg-[var(--color-blue-720)]"></div>
+        <div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-blue-720)]"></div>
+        <div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-blue-720)] max-[640px]:hidden"></div>
+        <div class="ui-shimmer h-7 w-7 rounded-md bg-[var(--color-blue-720)]"></div>
+      </div>
+      }
+    </div>
+  </div>
   }
 
   @if (queryTriggered && !loading && errorMessage) {
-    <section class="mt-[15px] rounded-[10px] border border-rose-400/30 bg-[var(--color-blue-790)] p-[20px] text-center" @fadeInDashboardItem>
-      <div class="text-[16px] font-semibold text-[var(--color-text1)]">{{ 'Analysis failed' | translate }}</div>
-      <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">{{ errorMessage }}</div>
-    </section>
+  <section class="mt-[15px] rounded-[10px] border border-rose-400/30 bg-[var(--color-blue-790)] p-[20px] text-center" @fadeInDashboardItem>
+    <div class="text-[16px] font-semibold text-[var(--color-text1)]">{{ 'Analysis failed' | translate }}</div>
+    <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">{{ errorMessage }}</div>
+  </section>
   }
 
   @if (queryTriggered && !loading && hasResult && result) {
-    <div class="mt-[15px] mx-0" @fadeInDashboardItem>
-      <section>
-        <div class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3" @fadeInDashboardItem>
-          <div class="flex items-center gap-2">
-            <img alt="API Type" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
-            <div class="text-sm font-semibold capitalize text-[var(--color-text1)]">{{ 'text analysis' | translate }}</div>
-            <div class="text-xs text-[var(--color-text4)]">{{ 'API Type' | translate }}</div>
+  <div class="mt-[15px] mx-0" @fadeInDashboardItem>
+    <section>
+      <div class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3" @fadeInDashboardItem>
+        <div class="flex items-center gap-2">
+          <img alt="API Type" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
+          <div class="text-sm font-semibold capitalize text-[var(--color-text1)]">{{ 'text analysis' | translate }}
           </div>
-          <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
-          <div class="hidden items-center gap-2 md:flex">
-            <img alt="iocTypes.m_url" src="assets/images/shared/results_found.svg" class="h-5 w-5">
-            <div class="text-sm font-semibold text-[var(--color-text1)]">{{ result.urls_found || 0 }}</div>
-            <div class="text-xs text-[var(--color-text4)]">{{ 'iocTypes.m_url' | translate }}</div>
-          </div>
-          <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
-          <div class="hidden min-w-0 items-center gap-2 lg:flex">
-            <img alt="Verdict" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
-            <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]">{{ riskLabel }}</div>
-            <div class="text-xs text-[var(--color-text4)]">{{ 'Verdict' | translate }}</div>
-          </div>
-          <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
-          <div class="hidden items-center gap-2 xl:flex">
-            <img alt="Fields" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
-            <div class="text-sm font-semibold text-[var(--color-text1)]">{{ resultEntries.length }}</div>
-            <div class="text-xs text-[var(--color-text4)]">{{ 'Fields' | translate }}</div>
-          </div>
+          <div class="text-xs text-[var(--color-text4)]">{{ 'API Type' | translate }}</div>
         </div>
+        <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
+        <div class="hidden items-center gap-2 md:flex">
+          <img alt="iocTypes.m_url" src="assets/images/shared/results_found.svg" class="h-5 w-5">
+          <div class="text-sm font-semibold text-[var(--color-text1)]">{{ result.urls_found || 0 }}</div>
+          <div class="text-xs text-[var(--color-text4)]">{{ 'iocTypes.m_url' | translate }}</div>
+        </div>
+        <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
+        <div class="hidden min-w-0 items-center gap-2 lg:flex">
+          <img alt="Verdict" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
+          <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]">{{ riskLabel }}</div>
+          <div class="text-xs text-[var(--color-text4)]">{{ 'Verdict' | translate }}</div>
+        </div>
+        <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
+        <div class="hidden items-center gap-2 xl:flex">
+          <img alt="Fields" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
+          <div class="text-sm font-semibold text-[var(--color-text1)]">{{ resultEntries.length }}</div>
+          <div class="text-xs text-[var(--color-text4)]">{{ 'Fields' | translate }}</div>
+        </div>
+      </div>
 
-        <section class="mt-[16px] space-y-[16px]">
-          <div data-testid="text-analysis-table" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]" @fadeInDashboardItem>
-            <div class="ui-ioc-table-head grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[60px_1fr_120px_48px]">
-              <div>#</div>
-              <div>{{ 'Result' | translate }}</div>
-              <div>{{ 'Fields' | translate }}</div>
-              <div class="max-[640px]:hidden">{{ 'API Type' | translate }}</div>
-              <div></div>
-            </div>
-            <div data-testid="text-analysis-row" role="row" tabindex="0" class="ui-ioc-table-row grid min-w-[680px] cursor-pointer grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] px-4 py-3 text-sm text-[var(--color-text1)] transition-colors max-[900px]:grid-cols-[60px_1fr_120px_48px] ui-ioc-row-even" [class.credential_row_expand]="expanded" [attr.aria-expanded]="expanded" (click)="toggleExpanded()" (keydown.enter)="toggleExpanded()" (keydown.space)="$event.preventDefault(); toggleExpanded()">
-              <div class="font-mono text-xs">1</div>
-              <div class="truncate" [title]="primaryDetectionLabel">{{ primaryDetectionLabel }}</div>
-              <div class="truncate">{{ resultEntries.length + (urlResults.length * 4) }} {{ 'Fields' | translate }}</div>
-              <div class="text-xs capitalize text-[var(--color-text4)] max-[640px]:hidden">{{ 'text analysis' | translate }}</div>
-              <button data-testid="text-analysis-row-toggle" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="$event.stopPropagation(); toggleExpanded()" [attr.aria-label]="(expanded ? 'Collapse row' : 'Expand row') | translate" [attr.aria-pressed]="expanded">
-                <img class="h-3 w-3 ui-action-icon" [src]="expanded ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" [alt]="expanded ? 'Collapse row' : 'Expand row'">
-              </button>
-            </div>
-            @if (expanded) {
-              <div class="border-b border-[var(--color-divider)] bg-[var(--color-blue-790)] px-4 py-3" @fadeInDashboardItem>
-                <div data-testid="defacement-report-card" class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border border-[var(--ui-consolidated-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] [--ui-consolidated-sub-bg:var(--color-blue-700)] [--ui-consolidated-sub-hover:var(--color-blue-700)] [--ui-consolidated-border:var(--color-border)] [--ui-consolidated-divider:var(--color-divider)]">
-                  <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
-                    <div class="min-w-0">
-                      <b data-testid="defacement-report-card-title" class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">{{ 'TEXT ANALYSIS RESULT | 1' | translate }}</b>
-                      <div class="mt-[4px] overflow-hidden text-ellipsis whitespace-nowrap text-[11px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text6)]">
-                        {{ 'Text' | translate }}: <span class="font-[600] text-[var(--color-text2)]">{{ submittedText }}</span>
-                      </div>
-                    </div>
-                    <span class="inline-flex h-[32px] items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent px-[12px] text-[12px] font-[800] tracking-[0.2px] text-[var(--color-text1)]">{{ resultEntries.length + (urlResults.length * 4) }} {{ 'Fields' | translate }}</span>
+      <section class="mt-[16px] space-y-[16px]">
+        <div data-testid="text-analysis-table" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]" @fadeInDashboardItem>
+          <div class="ui-ioc-table-head grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[60px_1fr_120px_48px]">
+            <div>#</div>
+            <div>{{ 'Result' | translate }}</div>
+            <div>{{ 'Fields' | translate }}</div>
+            <div class="max-[640px]:hidden">{{ 'API Type' | translate }}</div>
+            <div></div>
+          </div>
+          <div data-testid="text-analysis-row" role="row" tabindex="0" class="ui-ioc-table-row grid min-w-[680px] cursor-pointer grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] px-4 py-3 text-sm text-[var(--color-text1)] transition-colors max-[900px]:grid-cols-[60px_1fr_120px_48px] ui-ioc-row-even" [class.credential_row_expand]="expanded" [attr.aria-expanded]="expanded" (click)="toggleExpanded()" (keydown.enter)="toggleExpanded()" (keydown.space)="$event.preventDefault(); toggleExpanded()">
+            <div class="font-mono text-xs">1</div>
+            <div class="truncate" [title]="primaryDetectionLabel">{{ primaryDetectionLabel }}</div>
+            <div class="truncate">{{ resultEntries.length + (urlResults.length * 4) }} {{ 'Fields' | translate }}</div>
+            <div class="text-xs capitalize text-[var(--color-text4)] max-[640px]:hidden">{{ 'text analysis' | translate
+              }}</div>
+            <button data-testid="text-analysis-row-toggle" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="$event.stopPropagation(); toggleExpanded()" [attr.aria-label]="(expanded ? 'Collapse row' : 'Expand row') | translate" [attr.aria-pressed]="expanded">
+              <img class="h-3 w-3 ui-action-icon" [src]="expanded ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" [alt]="expanded ? 'Collapse row' : 'Expand row'">
+            </button>
+          </div>
+          @if (expanded) {
+          <div class="border-b border-[var(--color-divider)] bg-[var(--color-blue-790)] px-4 py-3" @fadeInDashboardItem>
+            <div data-testid="defacement-report-card" class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border border-[var(--ui-consolidated-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] [--ui-consolidated-sub-bg:var(--color-blue-700)] [--ui-consolidated-sub-hover:var(--color-blue-700)] [--ui-consolidated-border:var(--color-border)] [--ui-consolidated-divider:var(--color-divider)]">
+              <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
+                <div class="min-w-0">
+                  <b data-testid="defacement-report-card-title" class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">{{
+                    'TEXT ANALYSIS RESULT | 1' | translate }}</b>
+                  <div class="mt-[4px] overflow-hidden text-ellipsis whitespace-nowrap text-[11px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text6)]">
+                    {{ 'Text' | translate }}: <span class="font-[600] text-[var(--color-text2)]">{{ submittedText
+                      }}</span>
                   </div>
-	                  <div class="border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[14px] max-[640px]:px-[10px]">
-	                    <div class="grid grid-cols-1 gap-[12px] lg:grid-cols-[minmax(0,1fr)_minmax(260px,360px)]">
-	                      <div class="min-w-0 rounded-[8px] border px-[14px] py-[12px]" [ngClass]="primaryDetectionClass">
-	                        <div class="text-[10px] font-[800] uppercase tracking-[0.08em] text-[var(--color-text6)]">{{ 'Primary Detection' | translate }}</div>
-	                        <div data-testid="text-analysis-primary-detection" class="mt-[6px] truncate text-[18px] font-[800]" [title]="primaryDetectionLabel">{{ primaryDetectionLabel }}</div>
-	                        <div class="mt-[4px] text-[12px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ detectionTypeLabel }}</div>
-	                      </div>
-	                      <div class="grid grid-cols-2 gap-[8px]">
-	                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-[12px] py-[10px]">
-	                          <div class="text-[10px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text6)]">{{ 'Spam Label' | translate }}</div>
-	                          <div class="mt-[5px] truncate text-[13px] font-[700] text-[var(--color-text1)]" [title]="spamLabel">{{ spamLabel }}</div>
-	                        </div>
-	                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-[12px] py-[10px]">
-	                          <div class="text-[10px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text6)]">{{ 'Confidence' | translate }}</div>
-	                          <div class="mt-[5px] truncate text-[13px] font-[700] text-[var(--color-text1)]">{{ spamConfidenceLabel }}</div>
-	                        </div>
-	                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-[12px] py-[10px]">
-	                          <div class="text-[10px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text6)]">{{ 'Unsafe URLs' | translate }}</div>
-	                          <div class="mt-[5px] text-[13px] font-[700] text-[var(--color-text1)]">{{ unsafeUrlCount }}</div>
-	                        </div>
-	                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-[12px] py-[10px]">
-	                          <div class="text-[10px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text6)]">{{ 'Total URLs' | translate }}</div>
-	                          <div class="mt-[5px] text-[13px] font-[700] text-[var(--color-text1)]">{{ result.urls_found || urlResults.length || 0 }}</div>
-	                        </div>
-	                      </div>
-	                    </div>
-	                  </div>
-	                  <div class="grid grid-cols-1 gap-0 px-[14px] py-[6px] md:grid-cols-2 md:gap-x-[18px] max-[640px]:px-[10px]">
-                    @for (entry of resultEntries; track entry.key || $index; let fieldIdx = $index; let last = $last) {
-                      <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [ngClass]="{ 'border-b-0': last && urlResults.length === 0 }">
-                        <div class="w-[112px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[86px]">{{ displayFieldLabel(entry.key) }}</div>
-                        <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]">{{ stringifyNestedValue(entry.value) }}</div>
-                      </div>
-                    }
-                    @for (item of urlResults; track trackByIndex($index); let urlIdx = $index) {
-                      <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]">
-                        <div class="w-[112px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[86px]">URL {{ urlIdx + 1 }}</div>
-                        <a class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-[600] text-[var(--color-text5)] hover:underline" [href]="item.url" target="_blank" rel="noopener noreferrer">{{ item.url }}</a>
-                      </div>
-                      <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]">
-                        <div class="w-[112px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[86px]">{{ 'Label' | translate }}</div>
-                        <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]">{{ (item.label || 'not available') | translate }}</div>
-                      </div>
-                      <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]">
-                        <div class="w-[112px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[86px]">{{ 'Confidence' | translate }}</div>
-                        <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]">{{ (item.confidence ?? 'not available') | translate }}</div>
-                      </div>
-                      <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [ngClass]="{ 'border-b-0': urlIdx === urlResults.length - 1 }">
-                        <div class="w-[112px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[86px]">{{ 'Safe' | translate }}</div>
-                        <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]">{{ (item.is_safe === true ? 'true' : (item.is_safe === false ? 'false' : 'not available')) | translate }}</div>
-                      </div>
-                    }
+                </div>
+                <span class="inline-flex h-[32px] items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent px-[12px] text-[12px] font-[800] tracking-[0.2px] text-[var(--color-text1)]">{{
+                  resultEntries.length + (urlResults.length * 4) }} {{ 'Fields' | translate }}</span>
+              </div>
+              <div class="border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[14px] max-[640px]:px-[10px]">
+                <div class="grid grid-cols-1 gap-[12px] lg:grid-cols-[minmax(0,1fr)_minmax(260px,360px)]">
+                  <div class="min-w-0 rounded-[8px] border px-[14px] py-[12px]" [ngClass]="primaryDetectionClass">
+                    <div class="text-[10px] font-[800] uppercase tracking-[0.08em] text-[var(--color-text6)]">{{
+                      'Primary Detection' | translate }}</div>
+                    <div data-testid="text-analysis-primary-detection" class="mt-[6px] truncate text-[18px] font-[800]" [title]="primaryDetectionLabel">{{ primaryDetectionLabel }}</div>
+                    <div class="mt-[4px] text-[12px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text4)]">
+                      {{ detectionTypeLabel }}</div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-[8px]">
+                    <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-[12px] py-[10px]">
+                      <div class="text-[10px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text6)]">{{ 'Spam
+                        Label' | translate }}</div>
+                      <div class="mt-[5px] truncate text-[13px] font-[700] text-[var(--color-text1)]" [title]="spamLabel">{{ spamLabel }}</div>
+                    </div>
+                    <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-[12px] py-[10px]">
+                      <div class="text-[10px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text6)]">{{
+                        'Confidence' | translate }}</div>
+                      <div class="mt-[5px] truncate text-[13px] font-[700] text-[var(--color-text1)]">{{
+                        spamConfidenceLabel }}</div>
+                    </div>
+                    <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-[12px] py-[10px]">
+                      <div class="text-[10px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text6)]">{{
+                        'Unsafe URLs' | translate }}</div>
+                      <div class="mt-[5px] text-[13px] font-[700] text-[var(--color-text1)]">{{ unsafeUrlCount }}</div>
+                    </div>
+                    <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-[12px] py-[10px]">
+                      <div class="text-[10px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text6)]">{{
+                        'Total URLs' | translate }}</div>
+                      <div class="mt-[5px] text-[13px] font-[700] text-[var(--color-text1)]">{{ result.urls_found ||
+                        urlResults.length || 0 }}</div>
+                    </div>
                   </div>
                 </div>
               </div>
-            }
+              <div class="grid grid-cols-1 gap-0 px-[14px] py-[6px] md:grid-cols-2 md:gap-x-[18px] max-[640px]:px-[10px]">
+                @for (entry of resultEntries; track entry.key || $index; let fieldIdx = $index; let last = $last) {
+                <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [ngClass]="{ 'border-b-0': last && urlResults.length === 0 }">
+                  <div class="w-[112px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[86px]">
+                    {{ displayFieldLabel(entry.key) }}</div>
+                  <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]">
+                    {{ stringifyNestedValue(entry.value) }}</div>
+                </div>
+                }
+                @for (item of urlResults; track trackByIndex($index); let urlIdx = $index) {
+                <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]">
+                  <div class="w-[112px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[86px]">
+                    URL {{ urlIdx + 1 }}</div>
+                  <a class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-[600] text-[var(--color-text5)] hover:underline" [href]="item.url" target="_blank" rel="noopener noreferrer">{{ item.url }}</a>
+                </div>
+                <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]">
+                  <div class="w-[112px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[86px]">
+                    {{ 'Label' | translate }}</div>
+                  <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]">
+                    {{ (item.label || 'not available') | translate }}</div>
+                </div>
+                <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]">
+                  <div class="w-[112px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[86px]">
+                    {{ 'Confidence' | translate }}</div>
+                  <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]">
+                    {{ ((item.confidence ?? 'not available') + '') | translate }}</div>
+                </div>
+                <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [ngClass]="{ 'border-b-0': urlIdx === urlResults.length - 1 }">
+                  <div class="w-[112px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[86px]">
+                    {{ 'Safe' | translate }}</div>
+                  <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]">
+                    {{ (item.is_safe === true ? 'true' : (item.is_safe === false ? 'false' : 'not available')) |
+                    translate }}</div>
+                </div>
+                }
+              </div>
+            </div>
           </div>
-        </section>
+          }
+        </div>
       </section>
-    </div>
+    </section>
+  </div>
   }
 </div>
