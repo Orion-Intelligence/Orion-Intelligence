@@ -102,9 +102,11 @@
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-sm font-bold text-gray-900 dark:text-gray-100 cursor-pointer hover:underline" (click)="nodeClicked.emit(userNode.id.toString())">{{ platformData.username || userNode.label }}</span>
-                        <span class="inline-flex items-center gap-1 text-[11px] font-medium bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full">
-                          <i class="bi bi-check-circle-fill text-[10px]"></i> Scanned
-                        </span>
+                        @if (isPriorityPlatform(platformData.platform)) {
+                          <span class="inline-flex items-center gap-1 text-[11px] font-medium bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full" title="More details available for this platform">
+                            <i class="bi bi-check-circle-fill text-[10px]"></i> Scrapeable
+                          </span>
+                        }
                       </div>
                       <div class="flex items-center gap-2 mt-0.5">
                         <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-gray-100 dark:bg-[#3a3b3c] text-gray-500 dark:text-gray-400">
@@ -289,22 +291,44 @@
                   @if (getMetadataEntries(platformNode.id.toString()); as metadataEntries) {
                     @if (metadataEntries.length > 0) {
                       <div class="px-4 py-3">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Raw API Metadata</p>
+                        <div class="flex items-center justify-between mb-2">
+                          <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Raw API Metadata</p>
+                          <div class="relative w-48">
+                            <input type="text" [value]="metadataSearchTerms()[platformNode.id.toString()] || ''" (input)="updateMetadataSearch(platformNode.id.toString(), $event)" placeholder="Search keys or values..." class="h-7 w-full rounded-md border border-gray-200 dark:border-[#4a4b4c] bg-gray-50 dark:bg-[#3a3b3c] pl-7 pr-2 text-[11px] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1877f2]/50">
+                            <i class="bi bi-search absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400"></i>
+                          </div>
+                        </div>
+
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
-                          @for (item of metadataEntries; track trackByKey($index, item)) {
-                            <div class="bg-gray-50 dark:bg-[#3a3b3c] rounded-lg px-3 py-2 border border-gray-200 dark:border-[#3a3b3c]">
-                              <p class="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-1.5">{{ formatKey(item.key) }}</p>
+                          @for (item of getFilteredMetadataEntries(platformNode.id.toString()); track trackByKey($index, item)) {
+                            <div class="group relative bg-gray-50 dark:bg-[#3a3b3c] rounded-lg px-3 py-2 border border-gray-200 dark:border-[#4a4b4c] hover:border-[#1877f2]/40 transition-colors">
+                              <div class="flex items-center justify-between mb-1">
+                                <p class="text-[10px] font-bold uppercase tracking-wide text-gray-400">{{ formatKey(item.key) }}</p>
+                                <button (click)="copyToClipboard(item.value)" class="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-gray-200 dark:hover:bg-[#4a4b4c] text-gray-400 hover:text-[#1877f2] transition-all" title="Copy to clipboard">
+                                  <i class="bi bi-clipboard text-[10px]"></i>
+                                </button>
+                              </div>
                               <div class="text-sm text-gray-800 dark:text-gray-200">
                                 @if (isImageUrl(item.value)) {
-                                  <img [src]="item.value" [alt]="item.key" class="rounded-md max-w-[120px] h-auto">
+                                  <div class="relative group/img inline-block">
+                                    <img [src]="item.value" [alt]="item.key" class="rounded-md max-w-[120px] h-auto cursor-zoom-in hover:brightness-110 transition-all">
+                                    <a [href]="item.value" target="_blank" class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/img:opacity-100 rounded-md transition-opacity">
+                                      <i class="bi bi-box-arrow-up-right text-white"></i>
+                                    </a>
+                                  </div>
                                 }
                                 @if (!isImageUrl(item.value) && isUrl(item.value)) {
-                                  <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-[#1877f2] hover:underline break-all">{{ item.value }}</a>
+                                  <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-[#1877f2] hover:underline break-all font-mono text-[12px]">{{ item.value }}</a>
                                 }
                                 @if (!isImageUrl(item.value) && !isUrl(item.value)) {
-                                  <span class="break-words">{{ item.value }}</span>
+                                  <span class="break-words font-mono text-[12px]">{{ item.value }}</span>
                                 }
                               </div>
+                            </div>
+                          }
+                          @if (getFilteredMetadataEntries(platformNode.id.toString()).length === 0) {
+                            <div class="col-span-full py-4 text-center">
+                              <p class="text-[11px] text-gray-400 italic">No metadata matches your search.</p>
                             </div>
                           }
                         </div>
