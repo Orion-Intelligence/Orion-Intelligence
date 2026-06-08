@@ -15,6 +15,7 @@ import { ProxyController } from '../../services/proxy-controller';
 import { AiSummaryComponent } from '../../../pages/root-searches/ai-workspace/ai-summary/ai-summary.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { LANGUAGE_OPTIONS, LanguageOption } from '../../constants/shared-enums';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-report-header',
@@ -38,7 +39,7 @@ export class ReportHeaderComponent {
   readonly lang_detected = input<string>("");
   readonly languageUpdated = output<any>();
 
-  constructor(private helperService: HelperService, private api: ApiService, protected appService: AppService, private dashboardService: DashboardService, protected route: Router, protected licenseServise: LicenseService, private reportExportService: ReportExportService) {
+  constructor(private helperService: HelperService, private api: ApiService, protected appService: AppService, private dashboardService: DashboardService, protected route: Router, protected licenseServise: LicenseService, private reportExportService: ReportExportService, private translationService: TranslationService) {
   }
 
   downloadCSV() {
@@ -148,20 +149,20 @@ export class ReportHeaderComponent {
   }
 
   getActiveLanguage(): string {
-    const selectedLanguage = this.normalizeLanguage(this.selectedLanguage());
-    if (this.isSupportedLanguage(selectedLanguage)) {
+    const selectedLanguage = this.selectedLanguage();
+    if (this.translationService.isSupportedLanguage(selectedLanguage)) {
       return selectedLanguage;
     }
-    const currentLanguage = this.normalizeLanguage(this.lang());
-    if (this.isSupportedLanguage(currentLanguage)) {
+    const currentLanguage = this.lang();
+    if (this.translationService.isSupportedLanguage(currentLanguage)) {
       return currentLanguage;
     }
-    const systemLanguage = this.normalizeLanguage(this.appService.getConfig()?.appSettings?.language_allowed);
-    return this.isSupportedLanguage(systemLanguage) ? systemLanguage : 'en';
+    const systemLanguage = this.appService.getConfig()?.appSettings?.language_allowed;
+    return this.translationService.isSupportedLanguage(systemLanguage) ? systemLanguage : 'en';
   }
 
   langUpdate(language: string) {
-    const selectedLanguage = this.getSupportedLanguage(language);
+    const selectedLanguage = this.translationService.getSupportedLanguage(language);
     const currentUrl = new URL(window.location.href);
     currentUrl.searchParams.set('lang', selectedLanguage);
     const segments = currentUrl.pathname.split('/').filter(Boolean);
@@ -178,22 +179,5 @@ export class ReportHeaderComponent {
         this.languageUpdated.emit(result);
       }
     });
-  }
-
-  private getSupportedLanguage(language: unknown): string {
-    const code = this.normalizeLanguage(language);
-    if (this.isSupportedLanguage(code)) {
-      return code;
-    }
-    return this.getActiveLanguage();
-  }
-
-  private isSupportedLanguage(language: unknown): boolean {
-    const code = this.normalizeLanguage(language);
-    return this.languageOptions.some(option => option.code === code);
-  }
-
-  private normalizeLanguage(language: unknown): string {
-    return typeof language === 'string' ? language.trim().toLowerCase() : '';
   }
 }

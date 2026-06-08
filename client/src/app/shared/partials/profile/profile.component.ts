@@ -11,6 +11,7 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { LANGUAGE_OPTIONS, LanguageOption } from '../../constants/shared-enums';
 import { ApiService } from '../../services/api.service';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-profile',
@@ -42,7 +43,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
   languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
   readonly openPopup = output<undefined>();
 
-  constructor(protected authService: AuthService, public router: Router, public dashboardService: DashboardService, public appService: AppService, protected licenseService: LicenseService, private apiService: ApiService) {
+  constructor(protected authService: AuthService, public router: Router, public dashboardService: DashboardService, public appService: AppService, protected licenseService: LicenseService, private apiService: ApiService, private translationService: TranslationService) {
     this.username.set(this.appService.userSessionData()?.user?.username);
     this.role.set(this.appService.userSessionData()?.user?.role);
     effect(() => {
@@ -101,7 +102,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 
   selectLanguage(language: string, event: Event) {
     event.stopPropagation();
-    const selectedLanguage = this.getSupportedLanguage(language);
+    const selectedLanguage = this.translationService.getSupportedLanguage(language);
     const currentSession = this.appService.userSessionData();
     const preferences = {
       ...(currentSession.user.preferences || {}),
@@ -184,30 +185,8 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
     this.openPopup.emit(undefined);
   }
 
-  private getCurrentLanguage(userLanguage?: unknown): string {
-    return this.getSupportedLanguage(userLanguage, this.getSystemLanguage());
+  private getCurrentLanguage(userLanguage: string): string {
+    return this.translationService.getSupportedLanguage(userLanguage, this.translationService.getSystemLanguage());
   }
 
-  private getSupportedLanguage(language: unknown, fallbackLanguage = this.getSystemLanguage()): string {
-    const code = this.normalizeLanguage(language);
-    if (this.isSupportedLanguage(code)) {
-      return code;
-    }
-    const fallback = this.normalizeLanguage(fallbackLanguage);
-    return this.isSupportedLanguage(fallback) ? fallback : 'en';
-  }
-
-  private getSystemLanguage(): string {
-    const code = this.normalizeLanguage(this.appService.getConfig()?.appSettings?.language_allowed);
-    return this.isSupportedLanguage(code) ? code : 'en';
-  }
-
-  private isSupportedLanguage(language: unknown): boolean {
-    const code = this.normalizeLanguage(language);
-    return this.languageOptions.some(option => option.code === code);
-  }
-
-  private normalizeLanguage(language: unknown): string {
-    return typeof language === 'string' ? language.trim().toLowerCase() : '';
-  }
 }

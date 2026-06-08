@@ -14,6 +14,7 @@ import { areAllPasswordRequirementsMet, createEmptyPasswordChecks, evaluatePassw
 import { PasswordToggleDirective } from '../../../shared/directives/password-toggle.directive';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { LANGUAGE_OPTIONS, LanguageOption } from '../../../shared/constants/shared-enums';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-sidebar-profile-settings',
@@ -38,7 +39,7 @@ export class AccountSettingsComponent implements OnInit {
   passwordChecks: PasswordChecks = createEmptyPasswordChecks();
   currentUnmetCheck: string | null = null;
 
-  constructor(protected apiService: ApiService, protected appService: AppService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService) {
+  constructor(protected apiService: ApiService, protected appService: AppService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
     this.userSessionData = this.appService.userSessionData();
   }
 
@@ -57,9 +58,9 @@ export class AccountSettingsComponent implements OnInit {
     this.isDarkMode = theme === 'dark-theme';
     this.isProfileVisible = this.userSessionData?.user?.preferences?.["profile_visible"] !== false;
     const userLanguage = this.userSessionData?.user?.preferences?.["language"];
-    this.hasLanguagePreference = this.isSupportedLanguage(userLanguage);
-    const systemLanguage = this.getSystemLanguage();
-    this.selectedLanguage = this.hasLanguagePreference ? this.getSupportedLanguage(userLanguage, systemLanguage) : systemLanguage;
+    this.hasLanguagePreference = this.translationService.isSupportedLanguage(userLanguage);
+    const systemLanguage = this.translationService.getSystemLanguage();
+    this.selectedLanguage = this.hasLanguagePreference ? this.translationService.getSupportedLanguage(userLanguage, systemLanguage) : systemLanguage;
   }
 
   isTenantProfileVisibilityEnabled(): boolean {
@@ -120,7 +121,7 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   changeLanguage() {
-    this.selectedLanguage = this.getSupportedLanguage(this.selectedLanguage, this.getSystemLanguage());
+    this.selectedLanguage = this.translationService.getSupportedLanguage(this.selectedLanguage, this.translationService.getSystemLanguage());
     this.hasLanguagePreference = true;
     const preferences = {
       ...(this.userSessionData.user.preferences || {}),
@@ -225,29 +226,6 @@ export class AccountSettingsComponent implements OnInit {
     this.showPasswordMeter = false;
     this.passwordChecks = createEmptyPasswordChecks();
     this.currentUnmetCheck = null;
-  }
-
-  private getSupportedLanguage(language: unknown, fallbackLanguage = this.getSystemLanguage()): string {
-    const code = this.normalizeLanguage(language);
-    if (this.isSupportedLanguage(code)) {
-      return code;
-    }
-    const fallback = this.normalizeLanguage(fallbackLanguage);
-    return this.isSupportedLanguage(fallback) ? fallback : 'en';
-  }
-
-  private getSystemLanguage(): string {
-    const code = this.normalizeLanguage(this.appService.getConfig()?.appSettings?.language_allowed);
-    return this.isSupportedLanguage(code) ? code : 'en';
-  }
-
-  private isSupportedLanguage(language: unknown): boolean {
-    const code = this.normalizeLanguage(language);
-    return this.languageOptions.some(option => option.code === code);
-  }
-
-  private normalizeLanguage(language: unknown): string {
-    return typeof language === 'string' ? language.trim().toLowerCase() : '';
   }
 
   updateUserResource(file: File) {
