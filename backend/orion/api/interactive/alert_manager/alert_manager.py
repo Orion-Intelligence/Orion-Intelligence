@@ -42,7 +42,7 @@ class AlertManager:
         AlertManager.__instance = self
 
     def get_alert_job(self):
-        from orion.management.jobs.alert_job import alert_job
+        from orion.management.jobs.alert.alert_job import alert_job
         return alert_job
 
 
