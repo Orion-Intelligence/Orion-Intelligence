@@ -7,12 +7,14 @@ import { ExportChoiceModalComponent } from '../../../../shared/partials/export-c
 import { GraphReportExportType } from '../../../../shared/model/report/report-export.model';
 import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../../shared/model/report/export-choice.model';
 import { getFirstFileFromInputEvent, readFileAsText } from '../../../../shared/utils/file-input.util';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-tab-bar',
   templateUrl: './tab-bar.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [AutofocusDirective, ProfileComponent, ExportChoiceModalComponent],
+  imports: [AutofocusDirective, ProfileComponent, ExportChoiceModalComponent, TranslatePipe],
 })
 export class TabBarComponent {
   private tabManager = inject(TabManagerService, { optional: true });

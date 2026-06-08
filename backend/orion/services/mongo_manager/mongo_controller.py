@@ -12,6 +12,7 @@ from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_reco
 from orion.services.mongo_manager.shared_model.db_feeder_script_model import db_feeder_script_model
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_case_model import db_case_model
+from orion.services.mongo_manager.shared_model.db_chat_session_model import db_chat_session_model
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
@@ -68,6 +69,7 @@ class mongo_controller:
             name="unique_maintainer_per_company", )
 
         await self.__engine.get_collection(db_system_model).create_index("key", unique=True)
+        await self.__engine.get_collection(db_chat_session_model).create_index("user_id", unique=True)
         await self.__engine.get_collection(db_document_feedback_model).create_index("doc_id", unique=True)
         feeder_collection = self.__engine.get_collection(db_feeder_script_model)
         try:

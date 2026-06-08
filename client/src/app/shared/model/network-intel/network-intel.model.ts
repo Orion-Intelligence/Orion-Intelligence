@@ -143,3 +143,10 @@ export interface GeoLiveStats {
   ips_scanned:   number;
   cameras_found: number;
 }
+
+export type VulnerabilityScanDepth = 'low' | 'medium' | 'high';
+
+export interface VulnerabilityTargetSelection {
+  target: string;
+  depth: VulnerabilityScanDepth;
+}

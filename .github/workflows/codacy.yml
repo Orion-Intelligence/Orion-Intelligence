@@ -8,24 +8,94 @@ on:
   pull_request:
     branches:
       - trusted-main
+  schedule:
+    - cron: '33 6 * * 2'
+
+permissions: read-all
 
 jobs:
   codacy-security-scan:
     runs-on: ubuntu-latest
     name: Codacy Security Scan
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@17f84c3641ba7b8f6deff6309fc4c864478f5d62
         with:
           java-version: '11'
           distribution: 'temurin'
 
-      - name: Run Codacy Security Scan
-        uses: codacy/codacy-analysis-cli-action@v4
+      - name: Run Codacy Analysis for GitHub Code Scanning
+        uses: codacy/codacy-analysis-cli-action@562ee3e92b8e92df8b67e0a5ff8aa8e261919c08
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           verbose: true
+          output: results.sarif
+          format: sarif
+          gh-code-scanning-compat: true
+          max-allowed-issues: 2147483647
+
+      - name: Split SARIF runs into unique categories
+        run: |
+          python3 - <<'PY'
+          import copy
+          import json
+          import re
+          from pathlib import Path
+
+          source = Path("results.sarif")
+          sarif = json.loads(source.read_text())
+          runs = sarif.get("runs") or []
+          batch_size = 20
+
+          if not runs:
+              raise SystemExit("results.sarif does not contain any SARIF runs")
+
+          def slug(value):
+              value = re.sub(r"[^A-Za-z0-9_.-]+", "-", value or "codacy").strip("-").lower()
+              return value or "codacy"
+
+          for index, run in enumerate(runs, 1):
+              output_dir = Path(f"sarif-results-{((index - 1) // batch_size) + 1:02d}")
+              output_dir.mkdir(exist_ok=True)
+              tool_name = (
+                  run.get("tool", {})
+                  .get("driver", {})
+                  .get("name")
+                  or f"run-{index}"
+              )
+              run_sarif = copy.deepcopy(sarif)
+              run_sarif["runs"] = [copy.deepcopy(run)]
+              run_output = run_sarif["runs"][0]
+              automation = run_output.setdefault("automationDetails", {})
+              automation["id"] = f"codacy/{slug(tool_name)}/{index}"
+
+              target = output_dir / f"{index:02d}-{slug(tool_name)}.sarif"
+              target.write_text(json.dumps(run_sarif), encoding="utf-8")
+              print(f"Wrote {target} with category {automation['id']}")
+          PY
+
+      - name: Upload SARIF results to GitHub batch 01
+        if: ${{ hashFiles('sarif-results-01/*.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@fdbfb4d2750291e159f0156def62b853c2798ca2
+        with:
+          sarif_file: sarif-results-01
+
+      - name: Upload SARIF results to GitHub batch 02
+        if: ${{ hashFiles('sarif-results-02/*.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@fdbfb4d2750291e159f0156def62b853c2798ca2
+        with:
+          sarif_file: sarif-results-02
+
+      - name: Upload SARIF results to GitHub batch 03
+        if: ${{ hashFiles('sarif-results-03/*.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@fdbfb4d2750291e159f0156def62b853c2798ca2
+        with:
+          sarif_file: sarif-results-03

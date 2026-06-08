@@ -3,11 +3,18 @@ from datetime import timedelta, timezone
 from datetime import datetime
 from typing import Any
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
-from orion.constants.constant import CONSTANTS, allowed_keys
+from orion.constants.constant import CONSTANTS, allowed_key_titles
+from orion.helper_manager.country_normalization import expand_country_filter_values
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX, ELASTIC_SEMANTIC, ELASTIC_ENUMS
 from orion.api.interactive.search_manager.search_semantic_controller import search_semantic_controller
+from orion.services.log_manager.log_controller import log
+
+
+DATE_ONLY_FORMAT = "%Y-%m-%d"
+DATE_START_UTC_FORMAT = "%Y-%m-%dT00:00:00+00:00"
+DATE_END_UTC_FORMAT = "%Y-%m-%dT23:59:59+00:00"
 
 
 class search_query_generator:
@@ -46,8 +53,8 @@ class search_query_generator:
             merged += ["source_domain", "source_domain"]
             fields = list(dict.fromkeys([f for f in merged if f]))
 
-            if tag in ("m_search_all", "all") and allowed_keys:
-                fields = list(dict.fromkeys(fields + list(allowed_keys)))
+            if tag in ("m_search_all", "all") and allowed_key_titles:
+                fields = list(dict.fromkeys(fields + list(allowed_key_titles.keys())))
 
         if not fields:
             return {"match_none": {}}
@@ -70,9 +77,12 @@ class search_query_generator:
             if not isinstance(values, list):
                 values = [values]
 
+            if ioc_key == "m_country":
+                values = expand_country_filter_values(values)
+
             if ioc_key == "m_search_all":
                 es_fields = []
-                search_keys = allowed_keys or ELASTIC_ENUMS.ioc_field_mapping.keys()
+                search_keys = allowed_key_titles.keys() or ELASTIC_ENUMS.ioc_field_mapping.keys()
                 for key in search_keys:
                     mapped = ELASTIC_ENUMS.ioc_field_mapping.get(key)
                     if not mapped:
@@ -322,8 +332,8 @@ class search_query_generator:
                     query_statement["query"]["function_score"]["score_mode"] = "sum"
                     query_statement["query"]["function_score"]["boost_mode"] = "replace"
                     query_statement["min_score"] = 0.4
-            except Exception:
-                pass
+            except Exception as ex:
+                log.g().w(f"Semantic score adjustment skipped: {str(ex)}")
 
         return query_statement
 
@@ -439,14 +449,14 @@ class search_query_generator:
             try:
                 parts = m_date_range.split(",")
                 if len(parts) == 2:
-                    from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT00:00:00+00:00")
-                    to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT23:59:59+00:00")
+                    from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_START_UTC_FORMAT)
+                    to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_END_UTC_FORMAT)
                     must_clauses.append(search_query_generator.build_date_priority_filter(from_date, to_date, date_priority_fields))
             except ValueError:
                 pass
         elif m_date_range != "":
-            to_date = datetime.now(timezone.utc).strftime("%Y-%m-%dT23:59:59+00:00")
-            from_date = (datetime.now(timezone.utc) - timedelta(days=150)).strftime("%Y-%m-%dT00:00:00+00:00")
+            to_date = datetime.now(timezone.utc).strftime(DATE_END_UTC_FORMAT)
+            from_date = (datetime.now(timezone.utc) - timedelta(days=150)).strftime(DATE_START_UTC_FORMAT)
             must_clauses.append(search_query_generator.build_date_priority_filter(from_date, to_date, date_priority_fields))
 
         if p_query_model.category:
@@ -557,8 +567,8 @@ class search_query_generator:
         if p_query_model.daterange:
             parts = p_query_model.daterange.split(",")
             if len(parts) == 2:
-                from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT00:00:00+00:00")
-                to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT23:59:59+00:00")
+                from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_START_UTC_FORMAT)
+                to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_END_UTC_FORMAT)
 
                 must_clauses.append({
                     "bool": {
@@ -627,10 +637,23 @@ class search_query_generator:
             parts = date_range.split(',')
             if len(parts) == 2:
                 try:
-                    from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
-                    to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+                    from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_ONLY_FORMAT)
+                    to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_ONLY_FORMAT)
+                    date_should_clauses = [
+                        {"range": {date_field: {"gte": from_date, "lte": to_date}}}
+                    ]
+
+                    if from_date <= "2025-12-31" and to_date >= "2025-01-01":
+                        date_should_clauses.extend([
+                            {"bool": {"must_not": [{"exists": {"field": date_field}}]}},
+                            {"term": {f"{date_field}.keyword": ""}},
+                        ])
+
                     es_query["bool"]["filter"].append({
-                        "range": {date_field: {"gte": from_date, "lte": to_date}}
+                        "bool": {
+                            "should": date_should_clauses,
+                            "minimum_should_match": 1
+                        }
                     })
                 except ValueError:
                     pass

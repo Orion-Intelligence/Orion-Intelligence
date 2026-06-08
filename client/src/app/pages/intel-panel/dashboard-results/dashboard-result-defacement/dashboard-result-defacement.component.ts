@@ -9,9 +9,11 @@ import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { ProxyController } from '../../../../shared/services/proxy-controller';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-dashboard-result-defacement',
-  standalone: true, imports: [RouterLink, NgClass, DatePipe, CommonModule, TooltipDirective],
+  standalone: true, imports: [RouterLink, NgClass, DatePipe, CommonModule, TooltipDirective, TranslatePipe],
   templateUrl: './dashboard-result-defacement.component.html',
   animations: [fadeInDashboardItem],
 })

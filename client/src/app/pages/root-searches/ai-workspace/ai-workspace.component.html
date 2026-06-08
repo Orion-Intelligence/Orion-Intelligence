@@ -6,9 +6,9 @@
       </svg>
     </button>
   }
-  <button data-testid="consolidated-tab-iocs" type="button" [routerLink]="['/dashboard/profile/consolidated/all']" [queryParams]="{ tab: 'IOCs', q: contextQuery() || null }" queryParamsHandling="merge" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors shrink-0 border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">IOCs</button>
-  <button data-testid="consolidated-tab-deep-search" type="button" [routerLink]="['/dashboard/profile/consolidated/all']" [queryParams]="{ tab: 'Deep Search', q: contextQuery() || null }" queryParamsHandling="merge" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors shrink-0 border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">Deep Search</button>
-  <button data-testid="consolidated-tab-network-intelligence" type="button" [routerLink]="['/dashboard/profile/consolidated/all']" [queryParams]="{ tab: 'Network Intelligence', q: contextQuery() || null }" queryParamsHandling="merge" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors shrink-0 border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">Network Intelligence</button>
+  <button data-testid="consolidated-tab-iocs" type="button" [routerLink]="['/dashboard/profile/consolidated/all']" [queryParams]="{ tab: 'IOCs', q: contextQuery() || null }" queryParamsHandling="merge" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors shrink-0 border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">{{ 'categoryAlerts.fields.iocs' | translate }}</button>
+  <button data-testid="consolidated-tab-deep-search" type="button" [routerLink]="['/dashboard/profile/consolidated/all']" [queryParams]="{ tab: 'Deep Search', q: contextQuery() || null }" queryParamsHandling="merge" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors shrink-0 border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">{{ 'Deep Search' | translate }}</button>
+  <button data-testid="consolidated-tab-network-intelligence" type="button" [routerLink]="['/dashboard/profile/consolidated/all']" [queryParams]="{ tab: 'Network Intelligence', q: contextQuery() || null }" queryParamsHandling="merge" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors shrink-0 border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">{{ 'Network Intelligence' | translate }}</button>
 </div>
 
 <div class="ui-consolidated-theme w-auto space-y-4 m-0 h-[calc(100vh-120px)] overflow-hidden p-[32px] max-[1100px]:p-[20px] max-[640px]:h-[calc(100vh-70px)] max-[640px]:p-[10px]">
@@ -17,23 +17,23 @@
       <div class="shrink-0 px-5 pt-4 max-[640px]:px-4">
         <div class="flex flex-wrap gap-2">
           <button type="button" (click)="startNewChat()" class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
-            New Chat
+            {{ 'New Chat' | translate }}
           </button>
           <button type="button" (click)="shareChat()" [disabled]="isChatShareCreating() || !messages.length" class="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-50">
             <i [ngClass]="isChatShareCreating() ? 'bi-arrow-repeat animate-spin' : 'bi-share-fill'" class="bi text-[12px] leading-none"></i>
-            Share
+            {{ 'Share' | translate }}
           </button>
         </div>
       </div>
       <app-message-scroll-rail [messages]="messages"></app-message-scroll-rail>
-      <div #messagesContainer data-testid="chat-widget-messages" [class]="messages.length ? 'min-h-0 flex-1 space-y-5 overflow-y-auto scroll-smooth px-5 pt-5 pb-[300px] [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-4 max-[640px]:px-4 max-[640px]:pb-[300px] max-[640px]:[mask-image:none]' : 'min-h-0 flex-1 space-y-5 overflow-y-auto scroll-smooth px-5 pt-5 pb-6 [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-4 max-[640px]:px-4 max-[640px]:pb-0 max-[640px]:[mask-image:none]'">
+      <div #messagesContainer data-testid="chat-widget-messages" [class]="messages.length ? 'min-h-0 flex-1 space-y-4 overflow-y-auto scroll-smooth px-5 pt-5 pb-[300px] [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-3 max-[640px]:px-4 max-[640px]:pb-[300px] max-[640px]:[mask-image:none]' : 'min-h-0 flex-1 space-y-4 overflow-y-auto scroll-smooth px-5 pt-5 pb-6 [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-3 max-[640px]:px-4 max-[640px]:pb-0 max-[640px]:[mask-image:none]'">
         @if (isLoadingHistory()) {
           <div class="flex min-h-full items-start justify-center pt-8 max-[640px]:pt-5">
             <div class="inline-flex items-center gap-3 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-2.5 text-[13px] text-[var(--color-text3)] shadow-[0_8px_20px_var(--color-shadow-medium)]">
               <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
               <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:140ms]"></span>
               <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:280ms]"></span>
-              <span class="ml-1">Fetching chat history</span>
+              <span class="ml-1">{{ 'Fetching chat history' | translate }}</span>
             </div>
           </div>
         } @else if (!messages.length) {
@@ -42,8 +42,8 @@
               <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] shadow-[0_6px_14px_rgba(0,0,0,0.08)]">
                 <img alt="chat" src="assets/images/shared/chat-icon.svg" class="h-9 w-9 rounded-full object-cover">
               </div>
-              <h3 class="mt-5 text-[32px] font-semibold tracking-[-0.03em] text-[var(--color-text1)] max-[640px]:text-[26px]">How can Nexus help?</h3>
-              <p class="mx-auto mt-3 max-w-[580px] text-[14px] leading-7 text-[var(--color-text4)]">Use this compact analyst assistant for summaries, triage notes, and quick next-step guidance without leaving the dashboard.</p>
+              <h3 class="mt-5 text-[32px] font-semibold tracking-[-0.03em] text-[var(--color-text1)] max-[640px]:text-[26px]">{{ 'How can Nexus help?' | translate }}</h3>
+              <p class="mx-auto mt-3 max-w-[580px] text-[14px] leading-7 text-[var(--color-text4)]">{{ 'Use this compact analyst assistant for summaries, triage notes, and quick next-step guidance without leaving the dashboard.' | translate }}</p>
               <div class="mt-7 flex flex-wrap justify-center gap-3 max-[640px]:grid max-[640px]:grid-cols-1">
                 @for (prompt of quickPrompts; track prompt) {
                   <button type="button" (click)="usePrompt(prompt)" class="rounded-full border border-[rgba(87,165,235,0.16)] bg-[linear-gradient(180deg,rgba(87,165,235,0.12)_0%,rgba(87,165,235,0.07)_100%)] px-4 py-2 text-[12px] font-medium text-[var(--color-text3)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:border-[rgba(87,165,235,0.28)] hover:bg-[linear-gradient(180deg,rgba(87,165,235,0.18)_0%,rgba(87,165,235,0.11)_100%)] hover:text-[var(--color-text1)] max-[640px]:w-full max-[640px]:justify-center">
@@ -56,25 +56,23 @@
         } @else {
           @for (message of messages; track trackMessage($index, message)) {
             @if (message.sender === 'bot') {
-              <div [attr.data-ai-message-index]="$index" class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
-                <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
-                  <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
-                </div>
-                <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
-                  <div class="flex min-h-[20px] items-center gap-2 px-1">
-                    <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
-                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
-                  </div>
+              <div [attr.data-ai-message-index]="$index" class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] justify-start">
+                <div class="ui-ai-chat-agent-turn space-y-1.5">
+                  @if ($index === 0 || messages[$index - 1].sender !== message.sender) {
+                    <div class="flex min-h-[20px] items-center gap-2 px-4">
+                      <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{ 'Nexus' | translate }}</span>
+                      <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
+                    </div>
+                  }
                   <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot relative rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3.5 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
-                    <p class="whitespace-pre-wrap text-[14px] leading-7 text-[var(--color-text1)]">
-                      {{ message.text }}@if (streamingMessageId() === message.id) {
-                        <span class="ml-1 inline-flex translate-y-[-1px] items-center gap-1 align-middle">
-                          <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
-                          <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:140ms]"></span>
-                          <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:280ms]"></span>
-                        </span>
-                      }
-                    </p>
+                    <div class="ui-ai-markdown text-[15px] leading-7 text-[var(--color-text1)]" [innerHTML]="message.text | markdown"></div>
+                    @if (streamingMessageId() === message.id) {
+                      <span class="mt-2 inline-flex translate-y-[-1px] items-center gap-1 align-middle">
+                        <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
+                        <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:140ms]"></span>
+                        <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:280ms]"></span>
+                      </span>
+                    }
                   </div>
                   @if (streamingMessageId() !== message.id && message.text.trim()) {
                     <app-bot-message-actions [message]="message"></app-bot-message-actions>
@@ -82,12 +80,14 @@
                 </div>
               </div>
             } @else if (message.sender === 'user') {
-              <div [attr.data-ai-message-index]="$index" class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] justify-end">
+              <div [attr.data-ai-message-index]="$index" class="ui-ai-chat-row ui-ai-user-message-turn mx-auto flex w-full max-w-[980px] justify-end">
                 <div class="max-w-[72%] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
-                  <div class="flex min-h-[20px] items-center justify-end gap-2 px-1">
-                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
-                    <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text1)]">Analyst</span>
-                  </div>
+                  @if ($index === 0 || messages[$index - 1].sender !== message.sender) {
+                    <div class="flex min-h-[20px] items-center justify-end gap-2 px-1">
+                      <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
+                      <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text1)]">{{ 'Analyst' | translate }}</span>
+                    </div>
+                  }
                   <div class="ui-ai-chat-bubble ui-ai-chat-bubble-user relative rounded-[22px] rounded-tr-[10px] border border-[var(--color-border)] px-4 py-2.5 text-sm text-[var(--color-text1)] shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full" [ngClass]="editingMessageId === message.id ? 'border-sky-400/45 bg-white/15 ring-2 ring-sky-400/15' : ''">
                     @if (editingMessageId === message.id) {
                       <p aria-hidden="true" class="invisible min-h-[28px] whitespace-pre-wrap leading-7 text-[var(--color-text1)]">{{ getEditReserveText(message) }}</p>
@@ -96,23 +96,26 @@
                       <p class="whitespace-pre-wrap leading-7 text-[var(--color-text1)]">{{ message.text }}</p>
                     }
                   </div>
-                  <div class="flex justify-end gap-2 px-1 pt-1.5">
+                  @if (editingMessageId === message.id && isEditDraftOverLimit) {
+                    <p class="px-1 text-right text-[11px] font-medium text-amber-300">{{ '300 token max. Remove' | translate }} {{ editDraftTokenOverflow }} {{ 'tokens.' | translate }}</p>
+                  }
+                  <div class="ui-ai-user-message-actions flex justify-end gap-2 px-1 pt-1.5" [attr.data-visible]="editingMessageId === message.id ? 'true' : null">
                     @if (editingMessageId === message.id) {
-                      <button type="button" (click)="saveMessageEdit(message)" [disabled]="!editDraft.trim()" aria-label="Save edit" title="Save edit" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#57A5EB] text-white hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50">
+                      <button type="button" (click)="saveMessageEdit(message)" [disabled]="!editDraft.trim() || isEditDraftOverLimit" [attr.aria-label]="'Save edit' | translate" [title]="'Save edit' | translate" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#57A5EB] text-white hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50">
                         <i class="bi bi-check-lg text-[13px] leading-none"></i>
                       </button>
-                      <button type="button" (click)="cancelMessageEdit()" aria-label="Cancel edit" title="Cancel edit" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white">
+                      <button type="button" (click)="cancelMessageEdit()" [attr.aria-label]="'Cancel edit' | translate" [title]="'Cancel edit' | translate" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white">
                         <i class="bi bi-x-lg text-[12px] leading-none"></i>
                       </button>
                     } @else {
-                      <button type="button" (click)="copyMessage(message, $event)" class="ui-ai-action-button relative inline-flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white" aria-label="Copy message" title="Copy message">
+                      <button type="button" (click)="copyMessage(message, $event)" class="ui-ai-action-button relative inline-flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white" [attr.aria-label]="'Copy message' | translate" [title]="'Copy message' | translate">
                         <i class="bi bi-copy text-[12px] leading-none"></i>
                         @if (copiedMessageId() === message.id) {
-                          <span class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--color-blue-640)] px-2 py-1 text-[10px] font-semibold text-white">Copied!</span>
+                          <span class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--color-blue-640)] px-2 py-1 text-[10px] font-semibold text-white">{{ 'Copied!' | translate }}</span>
                         }
                       </button>
                       @if (canEditMessage(message)) {
-                        <button type="button" (click)="startMessageEdit(message)" aria-label="Edit message" title="Edit message" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white">
+                        <button type="button" (click)="startMessageEdit(message)" [attr.aria-label]="'Edit message' | translate" [title]="'Edit message' | translate" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white">
                           <i class="bi bi-pencil-fill text-[12px] leading-none"></i>
                         </button>
                       }
@@ -124,23 +127,18 @@
                 </div>
               </div>
             } @else {
-              <div [attr.data-ai-message-index]="$index" class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
-                <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border-red)] bg-[var(--color-red-100)] box-border max-[640px]:hidden">
-                  <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
-                </div>
-                <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
+              <div [attr.data-ai-message-index]="$index" class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] justify-start">
+                <div class="ui-ai-chat-agent-turn space-y-1 max-[640px]:w-full">
                   <div class="flex min-h-[20px] items-center gap-2 px-1">
-                    <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
+                    <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{ 'Nexus' | translate }}</span>
                   </div>
-                  <div class="ui-ai-chat-bubble-cancel rounded-[18px] rounded-tl-[8px] border border-red-300/25 bg-red-950/35 px-4 py-2.5 text-sm text-red-100 shadow-[0_10px_24px_var(--color-shadow-medium)] max-[640px]:w-full">
-                    <p class="flex items-center gap-2 whitespace-pre-wrap leading-6">
-                      <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-red-300/25 bg-red-950/60 text-[10px] font-semibold text-red-100">!</span>
-                      <span>{{ message.text }}</span>
-                    </p>
+                  <div class="flex items-start gap-2 px-1">
+                    <span class="mt-1.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-red-300/25 bg-red-300/10 text-[10px] font-semibold leading-none text-red-100/80">!</span>
+                    <div class="ui-ai-markdown text-[15px] leading-7 text-[var(--color-text1)]" [innerHTML]="message.text | markdown"></div>
                   </div>
                   @if (message.retryPayload) {
                     <button type="button" (click)="retryMessage(message.retryPayload)" class="mt-1 inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text1)] transition hover:opacity-90">
-                      Retry
+                      {{ 'Retry' | translate }}
                     </button>
                   }
                 </div>
@@ -150,14 +148,11 @@
         }
 
         @if (isSending() && !isStreamingReply()) {
-          <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] items-start gap-3.5 max-[640px]:gap-0">
-            <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
-              <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
-            </div>
-            <div class="max-w-[300px] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
-              <div class="flex min-h-[20px] items-center gap-2 px-1">
-                <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">Nexus</span>
-                <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">Thinking</span>
+          <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] justify-start">
+            <div class="ui-ai-chat-agent-turn space-y-1.5">
+              <div class="flex min-h-[20px] items-center gap-2 px-4">
+                <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{ 'Nexus' | translate }}</span>
+                <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ 'Thinking' | translate }}</span>
               </div>
               <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot min-w-0 w-[280px] max-w-full rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
                 <div class="flex min-w-0 flex-col gap-2">
@@ -187,20 +182,23 @@
 
         <form novalidate class="border border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-800)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded">
           <div class="flex items-end gap-2">
-            <textarea #composerInput [(ngModel)]="messageDraft" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" data-testid="chat-widget-input" [rows]="composerRows" name="message" placeholder="Ask a cybersecurity question" class="block min-h-8 max-h-[120px] flex-1 resize-none whitespace-pre-wrap break-words bg-[var(--color-blue-800)] px-3 py-1.5 text-sm leading-5 text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" [class.overflow-y-hidden]="!composerScrollable" [class.overflow-y-auto]="composerScrollable" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded"></textarea>
-            <button data-testid="chat-widget-send" type="button" (click)="isSending() ? stopMessageGeneration() : sendMessage()" [disabled]="!isSending() && !messageDraft.trim()" [attr.aria-label]="isSending() ? 'Stop generation' : 'Send message'" [class]="isSending() ? 'ui-ai-action-button flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 bg-red-950/70 text-red-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_1px_rgba(248,113,113,0.08)] hover:bg-red-900/80 hover:text-white disabled:cursor-not-allowed disabled:opacity-50' : 'ui-ai-action-button flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] text-white hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:border disabled:border-[#57A5EB]/25 disabled:bg-[#57A5EB]/15 disabled:text-[#A7D5FF] disabled:opacity-100'">
+            <textarea #composerInput [(ngModel)]="messageDraft" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" data-testid="chat-widget-input" [rows]="composerRows" name="message" [placeholder]="'Ask a cybersecurity question' | translate" class="block min-h-8 max-h-[120px] flex-1 resize-none whitespace-pre-wrap break-words bg-[var(--color-blue-800)] px-3 py-1.5 text-sm leading-5 text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" [class.overflow-y-hidden]="!composerScrollable" [class.overflow-y-auto]="composerScrollable" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded"></textarea>
+            <button data-testid="chat-widget-send" type="button" (click)="isSending() ? stopMessageGeneration() : sendMessage()" [disabled]="!isSending() && (!messageDraft.trim() || isMessageDraftOverLimit)" [attr.aria-label]="(isSending() ? 'Stop generation' : 'Send message') | translate" [class]="isSending() ? 'ui-ai-action-button flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 bg-red-950/70 text-red-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_1px_rgba(248,113,113,0.08)] hover:bg-red-900/80 hover:text-white disabled:cursor-not-allowed disabled:opacity-50' : 'ui-ai-action-button flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] text-white hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:border disabled:border-[#57A5EB]/25 disabled:bg-[#57A5EB]/15 disabled:text-[#A7D5FF] disabled:opacity-100'">
               @if (isSending()) {
                 <span class="h-3 w-3 rounded-[3px] bg-current shadow-[0_0_10px_rgba(248,113,113,0.28)]" aria-hidden="true"></span>
-                <span class="sr-only">Stop generation</span>
+                <span class="sr-only">{{ 'Stop generation' | translate }}</span>
               } @else {
                 <i class="bi bi-chat-dots-fill text-[14px] leading-none"></i>
               }
             </button>
           </div>
+          @if (isMessageDraftOverLimit) {
+            <p class="mt-2 px-1 text-[11px] font-medium text-amber-300">{{ '300 token max. Remove' | translate }} {{ messageDraftTokenOverflow }} {{ 'tokens before sending.' | translate }}</p>
+          }
         </form>
 
         <div class="mt-2 flex flex-wrap items-center justify-between gap-2 px-1 text-[11px] text-[var(--color-text6)] max-[640px]:hidden">
-          <p>Enter sends. Shift + Enter adds a new line.</p>
+          <p>{{ 'Enter sends. Shift + Enter adds a new line.' | translate }}</p>
         </div>
       </div>
     </div>

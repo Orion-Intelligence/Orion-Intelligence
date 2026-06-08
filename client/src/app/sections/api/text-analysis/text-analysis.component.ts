@@ -9,6 +9,7 @@ import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.a
 import { ValuePresentationBase } from '../../../shared/utils/value-presentation.base';
 import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { AppService } from '../../../services/core/app/app.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 type TextAnalysisResult = {
   title: string;
@@ -36,7 +37,7 @@ type TextAnalysisResult = {
 @Component({
   selector: 'app-text-analysis',
   standalone: true,
-  imports: [FormsModule, NgClass, EmptyQueryComponent, ChatWidgetComponent],
+  imports: [FormsModule, NgClass, EmptyQueryComponent, ChatWidgetComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
   templateUrl: './text-analysis.component.html'
 })

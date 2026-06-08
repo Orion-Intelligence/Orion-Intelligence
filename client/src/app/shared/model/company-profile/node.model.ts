@@ -48,16 +48,21 @@ export interface TenantDataModel {
     image?: string;
     profileVisibilityEnabled?: boolean;
     eventManagementEnabled?: boolean;
+    accountsMailPassword?: string;
+    accountsMail?: string;
+    accountsSmtpServer?: string;
+    accountsSmtpPort?: string;
 }
 export interface userMetaData {
     username: string;
-    twofa_enabled: boolean;
+    twofa_enabled?: boolean;
+    password?: string;
     theme?: 'dark-theme' | 'light-theme';
     preferences?: Record<string, any> & {
         theme?: 'dark-theme' | 'light-theme';
         profile_visible?: boolean;
     };
-    demo_tour:boolean|undefined;
+    demo_tour?:boolean;
 }
 export interface AlertAllIoc {
     name: string;

@@ -1,8 +1,10 @@
 import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy } from '@angular/core';
 import { ScrollRailMarker, ScrollRailMessage, ScrollRailPrompt } from '../../../../shared/model/chat/message-scroll-rail.model';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-message-scroll-rail',
+  imports: [TranslatePipe],
   standalone: true,
   templateUrl: './message-scroll-rail.component.html',
 })
@@ -101,7 +103,7 @@ export class MessageScrollRailComponent implements OnChanges, OnDestroy {
       return [];
     }
 
-    const markerCount = Math.min(this.maxVisibleMarkers, this.messages.length);
+    const markerCount = Math.min(this.maxVisibleMarkers, prompts.length, this.messages.length);
     return Array.from({ length: markerCount }, (_, index) => {
       const startMessageIndex = Math.floor(index * this.messages.length / markerCount);
       const rawEndMessageIndex = Math.floor((index + 1) * this.messages.length / markerCount) - 1;

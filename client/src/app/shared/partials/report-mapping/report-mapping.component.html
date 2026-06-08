@@ -3,12 +3,12 @@
     <div (click)="toggleContent()" class="flex cursor-pointer items-start justify-between gap-3">
       <div class="min-w-0">
         <div class="flex items-center gap-2 text-[16px] font-semibold leading-tight text-[var(--color-text1)]">
-          <img src="/assets/images/shared/theme/info.svg" alt="Icon" class="h-5 w-5 shrink-0 ui-action-icon" appTooltip="list of reports that are either directly or indirectly linked to this document ">
-          <span class="truncate">Related Reports</span>
+          <img src="/assets/images/shared/theme/info.svg" alt="Icon" class="h-5 w-5 shrink-0 ui-action-icon" [appTooltip]="'list of reports that are either directly or indirectly linked to this document' | translate">
+          <span class="truncate">{{ 'Related Reports' | translate }}</span>
         </div>
-        <p class="mt-1 text-[12px] text-[var(--color-text4)]">Reports linked directly or indirectly through mapped entities.</p>
+        <p class="mt-1 text-[12px] text-[var(--color-text4)]">{{ 'Reports linked directly or indirectly through mapped entities.' | translate }}</p>
       </div>
-      <div [attr.aria-label]="isExpanded ? 'Collapse' : 'Expand'" class="mt-[2px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+      <div [attr.aria-label]="(isExpanded ? 'Collapse' : 'Expand') | translate" class="mt-[2px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
         <img [ngClass]="{ 'rotate-180': !isExpanded }" alt="toggle icon" class="h-[18px] w-[18px] transition ui-action-icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
       </div>
     </div>
@@ -21,9 +21,9 @@
               <thead class="text-[var(--color-text3)]">
                 <tr>
                   <th class="px-3 py-2 font-semibold">ID</th>
-                  <th class="px-3 py-2 font-semibold">Mapping To</th>
-                  <th class="px-3 py-2 font-semibold">Mapping On</th>
-                  <th class="px-3 py-2 font-semibold">Mapping Value</th>
+                  <th class="px-3 py-2 font-semibold">{{ 'Mapping To' | translate }}</th>
+                  <th class="px-3 py-2 font-semibold">{{ 'Mapping On' | translate }}</th>
+                  <th class="px-3 py-2 font-semibold">{{ 'Mapping Value' | translate }}</th>
                 </tr>
               </thead>
             }
@@ -67,8 +67,8 @@
         </div>
         @if (!loading && filteredItems.length==0) {
           <div class="mt-4">
-            <div class="text-sm font-semibold text-[var(--color-text1)]">No structured records found!</div>
-            <div class="mt-1 text-xs text-[var(--color-text4)]">We’re watching this source — new breach or tracking data will appear here once detected.</div>
+            <div class="text-sm font-semibold text-[var(--color-text1)]">{{ 'No structured records found!' | translate }}</div>
+            <div class="mt-1 text-xs text-[var(--color-text4)]">{{ 'We’re watching this source — new breach or tracking data will appear here once detected.' | translate }}</div>
           </div>
         }
       </div>

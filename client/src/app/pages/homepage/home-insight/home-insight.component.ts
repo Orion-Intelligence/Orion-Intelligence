@@ -7,10 +7,12 @@ import { LatestDocument, LatestDocumentCallbackModel } from '../../../shared/mod
 import { AppService } from '../../../services/core/app/app.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { InsightCacheService } from '../../../shared/services/insight-cache.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-home-insight',
   templateUrl: './home-insight.component.html',
-  imports: [NgOptimizedImage, NgClass, TooltipDirective],
+  imports: [NgOptimizedImage, NgClass, TooltipDirective, TranslatePipe],
   standalone: true,
 })
 export class HomeInsightComponent implements OnInit {

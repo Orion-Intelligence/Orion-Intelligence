@@ -10,17 +10,17 @@
                 tag }}</span>
               }
             } @else {
-              <span class="inline-flex h-[31px] items-center rounded-full bg-[var(--color-tags)] px-[13px] text-[12px] font-normal text-[var(--color-text3)]">unknown</span>
+              <span class="inline-flex h-[31px] items-center rounded-full bg-[var(--color-tags)] px-[13px] text-[12px] font-normal text-[var(--color-text3)]">{{ 'unknown' | translate }}</span>
             }
           </div>
           @if (!authService.getIsMobileDemo()) {
             <div class="ml-auto flex gap-[20px]">
-            <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-cti-graph">
+            <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" [appTooltip]="'Open CTI Graph' | translate" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-cti-graph">
               <div class="p-[0_0_10px_10px]">
                 <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
               </div>
             </div>
-            <a (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [queryParams]="queryParams" appTooltip="Open Report" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-report">
+            <a (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [queryParams]="queryParams" [appTooltip]="'Open Report' | translate" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-report">
               <div class="p-[0_0_10px_10px]">
                 <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" class="ui-action-icon" />
               </div>
@@ -49,13 +49,13 @@
         @if (item.m_platform !== 'forum') {
           @if (hasCodeType(item)) {
             <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text">
-            Code snippet - content not available</p>
+            {{ 'Code snippet - content not available' | translate }}</p>
             <div class="mb-[12px] mt-[10px] max-h-[300px] overflow-y-auto rounded-[8px] border border-[var(--color-border)] bg-[rgb(0,0,0,0.161)] p-[12px]">
               <code [innerText]="getContentWithoutEmptyLines(item.m_content)" class="text-[14px] text-[var(--color-text1)]"></code>
             </div>
           } @else {
             @if (item.m_content) {
-              <h5 class="mb-[10px] mt-3 font-[Inter] text-[20px] font-medium text-[var(--color-text1)]">Content</h5>
+              <h5 class="mb-[10px] mt-3 font-[Inter] text-[20px] font-medium text-[var(--color-text1)]">{{ 'Content' | translate }}</h5>
               <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text">
                 @for (part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; track $index; let last = $last) {
                   {{ part }}@if (!last) {
@@ -73,7 +73,7 @@
           <div class="mb-[12px] mt-[10px] space-y-[10px]">
             @for (section of getContentLines(item).slice(0, 5); track $index; let i = $index; let isLast = $last) {
               <div class="p-0">
-                <h3 class="m-0 text-[15px] font-semibold text-[var(--color-text1)]">Section {{ i + 1 }}</h3>
+                <h3 class="m-0 text-[15px] font-semibold text-[var(--color-text1)]">{{ 'Section' | translate }} {{ i + 1 }}</h3>
                 <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)] select-text" [class.mb-0]="isLast">{{ section.length > 150 ? (section | slice:0:150) + '...' : section }}</p>
               </div>
             }
@@ -81,7 +81,7 @@
         }
       }
       @if (item.m_weblink?.length) {
-        <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">Embedded URL</h5>
+        <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">{{ 'Embedded URL' | translate }}</h5>
         @for (link of item.m_weblink | slice:0:3; track $index) {
           <div class="block truncate text-[12px] font-medium text-[var(--color-text8)]">
             <a [href]="link" target="_blank" rel="noopener noreferrer" class="hover:underline" (click)="$event.stopPropagation()">
@@ -92,9 +92,9 @@
       }
       <div class="mt-[20px] flex flex-wrap items-start justify-start gap-[15px] pt-[10px] pr-[10px] text-[12px]">
         <div class="flex flex-col gap-[2px]">
-          <span class="font-[Roboto] text-[12px] font-[400] text-[var(--color-text4)]">Message Date:</span>
+          <span class="font-[Roboto] text-[12px] font-[400] text-[var(--color-text4)]">{{ 'Message Date' | translate }}:</span>
           <span class="font-[Roboto] text-[14px] font-[500] text-[var(--color-text1)]">{{ item.m_message_date ?
-          (item.m_message_date | date: 'MMM d, y') : 'Not available' }}</span>
+          (item.m_message_date | date: 'MMM d, y') : ('Not available' | translate) }}</span>
         </div>
       </div>
     </div>
@@ -104,7 +104,7 @@
 @if (isExpandAble() && searchResults().length > 2) {
   <div class="flex justify-center">
     <span class="ui-see-more-btn cursor-pointer" (click)="isCollapsed = !isCollapsed" data-testid="consolidated-section-see-more">
-      {{ isCollapsed ? 'See More' : 'See Less' }}
+      {{ (isCollapsed ? 'See More' : 'See Less') | translate }}
     </span>
   </div>
 }

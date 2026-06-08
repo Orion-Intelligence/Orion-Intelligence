@@ -6,6 +6,7 @@ import { NetworkData, PlatformResult } from '../../../../shared/model/social/soc
 import { FetchingStateService } from '../services/fetching-state.service';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
 import { ensureStylesheet } from '../../../../shared/utils/ensure-stylesheet.util';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 interface GraphPosition { x: number; y: number; }
 interface NetworkInstance {
@@ -31,7 +32,7 @@ interface NetworkInstance {
   templateUrl: './network-graph.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
 })
 export class NetworkGraphComponent implements OnInit, OnDestroy {
   private fetchingState = inject(FetchingStateService);

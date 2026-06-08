@@ -8,10 +8,11 @@ import { caseInlineMotion, caseModeSwapMotion } from '../case-details.animations
 import { getCaseAnalystLabel, getCaseDisplayLabel, getFormattedCaseDateTime } from '../case-details-formatters';
 import { CaseDetailsStore } from '../case-details.store';
 import { CaseEditDrawerComponent } from '../case-edit-drawer/case-edit-drawer';
+import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-case-closure-section',
-  imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent],
+  imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent, TranslatePipe],
   animations: [caseInlineMotion, caseModeSwapMotion],
   host: { class: 'block' },
   templateUrl: './case-closure-section.html'

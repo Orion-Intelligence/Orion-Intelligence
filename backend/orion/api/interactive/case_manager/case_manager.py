@@ -641,13 +641,8 @@ class CaseManager:
             or "Untitled Report"
         )
     
-    async def get_artifact_reports(
-        self,
-        source: str,
-        current_user,
-        q: str = "",
-        limit: int = 10,
-    ) -> list[dict]:
+
+    async def get_artifact_reports(self, source: str, current_user, q: str = "", limit: int = 10) -> list[dict]:
         source = (source or "").strip().lower()
         q = (q or "").strip()
         limit = max(1, min(limit or 10, 50))

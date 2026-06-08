@@ -8,9 +8,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { overlayAnimation, popupAnimation } from '../../../../shared/animations/popup.animations';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 @Component({
   selector: 'app-add-custom-alert',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './add-custom-alert.component.html',
   animations: [overlayAnimation, popupAnimation],
 })

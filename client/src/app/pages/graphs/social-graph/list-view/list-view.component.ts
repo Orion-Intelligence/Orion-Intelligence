@@ -8,11 +8,13 @@ import { SocialEntityUiService } from '../services/social-entity-ui.service';
 import { getMetadataEntries } from '../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
 import { getEntityRecordEntries, getEntityReportRecords, getScanResultsByUsername, parsePlatformNodeId } from '../utils/social-graph-view.util';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-list-view',
   templateUrl: './list-view.component.html',
   standalone: true,
-  imports: [SocialIconComponent],
+  imports: [SocialIconComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListViewComponent {

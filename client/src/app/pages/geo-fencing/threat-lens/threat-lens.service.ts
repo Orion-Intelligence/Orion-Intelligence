@@ -4,6 +4,7 @@ import { ConsolidatedCallbackModel } from '../../../shared/model/results/consoli
 import { ConsolidatedParamModel } from '../../../shared/model/results/consolidated/consolidated.param.model';
 import { ApiService } from '../../../shared/services/api.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
+import { normalizeCountryLabel, splitCountryValues, toCountryKey } from '../../../shared/utils/country-normalization.util';
 import { THREAT_LENS_CATEGORY_CONFIG, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
 
 const COUNTRY_FIELDS = ['m_country', 'm_country_name', 'm_location', 'country', 'location'];
@@ -24,23 +25,12 @@ export class ThreatLensService {
     return from(this.fetchAllThreatLensData(payload)).pipe(map((responses) => this.buildMapDataFromResponses(responses)));
   }
 
-  toCountryKey(value: string): string {
-    return value
-      .toLowerCase()
-      .replace(/&/g, 'and')
-      .replace(/[^a-z0-9]+/g, ' ')
-      .trim();
+  _toCountryKey(value: string): string {
+    return toCountryKey(value);
   }
 
   normalizeCountryLabel(rawValue: string): string {
-    const value = String(rawValue || '').trim();
-    if (!value) {
-      return '';
-    }
-
-    const compact = value.replace(/\s+/g, ' ').trim();
-
-    return this.resolveRegionCode(compact) || compact;
+    return normalizeCountryLabel(rawValue);
   }
 
   private buildThreatLensPayload(payload?: Partial<ThreatLensRequestPayload>): ThreatLensRequestPayload {
@@ -129,7 +119,7 @@ export class ThreatLensService {
 
         for (const country of this.extractCountries(document)) {
           const normalized = this.normalizeCountryLabel(country);
-          const key = this.toCountryKey(normalized);
+          const key = this._toCountryKey(normalized);
 
           if (!key || seenKeys.has(key)) {
             continue;
@@ -251,33 +241,7 @@ export class ThreatLensService {
   }
 
   private splitCountryString(value: unknown): string[] {
-    if (typeof value !== 'string') {
-      return [];
-    }
-
-    return value
-      .split(/[,;|]/g)
-      .map((entry) => entry.trim())
-      .filter(Boolean);
-  }
-
-  private resolveRegionCode(value: string): string {
-    const code = value.trim().toUpperCase();
-    if (!/^[A-Z]{2,3}$/.test(code) || typeof Intl === 'undefined' || typeof Intl.DisplayNames !== 'function') {
-      return '';
-    }
-
-    try {
-      const regionName = new Intl.DisplayNames(['en'], { type: 'region' }).of(code);
-      if (regionName && regionName.toUpperCase() !== code) {
-        return regionName;
-      }
-    }
-    catch {
-      return '';
-    }
-
-    return '';
+    return splitCountryValues(value);
   }
 
   private buildFeedItem(category: typeof THREAT_LENS_CATEGORY_CONFIG[number], document: any, countriesForDoc: string[]): ThreatLensFeedItem | null {
@@ -303,7 +267,7 @@ export class ThreatLensService {
       link,
       date: isoDate,
       timestamp,
-      countryKeys: countriesForDoc.map((country) => this.toCountryKey(country)).filter(Boolean),
+      countryKeys: countriesForDoc.map((country) => this._toCountryKey(country)).filter(Boolean),
     };
   }
 

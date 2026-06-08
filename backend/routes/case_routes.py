@@ -85,18 +85,8 @@ async def revoke_case_shares(case_id: str, current_user=Depends(get_current_user
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
     ],
 )
-async def get_artifact_reports(
-    source: str = Query(...),
-    q: str = Query(""),
-    limit: int = Query(10, ge=1, le=50),
-    current_user=Depends(get_current_user),
-):
-    return await CaseManager.get_instance().get_artifact_reports(
-        source,
-        current_user,
-        q=q,
-        limit=limit,
-    )
+async def get_artifact_reports(source: str = Query(...), q: str = Query(""), limit: int = Query(10, ge=1, le=50), current_user=Depends(get_current_user)):
+    return await CaseManager.get_instance().get_artifact_reports(source, current_user, q=q, limit=limit)
 
 @case_routes.put(
     "/api/profile/cases/{case_id}/archive",

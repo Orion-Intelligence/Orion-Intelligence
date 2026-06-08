@@ -7,10 +7,11 @@ import { AddNewCase } from './model/add-new-case/add-new-case';
 import { CaseManagement } from './case-management-service/case-management';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-sidebar-user-case-management',
-  imports: [CommonModule, FormsModule, AddNewCase, ConfirmationPopupComponent],
+  imports: [CommonModule, FormsModule, AddNewCase, ConfirmationPopupComponent, TranslatePipe],
   templateUrl: './sidebar-user-case-management.html'
 })
 export class SidebarUserCaseManagement implements OnInit {

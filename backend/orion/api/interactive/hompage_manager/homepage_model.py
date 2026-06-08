@@ -11,6 +11,9 @@ from orion.management.jobs.insight_generator import insight_generator
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 
 
+HOMEPAGE_DISPLAY_DATE_FORMAT = "%B %d, %Y"
+
+
 class homepage_model:
     __instance = None
 
@@ -276,5 +279,5 @@ class homepage_model:
         for fmt in formats:
             with suppress(ValueError):
                 dt = datetime.strptime(raw_date, fmt)
-                return dt.strftime("%B %d, %Y")
+                return dt.strftime(HOMEPAGE_DISPLAY_DATE_FORMAT)
         return None

@@ -11,27 +11,27 @@
           ></app-user-image-picker>
         </div>
         <div>
-          <h1 class="ui-page-title">System Settings</h1>
-          <p class="ui-page-description">Manage platform-level configuration and integrations.</p>
+          <h1 class="ui-page-title">{{ 'System Settings' | translate }}</h1>
+          <p class="ui-page-description">{{ 'Manage platform-level configuration and integrations.' | translate }}</p>
           <p class="mt-1 text-xs font-medium text-[var(--color-text4)]">
-            Version <span class="font-semibold text-[var(--color-text2)]">{{ displayVersion }}</span>
+            {{ 'Version' | translate }} <span class="font-semibold text-[var(--color-text2)]">{{ displayVersion }}</span>
           </p>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
         @if (!isEditing) {
-          <button data-testid="system-settings-edit" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" aria-label="Edit settings" (click)="toggleEdit()">
+          <button data-testid="system-settings-edit" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Edit settings' | translate" (click)="toggleEdit()">
             <img src="assets/images/shared/edit.svg" width="16" alt="edit" />
           </button>
         }
         @if (isEditing) {
-          <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" aria-label="Cancel edit" (click)="cancelEdit()">
+          <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Cancel edit' | translate" (click)="cancelEdit()">
             <i class="bi bi-x-lg text-sm"></i>
           </button>
         }
         @if (isEditing) {
-          <button data-testid="system-settings-save" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" aria-label="Save settings" (click)="toggleEdit()">
+          <button data-testid="system-settings-save" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Save settings' | translate" (click)="toggleEdit()">
             <i class="bi bi-check-lg text-sm"></i>
           </button>
         }
@@ -40,12 +40,12 @@
 
     <div class="grid gap-3 sm:grid-cols-2">
       <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 sm:col-span-2">
-        <div class="ui-section-title">Assets</div>
-        <div class="ui-section-description">Upload and manage your system brand logos.</div>
+        <div class="ui-section-title">{{ 'Assets' | translate }}</div>
+        <div class="ui-section-description">{{ 'Upload and manage your system brand logos.' | translate }}</div>
         <div class="mt-1 flex flex-col divide-y divide-[var(--color-divider)] xl:flex-row xl:items-start xl:divide-x xl:divide-y-0">
           <div class="py-1 xl:pr-3">
-            <div class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Wide Logo (Light)</div>
-            <div class="mt-0.5 text-xs text-[var(--color-text4)]">Used on light surfaces and reports.</div>
+            <div class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Wide Logo (Light)' | translate }}</div>
+            <div class="mt-0.5 text-xs text-[var(--color-text4)]">{{ 'Used on light surfaces and reports.' | translate }}</div>
             <app-user-image-picker
               class="mt-1 block h-20 w-full max-w-[250px] rounded-xl p-2 pl-0"
               [wide]="true"
@@ -57,8 +57,8 @@
           </div>
 
           <div class="py-1 xl:pl-3">
-            <div class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Wide Logo (Dark)</div>
-            <div class="mt-0.5 text-xs text-[var(--color-text4)]">Used on dark navigation and headers.</div>
+            <div class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Wide Logo (Dark)' | translate }}</div>
+            <div class="mt-0.5 text-xs text-[var(--color-text4)]">{{ 'Used on dark navigation and headers.' | translate }}</div>
             <app-user-image-picker
               class="mt-1 block h-20 w-full max-w-[250px] rounded-xl p-2 pl-0"
               [wide]="true"
@@ -70,8 +70,8 @@
           </div>
 
           <div class="py-1 xl:pl-3">
-            <div class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Auth Dashboard Icon</div>
-            <div class="mt-0.5 text-xs text-[var(--color-text4)]">Used on login and sign up pages.</div>
+            <div class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Auth Dashboard Icon' | translate }}</div>
+            <div class="mt-0.5 text-xs text-[var(--color-text4)]">{{ 'Used on login and sign up pages.' | translate }}</div>
             <app-user-image-picker
               class="mt-1 block h-20 w-full max-w-[250px] rounded-xl p-2 pl-0"
               [wide]="true"
@@ -85,18 +85,18 @@
       </div>
 
       <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 sm:col-span-2" [ngClass]="isEditing ? 'ring-2 ring-sky-400/20 border-sky-400/35' : ''">
-        <div class="ui-section-title">Configuration</div>
-        <div class="ui-section-description">Control system identity, language, and service state.</div>
+        <div class="ui-section-title">{{ 'Configuration' | translate }}</div>
+        <div class="ui-section-description">{{ 'Control system identity, language, and service state.' | translate }}</div>
         @if (isEditing) {
           <div class="mt-2 inline-flex items-center rounded-full border border-sky-400/35 bg-sky-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-sky-300">
-            Editing Enabled
+            {{ 'Editing Enabled' | translate }}
           </div>
         }
 
         <div class="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
           <div class="lg:col-span-2">
             <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-              App Name
+              {{ 'App Name' | translate }}
               @if (isEditing) {
                 <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
               }
@@ -106,7 +106,7 @@
 
           <div>
             <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-              Language
+              {{ 'Language' | translate }}
               @if (isEditing) {
                 <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
               }
@@ -122,49 +122,49 @@
 
           <div class="lg:col-span-2">
             <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-              Onion Address
+              {{ 'Onion Address' | translate }}
               @if (isEditing) {
                 <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
               }
             </label>
-            <input data-testid="system-settings-onion-address" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.s_onion" [disabled]="!isEditing" placeholder="Enter onion site" />
+            <input data-testid="system-settings-onion-address" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.s_onion" [disabled]="!isEditing" [placeholder]="'Enter onion site' | translate" />
           </div>
 
           <div>
             <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-              Data Sources URL
+              {{ 'Data Sources URL' | translate }}
               @if (isEditing) {
                 <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
               }
             </label>
-            <input data-testid="system-settings-data-sources-url" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.data_sources_url" [disabled]="!isEditing" placeholder="Data Sources" />
+            <input data-testid="system-settings-data-sources-url" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.data_sources_url" [disabled]="!isEditing" [placeholder]="'Data Sources' | translate" />
           </div>
 
           <div>
             <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-              Adversaries URL
+              {{ 'Adversaries URL' | translate }}
               @if (isEditing) {
                 <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
               }
             </label>
-            <input data-testid="system-settings-adversaries-url" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.adversaries_url" [disabled]="!isEditing" placeholder="Adversaries" />
+            <input data-testid="system-settings-adversaries-url" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.adversaries_url" [disabled]="!isEditing" [placeholder]="'Adversaries' | translate" />
           </div>
 
           <div class="lg:col-span-2">
             <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-              Pricing URL
+              {{ 'Pricing URL' | translate }}
               @if (isEditing) {
                 <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
               }
             </label>
-            <input data-testid="system-settings-pricing-url" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.pricing_url" [disabled]="!isEditing" placeholder="Pricing" />
+            <input data-testid="system-settings-pricing-url" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.pricing_url" [disabled]="!isEditing" [placeholder]="'Pricing' | translate" />
           </div>
 
           <div class="lg:col-span-2">
             <label class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2" [class.cursor-pointer]="isEditing" [class.cursor-not-allowed]="!isEditing">
-              <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">AI Enabled</span>
+              <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'AI Enabled' | translate }}</span>
               <span class="relative inline-flex items-center">
-                <input data-testid="system-settings-ai-enabled" type="checkbox" class="sr-only peer" aria-label="AI enabled" [(ngModel)]="form.ai_endpoint_enabled" [disabled]="!isEditing" />
+                <input data-testid="system-settings-ai-enabled" type="checkbox" class="sr-only peer" [attr.aria-label]="'AI enabled' | translate" [(ngModel)]="form.ai_endpoint_enabled" [disabled]="!isEditing" />
                 <span class="relative h-[18px] w-[32px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] transition-colors duration-300 peer-checked:bg-sky-500/70 peer-disabled:opacity-60">
                   <span class="absolute left-[1px] top-0 mt-[1px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="form.ai_endpoint_enabled ? 'translate-x-[14px]' : 'translate-x-0'"></span>
                 </span>
@@ -174,9 +174,9 @@
 
           <div class="lg:col-span-2">
             <label class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2" [class.cursor-pointer]="isEditing" [class.cursor-not-allowed]="!isEditing">
-              <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Documentation Allowed</span>
+              <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Documentation Allowed' | translate }}</span>
               <span class="relative inline-flex items-center">
-                <input type="checkbox" class="sr-only peer" aria-label="Documentation allowed" [(ngModel)]="form.documentation_allowed" [disabled]="!isEditing" />
+                <input type="checkbox" class="sr-only peer" [attr.aria-label]="'Documentation allowed' | translate" [(ngModel)]="form.documentation_allowed" [disabled]="!isEditing" />
                 <span class="relative h-[18px] w-[32px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] transition-colors duration-300 peer-checked:bg-sky-500/70 peer-disabled:opacity-60">
                   <span class="absolute left-[1px] top-0 mt-[1px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="form.documentation_allowed ? 'translate-x-[14px]' : 'translate-x-0'"></span>
                 </span>
@@ -186,9 +186,9 @@
 
           <div class="lg:col-span-2">
             <label class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2" [class.cursor-pointer]="isEditing" [class.cursor-not-allowed]="!isEditing">
-              <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Whistle Blowing Allowed</span>
+              <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Whistle Blowing Allowed' | translate }}</span>
               <span class="relative inline-flex items-center">
-                <input type="checkbox" class="sr-only peer" aria-label="Whistle blowing allowed" [(ngModel)]="form.whistle_blowing_allowed" [disabled]="!isEditing" />
+                <input type="checkbox" class="sr-only peer" [attr.aria-label]="'Whistle blowing allowed' | translate" [(ngModel)]="form.whistle_blowing_allowed" [disabled]="!isEditing" />
                 <span class="relative h-[18px] w-[32px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] transition-colors duration-300 peer-checked:bg-sky-500/70 peer-disabled:opacity-60">
                   <span class="absolute left-[1px] top-0 mt-[1px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="form.whistle_blowing_allowed ? 'translate-x-[14px]' : 'translate-x-0'"></span>
                 </span>
@@ -204,66 +204,20 @@
         </div>
       </div>
 
-      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 sm:col-span-2" [ngClass]="isEditing ? 'ring-2 ring-sky-400/20 border-sky-400/35' : ''">
-        <div class="ui-section-title">Network Configuration</div>
-        <div class="ui-section-description">Set mail and app connectivity variables.</div>
-        <div class="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <div>
-            <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-              ACCOUNT MAIL
-              @if (isEditing) {
-                <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
-              }
-            </label>
-            <input data-testid="system-settings-account-mail" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.accounts_mail" [disabled]="!isEditing" />
-          </div>
-
-          <div>
-            <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-              ACCOUNT MAIL PASSWORD
-              @if (isEditing) {
-                <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
-              }
-            </label>
-            <input data-testid="system-settings-account-mail-password" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="password" [(ngModel)]="form.accounts_mail_password" [disabled]="!isEditing" placeholder="test" />
-          </div>
-
-          <div>
-            <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-              ACCOUNT SMTP SERVER
-              @if (isEditing) {
-                <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
-              }
-            </label>
-            <input data-testid="system-settings-account-smtp-server" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.accounts_smtp_server" [disabled]="!isEditing" placeholder="mailpit" />
-          </div>
-
-          <div>
-            <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-              ACCOUNT SMTP PORT
-              @if (isEditing) {
-                <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
-              }
-            </label>
-            <input data-testid="system-settings-account-smtp-port" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.accounts_smtp_port" [disabled]="!isEditing" placeholder="1025" />
-          </div>
-
-          @if (networkConfigurationError) {
-            <div class="lg:col-span-2 rounded-[8px] border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-sm text-rose-300">
-              {{ networkConfigurationError }}
-            </div>
-          }
-        </div>
-      </div>
+      <app-smtp-settings-block
+        [form]="form"
+        [isEditing]="isEditing"
+        [errorState]="mailErrorState">
+      </app-smtp-settings-block>
 
       <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 sm:col-span-2">
-        <div class="ui-section-title">Service Status</div>
-        <div class="ui-section-description">Read-only runtime flags.</div>
+        <div class="ui-section-title">{{ 'Service Status' | translate }}</div>
+        <div class="ui-section-description">{{ 'Read-only runtime flags.' | translate }}</div>
         <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div class="flex items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2">
-            <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">AI Enabled</span>
+            <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'AI Enabled' | translate }}</span>
             <span data-testid="system-settings-ai-status" class="rounded-full border px-3 py-1 text-[12px] font-semibold" [ngClass]="systemData.ai_endpoint_enabled ? 'border-emerald-400/30 bg-emerald-400/15 text-emerald-300' : 'border-rose-400/30 bg-rose-400/15 text-rose-300'">
-              {{ systemData.ai_endpoint_enabled ? 'Enabled' : 'Disabled' }}
+              {{ (systemData.ai_endpoint_enabled ? 'Enabled' : 'Disabled') | translate }}
             </span>
           </div>
         </div>

@@ -1,10 +1,10 @@
 @if (consolidated) {
   <div class="ui-result-tabs-strip mx-[30px] mt-[14px] flex items-end border-b pb-0 max-[1000px]:mx-[15px]" (click)="onTabClick($event)">
     <div class="inline-flex items-center gap-[2px] bg-transparent p-0">
-      <button data-testid="consolidated-tab-iocs" type="button" data-tab="IOCs" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'IOCs', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'IOCs' }">IOCs</button>
-      <button data-testid="consolidated-tab-deep-search" type="button" data-tab="Deep Search" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'Deep Search', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'Deep Search' }">Deep Search</button>
-      <button data-testid="consolidated-tab-network-intelligence" type="button" data-tab="Network Intelligence" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'Network Intelligence', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'Network Intelligence' }">Network Intel</button>
-      <button data-testid="consolidated-tab-geo-fencing" type="button" data-tab="Geo Fencing" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'Geo Fencing', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'Geo Fencing' }">Geo Fencing</button>
+      <button data-testid="consolidated-tab-iocs" type="button" data-tab="IOCs" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'IOCs', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'IOCs' }">{{ 'categoryAlerts.fields.iocs' | translate }}</button>
+      <button data-testid="consolidated-tab-deep-search" type="button" data-tab="Deep Search" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'Deep Search', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'Deep Search' }">{{ 'Deep Search' | translate }}</button>
+      <button data-testid="consolidated-tab-network-intelligence" type="button" data-tab="Network Intelligence" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'Network Intelligence', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'Network Intelligence' }">{{ 'Network Intel' | translate }}</button>
+      <button data-testid="consolidated-tab-geo-fencing" type="button" data-tab="Geo Fencing" class="inline-flex h-[46px] cursor-pointer items-center border-b-2 border-transparent text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="{ 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]': activeTab === 'Geo Fencing', 'text-[var(--color-text4)] hover:text-[var(--color-text1)]': activeTab !== 'Geo Fencing' }">{{ 'Geo Fencing' | translate }}</button>
     </div>
   </div>
   @if (consolidated && activeTab === 'Deep Search') {
@@ -29,16 +29,16 @@
                   <button data-testid="dashboard-search-submit" class="flex h-[40px] w-[42px] items-center justify-center bg-white transition-colors hover:bg-white" type="submit">
                     <img alt="Search" height="16" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
                   </button>
-                  <input #searchInput data-testid="dashboard-general-input" class="h-[40px] flex-1 bg-white text-[15px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[14px] placeholder:text-[rgba(0,0,0,0.38)]" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" maxlength="350" name="q" placeholder="Search..." type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)" />
-                  <button type="button" class="ui-search-clear-btn group flex h-[40px] w-[38px] items-center justify-center bg-white px-0 transition-colors hover:bg-[#f3f4f6]" aria-label="Clear input" title="Clear input" (click)="clearSearchInput()" [disabled]="!searchQuery">
+                  <input #searchInput data-testid="dashboard-general-input" class="h-[40px] flex-1 bg-white text-[15px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[14px] placeholder:text-[rgba(0,0,0,0.38)]" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" maxlength="350" name="q" [placeholder]="'common.actions.search' | translate" type="search" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)" />
+                  <button type="button" class="ui-search-clear-btn group flex h-[40px] w-[38px] items-center justify-center bg-white px-0 transition-colors hover:bg-[#f3f4f6]" [attr.aria-label]="'Clear input' | translate" [title]="'Clear input' | translate" (click)="clearSearchInput()" [disabled]="!searchQuery">
                     <i class="bi bi-x-circle-fill text-[14px] text-[#374151] transition-colors group-hover:text-[#111827]" [ngClass]="{ 'invisible': !searchQuery }"></i>
                   </button>
                   <div class="flex h-[40px] shrink-0 items-center whitespace-nowrap bg-white font-[Roboto] text-[14px] font-normal text-[#292828] max-[700px]:w-0 max-[700px]:border-y-0 max-[700px]:border-r-0 max-[700px]:px-0 max-[700px]:overflow-hidden">
                     <ng-container>
                       <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]" />
-                      <span>Advance&nbsp;&nbsp;</span>
+                      <span>{{ 'Advance' | translate }}</span>
                       <label class="relative inline-flex cursor-pointer items-center rounded-full bg-white p-[1px]">
-                        <input data-testid="dashboard-advance-toggle" type="checkbox" class="sr-only peer" aria-label="Advance search" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()" />
+                        <input data-testid="dashboard-advance-toggle" type="checkbox" class="sr-only peer" [attr.aria-label]="'Advance search' | translate" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()" />
                         <span class="relative h-[20px] w-[32px] rounded-full border border-[var(--color-border)] bg-[#e5e7eb] transition peer-checked:border-[#57A5EB] peer-checked:bg-[#57A5EB]">
                           <span class="absolute left-[1px] top-0 mt-[2px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="app_service.configData().localSettings.advance_setting_toggle ? 'translate-x-[14px]' : 'translate-x-0'">
                           </span>
@@ -48,7 +48,7 @@
                     <ng-container>
                       <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)]" />
                       <button data-testid="dashboard-tools-toggle" type="button" class="inline-flex items-center cursor-pointer" (click)="onToolToggle($event)">
-                        Tools
+                        {{ 'Tools' | translate }}
                         <img src="assets/images/shared/theme/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [class.rotate-90]="app_service.configData().localSettings.enable_advanced_tools" class="mt-[-1px] px-[10px] transition-transform duration-300" />
                       </button>
                     </ng-container>
@@ -68,32 +68,32 @@
                     @if (showSorting()) {
                       <div #sortMenuRef class="relative">
                         <button data-testid="result-tools-sort" type="button" class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)]" (click)="toggleSortMenu($event)">
-                          sort by <b>({{ selectedSortBy }})</b>
+                          {{ 'sort by' | translate }} <b>({{ selectedSortBy }})</b>
                           <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16" class="ui-action-icon transition-transform duration-200" [ngClass]="{ 'rotate-180': sortMenuOpen }">
                         </button>
                         @if (sortMenuOpen) {
                           <div class="ui-result-dropdown-panel absolute z-[10] mt-[12px] w-[260px] rounded-[7px] border p-[7px_12px]">
-                            <button data-testid="result-tools-sort-newest" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSortChange(SortType.NEWEST_FIRST); closeMenus()">Newest first</button>
+                            <button data-testid="result-tools-sort-newest" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSortChange(SortType.NEWEST_FIRST); closeMenus()">{{ 'Newest first' | translate }}</button>
                             <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
-                            <button data-testid="result-tools-sort-oldest" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSortChange(SortType.OLDEST_FIRST); closeMenus()">Oldest first</button>
+                            <button data-testid="result-tools-sort-oldest" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSortChange(SortType.OLDEST_FIRST); closeMenus()">{{ 'Oldest first' | translate }}</button>
                           </div>
                         }
                       </div>
                     }
                     <div #searchMenuRef class="relative">
                       <button data-testid="result-tools-searchby" type="button" class="flex cursor-pointer items-center gap-[6px] text-[13px] font-[Roboto] font-medium text-[var(--color-text1)]" (click)="toggleSearchMenu($event)">
-                        search by <b>({{ matchTypeLabel() }})</b>
+                        {{ 'search by' | translate }} <b>({{ matchTypeLabel() }})</b>
                         <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16" class="ui-action-icon transition-transform duration-200" [ngClass]="{ 'rotate-180': searchMenuOpen }">
                       </button>
                       @if (searchMenuOpen) {
                         <div class="ui-result-dropdown-panel absolute z-[10] mt-[12px] w-[260px] rounded-[7px] border p-[7px_12px]">
-                          <button data-testid="result-tools-searchby-semantic" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSetMatchType('semantic'); onFormSubmit(); closeMenus()">Match Semantic</button>
+                          <button data-testid="result-tools-searchby-semantic" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSetMatchType('semantic'); onFormSubmit(); closeMenus()">{{ 'Match Semantic' | translate }}</button>
                           <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
-                          <button data-testid="result-tools-searchby-or" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSetMatchType('or'); onFormSubmit(); closeMenus()">Match any term (OR)</button>
+                          <button data-testid="result-tools-searchby-or" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSetMatchType('or'); onFormSubmit(); closeMenus()">{{ 'Match any term (OR)' | translate }}</button>
                           <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
-                          <button data-testid="result-tools-searchby-and" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSetMatchType('and'); onFormSubmit(); closeMenus()">Match indivisual terms (AND)</button>
+                          <button data-testid="result-tools-searchby-and" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSetMatchType('and'); onFormSubmit(); closeMenus()">{{ 'Match indivisual terms (AND)' | translate }}</button>
                           <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
-                          <button data-testid="result-tools-searchby-full" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSetMatchType('full'); onFormSubmit(); closeMenus()">Match full query (AND)</button>
+                          <button data-testid="result-tools-searchby-full" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="onSetMatchType('full'); onFormSubmit(); closeMenus()">{{ 'Match full query (AND)' | translate }}</button>
                         </div>
                       }
                     </div>
@@ -102,9 +102,9 @@
               </div>
               @if (!shrinkmenu() && filterModel) {
                 <div class="flex h-[40px] shrink-0 items-center max-[900px]:mt-[2px] max-[900px]:self-end" [ngClass]="homeSearchService.showFiltersOverlay ? 'z-[0]' : 'z-[3]'">
-                  <label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)] max-[550px]:w-full max-[550px]:justify-center">
+                  <label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" [appTooltip]="'Customize Results' | translate" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)] max-[550px]:w-full max-[550px]:justify-center">
                     <img alt="Filter Icon" height="20" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
-                    <span>Filter</span>
+                    <span>{{ 'Filter' | translate }}</span>
                   </label>
                 </div>
               }
@@ -125,13 +125,13 @@
     @if (result_count && !isLoading() && result_count !== 0) {
       <div @fadeInDashboardItem>
         <div class="mt-[26px] mb-[8px] flex w-full max-w-[910px] items-center text-[14px] leading-[1.35] font-[Roboto] font-medium tracking-[0.01em] text-[var(--color-text3)]" [ngClass]="domain() ? '' : 'mx-[30px] max-[1000px]:mx-[15px]'">
-          <span class="text-[var(--color-text2)]">{{ result_count }} Results Found</span>
+          <span class="text-[var(--color-text2)]">{{ result_count }} {{ 'Results Found' | translate }}</span>
         </div>
       </div>
     } @else {
       @if ((!checkMember() || hasIOCs()) && isLoading()) {
         <div class="mt-[30px] mb-[10px] ml-[30px] w-full max-w-[910px] text-[14px] font-[Roboto] font-medium text-[var(--color-text2)] max-[1000px]:ml-[15px]">
-          <span>Searching for results ...</span><br><br>
+          <span>{{ 'Searching for results ...' | translate }}</span><br><br>
         </div>
       }
     }
@@ -177,9 +177,9 @@
         <img alt="Info Icon" width="16" height="16" class="mr-[8px] h-[16px] w-[16px] shrink-0" src="assets/images/shared/hint.svg">
       </span>
       <span>
-        Current results are general and may lack accuracy. For precise insights, open the
-        <u><b><a appTooltip="Go to Breach Details" class="cursor-pointer text-[inherit] no-underline" queryParamsHandling="preserve" routerLink="/dashboard/breach/databases">Data Breaches</a></b></u>
-        section in sidebar.
+        {{ 'Current results are general and may lack accuracy. For precise insights, open the' | translate }}
+        <u><b><a [appTooltip]="'Go to Breach Details' | translate" class="cursor-pointer text-[inherit] no-underline" queryParamsHandling="preserve" routerLink="/dashboard/breach/databases">{{ 'Data Breaches' | translate }}</a></b></u>
+        {{ 'section in sidebar.' | translate }}
       </span>
     </div>
   }

@@ -19,14 +19,14 @@
   <div class="ml-auto flex items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
     <button data-testid="ioc-advanced-toggle" class="ui-cred-toolbar-btn inline-flex h-10 items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-xs font-semibold text-[var(--color-text2)] transition-[background-color,border-color,color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" (click)="toggleAdvanced()">
       <i class="bi inline-flex h-4 w-4 items-center justify-center text-[15px]" [ngClass]="isAdvanced ? 'bi-search' : 'bi-sliders2-vertical'"></i>
-      {{ isAdvanced ? 'Basic':'Advanced' }}
+      {{ (isAdvanced ? 'Basic':'Advanced') | translate }}
     </button>
 
     <div class="h-6 w-px bg-[var(--color-divider)]"></div>
 
-    <label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" appTooltip="Customize Results" class="ui-cred-toolbar-btn inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-xs font-semibold text-[var(--color-text2)] transition-[background-color,border-color,color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]">
+    <label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" [appTooltip]="'Customize Results' | translate" class="ui-cred-toolbar-btn inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-xs font-semibold text-[var(--color-text2)] transition-[background-color,border-color,color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]">
       <img alt="Filter Icon" height="16" src="assets/images/shared/theme/filter_icon.svg" priority width="16" class="h-4 w-4 shrink-0 ui-action-icon">
-      <span>Filter</span>
+      <span>{{ 'Filter' | translate }}</span>
     </label>
   </div>
 </div>
@@ -37,7 +37,7 @@
       <app-chat-widget #iocChatWidget [showLauncher]="false" tool="api_payload" type="/api/search/stealer/ioc"></app-chat-widget>
       <form (submit)="$event.preventDefault(); triggerSearch()" @fadeInDashboardItem class="relative flex w-full items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-white px-3 py-2" [ngClass]="isBasicInvalid() ? 'ring-1 ring-[var(--color-border-red)]' : ''">
         @if (licenseService.canUseModule('ai') && appService.configData().appSettings.ai_endpoint_enabled) {
-          <button type="button" data-testid="ioc-basic-tag-AI" class="ui-home-ai-button group flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-[rgba(87,165,235,0.24)] bg-[linear-gradient(180deg,rgba(87,165,235,0.14)_0%,rgba(87,165,235,0.07)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-200 hover:border-[rgba(87,165,235,0.38)] hover:bg-[linear-gradient(180deg,rgba(87,165,235,0.2)_0%,rgba(87,165,235,0.1)_100%)] hover:shadow-[0_0_0_2px_rgba(87,165,235,0.08),inset_0_1px_0_rgba(255,255,255,0.12)]" aria-label="Open AI workspace" (click)="iocChatWidget.openChat()">
+          <button type="button" data-testid="ioc-basic-tag-AI" class="ui-home-ai-button group flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-[rgba(87,165,235,0.24)] bg-[linear-gradient(180deg,rgba(87,165,235,0.14)_0%,rgba(87,165,235,0.07)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-200 hover:border-[rgba(87,165,235,0.38)] hover:bg-[linear-gradient(180deg,rgba(87,165,235,0.2)_0%,rgba(87,165,235,0.1)_100%)] hover:shadow-[0_0_0_2px_rgba(87,165,235,0.08),inset_0_1px_0_rgba(255,255,255,0.12)]" [attr.aria-label]="'Open AI workspace' | translate" (click)="iocChatWidget.openChat()">
             <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" class="h-2.5 w-2.5 drop-shadow-[0_1px_4px_rgba(255,255,255,0.18)]">
               <defs>
                 <linearGradient id="ioc-ai-stars-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -54,7 +54,7 @@
         @if (!(licenseService.canUseModule('ai') && appService.configData().appSettings.ai_endpoint_enabled)) {
           <i class="bi bi-search text-[14px] text-[#0e1626]/70"></i>
         }
-        <input data-testid="ioc-basic-search-input" [(ngModel)]="basicQuery" (ngModelChange)="onBasicQueryChange($event)" (input)="filterBasicInput($event)" name="searchQuery" class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/45" [ngClass]="isBasicInvalid() ? 'pr-[250px] max-[900px]:pr-[170px] max-[640px]:pr-[36px]' : ''" type="text" placeholder="Search..." />
+        <input data-testid="ioc-basic-search-input" [(ngModel)]="basicQuery" (ngModelChange)="onBasicQueryChange($event)" (input)="filterBasicInput($event)" name="searchQuery" class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/45" [ngClass]="isBasicInvalid() ? 'pr-[250px] max-[900px]:pr-[170px] max-[640px]:pr-[36px]' : ''" type="text" [placeholder]="'common.actions.search' | translate" />
         @if (isBasicInvalid()) {
           <div data-testid="ioc-basic-error" class="pointer-events-none absolute right-2 top-1/2 inline-flex max-w-[240px] -translate-y-1/2 items-center gap-1 rounded-md bg-red-500/85 px-2 py-[3px] text-[12px] font-semibold text-white max-[900px]:max-w-[160px] max-[640px]:max-w-[28px]">
             <i class="bi bi-exclamation-triangle-fill text-[12px] text-white"></i>
@@ -73,8 +73,8 @@
             <div class="relative">
               <select data-testid="ioc-adv-operator-select" class="ui-ioc-adv-control h-11 w-full appearance-none rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 pr-11 text-xs font-semibold text-[var(--color-text1)] outline-none transition-colors focus:border-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-75" [disabled]="i === 0" [ngModel]="i === 0 ? '__where__' : advancedFilters[i-1].operator" (ngModelChange)="i > 0 ? (advancedFilters[i-1].operator = $event) : null">
                 <option value="__where__">WHERE</option>
-                <option value="&&">AND</option>
-                <option value="||">OR</option>
+                <option value="&&">{{ 'AND' | translate }}</option>
+                <option value="||">{{ 'OR' | translate }}</option>
               </select>
               <i class="bi bi-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-text4)]"></i>
             </div>
@@ -87,7 +87,7 @@
             </select>
             <i class="bi bi-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-text4)]"></i>
           </div>
-          <input data-testid="ioc-adv-value-input" [(ngModel)]="filter.value" type="text" placeholder="Enter value..." class="ui-ioc-adv-control h-11 w-full rounded-lg border bg-[var(--color-blue-720)] px-3 text-[13px] font-medium text-[var(--color-text1)] placeholder:text-[var(--color-text4)] outline-none transition-colors focus:border-[var(--color-blue-640)]" [ngClass]="isAdvancedInvalid(filter) ? 'border-[var(--color-border-red)]' : 'border-[var(--color-border)]'" />
+          <input data-testid="ioc-adv-value-input" [(ngModel)]="filter.value" type="text" [placeholder]="'Enter value...' | translate" class="ui-ioc-adv-control h-11 w-full rounded-lg border bg-[var(--color-blue-720)] px-3 text-[13px] font-medium text-[var(--color-text1)] placeholder:text-[var(--color-text4)] outline-none transition-colors focus:border-[var(--color-blue-640)]" [ngClass]="isAdvancedInvalid(filter) ? 'border-[var(--color-border-red)]' : 'border-[var(--color-border)]'" />
           <div class="flex items-center gap-2">
             <button data-testid="ioc-adv-delete-filter" (click)="removeFilter(filter.id)" [disabled]="advancedFilters.length === 1" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-45">
               <img alt="delete filter" src="assets/images/shared/theme/bin.svg" class="h-4 w-4 ui-action-icon">
@@ -103,7 +103,7 @@
       <div class="flex justify-end">
         <button data-testid="ioc-adv-execute" (click)="triggerSearch()" class="inline-flex items-center gap-2 rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-xs font-semibold text-white">
           <img alt="Search" src="assets/images/shared/theme/magnifyingglasswhite.svg" class="h-4 w-4">
-          Execute
+          {{ 'Execute' | translate }}
         </button>
       </div>
     </div>

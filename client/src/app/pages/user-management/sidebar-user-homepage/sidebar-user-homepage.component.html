@@ -10,11 +10,13 @@
           }
           @if (licenseService.getLicenses().includes('enterprise') || licenseService.isMaintainer()) {
             <div class="mb-[15px] pb-[12px]">
-              <app-home-search class="homepage-search-no-margin" [isRoleAdmin]="false" [hideToolsSection]="true" [hideHeatmapAndAnalytics]="licenseService.isMaintainer()" [compactLayout]="licenseService.isMaintainer()"></app-home-search>
+              @if (!licenseService.isMaintainer()) {
+                <app-home-search class="homepage-search-no-margin" [isRoleAdmin]="false" [hideToolsSection]="true" [hideHeatmapAndAnalytics]="licenseService.isMaintainer()" [compactLayout]="licenseService.isMaintainer()"></app-home-search>
+              }
               <div class="mt-[12px] flex justify-end max-[640px]:justify-start">
                 <div class="ioc-action-toolbar inline-flex items-center gap-2 rounded-[8px] border border-[#ffffff15] bg-[var(--color-blue-800)] px-[8px] py-[6px] max-[640px]:w-full max-[640px]:justify-center" [ngClass]="isLightTheme() ? 'bg-[#f7fbff] border-[#d3deeb]' : ''">
                   @if (hasReports()) {
-                    <button data-testid="tenant-home-print-alerts" appTooltip="Print Alerts" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" (click)="openExportChoice()" (mouseenter)="setHomeToolHover('print')" (mouseleave)="setHomeToolHover(null)" [ngClass]="isLightTheme() && hoveredHomeTool==='print' ? 'bg-[#cfe0f4]' : ''">
+                    <button data-testid="tenant-home-print-alerts" [appTooltip]="'Print Alerts' | translate" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" (click)="openExportChoice()" (mouseenter)="setHomeToolHover('print')" (mouseleave)="setHomeToolHover(null)" [ngClass]="isLightTheme() && hoveredHomeTool==='print' ? 'bg-[#cfe0f4]' : ''">
                       <img src="assets/images/shared/theme/print.svg" height="25" alt="print" class="ioc-action-icon" />
                     </button>
                   }
@@ -23,12 +25,12 @@
                   }
                   <div class="inline-flex items-center gap-2">
                     @if (hasReports() && licenseService.isMaintainer()) {
-                      <button data-testid="tenant-home-flush-all" (click)="flushAll()" appTooltip="flush all" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" (mouseenter)="setHomeToolHover('flush')" (mouseleave)="setHomeToolHover(null)" [ngClass]="isLightTheme() && hoveredHomeTool==='flush' ? 'bg-[#cfe0f4]' : ''">
+                      <button data-testid="tenant-home-flush-all" (click)="flushAll()" [appTooltip]="'categoryAlerts.actions.flushAll' | translate" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" (mouseenter)="setHomeToolHover('flush')" (mouseleave)="setHomeToolHover(null)" [ngClass]="isLightTheme() && hoveredHomeTool==='flush' ? 'bg-[#cfe0f4]' : ''">
                         <img alt="flush" height="20" ngSrc="../../../../assets/images/shared/theme/bin.svg" width="20" class="ioc-action-icon" />
                       </button>
                     }
                     @if (licenseService.isMaintainer()) {
-                      <button data-testid="tenant-home-scan-all" (click)="scanIOCs()" appTooltip="scan all" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" (mouseenter)="setHomeToolHover('scan')" (mouseleave)="setHomeToolHover(null)" [ngClass]="isLightTheme() && hoveredHomeTool==='scan' ? 'bg-[#cfe0f4]' : ''">
+                      <button data-testid="tenant-home-scan-all" (click)="scanIOCs()" [appTooltip]="'scan all' | translate" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" (mouseenter)="setHomeToolHover('scan')" (mouseleave)="setHomeToolHover(null)" [ngClass]="isLightTheme() && hoveredHomeTool==='scan' ? 'bg-[#cfe0f4]' : ''">
                         <img alt="scan" height="20" ngSrc="../../../../assets/images/sidebar/theme/scanner.svg" width="20" class="ioc-action-icon" />
                       </button>
                     }
@@ -41,16 +43,16 @@
             @if (licenseService.isMaintainer() ) {
               <div class="ioc-summary-bar flex items-center justify-between gap-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-800)] px-[16px] py-[10px] max-[620px]:flex-wrap max-[620px]:gap-2 max-[620px]:px-[12px] max-[620px]:py-[12px]">
                 <div>
-                  <div class="text-[16px] font-semibold text-[var(--color-text1)]">IOC’s</div>
-                  <div class="text-[12px] text-[var(--color-text4)]">Monitored entities and filters</div>
+                  <div class="text-[16px] font-semibold text-[var(--color-text1)]">{{ 'IOC’s' | translate }}</div>
+                  <div class="text-[12px] text-[var(--color-text4)]">{{ 'Monitored entities and filters' | translate }}</div>
                 </div>
                 <div class="flex items-center gap-[8px] max-[620px]:w-full max-[620px]:justify-between">
                   <button class="ioc-entity-pill inline-flex h-[30px] items-center rounded-[7px] border border-[#57a5eb4a] bg-[#57a5eb1a] px-[10px] text-[12px] font-medium text-[#8bc6f7] max-[620px]:flex-1 max-[620px]:justify-center">
-                    Entity ({{ entityFiltersCount() }})
+                    {{ 'Entity (' | translate }}{{ entityFiltersCount() }})
                   </button>
                   <button class="ioc-edit-btn inline-flex h-[30px] items-center gap-[6px] rounded-[7px] border border-[var(--color-border)] bg-[#fcfcfc12] px-[11px] text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[#fcfcfc1f] max-[620px]:flex-1 max-[620px]:justify-center" (click)="editIocs()">
                     <img alt="edit-icon" src="assets/images/shared/theme/edit.svg" class="ioc-edit-icon h-[12px] w-[12px]">
-                    Edit
+                    {{ 'Edit' | translate }}
                   </button>
                 </div>
               </div>
@@ -61,32 +63,32 @@
                   <div class="text-[20px] font-semibold text-[var(--color-text1)]">
                     {{ criticalRisks }}
                   </div>
-                  <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px]" appTooltip="Total critical alert types" />
+                  <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px]" [appTooltip]="'Total critical alert types' | translate" />
                 </div>
                 <div class="text-[16px] font-semibold text-[#ff4c4c]">
-                  Critical Alerts
+                  {{ 'Critical Alerts' | translate }}
                 </div>
               </div>
               <div class="risk-summary-card risk-summary-card--high rounded-[8px] border border-[var(--color-border)] bg-[#ffb3471a] px-[16px] py-[14px]">
                 <div class="flex items-center justify-between">
                   <div class="text-[20px] font-semibold text-[var(--color-text1)]">{{ highRisks }}</div>
-                  <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px]" appTooltip="Total high risk alert types" />
+                  <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px]" [appTooltip]="'Total high risk alert types' | translate" />
                 </div>
-                <div class="text-[16px] font-semibold text-[#ffb347]">High Risk Alerts</div>
+                <div class="text-[16px] font-semibold text-[#ffb347]">{{ 'High Risk Alerts' | translate }}</div>
               </div>
               <div class="risk-summary-card risk-summary-card--medium rounded-[8px] border border-[var(--color-border)] bg-[#ffd9661a] px-[16px] py-[14px]">
                 <div class="flex items-center justify-between">
                   <div class="text-[20px] font-semibold text-[var(--color-text1)]">{{ mediumRisks }}</div>
-                  <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px]" appTooltip="Total medium risk alert types" />
+                  <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px]" [appTooltip]="'Total medium risk alert types' | translate" />
                 </div>
-                <div class="text-[16px] font-semibold text-[#ffd966]">Medium Risk</div>
+                <div class="text-[16px] font-semibold text-[#ffd966]">{{ 'Medium Risk' | translate }}</div>
               </div>
               <div class="risk-summary-card risk-summary-card--low rounded-[8px] border border-[var(--color-border)] bg-[#6ccf7e1a] px-[16px] py-[14px]">
                 <div class="flex items-center justify-between">
                   <div class="text-[20px] font-semibold text-[var(--color-text1)]">{{ lowRisks }}</div>
-                  <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px]" appTooltip="Total low rish alert types" />
+                  <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px]" [appTooltip]="'Total low rish alert types' | translate" />
                 </div>
-                <div class="text-[16px] font-semibold text-[#6ccf7e]">Low Risk</div>
+                <div class="text-[16px] font-semibold text-[#6ccf7e]">{{ 'Low Risk' | translate }}</div>
               </div>
             </div>
             <div class="mt-[15px] grid grid-cols-[repeat(auto-fit,minmax(340px,1fr))] gap-[16px] max-[760px]:grid-cols-1">
@@ -98,15 +100,15 @@
                       {{ category.categoryName.charAt(0).toUpperCase() + category.categoryName.slice(1) }}
                     </div>
                     <div class="category-risk-badge rounded-[100px] border border-[var(--color-border)] px-[10px] py-[4px] text-[12px] font-normal max-[640px]:text-[11px]" [ngClass]="{ 'bg-[#ff4c4c1a] text-[#ff4c4c] category-risk-badge--critical': category.risk.toLowerCase() === 'critical', 'bg-[#ffb3471a] text-[#ffb347] category-risk-badge--high': category.risk.toLowerCase() === 'high', 'bg-[#ffd9661a] text-[#ffd966] category-risk-badge--medium': category.risk.toLowerCase() === 'medium', 'bg-[#6ccf7e1a] text-[#6ccf7e] category-risk-badge--low': category.risk.toLowerCase() === 'low' }">
-                      {{ category.risk }} Risk
+                      {{ category.risk }} {{ 'categoryAlerts.fields.risk' | translate }}
                     </div>
                   </div>
                   <div class="flex justify-between text-[12px] font-normal text-[#a0b8d1]">
-                    <span>IOC’s found</span>
+                    <span>{{ 'IOC’s found' | translate }}</span>
                     <span class="font-semibold text-[var(--color-text1)]">{{ category.iocCount }}</span>
                   </div>
                   <div class="flex justify-between text-[12px] font-normal text-[#a0b8d1]">
-                    <span>Detected on</span>
+                    <span>{{ 'Detected on' | translate }}</span>
                     <span class="font-semibold text-[var(--color-text1)]">
                       {{ category.detectedDate ? (category.detectedDate | date:'dd/MM/yyyy') : '-' }}
                     </span>
@@ -134,17 +136,17 @@
       }
     }
     @if (isConfirmationOpen()) {
-      <app-confirmation-popup [message]="'Are you sure you want to clear your scan history?'"
+      <app-confirmation-popup [message]="('Are you sure you want to clear your scan history?') | translate"
       (confirmed)="flushAllConfirmation($event)"></app-confirmation-popup>
     }
     @if (noIocPopup()) {
-      <app-message-popup [message]="'There are no IOCs in your tenant'"
+      <app-message-popup [message]="('There are no IOCs in your tenant') | translate"
       (confirmed)="clossNoIocPopup()"></app-message-popup>
     }
     <app-export-choice-modal
       [visible]="isExportChoiceOpen"
-      [title]="'Export Alerts'"
-      [subtitle]="'Choose the export format.'"
+      [title]="('Export Alerts') | translate"
+      [subtitle]="('Choose the export format.') | translate"
       [options]="alertExportOptions"
       [overlayTestId]="'home-alert-export-overlay'"
       [modalTestId]="'home-alert-export-modal'"

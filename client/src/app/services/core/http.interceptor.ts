@@ -18,6 +18,7 @@ const STATUS_MEANINGS: Record<number, string> = {
   404: 'Not Found',
   408: 'Request Timeout',
   409: 'Conflict',
+  424: 'Mail Configuration Failed',
   422: 'Unprocessable Entity',
   429: 'Too Many Requests',
   500: 'Internal Server Error',
@@ -92,7 +93,7 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
       ]);
       const isSilentLogout = silentLogoutMessages.has(message);
       const isPublicCaseShareRequest = error instanceof HttpErrorResponse && authReq.url.includes('public/case-shares/');
-      if (error instanceof HttpErrorResponse && !isPublicCaseShareRequest && error.status !== 400 && error.status !== 409 && error.status !== 429) {
+      if (error instanceof HttpErrorResponse && !isPublicCaseShareRequest && error.status !== 400 && error.status !== 409 && error.status !== 424 && error.status !== 429) {
         localStorage.clear();
         sessionStorage.clear();
         router.navigate(['/login']).then();

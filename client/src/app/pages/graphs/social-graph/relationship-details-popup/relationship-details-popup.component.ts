@@ -2,10 +2,12 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 
 import { RelationshipConnectionItem, RelationshipPopupData } from '../services/social-mapper-state.service';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-relationship-details-popup',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './relationship-details-popup.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

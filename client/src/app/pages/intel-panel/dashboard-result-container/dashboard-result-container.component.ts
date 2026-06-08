@@ -19,6 +19,7 @@ import { HelperService } from '../../../shared/services/helper.service';
 import { DashboardResultDefacementComponent } from '../dashboard-results/dashboard-result-defacement/dashboard-result-defacement.component';
 import { ScrollService } from '../../../shared/services/scroll.service';
 import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-dashboard-result-container',
@@ -30,8 +31,7 @@ import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-
     DashboardResultExploitComponent,
     DashboardResultSocialComponent,
     DashboardResultChatComponent,
-    DashboardResultDefacementComponent
-  ],
+    DashboardResultDefacementComponent, TranslatePipe],
   templateUrl: './dashboard-result-container.component.html',
   animations: [fadeInDashboardItem],
 })

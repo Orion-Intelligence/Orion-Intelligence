@@ -6,7 +6,7 @@
           <h3 id="share-response-dialog-title" class="ui-popup-title text-[16px] font-semibold">{{ title }}</h3>
           <p class="mt-0.5 text-[12px] leading-5 text-[var(--color-text4)]">{{ description }}</p>
         </div>
-        <button type="button" (click)="close()" appTooltip="Close" class="ui-popup-close inline-flex h-9 w-9 shrink-0 items-center justify-center text-[18px]" aria-label="Close">
+        <button type="button" (click)="close()" [appTooltip]="'common.actions.close' | translate" class="ui-popup-close inline-flex h-9 w-9 shrink-0 items-center justify-center text-[18px]" [attr.aria-label]="'common.actions.close' | translate">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
@@ -16,9 +16,9 @@
           <div class="mb-2 flex items-center justify-between gap-3">
             <span class="inline-flex min-w-0 items-center gap-2 text-[12px] font-semibold text-[var(--color-text2)]">
               <i class="bi bi-body-text text-[13px] leading-none text-[#A7D5FF]"></i>
-              <span>Message</span>
+              <span>{{ 'Message' | translate }}</span>
             </span>
-            <span class="shrink-0 text-[11px] text-[var(--color-text5)]">{{ characterCount }} chars</span>
+            <span class="shrink-0 text-[11px] text-[var(--color-text5)]">{{ characterCount }} {{ 'chars' | translate }}</span>
           </div>
           <p class="max-h-[96px] overflow-y-auto whitespace-pre-wrap break-words text-[12px] leading-5 text-[var(--color-text3)]">{{ shareText }}</p>
         </div>
@@ -29,7 +29,7 @@
               <span class="inline-flex h-12 w-12 items-center justify-center rounded-full border border-[#57A5EB]/25 bg-[#57A5EB]/15 text-[#A7D5FF] transition group-hover:bg-[#57A5EB]/25 group-active:scale-95">
                 <i class="bi bi-share-fill text-[18px] leading-none"></i>
               </span>
-              <span class="w-full truncate text-[11px] font-medium text-[var(--color-text3)]">System</span>
+              <span class="w-full truncate text-[11px] font-medium text-[var(--color-text3)]">{{ 'System' | translate }}</span>
             </button>
           }
 

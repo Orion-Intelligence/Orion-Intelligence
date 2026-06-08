@@ -1,0 +1,30 @@
+name: Codacy Repository Analysis
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  codacy-repository-analysis:
+    runs-on: ubuntu-latest
+    name: Codacy Repository Analysis
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Set up JDK
+        uses: actions/setup-java@17f84c3641ba7b8f6deff6309fc4c864478f5d62
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Upload Codacy repository analysis results
+        uses: codacy/codacy-analysis-cli-action@562ee3e92b8e92df8b67e0a5ff8aa8e261919c08
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          verbose: true
+          upload: true
+          max-allowed-issues: 2147483647

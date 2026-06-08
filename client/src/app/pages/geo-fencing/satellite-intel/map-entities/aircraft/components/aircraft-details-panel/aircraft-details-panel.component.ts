@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { TranslatePipe } from '../../../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-aircraft-details-panel',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './aircraft-details-panel.component.html',
 })
 export class AircraftDetailsPanelComponent {

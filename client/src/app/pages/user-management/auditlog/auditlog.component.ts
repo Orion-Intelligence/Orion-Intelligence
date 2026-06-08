@@ -11,9 +11,11 @@ import { BaseListingComponent } from '../../../shared/directive/base.listing.dir
 import { HelperService } from '../../../shared/services/helper.service';
 import { take } from 'rxjs/operators';
 import { SidebarService } from '../../../shared/services/sidebar.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-auditlog',
-  imports: [FormsModule, PaginationComponent, AsyncPipe, AuditlogListComponent, FiltersComponent, NgOptimizedImage, NgClass],
+  imports: [FormsModule, PaginationComponent, AsyncPipe, AuditlogListComponent, FiltersComponent, NgOptimizedImage, NgClass, TranslatePipe],
   templateUrl: './auditlog.component.html'
 })
 export class AuditlogComponent extends BaseListingComponent<AuditLogCallbackModel> {

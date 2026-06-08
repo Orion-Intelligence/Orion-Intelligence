@@ -9,6 +9,8 @@ import { RemoveEmojisPipe } from '../../../../shared/pipes/remove-emojis-pipe.pi
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { ProxyController } from '../../../../shared/services/proxy-controller';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-dashboard-result-social',
   standalone: true,
@@ -18,8 +20,7 @@ import { ProxyController } from '../../../../shared/services/proxy-controller';
     RouterLink,
     TooltipDirective,
     CommonModule,
-    RemoveEmojisPipe
-  ],
+    RemoveEmojisPipe, TranslatePipe],
   templateUrl: './dashboard-result-social.component.html',
   animations: [fadeInDashboardItem]
 })

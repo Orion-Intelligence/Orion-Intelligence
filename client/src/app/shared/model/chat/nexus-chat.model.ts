@@ -13,4 +13,5 @@ export interface NexusChatStreamChunk {
   delta?: string;
   response?: string;
   status?: string;
+  error?: boolean;
 }

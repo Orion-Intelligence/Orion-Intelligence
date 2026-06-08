@@ -4,18 +4,18 @@
         <div class="ui-page-container p-5" data-testid="case-management-page">
             <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="ui-page-title">Cases</h1>
+                    <h1 class="ui-page-title">{{ 'Cases' | translate }}</h1>
                     <p class="ui-page-description">
-                        {{ showArchivedCases ? 'Viewing archived cases' : 'Manage cybersecurity cases' }}
+                        {{ (showArchivedCases ? 'Viewing archived cases' : 'Manage cybersecurity cases') | translate }}
                     </p>
                 </div>
                 <div class="flex items-center gap-2">
                     <button type="button" data-testid="toggle-archived-cases-button" class="ui-btn" [ngClass]="showArchivedCases ? 'ui-btn-primary' : 'ui-btn-secondary'" (click)="toggleArchivedCases()">
-                        {{ showArchivedCases ? 'Hide Archived Cases' : 'See Archived Cases' }}
+                        {{ (showArchivedCases ? 'Hide Archives' : 'Show Archived') | translate }}
                     </button>
 
                     <button type="button" data-testid="add-case-button" class="ui-btn ui-btn-primary" (click)="addCase()">
-                        Add Case
+                        {{ 'Add Case' | translate }}
                     </button>
                 </div>
             </div>
@@ -28,14 +28,14 @@
                     <table class="w-full min-w-[1120px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]" data-testid="case-management-table">
                         <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
                             <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
-                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">Case ID</th>
-                                <th class="w-[220px] overflow-clip align-middle px-4 py-3.5">Title</th>
-                                <th class="w-[160px] overflow-clip align-middle px-4 py-3.5">Case Type</th>
-                                <th class="w-[120px] overflow-clip align-middle px-4 py-3.5">Status</th>
-                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">Severity</th>
-                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">Priority</th>
-                                <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">Updated</th>
-                                <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">Action</th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Case ID' | translate }}</th>
+                                <th class="w-[220px] overflow-clip align-middle px-4 py-3.5">{{ 'categoryAlerts.form.title' | translate }}</th>
+                                <th class="w-[160px] overflow-clip align-middle px-4 py-3.5">{{ 'Case Type' | translate }}</th>
+                                <th class="w-[120px] overflow-clip align-middle px-4 py-3.5">{{ 'Status' | translate }}</th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Severity' | translate }}</th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Priority' | translate }}</th>
+                                <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">{{ 'Updated' | translate }}</th>
+                                <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">{{ 'Action' | translate }}</th>
                             </tr>
                         </thead>
 
@@ -73,11 +73,11 @@
                                 </td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
                                     <div class="inline-flex items-center justify-center gap-2">
-                                        <button type="button" (click)="viewCase(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" aria-label="View case" [attr.data-testid]="'case-view-' + case.caseId">
+                                        <button type="button" (click)="viewCase(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="'View case' | translate" [attr.data-testid]="'case-view-' + case.caseId">
                                             <img src="assets/images/shared/view.svg" width="18" alt="view" class="case-action-icon cursor-pointer" />
                                         </button>
                                         @if (canDeleteCases()) {
-                                        <button type="button" (click)="openDeleteConfirmation(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)]" aria-label="Delete case" [attr.data-testid]="'case-delete-' + case.caseId">
+                                        <button type="button" (click)="openDeleteConfirmation(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)]" [attr.aria-label]="'Delete case' | translate" [attr.data-testid]="'case-delete-' + case.caseId">
                                             <img src="assets/images/shared/theme/bin.svg" width="18" alt="delete" class="case-action-icon cursor-pointer" />
                                         </button>
                                         }
@@ -90,8 +90,7 @@
                         @if ((cases?.length || 0) === 0) {
                         <tbody>
                             <tr class="border-t !border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]" data-testid="case-management-empty">
-                                <td class="px-4 py-12 text-center text-sm text-[var(--color-text4)]" colspan="8">No case
-                                    available.</td>
+                                <td class="px-4 py-12 text-center text-sm text-[var(--color-text4)]" colspan="8">{{ 'No case                                     available.' | translate }}</td>
                             </tr>
                         </tbody>
                         }
@@ -109,11 +108,11 @@
                                     &middot; {{ formatLabel(case.caseType) }}</div>
                             </div>
                             <div class="flex shrink-0 items-center gap-2">
-                                <button type="button" (click)="viewCase(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" aria-label="View case" [attr.data-testid]="'case-mobile-view-' + case.caseId">
+                                <button type="button" (click)="viewCase(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="'View case' | translate" [attr.data-testid]="'case-mobile-view-' + case.caseId">
                                     <img src="assets/images/shared/view.svg" width="18" alt="view" class="case-action-icon cursor-pointer" />
                                 </button>
                                 @if (canDeleteCases()) {
-                                <button type="button" (click)="openDeleteConfirmation(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)]" aria-label="Delete case" [attr.data-testid]="'case-mobile-delete-' + case.caseId">
+                                <button type="button" (click)="openDeleteConfirmation(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)]" [attr.aria-label]="'Delete case' | translate" [attr.data-testid]="'case-mobile-delete-' + case.caseId">
                                     <img src="assets/images/shared/theme/bin.svg" width="18" alt="delete" class="case-action-icon cursor-pointer" />
                                 </button>
                                 }
@@ -121,25 +120,25 @@
                         </div>
                         <div class="divide-y divide-[var(--tenant-line)] px-3 py-2.5 text-sm text-[var(--color-text2)]">
                             <div class="flex items-center justify-between gap-3 py-2">
-                                <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</span>
+                                <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Status' | translate }}</span>
                                 <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="{ 'bg-blue-500/10 text-blue-300 [body.light-theme_&]:bg-blue-100 [body.light-theme_&]:text-blue-800': case.status === 'new' || case.status === 'triaged' || case.status === 'assigned', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': case.status === 'investigating' || case.status === 'waiting_on_response' || case.status === 'remediating' || case.status === 'review', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': case.status === 'resolved', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700': case.status !== 'new' && case.status !== 'triaged' && case.status !== 'assigned' && case.status !== 'investigating' && case.status !== 'waiting_on_response' && case.status !== 'remediating' && case.status !== 'review' && case.status !== 'resolved' }">
                                     {{ formatLabel(case.status) }}
                                 </span>
                             </div>
                             <div class="flex items-center justify-between gap-3 py-2">
-                                <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Severity</span>
+                                <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Severity' | translate }}</span>
                                 <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="{ 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': case.severity === 'critical', 'bg-orange-500/10 text-orange-300 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': case.severity === 'high', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': case.severity === 'medium', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': case.severity !== 'critical' && case.severity !== 'high' && case.severity !== 'medium' }">
                                     {{ case.severity }}
                                 </span>
                             </div>
                             <div class="flex items-center justify-between gap-3 py-2">
-                                <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Priority</span>
+                                <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Priority' | translate }}</span>
                                 <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="{ 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': case.priority === 'critical', 'bg-orange-500/10 text-orange-300 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': case.priority === 'high', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': case.priority === 'medium', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': case.priority !== 'critical' && case.priority !== 'high' && case.priority !== 'medium' }">
                                     {{ case.priority }}
                                 </span>
                             </div>
                             <div class="flex items-center justify-between gap-3 py-2">
-                                <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Updated</span>
+                                <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Updated' | translate }}</span>
                                 <span class="text-right text-xs font-medium text-[var(--color-text1)]">{{
                                     getFormattedDate(case.updatedAt) }} &middot; {{ getFormattedTime(case.updatedAt)
                                     }}</span>
@@ -150,7 +149,7 @@
                     }
                     @if ((cases?.length || 0) === 0) {
                     <div class="rounded-[10px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] px-3 py-8 text-center text-sm text-[var(--color-text4)]" data-testid="case-management-mobile-empty">
-                        No case available.
+                        {{ 'No case available.' | translate }}
                     </div>
                     }
                 </div>
@@ -159,14 +158,14 @@
                     <table class="w-full min-w-[1120px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]">
                         <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
                             <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
-                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">Case ID</th>
-                                <th class="w-[220px] overflow-clip align-middle px-4 py-3.5">Title</th>
-                                <th class="w-[160px] overflow-clip align-middle px-4 py-3.5">Case Type</th>
-                                <th class="w-[120px] overflow-clip align-middle px-4 py-3.5">Status</th>
-                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">Severity</th>
-                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">Priority</th>
-                                <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">Updated</th>
-                                <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">Action</th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Case ID' | translate }}</th>
+                                <th class="w-[220px] overflow-clip align-middle px-4 py-3.5">{{ 'categoryAlerts.form.title' | translate }}</th>
+                                <th class="w-[160px] overflow-clip align-middle px-4 py-3.5">{{ 'Case Type' | translate }}</th>
+                                <th class="w-[120px] overflow-clip align-middle px-4 py-3.5">{{ 'Status' | translate }}</th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Severity' | translate }}</th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Priority' | translate }}</th>
+                                <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">{{ 'Updated' | translate }}</th>
+                                <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">{{ 'Action' | translate }}</th>
                             </tr>
                         </thead>
                         <tbody class="text-[15px] font-normal text-[var(--color-text3)]">
@@ -221,7 +220,7 @@
             </app-add-new-case>
             }
             @if (isDeleteConfirmationOpen) {
-            <app-confirmation-popup [message]="'Are you sure you want to delete this case?'"
+            <app-confirmation-popup [message]="('Are you sure you want to delete this case?') | translate"
                 (confirmed)="deleteCase($event)"></app-confirmation-popup>
             }
         </div>

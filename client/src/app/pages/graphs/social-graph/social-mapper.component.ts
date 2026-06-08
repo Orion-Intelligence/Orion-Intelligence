@@ -32,6 +32,8 @@ import { RelationshipResolverService } from './services/relationship-resolver.se
 import { GraphLoadingComponent } from '../shared/graph-loading/graph-loading.component';
 import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/utils/file-input.util';
 import { getEntityRecordEntries, getEntityReportRecords, getScanResultsByUsername, parsePlatformNodeId } from './utils/social-graph-view.util';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-social-graph',
   templateUrl: './social-mapper.component.html',
@@ -56,8 +58,7 @@ import { getEntityRecordEntries, getEntityReportRecords, getScanResultsByUsernam
     RelationshipDetailsPopupComponent,
     GraphToolbarComponent,
     GraphSearchTriggerComponent,
-    GraphLoadingComponent
-  ]
+    GraphLoadingComponent, TranslatePipe]
 })
 export class SocialMapperComponent implements OnInit, OnDestroy {
   private activeTabState = computed(() => this.tabManager.activeTab()?.state);

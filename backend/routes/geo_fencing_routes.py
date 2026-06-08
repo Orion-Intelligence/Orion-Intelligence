@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from configs.app_dependency import get_current_user, license_required, role_required, status_required
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
@@ -41,7 +41,12 @@ def _enforce_demo_safe_search(param: search_consolidated_param_model, current_us
 )
 async def stream_map_entities(param: search_map_entities_param_model = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
-    stream = await geo_fencing_manager.get_instance().stream_map_entities_points(chunk_size=param.size)
+    try:
+        stream = await geo_fencing_manager.get_instance().stream_map_entities_points(chunk_size=param.size)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Failed to stream map entities") from exc
     return StreamingResponse(
         stream,
         media_type="application/x-ndjson",

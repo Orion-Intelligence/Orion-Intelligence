@@ -10,11 +10,13 @@ import { AppService } from '../../../../services/core/app/app.service';
 import { NexusChatService } from '../nexus-chat.service';
 import { AiWorkspaceMessage } from '../../../../shared/model/chat/ai-workspace-message.model';
 import { BotMessageActionsComponent } from '../bot-message-actions/bot-message-actions.component';
+import { MarkdownPipe } from '../../../../shared/pipes/markdown.pipe';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-chat-widget',
   standalone: true,
-  imports: [CommonModule, FormsModule, BotMessageActionsComponent],
+  imports: [CommonModule, FormsModule, BotMessageActionsComponent, MarkdownPipe, TranslatePipe],
   templateUrl: './chat-widget.component.html',
   animations: [chatBotAnimation, overlayFadeAnimation]
 })
@@ -38,6 +40,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   composerExpanded = false;
   composerRows = 1;
   composerScrollable = false;
+  readonly maxComposerTokens = 300;
   readonly reportText = input<string>();
   readonly report = input<string>();
   readonly showLauncher = input(true);
@@ -75,7 +78,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     const text = this.newMessage.trim();
-    if (!text) {
+    if (!text || this.countMessageTokens(text) > this.maxComposerTokens) {
       return;
     }
     this.chatMessages.push({ id: crypto.randomUUID(), sender: 'user', text, time: new Date() });
@@ -146,6 +149,13 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
           this.botStep = chunk.status;
           this.cdr.detectChanges();
         }
+        if (chunk.error) {
+          reply = chunk.response || chunk.delta || 'Something went wrong. try again.';
+          this.chatMessages = botMessage ? this.chatMessages.filter(message => message.id !== botMessage?.id) : this.chatMessages;
+          this.showErrorMessage(userMessage, reply);
+          this.scrollToNewMessage();
+          return;
+        }
         if (chunk.delta) {
           reply += chunk.delta;
           updateReply(reply);
@@ -172,11 +182,11 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private showErrorMessage(originalMessage: string): void {
+  private showErrorMessage(originalMessage: string, errorText = 'Something went wrong. try again.'): void {
     this.chatMessages.push({
       id: crypto.randomUUID(),
       sender: 'error',
-      text: 'Something went wrong. try again.',
+      text: errorText.trim() || 'Something went wrong. try again.',
       time: new Date(),
       retryPayload: originalMessage
     });
@@ -273,6 +283,18 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     this.composerExpanded = this.composerRows > 1;
   }
 
+  get newMessageTokenCount(): number {
+    return this.countMessageTokens(this.newMessage);
+  }
+
+  get newMessageTokenOverflow(): number {
+    return Math.max(0, this.newMessageTokenCount - this.maxComposerTokens);
+  }
+
+  get isNewMessageOverLimit(): boolean {
+    return this.newMessageTokenOverflow > 0;
+  }
+
   queueComposerResize(): void {
     requestAnimationFrame(() => this.resizeComposer());
   }
@@ -321,6 +343,10 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     const lines = (textarea.value || '').split('\n');
 
     return Math.max(1, lines.reduce((total, line) => total + Math.max(1, Math.ceil(line.length / charsPerLine)), 0));
+  }
+
+  private countMessageTokens(value: string): number {
+    return value.trim().match(/[A-Za-z0-9_]+|[^\sA-Za-z0-9_]/g)?.length ?? 0;
   }
 
   private scrollToNewMessage(): void {

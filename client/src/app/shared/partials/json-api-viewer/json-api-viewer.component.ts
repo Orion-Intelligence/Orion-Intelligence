@@ -2,10 +2,12 @@ import { Component, input } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { JsonViewerComponent } from './json-viewer/json-viewer.component';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
 @Component({
   selector: 'app-json-api-viewer',
   standalone: true,
-  imports: [CommonModule, NgClass, JsonViewerComponent, JsonViewerComponent, TooltipDirective],
+  imports: [CommonModule, NgClass, JsonViewerComponent, JsonViewerComponent, TooltipDirective, TranslatePipe],
   templateUrl: './json-api-viewer.component.html',
 })
 export class JsonApiViewerComponent {

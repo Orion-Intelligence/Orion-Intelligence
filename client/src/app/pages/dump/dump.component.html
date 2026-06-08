@@ -4,13 +4,13 @@
   <div class="ui-page-container w-full max-w-[2400px]">
     <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="ui-page-title">Dump Listing</h1>
-        <p class="ui-page-description">Track and search monitored leak dump records.</p>
+        <h1 class="ui-page-title">{{ 'Dump Listing' | translate }}</h1>
+        <p class="ui-page-description">{{ 'Track and search monitored leak dump records.' | translate }}</p>
       </div>
 
       <button type="button" (click)="openSidebar()" class="ui-btn ui-btn-secondary gap-2">
         <img alt="Filter Icon" height="16" ngSrc="/assets/images/shared/theme/filter_icon.svg" width="16" class="ui-filter-icon">
-        Filter
+        {{ 'Filter' | translate }}
       </button>
 
       @if (isFilterOpen$ | async) {
@@ -29,9 +29,9 @@
           <div class="flex w-[45px] items-center justify-center bg-white">
             <img alt="Search" height="20" ngSrc="/assets/images/shared/domain.svg" priority width="20" class="brightness-0 opacity-80">
           </div>
-          <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white px-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[rgba(23,34,53,0.52)]" maxlength="150" name="username" placeholder="Search leak URL" type="text" required>
+          <input [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white px-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[rgba(23,34,53,0.52)]" maxlength="150" name="username" [placeholder]="'Search leak URL' | translate" type="text" required>
           <input type="hidden" value="1">
-          <button class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40" [disabled]="!searchForm.valid">Search</button>
+          <button class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-300/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40" [disabled]="!searchForm.valid">{{ 'Search' | translate }}</button>
         </div>
       </div>
     </form>

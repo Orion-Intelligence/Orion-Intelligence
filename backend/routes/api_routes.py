@@ -1,6 +1,6 @@
 import asyncio
 from typing import Optional
-from fastapi import APIRouter, Body, Depends, Query, UploadFile, File
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, UploadFile, File
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from configs.app_dependency import license_required, role_required, status_required, get_current_role, get_current_user, get_is_free_token
 from configs.limiter_dependency import limiter_dependency
@@ -58,7 +58,12 @@ def _enforce_demo_safe_search(param: search_consolidated_param_model, current_us
     response_model=SiemSearchResponseModel,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])), Depends(license_required("maintainer", bypass_roles=[user_role.ADMIN])), Depends(limiter_dependency)])
 async def search_siem_logs(payload: SiemSearchRequestModel = Body(...), current_user=Depends(get_current_user)):
-    return await SiemLogManager.get_instance().search_logs(payload, current_user)
+    try:
+        return await SiemLogManager.get_instance().search_logs(payload, current_user)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Failed to search SIEM logs") from exc
 
 @api_routes.get(
     "/api/insight/country",
@@ -594,7 +599,12 @@ async def search_dynamic_social(param: search_dynamic_social_model = Body(...), 
     dependencies=SCANNING_DEPS, )
 async def search_dynamic_wanted(param: search_dynamic_social_model = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().search_audit(current_user, "dynamic_wanted", next((str(v) for v in (param.text or {}).values() if v), ""))
-    return await search_model.getInstance().search_wanted_list(param)
+    try:
+        return await search_model.getInstance().search_wanted_list(param)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Failed to search wanted records") from exc
 
 @api_routes.post(
     "/api/dynamic/national-identity",
@@ -829,7 +839,7 @@ async def ipscanner(param: NetIntelDeepScanRequest = Body(...), current_user=Dep
     dependencies=SCAN_WITH_LIMITER_DEPS,
 )
 async def url_vulnerability_scan(param: UrlVulnerabilityScanRequest = Body(...), current_user=Depends(get_current_user)):
-    await AuditLogManager.get_instance().search_audit(current_user, "url_vulnerability_scan", param.domain)
+    await AuditLogManager.get_instance().search_audit(current_user, "url_vulnerability_scan", param.domain+", depth: "+param.depth)
     return await search_model.getInstance().network_intel(param, "url_vulnerability_scan", user_id=str(current_user.id))
 
 @api_routes.post(

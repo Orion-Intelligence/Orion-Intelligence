@@ -21,3 +21,7 @@ class NexusRpcPayloadModel(BaseModel):
     @classmethod
     def tool_cancel(cls, request_id: str, user_id: str):
         return cls(id=request_id, method="tools/cancel", params={"user_id": user_id})
+
+    @classmethod
+    def tool_resume(cls, request_id: str, user_id: str):
+        return cls(id=request_id, method="tools/resume", params={"user_id": user_id})

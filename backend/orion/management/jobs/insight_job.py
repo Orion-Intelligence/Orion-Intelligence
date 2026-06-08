@@ -13,6 +13,9 @@ from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 
 
+INSIGHT_DATE_LABEL_FORMAT = "%d %b"
+
+
 class insight_job:
     __instance = None
 
@@ -60,7 +63,7 @@ class insight_job:
                         value = capwords(buckets[0]["key"]) if buckets else "-"
 
                     if key in ["Most Recent", "Oldest Update"] and value and isinstance(value, (int, float)):
-                        value = datetime.fromtimestamp(value / 1000, tz=timezone.utc).strftime("%d %b")
+                        value = datetime.fromtimestamp(value / 1000, tz=timezone.utc).strftime(INSIGHT_DATE_LABEL_FORMAT)
                     if isinstance(value, float):
                         value = round(value, 2)
 

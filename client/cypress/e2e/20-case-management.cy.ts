@@ -5,6 +5,7 @@ import {
   addCase,
   addCommentToCreatedCase,
   addLinkTargetCase,
+  archiveClosedCaseAndShowArchived,
   assertCreatedCaseDetails,
   closeCreatedCase,
   editCreatedCase,
@@ -35,5 +36,6 @@ describe('Case Management - Add View Edit Flow', () => {
     exportCreatedCasePdf();
     shareAndRevokeCreatedCaseLink();
     closeCreatedCase();
+    archiveClosedCaseAndShowArchived();
   });
 });

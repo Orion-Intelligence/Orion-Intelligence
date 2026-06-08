@@ -22,6 +22,7 @@ import { CaseDetailsEditSection, CaseDetailsStore } from './case-details.store';
 import { caseInlineMotion, caseModeSwapMotion, caseSectionMotion } from './case-details.animations';
 import { CaseEditDrawerComponent } from './case-edit-drawer/case-edit-drawer';
 import { CasePdfExportService } from '../../case-management-service/case-pdf-export.service';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-case-details',
@@ -38,8 +39,7 @@ import { CasePdfExportService } from '../../case-management-service/case-pdf-exp
     CaseEditDrawerComponent,
     CaseLinkedCasesSectionComponent,
     CaseRelatedEntitiesSectionComponent,
-    CaseTasksSectionComponent
-  ],
+    CaseTasksSectionComponent, TranslatePipe],
   providers: [
     { provide: CaseDetailsStore, useExisting: forwardRef(() => CaseDetails) }
   ],
@@ -1518,10 +1518,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   private createId(): string {
-    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-      return crypto.randomUUID();
-    }
-    return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    return crypto.randomUUID();
   }
 
   getDisplayLabel(value?: string | null, otherValue?: string | null): string {

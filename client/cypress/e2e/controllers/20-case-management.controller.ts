@@ -291,3 +291,21 @@ export function closeCreatedCase() {
   cy.get(selector('case-task-add')).should('not.exist');
   cy.get(selector('case-linked-case-add')).should('not.exist');
 }
+
+export function archiveClosedCaseAndShowArchived() {
+  clickHeaderAction('case-details-archive');
+  cy.get(selector('case-details-archive-confirmation')).should('exist');
+  cy.get(selector('confirmation-popup')).should('contain.text', 'archive this case');
+  cy.get(selector('confirmation-yes-button')).should('be.visible').click();
+
+  assertNotification('Case archived successfully');
+  cy.get(selector('case-details-archive')).should('not.exist');
+
+  cy.visit('/dashboard/profile/case-management');
+  cy.get(selector('case-management-page')).should('be.visible');
+  cy.get(selector('toggle-archived-cases-button')).should('be.visible').click();
+  cy.get(selector('case-management-page')).should('contain.text', 'Viewing archived cases');
+  cy.then(() => {
+    cy.get(selector(`case-row-${caseId}`)).should('be.visible');
+  });
+}

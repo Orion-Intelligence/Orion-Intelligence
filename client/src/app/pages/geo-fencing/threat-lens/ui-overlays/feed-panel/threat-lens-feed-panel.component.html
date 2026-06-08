@@ -17,7 +17,7 @@
         </p>
       </div>
 
-      <button [attr.data-testid]="'threat-lens-feed-toggle-' + feedType" type="button" (click)="toggleCollapsed()" [attr.aria-label]="collapsed ? 'Expand' : 'Collapse'" class="ui-consolidated-sub flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
+      <button [attr.data-testid]="'threat-lens-feed-toggle-' + feedType" type="button" (click)="toggleCollapsed()" [attr.aria-label]="(collapsed ? 'Expand' : 'Collapse') | translate" class="ui-consolidated-sub flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
         <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 transition duration-200" [ngClass]="{ 'rotate-180': !collapsed }" />
       </button>
     </div>
@@ -30,7 +30,7 @@
 
       @if (searchTerm) {
         <p class="mt-2 text-[10px] text-[var(--color-text4)]">
-          Local search active: "{{ searchTerm }}"
+          {{ 'Local search active: "' | translate }}{{ searchTerm }}"
         </p>
       }
 
@@ -43,7 +43,7 @@
       </div>
 
       <p class="mt-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-[10px] leading-4 text-[var(--color-text3)]">
-        Feed tabs filter loaded data. Use sidebar date filter to fetch new data.
+        {{ 'Feed tabs filter loaded data. Use sidebar date filter to fetch new data.' | translate }}
       </p>
     }
   </div>

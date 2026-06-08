@@ -1,8 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { HttpParams } from '@angular/common/http';
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ApiService } from '../../../shared/services/api.service';
@@ -15,22 +13,19 @@ import { ResultRowHelperService } from '../../../shared/services/result-row-help
 import { NexusChatService } from './nexus-chat.service';
 import { BotMessageActionsComponent } from './bot-message-actions/bot-message-actions.component';
 import { MessageScrollRailComponent } from './message-scroll-rail/message-scroll-rail.component';
+import { MarkdownPipe } from '../../../shared/pipes/markdown.pipe';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 type ChatHistoryMessage = {
-  sender: 'user' | 'bot';
+  sender: AiWorkspaceMessage['sender'];
   text: string;
   time: string;
-};
-
-type SharedChatMessage = {
-  sender: 'user' | 'bot';
-  text: string;
-  time: Date;
 };
 
 @Component({
   selector: 'app-ai-workspace',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, RouterLink, BotMessageActionsComponent, MessageScrollRailComponent],
+  imports: [CommonModule, DatePipe, FormsModule, RouterLink, BotMessageActionsComponent, MessageScrollRailComponent, MarkdownPipe, TranslatePipe],
   templateUrl: './ai-workspace.component.html',
 })
 export class AiWorkspaceComponent implements OnInit, OnDestroy {
@@ -51,6 +46,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   protected readonly nexusStep = signal('');
   protected readonly contextQuery = computed(() => this.queryContext);
   protected readonly canUseNexusChat = computed(() => this.licenseService.canUseModule('ai'));
+  protected readonly maxComposerTokens = 300;
 
   messageDraft = '';
   editingMessageId: string | null = null;
@@ -69,13 +65,13 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.cancelActiveNexusRequest();
+    this.detachActiveNexusRequest();
     this.stoppedRequestIds.clear();
   }
 
   @HostListener('window:beforeunload')
   onBeforeUnload(): void {
-    this.cancelActiveNexusRequest();
+    this.detachActiveNexusRequest();
   }
 
   sendMessage(): void {
@@ -84,12 +80,12 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     }
 
     const text = this.messageDraft.trim();
-    if (!text) {
+    if (!text || this.countMessageTokens(text) > this.maxComposerTokens) {
       return;
     }
 
     this.cancelMessageEdit();
-    this.cancelActiveNexusRequest();
+    this.detachActiveNexusRequest();
     this.messages = [...this.messages, this.createMessage('user', text)];
     this.persistChatHistory();
     this.messageDraft = '';
@@ -146,13 +142,21 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       this.scrollToBottom();
     };
 
-    this.activeChatRequest = this.nexusChatService.streamNexusChat(payload).subscribe({
+    this.activeChatRequest = this.nexusChatService.streamNexusChat(payload, { recoverable: true }).subscribe({
       next: (chunk) => {
         if (requestId !== this.chatRequestId) {
           return;
         }
         if (chunk.status) {
           this.nexusStep.set(chunk.status);
+        }
+        if (chunk.error) {
+          reply = chunk.response || chunk.delta || 'Something went wrong. Try again.';
+          this.isStreamingReply.set(false);
+          this.streamingMessageId.set(null);
+          this.messages = botMessage ? this.messages.filter(message => message.id !== botMessage?.id) : this.messages;
+          this.messages = [...this.messages, this.createErrorMessage(text, reply)];
+          return;
         }
         if (chunk.delta) {
           reply += chunk.delta;
@@ -224,13 +228,17 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.isStreamingReply.set(false);
     this.streamingMessageId.set(null);
     this.nexusStep.set('');
+    this.persistChatHistory();
     this.scrollToBottom();
   }
 
   startNewChat(): void {
+    if (this.isSending() || this.isStreamingReply()) {
+      return;
+    }
     this.chatRequestId += 1;
     this.stoppedRequestIds.clear();
-    this.cancelActiveNexusRequest();
+    this.detachActiveNexusRequest();
     this.isSending.set(false);
     this.isStreamingReply.set(false);
     this.streamingMessageId.set(null);
@@ -311,12 +319,12 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   saveMessageEdit(message: AiWorkspaceMessage): void {
     const text = this.editDraft.trim();
     const index = this.messages.findIndex(item => item.id === message.id);
-    if (!text || index === -1) {
+    if (!text || index === -1 || this.countMessageTokens(text) > this.maxComposerTokens) {
       return;
     }
 
     this.chatRequestId += 1;
-    this.cancelActiveNexusRequest();
+    this.detachActiveNexusRequest();
     this.isSending.set(false);
     this.isStreamingReply.set(false);
     this.streamingMessageId.set(null);
@@ -344,6 +352,30 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     return this.editDraft.length > message.text.length ? this.editDraft : message.text;
   }
 
+  protected get messageDraftTokenCount(): number {
+    return this.countMessageTokens(this.messageDraft);
+  }
+
+  protected get messageDraftTokenOverflow(): number {
+    return Math.max(0, this.messageDraftTokenCount - this.maxComposerTokens);
+  }
+
+  protected get isMessageDraftOverLimit(): boolean {
+    return this.messageDraftTokenOverflow > 0;
+  }
+
+  protected get editDraftTokenCount(): number {
+    return this.countMessageTokens(this.editDraft);
+  }
+
+  protected get editDraftTokenOverflow(): number {
+    return Math.max(0, this.editDraftTokenCount - this.maxComposerTokens);
+  }
+
+  protected get isEditDraftOverLimit(): boolean {
+    return this.editDraftTokenOverflow > 0;
+  }
+
   private createMessage(sender: AiWorkspaceMessage['sender'], text: string): AiWorkspaceMessage {
     return {
       id: crypto.randomUUID(),
@@ -361,11 +393,16 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.activeChatRequest = undefined;
   }
 
-  private createErrorMessage(text: string): AiWorkspaceMessage {
+  private detachActiveNexusRequest(): void {
+    this.activeChatRequest?.unsubscribe();
+    this.activeChatRequest = undefined;
+  }
+
+  private createErrorMessage(text: string, errorText = 'Something went wrong. Try again.'): AiWorkspaceMessage {
     return {
       id: crypto.randomUUID(),
       sender: 'error',
-      text: 'Something went wrong. Try again.',
+      text: errorText.trim() || 'Something went wrong. Try again.',
       time: new Date(),
       retryPayload: text,
     };
@@ -396,7 +433,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       next: (response) => {
         const history = response?.chat_history || [];
         const messages = history
-          .filter((message) => message.sender === 'user' || message.sender === 'bot')
+          .filter((message) => message.sender === 'user' || message.sender === 'bot' || message.sender === 'error')
           .map((message) => ({
             id: crypto.randomUUID(),
             sender: message.sender,
@@ -406,6 +443,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         this.messages = this.addMissingAiFailureMessages(messages);
         this.isLoadingHistory.set(false);
         this.scrollToBottom();
+        this.resumeActiveNexusStream();
       },
       error: () => {
         this.isLoadingHistory.set(false);
@@ -418,7 +456,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     const result: AiWorkspaceMessage[] = [];
     messages.forEach((message, index) => {
       result.push(message);
-      if (message.sender === 'user' && index < messages.length - 1 && messages[index + 1]?.sender !== 'bot') {
+      const nextSender = messages[index + 1]?.sender;
+      if (message.sender === 'user' && index < messages.length - 1 && nextSender !== 'bot' && nextSender !== 'error') {
         result.push(this.createErrorMessage(message.text));
       }
     });
@@ -426,7 +465,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   private buildChatHistoryPayload(): ChatHistoryMessage[] {
-    const filtered = this.messages.filter((message): message is AiWorkspaceMessage & { sender: 'user' | 'bot'; } => message.sender === 'user' || message.sender === 'bot');
+    const filtered = this.messages.filter((message) => this.shouldPersistHistoryMessage(message));
     let userOverflow = 0;
     let botOverflow = 0;
 
@@ -434,7 +473,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       if (message.sender === 'user') {
         userOverflow += 1;
       }
-      else {
+      else if (message.sender === 'bot') {
         botOverflow += 1;
       }
     }
@@ -442,7 +481,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     userOverflow = Math.max(0, userOverflow - 100);
     botOverflow = Math.max(0, botOverflow - 100);
 
-    const kept: Array<AiWorkspaceMessage & { sender: 'user' | 'bot'; }> = [];
+    const kept: AiWorkspaceMessage[] = [];
     for (const message of filtered) {
       if (message.sender === 'user' && userOverflow > 0) {
         userOverflow -= 1;
@@ -460,6 +499,13 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       text: message.text,
       time: message.time.toISOString(),
     }));
+  }
+
+  private shouldPersistHistoryMessage(message: AiWorkspaceMessage): boolean {
+    if (message.sender === 'user' || message.sender === 'bot') {
+      return true;
+    }
+    return message.sender === 'error' && message.text.trim() === 'Message canceled.';
   }
 
   private scrollToBottom(): void {
@@ -484,6 +530,89 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
+  private resumeActiveNexusStream(): void {
+    if (this.activeChatRequest || this.messages.at(-1)?.sender !== 'user') {
+      return;
+    }
+
+    const requestId = ++this.chatRequestId;
+    let reply = '';
+    let receivedReply = false;
+    const retryPayload = this.messages.at(-1)?.sender === 'user' ? this.messages.at(-1)!.text : '';
+    let botMessage: AiWorkspaceMessage | undefined;
+    this.isSending.set(true);
+    this.isStreamingReply.set(false);
+    this.streamingMessageId.set(null);
+    this.nexusStep.set('');
+
+    const updateReply = (value: string) => {
+      if (requestId !== this.chatRequestId) {
+        return;
+      }
+      receivedReply = true;
+      if (!botMessage) {
+        botMessage = this.createMessage('bot', '');
+        this.messages = [...this.messages, botMessage];
+        this.isStreamingReply.set(true);
+        this.streamingMessageId.set(botMessage.id);
+      }
+      this.messages = this.messages.map(message => message.id === botMessage?.id ? { ...message, text: value } : message);
+    };
+    this.activeChatRequest = this.nexusChatService.resumeNexusChat().subscribe({
+      next: (chunk) => {
+        if (requestId !== this.chatRequestId) {
+          return;
+        }
+        if (chunk.status) {
+          this.nexusStep.set(chunk.status);
+        }
+        if (chunk.error) {
+          reply = chunk.response || chunk.delta || 'Something went wrong. Try again.';
+          this.isStreamingReply.set(false);
+          this.streamingMessageId.set(null);
+          this.messages = botMessage ? this.messages.filter(message => message.id !== botMessage?.id) : this.messages;
+          if (retryPayload) {
+            this.messages = [...this.messages, this.createErrorMessage(retryPayload, reply)];
+          }
+          return;
+        }
+        if (chunk.delta) {
+          reply += chunk.delta;
+          updateReply(reply);
+        }
+        if (chunk.response) {
+          reply = chunk.response;
+          updateReply(reply);
+        }
+      },
+      complete: () => {
+        if (requestId !== this.chatRequestId) {
+          return;
+        }
+        this.activeChatRequest = undefined;
+        this.isSending.set(false);
+        this.isStreamingReply.set(false);
+        this.streamingMessageId.set(null);
+        this.nexusStep.set('');
+        if (receivedReply && reply.trim()) {
+          this.persistChatHistory();
+        }
+        this.scrollToBottom();
+      },
+      error: () => {
+        if (requestId !== this.chatRequestId) {
+          return;
+        }
+        this.activeChatRequest = undefined;
+        this.isSending.set(false);
+        this.isStreamingReply.set(false);
+        this.streamingMessageId.set(null);
+        this.nexusStep.set('');
+        this.scrollToBottom();
+      },
+    });
+  }
+
   queueComposerResize(): void {
     requestAnimationFrame(() => this.resizeComposer());
   }
@@ -498,72 +627,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     return Math.max(1, lines.reduce((total, line) => total + Math.max(1, Math.ceil(line.length / charsPerLine)), 0));
   }
 
-}
-
-@Component({
-  selector: 'app-chat-share',
-  standalone: true,
-  imports: [CommonModule, DatePipe, MessageScrollRailComponent],
-  templateUrl: './chat-share/chat-share.component.html',
-})
-export class ChatShareComponent implements OnInit, OnDestroy {
-  private previousTheme: 'light-theme' | 'dark-theme' | null = null;
-  private previousTitle = '';
-
-  messages: SharedChatMessage[] = [];
-  expiresAt: Date | null = null;
-  isLoading = true;
-  errorMessage = '';
-
-  constructor(private readonly route: ActivatedRoute, private readonly api: ApiService, private readonly title: Title) { }
-
-  ngOnInit(): void {
-    this.previousTitle = this.title.getTitle();
-    this.title.setTitle('Shared Chat');
-    this.forceDarkTheme();
-    const shareId = this.route.snapshot.paramMap.get('shareId') || '';
-    const token = this.route.snapshot.queryParamMap.get('token') || '';
-    if (!shareId || !token) {
-      this.errorMessage = 'Invalid share link.';
-      this.isLoading = false;
-      return;
-    }
-    this.api.get<{ messages: Array<Omit<SharedChatMessage, 'time'> & { time: string; }>; expiresAt: string; }>(`public/chat-shares/${shareId}`, {
-      params: new HttpParams().set('token', token)
-    }).subscribe({
-      next: response => {
-        this.messages = (response.messages || [])
-          .filter(message => message.sender === 'user' || message.sender === 'bot')
-          .map(message => ({ ...message, time: new Date(message.time) }));
-        this.expiresAt = response.expiresAt ? new Date(response.expiresAt) : null;
-        this.isLoading = false;
-      },
-      error: err => {
-        this.errorMessage = err?.error?.detail || 'This share link is unavailable.';
-        this.isLoading = false;
-      }
-    });
+  private countMessageTokens(value: string): number {
+    return value.trim().match(/[A-Za-z0-9_]+|[^\sA-Za-z0-9_]/g)?.length ?? 0;
   }
 
-  ngOnDestroy(): void {
-    document.body.classList.remove('light-theme', 'dark-theme');
-    if (this.previousTheme) {
-      document.body.classList.add(this.previousTheme);
-    }
-    if (this.previousTitle) {
-      this.title.setTitle(this.previousTitle);
-    }
-  }
-
-  trackMessage(index: number): number {
-    return index;
-  }
-
-  private forceDarkTheme(): void {
-    this.previousTheme = document.body.classList.contains('light-theme') ? 'light-theme'
-      : document.body.classList.contains('dark-theme') ? 'dark-theme'
-        : null;
-    document.body.classList.remove('light-theme');
-    document.body.classList.add('dark-theme');
-  }
 }

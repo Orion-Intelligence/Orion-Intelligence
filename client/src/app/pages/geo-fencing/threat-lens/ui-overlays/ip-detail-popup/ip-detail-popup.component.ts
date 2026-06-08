@@ -4,11 +4,12 @@ import { Subscription } from 'rxjs';
 import { IpDetail } from '../../../../../shared/model/network-intel/network-intel.model';
 import { NetworkIntelScanService } from '../../../../../shared/services/network-intel/network-intel-scan.service';
 import { IpDetailComponent } from '../../../../root-searches/network-intel/ip-detail/ip-detail.component';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-threat-lens-ip-detail-popup',
   standalone: true,
-  imports: [CommonModule, IpDetailComponent],
+  imports: [CommonModule, IpDetailComponent, TranslatePipe],
   templateUrl: './ip-detail-popup.component.html',
 })
 export class IpDetailPopupComponent implements OnChanges, OnDestroy {

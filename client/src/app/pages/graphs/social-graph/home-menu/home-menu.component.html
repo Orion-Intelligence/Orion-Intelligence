@@ -6,16 +6,16 @@
           <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
             <i class="bi bi-search w-5 h-5 text-slate-400"></i>
           </div>
-          <input type="text" placeholder="Filter items..." [value]="searchTerm()" (input)="onSearchInput($event)" class="block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-690)] py-1.5 pl-10 pr-3 text-[var(--color-text2)] placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6" />
+          <input type="text" [placeholder]="'Filter items...' | translate" [value]="searchTerm()" (input)="onSearchInput($event)" class="block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-690)] py-1.5 pl-10 pr-3 text-[var(--color-text2)] placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6" />
         </div>
       </div>
 
       <div class="flex-grow p-3 flex flex-col overflow-y-auto">
         <div class="border-b border-slate-700 shrink-0">
-          <nav class="-mb-px flex space-x-4" aria-label="Tabs">
-            <button data-testid="home-menu-tab-history" (click)="tabSelected.emit('history')" [class]="'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'history' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">Scan History</button>
+          <nav class="-mb-px flex space-x-4" [attr.aria-label]="'Tabs' | translate">
+            <button data-testid="home-menu-tab-history" (click)="tabSelected.emit('history')" [class]="'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'history' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">{{ 'Scan History' | translate }}</button>
             @if (!isSmallScreen()) {
-              <button data-testid="home-menu-tab-entities" (click)="tabSelected.emit('entities')" [class]="'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'entities' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">Entities</button>
+              <button data-testid="home-menu-tab-entities" (click)="tabSelected.emit('entities')" [class]="'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'entities' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-500')">{{ 'Entities' | translate }}</button>
             }
           </nav>
         </div>
@@ -51,7 +51,7 @@
                           @if (job.status === 'in_progress' || job.status === 'queued') {
                             <div class="flex items-center gap-2 shrink-0">
                               <div class="font-mono text-xs text-slate-400">{{ getAnimatedProgress(job) }}%</div>
-                              <button (click)="$event.stopPropagation(); cancelScan.emit(job.id)" title="Cancel Scan" class="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors">
+                              <button (click)="$event.stopPropagation(); cancelScan.emit(job.id)" [title]="'Cancel Scan' | translate" class="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors">
                                 <i class="bi bi-x-lg"></i>
                               </button>
                             </div>
@@ -59,7 +59,7 @@
                           @if (job.status !== 'in_progress' && job.status !== 'queued' && isUserBusy(job.username)) {
                             <div class="flex items-center gap-2 shrink-0">
                               <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400" role="status"></div>
-                              <button (click)="$event.stopPropagation(); cancelAllFetches.emit(job.username)" title="Cancel active fetches" class="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors">
+                              <button (click)="$event.stopPropagation(); cancelAllFetches.emit(job.username)" [title]="'Cancel active fetches' | translate" class="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors">
                                 <i class="bi bi-x-lg"></i>
                               </button>
                             </div>
@@ -75,22 +75,22 @@
                               <div>
                                 <div class="flex items-center gap-1.5 text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
                                   <i class="bi bi-check-circle-fill"></i>
-                                  <span>On Graph</span>
+                                  <span>{{ 'On Graph' | translate }}</span>
                                 </div>
                               </div>
                             } @else {
                               <div class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-500/10 px-2 py-0.5 rounded-full">
                                 <i class="bi bi-node-minus"></i>
-                                <span>Not on Graph</span>
+                                <span>{{ 'Not on Graph' | translate }}</span>
                               </div>
                             }
                             <div class="flex items-center gap-2">
                               @if (activeUsernames().has(job.username) && viewMode() === 'graph') {
-                                <button (click)="$event.stopPropagation(); state.focusOnUser(job.username)" title="Focus on graph" class="w-8 h-8 flex items-center justify-center rounded-full text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors leading-none">
+                                <button (click)="$event.stopPropagation(); state.focusOnUser(job.username)" [title]="'Focus on graph' | translate" class="w-8 h-8 flex items-center justify-center rounded-full text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors leading-none">
                                   <i class="bi bi-bullseye text-base leading-none block"></i>
                                 </button>
                               }
-                              <button (click)="$event.stopPropagation(); state.openDeleteConfirmation(job.username)" title="Delete Profile" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-500 bg-slate-700/50 hover:bg-red-500/20 hover:text-red-400 transition-colors">
+                              <button (click)="$event.stopPropagation(); state.openDeleteConfirmation(job.username)" [title]="'Delete Profile' | translate" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-500 bg-slate-700/50 hover:bg-red-500/20 hover:text-red-400 transition-colors">
                                 <i class="bi bi-trash3 w-4 h-4 leading-none block"></i>
                               </button>
                             </div>
@@ -103,19 +103,19 @@
               </div>
               @if (displayJobs().length < jobsWithFilter().length) {
                 <div class="mt-4">
-                  <button (click)="loadMoreJobs()" class="w-full rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-indigo-400 transition-colors hover:bg-slate-700">Load More</button>
+                  <button (click)="loadMoreJobs()" class="w-full rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-indigo-400 transition-colors hover:bg-slate-700">{{ 'Load More' | translate }}</button>
                 </div>
               }
               @if (jobs().length === 0) {
                 <div class="text-center text-slate-500 py-8 flex flex-col items-center opacity-50">
-                  <p class="text-sm">Scan history is empty.</p>
+                  <p class="text-sm">{{ 'Scan history is empty.' | translate }}</p>
                 </div>
               }
               @if (!hasJobMatches() && jobs().length > 0) {
                 <div class="text-center text-slate-500 py-8 flex flex-col items-center">
                   <i class="bi bi-search text-4xl text-slate-600"></i>
-                  <h3 class="mt-2 text-md font-semibold text-slate-300">No Results Found</h3>
-                  <p class="text-sm">Filter "{{ searchTerm() }}" did not match any scans.</p>
+                  <h3 class="mt-2 text-md font-semibold text-slate-300">{{ 'No Results Found' | translate }}</h3>
+                  <p class="text-sm">{{ 'Filter "' | translate }}{{ searchTerm() }}{{ '" did not match any scans.' | translate }}</p>
                 </div>
               }
             </div>
@@ -153,7 +153,7 @@
                           @if (entity.status === 'in_progress' || entity.status === 'pending') {
                             <div class="flex items-center gap-2 shrink-0">
                               <div class="font-mono text-xs text-slate-400">{{ getAnimatedEntityProgress(entity) }}%</div>
-                              <button (click)="$event.stopPropagation(); cancelEntityScan.emit(entity.id)" title="Cancel Scan" class="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors">
+                              <button (click)="$event.stopPropagation(); cancelEntityScan.emit(entity.id)" [title]="'Cancel Scan' | translate" class="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition-colors">
                                 <i class="bi bi-x-lg"></i>
                               </button>
                             </div>
@@ -162,24 +162,24 @@
                         @if (showEntityProgress(entity)) {
                           <progress class="home-menu-progress-track mt-2" max="100" [value]="getAnimatedEntityProgress(entity)"></progress>
                         }
-                        <p class="text-sm text-slate-400 truncate mb-0 mt-1">{{ entity.step || (entity.status === 'added' ? 'Completed' : (entity.status === 'failed' ? 'Extraction failed' : 'Queued')) }}</p>
+                        <p class="text-sm text-slate-400 truncate mb-0 mt-1">{{ (entity.step || (entity.status === 'added' ? 'Completed' : (entity.status === 'failed' ? 'Extraction failed' : 'Queued'))) | translate }}</p>
                         @if (entity.status === 'added' || entity.status === 'failed') {
                           <div class="flex justify-between items-center mt-3">
                             @if (entity.onGraph) {
                               <div>
                                 <div class="flex items-center gap-1.5 text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
                                   <i class="bi bi-check-circle-fill"></i>
-                                  <span>On Graph</span>
+                                  <span>{{ 'On Graph' | translate }}</span>
                                 </div>
                               </div>
                             } @else {
                               <div class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-500/10 px-2 py-0.5 rounded-full">
                                 <i class="bi bi-node-minus"></i>
-                                <span>Not on Graph</span>
+                                <span>{{ 'Not on Graph' | translate }}</span>
                               </div>
                             }
                             <div class="flex items-center gap-2">
-                              <button (click)="$event.stopPropagation(); deleteEntity.emit(entity.id)" title="Delete Entity" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-500 bg-slate-700/50 hover:bg-red-500/20 hover:text-red-400 transition-colors">
+                              <button (click)="$event.stopPropagation(); deleteEntity.emit(entity.id)" [title]="'Delete Entity' | translate" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-500 bg-slate-700/50 hover:bg-red-500/20 hover:text-red-400 transition-colors">
                                 <i class="bi bi-trash3 w-4 h-4 leading-none block"></i>
                               </button>
                             </div>
@@ -191,19 +191,19 @@
                 }
                 @if (displayEntities().length < filteredEntities().length) {
                   <div class="mt-2">
-                    <button (click)="loadMoreEntities()" class="w-full rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-indigo-400 transition-colors hover:bg-slate-700">Load More</button>
+                    <button (click)="loadMoreEntities()" class="w-full rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-indigo-400 transition-colors hover:bg-slate-700">{{ 'Load More' | translate }}</button>
                   </div>
                 }
                 @if (customEntities().length === 0) {
                   <div class="text-center text-slate-500 py-8 flex flex-col items-center opacity-50">
-                    <p class="text-sm">No custom entities added.</p>
+                    <p class="text-sm">{{ 'No custom entities added.' | translate }}</p>
                   </div>
                 }
                 @if (filteredEntities().length === 0 && customEntities().length > 0) {
                   <div class="text-center text-slate-500 py-8 flex flex-col items-center">
                     <i class="bi bi-search text-4xl text-slate-600"></i>
-                    <h3 class="mt-2 text-md font-semibold text-slate-300">No Results Found</h3>
-                    <p class="text-sm">Filter "{{ searchTerm() }}" did not match any entities.</p>
+                    <h3 class="mt-2 text-md font-semibold text-slate-300">{{ 'No Results Found' | translate }}</h3>
+                    <p class="text-sm">{{ 'Filter "' | translate }}{{ searchTerm() }}{{ '" did not match any entities.' | translate }}</p>
                   </div>
                 }
               </div>
@@ -215,11 +215,11 @@
 
     <div sidebar-collapsed class="h-full flex flex-col items-center">
       <div class="py-4 flex flex-col items-center gap-4">
-        <button data-testid="home-menu-tab-history-collapsed" (click)="tabSelected.emit('history')" [class]="'w-9 h-9 flex items-center justify-center rounded-lg transition-colors ' + (activeTab() === 'history' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" title="Scan History">
+        <button data-testid="home-menu-tab-history-collapsed" (click)="tabSelected.emit('history')" [class]="'w-9 h-9 flex items-center justify-center rounded-lg transition-colors ' + (activeTab() === 'history' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" [title]="'Scan History' | translate">
           <i class="bi bi-clock-history text-lg leading-none"></i>
         </button>
         @if (!isSmallScreen()) {
-          <button data-testid="home-menu-tab-entities-collapsed" (click)="tabSelected.emit('entities')" [class]="'w-9 h-9 flex items-center justify-center rounded-lg transition-colors ' + (activeTab() === 'entities' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" title="Entities">
+          <button data-testid="home-menu-tab-entities-collapsed" (click)="tabSelected.emit('entities')" [class]="'w-9 h-9 flex items-center justify-center rounded-lg transition-colors ' + (activeTab() === 'entities' ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'text-slate-400 hover:bg-slate-700 hover:text-white')" [title]="'Entities' | translate">
             <i class="bi bi-diagram-3 text-lg leading-none"></i>
           </button>
         }

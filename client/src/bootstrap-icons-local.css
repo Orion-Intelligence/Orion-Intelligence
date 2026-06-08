@@ -6,7 +6,7 @@
 
 @font-face {
   font-display: swap;
-  font-family: "bootstrap-icons";
+  font-family: bootstrap-icons;
   src: url("../node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2?e34853135f9e39acf64315236852cd5a") format("woff2"),
 url("../node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff?e34853135f9e39acf64315236852cd5a") format("woff");
 }
@@ -15,7 +15,7 @@ url("../node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff?e34853135f9
 [class^="bi-"]::before,
 [class*=" bi-"]::before {
   display: inline-block;
-  font-family: bootstrap-icons !important;
+  font-family: bootstrap-icons, sans-serif !important;
   font-style: normal;
   font-weight: normal !important;
   font-variant: normal;

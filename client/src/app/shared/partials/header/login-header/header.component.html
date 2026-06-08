@@ -1,6 +1,6 @@
 <div class="relative z-[1100] flex h-[60px] items-center border-b" [ngClass]="forceDark() ? 'border-[#ffffff26] bg-[#0f1d2f] backdrop-blur-[2px]' : (isLightTheme ? 'border-[#dbe6f2] bg-[#ffffff] text-black' : 'border-[#ffffff22] bg-[#153454] text-white backdrop-blur-[2px]')">
   <div class="flex h-full w-full items-center gap-3 px-[10px] sm:px-3 md:px-4">
-    <a aria-label="Go to Homepage" class="flex h-full items-center select-none" href="/">
+    <a [attr.aria-label]="'Go to Homepage' | translate" class="flex h-full items-center select-none" href="/">
       <img alt="Logo" class="h-[35px] w-auto object-contain" height="35" [ngSrc]="forceDark() ? (appService.getConfig().appSettings.logo_wide_dark || 'assets/images/sidebar/search_nav_logo.png') : (isLightTheme ? (appService.getConfig().appSettings.logo_wide_light || appService.getConfig().appSettings.logo_wide_dark || 'assets/images/sidebar/search_nav_logo.png') : (appService.getConfig().appSettings.logo_wide_dark || 'assets/images/sidebar/search_nav_logo.png'))" priority width="197">
     </a>
     <div class="ml-auto flex h-full items-center pr-[2px]">

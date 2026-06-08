@@ -2,6 +2,8 @@ import { Component, OnChanges, OnDestroy, SimpleChanges, input } from '@angular/
 import { NgClass, TitleCasePipe } from '@angular/common';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { ResultRowHelperService } from '../../../../shared/services/result-row-helper.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 interface TelemetryGroup {
     key: string;
     label: string;
@@ -10,7 +12,7 @@ interface TelemetryGroup {
 @Component({
   selector: 'app-expanded-row',
   standalone: true,
-  imports: [NgClass, TitleCasePipe, TooltipDirective],
+  imports: [NgClass, TitleCasePipe, TooltipDirective, TranslatePipe],
   templateUrl: './expanded-row.component.html',
 })
 export class ExpandedRowComponent implements OnChanges, OnDestroy {

@@ -11,6 +11,8 @@ import { AppService } from '../../services/core/app/app.service';
 import { AuthService } from '../../services/authetication/auth.service';
 import { filter } from 'rxjs';
 import { DemoTourComponent } from "../demo-tour/demo-tour/demo-tour.component";
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -21,8 +23,7 @@ import { DemoTourComponent } from "../demo-tour/demo-tour/demo-tour.component";
     RouterOutlet,
     ScrollingModule,
     ProSubscriptionComponent,
-    DemoTourComponent
-  ],
+    DemoTourComponent, TranslatePipe],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]
 })

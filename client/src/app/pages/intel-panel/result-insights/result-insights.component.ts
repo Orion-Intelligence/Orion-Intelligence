@@ -5,9 +5,11 @@ import { ConsolidatedCallbackModel } from '../../../shared/model/results/consoli
 import { UniqueLinkItem } from '../../../shared/model/homepage/consolidation_insights';
 import { search_filter_labels } from '../../../shared/constants/shared-enums';
 import { getStatusFlag } from '../../../shared/utils/intel-report.util';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-result-insights',
-  imports: [CommonModule, FormsModule, NgClass],
+  imports: [CommonModule, FormsModule, NgClass, TranslatePipe],
   templateUrl: './result-insights.component.html'
 })
 export class ResultInsightsComponent implements OnInit {

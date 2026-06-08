@@ -397,7 +397,7 @@ For developer-facing answers, tie the user-visible workflow back to the code are
 | Feeder behavior | `backend/routes/crawl_routes.py`, feeder manager | Feeder UI, owner/enable/disable/delete flows. |
 | AI/chat behavior | `backend/routes/api_micros.py`, AI enabled checks | Report chat UI, AI workspace, `ai_endpoint_enabled`. |
 | Graph behavior | Graph managers and CTI/social pages | Canvas/list views, session import/export, context menus. |
-| Documentation screenshots | `docs/e2e`, `docs/screenshots`, `docs/scripts/postprocess_screenshots.py`, `run.sh` | Cypress docs screenshot workflow. |
+| Documentation screenshots | `docs/e2e`, `docs/screenshots`, `docs/scripts/generate_docs.sh`, `docs/scripts/postprocess_screenshots.py`, `run.sh` | Cypress docs screenshot workflow. |
 
 Keep code-change responses scoped. Orion behavior is role-aware, tenant-aware, and license-aware, so verify the affected user states before calling a change complete.
 

@@ -162,8 +162,7 @@ services:
       ' &&
       mongod --shutdown &&
       sleep 5 &&
-      mongod --auth --bind_ip_all --fork --logpath /var/log/mongodb.log &&
-      tail -f /var/log/mongodb.log
+      exec mongod --auth --bind_ip_all
       "
     networks:
       backend:

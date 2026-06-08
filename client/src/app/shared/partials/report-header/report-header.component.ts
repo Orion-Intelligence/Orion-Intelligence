@@ -15,10 +15,12 @@ import { REPORT_EXPORT_OPTIONS } from '../../model/report/export-choice.model';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { ProxyController } from '../../services/proxy-controller';
 import { AiSummaryComponent } from '../../../pages/root-searches/ai-workspace/ai-summary/ai-summary.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
 @Component({
   selector: 'app-report-header',
   standalone: true,
-  imports: [NgOptimizedImage, TooltipDirective, ExportChoiceModalComponent, AiSummaryComponent],
+  imports: [NgOptimizedImage, TooltipDirective, ExportChoiceModalComponent, AiSummaryComponent, TranslatePipe],
   templateUrl: './report-header.component.html',
 })
 export class ReportHeaderComponent {

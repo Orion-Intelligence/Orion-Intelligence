@@ -204,7 +204,8 @@ class elastic_controller:
             await self.__m_core_connection.indices.create(index=index_name, body=mapping_map_entities_model, request_timeout=220)
 
         raw_data = constant.map_entities_data
-        raw_data = json.loads(raw_data)
+        if isinstance(raw_data, str):
+            raw_data = json.loads(raw_data)
 
         documents = [
             document for document in (raw_data if isinstance(raw_data, list) else [])
@@ -222,7 +223,7 @@ class elastic_controller:
                     "_source": prepared,
                 }
 
-        success_count, errors = await es_helpers.async_bulk(
+        await es_helpers.async_bulk(
             self.__m_core_connection,
             action_generator(),
             chunk_size=2000,
@@ -263,7 +264,7 @@ class elastic_controller:
             return True, m_data
         except Exception as ex:
             log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
-            return False, str(ex)
+            return False, None
 
     @staticmethod
     def _read_index(i: str) -> str:

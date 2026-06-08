@@ -31,8 +31,6 @@ from orion.constants.constant import CONSTANTS
 from orion.constants import constant
 
 
-
-
 class crawl_model:
     __instance = None
     __swarm_bloom = None
@@ -396,23 +394,44 @@ class crawl_model:
         )
 
     @staticmethod
+    def _is_valid_screenshot_filename(filename: str) -> bool:
+        allowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-"
+        return (
+            bool(filename)
+            and filename.endswith(".webp")
+            and filename != ".webp"
+            and Path(filename).name == filename
+            and all(char in allowed for char in filename)
+        )
+
+    @staticmethod
     async def get_screenshot_file(filename: str):
         try:
-            file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, filename)
-            if not os.path.exists(file_path):
+            if not crawl_model._is_valid_screenshot_filename(filename):
                 return {"error": "File not found"}
-            return FileResponse(path=file_path, filename=filename, media_type="image/webp")
+            screenshot_root = Path(CRAWL_PATHS.M_SCREENSHOT)
+            requested_path = next((path for path in screenshot_root.iterdir() if path.name == filename and path.is_file()), None)
+
+            if not requested_path:
+                return {"error": "File not found"}
+            return FileResponse(path=requested_path, filename=filename, media_type="image/webp")
         except Exception:
             return {"error": "Failed to retrieve screenshot"}
 
     @staticmethod
     async def invoke_file_upload(payload: ScreenshotPayload):
         try:
-            os.makedirs(CRAWL_PATHS.M_SCREENSHOT, exist_ok=True)
-            file_path = os.path.join(CRAWL_PATHS.M_SCREENSHOT, payload.filename)
+            filename = os.path.basename(payload.filename)
+            if filename != payload.filename or not crawl_model._is_valid_screenshot_filename(filename):
+                return {"error": "Failed to save screenshot"}
+            screenshot_root = os.path.realpath(CRAWL_PATHS.M_SCREENSHOT)
+            os.makedirs(screenshot_root, exist_ok=True)
+            file_path = os.path.realpath(os.path.join(screenshot_root, filename))
+            if not file_path.startswith(f"{screenshot_root}{os.sep}"):
+                return {"error": "Failed to save screenshot"}
             with open(file_path, "wb") as f:
                 f.write(base64.b64decode(payload.data))
-            return {"message": f"Screenshot saved successfully at {file_path}", "filename": payload.filename}
+            return {"message": f"Screenshot saved successfully at {file_path}", "filename": filename}
         except Exception:
             return {"error": "Failed to save screenshot"}
 
@@ -530,7 +549,11 @@ class crawl_model:
 
     @staticmethod
     async def fetch_cti_label(payload: CTITextRequest):
-        url = "http://trusted-micros-api:8010/cti_classifier/classify"
+        trusted_micros_base_url = (
+            env_handler.get_instance().env("TRUSTED_MICROS_API_BASE")
+            or "://".join(("http", "trusted-micros-api:8010"))
+        )
+        url = f"{trusted_micros_base_url.rstrip('/')}/cti_classifier/classify"
         payload = {"data": payload.data}
 
         response = requests.post(url, json=payload, timeout=120)

@@ -2,10 +2,10 @@
   <header class="border-b border-[var(--color-border)] bg-[var(--color-blue-850)]/80 backdrop-blur">
     <div class="mx-auto flex h-[64px] w-full max-w-[980px] items-center justify-between gap-4 px-4">
       <div class="min-w-0">
-        <h1 class="truncate text-[16px] font-semibold text-[var(--color-text1)]">Shared Chat</h1>
-        <p class="mt-0.5 text-[11px] font-medium text-[var(--color-text5)]">Read only@if (expiresAt) { · Expires {{ expiresAt | date : 'medium' }} }</p>
+        <h1 class="truncate text-[16px] font-semibold text-[var(--color-text1)]">{{ 'Shared Chat' | translate }}</h1>
+        <p class="mt-0.5 text-[11px] font-medium text-[var(--color-text5)]">{{ 'Read only' | translate }}@if (expiresAt) { · {{ 'Expires' | translate }} {{ expiresAt | date : 'medium' }} }</p>
       </div>
-      <span class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)]">Read Only</span>
+      <span class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)]">{{ 'Read Only' | translate }}</span>
     </div>
   </header>
 
@@ -13,7 +13,7 @@
 
   <main class="mx-auto w-full max-w-[980px] px-4 py-6">
     @if (isLoading) {
-      <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 text-sm text-[var(--color-text3)]">Loading shared chat...</div>
+      <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 text-sm text-[var(--color-text3)]">{{ 'Loading shared chat...' | translate }}</div>
     } @else if (errorMessage) {
       <div class="rounded-[8px] border border-red-400/20 bg-red-950/30 p-4 text-sm font-medium text-red-200">{{ errorMessage }}</div>
     } @else {
@@ -21,12 +21,18 @@
         @for (message of messages; track trackMessage($index)) {
           <div class="flex" [attr.data-ai-message-index]="$index" [ngClass]="message.sender === 'user' ? 'justify-end' : 'justify-start'">
             <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-full">
-              <div class="flex items-center gap-2 px-1" [ngClass]="message.sender === 'user' ? 'justify-end' : 'justify-start'">
-                <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{ message.sender === 'user' ? 'Analyst' : 'Nexus' }}</span>
-                <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
-              </div>
-              <div class="rounded-[20px] border border-[var(--color-border)] px-4 py-3 shadow-[0_10px_28px_var(--color-shadow-medium)]" [ngClass]="message.sender === 'user' ? 'rounded-tr-[8px] bg-[#57A5EB]/20 text-[var(--color-text1)]' : 'rounded-tl-[8px] bg-[var(--color-blue-820-light)] text-[var(--color-text1)]'">
-                <p class="whitespace-pre-wrap text-[14px] leading-7">{{ message.text }}</p>
+              @if ($index === 0 || messages[$index - 1].sender !== message.sender) {
+                <div class="flex items-center gap-2" [ngClass]="message.sender === 'user' ? 'justify-end px-1' : 'justify-start px-4'">
+                  <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{ (message.sender === 'user' ? 'Analyst' : 'Nexus') | translate }}</span>
+                  <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
+                </div>
+              }
+              <div class="rounded-[20px] border border-[var(--color-border)] px-4 py-3 shadow-[0_10px_28px_var(--color-shadow-medium)]" [class.ui-ai-chat-share-bubble-bot]="message.sender === 'bot'" [ngClass]="message.sender === 'user' ? 'rounded-tr-[8px] bg-[#57A5EB]/20 text-[var(--color-text1)]' : 'rounded-tl-[8px] bg-[var(--color-blue-820-light)] text-[var(--color-text1)]'">
+                @if (message.sender === 'bot') {
+                  <div class="ui-ai-markdown text-[15px] leading-7" [innerHTML]="message.text | markdown"></div>
+                } @else {
+                  <p class="whitespace-pre-wrap text-[14px] leading-7">{{ message.text }}</p>
+                }
               </div>
             </div>
           </div>

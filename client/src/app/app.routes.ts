@@ -26,7 +26,7 @@ const loadCredentialComponent = () => import('./pages/root-searches/credentials/
 const loadErrorHandlerComponent = () => import('./shared/partials/error-handler/error-handler.component').then(m => m.ErrorHandlerComponent);
 const loadDashboardConsolidatedComponent = () => import('./pages/root-searches/dashboard-consolidated/dashboard-consolidated.component').then(m => m.DashboardConsolidatedComponent);
 const loadAiWorkspaceComponent = () => import('./pages/root-searches/ai-workspace/ai-workspace.component').then(m => m.AiWorkspaceComponent);
-const loadChatShareComponent = () => import('./pages/root-searches/ai-workspace/ai-workspace.component').then(m => m.ChatShareComponent);
+const loadChatShareComponent = () => import('./pages/root-searches/ai-workspace/chat-share/chat-share.component').then(m => m.ChatShareComponent);
 const loadSecurityScanComponent = () => import('./pages/root-searches/network-intel/security-scan/security-scan.component').then(m => m.SecurityScanComponent);
 const loadTenantComponent = () => import('./pages/tenant/tenant.component').then(m => m.TenantComponent);
 const loadWelcomeComponent = () => import('./pages/welcome/welcome.component').then(m => m.WelcomeComponent);

@@ -4,12 +4,12 @@
       <thead>
         <tr>
           <th class="font-semibold">ID</th>
-          <th class="font-semibold">Timestamp</th>
-          <th class="font-semibold">Actor</th>
-          <th class="font-semibold">Tenant</th>
-          <th class="font-semibold">Event</th>
+          <th class="font-semibold">{{ 'Timestamp' | translate }}</th>
+          <th class="font-semibold">{{ 'Actor' | translate }}</th>
+          <th class="font-semibold">{{ 'Tenant' | translate }}</th>
+          <th class="font-semibold">{{ 'Event' | translate }}</th>
           @if (isAdmin()) {
-            <th class="font-semibold w-[60px]">Action</th>
+            <th class="font-semibold w-[60px]">{{ 'Action' | translate }}</th>
           }
         </tr>
       </thead>
@@ -23,7 +23,7 @@
             <td class="max-w-[420px] truncate">{{ item.event }}</td>
             @if (isAdmin()) {
               <td>
-                <button data-testid="auditlog-delete-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:border-[rgba(255,107,107,0.28)] hover:bg-[rgba(255,107,107,0.12)] hover:text-[#ff6b6b]" (click)="openDeleteConfirmation(item.id)" title="Delete audit log" aria-label="Delete audit log">
+                <button data-testid="auditlog-delete-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:border-[rgba(255,107,107,0.28)] hover:bg-[rgba(255,107,107,0.12)] hover:text-[#ff6b6b]" (click)="openDeleteConfirmation(item.id)" [title]="'Delete audit log' | translate" [attr.aria-label]="'Delete audit log' | translate">
                   <i class="bi bi-trash3 text-sm leading-none"></i>
                 </button>
               </td>
@@ -32,7 +32,7 @@
         }
         @if (dumpData.items?.length === 0) {
           <tr>
-            <td data-testid="auditlog-empty-state" class="py-10 text-center text-sm text-[var(--color-text4)]" [attr.colspan]="isAdmin() ? 6 : 5">No audit logs found for the selected filters.</td>
+            <td data-testid="auditlog-empty-state" class="py-10 text-center text-sm text-[var(--color-text4)]" [attr.colspan]="isAdmin() ? 6 : 5">{{ 'No audit logs found for the selected filters.' | translate }}</td>
           </tr>
         }
       </tbody>
@@ -47,20 +47,20 @@
         </div>
         <div class="divide-y divide-white/10">
           <div class="px-3 py-2">
-            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Actor</div>
+            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Actor' | translate }}</div>
             <div data-testid="auditlog-actor" class="mt-0.5 break-all text-sm font-medium text-[var(--color-text3)]">{{ item.actor_id }}</div>
           </div>
           <div class="px-3 py-2">
-            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Tenant</div>
+            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Tenant' | translate }}</div>
             <div class="mt-0.5 break-all text-sm font-medium text-[var(--color-text3)]">{{ item.tenant_id }}</div>
           </div>
           <div class="px-3 py-2">
-            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Event</div>
+            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Event' | translate }}</div>
             <div class="mt-0.5 text-sm font-medium leading-5 text-[var(--color-text3)]">{{ item.event }}</div>
           </div>
           @if (isAdmin()) {
             <div class="px-3 py-2">
-              <button data-testid="auditlog-delete-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:border-[rgba(255,107,107,0.28)] hover:bg-[rgba(255,107,107,0.12)] hover:text-[#ff6b6b]" (click)="openDeleteConfirmation(item.id)" title="Delete audit log" aria-label="Delete audit log">
+              <button data-testid="auditlog-delete-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:border-[rgba(255,107,107,0.28)] hover:bg-[rgba(255,107,107,0.12)] hover:text-[#ff6b6b]" (click)="openDeleteConfirmation(item.id)" [title]="'Delete audit log' | translate" [attr.aria-label]="'Delete audit log' | translate">
                 <i class="bi bi-trash3 text-sm leading-none"></i>
               </button>
             </div>
@@ -70,14 +70,14 @@
     }
     @if (dumpData.items?.length === 0) {
       <div data-testid="auditlog-empty-state" class="rounded-xl border border-[var(--tenant-line)] bg-[var(--color-blue-830)] px-3 py-8 text-center text-sm text-[var(--color-text4)]">
-        No audit logs found for the selected filters.
+        {{ 'No audit logs found for the selected filters.' | translate }}
       </div>
     }
   </div>
 }
 
 @if (isDeleteConfirmationOpen) {
-  <app-confirmation-popup [message]="'Are you sure you want to delete this audit log record?'" (confirmed)="deleteAuditLog($event)"></app-confirmation-popup>
+  <app-confirmation-popup [message]="('Are you sure you want to delete this audit log record?') | translate" (confirmed)="deleteAuditLog($event)"></app-confirmation-popup>
 }
 
 @if (isLoading()) {
@@ -86,12 +86,12 @@
       <thead>
         <tr>
           <th class="font-semibold">ID</th>
-          <th class="font-semibold">Timestamp</th>
-          <th class="font-semibold">Actor</th>
-          <th class="font-semibold">Tenant</th>
-          <th class="font-semibold">Event</th>
+          <th class="font-semibold">{{ 'Timestamp' | translate }}</th>
+          <th class="font-semibold">{{ 'Actor' | translate }}</th>
+          <th class="font-semibold">{{ 'Tenant' | translate }}</th>
+          <th class="font-semibold">{{ 'Event' | translate }}</th>
           @if (isAdmin()) {
-            <th class="font-semibold w-[60px]">Action</th>
+            <th class="font-semibold w-[60px]">{{ 'Action' | translate }}</th>
           }
         </tr>
       </thead>

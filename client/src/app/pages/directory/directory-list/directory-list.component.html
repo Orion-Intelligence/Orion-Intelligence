@@ -5,12 +5,12 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Service URL</th>
-            <th>Category</th>
-            <th>General</th>
-            <th>Leak</th>
-            <th>Network</th>
-            <th>Last Updated</th>
+            <th>{{ 'Service URL' | translate }}</th>
+            <th>{{ 'categoryAlerts.fields.category' | translate }}</th>
+            <th>{{ 'alertTypes.general' | translate }}</th>
+            <th>{{ 'Leak' | translate }}</th>
+            <th>{{ 'Network' | translate }}</th>
+            <th>{{ 'Last Updated' | translate }}</th>
           </tr>
         </thead>
       }
@@ -22,14 +22,14 @@
                 <td data-label="ID">
                   {{ (i + 1) + ((this.directoryService.currentPage$ | async)! - 1) * 1000 }}
                 </td>
-                <td class="max-w-[460px] truncate" data-label="Service URL">
+                <td class="max-w-[460px] truncate" [attr.data-label]="'Service URL' | translate">
                   @if (item.network_type === 'telegram') {
                     <span class="text-[var(--color-text1)]">{{ item.name?.toLowerCase() }}</span>
                   } @else {
                     <span class="text-[var(--color-text1)]">{{ item.url }}</span>
                   }
                 </td>
-                <td data-label="Category">
+                <td [attr.data-label]="'categoryAlerts.fields.category' | translate">
                   <div class="flex flex-wrap gap-[6px]">
                     @if (item.content_type?.length) {
                       @for (category of item.content_type | slice:0:2; track $index) {
@@ -38,26 +38,26 @@
                         </div>
                       }
                     } @else {
-                      <div class="rounded-full bg-white/[0.05] px-[10px] py-[4px] text-[12px] text-[var(--color-text4)]">No categories</div>
+                      <div class="rounded-full bg-white/[0.05] px-[10px] py-[4px] text-[12px] text-[var(--color-text4)]">{{ 'No categories' | translate }}</div>
                     }
                   </div>
                 </td>
-                <td data-label="General Model Status">
+                <td [attr.data-label]="'General Model Status' | translate">
                   <span class="inline-flex w-full items-center justify-end gap-[6px]">
                     <span class="inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.geneic_model_last_update) ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
                     <span>{{ isRecent(item.geneic_model_last_update) ? 'active' : 'unavailable' }}</span>
                   </span>
                 </td>
-                <td data-label="Leak Model Status">
+                <td [attr.data-label]="'Leak Model Status' | translate">
                   <span class="inline-flex w-full items-center justify-end gap-[6px]">
                     <span class="inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.leak_model_last_update) ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
                     <span>{{ isRecent(item.leak_model_last_update) ? 'active' : 'unavailable' }}</span>
                   </span>
                 </td>
-                <td class="capitalize" data-label="Network Type">
-                  {{ item.network_type ? item.network_type : 'Unknown' }}
+                <td class="capitalize" [attr.data-label]="'Network Type' | translate">
+                  {{ (item.network_type ? item.network_type : 'Unknown') | translate }}
                 </td>
-                <td data-label="Last Updated">
+                <td [attr.data-label]="'Last Updated' | translate">
                   {{ (item.leak_model_last_update || item.geneic_model_last_update) | date: 'd MMM y hh:mm a' }}
                 </td>
               </tr>
@@ -75,9 +75,9 @@
     </table>
     @if ((data?.mDirectoryCallbackLinks?.length || 0) === 0) {
       <div class="px-[20px] py-[24px]">
-        <div class="text-[16px] font-semibold text-[var(--color-text1)]">No links found!</div>
+        <div class="text-[16px] font-semibold text-[var(--color-text1)]">{{ 'No links found!' | translate }}</div>
         <div class="mt-[6px] text-[13px] text-[var(--color-text4)]">
-          We’re watching this source — new links will appear here once detected.
+          {{ 'We’re watching this source — new links will appear here once detected.' | translate }}
         </div>
       </div>
     }
@@ -86,12 +86,12 @@
       <thead>
         <tr>
           <th>ID</th>
-          <th>Service URL</th>
-          <th>Category</th>
-          <th>General</th>
-          <th>Leak</th>
-          <th>Network</th>
-          <th>Last Updated</th>
+          <th>{{ 'Service URL' | translate }}</th>
+          <th>{{ 'categoryAlerts.fields.category' | translate }}</th>
+          <th>{{ 'alertTypes.general' | translate }}</th>
+          <th>{{ 'Leak' | translate }}</th>
+          <th>{{ 'Network' | translate }}</th>
+          <th>{{ 'Last Updated' | translate }}</th>
         </tr>
       </thead>
       <tbody @fadeInDashboardItem>

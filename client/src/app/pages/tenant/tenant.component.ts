@@ -9,9 +9,11 @@ import { AppService } from '../../services/core/app/app.service';
 import { TooltipDirective } from '../../shared/directive/tooltip-directive.directive';
 import { ConfirmationPopupComponent } from '../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { HeaderComponent } from '../../shared/partials/header/login-header/header.component';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-tenant',
-  imports: [FormsModule, CommonModule, TooltipDirective, ConfirmationPopupComponent, NgClass, HeaderComponent],
+  imports: [FormsModule, CommonModule, TooltipDirective, ConfirmationPopupComponent, NgClass, HeaderComponent, TranslatePipe],
   templateUrl: './tenant.component.html'
 })
 export class TenantComponent implements OnInit {

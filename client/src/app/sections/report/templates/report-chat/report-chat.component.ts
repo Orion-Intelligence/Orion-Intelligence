@@ -18,6 +18,8 @@ import { ScrollService } from '../../../../shared/services/scroll.service';
 import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, isLikelyUrl as isLikelyUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
 import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
 import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-report-chat',
   templateUrl: './report-chat.component.html',
@@ -32,8 +34,7 @@ import { ReportInteractionHostComponent } from '../../social-interactions/report
     TooltipDirective,
     ReportHeaderComponent,
     ChatWidgetComponent,
-    ReportInteractionHostComponent
-  ],
+    ReportInteractionHostComponent, TranslatePipe],
   animations: [fadeInDashboardItem]
 })
 export class ReportChatComponent implements OnInit, AfterViewInit {

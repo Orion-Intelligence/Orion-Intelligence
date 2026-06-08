@@ -12,10 +12,12 @@ import { TabManagerService } from '../../../shared/services/tab-manager.service'
 import { catchError, finalize, map } from 'rxjs/operators';
 import { forkJoin, of } from 'rxjs';
 import { PlatformFeedViewBase } from '../../utils/platform-feed-view.base';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-summary-all-platforms-view',
   standalone: true,
-  imports: [CommonModule, SocialIconComponent, PlatformIconBgDirective],
+  imports: [CommonModule, SocialIconComponent, PlatformIconBgDirective, TranslatePipe],
   templateUrl: './summary-all-platforms-view.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

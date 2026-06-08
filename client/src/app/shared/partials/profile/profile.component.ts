@@ -8,6 +8,8 @@ import { AppService } from '../../../services/core/app/app.service';
 import { ConfigSettings } from '../../model/app/config';
 import { AlertNotificationComponent } from "../alert-notification/alert-notification.component";
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -15,8 +17,7 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
     NgOptimizedImage,
     TooltipDirective,
     NgClass,
-    AlertNotificationComponent
-  ],
+    AlertNotificationComponent, TranslatePipe],
   templateUrl: './profile.component.html'
 })
 export class ProfileComponent implements AfterViewInit, OnDestroy {
@@ -94,11 +95,6 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 
   openAccountSettings() {
     this.router.navigate(['/dashboard/profile/system-settings']).then();
-  }
-
-  changePassword() {
-    this.logout();
-    this.router.navigate(['/reset']).then();
   }
 
   logout() {

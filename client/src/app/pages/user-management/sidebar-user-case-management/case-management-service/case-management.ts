@@ -84,4 +84,19 @@ export class CaseManagement {
       {});
   }
 
+  getArtifactReports(source: string, q: string = '', limit: number = 10): Observable<ArtifactReportOption[]> {
+    const params = new URLSearchParams();
+
+    params.set('source', source);
+    params.set('q', q);
+    params.set('limit', String(limit));
+
+    return this.api.get<ArtifactReportOption[]>(`profile/cases/artifact-reports?${params.toString()}`);
+  }
+
+  archiveCase(caseId: string): Observable<{ success: boolean; message?: string }> {
+    return this.api.put<{ success: boolean; message?: string }>(`profile/cases/${caseId}/archive`,
+      {});
+  }
+
 }

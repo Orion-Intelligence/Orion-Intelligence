@@ -2,13 +2,14 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, HostBinding, Input, NgZone, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ThreatLensDisplayFeedItem, ThreatLensFeedItem, ThreatLensFeedRange, ThreatLensFeedRangeOption } from '../../../models/geo-fencing.models';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 export type ThreatLensFeedPanelType = 'news' | 'archive';
 
 @Component({
   selector: 'app-threat-lens-feed-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './threat-lens-feed-panel.component.html',
 })
 export class ThreatLensFeedPanelComponent implements AfterViewInit, OnChanges, OnDestroy {

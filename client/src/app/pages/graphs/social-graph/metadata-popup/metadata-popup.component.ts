@@ -8,12 +8,14 @@ import { PlatformIconBgDirective } from '../directives/platform-icon-bg.directiv
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
 import { getMetadataEntries, getProfileDetailEntries } from '../utils/summary-view.util';
 import { PlatformFeedViewBase } from '../utils/platform-feed-view.base';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-metadata-popup',
   templateUrl: './metadata-popup.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [SocialIconComponent, PlatformIconBgDirective],
+  imports: [SocialIconComponent, PlatformIconBgDirective, TranslatePipe],
 })
 export class MetadataPopupComponent extends PlatformFeedViewBase {
   data = input.required<PlatformResult>();

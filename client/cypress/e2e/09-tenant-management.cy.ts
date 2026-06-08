@@ -1,21 +1,30 @@
 import {
   addIOCForAllTabs,
   applyAuditLogDateRange,
-  approveAllTenants,
+  assertAlertScanCompletedMailPresent,
   closeFilterSidebar,
   closeNotificationSidebar,
   exportFromModal,
+  fillTenantNetworkConfiguration,
+  loginTenant,
   openFilterSidebar,
   openAuditLogPage,
   openManageIOCs,
+  openTenantEditor,
+  openTenantSettings,
   openTenantsPage,
   resetAuditLogFilters,
+  saveTenantEditor,
+  setTenantEditorToggle,
+  setTenantLicense,
+  submitLogin,
   waitForBlockingOverlayToClose
-} from './controllers/08-tenant-management.controller';
+} from './controllers/09-tenant-management.controller';
 
 describe('Tenant Management - End-to-End Provisioning Flows', () => {
   let tenant: any;
   let tenantSubUser: any;
+  const tenantResetNewPassword = '2wsx@WSX2026';
 
   before(() => {
     cy.env(['TENANT_ACCOUNT', 'TENANT_SUB_USER']).then(({TENANT_ACCOUNT, TENANT_SUB_USER}) => {
@@ -51,12 +60,14 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.loginAsAdmin();
     openTenantsPage();
     cy.get('[data-testid="tenant-page-header"]').should('be.visible');
-    cy.get('tbody tr').its('length').should('be.gte', 1);
-
-    const state = {verifiedCount: 0};
-    approveAllTenants(state);
-
-    openTenantsPage();
+    openTenantEditor(tenant);
+    setTenantEditorToggle('tenant-verified-toggle', true);
+    setTenantEditorToggle('tenant-status-toggle', true);
+    setTenantEditorToggle('tenant-password-reset-required-toggle', false);
+    setTenantLicense('free', false);
+    setTenantLicense('maintainer', true);
+    setTenantLicense('enterprise', true);
+    saveTenantEditor('saveTenantLicense');
     cy.logout();
   });
 
@@ -112,6 +123,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
       .first()
       .scrollTo('bottomRight', {ensureScrollable: false});
 
+    cy.scrollDashboardToBottom()
     cy.get('@tenantEditFormPanel')
       .find('[data-testid="tenant-save-changes"]')
       .first()
@@ -184,6 +196,61 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.location('pathname').should('include', '/dashboard/profile/homepage');
   });
 
+  it('saves tenant network configuration after failed SMTP validation', () => {
+    loginTenant(tenant);
+    openTenantSettings();
+    cy.contains('app-smtp-settings-block', 'Network Configuration').should('be.visible');
+
+    cy.contains('button', 'Edit').scrollIntoView().should('be.visible').click();
+    fillTenantNetworkConfiguration('localhost', '1');
+    cy.intercept('POST', '**/api/update/tenants').as('saveWrongTenantMail');
+    cy.contains('button', 'Save').scrollIntoView().should('be.visible').click();
+    cy.wait('@saveWrongTenantMail', {timeout: 60000})
+      .its('response.statusCode')
+      .should('eq', 424);
+    cy.contains('app-smtp-settings-block', 'Mail configuration is not working').should('be.visible');
+
+    cy.contains('button', 'Edit').scrollIntoView().should('be.visible').click();
+    fillTenantNetworkConfiguration('mailpit', '1025');
+    cy.intercept('POST', '**/api/update/tenants').as('saveRightTenantMail');
+    cy.contains('button', 'Save').scrollIntoView().should('be.visible').click();
+    cy.wait('@saveRightTenantMail', {timeout: 60000})
+      .its('response.statusCode')
+      .should('be.oneOf', [200, 201]);
+    cy.contains('button', 'Edit', {timeout: 30000}).should('be.visible');
+    cy.contains('app-smtp-settings-block', 'Mail configuration is not working').should('not.exist');
+    cy.logout();
+  });
+
+  it('forces tenant account to change password when admin enables reset', () => {
+    cy.loginAsAdmin();
+    openTenantsPage();
+    openTenantEditor(tenant);
+    setTenantEditorToggle('tenant-password-reset-required-toggle', true);
+    saveTenantEditor('saveTenantPasswordReset');
+    cy.logout();
+
+    submitLogin(tenant.username, tenant.password);
+    cy.url().should('include', '/reset/');
+    cy.get('[data-testid="reset-title"]').should('contain.text', 'Change Password');
+    cy.get('[data-testid="reset-password"]').should('be.visible').clear().type(tenantResetNewPassword, {log: false});
+    cy.get('[data-testid="reset-confirm-password"]').should('be.visible').clear().type(tenantResetNewPassword, {log: false});
+    cy.get('[data-testid="reset-submit"]').should('not.be.disabled').click();
+    cy.get('[data-testid="dashboard-main"]').should('be.visible');
+    tenant.password = tenantResetNewPassword;
+    cy.logout();
+
+    cy.loginAsAdmin();
+    openTenantsPage();
+    openTenantEditor(tenant);
+    cy.get('@tenantEditFormPanel').within(() => {
+      cy.get('[data-testid="tenant-password-reset-required-toggle"]')
+        .find('input[type="checkbox"]')
+        .should('not.be.checked');
+    });
+    cy.logout();
+  });
+
   it('goes through tenant settings and disables profile visibility', () => {
     const phoneValue = `0300${Date.now().toString().slice(-7)}`;
     const countryValue = 'Pakistan';
@@ -200,6 +267,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.contains('div', 'Profile').should('be.visible');
     cy.contains('div', 'Contacts').should('be.visible');
     cy.contains('div', 'Users').should('be.visible');
+    cy.scrollDashboardToBottom()
     cy.contains('div', 'Privacy').should('be.visible');
     cy.contains('div', 'Address').should('be.visible');
 
@@ -218,8 +286,10 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
         }
       });
 
+    cy.scrollDashboardToBottom()
     cy.contains('button', 'Save').scrollIntoView().should('be.visible').click();
     cy.reload();
+    cy.scrollDashboardToBottom()
 
     cy.location('pathname').should('include', '/dashboard/profile/tenant-settings');
     cy.get('input[name="tenant_phone"]').should('have.value', phoneValue);
@@ -243,6 +313,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
 
     cy.get('app-alert-scan-loading', { timeout: 40000 }).should('not.exist');
+    assertAlertScanCompletedMailPresent();
     cy.get('[data-testid="tenant-home-print-alerts"]').scrollIntoView().should('be.visible').click();
     exportFromModal('home-alert-export-modal', 'home-alert-export-option-report');
 

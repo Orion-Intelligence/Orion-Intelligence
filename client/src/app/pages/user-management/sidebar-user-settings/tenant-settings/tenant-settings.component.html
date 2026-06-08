@@ -12,11 +12,11 @@
           </app-user-image-picker>
         </div>
         <div class="pt-1">
-          <h1 class="ui-page-title">Tenant Data</h1>
-          <p class="ui-page-description">Manage and edit your company details, including phone, address, and profile information.</p>
+          <h1 class="ui-page-title">{{ 'Tenant Data' | translate }}</h1>
+          <p class="ui-page-description">{{ 'Manage and edit your company details, including phone, address, and profile information.' | translate }}</p>
           <p class="mt-1 text-xs font-medium text-[var(--color-text4)]">
-            Licenses assigned:
-            <span class="font-semibold text-[var(--color-text2)]">{{ userSessionData.tenant.licenses.join(', ') || 'No licenses assigned' }}</span>
+            {{ 'Licenses assigned' | translate }}:
+            <span class="font-semibold text-[var(--color-text2)]">{{ (userSessionData.tenant.licenses.join(', ') || 'No licenses assigned') | translate }}</span>
           </p>
         </div>
       </div>
@@ -24,33 +24,33 @@
         <div class="flex shrink-0 items-center gap-2 pt-1">
           @if (isEditing) {
             <button type="button" class="inline-flex h-10 items-center rounded-[8px] border border-[var(--color-border)] px-4 text-sm font-semibold text-[var(--color-text3)] transition hover:bg-[var(--color-blue-700)]" (click)="cancelEdit($event)">
-              Cancel
+              {{ 'common.actions.cancel' | translate }}
             </button>
           }
           <button type="button" class="inline-flex h-10 items-center rounded-[8px] bg-[var(--color-blue-640)] px-4 text-sm font-semibold text-white transition hover:brightness-110" (click)="toggleEdit($event)">
-            {{ isEditing ? 'Save' : 'Edit' }}
+            {{ (isEditing ? 'Save' : 'Edit') | translate }}
           </button>
         </div>
       }
     </div>
 
     <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-      <div class="ui-section-title">Profile</div>
-      <div class="ui-section-description">Core tenant identity and assigned licenses.</div>
+      <div class="ui-section-title">{{ 'Profile' | translate }}</div>
+      <div class="ui-section-description">{{ 'Core tenant identity and assigned licenses.' | translate }}</div>
       <div class="mt-3">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text6)]">Tenant Overview</div>
-            <div class="mt-1 text-[22px] font-[800] leading-tight text-[var(--color-text1)]">{{ userSessionData.tenant.name || 'Unnamed Tenant' }}</div>
+            <div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text6)]">{{ 'Tenant Overview' | translate }}</div>
+            <div class="mt-1 text-[22px] font-[800] leading-tight text-[var(--color-text1)]">{{ (userSessionData.tenant.name || 'Unnamed Tenant') | translate }}</div>
           </div>
           <div class="flex items-center gap-2">
             <span class="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">
               <i class="bi bi-lock-fill text-[10px]"></i>
-              Read only
+              {{ 'Read only' | translate }}
             </span>
             <span class="inline-flex items-center gap-1 rounded-full border border-[#57a5eb66] bg-[#57a5eb1f] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-[#8bc6f7]">
               <i class="bi bi-stars text-[10px]"></i>
-              Active
+              {{ 'Active' | translate }}
             </span>
           </div>
         </div>
@@ -59,15 +59,15 @@
           <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820)]/45 p-3">
             <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text6)]">
               <i class="bi bi-geo-alt-fill text-[12px] text-[#7fb8ec]"></i>
-              Location
+              {{ 'Location' | translate }}
             </div>
-            <div class="mt-2 text-[13px] font-semibold text-[var(--color-text2)]">{{ getLocationDisplay() || 'Location will appear here' }}</div>
+            <div class="mt-2 text-[13px] font-semibold text-[var(--color-text2)]">{{ (getLocationDisplay() || 'Location will appear here') | translate }}</div>
           </div>
 
           <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820)]/45 p-3">
             <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text6)]">
               <i class="bi bi-people-fill text-[12px] text-[#7fb8ec]"></i>
-              Assigned Quota
+              {{ 'Assigned Quota' | translate }}
             </div>
             <div class="mt-2 text-[20px] font-[800] leading-none text-[var(--color-text1)]">{{ userSessionData.tenant.assignedQuota || '0' }}</div>
           </div>
@@ -75,14 +75,14 @@
           <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820)]/45 p-3">
             <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text6)]">
               <i class="bi bi-shield-check text-[12px] text-[#7fb8ec]"></i>
-              Licenses Count
+              {{ 'Licenses Count' | translate }}
             </div>
             <div class="mt-2 text-[20px] font-[800] leading-none text-[var(--color-text1)]">{{ userSessionData.tenant.licenses.length || 0 }}</div>
           </div>
         </div>
 
         <div class="mt-4">
-          <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text6)]">Assigned Licenses</div>
+          <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text6)]">{{ 'Assigned Licenses' | translate }}</div>
           <div class="flex flex-wrap gap-2">
             @if (userSessionData.tenant.licenses.length) {
               @for (license of userSessionData.tenant.licenses; track license) {
@@ -91,7 +91,7 @@
                 </span>
               }
             } @else {
-              <span class="text-sm text-[var(--color-text4)]">No licenses assigned</span>
+              <span class="text-sm text-[var(--color-text4)]">{{ 'No licenses assigned' | translate }}</span>
             }
           </div>
         </div>
@@ -101,12 +101,12 @@
 
     @if (isMember() && !licenseService.getLicenses().includes('free')) {
       <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-        <div class="ui-section-title">Contacts, Users & Address</div>
-        <div class="ui-section-description">Tenant communication details, assigned quota, and address information.</div>
+        <div class="ui-section-title">{{ 'Contacts, Users & Address' | translate }}</div>
+        <div class="ui-section-description">{{ 'Tenant communication details, assigned quota, and address information.' | translate }}</div>
         <div class="mt-3 grid gap-3 sm:grid-cols-2">
           <div>
             <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-              <span>Email Address</span>
+              <span>{{ 'Email Address' | translate }}</span>
               @if (isEditing) {
                 <img src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
               }
@@ -115,16 +115,16 @@
           </div>
           <div>
             <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-              <span>Phone</span>
+              <span>{{ 'Phone' | translate }}</span>
               @if (isEditing) {
                 <img src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
               }
             </label>
-            <input type="text" [(ngModel)]="userSessionData.tenant.phone" name="tenant_phone" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!isEditing" [ngClass]="isEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" placeholder="Enter phone..." />
+            <input type="text" [(ngModel)]="userSessionData.tenant.phone" name="tenant_phone" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!isEditing" [ngClass]="isEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" [placeholder]="'Enter phone...' | translate" />
           </div>
           <div>
             <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-              <span>Assigned User Quota</span>
+              <span>{{ 'Assigned User Quota' | translate }}</span>
               @if (isEditing) {
                 <img src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
               }
@@ -133,36 +133,45 @@
           </div>
           <div>
             <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-              <span>Country</span>
+              <span>{{ 'iocTypes.m_country' | translate }}</span>
               @if (isEditing) {
                 <img src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
               }
             </label>
-            <input type="text" [(ngModel)]="userSessionData.tenant.country" name="tenant_country" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!isEditing" [ngClass]="isEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" placeholder="Enter country..." />
+            <input type="text" [(ngModel)]="userSessionData.tenant.country" name="tenant_country" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!isEditing" [ngClass]="isEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" [placeholder]="'Enter country...' | translate" />
           </div>
           <div>
             <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-              <span>City/State</span>
+              <span>{{ 'City/State' | translate }}</span>
               @if (isEditing) {
                 <img src="assets/images/shared/edit.svg" alt="Edit" class="h-3 w-3 opacity-70">
               }
             </label>
-            <input type="text" [(ngModel)]="userSessionData.tenant .city" name="tenant_city" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!isEditing" [ngClass]="isEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" placeholder="Enter city/state..." />
+            <input type="text" [(ngModel)]="userSessionData.tenant .city" name="tenant_city" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!isEditing" [ngClass]="isEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" [placeholder]="'Enter city/state...' | translate" />
           </div>
         </div>
       </div>
     }
 
     @if (isMember() && !licenseService.getLicenses().includes('free')) {
+      <app-smtp-settings-block
+        class="mt-4"
+        [form]="mailForm"
+        [isEditing]="isEditing"
+        [errorState]="mailErrorState">
+      </app-smtp-settings-block>
+    }
+
+    @if (isMember() && !licenseService.getLicenses().includes('free')) {
       <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-        <div class="ui-section-title">Privacy & Access</div>
-        <div class="ui-section-description">Manage profile visibility and tenant access to Event Management.</div>
+        <div class="ui-section-title">{{ 'Privacy & Access' | translate }}</div>
+        <div class="ui-section-description">{{ 'Manage profile visibility and tenant access to Event Management.' | translate }}</div>
 
         <div class="mt-3 cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="userSessionData.tenant.profileVisibilityEnabled = !userSessionData.tenant.profileVisibilityEnabled; updateUser()">
           <div class="flex items-center justify-between gap-3">
             <div>
-              <label class="block text-sm font-semibold text-[var(--color-text1)]">Allow User Profile Visibility</label>
-              <p class="mt-1 text-xs text-[var(--color-text4)]">{{ userSessionData.tenant.profileVisibilityEnabled !== false ? 'Users can manage their profile visibility' : 'User profile visibility is disabled for this tenant' }}</p>
+              <label class="block text-sm font-semibold text-[var(--color-text1)]">{{ 'Allow User Profile Visibility' | translate }}</label>
+              <p class="mt-1 text-xs text-[var(--color-text4)]">{{ (userSessionData.tenant.profileVisibilityEnabled !== false ? 'Users can manage their profile visibility' : 'User profile visibility is disabled for this tenant') | translate }}</p>
             </div>
             <label class="pointer-events-none relative h-6 w-11 shrink-0">
               <input type="checkbox" class="peer h-0 w-0 opacity-0" [checked]="userSessionData.tenant.profileVisibilityEnabled !== false" />
@@ -174,8 +183,8 @@
         <div class="mt-3 cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="userSessionData.tenant.eventManagementEnabled = userSessionData.tenant.eventManagementEnabled !== true; updateUser()">
           <div class="flex items-center justify-between gap-3">
             <div>
-              <label class="block text-sm font-semibold text-[var(--color-text1)]">Allow Event Management</label>
-              <p class="mt-1 text-xs text-[var(--color-text4)]">{{ userSessionData.tenant.eventManagementEnabled === true ? 'Event Management is enabled for this tenant' : 'Event Management is disabled for this tenant' }}</p>
+              <label class="block text-sm font-semibold text-[var(--color-text1)]">{{ 'Allow Event Management' | translate }}</label>
+              <p class="mt-1 text-xs text-[var(--color-text4)]">{{ (userSessionData.tenant.eventManagementEnabled === true ? 'Event Management is enabled for this tenant' : 'Event Management is disabled for this tenant') | translate }}</p>
             </div>
             <label class="pointer-events-none relative h-6 w-11 shrink-0">
               <input type="checkbox" class="peer h-0 w-0 opacity-0" [checked]="userSessionData.tenant.eventManagementEnabled === true" />

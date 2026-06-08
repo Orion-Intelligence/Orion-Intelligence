@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Injectable, SecurityContext } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import { franc } from 'franc-min';
 import { LANGUAGE_MAP } from '../constants/shared-enums';
 import { ConsolidatedParamModel } from '../model/results/consolidated/consolidated.param.model';
@@ -128,7 +128,7 @@ export class HelperService {
   }
   
 
-  highlightWords(text: string): SafeHtml {
+  highlightWords(text: string): string {
     if (!text) {
       return '';
     }
@@ -155,14 +155,13 @@ export class HelperService {
           const prevEnd = end;
           const nextStart = matches[j].index;
           const betweenText = text.slice(prevEnd, nextStart);
-          const wordGap = betweenText
-            .replace(/<[^>]+>/g, '')
+          const cleanBetween = new DOMParser().parseFromString(betweenText, 'text/html').body.textContent || '';
+          const wordGap = cleanBetween
             .trim()
             .split(/\s+/)
             .filter(Boolean).length;
           if (wordGap <= 2) {
-            const cleanBetween = betweenText.replace(/<[^>]+>/g, '').trim();
-            merged += ` ${cleanBetween} ${matches[j][1]}`;
+            merged += ` ${cleanBetween.trim()} ${matches[j][1]}`;
             end = matches[j].index + matches[j][0].length;
             j++;
           }
@@ -180,7 +179,7 @@ export class HelperService {
     else {
       renderedHtml = escapeHtml(text.length > 500 ? text.substring(0, 500) : text);
     }
-    return this.sanitizer.bypassSecurityTrustHtml(renderedHtml);
+    return this.sanitizer.sanitize(SecurityContext.HTML, renderedHtml) || '';
   }
 
   private convertToCSV(data: any): string {

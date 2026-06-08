@@ -8,7 +8,7 @@
           </div>
           <div class="min-w-0 space-y-2">
             <div class="min-w-0">
-              <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Profile Intelligence</p>
+              <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{{ 'Profile Intelligence' | translate }}</p>
               <h3 class="truncate text-2xl font-semibold text-slate-100">{{ username() }}</h3>
               @if (email()) {
                 <p class="truncate font-mono text-sm text-indigo-300/90">{{ email() }}</p>
@@ -16,32 +16,32 @@
             </div>
             <div class="flex flex-wrap gap-2">
               <div class="rounded-full border border-slate-700/80 bg-slate-800/80 px-3 py-1.5 text-xs text-slate-300">
-                <span class="font-semibold text-slate-100">{{ totalPlatforms() }}</span> platforms
+                <span class="font-semibold text-slate-100">{{ totalPlatforms() }}</span> {{ 'platforms' | translate }}
               </div>
               <div class="rounded-full border border-slate-700/80 bg-slate-800/80 px-3 py-1.5 text-xs text-slate-300">
-                <span class="font-semibold text-slate-100">{{ populatedProfilesCount() }}</span> profiles loaded
+                <span class="font-semibold text-slate-100">{{ populatedProfilesCount() }}</span> {{ 'profiles loaded' | translate }}
               </div>
               <div class="rounded-full border border-slate-700/80 bg-slate-800/80 px-3 py-1.5 text-xs text-slate-300">
-                <span class="font-semibold text-slate-100">{{ populatedPostsCount() }}</span> post feeds
+                <span class="font-semibold text-slate-100">{{ populatedPostsCount() }}</span> {{ 'post feeds' | translate }}
               </div>
               <div class="rounded-full border border-slate-700/80 bg-slate-800/80 px-3 py-1.5 text-xs text-slate-300">
-                <span class="font-semibold text-slate-100">{{ populatedConnectionsCount() }}</span> with connections
+                <span class="font-semibold text-slate-100">{{ populatedConnectionsCount() }}</span> {{ 'with connections' | translate }}
               </div>
             </div>
           </div>
         </div>
         <div class="flex items-center gap-2 self-start">
           @if (isAnythingFetching()) {
-            <button (click)="cancelAllFetches.emit(username())" title="Cancel all active fetches" class="flex h-9 items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-3 text-red-300 transition-colors hover:bg-red-500/20">
+            <button (click)="cancelAllFetches.emit(username())" [title]="'Cancel all active fetches' | translate" class="flex h-9 items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-3 text-red-300 transition-colors hover:bg-red-500/20">
               <i class="bi bi-x-octagon text-base"></i>
-              <span class="hidden text-xs font-semibold sm:inline">Cancel All</span>
+              <span class="hidden text-xs font-semibold sm:inline">{{ 'Cancel All' | translate }}</span>
             </button>
           }
-          <button (click)="rescan.emit(username())" [disabled]="isScanInProgress()" title="Re-scan profile" class="flex h-9 items-center justify-center gap-2 rounded-full border border-slate-600/80 bg-slate-800/80 px-3 text-slate-200 transition-colors hover:border-slate-500 hover:bg-slate-700/80 disabled:cursor-not-allowed disabled:opacity-50">
+          <button (click)="rescan.emit(username())" [disabled]="isScanInProgress()" [title]="'Re-scan profile' | translate" class="flex h-9 items-center justify-center gap-2 rounded-full border border-slate-600/80 bg-slate-800/80 px-3 text-slate-200 transition-colors hover:border-slate-500 hover:bg-slate-700/80 disabled:cursor-not-allowed disabled:opacity-50">
             <i class="bi bi-arrow-clockwise text-base" [class.animate-spin]="isScanInProgress()"></i>
-            <span class="hidden text-xs font-semibold sm:inline">Re-scan</span>
+            <span class="hidden text-xs font-semibold sm:inline">{{ 'Re-scan' | translate }}</span>
           </button>
-          <button (click)="onClose()" type="button" class="ui-social-popup-icon-btn border border-slate-700/80 bg-slate-800/80 text-slate-400 hover:border-slate-500 hover:bg-slate-700/80" title="Close">
+          <button (click)="onClose()" type="button" class="ui-social-popup-icon-btn border border-slate-700/80 bg-slate-800/80 text-slate-400 hover:border-slate-500 hover:bg-slate-700/80" [title]="'common.actions.close' | translate">
             <i class="bi bi-x-lg text-[15px] leading-none"></i>
           </button>
         </div>
@@ -53,8 +53,8 @@
         <div class="border-b border-slate-700/80 px-4 py-4">
           <div class="mb-3 flex items-center justify-between gap-3">
             <div>
-              <p class="text-sm font-semibold text-slate-100">Platforms</p>
-              <p class="text-xs text-slate-400">Choose a single platform or review the aggregated view.</p>
+              <p class="text-sm font-semibold text-slate-100">{{ 'Platforms' | translate }}</p>
+              <p class="text-xs text-slate-400">{{ 'Choose a single platform or review the aggregated view.' | translate }}</p>
             </div>
             <div class="rounded-full bg-slate-800 px-2.5 py-1 text-[11px] font-medium text-slate-400">
               {{ filteredPlatforms().length }}/{{ totalPlatforms() }}
@@ -64,7 +64,7 @@
             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
               <i class="bi bi-search w-5 h-5 text-slate-400"></i>
             </div>
-            <input data-testid="social-summary-platform-filter" type="text" placeholder="Filter platforms..." [value]="platformSearchTerm()" (input)="onSearchTermChange($event)" class="block w-full rounded-lg border border-slate-700/80 bg-slate-950/50 py-2.5 pl-10 pr-10 text-white shadow-sm placeholder:text-slate-500 focus:border-indigo-500/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:text-sm">
+            <input data-testid="social-summary-platform-filter" type="text" [placeholder]="'Filter platforms...' | translate" [value]="platformSearchTerm()" (input)="onSearchTermChange($event)" class="block w-full rounded-lg border border-slate-700/80 bg-slate-950/50 py-2.5 pl-10 pr-10 text-white shadow-sm placeholder:text-slate-500 focus:border-indigo-500/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:text-sm">
             @if (platformSearchTerm()) {
               <button (click)="clearSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 transition-colors hover:text-slate-300"><i class="bi bi-x-circle-fill"></i></button>
             }
@@ -78,10 +78,10 @@
             </div>
             <div class="min-w-0 flex-1">
               <div class="flex items-center justify-between gap-3">
-                <p class="truncate text-sm font-semibold text-slate-100">All Platforms</p>
+                <p class="truncate text-sm font-semibold text-slate-100">{{ 'All Platforms' | translate }}</p>
                 <span class="rounded-full bg-slate-900/80 px-2 py-0.5 text-[11px] text-slate-400">{{ totalPlatforms() }}</span>
               </div>
-              <p class="mt-1 text-xs leading-5 text-slate-400">Best for cross-platform review, metadata, post connections, and image fetches.</p>
+              <p class="mt-1 text-xs leading-5 text-slate-400">{{ 'Best for cross-platform review, metadata, post connections, and image fetches.' | translate }}</p>
             </div>
           </button>
 
@@ -102,13 +102,13 @@
                     <p class="mt-1 truncate text-xs text-slate-400">{{ platform.username }}</p>
                     <div class="mt-2 flex flex-wrap gap-1.5 text-[11px] text-slate-500">
                       @if (platform.profileDetails !== undefined) {
-                        <span class="rounded-full bg-slate-900/80 px-2 py-0.5">Profile</span>
+                        <span class="rounded-full bg-slate-900/80 px-2 py-0.5">{{ 'Profile' | translate }}</span>
                       }
                       @if (platform.posts !== undefined) {
-                        <span class="rounded-full bg-slate-900/80 px-2 py-0.5">Posts</span>
+                        <span class="rounded-full bg-slate-900/80 px-2 py-0.5">{{ 'Posts' | translate }}</span>
                       }
                       @if (platform.images !== undefined) {
-                        <span class="rounded-full bg-slate-900/80 px-2 py-0.5">Images</span>
+                        <span class="rounded-full bg-slate-900/80 px-2 py-0.5">{{ 'Images' | translate }}</span>
                       }
                     </div>
                   </div>
@@ -119,7 +119,7 @@
             @if (platformSearchTerm()) {
               <div class="rounded-lg border border-dashed border-slate-700/80 bg-slate-800/40 px-6 py-10 text-center text-slate-500">
                 <i class="bi bi-search text-2xl"></i>
-                <p class="mt-2 text-sm">No platforms match your filter.</p>
+                <p class="mt-2 text-sm">{{ 'No platforms match your filter.' | translate }}</p>
               </div>
             }
           }

@@ -4,6 +4,9 @@ from datetime import date
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 
+DATE_ONLY_FORMAT = "%Y-%m-%d"
+
+
 class social_model(BaseModel):
     m_title: Optional[str] = None
     m_sender_name: Optional[str] = None
@@ -21,7 +24,7 @@ class social_model(BaseModel):
 
     @field_serializer("m_message_date")
     def serialize_message_date(self, value: Optional[date]):
-        return value.strftime("%Y-%m-%d") if value else None
+        return value.strftime(DATE_ONLY_FORMAT) if value else None
 
 
 class social_data_model(BaseModel):

@@ -3,11 +3,13 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { GraphClusterType, GraphType, search_filter_labels } from '../../../../shared/constants/shared-enums';
 import { SidebarShellComponent } from '../../shared/sidebar-shell/sidebar-shell.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'graph-sidebar',
   standalone: true,
   templateUrl: './sidebar.component.html',
-  imports: [FormsModule, ReactiveFormsModule, TitleCasePipe, SidebarShellComponent],
+  imports: [FormsModule, ReactiveFormsModule, TitleCasePipe, SidebarShellComponent, TranslatePipe],
 })
 export class SidebarComponent implements OnInit, OnChanges {
   isCollapsed = false;

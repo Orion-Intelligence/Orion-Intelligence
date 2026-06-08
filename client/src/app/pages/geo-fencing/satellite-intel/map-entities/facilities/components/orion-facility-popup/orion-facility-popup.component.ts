@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { OrionSatelliteFeature } from '../../../../../models/geo-fencing.models';
+import { TranslatePipe } from '../../../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector:    'app-orion-facility-popup',
   standalone:  true,
-  imports:     [CommonModule],
+  imports:     [CommonModule, TranslatePipe],
   templateUrl: './orion-facility-popup.component.html',
 })
 export class OrionFacilityPopupComponent {
