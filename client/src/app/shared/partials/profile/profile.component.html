@@ -2,7 +2,7 @@
   <div class="profile relative z-[1300] flex items-center gap-[2px]">
     @if (licenseService.isMaintainer()) {
       @if (isMember()) {
-        <a data-testid="profile-notification-bell" (click)="openNotifications()" class="relative inline-flex cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
+        <a data-testid="profile-notification-bell" (click)="openNotifications()" class="relative inline-flex cursor-pointer items-center justify-center px-[15px] pt-[18px] pb-[20px]">
           @if (!this.appService.userSessionData().tenant.hasOnboarding) {
             <div class="relative p-0">
               <img alt="Settings" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="20" class="h-6 w-5">
@@ -16,8 +16,8 @@
     }
     @if (router.url !== '/login') {
       <div class="relative">
-        <button type="button" (click)="toggleLanguageDropdown($event)" data-testid="profile-language-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]" [attr.aria-label]="'Language' | translate" [attr.aria-expanded]="languageDropdownOpen()">
-          <img alt="Language" ngSrc="assets/images/shared/translate.svg" priority height="35" width="35" class="ui-topbar-icon">
+        <button type="button" (click)="toggleLanguageDropdown($event)" data-testid="profile-language-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[15px] pt-[18px] pb-[20px]" [attr.aria-label]="'Language' | translate" [attr.aria-expanded]="languageDropdownOpen()">
+          <img alt="Language" ngSrc="assets/images/shared/global.svg" priority height="24" width="24" class="ui-topbar-icon">
         </button>
         @if (languageDropdownOpen()) {
           <ul class="absolute right-[10px] top-[calc(100%+8px)] z-[1310] w-[248px] list-none rounded-[12px] border border-[#e5e7eb] bg-white p-[10px] text-[15px] shadow-[0_16px_30px_rgba(2,6,23,0.14)]">
@@ -36,7 +36,7 @@
           </ul>
         }
       </div>
-      <button type="button" (click)="toggleDropdown($event)" appTooltip="" data-testid="profile-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
+      <button type="button" (click)="toggleDropdown($event)" appTooltip="" data-testid="profile-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[15px] pt-[18px] pb-[20px]">
         <img alt="Logout" height="24" ngSrc="assets/images/shared/theme/profile-icon.svg" priority width="24" class="ui-topbar-icon ui-topbar-profile-icon">
       </button>
     }
