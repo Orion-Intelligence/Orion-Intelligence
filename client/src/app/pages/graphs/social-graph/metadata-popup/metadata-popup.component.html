@@ -426,21 +426,47 @@
           </summary>
           <div class="border-t border-[var(--color-border)] bg-[rgba(15,23,42,0.18)] p-4">
             @if (getMetadataEntries().length > 0) {
-              <dl class="text-sm">
-                @for (item of getMetadataEntries(); track trackByKey($index, item)) {
-                  <div class="border-b border-[var(--color-border)] py-2 last:border-b-0 first:pt-0 last:pb-0">
-                    <dt class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ formatKey(item.key) }}</dt>
-                    <dd class="mt-1 break-words text-[var(--color-text2)]">
+              <div class="mb-4 relative">
+                <input type="text" [value]="metadataSearchTerm()" (input)="updateMetadataSearch($event)" placeholder="Search keys or values..." class="h-9 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/30 px-9 text-xs text-[var(--color-text2)] placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-1 focus:ring-sky-500/50">
+                <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--color-text4)]"></i>
+                @if (metadataSearchTerm()) {
+                  <button (click)="metadataSearchTerm.set('')" class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text4)] hover:text-[var(--color-text1)]">
+                    <i class="bi bi-x-circle-fill text-xs"></i>
+                  </button>
+                }
+              </div>
+
+              <dl class="text-sm space-y-2">
+                @for (item of getFilteredMetadataEntries(); track trackByKey($index, item)) {
+                  <div class="group relative rounded-lg border border-[var(--color-border)]/50 bg-[var(--color-blue-850)]/20 p-3 hover:border-sky-500/40 transition-all">
+                    <div class="flex items-center justify-between mb-1.5">
+                      <dt class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ formatKey(item.key) }}</dt>
+                      <button (click)="copyToClipboard(item.value)" class="opacity-0 group-hover:opacity-100 p-1 rounded bg-[var(--color-blue-720)]/50 text-[var(--color-text4)] hover:text-sky-400 transition-all" title="Copy value">
+                        <i class="bi bi-clipboard text-[10px]"></i>
+                      </button>
+                    </div>
+                    <dd class="break-words text-[var(--color-text2)] font-mono text-[12px]">
                       @if (isImageUrl(item.value)) {
-                        <img [src]="item.value" class="rounded-lg max-w-full h-auto max-h-40 mt-1" [alt]="item.key"/>
+                        <div class="relative group/img inline-block mt-1">
+                          <img [src]="item.value" class="rounded-lg max-w-full h-auto max-h-40 border border-[var(--color-border)] shadow-sm" [alt]="item.key"/>
+                          <a [href]="item.value" target="_blank" class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/img:opacity-100 rounded-lg transition-opacity">
+                            <i class="bi bi-box-arrow-up-right text-white"></i>
+                          </a>
+                        </div>
                       }
                       @if (!isImageUrl(item.value) && isUrl(item.value)) {
-                        <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">{{ item.value }}</a>
+                        <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline break-all">{{ item.value }}</a>
                       }
                       @if (!isImageUrl(item.value) && !isUrl(item.value)) {
                         {{ item.value }}
                       }
                     </dd>
+                  </div>
+                }
+                @if (getFilteredMetadataEntries().length === 0) {
+                  <div class="py-8 text-center text-[var(--color-text4)] italic">
+                    <i class="bi bi-search text-2xl mb-2 block opacity-20"></i>
+                    No results for "{{ metadataSearchTerm() }}"
                   </div>
                 }
               </dl>
