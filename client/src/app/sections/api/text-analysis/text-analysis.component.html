@@ -169,7 +169,7 @@
                       </div>
                       <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]">
                         <div class="w-[112px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[86px]">{{ 'Confidence' | translate }}</div>
-                        <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]">{{ (item.confidence ?? 'not available') | translate }}</div>
+                        <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]">{{ item.confidence ?? ('not available' | translate) }}</div>
                       </div>
                       <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [ngClass]="{ 'border-b-0': urlIdx === urlResults.length - 1 }">
                         <div class="w-[112px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[86px]">{{ 'Safe' | translate }}</div>
