@@ -1,8 +1,8 @@
 @if (this.username()) {
-  <div class="relative z-[1300] flex items-center gap-[2px]">
+  <div class="profile relative z-[1300] flex items-center gap-[2px]">
     @if (licenseService.isMaintainer()) {
       @if (isMember()) {
-        <a data-testid="profile-notification-bell" (click)="openNotifications()" class="relative inline-flex cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
+        <a data-testid="profile-notification-bell" (click)="openNotifications()" class="relative inline-flex cursor-pointer items-center justify-center px-[15px] pt-[18px] pb-[20px]">
           @if (!this.appService.userSessionData().tenant.hasOnboarding) {
             <div class="relative p-0">
               <img alt="Settings" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="20" class="h-6 w-5">
@@ -15,7 +15,28 @@
       }
     }
     @if (router.url !== '/login') {
-      <button type="button" (click)="toggleDropdown($event)" appTooltip="" data-testid="profile-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[20px] pt-[18px] pb-[20px]">
+      <div class="relative">
+        <button type="button" (click)="toggleLanguageDropdown($event)" data-testid="profile-language-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[15px] pt-[18px] pb-[20px]" [attr.aria-label]="'Language' | translate" [attr.aria-expanded]="languageDropdownOpen()">
+          <img alt="Language" ngSrc="assets/images/shared/global.svg" priority height="24" width="24" class="ui-topbar-icon">
+        </button>
+        @if (languageDropdownOpen()) {
+          <ul class="absolute right-[10px] top-[calc(100%+8px)] z-[1310] w-[248px] list-none rounded-[12px] border border-[#e5e7eb] bg-white p-[10px] text-[15px] shadow-[0_16px_30px_rgba(2,6,23,0.14)]">
+            <div class="pointer-events-none absolute top-[-10px] right-[16px] h-0 w-0 border-l-[8px] border-r-[8px] border-b-[10px] border-l-transparent border-r-transparent border-b-white"></div>
+            <li class="mb-[6px] px-[8px] py-[6px] text-[11px] font-semibold uppercase tracking-wide text-[#667085]">{{ 'Language' | translate }}</li>
+            <div class="max-h-[320px] overflow-y-auto pr-[2px]">
+              @for (lang of languageOptions; track lang.code) {
+                <li>
+                  <button type="button" class="flex w-full cursor-pointer items-center justify-between gap-[10px] rounded-[8px] px-[8px] py-[10px] text-left" [ngClass]="selectedLanguage() === lang.code ? 'bg-[#eef6ff] text-[#0f5fa8]' : 'text-[#172235] hover:bg-[#f5f7fa]'" (click)="selectLanguage(lang.code, $event)">
+                    <span class="text-[14px] font-medium">{{ lang.name | translate }}</span>
+                    <span class="text-[12px] font-semibold uppercase text-[#98a2b3]">{{ lang.code }}</span>
+                  </button>
+                </li>
+              }
+            </div>
+          </ul>
+        }
+      </div>
+      <button type="button" (click)="toggleDropdown($event)" appTooltip="" data-testid="profile-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[15px] pt-[18px] pb-[20px]">
         <img alt="Logout" height="24" ngSrc="assets/images/shared/theme/profile-icon.svg" priority width="24" class="ui-topbar-icon ui-topbar-profile-icon">
       </button>
     }

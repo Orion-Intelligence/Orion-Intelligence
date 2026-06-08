@@ -13,6 +13,8 @@ import { getTenantLocationDisplay } from './sidebar-settings.util';
 import { areAllPasswordRequirementsMet, createEmptyPasswordChecks, evaluatePasswordInput, PasswordChecks, PasswordStrength } from '../../../shared/utils/auth-form.util';
 import { PasswordToggleDirective } from '../../../shared/directives/password-toggle.directive';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { LANGUAGE_OPTIONS, LanguageOption } from '../../../shared/constants/shared-enums';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-sidebar-profile-settings',
@@ -26,6 +28,9 @@ export class AccountSettingsComponent implements OnInit {
   isDarkMode = true;
   isProfileVisible = true;
   editableUsername = '';
+  selectedLanguage = '';
+  hasLanguagePreference = false;
+  languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
   isPasswordSectionOpen = false;
   newPassword = '';
   confirmPassword = '';
@@ -34,7 +39,7 @@ export class AccountSettingsComponent implements OnInit {
   passwordChecks: PasswordChecks = createEmptyPasswordChecks();
   currentUnmetCheck: string | null = null;
 
-  constructor(protected apiService: ApiService, protected appService: AppService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService) {
+  constructor(protected apiService: ApiService, protected appService: AppService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
     this.userSessionData = this.appService.userSessionData();
   }
 
@@ -52,6 +57,10 @@ export class AccountSettingsComponent implements OnInit {
     const theme = userTheme || preferenceTheme || 'dark-theme';
     this.isDarkMode = theme === 'dark-theme';
     this.isProfileVisible = this.userSessionData?.user?.preferences?.["profile_visible"] !== false;
+    const userLanguage = this.userSessionData?.user?.preferences?.["language"];
+    this.hasLanguagePreference = this.translationService.isSupportedLanguage(userLanguage);
+    const systemLanguage = this.translationService.getSystemLanguage();
+    this.selectedLanguage = this.hasLanguagePreference ? this.translationService.getSupportedLanguage(userLanguage, systemLanguage) : systemLanguage;
   }
 
   isTenantProfileVisibilityEnabled(): boolean {
@@ -111,6 +120,32 @@ export class AccountSettingsComponent implements OnInit {
     this.updateUser();
   }
 
+  changeLanguage() {
+    this.selectedLanguage = this.translationService.getSupportedLanguage(this.selectedLanguage, this.translationService.getSystemLanguage());
+    this.hasLanguagePreference = true;
+    const preferences = {
+      ...(this.userSessionData.user.preferences || {}),
+      language: this.selectedLanguage
+    };
+    this.userSessionData.user.preferences = preferences;
+    this.appService.userSessionData.update(state => {
+      if (!state) {
+        return state;
+      }
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          preferences: {
+            ...(state.user.preferences || {}),
+            language: this.selectedLanguage
+          }
+        }
+      };
+    });
+    this.updateUser();
+  }
+
   getLocationDisplay(): string {
     return getTenantLocationDisplay(this.userSessionData.tenant);
   }
@@ -119,11 +154,20 @@ export class AccountSettingsComponent implements OnInit {
     const route = "update/current/user";
     this.userSessionData.user.username = this.editableUsername.trim() || this.userSessionData.user.username;
     const theme = this.getCurrentTheme();
-    const preferences = {
+    const preferences: Record<string, any> & {
+      theme: 'dark-theme' | 'light-theme';
+      profile_visible: boolean;
+    } = {
       ...(this.userSessionData.user.preferences || {}),
       theme,
       profile_visible: this.isProfileVisible
     };
+    if (this.hasLanguagePreference) {
+      preferences['language'] = this.selectedLanguage;
+    }
+    else {
+      delete preferences['language'];
+    }
     this.userSessionData.user.theme = theme;
     this.userSessionData.user.preferences = preferences;
     const userMeta: userMetaData = {

@@ -1,4 +1,4 @@
-<app-report-header [csv_object]="resultItem" [url]="resultItem?.m_channel_url" [content]="resultItem?.m_content"></app-report-header>
+<app-report-header [csv_object]="resultItem" [url]="resultItem?.m_channel_url" [content]="resultItem?.m_content" (languageUpdated)="langUpdate($event)"></app-report-header>
 
 @if (resultItem) {
   <app-report-interaction-host [docId]="reportDocId">

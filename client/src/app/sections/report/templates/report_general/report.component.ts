@@ -97,6 +97,7 @@ export class ReportComponent implements OnInit, AfterViewInit {
   langUpdate(result: any) {
     this.resultItem = result;
     this.processResultItem();
+    this.syncActiveMetadataTab();
     if (this.resultItem?.m_screenshot) {
       this.loadImage(this.resultItem.m_screenshot);
     }
@@ -127,6 +128,28 @@ export class ReportComponent implements OnInit, AfterViewInit {
           this.arrayKeys.push(key);
         }
       });
+    }
+  }
+
+  private syncActiveMetadataTab(): void {
+    const keys = this.filteredArrayKeys;
+    if (!keys.length) {
+      this.activeTab = '';
+      this.listItems = [];
+      return;
+    }
+    if (!this.activeTab || !keys.includes(this.activeTab)) {
+      this.activeTab = keys[0];
+    }
+    if (this.activeTab === 'm_content') {
+      this.listItems = [];
+      return;
+    }
+    if (this.resultItem && Array.isArray(this.resultItem[this.activeTab])) {
+      this.listItems = [...this.resultItem[this.activeTab]];
+    }
+    else {
+      this.listItems = [];
     }
   }
 
