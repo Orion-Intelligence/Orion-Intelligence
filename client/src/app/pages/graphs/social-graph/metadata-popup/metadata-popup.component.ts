@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, computed, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed, effect, signal } from '@angular/core';
 
 import { PlatformResult, SocialImage, SocialPost } from '../../../../shared/model/social/social-scan.models';
 import { formatFollowers, formatKey, isUrl, isImageUrl } from '../../../../shared/utils/formatters';
@@ -36,6 +36,7 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
   isFetchingImages = computed(() => this.fetchingState.platformImages()[this.getPlatformUniqueKey()]);
   isFetchingFollowers = computed(() => this.fetchingState.followers()[this.getPlatformUniqueKey()]);
   isFetchingFollowing = computed(() => this.fetchingState.following()[this.getPlatformUniqueKey()]);
+  metadataSearchTerm = signal('');
   public formatFollowers = formatFollowers;
   public formatKey = formatKey;
   public isUrl = isUrl;
@@ -51,6 +52,27 @@ export class MetadataPopupComponent extends PlatformFeedViewBase {
 
   getPlatformUniqueKey(): string {
     return this.fetchingState.getPlatformUniqueKey(this.data());
+  }
+
+  updateMetadataSearch(event: Event) {
+    this.metadataSearchTerm.set((event.target as HTMLInputElement).value);
+  }
+
+  getFilteredMetadataEntries(): { key: string; value: any; }[] {
+    const all = this.getMetadataEntries();
+    const term = this.metadataSearchTerm().toLowerCase().trim();
+    if (!term) return all;
+    return all.filter(e =>
+      formatKey(e.key).toLowerCase().includes(term) ||
+      String(e.value).toLowerCase().includes(term)
+    );
+  }
+
+  copyToClipboard(text: any) {
+    const str = String(text);
+    navigator.clipboard.writeText(str).then(() => {
+      // Logic for toast or visual feedback could be added here
+    });
   }
 
   override loadMorePosts() {
