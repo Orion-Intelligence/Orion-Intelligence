@@ -10,6 +10,7 @@ import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.a
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { SmtpSettingsBlockComponent } from '../../../shared/components/smtp-settings-block/smtp-settings-block.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { LANGUAGE_OPTIONS, LanguageOption } from '../../../shared/constants/shared-enums';
 
 const DEFAULT_APP_NAME = 'Orion Intelligence';
 
@@ -25,7 +26,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   mailErrorState = false;
   systemData = { ai_endpoint_enabled: true, language_allowed: '', version: '', app_name: '0', s_onion: '' };
   form = { language: '', version: '', app_name: '0', ai_endpoint_enabled: true, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
-  languageOptions = [ 'en', 'fr', 'es', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko', 'ar', 'hi', 'bn', 'tr', 'nl', 'sv', 'pl', 'cs' ];
+  languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
   onionPattern = /^(https?:\/\/)?[a-z2-7]{56}\.onion\/?$/i;
   urlPattern = /^https?:\/\/.+/i;
   emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

@@ -1,11 +1,9 @@
-import { Component, ViewChild, inject, input, output } from '@angular/core';
-import { NgOptimizedImage } from '@angular/common';
+import { Component, HostListener, ViewChild, inject, input, output, signal } from '@angular/core';
+import { NgClass, NgOptimizedImage } from '@angular/common';
 import { HelperService } from '../../services/helper.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { ApiService } from '../../services/api.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
-import { GeneralResultItem } from '../../model/results/general/general.callback.model';
-import { LeakResultItem } from '../../model/results/leak/leak.callback.model';
 import { HttpParams } from '@angular/common/http';
 import { AppService } from '../../../services/core/app/app.service';
 import { Router } from '@angular/router';
@@ -16,11 +14,12 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { ProxyController } from '../../services/proxy-controller';
 import { AiSummaryComponent } from '../../../pages/root-searches/ai-workspace/ai-summary/ai-summary.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { LANGUAGE_OPTIONS, LanguageOption } from '../../constants/shared-enums';
 
 @Component({
   selector: 'app-report-header',
   standalone: true,
-  imports: [NgOptimizedImage, TooltipDirective, ExportChoiceModalComponent, AiSummaryComponent, TranslatePipe],
+  imports: [NgOptimizedImage, NgClass, TooltipDirective, ExportChoiceModalComponent, AiSummaryComponent, TranslatePipe],
   templateUrl: './report-header.component.html',
 })
 export class ReportHeaderComponent {
@@ -28,13 +27,16 @@ export class ReportHeaderComponent {
   @ViewChild(AiSummaryComponent) private aiSummary?: AiSummaryComponent;
 
   isExportChoiceOpen = false;
+  isLanguageDropdownOpen = signal(false);
+  selectedLanguage = signal('');
+  readonly languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
   readonly reportExportOptions = REPORT_EXPORT_OPTIONS;
   readonly csv_object = input<string | object | null | undefined>(null);
   readonly url = input<string | null | undefined>(null);
   readonly lang = input<string>("");
   readonly content = input<string | null | undefined>(null);
   readonly lang_detected = input<string>("");
-  readonly languageUpdated = output<LeakResultItem | GeneralResultItem>();
+  readonly languageUpdated = output<any>();
 
   constructor(private helperService: HelperService, private api: ApiService, protected appService: AppService, private dashboardService: DashboardService, protected route: Router, protected licenseServise: LicenseService, private reportExportService: ReportExportService) {
   }
@@ -132,21 +134,66 @@ export class ReportHeaderComponent {
     this.aiSummary?.summarize();
   }
 
-  langUpdate() {
+  toggleLanguageDropdown(event: Event) {
+    event.stopPropagation();
+    this.isLanguageDropdownOpen.update(open => !open);
+  }
+
+  @HostListener('document:click', ['$event'])
+  closeLanguageDropdown(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.report-language-picker')) {
+      this.isLanguageDropdownOpen.set(false);
+    }
+  }
+
+  getActiveLanguage(): string {
+    const selectedLanguage = this.normalizeLanguage(this.selectedLanguage());
+    if (this.isSupportedLanguage(selectedLanguage)) {
+      return selectedLanguage;
+    }
+    const currentLanguage = this.normalizeLanguage(this.lang());
+    if (this.isSupportedLanguage(currentLanguage)) {
+      return currentLanguage;
+    }
+    const systemLanguage = this.normalizeLanguage(this.appService.getConfig()?.appSettings?.language_allowed);
+    return this.isSupportedLanguage(systemLanguage) ? systemLanguage : 'en';
+  }
+
+  langUpdate(language: string) {
+    const selectedLanguage = this.getSupportedLanguage(language);
     const currentUrl = new URL(window.location.href);
-    const lang = this.lang();
-    currentUrl.searchParams.set('lang', lang);
+    currentUrl.searchParams.set('lang', selectedLanguage);
     const segments = currentUrl.pathname.split('/').filter(Boolean);
     const type = segments[segments.length - 3];
     const reportId = segments[segments.length - 1];
     const apiUrl = `search/${type}/${reportId}`;
+    this.selectedLanguage.set(selectedLanguage);
+    this.isLanguageDropdownOpen.set(false);
     window.history.pushState({}, '', currentUrl.toString());
-    this.api.get<GeneralResultItem | LeakResultItem>(apiUrl, {
-      params: new HttpParams().set('lang', lang)
+    this.api.get<any>(apiUrl, {
+      params: new HttpParams().set('lang', selectedLanguage)
     }).subscribe({
       next: (result) => {
         this.languageUpdated.emit(result);
       }
     });
+  }
+
+  private getSupportedLanguage(language: unknown): string {
+    const code = this.normalizeLanguage(language);
+    if (this.isSupportedLanguage(code)) {
+      return code;
+    }
+    return this.getActiveLanguage();
+  }
+
+  private isSupportedLanguage(language: unknown): boolean {
+    const code = this.normalizeLanguage(language);
+    return this.languageOptions.some(option => option.code === code);
+  }
+
+  private normalizeLanguage(language: unknown): string {
+    return typeof language === 'string' ? language.trim().toLowerCase() : '';
   }
 }

@@ -1,5 +1,6 @@
 import { effect, Injectable, inject, signal } from '@angular/core';
 import { AppService } from '../../services/core/app/app.service';
+import { LANGUAGE_OPTIONS } from '../constants/shared-enums';
 
 @Injectable({ providedIn: 'root' })
 export class TranslationService {
@@ -13,7 +14,7 @@ export class TranslationService {
 
   constructor() {
     effect(() => {
-      const language = this.appService.configData().appSettings.language_allowed;
+      const language = this.getPreferredLocale();
       if (this.initialized) {
         void this.setLocale(language);
       }
@@ -23,7 +24,7 @@ export class TranslationService {
   async initialize(): Promise<void> {
     this.fallbackTranslations = await this.loadLocale(this.defaultLocale);
     this.initialized = true;
-    await this.setLocale(this.appService.configData().appSettings.language_allowed);
+    await this.setLocale(this.getPreferredLocale());
   }
 
   async setLocale(locale: string): Promise<void> {
@@ -65,5 +66,13 @@ export class TranslationService {
 
   private isRtl(locale: string): boolean {
     return ['ar'].includes(locale);
+  }
+
+  private getPreferredLocale(): string {
+    const userLanguage = this.appService.userSessionData()?.user?.preferences?.['language'];
+    const systemLanguage = this.appService.configData().appSettings.language_allowed;
+    const language = typeof userLanguage === 'string' && userLanguage.trim() ? userLanguage : systemLanguage;
+    const code = (language || this.defaultLocale).trim().toLowerCase();
+    return LANGUAGE_OPTIONS.some(option => option.code === code) ? code : this.defaultLocale;
   }
 }

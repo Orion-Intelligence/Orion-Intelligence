@@ -13,6 +13,7 @@ import { getTenantLocationDisplay } from './sidebar-settings.util';
 import { areAllPasswordRequirementsMet, createEmptyPasswordChecks, evaluatePasswordInput, PasswordChecks, PasswordStrength } from '../../../shared/utils/auth-form.util';
 import { PasswordToggleDirective } from '../../../shared/directives/password-toggle.directive';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { LANGUAGE_OPTIONS, LanguageOption } from '../../../shared/constants/shared-enums';
 
 @Component({
   selector: 'app-sidebar-profile-settings',
@@ -26,6 +27,9 @@ export class AccountSettingsComponent implements OnInit {
   isDarkMode = true;
   isProfileVisible = true;
   editableUsername = '';
+  selectedLanguage = '';
+  hasLanguagePreference = false;
+  languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
   isPasswordSectionOpen = false;
   newPassword = '';
   confirmPassword = '';
@@ -52,6 +56,10 @@ export class AccountSettingsComponent implements OnInit {
     const theme = userTheme || preferenceTheme || 'dark-theme';
     this.isDarkMode = theme === 'dark-theme';
     this.isProfileVisible = this.userSessionData?.user?.preferences?.["profile_visible"] !== false;
+    const userLanguage = this.userSessionData?.user?.preferences?.["language"];
+    this.hasLanguagePreference = this.isSupportedLanguage(userLanguage);
+    const systemLanguage = this.getSystemLanguage();
+    this.selectedLanguage = this.hasLanguagePreference ? this.getSupportedLanguage(userLanguage, systemLanguage) : systemLanguage;
   }
 
   isTenantProfileVisibilityEnabled(): boolean {
@@ -111,6 +119,32 @@ export class AccountSettingsComponent implements OnInit {
     this.updateUser();
   }
 
+  changeLanguage() {
+    this.selectedLanguage = this.getSupportedLanguage(this.selectedLanguage, this.getSystemLanguage());
+    this.hasLanguagePreference = true;
+    const preferences = {
+      ...(this.userSessionData.user.preferences || {}),
+      language: this.selectedLanguage
+    };
+    this.userSessionData.user.preferences = preferences;
+    this.appService.userSessionData.update(state => {
+      if (!state) {
+        return state;
+      }
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          preferences: {
+            ...(state.user.preferences || {}),
+            language: this.selectedLanguage
+          }
+        }
+      };
+    });
+    this.updateUser();
+  }
+
   getLocationDisplay(): string {
     return getTenantLocationDisplay(this.userSessionData.tenant);
   }
@@ -119,11 +153,20 @@ export class AccountSettingsComponent implements OnInit {
     const route = "update/current/user";
     this.userSessionData.user.username = this.editableUsername.trim() || this.userSessionData.user.username;
     const theme = this.getCurrentTheme();
-    const preferences = {
+    const preferences: Record<string, any> & {
+      theme: 'dark-theme' | 'light-theme';
+      profile_visible: boolean;
+    } = {
       ...(this.userSessionData.user.preferences || {}),
       theme,
       profile_visible: this.isProfileVisible
     };
+    if (this.hasLanguagePreference) {
+      preferences['language'] = this.selectedLanguage;
+    }
+    else {
+      delete preferences['language'];
+    }
     this.userSessionData.user.theme = theme;
     this.userSessionData.user.preferences = preferences;
     const userMeta: userMetaData = {
@@ -182,6 +225,29 @@ export class AccountSettingsComponent implements OnInit {
     this.showPasswordMeter = false;
     this.passwordChecks = createEmptyPasswordChecks();
     this.currentUnmetCheck = null;
+  }
+
+  private getSupportedLanguage(language: unknown, fallbackLanguage = this.getSystemLanguage()): string {
+    const code = this.normalizeLanguage(language);
+    if (this.isSupportedLanguage(code)) {
+      return code;
+    }
+    const fallback = this.normalizeLanguage(fallbackLanguage);
+    return this.isSupportedLanguage(fallback) ? fallback : 'en';
+  }
+
+  private getSystemLanguage(): string {
+    const code = this.normalizeLanguage(this.appService.getConfig()?.appSettings?.language_allowed);
+    return this.isSupportedLanguage(code) ? code : 'en';
+  }
+
+  private isSupportedLanguage(language: unknown): boolean {
+    const code = this.normalizeLanguage(language);
+    return this.languageOptions.some(option => option.code === code);
+  }
+
+  private normalizeLanguage(language: unknown): string {
+    return typeof language === 'string' ? language.trim().toLowerCase() : '';
   }
 
   updateUserResource(file: File) {
