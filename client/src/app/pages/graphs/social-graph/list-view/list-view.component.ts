@@ -30,13 +30,16 @@ export class ListViewComponent implements OnDestroy {
   public state = inject(SocialMapperStateService);
   readonly socialEntityUiService = inject(SocialEntityUiService);
   addSearchTerm = signal('');
+  metadataSearchTerms = signal<Record<string, string>>({});
   entityAddOptions: { type: CustomEntity['type']; label: string; iconClass: string; }[] = [ { type: 'email-breach', label: 'Add Email Breach', iconClass: 'bi bi-person-badge text-indigo-400' }, { type: 'wanted-list', label: 'Add Wanted List', iconClass: 'bi bi-person-exclamation text-indigo-400' }, { type: 'phone', label: 'Add Phone', iconClass: 'bi bi-telephone text-indigo-400' }, { type: 'crypto-scanner', label: 'Add Crypto Scanner', iconClass: 'bi bi-currency-bitcoin text-green-400' } ];
   expandedEntityIds = signal<Set<string>>(new Set<string>());
   animatedProgressByEntityId = signal<Record<string, number>>({});
+  private readonly PRIORITY_PLATFORMS = ['instagram', 'youtube', 'facebook', 'behance', 'tiktok', 'twitter', 'vimeo', 'x'];
   public formatFollowers = formatFollowers;
   public formatKey = formatKey;
   public isUrl = isUrl;
   public isImageUrl = isImageUrl;
+
   activeUserNodes = computed(() => this.networkData().nodes.filter(n => n.id.toString().startsWith('user-')));
   displayEntitiesInFeed = computed(() => this.customEntities());
 
@@ -53,6 +56,37 @@ export class ListViewComponent implements OnDestroy {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
     }
+  }
+
+  updateMetadataSearch(platformNodeId: string, event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.metadataSearchTerms.update(current => ({
+      ...current,
+      [platformNodeId]: value
+    }));
+  }
+
+  getFilteredMetadataEntries(platformNodeId: string): { key: string; value: any; }[] {
+    const all = this.getMetadataEntries(platformNodeId);
+    const term = (this.metadataSearchTerms()[platformNodeId] || '').toLowerCase().trim();
+    if (!term) return all;
+    return all.filter(e =>
+      formatKey(e.key).toLowerCase().includes(term) ||
+      String(e.value).toLowerCase().includes(term)
+    );
+  }
+
+  copyToClipboard(text: any) {
+    const str = String(text);
+    navigator.clipboard.writeText(str).then(() => {
+      // Could add a toast here if available
+    });
+  }
+
+  isPriorityPlatform(platformName?: string): boolean {
+    if (!platformName) return false;
+    const normalized = platformName.toLowerCase();
+    return this.PRIORITY_PLATFORMS.includes(normalized);
   }
 
   setActiveUserIndex(index: number) {
@@ -88,7 +122,14 @@ export class ListViewComponent implements OnDestroy {
 
   getPlatformsForUserNode(userNodeId: string): NetworkNode[] {
     const username = userNodeId.replace('user-', '');
-    return this.networkData().nodes.filter(n => n.id.toString().startsWith(`platform-${username}|`));
+    const platforms = this.networkData().nodes.filter(n => n.id.toString().startsWith(`platform-${username}|`));
+    return platforms.sort((a, b) => {
+      const aPriority = this.isPriorityPlatform(a.label);
+      const bPriority = this.isPriorityPlatform(b.label);
+      if (aPriority && !bPriority) return -1;
+      if (!aPriority && bPriority) return 1;
+      return a.label.localeCompare(b.label);
+    });
   }
 
   getFollowers(platformData: PlatformResult): string[] {
