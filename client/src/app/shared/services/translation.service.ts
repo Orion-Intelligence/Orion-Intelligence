@@ -75,7 +75,8 @@ export class TranslationService {
     const code = (language || this.defaultLocale).trim().toLowerCase();
     return LANGUAGE_OPTIONS.some(option => option.code === code) ? code : this.defaultLocale;
   }
-    public getSupportedLanguage(language: string, fallbackLanguage = this.getSystemLanguage()): string {
+
+  public getSupportedLanguage(language: string, fallbackLanguage = this.getSystemLanguage()): string {
     const code = language;
     if (this.isSupportedLanguage(code)) {
       return code;
@@ -83,10 +84,12 @@ export class TranslationService {
     const fallback = fallbackLanguage;
     return this.isSupportedLanguage(fallback) ? fallback : 'en';
   }
-    public getSystemLanguage(): string {
+
+  public getSystemLanguage(): string {
     const code = this.appService.getConfig()?.appSettings?.language_allowed;
     return this.isSupportedLanguage(code) ? code : 'en';
   }
+
   public isSupportedLanguage(language: string): boolean {
     const code = language;
     return LANGUAGE_OPTIONS.some(option => option.code === code);

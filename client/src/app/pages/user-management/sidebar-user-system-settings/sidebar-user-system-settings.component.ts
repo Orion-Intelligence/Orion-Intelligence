@@ -104,7 +104,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           if(res?.auth_dashboard_icon){
             (this.appService.getConfig().appSettings as any).auth_dashboard_icon = res.auth_dashboard_icon;
           }
-         if ((this.appService.getConfig().appSettings as any).logo_url) {
+          if ((this.appService.getConfig().appSettings as any).logo_url) {
             this.appService.updateFavicon((this.appService.getConfig().appSettings as any).logo_url);
           }
         },
