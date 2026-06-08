@@ -210,6 +210,36 @@ export function addAndEditArtifactAndTask() {
   assertNotification('File deleted successfully');
   cy.get(selector('case-artifact-file-view-0')).should('not.exist');
 
+  clickVisible('case-artifact-add');
+  visible('case-artifact-add-drawer').should('be.visible');
+
+  cy.get(selector('case-artifact-title-input'))
+    .should('be.visible')
+    .type('Cypress Raw Alert Artifact');
+
+  cy.get(selector('case-artifact-type-select'))
+    .should('be.visible')
+    .select('raw_alert');
+
+  cy.get(selector('case-artifact-source-select'))
+    .should('be.visible')
+    .select('manual');
+
+  cy.get(selector('case-artifact-description-input'))
+    .should('be.visible')
+    .type('Raw alert artifact added by Cypress');
+
+  clickVisible('case-artifact-add-save');
+
+  assertNotification('Artifact added successfully');
+
+  cy.get(selector('case-artifact-card-2'))
+    .scrollIntoView()
+    .should('be.visible');
+
+  cy.get(selector('case-artifact-title-value-2'))
+    .should('contain.text', 'Cypress Raw Alert Artifact');
+
   clickVisible('case-task-add');
   visible('case-task-add-drawer').should('be.visible');
   cy.get(selector('case-task-title-input')).should('be.visible').type('Cypress Review Task');
