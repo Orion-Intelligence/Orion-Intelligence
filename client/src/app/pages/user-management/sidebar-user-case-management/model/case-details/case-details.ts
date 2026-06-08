@@ -81,10 +81,12 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   priorityOptions = PRIORITY_OPTIONS;
   tagOptions: { value: CaseTag; label: string }[] = CASE_TAG_OPTIONS;
   readonly artifactAllowedFileTypes = ['application/pdf', 'image/jpeg', 'image/png', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-  pendingNewArtifactFile: File | null = null;
+  pendingNewArtifactFiles: File[] = [];
   pendingNewArtifactFileInput: HTMLInputElement | null = null;
   artifactReports: ArtifactReportOption[] = [];
   isArtifactReportsLoading = false;
+  artifactReportSearchText = '';
+  isArtifactReportDropdownOpen = false;
   isArchiveConfirmationOpen = false;
   isArchivingCase = false;
 
@@ -184,13 +186,13 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     this.cancelAllSectionModes();
   }
 
-  private patchArtifactFileMetadata(artifactId: string, patch: Partial<CaseArtifact>): void {
+  private patchArtifactFiles(artifactId: string, files: CaseArtifact['files']): void {
     if (this.editedCase?.artifacts) {
       this.editedCase = {
         ...this.editedCase,
         artifacts: this.editedCase.artifacts.map(artifact =>
           artifact.artifactId === artifactId
-            ? { ...artifact, ...patch }
+            ? { ...artifact, files }
             : artifact)
       };
     }
@@ -200,7 +202,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         ...this.caseData,
         artifacts: this.caseData.artifacts.map(artifact =>
           artifact.artifactId === artifactId
-            ? { ...artifact, ...patch }
+            ? { ...artifact, files }
             : artifact)
       };
     }
@@ -208,49 +210,33 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     this.cdr.detectChanges();
   }
 
-  uploadArtifactFile(artifact: CaseArtifact, fileInput: HTMLInputElement): void {
+  uploadArtifactFiles(artifact: CaseArtifact, fileInput: HTMLInputElement): void {
     if (!this.caseData || !artifact.artifactId) {
       return;
     }
 
-    const file = fileInput.files?.[0];
+    const files = Array.from(fileInput.files || []);
 
-    if (!file) {
-      return;
-    }
-
-    if (artifact.type === 'screenshot' && file.type !== 'image/png') {
-      this.messageNotificationService.show('Screenshot must be a PNG image');
+    if (!this.validateArtifactFiles(artifact, files)) {
       fileInput.value = '';
       return;
     }
 
-    if (artifact.type === 'file' && !this.artifactAllowedFileTypes.includes(file.type)) {
-      this.messageNotificationService.show('Allowed file types: PDF, JPG, PNG, TXT, DOCX');
-      fileInput.value = '';
-      return;
-    }
-
-    this.caseService.uploadArtifactFile(this.caseData.caseId, artifact.artifactId, file).subscribe({
+    this.caseService.uploadArtifactFiles(this.caseData.caseId, artifact.artifactId, files).subscribe({
       next: uploaded => {
-        setTimeout(() => {
-          this.patchArtifactFileMetadata(artifact.artifactId, {
-            fileName: uploaded.fileName,
-            fileType: uploaded.fileType,
-            fileSize: uploaded.fileSize,
-            fileResourceId: uploaded.fileResourceId
-          });
+        const nextFiles = [
+          ...(artifact.files || []),
+          ...(uploaded.files || [])
+        ];
 
-          fileInput.value = '';
+        this.patchArtifactFiles(artifact.artifactId, nextFiles);
 
-          setTimeout(() => {
-            this.messageNotificationService.show('File uploaded successfully', 'success');
-          });
-        }, 0);
+        fileInput.value = '';
+        this.messageNotificationService.show('Files uploaded successfully', 'success');
       },
       error: err => {
         fileInput.value = '';
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to upload file');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to upload files');
       }
     });
   }
@@ -277,38 +263,101 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     });
   }
 
-  scheduleArtifactReportSearch(artifact: CaseArtifact): void {
+  searchArtifactReports(source: string, q: string): void {
+    this.artifactReportSearchText = q;
+
     if (this.artifactReportSearchTimer) {
       clearTimeout(this.artifactReportSearchTimer);
     }
 
-    if (artifact.type !== 'report' || !artifact.linkedReportSource) {
+    if (!source) {
       this.artifactReports = [];
       return;
     }
 
     this.artifactReportSearchTimer = setTimeout(() => {
-      this.loadArtifactReports(artifact.linkedReportSource || '', artifact.title || '');
-    }, 1000);
+      this.loadArtifactReports(source, q);
+    }, 500);
   }
 
-  onArtifactReportSelected(artifact: CaseArtifact, reportId: string): void {
-    const report = this.artifactReports.find(item => item.id === reportId);
+  scheduleArtifactReportSearch(artifact: CaseArtifact): void {
+    if (!artifact || artifact.type !== 'report' || !artifact.linkedReportSource) {
+      return;
+    }
 
-    artifact.linkedReportId = reportId;
-    artifact.linkedReportTitle = report?.title || '';
+    this.searchArtifactReports(artifact.linkedReportSource, artifact.title || '');
+  }
 
-    if (report?.title) {
-      artifact.title = report.title;
+  selectArtifactReport(artifact: CaseArtifact, report: ArtifactReportOption): void {
+    artifact.linkedReportId = report.id;
+    artifact.linkedReportTitle = report.title;
+
+    this.artifactReportSearchText = report.title;
+    this.isArtifactReportDropdownOpen = false;
+  }
+
+  clearArtifactReportSelection(artifact: CaseArtifact): void {
+    artifact.linkedReportId = '';
+    artifact.linkedReportTitle = '';
+
+    this.artifactReportSearchText = '';
+    this.isArtifactReportDropdownOpen = true;
+
+    if (artifact.linkedReportSource) {
+      this.loadArtifactReports(artifact.linkedReportSource, '');
     }
   }
 
-  viewArtifactFile(artifact: CaseArtifact): void {
+  viewArtifactReport(artifact: CaseArtifact): void {
+    const url = this.getArtifactReportViewUrl(artifact);
+
+    if (!url) {
+      this.messageNotificationService.show('Report link is not available');
+      return;
+    }
+
+    window.open(url, '_blank', 'noopener');
+  }
+
+  private getArtifactReportViewUrl(artifact: CaseArtifact): string {
+    if (!artifact.linkedReportSource || !artifact.linkedReportId) {
+      return '';
+    }
+
+    const source = artifact.linkedReportSource;
+    const reportId = encodeURIComponent(artifact.linkedReportId);
+
+    const sourcePathMap: Record<string, { base: string; category: string }> = {
+      strategic: { base: 'strategic', category: 'all' },
+      breach: { base: 'breach', category: 'all' },
+      defacement: { base: 'defacement', category: 'all' },
+      social: { base: 'social', category: 'all' },
+      feed: { base: 'feed', category: 'news' },
+      exploit: { base: 'exploit', category: 'all' }
+    };
+
+    const config = sourcePathMap[source];
+
+    if (!config) {
+      return '';
+    }
+
+    const tree = this.router.createUrlTree([
+      '/dashboard',
+      config.base,
+      config.category,
+      reportId
+    ]);
+
+    return this.router.serializeUrl(tree);
+  }
+
+  viewArtifactFile(artifact: CaseArtifact, fileId: string): void {
     if (!this.caseData || !artifact.artifactId) {
       return;
     }
 
-    this.http.get(`/api/profile/cases/${this.caseData.caseId}/artifacts/${artifact.artifactId}/file/view`,
+    this.http.get(`/api/profile/cases/${this.caseData.caseId}/artifacts/${artifact.artifactId}/files/${fileId}/view`,
       { responseType: 'blob' }).subscribe({
       next: blob => {
         const url = window.URL.createObjectURL(blob);
@@ -321,18 +370,20 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     });
   }
 
-  downloadArtifactFile(artifact: CaseArtifact): void {
+  downloadArtifactFile(artifact: CaseArtifact, fileId: string): void {
     if (!this.caseData || !artifact.artifactId) {
       return;
     }
 
-    this.http.get(`/api/profile/cases/${this.caseData.caseId}/artifacts/${artifact.artifactId}/file/download`,
+    const artifactFile = (artifact.files || []).find(file => file.fileId === fileId);
+
+    this.http.get(`/api/profile/cases/${this.caseData.caseId}/artifacts/${artifact.artifactId}/files/${fileId}/download`,
       { responseType: 'blob' }).subscribe({
       next: blob => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = artifact.fileName || 'artifact-file';
+        link.download = artifactFile?.fileName || 'artifact-file';
         link.click();
         window.URL.revokeObjectURL(url);
       },
@@ -342,25 +393,18 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     });
   }
 
-  deleteArtifactFile(artifact: CaseArtifact): void {
+  deleteArtifactFile(artifact: CaseArtifact, fileId: string): void {
     if (!this.caseData || !artifact.artifactId) {
       return;
     }
 
-    this.caseService.deleteArtifactFile(this.caseData.caseId, artifact.artifactId).subscribe({
+    this.caseService.deleteArtifactFile(this.caseData.caseId, artifact.artifactId, fileId).subscribe({
       next: () => {
-        setTimeout(() => {
-          this.patchArtifactFileMetadata(artifact.artifactId, {
-            fileName: '',
-            fileType: '',
-            fileSize: 0,
-            fileResourceId: ''
-          });
+        const nextFiles = (artifact.files || []).filter(file => file.fileId !== fileId);
 
-          setTimeout(() => {
-            this.messageNotificationService.show('File deleted successfully', 'success');
-          });
-        }, 0);
+        this.patchArtifactFiles(artifact.artifactId, nextFiles);
+
+        this.messageNotificationService.show('File deleted successfully', 'success');
       },
       error: err => {
         this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to delete file');
@@ -368,55 +412,32 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     });
   }
 
-  setPendingNewArtifactFile(fileInput: HTMLInputElement): void {
+  setPendingNewArtifactFiles(fileInput: HTMLInputElement): void {
     if (!this.newArtifact) {
       return;
     }
 
-    const file = fileInput.files?.[0];
+    const files = Array.from(fileInput.files || []);
 
-    if (!file) {
-      this.pendingNewArtifactFile = null;
+    if (!files.length) {
+      this.pendingNewArtifactFiles = [];
       this.pendingNewArtifactFileInput = null;
-      this.newArtifact.fileName = '';
-      this.newArtifact.fileType = '';
-      this.newArtifact.fileSize = 0;
       return;
     }
 
-    if (this.newArtifact.type === 'screenshot' && file.type !== 'image/png') {
-      this.messageNotificationService.show('Screenshot must be a PNG image');
+    if (!this.validateArtifactFiles(this.newArtifact, files)) {
       fileInput.value = '';
-      this.pendingNewArtifactFile = null;
+      this.pendingNewArtifactFiles = [];
       this.pendingNewArtifactFileInput = null;
-      this.newArtifact.fileName = '';
-      this.newArtifact.fileType = '';
-      this.newArtifact.fileSize = 0;
       return;
     }
 
-    if (this.newArtifact.type === 'file' && !this.artifactAllowedFileTypes.includes(file.type)) {
-      this.messageNotificationService.show('Allowed file types: PDF, JPG, PNG, TXT, DOCX');
-      fileInput.value = '';
-      this.pendingNewArtifactFile = null;
-      this.pendingNewArtifactFileInput = null;
-      this.newArtifact.fileName = '';
-      this.newArtifact.fileType = '';
-      this.newArtifact.fileSize = 0;
-      return;
-    }
-
-    this.pendingNewArtifactFile = file;
+    this.pendingNewArtifactFiles = files;
     this.pendingNewArtifactFileInput = fileInput;
-
-    this.newArtifact.fileName = '';
-    this.newArtifact.fileType = '';
-    this.newArtifact.fileSize = 0;
-    this.newArtifact.fileResourceId = '';
   }
 
-  getPendingNewArtifactFileName(): string {
-    return this.pendingNewArtifactFile?.name || '';
+  getPendingNewArtifactFileNames(): string {
+    return this.pendingNewArtifactFiles.map(file => file.name).join(', ');
   }
 
   exportPdf(): void {
@@ -596,8 +617,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
           artifactTypeOtherValue: artifact.artifactTypeOtherValue,
           artifactSourceOtherValue: artifact.artifactSourceOtherValue,
           url: artifact.url,
-          fileName: artifact.fileName,
-          fileType: artifact.fileType,
+          files: artifact.files || [],
           tags: artifact.tags || [],
           ...(capturedAt ? { capturedAt } : {})
         };
@@ -683,7 +703,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
     this.newRelatedEntity = null;
     this.newArtifact = null;
-    this.pendingNewArtifactFile = null;
+    this.pendingNewArtifactFiles = [];
     this.pendingNewArtifactFileInput = null;
     this.newTask = null;
     this.newLinkedCase = null;
@@ -1038,8 +1058,8 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return;
     }
 
-    if ((this.newArtifact.type === 'screenshot' || this.newArtifact.type === 'file') && !this.pendingNewArtifactFile) {
-      this.messageNotificationService.show('Please select a file');
+    if ((this.newArtifact.type === 'screenshot' || this.newArtifact.type === 'file') && !this.pendingNewArtifactFiles.length) {
+      this.messageNotificationService.show('Please select at least one file');
       return;
     }
 
@@ -1062,15 +1082,11 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
         const savedArtifact = updated.artifacts.find(item => item.artifactId === artifactToSave.artifactId);
 
-        if (savedArtifact && this.pendingNewArtifactFile && (savedArtifact.type === 'screenshot' || savedArtifact.type === 'file')) {
-          this.caseService.uploadArtifactFile(updated.caseId, savedArtifact.artifactId, this.pendingNewArtifactFile).subscribe({
+        if (savedArtifact && this.pendingNewArtifactFiles.length && (savedArtifact.type === 'screenshot' || savedArtifact.type === 'file')) {
+          this.caseService.uploadArtifactFiles(updated.caseId, savedArtifact.artifactId, this.pendingNewArtifactFiles).subscribe({
             next: uploaded => {
-              savedArtifact.fileName = uploaded.fileName;
-              savedArtifact.fileType = uploaded.fileType;
-              savedArtifact.fileSize = uploaded.fileSize;
-              savedArtifact.fileResourceId = uploaded.fileResourceId;
-
-              this.pendingNewArtifactFile = null;
+              savedArtifact.files = uploaded.files || [];
+              this.pendingNewArtifactFiles = [];
 
               if (this.pendingNewArtifactFileInput) {
                 this.pendingNewArtifactFileInput.value = '';
@@ -1082,7 +1098,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
               this.messageNotificationService.show('Artifact added successfully', 'success');
             },
             error: err => {
-              this.pendingNewArtifactFile = null;
+              this.pendingNewArtifactFiles = [];
               this.pendingNewArtifactFileInput = null;
               this.messageNotificationService.show(err?.error?.detail || err?.message || 'Artifact saved, but file upload failed');
             }
@@ -1091,7 +1107,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
           return;
         }
 
-        this.pendingNewArtifactFile = null;
+        this.pendingNewArtifactFiles = [];
         this.pendingNewArtifactFileInput = null;
         this.cancelAllSectionModes();
 
@@ -1391,10 +1407,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     artifact.description = artifact.description || '';
     artifact.source = artifact.source || 'manual';
     artifact.url = artifact.url || '';
-    artifact.fileName = artifact.fileName || '';
-    artifact.fileType = artifact.fileType || '';
-    artifact.fileSize = artifact.fileSize || 0;
-    artifact.fileResourceId = artifact.fileResourceId || '';
+    artifact.files = artifact.files || [];
     artifact.entityIds = artifact.entityIds || [];
     artifact.tags = artifact.tags || [];
     artifact.linkedReportSource = artifact.linkedReportSource || '';
@@ -1414,10 +1427,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       source: artifact.source || 'manual',
       artifactSourceOtherValue: artifact.artifactSourceOtherValue?.trim() || '',
       url: artifact.url?.trim() || '',
-      fileName: artifact.fileName?.trim() || '',
-      fileType: artifact.fileType?.trim() || '',
-      fileSize: artifact.fileSize || 0,
-      fileResourceId: artifact.fileResourceId || '',
+      files: artifact.files || [],
       entityIds: artifact.entityIds || [],
       tags: artifact.tags || [],
       linkedReportSource: artifact.linkedReportSource || '',
@@ -1540,5 +1550,25 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       .filter(Boolean);
 
     return new Set(selectedCaseIds).size !== selectedCaseIds.length;
+  }
+
+  private validateArtifactFiles(artifact: CaseArtifact, files: File[]): boolean {
+    if (!files.length) {
+      return false;
+    }
+
+    for (const file of files) {
+      if (artifact.type === 'screenshot' && file.type !== 'image/png') {
+        this.messageNotificationService.show('Screenshots must be PNG images');
+        return false;
+      }
+
+      if (artifact.type === 'file' && !this.artifactAllowedFileTypes.includes(file.type)) {
+        this.messageNotificationService.show('Allowed file types: PDF, JPG, PNG, TXT, DOCX');
+        return false;
+      }
+    }
+
+    return true;
   }
 }

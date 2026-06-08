@@ -240,10 +240,7 @@ export const DEFAULT_CASE_ARTIFACT_TEMPLATE: CaseArtifact = {
   description: '',
   source: 'manual',
   url: '',
-  fileName: '',
-  fileType: '',
-  fileSize: 0,
-  fileResourceId: '',
+  files: [],
   entityIds: [],
   tags: [],
   capturedAt: null,
@@ -260,9 +257,8 @@ export const ARTIFACT_REPORT_SOURCE_OPTIONS: CaseOption<ArtifactReportSource>[] 
   { value: 'defacement', label: 'Defacement' },
   { value: 'social', label: 'Social' },
   { value: 'feed', label: 'Feed' },
-  { value: 'dump', label: 'Dump' },
-  { value: 'stealerlogs', label: 'Stealer Logs' },
-  { value: 'scanner', label: 'Web Scans' }
+  { value: 'exploit', label: 'Exploit' },
+  { value: 'stealerlogs', label: 'Stealer Logs' }
 ];
 
 export const DEFAULT_CASE_TASK_TEMPLATE: CaseTask = {

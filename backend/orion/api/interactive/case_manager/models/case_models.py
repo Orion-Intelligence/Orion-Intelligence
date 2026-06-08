@@ -94,7 +94,14 @@ class CaseEntityModel(CaseRequestModel):
         validate_other_value(self.type, self.entityTypeOtherValue, "Entity type")
         validate_other_value(self.source, self.entitySourceOtherValue, "Entity source")
         return self
-
+    
+class CaseArtifactFileModel(CaseRequestModel):
+    fileId: str = ""
+    fileName: str = ""
+    fileType: str = ""
+    fileSize: int = 0
+    fileResourceId: str = ""
+    uploadedAt: Optional[datetime] = None
 
 class CaseArtifactModel(CaseRequestModel):
     artifactId: str = ""
@@ -105,10 +112,7 @@ class CaseArtifactModel(CaseRequestModel):
     source: SourceType = Field(default=SourceType.MANUAL)
     artifactSourceOtherValue: str = ""
     url: str = ""
-    fileName: str = ""
-    fileType: str = ""
-    fileSize: int = 0
-    fileResourceId: str = ""
+    files: List[CaseArtifactFileModel] = Field(default_factory=list)
     linkedReportSource: str = ""
     linkedReportId: str = ""
     linkedReportTitle: str = ""

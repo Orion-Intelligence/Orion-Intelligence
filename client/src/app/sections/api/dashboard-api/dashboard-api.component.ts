@@ -422,8 +422,8 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
 
   private isFailedPendingResponse(res: any): boolean {
     return (res?.status === 'pending' || res?.result?.status === 'pending') &&
-            ((res?.result?.progress ?? res?.progress) === 0) &&
-            ((res?.result?.step ?? res?.step) === 'failed');
+      ((res?.result?.progress ?? res?.progress) === 0) &&
+      ((res?.result?.step ?? res?.step) === 'failed');
   }
 
   private isFailedDoneResponse(res: any): boolean {

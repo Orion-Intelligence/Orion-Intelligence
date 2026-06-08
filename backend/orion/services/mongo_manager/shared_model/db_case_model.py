@@ -44,6 +44,16 @@ class CaseStatus(str, Enum):
     CLOSED = "closed"
 
 
+class ArtifactReportSource(str, Enum):
+    STRATEGIC = "strategic"
+    BREACH = "breach"
+    DEFACEMENT = "defacement"
+    SOCIAL = "social"
+    FEED = "feed"
+    EXPLOIT = "exploit"
+    STEALER_LOGS = "stealerlogs"
+
+
 class Severity(str, Enum):
     INFO = "info"
     LOW = "low"
@@ -278,6 +288,15 @@ class CaseEntity(EmbeddedModel):
     updatedAt: datetime = Field(default_factory=utc_now)
 
 
+class CaseArtifactFile(EmbeddedModel):
+    fileId: str
+    fileName: str = ""
+    fileType: str = ""
+    fileSize: int = 0
+    fileResourceId: str = ""
+    uploadedAt: datetime = Field(default_factory=utc_now)
+
+
 class CaseArtifact(EmbeddedModel):
     artifactId: str
     type: ArtifactType = Field(default=ArtifactType.EVIDENCE)
@@ -287,10 +306,7 @@ class CaseArtifact(EmbeddedModel):
     source: SourceType = Field(default=SourceType.MANUAL)
     artifactSourceOtherValue: str = ""
     url: str = ""
-    fileName: str = ""
-    fileType: str = ""
-    fileSize: int = 0
-    fileResourceId: str = ""
+    files: List[CaseArtifactFile] = Field(default_factory=list)
     linkedReportSource: str = ""
     linkedReportId: str = ""
     linkedReportTitle: str = ""
