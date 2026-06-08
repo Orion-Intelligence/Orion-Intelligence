@@ -1123,7 +1123,9 @@ describe('User Manual Screenshot Flow', () => {
     });
 
     if (tenantAccount?.username && tenantAccount?.password) {
-      cy.logout();
+      cy.clearLocalStorage();
+      cy.clearCookies();
+      cy.window().then((win) => win.sessionStorage.clear());
       cy.visit('/login');
       cy.get('[data-testid="login-user"]').type(tenantAccount.username);
       cy.get('[data-testid="login-pass"]').type(tenantAccount.password, { log: false });

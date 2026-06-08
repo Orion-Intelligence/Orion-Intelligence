@@ -15,9 +15,9 @@
       }
     }
     @if (router.url !== '/login') {
-      <div class="relative">
-        <button type="button" (click)="toggleLanguageDropdown($event)" data-testid="profile-language-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[15px] pt-[18px] pb-[20px]" [attr.aria-label]="'Language' | translate" [attr.aria-expanded]="languageDropdownOpen()">
-          <img alt="Language" ngSrc="assets/images/shared/global.svg" priority height="24" width="24" class="ui-topbar-icon">
+      <div class="relative flex items-center">
+        <button type="button" (click)="toggleLanguageDropdown($event)" data-testid="profile-language-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center pl-[15px] pr-[8px] pt-[18px] pb-[20px]" [attr.aria-label]="'Language' | translate" [attr.aria-expanded]="languageDropdownOpen()">
+          <img alt="Language" ngSrc="assets/images/shared/global.svg" priority height="24" width="24" class="ui-topbar-icon h-6 w-6">
         </button>
         @if (languageDropdownOpen()) {
           <ul class="absolute right-[10px] top-[calc(100%+8px)] z-[1310] w-[248px] list-none rounded-[12px] border border-[#e5e7eb] bg-white p-[10px] text-[15px] shadow-[0_16px_30px_rgba(2,6,23,0.14)]">
@@ -36,8 +36,8 @@
           </ul>
         }
       </div>
-      <button type="button" (click)="toggleDropdown($event)" appTooltip="" data-testid="profile-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[15px] pt-[18px] pb-[20px]">
-        <img alt="Logout" height="24" ngSrc="assets/images/shared/theme/profile-icon.svg" priority width="24" class="ui-topbar-icon ui-topbar-profile-icon">
+      <button type="button" (click)="toggleDropdown($event)" appTooltip="" data-testid="profile-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center pl-[8px] pr-[15px] pt-[18px] pb-[20px]">
+        <img alt="Logout" height="24" ngSrc="assets/images/shared/theme/profile-icon.svg" priority width="24" class="ui-topbar-icon ui-topbar-profile-icon h-6 w-6">
       </button>
     }
     @if (dropdownOpen()) {
