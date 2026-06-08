@@ -167,6 +167,36 @@ export function addAndEditArtifactAndTask() {
   assertNotification('Artifacts updated successfully');
   cy.get(selector('case-artifact-title-value-0')).should('contain.text', 'Cypress Updated Evidence Artifact');
 
+  clickVisible('case-artifact-add');
+  visible('case-artifact-add-drawer').should('be.visible');
+
+  cy.get(selector('case-artifact-title-input')).should('be.visible').type('Cypress Linked Report Artifact');
+  cy.get(selector('case-artifact-type-select')).should('be.visible').select('report');
+
+  cy.get('select[name="new-artifact-report-source"]')
+    .should('be.visible')
+    .select('strategic');
+
+  cy.get('input[name="new-artifact-report-search"]')
+    .should('be.visible')
+    .type('test');
+
+  cy.get('button')
+    .contains('No reports found')
+    .should('not.exist');
+
+  cy.get('.absolute.z-50 button')
+    .first()
+    .click({ force: true });
+
+  clickVisible('case-artifact-add-save');
+
+  assertNotification('Artifact added successfully');
+
+  cy.get(selector('case-artifact-card-1')).scrollIntoView().should('be.visible');
+  cy.get(selector('case-artifact-title-value-1')).should('contain.text', 'Cypress Linked Report Artifact');
+  cy.get(selector('case-artifact-card-1')).should('contain.text', 'Linked Report');
+
   cy.window().then((win) => {
     cy.stub(win, 'open').as('artifactWindowOpen');
   });

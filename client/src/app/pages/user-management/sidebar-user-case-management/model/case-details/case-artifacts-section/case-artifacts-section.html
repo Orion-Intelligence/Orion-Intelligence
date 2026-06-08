@@ -227,22 +227,22 @@
             }
             @if ((artifact.files || []).length) {
             <div @caseInlineMotion class="mt-3 space-y-2 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
-                @for (artifactFile of artifact.files; track artifactFile.fileId) {
+                @for (artifactFile of artifact.files; track artifactFile.fileId; let fileIndex = $index) {
                 <div class="flex flex-wrap items-center gap-2 border-b border-[var(--tenant-line)] pb-2 last:border-b-0 last:pb-0">
                     <span class="text-xs text-[var(--color-text2)] break-all">
                         {{ artifactFile.fileName }}
                     </span>
 
-                    <button type="button" (click)="store.viewArtifactFile(artifact, artifactFile.fileId)" class="text-xs text-sky-300 [body.light-theme_&]:text-sky-800">
+                    <button type="button" (click)="store.viewArtifactFile(artifact, artifactFile.fileId)" class="text-xs text-sky-300 [body.light-theme_&]:text-sky-800" [attr.data-testid]="'case-artifact-file-view-' + $index">
                         {{ 'View' | translate }}
                     </button>
 
-                    <button type="button" (click)="store.downloadArtifactFile(artifact, artifactFile.fileId)" class="text-xs text-emerald-300 [body.light-theme_&]:text-emerald-800">
+                    <button type="button" (click)="store.downloadArtifactFile(artifact, artifactFile.fileId)" class="text-xs text-emerald-300 [body.light-theme_&]:text-emerald-800" [attr.data-testid]="'case-artifact-file-download-' + $index">
                         {{ 'Download' | translate }}
                     </button>
 
                     @if (!caseData.closure) {
-                    <button type="button" (click)="store.deleteArtifactFile(artifact, artifactFile.fileId)" class="text-xs text-red-300 [body.light-theme_&]:text-red-800">
+                    <button type="button" (click)="store.deleteArtifactFile(artifact, artifactFile.fileId)" class="text-xs text-red-300 [body.light-theme_&]:text-red-800" [attr.data-testid]="'case-artifact-file-delete-' + $index">
                         {{ 'Delete' | translate }}
                     </button>
                     }
