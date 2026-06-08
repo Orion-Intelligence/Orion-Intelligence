@@ -30,9 +30,7 @@ export type ArtifactReportSource =
     'social' |
     'feed' |
     'exploit' |
-    'dump' |
-    'stealerlogs' |
-    'scanner';
+    'stealerlogs';
 
 export type EntityConfidence = 'low' | 'medium' | 'high';
 export type Severity = 'info' | 'low' | 'medium' | 'high' | 'critical';

@@ -44,6 +44,16 @@ class CaseStatus(str, Enum):
     CLOSED = "closed"
 
 
+class ArtifactReportSource(str, Enum):
+    STRATEGIC = "strategic"
+    BREACH = "breach"
+    DEFACEMENT = "defacement"
+    SOCIAL = "social"
+    FEED = "feed"
+    EXPLOIT = "exploit"
+    STEALER_LOGS = "stealerlogs"
+
+
 class Severity(str, Enum):
     INFO = "info"
     LOW = "low"

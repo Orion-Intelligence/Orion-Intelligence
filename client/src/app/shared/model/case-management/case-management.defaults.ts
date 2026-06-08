@@ -258,9 +258,7 @@ export const ARTIFACT_REPORT_SOURCE_OPTIONS: CaseOption<ArtifactReportSource>[] 
   { value: 'social', label: 'Social' },
   { value: 'feed', label: 'Feed' },
   { value: 'exploit', label: 'Exploit' },
-  { value: 'dump', label: 'Dump' },
-  { value: 'stealerlogs', label: 'Stealer Logs' },
-  { value: 'scanner', label: 'Web Scans' }
+  { value: 'stealerlogs', label: 'Stealer Logs' }
 ];
 
 export const DEFAULT_CASE_TASK_TEMPLATE: CaseTask = {

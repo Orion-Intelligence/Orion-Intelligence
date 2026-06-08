@@ -509,14 +509,7 @@ class CaseManager:
 
         return {"files": uploaded_files}
     
-    async def get_artifact_file_response(
-        self,
-        case_id: str,
-        artifact_id: str,
-        file_id: str,
-        current_user,
-        download: bool = False
-    ) -> Response:
+    async def get_artifact_file_response(self, case_id: str, artifact_id: str, file_id: str, current_user, download: bool = False) -> Response:
         record = await self._engine.find_one(
             db_case_model,
             (db_case_model.caseId == case_id)
@@ -561,13 +554,7 @@ class CaseManager:
             },
         )
     
-    async def delete_artifact_file_from_case(
-        self,
-        case_id: str,
-        artifact_id: str,
-        file_id: str,
-        current_user
-    ) -> dict:
+    async def delete_artifact_file_from_case(self, case_id: str, artifact_id: str, file_id: str, current_user) -> dict:
         record = await self._engine.find_one(
             db_case_model,
             (db_case_model.caseId == case_id)
@@ -708,14 +695,6 @@ class CaseManager:
                 [],
                 ["news"],
             )
-        
-        elif source == "dump":
-            result = await search_model.getInstance().search_consolidated_ranked_result(
-                param,
-                [ELASTIC_INDEX.S_LEAK_INDEX],
-                [],
-                ["dump", "dumps", "listing"],
-            )
 
         elif source == "stealerlogs":
             result = await search_model.getInstance().search_consolidated_ranked_result(
@@ -723,14 +702,6 @@ class CaseManager:
                 [ELASTIC_INDEX.S_LEAK_INDEX],
                 [],
                 ["stealerlogs", "stealer_logs", "tracking"],
-            )
-        
-        elif source == "scanner":
-            result = await search_model.getInstance().search_consolidated_ranked_result(
-                param,
-                [ELASTIC_INDEX.S_GENERIC_INDEX],
-                [],
-                ["scanner", "scan", "web_scan", "network_scan"],
             )
 
         else:
