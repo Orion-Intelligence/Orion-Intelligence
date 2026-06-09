@@ -124,8 +124,8 @@
       </div>
     }
     @if (defResults.length > showLimitDefacement) {
-      <div class="mt-[16px] text-center pb-[12px]" [appTooltip]="'list more results' | translate" (click)="onShowMore('defacement', $event)">
-        <span class="ui-see-more-btn cursor-pointer">
+      <div class="mt-[16px] flex justify-center pb-[12px]">
+        <span class="ui-see-more-btn cursor-pointer" [appTooltip]="'list more results' | translate" (click)="onShowMore('defacement', $event)">
           {{ 'See More' | translate }}
         </span>
       </div>
@@ -225,8 +225,8 @@
       </div>
     }
     @if (stResults.length > showLimitStealer) {
-      <div class="text-center pb-[12px]">
-        <span class="ui-see-more-btn cursor-pointer">
+      <div class="mt-[16px] flex justify-center pb-[12px]">
+        <span class="ui-see-more-btn cursor-pointer" [appTooltip]="'list more results' | translate" (click)="onShowMore('stealerlog', $event)">
           {{ 'See More' | translate }}
         </span>
       </div>
