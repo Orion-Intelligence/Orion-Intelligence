@@ -20,6 +20,10 @@
     "rule_type": "unique",
     "path": "leak_collector/leak"
   },
+  "apt": {
+    "rule_type": "unique",
+    "path": "malware_collector"
+  },
   "mastodon": {
     "rule_type": "shared",
     "path": "social/platform",

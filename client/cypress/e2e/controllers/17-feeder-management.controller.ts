@@ -1,5 +1,6 @@
 let feederValidationData: any = null;
 export const FEEDER_RULE_KEYS = [
+  'apt',
   'defacement',
   'exploit',
   'forum',

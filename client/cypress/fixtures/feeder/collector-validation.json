@@ -1,6 +1,13 @@
 {
-  "ruleKeys": ["defacement", "exploit", "forum", "generic", "leak", "mastodon", "news", "pastebin", "reddit", "tracking", "twitter"],
+  "ruleKeys": ["apt", "defacement", "exploit", "forum", "generic", "leak", "mastodon", "news", "pastebin", "reddit", "tracking", "twitter"],
   "categories": {
+    "apt": {
+      "ruleKey": "apt",
+      "ruleType": "unique",
+      "fileName": "cypress_apt_sample.py",
+      "fileFixture": "feeder/unique/_apt_sample.py",
+      "seedHostsFixture": "feeder/crawl_data_apt.txt"
+    },
     "defacement": {
       "ruleKey": "defacement",
       "ruleType": "unique",
