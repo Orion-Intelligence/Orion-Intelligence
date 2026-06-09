@@ -48,7 +48,7 @@
             <div class="flex shrink-0 items-center whitespace-nowrap bg-white font-[Roboto] text-[15px] font-normal text-[#292828] max-[550px]:w-0 max-[550px]:px-0 max-[550px]:overflow-hidden max-[550px]:border-r-0" [ngClass]="hideToolsSection() ? 'pr-[5px]' : ''">
               <ng-container>
                 <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)] max-[550px]:hidden">
-                <span class="inline-flex items-center">{{ 'Advance' | translate }}</span>
+                <span class="mr-[6px] inline-flex items-center">{{ 'Advance' | translate }}</span>
                 <label class="relative inline-flex cursor-pointer items-center rounded-full bg-white p-[1px]">
                   <input type="checkbox" class="sr-only peer" [attr.aria-label]="'Advance search' | translate" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()" />
                   <span class="relative h-[20px] w-[32px] rounded-full border border-[var(--color-border)] bg-[#e5e7eb] transition peer-checked:border-[#57A5EB] peer-checked:bg-[#57A5EB]">
