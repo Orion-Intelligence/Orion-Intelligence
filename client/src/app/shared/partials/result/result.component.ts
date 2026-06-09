@@ -152,9 +152,10 @@ export class ResultComponent implements OnInit, OnChanges {
       return;
     }
     const tab = tabElement.getAttribute('data-tab') || '';
-    if (!tab || tab === this.activeTab) {
+    if (!tab) {
       return;
     }
+    this.clearSearchInput(false);
     this.onToggleAnalytics(tab);
   }
 
@@ -320,13 +321,15 @@ export class ResultComponent implements OnInit, OnChanges {
     }
   }
 
-  clearSearchInput(): void {
+  clearSearchInput(focusInput = true): void {
     this.searchQuery = '';
     this.local_query = '';
     const inputElement = this.searchInputRef?.nativeElement as HTMLInputElement | undefined;
     if (inputElement) {
       inputElement.value = '';
-      inputElement.focus();
+      if (focusInput) {
+        inputElement.focus();
+      }
     }
     this.updateQuery.emit('');
     this.init_domains();

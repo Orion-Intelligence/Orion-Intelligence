@@ -1,7 +1,7 @@
 <div id="dashboard-consolidated" class="relative flex h-full min-h-0 flex-col">
   @if (!isGeoFencing) {
     <app-result [showSorting]="false" [consolidated]="true" [shrinkmenu]="false" [showNoResult]="false"
-    (reloadData)="fetchSearchResults(true)" (onToggleSwitch)="onToggleMenu($event)" (updateQuery)="onUpdateQuery($event)"
+    (reloadData)="fetchSearchResults(true)" (onToggleSwitch)="onToggleMenu($event, true)" (updateQuery)="onUpdateQuery($event)"
     [activeTab]="isIOC ? 'IOCs' : (isNetworkIntel ? 'Network Intelligence' : 'Deep Search')" [isLoading]="isLoading()" [searchQuery]="query"
     [result_count]="getTotalResultCount()" [filterModel]="consolidated_filters"
   (reloadFilters)="reloadFilters($event)" [showSelectedFilters]="true"></app-result>

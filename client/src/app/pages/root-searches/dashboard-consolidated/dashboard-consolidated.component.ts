@@ -348,11 +348,15 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
   }
 
-  onToggleMenu(tab: string): void {
+  onToggleMenu(tab: string, clearQuery = false): void {
+    if (clearQuery) {
+      this.query = '';
+      this.dashboardService.consolidatedParamModel.q = '';
+    }
     this.dashboardService.consolidatedParamModel.tab = tab;
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { tab },
+      queryParams: clearQuery ? { tab, q: null } : { tab },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     }).then();
