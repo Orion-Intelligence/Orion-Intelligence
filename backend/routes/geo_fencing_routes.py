@@ -77,6 +77,10 @@ async def get_map_entities_by_ids(param: list[str] = Body(...)):
 )
 async def search_threat_lens_news(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
     _enforce_demo_safe_search(param, current_user)
+    if param.platform_result_count is None or "platform_result_count" not in param.model_fields_set:
+        param.platform_result_count = 25
+    param.sort_latest = True
+    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     return await search_model.getInstance().search_consolidated_result(param)
 
 

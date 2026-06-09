@@ -541,6 +541,39 @@ class search_query_generator:
         unified_query["size"] = result_size
         unified_query["from"] = max(0, (m_page_number - 1) * result_size)
 
+        if getattr(p_query_model, "sort_latest", False):
+            unified_query["sort"] = [
+                {
+                    "_script": {
+                        "type": "number",
+                        "order": "desc",
+                        "script": {
+                            "lang": "painless",
+                            "source": """
+                                long latest = 0;
+                                for (String field : params.fields) {
+                                    if (doc.containsKey(field) && !doc[field].empty) {
+                                        long value = doc[field].value.toInstant().toEpochMilli();
+                                        if (value > latest) {
+                                            latest = value;
+                                        }
+                                    }
+                                }
+                                return latest;
+                            """,
+                            "params": {
+                                "fields": date_priority_fields
+                            }
+                        }
+                    }
+                },
+                {
+                    "_score": {
+                        "order": "desc"
+                    }
+                }
+            ]
+
         if channel_q:
             qb = unified_query["query"]["function_score"]["query"].setdefault("bool", {"must": []})
             qb.setdefault("should", []).extend(
