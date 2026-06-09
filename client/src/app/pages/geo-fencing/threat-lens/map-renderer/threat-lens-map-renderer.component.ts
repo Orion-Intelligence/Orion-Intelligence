@@ -130,10 +130,17 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
     const selection = this.buildCountrySelection(graphic);
     this.countryRenderer.applyHighlight(graphic);
-    const geometryToFocus = graphic.geometry?.extent ?? graphic.geometry;
+    const extent = graphic.geometry?.extent ?? graphic.geometry;
+    const center = this.toThreatLensCoordinates(extent?.center) ?? this.getExtentCenterCoordinates(extent);
 
-    if (geometryToFocus) {
-      await this.view.goTo(geometryToFocus, { duration: 750, easing: 'ease-in-out' }).then(() => undefined, () => undefined);
+    if (center) {
+      const target: any = { center: [center.lon, center.lat] };
+      const currentZoom = Number(this.view.zoom);
+      if (Number.isFinite(currentZoom)) {
+        target.zoom = currentZoom;
+      }
+
+      await this.view.goTo(target, { duration: 750, easing: 'ease-in-out' }).then(() => undefined, () => undefined);
     }
 
     return selection;

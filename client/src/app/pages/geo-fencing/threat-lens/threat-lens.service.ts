@@ -40,7 +40,34 @@ export class ThreatLensService {
       request.q = '';
     }
 
+    if (!String(request['daterange'] ?? '').trim()) {
+      request['daterange'] = this.buildDefaultThreatLensDateRange();
+    }
+
     return this.removeEmptyOrDefaultValues(request) as ThreatLensRequestPayload;
+  }
+
+  private buildDefaultThreatLensDateRange(): string {
+    const today = this.toDateOnly(new Date());
+    const endDate = new Date(today);
+    endDate.setMonth(endDate.getMonth() - 2);
+
+    if (endDate.getDate() !== today.getDate()) {
+      endDate.setDate(0);
+    }
+
+    return `${this.toIsoDate(endDate)},${this.toIsoDate(today)}`;
+  }
+
+  private toDateOnly(value: Date): Date {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+  }
+
+  private toIsoDate(value: Date): string {
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   private removeEmptyOrDefaultValues(params: ThreatLensRequestPayload & Record<string, any>): Record<string, any> {
