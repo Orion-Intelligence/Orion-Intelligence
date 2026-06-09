@@ -6,10 +6,10 @@
                     <h3 class="text-[15px] font-bold leading-tight text-[var(--color-text1)] mb-4">{{ 'Case Details' | translate }}</h3>
 
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Case                             ID' | translate }}</label>
+                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Case ID' | translate }}</label>
                         <input type="text" [value]="caseForm.caseId" disabled class="mt-1 w-full cursor-not-allowed rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[var(--color-text4)] outline-none" data-testid="case-add-id-input" />
                         @if (validationErrors['caseId']) {
-                        <p class="case-form-error mt-1 text-xs text-red-400">{{ (validationErrors['caseId']) | translate }}</p>
+                        <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['caseId'] }}</p>
                         }
                     </div>
 
@@ -29,7 +29,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Case                             Type' | translate }} <span class="text-red-500">*</span></label>
+                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Case Type' | translate }} <span class="text-red-500">*</span></label>
                         <select [(ngModel)]="caseForm.caseType" name="caseType" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-type-select">
                             @for (type of caseTypeOptions; track type.value) {
                             <option [value]="type.value">{{ type.label }}</option>
@@ -44,13 +44,13 @@
                         </label>
                         <input type="text" [(ngModel)]="caseForm.caseTypeOtherValue" name="caseTypeOtherValue" class="mt-1 mb-5 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" [placeholder]="'Specify other case type' | translate" />
                         @if (validationErrors['caseTypeOther']) {
-                        <p class="case-form-error mt-1 text-xs text-red-400">{{ (validationErrors['caseTypeOther']) | translate }}</p>
+                        <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['caseTypeOther'] }}</p>
                         }
                     </div>
                     }
 
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Intake                             Source' | translate }} <span class="text-red-500">*</span></label>
+                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Intake Source' | translate }} <span class="text-red-500">*</span></label>
                         <select [(ngModel)]="caseForm.intakeSource" name="intakeSource" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-intake-source-select">
                             @for (source of intakeSourceOptions; track source.value) {
                             <option [value]="source.value">{{ source.label }}</option>
@@ -65,7 +65,7 @@
                         </label>
                         <input type="text" [(ngModel)]="caseForm.intakeSourceOtherValue" name="intakeSourceOtherValue" class="mt-1 mb-5 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" [placeholder]="'Specify other intake source' | translate" />
                         @if (validationErrors['intakeSourceOther']) {
-                        <p class="case-form-error mt-1 text-xs text-red-400">{{ (validationErrors['intakeSourceOther']) | translate }}
+                        <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['intakeSourceOther'] }}
                         </p>
                         }
                     </div>
@@ -123,7 +123,7 @@
                 <p class="case-form-error text-xs text-red-400">{{ validationErrors['identifier'] }}</p>
                 }
                 @if (validationErrors['socialProfile']) {
-                <p class="case-form-error text-xs text-red-400">{{ (validationErrors['socialProfile']) | translate }}</p>
+                <p class="case-form-error text-xs text-red-400">{{ validationErrors['socialProfile'] }}</p>
                 }
             </form>
         </div>

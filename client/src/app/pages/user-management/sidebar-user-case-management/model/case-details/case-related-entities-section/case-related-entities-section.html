@@ -16,7 +16,7 @@
     </div>
 
     @if (isEditing && selectedEditableRelatedEntity; as editableEntity) {
-    <app-case-edit-drawer [title]="'Edit Related Entity' | translate" [subtitle]="(editableEntity.value || 'Related Entity') | translate" [saveLabel]="'Save Entity' | translate" saveTestId="case-related-entity-save" cancelTestId="case-related-entity-cancel" drawerTestId="case-related-entity-edit-drawer" (save)="store.saveRelatedEntities()" (cancel)="cancelRelatedEntityEditing()">
+    <app-case-edit-drawer [title]="'Edit Related Entity' | translate" [subtitle]="editableEntity.value || ('Related Entity' | translate)" [saveLabel]="'Save Entity' | translate" saveTestId="case-related-entity-save" cancelTestId="case-related-entity-cancel" drawerTestId="case-related-entity-edit-drawer" (save)="store.saveRelatedEntities()" (cancel)="cancelRelatedEntityEditing()">
         <div class="p-6">
             <app-entity-details @caseListItemMotion [entity]="editableEntity" [isMainEntity]="false" [showTitle]="false"
                 [showTopDivider]="false" [showRoleRelationshipFields]="true" [showInlineSaveButtons]="false" [entityIndex]="selectedEditableRelatedEntityIndex"
@@ -41,7 +41,7 @@
 
                     <div class="flex items-center gap-1.5">
                         <div class="text-sm font-semibold text-[var(--color-text1)] break-words" [attr.data-testid]="'case-related-entity-value-' + i">
-                            {{ (entity.value || 'Untitled entity') | translate }}
+                            {{ entity.value || ('Untitled entity' | translate) }}
                         </div>
 
                         <i class="bi text-xs text-[var(--color-text4)]" [ngClass]="isRelatedEntityExpanded(entity.entityId) ? 'bi-chevron-up' : 'bi-chevron-down'">

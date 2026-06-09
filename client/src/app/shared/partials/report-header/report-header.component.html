@@ -21,7 +21,7 @@
             <div class="max-h-[320px] overflow-y-auto pr-1">
               @for (language of languageOptions; track language.code) {
                 <button type="button" class="flex h-9 w-full items-center justify-between gap-3 rounded-[8px] px-2 text-left text-sm font-medium transition-colors" [ngClass]="getActiveLanguage() === language.code ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]'" (click)="langUpdate(language.code)">
-                  <span class="min-w-0 truncate">{{ language.name | translate }}</span>
+                  <span class="min-w-0 truncate">{{ language.name }}</span>
                   <span class="shrink-0 text-[11px] font-semibold uppercase opacity-75">{{ language.code }}</span>
                 </button>
               }

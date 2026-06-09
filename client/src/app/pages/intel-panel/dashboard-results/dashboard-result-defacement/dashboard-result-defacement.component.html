@@ -92,7 +92,7 @@
             </div>
           }
         </div>
-        <h2 class="mt-3 text-lg font-semibold text-[var(--color-text1)]">{{ (item.m_team || 'No Team') | translate }}</h2>
+        <h2 class="mt-3 text-lg font-semibold text-[var(--color-text1)]">{{ item.m_team || ('No Team' | translate) }}</h2>
         @if (item.ioc?.length) {
           <h5 class="mt-4 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'categoryAlerts.export.ioc' | translate }}</h5>
           <div class="mt-2 text-sm text-[var(--color-text3)]">{{ item.ioc.join(', ') }}</div>

@@ -41,7 +41,7 @@
             <div class="min-w-0 flex-1">
               <div class="flex min-w-0 items-center justify-between gap-3">
                 <button data-testid="report-feedback-comment-user-name" type="button" (click)="openUser(comment.user_id)" class="truncate text-[13px] font-semibold text-[var(--color-text1)] transition hover:text-[var(--color-blue-640)]">
-                  {{ (comment.username || 'Analyst note') | translate }}
+                  {{ comment.username || ('Analyst note' | translate) }}
                 </button>
                 <div class="shrink-0 text-[11px] text-[var(--color-text4)]">{{ comment.created_at | date:'medium' }}</div>
               </div>

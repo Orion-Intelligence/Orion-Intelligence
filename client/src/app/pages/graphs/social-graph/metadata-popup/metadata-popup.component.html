@@ -150,7 +150,7 @@
                   <div class="space-y-3">
                     @for (post of displayPosts(); track trackByPostUrl($index, post)) {
                       <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)]/20 p-3 text-sm animate-[social-mapper-list-item-in_0.3s_ease-out_both]">
-                        <p class="text-slate-300 mb-2 line-clamp-3">{{ (post.caption || 'No caption') | translate }}</p>
+                        <p class="text-slate-300 mb-2 line-clamp-3">{{ post.caption || ('No caption' | translate) }}</p>
                         <div class="flex items-center justify-between text-slate-400">
                           <div class="flex items-center gap-4">
                             <span [title]="'Likes' | translate"><i class="bi bi-heart-fill text-red-500/80"></i> {{ post.likes }}</span>

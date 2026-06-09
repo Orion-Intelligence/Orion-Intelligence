@@ -13,7 +13,7 @@
         <div class="mt-[6px] rounded-[6px] border border-[#ffcc80] bg-[#fff4e5] px-[12px] py-[10px] text-[13px] text-[#a66300]">
           <div class="mb-[4px] font-semibold">{{ 'Username already taken, suggested usernames below' | translate }}</div>
           <div class="text-[12px] opacity-90">
-            {{ (usernameSuggestion.replace('Username already taken. Suggested usernames:', '')) | translate }}
+            {{ usernameSuggestion.replace('Username already taken. Suggested usernames:', '') }}
           </div>
         </div>
       }

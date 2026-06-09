@@ -7,7 +7,7 @@
           <h1 class="ui-page-title">{{ 'Tenant Users' | translate }}</h1>
           <p class="ui-page-description">{{ 'Manage user access, status, and licenses.' | translate }}</p>
         </div>
-        <span [appTooltip]="getAddUserTooltip() | translate">
+        <span [appTooltip]="getAddUserTooltip()">
           <button type="button" data-testid="tenant-add-user-button" class="ui-btn" [ngClass]="isAddUserDisabled() ? 'cursor-not-allowed border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text4)]' : 'ui-btn-primary'" [disabled]="isAddUserDisabled()" (click)="addtenant()">
             {{ 'Add User' | translate }}
           </button>

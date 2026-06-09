@@ -178,7 +178,7 @@
                 <div class="category_report_status-icon" [ngClass]="getRiskIconColorClass(item.risk)">
                   <i class="bi" [ngClass]="getRiskIcon(item.risk)" aria-hidden="true"></i>
                 </div>
-                {{ ('risk.' + item.risk.toLowerCase()) | translate }} {{ 'categoryAlerts.fields.risk' | translate }}
+                {{ item.risk }} {{ 'categoryAlerts.fields.risk' | translate }}
               </span>
               <span class="category_report_alert-date">{{ item.detectedOn| date:'MM/dd/yyyy' }}</span>
             </div>
@@ -230,7 +230,7 @@
                 <div class="category_report_alert-iocs-tags">
                   @for (ioc of getFilteredIocs(item.allIOC); track ioc.label) {
                     <div class="category_report_alert-iocs-tag">
-                      {{ ioc.label | translate }}({{ ioc.count }})
+                      {{ ioc.label }}({{ ioc.count }})
                     </div>
                   }
                 </div>

@@ -55,7 +55,7 @@
                   </span>
                 </td>
                 <td class="capitalize" [attr.data-label]="'Network Type' | translate">
-                  {{ (item.network_type ? item.network_type : 'Unknown') | translate }}
+                  {{ item.network_type ? item.network_type : ('Unknown' | translate) }}
                 </td>
                 <td [attr.data-label]="'Last Updated' | translate">
                   {{ (item.leak_model_last_update || item.geneic_model_last_update) | date: 'd MMM y hh:mm a' }}

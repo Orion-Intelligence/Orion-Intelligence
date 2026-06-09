@@ -260,7 +260,7 @@
                 <td class="px-4 py-2.5">
                   <div class="flex items-center justify-end gap-2">
                       <button [attr.data-testid]="'feeder-script-view-button-' + script.file_name" type="button" class="inline-flex h-[36px] items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3.5 text-[12px] font-semibold text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="toggleScript(script)">
-                      {{ (selectedScript?.id === script.id ? 'Hide' : 'View') | translate }}
+                      {{ selectedScript?.id === script.id ? ('Hide' | translate) : ('View' | translate) }}
                     </button>
                     @if (canTransferScript(script)) {
                       <button [attr.data-testid]="'feeder-script-owner-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text1)] opacity-100 transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="'Change Owner' | translate" (click)="openOwnerDialog(script)">
@@ -378,7 +378,7 @@
             <div class="px-3 py-2">
               <div class="flex flex-wrap justify-end gap-2">
                   <button [attr.data-testid]="'feeder-script-view-button-' + script.file_name" type="button" class="inline-flex h-[36px] items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3.5 text-[12px] font-semibold text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="toggleScript(script)">
-                  {{ (selectedScript?.id === script.id ? 'Hide' : 'View') | translate }}
+                  {{ selectedScript?.id === script.id ? ('Hide' | translate) : ('View' | translate) }}
                 </button>
                 @if (canTransferScript(script)) {
                   <button [attr.data-testid]="'feeder-script-owner-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text1)] opacity-100 transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="'Change Owner' | translate" (click)="openOwnerDialog(script)">

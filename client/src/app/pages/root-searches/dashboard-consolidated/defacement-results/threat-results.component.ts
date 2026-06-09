@@ -67,9 +67,13 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   updateThreatTypeCounts(results: DefacementResultItem[]) {
     this.threatTypeCounts = {};
     results.forEach(item => {
-      const type = item.m_ioc_type?.[0] || 'Unknown';
+      const type = this.normalizeThreatType(item.m_ioc_type?.[0]);
       this.threatTypeCounts[type] = (this.threatTypeCounts[type] || 0) + 1;
     });
+  }
+
+  private normalizeThreatType(type: any): string {
+    return String(type || 'Unknown').trim().toLowerCase() || 'Unknown';
   }
 
   explore(route: string, q: string) {
@@ -107,6 +111,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
 
   onFilterTypeClick(type: string, event: MouseEvent): void {
     event.stopPropagation();
+    type = this.normalizeThreatType(type);
     if (type === 'defacement_all') {
       let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
       const url = `/dashboard/defacement/databases?q=${encodeURIComponent(query)}`;
@@ -126,7 +131,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
     }
     else if (type === 'stealerlog') {
       let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
-      const finalUrl = `/dashboard/stealerlogs?url=${encodeURIComponent(query)}&user=`;
+      const finalUrl = `/dashboard/stealerlogs/iocs?q=${encodeURIComponent(query)}&user=`;
       this.proxied_resource.open(finalUrl);
     }
   }

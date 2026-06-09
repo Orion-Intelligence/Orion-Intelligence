@@ -32,7 +32,7 @@
     @if (!hasError && isLoading && progress() < 100) {
       <div class="relative z-[1] mx-[32px] mt-[12px] max-w-[720px]">
         <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text1)]">
-          {{ (currentStep || 'Processing file...') | translate }}
+          {{ currentStep || ('Processing file...' | translate) }}
         </div>
         <div class="ui-progress-track h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
           <div class="ui-progress-indeterminate-bar"></div>

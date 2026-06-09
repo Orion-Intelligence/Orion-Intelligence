@@ -14,7 +14,7 @@
     </div>
 
     @if (isEditing && selectedEditableTask; as task) {
-    <app-case-edit-drawer [title]="'Edit Task' | translate" [subtitle]="(task.title || 'Task') | translate" [saveLabel]="'Save Task' | translate" saveTestId="case-task-save" cancelTestId="case-task-cancel" drawerTestId="case-task-edit-drawer" (save)="store.saveTasks()" (cancel)="cancelTaskEditing()">
+    <app-case-edit-drawer [title]="'Edit Task' | translate" [subtitle]="task.title || ('Task' | translate)" [saveLabel]="'Save Task' | translate" saveTestId="case-task-save" cancelTestId="case-task-cancel" drawerTestId="case-task-edit-drawer" (save)="store.saveTasks()" (cancel)="cancelTaskEditing()">
         <div class="space-y-4 p-6">
         <div @caseListItemMotion class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
             <div class="mb-3 flex items-center justify-between gap-3">
@@ -46,7 +46,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Assign                         To' | translate }}</label>
+                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Assign To' | translate }}</label>
                     <select [(ngModel)]="task.assignedTo" name="task-assignee" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-assignee-select">
                         <option value="">{{ 'Unassigned' | translate }}</option>
                         @for (analyst of getCaseAnalysts(editedCase); track analyst.id) {
@@ -56,7 +56,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Due                         Date' | translate }}</label>
+                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Due Date' | translate }}</label>
                     <input [ngModel]="getDateInputValue(task.dueAt)" (ngModelChange)="setDateInputValue(task, 'dueAt', $event)" name="task-due" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-due-input" />
                 </div>
                 <div class="sm:col-span-2">
@@ -138,7 +138,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Assign                             To' | translate }}</label>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Assign To' | translate }}</label>
                         <select [(ngModel)]="newTask.assignedTo" name="new-task-assignee" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-task-assignee-select">
                             <option value="">{{ 'Unassigned' | translate }}</option>
                             @for (analyst of getCaseAnalysts(caseData); track analyst.id) {
@@ -149,7 +149,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Due                             Date' | translate }}</label>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Due Date' | translate }}</label>
                         <input [ngModel]="getDateInputValue(newTask.dueAt)" (ngModelChange)="setDateInputValue(newTask, 'dueAt', $event)" name="new-task-due" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-task-due-input" />
                     </div>
 

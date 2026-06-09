@@ -15,7 +15,7 @@
           <div class="space-y-2">
             @for (item of items; track item.id) {
               <div class="ui-consolidated-sub rounded-[10px] border border-[var(--ui-consolidated-border)] p-3 text-[12px]">
-                <div class="font-semibold text-[var(--color-text1)]">{{ (item.name || 'Entity') | translate }}</div>
+                <div class="font-semibold text-[var(--color-text1)]">{{ item.name || ('Entity' | translate) }}</div>
                 <div class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[var(--color-text3)]">
                   <span>{{ 'iocTypes.m_country' | translate }}</span><span class="text-right text-[var(--color-text1)]">{{ item.country || '-' }}</span>
                   <span>{{ 'categoryAlerts.export.type' | translate }}</span><span class="text-right text-[var(--color-text1)]">{{ item.type || '-' }}</span>

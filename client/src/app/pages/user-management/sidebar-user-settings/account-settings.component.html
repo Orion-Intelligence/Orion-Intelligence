@@ -32,13 +32,13 @@
         </div>
 
         <div>
-          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Tenant /             Location' | translate }}</label>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Tenant / Location' | translate }}</label>
           <input type="text" [value]="getLocationDisplay() || appService.userSessionData().user.username" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
         </div>
 
         <div>
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Licenses' | translate }}</label>
-          <input type="text" [value]="(getUserLicensesLabel(userSessionData.user) || 'No licenses assigned') | translate" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+          <input type="text" [value]="getUserLicensesLabel(userSessionData.user) || ('No licenses assigned' | translate)" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
         </div>
       </div>
     </div>
@@ -93,7 +93,7 @@
           <label for="account-settings-language" class="block text-sm font-semibold text-[var(--color-text1)]">{{ 'Language' | translate }}</label>
           <select id="account-settings-language" name="language" class="mt-2 h-10 w-full appearance-none rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] pl-3 pr-11 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" [(ngModel)]="selectedLanguage" (change)="changeLanguage()">
             @for (lang of languageOptions; track lang.code) {
-              <option [value]="lang.code">{{ lang.name | translate }} ({{ lang.code.toUpperCase() }})</option>
+              <option [value]="lang.code">{{ lang.name }} ({{ lang.code.toUpperCase() }})</option>
             }
           </select>
         </div>

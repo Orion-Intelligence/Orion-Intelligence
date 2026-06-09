@@ -16,7 +16,7 @@
           <p class="ui-page-description">{{ 'Manage and edit your company details, including phone, address, and profile information.' | translate }}</p>
           <p class="mt-1 text-xs font-medium text-[var(--color-text4)]">
             {{ 'Licenses assigned' | translate }}:
-            <span class="font-semibold text-[var(--color-text2)]">{{ (userSessionData.tenant.licenses.join(', ') || 'No licenses assigned') | translate }}</span>
+            <span class="font-semibold text-[var(--color-text2)]">{{ userSessionData.tenant.licenses.join(', ') || ('No licenses assigned' | translate) }}</span>
           </p>
         </div>
       </div>
@@ -41,7 +41,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text6)]">{{ 'Tenant Overview' | translate }}</div>
-            <div class="mt-1 text-[22px] font-[800] leading-tight text-[var(--color-text1)]">{{ (userSessionData.tenant.name || 'Unnamed Tenant') | translate }}</div>
+            <div class="mt-1 text-[22px] font-[800] leading-tight text-[var(--color-text1)]">{{ userSessionData.tenant.name || ('Unnamed Tenant' | translate) }}</div>
           </div>
           <div class="flex items-center gap-2">
             <span class="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">
@@ -61,7 +61,7 @@
               <i class="bi bi-geo-alt-fill text-[12px] text-[#7fb8ec]"></i>
               {{ 'Location' | translate }}
             </div>
-            <div class="mt-2 text-[13px] font-semibold text-[var(--color-text2)]">{{ (getLocationDisplay() || 'Location will appear here') | translate }}</div>
+            <div class="mt-2 text-[13px] font-semibold text-[var(--color-text2)]">{{ getLocationDisplay() || ('Location will appear here' | translate) }}</div>
           </div>
 
           <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820)]/45 p-3">

@@ -29,7 +29,7 @@
             @if (usernameSuggestion) {
               <div class="mt-1 rounded-lg border border-[#dc3545]/40 bg-[#dc3545]/10 px-3 py-2 text-[#373637] text-[13px]">
                 <div class="font-semibold">{{ 'Username already taken, suggested usernames below' | translate }}</div>
-                <div class="mt-1">{{ (usernameSuggestion.replace('Username already taken. Suggested usernames: ', '')) | translate }}</div>
+                <div class="mt-1">{{ usernameSuggestion.replace('Username already taken. Suggested usernames: ', '') }}</div>
               </div>
             }
 

@@ -6,7 +6,7 @@
           <i [class]="socialEntityUiService.getIconForEntityType(data()!.type) + ' text-2xl w-8 text-center'"></i>
           <div>
             <h3 class="text-lg font-semibold leading-6 text-[var(--color-text1)]">{{ getModalTitle() }}</h3>
-            <p class="mt-1 text-sm text-[var(--color-text4)]">{{ (data()?.mode === 'edit' ? 'Update existing entity details.' : 'Enter the details for the new entity.') | translate }}</p>
+            <p class="mt-1 text-sm text-[var(--color-text4)]">{{ data()?.mode === 'edit' ? ('Update existing entity details.' | translate) : ('Enter the details for the new entity.' | translate) }}</p>
           </div>
         </div>
         <button (click)="close.emit(undefined)" type="button" class="ui-social-popup-icon-btn" [title]="'common.actions.close' | translate">

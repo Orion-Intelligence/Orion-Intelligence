@@ -93,7 +93,7 @@
                     <div class="flex items-center gap-[10px] p-[11px] transition" [ngClass]="record.hostname ? 'cursor-pointer hover:bg-[#1f303f]' : 'opacity-60'" (click)="copy(record.ip + ': ' + (record.hostname || 'No PTR record'), 'DNS record copied')" role="button" tabindex="0">
                       <span class="text-[14px] font-bold" [ngClass]="record.hostname ? 'text-[#22c55e]' : 'text-[#ef4444]'">{{ record.hostname ? '✓' : '✗' }}</span>
                       <span class="flex-1 break-all font-mono text-[12px] text-[#e1e8f0]">{{ record.ip }}</span>
-                      <span class="text-[12px] text-[#9bb4d1]">{{ (record.hostname || 'not found') | translate }}</span>
+                      <span class="text-[12px] text-[#9bb4d1]">{{ record.hostname || ('not found' | translate) }}</span>
                     </div>
                   </div>
                 }

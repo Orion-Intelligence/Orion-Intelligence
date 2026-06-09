@@ -27,7 +27,7 @@
               @for (lang of languageOptions; track lang.code) {
                 <li>
                   <button type="button" class="flex w-full cursor-pointer items-center justify-between gap-[10px] rounded-[8px] px-[8px] py-[10px] text-left" [ngClass]="selectedLanguage() === lang.code ? 'bg-[#eef6ff] text-[#0f5fa8]' : 'text-[#172235] hover:bg-[#f5f7fa]'" (click)="selectLanguage(lang.code, $event)">
-                    <span class="text-[14px] font-medium">{{ lang.name | translate }}</span>
+                    <span class="text-[14px] font-medium">{{ lang.name }}</span>
                     <span class="text-[12px] font-semibold uppercase text-[#98a2b3]">{{ lang.code }}</span>
                   </button>
                 </li>

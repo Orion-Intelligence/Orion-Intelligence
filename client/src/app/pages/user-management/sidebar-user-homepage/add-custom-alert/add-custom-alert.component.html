@@ -1,12 +1,12 @@
 <div data-testid="tenant-alert-modal" class="ui-graph-popup-overlay fixed inset-0 z-[9999] flex items-center justify-center p-3" @overlayAnimation (click)="$event.target === $event.currentTarget && cancleAlert(false)">
   <div class="ui-popup-shell relative w-full max-w-[1000px] max-h-[88vh] overflow-y-auto rounded-[14px] p-[30px] font-[Inter] max-[900px]:p-[18px]" @popupAnimation>
     <div>
-      <div class="text-[24px] font-semibold leading-none">{{ heading() | translate }}</div>
+      <div class="text-[24px] font-semibold leading-none">{{ heading() }}</div>
       <button class="absolute right-[20px] top-[20px] text-[28px] text-[#ccc] hover:text-white" [attr.aria-label]="'common.actions.close' | translate" (click)="cancleAlert(false)">×</button>
     </div>
 
     <form>
-      <div class="mt-1 text-[12px] font-normal text-[var(--color-text2)]">{{ description() | translate }}</div>
+      <div class="mt-1 text-[12px] font-normal text-[var(--color-text2)]">{{ description() }}</div>
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">{{ 'categoryAlerts.form.selectedType' | translate }}</label>
       <button class="flex w-full items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-left text-[14px] text-[var(--color-text1)] opacity-80 [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47]" type="button" disabled>
@@ -22,7 +22,7 @@
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">{{ 'categoryAlerts.form.selectIocType' | translate }}</label>
       <div class="relative">
         <button data-testid="tenant-alert-ioc-type-toggle" type="button" class="flex w-full cursor-pointer list-none items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47]" (click)="toggleIocDropdown($event)">
-          <span>{{ getIOCTypeLabel(alert.ioc_type!) | translate }}</span>
+          <span>{{ getIOCTypeLabel(alert.ioc_type!) }}</span>
           <i class="bi text-[12px] text-[#57718D]" [ngClass]="iocDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
         </button>
         @if (iocDropdownOpen) {
@@ -30,7 +30,7 @@
             @for (item of allowedIocTypes; track item; let last = $last) {
               <li>
                 <button data-testid="tenant-alert-ioc-type-option" type="button" class="flex w-full items-center justify-between rounded-[6px] px-[10px] py-[8px] text-[14px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="onIOCTypeChange(item.key)" [class]="alert.ioc_type === item.key ? 'bg-[var(--color-blue-820)] text-[var(--color-text1)]' : ''">
-                  <span>{{ item.title | translate }}</span>
+                  <span>{{ item.title }}</span>
                   @if (alert.ioc_type === item.key) {
                     <span>✓</span>
                   }
@@ -57,7 +57,7 @@
       <div class="mt-[8px] text-center">
         <div class="inline-block w-full rounded-lg bg-[#dc3545] bg-opacity-75 px-3 py-2 text-center text-white shadow-sm">
           <i class="bi bi-exclamation-diamond-fill mr-2"></i>
-          {{ formError | translate }}
+          {{ formError }}
         </div>
       </div>
     }

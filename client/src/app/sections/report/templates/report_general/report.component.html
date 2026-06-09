@@ -101,8 +101,8 @@
       <div class="mt-4">
         <div class="flex flex-wrap items-center gap-2.5">
           @for (key of filteredArrayKeys; track key; let last = $last) {
-            <button (click)="setActiveTab(key)" [ngClass]="activeTab === key ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[0_2px_8px_rgba(87,165,235,0.35)]' : 'border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft text-[var(--color-text3)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)]'" [appTooltip]="('Info about' | translate) + ' ' + ((key === 'm_person' ? 'Entity' : formatKeyLabel(key)) | translate)" class="rounded-full border px-3 py-1 text-[12px] font-semibold tracking-[0.01em] transition-all duration-150">
-              {{ (key === 'm_person' ? 'Entity' : formatKeyLabel(key)) | translate }}
+            <button (click)="setActiveTab(key)" [ngClass]="activeTab === key ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[0_2px_8px_rgba(87,165,235,0.35)]' : 'border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft text-[var(--color-text3)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)]'" [appTooltip]="('Info about' | translate) + ' ' + (key === 'm_person' ? ('Entity' | translate) : formatKeyLabel(key))" class="rounded-full border px-3 py-1 text-[12px] font-semibold tracking-[0.01em] transition-all duration-150">
+              {{ key === 'm_person' ? ('Entity' | translate) : formatKeyLabel(key) }}
             </button>
             @if (!last) {
               <div class="h-4 w-px bg-[var(--color-divider)]/70"></div>

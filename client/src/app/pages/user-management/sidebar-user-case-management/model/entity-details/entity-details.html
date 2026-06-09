@@ -3,7 +3,7 @@
     @if (showTitle) {
     <div class="flex items-center justify-between gap-3">
         <h3 [ngClass]="isMainEntity ? 'm-0 text-[15px] font-bold leading-tight text-[var(--color-text1)]' : 'm-0 text-sm font-bold text-[var(--color-text1)]'">
-            {{ (isMainEntity ? 'Primary Entity' : 'Entity ' + (entityIndex + 1)) | translate }}
+            {{ isMainEntity ? ('Primary Entity' | translate) : (('Entity' | translate) + ' ' + (entityIndex + 1)) }}
         </h3>
         @if (!isMainEntity) {
         <button type="button" (click)="onRemove()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70 [body.light-theme_&]:hover:text-red-900">
@@ -141,7 +141,7 @@
         <div class="flex items-center justify-between gap-3" [ngClass]="entity.socialProfiles.length ? 'mb-4' : ''">
             <div class="min-w-0">
                 <div class="flex items-center gap-1.5">
-                    <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Social                         Profiles' | translate }}</label>
+                    <label class="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Social Profiles' | translate }}</label>
                     <img src="/assets/images/shared/theme/info.svg" alt="Icon" [appTooltip]="'Social accounts or profile URLs tied to this entity.' | translate" class="h-4 w-4 shrink-0 ui-action-icon">
                 </div>
                 @if (entity.socialProfiles.length) {

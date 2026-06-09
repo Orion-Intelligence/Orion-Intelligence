@@ -16,10 +16,10 @@
           </div>
           <div class="flex items-center gap-2">
             <span class="rounded-full px-3 py-1 text-xs font-semibold" [ngClass]="riskClass(alert.type)">
-              {{ getRiskLevel(alert.type) | translate }}
+              {{ getRiskLevel(alert.type) }}
             </span>
             <span class="rounded-full px-3 py-1 text-xs font-semibold" [ngClass]="statusClass(alert.status)">
-              {{ (alert.status || 'info') | translate | uppercase }}
+              {{ (alert.status || ('info' | translate)) | uppercase }}
             </span>
           </div>
         </header>

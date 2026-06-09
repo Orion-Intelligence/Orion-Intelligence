@@ -46,7 +46,7 @@
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="min-w-0 flex-1">
               <div class="text-sm font-semibold text-[var(--color-text1)]">{{ 'Parser File' | translate }}</div>
-              <div class="mt-1 text-sm text-[var(--color-text4)]">{{ (selectedFiles.length ? (selectedFiles.length === 1 ? selectedFiles[0].name : selectedFiles.length + ' Python files selected') : (hasSharedScriptUploaded() ? 'Parser file already uploaded' : 'No Python file selected yet')) | translate }}</div>
+              <div class="mt-1 text-sm text-[var(--color-text4)]">{{ selectedFiles.length ? (selectedFiles.length === 1 ? selectedFiles[0].name : selectedFiles.length + ' ' + ('Python files selected' | translate)) : (hasSharedScriptUploaded() ? ('Parser file already uploaded' | translate) : ('No Python file selected yet' | translate)) }}</div>
               @if (!selectedFiles.length && hasSharedScriptUploaded() && !isSharedScriptStatusLoading) {
                 <div class="mt-2 inline-flex items-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-xs text-[var(--color-text4)] [body.light-theme_&]:bg-white">
                   <svg class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -154,7 +154,7 @@
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
               <div class="text-sm font-semibold text-[var(--color-text1)]">{{ 'Parser File' | translate }}</div>
-              <div class="mt-1 text-sm text-[var(--color-text4)]">{{ (selectedFiles.length ? (selectedFiles.length === 1 ? selectedFiles[0].name : selectedFiles.length + ' Python files selected') : 'No Python file selected yet') | translate }}</div>
+              <div class="mt-1 text-sm text-[var(--color-text4)]">{{ selectedFiles.length ? (selectedFiles.length === 1 ? selectedFiles[0].name : selectedFiles.length + ' ' + ('Python files selected' | translate)) : ('No Python file selected yet' | translate) }}</div>
             </div>
             <div class="flex flex-wrap gap-2">
               <button data-testid="feeder-select-file-button" type="button" class="inline-flex h-10 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 text-sm font-semibold text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="fileInput.click()">

@@ -28,7 +28,7 @@
     <div class="ui-page-container w-full max-w-[2400px]">
       <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
         <div class="ui-section-title">{{ 'Profile' | translate }}</div>
-        <div class="ui-section-description">{{ (response?.profile?.message || 'Profile hidden by user') | translate }}</div>
+        <div class="ui-section-description">{{ response?.profile?.message || ('Profile hidden by user' | translate) }}</div>
       </div>
     </div>
   } @else if (response) {
@@ -38,7 +38,7 @@
           <img [src]="profileImageUrl" alt="Profile image" class="h-full w-full rounded-full object-cover">
         </div>
         <div class="pt-1">
-          <h1 class="ui-page-title">{{ (response.profile.username || 'Profile') | translate }}</h1>
+          <h1 class="ui-page-title">{{ response.profile.username || ('Profile' | translate) }}</h1>
           <p class="ui-page-description">{{ 'All threads where this user reacted or commented.' | translate }}</p>
           <p class="mt-1 text-xs font-medium text-[var(--color-text4)]">
             {{ response.profile.role || '-' }} · {{ response.profile.tenant_name || '-' }}

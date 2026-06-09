@@ -43,7 +43,7 @@
                 {{ 'Searching across search engines' | translate }}
               </div>
               <div class="mt-[4px] text-[12px] text-[var(--color-text4)]">
-                {{ (currentStep || 'Preparing engine queries') | translate }}
+                {{ currentStep || ('Preparing engine queries' | translate) }}
               </div>
             </div>
             <div class="inline-flex items-center gap-[8px] rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] px-[10px] py-[6px] text-[11px] font-[800] text-[var(--color-text5)]">
@@ -124,7 +124,7 @@
 
                   <div class="px-[14px] py-[12px] max-[640px]:px-[10px]">
                     <div class="overflow-hidden text-ellipsis whitespace-nowrap text-[14px] font-[800] leading-[1.45] text-[var(--color-text1)]">
-                      {{ (e.first_result?.title || 'Top result title unavailable') | translate }}
+                      {{ e.first_result?.title || ('Top result title unavailable' | translate) }}
                     </div>
 
                     @if (e.first_result?.description) {

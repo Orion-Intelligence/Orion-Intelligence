@@ -86,7 +86,7 @@
                 @for (row of liveApiRows.slice(0,3); track row.url || row.profile || $index) {
                   <div class="flex w-full items-center justify-between border-t border-[var(--ui-consolidated-divider)] pt-[6px] max-[640px]:grid max-[640px]:grid-cols-1 max-[640px]:gap-y-[6px] max-[640px]:pt-[10px]">
                     <div class="w-[200px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-full">
-                      {{ (row.url || 'Details').replace('https://', '').replace('http://', '').replace('www.', '') | translate }}
+                      {{ (row.url || ('Details' | translate)).replace('https://', '').replace('http://', '').replace('www.', '') }}
                     </div>
                     <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text2)] max-[640px]:w-full">{{ row.profile }}</div>
                     <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-full">

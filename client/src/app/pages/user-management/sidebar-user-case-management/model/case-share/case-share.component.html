@@ -22,7 +22,7 @@
     <div class="mb-5 overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
       <div class="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
         <div class="min-w-0">
-          <div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text4)]">{{ 'Shared Case             Report' | translate }}</div>
+          <div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text4)]">{{ 'Shared Case Report' | translate }}</div>
           <h1 class="mt-2 text-[24px] font-bold leading-tight text-[var(--color-text1)] sm:text-[28px]">{{ (report?.title
             || 'Case Report') | translate }}</h1>
           @if (report) {
@@ -120,7 +120,7 @@
             <div class="mt-4 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'categoryAlerts.form.description' | translate }}
             </div>
             <div class="mt-2 min-h-[44px] text-sm leading-6 text-[var(--color-text3)] break-words">
-              {{ (report.description || 'No description provided.') | translate }}
+              {{ report.description || ('No description provided.' | translate) }}
             </div>
             @if ((report.tags?.length || 0) > 0) {
             <div class="mt-4 flex flex-wrap gap-2">
@@ -437,7 +437,7 @@
             </div>
             <div class="text-sm font-medium leading-6 text-[var(--color-text2)]">{{ formatLabel(report.closure?.reason)
               }}</div>
-            <div class="mt-3 mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Closure               Summary' | translate }}</div>
+            <div class="mt-3 mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Closure Summary' | translate }}</div>
             <div class="text-sm leading-6 text-[var(--color-text2)]">{{ (report.closure?.summary || 'No closure summary
               provided.') | translate }}</div>
             @if (report.closure?.resolution) {
@@ -467,8 +467,7 @@
           <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]">
             <button type="button" (click)="toggleArtifact(artifact.artifactId)" class="flex w-full flex-col gap-3 p-3 text-left transition hover:bg-[var(--tenant-chip-hover)] md:flex-row md:items-start md:justify-between">
               <div class="min-w-0">
-                <div class="text-sm font-semibold text-[var(--color-text1)] break-words">{{ (artifact.title || 'Untitled
-                  artifact') | translate }}</div>
+                <div class="text-sm font-semibold text-[var(--color-text1)] break-words">{{ artifact.title || ('Untitled artifact' | translate) }}</div>
                 <div class="mt-1 flex flex-wrap gap-2 text-xs text-[var(--color-text4)]">
                   <span>{{ formatLabel(artifact.type, artifact.artifactTypeOtherValue) }}</span>
                   <span>·</span>
@@ -574,7 +573,7 @@
           <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
             <div class="text-sm font-semibold text-[var(--color-text1)]">{{ linkedCase.targetCaseId }}</div>
             <div class="mt-1 text-xs text-[var(--color-text4)]">
-              {{ formatLabel(linkedCase.relationship) }} · {{ (linkedCase.reason || 'No reason provided.') | translate }}
+              {{ formatLabel(linkedCase.relationship) }} · {{ linkedCase.reason || ('No reason provided.' | translate) }}
             </div>
             <div class="mt-3 grid gap-2 text-xs text-[var(--color-text2)] sm:grid-cols-2">
               @if (linkedCase.createdBy) {

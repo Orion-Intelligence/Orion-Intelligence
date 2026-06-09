@@ -60,7 +60,7 @@
                     <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
                         {{ 'Closure Summary' | translate }}</div>
                     <div class="text-sm leading-6 text-[var(--color-text2)] break-words" data-testid="case-closure-summary-value">
-                        {{ (closure.summary || 'No closure summary provided.') | translate }}
+                        {{ closure.summary || ('No closure summary provided.' | translate) }}
                     </div>
                 </div>
                 @if (closure.resolution) {

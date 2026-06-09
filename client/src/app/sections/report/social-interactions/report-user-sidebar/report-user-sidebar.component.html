@@ -43,7 +43,7 @@
       } @else if (userData?.hidden) {
         <div data-testid="report-user-sidebar-hidden-profile" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
           <div class="ui-section-title">{{ 'Profile' | translate }}</div>
-          <div class="ui-section-description">{{ (userData?.message || 'Profile hidden by user') | translate }}</div>
+          <div class="ui-section-description">{{ userData?.message || ('Profile hidden by user' | translate) }}</div>
         </div>
       } @else if (userData) {
         <div class="w-full">

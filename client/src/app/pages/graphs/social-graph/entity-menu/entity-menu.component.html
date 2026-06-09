@@ -17,7 +17,7 @@
           @for (option of filteredEntityAddOptions; track option.type) {
             <button [attr.data-testid]="'add-entity-option-' + option.type" (click)="addEntityClicked.emit(option.type)" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 px-3 py-2 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
               <i [class]="option.iconClass + ' w-4 h-4'"></i>
-              <span>{{ option.label | translate }}</span>
+              <span>{{ option.label }}</span>
             </button>
           }
           <div class="my-2 h-px bg-[var(--color-border)]"></div>
@@ -44,7 +44,7 @@
       @if (isCollapsed()) {
         <div class="h-full w-14 flex flex-col items-center py-4 gap-4 transition-all duration-300 ease-in opacity-100">
           @for (option of entityAddOptions; track option.type) {
-            <button [attr.data-testid]="'add-entity-option-' + option.type" (click)="addEntityClicked.emit(option.type)" class="rounded-lg p-2 text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]" [title]="option.label | translate">
+            <button [attr.data-testid]="'add-entity-option-' + option.type" (click)="addEntityClicked.emit(option.type)" class="rounded-lg p-2 text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]" [title]="option.label">
               <i [class]="option.iconClass + ' text-xl'"></i>
             </button>
           }
@@ -73,7 +73,7 @@
         @for (option of filteredEntityAddOptions; track option.type) {
           <button [attr.data-testid]="'add-entity-option-' + option.type" (click)="addEntityClicked.emit(option.type); closeMobilePanel();" class="flex w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/85 p-3 text-left text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-720)]">
             <i [class]="option.iconClass + ' w-5 h-5'"></i>
-            <span>{{ option.label | translate }}</span>
+            <span>{{ option.label }}</span>
           </button>
         }
         <div class="my-1 h-px bg-[var(--color-border)]"></div>

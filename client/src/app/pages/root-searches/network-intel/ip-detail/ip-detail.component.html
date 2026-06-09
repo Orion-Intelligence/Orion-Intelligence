@@ -110,7 +110,7 @@
                   <div class="flex flex-col gap-1 rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] p-2.5">
                     <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Version' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.version }}</span></div>
                     @if (p.tls.cipher) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Cipher Suite' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.cipher }}{{ (p.tls.bits ? ' (' + p.tls.bits + ' bit)' : '') | translate }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Cipher Suite' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.cipher }}{{ p.tls.bits ? ' (' + p.tls.bits + ' bit)' : '' }}</span></div>
                     }
                     @if (p.tls.cert_cn) {
                       <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Subject CN' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.cert_cn }}</span></div>
@@ -119,12 +119,12 @@
                       <div class="flex gap-2.5 text-[13px]">
                         <span class="text-sky-400 font-semibold w-32 flex-shrink-0">{{ 'Issuer' | translate }}</span>
                         <span class="text-[var(--color-text2)]">
-                          {{ (p.tls.issuer['commonName'] || '') | translate }}
+                          {{ p.tls.issuer['commonName'] || '' }}
                           @if (p.tls.issuer['organizationName']) {
-                            <ng-container> / {{ (p.tls.issuer['organizationName']) | translate }}</ng-container>
+                            <ng-container> / {{ p.tls.issuer['organizationName'] }}</ng-container>
                           }
                           @if (p.tls.issuer['countryName']) {
-                            <ng-container> ({{ (p.tls.issuer['countryName']) | translate }})</ng-container>
+                            <ng-container> ({{ p.tls.issuer['countryName'] }})</ng-container>
                           }
                         </span>
                       </div>
@@ -148,7 +148,7 @@
                       <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Signature Algo' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.signature_algorithm }}</span></div>
                     }
                     @if (p.tls.public_key_algorithm) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Public Key' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.public_key_algorithm }}{{ (p.tls.public_key_size ? ' (' + p.tls.public_key_size + ' bit)' : '') | translate }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Public Key' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.public_key_algorithm }}{{ p.tls.public_key_size ? ' (' + p.tls.public_key_size + ' bit)' : '' }}</span></div>
                     }
                     @if (ui.hasItems(p.tls.key_usage)) {
                       <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Key Usage' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.key_usage?.join(', ') }}</span></div>
