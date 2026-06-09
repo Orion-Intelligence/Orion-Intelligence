@@ -1,4 +1,4 @@
-import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseClosure, CaseEntity, CaseLink, CaseTask } from '../../../../../shared/model/case-management/case.model';
+import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseArtifactFile, CaseClosure, CaseEntity, CaseLink, CaseTask } from '../../../../../shared/model/case-management/case.model';
 
 export type CaseDetailsEditSection = 'caseDetails' | 'primaryEntity' | 'relatedEntities' | 'artifacts' | 'tasks' | 'linkedCases';
 
@@ -59,4 +59,7 @@ export abstract class CaseDetailsStore {
   abstract artifactReportSearchText: string;
   abstract isArtifactReportDropdownOpen: boolean;
   abstract viewArtifactReport(artifact: CaseArtifact): void;
+  abstract verifyArtifactFile(artifact: CaseArtifact, artifactFile: CaseArtifactFile): void;
+  abstract verifyAllArtifactFiles(artifact: CaseArtifact): void;
+  abstract isArtifactFileIntegrityFailed(artifactFile: CaseArtifactFile): boolean;
 }

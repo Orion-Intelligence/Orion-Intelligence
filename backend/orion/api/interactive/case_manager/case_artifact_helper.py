@@ -1,5 +1,6 @@
+from curses import raw
 from uuid import uuid4
-
+import hashlib
 from cryptography.fernet import Fernet
 from fastapi import HTTPException, UploadFile
 
@@ -23,16 +24,34 @@ class CaseArtifactHelper:
             return
 
         raise HTTPException(status_code=400, detail="This artifact type does not accept file uploads")
+    
+    def generate_sha256_hash(self, raw: bytes) -> str:
+        return hashlib.sha256(raw).hexdigest()
 
-    async def save_encrypted_artifact_file(self, file: UploadFile, enc: Fernet) -> tuple[str, int]:
+    async def save_encrypted_artifact_file(self, file: UploadFile, enc: Fernet) -> tuple[str, int, str]:
         resource_id = str(uuid4())
         target_path = self.resource_dir / f"{resource_id}.enc"
 
         raw = await file.read()
+        file_hash = self.generate_sha256_hash(raw)
+
         encrypted = enc.encrypt(raw)
         target_path.write_bytes(encrypted)
 
-        return resource_id, len(raw)
+        return resource_id, len(raw), file_hash
+    
+    def verify_artifact_file_hash(self, resource_id: str, expected_hash: str, enc: Fernet) -> tuple[bool, str]:
+        try:
+            raw = self.load_decrypted_artifact_file(resource_id, enc)
+
+            actual_hash = self.generate_sha256_hash(raw)
+
+            return actual_hash == expected_hash, actual_hash
+
+        except Exception as error:
+            print("ARTIFACT VERIFY FAILED:", str(error))
+
+            return False, ""
 
     def load_decrypted_artifact_file(self, resource_id: str, enc: Fernet) -> bytes:
         path = self.resource_dir / f"{resource_id}.enc"
@@ -50,3 +69,4 @@ class CaseArtifactHelper:
 
         if path.exists():
             path.unlink()
+    
