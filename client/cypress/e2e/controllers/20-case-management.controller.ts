@@ -155,6 +155,14 @@ export function addAndEditArtifactAndTask() {
   cy.get(selector('case-artifact-file-download-0')).should('be.visible');
   cy.get(selector('case-artifact-file-delete-0')).should('be.visible');
 
+  cy.get(selector('case-artifact-file-verify-0'))
+    .should('be.visible')
+    .click();
+
+  assertNotification('File integrity verified');
+
+  cy.contains('Verified').should('be.visible');
+
   clickVisible('case-artifact-edit-0');
   visible('case-artifact-edit-drawer').within(() => {
     cy.get(selector('case-artifact-file-view-0')).should('not.exist');

@@ -6,7 +6,7 @@ import { EntityDetailsComponent } from '../entity-details/entity-details';
 import { ReportFeedbackCommentsComponent } from '../../../../../sections/report/social-interactions/report-feedback-comments/report-feedback-comments.component';
 import { ReportUserSidebarComponent } from '../../../../../sections/report/social-interactions/report-user-sidebar/report-user-sidebar.component';
 import { ReportFeedbackModel } from '../../../../../sections/report/templates/report_general/models/report-feedback.model';
-import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseArtifactRequest, CaseClosure, CaseClosureRequest, CaseComment, CaseCommentRequest, CaseEntity, CaseEntityRequest, CaseLink, CaseTag, CaseTask, CaseTaskRequest, CaseUpdateRequest, SharedCaseReport } from '../../../../../shared/model/case-management/case.model';
+import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseArtifactFile, CaseArtifactRequest, CaseClosure, CaseClosureRequest, CaseComment, CaseCommentRequest, CaseEntity, CaseEntityRequest, CaseLink, CaseTag, CaseTask, CaseTaskRequest, CaseUpdateRequest, SharedCaseReport } from '../../../../../shared/model/case-management/case.model';
 import { CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
@@ -357,6 +357,13 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return;
     }
 
+    const artifactFile = (artifact.files || []).find(file => file.fileId === fileId);
+
+    if (artifactFile && this.isArtifactFileIntegrityFailed(artifactFile)) {
+      this.messageNotificationService.show('File has been manipulated. View is blocked.');
+      return;
+    }
+
     this.http.get(`/api/profile/cases/${this.caseData.caseId}/artifacts/${artifact.artifactId}/files/${fileId}/view`,
       { responseType: 'blob' }).subscribe({
       next: blob => {
@@ -365,7 +372,13 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         setTimeout(() => window.URL.revokeObjectURL(url), 1000);
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to view file');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
+
+        if (artifactFile) {
+          artifactFile.integrityStatus = 'failed';
+          artifactFile.integrityMessage =
+              err?.error?.detail || 'File integrity check failed';
+        }
       }
     });
   }
@@ -376,6 +389,11 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     const artifactFile = (artifact.files || []).find(file => file.fileId === fileId);
+
+    if (artifactFile && this.isArtifactFileIntegrityFailed(artifactFile)) {
+      this.messageNotificationService.show('File has been manipulated. Download is blocked.');
+      return;
+    }
 
     this.http.get(`/api/profile/cases/${this.caseData.caseId}/artifacts/${artifact.artifactId}/files/${fileId}/download`,
       { responseType: 'blob' }).subscribe({
@@ -388,7 +406,13 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         window.URL.revokeObjectURL(url);
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to download file');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
+
+        if (artifactFile) {
+          artifactFile.integrityStatus = 'failed';
+          artifactFile.integrityMessage =
+              err?.error?.detail || 'File integrity check failed';
+        }
       }
     });
   }
@@ -1435,6 +1459,98 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       linkedReportTitle: artifact.linkedReportTitle || '',
       capturedAt: artifact.capturedAt || null
     };
+  }
+
+  private patchArtifactFileIntegrity(artifactId: string, fileId: string, status: 'unknown' | 'verified' | 'failed', message: string, checkedAt?: Date | string | null): void {
+    const patchFiles = (artifacts: CaseArtifact[] = []) =>
+      artifacts.map(artifact =>
+        artifact.artifactId === artifactId
+          ? {
+            ...artifact,
+            files: (artifact.files || []).map(file =>
+              file.fileId === fileId
+                ? {
+                  ...file,
+                  integrityStatus: status,
+                  integrityMessage: message,
+                  integrityCheckedAt: checkedAt || new Date().toISOString()
+                }
+                : file)
+          }
+          : artifact);
+
+    if (this.caseData) {
+      this.caseData = {
+        ...this.caseData,
+        artifacts: patchFiles(this.caseData.artifacts)
+      };
+    }
+
+    if (this.editedCase) {
+      this.editedCase = {
+        ...this.editedCase,
+        artifacts: patchFiles(this.editedCase.artifacts)
+      };
+    }
+
+    this.cdr.detectChanges();
+  }
+
+  verifyArtifactFile(artifact: CaseArtifact, artifactFile: CaseArtifactFile): void {
+    if (!this.caseData || !artifact.artifactId || !artifactFile.fileId) {
+      return;
+    }
+
+    this.caseService.verifyArtifactFile(this.caseData.caseId,
+      artifact.artifactId,
+      artifactFile.fileId).subscribe({
+      next: result => {
+        this.patchArtifactFileIntegrity(artifact.artifactId,
+          artifactFile.fileId,
+          result.status,
+          result.message,
+          result.verifiedAt);
+
+        this.messageNotificationService.show(result.message, result.success ? 'success' : undefined);
+      },
+      error: err => {
+        this.patchArtifactFileIntegrity(artifact.artifactId,
+          artifactFile.fileId,
+          'failed',
+          err?.error?.detail || err?.message || 'File integrity check failed');
+
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
+      }
+    });
+  }
+
+  verifyAllArtifactFiles(artifact: CaseArtifact): void {
+    if (!this.caseData || !artifact.artifactId) {
+      return;
+    }
+
+    this.caseService.verifyAllArtifactFiles(this.caseData.caseId,
+      artifact.artifactId).subscribe({
+      next: response => {
+        for (const result of response.files || []) {
+          this.patchArtifactFileIntegrity(artifact.artifactId,
+            result.fileId,
+            result.status,
+            result.message,
+            result.verifiedAt);
+        }
+
+        this.messageNotificationService.show(response.success ? 'All files verified successfully' : 'One or more files failed integrity verification',
+          response.success ? 'success' : undefined);
+      },
+      error: err => {
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to verify files');
+      }
+    });
+  }
+
+  isArtifactFileIntegrityFailed(artifactFile: CaseArtifactFile): boolean {
+    return artifactFile.integrityStatus === 'failed';
   }
 
   private ensureTaskDefaults(task: CaseTask): CaseTask {
