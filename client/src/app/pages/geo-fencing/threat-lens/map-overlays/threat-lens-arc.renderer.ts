@@ -14,11 +14,11 @@ export class ThreatLensArcRenderer {
   private movingDotGraphics: any[] = [];
   private startMarkerGraphics: any[] = [];
   private endMarkerGraphics: any[] = [];
-  private readonly maxArcCount = 80;
+  private readonly maxArcCount = 200;
   private readonly minArcWeight = 1;
   private readonly arcBatchSize = 10;
-  private readonly arcBatchDuration = 6000;
-  private readonly movingDotBaseSize = 90000;
+  private readonly arcBatchDuration = 10000;
+  private readonly movingDotBaseSize = 5;
 
   constructor( private ngZone: NgZone, private countryRenderer: ThreatLensCountryLayerRenderer, private arcGraphicsLayer: any, private arcSurfaceGraphicsLayer: any, private animatedArcGraphicsLayer: any, private geometryEngine: any, private webMercatorUtils: any, private toCountryKey: (value: string) => string, private onVisibleArcCountChange: (count: number) => void, ) {}
 
@@ -61,7 +61,7 @@ export class ThreatLensArcRenderer {
         }
 
         const arcPoints = ThreatLensMapUtils.buildArcPathPoints(start, end, pair.weight);
-        const arcPaths = ThreatLensMapUtils.buildArcPath(start, end, pair.weight);
+        const arcPaths = [arcPoints];
         const surfacePaths = ThreatLensMapUtils.buildSurfacePath(start, end);
         if (!arcPaths.length || !surfacePaths.length || arcPoints.length < 2) {
           continue;
@@ -169,12 +169,11 @@ export class ThreatLensArcRenderer {
           const graphic = this.movingDotGraphics[index];
 
           if (point && graphic) {
-            const [lon, lat, z] = point;
+            const [lon, lat] = point;
             graphic.geometry = {
               type: 'point',
               longitude: lon,
               latitude: lat,
-              z,
               spatialReference: { wkid: 4326 },
             };
           }
@@ -229,7 +228,7 @@ export class ThreatLensArcRenderer {
     for (const arc of items) {
       this.startMarkerGraphics.push(this.buildEndpointGraphic(arc, arc.arcPoints[0], 'arc-start', 98000, 1));
       this.endMarkerGraphics.push(this.buildEndpointGraphic(arc, arc.arcPoints[arc.arcPoints.length - 1], 'arc-end', 98000, 0.88));
-      this.movingDotGraphics.push(this.buildMovingDotGraphic(arc));
+      this.movingDotGraphics.push(this.buildMovingDotGraphic(arc, arc.arcPoints[0]));
     }
 
     this.animatedArcGraphicsLayer.removeAll();
@@ -238,45 +237,27 @@ export class ThreatLensArcRenderer {
       ...this.endMarkerGraphics,
       ...this.movingDotGraphics,
     ]);
+
+    const layerGraphics = this.animatedArcGraphicsLayer.graphics?.toArray?.() ?? [];
+    this.startMarkerGraphics = layerGraphics.filter((graphic: any) => graphic?.attributes?.role === 'arc-start');
+    this.endMarkerGraphics = layerGraphics.filter((graphic: any) => graphic?.attributes?.role === 'arc-end');
+    this.movingDotGraphics = layerGraphics.filter((graphic: any) => graphic?.attributes?.role === 'arc-traveler');
   }
 
   private buildArcGraphic(arc: AnimatedArcDescriptor): any {
     return {
       geometry: {
         type: 'polyline',
-        hasZ: true,
-        paths: arc.arcPaths,
+        paths: arc.surfacePaths,
         spatialReference: { wkid: 4326 },
       },
       attributes: this.buildArcAttributes(arc, 'arc'),
       symbol: {
-        type: 'line-3d',
-        symbolLayers: [
-          {
-            type: 'path',
-            profile: 'quad',
-            width: Math.min(22, 13 + (arc.weight * 0.9)),
-            cap: 'round',
-            material: { color: [...arc.color, 0.14] },
-            anchor: 'center',
-          },
-          {
-            type: 'path',
-            profile: 'quad',
-            width: Math.min(10, 4.6 + (arc.weight * 0.44)),
-            cap: 'round',
-            material: { color: [...arc.color, 0.62] },
-            anchor: 'center',
-          },
-          {
-            type: 'path',
-            profile: 'quad',
-            width: Math.min(3.6, 2.4 + (arc.weight * 0.12)),
-            cap: 'round',
-            material: { color: [...arc.color, 0.92] },
-            anchor: 'center',
-          },
-        ],
+        type: 'simple-line',
+        color: [...arc.color, 0.92],
+        width: 1,
+        cap: 'round',
+        join: 'round',
       },
     };
   }
@@ -303,51 +284,43 @@ export class ThreatLensArcRenderer {
         type: 'point',
         longitude: point[0],
         latitude: point[1],
-        z: point[2],
         spatialReference: { wkid: 4326 },
       },
       attributes: this.buildArcAttributes(arc, role),
       symbol: {
-        type: 'point-3d',
-        symbolLayers: [
-          {
-            type: 'object',
-            resource: { primitive: 'sphere' },
-            width: size * 1.6,
-            height: size * 1.6,
-            depth: size * 1.6,
-            material: { color: [...arc.color, 0.18] },
-          },
-          {
-            type: 'object',
-            resource: { primitive: 'sphere' },
-            width: size * 0.72,
-            height: size * 0.72,
-            depth: size * 0.72,
-            material: { color: [...arc.color, opacity] },
-          },
-        ],
+        type: 'picture-marker',
+        url:'/assets/images/shared/flag.svg',
+        width: '18px',
+        height: '18px',
+        color: [...arc.color, opacity],
+        outline: {
+          color: [255, 255, 255, 0.84],
+          width: 1.2,
+        },
       },
     };
   }
 
-  private buildMovingDotGraphic(arc: AnimatedArcDescriptor): any {
-    const movingDotSize = Math.min(120000, this.movingDotBaseSize + (arc.weight * 2200));
+  private buildMovingDotGraphic(arc: AnimatedArcDescriptor, point: [number, number, number]): any {
+    const movingDotSize = Math.min(16, this.movingDotBaseSize + (arc.weight * 0.32));
+
     return {
-      geometry: null,
+      geometry: {
+        type: 'point',
+        longitude: point[0],
+        latitude: point[1],
+        spatialReference: { wkid: 4326 },
+      },
       attributes: this.buildArcAttributes(arc, 'arc-traveler'),
       symbol: {
-        type: 'point-3d',
-        symbolLayers: [
-          {
-            type: 'object',
-            resource: { primitive: 'sphere' },
-            width: movingDotSize,
-            height: movingDotSize,
-            depth: movingDotSize,
-            material: { color: [...arc.color, 1] },
-          },
-        ],
+        type: 'simple-marker',
+        style: 'circle',
+        size: movingDotSize,
+        color: [255, 255, 255, 0.96],
+        outline: {
+          color: [...arc.color, 1],
+          width: 0.75,
+        },
       },
     };
   }

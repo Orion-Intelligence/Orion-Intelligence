@@ -132,7 +132,7 @@ def license_required(feature: str, bypass_roles: Optional[list[user_role]] = Non
 
     return checker
 def get_user_permissions(user):
-    final = {"modules": set(), "cti_graph": False, "mapping": False, "scanning": False, "maintainer": False}
+    final = {"modules": set(), "cti_graph": False, "mapping": False, "scanning": False, "maintainer": False, "geo_fencing": False}
 
     for lic in user.licenses:
         rules = constant.license_rules.get(lic, {})
@@ -145,5 +145,5 @@ def get_user_permissions(user):
         final["mapping"] |= rules.get("mapping", False)
         final["scanning"] |= rules.get("scanning", False)
         final["maintainer"] |= rules.get("maintainer", False)
-
+        final["geo_fencing"] |= rules.get("geo_fencing", False)
     return final
