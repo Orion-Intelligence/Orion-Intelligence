@@ -1,16 +1,19 @@
 @if (isPanelMenuOpen) {
-  <div data-testid="geo-fencing-panel-menu" class="map-overlay-menu absolute right-3 top-16 z-[999] flex w-[230px] flex-col overflow-hidden rounded-[12px] border border-white/15 bg-[rgba(8,16,27,0.94)] shadow-[0_16px_40px_rgba(2,6,23,.45)] backdrop-blur-md animate-[ui-popup-flyout-in_160ms_ease-out_both] [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_16px_38px_rgba(15,23,42,.14)] max-[943px]:right-2 max-[943px]:top-[88px] max-[520px]:top-[136px] max-[520px]:w-[min(230px,calc(100%-16px))]">
-    @if (isThreatView) {
-      <button data-testid="geo-fencing-panel-menu-filter" class="border-b border-white/10 px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text3)] transition-colors last:border-b-0 hover:bg-white/5 hover:text-[var(--color-text1)] [body.light-theme_&]:border-[#d8e3f0] [body.light-theme_&]:hover:bg-[#eef5ff]" (click)="threatFiltersOpened.emit()">
-        {{ 'Filter' | translate }}
-      </button>
-    } @else {
-      @for (tab of panelTabs; track tab.id) {
-        <button [attr.data-testid]="'geo-fencing-panel-tab-' + tab.id" class="border-b border-white/10 px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text3)] transition-colors last:border-b-0 hover:bg-white/5 hover:text-[var(--color-text1)] [body.light-theme_&]:border-[#d8e3f0] [body.light-theme_&]:hover:bg-[#eef5ff]" (click)="panelOpened.emit(tab.id)">
-          {{ tab.label }}
+  <div data-testid="geo-fencing-panel-menu" class="map-overlay-menu absolute right-3 top-16 z-[999] flex min-h-[64px] w-[248px] flex-col rounded-[12px] border border-[#e5e7eb] bg-white p-[10px] text-[15px] shadow-[0_16px_30px_rgba(2,6,23,0.14)] animate-[ui-popup-flyout-in_160ms_ease-out_both] max-[943px]:right-2 max-[943px]:top-[88px] max-[520px]:top-[136px] max-[520px]:w-[min(248px,calc(100%-16px))]">
+    <div class="pointer-events-none absolute top-[-10px] right-[16px] h-0 w-0 border-l-[8px] border-r-[8px] border-b-[10px] border-l-transparent border-r-transparent border-b-white"></div>
+    <div class="max-h-[320px] min-h-[160px] overflow-y-auto pr-[2px]">
+      @if (isThreatView) {
+        <button type="button" data-testid="geo-fencing-panel-menu-filter" class="flex w-full cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] text-left text-[14px] font-medium text-[#172235] transition-colors hover:bg-[#f5f7fa]" (click)="threatFiltersOpened.emit()">
+          {{ 'Filter' | translate }}
         </button>
+      } @else {
+        @for (tab of panelTabs; track tab.id) {
+          <button type="button" [attr.data-testid]="'geo-fencing-panel-tab-' + tab.id" class="flex w-full cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] text-left text-[14px] font-medium transition-colors" [ngClass]="activePanel === tab.id ? 'bg-[#eef6ff] text-[#0f5fa8]' : 'text-[#172235] hover:bg-[#f5f7fa]'" (click)="panelOpened.emit(tab.id)">
+            {{ tab.label | translate }}
+          </button>
+        }
       }
-    }
+    </div>
   </div>
 }
 
