@@ -6,6 +6,7 @@ export const FEEDER_RULE_KEYS = [
   'forum',
   'generic',
   'leak',
+  'malware',
   'mastodon',
   'news',
   'pastebin',

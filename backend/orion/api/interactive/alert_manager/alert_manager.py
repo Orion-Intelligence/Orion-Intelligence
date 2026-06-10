@@ -334,7 +334,7 @@ class AlertManager:
         normalized = (alert.type or "").lower()
         if normalized in {"general", "seo scanning"}:
             risk = "Low"
-        elif normalized in {"breach", "exploit", "feed", "playstore-scanning", "social-scanner",
+        elif normalized in {"breach", "exploit", "malware", "feed", "playstore-scanning", "social-scanner",
             "email-breach", "stealerlogs", "software-scanning"}:
             risk = "Critical"
         elif normalized in {"defacement", "advanced scanning", "repo scanning"}:

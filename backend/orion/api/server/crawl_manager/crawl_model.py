@@ -329,6 +329,13 @@ class crawl_model:
             network_type="surface",
             is_leak_update=True)
 
+    async def invoke_malware_index(self, malware_index: MalwareDataModel):
+        m_data = crawl_index_generator.index_query_malware(malware_index.model_dump())
+        if not m_data:
+            return {"message": "no valid malware records to index"}
+        await elastic_controller.get_instance().index_data(m_data, bypass_empty_embedding=True)
+        return {"message": "malware indexed successfully", "indexed": len(m_data)}
+
     async def init_stealerlogs(self, leak_index: LeakDataModel):
         m_data = crawl_index_generator.index_query_stealerlog(leak_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)

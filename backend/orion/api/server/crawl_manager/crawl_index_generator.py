@@ -187,6 +187,9 @@ class crawl_index_generator:
                 continue
 
             card["m_hash"] = helper_controller.generate_data_hash(title)
+            leak_date = card.get("m_leak_date") or card.get("m_published_date") or card.get("m_last_updated")
+            if leak_date:
+                card["m_leak_date"] = str(leak_date)[:10]
             card["m_update_date"] = current_timestamp
             card["m_contact_link"] = contact_link
             card.setdefault("m_base_url", base_url)
@@ -195,5 +198,34 @@ class crawl_index_generator:
 
             index_entries.append(
                 {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_APT_INDEX, ELASTIC_KEYS.S_VALUE: cleaned_card, })
+
+        return index_entries
+
+    @staticmethod
+    def index_query_malware(p_index_data):
+        contact_link = p_index_data.get("contact_link", "")
+        base_url = p_index_data.get("base_url", "")
+        index_entries = []
+        current_timestamp = datetime.now(timezone.utc).isoformat()
+
+        for card in p_index_data.get("cards_data", []):
+            title = card.get("m_title")
+            if not title:
+                continue
+
+            unique_value = card.get("m_sha256_hash") or card.get("m_source_url") or title
+            card["m_hash"] = helper_controller.generate_data_hash(str(unique_value))
+            leak_date = card.get("m_leak_date") or card.get("m_first_seen") or card.get("m_last_seen")
+            if leak_date:
+                card["m_leak_date"] = str(leak_date)[:10]
+            card["m_update_date"] = current_timestamp
+            card["m_contact_link"] = contact_link
+            card.setdefault("m_base_url", base_url)
+            card.setdefault("m_content_type", ["malware"])
+
+            cleaned_card = {k: v for k, v in card.items() if v is not None}
+
+            index_entries.append(
+                {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_MALWARE_INDEX, ELASTIC_KEYS.S_VALUE: cleaned_card, })
 
         return index_entries

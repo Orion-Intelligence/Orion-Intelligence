@@ -8,6 +8,7 @@ from .file_model import ScreenshotPayload
 from .general_model import GeneralDataModel
 from .leak_model import LeakDataModel
 from .log_model import InjectionBatchRequestModel, InjectionBatchResponseModel, InjectionLogModel, LogModel, LogBatchModel, SiemSearchRequestModel, SiemSearchResponseModel
+from .malware_model import MalwareDataModel
 from .nlp_data_model import nlp_data_model
 from .open_sanctions_model import open_sanctions_data_model
 from .report_chat_data_model import NexusTextAnalysisRequest, ReportChatRequest
@@ -30,6 +31,7 @@ __all__ = [
     "LeakDataModel",
     "LogModel",
     "LogBatchModel",
+    "MalwareDataModel",
     "SiemSearchRequestModel",
     "SiemSearchResponseModel",
     "nlp_data_model",

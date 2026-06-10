@@ -100,6 +100,7 @@ async def search_general(param: search_consolidated_param_model = Body(...), cur
             ELASTIC_INDEX.S_GENERIC_INDEX,
             ELASTIC_INDEX.S_EXPLOIT_INDEX,
             ELASTIC_INDEX.S_APT_INDEX,
+            ELASTIC_INDEX.S_MALWARE_INDEX,
             ELASTIC_INDEX.S_CHATS_INDEX,
             ELASTIC_INDEX.S_SOCIAL_INDEX,
         ]
@@ -168,6 +169,22 @@ async def search_exploit(param: search_consolidated_param_model = Body(...), cur
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
     base_index = [ELASTIC_INDEX.S_EXPLOIT_INDEX]
+    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
+
+
+@api_routes.post(
+    "/api/search/malware",
+    summary="Search malware reports",
+    description=SEARCH_DOCS["strategic"]["description"],
+    tags=["Search"],
+    operation_id="searchMalwareReports",
+    response_description=SEARCH_DOCS["strategic"]["response_description"],
+    status_code=200,
+    dependencies=GENERAL_MODULE_DEPS, )
+async def search_malware(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
+    _enforce_demo_safe_search(param, current_user)
+    base_index = [ELASTIC_INDEX.S_MALWARE_INDEX]
     return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
 
 
@@ -349,6 +366,7 @@ async def search_consolidated_iocs(param: search_consolidated_param_model = Body
         ELASTIC_INDEX.S_GENERIC_INDEX,
         ELASTIC_INDEX.S_EXPLOIT_INDEX,
         ELASTIC_INDEX.S_APT_INDEX,
+        ELASTIC_INDEX.S_MALWARE_INDEX,
         ELASTIC_INDEX.S_CHATS_INDEX,
         ELASTIC_INDEX.S_SOCIAL_INDEX,
         ELASTIC_INDEX.S_DEFACEMENT_INDEX,
@@ -419,6 +437,19 @@ async def get_exploit_document(doc_id: str, lang: Optional[str] = Query(None, al
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:general", bypass_licenses=["maintainer"]))], )
 async def get_apt_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await search_model.getInstance().request_apt_doc(doc_id, lang)
+
+
+@api_routes.get(
+    "/api/search/malware/{doc_id}",
+    summary="Get malware intelligence report",
+    description="Retrieve an indexed malware intelligence report.",
+    tags=["Reports"],
+    operation_id="getMalwareReport",
+    response_description="Malware report document",
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:general", bypass_licenses=["maintainer"]))], )
+async def get_malware_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
+    return await search_model.getInstance().request_malware_doc(doc_id, lang)
 
 
 @api_routes.get(

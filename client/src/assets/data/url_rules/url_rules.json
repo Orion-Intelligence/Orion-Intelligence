@@ -24,6 +24,10 @@
     "rule_type": "unique",
     "path": "malware_collector"
   },
+  "malware": {
+    "rule_type": "unique",
+    "path": "malware_collector/scripts"
+  },
   "mastodon": {
     "rule_type": "shared",
     "path": "social/platform",

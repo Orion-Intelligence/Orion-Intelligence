@@ -34,6 +34,7 @@ class AlertSummaryHelper:
         if normalized in (
             "breach",
             "exploit",
+            "malware",
             "feed",
             "playstore-scanning",
             "social-scanner",

@@ -1,6 +1,7 @@
+from datetime import date
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class AptCardModel(BaseModel):
@@ -15,6 +16,7 @@ class AptCardModel(BaseModel):
     m_references: Optional[List[str]] = Field(default_factory=list)
     m_platform: str
     m_country: Optional[str] = None
+    m_leak_date: Optional[date] = None
     m_name: Optional[str] = None
     m_last_updated: Optional[str] = None
     m_actor_names: Optional[List[str]] = Field(default_factory=list)
@@ -24,6 +26,13 @@ class AptCardModel(BaseModel):
     m_organization: Optional[str] = None
     m_authors: Optional[List[str]] = Field(default_factory=list)
     m_embedding: List[float] = Field(default_factory=list)
+
+    @field_validator("m_organization", mode="before")
+    @classmethod
+    def normalize_organization(cls, value):
+        if isinstance(value, list):
+            return ", ".join(str(item).strip() for item in value if str(item).strip())
+        return value
 
     model_config = ConfigDict(extra="allow")
 

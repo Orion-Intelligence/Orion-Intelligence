@@ -291,6 +291,10 @@ class alert_job:
                 base_index = [ELASTIC_INDEX.S_APT_INDEX]
                 ParamModel = search_consolidated_param_model
                 search_func = self._search_model.search_consolidated_ranked_result
+            elif category == "malware":
+                base_index = [ELASTIC_INDEX.S_MALWARE_INDEX]
+                ParamModel = search_consolidated_param_model
+                search_func = self._search_model.search_consolidated_ranked_result
             elif category == "general":
                 base_index = [ELASTIC_INDEX.S_GENERIC_INDEX]
                 ParamModel = search_consolidated_param_model

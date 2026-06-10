@@ -38,6 +38,12 @@ SEARCH_CONFIG = {
         "blocked_categories": []
     },
 
+    "malware_model": {
+        "base_index": [ELASTIC_INDEX.S_MALWARE_INDEX],
+        "allowed_categories": [],
+        "blocked_categories": []
+    },
+
     "chat_model": {
         "base_index": [ELASTIC_INDEX.S_CHATS_INDEX],
         "allowed_categories": [],
