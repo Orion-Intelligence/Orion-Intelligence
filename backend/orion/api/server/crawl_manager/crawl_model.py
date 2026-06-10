@@ -319,6 +319,16 @@ class crawl_model:
             network_type=exploit_index.m_network,
             is_leak_update=True)
 
+    async def invoke_apt_index(self, apt_index: AptDataModel):
+        m_data = crawl_index_generator.index_query_apt(apt_index.model_dump())
+        await elastic_controller.get_instance().index_data(m_data)
+        return await self._update_or_create_model(
+            base_url=apt_index.base_url,
+            new_content_type=['apt'],
+            new_index_type=['apt'],
+            network_type="surface",
+            is_leak_update=True)
+
     async def init_stealerlogs(self, leak_index: LeakDataModel):
         m_data = crawl_index_generator.index_query_stealerlog(leak_index.model_dump())
         await elastic_controller.get_instance().index_data(m_data)

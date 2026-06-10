@@ -164,6 +164,13 @@ async def index_exploit_data(request: Request):
     instance = crawl_model.getInstance()
     return await _index(request, ExploitDataModel, instance.invoke_exploit_index)
 
+
+@crawl_routes.post("/api/index/apt", dependencies=_leak_deps)
+async def index_apt_data(request: Request):
+    instance = crawl_model.getInstance()
+    return await _index(request, AptDataModel, instance.invoke_apt_index)
+
+
 @crawl_routes.post(
     "/api/index/defacement",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])

@@ -58,6 +58,7 @@ class elastic_controller:
             mapping_generic_model = ELASTIC_ENUMS.mapping_generic_model
             mapping_defacement_model = ELASTIC_ENUMS.mapping_defacement_model
             mapping_exploit_model = ELASTIC_ENUMS.mapping_exploit_model
+            mapping_apt_model = ELASTIC_ENUMS.mapping_apt_model
             mapping_siem_model = ELASTIC_ENUMS.mapping_siem_model
             mapping_chat_model = ELASTIC_ENUMS.mapping_chat_model
             mapping_stealer_model = ELASTIC_ENUMS.mapping_stealer_log_model
@@ -108,6 +109,16 @@ class elastic_controller:
                     index=ELASTIC_INDEX.S_EXPLOIT_INDEX, body=mapping_exploit_model, request_timeout=220)
                 await self.__m_core_connection.indices.put_settings(
                     index=ELASTIC_INDEX.S_EXPLOIT_INDEX,
+                    body={"index.blocks.read_only_allow_delete": False},
+                    request_timeout=220)
+
+            if not await self.__m_core_connection.indices.exists(
+                    index=ELASTIC_INDEX.S_APT_INDEX,
+                    request_timeout=220):
+                await self.__m_core_connection.indices.create(
+                    index=ELASTIC_INDEX.S_APT_INDEX, body=mapping_apt_model, request_timeout=220)
+                await self.__m_core_connection.indices.put_settings(
+                    index=ELASTIC_INDEX.S_APT_INDEX,
                     body={"index.blocks.read_only_allow_delete": False},
                     request_timeout=220)
 

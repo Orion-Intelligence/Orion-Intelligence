@@ -432,7 +432,7 @@ class search_query_generator:
         must_not_clause = []
         index_set = set(base_index or [])
 
-        if index_set and index_set.issubset({ELASTIC_INDEX.S_EXPLOIT_INDEX, ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_INDEX.S_LEAK_INDEX}):
+        if index_set and index_set.issubset({ELASTIC_INDEX.S_EXPLOIT_INDEX, ELASTIC_INDEX.S_APT_INDEX, ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_INDEX.S_LEAK_INDEX}):
             date_priority_fields = ["m_leak_date", "m_update_date", "m_creation_date"]
             date_boost_fields = [("m_leak_date", 0), ("m_update_date", 0), ("m_creation_date", 0)]
         elif index_set and index_set.issubset({ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX}):

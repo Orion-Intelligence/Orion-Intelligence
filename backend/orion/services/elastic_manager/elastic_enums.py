@@ -7,6 +7,7 @@ class ELASTIC_SEMANTIC_INDEX:
     S_DEFACEMENT_INDEX = "defacement_model"
     S_CHATS_INDEX = "chat_model"
     S_EXPLOIT_INDEX = "exploit_model"
+    S_APT_INDEX = "apt_model"
     S_SOCIAL_INDEX = "social_model"
 
 
@@ -16,6 +17,7 @@ class ELASTIC_INDEX:
     S_DEFACEMENT_INDEX = "defacement_model"
     S_CHATS_INDEX = "chat_model"
     S_EXPLOIT_INDEX = "exploit_model"
+    S_APT_INDEX = "apt_model"
     S_SIEM_INDEX = "siem_model"
     S_STEALERLOGS_INDEX = "stealer_model"
     S_SOCIAL_INDEX = "social_model"
@@ -79,6 +81,9 @@ class ELASTIC_ENUMS:
 
     mapping_exploit_model = {"settings": {"number_of_shards": 1, "number_of_replicas": 0, "max_result_window": 1000000}, "mappings": {"dynamic_templates": [
         {"strings_as_keywords": {"match_mapping_type": "string", "mapping": {"type": "keyword"}}}], "properties": {"m_attacker": {"type": "keyword"}, "m_base_url": {"type": "keyword"}, "m_confidence": {"type": "keyword"}, "m_content_type": {"type": "keyword"}, "m_creation_date": {"type": "date"}, "m_cve": {"type": "keyword"}, "m_cve_source": {"type": "keyword"}, "m_cvss": {"type": "keyword"}, "m_cwe": {"type": "keyword"}, "m_leak_date": {"type": "date", "format": "yyyy-MM-dd"}, "m_exploit_year": {"type": "keyword"}, "m_github_links": {"type": "keyword"}, "m_hash": {"type": "keyword"}, "m_ip": {"type": "keyword"}, "m_location": {"type": "keyword"}, "m_mirror_links": {"type": "keyword"}, "m_name": {"type": "keyword"}, "m_network": {"type": "keyword"}, "m_org": {"type": "keyword"}, "m_product": {"type": "keyword"}, "m_remote_type": {"type": "keyword"}, "m_risk": {"type": "keyword"}, "m_screenshot": {"type": "keyword"}, "m_severity": {"type": "keyword"}, "m_solution": {"type": "keyword"}, "m_team": {"type": "keyword"}, "m_version": {"type": "keyword"}, "m_vulnerability": {"type": "keyword"}, "m_web_server": {"type": "keyword"}, "m_web_url": {"type": "keyword"}, "m_weblink": {"type": "keyword"}, "m_websites": {"type": "keyword"}, "m_update_date": {"type": "date"}, "m_url": {"type": "keyword"}, "m_title": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, "m_code_snippet": {"type": "text", "fields": {"keyword": {"type": "keyword", "ignore_above": 600}}}, "m_content": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, "m_important_content": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, "m_mitre_ttp_type": {"type": "keyword"}, "m_embedding": {"type": "dense_vector", "dims": 384, "element_type": "float", "similarity": "cosine", "index": True}}}}
+
+    mapping_apt_model = {"settings": {"number_of_shards": 1, "number_of_replicas": 0, "max_result_window": 1000000}, "mappings": {"dynamic": True, "dynamic_templates": [
+        {"strings_as_keywords": {"match_mapping_type": "string", "mapping": {"type": "keyword"}}}], "properties": {"m_hash": {"type": "keyword"}, "m_title": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, "m_content": {"type": "text"}, "m_family": {"type": "keyword"}, "m_aliases": {"type": "keyword"}, "m_references": {"type": "keyword"}, "m_platform": {"type": "keyword"}, "m_country": {"type": "keyword"}, "m_base_url": {"type": "keyword"}, "m_contact_link": {"type": "keyword"}, "m_update_date": {"type": "date"}, "m_creation_date": {"type": "date"}, "m_embedding": {"type": "dense_vector", "dims": 384, "element_type": "float", "similarity": "cosine", "index": True}}}}
 
     mapping_siem_model = {"settings": {"number_of_shards": 1, "number_of_replicas": 0, "max_result_window": 1000000}, "mappings": {"dynamic": True, "dynamic_templates": [
         {"strings_as_keywords": {"match_mapping_type": "string", "mapping": {"type": "keyword"}}}], "properties": {"tenant_id": {"type": "keyword"}, "event_id": {"type": "keyword"}, "hash": {"type": "keyword"}, "raw": {"type": "text"}, "timestamp": {"type": "date"}, "ingested_at": {"type": "date"}, "source": {"type": "keyword"}, "event_type": {"type": "keyword"}, "severity": {"type": "keyword"}, "host": {"type": "keyword"}, "user": {"type": "keyword"}, "tags": {"type": "keyword"}, "m_domain": {"type": "keyword"}, "m_email": {"type": "keyword"}, "m_ip": {"type": "keyword"}, "m_username": {"type": "keyword"}, "m_language": {"type": "keyword"}}}}

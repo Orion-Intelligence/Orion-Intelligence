@@ -32,6 +32,12 @@ SEARCH_CONFIG = {
         "blocked_categories": []
     },
 
+    "apt_model": {
+        "base_index": [ELASTIC_INDEX.S_APT_INDEX],
+        "allowed_categories": [],
+        "blocked_categories": []
+    },
+
     "chat_model": {
         "base_index": [ELASTIC_INDEX.S_CHATS_INDEX],
         "allowed_categories": [],

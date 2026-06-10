@@ -1,3 +1,4 @@
+from .apt_model import AptDataModel
 from .chat_model import chat_data_model
 from .credential_model import credential_data_model
 from .defacement_model import DefacementDataModel
@@ -16,6 +17,7 @@ from ..crawl_enums import CRAWL_PATHS, CRAWL_CALLBACK_RESPONSES
 
 __all__ = [
     "chat_data_model",
+    "AptDataModel",
     "credential_data_model",
     "DefacementDataModel",
     "DumpModel",

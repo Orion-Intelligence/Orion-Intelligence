@@ -99,6 +99,7 @@ async def search_general(param: search_consolidated_param_model = Body(...), cur
             ELASTIC_INDEX.S_LEAK_INDEX,
             ELASTIC_INDEX.S_GENERIC_INDEX,
             ELASTIC_INDEX.S_EXPLOIT_INDEX,
+            ELASTIC_INDEX.S_APT_INDEX,
             ELASTIC_INDEX.S_CHATS_INDEX,
             ELASTIC_INDEX.S_SOCIAL_INDEX,
         ]
@@ -347,6 +348,7 @@ async def search_consolidated_iocs(param: search_consolidated_param_model = Body
         ELASTIC_INDEX.S_LEAK_INDEX,
         ELASTIC_INDEX.S_GENERIC_INDEX,
         ELASTIC_INDEX.S_EXPLOIT_INDEX,
+        ELASTIC_INDEX.S_APT_INDEX,
         ELASTIC_INDEX.S_CHATS_INDEX,
         ELASTIC_INDEX.S_SOCIAL_INDEX,
         ELASTIC_INDEX.S_DEFACEMENT_INDEX,
@@ -404,6 +406,19 @@ async def get_news_document(doc_id: str, lang: Optional[str] = Query(None, alias
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:exploit", bypass_licenses=["maintainer"]))], )
 async def get_exploit_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await search_model.getInstance().request_exploit_doc(doc_id, lang)
+
+
+@api_routes.get(
+    "/api/search/apt/{doc_id}",
+    summary="Get APT intelligence report",
+    description="Retrieve an indexed APT actor intelligence report.",
+    tags=["Reports"],
+    operation_id="getAptReport",
+    response_description="APT report document",
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:general", bypass_licenses=["maintainer"]))], )
+async def get_apt_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
+    return await search_model.getInstance().request_apt_doc(doc_id, lang)
 
 
 @api_routes.get(

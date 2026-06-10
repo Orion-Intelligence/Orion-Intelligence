@@ -197,6 +197,7 @@ class homepage_model:
             "leak": ELASTIC_INDEX.S_LEAK_INDEX,
             "generic": ELASTIC_INDEX.S_GENERIC_INDEX,
             "exploit": ELASTIC_INDEX.S_EXPLOIT_INDEX,
+            "apt": ELASTIC_INDEX.S_APT_INDEX,
             "chat": ELASTIC_INDEX.S_CHATS_INDEX,
             "social": ELASTIC_INDEX.S_SOCIAL_INDEX,
             "defacement": ELASTIC_INDEX.S_DEFACEMENT_INDEX,

@@ -137,6 +137,9 @@ class search_model:
     async def request_exploit_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
         return await self._request_doc(ELASTIC_INDEX.S_EXPLOIT_INDEX, doc_id, lang, ["m_content", "m_important_content"])
 
+    async def request_apt_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
+        return await self._request_doc(ELASTIC_INDEX.S_APT_INDEX, doc_id, lang, ["m_content"])
+
     async def request_leak_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
         return await self._request_doc(ELASTIC_INDEX.S_LEAK_INDEX, doc_id, lang, ["m_content", "m_important_content"])
 
@@ -247,6 +250,7 @@ class search_model:
             "leak_model",
             "generic_model",
             "exploit_model",
+            "apt_model",
             "chat_model",
             "social_model",
             "defacement_model",

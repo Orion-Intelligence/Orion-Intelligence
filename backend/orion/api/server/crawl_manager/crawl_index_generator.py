@@ -173,3 +173,27 @@ class crawl_index_generator:
                 {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_EXPLOIT_INDEX, ELASTIC_KEYS.S_VALUE: cleaned_card, })
 
         return index_entries
+
+    @staticmethod
+    def index_query_apt(p_index_data):
+        contact_link = p_index_data.get("contact_link", "")
+        base_url = p_index_data.get("base_url", "")
+        index_entries = []
+        current_timestamp = datetime.now(timezone.utc).isoformat()
+
+        for card in p_index_data.get("cards_data", []):
+            title = card.get("m_title")
+            if not title:
+                continue
+
+            card["m_hash"] = helper_controller.generate_data_hash(title)
+            card["m_update_date"] = current_timestamp
+            card["m_contact_link"] = contact_link
+            card.setdefault("m_base_url", base_url)
+
+            cleaned_card = {k: v for k, v in card.items() if v is not None}
+
+            index_entries.append(
+                {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_APT_INDEX, ELASTIC_KEYS.S_VALUE: cleaned_card, })
+
+        return index_entries
