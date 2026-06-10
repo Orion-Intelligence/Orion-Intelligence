@@ -29,6 +29,11 @@ export class ReportResolver implements Resolve<any> {
       case 'exploit':
         apiUrl = hash ? `search/exploit/${hash}` : `search/exploit`;
         break;
+      case 'threat-intel':
+        apiUrl = category_2 === 'apt'
+          ? (hash ? `search/apt/${hash}` : `search/apt`)
+          : (hash ? `search/malware/${hash}` : `search/malware`);
+        break;
       case 'social':
         if (category_2 == "all") {
           if (apiUrl.includes("chat")) {

@@ -55,7 +55,7 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
     this.currentUrl = this.router.url.split('?')[0];
     this.isConsolidatedView = this.currentUrl.includes('/consolidated/');
     const type = this.type();
-    const ci = type === 'leak' ? 'leak' : type === 'tracking' ? 'leak' : type === 'news' ? 'leak' : type === 'general' ? 'general' : type === 'Strategic' ? 'strategic' : 'leak';
+    const ci = type === 'leak' ? 'leak' : type === 'tracking' ? 'leak' : type === 'news' ? 'leak' : type === 'apt' ? 'apt' : type === 'malware' ? 'malware' : type === 'general' ? 'general' : type === 'Strategic' ? 'strategic' : 'leak';
     if (this.currentUrl.includes('/consolidated/all') || this.currentUrl.includes('/profile/homepage/all')) {
       this.currentUrl = this.currentUrl.replace('/all', `/${ci}`);
     }
@@ -78,6 +78,35 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
 
   isMobileMode(): boolean {
     return this.authService.getIsMobileDemo();
+  }
+
+  getDisplayTags(item: GeneralResultItem | LeakResultItem): string[] {
+    if (item.m_content_type?.length) {
+      return item.m_content_type;
+    }
+    if (item.rank_index === 'apt_model') {
+      return ['APT'];
+    }
+    if (item.rank_index === 'malware_model') {
+      return ['Malware Bazaar'];
+    }
+    return [];
+  }
+
+  getDisplayContent(item: GeneralResultItem | LeakResultItem): string {
+    return item.m_important_content || item.m_content || '';
+  }
+
+  getDisplayUrl(item: GeneralResultItem | LeakResultItem): string {
+    return item.m_url || item.m_source_url || item.m_base_url || '';
+  }
+
+  getReportLink(item: GeneralResultItem | LeakResultItem): string[] {
+    let url = this.currentUrl;
+    if (url.includes('/threat-intel/all')) {
+      url = url.replace('/all', item.rank_index === 'malware_model' ? '/malware-bazaar' : '/apt');
+    }
+    return [url, item.m_hash];
   }
 
   openExternalUrl(url?: string | null): void {

@@ -159,6 +159,8 @@ const PLATFORM_FILTER = {
     { key: "generic_model", label: "General Iintelligence" },
     { key: "leak_model", label: "Data Breach" },
     { key: "exploit_model", label: "Exploit" },
+    { key: "apt_model", label: "APT" },
+    { key: "malware_model", label: "Malware Bazaar" },
     { key: "social_model", label: "Social" },
     { key: "chat_model", label: "Chat" },
     { key: "all", label: "All" },

@@ -96,6 +96,16 @@ const consolidatedChildren: Route[] = [
     ...HASH_CONSOLIDATED_ROUTE
   },
   {
+    path: 'apt/:m_hash',
+    loadComponent: loadReportComponent,
+    ...HASH_CONSOLIDATED_ROUTE
+  },
+  {
+    path: 'malware/:m_hash',
+    loadComponent: loadReportComponent,
+    ...HASH_CONSOLIDATED_ROUTE
+  },
+  {
     path: 'defacement/:m_hash',
     loadComponent: loadReportDefacementComponent,
     ...HASH_CONSOLIDATED_ROUTE
@@ -599,6 +609,38 @@ export const routes: Routes = [
             loadComponent: loadReportComponent,
             resolve: { reportdata: ReportResolver },
             data: { type: 'Exploit', animation: 'HashPage' }
+          }
+        ]
+      },
+      {
+        path: 'threat-intel',
+        data: { animation: 'ThreatIntelPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'all',
+            pathMatch: 'full'
+          },
+          {
+            path: 'all',
+            loadComponent: loadDashboardResultContainer,
+            data: { type: 'Threat Intelligence', animation: 'DataBreach' }
+          },
+          {
+            path: 'apt',
+            loadComponent: loadDashboardResultContainer,
+            data: { type: 'Threat Intelligence', animation: 'DataBreach' }
+          },
+          {
+            path: 'malware-bazaar',
+            loadComponent: loadDashboardResultContainer,
+            data: { type: 'Threat Intelligence', animation: 'DataBreach' }
+          },
+          {
+            path: ':category/:m_hash',
+            loadComponent: loadReportComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Threat Intelligence', animation: 'HashPage' }
           }
         ]
       },

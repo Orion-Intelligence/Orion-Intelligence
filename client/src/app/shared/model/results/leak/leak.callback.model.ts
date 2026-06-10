@@ -4,7 +4,9 @@ export class LeakResultItem {
   m_password!: string;
   m_title!: string;
   m_url?: string;
+  m_source_url?: string;
   m_base_url?: string;
+  m_platform?: string;
   m_content!: string;
   m_screenshot!: string;
   m_important_content!: string;
@@ -25,6 +27,7 @@ export class LeakResultItem {
   m_update_date!: string;
   m_hash!: string;
   m_creation_date!: string;
+  rank_index?: string;
 
   constructor(init?: Partial<LeakResultItem>) {
     Object.assign(this, init);

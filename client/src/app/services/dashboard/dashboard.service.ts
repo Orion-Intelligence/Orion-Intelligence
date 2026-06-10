@@ -133,6 +133,8 @@ export class DashboardService {
     return this.apiService.post<ConsolidatedCallbackModel>(apiEndpoint, payload).pipe(takeUntil(this.cancelRequest$), map((response: ConsolidatedCallbackModel) => {
       const hasAnyResults = !!(response?.leak_model?.Result?.length ||
                 response?.exploit_model?.Result?.length ||
+                response?.apt_model?.Result?.length ||
+                response?.malware_model?.Result?.length ||
                 response?.chat_model?.Result?.length ||
                 response?.generic_model?.Result?.length ||
                 response?.defacement_model?.Result?.length);

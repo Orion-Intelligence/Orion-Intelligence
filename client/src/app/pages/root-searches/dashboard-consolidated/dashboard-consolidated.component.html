@@ -79,10 +79,10 @@
                       }
                     </div>
                     @if (index.value.length > 0) {
-                      @if (index.key === 'leak_model' || index.key === 'generic_model' || index.key === 'tracking_model' || index.key === 'news_model') {
+                      @if (index.key === 'leak_model' || index.key === 'generic_model' || index.key === 'tracking_model' || index.key === 'news_model' || index.key === 'apt_model' || index.key === 'malware_model') {
                         <app-dashboard-results-general-grid
                           @fadeInDashboardItem [query]="query" [searchResults]="index.value" [isExpandAble]="true"
-                          [type]="index.key === 'leak_model' ? 'leak' : index.key === 'tracking_model' ? 'tracking' : index.key === 'news_model' ? 'news' : 'general'">
+                          [type]="index.key === 'leak_model' ? 'leak' : index.key === 'tracking_model' ? 'tracking' : index.key === 'news_model' ? 'news' : index.key === 'apt_model' ? 'apt' : index.key === 'malware_model' ? 'malware' : 'general'">
                         </app-dashboard-results-general-grid>
                       }
                       @if (index.key === 'exploit_model') {
@@ -106,11 +106,11 @@
               @for (item of rankedResult.result; track item.m_hash || item.m_message_id || item.id || item.m_url || $index) {
                 <div class="mt-4">
                   <div class="ui-consolidated-main min-w-0 rounded-xl border border-[var(--color-border)] p-3">
-                    @if (item.rank_index === 'leak_model' || item.rank_index === 'generic_model') {
+                    @if (item.rank_index === 'leak_model' || item.rank_index === 'generic_model' || item.rank_index === 'apt_model' || item.rank_index === 'malware_model') {
                       <app-dashboard-results-general-grid
                         [query]="query"
                         [searchResults]="[item]" [isExpandAble]="false"
-                      [type]="item.rank_index === 'leak_model' ? 'leak' : 'general'"></app-dashboard-results-general-grid>
+                      [type]="item.rank_index === 'leak_model' ? 'leak' : item.rank_index === 'apt_model' ? 'apt' : item.rank_index === 'malware_model' ? 'malware' : 'general'"></app-dashboard-results-general-grid>
                     }
                     @if (item.rank_index === 'exploit_model') {
                       <app-dashboard-result-exploit [isExpandAble]="false"

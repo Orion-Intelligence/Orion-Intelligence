@@ -52,6 +52,8 @@ export class SidebarSectionComponent {
   getItemIcon(item: string): string {
     const normalized = item.toLowerCase().replace(/\s+/g, '-');
     const mapped = {
+      apt: 'mitre',
+      'malware-bazaar': 'phishing',
       iocs: 'ioc',
       'file-scanner': 'archive',
       'text-analysis': 'phishing',

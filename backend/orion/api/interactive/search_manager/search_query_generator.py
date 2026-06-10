@@ -523,8 +523,10 @@ class search_query_generator:
             loose_terms=[]
         else:
             loose_terms = [] if raw_query in ("*", "") else [t for t in re.findall(r'\w+', raw_query) if t and t.strip('"')]
-        phrase_fields = [("m_title", 5), ("m_content", 3), ("m_url", 2), ("m_sender_name", 2), ("m_base_url", 1),
-            ("m_team", 1), ("m_attacker", 1), ("m_users", 1), ("m_network", 1), ("m_channel_name", 4)]
+        phrase_fields = [("m_title", 5), ("m_content", 3), ("m_url", 2), ("m_source_url", 2), ("m_sender_name", 2), ("m_base_url", 1),
+            ("m_team", 1), ("m_attacker", 1), ("m_users", 1), ("m_network", 1), ("m_channel_name", 4),
+            ("m_name", 4), ("m_family", 3), ("m_aliases", 3), ("m_actor_names", 3), ("m_references", 1),
+            ("m_sha256_hash", 5), ("m_sha1_hash", 4), ("m_md5_hash", 4), ("m_signature", 4), ("m_tags", 3), ("m_file_name", 3)]
         unified_query = self._build_query_block(
             p_query_model=p_query_model,
             pfilter=pfilter,
@@ -549,7 +551,7 @@ class search_query_generator:
 
         query = base_index, unified_query, [b for b in
             [{ELASTIC_INDEX.S_LEAK_INDEX: 2}, {ELASTIC_INDEX.S_GENERIC_INDEX: 0.5},
-                {ELASTIC_INDEX.S_EXPLOIT_INDEX: 1.4}, {ELASTIC_INDEX.S_MALWARE_INDEX: 1.4}, {ELASTIC_INDEX.S_CHATS_INDEX: 1.4},
+                {ELASTIC_INDEX.S_EXPLOIT_INDEX: 1.4}, {ELASTIC_INDEX.S_APT_INDEX: 1.4}, {ELASTIC_INDEX.S_MALWARE_INDEX: 1.4}, {ELASTIC_INDEX.S_CHATS_INDEX: 1.4},
                 {ELASTIC_INDEX.S_SOCIAL_INDEX: 1.4}, {ELASTIC_INDEX.S_DEFACEMENT_INDEX: 1.4}] if
             next(iter(b)) in base_index]
 

@@ -189,6 +189,29 @@ async def search_malware(param: search_consolidated_param_model = Body(...), cur
 
 
 @api_routes.post(
+    "/api/search/threat-intel",
+    summary="Search threat intelligence reports",
+    description=SEARCH_DOCS["strategic"]["description"],
+    tags=["Search"],
+    operation_id="searchThreatIntelReports",
+    response_description=SEARCH_DOCS["strategic"]["response_description"],
+    status_code=200,
+    dependencies=GENERAL_MODULE_DEPS, )
+async def search_threat_intel(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
+    _enforce_demo_safe_search(param, current_user)
+    category = (param.category or "all").lower()
+    if category == "apt":
+        base_index = [ELASTIC_INDEX.S_APT_INDEX]
+    elif category in {"malware", "malware-bazaar"}:
+        base_index = [ELASTIC_INDEX.S_MALWARE_INDEX]
+    else:
+        base_index = [ELASTIC_INDEX.S_APT_INDEX, ELASTIC_INDEX.S_MALWARE_INDEX]
+    param.category = "all"
+    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
+
+
+@api_routes.post(
     "/api/search/defacement",
     summary="Search defacement reports",
     description=SEARCH_DOCS["strategic"]["description"],

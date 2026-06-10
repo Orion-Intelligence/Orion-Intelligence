@@ -51,7 +51,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
 
   constructor(protected helperService: HelperService, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, private scrollService: ScrollService) {
     this.type = this.route.snapshot.data['type'] as Category;
-    this.apiEndpoint = this.type.toLowerCase() === Category.STRATEGIC.toLowerCase() ? 'search/strategic' : this.type.toLowerCase() === Category.SOCIAL.toLowerCase() ? 'search/social' : this.type.toLowerCase() === Category.EXPLOIT.toLowerCase() ? 'search/exploit' : this.type.toLowerCase() === Category.DEFACEMENT.toLowerCase() ? 'search/defacement' : 'search/breach';
+    this.apiEndpoint = this.type.toLowerCase() === Category.STRATEGIC.toLowerCase() ? 'search/strategic' : this.type.toLowerCase() === Category.SOCIAL.toLowerCase() ? 'search/social' : this.type.toLowerCase() === Category.EXPLOIT.toLowerCase() ? 'search/exploit' : this.type.toLowerCase() === Category.THREAT_INTEL.toLowerCase() ? 'search/threat-intel' : this.type.toLowerCase() === Category.DEFACEMENT.toLowerCase() ? 'search/defacement' : 'search/breach';
   }
 
   get currentParamModel(): ConsolidatedParamModel {
@@ -164,7 +164,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
     let key: string;
     let order: 'asc' | 'desc' = 'asc';
 
-    if (this.type === Category.BREACH) {
+    if (this.type === Category.BREACH || this.type === Category.THREAT_INTEL) {
       key = 'm_leak_date';
     }
     else {

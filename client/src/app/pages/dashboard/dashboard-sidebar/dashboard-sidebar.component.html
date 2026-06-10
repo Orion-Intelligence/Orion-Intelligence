@@ -80,6 +80,16 @@
           [routePrefix]="'exploit'"
         [title]="('Exploit') | translate"></app-dashboard-sidebar-items>
       }
+      @if (isAdmin() || licenseService.canUseModule('general')) {
+        <app-dashboard-sidebar-items
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.THREAT_INTEL"
+          [icon]="'assets/images/sidebar/graph.svg'"
+          [items]="threatIntelCategories"
+          [routePrefix]="'threat-intel'"
+        [title]="('Actors & Malware') | translate"></app-dashboard-sidebar-items>
+      }
       @if (isAdmin() || licenseService.canUseModule('feed')) {
         <app-dashboard-sidebar-items
           (optionSelected)="onOptionSelected($event)"
@@ -88,7 +98,7 @@
           [icon]="'assets/images/sidebar/news.svg'"
           [items]="newsCategories"
           [routePrefix]="'feed'"
-        [title]="('Feed') | translate"></app-dashboard-sidebar-items>
+        [title]="('News Feed') | translate"></app-dashboard-sidebar-items>
       }
       @if (isAdmin() || licenseService.canUseModule('dumps')) {
         <app-dashboard-sidebar-items
@@ -98,7 +108,7 @@
           [icon]="'assets/images/sidebar/dump.svg'"
           [items]="dumpCategories"
           [routePrefix]="'dump'"
-        [title]="('Dump') | translate"></app-dashboard-sidebar-items>
+        [title]="('Breach Artifacts') | translate"></app-dashboard-sidebar-items>
       }
       @if (licenseService.canUseScanning() || licenseService.canUseModule('stealer_logs')) {
         <div class="mt-[20px] text-[13px] font-bold text-white">{{ 'Webscans' | translate }}</div>
@@ -314,6 +324,18 @@
           [title]="('Exploit') | translate">
         </app-dashboard-sidebar-collapsed>
       }
+      @if (isAdmin() || licenseService.canUseModule('general')) {
+        <app-dashboard-sidebar-collapsed
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.THREAT_INTEL"
+          [icon]="'assets/images/sidebar/graph.svg'"
+          [items]="threatIntelCategories"
+          [routePrefix]="'threat-intel'"
+          [selectionStore]="selectionStore"
+          [title]="('Actors & Malware') | translate">
+        </app-dashboard-sidebar-collapsed>
+      }
       @if (isAdmin() || licenseService.canUseModule('feed')) {
         <app-dashboard-sidebar-collapsed
           (optionSelected)="onOptionSelected($event)"
@@ -323,7 +345,7 @@
           [items]="newsCategories"
           [routePrefix]="'feed'"
           [selectionStore]="selectionStore"
-          [title]="('Feed') | translate">
+          [title]="('News Feed') | translate">
         </app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseModule('dumps')) {
@@ -335,7 +357,7 @@
           [items]="dumpCategories"
           [routePrefix]="'dump'"
           [selectionStore]="selectionStore"
-        [title]="('Dump') | translate"></app-dashboard-sidebar-collapsed>
+        [title]="('Breach Artifacts') | translate"></app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseModule('stealer_logs')) {
         <app-dashboard-sidebar-collapsed

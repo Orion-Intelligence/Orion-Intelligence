@@ -219,6 +219,22 @@ export class ReportComponent implements OnInit, AfterViewInit {
     return normalizeDisplayUrlUtil(url, '-');
   }
 
+  getReportUrl(): string {
+    return this.resultItem?.m_url || this.resultItem?.m_source_url || this.resultItem?.m_base_url || '';
+  }
+
+  getReportDescription(): string {
+    return this.resultItem?.m_important_content || this.resultItem?.m_content || '';
+  }
+
+  getReportDate(): string {
+    return this.resultItem?.m_leak_date || this.resultItem?.m_published_date || this.resultItem?.m_first_seen || '';
+  }
+
+  getStatusDate(): string {
+    return this.resultItem?.m_creation_date || this.resultItem?.m_update_date || this.getReportDate();
+  }
+
   get reportDocId(): string {
     return this.resultItem?.m_hash || this.resultItem?._id || '';
   }

@@ -96,6 +96,9 @@ export class LicenseService {
     if (moduleName === 'Strategic') {
       moduleName = 'general';
     }
+    if (moduleName === 'Threat Intelligence') {
+      moduleName = 'general';
+    }
     const key = moduleName.toLowerCase();
     if (this.subscriptionService.isDemo() && [
       'profile',

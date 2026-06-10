@@ -29,12 +29,12 @@
     <div class="mx-[32px] max-w-[1220px] pb-[16px] max-[1000px]:mx-[15px]">
       @for (item of currentResultModel; track (item.m_hash || item.m_message_id || item.id || item.m_url || 'item') + '-' + $index) {
         <div class="space-y-6">
-          @if (item.rank_index === 'leak_model' || item.rank_index === 'generic_model') {
+          @if (item.rank_index === 'leak_model' || item.rank_index === 'generic_model' || item.rank_index === 'apt_model' || item.rank_index === 'malware_model') {
             <app-dashboard-results-general-grid
               [query]="currentQuery"
               [searchResults]="[item]"
               [isExpandAble]="false"
-              [type]="item.rank_index === 'generic_model' ? 'Strategic' : 'leak'">
+              [type]="item.rank_index === 'generic_model' ? 'Strategic' : item.rank_index === 'apt_model' ? 'apt' : item.rank_index === 'malware_model' ? 'malware' : 'leak'">
             </app-dashboard-results-general-grid>
           }
           @if (item.rank_index === 'exploit_model') {
