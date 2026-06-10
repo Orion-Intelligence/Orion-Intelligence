@@ -264,10 +264,7 @@ export interface CaseArtifactFile {
     fileSize: number;
     fileResourceId: string;
     fileHash?: string;
-    hashAlgorithm?: string;
     integrityStatus?: 'unknown' | 'verified' | 'failed';
-    integrityCheckedAt?: Date | string | null;
-    integrityMessage?: string;
     uploadedAt?: Date | string;
 }
 

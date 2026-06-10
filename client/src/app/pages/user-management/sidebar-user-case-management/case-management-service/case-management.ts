@@ -3,19 +3,10 @@ import { Observable } from 'rxjs';
 import { ApiService } from '../../../../shared/services/api.service';
 import { ArtifactReportOption, Case, CaseAnalyst, CaseRequest, CaseShareRequest, CaseShareResponse, CaseUpdateRequest } from '../../../../shared/model/case-management/case.model';
 
-export type ArtifactFileIntegrityResult = {
+type ArtifactFileIntegrityResult = {
   fileId: string;
   success: boolean;
   status: 'verified' | 'failed';
-  expectedHash?: string;
-  actualHash?: string;
-  message: string;
-  verifiedAt?: string;
-};
-
-export type ArtifactFilesIntegrityResponse = {
-  success: boolean;
-  files: ArtifactFileIntegrityResult[];
 };
 
 type ArtifactFileUploadResponse = {
@@ -86,10 +77,6 @@ export class CaseManagement {
 
   verifyArtifactFile(caseId: string, artifactId: string, fileId: string): Observable<ArtifactFileIntegrityResult> {
     return this.api.post<ArtifactFileIntegrityResult>(`profile/cases/${caseId}/artifacts/${artifactId}/files/${fileId}/verify`, {});
-  }
-
-  verifyAllArtifactFiles(caseId: string, artifactId: string): Observable<ArtifactFilesIntegrityResponse> {
-    return this.api.post<ArtifactFilesIntegrityResponse>(`profile/cases/${caseId}/artifacts/${artifactId}/files/verify-all`, {});
   }
 
   deleteArtifactFile(caseId: string, artifactId: string, fileId: string): Observable<{ success: boolean }> {

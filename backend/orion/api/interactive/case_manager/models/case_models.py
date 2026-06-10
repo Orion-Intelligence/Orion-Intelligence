@@ -102,10 +102,7 @@ class CaseArtifactFileModel(CaseRequestModel):
     fileSize: int = 0
     fileResourceId: str = ""
     fileHash: str = ""
-    hashAlgorithm: str = "sha256"
     integrityStatus: str = "unknown"
-    integrityCheckedAt: Optional[datetime] = None
-    integrityMessage: str = ""
     uploadedAt: Optional[datetime] = None
 
 class CaseArtifactModel(CaseRequestModel):
