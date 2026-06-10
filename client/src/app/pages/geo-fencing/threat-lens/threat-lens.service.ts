@@ -50,7 +50,7 @@ export class ThreatLensService {
   private buildDefaultThreatLensDateRange(): string {
     const today = this.toDateOnly(new Date());
     const endDate = new Date(today);
-    endDate.setMonth(endDate.getMonth() - 2);
+    endDate.setMonth(endDate.getMonth() - 8);
 
     if (endDate.getDate() !== today.getDate()) {
       endDate.setDate(0);

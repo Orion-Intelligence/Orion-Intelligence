@@ -44,6 +44,16 @@ export interface ThreatLensCountrySelection {
   ipScanRequest?: ThreatLensIpViewportScanRequest | null;
 }
 
+export interface ThreatLensArcSelection {
+  categoryKey: ThreatLensCategoryModelKey;
+  categoryLabel: string;
+  countryAKey: string;
+  countryBKey: string;
+  countryAName: string;
+  countryBName: string;
+  weight: number;
+}
+
 export interface ThreatLensArcRenderResult {
   totalArcCount: number;
   arcCountByCategory: Map<ThreatLensCategoryModelKey, number>;

@@ -67,6 +67,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   isPanelMenuOpen = false;
   isPanelPopupOpen = true;
   isThreatLensLoading = false;
+  isThreatLensDetailOverlayOpen = false;
   isFilterOpen$!: Observable<boolean>;
   fetchGeocodeResults = (query: string) => this.geocodeService.fetchGeocodeResults(query);
 
@@ -314,6 +315,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     if (view === 'map') {
       this.activePanel = SatelliteIntelPanelEnum.Dashboard;
       this.isPanelPopupOpen = true;
+      this.isThreatLensDetailOverlayOpen = false;
     }
     this.isThreatLensLoading = view === 'threat';
     this.isPanelMenuOpen = false;
@@ -328,6 +330,13 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   onThreatLensLoadingChange(isLoading: boolean): void {
     this.isThreatLensLoading = isLoading;
+  }
+
+  onThreatLensDetailOverlayOpenChange(isOpen: boolean): void {
+    this.isThreatLensDetailOverlayOpen = isOpen;
+    if (isOpen) {
+      this.isPanelMenuOpen = false;
+    }
   }
 
   onSatelliteMapReady(): void {

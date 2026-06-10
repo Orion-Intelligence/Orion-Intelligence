@@ -11,6 +11,7 @@
 		(countrySelected)="onCountrySelected($event)"
 		(emptySelection)="onMapEmptySelection()"
 		(ipSelected)="onIpSelected($event)"
+		(arcSelected)="onArcSelected($event)"
 		(viewportIpScanRequested)="onViewportIpScanRequested($event)"
 		(arcCountChange)="onArcCountChange($event)">
 	</app-threat-lens-map-renderer>
@@ -224,4 +225,12 @@
 		[ip]="selectedIp"
 		(close)="onIpDetailPopupClose()">
 	</app-threat-lens-ip-detail-popup>
+}
+
+@if (selectedArc; as arc) {
+	<app-threat-lens-arc-report-popup
+		[arc]="arc"
+		[items]="feedItems"
+		(close)="onArcReportPanelClose()">
+	</app-threat-lens-arc-report-popup>
 }
