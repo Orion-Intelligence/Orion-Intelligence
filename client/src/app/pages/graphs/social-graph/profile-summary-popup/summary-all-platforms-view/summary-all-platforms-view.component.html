@@ -6,9 +6,9 @@
           <i class="bi bi-collection-fill"></i>
         </div>
         <div>
-          <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-200/70">Aggregate View</p>
-          <h3 class="mt-1 text-2xl font-semibold text-white">All Platforms Summary</h3>
-          <p class="mt-1 text-sm text-slate-300">Cross-platform intelligence for <span class="font-semibold text-white">{{ username() }}</span></p>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-200/70">{{ 'Aggregate View' | translate }}</p>
+          <h3 class="mt-1 text-2xl font-semibold text-white">{{ 'All Platforms Summary' | translate }}</h3>
+          <p class="mt-1 text-sm text-slate-300">{{ 'Cross-platform intelligence for' | translate }} <span class="font-semibold text-white">{{ username() }}</span></p>
           @if (email()) {
             <p class="mt-1 truncate font-mono text-xs text-indigo-200/90">{{ email() }}</p>
           }
@@ -17,34 +17,34 @@
       <div class="flex flex-wrap gap-2">
         <button (click)="fetchProfileLeaks()" [disabled]="profileLeaksLoading()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600 whitespace-nowrap">
           <i class="bi" [ngClass]="profileLeaksLoading() ? 'bi-arrow-repeat animate-spin' : 'bi-shield-exclamation'"></i>
-          <span>{{ profileLeaksLoading() ? 'Fetching leaks...' : 'Fetch Profile Leaks' }}</span>
+          <span>{{ (profileLeaksLoading() ? 'Fetching leaks...' : 'Fetch Profile Leaks') | translate }}</span>
         </button>
         <button (click)="fetchProfileMetadata()" [disabled]="profileMetadataLoading()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600 whitespace-nowrap">
           <i class="bi" [ngClass]="profileMetadataLoading() ? 'bi-arrow-repeat animate-spin' : 'bi-search'"></i>
-          <span>{{ profileMetadataLoading() ? 'Searching...' : 'Search Metadata' }}</span>
+          <span>{{ (profileMetadataLoading() ? 'Searching...' : 'Search Metadata') | translate }}</span>
         </button>
       </div>
     </div>
 
     <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
       <div class="rounded-lg border border-slate-700/70 bg-slate-900/40 p-3">
-        <p class="text-[11px] uppercase tracking-wide text-slate-500">Platforms</p>
+        <p class="text-[11px] uppercase tracking-wide text-slate-500">{{ 'Platforms' | translate }}</p>
         <p class="mt-2 text-2xl font-semibold text-white">{{ totalPlatforms() }}</p>
       </div>
       <div class="rounded-lg border border-slate-700/70 bg-slate-900/40 p-3">
-        <p class="text-[11px] uppercase tracking-wide text-slate-500">Profile Details</p>
+        <p class="text-[11px] uppercase tracking-wide text-slate-500">{{ 'Profile Details' | translate }}</p>
         <p class="mt-2 text-2xl font-semibold text-white">{{ detailsReadyCount() }}</p>
       </div>
       <div class="rounded-lg border border-slate-700/70 bg-slate-900/40 p-3">
-        <p class="text-[11px] uppercase tracking-wide text-slate-500">Recent Posts</p>
+        <p class="text-[11px] uppercase tracking-wide text-slate-500">{{ 'Recent Posts' | translate }}</p>
         <p class="mt-2 text-2xl font-semibold text-white">{{ postsReadyCount() }}</p>
       </div>
       <div class="rounded-lg border border-slate-700/70 bg-slate-900/40 p-3">
-        <p class="text-[11px] uppercase tracking-wide text-slate-500">Post Connections</p>
+        <p class="text-[11px] uppercase tracking-wide text-slate-500">{{ 'Post Connections' | translate }}</p>
         <p class="mt-2 text-2xl font-semibold text-white">{{ connectionsReadyCount() }}</p>
       </div>
       <div class="rounded-lg border border-slate-700/70 bg-slate-900/40 p-3">
-        <p class="text-[11px] uppercase tracking-wide text-slate-500">Images</p>
+        <p class="text-[11px] uppercase tracking-wide text-slate-500">{{ 'Images' | translate }}</p>
         <p class="mt-2 text-2xl font-semibold text-white">{{ imagesReadyCount() }}</p>
       </div>
     </div>
@@ -54,7 +54,7 @@
     <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">
       <i class="bi bi-chevron-right pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-transform duration-200 group-open:rotate-90"></i>
       <div class="flex items-center gap-3">
-        <span>Profile Leak Intelligence</span>
+        <span>{{ 'Profile Leak Intelligence' | translate }}</span>
         <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-slate-400">{{ profileBreachCards().length + profileStealerRows().length }}</span>
       </div>
     </summary>
@@ -66,7 +66,7 @@
         <div class="grid gap-4 xl:grid-cols-2">
           <div class="rounded-lg border border-slate-700/70 bg-slate-950/30 p-4">
             <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
-              <h4 class="font-semibold text-slate-100">Email Breach Results</h4>
+              <h4 class="font-semibold text-slate-100">{{ 'Email Breach Results' | translate }}</h4>
               <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] text-slate-400">{{ profileBreachCards().length }}</span>
             </div>
             @if (profileBreachCards().length > 0) {
@@ -80,10 +80,10 @@
                           <span class="ml-1 break-words text-slate-200">{{ stringifyPrimitive(entry.value) }}</span>
                         }
                         @if (isArrayValue(entry.value)) {
-                          <span class="ml-1 break-words text-slate-200">{{ entry.value.length ? entry.value.join(', ') : 'not available' }}</span>
+                          <span class="ml-1 break-words text-slate-200">{{ (entry.value.length ? entry.value.join(', ') : 'not available') | translate }}</span>
                         }
                         @if (isObjectValue(entry.value)) {
-                          <span class="ml-1 break-words text-slate-200">[object]</span>
+                          <span class="ml-1 break-words text-slate-200">{{ '[object]' | translate }}</span>
                         }
                       </div>
                     }
@@ -91,13 +91,13 @@
                 }
               </div>
             } @else {
-              <p class="mt-3 text-sm text-slate-500">No response was found.</p>
+              <p class="mt-3 text-sm text-slate-500">{{ 'No response was found.' | translate }}</p>
             }
           </div>
 
           <div class="rounded-lg border border-slate-700/70 bg-slate-950/30 p-4">
             <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
-              <h4 class="font-semibold text-slate-100">Stealer Log Results</h4>
+              <h4 class="font-semibold text-slate-100">{{ 'Stealer Log Results' | translate }}</h4>
               <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] text-slate-400">{{ profileStealerRows().length }}</span>
             </div>
             @if (profileStealerRows().length > 0) {
@@ -111,10 +111,10 @@
                           <span class="ml-1 break-words text-slate-200">{{ stringifyPrimitive(entry.value) }}</span>
                         }
                         @if (isArrayValue(entry.value)) {
-                          <span class="ml-1 break-words text-slate-200">{{ entry.value.length ? entry.value.join(', ') : 'not available' }}</span>
+                          <span class="ml-1 break-words text-slate-200">{{ (entry.value.length ? entry.value.join(', ') : 'not available') | translate }}</span>
                         }
                         @if (isObjectValue(entry.value)) {
-                          <span class="ml-1 break-words text-slate-200">[object]</span>
+                          <span class="ml-1 break-words text-slate-200">{{ '[object]' | translate }}</span>
                         }
                       </div>
                     }
@@ -122,7 +122,7 @@
                 }
               </div>
             } @else {
-              <p class="mt-3 text-sm text-slate-500">No response was found.</p>
+              <p class="mt-3 text-sm text-slate-500">{{ 'No response was found.' | translate }}</p>
             }
           </div>
         </div>
@@ -134,7 +134,7 @@
     <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">
       <i class="bi bi-chevron-right pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-transform duration-200 group-open:rotate-90"></i>
       <div class="flex items-center gap-3">
-        <span>Profile Metadata Results</span>
+        <span>{{ 'Profile Metadata Results' | translate }}</span>
         <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-slate-400">{{ profileMetadataResult()?.total_found || 0 }}</span>
       </div>
     </summary>
@@ -150,15 +150,15 @@
                 </button>
               </span>
             }
-            <input type="text" [value]="profileMetadataTokenInput()" (input)="profileMetadataTokenInput.set($any($event.target).value)" (keydown)="onMetadataTokenKeydown($event)" (blur)="addTokensFromInput()" placeholder="Type a token and press Enter" class="min-w-[180px] flex-1 rounded-md bg-transparent px-2 py-1 text-xs text-white placeholder:text-slate-500 focus:outline-none">
+            <input type="text" [value]="profileMetadataTokenInput()" (input)="profileMetadataTokenInput.set($any($event.target).value)" (keydown)="onMetadataTokenKeydown($event)" (blur)="addTokensFromInput()" [placeholder]="'Type a token and press Enter' | translate" class="min-w-[180px] flex-1 rounded-md bg-transparent px-2 py-1 text-xs text-white placeholder:text-slate-500 focus:outline-none">
           </div>
           <div class="flex items-center gap-2">
             <button (click)="fetchProfileMetadata()" [disabled]="profileMetadataLoading()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
               <i class="bi" [ngClass]="profileMetadataLoading() ? 'bi-arrow-repeat animate-spin' : 'bi-search'"></i>
-              <span>{{ profileMetadataLoading() ? 'Searching...' : 'Search Metadata' }}</span>
+              <span>{{ (profileMetadataLoading() ? 'Searching...' : 'Search Metadata') | translate }}</span>
             </button>
             @if (profileMetadataTokens().length) {
-              <button type="button" (click)="clearMetadataTokens()" class="text-xs text-slate-400 hover:text-slate-200">Clear</button>
+              <button type="button" (click)="clearMetadataTokens()" class="text-xs text-slate-400 hover:text-slate-200">{{ 'common.actions.clear' | translate }}</button>
             }
           </div>
         </div>
@@ -174,19 +174,19 @@
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div>
                 @if (meta.query) {
-                  <p class="text-xs text-slate-400">Query: {{ meta.query }}</p>
+                  <p class="text-xs text-slate-400">{{ 'Query' | translate }}: {{ meta.query }}</p>
                 }
                 @if (meta.timestamp) {
-                  <p class="mt-1 text-xs text-slate-500">Timestamp: {{ meta.timestamp }}</p>
+                  <p class="mt-1 text-xs text-slate-500">{{ 'Timestamp' | translate }}: {{ meta.timestamp }}</p>
                 }
               </div>
-              <span class="rounded-full bg-slate-800 px-2.5 py-1 text-[11px] text-slate-400">{{ meta.total_found || 0 }} results</span>
+              <span class="rounded-full bg-slate-800 px-2.5 py-1 text-[11px] text-slate-400">{{ meta.total_found || 0 }} {{ 'results' | translate }}</span>
             </div>
             @if ((meta?.results?.length || 0) > 0) {
               <div class="mt-3 space-y-2">
                 @for (row of (meta?.results || []).slice(0, 10); track row.url || row.title || $index) {
                   <div class="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3">
-                    <div class="text-sm font-semibold text-slate-200">{{ row.title || 'Untitled' }}</div>
+                    <div class="text-sm font-semibold text-slate-200">{{ (row.title || 'Untitled') | translate }}</div>
                     @if (row.url) {
                       <a [href]="row.url" target="_blank" rel="noopener noreferrer" class="mt-1 block break-words text-xs text-indigo-400 hover:underline">{{ row.url }}</a>
                     }
@@ -197,7 +197,7 @@
                 }
               </div>
             } @else {
-              <p class="mt-3 text-sm text-slate-500">No response was found.</p>
+              <p class="mt-3 text-sm text-slate-500">{{ 'No response was found.' | translate }}</p>
             }
           </div>
         }
@@ -209,14 +209,14 @@
     <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">
       <i class="bi bi-chevron-right pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-transform duration-200 group-open:rotate-90"></i>
       <div class="flex items-center gap-3">
-        <span>Profile Details</span>
+        <span>{{ 'Profile Details' | translate }}</span>
         <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-slate-400">{{ detailsReadyCount() }}/{{ totalPlatforms() }}</span>
       </div>
     </summary>
     <div class="border-t border-slate-700/80 p-4 space-y-4">
       <div class="relative">
         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><i class="bi bi-search w-4 h-4 text-slate-400"></i></div>
-        <input type="text" placeholder="Filter platforms..." [value]="detailsSearchTerm()" (input)="onDetailsSearch($event)" class="block w-full rounded-lg border border-slate-700/80 bg-slate-950/40 py-2.5 pl-9 pr-9 text-white placeholder:text-slate-500 focus:border-indigo-500/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:text-sm">
+        <input type="text" [placeholder]="'Filter platforms...' | translate" [value]="detailsSearchTerm()" (input)="onDetailsSearch($event)" class="block w-full rounded-lg border border-slate-700/80 bg-slate-950/40 py-2.5 pl-9 pr-9 text-white placeholder:text-slate-500 focus:border-indigo-500/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:text-sm">
         @if (detailsSearchTerm()) {
           <button (click)="clearDetailsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 transition-colors hover:text-slate-300"><i class="bi bi-x-circle-fill"></i></button>
         }
@@ -244,7 +244,7 @@
                     }
                   </dl>
                 } @else {
-                  <p class="text-center text-sm text-slate-500 py-2">No additional profile data found.</p>
+                  <p class="text-center text-sm text-slate-500 py-2">{{ 'No additional profile data found.' | translate }}</p>
                 }
               </div>
             } @else {
@@ -256,11 +256,11 @@
                 @if (fetchingState.profile()[getPlatformUniqueKey(platform)]) {
                   <div class="flex shrink-0 items-center gap-2 text-xs text-slate-400">
                     <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-current" role="status"></div>
-                    <span>Fetching...</span>
+                    <span>{{ 'Fetching...' | translate }}</span>
                   </div>
                 } @else {
                   <button (click)="fetchProfile.emit(platform)" [disabled]="isScanInProgress()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
-                    <i class="bi bi-person-lines-fill"></i><span>Fetch</span>
+                    <i class="bi bi-person-lines-fill"></i><span>{{ 'Fetch' | translate }}</span>
                   </button>
                 }
               </div>
@@ -268,12 +268,12 @@
           </div>
         }
         @if (filteredPlatformsForDetails().length === 0) {
-          <p class="rounded-lg border border-dashed border-slate-700/80 bg-slate-950/20 px-4 py-8 text-center text-sm text-slate-500">No platforms match your filter.</p>
+          <p class="rounded-lg border border-dashed border-slate-700/80 bg-slate-950/20 px-4 py-8 text-center text-sm text-slate-500">{{ 'No platforms match your filter.' | translate }}</p>
         }
       </div>
 
       @if (displayPlatformsForDetails().length < filteredPlatformsForDetails().length) {
-        <button (click)="loadMoreDetailsPlatforms()" class="w-full rounded-lg border border-slate-700/80 bg-slate-800/50 px-4 py-2 text-sm font-medium text-indigo-300 transition-colors hover:bg-slate-700/70">Load More Platforms</button>
+        <button (click)="loadMoreDetailsPlatforms()" class="w-full rounded-lg border border-slate-700/80 bg-slate-800/50 px-4 py-2 text-sm font-medium text-indigo-300 transition-colors hover:bg-slate-700/70">{{ 'Load More Platforms' | translate }}</button>
       }
     </div>
   </details>
@@ -281,14 +281,14 @@
     <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">
       <i class="bi bi-chevron-right pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-transform duration-200 group-open:rotate-90"></i>
       <div class="flex items-center gap-3">
-        <span>Recent Posts</span>
+        <span>{{ 'Recent Posts' | translate }}</span>
         <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-slate-400">{{ postsReadyCount() }}/{{ totalPlatforms() }}</span>
       </div>
     </summary>
     <div class="border-t border-slate-700/80 p-4 space-y-4">
       <div class="relative">
         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><i class="bi bi-search w-4 h-4 text-slate-400"></i></div>
-        <input type="text" placeholder="Filter platforms..." [value]="postsSearchTerm()" (input)="onPostsSearch($event)" class="block w-full rounded-lg border border-slate-700/80 bg-slate-950/40 py-2.5 pl-9 pr-9 text-white placeholder:text-slate-500 focus:border-indigo-500/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:text-sm">
+        <input type="text" [placeholder]="'Filter platforms...' | translate" [value]="postsSearchTerm()" (input)="onPostsSearch($event)" class="block w-full rounded-lg border border-slate-700/80 bg-slate-950/40 py-2.5 pl-9 pr-9 text-white placeholder:text-slate-500 focus:border-indigo-500/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:text-sm">
         @if (postsSearchTerm()) {
           <button (click)="clearPostsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 transition-colors hover:text-slate-300"><i class="bi bi-x-circle-fill"></i></button>
         }
@@ -310,19 +310,19 @@
                   <div class="space-y-3">
                     @for (post of platform.posts!.slice(0, 3); track post.post_url || $index) {
                       <div class="rounded-lg border border-slate-700/60 bg-slate-900/40 p-3 text-sm">
-                        <p class="mb-3 line-clamp-3 text-slate-300">{{ post.caption || 'No caption' }}</p>
+                        <p class="mb-3 line-clamp-3 text-slate-300">{{ (post.caption || 'No caption') | translate }}</p>
                         <div class="flex items-center justify-between gap-3 text-slate-400">
                           <div class="flex items-center gap-4 text-xs">
-                            <span title="Likes"><i class="bi bi-heart-fill text-red-500/80"></i> {{ post.likes }}</span>
-                            <span title="Comments"><i class="bi bi-chat-dots-fill text-sky-400/80"></i> {{ post.comments }}</span>
+                            <span [title]="'Likes' | translate"><i class="bi bi-heart-fill text-red-500/80"></i> {{ post.likes }}</span>
+                            <span [title]="'Comments' | translate"><i class="bi bi-chat-dots-fill text-sky-400/80"></i> {{ post.comments }}</span>
                           </div>
-                          <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" class="text-xs font-medium text-indigo-400 hover:underline">View Post <i class="bi bi-link-45deg text-xs"></i></a>
+                          <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" class="text-xs font-medium text-indigo-400 hover:underline">{{ 'View Post' | translate }} <i class="bi bi-link-45deg text-xs"></i></a>
                         </div>
                       </div>
                     }
                   </div>
                 } @else {
-                  <p class="text-center text-sm text-slate-500 py-2">No posts found for this account.</p>
+                  <p class="text-center text-sm text-slate-500 py-2">{{ 'No posts found for this account.' | translate }}</p>
                 }
               </div>
             } @else {
@@ -334,11 +334,11 @@
                 @if (fetchingState.posts()[getPlatformUniqueKey(platform)]) {
                   <div class="flex shrink-0 items-center gap-2 text-xs text-slate-400">
                     <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-current" role="status"></div>
-                    <span>Fetching...</span>
+                    <span>{{ 'Fetching...' | translate }}</span>
                   </div>
                 } @else {
                   <button (click)="fetchPosts.emit(platform)" [disabled]="isScanInProgress()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">
-                    <i class="bi bi-file-post"></i><span>Fetch</span>
+                    <i class="bi bi-file-post"></i><span>{{ 'Fetch' | translate }}</span>
                   </button>
                 }
               </div>
@@ -346,12 +346,12 @@
           </div>
         }
         @if (filteredPlatformsForPosts().length === 0) {
-          <p class="rounded-lg border border-dashed border-slate-700/80 bg-slate-950/20 px-4 py-8 text-center text-sm text-slate-500">No platforms match your filter.</p>
+          <p class="rounded-lg border border-dashed border-slate-700/80 bg-slate-950/20 px-4 py-8 text-center text-sm text-slate-500">{{ 'No platforms match your filter.' | translate }}</p>
         }
       </div>
 
       @if (displayPlatformsForPosts().length < filteredPlatformsForPosts().length) {
-        <button (click)="loadMorePostsPlatforms()" class="w-full rounded-lg border border-slate-700/80 bg-slate-800/50 px-4 py-2 text-sm font-medium text-indigo-300 transition-colors hover:bg-slate-700/70">Load More Platforms</button>
+        <button (click)="loadMorePostsPlatforms()" class="w-full rounded-lg border border-slate-700/80 bg-slate-800/50 px-4 py-2 text-sm font-medium text-indigo-300 transition-colors hover:bg-slate-700/70">{{ 'Load More Platforms' | translate }}</button>
       }
     </div>
   </details>
@@ -361,14 +361,14 @@
     <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">
       <i class="bi bi-chevron-right pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-transform duration-200 group-open:rotate-90"></i>
       <div class="flex items-center gap-3">
-        <span>Post Connections</span>
+        <span>{{ 'Post Connections' | translate }}</span>
         <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-slate-400">{{ connectionsReadyCount() }}/{{ connectionsSupportedCount() }}</span>
       </div>
     </summary>
     <div class="border-t border-slate-700/80 p-4 space-y-4">
       <div class="relative">
         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><i class="bi bi-search w-4 h-4 text-slate-400"></i></div>
-        <input type="text" placeholder="Filter platforms..." [value]="postsSearchTerm()" (input)="onPostsSearch($event)" class="block w-full rounded-lg border border-slate-700/80 bg-slate-950/40 py-2.5 pl-9 pr-9 text-white placeholder:text-slate-500 focus:border-indigo-500/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:text-sm">
+        <input type="text" [placeholder]="'Filter platforms...' | translate" [value]="postsSearchTerm()" (input)="onPostsSearch($event)" class="block w-full rounded-lg border border-slate-700/80 bg-slate-950/40 py-2.5 pl-9 pr-9 text-white placeholder:text-slate-500 focus:border-indigo-500/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:text-sm">
         @if (postsSearchTerm()) {
           <button (click)="clearPostsSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 transition-colors hover:text-slate-300"><i class="bi bi-x-circle-fill"></i></button>
         }
@@ -381,7 +381,7 @@
               <div [socialMapperPlatformBg]="platform.platform" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#475569] p-1.5 text-sm font-bold text-white"><app-social-icon [platformName]="platform.platform"></app-social-icon></div>
               <h4 class="flex-1 font-semibold text-slate-100">{{ platform.platform }}</h4>
               @if ((platform.post_connections?.length ?? 0) > 0) {
-                <span class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-300">{{ platform.post_connections?.length }} connections</span>
+                <span class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-300">{{ platform.post_connections?.length }} {{ 'connections' | translate }}</span>
               }
             </div>
             @if (platform.post_connections?.length) {
@@ -394,21 +394,21 @@
               </div>
               @if (canLoadMorePostConnections(platform)) {
                 <button (click)="loadMorePlatformPostConnections(platform)" class="mt-3 w-full rounded-lg border border-slate-700/80 bg-slate-800/50 px-4 py-2 text-sm font-medium text-indigo-300 transition-colors hover:bg-slate-700/70">
-                  Load More Connections
+                  {{ 'Load More Connections' | translate }}
                 </button>
               }
             } @else {
-              <p class="text-center text-sm text-slate-500 py-2">No connections detected in posts.</p>
+              <p class="text-center text-sm text-slate-500 py-2">{{ 'No connections detected in posts.' | translate }}</p>
             }
           </div>
         }
         @if (filteredPlatformsForConnections().length === 0) {
-          <p class="rounded-lg border border-dashed border-slate-700/80 bg-slate-950/20 px-4 py-8 text-center text-sm text-slate-500">No platforms match your filter.</p>
+          <p class="rounded-lg border border-dashed border-slate-700/80 bg-slate-950/20 px-4 py-8 text-center text-sm text-slate-500">{{ 'No platforms match your filter.' | translate }}</p>
         }
       </div>
 
       @if (displayPlatformsForConnections().length < filteredPlatformsForConnections().length) {
-        <button (click)="loadMorePostsPlatforms()" class="w-full rounded-lg border border-slate-700/80 bg-slate-800/50 px-4 py-2 text-sm font-medium text-indigo-300 transition-colors hover:bg-slate-700/70">Load More Platforms</button>
+        <button (click)="loadMorePostsPlatforms()" class="w-full rounded-lg border border-slate-700/80 bg-slate-800/50 px-4 py-2 text-sm font-medium text-indigo-300 transition-colors hover:bg-slate-700/70">{{ 'Load More Platforms' | translate }}</button>
       }
     </div>
   </details>
@@ -418,14 +418,14 @@
     <summary class="relative flex cursor-pointer items-center justify-between gap-3 px-4 py-3 pl-10 text-sm font-semibold text-slate-200 list-none [&::-webkit-details-marker]:hidden">
       <i class="bi bi-chevron-right pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-transform duration-200 group-open:rotate-90"></i>
       <div class="flex items-center gap-3">
-        <span>Associated Images</span>
+        <span>{{ 'Associated Images' | translate }}</span>
         <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-slate-400">{{ imagesReadyCount() }}/{{ totalPlatforms() }}</span>
       </div>
     </summary>
     <div class="border-t border-slate-700/80 p-4 space-y-4">
       <div class="relative">
         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><i class="bi bi-search w-4 h-4 text-slate-400"></i></div>
-        <input type="text" placeholder="Filter platforms..." [value]="imagesSearchTerm()" (input)="onImagesSearch($event)" class="block w-full rounded-lg border border-slate-700/80 bg-slate-950/40 py-2.5 pl-9 pr-9 text-white placeholder:text-slate-500 focus:border-indigo-500/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:text-sm">
+        <input type="text" [placeholder]="'Filter platforms...' | translate" [value]="imagesSearchTerm()" (input)="onImagesSearch($event)" class="block w-full rounded-lg border border-slate-700/80 bg-slate-950/40 py-2.5 pl-9 pr-9 text-white placeholder:text-slate-500 focus:border-indigo-500/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:text-sm">
         @if (imagesSearchTerm()) {
           <button (click)="clearImagesSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 transition-colors hover:text-slate-300"><i class="bi bi-x-circle-fill"></i></button>
         }
@@ -441,16 +441,16 @@
                   <div class="min-w-0 flex-1">
                     <h4 class="truncate font-semibold text-slate-100">{{ platform.platform }}</h4>
                     @if (!platform.images?.length) {
-                      <p class="mt-0.5 truncate text-sm text-slate-500">No images found for this platform.</p>
+                      <p class="mt-0.5 truncate text-sm text-slate-500">{{ 'No images found for this platform.' | translate }}</p>
                     }
                   </div>
                   @if (fetchingState.platformImages()[getPlatformUniqueKey(platform)]) {
                     <div class="flex shrink-0 items-center gap-2 text-xs text-slate-400">
                       <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-current" role="status"></div>
-                      <span>Fetching...</span>
+                      <span>{{ 'Fetching...' | translate }}</span>
                     </div>
                   } @else {
-                    <button (click)="fetchPlatformImages.emit(platform)" [disabled]="isScanInProgress()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">Fetch Images</button>
+                    <button (click)="fetchPlatformImages.emit(platform)" [disabled]="isScanInProgress()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">{{ 'Fetch Images' | translate }}</button>
                   }
                 </div>
                 @if (platform.images?.length) {
@@ -472,22 +472,22 @@
                 @if (fetchingState.platformImages()[getPlatformUniqueKey(platform)]) {
                   <div class="flex shrink-0 items-center gap-2 text-xs text-slate-400">
                     <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-current" role="status"></div>
-                    <span>Fetching...</span>
+                    <span>{{ 'Fetching...' | translate }}</span>
                   </div>
                 } @else {
-                  <button (click)="fetchPlatformImages.emit(platform)" [disabled]="isScanInProgress()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">Fetch Images</button>
+                  <button (click)="fetchPlatformImages.emit(platform)" [disabled]="isScanInProgress()" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-600">{{ 'Fetch Images' | translate }}</button>
                 }
               </div>
             }
           </div>
         }
         @if (filteredPlatformsForImages().length === 0) {
-          <p class="rounded-lg border border-dashed border-slate-700/80 bg-slate-950/20 px-4 py-8 text-center text-sm text-slate-500">No platforms match your filter.</p>
+          <p class="rounded-lg border border-dashed border-slate-700/80 bg-slate-950/20 px-4 py-8 text-center text-sm text-slate-500">{{ 'No platforms match your filter.' | translate }}</p>
         }
       </div>
 
       @if (displayPlatformsForImages().length < filteredPlatformsForImages().length) {
-        <button (click)="loadMoreImagesPlatforms()" class="w-full rounded-lg border border-slate-700/80 bg-slate-800/50 px-4 py-2 text-sm font-medium text-indigo-300 transition-colors hover:bg-slate-700/70">Load More Platforms</button>
+        <button (click)="loadMoreImagesPlatforms()" class="w-full rounded-lg border border-slate-700/80 bg-slate-800/50 px-4 py-2 text-sm font-medium text-indigo-300 transition-colors hover:bg-slate-700/70">{{ 'Load More Platforms' | translate }}</button>
       }
     </div>
   </details>

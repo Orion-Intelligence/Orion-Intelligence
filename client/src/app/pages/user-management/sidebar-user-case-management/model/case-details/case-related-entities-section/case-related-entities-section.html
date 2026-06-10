@@ -1,22 +1,22 @@
 <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
     <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
         <div class="flex items-center gap-1.5">
-            <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Related Entities
+            <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Related Entities' | translate }}
             </h2>
-            <img src="/assets/images/shared/theme/info.svg" alt="" aria-hidden="true" appTooltip="Other entities connected to the case, such as affected assets, accounts, indicators, sources, or linked actors." class="h-4 w-4 shrink-0 ui-action-icon">
+            <img src="/assets/images/shared/theme/info.svg" alt="" aria-hidden="true" [appTooltip]="'Other entities connected to the case, such as affected assets, accounts, indicators, sources, or linked actors.' | translate" class="h-4 w-4 shrink-0 ui-action-icon">
         </div>
 
         <div class="flex items-center gap-2">
             @if (!caseData.closure) {
             <button type="button" (click)="store.openAddRelatedEntity()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800 [body.light-theme_&]:hover:border-sky-700/40 [body.light-theme_&]:hover:bg-sky-200/70 [body.light-theme_&]:hover:text-sky-900" data-testid="case-related-entity-add">
-                <i class="bi bi-plus-lg"></i> Add
+                <i class="bi bi-plus-lg"></i> {{ 'common.actions.add' | translate }}
             </button>
             }
         </div>
     </div>
 
     @if (isEditing && selectedEditableRelatedEntity; as editableEntity) {
-    <app-case-edit-drawer title="Edit Related Entity" [subtitle]="editableEntity.value || 'Related Entity'" saveLabel="Save Entity" saveTestId="case-related-entity-save" cancelTestId="case-related-entity-cancel" drawerTestId="case-related-entity-edit-drawer" (save)="store.saveRelatedEntities()" (cancel)="cancelRelatedEntityEditing()">
+    <app-case-edit-drawer [title]="'Edit Related Entity' | translate" [subtitle]="(editableEntity.value || 'Related Entity') | translate" [saveLabel]="'Save Entity' | translate" saveTestId="case-related-entity-save" cancelTestId="case-related-entity-cancel" drawerTestId="case-related-entity-edit-drawer" (save)="store.saveRelatedEntities()" (cancel)="cancelRelatedEntityEditing()">
         <div class="p-6">
             <app-entity-details @caseListItemMotion [entity]="editableEntity" [isMainEntity]="false" [showTitle]="false"
                 [showTopDivider]="false" [showRoleRelationshipFields]="true" [showInlineSaveButtons]="false" [entityIndex]="selectedEditableRelatedEntityIndex"
@@ -36,12 +36,12 @@
             <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <button type="button" (click)="toggleRelatedEntity(entity.entityId)" class="min-w-0 flex-1 text-left" [attr.aria-expanded]="isRelatedEntityExpanded(entity.entityId)">
                     <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                        Related Entity {{ i + 1 }}
+                        {{ 'Related Entity' | translate }} {{ i + 1 }}
                     </div>
 
                     <div class="flex items-center gap-1.5">
                         <div class="text-sm font-semibold text-[var(--color-text1)] break-words" [attr.data-testid]="'case-related-entity-value-' + i">
-                            {{ entity.value || 'Untitled entity' }}
+                            {{ (entity.value || 'Untitled entity') | translate }}
                         </div>
 
                         <i class="bi text-xs text-[var(--color-text4)]" [ngClass]="isRelatedEntityExpanded(entity.entityId) ? 'bi-chevron-up' : 'bi-chevron-down'">
@@ -61,7 +61,7 @@
 
                     @if (!caseData.closure) {
                     <button type="button" (click)="openEditRelatedEntity(entity.entityId)" class="inline-flex h-7 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-xs font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.data-testid]="'case-related-entity-edit-' + i">
-                        <i class="bi bi-pencil-square"></i> Edit
+                        <i class="bi bi-pencil-square"></i> {{ 'Edit' | translate }}
                     </button>
                     }
                 </div>
@@ -72,7 +72,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
                     <div class="min-w-0 pb-4 lg:pb-0 lg:pr-4">
                         <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                            Value
+                            {{ 'Value' | translate }}
                         </div>
 
                         <div class="mt-1 text-[18px] font-semibold leading-snug text-[var(--color-text1)] break-all">
@@ -80,7 +80,7 @@
                         </div>
 
                         <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                            Description
+                            {{ 'categoryAlerts.form.description' | translate }}
                         </div>
 
                         <div class="mt-2 text-sm leading-6 text-[var(--color-text3)] break-words">
@@ -102,7 +102,7 @@
                         <div class="grid grid-cols-2 gap-x-5 gap-y-4">
                             <div>
                                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                    Type
+                                    {{ 'categoryAlerts.export.type' | translate }}
                                 </div>
                                 <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
                                     {{ getDisplayLabel(entity.type, entity.entityTypeOtherValue) }}
@@ -111,7 +111,7 @@
 
                             <div>
                                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                    Source
+                                    {{ 'categoryAlerts.fields.source' | translate }}
                                 </div>
                                 <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
                                     {{ getDisplayLabel(entity.source, entity.entitySourceOtherValue) }}
@@ -120,7 +120,7 @@
 
                             <div>
                                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                    Role
+                                    {{ 'Role' | translate }}
                                 </div>
                                 <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
                                     {{ formatLabel(entity.role) }}
@@ -129,7 +129,7 @@
 
                             <div>
                                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                    Relationship
+                                    {{ 'Relationship' | translate }}
                                 </div>
                                 <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
                                     {{ getLinkedEntityDisplayLabel(entity.linkedEntityId, caseData) }}
@@ -138,7 +138,7 @@
 
                             <div>
                                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                    Confidence
+                                    {{ 'Confidence' | translate }}
                                 </div>
                                 <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">
                                     {{ formatConfidence(entity.confidence) }}
@@ -155,7 +155,7 @@
                         @if ((entity.socialProfiles?.length || 0) > 0) {
                         <div>
                             <div class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                Social Profiles
+                                {{ 'Social Profiles' | translate }}
                             </div>
 
                             <div class="space-y-2">
@@ -174,7 +174,7 @@
 
                                     @if (profile.profileUrl) {
                                     <a [href]="profile.profileUrl" target="_blank" rel="noopener" class="ml-2 text-sky-300 hover:text-sky-200">
-                                        Open
+                                        {{ 'Open' | translate }}
                                     </a>
                                     }
                                 </div>
@@ -186,7 +186,7 @@
                         @if ((entity.identifiers?.length || 0) > 0) {
                         <div>
                             <div class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                Identifiers
+                                {{ 'Identifiers' | translate }}
                             </div>
 
                             <div class="space-y-2">
@@ -200,12 +200,12 @@
 
                                     @if (identifier.issuer) {
                                     <span class="ml-1 text-[var(--color-text4)]">
-                                        Issuer: {{ identifier.issuer }}
+                                        {{ 'Issuer' | translate }}: {{ identifier.issuer }}
                                     </span>
                                     }
 
                                     @if (identifier.verified) {
-                                    <span class="ml-1 text-green-300">Verified</span>
+                                    <span class="ml-1 text-green-300">{{ 'Verified' | translate }}</span>
                                     }
                                 </div>
                                 }
@@ -223,12 +223,12 @@
         }
     </div>
     } @else {
-    <div @caseModeSwapMotion class="p-4 text-sm text-[var(--color-text4)]">No related entities added.</div>
+    <div @caseModeSwapMotion class="p-4 text-sm text-[var(--color-text4)]">{{ 'No related entities added.' | translate }}</div>
     }
 </div>
 
 @if (isAddingRelatedEntity && newRelatedEntity) {
-<app-case-edit-drawer title="Add Related Entity" [subtitle]="caseData.caseId" saveLabel="Save Entity" saveTestId="case-related-entity-add-save" cancelTestId="case-related-entity-add-cancel" drawerTestId="case-related-entity-add-drawer" (save)="store.saveNewRelatedEntity()" (cancel)="store.cancelSectionMode()">
+<app-case-edit-drawer [title]="'Add Related Entity' | translate" [subtitle]="caseData.caseId" [saveLabel]="'Save Entity' | translate" saveTestId="case-related-entity-add-save" cancelTestId="case-related-entity-add-cancel" drawerTestId="case-related-entity-add-drawer" (save)="store.saveNewRelatedEntity()" (cancel)="store.cancelSectionMode()">
     <div class="p-6">
         <app-entity-details [entity]="newRelatedEntity" [isMainEntity]="false" [showTitle]="false"
             [showTopDivider]="false" [showRoleRelationshipFields]="true" [showInlineSaveButtons]="false" [entityIndex]="0"

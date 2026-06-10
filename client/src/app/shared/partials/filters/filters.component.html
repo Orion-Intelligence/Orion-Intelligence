@@ -1,6 +1,6 @@
 <div class="border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-5 py-3">
   <div class="flex items-center justify-between">
-    <h2 class="text-base font-bold text-[var(--color-text1)]">Filters</h2>
+    <h2 class="text-base font-bold text-[var(--color-text1)]">{{ 'Filters' | translate }}</h2>
     <button data-testid="side-filter-close" type="button" (click)="closeFilter()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
       <img alt="close" height="22" ngSrc="assets/images/shared/theme/nav-next.svg" priority width="22" class="ui-action-icon">
     </button>
@@ -10,47 +10,48 @@
 <form class="flex h-[calc(100vh-61px)] flex-col overflow-hidden bg-[var(--color-blue-830)] px-5 overflow-x-hidden">
   <div class="flex-1 overflow-y-auto overflow-x-hidden pb-4">
     @for (key of Object.keys(filterModel.filters); track key) {
-      <div>
-        <label [attr.for]="'side-filter-' + key" appTooltip="{{filterModel.filters[key].tooltip}}" class="mb-[10px] mt-5 block text-[14px] font-medium text-[var(--color-text1)]">
-          {{ filterModel.filters[key].title }}
-        </label>
-        @if (filterModel.filters[key].type === 'daterange') {
-          <app-date-picker (dateSelected)="updateFilter($event)" (selectedFiltersChange)="updateFilter($event)"
-          [filterModel]="filterModel" [key]="key" [mSelectedFilters]="selectedFilters"></app-date-picker>
+    <div>
+      <label [attr.for]="'side-filter-' + key" [appTooltip]="filterModel.filters[key].tooltip | translate" class="mb-[10px] mt-5 block text-[14px] font-medium text-[var(--color-text1)]">
+        {{ filterModel.filters[key].title | translate }}
+      </label>
+      @if (filterModel.filters[key].type === 'daterange') {
+      <app-date-picker (dateSelected)="updateFilter($event)" (selectedFiltersChange)="updateFilter($event)"
+        [filterModel]="filterModel" [key]="key" [mSelectedFilters]="selectedFilters"></app-date-picker>
+      }
+      @if (filterModel.filters[key].type === 'dropdown') {
+      <select [attr.data-testid]="'side-filter-select-' + key" [id]="'side-filter-' + key" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" [ngModel]="selectedFilters[key] ?? ''" (ngModelChange)="onSelectionChange(key, $event)" name="{{ key }}">
+        <option [ngValue]="''">{{ 'Select' | translate }}</option>
+        @for (option of filterModel.filters[key].options; track option) {
+        <option [ngValue]="option.key">{{ option.label | translate }}</option>
         }
-        @if (filterModel.filters[key].type === 'dropdown') {
-          <select [attr.data-testid]="'side-filter-select-' + key" [id]="'side-filter-' + key" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" [ngModel]="selectedFilters[key] ?? ''" (ngModelChange)="onSelectionChange(key, $event)" name="{{ key }}">
-            <option [ngValue]="''">Select</option>
-            @for (option of filterModel.filters[key].options; track option) {
-              <option [ngValue]="option.key">{{ option.label }}</option>
-            }
-          </select>
-        }
-        @if (filterModel.filters[key].type === 'text') {
-          <div class="mb-2">
-            <input [id]="'side-filter-' + key" (ngModelChange)="onSelectionChange(key, selectedFilters[key])" [(ngModel)]="selectedFilters[key]" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" name="{{ key }}" placeholder="{{ filterModel.filters[key].title }}" type="text" />
-          </div>
-        }
-        @if (filterModel.filters[key].type === 'number') {
-          <div class="mb-2">
-            <input [id]="'side-filter-' + key" [max]="filterModel.filters[key].max ?? null" [min]="filterModel.filters[key].min ?? null" [ngModel]="selectedFilters[key] ?? ''" (ngModelChange)="onNumberInputChange(key, $event)" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" inputmode="numeric" name="{{ key }}" placeholder="{{ filterModel.filters[key].placeholder || filterModel.filters[key].title }}" type="number" />
-            @if (filterModel.filters[key].min || filterModel.filters[key].max) {
-              <p class="mt-2 text-[11px] text-[var(--color-text3)]">
-                Allowed range: {{ filterModel.filters[key].min || 0 }} to {{ filterModel.filters[key].max || 'No limit' }}
-              </p>
-            }
-          </div>
+      </select>
+      }
+      @if (filterModel.filters[key].type === 'text') {
+      <div class="mb-2">
+        <input [id]="'side-filter-' + key" (ngModelChange)="onSelectionChange(key, selectedFilters[key])" [(ngModel)]="selectedFilters[key]" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" name="{{ key }}" [placeholder]="filterModel.filters[key].title | translate" type="text" />
+      </div>
+      }
+      @if (filterModel.filters[key].type === 'number') {
+      <div class="mb-2">
+        <input [id]="'side-filter-' + key" [max]="filterModel.filters[key].max ?? null" [min]="filterModel.filters[key].min ?? null" [ngModel]="selectedFilters[key] ?? ''" (ngModelChange)="onNumberInputChange(key, $event)" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" inputmode="numeric" name="{{ key }}" [placeholder]="(filterModel.filters[key].placeholder || filterModel.filters[key].title) | translate" type="number" />
+        @if (filterModel.filters[key].min || filterModel.filters[key].max) {
+        <p class="mt-2 text-[11px] text-[var(--color-text3)]">
+          {{ 'Allowed range' | translate }}: {{ filterModel.filters[key].min || 0 }} {{ 'to' | translate }} {{
+          ((filterModel.filters[key].max || 'No limit') + '') | translate }}
+        </p>
         }
       </div>
+      }
+    </div>
     }
   </div>
 
   <div class="mb-6 mt-auto flex flex-col pt-5">
     <button data-testid="side-filter-reset" (click)="resetFilters()" class="mb-4 h-[42px] w-full rounded-lg border-2 border-[var(--color-blue-640)] bg-transparent px-[14px] text-sm font-medium text-[var(--color-text1)] transition hover:bg-white/10" type="button">
-      Reset
+      {{ 'common.actions.reset' | translate }}
     </button>
     <button data-testid="side-filter-apply" (click)="applyFilters()" class="h-[42px] w-full rounded-lg bg-[var(--color-blue-640)] px-[14px] text-sm font-medium text-[var(--color-text1)] transition" type="button">
-      Apply
+      {{ 'common.actions.apply' | translate }}
     </button>
   </div>
 </form>

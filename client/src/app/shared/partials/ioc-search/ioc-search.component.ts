@@ -10,12 +10,13 @@ import { TooltipDirective } from '../../../shared/directive/tooltip-directive.di
 import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { AppService } from '../../../services/core/app/app.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 interface SharedSearchAdvancedFilter { id: string; tag: string; value: string; operator: '&&' | '||' }
 
 @Component({
   selector: 'app-ioc-search',
-  imports: [KeyValuePipe, FormsModule, TooltipDirective, NgClass, ChatWidgetComponent],
+  imports: [KeyValuePipe, FormsModule, TooltipDirective, NgClass, ChatWidgetComponent, TranslatePipe],
   templateUrl: './ioc-search.component.html',
   animations: [fadeInDashboardItem, advancedRowMotionAnimation],
 })

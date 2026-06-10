@@ -63,17 +63,17 @@
             @if (showTopBar) {
               <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition-opacity [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)]" [ngClass]="isThreatToolbarDisabled ? 'opacity-50' : 'opacity-100'">
                 <button data-testid="geo-fencing-tab-map" class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors max-[420px]:px-2" [ngClass]="activeTab === 'map' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('map')">
-                  Satellite Map
+                  {{ 'Satellite Map' | translate }}
                 </button>
                 <button data-testid="geo-fencing-tab-threat" class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="isThreatToolbarDisabled" [ngClass]="activeTab === 'threat' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('threat')">
-                  Threat Lens
+                  {{ 'Threat Lens' | translate }}
                 </button>
               </div>
             }
             <div class="flex items-center gap-2 max-[520px]:justify-end">
             <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition-opacity [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)]" [ngClass]="showTopBar && activeTab === 'threat' ? 'pointer-events-none opacity-50' : 'opacity-100'">
-              <button data-testid="geo-fencing-layer-satellite" class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="showTopBar && activeTab === 'threat'" [ngClass]="selectedLayer === 'esri' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('esri')">Satellite</button>
-              <button data-testid="geo-fencing-layer-street" class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="showTopBar && activeTab === 'threat'" [ngClass]="selectedLayer === 'osm' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('osm')">Street</button>
+              <button data-testid="geo-fencing-layer-satellite" class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="showTopBar && activeTab === 'threat'" [ngClass]="selectedLayer === 'esri' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('esri')">{{ 'Satellite' | translate }}</button>
+              <button data-testid="geo-fencing-layer-street" class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed max-[420px]:px-2" [disabled]="showTopBar && activeTab === 'threat'" [ngClass]="selectedLayer === 'osm' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setLayer('osm')">{{ 'Street' | translate }}</button>
             </div>
             <button data-testid="geo-fencing-panel-menu-button" class="map-overlay-menu rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-3 py-2 text-[13px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)] max-[420px]:px-2" (click)="togglePanelMenu()">
               <i class="bi bi-list"></i>

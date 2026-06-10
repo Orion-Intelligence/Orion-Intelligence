@@ -26,6 +26,7 @@ import { SatelliteLoadingState } from './state/satellite-loading.state';
 import { SatelliteLocationState } from './state/satellite-location.state';
 import { SatelliteScanState } from './state/satellite-scan.state';
 import { SatelliteIntelPanel, SatelliteIntelPanelEnum } from '../enums/geo-fencing.enums';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector:    'app-satellite-intel',
@@ -40,8 +41,7 @@ import { SatelliteIntelPanel, SatelliteIntelPanelEnum } from '../enums/geo-fenci
     MapEntitiesOverlayComponent,
     DashboardSectionComponent,
     PanelShellComponent,
-    ThreatLensComponent
-  ],
+    ThreatLensComponent, TranslatePipe],
 })
 export class SatelliteIntel implements OnInit, OnDestroy {
   private entityLoader: EntityLoader;

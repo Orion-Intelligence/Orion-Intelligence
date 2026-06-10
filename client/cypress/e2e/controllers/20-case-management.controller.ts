@@ -167,6 +167,36 @@ export function addAndEditArtifactAndTask() {
   assertNotification('Artifacts updated successfully');
   cy.get(selector('case-artifact-title-value-0')).should('contain.text', 'Cypress Updated Evidence Artifact');
 
+  clickVisible('case-artifact-add');
+  visible('case-artifact-add-drawer').should('be.visible');
+
+  cy.get(selector('case-artifact-title-input')).should('be.visible').type('Cypress Linked Report Artifact');
+  cy.get(selector('case-artifact-type-select')).should('be.visible').select('report');
+
+  cy.get('select[name="new-artifact-report-source"]')
+    .should('be.visible')
+    .select('strategic');
+
+  cy.get('input[name="new-artifact-report-search"]')
+    .should('be.visible')
+    .type('test');
+
+  cy.get('button')
+    .contains('No reports found')
+    .should('not.exist');
+
+  cy.get('.absolute.z-50 button')
+    .first()
+    .click({ force: true });
+
+  clickVisible('case-artifact-add-save');
+
+  assertNotification('Artifact added successfully');
+
+  cy.get(selector('case-artifact-card-1')).scrollIntoView().should('be.visible');
+  cy.get(selector('case-artifact-title-value-1')).should('contain.text', 'Cypress Linked Report Artifact');
+  cy.get(selector('case-artifact-card-1')).should('contain.text', 'Linked Report');
+
   cy.window().then((win) => {
     cy.stub(win, 'open').as('artifactWindowOpen');
   });
@@ -179,6 +209,36 @@ export function addAndEditArtifactAndTask() {
   clickVisible('case-artifact-file-delete-0');
   assertNotification('File deleted successfully');
   cy.get(selector('case-artifact-file-view-0')).should('not.exist');
+
+  clickVisible('case-artifact-add');
+  visible('case-artifact-add-drawer').should('be.visible');
+
+  cy.get(selector('case-artifact-title-input'))
+    .should('be.visible')
+    .type('Cypress Raw Alert Artifact');
+
+  cy.get(selector('case-artifact-type-select'))
+    .should('be.visible')
+    .select('raw_alert');
+
+  cy.get(selector('case-artifact-source-select'))
+    .should('be.visible')
+    .select('manual');
+
+  cy.get(selector('case-artifact-description-input'))
+    .should('be.visible')
+    .type('Raw alert artifact added by Cypress');
+
+  clickVisible('case-artifact-add-save');
+
+  assertNotification('Artifact added successfully');
+
+  cy.get(selector('case-artifact-card-2'))
+    .scrollIntoView()
+    .should('be.visible');
+
+  cy.get(selector('case-artifact-title-value-2'))
+    .should('contain.text', 'Cypress Raw Alert Artifact');
 
   clickVisible('case-task-add');
   visible('case-task-add-drawer').should('be.visible');

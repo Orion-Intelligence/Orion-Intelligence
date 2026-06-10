@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
+import { TranslatePipe } from '../../../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector:    'app-facility-popup',
+  imports: [TranslatePipe],
   standalone:  true,
   templateUrl: './facility-popup.component.html',
 })

@@ -7,10 +7,12 @@ import { SelectionStoreService } from '../../../../services/dashboard/selection.
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { SubscriptionService } from '../../../../services/dashboard/subscription.service';
 import { SidebarHomepageService } from '../../../../services/dashboard/sidebar.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-dashboard-sidebar-items',
   standalone: true,
-  imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, TooltipDirective, LowerPipe],
+  imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, TooltipDirective, LowerPipe, TranslatePipe],
   templateUrl: './dashboard-sidebar-items.component.html',
 })
 export class DashboardSidebarItemsComponent {

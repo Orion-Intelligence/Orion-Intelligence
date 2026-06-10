@@ -4,11 +4,11 @@
       <div class="flex min-w-0 items-center gap-3">
         <img [src]="getLogoSrc()" alt="Orion" class="h-9 w-auto max-w-[220px] object-contain brightness-0 invert [body.light-theme_&]:filter-none">
         <div class="hidden h-7 w-px bg-white/10 sm:block"></div>
-        <div class="hidden min-w-0 text-sm font-semibold text-[var(--color-text2)] sm:block">Shared Intelligence Report
+        <div class="hidden min-w-0 text-sm font-semibold text-[var(--color-text2)] sm:block">{{ 'Shared Intelligence Report' | translate }}
         </div>
       </div>
       <div class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)]">
-        Read Only</div>
+        {{ 'Read Only' | translate }}</div>
     </header>
   </div>
 
@@ -16,16 +16,15 @@
     <div class="mb-3 flex justify-end print:hidden">
       <button type="button" (click)="exportPdf()" [disabled]="isLoading || !report" class="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 text-sm font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-share-export-pdf">
         <i class="bi bi-download text-sm"></i>
-        Export PDF
+        {{ 'Export PDF' | translate }}
       </button>
     </div>
     <div class="mb-5 overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
       <div class="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
         <div class="min-w-0">
-          <div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text4)]">Shared Case
-            Report</div>
-          <h1 class="mt-2 text-[24px] font-bold leading-tight text-[var(--color-text1)] sm:text-[28px]">{{ report?.title
-            || 'Case Report' }}</h1>
+          <div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text4)]">{{ 'Shared Case             Report' | translate }}</div>
+          <h1 class="mt-2 text-[24px] font-bold leading-tight text-[var(--color-text1)] sm:text-[28px]">{{ (report?.title
+            || 'Case Report') | translate }}</h1>
           @if (report) {
           <p class="mt-1 text-sm text-[var(--color-text4)]">{{ report.caseId }} · {{ formatLabel(report.caseType,
             report.otherValue) }}</p>
@@ -33,11 +32,11 @@
         </div>
         <div class="grid grid-cols-1 gap-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/60 p-3 sm:grid-cols-2 lg:grid-cols-1">
           <div>
-            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Access</div>
-            <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">Public link</div>
+            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Access' | translate }}</div>
+            <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ 'Public link' | translate }}</div>
           </div>
           <div>
-            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Expires</div>
+            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Expires' | translate }}</div>
             <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatDate(report?.expiresAt) }}</div>
           </div>
         </div>
@@ -74,7 +73,7 @@
     } @else if (errorMessage) {
     <div class="overflow-hidden rounded-[8px] border border-red-400/20 bg-[color-mix(in_srgb,var(--tenant-expand-bg)_90%,#7f1d1d_10%)]">
       <div class="border-b border-red-400/15 bg-red-500/10 px-4 py-3">
-        <h2 class="m-0 text-[16px] font-bold leading-tight text-red-100">Share Link Unavailable</h2>
+        <h2 class="m-0 text-[16px] font-bold leading-tight text-red-100">{{ 'Share Link Unavailable' | translate }}</h2>
       </div>
       <div class="p-4 text-sm font-medium text-red-200">{{ errorMessage }}</div>
     </div>
@@ -83,28 +82,28 @@
       <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
         <div class="flex flex-col gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-3 lg:flex-row lg:items-center lg:justify-between">
           <div class="min-w-0">
-            <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Case Summary</h2>
+            <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Case Summary' | translate }}</h2>
             <div class="mt-1 text-xs font-medium text-[var(--color-text4)]">
               {{ report.caseId }} · {{ formatLabel(report.caseType, report.otherValue) }}
             </div>
           </div>
           <div class="grid w-full grid-cols-3 overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/60 lg:w-[480px]">
             <div class="min-w-0 border-r border-[var(--tenant-line)] px-3 py-2" [ngClass]="{ 'bg-blue-500/10 text-blue-300': report.status === 'new' || report.status === 'triaged' || report.status === 'assigned', 'bg-yellow-500/10 text-yellow-300': report.status === 'investigating' || report.status === 'waiting_on_response' || report.status === 'remediating' || report.status === 'review', 'bg-emerald-500/10 text-emerald-300': report.status === 'resolved', 'bg-slate-500/10 text-slate-300': report.status !== 'new' && report.status !== 'triaged' && report.status !== 'assigned' && report.status !== 'investigating' && report.status !== 'waiting_on_response' && report.status !== 'remediating' && report.status !== 'review' && report.status !== 'resolved' }">
-              <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">Status</div>
+              <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Status' | translate }}</div>
               <div class="mt-1 flex items-center gap-1.5 truncate text-xs font-semibold text-[var(--color-text1)]">
                 <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-current"></span>
                 <span class="truncate">{{ formatLabel(report.status) }}</span>
               </div>
             </div>
             <div class="min-w-0 border-r border-[var(--tenant-line)] px-3 py-2" [ngClass]="{ 'bg-red-500/10 text-red-300': report.severity === 'critical', 'bg-orange-500/10 text-orange-300': report.severity === 'high', 'bg-yellow-500/10 text-yellow-300': report.severity === 'medium', 'bg-green-500/10 text-green-300': report.severity !== 'critical' && report.severity !== 'high' && report.severity !== 'medium' }">
-              <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">Severity</div>
+              <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Severity' | translate }}</div>
               <div class="mt-1 flex items-center gap-1.5 truncate text-xs font-semibold capitalize text-[var(--color-text1)]">
                 <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-current"></span>
                 <span class="truncate">{{ formatLabel(report.severity) }}</span>
               </div>
             </div>
             <div class="min-w-0 px-3 py-2" [ngClass]="{ 'bg-red-500/10 text-red-300': report.priority === 'critical', 'bg-orange-500/10 text-orange-300': report.priority === 'high', 'bg-yellow-500/10 text-yellow-300': report.priority === 'medium', 'bg-green-500/10 text-green-300': report.priority !== 'critical' && report.priority !== 'high' && report.priority !== 'medium' }">
-              <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">Priority</div>
+              <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Priority' | translate }}</div>
               <div class="mt-1 flex items-center gap-1.5 truncate text-xs font-semibold capitalize text-[var(--color-text1)]">
                 <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-current"></span>
                 <span class="truncate">{{ formatLabel(report.priority) }}</span>
@@ -115,13 +114,13 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
           <div class="min-w-0 p-4">
-            <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</div>
+            <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'categoryAlerts.form.title' | translate }}</div>
             <div class="text-[18px] font-semibold leading-snug text-[var(--color-text1)] break-words">{{ report.title }}
             </div>
-            <div class="mt-4 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description
+            <div class="mt-4 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'categoryAlerts.form.description' | translate }}
             </div>
             <div class="mt-2 min-h-[44px] text-sm leading-6 text-[var(--color-text3)] break-words">
-              {{ report.description || 'No description provided.' }}
+              {{ (report.description || 'No description provided.') | translate }}
             </div>
             @if ((report.tags?.length || 0) > 0) {
             <div class="mt-4 flex flex-wrap gap-2">
@@ -136,15 +135,15 @@
           <div class="border-t border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4 lg:border-l lg:border-t-0">
             <div class="grid grid-cols-1 gap-x-5 gap-y-4 xl:grid-cols-2">
               <div>
-                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Created</div>
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Created' | translate }}</div>
                 <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatDate(report.createdAt) }}</div>
               </div>
               <div>
-                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Updated</div>
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Updated' | translate }}</div>
                 <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatDate(report.updatedAt) }}</div>
               </div>
               <div>
-                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Shared Until
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Shared Until' | translate }}
                 </div>
                 <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatDate(report.expiresAt) }}</div>
               </div>
@@ -157,7 +156,7 @@
       <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
         <div class="flex flex-col gap-1 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Primary Entity</h2>
+            <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Primary Entity' | translate }}</h2>
             <span class="w-fit rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text2)]">
               {{ formatLabel(primaryEntity.type, primaryEntity.entityTypeOtherValue) }}
             </span>
@@ -170,10 +169,10 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
           <div class="min-w-0 p-4">
-            <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Value</div>
+            <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Value' | translate }}</div>
             <div class="mt-1 text-[18px] font-semibold leading-snug text-[var(--color-text1)] break-all">{{
               primaryEntity.value }}</div>
-            <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description
+            <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'categoryAlerts.form.description' | translate }}
             </div>
             <div class="mt-2 text-sm leading-6 text-[var(--color-text3)] break-words">{{ primaryEntity.entityDescription
               || primaryEntity.value }}</div>
@@ -189,35 +188,35 @@
           <div class="border-t border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4 lg:border-l lg:border-t-0">
             <div class="grid grid-cols-2 gap-x-5 gap-y-4">
               <div>
-                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Type</div>
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'categoryAlerts.export.type' | translate }}</div>
                 <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(primaryEntity.type,
                   primaryEntity.entityTypeOtherValue) }}</div>
               </div>
               <div>
-                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Role</div>
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Role' | translate }}</div>
                 <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(primaryEntity.role) }}
                 </div>
               </div>
               <div>
-                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Confidence
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Confidence' | translate }}
                 </div>
                 <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{
                   formatConfidence(primaryEntity.confidence) }}</div>
               </div>
               <div>
-                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Relationship
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Relationship' | translate }}
                 </div>
                 <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{
                   formatLabel(primaryEntity.relationshipToCase) }}</div>
               </div>
               <div>
-                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Source</div>
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'categoryAlerts.fields.source' | translate }}</div>
                 <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(primaryEntity.source,
                   primaryEntity.entitySourceOtherValue) }}</div>
               </div>
               @if (primaryEntity.createdBy) {
               <div>
-                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Created By
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Created By' | translate }}
                 </div>
                 <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all">{{ primaryEntity.createdBy }}
                 </div>
@@ -225,7 +224,7 @@
               }
               @if (primaryEntity.updatedBy) {
               <div>
-                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Updated By
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Updated By' | translate }}
                 </div>
                 <div class="mt-1 text-xs font-medium text-[var(--color-text1)] break-all">{{ primaryEntity.updatedBy }}
                 </div>
@@ -233,7 +232,7 @@
               }
               @if (primaryEntity.createdAt) {
               <div>
-                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Created At
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Created At' | translate }}
                 </div>
                 <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{ formatDate(primaryEntity.createdAt)
                   }}</div>
@@ -241,7 +240,7 @@
               }
               @if (primaryEntity.updatedAt) {
               <div>
-                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Updated At
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Updated At' | translate }}
                 </div>
                 <div class="mt-1 text-xs font-medium text-[var(--color-text1)]">{{ formatDate(primaryEntity.updatedAt)
                   }}</div>
@@ -253,7 +252,7 @@
 
         @if ((primaryEntity.socialProfiles?.length || 0) > 0) {
         <div class="px-4 py-3">
-          <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Social Profiles
+          <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Social Profiles' | translate }}
           </div>
           <div class="flex flex-wrap gap-2">
             @for (profile of primaryEntity.socialProfiles; track $index) {
@@ -275,7 +274,7 @@
 
         @if ((primaryEntity.identifiers?.length || 0) > 0) {
         <div class="px-4 py-3">
-          <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Identifiers
+          <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Identifiers' | translate }}
           </div>
           <div class="flex flex-wrap gap-2">
             @for (identifier of primaryEntity.identifiers; track $index) {
@@ -285,10 +284,10 @@
                 }}</span>
               <span class="ml-1 text-[var(--color-text2)]">{{ identifier.value }}</span>
               @if (identifier.issuer) {
-              <span class="ml-1 text-[var(--color-text4)]">Issuer: {{ identifier.issuer }}</span>
+              <span class="ml-1 text-[var(--color-text4)]">{{ 'Issuer' | translate }}: {{ identifier.issuer }}</span>
               }
               @if (identifier.verified) {
-              <span class="ml-1 text-green-300">Verified</span>
+              <span class="ml-1 text-green-300">{{ 'Verified' | translate }}</span>
               }
             </div>
             }
@@ -301,7 +300,7 @@
       @if (getRelatedEntities().length > 0) {
       <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
         <div class="flex items-center border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
-          <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Related Entities</h2>
+          <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Related Entities' | translate }}</h2>
         </div>
 
         <div class="space-y-3 p-4">
@@ -337,23 +336,23 @@
             <div class="border-t border-[var(--tenant-line)] p-4">
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Value</div>
+                  <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Value' | translate }}</div>
                   <div class="mt-1 text-sm font-medium text-[var(--color-text1)] break-all">{{ entity.value }}</div>
                 </div>
 
                 <div>
-                  <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Type</div>
+                  <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'categoryAlerts.export.type' | translate }}</div>
                   <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(entity.type,
                     entity.entityTypeOtherValue) }}</div>
                 </div>
 
                 <div>
-                  <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Role</div>
+                  <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Role' | translate }}</div>
                   <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(entity.role) }}</div>
                 </div>
 
                 <div>
-                  <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Source</div>
+                  <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'categoryAlerts.fields.source' | translate }}</div>
                   <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatLabel(entity.source,
                     entity.entitySourceOtherValue) }}</div>
                 </div>
@@ -361,7 +360,7 @@
 
               @if (entity.entityDescription) {
               <div class="mt-4">
-                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'categoryAlerts.form.description' | translate }}
                 </div>
                 <div class="mt-1 text-sm leading-6 text-[var(--color-text3)] break-words">{{ entity.entityDescription }}
                 </div>
@@ -370,7 +369,7 @@
 
               @if ((entity.socialProfiles?.length || 0) > 0) {
               <div class="mt-4">
-                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Social Profiles
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Social Profiles' | translate }}
                 </div>
                 <div class="mt-2 space-y-2">
                   @for (profile of entity.socialProfiles; track profile.platform + profile.username) {
@@ -391,7 +390,7 @@
 
               @if ((entity.identifiers?.length || 0) > 0) {
               <div class="mt-4">
-                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Identifiers
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Identifiers' | translate }}
                 </div>
                 <div class="mt-2 space-y-2">
                   @for (identifier of entity.identifiers; track identifier.type + identifier.value) {
@@ -399,10 +398,10 @@
                     <div class="font-semibold">{{ formatLabel(identifier.type, identifier.identifierTypeOtherValue) }} ·
                       {{ identifier.value }}</div>
                     @if (identifier.issuer) {
-                    <div class="mt-1 text-xs text-[var(--color-text4)]">Issuer: {{ identifier.issuer }}</div>
+                    <div class="mt-1 text-xs text-[var(--color-text4)]">{{ 'Issuer' | translate }}: {{ identifier.issuer }}</div>
                     }
                     @if (identifier.verified) {
-                    <div class="mt-1 text-xs text-emerald-300">Verified</div>
+                    <div class="mt-1 text-xs text-emerald-300">{{ 'Verified' | translate }}</div>
                     }
                   </div>
                   }
@@ -430,26 +429,25 @@
       @if (report.closure || report.closedAt) {
       <div class="overflow-hidden rounded-[8px] border border-emerald-400/20 bg-[color-mix(in_srgb,var(--tenant-expand-bg)_92%,#064e3b_8%)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
         <div class="border-b border-emerald-400/15 bg-[color-mix(in_srgb,var(--color-blue-820-light)_90%,#064e3b_10%)] px-4 py-3">
-          <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Closure</h2>
+          <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Closure' | translate }}</h2>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
           <div class="p-4">
-            <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Closure Reason
+            <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Closure Reason' | translate }}
             </div>
             <div class="text-sm font-medium leading-6 text-[var(--color-text2)]">{{ formatLabel(report.closure?.reason)
               }}</div>
-            <div class="mt-3 mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Closure
-              Summary</div>
-            <div class="text-sm leading-6 text-[var(--color-text2)]">{{ report.closure?.summary || 'No closure summary
-              provided.' }}</div>
+            <div class="mt-3 mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Closure               Summary' | translate }}</div>
+            <div class="text-sm leading-6 text-[var(--color-text2)]">{{ (report.closure?.summary || 'No closure summary
+              provided.') | translate }}</div>
             @if (report.closure?.resolution) {
             <div class="mt-3 mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-              Resolution Notes</div>
+              {{ 'Resolution Notes' | translate }}</div>
             <div class="text-sm leading-6 text-[var(--color-text2)]">{{ report.closure?.resolution }}</div>
             }
           </div>
           <div class="border-t border-emerald-400/15 p-4 lg:border-l lg:border-t-0">
-            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Closed At</div>
+            <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Closed At' | translate }}</div>
             <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatDate(report.closedAt ||
               report.closure?.closedAt) }}</div>
           </div>
@@ -459,9 +457,9 @@
 
       <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
         <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
-          <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Artifacts</h2>
+          <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Artifacts' | translate }}</h2>
           <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1 text-[11px] font-semibold text-[var(--color-text4)]">
-            {{ report.artifacts?.length || 0 }} shared
+            {{ report.artifacts?.length || 0 }} {{ 'shared' | translate }}
           </span>
         </div>
         <div class="space-y-3 p-4">
@@ -469,8 +467,8 @@
           <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]">
             <button type="button" (click)="toggleArtifact(artifact.artifactId)" class="flex w-full flex-col gap-3 p-3 text-left transition hover:bg-[var(--tenant-chip-hover)] md:flex-row md:items-start md:justify-between">
               <div class="min-w-0">
-                <div class="text-sm font-semibold text-[var(--color-text1)] break-words">{{ artifact.title || 'Untitled
-                  artifact' }}</div>
+                <div class="text-sm font-semibold text-[var(--color-text1)] break-words">{{ (artifact.title || 'Untitled
+                  artifact') | translate }}</div>
                 <div class="mt-1 flex flex-wrap gap-2 text-xs text-[var(--color-text4)]">
                   <span>{{ formatLabel(artifact.type, artifact.artifactTypeOtherValue) }}</span>
                   <span>·</span>
@@ -481,24 +479,24 @@
                   }
                 </div>
               </div>
-              <span class="shrink-0 text-xs font-semibold text-sky-300">{{ isArtifactExpanded(artifact.artifactId) ?
-                'Hide details' : 'View details' }}</span>
+              <span class="shrink-0 text-xs font-semibold text-sky-300">{{ (isArtifactExpanded(artifact.artifactId) ?
+                'Hide details' : 'View details') | translate }}</span>
             </button>
             @if (isArtifactExpanded(artifact.artifactId)) {
             <div class="border-t border-[var(--color-divider)] px-3 py-3">
-              <div class="text-sm leading-6 text-[var(--color-text3)]">{{ artifact.description || 'No artifact
-                description provided.' }}</div>
+              <div class="text-sm leading-6 text-[var(--color-text3)]">{{ (artifact.description || 'No artifact
+                description provided.') | translate }}</div>
               @if (artifact.url) {
               <a [href]="artifact.url" target="_blank" rel="noopener" class="mt-2 block truncate text-sm font-medium text-sky-300 hover:text-sky-200">{{ artifact.url }}</a>
               }
               <div class="mt-3 grid gap-x-6 gap-y-2 border-t border-[var(--color-divider)] pt-2 text-xs sm:grid-cols-2">
                 <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
-                  <span class="font-semibold uppercase tracking-wide text-[var(--color-text4)]">File</span>
+                  <span class="font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'File' | translate }}</span>
                   <span class="max-w-[65%] truncate text-right font-medium text-[var(--color-text1)]">{{
                     artifact.fileName || '-' }}</span>
                 </div>
                 <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
-                  <span class="font-semibold uppercase tracking-wide text-[var(--color-text4)]">File Type</span>
+                  <span class="font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'File Type' | translate }}</span>
                   <span class="max-w-[65%] truncate text-right font-medium text-[var(--color-text1)]">{{
                     artifact.fileType || '-' }}</span>
                 </div>
@@ -515,16 +513,16 @@
             }
           </div>
           } @empty {
-          <div class="text-sm text-[var(--color-text4)]">No artifacts added.</div>
+          <div class="text-sm text-[var(--color-text4)]">{{ 'No artifacts added.' | translate }}</div>
           }
         </div>
       </div>
 
       <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
         <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
-          <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Tasks</h2>
+          <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Tasks' | translate }}</h2>
           <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1 text-[11px] font-semibold text-[var(--color-text4)]">
-            {{ report.tasks?.length || 0 }} total
+            {{ report.tasks?.length || 0 }} {{ 'total' | translate }}
           </span>
         </div>
         <div class="space-y-3 p-4">
@@ -545,30 +543,30 @@
               </div>
             </div>
             <div class="mt-3 grid gap-2 text-xs text-[var(--color-text2)] sm:grid-cols-2">
-              <div><span class="text-[var(--color-text4)]">Assigned:</span> {{ task.assignedTo || '-' }}</div>
-              <div><span class="text-[var(--color-text4)]">Due:</span> {{ formatDate(task.dueAt) }}</div>
+              <div><span class="text-[var(--color-text4)]">{{ 'Assigned' | translate }}:</span> {{ task.assignedTo || '-' }}</div>
+              <div><span class="text-[var(--color-text4)]">{{ 'Due' | translate }}:</span> {{ formatDate(task.dueAt) }}</div>
               @if (task.createdAt) {
-              <div><span class="text-[var(--color-text4)]">Created:</span> {{ formatDate(task.createdAt) }}</div>
+              <div><span class="text-[var(--color-text4)]">{{ 'Created' | translate }}:</span> {{ formatDate(task.createdAt) }}</div>
               }
               @if (task.updatedAt) {
-              <div><span class="text-[var(--color-text4)]">Updated:</span> {{ formatDate(task.updatedAt) }}</div>
+              <div><span class="text-[var(--color-text4)]">{{ 'Updated' | translate }}:</span> {{ formatDate(task.updatedAt) }}</div>
               }
               @if (task.completedAt) {
-              <div><span class="text-[var(--color-text4)]">Completed:</span> {{ formatDate(task.completedAt) }}</div>
+              <div><span class="text-[var(--color-text4)]">{{ 'Completed' | translate }}:</span> {{ formatDate(task.completedAt) }}</div>
               }
             </div>
           </div>
           } @empty {
-          <div class="text-sm text-[var(--color-text4)]">No tasks added.</div>
+          <div class="text-sm text-[var(--color-text4)]">{{ 'No tasks added.' | translate }}</div>
           }
         </div>
       </div>
 
       <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
         <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
-          <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Linked Cases</h2>
+          <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Linked Cases' | translate }}</h2>
           <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1 text-[11px] font-semibold text-[var(--color-text4)]">
-            {{ report.linkedCases?.length || 0 }} linked
+            {{ report.linkedCases?.length || 0 }} {{ 'linked' | translate }}
           </span>
         </div>
         <div class="space-y-3 p-4">
@@ -576,26 +574,26 @@
           <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
             <div class="text-sm font-semibold text-[var(--color-text1)]">{{ linkedCase.targetCaseId }}</div>
             <div class="mt-1 text-xs text-[var(--color-text4)]">
-              {{ formatLabel(linkedCase.relationship) }} · {{ linkedCase.reason || 'No reason provided.' }}
+              {{ formatLabel(linkedCase.relationship) }} · {{ (linkedCase.reason || 'No reason provided.') | translate }}
             </div>
             <div class="mt-3 grid gap-2 text-xs text-[var(--color-text2)] sm:grid-cols-2">
               @if (linkedCase.createdBy) {
-              <div><span class="text-[var(--color-text4)]">Created By:</span> {{ linkedCase.createdBy }}</div>
+              <div><span class="text-[var(--color-text4)]">{{ 'Created By' | translate }}:</span> {{ linkedCase.createdBy }}</div>
               }
               @if (linkedCase.createdAt) {
-              <div><span class="text-[var(--color-text4)]">Created:</span> {{ formatDate(linkedCase.createdAt) }}</div>
+              <div><span class="text-[var(--color-text4)]">{{ 'Created' | translate }}:</span> {{ formatDate(linkedCase.createdAt) }}</div>
               }
             </div>
           </div>
           } @empty {
-          <div class="text-sm text-[var(--color-text4)]">No linked cases added.</div>
+          <div class="text-sm text-[var(--color-text4)]">{{ 'No linked cases added.' | translate }}</div>
           }
         </div>
       </div>
 
       <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
         <div class="flex items-center border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
-          <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Comments</h2>
+          <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Comments' | translate }}</h2>
         </div>
 
         @if (getComments().length > 0) {
@@ -608,7 +606,7 @@
 
             <div class="mt-3 flex flex-wrap gap-2 text-[11px] font-medium text-[var(--color-text4)]">
               @if (comment.createdBy) {
-              <span>By {{ comment.createdBy }}</span>
+              <span>{{ 'By' | translate }} {{ comment.createdBy }}</span>
               }
               @if (comment.createdAt) {
               <span>· {{ formatDate(comment.createdAt) }}</span>
@@ -618,7 +616,7 @@
           }
         </div>
         } @else {
-        <div class="p-4 text-sm text-[var(--color-text4)]">No comments added.</div>
+        <div class="p-4 text-sm text-[var(--color-text4)]">{{ 'No comments added.' | translate }}</div>
         }
       </div>
     </div>
@@ -627,8 +625,8 @@
 
   <footer class="relative z-[1] mx-auto mt-3 w-full max-w-[1280px] px-3 pb-6 sm:px-5">
     <div class="flex flex-col gap-2 border-t border-white/10 pt-4 text-xs text-[var(--color-text4)] sm:flex-row sm:items-center sm:justify-between">
-      <div>Shared report generated by {{ getAppName() }}</div>
-      <div>Confidential intelligence. Do not redistribute without authorization.</div>
+      <div>{{ 'Shared report generated by' | translate }} {{ getAppName() }}</div>
+      <div>{{ 'Confidential intelligence. Do not redistribute without authorization.' | translate }}</div>
     </div>
   </footer>
 </div>

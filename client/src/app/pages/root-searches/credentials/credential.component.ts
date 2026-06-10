@@ -23,6 +23,8 @@ import { ExportChoiceModalComponent } from '../../../shared/partials/export-choi
 import { REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportPayload, GraphReportTableRow } from '../../../shared/model/report/report-export.model';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-credential',
   standalone: true,
@@ -36,8 +38,7 @@ import { GraphReportPayload, GraphReportTableRow } from '../../../shared/model/r
     IocSearchComponent,
     PasswordSchemaComponent,
     ScanHelperMethods,
-    ExportChoiceModalComponent
-  ],
+    ExportChoiceModalComponent, TranslatePipe],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],
 })

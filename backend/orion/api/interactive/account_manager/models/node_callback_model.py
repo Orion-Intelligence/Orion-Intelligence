@@ -41,6 +41,10 @@ class TenantDataModel(BaseModel):
     image: Optional[str] = None
     profileVisibilityEnabled: bool = True
     eventManagementEnabled: bool = False
+    accountsMailPassword: str = ""
+    accountsMail: str = ""
+    accountsSmtpServer: str = ""
+    accountsSmtpPort: str = ""
 
 
 class NodeCallbackModel(BaseModel):

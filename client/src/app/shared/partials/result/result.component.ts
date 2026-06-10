@@ -30,13 +30,14 @@ import { ProxyController } from '../../services/proxy-controller';
 import { CrossSearchCardComponent } from '../onion-search-engine/cross-search-card.component';
 import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { AiToolRoutingService } from '../../services/ai-tool-routing.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-result',
   standalone: true,
   templateUrl: './result.component.html',
   animations: [fadeInDashboardItem, searchFilterAnimation],
-  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent, CrossSearchCardComponent, ChatWidgetComponent],
+  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent, CrossSearchCardComponent, ChatWidgetComponent, TranslatePipe],
 })
 export class ResultComponent implements OnInit, OnChanges {
   private readonly proxied_resource = inject(ProxyController);

@@ -66,7 +66,11 @@ export class AppService {
         licenses: [],
         assignedQuota: '0',
         quotaExceeded: false,
-        eventManagementEnabled: false
+        eventManagementEnabled: false,
+        accountsMailPassword: '',
+        accountsMail: '',
+        accountsSmtpServer: '',
+        accountsSmtpPort: ''
       },
       alerts: [],
       alert_summary: {

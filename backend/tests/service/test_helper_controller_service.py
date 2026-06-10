@@ -91,6 +91,7 @@ def test_build_assets_loads_templates_and_keys(tmp_path: Path):
 
     (entities_dir / "entities.json").write_text(json.dumps([{"key": "m_email"}, {"key": "m_domain"}]), encoding="utf-8")
     (mail_dir / "mail_template.html").write_text("<p>{{ name }}</p>", encoding="utf-8")
+    (mail_dir / "alert_mail_template.html").write_text("<p>{{ email_title }}</p>", encoding="utf-8")
     (license_dir / "license_rules.json").write_text('{"free": {"modules": []}}', encoding="utf-8")
     (url_dir / "url_rules.json").write_text('{"allowed": ["example.com"]}', encoding="utf-8")
     (satellite_dir / "satellite_assets.json").write_text('{"version": 1, "data": []}', encoding="utf-8")
@@ -101,6 +102,11 @@ def test_build_assets_loads_templates_and_keys(tmp_path: Path):
     assert constant.mail_template.render(name="alice") == "<p>alice</p>"
     assert constant.license_rules["free"]["modules"] == []
     assert constant.url_rules["allowed"] == ["example.com"]
+
+
+@pytest.mark.anyio
+async def test_init_map_entities_without_build_dir_is_noop():
+    await helper_controller.init_map_entities(None)
 
 
 @pytest.mark.anyio

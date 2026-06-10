@@ -5,11 +5,13 @@ import { FetchingStateService } from '../services/fetching-state.service';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
 import { SocialEntityUiService } from '../services/social-entity-ui.service';
 import { SidebarShellComponent } from '../../shared/sidebar-shell/sidebar-shell.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-home-menu',
   templateUrl: './home-menu.component.html',
   standalone: true,
-  imports: [SidebarShellComponent],
+  imports: [SidebarShellComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeMenuComponent implements OnDestroy {

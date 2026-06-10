@@ -12,11 +12,12 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from '../../../services/home_search/home.search.service';
 import { WorldHeatmapComponent } from '../world-heatmap/world-heatmap.component';
 import { DemoTourComponent } from "../../demo-tour/demo-tour/demo-tour.component";
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-home-search',
   standalone: true,
-  imports: [FormsModule, NgOptimizedImage, CommonModule, RouterLink, SearchFiltersComponent, HomeInsightComponent, WorldHeatmapComponent, DemoTourComponent],
+  imports: [FormsModule, NgOptimizedImage, CommonModule, RouterLink, SearchFiltersComponent, HomeInsightComponent, WorldHeatmapComponent, DemoTourComponent, TranslatePipe],
   templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent implements OnInit {

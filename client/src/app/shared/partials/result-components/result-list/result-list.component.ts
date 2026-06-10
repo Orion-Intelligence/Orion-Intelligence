@@ -1,10 +1,12 @@
 import { Component, effect, input } from '@angular/core';
 
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
+
 @Component({
   selector: 'app-result-list',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './result-list.component.html',
   animations: [fadeInDashboardItem]
 })

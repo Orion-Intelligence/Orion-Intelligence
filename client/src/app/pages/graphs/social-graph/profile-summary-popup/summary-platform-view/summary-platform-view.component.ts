@@ -11,10 +11,12 @@ import { getProfileDetailEntries } from '../../utils/summary-view.util';
 import { PlatformFeedViewBase } from '../../utils/platform-feed-view.base';
 import { SocialScanService } from '../../../shared/services/social-scan.service';
 import { finalize } from 'rxjs/operators';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-summary-platform-view',
   standalone: true,
-  imports: [CommonModule, SocialIconComponent, PlatformIconBgDirective],
+  imports: [CommonModule, SocialIconComponent, PlatformIconBgDirective, TranslatePipe],
   templateUrl: './summary-platform-view.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -2,6 +2,7 @@ import { CommonModule, DOCUMENT } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, Output, Renderer2, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { validateCoordinatesInput } from '../../utils/geo-coordinates.utils';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 export interface GeoLocationSearchResult {
   name:          string;
@@ -14,7 +15,7 @@ export interface GeoLocationSearchResult {
 @Component({
   selector:    'app-geocode-modal',
   standalone:  true,
-  imports:     [CommonModule, FormsModule],
+  imports:     [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './geocode-modal.component.html',
 })
 export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestroy {

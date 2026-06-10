@@ -5,6 +5,7 @@ from typing import Any, List
 
 from fastapi import HTTPException
 
+from orion.api.interactive.alert_manager.alert_mail_helper import AlertMailHelper
 from orion.api.interactive.alert_manager.alert_summary_helper import AlertSummaryHelper
 from orion.api.interactive.alert_manager.function_map.function_maping import MODULE_ALERT_TYPE_MAP, SCANNING_ALERT_TYPES
 
@@ -37,6 +38,7 @@ class AlertManager:
         self._redis = redis_controller.getInstance()
         self._alert_summary_ttl_seconds = 300
         self._summary_helper = AlertSummaryHelper(self._engine, self._redis, self._alert_summary_ttl_seconds)
+        self._mail_helper = AlertMailHelper(self._engine)
         if AlertManager.__instance is not None:
             raise Exception("This class is a singleton!")
         AlertManager.__instance = self
@@ -262,7 +264,11 @@ class AlertManager:
 
         if existing_doc and existing_doc.alerts:
             for alert in existing_doc.alerts:
-                if (alert.data_hash or "") == data_hash and (alert.type or"")==category and (alert.ioc_value or"")==ioc_value:
+                if (
+                    (alert.data_hash or "") == data_hash
+                    and (alert.type or "") == category
+                    and (alert.ioc_value or "") == ioc_value
+                ):
                     alert.last_seen = datetime.now(timezone.utc)
 
                     alert_updated = True

@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, ViewChild } from '@angular/core';
 import { OrionSatelliteFilterOption } from '../../../../../models/geo-fencing.models';
+import { TranslatePipe } from '../../../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-facility-legend',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './facility-legend.component.html',
 })
 export class FacilityLegendComponent implements AfterViewInit, OnChanges, OnDestroy {

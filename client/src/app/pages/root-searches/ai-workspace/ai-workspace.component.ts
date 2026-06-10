@@ -14,6 +14,8 @@ import { NexusChatService } from './nexus-chat.service';
 import { BotMessageActionsComponent } from './bot-message-actions/bot-message-actions.component';
 import { MessageScrollRailComponent } from './message-scroll-rail/message-scroll-rail.component';
 import { MarkdownPipe } from '../../../shared/pipes/markdown.pipe';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 type ChatHistoryMessage = {
   sender: AiWorkspaceMessage['sender'];
   text: string;
@@ -23,7 +25,7 @@ type ChatHistoryMessage = {
 @Component({
   selector: 'app-ai-workspace',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, RouterLink, BotMessageActionsComponent, MessageScrollRailComponent, MarkdownPipe],
+  imports: [CommonModule, DatePipe, FormsModule, RouterLink, BotMessageActionsComponent, MessageScrollRailComponent, MarkdownPipe, TranslatePipe],
   templateUrl: './ai-workspace.component.html',
 })
 export class AiWorkspaceComponent implements OnInit, OnDestroy {

@@ -12,6 +12,8 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-report-defacement',
   templateUrl: './report-defacement.component.html',
@@ -25,8 +27,7 @@ import { ReportInteractionHostComponent } from '../../social-interactions/report
     ResultListComponent,
     NgClass,
     TooltipDirective,
-    ReportInteractionHostComponent
-  ]
+    ReportInteractionHostComponent, TranslatePipe]
 })
 export class ReportDefacementComponent implements OnInit, AfterViewInit {
   defacementData: DefacementResultItem | null = null;

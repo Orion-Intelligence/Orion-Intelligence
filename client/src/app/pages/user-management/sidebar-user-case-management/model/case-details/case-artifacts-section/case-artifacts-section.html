@@ -1,65 +1,72 @@
 <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
     <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
         <div class="flex items-center gap-1.5">
-            <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">Artifacts</h2>
-            <img src="/assets/images/shared/theme/info.svg" alt="" aria-hidden="true" appTooltip="Evidence or supporting material attached to the case, such as screenshots, files, URLs, raw alerts, logs, or reports." class="h-4 w-4 shrink-0 ui-action-icon">
+            <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Artifacts' | translate }}
+            </h2>
+            <img src="/assets/images/shared/theme/info.svg" alt="" aria-hidden="true" [appTooltip]="'Evidence or supporting material attached to the case, such as screenshots, files, URLs, raw alerts, logs, or reports.' | translate" class="h-4 w-4 shrink-0 ui-action-icon">
         </div>
 
         @if (!caseData.closure) {
         <div class="flex items-center gap-2">
             <button type="button" (click)="store.openAddArtifact()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800 [body.light-theme_&]:hover:border-sky-700/40 [body.light-theme_&]:hover:bg-sky-200/70 [body.light-theme_&]:hover:text-sky-900" data-testid="case-artifact-add">
-                <i class="bi bi-plus-lg"></i> Add
+                <i class="bi bi-plus-lg"></i> {{ 'common.actions.add' | translate }}
             </button>
         </div>
         }
     </div>
 
     @if (isEditing && selectedEditableArtifact; as artifact) {
-    <app-case-edit-drawer title="Edit Artifact" [subtitle]="artifact.title || 'Artifact'" saveLabel="Save Artifact"
-        saveTestId="case-artifact-save" cancelTestId="case-artifact-cancel" drawerTestId="case-artifact-edit-drawer"
-        (save)="store.saveArtifacts()" (cancel)="cancelArtifactEditing()">
+    <app-case-edit-drawer [title]="'Edit Artifact' | translate" [subtitle]="(artifact.title || 'Artifact') | translate"
+        [saveLabel]="'Save Artifact' | translate" saveTestId="case-artifact-save" cancelTestId="case-artifact-cancel"
+        drawerTestId="case-artifact-edit-drawer" (save)="store.saveArtifacts()" (cancel)="cancelArtifactEditing()">
         <div class="space-y-4 p-6">
             <div @caseListItemMotion class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
                 <div class="mb-3 flex items-center justify-between gap-3">
-                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">Artifact
+                    <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">{{
+                        'Artifact' | translate }}
                         {{ (editingArtifactIndex || 0) + 1 }}</span>
-                    <button type="button" (click)="store.removeArtifact(editingArtifactIndex || 0)" aria-label="Remove artifact" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70 [body.light-theme_&]:hover:text-red-900" [attr.data-testid]="'case-artifact-remove-' + (editingArtifactIndex || 0)">
-                        <i class="bi bi-x-lg"></i> Remove
+                    <button type="button" (click)="store.removeArtifact(editingArtifactIndex || 0)" [attr.aria-label]="'Remove artifact' | translate" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70 [body.light-theme_&]:hover:text-red-900" [attr.data-testid]="'case-artifact-remove-' + (editingArtifactIndex || 0)">
+                        <i class="bi bi-x-lg"></i> {{ 'Remove' | translate }}
                     </button>
                 </div>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
-                        <input [(ngModel)]="artifact.title" (ngModelChange)="store.scheduleArtifactReportSearch(artifact)" name="artifact-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-title-input" />
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
+                            'Title' | translate }}</label>
+                        <input [(ngModel)]="artifact.title" name="artifact-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-title-input" />
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Type</label>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
+                            'Type' | translate }}</label>
                         <select [(ngModel)]="artifact.type" (ngModelChange)="artifact.linkedReportSource = ''; artifact.linkedReportId = ''; artifact.linkedReportTitle = ''" name="artifact-type" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-type-select">
                             @for (type of artifactTypeOptions; track type.value) {
                             <option [value]="type.value">{{ type.label }}</option>
                             }
                         </select>
                         @if (artifact.type === 'other') {
-                        <input @caseInlineMotion type="text" [(ngModel)]="artifact.artifactTypeOtherValue" name="artifact-type-other" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" placeholder="Specify other artifact type" />
+                        <input @caseInlineMotion type="text" [(ngModel)]="artifact.artifactTypeOtherValue" name="artifact-type-other" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" placeholder="{{ 'Specify other artifact type' | translate }}" />
                         }
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Source</label>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
+                            'Source' | translate }}</label>
                         <select [(ngModel)]="artifact.source" name="artifact-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-source-select">
                             @for (source of sourceTypeOptions; track source.value) {
                             <option [value]="source.value">{{ source.label }}</option>
                             }
                         </select>
                         @if (artifact.source === 'other') {
-                        <input @caseInlineMotion type="text" [(ngModel)]="artifact.artifactSourceOtherValue" name="artifact-source-other" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" placeholder="Specify other artifact source" />
+                        <input @caseInlineMotion type="text" [(ngModel)]="artifact.artifactSourceOtherValue" name="artifact-source-other" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" placeholder="{{ 'Specify other artifact source' | translate }}" />
                         }
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Captured</label>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
+                            'Captured' | translate }}</label>
                         <input [ngModel]="getDateInputValue(artifact.capturedAt)" (ngModelChange)="setDateInputValue(artifact, 'capturedAt', $event)" name="artifact-captured" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-captured-input" />
                     </div>
                     <div class="sm:col-span-2">
-                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
+                            'Description' | translate }}</label>
                         <textarea [(ngModel)]="artifact.description" name="artifact-description" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-description-input"></textarea>
                     </div>
                     @if (artifact.type === 'url_capture') {
@@ -75,12 +82,12 @@
                     @if (artifact.type === 'report') {
                     <div @caseInlineMotion class="sm:col-span-2">
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                            Report Source
+                            {{ 'Report Source' | translate }}
                         </label>
 
-                        <select [(ngModel)]="artifact.linkedReportSource" (ngModelChange)="store.loadArtifactReports($event, artifact.title); artifact.linkedReportId = ''; artifact.linkedReportTitle = ''" name="artifact-report-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                        <select [(ngModel)]="artifact.linkedReportSource" (ngModelChange)="artifact.linkedReportId = ''; artifact.linkedReportTitle = ''; store.artifactReportSearchText = ''; store.isArtifactReportDropdownOpen = true; store.loadArtifactReports($event, '')" name="artifact-report-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
 
-                            <option value="">Select report source</option>
+                            <option value="">{{ 'Select report source' | translate }}</option>
 
                             @for (source of reportSourceOptions; track source.value) {
                             <option [value]="source.value">{{ source.label }}</option>
@@ -91,19 +98,45 @@
                     @if (artifact.linkedReportSource) {
                     <div @caseInlineMotion class="sm:col-span-2">
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                            Select Report
+                            {{ 'Select Report' | translate }}
                         </label>
 
-                        <select [(ngModel)]="artifact.linkedReportId" (ngModelChange)="store.onArtifactReportSelected(artifact, $event)" name="artifact-linked-report" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                        <div class="relative mt-1">
+                            <input type="text" [ngModel]="store.artifactReportSearchText || artifact.linkedReportTitle || ''" (ngModelChange)="store.searchArtifactReports(artifact.linkedReportSource || '', $event)" (focus)="store.isArtifactReportDropdownOpen = true; store.loadArtifactReports(artifact.linkedReportSource || '', store.artifactReportSearchText || '')" name="artifact-report-search" placeholder="Search reports..." autocomplete="off" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
 
-                            <option value="">
-                                {{ isArtifactReportsLoading ? 'Loading reports...' : 'Select report' }}
-                            </option>
+                            @if (artifact.linkedReportId) {
+                            <div class="mt-2 flex items-center gap-2">
+                                <button type="button" (click)="store.viewArtifactReport(artifact)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-xs font-semibold text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                    {{"View Report" | translate}}
+                                </button>
 
-                            @for (report of artifactReports; track report.id) {
-                            <option [value]="report.id">{{ report.title }}</option>
+                                <button type="button" (click)="store.clearArtifactReportSelection(artifact)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-xs font-semibold text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800">
+                                    {{"Clear" | translate}}
+                                </button>
+                            </div>
                             }
-                        </select>
+
+                            @if (store.isArtifactReportDropdownOpen) {
+                            <div class="absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-lg">
+                                @if (isArtifactReportsLoading) {
+                                <div class="px-3 py-2 text-sm text-[var(--color-text4)]">
+                                    {{"Loading reports..." | translate}}
+                                </div>
+                                } @else {
+                                @for (report of artifactReports; track report.id) {
+                                <button type="button" (click)="store.selectArtifactReport(artifact, report)" class="block w-full px-3 py-2 text-left text-sm text-[var(--color-text2)] hover:bg-sky-500/10 hover:text-sky-200">
+                                    {{ report.title }}
+                                </button>
+                                } @empty {
+                                <div class="px-3 py-2 text-sm text-[var(--color-text4)]">
+                                    {{"No reports found" | translate}}
+                                </div>
+                                }
+                                }
+                            </div>
+                            }
+                        </div>
                     </div>
                     }
                     }
@@ -114,21 +147,24 @@
                         </label>
 
                         <div class="mt-2 rounded-[8px] border border-dashed border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-4 transition hover:border-sky-400/35 hover:bg-sky-500/5 [body.light-theme_&]:bg-sky-50/60">
-                            <input #artifactFileInput type="file" [accept]="getArtifactAccept(artifact)" (change)="store.uploadArtifactFile(artifact, artifactFileInput)" class="sr-only" data-testid="case-artifact-file-input" />
+                            <input #artifactFileInput type="file" multiple [accept]="getArtifactAccept(artifact)" (change)="store.uploadArtifactFiles(artifact, artifactFileInput)" class="sr-only" data-testid="case-artifact-file-input" />
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <div class="min-w-0">
                                     <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                        Selected file</div>
+                                        {{ "Selected files" | translate }}</div>
                                     <div class="mt-1 truncate rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm font-medium text-[var(--color-text2)]">
-                                        {{ artifact.fileName || 'No file selected' }}
+                                        {{ (artifact.files || []).length ? (artifact.files.length + ' file(s) uploaded'
+                                        | translate)
+                                        : 'No files selected' | translate }}
                                     </div>
                                 </div>
                                 <button type="button" (click)="artifactFileInput.click()" class="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-3 text-sm font-semibold text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800">
-                                    <i class="bi bi-upload"></i> Choose File
+                                    <i class="bi bi-upload"></i> {{ "Choose File" | translate }}
                                 </button>
                             </div>
                             <div class="mt-3 text-xs font-medium text-[var(--color-text4)]">
-                                {{ artifact.type === 'screenshot' ? 'PNG only.' : 'PDF, JPG, PNG, TXT, or DOCX.' }}
+                                {{ (artifact.type === 'screenshot') ? ('PNG only.' | translate) : ('PDF, JPG, PNG, TXT,
+                                or DOCX.' | translate) }}
                             </div>
                         </div>
                     </div>
@@ -144,7 +180,7 @@
             <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div class="min-w-0">
                     <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                        Artifact Title</div>
+                        {{ 'Artifact Title' | translate }}</div>
                     <div class="text-sm font-semibold text-[var(--color-text1)] break-words" [attr.data-testid]="'case-artifact-title-value-' + $index">{{ artifact.title }}
                     </div>
                     <div class="mt-1 text-xs text-[var(--color-text4)]">{{
@@ -157,45 +193,67 @@
                         getFormattedDateTime(artifact.capturedAt) }}</span>
                     }
                     @if (artifact.url) {
-                    <a [href]="artifact.url" target="_blank" rel="noopener" class="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-xs text-sky-300 hover:text-sky-200">Open</a>
+                    <a [href]="artifact.url" target="_blank" rel="noopener" class="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-xs text-sky-300 hover:text-sky-200">{{
+                        'Open' | translate }}</a>
                     }
                     @if (!caseData.closure) {
                     <button type="button" (click)="openEditArtifact($index)" class="inline-flex h-7 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-xs font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.data-testid]="'case-artifact-edit-' + $index">
-                        <i class="bi bi-pencil-square"></i> Edit
+                        <i class="bi bi-pencil-square"></i> {{ 'Edit' | translate }}
+                    </button>
+                    }
+                    @if (artifact.type === 'report' && artifact.linkedReportId) {
+                    <button type="button" (click)="store.viewArtifactReport(artifact)" class="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-xs text-sky-300 hover:text-sky-200">
+                        View Report
                     </button>
                     }
                 </div>
             </div>
-            @if (artifact.description || artifact.fileName) {
+            @if (artifact.description || (artifact.files || []).length) {
             <div @caseInlineMotion class="mt-3 grid gap-2 text-xs text-[var(--color-text2)] sm:grid-cols-2">
-                @if (artifact.description) { <div class="sm:col-span-2"><span class="text-[var(--color-text4)]">Description:</span> {{ artifact.description }}
-                </div> }
-                @if (artifact.fileName) { <div><span class="text-[var(--color-text4)]">File:</span> {{
-                    artifact.fileName }}</div> }
+                @if (artifact.description) {
+                <div class="sm:col-span-2">
+                    <span class="text-[var(--color-text4)]">{{ 'Description:' | translate }}</span> {{
+                    artifact.description }}
+                </div>
+                }
+
+                @if ((artifact.files || []).length) {
+                <div>
+                    <span class="text-[var(--color-text4)]">{{ 'Files:' | translate }}</span>
+                    {{ artifact.files.length }} file(s)
+                </div>
+                }
             </div>
             }
-            @if (artifact.fileName) {
-            <div @caseInlineMotion class="mt-3 flex flex-wrap items-center gap-2 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
-                <span class="text-xs text-[var(--color-text2)] break-all">
-                    {{ artifact.fileName }}
-                </span>
-                <button type="button" (click)="store.viewArtifactFile(artifact)" class="text-xs text-sky-300 [body.light-theme_&]:text-sky-800" [attr.data-testid]="'case-artifact-file-view-' + $index">
-                    View
-                </button>
-                <button type="button" (click)="store.downloadArtifactFile(artifact)" class="text-xs text-emerald-300 [body.light-theme_&]:text-emerald-800" [attr.data-testid]="'case-artifact-file-download-' + $index">
-                    Download
-                </button>
-                @if (!caseData.closure) {
-                <button type="button" (click)="store.deleteArtifactFile(artifact)" class="text-xs text-red-300 [body.light-theme_&]:text-red-800" [attr.data-testid]="'case-artifact-file-delete-' + $index">
-                    Delete
-                </button>
+            @if ((artifact.files || []).length) {
+            <div @caseInlineMotion class="mt-3 space-y-2 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
+                @for (artifactFile of artifact.files; track artifactFile.fileId; let fileIndex = $index) {
+                <div class="flex flex-wrap items-center gap-2 border-b border-[var(--tenant-line)] pb-2 last:border-b-0 last:pb-0">
+                    <span class="text-xs text-[var(--color-text2)] break-all">
+                        {{ artifactFile.fileName }}
+                    </span>
+
+                    <button type="button" (click)="store.viewArtifactFile(artifact, artifactFile.fileId)" class="text-xs text-sky-300 [body.light-theme_&]:text-sky-800" [attr.data-testid]="'case-artifact-file-view-' + $index">
+                        {{ 'View' | translate }}
+                    </button>
+
+                    <button type="button" (click)="store.downloadArtifactFile(artifact, artifactFile.fileId)" class="text-xs text-emerald-300 [body.light-theme_&]:text-emerald-800" [attr.data-testid]="'case-artifact-file-download-' + $index">
+                        {{ 'Download' | translate }}
+                    </button>
+
+                    @if (!caseData.closure) {
+                    <button type="button" (click)="store.deleteArtifactFile(artifact, artifactFile.fileId)" class="text-xs text-red-300 [body.light-theme_&]:text-red-800" [attr.data-testid]="'case-artifact-file-delete-' + $index">
+                        {{ 'Delete' | translate }}
+                    </button>
+                    }
+                </div>
                 }
             </div>
             }
 
             @if (artifact.type === 'report' && artifact.linkedReportTitle) {
             <div @caseInlineMotion class="mt-3 flex flex-wrap items-center gap-2 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
-                <span class="text-xs text-[var(--color-text4)]">Linked Report:</span>
+                <span class="text-xs text-[var(--color-text4)]">{{ 'Linked Report:' | translate }}</span>
                 <span class="text-xs font-semibold text-[var(--color-text2)]">
                     {{ artifact.linkedReportTitle }}
                 </span>
@@ -204,53 +262,59 @@
 
         </div>
         } @empty {
-        <div class="text-sm text-[var(--color-text4)]">No artifacts added.</div>
+        <div class="text-sm text-[var(--color-text4)]">{{ 'No artifacts added.' | translate }}</div>
         }
     </div>
 
     @if (isAddingArtifact && newArtifact) {
-    <app-case-edit-drawer title="Add Artifact" [subtitle]="caseData.caseId" saveLabel="Save Artifact"
-        saveTestId="case-artifact-add-save" cancelTestId="case-artifact-add-cancel"
-        drawerTestId="case-artifact-add-drawer" (save)="store.saveNewArtifact()" (cancel)="store.cancelSectionMode()">
+    <app-case-edit-drawer title="{{ 'Add Artifact' | translate }}" [subtitle]="caseData.caseId"
+        saveLabel="{{ 'Save Artifact' | translate }}" saveTestId="case-artifact-add-save"
+        cancelTestId="case-artifact-add-cancel" drawerTestId="case-artifact-add-drawer" (save)="store.saveNewArtifact()"
+        (cancel)="store.cancelSectionMode()">
         <div class="space-y-4 p-6">
             <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Title</label>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
+                            'categoryAlerts.form.title' | translate }}</label>
                         <input [(ngModel)]="newArtifact.title" (ngModelChange)="store.scheduleArtifactReportSearch(newArtifact)" name="new-artifact-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" data-testid="case-artifact-title-input" />
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Type</label>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
+                            'Type' | translate }}</label>
                         <select [(ngModel)]="newArtifact.type" (ngModelChange)="newArtifact.linkedReportSource = ''; newArtifact.linkedReportId = ''; newArtifact.linkedReportTitle = ''" name="new-artifact-type" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-artifact-type-select">
                             @for (type of artifactTypeOptions; track type.value) {
                             <option [value]="type.value">{{ type.label }}</option>
                             }
                         </select>
                         @if (newArtifact.type === 'other') {
-                        <input @caseInlineMotion type="text" [(ngModel)]="newArtifact.artifactTypeOtherValue" name="new-artifact-type-other" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" placeholder="Specify other artifact type" />
+                        <input @caseInlineMotion type="text" [(ngModel)]="newArtifact.artifactTypeOtherValue" name="new-artifact-type-other" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [placeholder]="'Specify other artifact type' | translate" />
                         }
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Source</label>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
+                            'categoryAlerts.fields.source' | translate }}</label>
                         <select [(ngModel)]="newArtifact.source" name="new-artifact-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-artifact-source-select">
                             @for (source of sourceTypeOptions; track source.value) {
                             <option [value]="source.value">{{ source.label }}</option>
                             }
                         </select>
                         @if (newArtifact.source === 'other') {
-                        <input @caseInlineMotion type="text" [(ngModel)]="newArtifact.artifactSourceOtherValue" name="new-artifact-source-other" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" placeholder="Specify other artifact source" />
+                        <input @caseInlineMotion type="text" [(ngModel)]="newArtifact.artifactSourceOtherValue" name="new-artifact-source-other" class="mt-2 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [placeholder]="'Specify other artifact source' | translate" />
                         }
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Captured</label>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
+                            'Captured' | translate }}</label>
                         <input [ngModel]="getDateInputValue(newArtifact.capturedAt)" (ngModelChange)="setDateInputValue(newArtifact, 'capturedAt', $event)" name="new-artifact-captured" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-artifact-captured-input" />
                     </div>
 
                     <div class="sm:col-span-2">
-                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Description</label>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
+                            'categoryAlerts.form.description' | translate }}</label>
                         <textarea [(ngModel)]="newArtifact.description" name="new-artifact-description" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)]" data-testid="case-artifact-description-input"></textarea>
                     </div>
 
@@ -264,12 +328,12 @@
                     @if (newArtifact.type === 'report') {
                     <div @caseInlineMotion class="sm:col-span-2">
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                            Report Source
+                            {{ 'Report Source' | translate }}
                         </label>
 
-                        <select [(ngModel)]="newArtifact.linkedReportSource" (ngModelChange)="store.loadArtifactReports($event, newArtifact.title); newArtifact.linkedReportId = ''; newArtifact.linkedReportTitle = ''" name="new-artifact-report-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                        <select [(ngModel)]="newArtifact.linkedReportSource" (ngModelChange)="newArtifact.linkedReportId = ''; newArtifact.linkedReportTitle = ''; store.artifactReportSearchText = ''; store.isArtifactReportDropdownOpen = true; store.loadArtifactReports($event, '')" name="new-artifact-report-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
 
-                            <option value="">Select report source</option>
+                            <option value="">{{ 'Select report source' | translate }}</option>
 
                             @for (source of reportSourceOptions; track source.value) {
                             <option [value]="source.value">{{ source.label }}</option>
@@ -280,19 +344,45 @@
                     @if (newArtifact.linkedReportSource) {
                     <div @caseInlineMotion class="sm:col-span-2">
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                            Select Report
+                            {{ 'Select Report' | translate }}
                         </label>
 
-                        <select [(ngModel)]="newArtifact.linkedReportId" (ngModelChange)="store.onArtifactReportSelected(newArtifact, $event)" name="new-artifact-linked-report" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                        <div class="relative mt-1">
+                            <input type="text" [ngModel]="store.artifactReportSearchText || newArtifact.linkedReportTitle || ''" (ngModelChange)="store.searchArtifactReports(newArtifact.linkedReportSource || '', $event)" (focus)="store.isArtifactReportDropdownOpen = true; store.loadArtifactReports(newArtifact.linkedReportSource || '', store.artifactReportSearchText || '')" name="new-artifact-report-search" placeholder="Search reports..." autocomplete="off" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
 
-                            <option value="">
-                                {{ isArtifactReportsLoading ? 'Loading reports...' : 'Select report' }}
-                            </option>
+                            @if (newArtifact.linkedReportId) {
+                            <div class="mt-2 flex items-center gap-2">
+                                <button type="button" (click)="store.viewArtifactReport(newArtifact)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-xs font-semibold text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                    {{ 'View Report' | translate }}
+                                </button>
 
-                            @for (report of artifactReports; track report.id) {
-                            <option [value]="report.id">{{ report.title }}</option>
+                                <button type="button" (click)="store.clearArtifactReportSelection(newArtifact)" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-xs font-semibold text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800">
+                                    {{ 'Clear' | translate }}
+                                </button>
+                            </div>
                             }
-                        </select>
+
+                            @if (store.isArtifactReportDropdownOpen) {
+                            <div class="absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-lg">
+                                @if (isArtifactReportsLoading) {
+                                <div class="px-3 py-2 text-sm text-[var(--color-text4)]">
+                                    {{ 'Loading reports...' | translate }}
+                                </div>
+                                } @else {
+                                @for (report of artifactReports; track report.id) {
+                                <button type="button" (click)="store.selectArtifactReport(newArtifact, report)" class="block w-full px-3 py-2 text-left text-sm text-[var(--color-text2)] hover:bg-sky-500/10 hover:text-sky-200">
+                                    {{ report.title }}
+                                </button>
+                                } @empty {
+                                <div class="px-3 py-2 text-sm text-[var(--color-text4)]">
+                                    {{ 'No reports found' | translate }}
+                                </div>
+                                }
+                                }
+                            </div>
+                            }
+                        </div>
                     </div>
                     }
                     }
@@ -300,26 +390,28 @@
                     @if (newArtifact.type === 'screenshot' || newArtifact.type === 'file') {
                     <div @caseInlineMotion class="sm:col-span-2">
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                            {{ newArtifact.type === 'screenshot' ? 'Upload Screenshot PNG' : 'Upload File'
+                            {{ (newArtifact.type === 'screenshot' ? 'Upload Screenshot PNG' : 'Upload File') | translate
                             }}
                         </label>
 
                         <div class="mt-2 rounded-[8px] border border-dashed border-[var(--tenant-line)] bg-[var(--color-blue-830)]/35 p-4 transition hover:border-sky-400/35 hover:bg-sky-500/5 [body.light-theme_&]:bg-sky-50/60">
-                            <input #newArtifactFileInput type="file" [accept]="getArtifactAccept(newArtifact)" (change)="store.setPendingNewArtifactFile(newArtifactFileInput)" class="sr-only" data-testid="case-artifact-file-input" />
+                            <input #newArtifactFileInput type="file" multiple [accept]="getArtifactAccept(newArtifact)" (change)="store.setPendingNewArtifactFiles(newArtifactFileInput)" class="sr-only" data-testid="case-artifact-file-input" />
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <div class="min-w-0">
                                     <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
-                                        Selected file</div>
+                                        {{ 'Selected files' | translate }}
+                                    </div>
                                     <div class="mt-1 truncate rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm font-medium text-[var(--color-text2)]">
-                                        {{ pendingNewArtifactFileName || 'No file selected' }}
+                                        {{ pendingNewArtifactFileNames || 'No files selected' | translate }}
                                     </div>
                                 </div>
                                 <button type="button" (click)="newArtifactFileInput.click()" class="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-3 text-sm font-semibold text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800">
-                                    <i class="bi bi-upload"></i> Choose File
+                                    <i class="bi bi-upload"></i> {{ 'Choose File' | translate }}
                                 </button>
                             </div>
                             <div class="mt-3 text-xs font-medium text-[var(--color-text4)]">
-                                {{ newArtifact.type === 'screenshot' ? 'PNG only.' : 'PDF, JPG, PNG, TXT, or DOCX.' }}
+                                {{ (newArtifact.type === 'screenshot') ? ('PNG only.' | translate) : ('PDF, JPG, PNG,
+                                TXT, or DOCX.' | translate) }}
                             </div>
                         </div>
                     </div>

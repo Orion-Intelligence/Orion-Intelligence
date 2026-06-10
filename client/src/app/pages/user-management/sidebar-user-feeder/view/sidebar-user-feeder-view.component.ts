@@ -10,11 +10,12 @@ import { AppService } from '../../../../services/core/app/app.service';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { FeederService } from '../feeder.service';
 import { SidebarUserFeederOwnerDialogComponent } from '../owner-dialog/sidebar-user-feeder-owner-dialog.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-sidebar-user-feeder-view',
   standalone: true,
-  imports: [NgClass, DatePipe, PaginationComponent, ConfirmationPopupComponent, ScrollTopComponent, SidebarUserFeederOwnerDialogComponent],
+  imports: [NgClass, DatePipe, PaginationComponent, ConfirmationPopupComponent, ScrollTopComponent, SidebarUserFeederOwnerDialogComponent, TranslatePipe],
   templateUrl: './sidebar-user-feeder-view.component.html',
 })
 export class SidebarUserFeederViewComponent implements OnChanges {

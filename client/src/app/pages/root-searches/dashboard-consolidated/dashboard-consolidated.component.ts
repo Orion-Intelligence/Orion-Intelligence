@@ -32,10 +32,12 @@ import { applyQueryAndPageFromParams, isRouteChanged } from '../../intel-panel/d
 import { NetworkIntel } from '../network-intel/network-intel';
 import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
 import { SatelliteIntel } from "../../geo-fencing/satellite-intel/satellite-intel";
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel, CrossSearchCardComponent, SatelliteIntel],
+  imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel, CrossSearchCardComponent, SatelliteIntel, TranslatePipe],
   templateUrl: './dashboard-consolidated.component.html',
   animations: [scanAnimation, fadeInDashboardItem],
 })

@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
+import { TranslatePipe } from '../../../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector:    'app-aircraft-marker-icon',
+  imports: [TranslatePipe],
   standalone:  true,
   templateUrl: './aircraft-marker-icon.component.html',
 })

@@ -20,11 +20,12 @@ import { CodeBlockComponent } from '../../../../shared/partials/code-block/code-
 import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
 import { formatKeyLabel as formatKeyLabelUtil, getDisplayTitle as getDisplayTitleUtil, getStatusText as getStatusTextUtil, isWithinDays as isWithinDaysUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
 import { ScrollService } from '../../../../shared/services/scroll.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
-  imports: [ResultListComponent, CommonModule, NgClass, ResultSectionComponent, TooltipDirective, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ChatWidgetComponent, CodeBlockComponent, ReportInteractionHostComponent],
+  imports: [ResultListComponent, CommonModule, NgClass, ResultSectionComponent, TooltipDirective, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ChatWidgetComponent, CodeBlockComponent, ReportInteractionHostComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit, AfterViewInit {
@@ -96,6 +97,7 @@ export class ReportComponent implements OnInit, AfterViewInit {
   langUpdate(result: any) {
     this.resultItem = result;
     this.processResultItem();
+    this.syncActiveMetadataTab();
     if (this.resultItem?.m_screenshot) {
       this.loadImage(this.resultItem.m_screenshot);
     }
@@ -126,6 +128,28 @@ export class ReportComponent implements OnInit, AfterViewInit {
           this.arrayKeys.push(key);
         }
       });
+    }
+  }
+
+  private syncActiveMetadataTab(): void {
+    const keys = this.filteredArrayKeys;
+    if (!keys.length) {
+      this.activeTab = '';
+      this.listItems = [];
+      return;
+    }
+    if (!this.activeTab || !keys.includes(this.activeTab)) {
+      this.activeTab = keys[0];
+    }
+    if (this.activeTab === 'm_content') {
+      this.listItems = [];
+      return;
+    }
+    if (this.resultItem && Array.isArray(this.resultItem[this.activeTab])) {
+      this.listItems = [...this.resultItem[this.activeTab]];
+    }
+    else {
+      this.listItems = [];
     }
   }
 

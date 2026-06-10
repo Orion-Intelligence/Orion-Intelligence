@@ -4,11 +4,13 @@ import { Observable, Subscription } from 'rxjs';
 import { DirectoryCallbackModel } from '../../../shared/model/directory/directory.model';
 import { DirectoryService } from '../../../services/directory/directory.service';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-directory-list',
   templateUrl: './directory-list.component.html',
   standalone: true,
-  imports: [CommonModule, NgClass],
+  imports: [CommonModule, NgClass, TranslatePipe],
   animations: [fadeInDashboardItem]
 })
 export class DirectoryListComponent implements AfterViewInit, OnDestroy {

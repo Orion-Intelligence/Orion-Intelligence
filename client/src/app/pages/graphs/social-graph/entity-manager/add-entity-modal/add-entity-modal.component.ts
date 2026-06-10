@@ -2,6 +2,8 @@ import { Component, ChangeDetectionStrategy, input, output, signal, effect, comp
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { CustomEntity } from '../../../../../shared/model/social/social-scan.models';
 import { SocialEntityUiService } from '../../services/social-entity-ui.service';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+
 export interface AddEntityData {
     type: CustomEntity['type'];
     value: string;
@@ -14,7 +16,7 @@ export interface AddEntityData {
 @Component({
   selector: 'app-add-entity-modal',
   standalone: true,
-  imports: [CommonModule, TitleCasePipe],
+  imports: [CommonModule, TitleCasePipe, TranslatePipe],
   templateUrl: './add-entity-modal.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

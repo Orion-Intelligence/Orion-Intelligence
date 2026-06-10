@@ -57,6 +57,32 @@ class NexusStreamManager:
         answer = re.sub(r"^(?:it appears that|the result matches(?: the original user query)?[:,]?)\s*", "", answer, flags=re.IGNORECASE)
         return answer.strip()
 
+    @staticmethod
+    def _parse_stream_line(line: str) -> dict[str, Any] | None:
+        line = line.strip()
+        if not line or line.startswith(":"):
+            return None
+        if line.startswith("data:"):
+            line = line[5:].strip()
+        if not line:
+            return None
+        try:
+            return json.loads(line)
+        except json.JSONDecodeError:
+            return None
+
+    @staticmethod
+    def _stream_output(parsed_line: dict[str, Any]) -> dict[str, Any]:
+        output = parsed_line.get("output")
+        if isinstance(output, dict):
+            return output
+        result = parsed_line.get("result")
+        if isinstance(result, dict):
+            structured_content = result.get("structuredContent")
+            if isinstance(structured_content, dict):
+                return structured_content
+        return parsed_line
+
     async def get_recent_history(
         self,
         current_user,
@@ -112,8 +138,11 @@ class NexusStreamManager:
                 if not line:
                     continue
                 try:
-                    parsed_line = json.loads(line)
-                    error_message = (parsed_line.get("error") or {}).get("message")
+                    parsed_line = self._parse_stream_line(line)
+                    if parsed_line is None:
+                        continue
+                    error_payload = parsed_line.get("error") or {}
+                    error_message = error_payload.get("message") if isinstance(error_payload, dict) else ""
                     if error_message:
                         yield json.dumps({"output": {"response": error_message}, "done": True, "error": True}, ensure_ascii=True) + "\n", "", True, None
                         return
@@ -122,7 +151,7 @@ class NexusStreamManager:
                     if status_value:
                         yield json.dumps({"status": status_value, "done": False, "error": False}, ensure_ascii=True) + "\n", "", False, None
 
-                    output = parsed_line.get("output") or {}
+                    output = self._stream_output(parsed_line)
                     response_type = output.get("response_type") or parsed_line.get("response_type")
                     if response_type == "api_pipeline":
                         tool_request = output["response"]

@@ -5,12 +5,14 @@ import { DumpService } from '../../../services/dump/dump.service';
 import { DumpCallbackModel } from '../../../shared/model/dump/dump.mode';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'dump-list',
   standalone: true,
   templateUrl: './dump-list.component.html',
   animations: [fadeInDashboardItem],
-  imports: [AsyncPipe, DatePipe, NgClass]
+  imports: [AsyncPipe, DatePipe, NgClass, TranslatePipe]
 })
 export class DumpListComponent implements OnInit {
   readonly isLoadingInput = input(true, { alias: 'isLoading' });

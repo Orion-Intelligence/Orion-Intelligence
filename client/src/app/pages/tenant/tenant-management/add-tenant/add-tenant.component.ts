@@ -8,9 +8,12 @@ import { popupAnimation, overlayAnimation } from '../../../../shared/animations/
 import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { areAllPasswordRequirementsMet, buildUsernameSuggestions, buildUsernameSuggestionText, createEmptyPasswordChecks, evaluatePasswordInput, PasswordChecks, PasswordStrength } from '../../../../shared/utils/auth-form.util';
+import { PasswordToggleDirective } from '../../../../shared/directives/password-toggle.directive';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-add-tenant',
-  imports: [FormsModule, NgClass],
+  imports: [FormsModule, NgClass, PasswordToggleDirective, TranslatePipe],
   templateUrl: './add-tenant.component.html',
   animations: [popupAnimation, overlayAnimation]
 })

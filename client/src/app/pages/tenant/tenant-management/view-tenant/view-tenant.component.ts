@@ -8,10 +8,12 @@ import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { TenantStatus, TenantStatusValues } from '../../../../shared/model/tenant/tenant.model';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-view-tenant',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslatePipe],
   animations: [fadeInDashboardItem],
   templateUrl: './view-tenant.component.html',
 })

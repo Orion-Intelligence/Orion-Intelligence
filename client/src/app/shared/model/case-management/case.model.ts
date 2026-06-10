@@ -29,9 +29,8 @@ export type ArtifactReportSource =
     'defacement' |
     'social' |
     'feed' |
-    'dump' |
-    'stealerlogs' |
-    'scanner';
+    'exploit' |
+    'stealerlogs';
 
 export type EntityConfidence = 'low' | 'medium' | 'high';
 export type Severity = 'info' | 'low' | 'medium' | 'high' | 'critical';
@@ -258,6 +257,15 @@ export interface CaseLinkRequest {
     reason: string;
 }
 
+export interface CaseArtifactFile {
+    fileId: string;
+    fileName: string;
+    fileType: string;
+    fileSize: number;
+    fileResourceId: string;
+    uploadedAt?: Date | string;
+}
+
 export interface CaseArtifact {
     artifactId: string;
     type: ArtifactType;
@@ -267,10 +275,7 @@ export interface CaseArtifact {
     artifactTypeOtherValue?: string;
     artifactSourceOtherValue?: string;
     url?: string;
-    fileName?: string;
-    fileType?: string;
-    fileSize?: number;
-    fileResourceId?: string;
+    files: CaseArtifactFile[];
     entityIds: string[];
     tags: CaseTag[];
     linkedReportSource?: ArtifactReportSource | '';
@@ -295,10 +300,7 @@ export interface CaseArtifactRequest {
     artifactTypeOtherValue?: string;
     artifactSourceOtherValue?: string;
     url?: string;
-    fileName?: string;
-    fileType?: string;
-    fileSize?: number;
-    fileResourceId?: string;
+    files: CaseArtifactFile[];
     entityIds: string[];
     tags: CaseTag[];
     linkedReportSource?: ArtifactReportSource | '';

@@ -51,7 +51,12 @@ export class AlertExportService {
     if (value === null || value === undefined) {
       return '-';
     }
-    const text = String(value).trim();
+    const text = String(value)
+      .normalize('NFKC')
+      .replace(/[\u00AD\u034F\u061C\u180E\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFE0E\uFE0F\uFEFF]/g, '')
+      .replace(/[\uD800-\uDFFF]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
     return text ? text : '-';
   }
 

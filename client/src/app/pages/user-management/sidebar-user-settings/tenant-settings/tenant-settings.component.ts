@@ -11,17 +11,23 @@ import { TenantModel } from '../../../../shared/model/tenant/tenant.model';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { getTenantLocationDisplay, toggleEditState } from '../sidebar-settings.util';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
+import { SmtpSettingsBlockComponent } from '../../../../shared/components/smtp-settings-block/smtp-settings-block.component';
+import { SmtpSettingsForm } from '../../../../shared/model/smtp-settings/smtp-settings.model';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-tenant-settings',
-  imports: [FormsModule, CommonModule, UserImagePickerComponent],
+  imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
   templateUrl: './tenant-settings.component.html'
 })
 export class TenantSettingsComponent implements OnInit {
   isAccountSectionOpen = true;
   isEditing = false;
+  mailErrorState = false;
   userSessionData: userSessionData;
   userId: string = '';
+  mailForm: SmtpSettingsForm = { accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
 
   constructor(protected apiService: ApiService, protected appService: AppService, protected authService: AuthService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService) {
     this.userSessionData = this.appService.userSessionData();
@@ -29,6 +35,12 @@ export class TenantSettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.userId = this.userSessionData?.user.preferences?.["userId"];
+    this.mailForm = {
+      accounts_mail_password: this.userSessionData.tenant.accountsMailPassword || '',
+      accounts_mail: this.userSessionData.tenant.accountsMail || '',
+      accounts_smtp_server: this.userSessionData.tenant.accountsSmtpServer || '',
+      accounts_smtp_port: this.userSessionData.tenant.accountsSmtpPort || '',
+    };
   }
 
   isMember(): boolean {
@@ -53,6 +65,7 @@ export class TenantSettingsComponent implements OnInit {
 
   updateUser() {
     let route = "update/tenants";
+    this.mailErrorState = false;
     const tenantData: TenantModel = {
       id: '',
       name: this.userSessionData.tenant.name,
@@ -64,7 +77,15 @@ export class TenantSettingsComponent implements OnInit {
       profile_visibility_enabled: this.userSessionData.tenant.profileVisibilityEnabled,
       event_management_enabled: this.userSessionData.tenant.eventManagementEnabled === true,
     };
-    this.apiService.post(route, tenantData).subscribe();
+    tenantData.accounts_mail_password = this.mailForm.accounts_mail_password;
+    tenantData.accounts_mail = this.mailForm.accounts_mail;
+    tenantData.accounts_smtp_server = this.mailForm.accounts_smtp_server;
+    tenantData.accounts_smtp_port = this.mailForm.accounts_smtp_port;
+    this.apiService.post(route, tenantData).subscribe({
+      error: () => {
+        this.mailErrorState = true;
+      }
+    });
   }
 
   cancelEdit(event: Event) {

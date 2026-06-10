@@ -18,6 +18,8 @@ import { ScrollService } from '../../../../shared/services/scroll.service';
 import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, isLikelyUrl as isLikelyUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
 import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
 import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-report-chat',
   templateUrl: './report-chat.component.html',
@@ -32,8 +34,7 @@ import { ReportInteractionHostComponent } from '../../social-interactions/report
     TooltipDirective,
     ReportHeaderComponent,
     ChatWidgetComponent,
-    ReportInteractionHostComponent
-  ],
+    ReportInteractionHostComponent, TranslatePipe],
   animations: [fadeInDashboardItem]
 })
 export class ReportChatComponent implements OnInit, AfterViewInit {
@@ -65,6 +66,12 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
   private scrollToTop(): void {
     this.scrollService.scrollReportToTop();
     this.elementRef.nativeElement.scrollIntoView({ block: 'start', behavior: 'auto' });
+  }
+
+  langUpdate(result: ChatResultItem | SocialResultItem) {
+    this.resultItem = result;
+    this.processResultItem();
+    this.syncActiveMetadataTab();
   }
 
   metaadataToggleContent(): void {
@@ -120,6 +127,27 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
           }
         }
       }
+    }
+  }
+
+  private syncActiveMetadataTab(): void {
+    if (!this.arrayKeys.length) {
+      this.activeTab = '';
+      this.listItems = [];
+      return;
+    }
+    if (!this.activeTab || !this.arrayKeys.includes(this.activeTab)) {
+      this.activeTab = this.arrayKeys[0];
+    }
+    if (this.activeTab === 'm_content' || this.activeTab === 'm_summary') {
+      this.listItems = [];
+      return;
+    }
+    if (this.resultItem && Array.isArray((this.resultItem as any)[this.activeTab])) {
+      this.listItems = (this.resultItem as any)[this.activeTab].slice(0, 100);
+    }
+    else {
+      this.listItems = [];
     }
   }
 

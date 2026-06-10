@@ -176,7 +176,7 @@ class auth_manager:
             lurlHeading=MailUrlHeading.ACCOUNT_RECOVERY.value,
             url=forgot_url)
         await mail_manager.get_instance().send_verification_mail(
-            to=user.email, subject=MailSubject.ACCOUNT_RECOVERY.value, body=html_content)
+            to=user.email, subject=MailSubject.ACCOUNT_RECOVERY.value, body=html_content, tenant_id=str(user.tenant_uuid))
 
         return {"message": "Reset password mail send successfully."}
 
@@ -206,6 +206,7 @@ class auth_manager:
                 to=user.email,
                 subject="Your account has been approved",
                 body=f"Hi {user.username},\n\nYour account is now approved. "
-                     f"You can log in and start onboarding.\n\nBest regards,\nTeam")
+                     f"You can log in and start onboarding.\n\nBest regards,\nTeam",
+                tenant_id=str(user.tenant_uuid))
 
         return user

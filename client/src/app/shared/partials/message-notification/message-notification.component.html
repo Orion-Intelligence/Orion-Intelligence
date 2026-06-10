@@ -5,7 +5,7 @@
       <div data-testid="message-notification-text" class="min-w-0 flex-1 break-words pr-1 text-[13px] font-medium leading-[1.45] tracking-[0.005em]">
         {{ message }}
       </div>
-      <button type="button" aria-label="Dismiss notification" class="pointer-events-auto inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-white/15 text-current/80 transition hover:bg-black/25 hover:text-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 [body.light-theme_&]:border-slate-300 [body.light-theme_&]:text-current [body.light-theme_&]:hover:bg-slate-200 [body.light-theme_&]:focus-visible:ring-slate-400" (click)="dismiss()">
+      <button type="button" [attr.aria-label]="'Dismiss notification' | translate" class="pointer-events-auto inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-white/15 text-current/80 transition hover:bg-black/25 hover:text-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 [body.light-theme_&]:border-slate-300 [body.light-theme_&]:text-current [body.light-theme_&]:hover:bg-slate-200 [body.light-theme_&]:focus-visible:ring-slate-400" (click)="dismiss()">
         <i class="bi bi-x-lg text-[11px]" aria-hidden="true"></i>
       </button>
     </div>
