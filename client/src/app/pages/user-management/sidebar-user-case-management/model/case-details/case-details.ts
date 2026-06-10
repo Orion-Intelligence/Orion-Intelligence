@@ -360,7 +360,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     const artifactFile = (artifact.files || []).find(file => file.fileId === fileId);
 
     if (artifactFile && this.isArtifactFileIntegrityFailed(artifactFile)) {
-      this.messageNotificationService.show('File has been manipulated. View is blocked.');
+      this.messageNotificationService.show('File integrity check failed');
       return;
     }
 
@@ -372,13 +372,11 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         setTimeout(() => window.URL.revokeObjectURL(url), 1000);
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
-
         if (artifactFile) {
           artifactFile.integrityStatus = 'failed';
-          artifactFile.integrityMessage =
-              err?.error?.detail || 'File integrity check failed';
         }
+
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
       }
     });
   }
@@ -391,7 +389,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     const artifactFile = (artifact.files || []).find(file => file.fileId === fileId);
 
     if (artifactFile && this.isArtifactFileIntegrityFailed(artifactFile)) {
-      this.messageNotificationService.show('File has been manipulated. Download is blocked.');
+      this.messageNotificationService.show('File integrity check failed');
       return;
     }
 
@@ -406,13 +404,11 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         window.URL.revokeObjectURL(url);
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
-
         if (artifactFile) {
           artifactFile.integrityStatus = 'failed';
-          artifactFile.integrityMessage =
-              err?.error?.detail || 'File integrity check failed';
         }
+
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
       }
     });
   }
@@ -1461,64 +1457,26 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     };
   }
 
-  private patchArtifactFileIntegrity(artifactId: string, fileId: string, status: 'unknown' | 'verified' | 'failed', message: string, checkedAt?: Date | string | null): void {
-    const patchFiles = (artifacts: CaseArtifact[] = []) =>
-      artifacts.map(artifact =>
-        artifact.artifactId === artifactId
-          ? {
-            ...artifact,
-            files: (artifact.files || []).map(file =>
-              file.fileId === fileId
-                ? {
-                  ...file,
-                  integrityStatus: status,
-                  integrityMessage: message,
-                  integrityCheckedAt: checkedAt || new Date().toISOString()
-                }
-                : file)
-          }
-          : artifact);
-
-    if (this.caseData) {
-      this.caseData = {
-        ...this.caseData,
-        artifacts: patchFiles(this.caseData.artifacts)
-      };
+  private setArtifactFileStatus(artifact: CaseArtifact, fileId: string, status: 'verified' | 'failed'): void {
+    const file = artifact.files?.find(item => item.fileId === fileId);
+    if (file) {
+      file.integrityStatus = status;
     }
-
-    if (this.editedCase) {
-      this.editedCase = {
-        ...this.editedCase,
-        artifacts: patchFiles(this.editedCase.artifacts)
-      };
-    }
-
-    this.cdr.detectChanges();
   }
 
-  verifyArtifactFile(artifact: CaseArtifact, artifactFile: CaseArtifactFile): void {
-    if (!this.caseData || !artifact.artifactId || !artifactFile.fileId) {
+  verifyArtifactFile(artifact: CaseArtifact, fileId: string): void {
+    if (!this.caseData || !artifact.artifactId) {
       return;
     }
 
-    this.caseService.verifyArtifactFile(this.caseData.caseId,
-      artifact.artifactId,
-      artifactFile.fileId).subscribe({
+    this.caseService.verifyArtifactFile(this.caseData.caseId, artifact.artifactId, fileId).subscribe({
       next: result => {
-        this.patchArtifactFileIntegrity(artifact.artifactId,
-          artifactFile.fileId,
-          result.status,
-          result.message,
-          result.verifiedAt);
-
-        this.messageNotificationService.show(result.message, result.success ? 'success' : undefined);
+        this.setArtifactFileStatus(artifact, fileId, result.status);
+        this.messageNotificationService.show(result.success ? 'File integrity verified' : 'File integrity check failed',
+          result.success ? 'success' : undefined);
       },
       error: err => {
-        this.patchArtifactFileIntegrity(artifact.artifactId,
-          artifactFile.fileId,
-          'failed',
-          err?.error?.detail || err?.message || 'File integrity check failed');
-
+        this.setArtifactFileStatus(artifact, fileId, 'failed');
         this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
       }
     });
@@ -1529,22 +1487,17 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return;
     }
 
-    this.caseService.verifyAllArtifactFiles(this.caseData.caseId,
-      artifact.artifactId).subscribe({
+    this.caseService.verifyAllArtifactFiles(this.caseData.caseId, artifact.artifactId).subscribe({
       next: response => {
         for (const result of response.files || []) {
-          this.patchArtifactFileIntegrity(artifact.artifactId,
-            result.fileId,
-            result.status,
-            result.message,
-            result.verifiedAt);
+          this.setArtifactFileStatus(artifact, result.fileId, result.status);
         }
 
-        this.messageNotificationService.show(response.success ? 'All files verified successfully' : 'One or more files failed integrity verification',
+        this.messageNotificationService.show(response.success ? 'All files verified' : 'Some files failed integrity check',
           response.success ? 'success' : undefined);
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to verify files');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
       }
     });
   }

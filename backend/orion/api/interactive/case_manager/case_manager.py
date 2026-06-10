@@ -486,10 +486,7 @@ class CaseManager:
                 fileSize=file_size,
                 fileResourceId=resource_id,
                 fileHash=file_hash,
-                hashAlgorithm="sha256",
                 integrityStatus="verified",
-                integrityCheckedAt=utc_now(),
-                integrityMessage="File hash generated at upload",
                 uploadedAt=utc_now(),
             )
 
@@ -502,10 +499,7 @@ class CaseManager:
                 "fileSize": artifact_file.fileSize,
                 "fileResourceId": artifact_file.fileResourceId,
                 "fileHash": artifact_file.fileHash,
-                "hashAlgorithm": artifact_file.hashAlgorithm,
                 "integrityStatus": artifact_file.integrityStatus,
-                "integrityCheckedAt": artifact_file.integrityCheckedAt,
-                "integrityMessage": artifact_file.integrityMessage,
                 "uploadedAt": artifact_file.uploadedAt,
             })
 
@@ -553,14 +547,7 @@ class CaseManager:
         file_name = artifact_file.fileName or "artifact-file"
         file_type = artifact_file.fileType or "application/octet-stream"
 
-        verify_result = await self._verify_artifact_file_integrity(
-            record,
-            artifact,
-            artifact_file,
-            enc
-        )
-
-        if not verify_result["success"]:
+        if not self._verify_file_integrity(artifact_file, enc):
             record.updatedAt = utc_now()
             CaseHelperMethods.apply_sensitive_case_values(
                 record,
@@ -568,10 +555,7 @@ class CaseManager:
             )
             await self._engine.save(record)
 
-            raise HTTPException(
-                status_code=409,
-                detail="File integrity check failed. File may have been manipulated.",
-            )
+            raise HTTPException(status_code=409, detail="File integrity check failed")
 
         file_data = self._artifact_file_helper.load_decrypted_artifact_file(file_resource_id, enc)
 
@@ -803,56 +787,15 @@ class CaseManager:
 
         return {"success": True}
     
-    async def _verify_artifact_file_integrity(self, record: db_case_model, artifact: CaseArtifact, artifact_file: CaseArtifactFile, enc,) -> dict:
-        if not artifact_file.fileHash:
-            artifact_file.integrityStatus = "failed"
-            artifact_file.integrityCheckedAt = utc_now()
-            artifact_file.integrityMessage = "Stored hash is missing"
-            
-            return {
-                "fileId": artifact_file.fileId,
-                "success": False,
-                "status": "failed",
-                "message": "File integrity hash is missing",
-                "verifiedAt": artifact_file.integrityCheckedAt,
-            }
+    def _verify_file_integrity(self, artifact_file: CaseArtifactFile, enc) -> bool:
+        is_valid = self._artifact_file_helper.verify_artifact_file_hash(
+            artifact_file.fileResourceId,
+            artifact_file.fileHash,
+            enc,
+        )
 
-        try:
-            is_valid, actual_hash = self._artifact_file_helper.verify_artifact_file_hash(
-                artifact_file.fileResourceId,
-                artifact_file.fileHash,
-                enc
-            )
-        except Exception:
-            is_valid = False
-            actual_hash = ""
-
-        artifact_file.integrityCheckedAt = utc_now()
-
-        if is_valid:
-            artifact_file.integrityStatus = "verified"
-            artifact_file.integrityMessage = "File integrity verified"
-            return {
-                "fileId": artifact_file.fileId,
-                "success": True,
-                "status": "verified",
-                "expectedHash": artifact_file.fileHash,
-                "actualHash": actual_hash,
-                "message": "File integrity verified",
-                "verifiedAt": artifact_file.integrityCheckedAt,
-            }
-
-        artifact_file.integrityStatus = "failed"
-        artifact_file.integrityMessage = "File may have been manipulated"
-        return {
-            "fileId": artifact_file.fileId,
-            "success": False,
-            "status": "failed",
-            "expectedHash": artifact_file.fileHash,
-            "actualHash": actual_hash,
-            "message": "File integrity check failed. File may have been manipulated.",
-            "verifiedAt": artifact_file.integrityCheckedAt,
-        }
+        artifact_file.integrityStatus = "verified" if is_valid else "failed"
+        return is_valid
     
     async def verify_artifact_file(self, case_id: str, artifact_id: str, file_id: str, current_user) -> dict:
         record = await self._engine.find_one(
@@ -881,7 +824,7 @@ class CaseManager:
         if not artifact_file:
             raise HTTPException(status_code=404, detail="Artifact file not found")
 
-        result = await self._verify_artifact_file_integrity(record, artifact, artifact_file, enc)
+        is_valid = self._verify_file_integrity(artifact_file, enc)
 
         record.updatedAt = utc_now()
         CaseHelperMethods.apply_sensitive_case_values(
@@ -890,7 +833,11 @@ class CaseManager:
         )
         await self._engine.save(record)
 
-        return result
+        return {
+            "fileId": artifact_file.fileId,
+            "success": is_valid,
+            "status": artifact_file.integrityStatus,
+        }
     
     async def verify_all_artifact_files(self, case_id: str, artifact_id: str, current_user) -> dict:
         record = await self._engine.find_one(
@@ -915,11 +862,14 @@ class CaseManager:
         if not artifact:
             raise HTTPException(status_code=404, detail="Artifact not found")
 
-        results = []
+        files = []
         for artifact_file in artifact.files or []:
-            results.append(
-                await self._verify_artifact_file_integrity(record, artifact, artifact_file, enc)
-            )
+            is_valid = self._verify_file_integrity(artifact_file, enc)
+            files.append({
+                "fileId": artifact_file.fileId,
+                "success": is_valid,
+                "status": artifact_file.integrityStatus,
+            })
 
         record.updatedAt = utc_now()
         CaseHelperMethods.apply_sensitive_case_values(
@@ -929,6 +879,6 @@ class CaseManager:
         await self._engine.save(record)
 
         return {
-            "success": all(item["success"] for item in results),
-            "files": results,
+            "success": all(item["success"] for item in files),
+            "files": files,
         }

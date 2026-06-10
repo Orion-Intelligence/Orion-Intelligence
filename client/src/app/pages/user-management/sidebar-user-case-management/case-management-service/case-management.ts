@@ -3,17 +3,13 @@ import { Observable } from 'rxjs';
 import { ApiService } from '../../../../shared/services/api.service';
 import { ArtifactReportOption, Case, CaseAnalyst, CaseRequest, CaseShareRequest, CaseShareResponse, CaseUpdateRequest } from '../../../../shared/model/case-management/case.model';
 
-export type ArtifactFileIntegrityResult = {
+type ArtifactFileIntegrityResult = {
   fileId: string;
   success: boolean;
   status: 'verified' | 'failed';
-  expectedHash?: string;
-  actualHash?: string;
-  message: string;
-  verifiedAt?: string;
 };
 
-export type ArtifactFilesIntegrityResponse = {
+type ArtifactFilesIntegrityResponse = {
   success: boolean;
   files: ArtifactFileIntegrityResult[];
 };

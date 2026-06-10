@@ -76,9 +76,7 @@ async def create_case_share(case_id: str, payload: CreateCaseShareRequest = Body
     ],
 )
 async def verify_artifact_file(case_id: str, artifact_id: str, file_id: str, current_user=Depends(get_current_user)):
-    return await CaseManager.get_instance().verify_artifact_file(
-        case_id, artifact_id, file_id, current_user
-    )
+    return await CaseManager.get_instance().verify_artifact_file(case_id, artifact_id, file_id, current_user)
 
 
 @case_routes.post(
@@ -90,9 +88,7 @@ async def verify_artifact_file(case_id: str, artifact_id: str, file_id: str, cur
     ],
 )
 async def verify_all_artifact_files(case_id: str, artifact_id: str, current_user=Depends(get_current_user)):
-    return await CaseManager.get_instance().verify_all_artifact_files(
-        case_id, artifact_id, current_user
-    )
+    return await CaseManager.get_instance().verify_all_artifact_files(case_id, artifact_id, current_user)
 
 
 @case_routes.delete(

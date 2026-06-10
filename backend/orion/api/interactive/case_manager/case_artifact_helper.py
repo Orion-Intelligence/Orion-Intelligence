@@ -1,4 +1,3 @@
-from curses import raw
 from uuid import uuid4
 import hashlib
 from cryptography.fernet import Fernet
@@ -33,25 +32,18 @@ class CaseArtifactHelper:
         target_path = self.resource_dir / f"{resource_id}.enc"
 
         raw = await file.read()
-        file_hash = self.generate_sha256_hash(raw)
+        file_hash = hashlib.sha256(raw).hexdigest()
 
-        encrypted = enc.encrypt(raw)
-        target_path.write_bytes(encrypted)
+        target_path.write_bytes(enc.encrypt(raw))
 
         return resource_id, len(raw), file_hash
     
-    def verify_artifact_file_hash(self, resource_id: str, expected_hash: str, enc: Fernet) -> tuple[bool, str]:
+    def verify_artifact_file_hash(self, resource_id: str, expected_hash: str, enc: Fernet) -> bool:
         try:
             raw = self.load_decrypted_artifact_file(resource_id, enc)
-
-            actual_hash = self.generate_sha256_hash(raw)
-
-            return actual_hash == expected_hash, actual_hash
-
-        except Exception as error:
-            print("ARTIFACT VERIFY FAILED:", str(error))
-
-            return False, ""
+            return hashlib.sha256(raw).hexdigest() == expected_hash
+        except Exception:
+            return False
 
     def load_decrypted_artifact_file(self, resource_id: str, enc: Fernet) -> bytes:
         path = self.resource_dir / f"{resource_id}.enc"

@@ -254,16 +254,9 @@
                         {{ 'Download' | translate }}
                     </button>
 
-                    <button type="button" (click)="store.verifyArtifactFile(artifact, artifactFile)" [attr.data-testid]="'case-artifact-file-verify-' + fileIndex" class="text-xs text-amber-300 [body.light-theme_&]:text-amber-800">
+                    <button type="button" (click)="store.verifyArtifactFile(artifact, artifactFile.fileId)" [attr.data-testid]="'case-artifact-file-verify-' + fileIndex" class="text-xs text-amber-300 [body.light-theme_&]:text-amber-800">
                         {{ 'Verify Integrity' | translate }}
                     </button>
-
-                    @if (artifactFile.integrityStatus === 'failed') {
-                    <span class="basis-full text-xs font-semibold text-red-300 [body.light-theme_&]:text-red-800">
-                        {{ artifactFile.integrityMessage || 'File has been manipulated. View and download are blocked.'
-                        }}
-                    </span>
-                    }
 
                     @if (!caseData.closure) {
                     <button type="button" (click)="store.deleteArtifactFile(artifact, artifactFile.fileId)" class="text-xs text-red-300 [body.light-theme_&]:text-red-800" [attr.data-testid]="'case-artifact-file-delete-' + fileIndex">
