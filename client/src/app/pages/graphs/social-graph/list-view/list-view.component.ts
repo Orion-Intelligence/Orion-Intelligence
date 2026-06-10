@@ -65,6 +65,23 @@ export class ListViewComponent implements OnDestroy {
       [platformNodeId]: value
     }));
   }
+  isNumeric(value: any): boolean {
+  if (value === null || value === undefined || value === '') return false;
+  if (typeof value === 'number') return true;
+  const s = String(value);
+  return !isNaN(Number(s.replace(/,/g, ''))) && s.trim() !== '';
+}
+
+isBool(value: any): boolean {
+  if (typeof value === 'boolean') return true;
+  const s = String(value).toLowerCase().trim();
+  return s === 'true' || s === 'false';
+}
+
+formatNumericValue(value: any): string {
+  const n = typeof value === 'number' ? value : Number(String(value).replace(/,/g, ''));
+  return Number.isFinite(n) ? n.toLocaleString() : String(value);
+}
 
   getFilteredMetadataEntries(platformNodeId: string): { key: string; value: any; }[] {
     const all = this.getMetadataEntries(platformNodeId);

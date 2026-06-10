@@ -288,53 +288,114 @@
 
 
                   <!-- Raw metadata -->
-                  @if (getMetadataEntries(platformNode.id.toString()); as metadataEntries) {
-                    @if (metadataEntries.length > 0) {
-                      <div class="px-4 py-3">
-                        <div class="flex items-center justify-between mb-2">
-                          <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Raw API Metadata</p>
-                          <div class="relative w-48">
-                            <input type="text" [value]="metadataSearchTerms()[platformNode.id.toString()] || ''" (input)="updateMetadataSearch(platformNode.id.toString(), $event)" placeholder="Search keys or values..." class="h-7 w-full rounded-md border border-gray-200 dark:border-[#4a4b4c] bg-gray-50 dark:bg-[#3a3b3c] pl-7 pr-2 text-[11px] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1877f2]/50">
-                            <i class="bi bi-search absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400"></i>
-                          </div>
-                        </div>
+<!--@if (getActivePanel(platformNode.id.toString()) === null) {-->
+  @if (getMetadataEntries(platformNode.id.toString()); as metadataEntries) {
+    @if (metadataEntries.length > 0) {
+      <div class="px-4 py-3">
 
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
-                          @for (item of getFilteredMetadataEntries(platformNode.id.toString()); track trackByKey($index, item)) {
-                            <div class="group relative bg-gray-50 dark:bg-[#3a3b3c] rounded-lg px-3 py-2 border border-gray-200 dark:border-[#4a4b4c] hover:border-[#1877f2]/40 transition-colors">
-                              <div class="flex items-center justify-between mb-1">
-                                <p class="text-[10px] font-bold uppercase tracking-wide text-gray-400">{{ formatKey(item.key) }}</p>
-                                <button (click)="copyToClipboard(item.value)" class="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-gray-200 dark:hover:bg-[#4a4b4c] text-gray-400 hover:text-[#1877f2] transition-all" title="Copy to clipboard">
-                                  <i class="bi bi-clipboard text-[10px]"></i>
-                                </button>
-                              </div>
-                              <div class="text-sm text-gray-800 dark:text-gray-200">
-                                @if (isImageUrl(item.value)) {
-                                  <div class="relative group/img inline-block">
-                                    <img [src]="item.value" [alt]="item.key" class="rounded-md max-w-[120px] h-auto cursor-zoom-in hover:brightness-110 transition-all">
-                                    <a [href]="item.value" target="_blank" class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/img:opacity-100 rounded-md transition-opacity">
-                                      <i class="bi bi-box-arrow-up-right text-white"></i>
-                                    </a>
-                                  </div>
-                                }
-                                @if (!isImageUrl(item.value) && isUrl(item.value)) {
-                                  <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-[#1877f2] hover:underline break-all font-mono text-[12px]">{{ item.value }}</a>
-                                }
-                                @if (!isImageUrl(item.value) && !isUrl(item.value)) {
-                                  <span class="break-words font-mono text-[12px]">{{ item.value }}</span>
-                                }
-                              </div>
-                            </div>
-                          }
-                          @if (getFilteredMetadataEntries(platformNode.id.toString()).length === 0) {
-                            <div class="col-span-full py-4 text-center">
-                              <p class="text-[11px] text-gray-400 italic">No metadata matches your search.</p>
-                            </div>
-                          }
-                        </div>
-                      </div>
-                    }
+        <div class="flex items-center justify-between mb-2 gap-3">
+          <div class="flex items-center gap-1.5">
+            <i class="bi bi-database text-gray-400 text-sm"></i>
+            <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-0">
+              Raw API metadata
+            </p>
+            <span class="text-[11px] text-gray-400">
+              — {{ getFilteredMetadataEntries(platformNode.id.toString()).length }} fields
+            </span>
+          </div>
+          <div class="relative">
+            <input
+              type="text"
+              [value]="metadataSearchTerms()[platformNode.id.toString()] || ''"
+              (input)="updateMetadataSearch(platformNode.id.toString(), $event)"
+              placeholder="Search…"
+              class="h-7 w-44 rounded-md border border-gray-200 dark:border-[#4a4b4c]
+                     bg-gray-50 dark:bg-[#3a3b3c] pl-6 pr-2 text-[11px]
+                     text-gray-800 dark:text-gray-200
+                     focus:outline-none focus:ring-1 focus:ring-[#1877f2]/50">
+            <i class="bi bi-search absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400"></i>
+          </div>
+        </div>
+
+        <table class="w-full text-xs border-collapse">
+          <tbody>
+            @for (item of getFilteredMetadataEntries(platformNode.id.toString()); track trackByKey($index, item)) {
+              <tr class="group border-b border-gray-100 dark:border-[#3a3b3c] last:border-0
+                         hover:bg-gray-50 dark:hover:bg-[#2d2e2f] transition-colors">
+
+                <!-- Key -->
+                <td class="py-1.5 pr-3 w-[38%] align-middle whitespace-nowrap">
+                  <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                      [class.bg-[#1877f2]]="isUrl(item.value) && !isImageUrl(item.value)"
+                      [class.bg-emerald-500]="isImageUrl(item.value)"
+                      [class.bg-amber-500]="isNumeric(item.value)"
+                      [class.bg-rose-400]="isBool(item.value)"
+                      [class.bg-gray-300]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)"
+                      [class.dark:bg-gray-500]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)">
+                    </span>
+                    <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                      {{ formatKey(item.key) }}
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Value -->
+                <td class="py-1.5 align-middle font-mono text-[12px] text-gray-800 dark:text-gray-200 break-all leading-snug">
+                  @if (isImageUrl(item.value)) {
+                    <div class="flex items-center gap-2">
+                      <img [src]="item.value" [alt]="item.key"
+                           class="h-7 w-7 rounded object-cover flex-shrink-0">
+                      <a [href]="item.value" target="_blank" rel="noopener noreferrer"
+                         class="text-[11px] text-[#1877f2] hover:underline">view</a>
+                    </div>
+                  } @else if (isUrl(item.value)) {
+                    <a [href]="item.value" target="_blank" rel="noopener noreferrer"
+                       class="text-[#1877f2] hover:underline">{{ item.value }}</a>
+                  } @else if (isBool(item.value)) {
+                    <span [class.text-emerald-500]="item.value === true || item.value === 'true'"
+                          [class.text-rose-400]="item.value === false || item.value === 'false'"
+                          class="inline-flex items-center gap-1">
+                      <i [class.bi-check-circle-fill]="item.value === true || item.value === 'true'"
+                         [class.bi-x-circle-fill]="item.value === false || item.value === 'false'"
+                         class="bi text-[12px]"></i>
+                      {{ item.value }}
+                    </span>
+                  } @else if (isNumeric(item.value)) {
+                    <span class="text-amber-600 dark:text-amber-400">{{ formatNumericValue(item.value) }}</span>
+                  } @else {
+                    {{ item.value }}
                   }
+                </td>
+
+                <!-- Copy -->
+                <td class="py-1.5 pl-2 align-middle w-7 text-right">
+                  <button (click)="copyToClipboard(item.value)"
+                    class="opacity-0 group-hover:opacity-100 w-6 h-6 inline-flex items-center
+                           justify-center rounded hover:bg-gray-200 dark:hover:bg-[#4a4b4c]
+                           text-gray-400 hover:text-[#1877f2] transition-all"
+                    title="Copy value">
+                    <i class="bi bi-clipboard text-[10px]"></i>
+                  </button>
+                </td>
+
+              </tr>
+            }
+
+            @if (getFilteredMetadataEntries(platformNode.id.toString()).length === 0) {
+              <tr>
+                <td colspan="3" class="py-6 text-center text-[11px] text-gray-400 italic">
+                  No fields match your search.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+      </div>
+    }
+  }
+<!--}-->
 
                   <div class="px-4 py-3 flex items-center justify-between text-gray-800 dark:text-gray-200 border-t border-gray-100 dark:border-[#3a3b3c]">
                     <div class="flex items-center gap-1.5 flex-1 justify-center">
