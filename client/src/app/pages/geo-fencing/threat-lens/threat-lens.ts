@@ -15,7 +15,7 @@ import { IpDetailPopupComponent } from './ui-overlays/ip-detail-popup/ip-detail-
 import { ArcReportPopupComponent } from './ui-overlays/arc-report-popup/arc-report-popup.component';
 import { ThreatLensFeedPanelComponent } from './ui-overlays/feed-panel/threat-lens-feed-panel.component';
 import { ThreatLensMapRendererComponent } from './map-renderer/threat-lens-map-renderer.component';
-import { ThreatLensArcSelection, ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensCountrySelection, ThreatLensIpViewportScanRequest } from './models/threat-lens-map.types';
+import { ThreatLensArcBatchStatus, ThreatLensArcSelection, ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensCountrySelection, ThreatLensIpViewportScanRequest } from './models/threat-lens-map.types';
 import { ThreatLensService } from './threat-lens.service';
 import { ThreatLensGeoUtils } from './map-utils/threat-lens-geo.utils';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
@@ -47,7 +47,6 @@ export class ThreatLensComponent implements OnDestroy {
   private hasStartedDefaultIpScan = false;
   private lastAutomaticIpScanKey = '';
   private selectedCountryIpScanRequest: ThreatLensIpViewportScanRequest | null = null;
-  private readonly arcBatchSize = 5;
   private readonly defaultIpScanCoordinates = '20, 0';
   private readonly defaultIpScanCenter: ThreatLensCoordinates = { lat: 20, lon: 0 };
   private readonly defaultIpScanRadiusKm = 12000;
@@ -55,6 +54,7 @@ export class ThreatLensComponent implements OnDestroy {
   private detailOverlayOpenNotified = false;
 
   protected readonly filterModel: FilterModel = threat_lens_filters;
+  protected readonly arcBatchSizeOptions = [5, 10, 20, 50];
 
   isFilterOpen$: Observable<boolean>;
   searchTerm = '';
@@ -62,6 +62,9 @@ export class ThreatLensComponent implements OnDestroy {
   selectedCountryName = '';
   statusMessage = 'Loading threat lens results...';
   isLoading = true;
+  arcBatchSize = 10;
+  selectedArcCategoryKey: ThreatLensCategoryModelKey | null = null;
+  arcBatchStatus: ThreatLensArcBatchStatus | null = null;
   topCountries: ThreatCountryCount[] = [];
   arcCount = 0;
   categoryLegend: ThreatLensLegendItem[] = [];
@@ -100,6 +103,8 @@ export class ThreatLensComponent implements OnDestroy {
   }
 
   async onMapReady(): Promise<void> {
+    this.mapRenderer?.setArcBatchSize(this.arcBatchSize);
+    this.mapRenderer?.setArcCategoryFilter(this.selectedArcCategoryKey);
     await this.loadThreatLensData('');
   }
 
@@ -150,6 +155,25 @@ export class ThreatLensComponent implements OnDestroy {
   onArcCountChange(count: number): void {
     this.arcCount = count;
     this.cdr.detectChanges();
+  }
+
+  onArcBatchStatusChange(status: ThreatLensArcBatchStatus | null): void {
+    this.arcBatchStatus = status;
+    if (status) {
+      this.arcCount = status.visibleCount;
+    }
+    this.cdr.detectChanges();
+  }
+
+  onArcCategorySelect(categoryKey: ThreatLensCategoryModelKey | null): void {
+    this.selectedArcCategoryKey = categoryKey;
+    this.mapRenderer?.setArcCategoryFilter(categoryKey);
+  }
+
+  onArcBatchSizeChange(value: number | string): void {
+    const nextSize = Number(value);
+    this.arcBatchSize = this.arcBatchSizeOptions.includes(nextSize) ? nextSize : 10;
+    this.mapRenderer?.setArcBatchSize(this.arcBatchSize);
   }
 
   onIpSelected(ip: string): void {
@@ -221,6 +245,14 @@ export class ThreatLensComponent implements OnDestroy {
     return 'Idle';
   }
 
+  get arcBatchStatusText(): string {
+    if (!this.arcBatchStatus || !this.arcBatchStatus.visibleCount) {
+      return 'No arcs visible in the current batch.';
+    }
+
+    return `Showing ${this.arcBatchStatus.categoryLabel} arcs ${this.arcBatchStatus.start}-${this.arcBatchStatus.end} of ${this.arcBatchStatus.categoryArcCount}`;
+  }
+
   onIpDetailPopupClose(): void {
     this.selectedIp = '';
     this.emitDetailOverlayOpenChange();
@@ -284,7 +316,8 @@ export class ThreatLensComponent implements OnDestroy {
 
     this.arcCount = totalArcCount;
     this.categoryLegend = ThreatLensGeoUtils.buildThreatLensLegend(stats.categoryData, arcCountByCategory);
-    this.applyLoadedDataState(stats, activeQuery, totalArcCount);
+    const hasRenderableArcs = this.categoryLegend.some((item) => item.arcCount > 0);
+    this.applyLoadedDataState(stats, activeQuery, hasRenderableArcs ? Math.max(totalArcCount, 1) : 0);
 
     if (this.activeArcCountryFilterKey) {
       await this.focusCountryByKey(this.activeArcCountryFilterKey);
@@ -307,6 +340,7 @@ export class ThreatLensComponent implements OnDestroy {
 
   private applyEmptyDataState(activeQuery: string): void {
     this.arcCount = 0;
+    this.arcBatchStatus = null;
     this.ngZone.run(() => {
       this.topCountries = [];
       this.categoryLegend = [];
@@ -345,8 +379,8 @@ export class ThreatLensComponent implements OnDestroy {
 
       this.statusMessage = totalArcCount > 0
         ? this.activeArcCountryFilterKey
-          ? `Loaded ${stats.totalResults} records${queryLabel}. Showing only arc connections linked to ${this.selectedCountryName || activeQuery}, rotating in batches of up to ${this.arcBatchSize}.`
-          : `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries. Showing rotating arc batches of up to ${this.arcBatchSize} at a time. Most active: ${mostActive.country} (${mostActive.count}).`
+          ? `Loaded ${stats.totalResults} records${queryLabel}. Showing only arc connections linked to ${this.selectedCountryName || activeQuery}, rotating one category at a time in batches of up to ${this.arcBatchSize}.`
+          : `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries. Showing one category per arc batch, up to ${this.arcBatchSize} at a time. Most active: ${mostActive.country} (${mostActive.count}).`
         : this.activeArcCountryFilterKey
           ? `Loaded ${stats.totalResults} records${queryLabel}, but no arc connections were found for ${this.selectedCountryName || activeQuery}.`
           : `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries, but no multi-country co-occurrence was found for arcs.`;

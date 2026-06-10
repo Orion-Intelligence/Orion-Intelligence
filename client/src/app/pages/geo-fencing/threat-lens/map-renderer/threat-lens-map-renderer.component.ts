@@ -7,7 +7,7 @@ import { ThreatLensArcRenderer } from '../map-overlays/threat-lens-arc.renderer'
 import { ThreatLensCountryLayerRenderer } from '../map-overlays/threat-lens-country-layer.renderer';
 import { ThreatLensIpMarkerRenderer } from '../map-overlays/threat-lens-ip-marker.renderer';
 import { ThreatLensTooltipRenderer } from '../map-overlays/threat-lens-tooltip.renderer';
-import { ThreatLensArcRenderResult, ThreatLensArcSelection, ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensCountrySelection, ThreatLensIpRecord, ThreatLensIpViewportScanRequest } from '../models/threat-lens-map.types';
+import { ThreatLensArcBatchStatus, ThreatLensArcRenderResult, ThreatLensArcSelection, ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensCountrySelection, ThreatLensIpRecord, ThreatLensIpViewportScanRequest } from '../models/threat-lens-map.types';
 
 @Component({
   selector: 'app-threat-lens-map-renderer',
@@ -62,6 +62,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   @Output() arcSelected = new EventEmitter<ThreatLensArcSelection>();
   @Output() viewportIpScanRequested = new EventEmitter<ThreatLensIpViewportScanRequest>();
   @Output() arcCountChange = new EventEmitter<number>();
+  @Output() arcBatchStatusChange = new EventEmitter<ThreatLensArcBatchStatus | null>();
 
   constructor(private ngZone: NgZone, private threatLensService: ThreatLensService) {}
 
@@ -113,6 +114,14 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     const arcResult = this.arcRenderer?.render(categoryData, activeCountryFilterKey) ?? { totalArcCount: 0, arcCountByCategory: new Map() };
     this.categoryLegend = ThreatLensGeoUtils.buildThreatLensLegend(categoryData, arcResult.arcCountByCategory);
     return arcResult;
+  }
+
+  setArcBatchSize(size: number): void {
+    this.arcRenderer?.setBatchSize(size);
+  }
+
+  setArcCategoryFilter(categoryKey: ThreatLensCategoryModelKey | null): void {
+    this.arcRenderer?.setActiveCategory(categoryKey);
   }
 
   getSelectedCountryBreakdown(countryKey: string): ThreatLensCountrySelection['breakdown'] {
@@ -267,7 +276,8 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         geometryEngine,
         webMercatorUtils,
         (value) => this.toCountryKey(value),
-        (count) => this.arcCountChange.emit(count),);
+        (count) => this.arcCountChange.emit(count),
+        (status) => this.arcBatchStatusChange.emit(status),);
       this.ipMarkerRenderer = new ThreatLensIpMarkerRenderer(this.view, this.ipScanGraphicsLayer, geometryEngine);
 
       this.tooltipRenderer.init();

@@ -13,7 +13,8 @@
 		(ipSelected)="onIpSelected($event)"
 		(arcSelected)="onArcSelected($event)"
 		(viewportIpScanRequested)="onViewportIpScanRequested($event)"
-		(arcCountChange)="onArcCountChange($event)">
+		(arcCountChange)="onArcCountChange($event)"
+		(arcBatchStatusChange)="onArcBatchStatusChange($event)">
 	</app-threat-lens-map-renderer>
 
 	<div class="pointer-events-none absolute inset-0 bg-[var(--color-mono)] opacity-15 max-[1100px]:hidden"></div>
@@ -83,11 +84,27 @@
 
 				@if (categoryLegend.length) {
 					<div data-testid="threat-lens-category-layers" class="mt-5 border-t border-[var(--color-border)] pt-3">
-						<h3 class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">{{ 'Category Layers' | translate }}</h3>
+						<div class="flex items-center justify-between gap-2">
+							<h3 class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">{{ 'Category Layers' | translate }}</h3>
+							<label class="flex shrink-0 items-center gap-2 text-[11px] text-[var(--color-text4)]">
+								<span>{{ 'Limit' | translate }}</span>
+								<select data-testid="threat-lens-arc-batch-size" [(ngModel)]="arcBatchSize" (ngModelChange)="onArcBatchSizeChange($event)" class="h-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 text-[12px] font-semibold text-[var(--color-text1)] outline-none focus:border-[var(--color-blue-640)]">
+									@for (size of arcBatchSizeOptions; track size) {
+										<option [ngValue]="size">{{ size }}</option>
+									}
+								</select>
+							</label>
+						</div>
+						<div class="mt-3 flex items-center gap-2">
+							<button data-testid="threat-lens-arc-auto-mode" type="button" (click)="onArcCategorySelect(null)" class="h-8 rounded-[8px] border px-3 text-[12px] font-semibold transition-colors" [ngClass]="!selectedArcCategoryKey ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white' : 'border-[var(--color-border)] bg-[var(--color-blue-790)] text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]'">
+								{{ 'Auto' | translate }}
+							</button>
+							<p data-testid="threat-lens-arc-batch-status" class="min-w-0 truncate text-[11px] text-[var(--color-text4)]">{{ arcBatchStatusText }}</p>
+						</div>
 					</div>
 					<div class="mt-2 max-h-[220px] space-y-1 overflow-auto pr-1 max-[640px]:max-h-[160px]">
 						@for (item of categoryLegend; track item.categoryKey) {
-							<div data-testid="threat-lens-category-layer" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
+							<button data-testid="threat-lens-category-layer" type="button" (click)="onArcCategorySelect(item.categoryKey)" [disabled]="!item.arcCount" class="w-full rounded-[10px] border px-3 py-2 text-left text-[12px] text-[var(--color-text2)] transition-colors disabled:cursor-not-allowed disabled:opacity-55" [ngClass]="selectedArcCategoryKey === item.categoryKey ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-710)]' : 'border-[var(--color-border)] bg-[var(--color-blue-760)] hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]'">
 								<div class="flex items-center justify-between gap-3">
 									<span class="flex min-w-0 items-center gap-2">
 										<svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0 drop-shadow-[0_0_6px_currentColor]" [attr.color]="item.colorHex" aria-hidden="true">
@@ -98,7 +115,7 @@
 									<span>{{ item.arcCount }} {{ 'arcs' | translate }}</span>
 								</div>
 								<p class="mt-1 text-[11px] text-[var(--color-text4)]">{{ item.totalResults }} {{ 'results' | translate }}, {{ item.countryCount }} {{ 'countries' | translate }}</p>
-							</div>
+							</button>
 						}
 					</div>
 				}
@@ -135,6 +152,9 @@
 			}
 			<p data-testid="threat-lens-status" class="mt-2 max-w-[420px] text-[12px] text-[var(--color-text3)]">{{ statusMessage }}</p>
 			<p data-testid="threat-lens-visible-arcs" class="mt-2 text-[11px] text-[var(--color-text4)]">{{ 'Arcs currently visible' | translate }}: <span class="font-semibold text-[var(--color-text2)]">{{ arcCount }}</span></p>
+			@if (arcBatchStatus) {
+				<p data-testid="threat-lens-visible-arc-range" class="mt-1 text-[11px] text-[var(--color-text4)]">{{ arcBatchStatusText }}</p>
+			}
 			@if (showIpScanPanel) {
 				<div data-testid="threat-lens-ip-scan-panel" class="mt-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
 					<div class="flex items-start justify-between gap-3">
