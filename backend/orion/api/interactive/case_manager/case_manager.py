@@ -513,7 +513,7 @@ class CaseManager:
 
         return {"files": uploaded_files}
     
-    async def get_artifact_file_response(self, case_id: str, artifact_id: str, file_id: str, current_user, download: bool = False) -> Response:
+    async def get_artifact_file_response(self, case_id: str, artifact_id: str, file_id: str, current_user, download: bool = True) -> Response:
         record = await self._engine.find_one(
             db_case_model,
             (db_case_model.caseId == case_id)
@@ -566,7 +566,7 @@ class CaseManager:
         )
         await self._engine.save(record)
 
-        disposition = "attachment" if download else "inline"
+        disposition = "attachment"
 
         return Response(
             content=file_data,

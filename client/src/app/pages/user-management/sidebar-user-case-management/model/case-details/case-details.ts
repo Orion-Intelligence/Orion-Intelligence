@@ -352,35 +352,6 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     return this.router.serializeUrl(tree);
   }
 
-  viewArtifactFile(artifact: CaseArtifact, fileId: string): void {
-    if (!this.caseData || !artifact.artifactId) {
-      return;
-    }
-
-    const artifactFile = (artifact.files || []).find(file => file.fileId === fileId);
-
-    if (artifactFile && this.isArtifactFileIntegrityFailed(artifactFile)) {
-      this.messageNotificationService.show('File integrity check failed');
-      return;
-    }
-
-    this.http.get(`/api/profile/cases/${this.caseData.caseId}/artifacts/${artifact.artifactId}/files/${fileId}/view`,
-      { responseType: 'blob' }).subscribe({
-      next: blob => {
-        const url = window.URL.createObjectURL(blob);
-        window.open(url, '_blank', 'noopener');
-        setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-      },
-      error: err => {
-        if (artifactFile) {
-          artifactFile.integrityStatus = 'failed';
-        }
-
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
-      }
-    });
-  }
-
   downloadArtifactFile(artifact: CaseArtifact, fileId: string): void {
     if (!this.caseData || !artifact.artifactId) {
       return;

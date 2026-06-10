@@ -238,10 +238,6 @@
                         'failed' ? 'Integrity Failed' : 'Not Verified' }}
                     </span>
 
-                    <button type="button" (click)="store.viewArtifactFile(artifact, artifactFile.fileId)" [disabled]="store.isArtifactFileIntegrityFailed(artifactFile)" [attr.data-testid]="'case-artifact-file-view-' + fileIndex" class="text-xs text-sky-300 disabled:cursor-not-allowed disabled:opacity-40 [body.light-theme_&]:text-sky-800">
-                        {{ 'View' | translate }}
-                    </button>
-
                     <button type="button" (click)="store.downloadArtifactFile(artifact, artifactFile.fileId)" [disabled]="store.isArtifactFileIntegrityFailed(artifactFile)" [attr.data-testid]="'case-artifact-file-download-' + fileIndex" class="text-xs text-emerald-300 disabled:cursor-not-allowed disabled:opacity-40 [body.light-theme_&]:text-emerald-800">
                         {{ 'Download' | translate }}
                     </button>

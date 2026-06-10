@@ -30,7 +30,6 @@ export abstract class CaseDetailsStore {
   abstract saveArtifacts(): void;
   abstract removeArtifact(index: number): void;
   abstract uploadArtifactFiles(artifact: CaseArtifact, fileInput: HTMLInputElement): void;
-  abstract viewArtifactFile(artifact: CaseArtifact, fileId: string): void;
   abstract downloadArtifactFile(artifact: CaseArtifact, fileId: string): void;
   abstract deleteArtifactFile(artifact: CaseArtifact, fileId: string): void;
   abstract setPendingNewArtifactFiles(fileInput: HTMLInputElement): void;
