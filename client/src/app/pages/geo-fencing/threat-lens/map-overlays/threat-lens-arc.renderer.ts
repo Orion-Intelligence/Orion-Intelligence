@@ -16,7 +16,7 @@ export class ThreatLensArcRenderer {
   private endMarkerGraphics: any[] = [];
   private readonly maxArcCount = 80;
   private readonly minArcWeight = 1;
-  private readonly arcBatchSize = 5;
+  private readonly arcBatchSize = 10;
   private readonly arcBatchDuration = 6000;
   private readonly movingDotBaseSize = 90000;
 

@@ -449,54 +449,61 @@ class helper_controller:
         return True
 
     @staticmethod
-    def coerce_date_timestamp(value):
-        if not value:
-            return 0
-
-        if isinstance(value, datetime):
-            parsed_date = value
-        elif isinstance(value, str):
-            raw_value = value.strip()
-            if not raw_value:
-                return 0
-
-            try:
-                if len(raw_value) == 10:
-                    parsed_date = datetime.strptime(raw_value, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-                else:
-                    parsed_date = datetime.fromisoformat(raw_value.replace("Z", "+00:00"))
-            except ValueError:
-                return 0
-        else:
-            return 0
-
-        if parsed_date.tzinfo is None:
-            parsed_date = parsed_date.replace(tzinfo=timezone.utc)
-
-        return parsed_date.timestamp()
-
-    @staticmethod
-    def latest_document_timestamp(document):
-        date_fields = ("m_leak_date", "m_message_date", "m_update_date", "m_creation_date")
-        return max(helper_controller.coerce_date_timestamp(document.get(field)) for field in date_fields)
-
-    @staticmethod
     def threat_lens_sort_latest_and_limit_response(response, limit: int = 100):
+        def coerce_date_timestamp(value):
+            if not value:
+                return 0
+
+            if isinstance(value, datetime):
+                parsed_date = value
+            elif isinstance(value, str):
+                raw_value = value.strip()
+                if not raw_value:
+                    return 0
+
+                try:
+                    if len(raw_value) == 10:
+                        parsed_date = datetime.strptime(raw_value, "%Y-%m-%d").replace(
+                            tzinfo=timezone.utc
+                        )
+                    else:
+                        parsed_date = datetime.fromisoformat(
+                            raw_value.replace("Z", "+00:00")
+                        )
+                except ValueError:
+                    return 0
+            else:
+                return 0
+
+            if parsed_date.tzinfo is None:
+                parsed_date = parsed_date.replace(tzinfo=timezone.utc)
+
+            return parsed_date.timestamp()
+
+        def latest_document_timestamp(document):
+            date_fields = ("m_leak_date", "m_message_date","m_update_date", "m_creation_date")
+            return max(
+                coerce_date_timestamp(document.get(field))
+                for field in date_fields
+            )
+
         ranked_results = response.get("Result") or []
 
         ranked_results.sort(
             key=lambda item: (
-                helper_controller.latest_document_timestamp(item),
-                float(item.get("_score") or 0)
+                latest_document_timestamp(item),
+                float(item.get("_score") or 0),
             ),
-            reverse=True
+            reverse=True,
         )
 
         limited_results = ranked_results[:limit]
+
         for rank, item in enumerate(limited_results):
             item["_rank"] = rank + 1
 
         response["Result"] = limited_results
         response["Total_Hits"] = len(limited_results)
         response["Page_Count"] = 1 if limited_results else 0
+
         return response
