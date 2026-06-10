@@ -548,6 +548,12 @@ class CaseManager:
         file_type = artifact_file.fileType or "application/octet-stream"
 
         if not self._verify_file_integrity(artifact_file, enc):
+            await AuditLogManager.get_instance().register(
+                str(current_user.tenant_uuid),
+                str(current_user.id),
+                f"Artifact file integrity failed: caseId={case_id}, artifactId={artifact_id}, fileId={file_id}, fileName={file_name}",
+            )
+
             record.updatedAt = utc_now()
             CaseHelperMethods.apply_sensitive_case_values(
                 record,
@@ -825,6 +831,13 @@ class CaseManager:
             raise HTTPException(status_code=404, detail="Artifact file not found")
 
         is_valid = self._verify_file_integrity(artifact_file, enc)
+
+        if not is_valid:
+            await AuditLogManager.get_instance().register(
+                str(current_user.tenant_uuid),
+                str(current_user.id),
+                f"Artifact file integrity failed: caseId={case_id}, artifactId={artifact_id}, fileId={file_id}, fileName={artifact_file.fileName}",
+            )
 
         record.updatedAt = utc_now()
         CaseHelperMethods.apply_sensitive_case_values(
