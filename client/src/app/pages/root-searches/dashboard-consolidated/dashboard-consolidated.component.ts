@@ -376,6 +376,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.isGrouped = true;
       this.isIOC = false;
       this.isGeoFencing = false;
+      this.restoreDeepSearchQuery();
       if (skipConsolidatedBackFetchOnce) {
         sessionStorage.removeItem('skipConsolidatedBackFetchOnce');
         return;
@@ -407,6 +408,19 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.isGrouped = false;
       this.isGeoFencing = true;
     }
+  }
+
+  private restoreDeepSearchQuery(): void {
+    const snapshotParams = this.route.snapshot.queryParams;
+    const querySource = this.dashboardService.consolidatedParamModel.q || this.query || snapshotParams['q'];
+    if (!querySource) {
+      return;
+    }
+    this.query = querySource;
+    this.dashboardService.consolidatedParamModel.q = querySource;
+    this.dashboardService.consolidatedParamModel.url = '';
+    this.dashboardService.consolidatedParamModel.user = '';
+    this.dashboardService.consolidatedParamModel.ioc = '';
   }
 
   checkMember(): boolean {

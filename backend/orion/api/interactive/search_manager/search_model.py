@@ -286,7 +286,10 @@ class search_model:
                     config["allowed_categories"]
                 )
             response = await elastic_controller.get_instance().search_consolidated_ranked_query(indices,query,indices_boost)
-            results[label] = search_model._build_ranked_response(response, query, 10)
+            ranked_response = search_model._build_ranked_response(response, query, 10)
+            if getattr(param, "sort_latest", False):
+                ranked_response = helper_controller.threat_lens_sort_latest_and_limit_response(ranked_response, 100)
+            results[label] = ranked_response
 
         return grouped_consolidated_search_callback_model(**results)
 

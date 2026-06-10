@@ -59,7 +59,8 @@
             (closeSidebar)="mapRenderer.closeSidebar()">
           </app-map-entities-overlay>
         </div>
-          <div class="absolute right-3 top-3 z-[920] flex max-w-[calc(100%-24px)] items-center gap-2 map-overlay-menu max-[943px]:right-2 max-[943px]:top-2 max-[943px]:max-w-[calc(100%-16px)] max-[520px]:flex-col max-[520px]:items-end">
+          @if (!(isFilterOpen$ | async) && !isThreatLensDetailOverlayOpen) {
+          <div class="absolute right-3 top-3 z-20 flex max-w-[calc(100%-24px)] items-center gap-2 map-overlay-menu max-[943px]:right-2 max-[943px]:top-2 max-[943px]:max-w-[calc(100%-16px)] max-[520px]:flex-col max-[520px]:items-end">
             @if (showTopBar) {
               <div class="inline-flex overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition-opacity [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)]" [ngClass]="isThreatToolbarDisabled ? 'opacity-50' : 'opacity-100'">
                 <button data-testid="geo-fencing-tab-map" class="whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition-colors max-[420px]:px-2" [ngClass]="activeTab === 'map' ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text3)] hover:text-[var(--color-text1)]'" (click)="setActiveView('map')">
@@ -80,10 +81,11 @@
             </button>
           </div>
           </div>
+          }
 
         @if(isThreatView){
-          <div data-testid="geo-fencing-threat-view" class="h-full min-h-0 w-full overflow-hidden animate-[slideUp_220ms_ease-out_both]">
-            <app-threat-lens class="block h-full min-h-0 w-full" [showFilterButton]="false" (loadingChange)="onThreatLensLoadingChange($event)"></app-threat-lens>
+          <div data-testid="geo-fencing-threat-view" class="h-full min-h-0 w-full overflow-hidden animate-[ui-overlay-fade-in_180ms_ease-out_both]">
+            <app-threat-lens class="block h-full min-h-0 w-full" [showFilterButton]="false" (loadingChange)="onThreatLensLoadingChange($event)" (detailOverlayOpenChange)="onThreatLensDetailOverlayOpenChange($event)"></app-threat-lens>
           </div>
         }
       </div>

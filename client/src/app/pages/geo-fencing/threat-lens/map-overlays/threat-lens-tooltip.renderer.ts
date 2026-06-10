@@ -37,32 +37,6 @@ export class ThreatLensTooltipRenderer {
     this.show(event, tooltipContent);
   }
 
-  showArc(event: any, attributes: Record<string, unknown>): void {
-    if (!this.tooltipEl) {
-      return;
-    }
-
-    const startCountry = typeof attributes['start_country'] === 'string' ? attributes['start_country'] : 'Unknown start';
-    const endCountry = typeof attributes['end_country'] === 'string' ? attributes['end_country'] : 'Unknown end';
-    const category = typeof attributes['category_label'] === 'string' ? attributes['category_label'] : 'Threat';
-    const weight = typeof attributes['weight'] === 'number' ? attributes['weight'] : Number(attributes['weight'] || 0);
-
-    const tooltipContent = document.createElement('div');
-    tooltipContent.className = 'threat-lens-tooltip__content threat-lens-tooltip__content--arc';
-
-    const title = document.createElement('div');
-    title.className = 'threat-lens-tooltip__arc-title';
-    title.textContent = 'Arc Route';
-
-    tooltipContent.append(title,
-      this.buildTooltipRow('Start', startCountry),
-      this.buildTooltipRow('End', endCountry),
-      this.buildTooltipRow('Category', category),
-      this.buildTooltipRow('Records', String(weight)),);
-
-    this.show(event, tooltipContent);
-  }
-
   showCountry(event: any, countryName: string, threatCount: number, breakdown: SelectedCountryCategoryCount[]): void {
     if (!this.tooltipEl) {
       return;

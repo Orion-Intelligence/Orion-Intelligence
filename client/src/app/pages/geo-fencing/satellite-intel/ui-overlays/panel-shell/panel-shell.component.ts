@@ -1,3 +1,4 @@
+import { NgClass } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { SatelliteIntelPanel, SatelliteIntelPanelEnum } from '../../../enums/geo-fencing.enums';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
@@ -9,7 +10,7 @@ const PANEL_TABS: Array<{ id: SatelliteIntelPanel; label: string }> = [
 
 @Component({
   selector: 'app-satellite-panel-shell',
-  imports: [TranslatePipe],
+  imports: [NgClass, TranslatePipe],
   standalone: true,
   templateUrl: './panel-shell.component.html',
 })

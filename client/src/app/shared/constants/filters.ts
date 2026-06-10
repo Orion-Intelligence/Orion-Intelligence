@@ -174,9 +174,9 @@ const PLATFORM_RESULT_COUNT_FILTER = {
   options: [],
   type: "number" as const,
   tooltip: "Maximum results for per platform",
-  selected: "15",
+  selected: "25",
   min: 1,
-  max: 15,
+  max: 50,
   placeholder: "Enter platforms result count"
 };
 export const dump_filters: FilterModel = {

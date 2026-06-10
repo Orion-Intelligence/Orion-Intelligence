@@ -1,6 +1,7 @@
 import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { Observable } from 'rxjs';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { parseCoordinates } from '../../../shared/utils/geo-coordinates.utils';
 import { SatelliteIntelService } from './satellite-intel-service';
@@ -66,6 +67,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   isPanelMenuOpen = false;
   isPanelPopupOpen = true;
   isThreatLensLoading = false;
+  isThreatLensDetailOverlayOpen = false;
+  isFilterOpen$!: Observable<boolean>;
   fetchGeocodeResults = (query: string) => this.geocodeService.fetchGeocodeResults(query);
 
   @Input() toolbarMode: 'hidden' | 'geo' = 'hidden';
@@ -74,6 +77,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.satelliteService = satelliteService;
     this.route = route;
     this.sidebarService = sidebarService;
+    this.isFilterOpen$ = this.sidebarService.sidebarState$;
     const loadingBridge = {
       begin: (title: string, message: string) => this.loadingState.begin(title, message),
       end: (id: number) => this.loadingState.end(id),
@@ -311,6 +315,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     if (view === 'map') {
       this.activePanel = SatelliteIntelPanelEnum.Dashboard;
       this.isPanelPopupOpen = true;
+      this.isThreatLensDetailOverlayOpen = false;
     }
     this.isThreatLensLoading = view === 'threat';
     this.isPanelMenuOpen = false;
@@ -327,6 +332,13 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.isThreatLensLoading = isLoading;
   }
 
+  onThreatLensDetailOverlayOpenChange(isOpen: boolean): void {
+    this.isThreatLensDetailOverlayOpen = isOpen;
+    if (isOpen) {
+      this.isPanelMenuOpen = false;
+    }
+  }
+
   onSatelliteMapReady(): void {
     this.completeInitialMapLoad();
   }
@@ -340,8 +352,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   openThreatFilters(): void {
-    this.sidebarService.openSidebar();
     this.isPanelMenuOpen = false;
+    this.sidebarService.openSidebar();
   }
 
   openPanelPopup(id: SatelliteIntelPanel): void {
