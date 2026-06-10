@@ -60,6 +60,5 @@ export abstract class CaseDetailsStore {
   abstract isArtifactReportDropdownOpen: boolean;
   abstract viewArtifactReport(artifact: CaseArtifact): void;
   abstract verifyArtifactFile(artifact: CaseArtifact, fileId: string): void;
-  abstract verifyAllArtifactFiles(artifact: CaseArtifact): void;
   abstract isArtifactFileIntegrityFailed(artifactFile: CaseArtifactFile): boolean;
 }

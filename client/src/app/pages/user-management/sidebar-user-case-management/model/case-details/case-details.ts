@@ -1482,26 +1482,6 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     });
   }
 
-  verifyAllArtifactFiles(artifact: CaseArtifact): void {
-    if (!this.caseData || !artifact.artifactId) {
-      return;
-    }
-
-    this.caseService.verifyAllArtifactFiles(this.caseData.caseId, artifact.artifactId).subscribe({
-      next: response => {
-        for (const result of response.files || []) {
-          this.setArtifactFileStatus(artifact, result.fileId, result.status);
-        }
-
-        this.messageNotificationService.show(response.success ? 'All files verified' : 'Some files failed integrity check',
-          response.success ? 'success' : undefined);
-      },
-      error: err => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
-      }
-    });
-  }
-
   isArtifactFileIntegrityFailed(artifactFile: CaseArtifactFile): boolean {
     return artifactFile.integrityStatus === 'failed';
   }

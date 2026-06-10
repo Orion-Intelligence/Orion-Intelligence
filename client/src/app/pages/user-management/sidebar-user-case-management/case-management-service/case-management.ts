@@ -9,11 +9,6 @@ type ArtifactFileIntegrityResult = {
   status: 'verified' | 'failed';
 };
 
-type ArtifactFilesIntegrityResponse = {
-  success: boolean;
-  files: ArtifactFileIntegrityResult[];
-};
-
 type ArtifactFileUploadResponse = {
   files: {
     fileId: string;
@@ -82,10 +77,6 @@ export class CaseManagement {
 
   verifyArtifactFile(caseId: string, artifactId: string, fileId: string): Observable<ArtifactFileIntegrityResult> {
     return this.api.post<ArtifactFileIntegrityResult>(`profile/cases/${caseId}/artifacts/${artifactId}/files/${fileId}/verify`, {});
-  }
-
-  verifyAllArtifactFiles(caseId: string, artifactId: string): Observable<ArtifactFilesIntegrityResponse> {
-    return this.api.post<ArtifactFilesIntegrityResponse>(`profile/cases/${caseId}/artifacts/${artifactId}/files/verify-all`, {});
   }
 
   deleteArtifactFile(caseId: string, artifactId: string, fileId: string): Observable<{ success: boolean }> {

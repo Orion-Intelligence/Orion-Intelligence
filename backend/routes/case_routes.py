@@ -79,18 +79,6 @@ async def verify_artifact_file(case_id: str, artifact_id: str, file_id: str, cur
     return await CaseManager.get_instance().verify_artifact_file(case_id, artifact_id, file_id, current_user)
 
 
-@case_routes.post(
-    "/api/profile/cases/{case_id}/artifacts/{artifact_id}/files/verify-all",
-    status_code=200,
-    tags=["Case Management"],
-    dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
-    ],
-)
-async def verify_all_artifact_files(case_id: str, artifact_id: str, current_user=Depends(get_current_user)):
-    return await CaseManager.get_instance().verify_all_artifact_files(case_id, artifact_id, current_user)
-
-
 @case_routes.delete(
     "/api/profile/cases/{case_id}/shares",
     status_code=200,
