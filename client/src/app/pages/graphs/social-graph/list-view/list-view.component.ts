@@ -24,6 +24,7 @@ export class ListViewComponent implements OnDestroy {
   customEntities = input.required<CustomEntity[]>();
   nodeClicked = output<string>();
   platformNodeClicked = output<string>();
+  sidebarPlatformClicked = output<string>();
   deleteCustomEntity = output<string>();
   cancelEntityScan = output<string>();
   addEntityRequested = output<CustomEntity['type']>();

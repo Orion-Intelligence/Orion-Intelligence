@@ -86,6 +86,7 @@
                   [customEntities]="customEntities()"
                   (nodeClicked)="onNodeClicked($event)"
                   (platformNodeClicked)="onPlatformNodeClicked($event)"
+                  (sidebarPlatformClicked)="onSidebarPlatformClicked($event)"
                   (deleteCustomEntity)="deleteCustomEntity($event)"
                   (cancelEntityScan)="entityManager()?.cancelEntityScan($event)"
                    (addEntityRequested)="entityManager()?.openAddEntityModal($event)">
