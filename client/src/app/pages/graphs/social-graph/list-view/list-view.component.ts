@@ -33,6 +33,7 @@ export class ListViewComponent implements OnDestroy {
   metadataSearchTerms = signal<Record<string, string>>({});
   entityAddOptions: { type: CustomEntity['type']; label: string; iconClass: string; }[] = [ { type: 'email-breach', label: 'Add Email Breach', iconClass: 'bi bi-person-badge text-indigo-400' }, { type: 'wanted-list', label: 'Add Wanted List', iconClass: 'bi bi-person-exclamation text-indigo-400' }, { type: 'phone', label: 'Add Phone', iconClass: 'bi bi-telephone text-indigo-400' }, { type: 'crypto-scanner', label: 'Add Crypto Scanner', iconClass: 'bi bi-currency-bitcoin text-green-400' } ];
   expandedEntityIds = signal<Set<string>>(new Set<string>());
+  profileOverviewIds = signal<Set<string>>(new Set<string>());
   animatedProgressByEntityId = signal<Record<string, number>>({});
   private readonly PRIORITY_PLATFORMS = ['instagram', 'youtube', 'facebook', 'behance', 'tiktok', 'twitter', 'vimeo', 'x'];
   public formatFollowers = formatFollowers;
@@ -315,6 +316,23 @@ formatNumericValue(value: any): string {
 
   isEntityExpanded(entityId: string): boolean {
     return this.expandedEntityIds().has(entityId);
+  }
+
+  toggleProfileOverview(platformId: string) {
+    this.profileOverviewIds.update(current => {
+      const next = new Set(current);
+      if (next.has(platformId)) {
+        next.delete(platformId);
+      }
+      else {
+        next.add(platformId);
+      }
+      return next;
+    });
+  }
+
+  isProfileOverviewActive(platformId: string): boolean {
+    return this.profileOverviewIds().has(platformId);
   }
 
   toggleEntity(entityId: string) {
