@@ -151,13 +151,19 @@ export function addAndEditArtifactAndTask() {
   assertNotification('Artifact added successfully');
   cy.get(selector('case-artifact-card-0')).scrollIntoView().should('be.visible');
   cy.get(selector('case-artifact-title-value-0')).should('contain.text', 'Cypress Evidence Artifact');
-  cy.get(selector('case-artifact-file-view-0')).should('be.visible');
   cy.get(selector('case-artifact-file-download-0')).should('be.visible');
   cy.get(selector('case-artifact-file-delete-0')).should('be.visible');
 
+  cy.get(selector('case-artifact-file-verify-0'))
+    .should('be.visible')
+    .click();
+
+  assertNotification('File integrity verified');
+
+  cy.contains('Verified').should('be.visible');
+
   clickVisible('case-artifact-edit-0');
   visible('case-artifact-edit-drawer').within(() => {
-    cy.get(selector('case-artifact-file-view-0')).should('not.exist');
     cy.get(selector('case-artifact-file-download-0')).should('not.exist');
     cy.get(selector('case-artifact-file-delete-0')).should('not.exist');
   });
@@ -197,18 +203,10 @@ export function addAndEditArtifactAndTask() {
   cy.get(selector('case-artifact-title-value-1')).should('contain.text', 'Cypress Linked Report Artifact');
   cy.get(selector('case-artifact-card-1')).should('contain.text', 'Linked Report');
 
-  cy.window().then((win) => {
-    cy.stub(win, 'open').as('artifactWindowOpen');
-  });
-  clickVisible('case-artifact-file-view-0');
-  cy.get('@artifactWindowOpen').should('have.been.called');
-  cy.get('@artifactWindowOpen').then((openStub) => {
-    (openStub as unknown as { restore: () => void }).restore();
-  });
   clickVisible('case-artifact-file-download-0');
   clickVisible('case-artifact-file-delete-0');
   assertNotification('File deleted successfully');
-  cy.get(selector('case-artifact-file-view-0')).should('not.exist');
+  cy.get(selector('case-artifact-file-download-0')).should('not.exist');
 
   clickVisible('case-artifact-add');
   visible('case-artifact-add-drawer').should('be.visible');

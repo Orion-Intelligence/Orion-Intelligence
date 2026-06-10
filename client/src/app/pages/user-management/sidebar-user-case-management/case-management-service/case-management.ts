@@ -3,6 +3,12 @@ import { Observable } from 'rxjs';
 import { ApiService } from '../../../../shared/services/api.service';
 import { ArtifactReportOption, Case, CaseAnalyst, CaseRequest, CaseShareRequest, CaseShareResponse, CaseUpdateRequest } from '../../../../shared/model/case-management/case.model';
 
+type ArtifactFileIntegrityResult = {
+  fileId: string;
+  success: boolean;
+  status: 'verified' | 'failed';
+};
+
 type ArtifactFileUploadResponse = {
   files: {
     fileId: string;
@@ -10,6 +16,11 @@ type ArtifactFileUploadResponse = {
     fileType: string;
     fileSize: number;
     fileResourceId: string;
+    fileHash?: string;
+    hashAlgorithm?: string;
+    integrityStatus?: 'unknown' | 'verified' | 'failed';
+    integrityCheckedAt?: string;
+    integrityMessage?: string;
     uploadedAt?: string;
   }[];
 };
@@ -61,8 +72,11 @@ export class CaseManagement {
       formData.append('files', file);
     });
 
-    return this.api.post<ArtifactFileUploadResponse>(`profile/cases/${caseId}/artifacts/${artifactId}/files`,
-      formData);
+    return this.api.post<ArtifactFileUploadResponse>(`profile/cases/${caseId}/artifacts/${artifactId}/files`, formData);
+  }
+
+  verifyArtifactFile(caseId: string, artifactId: string, fileId: string): Observable<ArtifactFileIntegrityResult> {
+    return this.api.post<ArtifactFileIntegrityResult>(`profile/cases/${caseId}/artifacts/${artifactId}/files/${fileId}/verify`, {});
   }
 
   deleteArtifactFile(caseId: string, artifactId: string, fileId: string): Observable<{ success: boolean }> {
@@ -80,7 +94,6 @@ export class CaseManagement {
   }
 
   archiveCase(caseId: string): Observable<{ success: boolean; message?: string }> {
-    return this.api.put<{ success: boolean; message?: string }>(`profile/cases/${caseId}/archive`,
-      {});
+    return this.api.put<{ success: boolean; message?: string }>(`profile/cases/${caseId}/archive`, {});
   }
 }

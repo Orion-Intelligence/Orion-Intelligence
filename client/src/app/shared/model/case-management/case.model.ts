@@ -263,6 +263,8 @@ export interface CaseArtifactFile {
     fileType: string;
     fileSize: number;
     fileResourceId: string;
+    fileHash?: string;
+    integrityStatus?: 'unknown' | 'verified' | 'failed';
     uploadedAt?: Date | string;
 }
 

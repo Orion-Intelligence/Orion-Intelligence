@@ -67,6 +67,18 @@ async def create_case_share(case_id: str, payload: CreateCaseShareRequest = Body
     return await CaseShareManager.get_instance().create_case_share(case_id, payload, current_user)
 
 
+@case_routes.post(
+    "/api/profile/cases/{case_id}/artifacts/{artifact_id}/files/{file_id}/verify",
+    status_code=200,
+    tags=["Case Management"],
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+    ],
+)
+async def verify_artifact_file(case_id: str, artifact_id: str, file_id: str, current_user=Depends(get_current_user)):
+    return await CaseManager.get_instance().verify_artifact_file(case_id, artifact_id, file_id, current_user)
+
+
 @case_routes.delete(
     "/api/profile/cases/{case_id}/shares",
     status_code=200,
@@ -136,25 +148,6 @@ async def upload_artifact_files(
 ):
     return await CaseManager.get_instance().upload_artifact_files(
         case_id, artifact_id, files, current_user
-    )
-
-
-@case_routes.get(
-    "/api/profile/cases/{case_id}/artifacts/{artifact_id}/files/{file_id}/view",
-    status_code=200,
-    tags=["Case Management"],
-    dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
-    ],
-)
-async def view_artifact_file(
-    case_id: str,
-    artifact_id: str,
-    file_id: str,
-    current_user=Depends(get_current_user),
-):
-    return await CaseManager.get_instance().get_artifact_file_response(
-        case_id, artifact_id, file_id, current_user, download=False
     )
 
 

@@ -101,6 +101,8 @@ class CaseArtifactFileModel(CaseRequestModel):
     fileType: str = ""
     fileSize: int = 0
     fileResourceId: str = ""
+    fileHash: str = ""
+    integrityStatus: str = "unknown"
     uploadedAt: Optional[datetime] = None
 
 class CaseArtifactModel(CaseRequestModel):

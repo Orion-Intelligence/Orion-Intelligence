@@ -294,6 +294,8 @@ class CaseArtifactFile(EmbeddedModel):
     fileType: str = ""
     fileSize: int = 0
     fileResourceId: str = ""
+    fileHash: str = ""
+    integrityStatus: str = "unknown"
     uploadedAt: datetime = Field(default_factory=utc_now)
 
 

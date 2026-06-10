@@ -1,4 +1,4 @@
-import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseClosure, CaseEntity, CaseLink, CaseTask } from '../../../../../shared/model/case-management/case.model';
+import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseArtifactFile, CaseClosure, CaseEntity, CaseLink, CaseTask } from '../../../../../shared/model/case-management/case.model';
 
 export type CaseDetailsEditSection = 'caseDetails' | 'primaryEntity' | 'relatedEntities' | 'artifacts' | 'tasks' | 'linkedCases';
 
@@ -30,7 +30,6 @@ export abstract class CaseDetailsStore {
   abstract saveArtifacts(): void;
   abstract removeArtifact(index: number): void;
   abstract uploadArtifactFiles(artifact: CaseArtifact, fileInput: HTMLInputElement): void;
-  abstract viewArtifactFile(artifact: CaseArtifact, fileId: string): void;
   abstract downloadArtifactFile(artifact: CaseArtifact, fileId: string): void;
   abstract deleteArtifactFile(artifact: CaseArtifact, fileId: string): void;
   abstract setPendingNewArtifactFiles(fileInput: HTMLInputElement): void;
@@ -59,4 +58,6 @@ export abstract class CaseDetailsStore {
   abstract artifactReportSearchText: string;
   abstract isArtifactReportDropdownOpen: boolean;
   abstract viewArtifactReport(artifact: CaseArtifact): void;
+  abstract verifyArtifactFile(artifact: CaseArtifact, fileId: string): void;
+  abstract isArtifactFileIntegrityFailed(artifactFile: CaseArtifactFile): boolean;
 }

@@ -227,24 +227,32 @@
             @if ((artifact.files || []).length) {
             <div @caseInlineMotion class="mt-3 space-y-2 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-3">
                 @for (artifactFile of artifact.files; track artifactFile.fileId; let fileIndex = $index) {
-                <div class="flex flex-wrap items-center gap-2 border-b border-[var(--tenant-line)] pb-2 last:border-b-0 last:pb-0">
-                    <span class="text-xs text-[var(--color-text2)] break-all">
-                        {{ artifactFile.fileName }}
-                    </span>
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--tenant-line)] pb-2 last:border-b-0 last:pb-0">
+                    <div class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                        <span class="text-xs text-[var(--color-text2)] break-all">
+                            {{ artifactFile.fileName }}
+                        </span>
 
-                    <button type="button" (click)="store.viewArtifactFile(artifact, artifactFile.fileId)" class="text-xs text-sky-300 [body.light-theme_&]:text-sky-800" [attr.data-testid]="'case-artifact-file-view-' + $index">
-                        {{ 'View' | translate }}
-                    </button>
+                        <span class="rounded-full border px-2 py-0.5 text-[10px]" [ngClass]="{ 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300': artifactFile.integrityStatus === 'verified', 'border-red-400/30 bg-red-500/10 text-red-300': artifactFile.integrityStatus === 'failed' }">
+                            {{ artifactFile.integrityStatus === 'failed' ? 'Integrity Failed' : 'Verified' }}
+                        </span>
+                    </div>
 
-                    <button type="button" (click)="store.downloadArtifactFile(artifact, artifactFile.fileId)" class="text-xs text-emerald-300 [body.light-theme_&]:text-emerald-800" [attr.data-testid]="'case-artifact-file-download-' + $index">
-                        {{ 'Download' | translate }}
-                    </button>
+                    <div class="ml-auto flex shrink-0 items-center gap-2">
+                        <button type="button" (click)="store.downloadArtifactFile(artifact, artifactFile.fileId)" [disabled]="store.isArtifactFileIntegrityFailed(artifactFile)" [attr.data-testid]="'case-artifact-file-download-' + fileIndex" class="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-emerald-300 transition hover:bg-[var(--color-blue-810)] disabled:cursor-not-allowed disabled:opacity-40">
+                            <i class="bi bi-download text-xs"></i>
+                        </button>
 
-                    @if (!caseData.closure) {
-                    <button type="button" (click)="store.deleteArtifactFile(artifact, artifactFile.fileId)" class="text-xs text-red-300 [body.light-theme_&]:text-red-800" [attr.data-testid]="'case-artifact-file-delete-' + $index">
-                        {{ 'Delete' | translate }}
-                    </button>
-                    }
+                        <button type="button" (click)="store.verifyArtifactFile(artifact, artifactFile.fileId)" [attr.data-testid]="'case-artifact-file-verify-' + fileIndex" class="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-amber-300 transition hover:bg-[var(--color-blue-810)]">
+                            <i class="bi bi-shield-check text-xs"></i>
+                        </button>
+
+                        @if (!caseData.closure) {
+                        <button type="button" (click)="store.deleteArtifactFile(artifact, artifactFile.fileId)" [attr.data-testid]="'case-artifact-file-delete-' + fileIndex" class="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-red-300 transition hover:bg-red-500/10">
+                            <i class="bi bi-trash3 text-xs"></i>
+                        </button>
+                        }
+                    </div>
                 </div>
                 }
             </div>

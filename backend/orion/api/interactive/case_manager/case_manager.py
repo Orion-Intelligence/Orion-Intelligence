@@ -477,7 +477,7 @@ class CaseManager:
         uploaded_files = []
 
         for file in files:
-            resource_id, file_size = await self._artifact_file_helper.save_encrypted_artifact_file(file, enc)
+            resource_id, file_size, file_hash = await self._artifact_file_helper.save_encrypted_artifact_file(file, enc)
 
             artifact_file = CaseArtifactFile(
                 fileId=str(uuid4()),
@@ -485,6 +485,8 @@ class CaseManager:
                 fileType=file.content_type or "",
                 fileSize=file_size,
                 fileResourceId=resource_id,
+                fileHash=file_hash,
+                integrityStatus="verified",
                 uploadedAt=utc_now(),
             )
 
@@ -496,6 +498,8 @@ class CaseManager:
                 "fileType": artifact_file.fileType,
                 "fileSize": artifact_file.fileSize,
                 "fileResourceId": artifact_file.fileResourceId,
+                "fileHash": artifact_file.fileHash,
+                "integrityStatus": artifact_file.integrityStatus,
                 "uploadedAt": artifact_file.uploadedAt,
             })
 
@@ -509,7 +513,7 @@ class CaseManager:
 
         return {"files": uploaded_files}
     
-    async def get_artifact_file_response(self, case_id: str, artifact_id: str, file_id: str, current_user, download: bool = False) -> Response:
+    async def get_artifact_file_response(self, case_id: str, artifact_id: str, file_id: str, current_user, download: bool = True) -> Response:
         record = await self._engine.find_one(
             db_case_model,
             (db_case_model.caseId == case_id)
@@ -523,6 +527,7 @@ class CaseManager:
             raise HTTPException(status_code=403, detail="Access forbidden")
 
         enc = await CaseHelperMethods.get_case_cipher(current_user)
+
         CaseHelperMethods.apply_sensitive_case_values(
             record,
             lambda value: CaseHelperMethods.decrypt_value(enc, value)
@@ -538,17 +543,40 @@ class CaseManager:
         if not artifact_file:
             raise HTTPException(status_code=404, detail="Artifact file not found")
 
-        file_data = self._artifact_file_helper.load_decrypted_artifact_file(
-            artifact_file.fileResourceId,
-            enc
-        )
-
-        disposition = "attachment" if download else "inline"
+        file_resource_id = artifact_file.fileResourceId
         file_name = artifact_file.fileName or "artifact-file"
+        file_type = artifact_file.fileType or "application/octet-stream"
+
+        if not self._verify_file_integrity(artifact_file, enc):
+            await AuditLogManager.get_instance().register(
+                str(current_user.tenant_uuid),
+                str(current_user.id),
+                f"Artifact file integrity failed: caseId={case_id}, artifactId={artifact_id}, fileId={file_id}, fileName={file_name}",
+            )
+
+            record.updatedAt = utc_now()
+            CaseHelperMethods.apply_sensitive_case_values(
+                record,
+                lambda value: CaseHelperMethods.encrypt_value(enc, value),
+            )
+            await self._engine.save(record)
+
+            raise HTTPException(status_code=409, detail="File integrity check failed")
+
+        file_data = self._artifact_file_helper.load_decrypted_artifact_file(file_resource_id, enc)
+
+        record.updatedAt = utc_now()
+        CaseHelperMethods.apply_sensitive_case_values(
+            record,
+            lambda value: CaseHelperMethods.encrypt_value(enc, value),
+        )
+        await self._engine.save(record)
+
+        disposition = "attachment"
 
         return Response(
             content=file_data,
-            media_type=artifact_file.fileType or "application/octet-stream",
+            media_type=file_type,
             headers={
                 "Content-Disposition": f'{disposition}; filename="{file_name}"'
             },
@@ -764,3 +792,63 @@ class CaseManager:
         )
 
         return {"success": True}
+    
+    def _verify_file_integrity(self, artifact_file: CaseArtifactFile, enc) -> bool:
+        is_valid = self._artifact_file_helper.verify_artifact_file_hash(
+            artifact_file.fileResourceId,
+            artifact_file.fileHash,
+            enc,
+        )
+
+        artifact_file.integrityStatus = "verified" if is_valid else "failed"
+        return is_valid
+    
+    async def verify_artifact_file(self, case_id: str, artifact_id: str, file_id: str, current_user) -> dict:
+        record = await self._engine.find_one(
+            db_case_model,
+            (db_case_model.caseId == case_id)
+            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
+        )
+
+        if not record:
+            raise HTTPException(status_code=404, detail="Case not found")
+
+        if not CaseHelperMethods.can_view_case(record, current_user):
+            raise HTTPException(status_code=403, detail="Access forbidden")
+
+        enc = await CaseHelperMethods.get_case_cipher(current_user)
+        CaseHelperMethods.apply_sensitive_case_values(
+            record,
+            lambda value: CaseHelperMethods.decrypt_value(enc, value),
+        )
+
+        artifact = next((item for item in record.artifacts if item.artifactId == artifact_id), None)
+        if not artifact:
+            raise HTTPException(status_code=404, detail="Artifact not found")
+
+        artifact_file = next((item for item in artifact.files if item.fileId == file_id), None)
+        if not artifact_file:
+            raise HTTPException(status_code=404, detail="Artifact file not found")
+
+        is_valid = self._verify_file_integrity(artifact_file, enc)
+
+        if not is_valid:
+            await AuditLogManager.get_instance().register(
+                str(current_user.tenant_uuid),
+                str(current_user.id),
+                f"Artifact file integrity failed: caseId={case_id}, artifactId={artifact_id}, fileId={file_id}, fileName={artifact_file.fileName}",
+            )
+
+        record.updatedAt = utc_now()
+        CaseHelperMethods.apply_sensitive_case_values(
+            record,
+            lambda value: CaseHelperMethods.encrypt_value(enc, value),
+        )
+        await self._engine.save(record)
+
+        return {
+            "fileId": artifact_file.fileId,
+            "success": is_valid,
+            "status": artifact_file.integrityStatus,
+        }
+    
