@@ -481,6 +481,14 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   onPlatformNodeClicked(nodeId: string) {
+    this.handlePlatformNodeSelection(nodeId, true);
+  }
+
+  onSidebarPlatformClicked(nodeId: string) {
+    this.handlePlatformNodeSelection(nodeId, false);
+  }
+
+  private handlePlatformNodeSelection(nodeId: string, openPopup: boolean) {
     this.state.highlightedNodeId.set(nodeId);
     setTimeout(() => {
       if (this.state.highlightedNodeId() === nodeId) {
@@ -493,7 +501,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    if (!this.isCustomEntityNode(nodeId) && nodeId.startsWith('platform-')) {
+    if (openPopup && !this.isCustomEntityNode(nodeId) && nodeId.startsWith('platform-')) {
       this.state.openPlatformNodePopup(nodeId);
     }
   }
