@@ -39,7 +39,9 @@
                 <h3 data-testid="social-list-user-summary-trigger" class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100 cursor-pointer hover:underline" (click)="nodeClicked.emit(userNode.id.toString())">{{ userNode.label }}</h3>
                 <p class="text-xs text-gray-400 mt-0.5">{{ getPlatformsForUserNode(userNode.id.toString()).length }} platforms active</p>
                 <button data-testid="social-list-manage-profiles" (click)="state.openManageProfilesModal(userNode.label)" class="mt-3 w-full py-1.5 rounded-lg text-xs font-semibold bg-[#1877f2] text-white hover:bg-blue-600 transition-colors">Manage Profiles</button>
+                <!-- Disabled per user request
                 <button data-testid="social-list-profile-intelligence" (click)="state.openSummaryPopup(userNode.label)" class="mt-2 w-full py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 dark:bg-[#3a3b3c] dark:hover:bg-[#4a4b4c] transition-colors">Profile Intelligence</button>
+                -->
               </div>
             </div>
             <div class="flex flex-col gap-3">
@@ -140,7 +142,7 @@
                       </button>
                     </div>
 
-                    <!-- Recent posts preview -->
+                    <!-- Recent posts preview (Disabled per user request)
                     @if (getRecentPosts(platformData).length > 0) {
                       <div class="px-4 pt-4">
                         <div class="flex items-center justify-between mb-2">
@@ -204,6 +206,7 @@
                         </div>
                       </div>
                     }
+                    -->
 
                     <!-- Followers / following preview -->
                     @if (getFollowers(platformData).length > 0 || getFollowing(platformData).length > 0) {
@@ -260,10 +263,12 @@
                               <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-0">Raw API metadata</p>
                               <span class="text-[11px] text-gray-400">— {{ getFilteredMetadataEntries(platformNode.id.toString()).length }} fields</span>
                             </div>
+                            <!-- Disabled per user request (Metadata Search)
                             <div class="relative">
                               <input type="text" [value]="metadataSearchTerms()[platformNode.id.toString()] || ''" (input)="updateMetadataSearch(platformNode.id.toString(), $event)" placeholder="Search…" class="h-7 w-44 rounded-md border border-gray-200 dark:border-[#4a4b4c] bg-gray-50 dark:bg-[#3a3b3c] pl-6 pr-2 text-[11px] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1877f2]/50">
                               <i class="bi bi-search absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400"></i>
                             </div>
+                            -->
                           </div>
                           <table class="w-full text-xs border-collapse">
                             <tbody>
@@ -382,7 +387,7 @@
                       <div class="">
 
                         <!-- Tab bar -->
-                        <div class="flex border-b border-gray-100 dark:border-[#3a3b3c] overflow-x-auto scrollbar-none px-1">
+                        <div class="flex border-b border-gray-100 dark:border-[#3a3b3c] overflow-x-auto px-1 pb-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-[#4a4b4c] [&::-webkit-scrollbar-thumb:hover]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb:hover]:bg-[#5a5b5c] [&::-webkit-scrollbar-track]:bg-transparent">
                           @for (tab of fetchTabs; track tab.key) {
                             <button
                               (click)="setActiveTab(platformNode.id.toString(), tab.key)"
@@ -399,32 +404,100 @@
                           }
                         </div>
 
-                        <!-- No tab selected yet: show profile details -->
-                        @if (getActiveTab(platformNode.id.toString()) === null) {
-                          <div class="px-6 py-4">
-                            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3 flex items-center gap-3">
-                              Profile Details <span class="flex-1 h-px bg-gray-100 dark:bg-[#3a3b3c]"></span>
-                            </p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              @for (item of getProfileDetailEntries(platformData); track trackByKey($index, item)) {
-                                <div class="bg-gray-50 dark:bg-[#3a3b3c] border border-gray-100 dark:border-[#4a4b4c] rounded-xl p-3">
-                                  <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{{ formatKey(item.key) }}</p>
-                                  <p class="text-sm text-gray-900 dark:text-gray-100 font-semibold break-words leading-tight mb-0">{{ item.value }}</p>
+                        <!-- Tab: Details -->
+                        @if (getActiveTab(platformNode.id.toString()) === 'details') {
+                          <div class="px-4 py-3 animate-[social-mapper-fade-in-up_0.2s_ease-out_backwards] relative">
+                            @if (isTabLoading(platformNode.id.toString(), 'details')) {
+                              <div class="absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-[#242526]/50 backdrop-blur-[1px] rounded-b-xl">
+                                <div class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#3a3b3c] rounded-full shadow-md border border-gray-100 dark:border-[#4a4b4c]">
+                                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1877f2]"></div>
+                                  <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">Fetching Details...</span>
                                 </div>
-                              }
-                              @if (getProfileDetailEntries(platformData).length === 0) {
-                                <div class="col-span-full py-10 flex flex-col items-center justify-center text-center opacity-40">
-                                  <i class="bi bi-file-earmark-person text-3xl mb-2"></i>
-                                  <p class="text-sm font-medium">Select a tab above to fetch data</p>
-                                </div>
-                              }
+                              </div>
+                            }
+
+                            <div class="flex items-center justify-between mb-3">
+                              <div class="flex items-center gap-1.5">
+                                <i class="bi bi-person-vcard text-gray-400 text-sm"></i>
+                                <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-0">Profile Details</p>
+                              </div>
+                              <span class="text-[10px] font-semibold uppercase tracking-wide text-gray-400">{{ getProfileDetailEntries(platformData).length }} fields</span>
                             </div>
+
+                            @if (getProfileDetailEntries(platformData).length === 0) {
+                              <div class="flex flex-col items-center justify-center py-10 text-center gap-4">
+                                <i class="bi bi-file-earmark-person text-3xl text-gray-300 dark:text-gray-600 mb-1"></i>
+                                <p class="text-sm font-medium text-gray-400">No additional profile details found.</p>
+                                <button (click)="fetchMetadataInline.emit(platformData)" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#1877f2] text-white text-xs font-bold hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+                                  <i class="bi bi-lightning-charge-fill"></i> Fetch Details
+                                </button>
+                              </div>
+                            } @else {
+                              <table class="w-full text-xs border-collapse">
+                                <tbody>
+                                  @for (item of getProfileDetailEntries(platformData); track trackByKey($index, item)) {
+                                    <tr class="group border-b border-gray-100 dark:border-[#3a3b3c] last:border-0 hover:bg-gray-50 dark:hover:bg-[#2d2e2f] transition-colors">
+
+                                      <td class="py-1.5 pr-3 w-[38%] align-middle whitespace-nowrap">
+                                        <div class="flex items-center gap-2">
+                                          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                                            [class.bg-[#1877f2]]="isUrl(item.value) && !isImageUrl(item.value)"
+                                            [class.bg-emerald-500]="isImageUrl(item.value)"
+                                            [class.bg-amber-500]="isNumeric(item.value) && !isImageUrl(item.value) && !isUrl(item.value)"
+                                            [class.bg-rose-400]="isBool(item.value)"
+                                            [class.bg-gray-300]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)"
+                                            [class.dark:bg-gray-500]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)">
+                                          </span>
+                                          <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400">{{ formatKey(item.key) }}</span>
+                                        </div>
+                                      </td>
+
+                                      <td class="py-1.5 align-middle font-mono text-[12px] text-gray-800 dark:text-gray-200 break-words leading-snug">
+                                        @if (isImageUrl(item.value)) {
+                                          <div class="flex items-center gap-2">
+                                            <img [src]="item.value" [alt]="item.key" class="h-7 w-7 rounded object-cover flex-shrink-0">
+                                            <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-[11px] text-[#1877f2] hover:underline">view</a>
+                                          </div>
+                                        } @else if (isUrl(item.value)) {
+                                          <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-[#1877f2] hover:underline break-all">{{ item.value }}</a>
+                                        } @else if (isBool(item.value)) {
+                                          <span [class.text-emerald-500]="item.value === true || item.value === 'true'" [class.text-rose-400]="item.value === false || item.value === 'false'" class="inline-flex items-center gap-1">
+                                            <i [class.bi-check-circle-fill]="item.value === true || item.value === 'true'" [class.bi-x-circle-fill]="item.value === false || item.value === 'false'" class="bi text-[12px]"></i>
+                                            {{ item.value }}
+                                          </span>
+                                        } @else if (isNumeric(item.value)) {
+                                          <span class="text-amber-600 dark:text-amber-400">{{ formatNumericValue(item.value) }}</span>
+                                        } @else {
+                                          {{ item.value }}
+                                        }
+                                      </td>
+
+                                      <td class="py-1.5 pl-2 align-middle w-7 text-right">
+                                        <button (click)="copyToClipboard(item.value)" class="opacity-0 group-hover:opacity-100 w-6 h-6 inline-flex items-center justify-center rounded hover:bg-gray-200 dark:hover:bg-[#4a4b4c] text-gray-400 hover:text-[#1877f2] transition-all" title="Copy value">
+                                          <i class="bi bi-clipboard text-[10px]"></i>
+                                        </button>
+                                      </td>
+
+                                    </tr>
+                                  }
+                                </tbody>
+                              </table>
+                            }
                           </div>
                         }
 
                         <!-- Tab: Posts -->
                         @if (getActiveTab(platformNode.id.toString()) === 'posts') {
-                          <div class="p-3 animate-[social-mapper-fade-in-up_0.2s_ease-out_backwards]">
+                          <div class="p-3 animate-[social-mapper-fade-in-up_0.2s_ease-out_backwards] relative">
+                            @if (isTabLoading(platformNode.id.toString(), 'posts')) {
+                              <div class="absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-[#242526]/50 backdrop-blur-[1px] rounded-b-xl">
+                                <div class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#3a3b3c] rounded-full shadow-md border border-gray-100 dark:border-[#4a4b4c]">
+                                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1877f2]"></div>
+                                  <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">Fetching Posts...</span>
+                                </div>
+                              </div>
+                            }
+
                             @if (!getUniquePosts(platformData).length) {
                               <div class="flex flex-col items-center justify-center py-12 text-center gap-4 bg-gray-50 dark:bg-[#1c1d1e] rounded-2xl border-2 border-dashed border-gray-100 dark:border-[#3a3b3c]">
                                 <div class="w-16 h-16 rounded-full bg-white dark:bg-[#242526] flex items-center justify-center text-gray-300 shadow-sm">
@@ -442,7 +515,7 @@
                               <div class="flex flex-col gap-4">
                                 @for (post of getUniquePosts(platformData); track post.post_url || $index) {
                                   <div class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-100 dark:border-[#3a3b3c] overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
-                                    
+
                                     <!-- Post Content -->
                                     <div class="p-4">
                                       @if (getPostCaption(post)) {
@@ -486,7 +559,7 @@
 
                                   </div>
                                 }
-                                
+
                                 <div class="flex justify-center py-4">
                                   <button (click)="fetchPostsInline.emit(platformData)" class="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-[#1877f2] transition-colors">
                                     <i class="bi bi-arrow-clockwise text-sm"></i> Sync Timeline
@@ -499,7 +572,16 @@
 
                         <!-- Tab: Images -->
                         @if (getActiveTab(platformNode.id.toString()) === 'images') {
-                          <div class="p-4 animate-[social-mapper-fade-in-up_0.2s_ease-out_backwards]">
+                          <div class="p-4 animate-[social-mapper-fade-in-up_0.2s_ease-out_backwards] relative">
+                            @if (isTabLoading(platformNode.id.toString(), 'images')) {
+                              <div class="absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-[#242526]/50 backdrop-blur-[1px] rounded-b-xl">
+                                <div class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#3a3b3c] rounded-full shadow-md border border-gray-100 dark:border-[#4a4b4c]">
+                                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1877f2]"></div>
+                                  <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">Fetching Images...</span>
+                                </div>
+                              </div>
+                            }
+
                             @if (!platformData.images?.length) {
                               <div class="flex flex-col items-center justify-center py-10 text-center gap-3">
                                 <i class="bi bi-images text-2xl text-gray-300 dark:text-gray-600"></i>
@@ -530,7 +612,16 @@
 
                         <!-- Tab: Followers -->
                         @if (getActiveTab(platformNode.id.toString()) === 'followers') {
-                          <div class="animate-[social-mapper-fade-in-up_0.2s_ease-out_backwards]">
+                          <div class="animate-[social-mapper-fade-in-up_0.2s_ease-out_backwards] relative">
+                            @if (isTabLoading(platformNode.id.toString(), 'followers')) {
+                              <div class="absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-[#242526]/50 backdrop-blur-[1px] rounded-b-xl">
+                                <div class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#3a3b3c] rounded-full shadow-md border border-gray-100 dark:border-[#4a4b4c]">
+                                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1877f2]"></div>
+                                  <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">Fetching Followers...</span>
+                                </div>
+                              </div>
+                            }
+
                             @if (platformData.followers_list === undefined) {
                               <div class="flex flex-col items-center justify-center py-10 text-center gap-3">
                                 <i class="bi bi-people text-2xl text-gray-300 dark:text-gray-600"></i>
@@ -566,7 +657,16 @@
 
                         <!-- Tab: Following -->
                         @if (getActiveTab(platformNode.id.toString()) === 'following') {
-                          <div class="animate-[social-mapper-fade-in-up_0.2s_ease-out_backwards]">
+                          <div class="animate-[social-mapper-fade-in-up_0.2s_ease-out_backwards] relative">
+                            @if (isTabLoading(platformNode.id.toString(), 'following')) {
+                              <div class="absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-[#242526]/50 backdrop-blur-[1px] rounded-b-xl">
+                                <div class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#3a3b3c] rounded-full shadow-md border border-gray-100 dark:border-[#4a4b4c]">
+                                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1877f2]"></div>
+                                  <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">Fetching Following...</span>
+                                </div>
+                              </div>
+                            }
+
                             @if (platformData.following_list === undefined) {
                               <div class="flex flex-col items-center justify-center py-10 text-center gap-3">
                                 <i class="bi bi-person-plus text-2xl text-gray-300 dark:text-gray-600"></i>
@@ -611,10 +711,12 @@
                             } @else {
                               <div class="flex items-center justify-between mb-3">
                                 <span class="text-[10px] font-semibold uppercase tracking-wide text-gray-400">{{ getFilteredMetadataEntries(platformNode.id.toString()).length }} fields</span>
+                                <!-- Disabled per user request (Metadata Search)
                                 <div class="relative">
                                   <input type="text" [value]="metadataSearchTerms()[platformNode.id.toString()] || ''" (input)="updateMetadataSearch(platformNode.id.toString(), $event)" placeholder="Search…" class="h-7 w-40 rounded-md border border-gray-200 dark:border-[#4a4b4c] bg-gray-50 dark:bg-[#3a3b3c] pl-6 pr-2 text-[11px] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1877f2]/50">
                                   <i class="bi bi-search absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400"></i>
                                 </div>
+                                -->
                               </div>
                               <table class="w-full text-xs border-collapse">
                                 <tbody>
@@ -749,7 +851,7 @@
 
         </div>
 
-        <!-- Right sidebar -->
+        <!-- Right sidebar disabled per user request
         <aside class="hidden xl:flex w-[240px] flex-shrink-0 flex-col gap-3 sticky top-4 max-h-[calc(100vh-5rem)] overflow-y-auto pr-2">
           <div class="mt-0 bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/10 p-4 flex-shrink-0">
             <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Add Entity</p>
@@ -821,10 +923,10 @@
             }
           </div>
         </aside>
+        -->
 
       </div>
     </div>
 
   }
-
 </div>
