@@ -4,6 +4,7 @@ import { NetworkData, PlatformResult, CustomEntity, NetworkNode, SocialPost } fr
 import { formatFollowers, formatKey, isUrl, isImageUrl } from '../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
+import { FetchingStateService } from '../services/fetching-state.service';
 import { SocialEntityUiService } from '../services/social-entity-ui.service';
 import { getMetadataEntries, getProfileDetailEntries } from '../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
@@ -32,19 +33,21 @@ export class ListViewComponent implements OnDestroy {
   fetchImagesInline = output<PlatformResult>();
   fetchFollowersInline = output<PlatformResult>();
   fetchFollowingInline = output<PlatformResult>();
+  fetchMetadataInline = output<PlatformResult>();
 
   public state = inject(SocialMapperStateService);
+  public fetchingState = inject(FetchingStateService);
   readonly socialEntityUiService = inject(SocialEntityUiService);
   addSearchTerm = signal('');
   metadataSearchTerms = signal<Record<string, string>>({});
   activeTabs = signal<Record<string, string | null>>({});
 
   fetchTabs = [
+    { key: 'details', label: 'Details', icon: 'bi bi-person-vcard' },
     { key: 'posts', label: 'Posts', icon: 'bi bi-file-post' },
     { key: 'images', label: 'Images', icon: 'bi bi-images' },
     { key: 'followers', label: 'Followers', icon: 'bi bi-people' },
-    { key: 'following', label: 'Following', icon: 'bi bi-person-plus' },
-    { key: 'metadata', label: 'Raw Data', icon: 'bi bi-database' }
+    { key: 'following', label: 'Following', icon: 'bi bi-person-plus' }
   ];
 
   entityAddOptions: { type: CustomEntity['type']; label: string; iconClass: string; }[] = [ { type: 'email-breach', label: 'Add Email Breach', iconClass: 'bi bi-person-badge text-indigo-400' }, { type: 'wanted-list', label: 'Add Wanted List', iconClass: 'bi bi-person-exclamation text-indigo-400' }, { type: 'phone', label: 'Add Phone', iconClass: 'bi bi-telephone text-indigo-400' }, { type: 'crypto-scanner', label: 'Add Crypto Scanner', iconClass: 'bi bi-currency-bitcoin text-green-400' } ];
@@ -64,7 +67,7 @@ export class ListViewComponent implements OnDestroy {
     effect(() => {
       const entities = this.customEntities();
       this.pruneAnimatedEntityProgress(entities);
-      this.startProgressAnimation();
+      // this.startProgressAnimation();
     });
   }
 
@@ -89,9 +92,32 @@ export class ListViewComponent implements OnDestroy {
   }
 
   getActiveTab(platformNodeId: string): string | null {
-    return this.activeTabs()[platformNodeId] ?? null;
+    return this.activeTabs()[platformNodeId] ?? 'details';
   }
 
+  isTabLoading(platformNodeId: string, tabKey: string): boolean {
+    const platformData = this.getPlatformData(platformNodeId);
+    if (!platformData) return false;
+    const key = this.fetchingState.getPlatformUniqueKey(platformData);
+    
+    switch (tabKey) {
+      case 'details':
+      case 'metadata':
+        return !!this.fetchingState.profile()[key];
+      case 'posts':
+        return !!this.fetchingState.posts()[key];
+      case 'images':
+        return !!this.fetchingState.platformImages()[key];
+      case 'followers':
+        return !!this.fetchingState.followers()[key];
+      case 'following':
+        return !!this.fetchingState.following()[key];
+      default:
+        return false;
+    }
+  }
+
+  /* --- Disabled per user request (Metadata Search) ---
   updateMetadataSearch(platformNodeId: string, event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.metadataSearchTerms.update(current => ({
@@ -99,6 +125,7 @@ export class ListViewComponent implements OnDestroy {
       [platformNodeId]: value
     }));
   }
+  --- End Disabled Block --- */
 
   isNumeric(value: any): boolean {
     if (value === null || value === undefined || value === '') return false;
@@ -120,12 +147,15 @@ export class ListViewComponent implements OnDestroy {
 
   getFilteredMetadataEntries(platformNodeId: string): { key: string; value: any; }[] {
     const all = this.getPlatformMetadataEntries(platformNodeId);
+    /* Search is disabled
     const term = (this.metadataSearchTerms()[platformNodeId] || '').toLowerCase().trim();
     if (!term) return all;
     return all.filter(e =>
       formatKey(e.key).toLowerCase().includes(term) ||
       String(e.value).toLowerCase().includes(term)
     );
+    */
+    return all;
   }
 
   copyToClipboard(text: any) {
@@ -394,6 +424,7 @@ export class ListViewComponent implements OnDestroy {
     });
   }
 
+  /* --- Disabled per user request (Right Sidebar) ---
   get filteredEntityAddOptions(): { type: CustomEntity['type']; label: string; iconClass: string; }[] {
     const term = this.addSearchTerm().trim().toLowerCase();
     if (!term) {
@@ -430,6 +461,7 @@ export class ListViewComponent implements OnDestroy {
     }
     return true;
   }
+  --- End Disabled Block --- */
 
   private pruneAnimatedEntityProgress(entities: CustomEntity[]) {
     const next = this.socialEntityUiService.pruneAnimatedProgressMap(entities, this.animatedProgressByEntityId());
@@ -438,6 +470,7 @@ export class ListViewComponent implements OnDestroy {
     }
   }
 
+  /*
   private startProgressAnimation() {
     if (this.animationFrameId !== null) {
       return;
@@ -479,4 +512,5 @@ export class ListViewComponent implements OnDestroy {
     };
     this.animationFrameId = requestAnimationFrame(tick);
   }
+  */
 }
