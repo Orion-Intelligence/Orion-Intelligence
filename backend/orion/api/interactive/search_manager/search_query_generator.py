@@ -563,6 +563,7 @@ class search_query_generator:
         unified_query["size"] = result_size
         unified_query["from"] = max(0, (m_page_number - 1) * result_size)
 
+
         if channel_q:
             qb = unified_query["query"]["function_score"]["query"].setdefault("bool", {"must": []})
             qb.setdefault("should", []).extend(

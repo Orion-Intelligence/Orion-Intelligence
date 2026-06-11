@@ -1,4 +1,4 @@
-import { ArcPair, ArcPoint2D, ArcPoint3D, LngLat } from '../models/threat-lens-map.types';
+import { ArcPair, ArcPoint2D, LngLat } from '../models/threat-lens-map.types';
 
 export class ThreatLensMapUtils {
   static buildCountryFeatureIndex(features: any[], countryNameFields: string[], normalizeCountryLabel: (value: string) => string, toCountryKey: (value: string) => string): Map<string, any> {
@@ -134,26 +134,11 @@ export class ThreatLensMapUtils {
     return [lon, convertedLat];
   }
 
-  static buildArcPath(start: LngLat, end: LngLat, weight: number): [number, number, number][][] {
-    return ThreatLensMapUtils.splitPath3D(ThreatLensMapUtils.buildArcPathPoints(start, end, weight));
-  }
-
   static buildSurfacePath(start: LngLat, end: LngLat): [number, number][][] {
     return ThreatLensMapUtils.splitPath2D(ThreatLensMapUtils.buildSurfacePathPoints(start, end));
   }
 
-  static buildArcPathPoints(start: LngLat, end: LngLat, weight: number): ArcPoint3D[] {
-    const geodesicPoints = ThreatLensMapUtils.buildGreatCirclePoints(start, end);
-    const arcHeight = 520000 + Math.min(2600000, weight * 190000);
-
-    return geodesicPoints.map(([lon, lat], index) => {
-      const t = geodesicPoints.length <= 1 ? 0 : index / (geodesicPoints.length - 1);
-      const z = 18000 + (Math.sin(Math.PI * t) * arcHeight);
-      return [lon, lat, z];
-    });
-  }
-
-  static extractArcSegment(points: ArcPoint3D[], startProgress: number, endProgress: number): [number, number, number][][] {
+  static extractSurfaceSegment(points: ArcPoint2D[], startProgress: number, endProgress: number): ArcPoint2D[][] {
     if (points.length < 2) {
       return [];
     }
@@ -164,10 +149,10 @@ export class ThreatLensMapUtils {
       return [];
     }
 
-    return ThreatLensMapUtils.splitPath3D(ThreatLensMapUtils.slicePath3D(points, start, end));
+    return ThreatLensMapUtils.splitPath2D(ThreatLensMapUtils.slicePath2D(points, start, end));
   }
 
-  static getArcPointAtProgress(points: ArcPoint3D[], progress: number): ArcPoint3D | null {
+  static getSurfacePointAtProgress(points: ArcPoint2D[], progress: number): ArcPoint2D | null {
     if (!points.length) {
       return null;
     }
@@ -185,7 +170,7 @@ export class ThreatLensMapUtils {
       return points[startIndex];
     }
 
-    return ThreatLensMapUtils.interpolatePoint3D(points[startIndex], points[endIndex], position - startIndex);
+    return ThreatLensMapUtils.interpolatePoint2D(points[startIndex], points[endIndex], position - startIndex);
   }
 
   static buildSurfacePathPoints(start: LngLat, end: LngLat): ArcPoint2D[] {
@@ -227,41 +212,6 @@ export class ThreatLensMapUtils {
     return points;
   }
 
-  private static splitPath3D(points: ArcPoint3D[]): ArcPoint3D[][] {
-    if (!points.length) {
-      return [];
-    }
-
-    const paths: ArcPoint3D[][] = [];
-    let currentPath: ArcPoint3D[] = [[ThreatLensMapUtils.normalizeLongitude(points[0][0]), points[0][1], points[0][2]]];
-
-    for (let i = 1; i < points.length; i += 1) {
-      const previous = points[i - 1];
-      const next = points[i];
-      const lonDelta = next[0] - previous[0];
-
-      if (Math.abs(lonDelta) > 180) {
-        const boundary = lonDelta > 0 ? 180 : -180;
-        const t = (boundary - previous[0]) / lonDelta;
-        const crossingLat = previous[1] + ((next[1] - previous[1]) * t);
-        const crossingZ = previous[2] + ((next[2] - previous[2]) * t);
-        currentPath.push([boundary, crossingLat, crossingZ]);
-        paths.push(currentPath);
-
-        currentPath = [
-          [boundary === 180 ? -180 : 180, crossingLat, crossingZ],
-          [ThreatLensMapUtils.normalizeLongitude(next[0]), next[1], next[2]],
-        ];
-        continue;
-      }
-
-      currentPath.push([ThreatLensMapUtils.normalizeLongitude(next[0]), next[1], next[2]]);
-    }
-
-    paths.push(currentPath);
-    return paths.filter((path) => path.length >= 2);
-  }
-
   private static splitPath2D(points: ArcPoint2D[]): ArcPoint2D[][] {
     if (!points.length) {
       return [];
@@ -296,39 +246,38 @@ export class ThreatLensMapUtils {
     return paths.filter((path) => path.length >= 2);
   }
 
-  private static slicePath3D(points: ArcPoint3D[], startProgress: number, endProgress: number): ArcPoint3D[] {
+  private static slicePath2D(points: ArcPoint2D[], startProgress: number, endProgress: number): ArcPoint2D[] {
     const maxIndex = points.length - 1;
     const startPosition = startProgress * maxIndex;
     const endPosition = endProgress * maxIndex;
     const startIndex = Math.floor(startPosition);
     const endIndex = Math.ceil(endPosition);
-    const segment: ArcPoint3D[] = [ThreatLensMapUtils.interpolatePoint3D(points[startIndex], points[Math.min(maxIndex, startIndex + 1)], startPosition - startIndex)];
+    const segment: ArcPoint2D[] = [ThreatLensMapUtils.interpolatePoint2D(points[startIndex], points[Math.min(maxIndex, startIndex + 1)], startPosition - startIndex)];
 
     for (let index = startIndex + 1; index <= endIndex - 1 && index < points.length; index += 1) {
       segment.push(points[index]);
     }
 
-    segment.push(ThreatLensMapUtils.interpolatePoint3D(points[Math.max(0, endIndex - 1)], points[Math.min(maxIndex, endIndex)], endPosition - Math.max(0, endIndex - 1)));
-    return ThreatLensMapUtils.dedupeSequentialPoints(segment);
+    segment.push(ThreatLensMapUtils.interpolatePoint2D(points[Math.max(0, endIndex - 1)], points[Math.min(maxIndex, endIndex)], endPosition - Math.max(0, endIndex - 1)));
+    return ThreatLensMapUtils.dedupeSequentialPoints2D(segment);
   }
 
-  private static interpolatePoint3D(start: ArcPoint3D, end: ArcPoint3D, t: number): ArcPoint3D {
+  private static interpolatePoint2D(start: ArcPoint2D, end: ArcPoint2D, t: number): ArcPoint2D {
     const ratio = Math.max(0, Math.min(1, t));
     return [
       start[0] + ((end[0] - start[0]) * ratio),
       start[1] + ((end[1] - start[1]) * ratio),
-      start[2] + ((end[2] - start[2]) * ratio),
     ];
   }
 
-  private static dedupeSequentialPoints(points: ArcPoint3D[]): ArcPoint3D[] {
+  private static dedupeSequentialPoints2D(points: ArcPoint2D[]): ArcPoint2D[] {
     return points.filter((point, index) => {
       if (index === 0) {
         return true;
       }
 
       const previous = points[index - 1];
-      return previous[0] !== point[0] || previous[1] !== point[1] || previous[2] !== point[2];
+      return previous[0] !== point[0] || previous[1] !== point[1];
     });
   }
 
