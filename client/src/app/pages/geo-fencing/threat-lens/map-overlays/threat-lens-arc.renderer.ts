@@ -16,11 +16,15 @@ export class ThreatLensArcRenderer {
   private movingDotGraphics: any[] = [];
   private startMarkerGraphics: any[] = [];
   private endMarkerGraphics: any[] = [];
+  private hoveredEndpointGraphic: any | null = null;
   private readonly maxArcCount = 1000;
   private readonly minArcWeight = 1;
   private arcBatchSize = 10;
   private readonly arcBatchDuration = 10000;
   private readonly movingDotBaseSize = 5;
+  private readonly endpointBaseSize = 18;
+  private readonly endpointHoverSize = 30;
+  private readonly endpointHoverColor = [250, 0, 0];
 
   constructor( private ngZone: NgZone, private countryRenderer: ThreatLensCountryLayerRenderer, private arcGraphicsLayer: any, private arcSurfaceGraphicsLayer: any, private animatedArcGraphicsLayer: any, private geometryEngine: any, private webMercatorUtils: any, private toCountryKey: (value: string) => string, private onVisibleArcCountChange: (count: number) => void, private onBatchStatusChange: (status: ThreatLensArcBatchStatus | null) => void, ) {}
 
@@ -136,6 +140,7 @@ export class ThreatLensArcRenderer {
     this.lastAnimationTick = 0;
     this.batchAnimationStartTime = 0;
     this.visibleBatchIndex = -1;
+    this.hoveredEndpointGraphic = null;
     this.onBatchStatusChange(null);
   }
 
@@ -147,11 +152,38 @@ export class ThreatLensArcRenderer {
     this.animatedArcs = [];
     this.arcBatches = [];
     this.movingDotGraphics = [];
+    this.hoveredEndpointGraphic = null;
   }
 
   isTooltipGraphic(graphic: any): boolean {
     const role = graphic?.attributes?.role;
     return role === 'arc' || role === 'arc-surface' || role === 'arc-start' || role === 'arc-end' || role === 'arc-traveler';
+  }
+
+  isEndpointGraphic(graphic: any): boolean {
+    const role = graphic?.attributes?.role;
+    return role === 'arc-start' || role === 'arc-end';
+  }
+
+  setHoveredEndpointGraphic(graphic: any | null): void {
+    const nextGraphic = this.isEndpointGraphic(graphic) ? graphic : null;
+    if (this.hoveredEndpointGraphic === nextGraphic) {
+      return;
+    }
+
+    if (this.hoveredEndpointGraphic) {
+      this.setEndpointHoverState(this.hoveredEndpointGraphic, false);
+    }
+
+    this.hoveredEndpointGraphic = nextGraphic;
+
+    if (this.hoveredEndpointGraphic) {
+      this.setEndpointHoverState(this.hoveredEndpointGraphic, true);
+    }
+  }
+
+  clearEndpointHover(): void {
+    this.setHoveredEndpointGraphic(null);
   }
 
   setAnimationPaused(paused: boolean): void {
@@ -238,6 +270,7 @@ export class ThreatLensArcRenderer {
 
     this.startMarkerGraphics = [];
     this.endMarkerGraphics = [];
+    this.hoveredEndpointGraphic = null;
     const batches = this.getVisibleBatchSequence();
     const batch = batchOverride ?? (index >= 0 ? batches[index] ?? null : null);
     const items = batch?.items ?? [];
@@ -384,12 +417,16 @@ export class ThreatLensArcRenderer {
         latitude: point[1],
         spatialReference: { wkid: 4326 },
       },
-      attributes: this.buildArcAttributes(arc, role),
+      attributes: {
+        ...this.buildArcAttributes(arc, role),
+        endpoint_color: arc.color,
+        endpoint_opacity: opacity,
+      },
       symbol: {
         type: 'picture-marker',
-        url:'/assets/images/shared/flag.svg',
-        width: '18px',
-        height: '18px',
+        url:'/assets/images/shared/location.svg',
+        width: `${this.endpointBaseSize}px`,
+        height: `${this.endpointBaseSize}px`,
         color: [...arc.color, opacity],
         outline: {
           color: [255, 255, 255, 0.84],
@@ -434,5 +471,24 @@ export class ThreatLensArcRenderer {
       end_country: arc.countryBName,
       weight: arc.weight,
     };
+  }
+
+  private setEndpointHoverState(graphic: any, hovered: boolean): void {
+    if (!this.isEndpointGraphic(graphic) || !graphic.symbol) {
+      return;
+    }
+
+    const symbol = graphic.symbol.clone?.() ?? { ...graphic.symbol, outline: graphic.symbol.outline ? { ...graphic.symbol.outline } : undefined };
+    const baseColor = Array.isArray(graphic.attributes?.endpoint_color) ? graphic.attributes.endpoint_color : [255, 255, 255];
+    const baseOpacity = Number(graphic.attributes?.endpoint_opacity);
+    const opacity = Number.isFinite(baseOpacity) ? baseOpacity : 1;
+    const size = hovered ? this.endpointHoverSize : this.endpointBaseSize;
+
+    symbol.color = hovered ? [...this.endpointHoverColor, 1] : [...baseColor, opacity];
+    symbol.width = `${size}px`;
+    symbol.height = `${size}px`;
+    symbol.outline = { ...(symbol.outline ?? {}), color: hovered ? [255, 255, 255, 1] : [255, 255, 255, 0.84], width: hovered ? 2.2 : 1.2, };
+
+    graphic.symbol = symbol;
   }
 }

@@ -413,7 +413,13 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
       const arcGraphic = hit.results.find((result: any) => this.arcRenderer?.isTooltipGraphic(result.graphic))?.graphic;
       if (arcGraphic) {
-        this.clearHoverHighlight();
+        this.clearCountryHoverHighlight();
+        if (this.arcRenderer?.isEndpointGraphic(arcGraphic)) {
+          this.arcRenderer.setHoveredEndpointGraphic(arcGraphic);
+        }
+        else {
+          this.arcRenderer?.clearEndpointHover();
+        }
         this.tooltipRenderer.hide();
         return;
       }
@@ -850,6 +856,11 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   }
 
   private clearHoverHighlight(): void {
+    this.clearCountryHoverHighlight();
+    this.arcRenderer?.clearEndpointHover();
+  }
+
+  private clearCountryHoverHighlight(): void {
     this.countryRenderer.clearHoverHighlight();
     this.hoveredCountryKey = '';
   }
