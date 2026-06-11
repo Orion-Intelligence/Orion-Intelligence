@@ -28,10 +28,25 @@ export class ListViewComponent implements OnDestroy {
   deleteCustomEntity = output<string>();
   cancelEntityScan = output<string>();
   addEntityRequested = output<CustomEntity['type']>();
+  fetchPostsInline = output<PlatformResult>();
+  fetchImagesInline = output<PlatformResult>();
+  fetchFollowersInline = output<PlatformResult>();
+  fetchFollowingInline = output<PlatformResult>();
+
   public state = inject(SocialMapperStateService);
   readonly socialEntityUiService = inject(SocialEntityUiService);
   addSearchTerm = signal('');
   metadataSearchTerms = signal<Record<string, string>>({});
+  activeTabs = signal<Record<string, string | null>>({});
+
+  fetchTabs = [
+    { key: 'posts', label: 'Posts', icon: 'bi bi-file-post' },
+    { key: 'images', label: 'Images', icon: 'bi bi-images' },
+    { key: 'followers', label: 'Followers', icon: 'bi bi-people' },
+    { key: 'following', label: 'Following', icon: 'bi bi-person-plus' },
+    { key: 'metadata', label: 'Raw Data', icon: 'bi bi-database' }
+  ];
+
   entityAddOptions: { type: CustomEntity['type']; label: string; iconClass: string; }[] = [ { type: 'email-breach', label: 'Add Email Breach', iconClass: 'bi bi-person-badge text-indigo-400' }, { type: 'wanted-list', label: 'Add Wanted List', iconClass: 'bi bi-person-exclamation text-indigo-400' }, { type: 'phone', label: 'Add Phone', iconClass: 'bi bi-telephone text-indigo-400' }, { type: 'crypto-scanner', label: 'Add Crypto Scanner', iconClass: 'bi bi-currency-bitcoin text-green-400' } ];
   expandedEntityIds = signal<Set<string>>(new Set<string>());
   profileOverviewIds = signal<Set<string>>(new Set<string>());
@@ -60,6 +75,23 @@ export class ListViewComponent implements OnDestroy {
     }
   }
 
+  setActiveTab(platformNodeId: string, tabKey: string) {
+    this.activeTabs.update(current => {
+      const next = { ...current };
+      if (next[platformNodeId] === tabKey) {
+        delete next[platformNodeId];
+      }
+      else {
+        next[platformNodeId] = tabKey;
+      }
+      return next;
+    });
+  }
+
+  getActiveTab(platformNodeId: string): string | null {
+    return this.activeTabs()[platformNodeId] ?? null;
+  }
+
   updateMetadataSearch(platformNodeId: string, event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.metadataSearchTerms.update(current => ({
@@ -67,26 +99,27 @@ export class ListViewComponent implements OnDestroy {
       [platformNodeId]: value
     }));
   }
+
   isNumeric(value: any): boolean {
-  if (value === null || value === undefined || value === '') return false;
-  if (typeof value === 'number') return true;
-  const s = String(value);
-  return !isNaN(Number(s.replace(/,/g, ''))) && s.trim() !== '';
-}
+    if (value === null || value === undefined || value === '') return false;
+    if (typeof value === 'number') return true;
+    const s = String(value);
+    return !isNaN(Number(s.replace(/,/g, ''))) && s.trim() !== '';
+  }
 
-isBool(value: any): boolean {
-  if (typeof value === 'boolean') return true;
-  const s = String(value).toLowerCase().trim();
-  return s === 'true' || s === 'false';
-}
+  isBool(value: any): boolean {
+    if (typeof value === 'boolean') return true;
+    const s = String(value).toLowerCase().trim();
+    return s === 'true' || s === 'false';
+  }
 
-formatNumericValue(value: any): string {
-  const n = typeof value === 'number' ? value : Number(String(value).replace(/,/g, ''));
-  return Number.isFinite(n) ? n.toLocaleString() : String(value);
-}
+  formatNumericValue(value: any): string {
+    const n = typeof value === 'number' ? value : Number(String(value).replace(/,/g, ''));
+    return Number.isFinite(n) ? n.toLocaleString() : String(value);
+  }
 
   getFilteredMetadataEntries(platformNodeId: string): { key: string; value: any; }[] {
-    const all = this.getMetadataEntries(platformNodeId);
+    const all = this.getPlatformMetadataEntries(platformNodeId);
     const term = (this.metadataSearchTerms()[platformNodeId] || '').toLowerCase().trim();
     if (!term) return all;
     return all.filter(e =>
@@ -193,7 +226,19 @@ formatNumericValue(value: any): string {
   }
 
   getRecentPosts(platformData: PlatformResult): SocialPost[] {
-    return (platformData.posts || []).filter(Boolean).slice(0, 3);
+    return this.getUniquePosts(platformData).slice(0, 3);
+  }
+
+  getUniquePosts(platformData: PlatformResult): SocialPost[] {
+    const posts = platformData.posts || [];
+    const seen = new Set<string>();
+    return posts.filter(post => {
+      if (!post) return false;
+      const key = post.post_url || JSON.stringify(post);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   }
 
   getPostCaption(post: SocialPost | null | undefined): string {
@@ -291,7 +336,7 @@ formatNumericValue(value: any): string {
     return 'bi bi-record-circle text-teal-400';
   }
 
-  getMetadataEntries(platformNodeId: string): {
+  getPlatformMetadataEntries(platformNodeId: string): {
         key: string;
         value: any;
     }[] {

@@ -8,11 +8,10 @@
     </div>
   } @else {
 
-
     @if (activeUserNodes().length > 1) {
       <div class="flex-shrink-0 bg-white dark:bg-[#242526] border-b border-gray-200 dark:border-[#3a3b3c] px-4">
         <div class="flex gap-0 overflow-x-auto scrollbar-none">
-          @for (userNode of activeUserNodes(); track trackById(i, userNode); let i = $index) {
+          @for (userNode of activeUserNodes(); track userNode.id; let i = $index) {
             <button (click)="setActiveUserIndex(i)" class="flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors flex-shrink-0 whitespace-nowrap" [class.border-[#1877f2]]="state.activeUserIndex() === i" [class.text-[#1877f2]]="state.activeUserIndex() === i" [class.border-transparent]="state.activeUserIndex() !== i" [class.text-gray-500]="state.activeUserIndex() !== i" [class.dark:text-gray-400]="state.activeUserIndex() !== i">
               <div class="w-6 h-6 rounded-full bg-[#1877f2] flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
                 {{ userNode.label.charAt(0).toUpperCase() }}
@@ -25,15 +24,12 @@
       </div>
     }
 
-
     <div class="flex-1 min-h-0 overflow-y-auto">
       <div class="flex gap-4 p-4 max-w-6xl mx-auto items-start">
 
-
+        <!-- Left sidebar -->
         <aside class="hidden lg:flex w-[240px] flex-shrink-0 flex-col gap-3 sticky top-4 max-h-[calc(100vh-5rem)] overflow-y-auto pr-2 custom-scrollbar">
-
           @if (activeUserNodes()[state.activeUserIndex()]; as userNode) {
-
             <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/30 overflow-hidden flex-shrink-0">
               <div class="h-16 bg-gradient-to-r from-[#1877f2] to-[#42a5f5]"></div>
               <div class="px-4 pb-4 flex flex-col items-center text-center -mt-7">
@@ -42,18 +38,11 @@
                 </div>
                 <h3 data-testid="social-list-user-summary-trigger" class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100 cursor-pointer hover:underline" (click)="nodeClicked.emit(userNode.id.toString())">{{ userNode.label }}</h3>
                 <p class="text-xs text-gray-400 mt-0.5">{{ getPlatformsForUserNode(userNode.id.toString()).length }} platforms active</p>
-                <button data-testid="social-list-manage-profiles" (click)="state.openManageProfilesModal(userNode.label)" class="mt-3 w-full py-1.5 rounded-lg text-xs font-semibold bg-[#1877f2] text-white hover:bg-blue-600 transition-colors">
-                  Manage Profiles
-                </button>
-                <button data-testid="social-list-profile-intelligence" (click)="state.openSummaryPopup(userNode.label)" class="mt-2 w-full py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 dark:bg-[#3a3b3c] dark:hover:bg-[#4a4b4c] transition-colors">
-                  Profile Intelligence
-                </button>
+                <button data-testid="social-list-manage-profiles" (click)="state.openManageProfilesModal(userNode.label)" class="mt-3 w-full py-1.5 rounded-lg text-xs font-semibold bg-[#1877f2] text-white hover:bg-blue-600 transition-colors">Manage Profiles</button>
+                <button data-testid="social-list-profile-intelligence" (click)="state.openSummaryPopup(userNode.label)" class="mt-2 w-full py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 dark:bg-[#3a3b3c] dark:hover:bg-[#4a4b4c] transition-colors">Profile Intelligence</button>
               </div>
             </div>
-
-
             <div class="flex flex-col gap-3">
-
               <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/20 p-4 flex-shrink-0">
                 <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Platforms</p>
                 <div class="flex flex-col gap-1">
@@ -87,400 +76,604 @@
               </div>
             </div>
           }
-
         </aside>
 
-
+        <!-- Main feed -->
         <div class="flex-1 min-w-0 flex flex-col gap-3">
 
           @if (activeUserNodes()[state.activeUserIndex()]; as userNode) {
-
             @for (platformNode of getPlatformsForUserNode(userNode.id.toString()); track trackById($index, platformNode)) {
               @if (getPlatformData(platformNode.id.toString()); as platformData) {
 
                 <article [id]="platformNode.id" [class.highlight-focused-card]="state.highlightedNodeId() === platformNode.id" class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] overflow-hidden animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
 
+                  <!-- ═══════════════════════════════════════════════════════
+                       DEFAULT CARD VIEW
+                  ════════════════════════════════════════════════════════ -->
                   @if (!isProfileOverviewActive(platformNode.id.toString())) {
-                  <div class="flex items-start gap-3 px-4 pt-4 relative">
-                    <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-[#3a3b3c] flex items-center justify-center flex-shrink-0 overflow-hidden text-lg">
-                      <app-social-icon [platformName]="platformNode.label"></app-social-icon>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                      <div class="flex items-center gap-2 flex-wrap">
-                        <span class="text-sm font-bold text-gray-900 dark:text-gray-100 cursor-pointer hover:underline" (click)="nodeClicked.emit(userNode.id.toString())">{{ platformData.username || userNode.label }}</span>
-                        @if (isPriorityPlatform(platformData.platform)) {
-                          <span class="inline-flex items-center gap-1 text-[11px] font-medium bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full" title="More details available for this platform">
-                            <i class="bi bi-check-circle-fill text-[10px]"></i> Scrapeable
+
+                    <!-- Header -->
+                    <div class="flex items-start gap-3 px-4 pt-4 relative">
+                      <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-[#3a3b3c] flex items-center justify-center flex-shrink-0 overflow-hidden text-lg">
+                        <app-social-icon [platformName]="platformNode.label"></app-social-icon>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <span class="text-sm font-bold text-gray-900 dark:text-gray-100 cursor-pointer hover:underline" (click)="nodeClicked.emit(userNode.id.toString())">{{ platformData.username || userNode.label }}</span>
+                          @if (isPriorityPlatform(platformData.platform)) {
+                            <span class="inline-flex items-center gap-1 text-[11px] font-medium bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full" title="More details available for this platform">
+                              <i class="bi bi-check-circle-fill text-[10px]"></i> Scrapeable
+                            </span>
+                          }
+                        </div>
+                        <div class="flex items-center gap-2 mt-0.5">
+                          <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-gray-100 dark:bg-[#3a3b3c] text-gray-500 dark:text-gray-400">
+                            <app-social-icon [platformName]="platformData.platform" class="text-[11px]"></app-social-icon>
+                            <span class="ml-0.5">{{ platformData.platform }}</span>
                           </span>
-                        }
+                        </div>
                       </div>
-                      <div class="flex items-center gap-2 mt-0.5">
-                        <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-gray-100 dark:bg-[#3a3b3c] text-gray-500 dark:text-gray-400">
-                          <app-social-icon [platformName]="platformData.platform" class="text-[11px]"></app-social-icon>
-                          <span class="ml-0.5">{{ platformData.platform }}</span>
-                        </span>
+                      <div class="flex items-center gap-1 flex-shrink-0 relative z-50">
+                        @if (platformData.url) {
+                          <a data-testid="social-list-platform-open-link" [href]="platformData.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors" title="Open profile">
+                            <i class="bi bi-box-arrow-up-right text-sm"></i>
+                          </a>
+                        }
+                        <button data-testid="social-list-platform-row" (click)="platformNodeClicked.emit(platformNode.id.toString())" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors" title="More options">
+                          <i class="bi bi-three-dots-vertical text-base"></i>
+                        </button>
                       </div>
                     </div>
-                    <div class="flex items-center gap-1 flex-shrink-0 relative z-50">
-                      @if (platformData.url) {
-                        <a data-testid="social-list-platform-open-link" [href]="platformData.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors" title="Open profile">
-                          <i class="bi bi-box-arrow-up-right text-sm"></i>
-                        </a>
-                      }
-                      <button data-testid="social-list-platform-row" (click)="platformNodeClicked.emit(platformNode.id.toString())" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors" title="More options">
-                        <i class="bi bi-three-dots-vertical text-base"></i>
+
+                    <!-- Bio -->
+                    @if (getProfileBio(platformData)) {
+                      <p class="px-4 pt-3 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{{ getProfileBio(platformData) }}</p>
+                    }
+
+                    <!-- Action strip -->
+                    <div class="flex items-center gap-3 px-4 py-3 mt-3 border-t border-gray-100 dark:border-[#3a3b3c]">
+                      <button data-testid="social-list-followers-following" (click)="state.openFollowerScanPopup(platformNode.id.toString())" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-[#1877f2] text-white hover:bg-blue-600 transition-colors">
+                        <i class="bi bi-people-fill"></i> Connections
+                      </button>
+                      <button (click)="toggleProfileOverview(platformNode.id.toString())" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-[#3a3b3c] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#4a4b4c] transition-colors">
+                        <i class="bi bi-person-lines-fill"></i> Profile Overview
                       </button>
                     </div>
-                  </div>
 
-
-                  @if (getProfileBio(platformData)) {
-                    <p class="px-4 pt-3 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{{ getProfileBio(platformData) }}</p>
-                  }
-
-                       <div class="flex items-center gap-3 px-4 py-3 mt-3 border-t border-gray-100 dark:border-[#3a3b3c]">
-                         <button data-testid="social-list-followers-following" (click)="state.openFollowerScanPopup(platformNode.id.toString())" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-[#1877f2] text-white hover:bg-blue-600 transition-colors">
-                           <i class="bi bi-people-fill"></i> Connections
-                         </button>
-                         <button (click)="toggleProfileOverview(platformNode.id.toString())" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-[#3a3b3c] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#4a4b4c] transition-colors">
-                           <i class="bi bi-person-lines-fill"></i> Profile Overview
-                         </button>
-                       </div>
-
-                  <!--
-                  <div class="px-4 pt-3 grid grid-cols-4 gap-2">
-                    <div class="flex flex-col items-center gap-0.5 bg-gray-50 dark:bg-[#3a3b3c] rounded-xl py-2.5">
-                      <i class="bi bi-grid-3x3-gap-fill text-amber-400 text-base"></i>
-                      <span class="text-sm font-bold text-gray-800 dark:text-gray-200 tabular-nums">{{ getStatValue(platformData, 'total_posts') }}</span>
-                      <span class="text-[10px] text-gray-400">Posts</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-0.5 bg-gray-50 dark:bg-[#3a3b3c] rounded-xl py-2.5">
-                      <i class="bi bi-people-fill text-[#1877f2] text-base"></i>
-                      <span class="text-sm font-bold text-gray-800 dark:text-gray-200 tabular-nums">{{ getStatValue(platformData, 'total_followers') }}</span>
-                      <span class="text-[10px] text-gray-400">Followers</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-0.5 bg-gray-50 dark:bg-[#3a3b3c] rounded-xl py-2.5">
-                      <i class="bi bi-person-plus-fill text-cyan-400 text-base"></i>
-                      <span class="text-sm font-bold text-gray-800 dark:text-gray-200 tabular-nums">{{ getStatValue(platformData, 'total_following') }}</span>
-                      <span class="text-[10px] text-gray-400">Following</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-0.5 bg-gray-50 dark:bg-[#3a3b3c] rounded-xl py-2.5">
-                      <i class="bi bi-heart-fill text-rose-400 text-base"></i>
-                      <span class="text-sm font-bold text-gray-800 dark:text-gray-200 tabular-nums">{{ getStatValue(platformData, 'total_likes') }}</span>
-                      <span class="text-[10px] text-gray-400">Likes</span>
-                    </div>
-                  </div>
-                  -->
-
-
-                  @if (getRecentPosts(platformData).length > 0) {
-                    <div class="px-4 pt-4">
-                      <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-semibold uppercase tracking-wide text-gray-400">Recent Posts</span>
-                        <span class="text-[11px] font-mono text-gray-400 bg-gray-100 dark:bg-[#3a3b3c] px-2 py-0.5 rounded-full">{{ platformData.posts?.length || 0 }} total</span>
-                      </div>
-                      <div class="flex flex-col gap-3">
-                        @for (post of getRecentPosts(platformData); track post.post_url || $index) {
-
-                          @if (getPostCaption(post)) {
-                            <p class="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{{ getPostCaption(post) }}</p>
-                          }
-
-                          @if (hasPostMedia(post) && !isVideoPost(post)) {
-                            <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-[#3a3b3c]">
-                              <img [src]="post.media_url" [alt]="getPostCaption(post)" class="w-full object-cover max-h-72">
-                            </div>
-                          } @else if (isVideoPost(post)) {
-                            <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-[#3a3b3c] h-48 bg-black flex items-center justify-center relative">
-                              <i class="bi bi-play-circle-fill text-6xl text-white/60"></i>
-                              <span class="absolute bottom-3 left-3 text-xs font-medium text-white bg-black/50 px-2 py-0.5 rounded backdrop-blur-sm">{{ getPostMediaTypeLabel(post) }}</span>
-                            </div>
-                          } @else if (!hasPostMedia(post)) {
-                            <div class="flex gap-3 items-center bg-gray-50 dark:bg-[#3a3b3c] rounded-xl p-3 border border-gray-200 dark:border-[#3a3b3c]">
-                              <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-[#4a4b4c] flex items-center justify-center flex-shrink-0">
-                                <i class="bi bi-file-richtext text-2xl text-gray-400"></i>
+                    <!-- Recent posts preview -->
+                    @if (getRecentPosts(platformData).length > 0) {
+                      <div class="px-4 pt-4">
+                        <div class="flex items-center justify-between mb-2">
+                          <span class="text-xs font-semibold uppercase tracking-wide text-gray-400">Recent Posts</span>
+                          <span class="text-[11px] font-mono text-gray-400 bg-gray-100 dark:bg-[#3a3b3c] px-2 py-0.5 rounded-full">{{ platformData.posts?.length || 0 }} total</span>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                          @for (post of getRecentPosts(platformData); track post.post_url || $index) {
+                            @if (getPostCaption(post)) {
+                              <p class="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{{ getPostCaption(post) }}</p>
+                            }
+                            @if (hasPostMedia(post) && !isVideoPost(post)) {
+                              <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-[#3a3b3c]">
+                                <img [src]="post.media_url" [alt]="getPostCaption(post)" class="w-full object-cover max-h-72">
                               </div>
-                              <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-snug line-clamp-2 mb-0">{{ getPostCaption(post) }}</p>
-                                @if (post.post_url) {
-                                  <p class="text-[11px] text-gray-400 mt-1 truncate mb-0">{{ post.post_url }}</p>
-                                }
+                            } @else if (isVideoPost(post)) {
+                              <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-[#3a3b3c] h-48 bg-black flex items-center justify-center relative">
+                                <i class="bi bi-play-circle-fill text-6xl text-white/60"></i>
+                                <span class="absolute bottom-3 left-3 text-xs font-medium text-white bg-black/50 px-2 py-0.5 rounded backdrop-blur-sm">{{ getPostMediaTypeLabel(post) }}</span>
                               </div>
+                            } @else if (!hasPostMedia(post)) {
+                              <div class="flex gap-3 items-center bg-gray-50 dark:bg-[#3a3b3c] rounded-xl p-3 border border-gray-200 dark:border-[#3a3b3c]">
+                                <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-[#4a4b4c] flex items-center justify-center flex-shrink-0">
+                                  <i class="bi bi-file-richtext text-2xl text-gray-400"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                  <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-snug line-clamp-2 mb-0">{{ getPostCaption(post) }}</p>
+                                  @if (post.post_url) {
+                                    <p class="text-[11px] text-gray-400 mt-1 truncate mb-0">{{ post.post_url }}</p>
+                                  }
+                                </div>
+                              </div>
+                            }
+                            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                              <div class="flex items-center gap-2">
+                                <div class="flex -space-x-0.5">
+                                  <span class="w-4 h-4 rounded-full bg-[#1877f2] flex items-center justify-center text-[9px] text-white border border-white dark:border-[#242526]">👍</span>
+                                  <span class="w-4 h-4 rounded-full bg-rose-500 flex items-center justify-center text-[9px] border border-white dark:border-[#242526]">❤️</span>
+                                </div>
+                                <span>{{ formatPostMetric(post.likes) }} likes@if (post.views) { · {{ formatPostMetric(post.views) }} views}</span>
+                              </div>
+                              <span>{{ formatPostMetric(post.comments) }} comments@if (post.shares) { · {{ formatPostMetric(post.shares) }} shares}</span>
+                            </div>
+                            <div class="flex border-t border-gray-100 dark:border-[#3a3b3c]">
+                              <button class="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#3a3b3c] rounded-lg transition-colors">
+                                <i class="bi bi-hand-thumbs-up text-base leading-none"></i> Like
+                              </button>
+                              <button class="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#3a3b3c] rounded-lg transition-colors">
+                                <i class="bi bi-chat text-base leading-none"></i> Comment
+                              </button>
+                              <button class="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#3a3b3c] rounded-lg transition-colors">
+                                <i class="bi bi-share text-base leading-none"></i> Share
+                              </button>
+                              @if (post.post_url) {
+                                <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-semibold text-[#1877f2] hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
+                                  <i class="bi bi-box-arrow-up-right text-base leading-none"></i> View
+                                </a>
+                              }
                             </div>
                           }
+                        </div>
+                      </div>
+                    }
 
-                          <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                            <div class="flex items-center gap-2">
-                              <div class="flex -space-x-0.5">
-                                <span class="w-4 h-4 rounded-full bg-[#1877f2] flex items-center justify-center text-[9px] text-white border border-white dark:border-[#242526]">👍</span>
-                                <span class="w-4 h-4 rounded-full bg-rose-500 flex items-center justify-center text-[9px] border border-white dark:border-[#242526]">❤️</span>
-                              </div>
-                              <span>{{ formatPostMetric(post.likes) }} likes@if (post.views) { · {{ formatPostMetric(post.views) }} views}</span>
+                    <!-- Followers / following preview -->
+                    @if (getFollowers(platformData).length > 0 || getFollowing(platformData).length > 0) {
+                      <div class="px-4 pt-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        @if (getFollowers(platformData).length > 0) {
+                          <div class="flex items-center gap-2 cursor-pointer hover:underline" (click)="state.openFollowerScanPopup(platformNode.id.toString())">
+                            <div class="flex -space-x-1.5">
+                              @for (username of getFollowerPreview(platformData).slice(0, 3); track trackByUsername($index, username)) {
+                                <div class="w-5 h-5 rounded-full bg-blue-100 dark:bg-[#4a4b4c] border border-white dark:border-[#242526] flex items-center justify-center text-[8px] font-bold text-[#1877f2] dark:text-gray-300 relative z-10" [title]="username">
+                                  {{ username.charAt(0).toUpperCase() }}
+                                </div>
+                              }
                             </div>
-                            <span>{{ formatPostMetric(post.comments) }} comments@if (post.shares) { · {{ formatPostMetric(post.shares) }} shares}</span>
+                            <span>{{ getFollowers(platformData).length }} followers</span>
                           </div>
-
-                          <div class="flex border-t border-gray-100 dark:border-[#3a3b3c]">
-                            <button class="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#3a3b3c] rounded-lg transition-colors">
-                              <i class="bi bi-hand-thumbs-up text-base leading-none"></i> Like
-                            </button>
-                            <button class="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#3a3b3c] rounded-lg transition-colors">
-                              <i class="bi bi-chat text-base leading-none"></i> Comment
-                            </button>
-                            <button class="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#3a3b3c] rounded-lg transition-colors">
-                              <i class="bi bi-share text-base leading-none"></i> Share
-                            </button>
-                            @if (post.post_url) {
-                              <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-semibold text-[#1877f2] hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
-                                <i class="bi bi-box-arrow-up-right text-base leading-none"></i> View
-                              </a>
-                            }
+                        } @else { <div></div> }
+                        @if (getFollowing(platformData).length > 0) {
+                          <div class="flex items-center gap-2 cursor-pointer hover:underline" (click)="state.openFollowerScanPopup(platformNode.id.toString())">
+                            <span>{{ getFollowing(platformData).length }} following</span>
+                            <div class="flex -space-x-1.5 flex-row-reverse">
+                              @for (username of getFollowingPreview(platformData).slice(0, 3); track trackByUsername($index, username)) {
+                                <div class="w-5 h-5 rounded-full bg-cyan-100 dark:bg-[#4a4b4c] border border-white dark:border-[#242526] flex items-center justify-center text-[8px] font-bold text-cyan-600 dark:text-gray-300 relative z-10" [title]="username">
+                                  {{ username.charAt(0).toUpperCase() }}
+                                </div>
+                              }
+                            </div>
                           </div>
-
-                        }
+                        } @else { <div></div> }
                       </div>
-                    </div>
-                  }
+                    }
 
-
-                  @if (getFollowers(platformData).length > 0 || getFollowing(platformData).length > 0) {
-                    <div class="px-4 pt-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                      @if (getFollowers(platformData).length > 0) {
-                        <div class="flex items-center gap-2 cursor-pointer hover:underline" (click)="state.openFollowerScanPopup(platformNode.id.toString())">
-                          <div class="flex -space-x-1.5">
-                            @for (username of getFollowerPreview(platformData).slice(0, 3); track trackByUsername($index, username)) {
-                              <div class="w-5 h-5 rounded-full bg-blue-100 dark:bg-[#4a4b4c] border border-white dark:border-[#242526] flex items-center justify-center text-[8px] font-bold text-[#1877f2] dark:text-gray-300 relative z-10" [title]="username">
-                                {{ username.charAt(0).toUpperCase() }}
-                              </div>
-                            }
-                          </div>
-                          <span>{{ getFollowers(platformData).length }} followers</span>
+                    <!-- Profile detail entries -->
+                    @if (getProfileDetailEntries(platformData).length > 0) {
+                      <div class="px-4 py-3">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Profile Details</p>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                          @for (item of getProfileDetailEntries(platformData); track trackByKey($index, item)) {
+                            <div class="bg-gray-50 dark:bg-[#3a3b3c] rounded-lg px-3 py-2 border border-gray-200 dark:border-[#3a3b3c]">
+                              <p class="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-1">{{ formatKey(item.key) }}</p>
+                              <p class="text-sm text-gray-800 dark:text-gray-200 break-words mb-0">{{ item.value }}</p>
+                            </div>
+                          }
                         </div>
-                      } @else {
-                        <div></div>
+                      </div>
+                    }
+
+                    <!-- Raw metadata table -->
+                    @if (getPlatformMetadataEntries(platformNode.id.toString()); as metadataEntries) {
+                      @if (metadataEntries.length > 0) {
+                        <div class="px-4 py-3">
+                          <div class="flex items-center justify-between mb-2 gap-3">
+                            <div class="flex items-center gap-1.5">
+                              <i class="bi bi-database text-gray-400 text-sm"></i>
+                              <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-0">Raw API metadata</p>
+                              <span class="text-[11px] text-gray-400">— {{ getFilteredMetadataEntries(platformNode.id.toString()).length }} fields</span>
+                            </div>
+                            <div class="relative">
+                              <input type="text" [value]="metadataSearchTerms()[platformNode.id.toString()] || ''" (input)="updateMetadataSearch(platformNode.id.toString(), $event)" placeholder="Search…" class="h-7 w-44 rounded-md border border-gray-200 dark:border-[#4a4b4c] bg-gray-50 dark:bg-[#3a3b3c] pl-6 pr-2 text-[11px] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1877f2]/50">
+                              <i class="bi bi-search absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400"></i>
+                            </div>
+                          </div>
+                          <table class="w-full text-xs border-collapse">
+                            <tbody>
+                              @for (item of getFilteredMetadataEntries(platformNode.id.toString()); track trackByKey($index, item)) {
+                                <tr class="group border-b border-gray-100 dark:border-[#3a3b3c] last:border-0 hover:bg-gray-50 dark:hover:bg-[#2d2e2f] transition-colors">
+                                  <td class="py-1.5 pr-3 w-[38%] align-middle whitespace-nowrap">
+                                    <div class="flex items-center gap-2">
+                                      <span class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                                        [class.bg-[#1877f2]]="isUrl(item.value) && !isImageUrl(item.value)"
+                                        [class.bg-emerald-500]="isImageUrl(item.value)"
+                                        [class.bg-amber-500]="isNumeric(item.value)"
+                                        [class.bg-rose-400]="isBool(item.value)"
+                                        [class.bg-gray-300]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)"
+                                        [class.dark:bg-gray-500]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)">
+                                      </span>
+                                      <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400">{{ formatKey(item.key) }}</span>
+                                    </div>
+                                  </td>
+                                  <td class="py-1.5 align-middle font-mono text-[12px] text-gray-800 dark:text-gray-200 break-all leading-snug">
+                                    @if (isImageUrl(item.value)) {
+                                      <div class="flex items-center gap-2">
+                                        <img [src]="item.value" [alt]="item.key" class="h-7 w-7 rounded object-cover flex-shrink-0">
+                                        <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-[11px] text-[#1877f2] hover:underline">view</a>
+                                      </div>
+                                    } @else if (isUrl(item.value)) {
+                                      <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-[#1877f2] hover:underline">{{ item.value }}</a>
+                                    } @else if (isBool(item.value)) {
+                                      <span [class.text-emerald-500]="item.value === true || item.value === 'true'" [class.text-rose-400]="item.value === false || item.value === 'false'" class="inline-flex items-center gap-1">
+                                        <i [class.bi-check-circle-fill]="item.value === true || item.value === 'true'" [class.bi-x-circle-fill]="item.value === false || item.value === 'false'" class="bi text-[12px]"></i>
+                                        {{ item.value }}
+                                      </span>
+                                    } @else if (isNumeric(item.value)) {
+                                      <span class="text-amber-600 dark:text-amber-400">{{ formatNumericValue(item.value) }}</span>
+                                    } @else {
+                                      {{ item.value }}
+                                    }
+                                  </td>
+                                  <td class="py-1.5 pl-2 align-middle w-7 text-right">
+                                    <button (click)="copyToClipboard(item.value)" class="opacity-0 group-hover:opacity-100 w-6 h-6 inline-flex items-center justify-center rounded hover:bg-gray-200 dark:hover:bg-[#4a4b4c] text-gray-400 hover:text-[#1877f2] transition-all" title="Copy value">
+                                      <i class="bi bi-clipboard text-[10px]"></i>
+                                    </button>
+                                  </td>
+                                </tr>
+                              }
+                              @if (getFilteredMetadataEntries(platformNode.id.toString()).length === 0) {
+                                <tr><td colspan="3" class="py-6 text-center text-[11px] text-gray-400 italic">No fields match your search.</td></tr>
+                              }
+                            </tbody>
+                          </table>
+                        </div>
                       }
+                    }
 
-                      @if (getFollowing(platformData).length > 0) {
-                        <div class="flex items-center gap-2 cursor-pointer hover:underline" (click)="state.openFollowerScanPopup(platformNode.id.toString())">
-                          <span>{{ getFollowing(platformData).length }} following</span>
-                          <div class="flex -space-x-1.5 flex-row-reverse">
-                            @for (username of getFollowingPreview(platformData).slice(0, 3); track trackByUsername($index, username)) {
-                              <div class="w-5 h-5 rounded-full bg-cyan-100 dark:bg-[#4a4b4c] border border-white dark:border-[#242526] flex items-center justify-center text-[8px] font-bold text-cyan-600 dark:text-gray-300 relative z-10" [title]="username">
-                                {{ username.charAt(0).toUpperCase() }}
-                              </div>
-                            }
-                          </div>
-                        </div>
-                      } @else {
-                        <div></div>
-                      }
-                    </div>
-                  }
-
-
-                  @if (getProfileDetailEntries(platformData).length > 0) {
-                    <div class="px-4 py-3">
-                      <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Profile Details</p>
-                      <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
-                        @for (item of getProfileDetailEntries(platformData); track trackByKey($index, item)) {
-                          <div class="bg-gray-50 dark:bg-[#3a3b3c] rounded-lg px-3 py-2 border border-gray-200 dark:border-[#3a3b3c]">
-                            <p class="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-1">{{ formatKey(item.key) }}</p>
-                            <p class="text-sm text-gray-800 dark:text-gray-200 break-words mb-0">{{ item.value }}</p>
-                          </div>
-                        }
+                    <!-- Stats bar -->
+                    <div class="px-4 py-3 flex items-center justify-between text-gray-800 dark:text-gray-200 border-t border-gray-100 dark:border-[#3a3b3c]">
+                      <div class="flex items-center gap-1.5 flex-1 justify-center">
+                        <i class="bi bi-grid-3x3-gap-fill text-amber-400 text-sm"></i>
+                        <span class="text-sm font-bold tabular-nums">{{ getStatValue(platformData, 'total_posts') }}</span>
+                        <span class="text-[11px] text-gray-400 font-medium">Posts</span>
+                      </div>
+                      <div class="h-6 w-px bg-gray-200 dark:bg-[#4a4b4c]"></div>
+                      <div class="flex items-center gap-1.5 flex-1 justify-center">
+                        <i class="bi bi-people-fill text-[#1877f2] text-sm"></i>
+                        <span class="text-sm font-bold tabular-nums">{{ getStatValue(platformData, 'total_followers') }}</span>
+                        <span class="text-[11px] text-gray-400 font-medium">Followers</span>
+                      </div>
+                      <div class="h-6 w-px bg-gray-200 dark:bg-[#4a4b4c]"></div>
+                      <div class="flex items-center gap-1.5 flex-1 justify-center">
+                        <i class="bi bi-person-plus-fill text-cyan-400 text-sm"></i>
+                        <span class="text-sm font-bold tabular-nums">{{ getStatValue(platformData, 'total_following') }}</span>
+                        <span class="text-[11px] text-gray-400 font-medium">Following</span>
+                      </div>
+                      <div class="h-6 w-px bg-gray-200 dark:bg-[#4a4b4c]"></div>
+                      <div class="flex items-center gap-1.5 flex-1 justify-center">
+                        <i class="bi bi-heart-fill text-rose-400 text-sm"></i>
+                        <span class="text-sm font-bold tabular-nums">{{ getStatValue(platformData, 'total_likes') }}</span>
+                        <span class="text-[11px] text-gray-400 font-medium">Likes</span>
                       </div>
                     </div>
-                  }
 
-
-                  <!-- Raw metadata -->
-<!--@if (getActivePanel(platformNode.id.toString()) === null) {-->
-  @if (getMetadataEntries(platformNode.id.toString()); as metadataEntries) {
-    @if (metadataEntries.length > 0) {
-      <div class="px-4 py-3">
-
-        <div class="flex items-center justify-between mb-2 gap-3">
-          <div class="flex items-center gap-1.5">
-            <i class="bi bi-database text-gray-400 text-sm"></i>
-            <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-0">
-              Raw API metadata
-            </p>
-            <span class="text-[11px] text-gray-400">
-              — {{ getFilteredMetadataEntries(platformNode.id.toString()).length }} fields
-            </span>
-          </div>
-          <div class="relative">
-            <input
-              type="text"
-              [value]="metadataSearchTerms()[platformNode.id.toString()] || ''"
-              (input)="updateMetadataSearch(platformNode.id.toString(), $event)"
-              placeholder="Search…"
-              class="h-7 w-44 rounded-md border border-gray-200 dark:border-[#4a4b4c]
-                     bg-gray-50 dark:bg-[#3a3b3c] pl-6 pr-2 text-[11px]
-                     text-gray-800 dark:text-gray-200
-                     focus:outline-none focus:ring-1 focus:ring-[#1877f2]/50">
-            <i class="bi bi-search absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400"></i>
-          </div>
-        </div>
-
-        <table class="w-full text-xs border-collapse">
-          <tbody>
-            @for (item of getFilteredMetadataEntries(platformNode.id.toString()); track trackByKey($index, item)) {
-              <tr class="group border-b border-gray-100 dark:border-[#3a3b3c] last:border-0
-                         hover:bg-gray-50 dark:hover:bg-[#2d2e2f] transition-colors">
-
-                <!-- Key -->
-                <td class="py-1.5 pr-3 w-[38%] align-middle whitespace-nowrap">
-                  <div class="flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                      [class.bg-[#1877f2]]="isUrl(item.value) && !isImageUrl(item.value)"
-                      [class.bg-emerald-500]="isImageUrl(item.value)"
-                      [class.bg-amber-500]="isNumeric(item.value)"
-                      [class.bg-rose-400]="isBool(item.value)"
-                      [class.bg-gray-300]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)"
-                      [class.dark:bg-gray-500]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)">
-                    </span>
-                    <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400">
-                      {{ formatKey(item.key) }}
-                    </span>
-                  </div>
-                </td>
-
-                <!-- Value -->
-                <td class="py-1.5 align-middle font-mono text-[12px] text-gray-800 dark:text-gray-200 break-all leading-snug">
-                  @if (isImageUrl(item.value)) {
-                    <div class="flex items-center gap-2">
-                      <img [src]="item.value" [alt]="item.key"
-                           class="h-7 w-7 rounded object-cover flex-shrink-0">
-                      <a [href]="item.value" target="_blank" rel="noopener noreferrer"
-                         class="text-[11px] text-[#1877f2] hover:underline">view</a>
-                    </div>
-                  } @else if (isUrl(item.value)) {
-                    <a [href]="item.value" target="_blank" rel="noopener noreferrer"
-                       class="text-[#1877f2] hover:underline">{{ item.value }}</a>
-                  } @else if (isBool(item.value)) {
-                    <span [class.text-emerald-500]="item.value === true || item.value === 'true'"
-                          [class.text-rose-400]="item.value === false || item.value === 'false'"
-                          class="inline-flex items-center gap-1">
-                      <i [class.bi-check-circle-fill]="item.value === true || item.value === 'true'"
-                         [class.bi-x-circle-fill]="item.value === false || item.value === 'false'"
-                         class="bi text-[12px]"></i>
-                      {{ item.value }}
-                    </span>
-                  } @else if (isNumeric(item.value)) {
-                    <span class="text-amber-600 dark:text-amber-400">{{ formatNumericValue(item.value) }}</span>
                   } @else {
-                    {{ item.value }}
-                  }
-                </td>
 
-                <!-- Copy -->
-                <td class="py-1.5 pl-2 align-middle w-7 text-right">
-                  <button (click)="copyToClipboard(item.value)"
-                    class="opacity-0 group-hover:opacity-100 w-6 h-6 inline-flex items-center
-                           justify-center rounded hover:bg-gray-200 dark:hover:bg-[#4a4b4c]
-                           text-gray-400 hover:text-[#1877f2] transition-all"
-                    title="Copy value">
-                    <i class="bi bi-clipboard text-[10px]"></i>
-                  </button>
-                </td>
+                  <!-- ═══════════════════════════════════════════════════════
+                       PROFILE OVERVIEW VIEW (with fetch tabs)
+                  ════════════════════════════════════════════════════════ -->
+                    <div class="animate-[social-mapper-fade-in-up_0.3s_ease-out]">
 
-              </tr>
-            }
-
-            @if (getFilteredMetadataEntries(platformNode.id.toString()).length === 0) {
-              <tr>
-                <td colspan="3" class="py-6 text-center text-[11px] text-gray-400 italic">
-                  No fields match your search.
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-
-      </div>
-    }
-  }
-<!--}-->
-
-                  <div class="px-4 py-3 flex items-center justify-between text-gray-800 dark:text-gray-200 border-t border-gray-100 dark:border-[#3a3b3c]">
-                    <div class="flex items-center gap-1.5 flex-1 justify-center">
-                      <i class="bi bi-grid-3x3-gap-fill text-amber-400 text-sm"></i>
-                      <span class="text-sm font-bold tabular-nums">{{ getStatValue(platformData, 'total_posts') }}</span>
-                      <span class="text-[11px] text-gray-400 font-medium">Posts</span>
-                    </div>
-                    <div class="h-6 w-px bg-gray-200 dark:bg-[#4a4b4c]"></div>
-                    <div class="flex items-center gap-1.5 flex-1 justify-center">
-                      <i class="bi bi-people-fill text-[#1877f2] text-sm"></i>
-                      <span class="text-sm font-bold tabular-nums">{{ getStatValue(platformData, 'total_followers') }}</span>
-                      <span class="text-[11px] text-gray-400 font-medium">Followers</span>
-                    </div>
-                    <div class="h-6 w-px bg-gray-200 dark:bg-[#4a4b4c]"></div>
-                    <div class="flex items-center gap-1.5 flex-1 justify-center">
-                      <i class="bi bi-person-plus-fill text-cyan-400 text-sm"></i>
-                      <span class="text-sm font-bold tabular-nums">{{ getStatValue(platformData, 'total_following') }}</span>
-                      <span class="text-[11px] text-gray-400 font-medium">Following</span>
-                    </div>
-                    <div class="h-6 w-px bg-gray-200 dark:bg-[#4a4b4c]"></div>
-                    <div class="flex items-center gap-1.5 flex-1 justify-center">
-                      <i class="bi bi-heart-fill text-rose-400 text-sm"></i>
-                      <span class="text-sm font-bold tabular-nums">{{ getStatValue(platformData, 'total_likes') }}</span>
-                      <span class="text-[11px] text-gray-400 font-medium">Likes</span>
-                    </div>
-                  </div>
-                  } @else {
-                    <div class="p-6 animate-[social-mapper-fade-in-up_0.3s_ease-out]">
-                      <div class="flex items-center justify-between mb-8">
-                        <button (click)="toggleProfileOverview(platformNode.id.toString())" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors">
-                          <i class="bi bi-arrow-left"></i> Back
+                      <!-- Slim Overview Header -->
+                      <div class="flex items-center gap-3 px-4 py-2.5 bg-gray-50/50 dark:bg-[#1c1d1e]/50 border-b border-gray-100 dark:border-[#3a3b3c]">
+                        <button (click)="toggleProfileOverview(platformNode.id.toString())" class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-200 dark:hover:bg-[#3a3b3c] transition-colors" title="Back to feed">
+                          <i class="bi bi-arrow-left text-base"></i>
                         </button>
-                        <button (click)="state.openPlatformNodePopup(platformNode.id.toString())" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-[#1877f2] text-white hover:bg-blue-600 shadow-lg shadow-blue-500/20 transition-all active:scale-95">
-                          <i class="bi bi-database-fill-gear"></i> Fetch Metadata
-                        </button>
-                      </div>
 
-                      <div class="flex items-center gap-5 mb-8">
-                        <div class="w-20 h-20 rounded-3xl bg-gray-100 dark:bg-[#3a3b3c] flex items-center justify-center text-4xl shadow-inner">
-                          <app-social-icon [platformName]="platformNode.label"></app-social-icon>
-                        </div>
-                        <div>
-                          <h3 class="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">{{ platformData.username || userNode.label }}</h3>
-                          <div class="flex items-center gap-2 mt-1">
-                             <app-social-icon [platformName]="platformData.platform" class="text-sm text-gray-400"></app-social-icon>
-                             <span class="text-sm font-semibold text-gray-400 uppercase tracking-widest">{{ platformData.platform }}</span>
+                        <div class="flex-1 min-w-0 flex items-center gap-2.5">
+                          <div class="w-7 h-7 rounded-lg bg-white dark:bg-[#242526] shadow-sm border border-gray-200 dark:border-[#4a4b4c] flex items-center justify-center text-sm">
+                            <app-social-icon [platformName]="platformNode.label"></app-social-icon>
+                          </div>
+                          <div class="min-w-0">
+                            <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate leading-tight">{{ platformData.username || userNode.label }}</h3>
+                            <p class="text-[10px] font-black text-[#1877f2] uppercase tracking-wider leading-tight">{{ platformData.platform }} Overview</p>
                           </div>
                         </div>
+
+                        <button (click)="state.openPlatformNodePopup(platformNode.id.toString())" class="h-8 px-3 rounded-xl bg-[#1877f2] text-white text-[11px] font-bold hover:bg-blue-600 shadow-sm shadow-blue-500/20 transition-all flex items-center gap-1.5 active:scale-95">
+                          <i class="bi bi-lightning-fill"></i> Fetch Details
+                        </button>
                       </div>
 
                       @if (getProfileBio(platformData)) {
-                        <div class="mb-8 relative">
-                          <div class="absolute -left-2 top-0 bottom-0 w-1 bg-[#1877f2] rounded-full opacity-50"></div>
-                          <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed font-medium italic pl-4">"{{ getProfileBio(platformData) }}"</p>
+                        <div class="px-4 py-3.5 border-b border-gray-50 dark:border-[#3a3b3c]/30">
+                          <p class="text-sm text-gray-600 dark:text-gray-400 italic leading-relaxed font-medium">"{{ getProfileBio(platformData) }}"</p>
                         </div>
                       }
 
-                      <div class="space-y-6">
-                        <h4 class="text-xs font-black uppercase tracking-[0.2em] text-gray-400 flex items-center gap-3">
-                          Profile Details
-                          <div class="flex-1 h-px bg-gray-100 dark:bg-[#3a3b3c]"></div>
-                        </h4>
+                      <!-- ── FETCH TABS ── -->
+                      <div class="">
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          @for (item of getProfileDetailEntries(platformData); track trackByKey($index, item)) {
-                            <div class="group bg-gray-50 dark:bg-[#3a3b3c] hover:bg-white dark:hover:bg-[#2d2e2f] border border-gray-100 dark:border-[#4a4b4c] rounded-2xl p-4 transition-all hover:shadow-md">
-                              <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 group-hover:text-[#1877f2] transition-colors">{{ formatKey(item.key) }}</p>
-                              <p class="text-base text-gray-900 dark:text-gray-100 font-bold break-words leading-tight">{{ item.value }}</p>
-                            </div>
-                          }
-                          @if (getProfileDetailEntries(platformData).length === 0) {
-                             <div class="col-span-full py-12 flex flex-col items-center justify-center text-center opacity-40">
-                                <i class="bi bi-file-earmark-person text-4xl mb-2"></i>
-                                <p class="text-sm font-medium">No additional profile details available</p>
-                             </div>
+                        <!-- Tab bar -->
+                        <div class="flex border-b border-gray-100 dark:border-[#3a3b3c] overflow-x-auto scrollbar-none px-1">
+                          @for (tab of fetchTabs; track tab.key) {
+                            <button
+                              (click)="setActiveTab(platformNode.id.toString(), tab.key)"
+                              class="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors flex-shrink-0 whitespace-nowrap"
+                              [class.border-[#1877f2]]="getActiveTab(platformNode.id.toString()) === tab.key"
+                              [class.text-[#1877f2]]="getActiveTab(platformNode.id.toString()) === tab.key"
+                              [class.border-transparent]="getActiveTab(platformNode.id.toString()) !== tab.key"
+                              [class.text-gray-400]="getActiveTab(platformNode.id.toString()) !== tab.key"
+                              [class.dark:text-gray-500]="getActiveTab(platformNode.id.toString()) !== tab.key"
+                              [class.hover:text-gray-700]="getActiveTab(platformNode.id.toString()) !== tab.key"
+                              [class.dark:hover:text-gray-300]="getActiveTab(platformNode.id.toString()) !== tab.key">
+                              <i [class]="tab.icon + ' text-[11px]'"></i>{{ tab.label }}
+                            </button>
                           }
                         </div>
+
+                        <!-- No tab selected yet: show profile details -->
+                        @if (getActiveTab(platformNode.id.toString()) === null) {
+                          <div class="px-6 py-4">
+                            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3 flex items-center gap-3">
+                              Profile Details <span class="flex-1 h-px bg-gray-100 dark:bg-[#3a3b3c]"></span>
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              @for (item of getProfileDetailEntries(platformData); track trackByKey($index, item)) {
+                                <div class="bg-gray-50 dark:bg-[#3a3b3c] border border-gray-100 dark:border-[#4a4b4c] rounded-xl p-3">
+                                  <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{{ formatKey(item.key) }}</p>
+                                  <p class="text-sm text-gray-900 dark:text-gray-100 font-semibold break-words leading-tight mb-0">{{ item.value }}</p>
+                                </div>
+                              }
+                              @if (getProfileDetailEntries(platformData).length === 0) {
+                                <div class="col-span-full py-10 flex flex-col items-center justify-center text-center opacity-40">
+                                  <i class="bi bi-file-earmark-person text-3xl mb-2"></i>
+                                  <p class="text-sm font-medium">Select a tab above to fetch data</p>
+                                </div>
+                              }
+                            </div>
+                          </div>
+                        }
+
+                        <!-- Tab: Posts -->
+                        @if (getActiveTab(platformNode.id.toString()) === 'posts') {
+                          <div class="p-3 animate-[social-mapper-fade-in-up_0.2s_ease-out_backwards]">
+                            @if (!getUniquePosts(platformData).length) {
+                              <div class="flex flex-col items-center justify-center py-12 text-center gap-4 bg-gray-50 dark:bg-[#1c1d1e] rounded-2xl border-2 border-dashed border-gray-100 dark:border-[#3a3b3c]">
+                                <div class="w-16 h-16 rounded-full bg-white dark:bg-[#242526] flex items-center justify-center text-gray-300 shadow-sm">
+                                  <i class="bi bi-file-post text-3xl"></i>
+                                </div>
+                                <div class="max-w-[200px]">
+                                  <p class="text-sm font-bold text-gray-500 dark:text-gray-400">No posts discovered</p>
+                                  <p class="text-xs text-gray-400 mt-1">Fetch posts to see timeline activity for this profile.</p>
+                                </div>
+                                <button (click)="fetchPostsInline.emit(platformData)" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#1877f2] text-white text-xs font-bold hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+                                  <i class="bi bi-lightning-charge-fill"></i> Fetch Posts
+                                </button>
+                              </div>
+                            } @else {
+                              <div class="flex flex-col gap-4">
+                                @for (post of getUniquePosts(platformData); track post.post_url || $index) {
+                                  <div class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-100 dark:border-[#3a3b3c] overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                                    
+                                    <!-- Post Content -->
+                                    <div class="p-4">
+                                      @if (getPostCaption(post)) {
+                                        <p class="text-[13px] text-gray-800 dark:text-gray-200 leading-relaxed line-clamp-4 group-hover:line-clamp-none transition-all mb-3">{{ getPostCaption(post) }}</p>
+                                      }
+
+                                      @if (hasPostMedia(post) && !isVideoPost(post)) {
+                                        <div class="rounded-xl overflow-hidden border border-gray-100 dark:border-[#3a3b3c] bg-gray-50 dark:bg-black/20">
+                                          <img [src]="post.media_url" [alt]="getPostCaption(post)" class="w-full object-cover max-h-80 hover:scale-105 transition-transform duration-700">
+                                        </div>
+                                      } @else if (isVideoPost(post)) {
+                                        <div class="rounded-xl overflow-hidden border border-gray-100 dark:border-[#3a3b3c] h-48 bg-black flex items-center justify-center relative">
+                                          <i class="bi bi-play-circle-fill text-6xl text-white/40 group-hover:text-white/60 transition-colors"></i>
+                                          <span class="absolute bottom-3 left-3 text-[10px] font-black text-white bg-black/60 px-2 py-0.5 rounded uppercase tracking-wider backdrop-blur-md">{{ getPostMediaTypeLabel(post) }}</span>
+                                        </div>
+                                      }
+                                    </div>
+
+                                    <!-- Post Meta & Actions -->
+                                    <div class="px-4 py-3 bg-gray-50/50 dark:bg-[#1c1d1e]/30 border-t border-gray-50 dark:border-[#3a3b3c]/50 flex items-center justify-between">
+                                      <div class="flex items-center gap-3">
+                                        <div class="flex items-center gap-1.5 text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                                          <i class="bi bi-heart-fill text-rose-500"></i> {{ formatPostMetric(post.likes) }}
+                                        </div>
+                                        <div class="flex items-center gap-1.5 text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                                          <i class="bi bi-chat-fill text-[#1877f2]"></i> {{ formatPostMetric(post.comments) }}
+                                        </div>
+                                      </div>
+
+                                      <div class="flex items-center gap-2">
+                                        @if (post.post_url) {
+                                          <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-[#242526] border border-gray-200 dark:border-[#3a3b3c] text-gray-400 hover:text-[#1877f2] hover:border-[#1877f2]/30 transition-all shadow-sm" title="View Source">
+                                            <i class="bi bi-box-arrow-up-right text-xs"></i>
+                                          </a>
+                                        }
+                                        <button class="h-8 px-3 flex items-center gap-1.5 rounded-lg bg-white dark:bg-[#242526] border border-gray-200 dark:border-[#3a3b3c] text-[11px] font-bold text-gray-500 hover:bg-gray-50 dark:hover:bg-[#3a3b3c] transition-all shadow-sm">
+                                          <i class="bi bi-share"></i> Share
+                                        </button>
+                                      </div>
+                                    </div>
+
+                                  </div>
+                                }
+                                
+                                <div class="flex justify-center py-4">
+                                  <button (click)="fetchPostsInline.emit(platformData)" class="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-[#1877f2] transition-colors">
+                                    <i class="bi bi-arrow-clockwise text-sm"></i> Sync Timeline
+                                  </button>
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        }
+
+                        <!-- Tab: Images -->
+                        @if (getActiveTab(platformNode.id.toString()) === 'images') {
+                          <div class="p-4 animate-[social-mapper-fade-in-up_0.2s_ease-out_backwards]">
+                            @if (!platformData.images?.length) {
+                              <div class="flex flex-col items-center justify-center py-10 text-center gap-3">
+                                <i class="bi bi-images text-2xl text-gray-300 dark:text-gray-600"></i>
+                                <p class="text-sm text-gray-400">No images fetched yet.</p>
+                                <button (click)="fetchImagesInline.emit(platformData)" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1877f2] text-white text-xs font-semibold hover:bg-blue-600 transition-colors">
+                                  <i class="bi bi-arrow-down-circle text-sm"></i> Fetch Images
+                                </button>
+                              </div>
+                            } @else {
+                              <div class="grid grid-cols-3 gap-2 mb-3">
+                                @for (image of platformData.images || []; track image.image_url || $index) {
+                                  <a [href]="image.image_url" target="_blank" rel="noopener noreferrer" class="group relative overflow-hidden rounded-xl border border-gray-200 dark:border-[#3a3b3c] hover:border-[#1877f2]/50 transition-colors">
+                                    <img [src]="image.thumbnail" [alt]="image.title" class="w-full h-24 object-cover transition-transform duration-300 group-hover:scale-105">
+                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-xl">
+                                      <i class="bi bi-box-arrow-up-right text-white text-sm"></i>
+                                    </div>
+                                  </a>
+                                }
+                              </div>
+                              <div class="flex justify-center pt-1 border-t border-gray-100 dark:border-[#3a3b3c]">
+                                <button (click)="fetchImagesInline.emit(platformData)" class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+                                  <i class="bi bi-arrow-clockwise text-sm"></i> Refresh
+                                </button>
+                              </div>
+                            }
+                          </div>
+                        }
+
+                        <!-- Tab: Followers -->
+                        @if (getActiveTab(platformNode.id.toString()) === 'followers') {
+                          <div class="animate-[social-mapper-fade-in-up_0.2s_ease-out_backwards]">
+                            @if (platformData.followers_list === undefined) {
+                              <div class="flex flex-col items-center justify-center py-10 text-center gap-3">
+                                <i class="bi bi-people text-2xl text-gray-300 dark:text-gray-600"></i>
+                                <p class="text-sm text-gray-400">Followers not fetched yet.</p>
+                                <button (click)="fetchFollowersInline.emit(platformData)" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1877f2] text-white text-xs font-semibold hover:bg-blue-600 transition-colors">
+                                  <i class="bi bi-arrow-down-circle text-sm"></i> Fetch Followers
+                                </button>
+                              </div>
+                            } @else if (!getFollowers(platformData).length) {
+                              <div class="flex flex-col items-center justify-center py-10 text-center gap-2">
+                                <i class="bi bi-people text-2xl text-gray-300 dark:text-gray-600"></i>
+                                <p class="text-sm text-gray-400">No followers found or data is private.</p>
+                              </div>
+                            } @else {
+                              <div class="px-4 py-3">
+                                <p class="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-3">{{ getFollowers(platformData).length }} followers</p>
+                                <div class="flex flex-wrap gap-2">
+                                  @for (follower of getFollowers(platformData); track trackByUsername($index, follower)) {
+                                    <button type="button" (click)="state.openFollowerScanPopup(platformNode.id.toString())" class="rounded-full border border-gray-200 dark:border-[#3a3b3c] bg-gray-50 dark:bg-[#3a3b3c] px-3 py-1.5 text-sm font-mono text-gray-700 dark:text-gray-300 hover:border-[#1877f2]/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-[#1877f2] transition-colors">
+                                      &#64;{{ follower }}
+                                    </button>
+                                  }
+                                </div>
+                              </div>
+                              <div class="flex justify-center py-3 border-t border-gray-100 dark:border-[#3a3b3c]">
+                                <button (click)="fetchFollowersInline.emit(platformData)" class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+                                  <i class="bi bi-arrow-clockwise text-sm"></i> Refresh
+                                </button>
+                              </div>
+                            }
+                          </div>
+                        }
+
+                        <!-- Tab: Following -->
+                        @if (getActiveTab(platformNode.id.toString()) === 'following') {
+                          <div class="animate-[social-mapper-fade-in-up_0.2s_ease-out_backwards]">
+                            @if (platformData.following_list === undefined) {
+                              <div class="flex flex-col items-center justify-center py-10 text-center gap-3">
+                                <i class="bi bi-person-plus text-2xl text-gray-300 dark:text-gray-600"></i>
+                                <p class="text-sm text-gray-400">Following not fetched yet.</p>
+                                <button (click)="fetchFollowingInline.emit(platformData)" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1877f2] text-white text-xs font-semibold hover:bg-blue-600 transition-colors">
+                                  <i class="bi bi-arrow-down-circle text-sm"></i> Fetch Following
+                                </button>
+                              </div>
+                            } @else if (!getFollowing(platformData).length) {
+                              <div class="flex flex-col items-center justify-center py-10 text-center gap-2">
+                                <i class="bi bi-person-plus text-2xl text-gray-300 dark:text-gray-600"></i>
+                                <p class="text-sm text-gray-400">Not following anyone or data is private.</p>
+                              </div>
+                            } @else {
+                              <div class="px-4 py-3">
+                                <p class="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-3">{{ getFollowing(platformData).length }} following</p>
+                                <div class="flex flex-wrap gap-2">
+                                  @for (user of getFollowing(platformData); track trackByUsername($index, user)) {
+                                    <button type="button" (click)="state.openFollowerScanPopup(platformNode.id.toString())" class="rounded-full border border-gray-200 dark:border-[#3a3b3c] bg-gray-50 dark:bg-[#3a3b3c] px-3 py-1.5 text-sm font-mono text-gray-700 dark:text-gray-300 hover:border-[#1877f2]/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-[#1877f2] transition-colors">
+                                      &#64;{{ user }}
+                                    </button>
+                                  }
+                                </div>
+                              </div>
+                              <div class="flex justify-center py-3 border-t border-gray-100 dark:border-[#3a3b3c]">
+                                <button (click)="fetchFollowingInline.emit(platformData)" class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+                                  <i class="bi bi-arrow-clockwise text-sm"></i> Refresh
+                                </button>
+                              </div>
+                            }
+                          </div>
+                        }
+
+                        <!-- Tab: Metadata -->
+                        @if (getActiveTab(platformNode.id.toString()) === 'metadata') {
+                          <div class="px-4 py-3 animate-[social-mapper-fade-in-up_0.2s_ease-out_backwards]">
+                            @if (getPlatformMetadataEntries(platformNode.id.toString()).length === 0) {
+                              <div class="flex flex-col items-center justify-center py-10 text-center gap-2">
+                                <i class="bi bi-database-x text-2xl text-gray-300 dark:text-gray-600"></i>
+                                <p class="text-sm text-gray-400">No metadata available.</p>
+                              </div>
+                            } @else {
+                              <div class="flex items-center justify-between mb-3">
+                                <span class="text-[10px] font-semibold uppercase tracking-wide text-gray-400">{{ getFilteredMetadataEntries(platformNode.id.toString()).length }} fields</span>
+                                <div class="relative">
+                                  <input type="text" [value]="metadataSearchTerms()[platformNode.id.toString()] || ''" (input)="updateMetadataSearch(platformNode.id.toString(), $event)" placeholder="Search…" class="h-7 w-40 rounded-md border border-gray-200 dark:border-[#4a4b4c] bg-gray-50 dark:bg-[#3a3b3c] pl-6 pr-2 text-[11px] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1877f2]/50">
+                                  <i class="bi bi-search absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400"></i>
+                                </div>
+                              </div>
+                              <table class="w-full text-xs border-collapse">
+                                <tbody>
+                                  @for (item of getFilteredMetadataEntries(platformNode.id.toString()); track trackByKey($index, item)) {
+                                    <tr class="group border-b border-gray-100 dark:border-[#3a3b3c] last:border-0 hover:bg-gray-50 dark:hover:bg-[#2d2e2f] transition-colors">
+                                      <td class="py-1.5 pr-3 w-[38%] align-middle whitespace-nowrap">
+                                        <div class="flex items-center gap-2">
+                                          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                                            [class.bg-[#1877f2]]="isUrl(item.value) && !isImageUrl(item.value)"
+                                            [class.bg-emerald-500]="isImageUrl(item.value)"
+                                            [class.bg-amber-500]="isNumeric(item.value) && !isImageUrl(item.value) && !isUrl(item.value)"
+                                            [class.bg-rose-400]="isBool(item.value)"
+                                            [class.bg-gray-300]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)"
+                                            [class.dark:bg-gray-500]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)">
+                                          </span>
+                                          <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400">{{ formatKey(item.key) }}</span>
+                                        </div>
+                                      </td>
+                                      <td class="py-1.5 align-middle font-mono text-[12px] text-gray-800 dark:text-gray-200 break-all leading-snug">
+                                        @if (isImageUrl(item.value)) {
+                                          <div class="flex items-center gap-2">
+                                            <img [src]="item.value" [alt]="item.key" class="h-7 w-7 rounded object-cover flex-shrink-0">
+                                            <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-[11px] text-[#1877f2] hover:underline">view</a>
+                                          </div>
+                                        } @else if (isUrl(item.value)) {
+                                          <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-[#1877f2] hover:underline">{{ item.value }}</a>
+                                        } @else if (isBool(item.value)) {
+                                          <span [class.text-emerald-500]="item.value === true || item.value === 'true'" [class.text-rose-400]="item.value === false || item.value === 'false'" class="inline-flex items-center gap-1">
+                                            <i [class.bi-check-circle-fill]="item.value === true || item.value === 'true'" [class.bi-x-circle-fill]="item.value === false || item.value === 'false'" class="bi text-[12px]"></i>
+                                            {{ item.value }}
+                                          </span>
+                                        } @else if (isNumeric(item.value)) {
+                                          <span class="text-amber-600 dark:text-amber-400">{{ formatNumericValue(item.value) }}</span>
+                                        } @else {
+                                          {{ item.value }}
+                                        }
+                                      </td>
+                                      <td class="py-1.5 pl-2 align-middle w-7 text-right">
+                                        <button (click)="copyToClipboard(item.value)" class="opacity-0 group-hover:opacity-100 w-6 h-6 inline-flex items-center justify-center rounded hover:bg-gray-200 dark:hover:bg-[#4a4b4c] text-gray-400 hover:text-[#1877f2] transition-all" title="Copy value">
+                                          <i class="bi bi-clipboard text-[10px]"></i>
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  }
+                                  @if (getFilteredMetadataEntries(platformNode.id.toString()).length === 0) {
+                                    <tr><td colspan="3" class="py-6 text-center text-[11px] text-gray-400 italic">No fields match your search.</td></tr>
+                                  }
+                                </tbody>
+                              </table>
+                            }
+                          </div>
+                        }
+
                       </div>
+                      <!-- END fetch tabs -->
+
                     </div>
+                    <!-- END profile overview view -->
+
                   }
                 </article>
 
@@ -488,14 +681,13 @@
             }
           }
 
-
+          <!-- Saved entities -->
           @if (displayEntitiesInFeed().length > 0) {
             <div class="flex items-center gap-3 py-1 text-xs font-semibold uppercase tracking-widest text-gray-400">
               <div class="flex-1 h-px bg-gray-200 dark:bg-[#3a3b3c]"></div>
               <span>Saved Entities</span>
               <div class="flex-1 h-px bg-gray-200 dark:bg-[#3a3b3c]"></div>
             </div>
-
             @for (entity of displayEntitiesInFeed(); track entity.id) {
               <article [id]="entity.id" class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] overflow-hidden animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
                 <div class="flex items-center gap-3 px-4 py-3.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#3a3b3c] transition-colors" (click)="toggleEntity(entity.id)">
@@ -557,9 +749,8 @@
 
         </div>
 
-
+        <!-- Right sidebar -->
         <aside class="hidden xl:flex w-[240px] flex-shrink-0 flex-col gap-3 sticky top-4 max-h-[calc(100vh-5rem)] overflow-y-auto pr-2">
-
           <div class="mt-0 bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/10 p-4 flex-shrink-0">
             <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Add Entity</p>
             <div class="mb-3">
@@ -574,8 +765,6 @@
               }
             </div>
           </div>
-
-
           <div class="bg-white dark:bg-[#242526] rounded-2xl border-2 border-[#1877f2]/10 p-4 flex-shrink-0">
             <p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">Saved Entities</p>
             @if (customEntities().length === 0) {
@@ -588,18 +777,10 @@
                       <div class="flex items-center gap-2 min-w-0">
                         <div class="flex-shrink-0">
                           @switch (entity.status) {
-                            @case ('in_progress') {
-                              <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-[#1877f2]"></div>
-                            }
-                            @case ('pending') {
-                              <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-[#1877f2]"></div>
-                            }
-                            @case ('added') {
-                              <i class="bi bi-check-circle-fill text-green-500 text-[10px]"></i>
-                            }
-                            @case ('failed') {
-                              <i class="bi bi-x-circle-fill text-red-400 text-[10px]"></i>
-                            }
+                            @case ('in_progress') { <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-[#1877f2]"></div> }
+                            @case ('pending') { <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-[#1877f2]"></div> }
+                            @case ('added') { <i class="bi bi-check-circle-fill text-green-500 text-[10px]"></i> }
+                            @case ('failed') { <i class="bi bi-x-circle-fill text-red-400 text-[10px]"></i> }
                           }
                         </div>
                         <button (click)="platformNodeClicked.emit(entity.id)" class="text-left min-w-0 hover:text-[#1877f2] transition-colors">
@@ -617,14 +798,12 @@
                         </button>
                       </div>
                     </div>
-
                     @if (showEntityProgress(entity)) {
                       <div class="flex items-center gap-2 mb-1">
                         <progress class="home-menu-progress-track flex-1" max="100" [value]="getAnimatedEntityProgress(entity)"></progress>
                         <span class="text-[9px] font-mono text-gray-400">{{ getAnimatedEntityProgress(entity) }}%</span>
                       </div>
                     }
-
                     <div class="flex items-center justify-between gap-2">
                       <div class="flex items-center gap-1 min-w-0">
                         <i [class]="socialEntityUiService.getIconForEntityType(entity.type) + ' text-[9px]'"></i>
