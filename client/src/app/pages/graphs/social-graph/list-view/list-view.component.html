@@ -50,12 +50,12 @@
                 <div class="flex flex-col gap-1">
                   @for (platformNode of getPlatformsForUserNode(userNode.id.toString()); track trackById($index, platformNode)) {
                     @if (getPlatformData(platformNode.id.toString()); as platformData) {
-                      <div (click)="sidebarPlatformClicked.emit(platformNode.id.toString())"
-                           [class.bg-blue-50]="state.highlightedNodeId() === platformNode.id.toString()"
-                           [class.dark:bg-blue-900/20]="state.highlightedNodeId() === platformNode.id.toString()"
-                           [class.ring-1]="state.highlightedNodeId() === platformNode.id.toString()"
-                           [class.ring-blue-200]="state.highlightedNodeId() === platformNode.id.toString()"
-                           [class.dark:ring-blue-800]="state.highlightedNodeId() === platformNode.id.toString()"
+                      <div (click)="handleSidebarPlatformClick(platformNode.id.toString())"
+                           [class.bg-blue-50]="state.highlightedNodeId() === platformNode.id.toString() || isProfileOverviewActive(platformNode.id.toString())"
+                           [class.dark:bg-blue-900/20]="state.highlightedNodeId() === platformNode.id.toString() || isProfileOverviewActive(platformNode.id.toString())"
+                           [class.ring-1]="state.highlightedNodeId() === platformNode.id.toString() || isProfileOverviewActive(platformNode.id.toString())"
+                           [class.ring-blue-200]="state.highlightedNodeId() === platformNode.id.toString() || isProfileOverviewActive(platformNode.id.toString())"
+                           [class.dark:ring-blue-800]="state.highlightedNodeId() === platformNode.id.toString() || isProfileOverviewActive(platformNode.id.toString())"
                            class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors">
                         <div class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-[#3a3b3c] flex items-center justify-center flex-shrink-0 overflow-hidden text-sm">
                           <app-social-icon [platformName]="platformNode.label"></app-social-icon>

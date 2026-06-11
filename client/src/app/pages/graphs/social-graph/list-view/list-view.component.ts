@@ -408,6 +408,16 @@ export class ListViewComponent implements OnDestroy {
     return this.profileOverviewIds().has(platformId);
   }
 
+  handleSidebarPlatformClick(platformId: string) {
+    if (this.profileOverviewIds().size > 0) {
+      // If we are already in profile overview mode, just switch the overview to the new platform
+      this.profileOverviewIds.set(new Set([platformId]));
+    } else {
+      // Normal feed mode: emit to scroll to it
+      this.sidebarPlatformClicked.emit(platformId);
+    }
+  }
+
   toggleEntity(entityId: string) {
     this.expandedEntityIds.update(current => {
       const next = new Set(current);
