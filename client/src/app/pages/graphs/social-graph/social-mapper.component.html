@@ -89,7 +89,12 @@
                   (sidebarPlatformClicked)="onSidebarPlatformClicked($event)"
                   (deleteCustomEntity)="deleteCustomEntity($event)"
                   (cancelEntityScan)="entityManager()?.cancelEntityScan($event)"
-                   (addEntityRequested)="entityManager()?.openAddEntityModal($event)">
+                  (addEntityRequested)="entityManager()?.openAddEntityModal($event)"
+                  (fetchPostsInline)="handleFetchPostsInline($event)"
+                  (fetchImagesInline)="handleFetchImagesInline($event)"
+                  (fetchFollowersInline)="handleFetchFollowersInline($event)"
+                  (fetchFollowingInline)="handleFetchFollowingInline($event)"
+                  (fetchMetadataInline)="handleFetchMetadataInline($event)">
                 </app-list-view>
               </div>
             </main>
