@@ -5,7 +5,7 @@ from interface import BASE_DIR
 from orion.constants.constant import allowed_key_titles
 from orion.helper_manager.helper_controller import helper_controller
 from orion.management.jobs.insight_job import insight_job
-from orion.management.jobs.alert_job import alert_job
+from orion.management.jobs.alert.alert_job import alert_job
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.log_manager.log_controller import log
 

@@ -22,7 +22,14 @@
           @if (!isCompactViewport()) {
             <app-dashboard-header data-testid="dashboard-header"></app-dashboard-header>
           }
-          <span [@dashboard-global-animation]="prepareRoute(routerOutlet)" [ngClass]="{ 'w-screen': authService.getIsMobileDemo(), 'relative z-[1300]': (isFilterOpen$ | async) }" class="ui-dashboard-grid-bg m-0 block flex-1 overflow-x-hidden" data-testid="dashboard-body">
+          <span [@dashboard-global-animation]="prepareRoute(routerOutlet)" [ngClass]="{ 'w-screen': authService.getIsMobileDemo(), 'relative z-[1300]': (isFilterOpen$ | async) }" class="ui-dashboard-grid-bg relative m-0 block flex-1 overflow-x-hidden" data-testid="dashboard-body">
+            @if (routeConfigLoading()) {
+              <div class="absolute inset-0 z-[2] overflow-hidden bg-[var(--color-blue-850)] pt-[24px]" data-testid="dashboard-route-loading">
+                <div class="mx-[30px] max-w-[910px] max-[1000px]:mx-[15px]">
+                  <app-loading-form></app-loading-form>
+                </div>
+              </div>
+            }
             <router-outlet #routerOutlet="outlet" data-testid="router-outlet"></router-outlet>
           </span>
         </div>
