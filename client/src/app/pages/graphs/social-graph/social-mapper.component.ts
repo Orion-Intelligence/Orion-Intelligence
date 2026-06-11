@@ -414,6 +414,26 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.fetchData(p, 'following', this.scanService.fetchFollowing(p.platform, p.username), this.cancelFollowingFetchSubjects);
   }
 
+  handleFetchPostsInline(p: PlatformResult) {
+    this.handleFetchSocialPosts(p);
+  }
+
+  handleFetchImagesInline(p: PlatformResult) {
+    this.handleFetchImagesForPlatform(p);
+  }
+
+  handleFetchFollowersInline(p: PlatformResult) {
+    this.handleFetchFollowers(p);
+  }
+
+  handleFetchFollowingInline(p: PlatformResult) {
+    this.handleFetchFollowing(p);
+  }
+
+  handleFetchMetadataInline(p: PlatformResult) {
+    this.fetchProfileDetails(p);
+  }
+
   private fetchData(platformResult: PlatformResult, stateKey: 'profile' | 'posts' | 'platformImages' | 'followers' | 'following', request$: any, cancelMap: Map<string, Subject<void>>) {
     this.platformFetchService.fetchData({
       platformResult,
@@ -477,7 +497,8 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     if (!nodeId.startsWith('user-')) {
       return;
     }
-    this.state.openSummaryPopup(nodeId.replace('user-', ''));
+    // Disabled per user request
+    // this.state.openSummaryPopup(nodeId.replace('user-', ''));
   }
 
   onPlatformNodeClicked(nodeId: string) {
