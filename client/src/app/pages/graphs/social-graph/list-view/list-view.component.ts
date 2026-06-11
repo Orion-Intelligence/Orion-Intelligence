@@ -396,14 +396,11 @@ export class ListViewComponent implements OnDestroy {
 
   toggleProfileOverview(platformId: string) {
     this.profileOverviewIds.update(current => {
-      const next = new Set(current);
-      if (next.has(platformId)) {
-        next.delete(platformId);
+      if (current.has(platformId)) {
+        return new Set<string>(); // Close it if it's already open
+      } else {
+        return new Set<string>([platformId]); // Open only this one
       }
-      else {
-        next.add(platformId);
-      }
-      return next;
     });
   }
 

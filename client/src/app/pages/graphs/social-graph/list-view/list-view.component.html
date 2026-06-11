@@ -86,8 +86,8 @@
           @if (activeUserNodes()[state.activeUserIndex()]; as userNode) {
             @for (platformNode of getPlatformsForUserNode(userNode.id.toString()); track trackById($index, platformNode)) {
               @if (getPlatformData(platformNode.id.toString()); as platformData) {
-
-                <article [id]="platformNode.id" [class.highlight-focused-card]="state.highlightedNodeId() === platformNode.id" class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] overflow-hidden animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
+                @if (profileOverviewIds().size === 0 || profileOverviewIds().has(platformNode.id.toString())) {
+                  <article [id]="platformNode.id" [class.highlight-focused-card]="state.highlightedNodeId() === platformNode.id" class="bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-[#3a3b3c] overflow-hidden animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
 
                   <!-- ═══════════════════════════════════════════════════════
                        DEFAULT CARD VIEW
@@ -778,6 +778,7 @@
 
                   }
                 </article>
+                }
 
               }
             }
