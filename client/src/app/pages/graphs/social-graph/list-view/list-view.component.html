@@ -241,15 +241,52 @@
                     <!-- Profile detail entries -->
                     @if (getProfileDetailEntries(platformData).length > 0) {
                       <div class="px-4 py-3">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Profile Details</p>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
-                          @for (item of getProfileDetailEntries(platformData); track trackByKey($index, item)) {
-                            <div class="bg-gray-50 dark:bg-[#3a3b3c] rounded-lg px-3 py-2 border border-gray-200 dark:border-[#3a3b3c]">
-                              <p class="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-1">{{ formatKey(item.key) }}</p>
-                              <p class="text-sm text-gray-800 dark:text-gray-200 break-words mb-0">{{ item.value }}</p>
-                            </div>
-                          }
-                        </div>
+                        <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-2">Profile Details</p>
+                        <table class="w-full text-xs border-collapse">
+                          <tbody>
+                            @for (item of getProfileDetailEntries(platformData); track trackByKey($index, item)) {
+                              <tr class="group border-b border-gray-100 dark:border-[#3a3b3c] last:border-0 hover:bg-gray-50 dark:hover:bg-[#2d2e2f] transition-colors">
+                                <td class="py-1.5 pr-3 w-[38%] align-middle whitespace-nowrap">
+                                  <div class="flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                                      [class.bg-[#1877f2]]="isUrl(item.value) && !isImageUrl(item.value)"
+                                      [class.bg-emerald-500]="isImageUrl(item.value)"
+                                      [class.bg-amber-500]="isNumeric(item.value) && !isImageUrl(item.value) && !isUrl(item.value)"
+                                      [class.bg-rose-400]="isBool(item.value)"
+                                      [class.bg-gray-300]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)"
+                                      [class.dark:bg-gray-500]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)">
+                                    </span>
+                                    <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400">{{ formatKey(item.key) }}</span>
+                                  </div>
+                                </td>
+                                <td class="py-1.5 align-middle font-mono text-[12px] text-gray-800 dark:text-gray-200 break-words leading-snug">
+                                  @if (isImageUrl(item.value)) {
+                                    <div class="flex items-center gap-2">
+                                      <img [src]="item.value" [alt]="item.key" class="h-7 w-7 rounded object-cover flex-shrink-0">
+                                      <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-[11px] text-[#1877f2] hover:underline">view</a>
+                                    </div>
+                                  } @else if (isUrl(item.value)) {
+                                    <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-[#1877f2] hover:underline break-all">{{ item.value }}</a>
+                                  } @else if (isBool(item.value)) {
+                                    <span [class.text-emerald-500]="item.value === true || item.value === 'true'" [class.text-rose-400]="item.value === false || item.value === 'false'" class="inline-flex items-center gap-1">
+                                      <i [class.bi-check-circle-fill]="item.value === true || item.value === 'true'" [class.bi-x-circle-fill]="item.value === false || item.value === 'false'" class="bi text-[12px]"></i>
+                                      {{ item.value }}
+                                    </span>
+                                  } @else if (isNumeric(item.value)) {
+                                    <span class="text-amber-600 dark:text-amber-400">{{ formatNumericValue(item.value) }}</span>
+                                  } @else {
+                                    {{ item.value }}
+                                  }
+                                </td>
+                                <td class="py-1.5 pl-2 align-middle w-7 text-right">
+                                  <button (click)="copyToClipboard(item.value)" class="opacity-0 group-hover:opacity-100 w-6 h-6 inline-flex items-center justify-center rounded hover:bg-gray-200 dark:hover:bg-[#4a4b4c] text-gray-400 hover:text-[#1877f2] transition-all" title="Copy value">
+                                    <i class="bi bi-clipboard text-[10px]"></i>
+                                  </button>
+                                </td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
                       </div>
                     }
 
