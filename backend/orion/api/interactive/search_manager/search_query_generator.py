@@ -426,6 +426,10 @@ class search_query_generator:
         m_page_number = getattr(p_query_model, "page", 1)
         m_content_type = p_query_model.content
         m_platform = (p_query_model.platform or "").strip().lower()
+        m_family = (p_query_model.family or "").strip()
+        m_country = (p_query_model.m_country or "").strip()
+        m_selected_content_type = (p_query_model.content_type or "").strip()
+        m_reporter = (p_query_model.m_reporter or "").strip()
         m_safe_search = p_query_model.safe
         result_size = p_query_model.platform_result_count
         must_clauses = []
@@ -489,6 +493,22 @@ class search_query_generator:
 
         if m_platform and m_platform not in ("", "all"):
             must_clauses.append({"term": {"m_platform": m_platform}})
+
+        if m_family and m_family.lower() not in ("", "all") and index_set == {ELASTIC_INDEX.S_APT_INDEX}:
+            must_clauses.append({"bool": {"should": [
+                {"term": {"m_family": m_family}},
+                {"term": {"m_name": m_family}},
+                {"term": {"m_title.keyword": m_family}}
+            ], "minimum_should_match": 1}})
+
+        if m_country and m_country.lower() not in ("", "all") and index_set in ({ELASTIC_INDEX.S_APT_INDEX}, {ELASTIC_INDEX.S_MALWARE_INDEX}):
+            must_clauses.append({"term": {"m_country": m_country}})
+
+        if m_selected_content_type and m_selected_content_type.lower() not in ("", "all") and index_set == {ELASTIC_INDEX.S_MALWARE_INDEX}:
+            must_clauses.append({"term": {"m_content_type": m_selected_content_type}})
+
+        if m_reporter and m_reporter.lower() not in ("", "all") and index_set == {ELASTIC_INDEX.S_MALWARE_INDEX}:
+            must_clauses.append({"term": {"m_reporter": m_reporter}})
 
         if m_safe_search and m_safe_search == True:
             must_not_clause.append({"term": {"m_content_type": "adult"}})

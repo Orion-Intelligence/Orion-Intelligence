@@ -213,6 +213,9 @@ export class DashboardService {
       "safe",
       "content",
       "mitre",
+      "family",
+      "m_country",
+      "m_reporter",
       "platform_result_count"
     ];
     const params = new URLSearchParams(window.location.search);

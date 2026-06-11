@@ -632,7 +632,7 @@ export const routes: Routes = [
             data: { type: 'Threat Intelligence', animation: 'DataBreach' }
           },
           {
-            path: 'malware-bazaar',
+            path: 'malware',
             loadComponent: loadDashboardResultContainer,
             data: { type: 'Threat Intelligence', animation: 'DataBreach' }
           },

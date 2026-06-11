@@ -232,7 +232,7 @@ export class HelperService {
       case 'apt_model':
         return { path: ['/dashboard', 'threat-intel', 'apt', docId], queryParams: { ci: 'apt' } };
       case 'malware_model':
-        return { path: ['/dashboard', 'threat-intel', 'malware-bazaar', docId], queryParams: { ci: 'malware' } };
+        return { path: ['/dashboard', 'threat-intel', 'malware', docId], queryParams: { ci: 'malware' } };
       case 'defacement_model':
         return { path: ['/dashboard', 'defacement', 'all', docId], queryParams: { ci: 'defacement' } };
       case 'social_model':

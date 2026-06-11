@@ -104,7 +104,7 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   getReportLink(item: GeneralResultItem | LeakResultItem): string[] {
     let url = this.currentUrl;
     if (url.includes('/threat-intel/all')) {
-      url = url.replace('/all', item.rank_index === 'malware_model' ? '/malware-bazaar' : '/apt');
+      url = url.replace('/all', item.rank_index === 'malware_model' ? '/malware' : '/apt');
     }
     return [url, item.m_hash];
   }

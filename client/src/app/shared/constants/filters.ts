@@ -179,6 +179,51 @@ const PLATFORM_RESULT_COUNT_FILTER = {
   max: 50,
   placeholder: "Enter platforms result count"
 };
+const APT_FAMILY_FILTER = {
+  title: "Family",
+  options: [
+    { key: "all", label: "All" }
+  ],
+  type: "dropdown" as const,
+  tooltip: "APT Family",
+  selected: "all"
+};
+const MALPEDIA_COUNTRY_FILTER = {
+  title: "Country",
+  options: [
+    { key: "all", label: "All" }
+  ],
+  type: "dropdown" as const,
+  tooltip: "Country",
+  selected: "all"
+};
+const MALWARE_BAZAAR_COUNTRY_FILTER = {
+  title: "Country",
+  options: [
+    { key: "all", label: "All" }
+  ],
+  type: "dropdown" as const,
+  tooltip: "Country",
+  selected: "all"
+};
+const MALWARE_CONTENT_TYPE_FILTER = {
+  title: "Content Type",
+  options: [
+    { key: "all", label: "All" }
+  ],
+  type: "dropdown" as const,
+  tooltip: "Content Type",
+  selected: "all"
+};
+const MALWARE_REPORTER_FILTER = {
+  title: "Reporter",
+  options: [
+    { key: "all", label: "All" }
+  ],
+  type: "dropdown" as const,
+  tooltip: "Reporter",
+  selected: "all"
+};
 export const dump_filters: FilterModel = {
   filters: {
     source: SOURCE_FILTER,
@@ -221,6 +266,26 @@ export const general_filters: FilterModel = {
     content: createThreatContent()
   }
 };
+export const threat_intel_filters: FilterModel = {
+  filters: {
+    daterange: DATERANGE_CREATION
+  }
+};
+export const threat_intel_apt_filters: FilterModel = {
+  filters: {
+    daterange: DATERANGE_CREATION,
+    family: APT_FAMILY_FILTER,
+    m_country: MALPEDIA_COUNTRY_FILTER
+  }
+};
+export const threat_intel_malware_filters: FilterModel = {
+  filters: {
+    daterange: DATERANGE_CREATION,
+    m_country: MALWARE_BAZAAR_COUNTRY_FILTER,
+    content_type: MALWARE_CONTENT_TYPE_FILTER,
+    m_reporter: MALWARE_REPORTER_FILTER
+  }
+};
 export const consolidated_filters: FilterModel = {
   filters: {
     network: COMMON_NETWORK,
@@ -253,5 +318,8 @@ export const filter_mapping: Record<string, string> = {
   safe: "Safe Search",
   content: "Content Type",
   mitre: "Mitre TTP",
+  family: "Family",
+  m_country: "Country",
+  m_reporter: "Reporter",
   platform_result_count: "Platform Results Count"
 };

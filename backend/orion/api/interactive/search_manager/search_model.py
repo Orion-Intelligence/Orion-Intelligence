@@ -212,6 +212,69 @@ class search_model:
 
         return search_model._build_ranked_response(response, query, 15, approximate_page_count=True)
 
+    @staticmethod
+    async def get_apt_filter_options():
+        data_filter = {
+            "size": 0,
+            "aggs": {
+                "families": {"terms": {"field": "m_family", "size": 10000, "order": {"_key": "asc"}}},
+                "countries": {"terms": {"field": "m_country", "size": 10000, "order": {"_key": "asc"}}},
+                "family_docs": {
+                    "filter": {"term": {"m_entity_type": "family"}},
+                    "aggs": {
+                        "names": {"terms": {"field": "m_name", "size": 10000, "order": {"_key": "asc"}}},
+                        "titles": {"terms": {"field": "m_title.keyword", "size": 10000, "order": {"_key": "asc"}}}
+                    }
+                }
+            }
+        }
+        success, documents = await elastic_controller.get_instance().search_query(ELASTIC_INDEX.S_APT_INDEX, data_filter)
+        if not success:
+            return {"families": [], "countries": []}
+        body = documents.body if hasattr(documents, "body") else documents
+        aggregations = body.get("aggregations", {}) if isinstance(body, dict) else {}
+        family_values = set()
+        for bucket in aggregations.get("families", {}).get("buckets", []):
+            value = str(bucket.get("key") or "").strip()
+            if value:
+                family_values.add(value)
+        country_values = set()
+        for bucket in aggregations.get("countries", {}).get("buckets", []):
+            value = str(bucket.get("key") or "").strip()
+            if value:
+                country_values.add(value)
+        family_docs = aggregations.get("family_docs", {})
+        for agg_key in ("names", "titles"):
+            for bucket in family_docs.get(agg_key, {}).get("buckets", []):
+                value = str(bucket.get("key") or "").strip()
+                if value:
+                    family_values.add(value)
+        return {"families": sorted(family_values, key=str.casefold), "countries": sorted(country_values, key=str.casefold)}
+
+    @staticmethod
+    async def get_malware_filter_options():
+        data_filter = {
+            "size": 0,
+            "aggs": {
+                "countries": {"terms": {"field": "m_country", "size": 10000, "order": {"_key": "asc"}}},
+                "content_types": {"terms": {"field": "m_content_type", "size": 10000, "order": {"_key": "asc"}}},
+                "reporters": {"terms": {"field": "m_reporter", "size": 10000, "order": {"_key": "asc"}}}
+            }
+        }
+        success, documents = await elastic_controller.get_instance().search_query(ELASTIC_INDEX.S_MALWARE_INDEX, data_filter)
+        if not success:
+            return {"countries": [], "content_types": [], "reporters": []}
+        body = documents.body if hasattr(documents, "body") else documents
+        aggregations = body.get("aggregations", {}) if isinstance(body, dict) else {}
+        values = {}
+        for key in ("countries", "content_types", "reporters"):
+            bucket_values = set()
+            for bucket in aggregations.get(key, {}).get("buckets", []):
+                value = str(bucket.get("key") or "").strip()
+                if value:
+                    bucket_values.add(value)
+            values[key] = sorted(bucket_values, key=str.casefold)
+        return values
 
     async def search_stealerlogs_persona_breach(self, param: search_credential_param_model):
         document, data_filter = search_query_generator().on_search_persona(param)
