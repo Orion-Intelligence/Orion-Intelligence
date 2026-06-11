@@ -23,7 +23,6 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private ipMarkerRenderer: ThreatLensIpMarkerRenderer | null = null;
   private webMercatorUtils: any | null = null;
   private arcGraphicsLayer: any | null = null;
-  private arcSurfaceGraphicsLayer: any | null = null;
   private animatedArcGraphicsLayer: any | null = null;
   private ipScanGraphicsLayer: any | null = null;
   private mapClickHandle: { remove: () => void } | null = null;
@@ -213,14 +212,12 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         title: 'Threat Lens Animated Arcs',
         elevationInfo: { mode: 'absolute-height' },
       });
-      this.arcSurfaceGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens Country Arc Connectors' });
       this.ipScanGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens IP Scan Markers' });
 
       const map = new EsriMap({
         basemap: this.threatBasemapId,
         layers: [
           countryLayer,
-          this.arcSurfaceGraphicsLayer,
           this.arcGraphicsLayer,
           this.animatedArcGraphicsLayer,
           this.ipScanGraphicsLayer,
@@ -271,7 +268,6 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       this.arcRenderer = new ThreatLensArcRenderer(this.ngZone,
         this.countryRenderer,
         this.arcGraphicsLayer,
-        this.arcSurfaceGraphicsLayer,
         this.animatedArcGraphicsLayer,
         geometryEngine,
         webMercatorUtils,
@@ -330,7 +326,6 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
           this.ipScanGraphicsLayer,
           this.animatedArcGraphicsLayer,
           this.arcGraphicsLayer,
-          this.arcSurfaceGraphicsLayer,
           this.countryRenderer.layer,
         ].filter(Boolean),
       });
@@ -397,7 +392,6 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
           this.ipScanGraphicsLayer,
           this.animatedArcGraphicsLayer,
           this.arcGraphicsLayer,
-          this.arcSurfaceGraphicsLayer,
           this.countryRenderer.layer,
         ].filter(Boolean),
       }).finally(() => {

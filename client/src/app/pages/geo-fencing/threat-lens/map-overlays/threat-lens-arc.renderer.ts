@@ -1,5 +1,5 @@
 import { NgZone } from '@angular/core';
-import { AnimatedArcDescriptor, ThreatLensCategoryMapData, ThreatLensCategoryModelKey } from '../../models/geo-fencing.models';
+import { AnimatedArcDescriptor, ArcDrawState, ThreatLensCategoryMapData, ThreatLensCategoryModelKey } from '../../models/geo-fencing.models';
 import { ThreatLensMapUtils } from '../map-utils/threat-lens-map.utils';
 import { ArcCategoryBatch, ThreatLensArcBatchStatus, ThreatLensArcRenderResult } from '../models/threat-lens-map.types';
 import { ThreatLensCountryLayerRenderer } from './threat-lens-country-layer.renderer';
@@ -7,9 +7,12 @@ import { ThreatLensCountryLayerRenderer } from './threat-lens-country-layer.rend
 export class ThreatLensArcRenderer {
   private animatedArcs: AnimatedArcDescriptor[] = [];
   private arcBatches: ArcCategoryBatch[] = [];
+  private arcDrawStates: ArcDrawState[] = [];
   private animationFrame: number | null = null;
   private lastAnimationTick = 0;
   private batchAnimationStartTime = 0;
+  private visibleBatchDrawStartTime = 0;
+  private animationPauseStartTime = 0;
   private visibleBatchIndex = -1;
   private animationPaused = false;
   private activeCategoryKey: ThreatLensCategoryModelKey | null = null;
@@ -21,26 +24,31 @@ export class ThreatLensArcRenderer {
   private readonly minArcWeight = 1;
   private arcBatchSize = 10;
   private readonly arcBatchDuration = 10000;
+  private readonly arcDrawDuration = 2500;
+  private readonly arcDrawStaggerMs = 0;
+  private readonly maxArcDrawStaggerMs = 400;
   private readonly movingDotBaseSize = 5;
   private readonly endpointBaseSize = 18;
   private readonly endpointHoverSize = 30;
   private readonly endpointHoverColor = [250, 0, 0];
 
-  constructor( private ngZone: NgZone, private countryRenderer: ThreatLensCountryLayerRenderer, private arcGraphicsLayer: any, private arcSurfaceGraphicsLayer: any, private animatedArcGraphicsLayer: any, private geometryEngine: any, private webMercatorUtils: any, private toCountryKey: (value: string) => string, private onVisibleArcCountChange: (count: number) => void, private onBatchStatusChange: (status: ThreatLensArcBatchStatus | null) => void, ) {}
+  constructor( private ngZone: NgZone, private countryRenderer: ThreatLensCountryLayerRenderer, private arcGraphicsLayer: any, private animatedArcGraphicsLayer: any, private geometryEngine: any, private webMercatorUtils: any, private toCountryKey: (value: string) => string, private onVisibleArcCountChange: (count: number) => void, private onBatchStatusChange: (status: ThreatLensArcBatchStatus | null) => void, ) {}
 
   render(categoryData: ThreatLensCategoryMapData[], activeCountryFilterKey: string): ThreatLensArcRenderResult {
-    if (!this.arcGraphicsLayer || !this.arcSurfaceGraphicsLayer || !this.animatedArcGraphicsLayer) {
+    if (!this.arcGraphicsLayer || !this.animatedArcGraphicsLayer) {
       return { totalArcCount: 0, arcCountByCategory: new Map() };
     }
 
     this.stop();
     this.arcGraphicsLayer.removeAll();
-    this.arcSurfaceGraphicsLayer.removeAll();
     this.animatedArcGraphicsLayer.removeAll();
     this.animatedArcs = [];
     this.arcBatches = [];
+    this.arcDrawStates = [];
     this.visibleBatchIndex = -1;
     this.batchAnimationStartTime = 0;
+    this.visibleBatchDrawStartTime = 0;
+    this.animationPauseStartTime = 0;
 
     const arcCountByCategory = new Map();
     let totalArcCount = 0;
@@ -67,10 +75,9 @@ export class ThreatLensArcRenderer {
           continue;
         }
 
-        const arcPoints = ThreatLensMapUtils.buildArcPathPoints(start, end, pair.weight);
-        const arcPaths = [arcPoints];
+        const arcPoints = ThreatLensMapUtils.buildSurfacePathPoints(start, end);
         const surfacePaths = ThreatLensMapUtils.buildSurfacePath(start, end);
-        if (!arcPaths.length || !surfacePaths.length || arcPoints.length < 2) {
+        if (!surfacePaths.length || arcPoints.length < 2) {
           continue;
         }
 
@@ -80,7 +87,6 @@ export class ThreatLensArcRenderer {
           color: category.color,
           weight: pair.weight,
           arcPoints,
-          arcPaths,
           surfacePaths,
           countryAKey: pair.countryAKey,
           countryBKey: pair.countryBKey,
@@ -139,7 +145,10 @@ export class ThreatLensArcRenderer {
     this.animatedArcGraphicsLayer?.removeAll();
     this.lastAnimationTick = 0;
     this.batchAnimationStartTime = 0;
+    this.visibleBatchDrawStartTime = 0;
+    this.animationPauseStartTime = 0;
     this.visibleBatchIndex = -1;
+    this.arcDrawStates = [];
     this.hoveredEndpointGraphic = null;
     this.onBatchStatusChange(null);
   }
@@ -147,10 +156,10 @@ export class ThreatLensArcRenderer {
   destroy(): void {
     this.stop();
     this.arcGraphicsLayer?.removeAll();
-    this.arcSurfaceGraphicsLayer?.removeAll();
     this.animatedArcGraphicsLayer?.removeAll();
     this.animatedArcs = [];
     this.arcBatches = [];
+    this.arcDrawStates = [];
     this.movingDotGraphics = [];
     this.hoveredEndpointGraphic = null;
   }
@@ -207,8 +216,24 @@ export class ThreatLensArcRenderer {
         }
 
         if (this.animationPaused) {
+          if (!this.animationPauseStartTime) {
+            this.animationPauseStartTime = timestamp;
+          }
+
           this.animationFrame = requestAnimationFrame(animate);
           return;
+        }
+
+        if (this.animationPauseStartTime) {
+          const pausedDuration = timestamp - this.animationPauseStartTime;
+          if (this.batchAnimationStartTime) {
+            this.batchAnimationStartTime += pausedDuration;
+          }
+          if (this.visibleBatchDrawStartTime) {
+            this.visibleBatchDrawStartTime += pausedDuration;
+          }
+          this.animationPauseStartTime = 0;
+          this.lastAnimationTick = timestamp;
         }
 
         if (this.lastAnimationTick && (timestamp - this.lastAnimationTick) < 40) {
@@ -220,13 +245,15 @@ export class ThreatLensArcRenderer {
         const batch = this.getCurrentBatch(timestamp);
 
         if (batch.index !== this.visibleBatchIndex) {
-          this.renderBatch(batch.index, batch.batch);
+          this.renderBatch(batch.index, batch.batch, timestamp);
         }
+
+        this.updateArcDrawGraphics(timestamp);
 
         let index = 0;
         for (const arc of batch.batch?.items ?? []) {
           const progress = ((timestamp + (arc.animationOffset * arc.animationDuration)) % arc.animationDuration) / arc.animationDuration;
-          const point = ThreatLensMapUtils.getArcPointAtProgress(arc.arcPoints, progress);
+          const point = ThreatLensMapUtils.getSurfacePointAtProgress(arc.arcPoints, progress);
           const graphic = this.movingDotGraphics[index];
 
           if (point && graphic) {
@@ -263,20 +290,22 @@ export class ThreatLensArcRenderer {
     };
   }
 
-  private renderBatch(index: number, batchOverride?: ArcCategoryBatch | null): void {
-    if (!this.arcGraphicsLayer || !this.arcSurfaceGraphicsLayer) {
+  private renderBatch(index: number, batchOverride?: ArcCategoryBatch | null, renderedAt = 0): void {
+    if (!this.arcGraphicsLayer) {
       return;
     }
 
     this.startMarkerGraphics = [];
     this.endMarkerGraphics = [];
+    this.arcDrawStates = [];
+    this.visibleBatchDrawStartTime = renderedAt;
     this.hoveredEndpointGraphic = null;
     const batches = this.getVisibleBatchSequence();
     const batch = batchOverride ?? (index >= 0 ? batches[index] ?? null : null);
     const items = batch?.items ?? [];
     this.visibleBatchIndex = index;
     this.arcGraphicsLayer.removeAll();
-    this.arcSurfaceGraphicsLayer.removeAll();
+    this.animatedArcGraphicsLayer.removeAll();
 
     if (!items.length) {
       this.ngZone.run(() => this.onVisibleArcCountChange(0));
@@ -284,8 +313,17 @@ export class ThreatLensArcRenderer {
       return;
     }
 
-    this.arcGraphicsLayer.addMany(items.map((arc) => this.buildArcGraphic(arc)));
-    this.arcSurfaceGraphicsLayer.addMany(items.map((arc) => this.buildSurfaceGraphic(arc)));
+    this.arcGraphicsLayer.addMany(items.map((arc) => this.buildArcGraphic(arc, 0)));
+    const arcLayerGraphics = this.arcGraphicsLayer.graphics?.toArray?.() ?? [];
+    this.arcDrawStates = arcLayerGraphics
+      .filter((graphic: any) => graphic?.attributes?.role === 'arc')
+      .reduce((states: ArcDrawState[], graphic: any, drawIndex: number) => {
+        const arc = items[drawIndex];
+        if (arc) {
+          states.push({ arc, graphic, completed: false });
+        }
+        return states;
+      }, []);
     this.ngZone.run(() => this.onVisibleArcCountChange(items.length));
     this.emitBatchStatus(batch);
     this.movingDotGraphics = [];
@@ -296,7 +334,6 @@ export class ThreatLensArcRenderer {
       this.movingDotGraphics.push(this.buildMovingDotGraphic(arc, arc.arcPoints[0]));
     }
 
-    this.animatedArcGraphicsLayer.removeAll();
     this.animatedArcGraphicsLayer.addMany([
       ...this.startMarkerGraphics,
       ...this.endMarkerGraphics,
@@ -353,6 +390,8 @@ export class ThreatLensArcRenderer {
 
   private resetBatchRotation(): void {
     this.batchAnimationStartTime = 0;
+    this.visibleBatchDrawStartTime = 0;
+    this.animationPauseStartTime = 0;
     this.visibleBatchIndex = -1;
     this.lastAnimationTick = 0;
   }
@@ -375,11 +414,48 @@ export class ThreatLensArcRenderer {
     this.ngZone.run(() => this.onBatchStatusChange(status));
   }
 
-  private buildArcGraphic(arc: AnimatedArcDescriptor): any {
+  private updateArcDrawGraphics(timestamp: number): void {
+    if (!this.arcDrawStates.length) {
+      return;
+    }
+
+    if (!this.visibleBatchDrawStartTime) {
+      this.visibleBatchDrawStartTime = timestamp;
+    }
+
+    for (let index = 0; index < this.arcDrawStates.length; index += 1) {
+      const state = this.arcDrawStates[index];
+      if (state.completed) {
+        continue;
+      }
+
+      const stagger = Math.min(this.maxArcDrawStaggerMs, index * this.arcDrawStaggerMs);
+      const elapsed = timestamp - this.visibleBatchDrawStartTime - stagger;
+      const linearProgress = Math.max(0, Math.min(1, elapsed / this.arcDrawDuration));
+      const progress = this.easeOutCubic(linearProgress);
+
+      state.graphic.geometry = {
+        type: 'polyline',
+        paths: this.getArcDrawPaths(state.arc, progress),
+        spatialReference: { wkid: 4326 },
+      };
+
+      if (linearProgress >= 1) {
+        state.graphic.geometry = {
+          type: 'polyline',
+          paths: state.arc.surfacePaths,
+          spatialReference: { wkid: 4326 },
+        };
+        state.completed = true;
+      }
+    }
+  }
+
+  private buildArcGraphic(arc: AnimatedArcDescriptor, drawProgress = 1): any {
     return {
       geometry: {
         type: 'polyline',
-        paths: arc.surfacePaths,
+        paths: this.getArcDrawPaths(arc, drawProgress),
         spatialReference: { wkid: 4326 },
       },
       attributes: this.buildArcAttributes(arc, 'arc'),
@@ -391,6 +467,19 @@ export class ThreatLensArcRenderer {
         join: 'round',
       },
     };
+  }
+
+  private getArcDrawPaths(arc: AnimatedArcDescriptor, progress: number): [number, number][][] {
+    if (progress >= 1) {
+      return arc.surfacePaths;
+    }
+
+    return ThreatLensMapUtils.extractSurfaceSegment(arc.arcPoints, 0, Math.max(0.001, progress));
+  }
+
+  private easeOutCubic(value: number): number {
+    const progress = Math.max(0, Math.min(1, value));
+    return 1 - Math.pow(1 - progress, 3);
   }
 
   private buildSurfaceGraphic(arc: AnimatedArcDescriptor): any {
@@ -409,7 +498,7 @@ export class ThreatLensArcRenderer {
     };
   }
 
-  private buildEndpointGraphic(arc: AnimatedArcDescriptor, point: [number, number, number], role: string, size: number, opacity: number): any {
+  private buildEndpointGraphic(arc: AnimatedArcDescriptor, point: [number, number], role: string, size: number, opacity: number): any {
     return {
       geometry: {
         type: 'point',
@@ -436,7 +525,7 @@ export class ThreatLensArcRenderer {
     };
   }
 
-  private buildMovingDotGraphic(arc: AnimatedArcDescriptor, point: [number, number, number]): any {
+  private buildMovingDotGraphic(arc: AnimatedArcDescriptor, point: [number, number]): any {
     const movingDotSize = Math.min(16, this.movingDotBaseSize + (arc.weight * 0.32));
 
     return {

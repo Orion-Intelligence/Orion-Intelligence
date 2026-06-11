@@ -180,8 +180,7 @@ export interface AnimatedArcDescriptor {
   categoryLabel: string;
   color: [number, number, number];
   weight: number;
-  arcPoints: [number, number, number][];
-  arcPaths: [number, number, number][][];
+  arcPoints: [number, number][];
   surfacePaths: [number, number][][];
   countryAKey: string;
   countryBKey: string;
@@ -201,4 +200,10 @@ export type ThreatLensDisplayFeedItem = ThreatLensFeedItem & {
 export interface ThreatLensFeedRangeOption {
   key: ThreatLensFeedRange;
   label: string;
+}
+
+export interface ArcDrawState {
+  arc: AnimatedArcDescriptor;
+  graphic: any;
+  completed: boolean;
 }

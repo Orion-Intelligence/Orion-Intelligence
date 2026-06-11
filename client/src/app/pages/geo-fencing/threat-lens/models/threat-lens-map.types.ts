@@ -8,7 +8,6 @@ export type ArcPair = {
   weight: number;
 };
 
-export type ArcPoint3D = [number, number, number];
 export type ArcPoint2D = [number, number];
 
 export interface ThreatLensCoordinates {
