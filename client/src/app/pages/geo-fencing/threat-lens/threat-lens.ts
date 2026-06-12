@@ -62,7 +62,7 @@ export class ThreatLensComponent implements OnDestroy {
   private detailOverlayOpenNotified = false;
 
   protected readonly filterModel: FilterModel = threat_lens_filters;
-  protected readonly arcBatchSizeOptions = [5, 10, 20, 50, 60];
+  protected readonly arcBatchSizeOptions = [5, 10, 20, 50, 100];
 
   isFilterOpen$: Observable<boolean>;
   searchTerm = '';
