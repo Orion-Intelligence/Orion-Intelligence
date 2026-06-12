@@ -33,11 +33,12 @@ import { LoadingFormComponent } from '../../shared/partials/loading-form/loading
   animations: [dashboardGlobalAnimation]
 })
 export class DashboardComponent implements AfterViewInit, OnInit {
+  protected readonly routeConfigLoading = signal(false);
+
   isMenuOpen = true;
   demoTourMounted = false;
   dashboardAnimationsReady = false;
   isFilterOpen$: Observable<boolean>;
-  protected readonly routeConfigLoading = signal(false);
 
   constructor(protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router, public authService: AuthService, protected appService: AppService, sidebarService: SidebarService) {
     this.isFilterOpen$ = sidebarService.sidebarState$;

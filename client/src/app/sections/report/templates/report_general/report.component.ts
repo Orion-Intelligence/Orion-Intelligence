@@ -22,6 +22,32 @@ import { formatKeyLabel as formatKeyLabelUtil, getDisplayTitle as getDisplayTitl
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
+const METADATA_EXCLUDED_KEYS = new Set([
+  '_id',
+  'id',
+  'rank_index',
+  'm_embedding',
+  'm_title',
+  'm_content',
+  'm_important_content',
+  'm_url',
+  'm_source_url',
+  'm_base_url',
+  'm_hash',
+  'm_creation_date',
+  'm_update_date',
+  'm_updation_date',
+  'm_scrap_file',
+  'm_scrape_file',
+  'creation_date',
+  'update_date',
+  'updation_date',
+  'created_at',
+  'updated_at',
+  'scrap_file',
+  'scrape_file'
+]);
+
 @Component({
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
@@ -47,31 +73,6 @@ export class ReportComponent implements OnInit, AfterViewInit {
   isExpandedMetadata = true;
   username = signal<string>('');
   role = signal<string>('');
-  private readonly metadataExcludedKeys = new Set([
-    '_id',
-    'id',
-    'rank_index',
-    'm_embedding',
-    'm_title',
-    'm_content',
-    'm_important_content',
-    'm_url',
-    'm_source_url',
-    'm_base_url',
-    'm_hash',
-    'm_creation_date',
-    'm_update_date',
-    'm_updation_date',
-    'm_scrap_file',
-    'm_scrape_file',
-    'creation_date',
-    'update_date',
-    'updation_date',
-    'created_at',
-    'updated_at',
-    'scrap_file',
-    'scrape_file'
-  ]);
 
   constructor(private api: ApiService, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private route: ActivatedRoute, private helperService: HelperService, protected appService: AppService, protected authService: AuthService, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>) {
     this.lang = appService.getConfig().appSettings.language_allowed;
@@ -157,7 +158,7 @@ export class ReportComponent implements OnInit, AfterViewInit {
   }
 
   private shouldShowMetadataKey(key: string, value: unknown): boolean {
-    if (this.metadataExcludedKeys.has(key)) {
+    if (METADATA_EXCLUDED_KEYS.has(key)) {
       return false;
     }
     if (Array.isArray(value)) {
