@@ -454,14 +454,7 @@ export class ThreatLensMapUtils {
     for (const ratio of [0.18, 0.32, 0.46]) {
       const lonOffset = (maxLon - minLon) * ratio;
       const latOffset = (maxLat - minLat) * ratio;
-      samples.push(
-        [centerLon - lonOffset, centerLat],
-        [centerLon + lonOffset, centerLat],
-        [centerLon, centerLat - latOffset],
-        [centerLon, centerLat + latOffset],
-        [centerLon - lonOffset, centerLat - latOffset],
-        [centerLon + lonOffset, centerLat + latOffset],
-      );
+      samples.push([centerLon - lonOffset, centerLat], [centerLon + lonOffset, centerLat], [centerLon, centerLat - latOffset], [centerLon, centerLat + latOffset], [centerLon - lonOffset, centerLat - latOffset], [centerLon + lonOffset, centerLat + latOffset]);
     }
 
     for (const sample of samples) {

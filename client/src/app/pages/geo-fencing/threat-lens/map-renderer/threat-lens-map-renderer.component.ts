@@ -744,9 +744,6 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   }
 
   private getFeatureAnchorCoordinates(feature: any): ThreatLensCoordinates | null {
-    const countryName = this.countryRenderer.extractCountryName(feature?.attributes);
-    const countryKey = this.toCountryKey(countryName);
-    const info = this.countryRenderer.getCountryDebugInfo(countryKey, feature);
     const anchor = ThreatLensMapUtils.getFeatureAnchor(feature, this.geometryEngine, this.webMercatorUtils);
 
     if (!ThreatLensMapUtils.isValidLngLat(anchor)) {
