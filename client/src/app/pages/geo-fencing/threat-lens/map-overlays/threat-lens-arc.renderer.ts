@@ -1,7 +1,7 @@
 import { NgZone } from '@angular/core';
 import { AnimatedArcDescriptor, ArcDrawState, ThreatLensCategoryMapData, ThreatLensCategoryModelKey } from '../../models/geo-fencing.models';
 import { ThreatLensMapUtils } from '../map-utils/threat-lens-map.utils';
-import { ArcCategoryBatch, ThreatLensArcBatchStatus, ThreatLensArcRenderResult } from '../models/threat-lens-map.types';
+import { ArcCategoryBatch, LngLat, ThreatLensArcBatchStatus, ThreatLensArcRenderResult } from '../models/threat-lens-map.types';
 import { ThreatLensCountryLayerRenderer } from './threat-lens-country-layer.renderer';
 
 export class ThreatLensArcRenderer {
@@ -22,6 +22,8 @@ export class ThreatLensArcRenderer {
   private startMarkerGraphics: any[] = [];
   private endMarkerGraphics: any[] = [];
   private hoveredEndpointGraphic: any | null = null;
+  private loggedCoordinateValidationKeys = new Set<string>();
+  private loggedSkippedArcKeys = new Set<string>();
   private readonly maxArcCount = 1000;
   private readonly minArcWeight = 1;
   private arcBatchSize = 10;
@@ -50,6 +52,8 @@ export class ThreatLensArcRenderer {
     this.selectedBatchIndex = 0;
     this.visibleBatchDrawStartTime = 0;
     this.animationPauseStartTime = 0;
+    this.loggedCoordinateValidationKeys.clear();
+    this.loggedSkippedArcKeys.clear();
 
     const arcCountByCategory = new Map();
     let totalArcCount = 0;
@@ -72,9 +76,18 @@ export class ThreatLensArcRenderer {
         const start = ThreatLensMapUtils.getFeatureAnchor(featureA, this.geometryEngine, this.webMercatorUtils);
         const end = ThreatLensMapUtils.getFeatureAnchor(featureB, this.geometryEngine, this.webMercatorUtils);
 
-        if (!start || !end) {
+        if (!ThreatLensMapUtils.isValidLngLat(start)) {
+          this.logSkippedArc(category, pair, pair.countryAKey, featureA, start, 'missing or invalid start coordinates');
           continue;
         }
+
+        if (!ThreatLensMapUtils.isValidLngLat(end)) {
+          this.logSkippedArc(category, pair, pair.countryBKey, featureB, end, 'missing or invalid end coordinates');
+          continue;
+        }
+
+        this.logCountryCoordinateValidation(pair.countryAKey, featureA, start);
+        this.logCountryCoordinateValidation(pair.countryBKey, featureB, end);
 
         const arcPoints = ThreatLensMapUtils.buildSurfacePathPoints(start, end);
         const surfacePaths = ThreatLensMapUtils.buildSurfacePath(start, end);
@@ -457,6 +470,22 @@ export class ThreatLensArcRenderer {
       : null;
 
     this.ngZone.run(() => this.onBatchStatusChange(status));
+  }
+
+  private logCountryCoordinateValidation(countryKey: string, feature: any, coordinates: LngLat): void {
+    const logKey = `${countryKey}:${coordinates[0].toFixed(6)}:${coordinates[1].toFixed(6)}`;
+    if (this.loggedCoordinateValidationKeys.has(logKey)) {
+      return;
+    }
+    this.loggedCoordinateValidationKeys.add(logKey);
+  }
+
+  private logSkippedArc(category: ThreatLensCategoryMapData, pair: { countryAKey: string; countryBKey: string; weight: number }, countryKey: string, feature: any, coordinates: LngLat | null, reason: string): void {
+    const logKey = `${category.categoryKey}:${pair.countryAKey}:${pair.countryBKey}:${countryKey}:${reason}`;
+    if (this.loggedSkippedArcKeys.has(logKey)) {
+      return;
+    }
+    this.loggedSkippedArcKeys.add(logKey);
   }
 
   private updateArcDrawGraphics(timestamp: number): void {
