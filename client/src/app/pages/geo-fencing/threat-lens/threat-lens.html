@@ -69,7 +69,7 @@
 
 				@if (topCountries.length) {
 					<h3 class="mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">{{ 'Top Highlighted Countries' | translate }}</h3>
-					<div class="mt-2 max-h-[260px] space-y-1 overflow-auto pr-1 max-[640px]:max-h-[180px]">
+					<div class="mt-2 max-h-[195px] space-y-1 overflow-auto pr-1 max-[640px]:max-h-[180px]">
 						@for (item of topCountries; track item.country) {
 							<button data-testid="threat-lens-top-country" type="button" (click)="onTopCountrySelect(item.country)" class="flex w-full items-center justify-between rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-left text-[12px] text-[var(--color-text2)] transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]">
 								<span class="truncate pr-2">{{ item.country }}</span>
@@ -86,21 +86,26 @@
 					<div data-testid="threat-lens-category-layers" class="mt-5 border-t border-[var(--color-border)] pt-3">
 						<div class="flex items-center justify-between gap-2">
 							<h3 class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">{{ 'Category Layers' | translate }}</h3>
-							<label class="flex shrink-0 items-center gap-2 text-[11px] text-[var(--color-text4)]">
+						</div>
+						<div class="mt-3 grid grid-cols-2 gap-2 max-[420px]:grid-cols-1">
+							<label class="flex min-w-0 items-center gap-2 text-[11px] text-[var(--color-text4)]">
 								<span>{{ 'Limit' | translate }}</span>
-								<select data-testid="threat-lens-arc-batch-size" [(ngModel)]="arcBatchSize" (ngModelChange)="onArcBatchSizeChange($event)" class="h-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 text-[12px] font-semibold text-[var(--color-text1)] outline-none focus:border-[var(--color-blue-640)]">
+								<select data-testid="threat-lens-arc-batch-size" [(ngModel)]="arcBatchSize" (ngModelChange)="onArcBatchSizeChange($event)" class="h-8 min-w-0 flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 text-[12px] font-semibold text-[var(--color-text1)] outline-none focus:border-[var(--color-blue-640)]">
 									@for (size of arcBatchSizeOptions; track size) {
 										<option [ngValue]="size">{{ size }}</option>
 									}
 								</select>
 							</label>
+							<label class="flex min-w-0 items-center gap-2 text-[11px] text-[var(--color-text4)]">
+								<span>{{ 'Range' | translate }}</span>
+								<select data-testid="threat-lens-arc-range" [(ngModel)]="selectedArcRangeIndex" (ngModelChange)="onArcRangeChange($event)" [disabled]="!arcRangeOptions.length" class="h-8 min-w-0 flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 text-[12px] font-semibold text-[var(--color-text1)] outline-none focus:border-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-60">
+									@for (range of arcRangeOptions; track range.index) {
+										<option [ngValue]="range.index">{{ range.label }}</option>
+									}
+								</select>
+							</label>
 						</div>
-						<div class="mt-3 flex items-center gap-2">
-							<button data-testid="threat-lens-arc-auto-mode" type="button" (click)="onArcCategorySelect(null)" class="h-8 rounded-[8px] border px-3 text-[12px] font-semibold transition-colors" [ngClass]="!selectedArcCategoryKey ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white' : 'border-[var(--color-border)] bg-[var(--color-blue-790)] text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]'">
-								{{ 'Auto' | translate }}
-							</button>
-							<p data-testid="threat-lens-arc-batch-status" class="min-w-0 truncate text-[11px] text-[var(--color-text4)]">{{ arcBatchStatusText }}</p>
-						</div>
+						<p data-testid="threat-lens-arc-batch-status" class="mt-2 min-w-0 truncate text-[11px] text-[var(--color-text4)]">{{ arcBatchStatusText }}</p>
 					</div>
 					<div class="mt-2 max-h-[220px] space-y-1 overflow-auto pr-1 max-[640px]:max-h-[160px]">
 						@for (item of categoryLegend; track item.categoryKey) {

@@ -121,6 +121,10 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.arcRenderer?.setBatchSize(size);
   }
 
+  setArcRangeIndex(index: number): void {
+    this.arcRenderer?.setSelectedRangeIndex(index);
+  }
+
   setArcCategoryFilter(categoryKey: ThreatLensCategoryModelKey | null): void {
     this.arcRenderer?.setActiveCategory(categoryKey);
   }
