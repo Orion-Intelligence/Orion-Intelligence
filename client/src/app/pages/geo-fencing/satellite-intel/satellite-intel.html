@@ -103,6 +103,7 @@
         [isPanelPopupOpen]="isPanelPopupOpen"
         [activePanel]="activePanel"
         (threatFiltersOpened)="openThreatFilters()"
+        (selectionsCleared)="clearAllSelections()"
         (panelOpened)="openPanelPopup($event)"
         (panelClosed)="closePanelPopup()">
 

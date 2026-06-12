@@ -56,6 +56,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private route: ActivatedRoute;
   private sidebarService: SidebarService;
   @ViewChild(MapRendererComponent) private mapRenderer?: MapRendererComponent;
+  @ViewChild(ThreatLensComponent) private threatLens?: ThreatLensComponent;
 
   satelliteService: SatelliteIntelService;
   readonly panel = SatelliteIntelPanelEnum;
@@ -354,6 +355,15 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   openThreatFilters(): void {
     this.isPanelMenuOpen = false;
     this.sidebarService.openSidebar();
+  }
+
+  clearAllSelections(): void {
+    this.isPanelMenuOpen = false;
+    this.selectedFeature = null;
+    this.focusedFeature = null;
+    this.mapEntityDetailsState.close();
+    this.mapRenderer?.closeSidebar();
+    this.threatLens?.clearAllSelections();
   }
 
   openPanelPopup(id: SatelliteIntelPanel): void {

@@ -170,6 +170,13 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.ipMarkerRenderer?.clear();
   }
 
+  clearSelections(): void {
+    this.countryRenderer.clearHighlight();
+    this.countryRenderer.setSelectedCountryKey('');
+    this.clearHoverHighlight();
+    this.tooltipRenderer.hide();
+  }
+
   requestViewportIpScan(): boolean {
     return this.emitViewportIpScanRequest(true);
   }

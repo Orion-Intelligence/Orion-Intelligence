@@ -23,6 +23,13 @@
           </button>
         }
       }
+      <button type="button" data-testid="geo-fencing-panel-menu-clear-selections" class="flex w-full cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] text-left text-[14px] font-medium text-[#172235] transition-colors hover:bg-[#f5f7fa]" (click)="selectionsCleared.emit()">
+        <svg viewBox="0 0 16 16" class="h-5 w-5 shrink-0" fill="none" aria-hidden="true">
+          <path d="M4.25 4.25 11.75 11.75M11.75 4.25 4.25 11.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+          <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.25"></circle>
+        </svg>
+        <span class="min-w-0 truncate">{{ 'Clear all selections' | translate }}</span>
+      </button>
     </div>
   </div>
 }
