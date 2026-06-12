@@ -223,7 +223,7 @@
                   <span class="text-[10px]">{{ sortStatusDirection === 'asc' ? '↑' : sortStatusDirection === 'desc' ? '↓' : '' }}</span>
                 </button>
               </th>
-              <th class="px-4 py-3">{{ 'Added' | translate }}</th>
+              <th class="px-4 py-3">{{ 'Last Success' | translate }}</th>
               <th class="px-4 py-3">{{ 'Updated' | translate }}</th>
               <th class="w-[170px] px-4 py-3 text-right">{{ 'Action' | translate }}</th>
             </tr>
@@ -255,7 +255,7 @@
                     {{ getRuntimeStatus(script) }}
                   </span>
                 </td>
-                <td class="px-4 py-2.5 text-[var(--color-text4)]">{{ script.created_at ? (script.created_at | date:'medium') : '-' }}</td>
+                <td class="px-4 py-2.5 text-[var(--color-text4)]">{{ script.last_success_date ? (script.last_success_date | date:'medium') : '-' }}</td>
                 <td class="px-4 py-2.5 text-[var(--color-text4)]">{{ script.updated_at ? (script.updated_at | date:'medium') : '-' }}</td>
                 <td class="px-4 py-2.5">
                   <div class="flex items-center justify-end gap-2">
@@ -367,8 +367,8 @@
             </div>
             <div class="grid gap-3 px-3 py-2 sm:grid-cols-2">
               <div>
-                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Added' | translate }}</div>
-                <div class="mt-0.5 text-sm text-[var(--color-text3)]">{{ script.created_at ? (script.created_at | date:'medium') : '-' }}</div>
+                <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Last Success' | translate }}</div>
+                <div class="mt-0.5 text-sm text-[var(--color-text3)]">{{ script.last_success_date ? (script.last_success_date | date:'medium') : '-' }}</div>
               </div>
               <div>
                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Updated' | translate }}</div>

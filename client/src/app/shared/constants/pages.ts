@@ -64,6 +64,7 @@ export enum SocialSubCategory {
     REDDIT = 'Reddit',
     FACEBOOK = 'Facebook',
     INSTAGRAM = 'Instagram',
+    LINKEDIN = 'LinkedIn',
     TIKTOK = 'TikTok',
     YOUTUBE = 'YouTube',
 }
