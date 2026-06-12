@@ -22,6 +22,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private arcRenderer: ThreatLensArcRenderer | null = null;
   private ipMarkerRenderer: ThreatLensIpMarkerRenderer | null = null;
   private webMercatorUtils: any | null = null;
+  private countryFillGraphicsLayer: any | null = null;
   private arcGraphicsLayer: any | null = null;
   private animatedArcGraphicsLayer: any | null = null;
   private ipScanGraphicsLayer: any | null = null;
@@ -110,6 +111,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   renderThreatData(categoryData: ThreatLensCategoryMapData[], countryCounts: ThreatCountryCount[], activeCountryFilterKey: string): ThreatLensArcRenderResult {
     this.countryNewsCountByKey = new Map(countryCounts.map((item) => [this.toCountryKey(item.country), item.count]));
     this.categoryCountryNewsCountByKey = ThreatLensGeoUtils.buildThreatLensCategoryCountryCounts(categoryData, (value) => this.toCountryKey(value));
+    this.countryRenderer.setSelectedCountryKey(activeCountryFilterKey);
     const arcResult = this.arcRenderer?.render(categoryData, activeCountryFilterKey) ?? { totalArcCount: 0, arcCountByCategory: new Map() };
     this.categoryLegend = ThreatLensGeoUtils.buildThreatLensLegend(categoryData, arcResult.arcCountByCategory);
     return arcResult;
@@ -138,6 +140,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     }
 
     const selection = this.buildCountrySelection(graphic);
+    this.countryRenderer.setSelectedCountryKey(selection.key);
     this.countryRenderer.applyHighlight(graphic);
     const extent = graphic.geometry?.extent ?? graphic.geometry;
     const center = this.toThreatLensCoordinates(extent?.center) ?? this.getExtentCenterCoordinates(extent);
@@ -204,6 +207,11 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
       this.webMercatorUtils = webMercatorUtils;
       const countryLayer = this.countryRenderer.createLayer(FeatureLayer);
+      this.countryFillGraphicsLayer = new GraphicsLayer({
+        title: 'Threat Lens Country Fills',
+        elevationInfo: { mode: 'on-the-ground' },
+      });
+      this.countryRenderer.setFillGraphicsLayer(this.countryFillGraphicsLayer);
       this.arcGraphicsLayer = new GraphicsLayer({
         title: 'Threat Lens Country Arcs',
         elevationInfo: { mode: 'absolute-height' },
@@ -218,6 +226,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         basemap: this.threatBasemapId,
         layers: [
           countryLayer,
+          this.countryFillGraphicsLayer,
           this.arcGraphicsLayer,
           this.animatedArcGraphicsLayer,
           this.ipScanGraphicsLayer,
@@ -356,6 +365,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
       if (!countryGraphic) {
         this.countryRenderer.clearHighlight();
+        this.countryRenderer.setSelectedCountryKey('');
         this.ngZone.run(() => this.emptySelection.emit());
         return;
       }
