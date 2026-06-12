@@ -1,5 +1,5 @@
 from datetime import date
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -15,7 +15,7 @@ class AptCardModel(BaseModel):
     m_aliases: Optional[List[str]] = Field(default_factory=list)
     m_references: Optional[List[str]] = Field(default_factory=list)
     m_platform: str
-    m_country: Optional[str] = None
+    m_country: Optional[Union[str, List[str]]] = None
     m_leak_date: Optional[date] = None
     m_name: Optional[str] = None
     m_last_updated: Optional[str] = None
