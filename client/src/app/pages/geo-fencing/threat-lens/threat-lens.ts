@@ -21,6 +21,13 @@ import { ThreatLensGeoUtils } from './map-utils/threat-lens-geo.utils';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 
+interface ThreatLensArcRangeOption {
+  index: number;
+  label: string;
+  start: number;
+  end: number;
+}
+
 @Component({
   selector: 'app-threat-lens',
   standalone: true,
@@ -51,10 +58,11 @@ export class ThreatLensComponent implements OnDestroy {
   private readonly defaultIpScanCenter: ThreatLensCoordinates = { lat: 20, lon: 0 };
   private readonly defaultIpScanRadiusKm = 12000;
   private readonly defaultIpScanMaxIps = 200;
+  private readonly defaultArcCategoryKey: ThreatLensCategoryModelKey = 'news_model';
   private detailOverlayOpenNotified = false;
 
   protected readonly filterModel: FilterModel = threat_lens_filters;
-  protected readonly arcBatchSizeOptions = [5, 10, 20, 50];
+  protected readonly arcBatchSizeOptions = [5, 10, 20, 50, 100];
 
   isFilterOpen$: Observable<boolean>;
   searchTerm = '';
@@ -63,7 +71,9 @@ export class ThreatLensComponent implements OnDestroy {
   statusMessage = 'Loading threat lens results...';
   isLoading = true;
   arcBatchSize = 10;
-  selectedArcCategoryKey: ThreatLensCategoryModelKey | null = null;
+  selectedArcCategoryKey: ThreatLensCategoryModelKey = this.defaultArcCategoryKey;
+  selectedArcRangeIndex = 0;
+  arcRangeOptions: ThreatLensArcRangeOption[] = [];
   arcBatchStatus: ThreatLensArcBatchStatus | null = null;
   topCountries: ThreatCountryCount[] = [];
   arcCount = 0;
@@ -105,6 +115,7 @@ export class ThreatLensComponent implements OnDestroy {
   async onMapReady(): Promise<void> {
     this.mapRenderer?.setArcBatchSize(this.arcBatchSize);
     this.mapRenderer?.setArcCategoryFilter(this.selectedArcCategoryKey);
+    this.mapRenderer?.setArcRangeIndex(this.selectedArcRangeIndex);
     await this.loadThreatLensData('');
   }
 
@@ -159,21 +170,29 @@ export class ThreatLensComponent implements OnDestroy {
 
   onArcBatchStatusChange(status: ThreatLensArcBatchStatus | null): void {
     this.arcBatchStatus = status;
-    if (status) {
-      this.arcCount = status.visibleCount;
-    }
+    this.arcCount = status?.visibleCount ?? 0;
     this.cdr.detectChanges();
   }
 
-  onArcCategorySelect(categoryKey: ThreatLensCategoryModelKey | null): void {
+  onArcCategorySelect(categoryKey: ThreatLensCategoryModelKey): void {
     this.selectedArcCategoryKey = categoryKey;
+    this.rebuildArcRangeOptions(true);
     this.mapRenderer?.setArcCategoryFilter(categoryKey);
+    this.mapRenderer?.setArcRangeIndex(this.selectedArcRangeIndex);
   }
 
   onArcBatchSizeChange(value: number | string): void {
     const nextSize = Number(value);
     this.arcBatchSize = this.arcBatchSizeOptions.includes(nextSize) ? nextSize : 10;
+    this.rebuildArcRangeOptions(true);
     this.mapRenderer?.setArcBatchSize(this.arcBatchSize);
+    this.mapRenderer?.setArcRangeIndex(this.selectedArcRangeIndex);
+  }
+
+  onArcRangeChange(value: number | string): void {
+    const nextIndex = Number(value);
+    this.selectedArcRangeIndex = this.arcRangeOptions.some((option) => option.index === nextIndex) ? nextIndex : 0;
+    this.mapRenderer?.setArcRangeIndex(this.selectedArcRangeIndex);
   }
 
   onIpSelected(ip: string): void {
@@ -252,10 +271,14 @@ export class ThreatLensComponent implements OnDestroy {
 
   get arcBatchStatusText(): string {
     if (!this.arcBatchStatus || !this.arcBatchStatus.visibleCount) {
-      return 'No arcs visible in the current batch.';
+      return 'No arcs visible for the selected range.';
     }
 
     return `Showing ${this.arcBatchStatus.categoryLabel} arcs ${this.arcBatchStatus.start}-${this.arcBatchStatus.end} of ${this.arcBatchStatus.categoryArcCount}`;
+  }
+
+  get selectedArcCategoryLabel(): string {
+    return this.getSelectedArcCategory()?.label || 'News';
   }
 
   onIpDetailPopupClose(): void {
@@ -275,8 +298,10 @@ export class ThreatLensComponent implements OnDestroy {
     this.selectedCountryName = '';
     this.selectedCountryBreakdown = [];
     this.selectedCountryIpScanRequest = null;
-    this.selectedArcCategoryKey = null;
-    this.mapRenderer?.setArcCategoryFilter(null);
+    this.selectedArcCategoryKey = this.defaultArcCategoryKey;
+    this.rebuildArcRangeOptions(true);
+    this.mapRenderer?.setArcCategoryFilter(this.selectedArcCategoryKey);
+    this.mapRenderer?.setArcRangeIndex(this.selectedArcRangeIndex);
     this.mapRenderer?.clearSelections();
     this.statusMessage = 'Selections cleared.';
     this.emitDetailOverlayOpenChange(false);
@@ -342,7 +367,11 @@ export class ThreatLensComponent implements OnDestroy {
     }
 
     this.arcCount = totalArcCount;
-    this.categoryLegend = ThreatLensGeoUtils.buildThreatLensLegend(stats.categoryData, arcCountByCategory);
+    this.categoryLegend = this.orderCategoryLegend(ThreatLensGeoUtils.buildThreatLensLegend(stats.categoryData, arcCountByCategory));
+    this.selectedArcCategoryKey = this.resolveSelectedArcCategoryKey();
+    this.rebuildArcRangeOptions(true);
+    this.mapRenderer?.setArcCategoryFilter(this.selectedArcCategoryKey);
+    this.mapRenderer?.setArcRangeIndex(this.selectedArcRangeIndex);
     const hasRenderableArcs = this.categoryLegend.some((item) => item.arcCount > 0);
     this.applyLoadedDataState(stats, activeQuery, hasRenderableArcs ? Math.max(totalArcCount, 1) : 0);
 
@@ -368,6 +397,9 @@ export class ThreatLensComponent implements OnDestroy {
   private applyEmptyDataState(activeQuery: string): void {
     this.arcCount = 0;
     this.arcBatchStatus = null;
+    this.selectedArcCategoryKey = this.defaultArcCategoryKey;
+    this.selectedArcRangeIndex = 0;
+    this.arcRangeOptions = [];
     this.ngZone.run(() => {
       this.topCountries = [];
       this.categoryLegend = [];
@@ -406,8 +438,8 @@ export class ThreatLensComponent implements OnDestroy {
 
       this.statusMessage = totalArcCount > 0
         ? this.activeArcCountryFilterKey
-          ? `Loaded ${stats.totalResults} records${queryLabel}. Showing only arc connections linked to ${this.selectedCountryName || activeQuery}, rotating one category at a time in batches of up to ${this.arcBatchSize}.`
-          : `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries. Showing one category per arc batch, up to ${this.arcBatchSize} at a time. Most active: ${mostActive.country} (${mostActive.count}).`
+          ? `Loaded ${stats.totalResults} records${queryLabel}. Showing selected ${this.selectedArcCategoryLabel.toLowerCase()} arc connections linked to ${this.selectedCountryName || activeQuery}.`
+          : `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries. Showing selected ${this.selectedArcCategoryLabel.toLowerCase()} arcs by range. Most active: ${mostActive.country} (${mostActive.count}).`
         : this.activeArcCountryFilterKey
           ? `Loaded ${stats.totalResults} records${queryLabel}, but no arc connections were found for ${this.selectedCountryName || activeQuery}.`
           : `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries, but no multi-country co-occurrence was found for arcs.`;
@@ -646,6 +678,62 @@ export class ThreatLensComponent implements OnDestroy {
 
   private getSelectedCountryBreakdown(countryKey: string): SelectedCountryCategoryCount[] {
     return ThreatLensGeoUtils.getThreatLensSelectedCountryBreakdown(countryKey, this.categoryLegend, this.categoryCountryNewsCountByKey);
+  }
+
+  private rebuildArcRangeOptions(selectFirst = false): void {
+    const totalArcCount = this.getSelectedArcCategory()?.arcCount ?? 0;
+    if (totalArcCount <= 0) {
+      this.arcRangeOptions = [];
+      this.selectedArcRangeIndex = 0;
+      return;
+    }
+
+    const rangeOptions: ThreatLensArcRangeOption[] = [];
+    for (let start = 1; start <= totalArcCount; start += this.arcBatchSize) {
+      const end = Math.min(totalArcCount, start + this.arcBatchSize - 1);
+      rangeOptions.push({
+        index: rangeOptions.length,
+        label: `${start}-${end}`,
+        start,
+        end,
+      });
+    }
+
+    this.arcRangeOptions = rangeOptions;
+    this.selectedArcRangeIndex = selectFirst
+      ? 0
+      : Math.max(0, Math.min(this.selectedArcRangeIndex, rangeOptions.length - 1));
+  }
+
+  private getSelectedArcCategory(): ThreatLensLegendItem | undefined {
+    return this.categoryLegend.find((item) => item.categoryKey === this.selectedArcCategoryKey);
+  }
+
+  private resolveSelectedArcCategoryKey(): ThreatLensCategoryModelKey {
+    if (this.categoryLegend.some((item) => item.categoryKey === this.selectedArcCategoryKey)) {
+      return this.selectedArcCategoryKey;
+    }
+
+    if (this.categoryLegend.some((item) => item.categoryKey === this.defaultArcCategoryKey)) {
+      return this.defaultArcCategoryKey;
+    }
+
+    return this.categoryLegend[0]?.categoryKey ?? this.defaultArcCategoryKey;
+  }
+
+  private orderCategoryLegend(items: ThreatLensLegendItem[]): ThreatLensLegendItem[] {
+    return items
+      .map((item, index) => ({ item, index }))
+      .sort((left, right) => {
+        if (left.item.categoryKey === this.defaultArcCategoryKey) {
+          return -1;
+        }
+        if (right.item.categoryKey === this.defaultArcCategoryKey) {
+          return 1;
+        }
+        return left.index - right.index;
+      })
+      .map(({ item }) => item);
   }
 
   private closeArcReportPanel(notify = true): void {

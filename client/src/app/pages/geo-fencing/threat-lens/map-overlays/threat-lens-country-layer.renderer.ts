@@ -7,6 +7,7 @@ export class ThreatLensCountryLayerRenderer {
   private highlightHandle: { remove: () => void } | null = null;
   private hoverHighlightHandle: { remove: () => void } | null = null;
   private readonly countryNameFields = ['COUNTRY', 'COUNTRYAFF', 'NAME', 'ADMIN', 'SOVEREIGNT'];
+  private readonly countryCodeFields = ['ISO_CC', 'ISO_CC_EH', 'ISO_A2', 'ISO_A2_EH', 'ISO_A3', 'ISO2', 'ISO3', 'WB_A2', 'WB_A3', 'ADM0_A3', 'SOV_A3', 'BRK_A3', 'CNTRY_CODE', 'COUNTRY_CODE', 'FIPS_CNTRY', 'FIPS'];
   private readonly connectedCountryKeys = new Set<string>();
   private selectedCountryKey = '';
 
@@ -62,6 +63,20 @@ export class ThreatLensCountryLayerRenderer {
     return this.extractCountryName(this.getFeature(countryKey)?.attributes);
   }
 
+  getCountryIsoCode(countryKey: string): string {
+    return this.extractCountryIsoCode(this.getFeature(countryKey)?.attributes);
+  }
+
+  getCountryDebugInfo(countryKey: string, feature?: any): { key: string; name: string; isoCode: string } {
+    const targetFeature = feature ?? this.getFeature(countryKey);
+    const attributes = targetFeature?.attributes;
+    return {
+      key: countryKey,
+      name: this.extractCountryName(attributes),
+      isoCode: this.extractCountryIsoCode(attributes),
+    };
+  }
+
   setSelectedCountryKey(countryKey: string): void {
     const nextKey = String(countryKey || '').trim();
     if (nextKey === this.selectedCountryKey) {
@@ -94,6 +109,24 @@ export class ThreatLensCountryLayerRenderer {
       const value = attributes[fieldName];
       if (typeof value === 'string' && value.trim()) {
         return value;
+      }
+    }
+
+    return '';
+  }
+
+  extractCountryIsoCode(attributes: Record<string, unknown> | undefined): string {
+    if (!attributes) {
+      return '';
+    }
+
+    for (const fieldName of this.countryCodeFields) {
+      const value = attributes[fieldName];
+      if (typeof value === 'string') {
+        const normalized = value.trim().toUpperCase();
+        if (normalized && normalized !== '-99' && normalized !== '99' && normalized !== 'NULL') {
+          return normalized;
+        }
       }
     }
 
@@ -151,7 +184,11 @@ export class ThreatLensCountryLayerRenderer {
     query.outFields = ['*'];
 
     const response = await this.layer.queryFeatures(query);
-    this.featureIndex = ThreatLensMapUtils.buildCountryFeatureIndex(response.features, this.countryNameFields, normalizeCountryLabel, toCountryKey);
+    this.featureIndex = ThreatLensMapUtils.buildCountryFeatureIndex(response.features,
+      this.countryNameFields,
+      normalizeCountryLabel,
+      toCountryKey,
+      this.countryCodeFields,);
   }
 
   private refreshCountryFills(): void {

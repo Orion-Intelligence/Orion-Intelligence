@@ -31,17 +31,6 @@
         <input [id]="'side-filter-' + key" (ngModelChange)="onSelectionChange(key, selectedFilters[key])" [(ngModel)]="selectedFilters[key]" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" name="{{ key }}" [placeholder]="filterModel.filters[key].title" type="text" />
       </div>
       }
-      @if (filterModel.filters[key].type === 'number') {
-      <div class="mb-2">
-        <input [id]="'side-filter-' + key" [max]="filterModel.filters[key].max ?? null" [min]="filterModel.filters[key].min ?? null" [ngModel]="selectedFilters[key] ?? ''" (ngModelChange)="onNumberInputChange(key, $event)" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" inputmode="numeric" name="{{ key }}" [placeholder]="filterModel.filters[key].placeholder || filterModel.filters[key].title" type="number" />
-        @if (filterModel.filters[key].min || filterModel.filters[key].max) {
-        <p class="mt-2 text-[11px] text-[var(--color-text3)]">
-          {{ 'Allowed range' | translate }}: {{ filterModel.filters[key].min || 0 }} {{ 'to' | translate }} {{
-          (filterModel.filters[key].max || ('No limit' | translate)) }}
-        </p>
-        }
-      </div>
-      }
     </div>
     }
   </div>

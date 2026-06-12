@@ -1,7 +1,7 @@
 import { NgZone } from '@angular/core';
 import { AnimatedArcDescriptor, ArcDrawState, ThreatLensCategoryMapData, ThreatLensCategoryModelKey } from '../../models/geo-fencing.models';
 import { ThreatLensMapUtils } from '../map-utils/threat-lens-map.utils';
-import { ArcCategoryBatch, ThreatLensArcBatchStatus, ThreatLensArcRenderResult } from '../models/threat-lens-map.types';
+import { ArcCategoryBatch, LngLat, ThreatLensArcBatchStatus, ThreatLensArcRenderResult } from '../models/threat-lens-map.types';
 import { ThreatLensCountryLayerRenderer } from './threat-lens-country-layer.renderer';
 
 export class ThreatLensArcRenderer {
@@ -10,10 +10,10 @@ export class ThreatLensArcRenderer {
   private arcDrawStates: ArcDrawState[] = [];
   private animationFrame: number | null = null;
   private lastAnimationTick = 0;
-  private batchAnimationStartTime = 0;
   private visibleBatchDrawStartTime = 0;
   private animationPauseStartTime = 0;
   private visibleBatchIndex = -1;
+  private selectedBatchIndex = 0;
   private animationPaused = false;
   private activeCategoryKey: ThreatLensCategoryModelKey | null = null;
   private movingDotGraphics: any[] = [];
@@ -22,10 +22,11 @@ export class ThreatLensArcRenderer {
   private startMarkerGraphics: any[] = [];
   private endMarkerGraphics: any[] = [];
   private hoveredEndpointGraphic: any | null = null;
+  private loggedCoordinateValidationKeys = new Set<string>();
+  private loggedSkippedArcKeys = new Set<string>();
   private readonly maxArcCount = 1000;
   private readonly minArcWeight = 1;
   private arcBatchSize = 10;
-  private readonly arcBatchDuration = 12000;
   private readonly arcDrawDuration = 1900;
   private readonly arcDrawStaggerMs = 90;
   private readonly maxArcDrawStaggerMs = 900;
@@ -48,9 +49,11 @@ export class ThreatLensArcRenderer {
     this.arcBatches = [];
     this.arcDrawStates = [];
     this.visibleBatchIndex = -1;
-    this.batchAnimationStartTime = 0;
+    this.selectedBatchIndex = 0;
     this.visibleBatchDrawStartTime = 0;
     this.animationPauseStartTime = 0;
+    this.loggedCoordinateValidationKeys.clear();
+    this.loggedSkippedArcKeys.clear();
 
     const arcCountByCategory = new Map();
     let totalArcCount = 0;
@@ -73,9 +76,18 @@ export class ThreatLensArcRenderer {
         const start = ThreatLensMapUtils.getFeatureAnchor(featureA, this.geometryEngine, this.webMercatorUtils);
         const end = ThreatLensMapUtils.getFeatureAnchor(featureB, this.geometryEngine, this.webMercatorUtils);
 
-        if (!start || !end) {
+        if (!ThreatLensMapUtils.isValidLngLat(start)) {
+          this.logSkippedArc(category, pair, pair.countryAKey, featureA, start, 'missing or invalid start coordinates');
           continue;
         }
+
+        if (!ThreatLensMapUtils.isValidLngLat(end)) {
+          this.logSkippedArc(category, pair, pair.countryBKey, featureB, end, 'missing or invalid end coordinates');
+          continue;
+        }
+
+        this.logCountryCoordinateValidation(pair.countryAKey, featureA, start);
+        this.logCountryCoordinateValidation(pair.countryBKey, featureB, end);
 
         const arcPoints = ThreatLensMapUtils.buildSurfacePathPoints(start, end);
         const surfacePaths = ThreatLensMapUtils.buildSurfacePath(start, end);
@@ -106,7 +118,7 @@ export class ThreatLensArcRenderer {
     }
 
     this.rebuildBatches();
-    this.renderBatch(0);
+    this.renderSelectedBatch();
     this.start();
 
     const firstVisibleBatch = this.getVisibleBatchSequence()[0];
@@ -117,15 +129,16 @@ export class ThreatLensArcRenderer {
   }
 
   setBatchSize(size: number): void {
-    const nextSize = Math.max(1, Math.min(50, Math.round(Number(size) || this.arcBatchSize)));
+    const nextSize = Math.max(1, Math.min(this.maxArcCount, Math.round(Number(size) || this.arcBatchSize)));
     if (nextSize === this.arcBatchSize) {
       return;
     }
 
     this.arcBatchSize = nextSize;
+    this.selectedBatchIndex = 0;
     this.rebuildBatches();
-    this.resetBatchRotation();
-    this.renderBatch(0);
+    this.resetRangeAnimation();
+    this.renderSelectedBatch();
   }
 
   setActiveCategory(categoryKey: ThreatLensCategoryModelKey | null): void {
@@ -134,8 +147,20 @@ export class ThreatLensArcRenderer {
     }
 
     this.activeCategoryKey = categoryKey;
-    this.resetBatchRotation();
-    this.renderBatch(0);
+    this.selectedBatchIndex = 0;
+    this.resetRangeAnimation();
+    this.renderSelectedBatch();
+  }
+
+  setSelectedRangeIndex(index: number): void {
+    const nextIndex = Math.max(0, Math.round(Number(index) || 0));
+    if (nextIndex === this.selectedBatchIndex) {
+      return;
+    }
+
+    this.selectedBatchIndex = nextIndex;
+    this.resetRangeAnimation();
+    this.renderSelectedBatch();
   }
 
   stop(): void {
@@ -146,7 +171,6 @@ export class ThreatLensArcRenderer {
 
     this.animatedArcGraphicsLayer?.removeAll();
     this.lastAnimationTick = 0;
-    this.batchAnimationStartTime = 0;
     this.visibleBatchDrawStartTime = 0;
     this.animationPauseStartTime = 0;
     this.visibleBatchIndex = -1;
@@ -221,10 +245,6 @@ export class ThreatLensArcRenderer {
           return;
         }
 
-        if (!this.batchAnimationStartTime) {
-          this.batchAnimationStartTime = timestamp;
-        }
-
         if (this.animationPaused) {
           if (!this.animationPauseStartTime) {
             this.animationPauseStartTime = timestamp;
@@ -236,9 +256,6 @@ export class ThreatLensArcRenderer {
 
         if (this.animationPauseStartTime) {
           const pausedDuration = timestamp - this.animationPauseStartTime;
-          if (this.batchAnimationStartTime) {
-            this.batchAnimationStartTime += pausedDuration;
-          }
           if (this.visibleBatchDrawStartTime) {
             this.visibleBatchDrawStartTime += pausedDuration;
           }
@@ -252,7 +269,7 @@ export class ThreatLensArcRenderer {
         }
 
         this.lastAnimationTick = timestamp;
-        const batch = this.getCurrentBatch(timestamp);
+        const batch = this.getSelectedBatch();
 
         if (batch.index !== this.visibleBatchIndex) {
           this.renderBatch(batch.index, batch.batch, timestamp);
@@ -292,14 +309,13 @@ export class ThreatLensArcRenderer {
     });
   }
 
-  private getCurrentBatch(timestamp: number): { index: number; batch: ArcCategoryBatch | null } {
+  private getSelectedBatch(): { index: number; batch: ArcCategoryBatch | null } {
     const batches = this.getVisibleBatchSequence();
     if (!batches.length) {
       return { index: -1, batch: null };
     }
 
-    const elapsed = Math.max(0, timestamp - this.batchAnimationStartTime);
-    const index = Math.floor(elapsed / this.arcBatchDuration) % batches.length;
+    const index = this.getClampedBatchIndex(batches);
     return {
       index,
       batch: batches[index],
@@ -417,8 +433,21 @@ export class ThreatLensArcRenderer {
     return this.arcBatches.filter((batch) => batch.categoryKey === this.activeCategoryKey);
   }
 
-  private resetBatchRotation(): void {
-    this.batchAnimationStartTime = 0;
+  private renderSelectedBatch(renderedAt = 0): void {
+    const batches = this.getVisibleBatchSequence();
+    this.selectedBatchIndex = this.getClampedBatchIndex(batches);
+    this.renderBatch(this.selectedBatchIndex, batches[this.selectedBatchIndex] ?? null, renderedAt);
+  }
+
+  private getClampedBatchIndex(batches: ArcCategoryBatch[]): number {
+    if (!batches.length) {
+      return -1;
+    }
+
+    return Math.max(0, Math.min(this.selectedBatchIndex, batches.length - 1));
+  }
+
+  private resetRangeAnimation(): void {
     this.visibleBatchDrawStartTime = 0;
     this.animationPauseStartTime = 0;
     this.visibleBatchIndex = -1;
@@ -441,6 +470,22 @@ export class ThreatLensArcRenderer {
       : null;
 
     this.ngZone.run(() => this.onBatchStatusChange(status));
+  }
+
+  private logCountryCoordinateValidation(countryKey: string, feature: any, coordinates: LngLat): void {
+    const logKey = `${countryKey}:${coordinates[0].toFixed(6)}:${coordinates[1].toFixed(6)}`;
+    if (this.loggedCoordinateValidationKeys.has(logKey)) {
+      return;
+    }
+    this.loggedCoordinateValidationKeys.add(logKey);
+  }
+
+  private logSkippedArc(category: ThreatLensCategoryMapData, pair: { countryAKey: string; countryBKey: string; weight: number }, countryKey: string, feature: any, coordinates: LngLat | null, reason: string): void {
+    const logKey = `${category.categoryKey}:${pair.countryAKey}:${pair.countryBKey}:${countryKey}:${reason}`;
+    if (this.loggedSkippedArcKeys.has(logKey)) {
+      return;
+    }
+    this.loggedSkippedArcKeys.add(logKey);
   }
 
   private updateArcDrawGraphics(timestamp: number): void {

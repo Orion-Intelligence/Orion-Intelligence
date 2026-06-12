@@ -3,6 +3,7 @@ import { loadModules, setDefaultOptions } from 'esri-loader';
 import { ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensLegendItem } from '../../models/geo-fencing.models';
 import { ThreatLensService } from '../threat-lens.service';
 import { ThreatLensGeoUtils } from '../map-utils/threat-lens-geo.utils';
+import { ThreatLensMapUtils } from '../map-utils/threat-lens-map.utils';
 import { ThreatLensArcRenderer } from '../map-overlays/threat-lens-arc.renderer';
 import { ThreatLensCountryLayerRenderer } from '../map-overlays/threat-lens-country-layer.renderer';
 import { ThreatLensIpMarkerRenderer } from '../map-overlays/threat-lens-ip-marker.renderer';
@@ -21,6 +22,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private tooltipRenderer = new ThreatLensTooltipRenderer();
   private arcRenderer: ThreatLensArcRenderer | null = null;
   private ipMarkerRenderer: ThreatLensIpMarkerRenderer | null = null;
+  private geometryEngine: any | null = null;
   private webMercatorUtils: any | null = null;
   private countryFillGraphicsLayer: any | null = null;
   private arcGraphicsLayer: any | null = null;
@@ -97,6 +99,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
     this.view?.destroy();
     this.view = null;
+    this.geometryEngine = null;
     this.webMercatorUtils = null;
   }
 
@@ -121,6 +124,10 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.arcRenderer?.setBatchSize(size);
   }
 
+  setArcRangeIndex(index: number): void {
+    this.arcRenderer?.setSelectedRangeIndex(index);
+  }
+
   setArcCategoryFilter(categoryKey: ThreatLensCategoryModelKey | null): void {
     this.arcRenderer?.setActiveCategory(categoryKey);
   }
@@ -142,8 +149,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     const selection = this.buildCountrySelection(graphic);
     this.countryRenderer.setSelectedCountryKey(selection.key);
     this.countryRenderer.applyHighlight(graphic);
-    const extent = graphic.geometry?.extent ?? graphic.geometry;
-    const center = this.toThreatLensCoordinates(extent?.center) ?? this.getExtentCenterCoordinates(extent);
+    const center = this.getFeatureAnchorCoordinates(graphic);
 
     if (center) {
       const target: any = { center: [center.lon, center.lat] };
@@ -214,6 +220,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         return;
       }
 
+      this.geometryEngine = geometryEngine;
       this.webMercatorUtils = webMercatorUtils;
       const countryLayer = this.countryRenderer.createLayer(FeatureLayer);
       this.countryFillGraphicsLayer = new GraphicsLayer({
@@ -646,7 +653,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
   private getCountryIpScanRequest(countryGraphic: any): ThreatLensIpViewportScanRequest | null {
     const extent = countryGraphic?.geometry?.extent ?? countryGraphic?.geometry;
-    const center = this.toThreatLensCoordinates(extent?.center) ?? this.getExtentCenterCoordinates(extent);
+    const center = this.getFeatureAnchorCoordinates(countryGraphic);
     if (!center) {
       return null;
     }
@@ -734,6 +741,22 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       this.toThreatLensCoordinates({ x: xmin, y: ymax }),
       this.toThreatLensCoordinates({ x: xmax, y: ymax }),
     ].filter((point): point is ThreatLensCoordinates => Boolean(point));
+  }
+
+  private getFeatureAnchorCoordinates(feature: any): ThreatLensCoordinates | null {
+    const countryName = this.countryRenderer.extractCountryName(feature?.attributes);
+    const countryKey = this.toCountryKey(countryName);
+    const info = this.countryRenderer.getCountryDebugInfo(countryKey, feature);
+    const anchor = ThreatLensMapUtils.getFeatureAnchor(feature, this.geometryEngine, this.webMercatorUtils);
+
+    if (!ThreatLensMapUtils.isValidLngLat(anchor)) {
+      return null;
+    }
+
+    return {
+      lat: anchor[1],
+      lon: anchor[0],
+    };
   }
 
   private getViewportCenterCoordinates(): ThreatLensCoordinates | null {

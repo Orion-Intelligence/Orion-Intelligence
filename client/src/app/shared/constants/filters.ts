@@ -169,16 +169,6 @@ const PLATFORM_FILTER = {
   tooltip: "Platform",
   selected: "all"
 };
-const PLATFORM_RESULT_COUNT_FILTER = {
-  title: "Platform Result Count",
-  options: [],
-  type: "number" as const,
-  tooltip: "Maximum results for per platform",
-  selected: "25",
-  min: 1,
-  max: 50,
-  placeholder: "Enter platforms result count"
-};
 const APT_FAMILY_FILTER = {
   title: "Family",
   options: [
@@ -299,8 +289,7 @@ export const threat_lens_filters: FilterModel = {
     network: COMMON_NETWORK,
     daterange: DATERANGE_CREATION,
     content: createThreatContent(),
-    platform: PLATFORM_FILTER,
-    platform_result_count: PLATFORM_RESULT_COUNT_FILTER
+    platform: PLATFORM_FILTER
   }
 };
 export const alert_filters: FilterModel = {

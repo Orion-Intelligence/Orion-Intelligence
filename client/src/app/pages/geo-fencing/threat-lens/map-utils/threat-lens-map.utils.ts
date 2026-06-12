@@ -1,7 +1,7 @@
 import { ArcPair, ArcPoint2D, LngLat } from '../models/threat-lens-map.types';
 
 export class ThreatLensMapUtils {
-  static buildCountryFeatureIndex(features: any[], countryNameFields: string[], normalizeCountryLabel: (value: string) => string, toCountryKey: (value: string) => string): Map<string, any> {
+  static buildCountryFeatureIndex(features: any[], countryNameFields: string[], normalizeCountryLabel: (value: string) => string, toCountryKey: (value: string) => string, countryCodeFields: string[] = []): Map<string, any> {
     const selected = new Map<string, { feature: any; priority: number; area: number }>();
     const priorityByField: Record<string, number> = {
       COUNTRY: 1,
@@ -14,8 +14,12 @@ export class ThreatLensMapUtils {
     for (const feature of features) {
       const attributes = feature?.attributes || {};
       const area = Number(attributes.Shape__Area || 0);
+      const candidateFields = [
+        ...countryCodeFields,
+        ...countryNameFields,
+      ];
 
-      for (const fieldName of countryNameFields) {
+      for (const fieldName of candidateFields) {
         const rawValue = attributes[fieldName];
         if (typeof rawValue !== 'string' || !rawValue.trim()) {
           continue;
@@ -81,11 +85,11 @@ export class ThreatLensMapUtils {
       return null;
     }
 
-    let anchor = null;
+    let anchor: LngLat | null = null;
 
     if (geometryEngine?.labelPoint) {
       try {
-        anchor = geometryEngine.labelPoint(geometry);
+        anchor = ThreatLensMapUtils.toValidLngLat(geometryEngine.labelPoint(geometry), webMercatorUtils);
       }
       catch {
       }
@@ -93,35 +97,58 @@ export class ThreatLensMapUtils {
 
     if (!anchor && geometryEngine?.centroid) {
       try {
-        anchor = geometryEngine.centroid(geometry);
+        anchor = ThreatLensMapUtils.toValidLngLat(geometryEngine.centroid(geometry), webMercatorUtils);
       }
       catch {
       }
     }
 
-    if (!anchor) {
-      anchor = geometry.extent?.center ?? geometry.centroid;
+    if (anchor && ThreatLensMapUtils.isAnchorInsideGeometry(anchor, geometry, webMercatorUtils)) {
+      return anchor;
     }
 
-    if (!anchor) {
+    const ringAnchor = ThreatLensMapUtils.getLargestRingAnchor(geometry, webMercatorUtils);
+    if (ringAnchor) {
+      return ringAnchor;
+    }
+
+    if (anchor) {
       return null;
     }
 
-    const rawLon = typeof anchor.longitude === 'number' ? anchor.longitude : anchor.x;
-    const rawLat = typeof anchor.latitude === 'number' ? anchor.latitude : anchor.y;
-    if (typeof rawLon !== 'number' || typeof rawLat !== 'number') {
+    return null;
+  }
+
+  static isValidLngLat(point: LngLat | null | undefined): point is LngLat {
+    if (!point) {
+      return false;
+    }
+
+    const [lon, lat] = point;
+    return Number.isFinite(lon) && Number.isFinite(lat) && lon >= -180 && lon <= 180 && lat >= -90 && lat <= 90;
+  }
+
+  private static toValidLngLat(point: any, webMercatorUtils: any): LngLat | null {
+    if (!point) {
+      return null;
+    }
+
+    const rawLon = Number(point.longitude ?? point.lon ?? point.x);
+    const rawLat = Number(point.latitude ?? point.lat ?? point.y);
+    if (!Number.isFinite(rawLon) || !Number.isFinite(rawLat)) {
       return null;
     }
 
     if (Math.abs(rawLon) <= 180 && Math.abs(rawLat) <= 90) {
-      return [rawLon, rawLat];
+      return [ThreatLensMapUtils.normalizeLongitude(rawLon), rawLat];
     }
 
     if (webMercatorUtils?.xyToLngLat) {
       try {
         const [lng, lat] = webMercatorUtils.xyToLngLat(rawLon, rawLat);
-        if (typeof lng === 'number' && typeof lat === 'number') {
-          return [lng, lat];
+        const lngLat: LngLat = [ThreatLensMapUtils.normalizeLongitude(lng), lat];
+        if (ThreatLensMapUtils.isValidLngLat(lngLat)) {
+          return lngLat;
         }
       }
       catch {
@@ -131,7 +158,8 @@ export class ThreatLensMapUtils {
     const lon = (rawLon / 20037508.34) * 180;
     const lat = (rawLat / 20037508.34) * 180;
     const convertedLat = (180 / Math.PI) * (2 * Math.atan(Math.exp((lat * Math.PI) / 180)) - (Math.PI / 2));
-    return [lon, convertedLat];
+    const lngLat: LngLat = [ThreatLensMapUtils.normalizeLongitude(lon), convertedLat];
+    return ThreatLensMapUtils.isValidLngLat(lngLat) ? lngLat : null;
   }
 
   static buildSurfacePath(start: LngLat, end: LngLat): [number, number][][] {
@@ -332,5 +360,152 @@ export class ThreatLensMapUtils {
       lon += 360;
     }
     return lon;
+  }
+
+  private static isAnchorInsideGeometry(anchor: LngLat, geometry: any, webMercatorUtils: any): boolean {
+    return ThreatLensMapUtils.getConvertedRings(geometry, webMercatorUtils)
+      .some((ring) => ThreatLensMapUtils.isPointInRing(anchor, ring));
+  }
+
+  private static getLargestRingAnchor(geometry: any, webMercatorUtils: any): LngLat | null {
+    const rings = ThreatLensMapUtils.getConvertedRings(geometry, webMercatorUtils)
+      .filter((ring) => ring.length >= 3)
+      .sort((a, b) => Math.abs(ThreatLensMapUtils.getRingArea(b)) - Math.abs(ThreatLensMapUtils.getRingArea(a)));
+
+    for (const ring of rings) {
+      const centroid = ThreatLensMapUtils.getRingCentroid(ring);
+      if (centroid && ThreatLensMapUtils.isPointInRing(centroid, ring)) {
+        return centroid;
+      }
+
+      const sampled = ThreatLensMapUtils.getSampledPointInRing(ring);
+      if (sampled) {
+        return sampled;
+      }
+
+      const vertex = ring.find((point) => ThreatLensMapUtils.isValidLngLat(point));
+      if (vertex) {
+        return vertex;
+      }
+    }
+
+    return null;
+  }
+
+  private static getConvertedRings(geometry: any, webMercatorUtils: any): LngLat[][] {
+    const rings = Array.isArray(geometry?.rings) ? geometry.rings : [];
+    return rings
+      .map((ring: any[]) => Array.isArray(ring)
+        ? ring
+          .map((point) => ThreatLensMapUtils.toValidLngLat(Array.isArray(point) ? { x: point[0], y: point[1] } : point, webMercatorUtils))
+          .filter((point): point is LngLat => ThreatLensMapUtils.isValidLngLat(point))
+        : [])
+      .filter((ring: LngLat[]) => ring.length >= 3);
+  }
+
+  private static getRingArea(ring: LngLat[]): number {
+    const unwrapped = ThreatLensMapUtils.unwrapRingLongitudes(ring);
+    let area = 0;
+    for (let index = 0; index < unwrapped.length; index += 1) {
+      const current = unwrapped[index];
+      const next = unwrapped[(index + 1) % unwrapped.length];
+      area += (current[0] * next[1]) - (next[0] * current[1]);
+    }
+    return area / 2;
+  }
+
+  private static getRingCentroid(ring: LngLat[]): LngLat | null {
+    const unwrapped = ThreatLensMapUtils.unwrapRingLongitudes(ring);
+    let twiceArea = 0;
+    let cx = 0;
+    let cy = 0;
+
+    for (let index = 0; index < unwrapped.length; index += 1) {
+      const current = unwrapped[index];
+      const next = unwrapped[(index + 1) % unwrapped.length];
+      const cross = (current[0] * next[1]) - (next[0] * current[1]);
+      twiceArea += cross;
+      cx += (current[0] + next[0]) * cross;
+      cy += (current[1] + next[1]) * cross;
+    }
+
+    if (Math.abs(twiceArea) < 1e-9) {
+      return null;
+    }
+
+    const lon = ThreatLensMapUtils.normalizeLongitude(cx / (3 * twiceArea));
+    const lat = cy / (3 * twiceArea);
+    const centroid: LngLat = [lon, lat];
+    return ThreatLensMapUtils.isValidLngLat(centroid) ? centroid : null;
+  }
+
+  private static getSampledPointInRing(ring: LngLat[]): LngLat | null {
+    const unwrapped = ThreatLensMapUtils.unwrapRingLongitudes(ring);
+    const lons = unwrapped.map(([lon]) => lon);
+    const lats = unwrapped.map(([, lat]) => lat);
+    const minLon = Math.min(...lons);
+    const maxLon = Math.max(...lons);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const centerLon = (minLon + maxLon) / 2;
+    const centerLat = (minLat + maxLat) / 2;
+    const samples: LngLat[] = [[centerLon, centerLat]];
+
+    for (const ratio of [0.18, 0.32, 0.46]) {
+      const lonOffset = (maxLon - minLon) * ratio;
+      const latOffset = (maxLat - minLat) * ratio;
+      samples.push(
+        [centerLon - lonOffset, centerLat],
+        [centerLon + lonOffset, centerLat],
+        [centerLon, centerLat - latOffset],
+        [centerLon, centerLat + latOffset],
+        [centerLon - lonOffset, centerLat - latOffset],
+        [centerLon + lonOffset, centerLat + latOffset],
+      );
+    }
+
+    for (const sample of samples) {
+      const normalized: LngLat = [ThreatLensMapUtils.normalizeLongitude(sample[0]), sample[1]];
+      if (ThreatLensMapUtils.isValidLngLat(normalized) && ThreatLensMapUtils.isPointInRing(normalized, ring)) {
+        return normalized;
+      }
+    }
+
+    return null;
+  }
+
+  private static isPointInRing(point: LngLat, ring: LngLat[]): boolean {
+    const unwrapped = ThreatLensMapUtils.unwrapRingLongitudes(ring);
+    const baseLon = unwrapped[0]?.[0] ?? point[0];
+    const x = ThreatLensMapUtils.unwrapLongitude(point[0], baseLon);
+    const y = point[1];
+    let inside = false;
+
+    for (let index = 0, previousIndex = unwrapped.length - 1; index < unwrapped.length; previousIndex = index, index += 1) {
+      const xi = unwrapped[index][0];
+      const yi = unwrapped[index][1];
+      const xj = unwrapped[previousIndex][0];
+      const yj = unwrapped[previousIndex][1];
+      const intersects = ((yi > y) !== (yj > y))
+        && (x < (((xj - xi) * (y - yi)) / ((yj - yi) || Number.EPSILON)) + xi);
+      if (intersects) {
+        inside = !inside;
+      }
+    }
+
+    return inside;
+  }
+
+  private static unwrapRingLongitudes(ring: LngLat[]): LngLat[] {
+    const unwrapped: LngLat[] = [];
+    let previousLon: number | null = null;
+
+    for (const point of ring) {
+      const lon: number = previousLon === null ? point[0] : ThreatLensMapUtils.unwrapLongitude(point[0], previousLon);
+      unwrapped.push([lon, point[1]]);
+      previousLon = lon;
+    }
+
+    return unwrapped;
   }
 }
