@@ -196,6 +196,10 @@ export class ThreatLensComponent implements OnDestroy {
       return;
     }
 
+    if (this.selectedCountryIpScanRequest && this.isIpScanRunning) {
+      return;
+    }
+
     const effectiveRequest = this.selectedCountryIpScanRequest
       ? { ...request, boundary: this.selectedCountryIpScanRequest.boundary ?? null }
       : request;
@@ -214,7 +218,8 @@ export class ThreatLensComponent implements OnDestroy {
       radiusKm,
       mode,
       this.defaultIpScanMaxIps,
-      effectiveRequest.boundary ?? null,);
+      effectiveRequest.boundary ?? null,
+      requestScope,);
   }
 
   get isIpScanRunning(): boolean {
@@ -403,26 +408,28 @@ export class ThreatLensComponent implements OnDestroy {
       this.defaultIpScanCenter,
       this.defaultIpScanRadiusKm,
       ThreatLensIpScanModeEnum.Default,
-      this.defaultIpScanMaxIps,);
+      this.defaultIpScanMaxIps,
+      null,
+      'default',);
   }
 
-  private runIpScan(coordinates: string, center: ThreatLensCoordinates, radiusKm: number, mode: ThreatLensIpScanMode, maxIps: number, boundary: ThreatLensCountryBoundary | null = null): void {
+  private runIpScan(coordinates: string, center: ThreatLensCoordinates, radiusKm: number, mode: ThreatLensIpScanMode, maxIps: number, boundary: ThreatLensCountryBoundary | null = null, scope: string = mode): void {
     this.ipScanSub?.unsubscribe();
     this.stopIpScanWatcher();
     this.networkIntelService.resetState();
     this.ipScanResultKey = '__pending__';
+    this.mapRenderer?.clearIpScanMarkers();
 
     this.ngZone.run(() => {
       this.ipScanErrorMessage = null;
+      this.hasIpScanResult = false;
       this.hasIpScanCompleted = false;
       this.ipScanProgress = null;
       this.ipScanScopeLabel = mode === ThreatLensIpScanModeEnum.Default
         ? 'Global view'
         : this.selectedCountryName || 'Selected country';
       this.ipScanRangeLabel = this.formatRadiusLabel(radiusKm);
-      if (!this.hasIpScanResult) {
-        this.ipScanResultCount = 0;
-      }
+      this.ipScanResultCount = 0;
       this.ipScanStatusMessage = mode === ThreatLensIpScanModeEnum.Default
         ? 'Loading default IP exposure map...'
         : 'Scanning selected country for IP exposure...';
@@ -430,7 +437,7 @@ export class ThreatLensComponent implements OnDestroy {
     });
 
     this.ipScanSub = this.networkIntelService.scanGeoCamera(coordinates, radiusKm, maxIps);
-    this.watchIpScanResult(center, radiusKm, mode, boundary);
+    this.watchIpScanResult(center, radiusKm, mode, boundary, scope);
   }
 
   private getIpScanRequestKey(center: ThreatLensCoordinates, radiusKm: number, scope: string): string {
@@ -456,7 +463,8 @@ export class ThreatLensComponent implements OnDestroy {
 
     const center = this.normalizeIpScanCenter(request.center);
     const radiusKm = Math.round(Math.max(25, Math.min(this.defaultIpScanRadiusKm, request.radiusKm)));
-    const requestKey = this.getIpScanRequestKey(center, radiusKm, `country:${this.toCountryKey(countryName)}`);
+    const requestScope = `country:${this.toCountryKey(countryName)}`;
+    const requestKey = this.getIpScanRequestKey(center, radiusKm, requestScope);
     if (requestKey === this.lastAutomaticIpScanKey && (this.hasIpScanResult || this.isIpScanRunning)) {
       return;
     }
@@ -467,7 +475,8 @@ export class ThreatLensComponent implements OnDestroy {
       radiusKm,
       ThreatLensIpScanModeEnum.Country,
       this.defaultIpScanMaxIps,
-      request.boundary ?? null,);
+      request.boundary ?? null,
+      requestScope,);
     this.ngZone.run(() => {
       this.ipScanStatusMessage = countryName
         ? `Scanning ${countryName} for IP exposure...`
@@ -476,15 +485,15 @@ export class ThreatLensComponent implements OnDestroy {
     });
   }
 
-  private watchIpScanResult(center: ThreatLensCoordinates, radiusKm: number, mode: ThreatLensIpScanMode, boundary: ThreatLensCountryBoundary | null): void {
+  private watchIpScanResult(center: ThreatLensCoordinates, radiusKm: number, mode: ThreatLensIpScanMode, boundary: ThreatLensCountryBoundary | null, scope: string): void {
     const parse = () => {
-      const finished = this.parseIpScanResult(center, radiusKm, mode, boundary);
+      const finished = this.parseIpScanResult(center, radiusKm, mode, boundary, scope);
       if (finished) {
         this.stopIpScanWatcher();
       }
     };
 
-    if (this.parseIpScanResult(center, radiusKm, mode, boundary)) {
+    if (this.parseIpScanResult(center, radiusKm, mode, boundary, scope)) {
       return;
     }
     this.ipScanWatchInterval = setInterval(parse, 250);
@@ -497,7 +506,7 @@ export class ThreatLensComponent implements OnDestroy {
     }
   }
 
-  private parseIpScanResult(center: ThreatLensCoordinates, radiusKm: number, mode: ThreatLensIpScanMode, boundary: ThreatLensCountryBoundary | null): boolean {
+  private parseIpScanResult(center: ThreatLensCoordinates, radiusKm: number, mode: ThreatLensIpScanMode, boundary: ThreatLensCountryBoundary | null, scope: string): boolean {
     const error = this.networkIntelService.onError();
     if (error) {
       this.ngZone.run(() => {
@@ -536,12 +545,12 @@ export class ThreatLensComponent implements OnDestroy {
     }
 
     const records = ThreatLensGeoUtils.extractThreatLensIpScanRecords(payload);
-    const resultKey = `${this.getIpScanRequestKey(center, radiusKm, mode)}:${records.map((record) => record.ip).join('|')}`;
+    const resultKey = `${this.getIpScanRequestKey(center, radiusKm, scope)}:${records.map((record) => record.ip).join('|')}`;
     const hasRenderableRecords = records.length > 0;
     const hadExistingResult = this.hasIpScanResult;
-    let renderedMarkers = hasRenderableRecords && resultKey === this.ipScanResultKey;
+    let renderedMarkers = false;
 
-    if (hasRenderableRecords && resultKey !== this.ipScanResultKey) {
+    if (hasRenderableRecords) {
       renderedMarkers = this.mapRenderer?.renderIpScanMarkers(records, center, radiusKm, boundary) ?? false;
       if (renderedMarkers) {
         this.ipScanResultKey = resultKey;

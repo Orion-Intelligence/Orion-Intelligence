@@ -152,7 +152,9 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         target.zoom = currentZoom;
       }
 
+      this.clearViewportNavigationRequest();
       await this.view.goTo(target, { duration: 750, easing: 'ease-in-out' }).then(() => undefined, () => undefined);
+      this.clearViewportNavigationRequest();
     }
     return selection;
   }
@@ -600,6 +602,11 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       clearTimeout(this.viewportIpScanTimer);
       this.viewportIpScanTimer = null;
     }
+  }
+
+  private clearViewportNavigationRequest(): void {
+    this.hasPendingViewportNavigation = false;
+    this.clearViewportIpScanTimer();
   }
 
   private emitViewportIpScanRequest(force = false): boolean {

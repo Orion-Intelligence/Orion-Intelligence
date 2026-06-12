@@ -1,15 +1,25 @@
 @if (isPanelMenuOpen) {
   <div data-testid="geo-fencing-panel-menu" class="map-overlay-menu absolute right-3 top-16 z-[999] flex min-h-[64px] w-[248px] flex-col rounded-[12px] border border-[#e5e7eb] bg-white p-[10px] text-[15px] shadow-[0_16px_30px_rgba(2,6,23,0.14)] animate-[ui-popup-flyout-in_160ms_ease-out_both] max-[943px]:right-2 max-[943px]:top-[88px] max-[520px]:top-[136px] max-[520px]:w-[min(248px,calc(100%-16px))]">
     <div class="pointer-events-none absolute top-[-10px] right-[16px] h-0 w-0 border-l-[8px] border-r-[8px] border-b-[10px] border-l-transparent border-r-transparent border-b-white"></div>
-    <div class="max-h-[320px] min-h-[160px] overflow-y-auto pr-[2px]">
+    <div class="max-h-[132px] overflow-y-auto pr-[2px]">
       @if (isThreatView) {
         <button type="button" data-testid="geo-fencing-panel-menu-filter" class="flex w-full cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] text-left text-[14px] font-medium text-[#172235] transition-colors hover:bg-[#f5f7fa]" (click)="threatFiltersOpened.emit()">
-          {{ 'Filter' | translate }}
+          <svg viewBox="0 0 16 16" class="h-5 w-5 shrink-0" fill="none" aria-hidden="true">
+            <path d="M1.75 2.75h12.5L9.5 8.2v4.05l-3 1.5V8.2z" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"></path>
+          </svg>
+          <span class="min-w-0 truncate">{{ 'Filter' | translate }}</span>
         </button>
       } @else {
         @for (tab of panelTabs; track tab.id) {
           <button type="button" [attr.data-testid]="'geo-fencing-panel-tab-' + tab.id" class="flex w-full cursor-pointer items-center gap-[10px] rounded-[8px] px-[8px] py-[10px] text-left text-[14px] font-medium transition-colors" [ngClass]="activePanel === tab.id ? 'bg-[#eef6ff] text-[#0f5fa8]' : 'text-[#172235] hover:bg-[#f5f7fa]'" (click)="panelOpened.emit(tab.id)">
-            {{ tab.label | translate }}
+            @if (tab.id === 'dashboard') {
+              <svg viewBox="0 0 16 16" class="h-5 w-5 shrink-0" fill="currentColor" aria-hidden="true">
+                <path d="M1.5 1.5h5v5h-5zm8 0h5v5h-5zm-8 8h5v5h-5zm8 0h5v5h-5z"></path>
+              </svg>
+            } @else {
+              <i class="bi bi-images flex h-5 w-5 shrink-0 items-center justify-center text-[16px] leading-none" aria-hidden="true"></i>
+            }
+            <span class="min-w-0 truncate">{{ tab.label | translate }}</span>
           </button>
         }
       }

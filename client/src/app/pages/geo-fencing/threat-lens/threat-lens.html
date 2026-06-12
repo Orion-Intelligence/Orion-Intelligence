@@ -41,9 +41,9 @@
 	}
 			</div>
 
-	<div class="absolute left-4 top-4 bottom-4 z-20 flex w-[min(24rem,calc(100%-5rem))] flex-col gap-3 max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pt-3">
+	<div class="absolute left-4 top-4 bottom-4 z-20 flex min-h-0 w-[min(24rem,calc(100%-5rem))] flex-col gap-3 overflow-hidden max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:overflow-visible max-[1100px]:px-3 max-[1100px]:pt-3">
 		<div class="h-[40px] shrink-0 max-[1100px]:hidden"></div>
-    <div data-testid="threat-lens-search-panel" class="map-overlay-menu rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] p-3 shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[640px]:rounded-[12px]">
+    <div data-testid="threat-lens-search-panel" class="map-overlay-menu min-h-0 overflow-y-auto rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] p-3 shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[1100px]:overflow-visible max-[640px]:rounded-[12px]">
 			<div class="flex items-center justify-between gap-3">
 				<div class="min-w-0">
 					<p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">{{ 'Search' | translate }}</p>
@@ -122,7 +122,7 @@
 			}
 		</div>
 
-		<div data-testid="threat-lens-summary-panel" class="map-overlay-menu w-full rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] px-4 py-3 text-[var(--color-text1)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md max-[1100px]:w-full [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[640px]:rounded-[12px]">
+		<div data-testid="threat-lens-summary-panel" class="map-overlay-menu max-h-[46%] min-h-0 w-full shrink-0 overflow-y-auto rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] px-4 py-3 text-[var(--color-text1)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md max-[1100px]:max-h-none max-[1100px]:w-full max-[1100px]:overflow-visible [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[640px]:rounded-[12px]">
 			<div class="flex items-center justify-between gap-3">
 				<div class="min-w-0">
 					<h2 class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">{{ 'Threat Lens' | translate }}</h2>
@@ -193,7 +193,7 @@
 		</div>
 	</div>
 
-	<div class="absolute right-4 top-4 bottom-4 z-20 flex w-[min(25rem,calc(100%-2rem))] flex-col gap-0 max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:right-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:mt-3 max-[1100px]:w-full max-[1100px]:px-3 max-[1100px]:pb-3">
+	<div class="absolute right-4 top-4 bottom-4 z-20 flex min-h-0 w-[min(25rem,calc(100%-2rem))] flex-col gap-0 overflow-hidden max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:right-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:mt-3 max-[1100px]:w-full max-[1100px]:overflow-visible max-[1100px]:px-3 max-[1100px]:pb-3">
 		@if (showFilterButton) {
 		<div class="flex justify-end gap-2 max-[550px]:flex-col">
 				<label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" [appTooltip]="'Customize Results' | translate" class="map-overlay-menu inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)] max-[550px]:w-full max-[550px]:justify-center">
@@ -203,7 +203,7 @@
 		</div>
 		}
 
-		<div class="min-h-0 flex-1 space-y-3 max-[1100px]:min-h-[unset]">
+		<div class="min-h-0 flex-1 space-y-3 overflow-hidden max-[1100px]:min-h-[unset] max-[1100px]:overflow-visible">
       <div class="shrink-0 max-[1100px]:hidden" [ngClass]="{ 'h-[40px]': !showFilterButton }"></div>
 				<app-threat-lens-feed-panel
 					[title]="'News Feed' | translate"

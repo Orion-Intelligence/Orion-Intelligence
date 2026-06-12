@@ -31,8 +31,7 @@ export class ThreatLensArcRenderer {
   private readonly maxArcDrawStaggerMs = 900;
   private readonly movingDotBaseSize = 5;
   private readonly endpointBaseSize = 18;
-  private readonly endpointHoverSize = 30;
-  private readonly endpointHitTargetSize = 38;
+  private readonly endpointHitTargetSize = 30;
   private readonly endpointHoverColor = [250, 0, 0];
 
   constructor( private ngZone: NgZone, private countryRenderer: ThreatLensCountryLayerRenderer, private arcGraphicsLayer: any, private animatedArcGraphicsLayer: any, private geometryEngine: any, private webMercatorUtils: any, private toCountryKey: (value: string) => string, private onVisibleArcCountChange: (count: number) => void, private onBatchStatusChange: (status: ThreatLensArcBatchStatus | null) => void, ) {}
@@ -361,11 +360,11 @@ export class ThreatLensArcRenderer {
     }
 
     this.animatedArcGraphicsLayer.addMany([
-      ...this.endpointHitTargetGraphics,
       ...this.startMarkerGraphics,
       ...this.endMarkerGraphics,
       ...this.receiverPulseGraphics,
       ...this.movingDotGraphics,
+      ...this.endpointHitTargetGraphics,
     ]);
 
     const layerGraphics = this.animatedArcGraphicsLayer.graphics?.toArray?.() ?? [];
@@ -549,7 +548,6 @@ export class ThreatLensArcRenderer {
         url:'/assets/images/shared/location.svg',
         width: `${this.endpointBaseSize}px`,
         height: `${this.endpointBaseSize}px`,
-        color: [...arc.color, opacity],
         outline: {
           color: [255, 255, 255, 0.84],
           width: 1.2,
@@ -568,6 +566,7 @@ export class ThreatLensArcRenderer {
       },
       attributes: {
         ...this.buildArcAttributes(arc, role),
+        endpoint_color: arc.color,
         endpoint_id: this.getEndpointId(arc, endpointRole),
         endpoint_role: endpointRole,
         hit_target: true,
@@ -576,7 +575,7 @@ export class ThreatLensArcRenderer {
         type: 'simple-marker',
         style: 'circle',
         size: this.endpointHitTargetSize,
-        color: [255, 255, 255, 0.001],
+        color: [...arc.color, 0.012],
         outline: {
           color: [255, 255, 255, 0],
           width: 0,
@@ -598,10 +597,10 @@ export class ThreatLensArcRenderer {
         type: 'simple-marker',
         style: 'circle',
         size: this.getDataPacketSize(0, arc.weight),
-        color: [255, 255, 255, 0.95],
+        color: [255, 255, 255, 0.5],
         outline: {
-          color: [...arc.color, 1],
-          width: 1.25,
+          color: [...arc.color, 0.38],
+          width: 0.8,
         },
       },
     };
@@ -651,14 +650,16 @@ export class ThreatLensArcRenderer {
     const baseColor = Array.isArray(graphic.attributes?.endpoint_color) ? graphic.attributes.endpoint_color : [255, 255, 255];
     const baseOpacity = Number(graphic.attributes?.endpoint_opacity);
     const opacity = Number.isFinite(baseOpacity) ? baseOpacity : 1;
-    const size = hovered ? this.endpointHoverSize : this.endpointBaseSize;
+    const endpointId = String(graphic.attributes?.endpoint_id || '');
 
-    symbol.color = hovered ? [...this.endpointHoverColor, 1] : [...baseColor, opacity];
-    symbol.width = `${size}px`;
-    symbol.height = `${size}px`;
-    symbol.outline = { ...(symbol.outline ?? {}), color: hovered ? [255, 255, 255, 1] : [255, 255, 255, 0.84], width: hovered ? 2.2 : 1.2, };
+    delete symbol.color;
+    symbol.opacity = hovered ? 1 : opacity;
+    symbol.width = `${this.endpointBaseSize}px`;
+    symbol.height = `${this.endpointBaseSize}px`;
+    symbol.outline = { ...(symbol.outline ?? {}), color: [255, 255, 255, 0.84], width: 1.2, };
 
     graphic.symbol = symbol;
+    this.setEndpointHitTargetHoverState(endpointId, baseColor, hovered);
   }
 
   private resolveEndpointIconGraphic(graphic: any | null): any | null {
@@ -687,16 +688,39 @@ export class ThreatLensArcRenderer {
     return `${arc.categoryKey}:${arc.countryAKey}:${arc.countryBKey}:${role}`;
   }
 
+  private setEndpointHitTargetHoverState(endpointId: string, color: number[], hovered: boolean): void {
+    if (!endpointId) {
+      return;
+    }
+
+    for (const hitTargetGraphic of this.endpointHitTargetGraphics) {
+      if (hitTargetGraphic?.attributes?.endpoint_id !== endpointId) {
+        continue;
+      }
+
+      hitTargetGraphic.symbol = {
+        type: 'simple-marker',
+        style: 'circle',
+        size: this.endpointHitTargetSize,
+        color: hovered ? [...color, 0.14] : [...color, 0.012],
+        outline: {
+          color: hovered ? [255, 255, 255, 0.92] : [255, 255, 255, 0],
+          width: hovered ? 1.8 : 0,
+        },
+      };
+    }
+  }
+
   private updateDataPacketSymbol(graphic: any, arc: AnimatedArcDescriptor, progress: number): void {
     const symbol = graphic.symbol.clone?.() ?? { ...graphic.symbol, outline: graphic.symbol?.outline ? { ...graphic.symbol.outline } : undefined };
     const arrivalLift = progress > 0.88 ? (progress - 0.88) / 0.12 : 0;
 
     symbol.size = this.getDataPacketSize(progress, arc.weight);
-    symbol.color = [255, 255, 255, 0.96 - (arrivalLift * 0.28)];
+    symbol.color = [255, 255, 255, 0.5 - (arrivalLift * 0.14)];
     symbol.outline = {
       ...(symbol.outline ?? {}),
-      color: [...arc.color, 1],
-      width: 1.2 + (arrivalLift * 1.1),
+      color: [...arc.color, 0.38 + (arrivalLift * 0.18)],
+      width: 0.8 + (arrivalLift * 0.5),
     };
     graphic.symbol = symbol;
   }
