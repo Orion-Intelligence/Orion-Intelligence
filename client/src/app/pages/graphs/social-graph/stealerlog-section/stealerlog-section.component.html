@@ -5,7 +5,7 @@
       <span class="mt-1 block truncate font-mono text-[11px] text-[var(--color-text4)]">{{ displayIdentity() }}</span>
     </span>
     @if (hasRecords()) {
-      <button type="button" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-white" title="Download records" aria-label="Download stealer log records" (click)="downloadRecords($event)">
+      <button type="button" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]" title="Download records" aria-label="Download stealer log records" (click)="downloadRecords($event)">
         <i class="bi bi-download text-[13px] leading-none"></i>
       </button>
     }
@@ -21,9 +21,9 @@
       <span class="h-2 w-2 flex-shrink-0 rounded-full bg-amber-400 shadow-[0_0_0_3px_rgba(245,158,11,0.14)]"></span>
       <span class="text-[12px] font-semibold text-[var(--color-text2)]">Exposure found</span>
     </div>
-    <div class="mt-2 overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)]">
+    <div class="ui-social-soft-surface mt-2 overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)]">
       @for (record of visibleRecords(); track getRecordTrackKey($index, record)) {
-        <div class="border-b border-[rgba(148,163,184,0.08)] bg-[rgba(15,23,42,0.05)] px-3 py-2.5 transition-colors last:border-b-0 hover:bg-[rgba(87,165,235,0.07)]">
+        <div class="ui-social-soft-row border-b border-[rgba(148,163,184,0.08)] bg-[rgba(15,23,42,0.05)] px-3 py-2.5 transition-colors last:border-b-0 hover:bg-[rgba(87,165,235,0.07)]">
           <div class="min-w-0">
             <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Domain</div>
             <div class="mt-0.5 truncate text-[12px] font-semibold text-[var(--color-text2)]" [title]="getRecordHost(record)">{{ getRecordHost(record) }}</div>
@@ -39,7 +39,7 @@
         </div>
       }
       @if (records().length > visibleRecords().length) {
-        <div class="border-t border-[rgba(148,163,184,0.08)] bg-[rgba(15,23,42,0.05)] px-3 py-2 text-[10px] font-medium text-[var(--color-text4)]">
+        <div class="ui-social-soft-row border-t border-[rgba(148,163,184,0.08)] bg-[rgba(15,23,42,0.05)] px-3 py-2 text-[10px] font-medium text-[var(--color-text4)]">
           {{ records().length - visibleRecords().length }} more records in download
         </div>
       }
@@ -55,6 +55,6 @@
   }
 
   @if (errorMessage()) {
-    <div class="mt-2 rounded-[8px] border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-200">{{ errorMessage() }}</div>
+    <div class="mt-2 rounded-[8px] border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-300">{{ errorMessage() }}</div>
   }
 </div>

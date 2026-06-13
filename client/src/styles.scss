@@ -1167,6 +1167,27 @@ body.demo-tour-scroll-locked {
   background-color: #f6faff !important;
 }
 
+.light-theme .ui-exploit-code-snippet {
+  border-color: #b9cadf !important;
+  background: #f4f8fd !important;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 78%), 0 8px 18px rgb(15 23 42 / 5%) !important;
+}
+
+.light-theme .ui-exploit-code-snippet-panel {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.light-theme .ui-exploit-code-snippet-header {
+  border-bottom-color: #c9d7e8 !important;
+  background: #e9f1fa !important;
+}
+
+.light-theme .ui-exploit-code-snippet-body {
+  background: #f9fcff !important;
+  color: #1f3047 !important;
+}
+
 .light-theme .ui-result-card-hover {
   transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
@@ -1404,6 +1425,10 @@ body.demo-tour-scroll-locked {
   background-color: #1f7fdc !important;
 }
 
+.light-theme .ui-graph-toolbar-search-btn:disabled:hover {
+  color: var(--color-text4) !important;
+}
+
 .ui-graph-popup-overlay {
   z-index: 9999 !important;
   background: rgb(2 6 23 / 64%) !important;
@@ -1558,6 +1583,55 @@ body.demo-tour-scroll-locked {
 
 .ui-social-manage-switch[data-selected='true']:hover {
   background: #10b981;
+}
+
+.ui-social-soft-surface {
+  background: rgba(87, 165, 235, 0.035) !important;
+}
+
+.ui-social-soft-row {
+  border-color: rgba(148, 163, 184, 0.08) !important;
+  background: rgba(15, 23, 42, 0.05) !important;
+}
+
+.ui-social-soft-row:hover {
+  background: rgba(87, 165, 235, 0.07) !important;
+}
+
+.light-theme app-social-graph .ui-social-soft-surface {
+  background: #f8fbff !important;
+}
+
+.light-theme app-social-graph .ui-social-soft-row {
+  border-color: rgba(199, 213, 230, 0.72) !important;
+  background: rgba(255, 255, 255, 0.76) !important;
+}
+
+.light-theme app-social-graph .ui-social-soft-row:hover {
+  background: #edf5fd !important;
+}
+
+.light-theme app-social-graph .text-emerald-300,
+.light-theme app-social-graph .text-emerald-200 {
+  color: #047857 !important;
+}
+
+.light-theme app-social-graph .hover\:text-emerald-100:hover,
+.light-theme app-social-graph .hover\:text-emerald-300:hover {
+  color: #065f46 !important;
+}
+
+.light-theme app-social-graph .text-sky-400,
+.light-theme app-social-graph .text-sky-300 {
+  color: #1d77c9 !important;
+}
+
+.light-theme app-social-graph .text-amber-300 {
+  color: #b45309 !important;
+}
+
+.light-theme app-social-graph .text-slate-400 {
+  color: var(--color-text4) !important;
 }
 
 @keyframes ui-profile-dropdown-in {
@@ -2270,8 +2344,8 @@ select:not(.ui-popup-select):not(.ui-select)::-ms-expand {
 
 .light-theme app-home-menu button[title='Delete Profile'],
 .light-theme app-home-menu button[title='Delete Entity'] {
-  background: rgba(225, 232, 240, 0.9) !important;
-  color: #64748b !important;
+  background: transparent !important;
+  color: var(--color-text4) !important;
 }
 
 .light-theme app-home-menu button[title='Delete Profile']:hover,
@@ -2280,13 +2354,29 @@ select:not(.ui-popup-select):not(.ui-select)::-ms-expand {
   color: #dc2626 !important;
 }
 
-.light-theme [data-testid='social-graph-root'] > main,
-.light-theme [data-testid='social-graph-root'] main > .h-full.w-full.min-h-0.flex.flex-col.overflow-hidden {
-  background: var(--color-blue-820-light) !important;
+.ui-social-root-bg {
+  background: var(--color-blue-850) !important;
 }
 
-.light-theme [data-testid='social-graph-root'] app-home-menu[class*='bg-[#172235]'] {
-  background: #f9fbff !important;
+.light-theme [data-testid='social-graph-root'].ui-social-root-bg {
+  background: #e7eff9 !important;
+}
+
+.light-theme [data-testid='social-graph-root'] > main,
+.light-theme [data-testid='social-graph-root'] main > .h-full.w-full.min-h-0.flex.flex-col.overflow-hidden,
+.light-theme [data-testid='social-graph-root'] .ui-social-dashboard-shell,
+.light-theme [data-testid='social-graph-root'] .ui-social-dashboard-body,
+.light-theme [data-testid='social-graph-root'] .ui-social-topbar,
+.light-theme [data-testid='social-graph-root'] app-list-view {
+  background: #e7eff9 !important;
+}
+
+.light-theme [data-testid='social-graph-root'] app-home-menu,
+.light-theme [data-testid='social-graph-root'] app-home-menu app-graph-sidebar-shell > div,
+.light-theme [data-testid='social-graph-root'] app-home-menu app-graph-sidebar-shell > div > .flex.shrink-0.items-center,
+.light-theme [data-testid='social-graph-root'] app-home-menu app-graph-sidebar-shell > div > .relative.flex-grow.overflow-hidden {
+  border-color: #ffffff12 !important;
+  background: #172235 !important;
 }
 
 .light-theme [data-testid='social-summary-popup'] > .relative.flex.flex-col.gap-4.border-b {

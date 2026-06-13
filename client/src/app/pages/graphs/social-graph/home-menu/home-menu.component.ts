@@ -70,15 +70,15 @@ export class HomeMenuComponent implements OnDestroy {
   }
 
   getJobClasses(job: Job): string {
-    const baseClasses = 'p-3 rounded-lg relative border bg-slate-800/50 transition-all duration-200';
+    const baseClasses = 'p-3 rounded-lg relative border bg-[var(--color-blue-820-light)] transition-all duration-200';
     if (job.status === 'completed') {
-      return `${baseClasses} border-slate-700 cursor-pointer hover:border-[var(--color-blue-640)] hover:bg-slate-800`;
+      return `${baseClasses} border-[var(--color-border)] cursor-pointer hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]`;
     }
     if (job.status === 'in_progress' || job.status === 'queued') {
-      return `${baseClasses} border-[rgba(87,165,235,0.5)]`;
+      return `${baseClasses} border-[rgba(87,165,235,0.5)] bg-[rgba(87,165,235,0.05)]`;
     }
     if (job.status === 'failed') {
-      return `${baseClasses} border-red-500/50`;
+      return `${baseClasses} border-red-500/50 bg-red-500/5`;
     }
     return baseClasses;
   }

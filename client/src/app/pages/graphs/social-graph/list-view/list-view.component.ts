@@ -7,6 +7,7 @@ import { FetchingStateService } from '../services/fetching-state.service';
 import { getMetadataEntries, getProfileDetailEntries } from '../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
 import { StealerlogSectionComponent } from '../stealerlog-section/stealerlog-section.component';
+import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 
 interface FeedUser {
   username: string;
@@ -21,7 +22,7 @@ type OnlinePresenceFetchRequest = { platformData: PlatformResult; token: string;
   selector: 'app-list-view',
   templateUrl: './list-view.component.html',
   standalone: true,
-  imports: [SocialIconComponent, StealerlogSectionComponent],
+  imports: [SocialIconComponent, StealerlogSectionComponent, TooltipDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListViewComponent {
@@ -474,6 +475,10 @@ export class ListViewComponent {
     }
     this.profileOverviewIds.set(new Set<string>([platformId]));
     this.setActiveTab(platformId, 'details', platformData);
+  }
+
+  clearProfileOverview(): void {
+    this.profileOverviewIds.set(new Set<string>());
   }
 
   isProfileOverviewActive(platformId: string): boolean {

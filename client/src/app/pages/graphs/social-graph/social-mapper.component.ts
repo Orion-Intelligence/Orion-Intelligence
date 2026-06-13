@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewEncapsulation, computed, inject, signal, viewChild } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser, NgOptimizedImage } from '@angular/common';
 import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { RouterLink } from '@angular/router';
 import { Job, PlatformResult, SocialStealerLogRecord, TabState } from '../../../shared/model/social/social-scan.models';
 import { SocialScanService } from '../shared/services/social-scan.service';
 import { TabManagerService } from '../shared/services/tab-manager.service';
@@ -31,7 +32,9 @@ import { ManageProfilesModalComponent } from './profile-popups/manage-profiles-m
     NotificationBarComponent,
     GraphLoadingComponent,
     ProfileComponent,
-    ManageProfilesModalComponent
+    ManageProfilesModalComponent,
+    NgOptimizedImage,
+    RouterLink
   ]
 })
 export class SocialMapperComponent implements OnInit, OnDestroy {
@@ -63,6 +66,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   isMobileHomeMenuOpen = signal(false);
   effectiveHomeMenuCollapsed = computed(() => this.isSmallScreen() ? !this.isMobileHomeMenuOpen() : this.isHomeMenuCollapsed());
   imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
+  listView = viewChild(ListViewComponent);
 
   constructor( private scanService: SocialScanService, private destroyRef: DestroyRef, public tabManager: TabManagerService, private fetchingState: FetchingStateService, private scanJobService: SocialScanJobService, private platformFetchService: PlatformFetchService, @Inject(PLATFORM_ID) private platformId: object ) {
     if (isPlatformBrowser(this.platformId)) {
@@ -169,6 +173,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     if (job.status !== 'completed') {
       return;
     }
+    this.listView()?.clearProfileOverview();
     this.state.setActiveUserByUsername(job.username);
     if (this.isSmallScreen()) {
       this.closeMobileHomeMenu();
