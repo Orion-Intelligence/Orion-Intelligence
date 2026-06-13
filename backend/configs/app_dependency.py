@@ -8,6 +8,7 @@ from orion.constants.constant import CONSTANTS
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
 from orion.services.session_manager.session_manager import session_manager
+from configs.auth_cookie import token_from_request
 # from orion.api.interactive.auth_manager.rules.license_rules import LICENSE_RULES
 from orion.constants import constant
 
@@ -22,11 +23,16 @@ def enforce_password_reset(user, request: Request):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Password reset required")
 
 
+def get_request_token(request: Request, token: str | None) -> str | None:
+    return token_from_request(request) or token
+
+
 async def get_current_role(request: Request, token: str = Depends(oauth2_scheme)):
     auth = env_handler.get_instance().env("AUTH")
     if auth == "0":
         return user_role.DEMO
 
+    token = get_request_token(request, token)
     user = await session_manager.get_instance().get_current_user(token)
     enforce_password_reset(user, request)
     role = user.role
@@ -39,6 +45,7 @@ async def get_current_role(request: Request, token: str = Depends(oauth2_scheme)
 
 
 async def get_current_status(request: Request, token: str = Depends(oauth2_scheme)):
+    token = get_request_token(request, token)
     user = await session_manager.get_instance().get_current_user(token)
     enforce_password_reset(user, request)
     user_status = user.status
@@ -61,12 +68,14 @@ def role_required(required_roles: list[user_role]):
 
 async def get_current_user(request: Request, token: str = Depends(oauth2_scheme)):
     session_mgr = session_manager.get_instance()
+    token = get_request_token(request, token)
     user = await session_mgr.get_current_user(token)
     enforce_password_reset(user, request)
     return user
 
 
-async def get_is_free_token(token: str = Depends(oauth2_scheme)) -> bool:
+async def get_is_free_token(request: Request, token: str = Depends(oauth2_scheme)) -> bool:
+    token = get_request_token(request, token)
     if not token:
         return False
 
@@ -123,7 +132,7 @@ def license_required(feature: str, bypass_roles: Optional[list[user_role]] = Non
 
     return checker
 def get_user_permissions(user):
-    final = {"modules": set(), "cti_graph": False, "mapping": False, "scanning": False, "maintainer": False}
+    final = {"modules": set(), "cti_graph": False, "mapping": False, "scanning": False, "maintainer": False, "geo_fencing": False}
 
     for lic in user.licenses:
         rules = constant.license_rules.get(lic, {})
@@ -136,5 +145,5 @@ def get_user_permissions(user):
         final["mapping"] |= rules.get("mapping", False)
         final["scanning"] |= rules.get("scanning", False)
         final["maintainer"] |= rules.get("maintainer", False)
-
+        final["geo_fencing"] |= rules.get("geo_fencing", False)
     return final

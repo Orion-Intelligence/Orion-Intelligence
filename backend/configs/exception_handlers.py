@@ -29,7 +29,10 @@ async def global_exception_handler(_: Request, exc: Exception):
     return RedirectResponse(url=f"/{status_code}")
 
 
-async def validation_exception_handler(_: Request, exc: RequestValidationError):
+async def validation_exception_handler(_: Request, exc: Exception):
+    if not isinstance(exc, RequestValidationError):
+        return RedirectResponse(url=f"/{HTTP_500_INTERNAL_SERVER_ERROR}")
+
     if config.DEBUG:
         errors = [ValidationErrorDetail(
             field=".".join(str(loc) for loc in error["loc"][1:]), message=error["msg"], type=error["type"]) for error in

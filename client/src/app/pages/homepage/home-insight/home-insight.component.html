@@ -38,13 +38,11 @@
     @for (model of models; track model) {
       <div>
         <div class="ui-home-insight-index-chip mb-[10px] inline-flex rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-[10px] py-[4px] text-[12px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text1)] shadow-[0_4px_10px_var(--color-shadow-light)]">
-          {{
-          model === 'general'
+          {{ (model === 'general'
           ? 'Generic Index'
           : model === 'leak'
           ? 'Leaked Index'
-          : 'Defacement Index'
-          }}
+          : 'Defacement Index') | translate }}
         </div>
         <div class="grid grid-cols-1 gap-[20px] md:grid-cols-2 xl:grid-cols-4">
           @for (_ of loadingCards; track $index) {
@@ -75,13 +73,13 @@
             <div class="ui-home-insight-card group flex h-[205px] w-full flex-col justify-between overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[15px] text-[var(--color-text2)] shadow-none transition-all duration-200 hover:border-[var(--color-text4)]/30 hover:bg-[var(--color-blue-720)]">
               <div class="mb-[10px] grid grid-cols-2 gap-x-4">
                 <div class="min-w-0">
-                  <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Title</div>
+                  <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'categoryAlerts.form.title' | translate }}</div>
                   <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" [title]="item.title ?? '-'">
                     {{ item.title ?? '-' }}
                   </div>
                 </div>
                 <div class="min-w-0 text-right">
-                  <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Source</div>
+                  <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'categoryAlerts.fields.source' | translate }}</div>
                   <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" [title]="item.source ?? '-'">
                     {{ item.source ?? '-' }}
                   </div>
@@ -90,7 +88,7 @@
               <div class="mb-[10px] min-w-0">
                 @if (item.location) {
                   <div class="flex flex-col">
-                    <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Location</div>
+                    <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Location' | translate }}</div>
                     <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" [title]="item.location">
                       {{ item.location }}
                     </div>
@@ -107,7 +105,7 @@
                     </div>
                   } @else {
                     <div class="flex min-w-0 flex-col">
-                      <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Phone Number</div>
+                      <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Phone Number' | translate }}</div>
                       <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" [title]="item.phoneNumber ?? '-'">
                         {{ item.phoneNumber ?? '-' }}
                       </div>
@@ -117,7 +115,7 @@
               </div>
               <div class="mb-[8px] min-w-0">
                 <div class="flex min-w-0 flex-col">
-                  <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">Date</div>
+                  <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Date' | translate }}</div>
                   <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]" [title]="item.date ?? '-'">
                     {{ item.date ?? '-' }}
                   </div>
@@ -128,8 +126,8 @@
               }
               @if (licenseService.canUseModule('defacement') && licenseService.canUseModule('breach')) {
                 <div class="text-center">
-                  <p appTooltip="Open Report" data-testid="open-report" (click)="openReport(modelKey, item.hash, item.title)" class="mt-[5px] inline-block cursor-pointer rounded-[6px] px-[12px] py-[7px] text-[12px] font-semibold text-[var(--color-blue-640)] transition-colors duration-200 hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]">
-                    View Details
+                  <p [appTooltip]="'Open Report' | translate" data-testid="open-report" (click)="openReport(modelKey, item.hash, item.title)" class="mt-[5px] inline-block cursor-pointer rounded-[6px] px-[12px] py-[7px] text-[12px] font-semibold text-[var(--color-blue-640)] transition-colors duration-200 hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]">
+                    {{ 'View Details' | translate }}
                   </p>
                 </div>
               }
@@ -143,14 +141,12 @@
 
   @for (model of models; track model) {
     <div>
-      <div [appTooltip]=" model === 'general' ? 'Track Data States/Crawl Insights Panel' : model === 'leak' ? 'This is the Leaked Data' : 'This is the Defacement' " class="ui-home-insight-index-chip mb-[10px] inline-flex rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-[10px] py-[4px] text-[12px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text1)] shadow-[0_4px_10px_var(--color-shadow-light)]">
-        {{
-        model === 'general'
+      <div [appTooltip]="(model === 'general' ? 'Track Data States/Crawl Insights Panel' : model === 'leak' ? 'This is the Leaked Data' : 'This is the Defacement') | translate" class="ui-home-insight-index-chip mb-[10px] inline-flex rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-[10px] py-[4px] text-[12px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text1)] shadow-[0_4px_10px_var(--color-shadow-light)]">
+        {{ (model === 'general'
         ? 'Generic Index'
         : model === 'leak'
         ? 'Leaked Index'
-        : 'Defacement Index'
-        }}
+        : 'Defacement Index') | translate }}
       </div>
       <div class="grid grid-cols-1 gap-[20px] md:grid-cols-2 xl:grid-cols-4">
         @for (key of getKeys(insights[model]); track key; let first = $first) {
@@ -168,10 +164,10 @@
                 </div>
               </div>
               <div class="ml-auto flex max-w-[86px] min-w-0 flex-col items-end justify-center text-right text-[13px] font-medium">
-                <div class="w-full truncate" [ngClass]="{ 'text-[#90DF53]': String(insights[model][key].change_daily).startsWith('+'), 'text-[#f59e0b]': String(insights[model][key].change_daily).startsWith('-'), 'text-[var(--color-text1)] opacity-50': insights[model][key].change_daily == null }" appTooltip="stat changes daily">
+                <div class="w-full truncate" [ngClass]="{ 'text-[#90DF53]': String(insights[model][key].change_daily).startsWith('+'), 'text-[#f59e0b]': String(insights[model][key].change_daily).startsWith('-'), 'text-[var(--color-text1)] opacity-50': insights[model][key].change_daily == null }" [appTooltip]="'stat changes daily' | translate">
                   {{ insights[model][key].change_daily ?? '-' }}
                 </div>
-                <div class="w-full truncate" [ngClass]="{ 'text-[#90DF53]': String(insights[model][key].change_weekly).startsWith('+'), 'text-[#f59e0b]': String(insights[model][key].change_weekly).startsWith('-'), 'text-[var(--color-text1)] opacity-50': insights[model][key].change_weekly == null }" appTooltip="stat changes weekly">
+                <div class="w-full truncate" [ngClass]="{ 'text-[#90DF53]': String(insights[model][key].change_weekly).startsWith('+'), 'text-[#f59e0b]': String(insights[model][key].change_weekly).startsWith('-'), 'text-[var(--color-text1)] opacity-50': insights[model][key].change_weekly == null }" [appTooltip]="'stat changes weekly' | translate">
                   {{ insights[model][key].change_weekly ?? '-' }}
                 </div>
               </div>

@@ -1,8 +1,11 @@
+import asyncio
 import copy
 import json
 import hashlib
 import locale
 import re
+from pathlib import Path
+from datetime import datetime, timezone
 
 from fastapi import HTTPException
 from jinja2 import Environment
@@ -14,8 +17,12 @@ from starlette.requests import Request
 from stopwords import get_stopwords
 
 from orion.constants import constant
-from orion.constants.constant import allowed_keys
+from orion.constants.constant import CONSTANTS, allowed_key_titles
 from orion.helper_manager.env_handler import env_handler
+from orion.services.elastic_manager.elastic_controller import elastic_controller
+from orion.services.log_manager.log_controller import log
+from orion.services.redis_manager.redis_controller import redis_controller
+from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 
 
 class helper_controller:
@@ -187,21 +194,125 @@ class helper_controller:
         with open(entities_file, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        allowed_keys.clear()
+        allowed_key_titles.clear()
         for item in data:
             if "key" in item:
-                allowed_keys.add(item["key"])
+                allowed_key_titles[item["key"]] = item.get("title") or item["key"]
 
-        mail_templete_env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "mail_template_data"))
+        mail_templete_env = Environment(
+            loader=FileSystemLoader(build_dir / "assets" / "data" / "mail_template_data"),
+            autoescape=True
+        )
         constant.mail_template = mail_templete_env.get_template("mail_template.html")
-        license_rules_env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "licenses"))
+        constant.alert_mail_template = mail_templete_env.get_template("alert_mail_template.html")
+        license_rules_env = Environment(
+            loader=FileSystemLoader(build_dir / "assets" / "data" / "licenses"),
+            autoescape=True
+        )
         license_rules_template = license_rules_env.get_template("license_rules.json")
         license_rules_json_str = license_rules_template.render()
         constant.license_rules = json.loads(license_rules_json_str)
-        url_rules_env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "url_rules"))
+        url_rules_env = Environment(
+            loader=FileSystemLoader(build_dir / "assets" / "data" / "url_rules"),
+            autoescape=True
+        )
         url_rules_template = url_rules_env.get_template("url_rules.json")
         url_rules_json_str = url_rules_template.render()
         constant.url_rules = json.loads(url_rules_json_str)
+        map_entities_env = Environment(
+            loader=FileSystemLoader(build_dir / "assets" / "data" / "satellite"),
+            autoescape=True
+        )
+        satellite_asset = map_entities_env.get_template(CONSTANTS.S_SATELLITE_ASSET_FILE_NAME).render()
+        version, data = helper_controller.parse_satellite_asset(satellite_asset)
+        constant.map_entities_version = version
+        constant.map_entities_data = data
+
+    @staticmethod
+    def parse_satellite_asset(asset_data):
+        payload = json.loads(asset_data)
+        if isinstance(payload, dict):
+            version = int(payload.get("version") or 0)
+            data = payload.get("data") or []
+        else:
+            version = 0
+            data = payload
+        return version, json.dumps(data)
+
+    @staticmethod
+    async def build_satellite_asset_if_needed(map_entities_file):
+        version, data = helper_controller.parse_satellite_asset(map_entities_file.read_text(encoding="utf-8"))
+        if version <= 0:
+            log.g().w("Satellite asset version missing, indexing skipped")
+            return False
+
+        stored_version = await redis_controller.getInstance().invoke_trigger(
+            REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.SATELLITE_ASSET_VERSION, None, None])
+        stored_version = int(stored_version or 0)
+
+        constant.map_entities_version = version
+        constant.map_entities_data = data
+
+        if stored_version and version <= stored_version:
+            log.g().i(f"Satellite asset version {version} already indexed")
+            return False
+
+        await elastic_controller.get_instance().reindex_map_entities_data()
+        await redis_controller.getInstance().invoke_trigger(
+            REDIS_COMMANDS.S_SET_STRING, [REDIS_KEYS.SATELLITE_ASSET_VERSION, str(version), None])
+        return True
+
+    @staticmethod
+    async def init_map_entities_task(build_dir):
+        asyncio.create_task(helper_controller.init_map_entities(build_dir))
+
+    @staticmethod
+    async def init_map_entities(build_dir):
+        if build_dir is None:
+            log.g().w("Map entities build directory not configured, file watching disabled")
+            return
+
+        build_dir = Path(build_dir)
+        map_entities_file = None
+        map_entities_candidates = [
+            build_dir / "assets" / "data" / "satellite" / CONSTANTS.S_SATELLITE_ASSET_FILE_NAME,
+            build_dir.parent / "client" / "src" / "assets" / "data" / "satellite" / CONSTANTS.S_SATELLITE_ASSET_FILE_NAME,
+        ]
+
+        for candidate in map_entities_candidates:
+            if candidate.exists():
+                map_entities_file = candidate
+                break
+
+        if not map_entities_file:
+            log.g().w("Map entities file not found, file watching disabled")
+            return
+
+        log.g().i(f"Loading map entities data from: {map_entities_file}")
+        try:
+            if await helper_controller.build_satellite_asset_if_needed(map_entities_file):
+                log.g().i("Initial map entities data indexed successfully")
+        except Exception as ex:
+            log.g().e(f"Error during initial indexing: {str(ex)}")
+
+        last_modified = map_entities_file.stat().st_mtime
+        log.g().i(f"File watcher started for: {map_entities_file}")
+
+        while True:
+            try:
+                await asyncio.sleep(5)
+                if map_entities_file.exists():
+                    current_modified = map_entities_file.stat().st_mtime
+                    if current_modified > last_modified:
+                        last_modified = current_modified
+                        log.g().i(f"Detected change in {map_entities_file.name}, re-indexing...")
+                        try:
+                            await helper_controller.build_satellite_asset_if_needed(map_entities_file)
+                        except Exception as ex:
+                            log.g().e(f"Error during re-indexing: {str(ex)}")
+            except Exception as ex:
+                log.g().e(f"File watcher error: {str(ex)}")
+                await asyncio.sleep(5)
 
     @staticmethod
     def clone_model(model):
@@ -336,3 +447,63 @@ class helper_controller:
                 return False
 
         return True
+
+    @staticmethod
+    def threat_lens_sort_latest_and_limit_response(response, limit: int = 100):
+        def coerce_date_timestamp(value):
+            if not value:
+                return 0
+
+            if isinstance(value, datetime):
+                parsed_date = value
+            elif isinstance(value, str):
+                raw_value = value.strip()
+                if not raw_value:
+                    return 0
+
+                try:
+                    if len(raw_value) == 10:
+                        parsed_date = datetime.strptime(raw_value, "%Y-%m-%d").replace(
+                            tzinfo=timezone.utc
+                        )
+                    else:
+                        parsed_date = datetime.fromisoformat(
+                            raw_value.replace("Z", "+00:00")
+                        )
+                except ValueError:
+                    return 0
+            else:
+                return 0
+
+            if parsed_date.tzinfo is None:
+                parsed_date = parsed_date.replace(tzinfo=timezone.utc)
+
+            return parsed_date.timestamp()
+
+        def latest_document_timestamp(document):
+            date_fields = ("m_leak_date", "m_message_date","m_update_date", "m_creation_date")
+            return max(
+                coerce_date_timestamp(document.get(field))
+                for field in date_fields
+            )
+
+        ranked_results = response.get("Result") or []
+
+        ranked_results.sort(
+            key=lambda item: (
+                latest_document_timestamp(item),
+                float(item.get("_score") or 0),
+            ),
+            reverse=True,
+        )
+
+        limited_results = ranked_results[:limit]
+
+        for rank, item in enumerate(limited_results):
+            item["_rank"] = rank + 1
+
+        response["Result"] = limited_results
+        response["Total_Hits"] = len(limited_results)
+        response["Page_Count"] = 1 if limited_results else 0
+
+        return response

@@ -8,11 +8,13 @@ import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { DatePickerComponent } from './date-picker/date-picker.component';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { ScrollService } from '../../services/scroll.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
 @Component({
   selector: 'app-filters',
   templateUrl: './filters.component.html',
   standalone: true,
-  imports: [FormsModule, NgOptimizedImage, TooltipDirective, DatePickerComponent],
+  imports: [FormsModule, NgOptimizedImage, TooltipDirective, DatePickerComponent, TranslatePipe],
   animations: [filterAnimation],
 })
 export class FiltersComponent implements OnInit {

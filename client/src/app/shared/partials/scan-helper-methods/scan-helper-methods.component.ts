@@ -5,10 +5,12 @@ import { Subscription, Subject } from 'rxjs';
 import { DnsRecord, WaybackSnapshot } from '../../model/scanners/scanner.models';
 import { ScanHelperMethodsService } from './scan-helper-methods-service.service';
 import { AppService } from '../../../services/core/app/app.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
 @Component({
   selector: 'app-scan-helper',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './scan-helper-methods.component.html'
 })
 export class ScanHelperMethods implements OnDestroy {

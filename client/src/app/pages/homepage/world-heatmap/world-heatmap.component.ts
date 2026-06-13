@@ -10,14 +10,14 @@ import { AppService } from '../../../services/core/app/app.service';
 import { ApiService } from '../../../shared/services/api.service';
 import { InsightCacheService } from '../../../shared/services/insight-cache.service';
 import { CountryData, CountryInsightPageResponse } from '../../../shared/model/homepage/country-insight.model';
-import { overlayFadeAnimation } from '../../../shared/animations/chat.overlay.animation';
+import { MapLoadingBadgesComponent } from '../../../shared/partials/map-loading-badges/map-loading-badges.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-world-heatmap',
-  imports: [HeatmapReportComponent],
+  imports: [HeatmapReportComponent, MapLoadingBadgesComponent, TranslatePipe],
   standalone: true,
-  host: { class: 'block w-full' },
   templateUrl: './world-heatmap.component.html',
-  animations: [overlayFadeAnimation]
 })
 export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, OnDestroy {
   @ViewChild('mapContainer') private chartContainer!: ElementRef;

@@ -16,7 +16,7 @@
               1
             }
           </div>
-          <span class="whitespace-nowrap text-[14px] font-medium" [ngClass]="currentStep >= 1 ? 'text-[#57a5eb]' : 'text-[#a0b8d1]'">Company Info</span>
+          <span class="whitespace-nowrap text-[14px] font-medium" [ngClass]="currentStep >= 1 ? 'text-[#57a5eb]' : 'text-[#a0b8d1]'">{{ 'Company Info' | translate }}</span>
         </div>
 
         <div class="h-[4px] w-[213px] shrink-0 rounded-[4px] max-[1200px]:w-[120px] max-[640px]:w-[60px]" [ngClass]="currentStep > 1 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d]'"></div>
@@ -29,14 +29,14 @@
               2
             }
           </div>
-          <span class="whitespace-nowrap text-[14px] font-medium" [ngClass]="currentStep >= 2 ? 'text-[#57a5eb]' : 'text-[#a0b8d1]'">Add IOCs</span>
+          <span class="whitespace-nowrap text-[14px] font-medium" [ngClass]="currentStep >= 2 ? 'text-[#57a5eb]' : 'text-[#a0b8d1]'">{{ 'Add IOCs' | translate }}</span>
         </div>
 
         <div class="h-[4px] w-[213px] shrink-0 rounded-[4px] max-[1200px]:w-[120px] max-[640px]:w-[60px]" [ngClass]="currentStep > 2 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d]'"></div>
 
         <div class="flex items-center gap-2">
           <div class="flex h-[31px] w-[31px] items-center justify-center rounded-full bg-[#fcfcfc0d] text-[14px] font-medium text-white">3</div>
-          <span class="whitespace-nowrap text-[14px] font-medium" [ngClass]="currentStep === 3 ? 'text-[#57a5eb]' : 'text-[#a0b8d1]'">Confirmation</span>
+          <span class="whitespace-nowrap text-[14px] font-medium" [ngClass]="currentStep === 3 ? 'text-[#57a5eb]' : 'text-[#a0b8d1]'">{{ 'Confirmation' | translate }}</span>
         </div>
       </div>
 
@@ -46,25 +46,25 @@
         @switch (currentStep) {
           @case (1) {
             <div>
-              <h2 class="mb-2 text-[20px] font-bold text-white">Welcome to {{ this.appService.getConfig().appSettings.app_name }}</h2>
-              <p class="mb-6 text-[14px] font-normal text-[#a0b8d1]">Let us know a little about your company</p>
+              <h2 class="mb-2 text-[20px] font-bold text-white">{{ 'Welcome to' | translate }} {{ this.appService.getConfig().appSettings.app_name }}</h2>
+              <p class="mb-6 text-[14px] font-normal text-[#a0b8d1]">{{ 'Let us know a little about your company' | translate }}</p>
               <div class="flex flex-col gap-2">
-                <label for="company" class="text-[14px] font-normal text-white">Company name</label>
-                <input id="company" data-testid="tenant-company-input" type="text" class="h-[44px] w-full rounded-[8px] border border-[#d0d5dd] bg-white px-4 text-[14px] text-[#0e1626] shadow-[0_1px_2px_#1018280d] outline-none" placeholder="Enter company name" [(ngModel)]="onboardingData.name" />
+                <label for="company" class="text-[14px] font-normal text-white">{{ 'Company name' | translate }}</label>
+                <input id="company" data-testid="tenant-company-input" type="text" class="h-[44px] w-full rounded-[8px] border border-[#d0d5dd] bg-white px-4 text-[14px] text-[#0e1626] shadow-[0_1px_2px_#1018280d] outline-none" [placeholder]="'Enter company name' | translate" [(ngModel)]="onboardingData.name" />
               </div>
             </div>
           }
           @case (2) {
             <div class="text-white">
-              <h2 class="mb-1 text-[20px] font-bold">Add IOCs</h2>
+              <h2 class="mb-1 text-[20px] font-bold">{{ 'Add IOCs' | translate }}</h2>
               <div class="flex items-center justify-between gap-2 max-[760px]:flex-wrap">
-                <p class="text-[14px] font-normal text-[#a0b8d1]">Manage and organize IOC values used by your tenant searches.</p>
+                <p class="text-[14px] font-normal text-[#a0b8d1]">{{ 'Manage and organize IOC values used by your tenant searches.' | translate }}</p>
                 <div class="flex items-center gap-2 max-[760px]:w-full max-[760px]:justify-between">
                   <div class="relative max-[760px]:flex-1">
                     <img src="assets/images/shared/theme/magnifyingglasswhite.svg" alt="Search" class="pointer-events-none absolute left-3 top-1/2 h-[13px] w-[13px] -translate-y-1/2 opacity-70 transition-all duration-300" />
-                    <input type="text" class="h-10 w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[var(--color-text1)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-sky-400/35 focus:bg-[var(--color-blue-720)] focus:ring-2 focus:ring-sky-400/20 max-[1024px]:w-[220px] max-[760px]:w-full" placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
+                    <input type="text" class="h-10 w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[var(--color-text1)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-sky-400/35 focus:bg-[var(--color-blue-720)] focus:ring-2 focus:ring-sky-400/20 max-[1024px]:w-[220px] max-[760px]:w-full" [placeholder]="'Search IOCs...' | translate" [(ngModel)]="iocSearchText" />
                   </div>
-                  <button appTooltip="clear all" class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]" (click)="openConfirmationPopup()">
+                  <button [appTooltip]="'clear all' | translate" class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]" (click)="openConfirmationPopup()">
                     <img alt="scan" src="assets/images/shared/theme/bin.svg" class="h-[16px] w-[16px]" />
                   </button>
                 </div>
@@ -85,7 +85,7 @@
                     }
                   } @else {
                     <div class="flex h-full w-full min-w-full items-center justify-start rounded-[8px] bg-[var(--color-blue-810)]/35 px-3 text-left font-[Inter] text-[12px] text-[var(--color-text4)]">
-                      No entity filters available.
+                      {{ 'No entity filters available.' | translate }}
                     </div>
                   }
                 </div>
@@ -97,15 +97,15 @@
                 }
               </div>
               <div class="mb-[16px] mt-[10px] h-[2px] w-full bg-[var(--color-border)]"></div>
-              <label class="mb-[8px] block font-[Inter] text-[14px] font-normal text-white">Enter IOCs</label>
+              <label class="mb-[8px] block font-[Inter] text-[14px] font-normal text-white">{{ 'Enter IOCs' | translate }}</label>
               <div class="relative w-full">
-                <input type="text" class="h-[44px] w-full max-w-full rounded-[8px] border border-[#D0D5DD] bg-white px-[16px] py-[10px] pr-[56px] font-[Inter] text-[14px] text-[#0E1626] shadow-[0_1px_2px_0_#1018280d] outline-none" placeholder="Type" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
+                <input type="text" class="h-[44px] w-full max-w-full rounded-[8px] border border-[#D0D5DD] bg-white px-[16px] py-[10px] pr-[56px] font-[Inter] text-[14px] text-[#0E1626] shadow-[0_1px_2px_0_#1018280d] outline-none" [placeholder]="'categoryAlerts.export.type' | translate" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
                 <button type="button" class="absolute right-[8px] top-1/2 inline-flex h-[35px] w-[80px] -translate-y-1/2 items-center justify-center rounded-[6px] bg-[var(--color-blue-640)] px-[12px] text-[13px] font-medium text-white transition hover:brightness-110" (click)="addIoc(inputEl.value); inputEl.value=''">
-                  Add
+                  {{ 'common.actions.add' | translate }}
                 </button>
               </div>
               <div class="my-[16px] h-[2px] w-full bg-[var(--color-border)]"></div>
-              <p class="mb-[8px] font-[Inter] text-[14px] font-medium text-[#a0b8d1]">Added IOCs</p>
+              <p class="mb-[8px] font-[Inter] text-[14px] font-medium text-[#a0b8d1]">{{ 'Added IOCs' | translate }}</p>
               <div class="max-h-[500px] min-h-[20px] space-y-3 overflow-y-auto max-[1024px]:max-h-[100px]">
                 @if (hasIocsWithValues()) {
                   <div>
@@ -126,20 +126,20 @@
                     }
                   </div>
                 } @else {
-                  <p class="text-[14px] text-[var(--color-text1)]">No IOCs added yet</p>
+                  <p class="text-[14px] text-[var(--color-text1)]">{{ 'No IOCs added yet' | translate }}</p>
                 }
               </div>
             </div>
           }
           @case (3) {
             <div>
-              <h2 class="mb-[25px] mt-[15px] text-[20px] font-bold text-white">Confirm Your Information</h2>
+              <h2 class="mb-[25px] mt-[15px] text-[20px] font-bold text-white">{{ 'Confirm Your Information' | translate }}</h2>
               <div class="mb-2">
-                <p class="mb-2 text-[14px] font-medium text-[#a0b8d1]">Company Name</p>
+                <p class="mb-2 text-[14px] font-medium text-[#a0b8d1]">{{ 'Company Name' | translate }}</p>
                 <p class="text-[14px] font-medium text-white">{{ onboardingData.name }}</p>
               </div>
               <hr class="my-4 h-[2px] border-0 bg-[var(--color-border)]" />
-              <p class="mb-2 text-[14px] font-medium text-[#a0b8d1]">Added IOCs</p>
+              <p class="mb-2 text-[14px] font-medium text-[#a0b8d1]">{{ 'Added IOCs' | translate }}</p>
               <div class="max-h-[290px] overflow-y-auto">
                 @if (hasIocsWithValues()) {
                   <div>
@@ -160,7 +160,7 @@
                     }
                   </div>
                 } @else {
-                  <p class="text-[14px] text-[var(--color-text1)]">No IOCs added yet</p>
+                  <p class="text-[14px] text-[var(--color-text1)]">{{ 'No IOCs added yet' | translate }}</p>
                 }
               </div>
             </div>
@@ -170,23 +170,23 @@
 
       <div class="mt-auto flex items-center justify-between max-[1024px]:mt-[30px]">
         <button class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] border border-[#57a5eb] bg-transparent text-[13px] font-medium text-[#a0b8d1] shadow-[0_1px_2px_#1018280d] disabled:cursor-not-allowed disabled:opacity-50" (click)="goBack()" [disabled]="currentStep === 1">
-          Back
+          {{ 'Back' | translate }}
         </button>
 
         @switch (currentStep) {
           @case (1) {
             <button data-testid="tenant-onboarding-next-step1" class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] bg-[#57a5eb] text-[13px] font-medium text-white shadow-[0_1px_2px_#1018280d] transition disabled:cursor-not-allowed disabled:opacity-50" (click)="goNext()" [disabled]="!onboardingData.name">
-              Next
+              {{ 'Next' | translate }}
             </button>
           }
           @case (2) {
             <button data-testid="tenant-onboarding-next-step2" class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] bg-[#57a5eb] text-[13px] font-medium text-white shadow-[0_1px_2px_#1018280d]" (click)="goNext()">
-              {{ hasIocsWithValues() ? 'Next' : 'Skip' }}
+              {{ (hasIocsWithValues() ? 'Next' : 'Skip') | translate }}
             </button>
           }
           @case (3) {
             <button data-testid="tenant-onboarding-confirm" class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] bg-[#57a5eb] text-[13px] font-medium text-white shadow-[0_1px_2px_#1018280d]" (click)="confirm()">
-              Confirm
+              {{ 'Confirm' | translate }}
             </button>
           }
         }
@@ -197,6 +197,6 @@
 
 @if (isConfirmationOpen) {
   <app-confirmation-popup
-    [message]="'Are you sure you want to clear all of your iocs?'"
+    [message]="('Are you sure you want to clear all of your iocs?') | translate"
   (confirmed)="clearAllIocs($event)"></app-confirmation-popup>
 }

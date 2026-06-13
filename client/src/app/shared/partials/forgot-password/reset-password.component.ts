@@ -6,10 +6,13 @@ import { NgForm, FormsModule } from '@angular/forms';
 import { HeaderComponent } from "../header/login-header/header.component";
 import { PasswordChecks, PasswordStrength, areAllPasswordRequirementsMet, createEmptyPasswordChecks, evaluatePasswordInput } from "../../utils/auth-form.util";
 import { AppService } from '../../../services/core/app/app.service';
+import { PasswordToggleDirective } from '../../directives/password-toggle.directive';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
 @Component({
   selector: 'app-forgot-password',
   templateUrl: './reset-password.component.html',
-  imports: [FormsModule, HeaderComponent, CommonModule]
+  imports: [FormsModule, HeaderComponent, CommonModule, PasswordToggleDirective, TranslatePipe]
 })
 export class ResetPasswordComponent implements OnInit {
   email = '';

@@ -5,9 +5,11 @@ import { ConsolidatedCallbackModel } from '../../../shared/model/results/consoli
 import { UniqueLinkItem } from '../../../shared/model/homepage/consolidation_insights';
 import { search_filter_labels } from '../../../shared/constants/shared-enums';
 import { getStatusFlag } from '../../../shared/utils/intel-report.util';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-result-insights',
-  imports: [CommonModule, FormsModule, NgClass],
+  imports: [CommonModule, FormsModule, NgClass, TranslatePipe],
   templateUrl: './result-insights.component.html'
 })
 export class ResultInsightsComponent implements OnInit {
@@ -129,6 +131,8 @@ export class ResultInsightsComponent implements OnInit {
     return ((consolidated.leak_model?.Result?.length || 0) +
           (consolidated.chat_model?.Result?.length || 0) +
           (consolidated.exploit_model?.Result?.length || 0) +
+          (consolidated.apt_model?.Result?.length || 0) +
+          (consolidated.malware_model?.Result?.length || 0) +
           (consolidated.generic_model?.Result?.length || 0) +
           (consolidated.defacement_model?.Result?.length || 0) +
           (consolidated.social_model?.Result?.length || 0));
@@ -141,6 +145,8 @@ export class ResultInsightsComponent implements OnInit {
     const models = [
       consolidated.leak_model,
       consolidated.exploit_model,
+      consolidated.apt_model,
+      consolidated.malware_model,
       consolidated.chat_model,
       consolidated.generic_model,
       consolidated.social_model,
@@ -164,7 +170,9 @@ export class ResultInsightsComponent implements OnInit {
         ...(consolidated.defacement_model?.Result || []),
         ...(consolidated.social_model?.Result || []),
         ...(consolidated.chat_model?.Result || []),
-        ...(consolidated.exploit_model?.Result || [])
+        ...(consolidated.exploit_model?.Result || []),
+        ...(consolidated.apt_model?.Result || []),
+        ...(consolidated.malware_model?.Result || [])
       ]
       : (Array.isArray(rankedData) ? rankedData : []);
     items.forEach(item => {
@@ -210,6 +218,8 @@ export class ResultInsightsComponent implements OnInit {
         ...(consolidated.social_model?.Result || []),
         ...(consolidated.leak_model?.Result || []),
         ...(consolidated.exploit_model?.Result || []),
+        ...(consolidated.apt_model?.Result || []),
+        ...(consolidated.malware_model?.Result || []),
         ...(consolidated.chat_model?.Result || [])
       ]
       : (Array.isArray(rankedData) ? rankedData : []);
@@ -242,6 +252,8 @@ export class ResultInsightsComponent implements OnInit {
         ...(consolidated.chat_model?.Result || []),
         ...(consolidated.generic_model?.Result || []),
         ...(consolidated.exploit_model?.Result || []),
+        ...(consolidated.apt_model?.Result || []),
+        ...(consolidated.malware_model?.Result || []),
         ...(consolidated.social_model?.Result || []),
         ...(consolidated.defacement_model?.Result || [])
       ]
@@ -304,7 +316,9 @@ export class ResultInsightsComponent implements OnInit {
       defacement_model: ['m_url', 'm_source_url'],
       social_model: ['m_channel_url', 'm_weblink'],
       chat_model: ['m_weblink'],
-      exploit_model: ['m_url']
+      exploit_model: ['m_url'],
+      apt_model: ['m_source_url', 'm_references'],
+      malware_model: ['m_source_url', 'm_references']
     };
     Object.entries(fieldMap).forEach(([modelKey, fields]) => {
       const results = (consolidated as any)[modelKey]?.Result || [];

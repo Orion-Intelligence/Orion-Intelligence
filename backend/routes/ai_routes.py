@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException
 
 from configs.app_dependency import get_current_user, license_required, role_required
 from configs.limiter_dependency import limiter_dependency
@@ -38,11 +38,6 @@ async def summarize_ai(payload: nlp_data_model, current_user=Depends(get_current
 
 @ai_routes.post(
     "/api/nlp/chat/report",
-    summary="Process chat report with NLP",
-    description="Use NLP pipeline to parse and enrich chat-based report content.",
-    tags=["NLP", "Chat"],
-    operation_id="chatReportNLP",
-    response_description="Parsed and enriched chat report.",
     status_code=200,
     include_in_schema=False,
     dependencies=[Depends(ai_enabled_required), Depends(role_required([user_role.ADMIN])), Depends(limiter_dependency)], )
@@ -53,11 +48,6 @@ async def chat_report(payload: ReportChatRequest, current_user=Depends(get_curre
 
 @ai_routes.post(
     "/api/nexus/chat",
-    summary="Process chat report with Nexus",
-    description="Use the Nexus chat pipeline to process and respond to chat-based report content.",
-    tags=["NLP", "Chat"],
-    operation_id="nexusChat",
-    response_description="Processed Nexus chat response.",
     status_code=200,
     include_in_schema=False,
     dependencies=[
@@ -73,6 +63,19 @@ async def chat_report(payload: ReportChatRequest, current_user=Depends(get_curre
 )
 async def nexus_chat(payload: ReportChatRequest, current_user=Depends(get_current_user)):
     response = await nexus_manager.getInstance().parse_chat(payload, user_id=str(current_user.id), current_user=current_user)
+    return response
+
+
+@ai_routes.post(
+    "/api/nexus/chat/workspace",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(ai_enabled_required), Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), Depends(limiter_dependency)], )
+async def nexus_workspace_chat(payload: ReportChatRequest | None = Body(default=None), current_user=Depends(get_current_user)):
+    user_id = str(current_user.id)
+    if payload is None or not payload.message.strip():
+        return await nexus_manager.getInstance().resume_chat(user_id=user_id)
+    response = await nexus_manager.getInstance().parse_chat(payload, user_id=user_id, current_user=current_user, recoverable=True)
     return response
 
 
@@ -109,11 +112,6 @@ async def clear_nexus_chat_session(current_user=Depends(get_current_user)):
 
 @ai_routes.post(
     "/api/nexus/analyze-text",
-    summary="Analyze text with Nexus OCR classifier",
-    description="Use the Nexus OCR classifier to analyze text for spam and malicious URLs.",
-    tags=["NLP", "Nexus"],
-    operation_id="nexusAnalyzeText",
-    response_description="Nexus OCR classifier result.",
     status_code=200,
     include_in_schema=False,
     dependencies=[

@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, output } from '@angular/core';
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
-import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, ExploitSubCategory, GeneralSubCategory, FeedSubCategory, SocialSubCategory, StealerlogsSubCategory, ScannerSubCategory, TenantSubCategory, ProfileSubCategory } from '../../../shared/constants/pages';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, ExploitSubCategory, GeneralSubCategory, FeedSubCategory, SocialSubCategory, StealerlogsSubCategory, ScannerSubCategory, TenantSubCategory, ProfileSubCategory, ThreatIntelSubCategory } from '../../../shared/constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
@@ -13,15 +13,15 @@ import { AppService } from '../../../services/core/app/app.service';
 import { ScrollService } from '../../../shared/services/scroll.service';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { sidebarModeAnimation } from '../../../shared/animations/sidebar.mode.animation';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ChatWidgetComponent } from '../../root-searches/ai-workspace/chat-widget/chat-widget.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
-  imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective, ChatWidgetComponent],
+  imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective, ChatWidgetComponent, TranslatePipe],
   templateUrl: './dashboard-sidebar.component.html',
-  animations: [sidebarModeAnimation],
 })
 export class DashboardSidebarComponent implements OnInit, OnDestroy {
   private readonly closeForSubscriptionHandler = () => {
@@ -33,9 +33,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   sidebar_default = true;
   min_detected = false;
   mobile_menu_status = false;
-  animationsDisabled = false;
   apiCategories = Object.values(ApiSubCategory);
   exploitCategories = Object.values(ExploitSubCategory);
+  threatIntelCategories = Object.values(ThreatIntelSubCategory);
   dumpCategories = Object.values(DumpSubCategory);
   newsCategories = Object.values(FeedSubCategory);
   generalCategories = Object.values(GeneralSubCategory);
@@ -45,7 +45,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   stealerlogsCategories = Object.values(StealerlogsSubCategory);
   scannerCategories = Object.values(ScannerSubCategory);
   tenantCategories = Object.values(TenantSubCategory);
-  profileCategories = Object.values(ProfileSubCategory);
   category = Category;
   readonly menuToggle = output<undefined>();
 
@@ -88,8 +87,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   checkScreenWidth() {
     const shouldStartCollapsed = window.innerWidth < 800;
-    const isMobile = window.innerWidth < 600;
-    this.animationsDisabled = isMobile;
     if (shouldStartCollapsed && !this.min_detected && this.sidebar_default) {
       this.min_detected = true;
       this.onToggleSidebar();
@@ -124,6 +121,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
           break;
         case Category.DEFACEMENT:
           firstSubcategory = this.defacementCategories[0];
+          break;
+        case Category.THREAT_INTEL:
+          firstSubcategory = this.threatIntelCategories[0];
           break;
         case Category.DUMP:
           firstSubcategory = this.dumpCategories[0];
@@ -175,30 +175,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   onToggleSidebar(mobile_menu_status: boolean = false) {
-    // TODO: The 'emit' function requires a mandatory void argument
     this.menuToggle.emit(undefined);
     this.sidebar_default = !this.sidebar_default;
     this.mobile_menu_status = mobile_menu_status;
-  }
-
-  canAccessNetworkIntel(): boolean {
-    return this.isAdmin() || this.licenseService.canUseModule('osint_advanced');
-  }
-
-  canAccessSocialIntel(): boolean {
-    return this.isAdmin() || (!this.isDemo() && this.licenseService.canUseModule('social_mapper'));
-  }
-
-  canAccessStandaloneDataCollection(): boolean {
-    return this.canAccessNetworkIntel() || this.licenseService.canUseCtiGraph() || this.canAccessSocialIntel() || this.shouldShowWhistleBlowing() || this.isDemo();
-  }
-
-  canAccessWhistleBlowing(): boolean {
-    return this.isAdmin() || !this.authService.getIsMobileDemo();
-  }
-
-  shouldShowWhistleBlowing(): boolean {
-    return !!this.appService.getConfig().appSettings.home_header_whistle_blowing_allowed;
   }
 
   requestStandaloneSubscription(event: Event, accessAllowed: boolean) {
@@ -224,23 +203,30 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     const categories = Object.values(ProfileSubCategory);
     const eventManagementEnabled = this.appService.userSessionData().tenant.eventManagementEnabled === true;
     const canAccessFeeder = this.licenseService.canUseModule('feeder');
+    const isMobileDemo = this.appService.isMobileMode();
 
     if (this.isAdmin()) {
       return categories.filter(c => c !== ProfileSubCategory.IOC &&
               c !== ProfileSubCategory.STATISTICS &&
               c !== ProfileSubCategory.TENANT_SETTINGS &&
+              (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
+              (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
               (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
               (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
     }
     if (this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
       return categories.filter(c => c !== ProfileSubCategory.TENANT &&
               c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+              (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
+              (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
               (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
               (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
     }
     return categories.filter(c => c !== ProfileSubCategory.TENANT &&
           c !== ProfileSubCategory.SYSTEM_SETTINGS &&
           c !== ProfileSubCategory.EVENT_MANAGEMENT &&
+          (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
+          (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
           (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
           c !== ProfileSubCategory.USERS &&
           c !== ProfileSubCategory.AUDITLOG &&

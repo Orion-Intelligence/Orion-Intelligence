@@ -6,6 +6,8 @@ import { ConsolidatedApiService } from '../../../../shared/services/consolidated
 import { ConsolidatedScanResults, ConsolidatedLiveApiResults, ConsolidatedLiveApis } from '../../../../shared/model/results/consolidated/consolidated.callback.model';
 import { RouterLink } from '@angular/router';
 import { scanAnimation } from '../../../../shared/animations/scan.animations';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 type ScanKey = 'basic' | 'seo' | 'repo' | 'liveapi';
 interface PendingMsg {
     status: 'pending';
@@ -15,7 +17,7 @@ interface PendingMsg {
 @Component({
   selector: 'app-consolidated-scan',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   templateUrl: './consolidated-scan.component.html',
   animations: [scanAnimation]
 })
@@ -71,7 +73,7 @@ export class ConsolidatedScanComponent {
     if (!isDomain) {
       return;
     }
-    const isRepo = input.includes('github.com/');
+    const isRepo = input.includes('github');
     this.expectedTypes = (isRepo ? ['repo', 'liveapi'] : ['basic', 'seo', 'liveapi']) as ScanKey[];
     this.resultsByType = {};
     this.progressByType = {};

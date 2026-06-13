@@ -9,11 +9,12 @@ import { FeederService } from './feeder.service';
 import { SidebarUserFeederAddComponent } from './add/sidebar-user-feeder-add.component';
 import { SidebarUserFeederViewComponent } from './view/sidebar-user-feeder-view.component';
 import { supportsFileUploadForRuleType, supportsValueUploadForRuleType } from './feeder-rule.utils';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-sidebar-user-feeder',
   standalone: true,
-  imports: [NgClass, FormsModule, SidebarUserFeederAddComponent, SidebarUserFeederViewComponent],
+  imports: [NgClass, FormsModule, SidebarUserFeederAddComponent, SidebarUserFeederViewComponent, TranslatePipe],
   templateUrl: './sidebar-user-feeder.component.html',
   animations: [fadeInDashboardItem],
 })

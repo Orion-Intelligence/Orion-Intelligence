@@ -6,9 +6,11 @@ import { filter_mapping } from '../../../shared/constants/filters';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { Router } from '@angular/router';
 import { countFilterValues } from '../../../shared/utils/filter-values.util';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-selected-filter-bar',
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './selected-filter-bar.component.html',
   animations: [fadeInDashboardItem],
 })

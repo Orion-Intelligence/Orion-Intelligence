@@ -1,9 +1,25 @@
+<<<<<<< HEAD
 <div class="flex h-full w-full flex-col">
   @if (isCollapsed()) {
     <div class="flex w-full shrink-0 items-center justify-center pt-0 text-[24px] font-medium">
       <button (click)="toggleClicked.emit(undefined)" aria-label="Expand sidebar" title="Expand sidebar" class="mx-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-transparent bg-transparent p-0 transition-colors hover:bg-[var(--color-blue-870)]">
         <img alt="Menu" class="block h-5 w-5 shrink-0 max-w-none object-contain" height="20" src="assets/images/sidebar/menu-mini.svg" width="20" />
       </button>
+=======
+<div class="block h-[calc(100vh-3rem)] min-h-0 w-full flex flex-col transition-all duration-300 ease-in-out">
+  <div class="flex shrink-0 items-center border-b border-slate-800 p-3 [body.light-theme_&]:border-[var(--color-border)]" [class.gap-3]="!isCollapsed()" [class.justify-between]="!isCollapsed()" [class.justify-center]="isCollapsed()">
+    <a [href]="homeHref()" [title]="logoAlt()" class="hidden lg:flex items-center overflow-hidden transition-all duration-300" [class.flex-grow]="!isCollapsed()" [class.w-0]="isCollapsed()" [class.opacity-0]="isCollapsed()" [class.pointer-events-none]="isCollapsed()">
+      <img [src]="logoSrc" [alt]="logoAlt()" class="h-8 object-contain">
+    </a>
+    <button (click)="toggleClicked.emit(undefined)" [class]="isCollapsed() ? 'h-10 w-10 shrink-0 flex items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300 ring-1 ring-indigo-400/50 transition-colors' : 'h-10 w-10 shrink-0 flex items-center justify-center rounded-xl text-[var(--color-text4)] hover:text-[var(--color-text1)] transition-colors active:bg-transparent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500'">
+      <i class="bi bi-list text-xl leading-none"></i>
+    </button>
+  </div>
+
+  <div class="relative flex-grow overflow-hidden">
+    <div class="absolute top-0 left-0 w-80 h-full transition-all duration-300 ease-out" [class.opacity-100]="!isCollapsed()" [class.opacity-0]="isCollapsed()" [class.translate-x-0]="!isCollapsed()" [class.-translate-x-3]="isCollapsed()" [class.pointer-events-none]="isCollapsed()">
+      <ng-content select="[sidebar-expanded]"></ng-content>
+>>>>>>> trusted-main
     </div>
     <div class="mt-1 flex w-full shrink-0 items-center justify-center px-2 py-2 text-[24px] font-medium">
       <a [href]="homeHref()" [title]="logoAlt()" aria-label="Go to homepage" class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-[8px] transition-colors hover:bg-[var(--color-blue-870)]">

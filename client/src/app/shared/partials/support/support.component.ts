@@ -5,9 +5,11 @@ import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { popupAnimation, overlayAnimation } from '../../animations/popup.animations';
 import { finalize } from 'rxjs';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
 @Component({
   selector: 'app-support',
-  imports: [NgClass, FormsModule],
+  imports: [NgClass, FormsModule, TranslatePipe],
   templateUrl: './support.component.html',
   animations: [popupAnimation, overlayAnimation],
 })

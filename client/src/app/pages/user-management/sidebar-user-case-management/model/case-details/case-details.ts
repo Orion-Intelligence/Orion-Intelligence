@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, forwardRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -6,31 +6,72 @@ import { EntityDetailsComponent } from '../entity-details/entity-details';
 import { ReportFeedbackCommentsComponent } from '../../../../../sections/report/social-interactions/report-feedback-comments/report-feedback-comments.component';
 import { ReportUserSidebarComponent } from '../../../../../sections/report/social-interactions/report-user-sidebar/report-user-sidebar.component';
 import { ReportFeedbackModel } from '../../../../../sections/report/templates/report_general/models/report-feedback.model';
-import { Case, CaseAnalyst, CaseArtifact, CaseArtifactRequest, CaseClosure, CaseClosureRequest, CaseComment, CaseCommentRequest, CaseEntity, CaseEntityRequest, CaseTag, CaseTask, CaseTaskRequest, CaseUpdateRequest } from '../../../../../shared/model/case-management/case.model';
-import { ARTIFACT_TYPE_OPTIONS, CASE_LINK_RELATIONSHIP_OPTIONS, CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, CLOSURE_REASON_OPTIONS, DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS, SOURCE_TYPE_OPTIONS, TASK_STATUS_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
+import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseArtifactFile, CaseArtifactRequest, CaseClosure, CaseClosureRequest, CaseComment, CaseCommentRequest, CaseEntity, CaseEntityRequest, CaseLink, CaseTag, CaseTask, CaseTaskRequest, CaseUpdateRequest, SharedCaseReport } from '../../../../../shared/model/case-management/case.model';
+import { CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 import { ConfirmationPopupComponent } from '../../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
+import { HttpClient } from '@angular/common/http';
+import { CaseArtifactsSectionComponent } from './case-artifacts-section/case-artifacts-section';
+import { CaseClosureSectionComponent } from './case-closure-section/case-closure-section';
+import { CaseLinkedCasesSectionComponent } from './case-linked-cases-section/case-linked-cases-section';
+import { CaseRelatedEntitiesSectionComponent } from './case-related-entities-section/case-related-entities-section';
+import { CaseTasksSectionComponent } from './case-tasks-section/case-tasks-section';
+import { CaseDetailsEditSection, CaseDetailsStore } from './case-details.store';
+import { caseInlineMotion, caseModeSwapMotion, caseSectionMotion } from './case-details.animations';
+import { CaseEditDrawerComponent } from './case-edit-drawer/case-edit-drawer';
+import { CasePdfExportService } from '../../case-management-service/case-pdf-export.service';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-case-details',
-  imports: [CommonModule, FormsModule, EntityDetailsComponent, ReportFeedbackCommentsComponent, ReportUserSidebarComponent, ConfirmationPopupComponent, TooltipDirective],
+  imports: [
+    CommonModule,
+    FormsModule,
+    EntityDetailsComponent,
+    ReportFeedbackCommentsComponent,
+    ReportUserSidebarComponent,
+    ConfirmationPopupComponent,
+    TooltipDirective,
+    CaseArtifactsSectionComponent,
+    CaseClosureSectionComponent,
+    CaseEditDrawerComponent,
+    CaseLinkedCasesSectionComponent,
+    CaseRelatedEntitiesSectionComponent,
+    CaseTasksSectionComponent, TranslatePipe],
+  providers: [
+    { provide: CaseDetailsStore, useExisting: forwardRef(() => CaseDetails) }
+  ],
+  animations: [caseInlineMotion, caseModeSwapMotion, caseSectionMotion],
   templateUrl: './case-details.html',
 })
-export class CaseDetails implements OnInit {
+export class CaseDetails extends CaseDetailsStore implements OnInit {
   @ViewChild(ReportUserSidebarComponent) private userSidebar?: ReportUserSidebarComponent;
+  private artifactReportSearchTimer: ReturnType<typeof setTimeout> | null = null;
 
   caseData: Case | null = null;
   isLoading = true;
+  caseMotionDisabled = false;
   isEditing = false;
+  activeEditSection: CaseDetailsEditSection | null = null;
   editedCase: Case | null = null;
-  expandedRelatedEntityIds = new Set<string>();
+  isAddingRelatedEntity = false;
+  isAddingArtifact = false;
+  isAddingTask = false;
+  isAddingLinkedCase = false;
+  isClosingCase = false;
+  newRelatedEntity: CaseEntity | null = null;
+  newArtifact: CaseArtifact | null = null;
+  newTask: CaseTask | null = null;
+  newLinkedCase: CaseLink | null = null;
+  newClosure: CaseClosure | null = null;
   analysts: CaseAnalyst[] = [];
   accessibleCases: Case[] = [];
   isCommentSaving = false;
   isShareCreating = false;
   isShareRevoking = false;
+  isPdfExporting = false;
   pendingShareAction: 'create' | 'revoke' | null = null;
   commentErrorMessage = '';
   caseTypeOptions = CASE_TYPE_OPTIONS;
@@ -38,14 +79,20 @@ export class CaseDetails implements OnInit {
   statusOptions = CASE_STATUS_OPTIONS;
   severityOptions = SEVERITY_OPTIONS;
   priorityOptions = PRIORITY_OPTIONS;
-  taskStatusOptions = TASK_STATUS_OPTIONS;
-  artifactTypeOptions = ARTIFACT_TYPE_OPTIONS;
-  sourceTypeOptions = SOURCE_TYPE_OPTIONS;
-  caseLinkRelationshipOptions = CASE_LINK_RELATIONSHIP_OPTIONS;
-  closureReasonOptions = CLOSURE_REASON_OPTIONS;
   tagOptions: { value: CaseTag; label: string }[] = CASE_TAG_OPTIONS;
+  readonly artifactAllowedFileTypes = ['application/pdf', 'image/jpeg', 'image/png', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  pendingNewArtifactFiles: File[] = [];
+  pendingNewArtifactFileInput: HTMLInputElement | null = null;
+  artifactReports: ArtifactReportOption[] = [];
+  isArtifactReportsLoading = false;
+  artifactReportSearchText = '';
+  isArtifactReportDropdownOpen = false;
+  isArchiveConfirmationOpen = false;
+  isArchivingCase = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private messageNotificationService: MessageNotificationService) { }
+  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef) {
+    super();
+  }
 
   ngOnInit(): void {
     this.loadCaseDetails();
@@ -84,7 +131,11 @@ export class CaseDetails implements OnInit {
         caseData.closure = caseData.closure || null;
         caseData.assignedAnalystIds = caseData.assignedAnalystIds || [];
         this.caseData = caseData;
+        this.caseMotionDisabled = true;
         this.isLoading = false;
+        setTimeout(() => {
+          this.caseMotionDisabled = false;
+        });
       },
       error: () => {
         this.messageNotificationService.show('Case not found');
@@ -105,7 +156,7 @@ export class CaseDetails implements OnInit {
     });
   }
 
-  enableEditing(): void {
+  enableEditing(section: CaseDetailsEditSection = 'caseDetails'): void {
     if (!this.caseData) {
       return;
     }
@@ -124,12 +175,287 @@ export class CaseDetails implements OnInit {
     editedCase.tasks = (editedCase.tasks || []).map(task => this.ensureTaskDefaults(task));
     this.ensurePrimaryEntity(editedCase);
     this.editedCase = editedCase;
+    this.activeEditSection = section;
     this.isEditing = true;
   }
 
   cancelEditing(): void {
     this.isEditing = false;
+    this.activeEditSection = null;
     this.editedCase = null;
+    this.cancelAllSectionModes();
+  }
+
+  private patchArtifactFiles(artifactId: string, files: CaseArtifact['files']): void {
+    if (this.editedCase?.artifacts) {
+      this.editedCase = {
+        ...this.editedCase,
+        artifacts: this.editedCase.artifacts.map(artifact =>
+          artifact.artifactId === artifactId
+            ? { ...artifact, files }
+            : artifact)
+      };
+    }
+
+    if (this.caseData?.artifacts) {
+      this.caseData = {
+        ...this.caseData,
+        artifacts: this.caseData.artifacts.map(artifact =>
+          artifact.artifactId === artifactId
+            ? { ...artifact, files }
+            : artifact)
+      };
+    }
+
+    this.cdr.detectChanges();
+  }
+
+  uploadArtifactFiles(artifact: CaseArtifact, fileInput: HTMLInputElement): void {
+    if (!this.caseData || !artifact.artifactId) {
+      return;
+    }
+
+    const files = Array.from(fileInput.files || []);
+
+    if (!this.validateArtifactFiles(artifact, files)) {
+      fileInput.value = '';
+      return;
+    }
+
+    this.caseService.uploadArtifactFiles(this.caseData.caseId, artifact.artifactId, files).subscribe({
+      next: uploaded => {
+        const nextFiles = [
+          ...(artifact.files || []),
+          ...(uploaded.files || [])
+        ];
+
+        this.patchArtifactFiles(artifact.artifactId, nextFiles);
+
+        fileInput.value = '';
+        this.messageNotificationService.show('Files uploaded successfully', 'success');
+      },
+      error: err => {
+        fileInput.value = '';
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to upload files');
+      }
+    });
+  }
+
+  loadArtifactReports(source: string, q: string = ''): void {
+    this.artifactReports = [];
+
+    if (!source) {
+      return;
+    }
+
+    this.isArtifactReportsLoading = true;
+
+    this.caseService.getArtifactReports(source, q, 10).subscribe({
+      next: reports => {
+        this.artifactReports = reports || [];
+        this.isArtifactReportsLoading = false;
+      },
+      error: err => {
+        this.artifactReports = [];
+        this.isArtifactReportsLoading = false;
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to load reports');
+      }
+    });
+  }
+
+  searchArtifactReports(source: string, q: string): void {
+    this.artifactReportSearchText = q;
+
+    if (this.artifactReportSearchTimer) {
+      clearTimeout(this.artifactReportSearchTimer);
+    }
+
+    if (!source) {
+      this.artifactReports = [];
+      return;
+    }
+
+    this.artifactReportSearchTimer = setTimeout(() => {
+      this.loadArtifactReports(source, q);
+    }, 500);
+  }
+
+  scheduleArtifactReportSearch(artifact: CaseArtifact): void {
+    if (!artifact || artifact.type !== 'report' || !artifact.linkedReportSource) {
+      return;
+    }
+
+    this.searchArtifactReports(artifact.linkedReportSource, artifact.title || '');
+  }
+
+  selectArtifactReport(artifact: CaseArtifact, report: ArtifactReportOption): void {
+    artifact.linkedReportId = report.id;
+    artifact.linkedReportTitle = report.title;
+
+    this.artifactReportSearchText = report.title;
+    this.isArtifactReportDropdownOpen = false;
+  }
+
+  clearArtifactReportSelection(artifact: CaseArtifact): void {
+    artifact.linkedReportId = '';
+    artifact.linkedReportTitle = '';
+
+    this.artifactReportSearchText = '';
+    this.isArtifactReportDropdownOpen = true;
+
+    if (artifact.linkedReportSource) {
+      this.loadArtifactReports(artifact.linkedReportSource, '');
+    }
+  }
+
+  viewArtifactReport(artifact: CaseArtifact): void {
+    const url = this.getArtifactReportViewUrl(artifact);
+
+    if (!url) {
+      this.messageNotificationService.show('Report link is not available');
+      return;
+    }
+
+    window.open(url, '_blank', 'noopener');
+  }
+
+  private getArtifactReportViewUrl(artifact: CaseArtifact): string {
+    if (!artifact.linkedReportSource || !artifact.linkedReportId) {
+      return '';
+    }
+
+    const source = artifact.linkedReportSource;
+    const reportId = encodeURIComponent(artifact.linkedReportId);
+
+    const sourcePathMap: Record<string, { base: string; category: string }> = {
+      strategic: { base: 'strategic', category: 'all' },
+      breach: { base: 'breach', category: 'all' },
+      defacement: { base: 'defacement', category: 'all' },
+      social: { base: 'social', category: 'all' },
+      feed: { base: 'feed', category: 'news' },
+      exploit: { base: 'exploit', category: 'all' }
+    };
+
+    const config = sourcePathMap[source];
+
+    if (!config) {
+      return '';
+    }
+
+    const tree = this.router.createUrlTree([
+      '/dashboard',
+      config.base,
+      config.category,
+      reportId
+    ]);
+
+    return this.router.serializeUrl(tree);
+  }
+
+  downloadArtifactFile(artifact: CaseArtifact, fileId: string): void {
+    if (!this.caseData || !artifact.artifactId) {
+      return;
+    }
+
+    const artifactFile = (artifact.files || []).find(file => file.fileId === fileId);
+
+    if (artifactFile && this.isArtifactFileIntegrityFailed(artifactFile)) {
+      this.messageNotificationService.show('File integrity check failed');
+      return;
+    }
+
+    this.http.get(`/api/profile/cases/${this.caseData.caseId}/artifacts/${artifact.artifactId}/files/${fileId}/download`,
+      { responseType: 'blob' }).subscribe({
+      next: blob => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = artifactFile?.fileName || 'artifact-file';
+        link.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: err => {
+        if (artifactFile) {
+          artifactFile.integrityStatus = 'failed';
+        }
+
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
+      }
+    });
+  }
+
+  deleteArtifactFile(artifact: CaseArtifact, fileId: string): void {
+    if (!this.caseData || !artifact.artifactId) {
+      return;
+    }
+
+    this.caseService.deleteArtifactFile(this.caseData.caseId, artifact.artifactId, fileId).subscribe({
+      next: () => {
+        const nextFiles = (artifact.files || []).filter(file => file.fileId !== fileId);
+
+        this.patchArtifactFiles(artifact.artifactId, nextFiles);
+
+        this.messageNotificationService.show('File deleted successfully', 'success');
+      },
+      error: err => {
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to delete file');
+      }
+    });
+  }
+
+  setPendingNewArtifactFiles(fileInput: HTMLInputElement): void {
+    if (!this.newArtifact) {
+      return;
+    }
+
+    const files = Array.from(fileInput.files || []);
+
+    if (!files.length) {
+      this.pendingNewArtifactFiles = [];
+      this.pendingNewArtifactFileInput = null;
+      return;
+    }
+
+    if (!this.validateArtifactFiles(this.newArtifact, files)) {
+      fileInput.value = '';
+      this.pendingNewArtifactFiles = [];
+      this.pendingNewArtifactFileInput = null;
+      return;
+    }
+
+    this.pendingNewArtifactFiles = files;
+    this.pendingNewArtifactFileInput = fileInput;
+  }
+
+  getPendingNewArtifactFileNames(): string {
+    return this.pendingNewArtifactFiles.map(file => file.name).join(', ');
+  }
+
+  exportPdf(): void {
+    if (!this.caseData || this.isPdfExporting) {
+      return;
+    }
+    this.isPdfExporting = true;
+    this.casePdfExportService.exportCaseReport(this.buildCasePdfReport(this.caseData), {
+      filenameSuffix: 'case-report',
+      reportLabel: 'Case Report'
+    }).subscribe({
+      next: () => {
+        this.isPdfExporting = false;
+      },
+      error: err => {
+        this.isPdfExporting = false;
+        this.messageNotificationService.show(err?.message || 'Failed to export PDF');
+      }
+    });
+  }
+
+  openArchiveConfirmation(): void {
+    if (!this.caseData?.closure || this.caseData.isArchived || this.isArchivingCase) {
+      return;
+    }
+
+    this.isArchiveConfirmationOpen = true;
   }
 
   openShareConfirmation(): void {
@@ -167,6 +493,30 @@ export class CaseDetails implements OnInit {
       return 'Revoking share links will expire all previously shared links for this case. Do you want to continue?';
     }
     return '';
+  }
+
+  archiveCase(confirmed: boolean): void {
+    this.isArchiveConfirmationOpen = false;
+
+    if (!confirmed || !this.caseData || this.isArchivingCase) {
+      return;
+    }
+
+    this.isArchivingCase = true;
+
+    this.caseService.archiveCase(this.caseData.caseId).subscribe({
+      next: () => {
+        this.isArchivingCase = false;
+        if (this.caseData) {
+          this.caseData.isArchived = true;
+        }
+        this.messageNotificationService.show('Case archived successfully', 'success');
+      },
+      error: err => {
+        this.isArchivingCase = false;
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to archive case');
+      }
+    });
   }
 
   private shareCase(): void {
@@ -212,52 +562,143 @@ export class CaseDetails implements OnInit {
     });
   }
 
-  saveChanges(): void {
-    if (!this.editedCase) {
-      return;
-    }
+  private buildCasePdfReport(caseData: Case): SharedCaseReport {
+    const report: SharedCaseReport = {
+      shareId: '',
+      caseId: caseData.caseId,
+      title: caseData.title,
+      description: caseData.description,
+      caseType: caseData.caseType,
+      otherValue: caseData.caseTypeOtherValue,
+      status: caseData.status,
+      severity: caseData.severity,
+      priority: caseData.priority,
+      tags: caseData.tags || [],
+      primaryEntityId: caseData.primaryEntityId || null,
+      entities: (caseData.entities || []).map(entity => {
+        const createdAt = this.toPdfDate(entity.createdAt);
+        const updatedAt = this.toPdfDate(entity.updatedAt);
+        return {
+          entityId: entity.entityId,
+          type: entity.type,
+          value: entity.value,
+          entityTypeOtherValue: entity.entityTypeOtherValue,
+          entitySourceOtherValue: entity.entitySourceOtherValue,
+          entityDescription: entity.entityDescription,
+          role: entity.role,
+          confidence: entity.confidence,
+          source: entity.source,
+          identifiers: entity.identifiers || [],
+          socialProfiles: entity.socialProfiles || [],
+          tags: entity.tags || [],
+          createdBy: entity.createdBy,
+          updatedBy: entity.updatedBy,
+          ...(createdAt ? { createdAt } : {}),
+          ...(updatedAt ? { updatedAt } : {})
+        };
+      }),
+      artifacts: (caseData.artifacts || []).map(artifact => {
+        const capturedAt = this.toPdfDate(artifact.capturedAt);
+        return {
+          artifactId: artifact.artifactId,
+          type: artifact.type,
+          title: artifact.title,
+          description: artifact.description,
+          source: artifact.source,
+          artifactTypeOtherValue: artifact.artifactTypeOtherValue,
+          artifactSourceOtherValue: artifact.artifactSourceOtherValue,
+          url: artifact.url,
+          files: artifact.files || [],
+          tags: artifact.tags || [],
+          ...(capturedAt ? { capturedAt } : {})
+        };
+      }),
+      tasks: (caseData.tasks || []).map(task => {
+        const dueAt = this.toPdfDate(task.dueAt);
+        const createdAt = this.toPdfDate(task.createdAt);
+        const updatedAt = this.toPdfDate(task.updatedAt);
+        const completedAt = this.toPdfDate(task.completedAt);
+        return {
+          taskId: task.taskId,
+          title: task.title,
+          description: task.description,
+          status: task.status,
+          priority: task.priority,
+          assignedTo: task.assignedTo ? this.getAnalystLabel(task.assignedTo) : '',
+          ...(dueAt ? { dueAt } : {}),
+          ...(createdAt ? { createdAt } : {}),
+          ...(updatedAt ? { updatedAt } : {}),
+          ...(completedAt ? { completedAt } : {})
+        };
+      }),
+      linkedCases: (caseData.linkedCases || []).map(linkedCase => {
+        const createdAt = this.toPdfDate(linkedCase.createdAt);
+        return {
+          targetCaseId: linkedCase.targetCaseId,
+          relationship: linkedCase.relationship,
+          reason: linkedCase.reason,
+          createdBy: linkedCase.createdBy,
+          ...(createdAt ? { createdAt } : {})
+        };
+      }),
+      comments: (caseData.comments || []).map(comment => {
+        const createdAt = this.toPdfDate(comment.createdAt);
+        const updatedAt = this.toPdfDate(comment.updatedAt);
+        return {
+          commentId: comment.commentId,
+          body: comment.body,
+          entityIds: comment.entityIds || [],
+          artifactIds: comment.artifactIds || [],
+          createdBy: comment.createdBy,
+          ...(createdAt ? { createdAt } : {}),
+          ...(updatedAt ? { updatedAt } : {})
+        };
+      }),
+      closure: caseData.closure ? {
+        reason: caseData.closure.reason,
+        closureReasonOtherValue: caseData.closure.closureReasonOtherValue,
+        summary: caseData.closure.summary,
+        resolution: caseData.closure.resolution,
+        ...((this.toPdfDate(caseData.closure.closedAt || caseData.closedAt)) ? { closedAt: this.toPdfDate(caseData.closure.closedAt || caseData.closedAt) } : {})
+      } : null
+    };
 
-    if (!this.editedCase.title.trim()) {
-      this.messageNotificationService.show('Case title is required');
-      return;
+    const createdAt = this.toPdfDate(caseData.createdAt);
+    const updatedAt = this.toPdfDate(caseData.updatedAt);
+    const closedAt = this.toPdfDate(caseData.closedAt);
+    if (createdAt) {
+      report.createdAt = createdAt;
     }
-
-    const primaryEntity = this.ensurePrimaryEntity(this.editedCase);
-    if (!primaryEntity.value.trim()) {
-      this.messageNotificationService.show('Primary entity value is required');
-      return;
+    if (updatedAt) {
+      report.updatedAt = updatedAt;
     }
-
-    const invalidRelatedEntityIndex = this.getRelatedEntities(this.editedCase).findIndex(entity => !entity.value.trim());
-    if (invalidRelatedEntityIndex >= 0) {
-      this.messageNotificationService.show(`Related entity ${invalidRelatedEntityIndex + 1} value is required`);
-      return;
+    if (closedAt) {
+      report.closedAt = closedAt;
     }
+    return report;
+  }
 
-    const invalidArtifactIndex = (this.editedCase.artifacts || []).findIndex(artifact => !artifact.title.trim());
-    if (invalidArtifactIndex >= 0) {
-      this.messageNotificationService.show(`Artifact ${invalidArtifactIndex + 1} title is required`);
-      return;
+  private toPdfDate(value?: Date | string | null): string | undefined {
+    if (!value) {
+      return undefined;
     }
+    return value instanceof Date ? value.toISOString() : String(value);
+  }
 
-    const invalidTaskIndex = (this.editedCase.tasks || []).findIndex(task => !task.title.trim());
-    if (invalidTaskIndex >= 0) {
-      this.messageNotificationService.show(`Task ${invalidTaskIndex + 1} title is required`);
-      return;
-    }
+  private cancelAllSectionModes(): void {
+    this.isAddingRelatedEntity = false;
+    this.isAddingArtifact = false;
+    this.isAddingTask = false;
+    this.isAddingLinkedCase = false;
+    this.isClosingCase = false;
 
-    const payload = this.cleanCaseForSave(this.editedCase);
-    this.caseService.updateCase(this.editedCase.caseId, payload).subscribe({
-      next: (updated) => {
-        this.caseData = updated;
-        this.isEditing = false;
-        this.editedCase = null;
-        this.messageNotificationService.show('Case updated successfully', 'success');
-      },
-      error: (err) => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to update case');
-      }
-    });
+    this.newRelatedEntity = null;
+    this.newArtifact = null;
+    this.pendingNewArtifactFiles = [];
+    this.pendingNewArtifactFileInput = null;
+    this.newTask = null;
+    this.newLinkedCase = null;
+    this.newClosure = null;
   }
 
   get editablePrimaryEntity(): CaseEntity | null {
@@ -281,115 +722,54 @@ export class CaseDetails implements OnInit {
     return caseItem?.entities?.filter(entity => entity.entityId !== primaryEntity?.entityId) || [];
   }
 
-  toggleRelatedEntity(entityId: string): void {
-    if (this.expandedRelatedEntityIds.has(entityId)) {
-      this.expandedRelatedEntityIds.delete(entityId);
-      return;
-    }
-    this.expandedRelatedEntityIds.add(entityId);
-  }
-
-  isRelatedEntityExpanded(entityId: string): boolean {
-    return this.expandedRelatedEntityIds.has(entityId);
-  }
-
-  addRelatedEntity(): void {
-    if (!this.editedCase) {
-      return;
-    }
-    this.editedCase.entities = this.editedCase.entities || [];
-    this.editedCase.entities.push({
-      ...structuredClone(DEFAULT_RELATED_CASE_ENTITY_TEMPLATE),
-      entityId: this.createId()
-    });
-  }
-
   removeRelatedEntity(index: number): void {
     if (!this.editedCase) {
       return;
     }
+
     const relatedEntity = this.getRelatedEntities(this.editedCase)[index];
+
     if (!relatedEntity) {
       return;
     }
-    this.editedCase.entities = this.editedCase.entities.filter(entity => entity.entityId !== relatedEntity.entityId);
-  }
 
-  addArtifact(): void {
-    if (!this.editedCase) {
-      return;
-    }
-    this.editedCase.artifacts = this.editedCase.artifacts || [];
-    this.editedCase.artifacts.push({
-      ...structuredClone(DEFAULT_CASE_ARTIFACT_TEMPLATE),
-      artifactId: this.createId()
-    });
+    this.editedCase.entities = this.editedCase.entities.filter(entity => entity.entityId !== relatedEntity.entityId);
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase),
+      'Related entity removed successfully');
   }
 
   removeArtifact(index: number): void {
     if (!this.editedCase?.artifacts) {
       return;
     }
-    this.editedCase.artifacts.splice(index, 1);
-  }
 
-  addTask(): void {
-    if (!this.editedCase) {
-      return;
-    }
-    this.editedCase.tasks = this.editedCase.tasks || [];
-    this.editedCase.tasks.push({
-      ...structuredClone(DEFAULT_CASE_TASK_TEMPLATE),
-      taskId: this.createId()
-    });
+    this.editedCase.artifacts = this.editedCase.artifacts.filter((_, i) => i !== index);
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase),
+      'Artifact removed successfully');
   }
 
   removeTask(index: number): void {
     if (!this.editedCase?.tasks) {
       return;
     }
-    this.editedCase.tasks.splice(index, 1);
-  }
 
-  addLinkedCase(): void {
-    if (!this.editedCase || !this.hasLinkableCases(this.editedCase)) {
-      return;
-    }
-    this.editedCase.linkedCases = this.editedCase.linkedCases || [];
-    this.editedCase.linkedCases.push({
-      targetCaseId: '',
-      relationship: 'related',
-      reason: ''
-    });
+    this.editedCase.tasks = this.editedCase.tasks.filter((_, i) => i !== index);
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase),
+      'Task removed successfully');
   }
 
   removeLinkedCase(index: number): void {
     if (!this.editedCase?.linkedCases) {
       return;
     }
-    this.editedCase.linkedCases.splice(index, 1);
-  }
 
-  addClosure(): void {
-    if (!this.editedCase) {
-      return;
-    }
-    this.editedCase.closure = {
-      reason: 'remediated',
-      summary: '',
-      resolution: ''
-    };
-    this.editedCase.status = 'closed';
-  }
+    this.editedCase.linkedCases = this.editedCase.linkedCases.filter((_, i) => i !== index);
 
-  removeClosure(): void {
-    if (!this.editedCase) {
-      return;
-    }
-    this.editedCase.closure = null;
-    if (this.editedCase.status === 'closed') {
-      this.editedCase.status = 'review';
-    }
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase),
+      'Linked case removed successfully');
   }
 
   hasCaseChanged(): boolean {
@@ -399,33 +779,20 @@ export class CaseDetails implements OnInit {
     return this.getCaseSaveSignature(this.editedCase) !== this.getCaseSaveSignature(this.caseData);
   }
 
-  hasClosureChanged(): boolean {
-    return Boolean(this.editedCase?.closure) !== Boolean(this.caseData?.closure);
-  }
-
-  hasRelatedEntitiesChanged(): boolean {
-    return this.getRelatedEntities(this.editedCase).length !== this.getRelatedEntities(this.caseData).length;
-  }
-
-  hasArtifactsChanged(): boolean {
-    return (this.editedCase?.artifacts?.length || 0) !== (this.caseData?.artifacts?.length || 0);
-  }
-
-  hasTasksChanged(): boolean {
-    return (this.editedCase?.tasks?.length || 0) !== (this.caseData?.tasks?.length || 0);
-  }
-
-  hasLinkedCasesChanged(): boolean {
-    return (this.editedCase?.linkedCases?.length || 0) !== (this.caseData?.linkedCases?.length || 0);
-  }
-
-  getLinkableCases(caseItem: Case | null = this.editedCase || this.caseData): Case[] {
+  getLinkableCases(caseItem: Case | null = this.editedCase || this.caseData, currentSelectedCaseId = ''): Case[] {
     const currentCaseId = caseItem?.caseId;
-    return this.accessibleCases.filter(item => item.caseId !== currentCaseId);
+
+    const alreadyLinkedCaseIds = new Set((caseItem?.linkedCases || [])
+      .map(linkedCase => linkedCase.targetCaseId)
+      .filter(caseId => caseId && caseId !== currentSelectedCaseId));
+
+    return this.accessibleCases.filter(item =>
+      item.caseId !== currentCaseId &&
+      !alreadyLinkedCaseIds.has(item.caseId));
   }
 
-  hasLinkableCases(caseItem: Case | null = this.editedCase || this.caseData): boolean {
-    return this.getLinkableCases(caseItem).length > 0;
+  hasLinkableCases(caseItem: Case | null = this.editedCase || this.caseData, currentSelectedCaseId = ''): boolean {
+    return this.getLinkableCases(caseItem, currentSelectedCaseId).length > 0;
   }
 
   getCaseCommentsFeedback(): ReportFeedbackModel {
@@ -440,6 +807,401 @@ export class CaseDetails implements OnInit {
       doc_id: this.caseData?.caseId || '',
       comments
     });
+  }
+
+  openAddRelatedEntity(): void {
+    if (!this.caseData || this.isEditing) {
+      return;
+    }
+
+    this.cancelAllSectionModes();
+    this.isAddingRelatedEntity = true;
+    this.newRelatedEntity = {
+      ...structuredClone(DEFAULT_RELATED_CASE_ENTITY_TEMPLATE),
+      entityId: this.createId()
+    };
+  }
+
+  openAddArtifact(): void {
+    if (!this.caseData || this.isEditing) {
+      return;
+    }
+
+    this.cancelAllSectionModes();
+    this.isAddingArtifact = true;
+    this.newArtifact = {
+      ...structuredClone(DEFAULT_CASE_ARTIFACT_TEMPLATE),
+      artifactId: this.createId()
+    };
+  }
+
+  openAddTask(): void {
+    if (!this.caseData || this.isEditing) {
+      return;
+    }
+
+    this.cancelAllSectionModes();
+    this.isAddingTask = true;
+    this.newTask = {
+      ...structuredClone(DEFAULT_CASE_TASK_TEMPLATE),
+      taskId: this.createId()
+    };
+  }
+
+  openAddLinkedCase(): void {
+    if (!this.caseData || this.isEditing || !this.hasLinkableCases(this.caseData)) {
+      return;
+    }
+
+    this.cancelAllSectionModes();
+    this.isAddingLinkedCase = true;
+    this.newLinkedCase = {
+      targetCaseId: '',
+      relationship: 'related',
+      reason: ''
+    };
+  }
+
+  openCloseCase(): void {
+    if (!this.caseData || this.isEditing || this.caseData.closure) {
+      return;
+    }
+
+    this.cancelAllSectionModes();
+    this.isClosingCase = true;
+    this.newClosure = {
+      reason: 'remediated',
+      summary: '',
+      resolution: ''
+    };
+  }
+
+  openEditClosure(): void {
+    if (!this.caseData || this.isEditing || !this.caseData.closure) {
+      return;
+    }
+
+    this.cancelAllSectionModes();
+    this.isClosingCase = true;
+    this.newClosure = JSON.parse(JSON.stringify(this.caseData.closure));
+  }
+
+  cancelSectionMode(): void {
+    this.cancelAllSectionModes();
+  }
+
+  private saveCasePayload(payload: CaseUpdateRequest, successMessage: string): void {
+    if (!this.caseData) {
+      return;
+    }
+
+    this.caseService.updateCase(this.caseData.caseId, payload).subscribe({
+      next: updated => {
+        updated.artifacts = updated.artifacts || [];
+        updated.tasks = updated.tasks || [];
+        updated.comments = updated.comments || [];
+        updated.linkedCases = updated.linkedCases || [];
+        updated.assignedAnalystIds = updated.assignedAnalystIds || [];
+        updated.closure = updated.closure || null;
+
+        this.caseData = updated;
+        this.isEditing = false;
+        this.activeEditSection = null;
+        this.editedCase = null;
+        this.cancelAllSectionModes();
+
+        this.messageNotificationService.show(successMessage, 'success');
+      },
+      error: err => {
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to save changes');
+      }
+    });
+  }
+
+  saveCaseDetails(): void {
+    if (!this.editedCase) {
+      return;
+    }
+
+    if (!this.editedCase.title.trim()) {
+      this.messageNotificationService.show('Case title is required');
+      return;
+    }
+
+    if (!this.validateOtherValue(this.editedCase.caseType, this.editedCase.caseTypeOtherValue, 'Other case type is required')) {
+      return;
+    }
+    if (!this.validateOtherValue(this.editedCase.intakeSource, this.editedCase.intakeSourceOtherValue, 'Other intake source is required')) {
+      return;
+    }
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase), 'Case details updated successfully');
+  }
+
+  savePrimaryEntity(): void {
+    if (!this.editedCase) {
+      return;
+    }
+
+    const primaryEntity = this.ensurePrimaryEntity(this.editedCase);
+
+    if (!primaryEntity.value.trim()) {
+      this.messageNotificationService.show('Primary entity value is required');
+      return;
+    }
+
+    if (!this.validateOtherValue(primaryEntity.type, primaryEntity.entityTypeOtherValue, 'Other primary entity type is required')) {
+      return;
+    }
+    if (!this.validateOtherValue(primaryEntity.source, primaryEntity.entitySourceOtherValue, 'Other primary entity source is required')) {
+      return;
+    }
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase), 'Primary entity updated successfully');
+  }
+
+  saveRelatedEntities(): void {
+    if (!this.editedCase) {
+      return;
+    }
+
+    const invalidIndex = this.getRelatedEntities(this.editedCase).findIndex(entity =>
+      !entity.value.trim()
+      || (entity.type === 'other' && !entity.entityTypeOtherValue?.trim())
+      || (entity.source === 'other' && !entity.entitySourceOtherValue?.trim()));
+
+    if (invalidIndex >= 0) {
+      this.messageNotificationService.show(`Related entity ${invalidIndex + 1} is invalid`);
+      return;
+    }
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase), 'Related entities updated successfully');
+  }
+
+  saveNewRelatedEntity(): void {
+    if (!this.caseData || !this.newRelatedEntity) {
+      return;
+    }
+
+    if (!this.newRelatedEntity.value.trim()) {
+      this.messageNotificationService.show('Related entity value is required');
+      return;
+    }
+
+    if (!this.validateOtherValue(this.newRelatedEntity.type, this.newRelatedEntity.entityTypeOtherValue, 'Other related entity type is required')) {
+      return;
+    }
+    if (!this.validateOtherValue(this.newRelatedEntity.source, this.newRelatedEntity.entitySourceOtherValue, 'Other related entity source is required')) {
+      return;
+    }
+
+    const draft: Case = JSON.parse(JSON.stringify(this.caseData));
+    draft.entities = draft.entities || [];
+    draft.entities.push(this.ensureEntityDefaults(this.newRelatedEntity));
+
+    this.saveCasePayload(this.cleanCaseForSave(draft), 'Related entity added successfully');
+  }
+
+  saveArtifacts(): void {
+    if (!this.editedCase) {
+      return;
+    }
+
+    const invalidIndex = (this.editedCase.artifacts || []).findIndex(artifact =>
+      !artifact.title.trim()
+      || (artifact.type === 'other' && !artifact.artifactTypeOtherValue?.trim())
+      || (artifact.source === 'other' && !artifact.artifactSourceOtherValue?.trim())
+      || (artifact.type === 'report' && (!artifact.linkedReportSource || !artifact.linkedReportId)));
+
+    if (invalidIndex >= 0) {
+      this.messageNotificationService.show(`Artifact ${invalidIndex + 1} is invalid`);
+      return;
+    }
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase), 'Artifacts updated successfully');
+  }
+
+  saveNewArtifact(): void {
+    if (!this.caseData || !this.newArtifact) {
+      return;
+    }
+
+    if (!this.newArtifact.title.trim()) {
+      this.messageNotificationService.show('Artifact title is required');
+      return;
+    }
+
+    if (!this.validateOtherValue(this.newArtifact.type, this.newArtifact.artifactTypeOtherValue, 'Other artifact type is required')) {
+      return;
+    }
+
+    if (!this.validateOtherValue(this.newArtifact.source, this.newArtifact.artifactSourceOtherValue, 'Other artifact source is required')) {
+      return;
+    }
+
+    if (this.newArtifact.type === 'url_capture' && !this.newArtifact.url?.trim()) {
+      this.messageNotificationService.show('URL is required');
+      return;
+    }
+
+    if (this.newArtifact.type === 'report' && (!this.newArtifact.linkedReportSource || !this.newArtifact.linkedReportId)) {
+      this.messageNotificationService.show('Please select a report');
+      return;
+    }
+
+    if ((this.newArtifact.type === 'screenshot' || this.newArtifact.type === 'file') && !this.pendingNewArtifactFiles.length) {
+      this.messageNotificationService.show('Please select at least one file');
+      return;
+    }
+
+    const artifactToSave = this.ensureArtifactDefaults(this.newArtifact);
+    const draft: Case = JSON.parse(JSON.stringify(this.caseData));
+    draft.artifacts = [...(draft.artifacts || []), artifactToSave];
+
+    const payload = this.cleanCaseForSave(draft);
+
+    this.caseService.updateCase(this.caseData.caseId, payload).subscribe({
+      next: updated => {
+        updated.artifacts = updated.artifacts || [];
+        updated.tasks = updated.tasks || [];
+        updated.comments = updated.comments || [];
+        updated.linkedCases = updated.linkedCases || [];
+        updated.assignedAnalystIds = updated.assignedAnalystIds || [];
+        updated.closure = updated.closure || null;
+
+        this.caseData = updated;
+
+        const savedArtifact = updated.artifacts.find(item => item.artifactId === artifactToSave.artifactId);
+
+        if (savedArtifact && this.pendingNewArtifactFiles.length && (savedArtifact.type === 'screenshot' || savedArtifact.type === 'file')) {
+          this.caseService.uploadArtifactFiles(updated.caseId, savedArtifact.artifactId, this.pendingNewArtifactFiles).subscribe({
+            next: uploaded => {
+              savedArtifact.files = uploaded.files || [];
+              this.pendingNewArtifactFiles = [];
+
+              if (this.pendingNewArtifactFileInput) {
+                this.pendingNewArtifactFileInput.value = '';
+              }
+
+              this.pendingNewArtifactFileInput = null;
+              this.cancelAllSectionModes();
+
+              this.messageNotificationService.show('Artifact added successfully', 'success');
+            },
+            error: err => {
+              this.pendingNewArtifactFiles = [];
+              this.pendingNewArtifactFileInput = null;
+              this.messageNotificationService.show(err?.error?.detail || err?.message || 'Artifact saved, but file upload failed');
+            }
+          });
+
+          return;
+        }
+
+        this.pendingNewArtifactFiles = [];
+        this.pendingNewArtifactFileInput = null;
+        this.cancelAllSectionModes();
+
+        this.messageNotificationService.show('Artifact added successfully', 'success');
+      },
+      error: err => {
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to add artifact');
+      }
+    });
+  }
+
+  saveTasks(): void {
+    if (!this.editedCase) {
+      return;
+    }
+
+    const invalidIndex = (this.editedCase.tasks || []).findIndex(task => !task.title.trim());
+
+    if (invalidIndex >= 0) {
+      this.messageNotificationService.show(`Task ${invalidIndex + 1} title is required`);
+      return;
+    }
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase), 'Tasks updated successfully');
+  }
+
+  saveNewTask(): void {
+    if (!this.caseData || !this.newTask) {
+      return;
+    }
+
+    if (!this.newTask.title.trim()) {
+      this.messageNotificationService.show('Task title is required');
+      return;
+    }
+
+    const draft: Case = JSON.parse(JSON.stringify(this.caseData));
+    draft.tasks = [...(draft.tasks || []), this.ensureTaskDefaults(this.newTask)];
+
+    this.saveCasePayload(this.cleanCaseForSave(draft), 'Task added successfully');
+  }
+
+  saveLinkedCases(): void {
+    if (!this.editedCase) {
+      return;
+    }
+
+    const linkedCases = this.editedCase.linkedCases || [];
+
+    const invalidIndex = linkedCases.findIndex(link => !link.targetCaseId);
+
+    if (invalidIndex >= 0) {
+      this.messageNotificationService.show(`Linked case ${invalidIndex + 1} target case is required`);
+      return;
+    }
+
+    if (this.hasDuplicateLinkedCases(linkedCases)) {
+      this.messageNotificationService.show('Same case cannot be linked more than once');
+      return;
+    }
+
+    this.saveCasePayload(this.cleanCaseForSave(this.editedCase), 'Linked cases updated successfully');
+  }
+
+  saveNewLinkedCase(): void {
+    if (!this.caseData || !this.newLinkedCase) {
+      return;
+    }
+
+    if (!this.newLinkedCase.targetCaseId) {
+      this.messageNotificationService.show('Target case is required');
+      return;
+    }
+
+    const alreadyLinked = (this.caseData.linkedCases || [])
+      .some(link => link.targetCaseId === this.newLinkedCase?.targetCaseId);
+
+    if (alreadyLinked) {
+      this.messageNotificationService.show('This case is already linked');
+      return;
+    }
+
+    const draft: Case = JSON.parse(JSON.stringify(this.caseData));
+    draft.linkedCases = [...(draft.linkedCases || []), this.newLinkedCase];
+
+    this.saveCasePayload(this.cleanCaseForSave(draft), 'Linked case added successfully');
+  }
+
+  saveClosure(): void {
+    if (!this.caseData || !this.newClosure) {
+      return;
+    }
+
+    if (this.newClosure.reason === 'other' && !this.newClosure.closureReasonOtherValue?.trim()) {
+      this.messageNotificationService.show('Other closure reason is required');
+      return;
+    }
+
+    const draft: Case = JSON.parse(JSON.stringify(this.caseData));
+    draft.status = 'closed';
+    draft.closure = this.newClosure;
+
+    this.saveCasePayload(this.cleanCaseForSave(draft), 'Case closed successfully');
   }
 
   saveCaseComment(body: string): void {
@@ -541,17 +1303,6 @@ export class CaseDetails implements OnInit {
     });
   }
 
-  getDateInputValue(date?: Date | string | null): string {
-    if (!date) {
-      return '';
-    }
-    return new Date(date).toISOString().slice(0, 10);
-  }
-
-  setDateInputValue(target: { dueAt?: Date | string | null; capturedAt?: Date | string | null }, field: 'dueAt' | 'capturedAt', value: string): void {
-    target[field] = value ? new Date(`${value}T00:00:00`).toISOString() : null;
-  }
-
   formatLabel(value?: string | null): string {
     if (!value) {
       return '-';
@@ -569,6 +1320,10 @@ export class CaseDetails implements OnInit {
     }).then(() => this.loadCaseDetails());
   }
 
+  formatConfidence(value?: string | null): string {
+    return this.formatLabel(value || 'high');
+  }
+
   private ensurePrimaryEntity(caseItem: Case): CaseEntity {
     if (!caseItem.entities) {
       caseItem.entities = [];
@@ -580,7 +1335,6 @@ export class CaseDetails implements OnInit {
     }
     this.ensureEntityDefaults(primaryEntity);
     primaryEntity.role = 'primary';
-    primaryEntity.relationshipToCase = 'subject_of_case';
     caseItem.primaryEntityId = primaryEntity.entityId;
     return primaryEntity;
   }
@@ -589,15 +1343,14 @@ export class CaseDetails implements OnInit {
     entity.entityId = entity.entityId || this.createId();
     entity.type = entity.type || 'person';
     entity.value = entity.value || '';
-    entity.displayName = entity.displayName || '';
+    entity.entityDescription = entity.entityDescription || '';
     entity.role = entity.role || 'related';
-    entity.relationshipToCase = entity.relationshipToCase || 'related_to';
-    entity.confidence = entity.confidence ?? 1;
+    entity.confidence = entity.confidence || 'high';
     entity.source = entity.source || 'manual';
     entity.identifiers = entity.identifiers || [];
     entity.socialProfiles = entity.socialProfiles || [];
     entity.tags = entity.tags || [];
-    entity.attributes = entity.attributes || [];
+    entity.linkedEntityId = entity.linkedEntityId || '';
     return entity;
   }
 
@@ -605,14 +1358,17 @@ export class CaseDetails implements OnInit {
     const primaryEntity = this.cleanEntity(this.ensurePrimaryEntity(caseItem));
     const relatedEntities = this.getRelatedEntities(caseItem)
       .map(entity => this.cleanEntity(this.ensureEntityDefaults(entity)));
+
     return {
       title: caseItem.title.trim(),
       description: caseItem.description?.trim() || '',
       caseType: caseItem.caseType,
+      caseTypeOtherValue: caseItem.caseTypeOtherValue?.trim() || '',
       status: caseItem.status,
       severity: caseItem.severity,
       priority: caseItem.priority,
       intakeSource: caseItem.intakeSource,
+      intakeSourceOtherValue: caseItem.intakeSourceOtherValue?.trim() || '',
       tags: caseItem.tags || [],
       primaryEntityId: primaryEntity.entityId,
       assignedAnalystIds: caseItem.assignedAnalystIds || [],
@@ -642,10 +1398,12 @@ export class CaseDetails implements OnInit {
     artifact.description = artifact.description || '';
     artifact.source = artifact.source || 'manual';
     artifact.url = artifact.url || '';
-    artifact.fileName = artifact.fileName || '';
-    artifact.fileType = artifact.fileType || '';
+    artifact.files = artifact.files || [];
     artifact.entityIds = artifact.entityIds || [];
     artifact.tags = artifact.tags || [];
+    artifact.linkedReportSource = artifact.linkedReportSource || '';
+    artifact.linkedReportId = artifact.linkedReportId || '';
+    artifact.linkedReportTitle = artifact.linkedReportTitle || '';
     artifact.capturedAt = artifact.capturedAt || null;
     return artifact;
   }
@@ -654,16 +1412,49 @@ export class CaseDetails implements OnInit {
     return {
       artifactId: artifact.artifactId || this.createId(),
       type: artifact.type,
+      artifactTypeOtherValue: artifact.artifactTypeOtherValue?.trim() || '',
       title: artifact.title.trim(),
       description: artifact.description?.trim() || '',
       source: artifact.source || 'manual',
+      artifactSourceOtherValue: artifact.artifactSourceOtherValue?.trim() || '',
       url: artifact.url?.trim() || '',
-      fileName: artifact.fileName?.trim() || '',
-      fileType: artifact.fileType?.trim() || '',
+      files: artifact.files || [],
       entityIds: artifact.entityIds || [],
       tags: artifact.tags || [],
+      linkedReportSource: artifact.linkedReportSource || '',
+      linkedReportId: artifact.linkedReportId || '',
+      linkedReportTitle: artifact.linkedReportTitle || '',
       capturedAt: artifact.capturedAt || null
     };
+  }
+
+  private setArtifactFileStatus(artifact: CaseArtifact, fileId: string, status: 'verified' | 'failed'): void {
+    const file = artifact.files?.find(item => item.fileId === fileId);
+    if (file) {
+      file.integrityStatus = status;
+    }
+  }
+
+  verifyArtifactFile(artifact: CaseArtifact, fileId: string): void {
+    if (!this.caseData || !artifact.artifactId) {
+      return;
+    }
+
+    this.caseService.verifyArtifactFile(this.caseData.caseId, artifact.artifactId, fileId).subscribe({
+      next: result => {
+        this.setArtifactFileStatus(artifact, fileId, result.status);
+        this.messageNotificationService.show(result.success ? 'File integrity verified' : 'File integrity check failed',
+          result.success ? 'success' : undefined);
+      },
+      error: err => {
+        this.setArtifactFileStatus(artifact, fileId, 'failed');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
+      }
+    });
+  }
+
+  isArtifactFileIntegrityFailed(artifactFile: CaseArtifactFile): boolean {
+    return artifactFile.integrityStatus === 'failed';
   }
 
   private ensureTaskDefaults(task: CaseTask): CaseTask {
@@ -705,6 +1496,7 @@ export class CaseDetails implements OnInit {
   private cleanClosure(closure: CaseClosure | CaseClosureRequest): CaseClosureRequest {
     return {
       reason: closure.reason || 'other',
+      closureReasonOtherValue: closure.closureReasonOtherValue?.trim() || '',
       summary: closure.summary?.trim() || '',
       resolution: closure.resolution?.trim() || ''
     };
@@ -712,19 +1504,37 @@ export class CaseDetails implements OnInit {
 
   private cleanEntity(entity: CaseEntity): CaseEntityRequest {
     const value = entity.value.trim();
+
     return {
       entityId: entity.entityId || this.createId(),
       type: entity.type,
+      entityTypeOtherValue: entity.entityTypeOtherValue?.trim() || '',
       value,
-      displayName: entity.displayName?.trim() || value,
+      entityDescription: entity.entityDescription?.trim() || value,
       role: entity.role,
-      relationshipToCase: entity.relationshipToCase,
       confidence: entity.confidence,
       source: entity.source,
-      identifiers: (entity.identifiers || []).filter(identifier => identifier.type && identifier.value.trim()),
-      socialProfiles: (entity.socialProfiles || []).filter(profile => profile.platform && profile.username.trim()),
+      entitySourceOtherValue: entity.entitySourceOtherValue?.trim() || '',
+      identifiers: (entity.identifiers || [])
+        .filter(identifier => identifier.type && identifier.value.trim())
+        .map(identifier => ({
+          type: identifier.type,
+          identifierTypeOtherValue: identifier.identifierTypeOtherValue?.trim() || '',
+          value: identifier.value.trim(),
+          issuer: identifier.issuer?.trim() || '',
+          verified: !!identifier.verified
+        })),
+      socialProfiles: (entity.socialProfiles || [])
+        .filter(profile => profile.platform && profile.username.trim())
+        .map(profile => ({
+          platform: profile.platform,
+          platformOtherValue: profile.platformOtherValue?.trim() || '',
+          username: profile.username.trim(),
+          profileUrl: profile.profileUrl?.trim() || '',
+          displayName: profile.displayName?.trim() || ''
+        })),
       tags: entity.tags || [],
-      attributes: (entity.attributes || []).filter(attribute => attribute.type && attribute.value.trim())
+      linkedEntityId: entity.linkedEntityId || '',
     };
   }
 
@@ -736,10 +1546,49 @@ export class CaseDetails implements OnInit {
   }
 
   private createId(): string {
-    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-      return crypto.randomUUID();
-    }
-    return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    return crypto.randomUUID();
   }
 
+  getDisplayLabel(value?: string | null, otherValue?: string | null): string {
+    if (value === 'other' && otherValue?.trim()) {
+      return `Other: ${otherValue}`;
+    }
+    return this.formatLabel(value);
+  }
+
+  private validateOtherValue(value: string | undefined | null, otherValue: string | undefined | null, message: string): boolean {
+    if (value === 'other' && !otherValue?.trim()) {
+      this.messageNotificationService.show(message);
+      return false;
+    }
+    return true;
+  }
+
+  private hasDuplicateLinkedCases(linkedCases: { targetCaseId: string }[] = []): boolean {
+    const selectedCaseIds = linkedCases
+      .map(link => link.targetCaseId)
+      .filter(Boolean);
+
+    return new Set(selectedCaseIds).size !== selectedCaseIds.length;
+  }
+
+  private validateArtifactFiles(artifact: CaseArtifact, files: File[]): boolean {
+    if (!files.length) {
+      return false;
+    }
+
+    for (const file of files) {
+      if (artifact.type === 'screenshot' && file.type !== 'image/png') {
+        this.messageNotificationService.show('Screenshots must be PNG images');
+        return false;
+      }
+
+      if (artifact.type === 'file' && !this.artifactAllowedFileTypes.includes(file.type)) {
+        this.messageNotificationService.show('Allowed file types: PDF, JPG, PNG, TXT, DOCX');
+        return false;
+      }
+    }
+
+    return true;
+  }
 }

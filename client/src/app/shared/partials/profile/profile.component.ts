@@ -8,6 +8,11 @@ import { AppService } from '../../../services/core/app/app.service';
 import { ConfigSettings } from '../../model/app/config';
 import { AlertNotificationComponent } from "../alert-notification/alert-notification.component";
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { LANGUAGE_OPTIONS, LanguageOption } from '../../constants/shared-enums';
+import { ApiService } from '../../services/api.service';
+import { TranslationService } from '../../services/translation.service';
+
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -15,14 +20,14 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
     NgOptimizedImage,
     TooltipDirective,
     NgClass,
-    AlertNotificationComponent
-  ],
+    AlertNotificationComponent, TranslatePipe],
   templateUrl: './profile.component.html'
 })
 export class ProfileComponent implements AfterViewInit, OnDestroy {
   private scrollContainer: HTMLElement | null = null;
   private scrollHandler = () => {
     this.dropdownOpen.set(false);
+    this.languageDropdownOpen.set(false);
   };
 
   protected readonly Date = Date;
@@ -33,9 +38,12 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
   profile_image: string = "";
   licences: string = '';
   dropdownOpen = signal(false);
+  languageDropdownOpen = signal(false);
+  selectedLanguage = signal('');
+  languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
   readonly openPopup = output<undefined>();
 
-  constructor(protected authService: AuthService, public router: Router, public dashboardService: DashboardService, public appService: AppService, protected licenseService: LicenseService) {
+  constructor(protected authService: AuthService, public router: Router, public dashboardService: DashboardService, public appService: AppService, protected licenseService: LicenseService, private apiService: ApiService, private translationService: TranslationService) {
     this.username.set(this.appService.userSessionData()?.user?.username);
     this.role.set(this.appService.userSessionData()?.user?.role);
     effect(() => {
@@ -45,6 +53,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
       const data = this.appService.userSessionData();
       this.username.set(data?.user?.username ?? '');
       this.role.set(data?.user?.role ?? '');
+      this.selectedLanguage.set(this.getCurrentLanguage(data?.user?.preferences?.['language']));
     });
   }
 
@@ -81,7 +90,45 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 
   toggleDropdown(event: Event) {
     event.stopPropagation();
+    this.languageDropdownOpen.set(false);
     this.dropdownOpen.update(v => !v);
+  }
+
+  toggleLanguageDropdown(event: Event) {
+    event.stopPropagation();
+    this.dropdownOpen.set(false);
+    this.languageDropdownOpen.update(v => !v);
+  }
+
+  selectLanguage(language: string, event: Event) {
+    event.stopPropagation();
+    const selectedLanguage = this.translationService.getSupportedLanguage(language);
+    const currentSession = this.appService.userSessionData();
+    const preferences = {
+      ...(currentSession.user.preferences || {}),
+      language: selectedLanguage
+    };
+    this.selectedLanguage.set(selectedLanguage);
+    this.appService.userSessionData.update(state => {
+      if (!state) {
+        return state;
+      }
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          preferences
+        }
+      };
+    });
+    this.apiService.post('update/current/user', {
+      username: currentSession.user.username,
+      preferences
+    }).subscribe({
+      next: () => void 0,
+      error: () => void 0
+    });
+    this.languageDropdownOpen.set(false);
   }
 
   auditlog() {
@@ -96,17 +143,13 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
     this.router.navigate(['/dashboard/profile/system-settings']).then();
   }
 
-  changePassword() {
-    this.logout();
-    this.router.navigate(['/reset']).then();
-  }
-
   logout() {
     this.dashboardService.resetParams();
     this.dashboardService.clearCallback();
     this.appService.configData.set(new ConfigSettings({}, {}));
     this.authService.logout();
     this.dropdownOpen.set(false);
+    this.languageDropdownOpen.set(false);
   }
 
   @HostListener('document:click', ['$event'])
@@ -114,10 +157,13 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
     const eventTargetElement = event.target as HTMLElement;
     if (!eventTargetElement.closest('.profile')) {
       this.dropdownOpen.set(false);
+      this.languageDropdownOpen.set(false);
     }
   }
 
   openNotifications(): void {
+    this.dropdownOpen.set(false);
+    this.languageDropdownOpen.set(false);
     this.isNotificationOpen.set(true);
   }
 
@@ -138,4 +184,9 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
     // TODO: The 'emit' function requires a mandatory void argument
     this.openPopup.emit(undefined);
   }
+
+  private getCurrentLanguage(userLanguage: string): string {
+    return this.translationService.getSupportedLanguage(userLanguage, this.translationService.getSystemLanguage());
+  }
+
 }

@@ -8,13 +8,16 @@ export enum Category {
     SOCIAL = 'Social',
     API = 'Api',
     EXPLOIT = 'Exploit',
+    THREAT_INTEL = 'Threat Intelligence',
     FEED = 'Feed',
     CONSOLIDATED = 'Consolidated',
     STEALERLOGS = 'Stealerlogs',
     SCANNER = 'Scanner',
     TENANT = 'Tenant',
     PROFILE = 'Profile',
-    NETINT = 'NETINT'
+    NETINT = 'NETINT',
+    SATELLITE_INTEL = 'SATELLITE_INTEL',
+    THREAT_LENS = 'THREAT_LENS'
 }
 export enum GeneralSubCategory {
     ALL = 'All',
@@ -61,6 +64,7 @@ export enum SocialSubCategory {
     REDDIT = 'Reddit',
     FACEBOOK = 'Facebook',
     INSTAGRAM = 'Instagram',
+    LINKEDIN = 'LinkedIn',
     TIKTOK = 'TikTok',
     YOUTUBE = 'YouTube',
 }
@@ -69,6 +73,12 @@ export enum ExploitSubCategory {
     CVE = 'CVE',
     TOOLS = 'Tools',
     ZERODAY = 'ZeroDay'
+}
+export enum ThreatIntelSubCategory {
+    ALL = 'All',
+    APT = 'APT',
+    MALWARE_BAZAAR = 'Malware',
+    COMPROMISED_ACTORS = 'Compromised-Actors'
 }
 export enum FeedSubCategory {
     NEWS = 'News'
@@ -92,6 +102,11 @@ export enum TenantSubCategory {
     AUDITLOG = 'Auditlog'
 }
 export enum NETINTSubCategory {
+    VIEW_PROFILE = 'View-Profiles',
+    VIEW_TENANT = 'View-Tenants',
+    AUDITLOG = 'Auditlog'
+}
+export enum SatelliteIntelSubCategory {
     VIEW_PROFILE = 'View-Profiles',
     VIEW_TENANT = 'View-Tenants',
     AUDITLOG = 'Auditlog'

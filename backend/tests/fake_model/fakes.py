@@ -86,6 +86,7 @@ class FakeElastic:
         self.get_calls = []
         self.get_doc_calls = []
         self.delete_calls = []
+        self.reindex_map_entities_calls = []
         self.responses = list(responses or [])
         self.search_result = {}
         self.search_query_result = (True, {})
@@ -148,6 +149,10 @@ class FakeElastic:
 
     async def delete_data(self, *args, **kwargs):
         self.delete_calls.append((args, kwargs))
+        return True
+
+    async def reindex_map_entities_data(self):
+        self.reindex_map_entities_calls.append(True)
         return True
 
     def get_connection(self):

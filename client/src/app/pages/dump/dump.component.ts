@@ -8,6 +8,8 @@ import { DumpListComponent } from './dump-list/dump-list.component';
 import { DumpCallbackModel } from '../../shared/model/dump/dump.mode';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BaseListingComponent } from '../../shared/directive/base.listing.directive';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-dump',
   standalone: true,
@@ -20,8 +22,7 @@ import { BaseListingComponent } from '../../shared/directive/base.listing.direct
     FiltersComponent,
     DumpListComponent,
     FormsModule,
-    ReactiveFormsModule
-  ],
+    ReactiveFormsModule, TranslatePipe],
 })
 export class DumpComponent extends BaseListingComponent<DumpCallbackModel> {
   private dumpService = inject(DumpService);

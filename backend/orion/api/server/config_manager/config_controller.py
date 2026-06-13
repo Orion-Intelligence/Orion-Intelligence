@@ -9,6 +9,7 @@ from orion.api.server.config_manager.model.config_data import config_data
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys, db_system_model
+from orion.services.mail_manager.mail_manager import mail_manager
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 
@@ -44,8 +45,8 @@ class config_controller:
                 REDIS_COMMANDS.S_SET_STRING,
                 [self.CONFIG_CACHE_KEY, json.dumps(self._config), None]
             )
-        except Exception:
-            pass
+        except Exception as ex:
+            log.g().w(f"Redis config cache save skipped: {str(ex)}")
 
     async def load_config(self, force_db: bool = False):
         try:
@@ -62,8 +63,8 @@ class config_controller:
                         if isinstance(config, dict):
                             self._config = config
                             return
-                except Exception:
-                    pass
+                except Exception as ex:
+                    log.g().w(f"Redis config cache read skipped: {str(ex)}")
 
             records = await self._engine.find(db_system_model)
             self._config = {record.key.value: record.value for record in records}
@@ -145,6 +146,15 @@ class config_controller:
     async def update_public_config(self, data: config_data):
         if self._engine is None:
             self._engine = mongo_controller.get_instance().get_engine()
+        meta_info_raw = data.settings.get("meta_info")
+        if meta_info_raw:
+            meta_info = json.loads(meta_info_raw)
+            await mail_manager.get_instance().send_test_mail(config={
+                "ACCOUNTS_MAIL_PASSWORD": meta_info.get("ACCOUNTS_MAIL_PASSWORD"),
+                "ACCOUNTS_MAIL": meta_info.get("ACCOUNTS_MAIL"),
+                "ACCOUNTS_SMTP_SERVER": meta_info.get("ACCOUNTS_SMTP_SERVER"),
+                "ACCOUNTS_SMTP_PORT": meta_info.get("ACCOUNTS_SMTP_PORT"),
+            })
         for key_str, value in data.settings.items():
             if key_str == "language":
                 key = AllowedKeys.LANGUAGE_ALLOWED
@@ -192,6 +202,15 @@ class config_controller:
 
     async def uploadSystemResource(self, file: UploadFile, current_user, key: str):
         from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+        file_name = {
+            AllowedKeys.LOGO_URL.value: "logo_url_custom.png",
+            AllowedKeys.LOGO_WIDE_LIGHT.value: "logo_wide_light_custom.png",
+            AllowedKeys.LOGO_WIDE_DARK.value: "logo_wide_dark_custom.png",
+            AllowedKeys.AUTH_DASHBOARD_ICON.value: "auth_dashboard_icon_custom.png",
+        }.get(key)
+        if file_name is None:
+            raise HTTPException(status_code=400, detail="Invalid system resource")
+        key = AllowedKeys(key)
         contents = await file.read()
         MAX_FILE_SIZE = 1024 * 1024
 
@@ -201,7 +220,6 @@ class config_controller:
         if not file.content_type.startswith("image/"):
             raise HTTPException(status_code=415, detail="Invalid file type. Only image files are allowed.")
 
-        file_name = f"{key}_custom.png"
         file_path = self.SYSTEM_DIR / file_name
         with open(file_path, "wb") as f:
             f.write(contents)

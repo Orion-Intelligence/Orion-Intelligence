@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div class="flex h-full w-full flex-col overflow-hidden bg-transparent">
   @if (!hasResults()) {
     <div class="pointer-events-none flex flex-1 select-none items-center justify-center p-6 text-center">
@@ -311,6 +312,138 @@
                                       <div class="flex items-center gap-2">
                                         <img [src]="item.value" [alt]="item.key" class="h-8 w-8 flex-shrink-0 rounded-[6px] object-cover">
                                         <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-[11px] text-[var(--color-blue-640)] hover:underline">view image</a>
+=======
+<div class="w-full h-full relative">
+  @if (networkData().nodes.length === 0) {
+    <div class="pointer-events-none absolute left-1/2 top-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 px-4 text-center select-none text-[var(--color-text4)]">
+      <div class="text-center opacity-[0.3]">
+        <i class="bi bi-list-ul mx-auto text-5xl text-[var(--color-text4)]"></i>
+        <p class="mt-3 text-2xl font-semibold text-[var(--color-text2)]">{{ 'List is Waiting for Data' | translate }}</p>
+        <p class="text-[var(--color-text4)]">{{ 'Complete a scan or add an entity to begin visualization.' | translate }}</p>
+      </div>
+    </div>
+  } @else {
+    <div class="w-full h-full px-[10px] py-4 lg:py-6 overflow-y-auto">
+      <div class="mx-[10px] space-y-8">
+        <div>
+          <h2 class="text-xl font-bold text-slate-300 border-b-2 border-slate-700 pb-2 mb-4">{{ 'Active Profiles' | translate }}</h2>
+          @if (activeUserNodes().length > 0) {
+            <div>
+              <div class="space-y-4">
+                @for (userNode of activeUserNodes(); track trackById(i, userNode); let i = $index) {
+                  <div class="overflow-hidden rounded-lg border border-slate-700 bg-slate-800/50 animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
+                    <div class="p-4 flex items-start gap-4 bg-slate-800/70">
+                      <div class="w-16 h-16 rounded-full ring-2 ring-slate-600 flex-shrink-0 flex items-center justify-center bg-slate-700">
+                        <i class="bi bi-person-fill text-4xl text-slate-400"></i>
+                      </div>
+                      <div class="flex-grow">
+                        <h3 data-testid="social-list-user-summary-trigger" class="text-lg font-bold text-indigo-400 cursor-pointer hover:underline" (click)="nodeClicked.emit(userNode.id.toString())">{{ userNode.label }}</h3>
+                        <p class="text-sm text-slate-400">{{ getPlatformsForUserNode(userNode.id.toString()).length }} {{ 'platform(s) visible' | translate }}</p>
+                      </div>
+                      <div class="flex items-center gap-2 flex-shrink-0">
+                        <button data-testid="social-list-manage-profiles" (click)="state.openManageProfilesModal(userNode.label)" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600">{{ 'Manage Profiles' | translate }}</button>
+                        <button (click)="state.openDeleteConfirmation(userNode.label)" [title]="'Delete Profile' | translate" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 bg-slate-700 hover:bg-red-500/20 hover:text-red-400 transition-colors"><i class="bi bi-trash3 leading-none block"></i></button>
+                      </div>
+                    </div>
+                    @if (getPlatformsForUserNode(userNode.id.toString()).length > 0) {
+                      <div class="p-4">
+                        <h4 class="text-sm font-semibold text-slate-400 mb-2">{{ 'Platforms' | translate }}</h4>
+                        <div class="flex flex-col gap-2">
+                          @for (platformNode of getPlatformsForUserNode(userNode.id.toString()); track trackById($index, platformNode)) {
+                            <div>
+                              @if (getPlatformData(platformNode.id.toString()); as platformData) {
+                                <div class="overflow-hidden rounded-lg border border-slate-700/70 bg-slate-900/30 transition-all duration-300">
+                                  <div data-testid="social-list-platform-row" (click)="platformNodeClicked.emit(platformNode.id.toString())" class="flex items-center gap-3 p-3 cursor-pointer transition-colors hover:bg-slate-800/60">
+                                    <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#475569] p-1 text-sm font-bold text-white">
+                                      <app-social-icon [platformName]="platformNode.label"></app-social-icon>
+                                    </div>
+                                    <div class="flex-grow min-w-0">
+                                      <p class="font-semibold text-slate-200 truncate">{{platformNode.label}}</p>
+                                      <p class="text-xs text-slate-400 truncate">{{ getFollowerSummary(platformData) }}</p>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                      <a data-testid="social-list-platform-open-link" [href]="platformData.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="w-7 h-7 rounded-full flex items-center justify-center text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors" [title]="'Open account in new tab' | translate">
+                                        <i class="bi bi-link-45deg text-sm leading-none"></i>
+                                      </a>
+                                      <button data-testid="social-list-followers-following" (click)="$event.stopPropagation(); state.openFollowerScanPopup(platformNode.id.toString())" class="w-7 h-7 rounded-full flex items-center justify-center text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" [title]="'Followers and Following' | translate">
+                                        <i class="bi bi-people-fill text-[11px] leading-none"></i>
+                                      </button>
+                                    </div>
+                                    <i class="bi bi-chevron-down text-slate-400 ml-2 transition-transform duration-300" [class.rotate-180]="expandedPlatformNodeId() === platformNode.id.toString()"></i>
+                                  </div>
+                                  <div class="grid transition-all duration-300 ease-in-out" [class.grid-rows-[1fr]]="expandedPlatformNodeId() === platformNode.id.toString()" [class.grid-rows-[0fr]]="expandedPlatformNodeId() !== platformNode.id.toString()">
+                                    <div class="overflow-hidden">
+                                      <div class="border-t border-slate-700/70">
+                                        <div class="bg-slate-950/20 p-4 transition-opacity duration-300 ease-in-out" [class.opacity-100]="expandedPlatformNodeId() === platformNode.id.toString()" [class.opacity-0]="expandedPlatformNodeId() !== platformNode.id.toString()">
+                                          <div class="space-y-2 text-sm">
+                                            @if (getMetadataEntries(platformNode.id.toString()); as metadataEntries) {
+                                              @for (item of metadataEntries; track trackByKey($index, item)) {
+                                                <div>
+                                                  <div class="flex items-start justify-between gap-4 border-b border-slate-700/50 py-2 last:border-b-0">
+                                                    <p class="font-medium text-slate-400 flex-shrink-0">{{ formatKey(item.key) }}</p>
+                                                    <div class="text-right text-slate-200">
+                                                      @if (isImageUrl(item.value)) {
+                                                        <img [src]="item.value" class="rounded-md max-w-[10rem] ml-auto h-auto shadow-lg" [alt]="item.key"/>
+                                                      }
+                                                      @if (!isImageUrl(item.value) && isUrl(item.value)) {
+                                                        <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline break-all">{{ item.value }}</a>
+                                                      }
+                                                      @if (!isImageUrl(item.value) && !isUrl(item.value)) {
+                                                        <p class="break-words">{{ item.value }}</p>
+                                                      }
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              }
+                                              @if (metadataEntries.length === 0) {
+                                                <div class="rounded-lg border border-dashed border-slate-700/80 bg-slate-900/20 px-4 py-6 text-center text-slate-500">{{ 'No additional metadata available.' | translate }}</div>
+                                              }
+                                            }
+                                          </div>
+                                          @if (getFollowers(platformData).length > 0 || getFollowing(platformData).length > 0) {
+                                            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                              <div class="rounded-lg border border-slate-700/70 bg-slate-900/30 p-3">
+                                                <div class="flex items-center justify-between mb-2">
+                                                  <p class="text-xs font-semibold uppercase tracking-wide text-indigo-300 mb-0">{{ 'Followers' | translate }}</p>
+                                                  <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-200">{{ getFollowers(platformData).length }}</span>
+                                                </div>
+                                                <div class="space-y-1.5">
+                                                  @for (username of getFollowerPreview(platformData); track trackByUsername($index, username)) {
+                                                    <div class="flex items-center justify-between gap-2 rounded-lg border border-slate-700/70 bg-slate-950/30 px-2 py-1.5 text-xs">
+                                                      <span class="font-mono text-slate-200 truncate">{{ '@' + username }}</span>
+                                                      <a [href]="getProfileUrl(platformData, username)" target="_blank" rel="noopener noreferrer" class="w-6 h-6 rounded-full flex items-center justify-center text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" [title]="'Open account in new tab' | translate"><i class="bi bi-link-45deg text-xs leading-none"></i></a>
+                                                    </div>
+                                                  }
+                                                </div>
+                                              </div>
+                                              <div class="rounded-lg border border-slate-700/70 bg-slate-900/30 p-3">
+                                                <div class="flex items-center justify-between mb-2">
+                                                  <p class="text-xs font-semibold uppercase tracking-wide text-cyan-300 mb-0">{{ 'Following' | translate }}</p>
+                                                  <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-200">{{ getFollowing(platformData).length }}</span>
+                                                </div>
+                                                <div class="space-y-1.5">
+                                                  @for (username of getFollowingPreview(platformData); track trackByUsername($index, username)) {
+                                                    <div class="flex items-center justify-between gap-2 rounded-lg border border-slate-700/70 bg-slate-950/30 px-2 py-1.5 text-xs">
+                                                      <span class="font-mono text-slate-200 truncate">{{ '@' + username }}</span>
+                                                      <a [href]="getProfileUrl(platformData, username)" target="_blank" rel="noopener noreferrer" class="w-6 h-6 rounded-full flex items-center justify-center text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors" [title]="'Open account in new tab' | translate"><i class="bi bi-link-45deg text-xs leading-none"></i></a>
+                                                    </div>
+                                                  }
+                                                </div>
+                                              </div>
+                                            </div>
+                                          }
+                                          <div class="mt-4 flex flex-wrap items-center gap-3">
+                                            <button (click)="state.openFollowerScanPopup(platformNode.id.toString())" type="button" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-sky-600">
+                                              <i class="bi bi-people-fill"></i>
+                                              <span>{{ 'Followers and Following' | translate }}</span>
+                                            </button>
+                                          </div>
+                                          <a data-testid="social-list-platform-visit-profile" [href]="platformData.url" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex items-center gap-2 text-sm text-indigo-400 hover:text-indigo-300 font-semibold">
+                                            <span>{{ 'Visit Profile' | translate }}</span>
+                                            <i class="bi bi-link-45deg"></i>
+                                          </a>
+                                        </div>
+>>>>>>> trusted-main
                                       </div>
                                     } @else if (isUrl(item.value)) {
                                       <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="break-all text-[var(--color-blue-640)] hover:underline">{{ item.value }}</a>
@@ -551,6 +684,7 @@
                             </div>
                           }
                         </div>
+<<<<<<< HEAD
                       }
 
                       @if (getActiveTabForPlatform(platformData) === 'stealerLogs') {
@@ -617,6 +751,18 @@
                                   </div>
                                 </div>
                               }
+=======
+                      </div>
+                    }
+                    @if (getConnectionsForNode(userNode.id.toString()).length > 0) {
+                      <div class="p-4 border-t border-slate-700/50">
+                        <h4 class="text-sm font-semibold text-slate-400 mb-2">{{ 'Connections' | translate }}</h4>
+                        <div class="flex flex-wrap gap-2">
+                          @for (connection of getConnectionsForNode(userNode.id.toString()); track trackConnectionById($index, connection)) {
+                            <div class="flex items-center gap-2 rounded-full border border-slate-700/70 bg-slate-900/40 px-3 py-1 text-sm">
+                              <i [class]="getNodeIcon(connection.node) + ' text-base'"></i>
+                              <span class="text-slate-300">{{connection.node.label}}</span>
+>>>>>>> trusted-main
                             </div>
                           }
                         </div>
@@ -706,6 +852,7 @@
                     </div>
                   </div>
                 }
+<<<<<<< HEAD
               </article>
               }
             }
@@ -714,6 +861,83 @@
         <aside class="sticky top-4 hidden w-[260px] flex-shrink-0 lg:block">
           @if (activeUser(); as user) {
             <app-social-stealerlog-section [username]="user.username"></app-social-stealerlog-section>
+=======
+              </div>
+            </div>
+          } @else {
+            <div class="rounded-lg border border-dashed border-slate-700/80 bg-slate-900/20 px-4 py-8 text-center text-slate-500">{{ 'No user profiles added to the view.' | translate }}</div>
+          }
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-300 border-b-2 border-slate-700 pb-2 mb-4">{{ 'Active Entities' | translate }}</h2>
+          @if (activeEntityNodesOnGraph().length > 0) {
+            <div>
+              <div class="space-y-4">
+                @for (entityNode of activeEntityNodesOnGraph(); track trackById(i, entityNode); let i = $index) {
+                  <div class="overflow-hidden rounded-lg border border-slate-700 bg-slate-800/50 animate-[social-mapper-fade-in-up_0.4s_ease-out_backwards]">
+                    @if (getEntityData(entityNode.id.toString()); as entity) {
+                      <div class="p-4 flex items-start gap-4 cursor-pointer hover:bg-slate-800/70 transition-colors" (click)="toggleEntity(entity.id)">
+                        <i [class]="socialEntityUiService.getIconForEntityType(entity.type) + ' text-3xl mt-1'"></i>
+                        <div class="flex-grow">
+                          <h3 class="text-md font-bold text-slate-300">{{entity.label}}</h3>
+                          <p class="text-sm text-slate-400 capitalize">{{entity.type}}</p>
+                        </div>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                          <i class="bi bi-chevron-down text-slate-400 transition-transform duration-300" [class.rotate-180]="isEntityExpanded(entity.id)"></i>
+                          <button (click)="$event.stopPropagation(); deleteCustomEntity.emit(entity.id)" [title]="'Delete Entity' | translate" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 bg-slate-700 hover:bg-red-500/20 hover:text-red-400 transition-colors"><i class="bi bi-trash3"></i></button>
+                        </div>
+                      </div>
+                      <div class="grid transition-all duration-300 ease-in-out" [class.grid-rows-[1fr]]="isEntityExpanded(entity.id)" [class.grid-rows-[0fr]]="!isEntityExpanded(entity.id)">
+                        <div class="overflow-hidden">
+                          @if (getConnectionsForNode(entityNode.id.toString()).length > 0) {
+                            <div class="p-4 border-t border-slate-700/50">
+                              <h4 class="text-sm font-semibold text-slate-400 mb-2">{{ 'Connections' | translate }}</h4>
+                              <div class="flex flex-wrap gap-2">
+                                @for (connection of getConnectionsForNode(entityNode.id.toString()); track trackConnectionById($index, connection)) {
+                                  <div class="flex items-center gap-2 rounded-full border border-slate-700/70 bg-slate-900/40 px-3 py-1 text-sm">
+                                    <i [class]="getNodeIcon(connection.node) + ' text-base'"></i>
+                                    <span class="text-slate-300">{{connection.node.label}}</span>
+                                  </div>
+                                }
+                              </div>
+                            </div>
+                          }
+                          @if (getEntityReportRecords(entity).length > 0) {
+                            <div class="p-4 border-t border-slate-700/50">
+                              <h4 class="text-sm font-semibold text-slate-400 mb-2">{{ 'Extracted Data' | translate }}</h4>
+                              <div class="space-y-3">
+                                @for (record of getEntityReportRecords(entity); track $index; let recordIndex = $index) {
+                                  <div class="rounded-lg border border-slate-700/70 bg-slate-900/20 p-3">
+                                    @if (getEntityReportRecords(entity).length > 1) {
+                                      <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{{ 'Record' | translate }} {{ recordIndex + 1 }}</div>
+                                    }
+                                    <div class="space-y-2">
+                                      @for (item of getEntityRecordEntries(record); track $index) {
+                                        <div class="rounded-md border border-slate-700/60 bg-slate-800/40 p-2">
+                                          <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{{ item.label }}</div>
+                                          <div class="mt-1 space-y-1">
+                                            @for (valueItem of item.values; track $index) {
+                                              <div class="text-sm break-words text-slate-200">{{ valueItem }}</div>
+                                            }
+                                          </div>
+                                        </div>
+                                      }
+                                    </div>
+                                  </div>
+                                }
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="rounded-lg border border-dashed border-slate-700/80 bg-slate-900/20 px-4 py-8 text-center text-slate-500">{{ 'No custom entities added to the view.' | translate }}</div>
+>>>>>>> trusted-main
           }
         </aside>
       </div>

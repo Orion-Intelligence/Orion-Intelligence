@@ -1,0 +1,73 @@
+@if (arc; as selectedArc) {
+  <div class="fixed inset-0 z-[1240] pointer-events-none">
+    <div class="map-overlay-menu pointer-events-auto absolute bottom-3 right-3 top-24 flex w-[min(860px,calc(100%-24px))] flex-col overflow-hidden rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] text-[var(--color-text2)] shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md animate-[ui-popup-panel-in_180ms_ease-out_both] [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[640px]:left-2 max-[640px]:right-2 max-[640px]:top-auto max-[640px]:bottom-2 max-[640px]:h-[78dvh] max-[640px]:w-auto max-[640px]:rounded-[12px]">
+      <div class="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 [body.light-theme_&]:border-[#d8e3f0]">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--color-blue-640)]"></span>
+            <span class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">{{ 'Arc Report' | translate }}</span>
+            <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-[3px] text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text2)]">{{ displayItems.length }}</span>
+          </div>
+          <div class="mt-1 truncate text-[12px] text-[var(--color-text3)]">{{ selectedArc.countryAName }} -> {{ selectedArc.countryBName }} · {{ selectedArc.categoryLabel }}</div>
+        </div>
+        <button type="button" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]" [attr.aria-label]="'Close arc report' | translate" (click)="onClose()">
+          <i class="bi bi-x-lg text-[13px]"></i>
+        </button>
+      </div>
+
+      <div class="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+        <div class="grid grid-cols-3 gap-2 max-[640px]:grid-cols-1">
+          <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text4)]">{{ 'From' | translate }}</p>
+            <p class="mt-1 truncate text-[13px] font-semibold text-[var(--color-text1)]">{{ selectedArc.countryAName }}</p>
+          </div>
+          <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text4)]">{{ 'To' | translate }}</p>
+            <p class="mt-1 truncate text-[13px] font-semibold text-[var(--color-text1)]">{{ selectedArc.countryBName }}</p>
+          </div>
+          <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text4)]">{{ 'Linked Reports' | translate }}</p>
+            <p class="mt-1 font-mono text-[13px] font-semibold tabular-nums text-[var(--color-text1)]">{{ reportCount }}</p>
+          </div>
+        </div>
+
+        @if (displayItems.length) {
+          <div class="mt-4 space-y-2">
+            @for (item of displayItems; track item.id) {
+              <button type="button" (click)="openReportItem(item)" class="block w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3 text-left transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                      <svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0 drop-shadow-[0_0_6px_currentColor]" [attr.color]="item.colorHex" aria-hidden="true">
+                        <circle cx="6" cy="6" r="5" [attr.fill]="item.colorHex"></circle>
+                      </svg>
+                      <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text2)]">{{ item.categoryLabel }}</span>
+                    </div>
+                    <p class="mt-2 line-clamp-2 text-[13px] font-semibold text-[var(--color-text1)]">{{ item.title }}</p>
+                  </div>
+                  <span class="shrink-0 text-[10px] uppercase tracking-[0.12em] text-[var(--color-text4)]">{{ item.displayDate }}</span>
+                </div>
+
+                @if (item.summary) {
+                  <p class="mt-2 line-clamp-4 text-[11px] leading-5 text-[var(--color-text3)]">{{ item.summary }}</p>
+                }
+
+                @if (item.highlights.length) {
+                  <div class="mt-3 flex flex-wrap gap-1.5">
+                    @for (highlight of item.highlights; track highlight) {
+                      <span class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-1 text-[10px] text-[var(--color-text2)]">{{ highlight }}</span>
+                    }
+                  </div>
+                }
+              </button>
+            }
+          </div>
+        } @else {
+          <div class="mt-4 flex min-h-[180px] items-center justify-center rounded-[10px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-760)] px-4 text-center text-[12px] text-[var(--color-text4)]">
+            {{ 'No loaded report matched this arc. Try widening the date filter and search again.' | translate }}
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

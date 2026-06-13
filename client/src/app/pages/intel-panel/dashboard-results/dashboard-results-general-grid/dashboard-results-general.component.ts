@@ -1,6 +1,5 @@
 import { AfterViewInit, Component, OnInit, inject, input } from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
-import { SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HelperService } from '../../../../shared/services/helper.service';
 import { GeneralResultItem } from '../../../../shared/model/results/general/general.callback.model';
@@ -11,14 +10,16 @@ import { AuthService } from '../../../../services/authetication/auth.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { isWithinDays as isWithinDaysUtil } from '../../../../shared/utils/intel-report.util';
 import { ProxyController } from '../../../../shared/services/proxy-controller';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-dashboard-results-general-grid',
   templateUrl: './dashboard-results-general.component.html',
-  imports: [RouterLink, DatePipe, TooltipDirective, CommonModule, NgClass],
+  imports: [RouterLink, DatePipe, TooltipDirective, CommonModule, NgClass, TranslatePipe],
   standalone: true
 })
 export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
-  private highlightCache = new Map<string, SafeHtml>();
+  private highlightCache = new Map<string, string>();
   private readonly proxied_resource = inject(ProxyController);
 
   protected readonly window = window;
@@ -40,7 +41,7 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
     this.scrollService.scrollToSavedPosition();
   }
 
-  highlightWords(text: any): SafeHtml {
+  highlightWords(text: any): string {
     const key = JSON.stringify(text);
     if (this.highlightCache.has(key)) {
       return this.highlightCache.get(key)!;
@@ -54,7 +55,7 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
     this.currentUrl = this.router.url.split('?')[0];
     this.isConsolidatedView = this.currentUrl.includes('/consolidated/');
     const type = this.type();
-    const ci = type === 'leak' ? 'leak' : type === 'tracking' ? 'leak' : type === 'news' ? 'leak' : type === 'general' ? 'general' : type === 'Strategic' ? 'strategic' : 'leak';
+    const ci = type === 'leak' ? 'leak' : type === 'tracking' ? 'leak' : type === 'news' ? 'leak' : type === 'apt' ? 'apt' : type === 'malware' ? 'malware' : type === 'general' ? 'general' : type === 'Strategic' ? 'strategic' : 'leak';
     if (this.currentUrl.includes('/consolidated/all') || this.currentUrl.includes('/profile/homepage/all')) {
       this.currentUrl = this.currentUrl.replace('/all', `/${ci}`);
     }
@@ -77,6 +78,35 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
 
   isMobileMode(): boolean {
     return this.authService.getIsMobileDemo();
+  }
+
+  getDisplayTags(item: GeneralResultItem | LeakResultItem): string[] {
+    if (item.m_content_type?.length) {
+      return item.m_content_type;
+    }
+    if (item.rank_index === 'apt_model') {
+      return ['APT'];
+    }
+    if (item.rank_index === 'malware_model') {
+      return ['Malware Bazaar'];
+    }
+    return [];
+  }
+
+  getDisplayContent(item: GeneralResultItem | LeakResultItem): string {
+    return item.m_important_content || item.m_content || '';
+  }
+
+  getDisplayUrl(item: GeneralResultItem | LeakResultItem): string {
+    return item.m_url || item.m_source_url || item.m_base_url || '';
+  }
+
+  getReportLink(item: GeneralResultItem | LeakResultItem): string[] {
+    let url = this.currentUrl;
+    if (url.includes('/threat-intel/all')) {
+      url = url.replace('/all', item.rank_index === 'malware_model' ? '/malware' : '/apt');
+    }
+    return [url, item.m_hash];
   }
 
   openExternalUrl(url?: string | null): void {

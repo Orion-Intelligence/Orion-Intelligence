@@ -2,18 +2,18 @@
   <div class="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]"></div>
   <div class="relative z-[1]">
     <div class="flex items-center justify-between gap-2 max-[760px]:flex-wrap">
-      <h2 class="ui-section-title !mb-0">Manage IOCs</h2>
+      <h2 class="ui-section-title !mb-0">{{ 'Manage IOCs' | translate }}</h2>
       <div class="flex items-center gap-2 max-[760px]:w-full max-[760px]:justify-between">
         <div class="relative max-[760px]:flex-1">
           <img src="assets/images/shared/theme/magnifyingglasswhite.svg" alt="Search" [ngClass]="isLightTheme() ? 'pointer-events-none absolute left-3 top-1/2 h-[13px] w-[13px] -translate-y-1/2 opacity-75 transition-all duration-300 [filter:brightness(0)_saturate(100%)_invert(16%)_sepia(16%)_saturate(934%)_hue-rotate(177deg)_brightness(92%)_contrast(92%)]' : 'pointer-events-none absolute left-3 top-1/2 h-[13px] w-[13px] -translate-y-1/2 opacity-70 transition-all duration-300'" />
-          <input data-testid="tenant-ioc-search-input" type="text" [ngClass]="isLightTheme() ? 'h-10 w-[280px] rounded-[8px] border border-[#d0d5dd] bg-white py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[#0f172a] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-[#93c5fd] focus:bg-white focus:ring-2 focus:ring-[#93c5fd33] max-[1024px]:w-[220px] max-[760px]:w-full' : 'h-10 w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[var(--color-text1)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-sky-400/35 focus:bg-[var(--color-blue-720)] focus:ring-2 focus:ring-sky-400/20 max-[1024px]:w-[220px] max-[760px]:w-full'" placeholder="Search IOCs..." [(ngModel)]="iocSearchText" />
+          <input data-testid="tenant-ioc-search-input" type="text" [ngClass]="isLightTheme() ? 'h-10 w-[280px] rounded-[8px] border border-[#d0d5dd] bg-white py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[#0f172a] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-[#93c5fd] focus:bg-white focus:ring-2 focus:ring-[#93c5fd33] max-[1024px]:w-[220px] max-[760px]:w-full' : 'h-10 w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[var(--color-text1)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-sky-400/35 focus:bg-[var(--color-blue-720)] focus:ring-2 focus:ring-sky-400/20 max-[1024px]:w-[220px] max-[760px]:w-full'" [placeholder]="'Search IOCs...' | translate" [(ngModel)]="iocSearchText" />
         </div>
-        <button appTooltip="clear all" class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]" (click)="openConfirmationPopup()">
+        <button [appTooltip]="'clear all' | translate" class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]" (click)="openConfirmationPopup()">
           <img alt="scan" src="assets/images/shared/theme/bin.svg" class="h-[16px] w-[16px]" />
         </button>
       </div>
     </div>
-    <p class="ui-section-description mt-0">Manage and organize IOC values used by your tenant searches.</p>
+    <p class="ui-section-description mt-0">{{ 'Manage and organize IOC values used by your tenant searches.' | translate }}</p>
 
     <div class="relative mt-[21px] flex h-10 items-center gap-[15px] overflow-hidden">
       @if (showLeftFade) {
@@ -33,7 +33,7 @@
           }
         } @else {
           <div class="flex h-full w-full min-w-full items-center justify-start rounded-[8px] bg-[var(--color-blue-810)]/35 px-3 text-left font-[Inter] text-[12px] text-[var(--color-text4)]">
-            No entity filters available.
+            {{ 'No entity filters available.' | translate }}
           </div>
         }
       </div>
@@ -49,15 +49,15 @@
 
     <div [ngClass]="isLightTheme() ? 'mb-[16px] mt-[10px] h-px w-full bg-[#dbe3ef]' : 'mb-[16px] mt-[10px] h-[2px] w-full bg-[var(--color-border)]'"></div>
 
-    <label class="mb-[8px] block font-[Inter] text-[14px] font-normal text-white [body.light-theme_&]:text-[#172235]">Enter IOCs</label>
+    <label class="mb-[8px] block font-[Inter] text-[14px] font-normal text-white [body.light-theme_&]:text-[#172235]">{{ 'Enter IOCs' | translate }}</label>
     <div class="relative w-full">
-      <input data-testid="tenant-ioc-value-input" type="text" class="h-[44px] w-full max-w-full rounded-[8px] border border-[#D0D5DD] bg-white px-[16px] py-[10px] pr-[56px] font-[Inter] text-[14px] text-[#0E1626] shadow-[0_1px_2px_0_#1018280d] outline-none" placeholder="Type" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
-      <button data-testid="tenant-ioc-add-button" type="button" class="absolute right-[8px] top-1/2 inline-flex h-[35px] w-[80px] -translate-y-1/2 items-center justify-center rounded-[6px] bg-[var(--color-blue-640)] px-[12px] text-[13px] font-medium text-white transition hover:brightness-110" (click)="addIoc(inputEl.value); inputEl.value=''">Add</button>
+      <input data-testid="tenant-ioc-value-input" type="text" class="h-[44px] w-full max-w-full rounded-[8px] border border-[#D0D5DD] bg-white px-[16px] py-[10px] pr-[56px] font-[Inter] text-[14px] text-[#0E1626] shadow-[0_1px_2px_0_#1018280d] outline-none" [placeholder]="'categoryAlerts.export.type' | translate" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
+      <button data-testid="tenant-ioc-add-button" type="button" class="absolute right-[8px] top-1/2 inline-flex h-[35px] w-[80px] -translate-y-1/2 items-center justify-center rounded-[6px] bg-[var(--color-blue-640)] px-[12px] text-[13px] font-medium text-white transition hover:brightness-110" (click)="addIoc(inputEl.value); inputEl.value=''">{{ 'common.actions.add' | translate }}</button>
     </div>
 
     <div [ngClass]="isLightTheme() ? 'my-[16px] h-px w-full bg-[#dbe3ef]' : 'my-[16px] h-[2px] w-full bg-[var(--color-border)]'"></div>
 
-    <p class="mb-[8px] font-[Inter] text-[14px] font-medium text-[#a0b8d1]">Added IOCs</p>
+    <p class="mb-[8px] font-[Inter] text-[14px] font-medium text-[#a0b8d1]">{{ 'Added IOCs' | translate }}</p>
     <div class="max-h-[500px] min-h-[20px] space-y-3 overflow-y-auto">
       @if (hasIocsWithValues()) {
         <div>
@@ -67,7 +67,7 @@
                 <p class="my-[12px] mb-[8px] font-[Inter] text-[14px] font-medium text-[#57a5eb]">{{ ioc.name }}</p>
                 <div class="flex flex-wrap gap-[8px]">
                   @for (value of ioc.values; track value) {
-                    <div [ngClass]="isLightTheme() ? 'flex cursor-pointer items-center gap-[8px] rounded-[6px] border border-[#d0d5dd] bg-white px-[10px] py-[4px] font-[Inter] text-[12px] font-medium text-[#344054] shadow-[0_1px_1px_rgba(16,24,40,0.04)] transition hover:border-[#b8c7dc] hover:bg-[#f8fafc]' : 'flex cursor-pointer items-center gap-[8px] rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] py-[4px] font-[Inter] text-[12px] font-normal text-[var(--color-text1)] transition hover:bg-[#FCFCFC20]'" appTooltip="remove IOC" (click)="removeIoc(ioc.ioc_id, value)">
+                    <div [ngClass]="isLightTheme() ? 'flex cursor-pointer items-center gap-[8px] rounded-[6px] border border-[#d0d5dd] bg-white px-[10px] py-[4px] font-[Inter] text-[12px] font-medium text-[#344054] shadow-[0_1px_1px_rgba(16,24,40,0.04)] transition hover:border-[#b8c7dc] hover:bg-[#f8fafc]' : 'flex cursor-pointer items-center gap-[8px] rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] py-[4px] font-[Inter] text-[12px] font-normal text-[var(--color-text1)] transition hover:bg-[#FCFCFC20]'" [appTooltip]="'remove IOC' | translate" (click)="removeIoc(ioc.ioc_id, value)">
                       <span>{{ value }}</span>
                       <span>✕</span>
                     </div>
@@ -78,7 +78,7 @@
           }
         </div>
       } @else {
-        <div class="mt-0 font-[Inter] text-[14px] text-[var(--color-text1)]">No IOCs added yet</div>
+        <div class="mt-0 font-[Inter] text-[14px] text-[var(--color-text1)]">{{ 'No IOCs added yet' | translate }}</div>
       }
 
     </div>
@@ -86,6 +86,6 @@
   </div>
 </div>
 @if (isConfirmationOpen) {
-  <app-confirmation-popup [message]="'Are you sure you want to clear your scan history?'"
+  <app-confirmation-popup [message]="('Are you sure you want to clear your scan history?') | translate"
   (confirmed)="clearAllIocs($event)"></app-confirmation-popup>
 }

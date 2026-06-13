@@ -14,9 +14,11 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import { finalize, switchMap, tap } from 'rxjs';
 import { NodeResolver } from '../../../../shared/resolvers/session-data-resolver.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-view-profile',
-  imports: [FormsModule, CommonModule, AddTenantComponent, ConfirmationPopupComponent, TooltipDirective],
+  imports: [FormsModule, CommonModule, AddTenantComponent, ConfirmationPopupComponent, TooltipDirective, TranslatePipe],
   animations: [fadeInDashboardItem],
   templateUrl: './manage-profile.component.html',
 })

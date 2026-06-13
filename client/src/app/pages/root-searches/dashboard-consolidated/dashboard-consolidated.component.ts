@@ -11,7 +11,7 @@ import { ConsolidatedCallbackModel } from '../../../shared/model/results/consoli
 import { DashboardResultExploitComponent } from '../../intel-panel/dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
 import { DashboardResultChatComponent } from '../../intel-panel/dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
 import { SortGroupedResultsPipe } from '../../../shared/pipes/sort-grouped-results.pipe';
-import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, FeedSubCategory, GeneralSubCategory, SocialSubCategory } from '../../../shared/constants/pages';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, FeedSubCategory, GeneralSubCategory, SocialSubCategory, ThreatIntelSubCategory } from '../../../shared/constants/pages';
 import { SelectionStoreService } from '../../../services/dashboard/selection.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { DashboardResultSocialComponent } from '../../intel-panel/dashboard-results/dashboard-result-social/dashboard-result-social.component';
@@ -31,11 +31,13 @@ import { DefacementCallbackModel } from '../../../shared/model/results/defacemen
 import { applyQueryAndPageFromParams, isRouteChanged } from '../../intel-panel/dashboard-manager.utils';
 import { NetworkIntel } from '../network-intel/network-intel';
 import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
+import { SatelliteIntel } from "../../geo-fencing/satellite-intel/satellite-intel";
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel, CrossSearchCardComponent],
+  imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel, CrossSearchCardComponent, SatelliteIntel, TranslatePipe],
   templateUrl: './dashboard-consolidated.component.html',
   animations: [scanAnimation, fadeInDashboardItem],
 })
@@ -53,6 +55,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   isGrouped = false;
   isIOC = true;
   isNetworkIntel = false;
+  isGeoFencing = false;
   query: string = '';
   isLoading = signal(false);
   isStealerLogLoading = signal(false);
@@ -60,6 +63,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   result_count = 0;
   apiCategories = Object.values(ApiSubCategory);
   dumpCategories = Object.values(DumpSubCategory);
+  threatIntelCategories = Object.values(ThreatIntelSubCategory);
   newsCategories = Object.values(FeedSubCategory);
   socialCategories = Object.values(SocialSubCategory);
   generalCategories = Object.values(GeneralSubCategory);
@@ -254,6 +258,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       'defacement_model',
       'generic_model',
       'exploit_model',
+      'apt_model',
+      'malware_model',
       'social_model',
       'stealer_model',
       'tracking_model',
@@ -306,6 +312,9 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       case Category.DEFACEMENT:
         firstSubcategory = this.defacementCategories[0];
         break;
+      case Category.THREAT_INTEL:
+        firstSubcategory = this.threatIntelCategories[0];
+        break;
       case Category.DUMP:
         firstSubcategory = this.dumpCategories[0];
         break;
@@ -320,7 +329,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     if (firstSubcategory) {
       this.selectionStore.setSelectedOption(firstSubcategory);
     }
-    const routePrefix = '/dashboard/' + section.toLowerCase() + '/' + second_category;
+    const sectionRoute = section === Category.THREAT_INTEL ? 'threat-intel' : section.toLowerCase();
+    const routePrefix = '/dashboard/' + sectionRoute + '/' + second_category;
     this.router.navigate([routePrefix], {
       queryParams: { page: 1 }, queryParamsHandling: 'merge'
     }).then();
@@ -332,6 +342,9 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         return Category.BREACH;
       case 'exploit_model':
         return Category.EXPLOIT;
+      case 'apt_model':
+      case 'malware_model':
+        return Category.THREAT_INTEL;
       case 'defacement_model':
         return Category.DEFACEMENT;
       case 'chat_model':
@@ -345,11 +358,15 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
   }
 
-  onToggleMenu(tab: string): void {
+  onToggleMenu(tab: string, clearQuery = false): void {
+    if (clearQuery) {
+      this.query = '';
+      this.dashboardService.consolidatedParamModel.q = '';
+    }
     this.dashboardService.consolidatedParamModel.tab = tab;
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { tab },
+      queryParams: clearQuery ? { tab, q: null } : { tab },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     }).then();
@@ -358,6 +375,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.isNetworkIntel = false;
       this.isGrouped = true;
       this.isIOC = false;
+      this.isGeoFencing = false;
+      this.restoreDeepSearchQuery();
       if (skipConsolidatedBackFetchOnce) {
         sessionStorage.removeItem('skipConsolidatedBackFetchOnce');
         return;
@@ -368,18 +387,40 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.isNetworkIntel = false;
       this.isGrouped = false;
       this.isIOC = false;
+      this.isGeoFencing = false;
       this.fetchRanked();
     }
     else if (tab == "IOCs") {
       this.isNetworkIntel = false;
       this.isIOC = true;
       this.isGrouped = false;
+      this.isGeoFencing = false;
     }
     else if (tab == "Network Intelligence") {
       this.isNetworkIntel = true;
       this.isIOC = false;
       this.isGrouped = false;
+      this.isGeoFencing = false;
     }
+    else if (tab == "Geo Fencing") {
+      this.isNetworkIntel = false;
+      this.isIOC = false;
+      this.isGrouped = false;
+      this.isGeoFencing = true;
+    }
+  }
+
+  private restoreDeepSearchQuery(): void {
+    const snapshotParams = this.route.snapshot.queryParams;
+    const querySource = this.dashboardService.consolidatedParamModel.q || this.query || snapshotParams['q'];
+    if (!querySource) {
+      return;
+    }
+    this.query = querySource;
+    this.dashboardService.consolidatedParamModel.q = querySource;
+    this.dashboardService.consolidatedParamModel.url = '';
+    this.dashboardService.consolidatedParamModel.user = '';
+    this.dashboardService.consolidatedParamModel.ioc = '';
   }
 
   checkMember(): boolean {

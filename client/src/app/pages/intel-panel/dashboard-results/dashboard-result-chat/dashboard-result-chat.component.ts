@@ -8,6 +8,8 @@ import { NormalizeUnicodePipe } from '../../../../shared/pipes/normalize-unicode
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { ProxyController } from '../../../../shared/services/proxy-controller';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-dashboard-result-chat',
   imports: [
@@ -16,8 +18,7 @@ import { ProxyController } from '../../../../shared/services/proxy-controller';
     TooltipDirective,
     CommonModule,
     NormalizeUnicodePipe,
-    RouterLink
-  ],
+    RouterLink, TranslatePipe],
   templateUrl: './dashboard-result-chat.component.html'
 })
 export class DashboardResultChatComponent implements OnInit, AfterViewInit {

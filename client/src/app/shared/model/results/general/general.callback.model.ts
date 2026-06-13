@@ -2,7 +2,9 @@ import { initCallbackModel } from '../callback.init';
 export class GeneralResultItem {
   m_title!: string;
   m_url?: string;
+  m_source_url?: string;
   m_base_url?: string;
+  m_platform?: string;
   m_content!: string;
   m_screenshot!: string;
   m_ref_html?: string | null;
@@ -19,6 +21,7 @@ export class GeneralResultItem {
   m_update_date!: string;
   m_hash!: string;
   m_creation_date!: string;
+  rank_index?: string;
 
   constructor(init?: Partial<GeneralResultItem>) {
     this.m_title = '';

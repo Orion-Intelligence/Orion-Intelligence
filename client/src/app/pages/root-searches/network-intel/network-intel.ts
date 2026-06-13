@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { EMPTY, Subject, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, concatMap, tap } from 'rxjs/operators';
-import { ScanHelperMethodsService } from './network-intel-service.service';
-import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats } from '../../../shared/model/network-intel/network-intel.model';
+import { NetworkIntelScanService } from '../../../shared/services/network-intel/network-intel-scan.service';
+import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats, VulnerabilityScanDepth } from '../../../shared/model/network-intel/network-intel.model';
 import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
@@ -14,15 +14,13 @@ import { GeoCoordinatesModalComponent } from './modal/geo-coordinates-modal/geo-
 import { DnsSectionComponent } from './dns-section/dns-section.component';
 import { ShodanSectionComponent } from './shodan-section/shodan-section.component';
 import { VulnerabilitySectionComponent } from './vulnerability-section/vulnerability-section.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector:    'app-network-intel',
   templateUrl: './network-intel.html',
   standalone:  true,
-  host: {
-    'class': 'block h-full min-h-0 overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]'
-  },
-  imports:     [CommonModule, FormsModule, EmptyQueryComponent, GeoCoordinatesModalComponent, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent],
+  imports:     [CommonModule, FormsModule, EmptyQueryComponent, GeoCoordinatesModalComponent, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent, TranslatePipe],
   animations:  [fadeInDashboardItem],
 })
 export class NetworkIntel implements OnInit, OnDestroy {
@@ -78,7 +76,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     return '-';
   }
 
-  constructor( public scanHelper: ScanHelperMethodsService, private route: ActivatedRoute, private router: Router, private reportExport: ReportExportService, ) {}
+  constructor( public scanHelper: NetworkIntelScanService, private route: ActivatedRoute, private router: Router, private reportExport: ReportExportService, ) {}
 
   ngOnInit(): void {
     this.scanHelper.resetState();
@@ -447,7 +445,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.watchResult(this.parseVulnerabilityTargets.bind(this));
   }
 
-  startVulnerabilityScanForTarget(target: string): void {
+  startVulnerabilityScanForTarget(target: string, depth: VulnerabilityScanDepth): void {
     const normalizedTarget = target.trim();
     if (!normalizedTarget || this.isScanning()) {
       return;
@@ -463,7 +461,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.vulnerabilityResult = null;
     this.lastResultCount = this.vulnerabilityTargets.length;
     this.syncUrl();
-    this.sub = this.scanHelper.scanUrlVulnerability(normalizedTarget);
+    this.sub = this.scanHelper.scanUrlVulnerability(normalizedTarget, depth);
     this.watchResult(this.parseVulnerabilityResult.bind(this));
   }
 

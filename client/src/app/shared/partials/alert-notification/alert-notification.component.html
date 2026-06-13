@@ -5,7 +5,7 @@
 @if (isNotificationOpen()) {
   <div data-testid="tenant-notification-sidebar" class="fixed right-0 top-0 z-50 flex h-screen w-[360px] flex-col items-center gap-[10px] rounded-l-[16px] border-l border-[var(--color-border)] bg-[var(--color-blue-850)] py-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] max-[420px]:w-full max-[420px]:rounded-none" @sidebarAnimation>
     <div class="flex w-[340px] items-center justify-between border-b border-[var(--color-border)] px-[6px] pb-3 max-[420px]:w-[calc(100%-20px)]">
-      <span class="font-[Inter] text-[18px] font-semibold text-[var(--color-text1)]">Notifications</span>
+      <span class="font-[Inter] text-[18px] font-semibold text-[var(--color-text1)]">{{ 'Notifications' | translate }}</span>
       <button data-testid="tenant-notification-close" type="button" (click)="close()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
         <img alt="close" height="22" src="assets/images/shared/theme/nav-next.svg" width="22" class="ui-action-icon" />
       </button>
@@ -14,19 +14,19 @@
       @if (isLoadingMore && !isLoadMoreTriggered) {
         <div class="my-2 flex items-center justify-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.04)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
           <div class="h-4 w-4 animate-spin rounded-full border-2 border-[#57a5eb] border-t-transparent"></div>
-          Loading alerts...
+          {{ 'Loading alerts...' | translate }}
         </div>
       }
       @if (isFetchingDetail) {
         <div class="my-2 flex items-center justify-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.04)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
           <div class="h-4 w-4 animate-spin rounded-full border-2 border-[#57a5eb] border-t-transparent"></div>
-          Fetching alert details...
+          {{ 'Fetching alert details...' | translate }}
         </div>
       }
       @if (alertNotifications.length==0) {
         <div class="my-[10px] rounded-[12px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.03)] p-4 [body.light-theme_&]:bg-[rgba(0,0,0,0.02)]">
-          <div class="text-[14px] font-semibold text-[var(--color-text1)]">No alerts to show yet.</div>
-          <div class="mt-1 text-[12px] leading-[1.5] text-[var(--color-text4)]">We’re monitoring this source. New breach or tracking results will appear here automatically.</div>
+          <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ 'No alerts to show yet.' | translate }}</div>
+          <div class="mt-1 text-[12px] leading-[1.5] text-[var(--color-text4)]">{{ 'We’re monitoring this source. New breach or tracking results will appear here automatically.' | translate }}</div>
         </div>
       }
       @if (alertNotifications.length>0) {
@@ -36,11 +36,11 @@
               <div class="flex items-center justify-between">
                 <span class="font-[Inter] text-[16px] font-medium text-[var(--color-text1)]">{{ n.categoryName.charAt(0).toUpperCase() + n.categoryName.slice(1) }}</span>
                 <span class="rounded-full border border-[var(--color-border)] px-2 py-1 font-[Inter] text-[12px] font-semibold" [ngClass]="{ 'bg-[rgb(255,0,0,0.15)] text-[#ff4d4f]': n.risk.toLowerCase() === 'critical', 'bg-[rgb(255,165,0,0.15)] text-[#f59e0b]': n.risk.toLowerCase() === 'high', 'bg-[rgb(255,215,0,0.15)] text-[#facc15]': n.risk.toLowerCase() === 'medium', 'bg-[rgb(0,255,0,0.15)] text-[#4ade80]': n.risk.toLowerCase() === 'low' }">
-                  {{ n.risk }} Risk
+                  {{ n.risk }} {{ 'categoryAlerts.fields.risk' | translate }}
                 </span>
               </div>
               <div class="mt-2 font-[Inter] text-[12px] font-normal text-[var(--color-text1)]">
-                New leak found on dark web mentioning
+                {{ 'New leak found on dark web mentioning' | translate }}
                 <span class="font-semibold text-[var(--color-text1)]">{{ n.iocNames.join(', ') }}</span>.
               </div>
               <div class="mt-2 mb-0 flex w-full items-center justify-between">
@@ -49,7 +49,7 @@
                   <span class="h-1 w-1 rounded-full bg-[#a0b8d1]"></span>
                   <span>{{ timeAgo(n.lastSeen) }}</span>
                 </div>
-                <button data-testid="tenant-notification-see-details" class="border-0 bg-transparent font-[Inter] text-[12px] font-semibold text-[#57a5eb]" (click)="seeDetails(n.categoryName,n.hash)">See Details</button>
+                <button data-testid="tenant-notification-see-details" class="border-0 bg-transparent font-[Inter] text-[12px] font-semibold text-[#57a5eb]" (click)="seeDetails(n.categoryName,n.hash)">{{ 'common.actions.seeDetails' | translate }}</button>
               </div>
             </div>
           }
@@ -57,7 +57,7 @@
         @if (canLoadMore()) {
           <div class="flex w-full items-center justify-center py-2">
             <button type="button" [disabled]="isLoadingMore" (click)="loadMoreNotifications()" class="rounded-md border border-[var(--color-border)] bg-transparent px-4 py-2 text-[12px] font-semibold text-[var(--color-text3)] transition hover:bg-[var(--color-blue-810)] disabled:cursor-not-allowed disabled:opacity-70">
-              {{ isLoadingMore && isLoadMoreTriggered ? 'Loading...' : 'Load more' }}
+              {{ (isLoadingMore && isLoadMoreTriggered ? 'Loading...' : 'Load more') | translate }}
             </button>
           </div>
         }
@@ -65,9 +65,9 @@
     </div>
     <div class="w-full px-5">
       <div class="flex flex-col gap-2">
-        <button (click)="close()" class="w-full rounded-md border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--color-blue-810)] [body.light-theme_&]:text-[#172235]" type="button">Close</button>
+        <button (click)="close()" class="w-full rounded-md border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--color-blue-810)] [body.light-theme_&]:text-[#172235]" type="button">{{ 'common.actions.close' | translate }}</button>
         @if (alertNotifications.length>0) {
-          <button data-testid="tenant-notification-clear-all" (click)="clearAll()" class="w-full rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110" type="button">Clear All</button>
+          <button data-testid="tenant-notification-clear-all" (click)="clearAll()" class="w-full rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110" type="button">{{ 'Clear All' | translate }}</button>
         }
       </div>
     </div>
@@ -76,8 +76,8 @@
 
 <app-export-choice-modal
   [visible]="isExportChoiceOpen"
-  [title]="'Export Alert'"
-  [subtitle]="'Choose the export format.'"
+  [title]="('Export Alert') | translate"
+  [subtitle]="('Choose the export format.') | translate"
   [options]="alertExportOptions"
   [overlayTestId]="'notification-alert-export-overlay'"
   [modalTestId]="'notification-alert-export-modal'"

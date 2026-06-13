@@ -1,44 +1,58 @@
 <div class="flex justify-end">
-  <div class="mr-[12px] mt-[16px] inline-flex items-stretch overflow-hidden rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)] ui-result-card-soft sm:mr-[35px] sm:mt-[20px]">
-    <button (click)="downloadCSV()" appTooltip="Download" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-      <img alt="Download" height="25" ngSrc="assets/images/shared/theme/download.svg" width="25" class="ui-action-icon" />
+  <div class="mr-[12px] mt-[16px] inline-flex items-stretch overflow-visible rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)] ui-result-card-soft sm:mr-[35px] sm:mt-[20px]">
+    <button (click)="downloadCSV()" [appTooltip]="'common.actions.download' | translate" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+      <img alt="common.actions.download" height="25" ngSrc="assets/images/shared/theme/download.svg" width="25" class="ui-action-icon" />
     </button>
     <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
 
-    <button (click)="openExportChoice()" appTooltip="Export Report" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+    <button (click)="openExportChoice()" [appTooltip]="'Export Report' | translate" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
       <img alt="Print" height="25" ngSrc="assets/images/shared/theme/print.svg" width="25" class="ui-action-icon" />
     </button>
 
-    @if (lang()!==lang_detected()) {
       <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
-      <button (click)="langUpdate()" appTooltip="Translator" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-        <img alt="background" height="25" ngSrc="assets/images/shared/translate.svg" width="25" class="ui-action-icon">
-      </button>
-    }
+      <div class="report-language-picker relative">
+        <button (click)="toggleLanguageDropdown($event)" [appTooltip]="'Translator' | translate" [attr.aria-expanded]="isLanguageDropdownOpen()" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+          <img alt="background" height="25" ngSrc="assets/images/shared/translate.svg" width="25" class="ui-action-icon">
+        </button>
+        @if (isLanguageDropdownOpen()) {
+          <div class="absolute right-0 top-[calc(100%+8px)] z-[1400] w-[248px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-750)] p-2 shadow-[0_16px_30px_rgba(2,6,23,0.22)]">
+            <div class="pointer-events-none absolute top-[-9px] right-[12px] h-0 w-0 border-l-[8px] border-r-[8px] border-b-[9px] border-l-transparent border-r-transparent border-b-[var(--color-blue-750)]"></div>
+            <div class="mb-1 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Language' | translate }}</div>
+            <div class="max-h-[320px] overflow-y-auto pr-1">
+              @for (language of languageOptions; track language.code) {
+                <button type="button" class="flex h-9 w-full items-center justify-between gap-3 rounded-[8px] px-2 text-left text-sm font-medium transition-colors" [ngClass]="getActiveLanguage() === language.code ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]'" (click)="langUpdate(language.code)">
+                  <span class="min-w-0 truncate">{{ language.name }}</span>
+                  <span class="shrink-0 text-[11px] font-semibold uppercase opacity-75">{{ language.code }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
 
     @if (appService.getConfig().appSettings.ai_endpoint_enabled && content()) {
       <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
-      <button (click)="aiSuggest()" appTooltip="AI Summary" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+      <button (click)="aiSuggest()" [appTooltip]="'AI Summary' | translate" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
         <img alt="AI Summary" height="25" ngSrc="assets/images/shared/theme/ai.svg" width="25" class="ui-action-icon" />
       </button>
       <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
-      <button (click)="shareResult()" appTooltip="Share" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+      <button (click)="shareResult()" [appTooltip]="'Share' | translate" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
         <img alt="Share" height="22" ngSrc="assets/images/shared/theme/share.svg" width="22" class="ui-action-icon" />
       </button>
     } @else {
       <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
-      <button (click)="shareResult()" appTooltip="Share" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+      <button (click)="shareResult()" [appTooltip]="'Share' | translate" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
         <img alt="Share" height="22" ngSrc="assets/images/shared/theme/share.svg" width="22" class="ui-action-icon" />
       </button>
     }
     <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
 
-    <button (click)="redirectToUrl()" appTooltip="Open Breach Link" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+    <button (click)="redirectToUrl()" [appTooltip]="'Open Breach Link' | translate" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
       <img alt="Open Breach Link" height="16" ngSrc="assets/images/shared/theme/redirect.svg" width="16" class="ui-action-icon" />
     </button>
     @if (showCtiGraph()) {
       <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
-      <button (click)="open_graph()" appTooltip="Open CTI Graph" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+      <button (click)="open_graph()" [appTooltip]="'Open CTI Graph' | translate" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] ui-result-card-soft p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
         <img alt="Graph" height="17" ngSrc="assets/images/sidebar/graph.svg" width="17" class="ui-action-icon" />
       </button>
     }
@@ -47,8 +61,8 @@
 
 <app-export-choice-modal
   [visible]="isExportChoiceOpen"
-  [title]="'Export Report'"
-  [subtitle]="'Choose the export format.'"
+  [title]="('Export Report') | translate"
+  [subtitle]="('Choose the export format.') | translate"
   [options]="reportExportOptions"
   (closed)="closeExportChoice()"
   (optionSelected)="selectExport($event)">

@@ -6,14 +6,15 @@ import { FormsModule } from '@angular/forms';
 import { EntityDetailsComponent } from '../entity-details/entity-details';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
+import { CaseEditDrawerComponent } from '../case-details/case-edit-drawer/case-edit-drawer';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-add-new-case',
-  imports: [CommonModule, FormsModule, EntityDetailsComponent],
+  imports: [CommonModule, FormsModule, EntityDetailsComponent, CaseEditDrawerComponent, TranslatePipe],
   templateUrl: './add-new-case.html'
 })
 export class AddNewCase {
-  isOpen = false;
   validationErrors: Record<string, string> = {};
   caseTypeOptions = CASE_TYPE_OPTIONS;
   intakeSourceOptions = INTAKE_SOURCE_OPTIONS;
@@ -31,10 +32,6 @@ export class AddNewCase {
 
   ngOnInit(): void {
     this.generateCaseId();
-    setTimeout(() => {
-      this.isOpen = true;
-      this.cdr.detectChanges();
-    }, 10);
   }
 
   generateCaseId(): void {
@@ -47,10 +44,7 @@ export class AddNewCase {
   }
 
   closePopup(): void {
-    this.isOpen = false;
-    setTimeout(() => {
-      this.close.emit();
-    }, 300);
+    this.close.emit();
   }
 
   toggleTag(tag: CaseTag): void {
@@ -81,20 +75,44 @@ export class AddNewCase {
     });
   }
 
+  private validateOther(value: string | undefined | null, otherValue: string | undefined | null, key: string, message: string): void {
+    if (value === 'other' && !otherValue?.trim()) {
+      this.validationErrors[key] = message;
+    }
+  }
+
   private cleanPrimaryEntity(): CaseEntityRequest {
     const entityId = this.primaryEntity.entityId || this.createId();
     const value = this.primaryEntity.value.trim();
+
     return {
       ...structuredClone(DEFAULT_PRIMARY_CASE_ENTITY_REQUEST_TEMPLATE),
       entityId,
       type: this.primaryEntity.type,
       value,
-      displayName: this.primaryEntity.displayName?.trim() || value,
+      entityDescription: this.primaryEntity.entityDescription?.trim() || value,
       confidence: this.primaryEntity.confidence,
-      identifiers: this.primaryEntity.identifiers.filter(identifier => identifier.type && identifier.value.trim()),
-      socialProfiles: this.primaryEntity.socialProfiles.filter(profile => profile.platform && profile.username.trim()),
-      tags: this.primaryEntity.tags || [],
-      attributes: this.primaryEntity.attributes || []
+      source: this.primaryEntity.source,
+      entityTypeOtherValue: this.primaryEntity.entityTypeOtherValue?.trim() || '',
+      entitySourceOtherValue: this.primaryEntity.entitySourceOtherValue?.trim() || '',
+      identifiers: this.primaryEntity.identifiers
+        .filter(identifier => identifier.type && identifier.value.trim())
+        .map(identifier => ({
+          ...identifier,
+          value: identifier.value.trim(),
+          issuer: identifier.issuer?.trim() || '',
+          identifierTypeOtherValue: identifier.identifierTypeOtherValue?.trim() || ''
+        })),
+      socialProfiles: this.primaryEntity.socialProfiles
+        .filter(profile => profile.platform && profile.username.trim())
+        .map(profile => ({
+          ...profile,
+          username: profile.username.trim(),
+          displayName: profile.displayName?.trim() || '',
+          profileUrl: profile.profileUrl?.trim() || '',
+          platformOtherValue: profile.platformOtherValue?.trim() || ''
+        })),
+      tags: this.primaryEntity.tags || []
     };
   }
 
@@ -104,25 +122,38 @@ export class AddNewCase {
     if (!this.caseForm.title.trim()) {
       this.validationErrors['title'] = 'Case title is required';
     }
+
     if (!this.caseForm.caseId.trim()) {
       this.validationErrors['caseId'] = 'Case ID is required';
     }
+
     if (!this.primaryEntity.value.trim()) {
       this.validationErrors['entityValue'] = 'Primary entity value is required';
     }
 
+    this.validateOther(this.caseForm.caseType, this.caseForm.caseTypeOtherValue, 'caseTypeOther', 'Other case type is required');
+    this.validateOther(this.caseForm.intakeSource, this.caseForm.intakeSourceOtherValue, 'intakeSourceOther', 'Other intake source is required');
+    this.validateOther(this.primaryEntity.type, this.primaryEntity.entityTypeOtherValue, 'entityTypeOther', 'Other entity type is required');
+    this.validateOther(this.primaryEntity.source, this.primaryEntity.entitySourceOtherValue, 'entitySourceOther', 'Other entity source is required');
+
     const invalidIdentifier = this.primaryEntity.identifiers.find(identifier => {
-      return (identifier.type && !identifier.value.trim()) || (!identifier.type && identifier.value.trim());
+      return (identifier.type && !identifier.value.trim())
+        || (!identifier.type && identifier.value.trim())
+        || (identifier.type === 'other' && !identifier.identifierTypeOtherValue?.trim());
     });
+
     if (invalidIdentifier) {
-      this.validationErrors['identifier'] = 'Identifiers require both type and value';
+      this.validationErrors['identifier'] = 'Identifiers require type, value, and other value when type is Other';
     }
 
     const invalidSocialProfile = this.primaryEntity.socialProfiles.find(profile => {
-      return (profile.platform && !profile.username.trim()) || (!profile.platform && profile.username.trim());
+      return (profile.platform && !profile.username.trim())
+        || (!profile.platform && profile.username.trim())
+        || (profile.platform === 'other' && !profile.platformOtherValue?.trim());
     });
+
     if (invalidSocialProfile) {
-      this.validationErrors['socialProfile'] = 'Social profiles require both platform and username';
+      this.validationErrors['socialProfile'] = 'Social profiles require platform, username, and other value when platform is Other';
     }
 
     if (Object.keys(this.validationErrors).length > 0) {
@@ -131,6 +162,7 @@ export class AddNewCase {
     }
 
     const primaryEntity = this.cleanPrimaryEntity();
+
     const request: CaseRequest = {
       caseId: this.caseForm.caseId,
       title: this.caseForm.title.trim(),
@@ -140,6 +172,8 @@ export class AddNewCase {
       severity: this.caseForm.severity,
       priority: this.caseForm.priority,
       intakeSource: this.caseForm.intakeSource,
+      caseTypeOtherValue: this.caseForm.caseTypeOtherValue?.trim() || '',
+      intakeSourceOtherValue: this.caseForm.intakeSourceOtherValue?.trim() || '',
       tags: this.caseForm.tags,
       primaryEntityId: primaryEntity.entityId,
       assignedAnalystIds: [],

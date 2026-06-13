@@ -8,17 +8,17 @@
               <span class="h-[31px] rounded-[25px] bg-[var(--color-tags)] px-[13px] py-[6px] text-[12px] font-normal text-[var(--color-text3)]">{{ tag }}</span>
             }
           } @else {
-            <span class="h-[31px] rounded-[25px] bg-[var(--color-tags)] px-[13px] py-[6px] text-[12px] font-normal text-[var(--color-text3)]">unknown</span>
+            <span class="h-[31px] rounded-[25px] bg-[var(--color-tags)] px-[13px] py-[6px] text-[12px] font-normal text-[var(--color-text3)]">{{ 'unknown' | translate }}</span>
           }
         </div>
         @if (!authService.getIsMobileDemo()) {
           <div class="ml-auto flex items-center gap-[20px]">
-          <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" appTooltip="Open CTI Graph" class="flex cursor-pointer justify-center" data-testid="open-cti-graph">
+          <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" [appTooltip]="'Open CTI Graph' | translate" class="flex cursor-pointer justify-center" data-testid="open-cti-graph">
             <div class="pb-[10px] pl-[10px]">
               <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
             </div>
           </div>
-          <a (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" appTooltip="Open Report" data-testid="open-report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="flex cursor-pointer justify-center">
+          <a (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [appTooltip]="'Open Report' | translate" data-testid="open-report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="flex cursor-pointer justify-center">
             <div class="pb-[10px] pl-[10px]">
               <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" />
             </div>
@@ -28,7 +28,7 @@
       </div>
       <div class="mt-3 flex items-center gap-2">
         <img alt="Channel" height="20" src="/assets/images/shared/theme/channel.svg" width="20" />
-        <h2 class="mb-0 ml-2 max-w-[700px] truncate text-[24px] font-medium text-[var(--color-text1)]">{{ item.m_channel_name || 'Untitled' }}</h2>
+        <h2 class="mb-0 ml-2 max-w-[700px] truncate text-[24px] font-medium text-[var(--color-text1)]">{{ item.m_channel_name || ('Untitled' | translate) }}</h2>
       </div>
       @if (item.m_message_sharable_link) {
         <div class="mb-[20px] mt-[5px] block truncate text-[12px] font-medium text-[var(--color-text8)]">
@@ -38,11 +38,11 @@
         </div>
       }
       @if (item.m_summary && item.m_summary[0] && item.m_summary[0].length > 5) {
-        <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">AI Summary</h5>
+        <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">{{ 'AI Summary' | translate }}</h5>
         <div class="text-[12px] font-medium text-[var(--color-text8)]">{{ item.m_summary[0].slice(0, 500) | normalizeUnicode}}...</div>
       }
       @if (item.m_file_name?.length) {
-        <h5 class="mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">Embedded Files</h5>
+        <h5 class="mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">{{ 'Embedded Files' | translate }}</h5>
         @for (file of item.m_file_name | slice:0:3; track $index) {
           <div class="text-[12px] font-medium text-[var(--color-text8)]">
             @for (part of file.split(' - '); track $index) {
@@ -55,11 +55,11 @@
         @if (item.m_caption && item.m_caption.length > 5) {
           <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)]">{{ item.m_caption.slice(0, 300) | normalizeUnicode}}...</p>
           @if (item.m_media_caption && item.m_media_caption.length > 5) {
-            <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">Media Caption</h5>
+            <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">{{ 'Media Caption' | translate }}</h5>
             <div class="text-[12px] font-medium text-[var(--color-text8)]">{{ item.m_media_caption.slice(0, 300) | normalizeUnicode}}...</div>
           }
           @if (item.m_content) {
-            <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">Raw Data Content</h5>
+            <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">{{ 'Raw Data Content' | translate }}</h5>
             <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)]">
               @for (part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; track $index; let last = $last) {
                 {{ part | normalizeUnicode }}@if (!last) {
@@ -75,7 +75,7 @@
         @if (item.m_media_caption && item.m_media_caption.length > 5) {
           <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)]">{{ item.m_media_caption.slice(0, 300) | normalizeUnicode }}...</p>
           @if (item.m_content) {
-            <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">Raw Data Content</h5>
+            <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">{{ 'Raw Data Content' | translate }}</h5>
             <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)]">
               @for (part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; track $index; let last = $last) {
                 {{ part | normalizeUnicode }}@if (!last) {
@@ -100,13 +100,13 @@
           }
         </p>
       } @else {
-        <p class="mt-[10px] text-[14px] font-normal text-[var(--color-text8)]">No content available</p>
+        <p class="mt-[10px] text-[14px] font-normal text-[var(--color-text8)]">{{ 'No content available' | translate }}</p>
       }
     }
   }
 }
   @if (item.m_weblink?.length) {
-  <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">Embedded URL</h5>
+  <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">{{ 'Embedded URL' | translate }}</h5>
   @for (link of item.m_weblink | slice:0:3; track $index) {
     <div class="block truncate text-[12px] font-medium text-[var(--color-text8)]">
       <a [href]="link" target="_blank" rel="noopener noreferrer" class="hover:underline" (click)="$event.stopPropagation()">
@@ -117,12 +117,12 @@
 }
 <div class="flex flex-wrap items-center justify-between gap-[15px] pt-[10px] pr-[10px] text-[12px]">
   <div class="flex flex-col gap-[2px]">
-    <span class="text-[var(--color-text4)]">Message Date:</span>
-    <span class="font-medium text-[var(--color-text1)]">{{ item.m_message_date ? (item.m_message_date | date: 'MMM d, y') : 'Not available' }}</span>
+    <span class="text-[var(--color-text4)]">{{ 'Message Date' | translate }}:</span>
+    <span class="font-medium text-[var(--color-text1)]">{{ item.m_message_date ? (item.m_message_date | date: 'MMM d, y') : ('Not available' | translate) }}</span>
   </div>
   @if (item.m_views) {
     <div class="flex flex-col gap-[2px]">
-      <span class="text-[var(--color-text4)]">Views:</span>
+      <span class="text-[var(--color-text4)]">{{ 'Views' | translate }}:</span>
       <span class="font-medium text-[var(--color-text1)]">{{ item.m_views }}</span>
     </div>
   }
@@ -132,7 +132,7 @@
 
 @if (isExpandAble() && searchResults().length > 2) {
   <div class="flex justify-center">
-    <span class="ui-see-more-btn cursor-pointer" (click)="isCollapsed = !isCollapsed" data-testid="consolidated-section-see-more">{{ isCollapsed ? 'See More' : 'See Less' }}</span>
+    <span class="ui-see-more-btn cursor-pointer" (click)="isCollapsed = !isCollapsed" data-testid="consolidated-section-see-more">{{ (isCollapsed ? 'See More' : 'See Less') | translate }}</span>
   </div>
 }
 </div>

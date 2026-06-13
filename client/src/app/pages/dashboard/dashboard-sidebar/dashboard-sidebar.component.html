@@ -1,12 +1,12 @@
-<app-chat-widget #sidebarChatWidget [showLauncher]="false" tool="orion_docs_search" type="support"></app-chat-widget>
+<app-chat-widget #sidebarChatWidget [showLauncher]="false" tool="documentation" type="support"></app-chat-widget>
 
 @if (this.sidebar_default) {
-  <nav @sidebarMode [@.disabled]="animationsDisabled" class="w-full">
+  <nav class="w-full animate-[sidebar-mode-enter_260ms_cubic-bezier(0.16,1,0.3,1)] max-[600px]:animate-none">
     <div class="mt-[10px] flex w-full items-center justify-between px-[20px] py-[10px] text-[24px] font-medium">
-      <a href="" aria-label="Go to homepage" class="inline-flex min-h-[48px] max-w-full items-center pr-[8px]">
+      <a href="" [attr.aria-label]="'Go to homepage' | translate" class="inline-flex min-h-[48px] max-w-full items-center pr-[8px]">
         <img alt="Logo" decoding="async" fetchpriority="high" height="44" loading="eager" class="block max-h-[36px] w-auto max-w-full object-contain" [src]="appService.getConfig().appSettings.logo_wide_dark || '/api/s/static/system/logo_wide_dark_default.png'" width="246" />
       </a>
-      <button (click)="onToggleSidebar(false)" appTooltip="Collapse sidebar" aria-label="Collapse sidebar" data-testid="sidebar-collapse-button" class="inline-flex h-[48px] w-[48px] shrink-0 cursor-pointer items-center justify-center rounded-[8px] border-0 bg-transparent p-0">
+      <button (click)="onToggleSidebar(false)" [appTooltip]="'Collapse sidebar' | translate" [attr.aria-label]="'Collapse sidebar' | translate" data-testid="sidebar-collapse-button" class="inline-flex h-[48px] w-[48px] shrink-0 cursor-pointer items-center justify-center rounded-[8px] border-0 bg-transparent p-0">
         <img alt="Collapse sidebar" height="28" src="assets/images/sidebar/nav_menu.svg" width="24" />
       </button>
     </div>
@@ -21,10 +21,9 @@
         [routePrefix]="'profile'"
         [title]="this.appService.userSessionData().user.username">
       </app-dashboard-sidebar-items>
-      <!-- </div> -->
       </div>
       @if (licenseService.canUseModule('free') || licenseService.canUseModule('osint_basic') || licenseService.canUseModule('osint_advanced') || licenseService.canUseModule('enterprise')) {
-        <div class="mt-[20px] text-[13px] font-bold text-white">Search API's</div>
+        <div class="mt-[20px] text-[13px] font-bold text-white">{{ 'Search API\'s' | translate }}</div>
         <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
       }
       @if (isAdmin() || licenseService.canUseModule('general')) {
@@ -36,7 +35,7 @@
           [icon]="'assets/images/sidebar/strategic.svg'"
           [items]="generalCategories"
           [routePrefix]="'strategic'"
-        [title]="'General Intelligence'"></app-dashboard-sidebar-items>
+        [title]="('General Intelligence') | translate"></app-dashboard-sidebar-items>
         </div>
       }
       @if (isAdmin() || licenseService.canUseModule('breach')) {
@@ -47,7 +46,7 @@
           [icon]="'assets/images/sidebar/data_breach.svg'"
           [items]="leakCategories"
           [routePrefix]="'breach'"
-        [title]="'Data Breach'"></app-dashboard-sidebar-items>
+        [title]="('Data Breach') | translate"></app-dashboard-sidebar-items>
       }
       @if (isAdmin() || licenseService.canUseModule('defacement')) {
         <app-dashboard-sidebar-items
@@ -57,7 +56,7 @@
           [icon]="'assets/images/sidebar/defacement.svg'"
           [items]="defacementCategories"
           [routePrefix]="'defacement'"
-        [title]="'Compromise Monitoring'"></app-dashboard-sidebar-items>
+        [title]="('Compromise Monitoring') | translate"></app-dashboard-sidebar-items>
       }
       @if (isAdmin() || licenseService.canUseModule('social')) {
         <div id="sidebar-social">
@@ -68,7 +67,7 @@
           [icon]="'assets/images/sidebar/social.svg'"
           [items]="socialCategories"
           [routePrefix]="'social'"
-        [title]="'Social'"></app-dashboard-sidebar-items>
+        [title]="('Social') | translate"></app-dashboard-sidebar-items>
         </div>
       }
       @if (isAdmin() || licenseService.canUseModule('exploit')) {
@@ -79,7 +78,17 @@
           [icon]="'assets/images/sidebar/exploits.svg'"
           [items]="exploitCategories"
           [routePrefix]="'exploit'"
-        [title]="'Exploit'"></app-dashboard-sidebar-items>
+        [title]="('Exploit') | translate"></app-dashboard-sidebar-items>
+      }
+      @if (isAdmin() || licenseService.canUseModule('general')) {
+        <app-dashboard-sidebar-items
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.THREAT_INTEL"
+          [icon]="'assets/images/sidebar/graph.svg'"
+          [items]="threatIntelCategories"
+          [routePrefix]="'threat-intel'"
+        [title]="('Actors & Malware') | translate"></app-dashboard-sidebar-items>
       }
       @if (isAdmin() || licenseService.canUseModule('feed')) {
         <app-dashboard-sidebar-items
@@ -89,7 +98,7 @@
           [icon]="'assets/images/sidebar/news.svg'"
           [items]="newsCategories"
           [routePrefix]="'feed'"
-        [title]="'Feed'"></app-dashboard-sidebar-items>
+        [title]="('News Feed') | translate"></app-dashboard-sidebar-items>
       }
       @if (isAdmin() || licenseService.canUseModule('dumps')) {
         <app-dashboard-sidebar-items
@@ -99,10 +108,10 @@
           [icon]="'assets/images/sidebar/dump.svg'"
           [items]="dumpCategories"
           [routePrefix]="'dump'"
-        [title]="'Dump'"></app-dashboard-sidebar-items>
+        [title]="('Breach Artifacts') | translate"></app-dashboard-sidebar-items>
       }
       @if (licenseService.canUseScanning() || licenseService.canUseModule('stealer_logs')) {
-        <div class="mt-[20px] text-[13px] font-bold text-white">Webscans</div>
+        <div class="mt-[20px] text-[13px] font-bold text-white">{{ 'Webscans' | translate }}</div>
         <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
       }
       @if (isAdmin() || licenseService.canUseModule('stealer_logs')) {
@@ -114,7 +123,7 @@
           [icon]="'assets/images/sidebar/stealerlog.svg'"
           [items]="stealerlogsCategories"
           [routePrefix]="'stealerlogs'"
-        [title]="'Stealer logs'"></app-dashboard-sidebar-items>
+        [title]="('Stealer logs') | translate"></app-dashboard-sidebar-items>
         </div>
       }
       @if (isAdmin() || licenseService.canUseScanning()) {
@@ -126,7 +135,7 @@
           [icon]="'assets/images/sidebar/theme/scanner.svg'"
           [items]="scannerCategories"
           [routePrefix]="'scanner'"
-        [title]="'Web Scans'"></app-dashboard-sidebar-items>
+        [title]="('Web Scans') | translate"></app-dashboard-sidebar-items>
         </div>
       }
       @if (isAdmin() || licenseService.canUseScanning()) {
@@ -138,18 +147,34 @@
           [icon]="'assets/images/sidebar/live_api.svg'"
           [items]="apiCategories"
           [routePrefix]="'api'"
-        [title]="'Entity API'"></app-dashboard-sidebar-items>
+        [title]="('Entity API') | translate"></app-dashboard-sidebar-items>
         </div>
       }
-      @if (licenseService.canUseScanning() || licenseService.canUseModule('stealer_logs') || canAccessStandaloneDataCollection()) {
-        <div class="mt-[20px] text-[13px] font-bold text-white">Data Collection</div>
+      @if (licenseService.canUseScanning() || licenseService.canUseModule('stealer_logs') || isAdmin() || licenseService.canUseModule('osint_advanced') || licenseService.canUseCtiGraph() || (!isDemo() && licenseService.canUseModule('social_mapper')) || appService.getConfig().appSettings.home_header_whistle_blowing_allowed || isDemo()) {
+        <div class="mt-[20px] text-[13px] font-bold text-white">{{ 'Data Collection' | translate }}</div>
         <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
       }
-      @if (canAccessNetworkIntel() || isDemo()) {
+      @if (isAdmin() || licenseService.canUseModule('osint_advanced') ||  isDemo()) {
         <div id="sidebar-network-intel" class="my-[6px] rounded-[8px] select-none">
-          <div (click)="requestStandaloneSubscription($event, canAccessNetworkIntel() && !appService.isMobileMode()); canAccessNetworkIntel() && !appService.isMobileMode() && onSectionSelected(category.NETINT)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.NETINT, 'opacity-20': (isDemo() && !canAccessNetworkIntel()) || appService.isMobileMode() }" [routerLink]="canAccessNetworkIntel() && !appService.isMobileMode() ? 'netint' : null" class="flex h-[46px] items-center gap-[8px] rounded-[8px] border border-transparent px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
+          <div (click)="requestStandaloneSubscription($event, (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode()); (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() && onSectionSelected(category.NETINT)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.NETINT, 'opacity-20': (isDemo() && !(isAdmin() || licenseService.canUseModule('osint_advanced'))) || appService.isMobileMode() }" [routerLink]="(isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() ? 'netint' : null" class="flex h-[46px] items-center gap-[8px] rounded-[8px] border border-transparent px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
             <img alt="Network Intel" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/dump.svg" width="20">
-            Network Intel
+            {{ 'Network Intel' | translate }}
+          </div>
+        </div>
+      }
+      @if (isAdmin() || licenseService.canUseModule('osint_advanced') || isDemo()) {
+        <div id="sidebar-satellite-intel" class="my-[6px] rounded-[8px] select-none">
+          <div (click)="requestStandaloneSubscription($event, (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode()); (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() && onSectionSelected(category.SATELLITE_INTEL)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.SATELLITE_INTEL, 'opacity-20': (isDemo() && !(isAdmin() || licenseService.canUseModule('osint_advanced'))) || appService.isMobileMode() }" [routerLink]="(isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() ? 'satellite-intel' : null" class="flex h-[46px] items-center gap-[8px] rounded-[8px] border border-transparent px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
+            <img alt="Satellite Intel" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/dump.svg" width="20">
+            {{ 'Satellite Intel' | translate }}
+          </div>
+        </div>
+      }
+      @if (isAdmin() || licenseService.canUseModule('osint_advanced')) {
+        <div class="my-[6px] rounded-[8px] select-none">
+          <div (click)="requestStandaloneSubscription($event, (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode()); (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() && onSectionSelected(category.THREAT_LENS)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.THREAT_LENS, 'opacity-20': !(isAdmin() || licenseService.canUseModule('osint_advanced')) || appService.isMobileMode() }" [routerLink]="(isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() ? 'threat-lens' : null" class="flex h-[46px] items-center gap-[8px] rounded-[8px] border border-transparent px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
+            <img alt="Threat Lens" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/theme/graph.svg" width="20">
+            {{ 'Threat Lens' | translate }}
           </div>
         </div>
       }
@@ -157,36 +182,35 @@
         <div id="sidebar-cti-graph" class="my-[6px] rounded-[8px] select-none">
           <a (click)="requestStandaloneSubscription($event, isAdmin() || licenseService.canUseCtiGraph())" [ngClass]="{ 'opacity-20': isDemo() && !(isAdmin() || licenseService.canUseCtiGraph()) }" class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" [attr.href]="isAdmin() || licenseService.canUseCtiGraph() ? '/dashboard/ctigraph' : null" target="_blank">
             <img alt="Links" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/graph.svg" width="20">
-
-            CTI Graph
+            {{ 'CTI Graph' | translate }}
           </a>
         </div>
       }
-      @if (canAccessSocialIntel() || isDemo()) {
+      @if (isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')) || isDemo()) {
         <div id="sidebar-social-intel" class="my-[6px] rounded-[8px] select-none">
-          <a (click)="requestStandaloneSubscription($event, canAccessSocialIntel())" [ngClass]="{ 'opacity-20': isDemo() && !canAccessSocialIntel() }" class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" [attr.href]="canAccessSocialIntel() ? '/dashboard/social-intel' : null" target="_blank">
+          <a (click)="requestStandaloneSubscription($event, isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')))" [ngClass]="{ 'opacity-20': isDemo() && !(isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper'))) }" class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" [attr.href]="isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')) ? '/dashboard/social-intel' : null" target="_blank">
             <img alt="Social Intel" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/social.svg" width="20">
-            Social Intel
+            {{ 'Social Intel' | translate }}
           </a>
         </div>
       }
-      @if (shouldShowWhistleBlowing()) {
+      @if (appService.getConfig().appSettings.home_header_whistle_blowing_allowed) {
         <div class="my-[6px] rounded-[8px] select-none">
-          <a (click)="requestStandaloneSubscription($event, canAccessWhistleBlowing())" class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" [attr.href]="canAccessWhistleBlowing() ? 'https://orionleaks.com/#/' : null" target="_blank">
+          <a (click)="requestStandaloneSubscription($event, isAdmin() || !authService.getIsMobileDemo())" class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" [attr.href]="isAdmin() || !authService.getIsMobileDemo() ? 'https://orionleaks.com/#/' : null" target="_blank">
             <img alt="Links" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/whistle.svg" width="20">
-            Whistle Blowing
+            {{ 'Whistle Blowing' | translate }}
           </a>
         </div>
       }
       <div class="mt-[20px] flex items-center gap-[6px] text-[13px] font-bold text-white max-[943px]:hidden">
-        <span>Help &amp; Support</span>
+        <span>{{ 'Help & Support' | translate }}</span>
       </div>
       <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
       @if (appService.getConfig().appSettings.s_onion) {
-        <a class="select-none p-0" [href]="appService.getConfig().appSettings.s_onion.startsWith('http') ? appService.getConfig().appSettings.s_onion : 'http://' + appService.getConfig().appSettings.s_onion" target="_blank" data-no-proxy>
+        <a class="select-none p-0" [href]="appService.getConfig().appSettings.s_onion.startsWith('http') ? appService.getConfig().appSettings.s_onion : 'http://' + appService.getConfig().appSettings.s_onion" target="_blank">
           <div class="my-[6px] rounded-[8px] select-none">
             <div class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white">
-              <img alt="Documentation" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/tor.svg" width="20">Onion Link
+              <img alt="Documentation" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/tor.svg" width="20">{{ 'Onion Link' | translate }}
             </div>
           </div>
         </a>
@@ -194,21 +218,21 @@
       <div class="my-[6px] rounded-[8px] select-none">
         <div (click)="onSectionSelected(category.DIRECTORY)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.DIRECTORY }" [routerLink]="'directory'" class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
           <img alt="Links" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/directory.svg" width="20">
-          Links
+          {{ 'Links' | translate }}
         </div>
       </div>
       @if (appService.getConfig().appSettings.home_header_pricing_allowed) {
         <a class="select-none p-0" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
           <div class="my-[6px] rounded-[8px] select-none">
             <div class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white">
-              <img alt="Documentation" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/documentation.svg" width="20">Documentation
+              <img alt="Documentation" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/documentation.svg" width="20">{{ 'Documentation' | translate }}
             </div>
           </div>
         </a>
         @if (appService.getConfig().appSettings.ai_endpoint_enabled) {
           <div class="my-[6px] rounded-[8px] select-none">
             <button (click)="sidebarChatWidget.openChat()" class="flex h-[46px] w-full items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" type="button">
-              <img alt="Help and Support" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" src="assets/images/shared/theme/chat.svg">Help &amp; Support
+              <img alt="Help and Support" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" src="assets/images/shared/theme/chat.svg">{{ 'Help & Support' | translate }}
             </button>
           </div>
         }
@@ -218,12 +242,12 @@
 }
 
 @if (!this.sidebar_default) {
-  <nav @sidebarMode [@.disabled]="animationsDisabled" class="w-full pt-0 h-full min-h-0 flex flex-col">
-    <button (click)="onToggleSidebar(true)" appTooltip="Expand sidebar" aria-label="Expand sidebar" data-testid="sidebar-expand-button" class="mx-auto flex h-10 w-10 items-center justify-center rounded-[8px] border border-transparent bg-transparent p-0 transition-colors hover:bg-[var(--color-blue-870)]">
+  <nav class="w-full pt-0 h-full min-h-0 flex flex-col animate-[sidebar-mode-enter_260ms_cubic-bezier(0.16,1,0.3,1)] max-[600px]:animate-none">
+    <button (click)="onToggleSidebar(true)" [appTooltip]="'Expand sidebar' | translate" [attr.aria-label]="'Expand sidebar' | translate" data-testid="sidebar-expand-button" class="mx-auto flex h-10 w-10 items-center justify-center rounded-[8px] border border-transparent bg-transparent p-0 transition-colors hover:bg-[var(--color-blue-870)]">
       <img alt="Menu" height="20" ngSrc="assets/images/sidebar/menu-mini.svg" width="20" />
     </button>
     <div class="mt-1 flex w-full items-center justify-center px-2 py-2 text-[24px] font-medium">
-      <a href="" aria-label="Go to homepage" class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-[8px]">
+      <a href="" [attr.aria-label]="'Go to homepage' | translate" class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-[8px]">
         <img alt="Logo" height="30" ngSrc="assets/images/shared/logo-min.svg" priority width="30" />
       </a>
     </div>
@@ -248,7 +272,7 @@
           [items]="generalCategories"
           [routePrefix]="'strategic'"
           [selectionStore]="selectionStore"
-          [title]="'General Intelligence'">
+          [title]="('General Intelligence') | translate">
         </app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseModule('breach')) {
@@ -260,7 +284,7 @@
           [items]="leakCategories"
           [routePrefix]="'breach'"
           [selectionStore]="selectionStore"
-          [title]="'Data Breach'">
+          [title]="('Data Breach') | translate">
         </app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseModule('defacement')) {
@@ -272,7 +296,7 @@
           [items]="defacementCategories"
           [routePrefix]="'defacement'"
           [selectionStore]="selectionStore"
-          [title]="'Defacement'">
+          [title]="('Defacement') | translate">
         </app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseModule('social')) {
@@ -285,7 +309,7 @@
           [items]="socialCategories"
           [routePrefix]="'social'"
           [selectionStore]="selectionStore"
-          [title]="'Social'">
+          [title]="('Social') | translate">
         </app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseModule('exploit')) {
@@ -297,7 +321,19 @@
           [items]="exploitCategories"
           [routePrefix]="'exploit'"
           [selectionStore]="selectionStore"
-          [title]="'Exploit'">
+          [title]="('Exploit') | translate">
+        </app-dashboard-sidebar-collapsed>
+      }
+      @if (isAdmin() || licenseService.canUseModule('general')) {
+        <app-dashboard-sidebar-collapsed
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.THREAT_INTEL"
+          [icon]="'assets/images/sidebar/graph.svg'"
+          [items]="threatIntelCategories"
+          [routePrefix]="'threat-intel'"
+          [selectionStore]="selectionStore"
+          [title]="('Actors & Malware') | translate">
         </app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseModule('feed')) {
@@ -309,7 +345,7 @@
           [items]="newsCategories"
           [routePrefix]="'feed'"
           [selectionStore]="selectionStore"
-          [title]="'Feed'">
+          [title]="('News Feed') | translate">
         </app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseModule('dumps')) {
@@ -321,7 +357,7 @@
           [items]="dumpCategories"
           [routePrefix]="'dump'"
           [selectionStore]="selectionStore"
-        [title]="'Dump'"></app-dashboard-sidebar-collapsed>
+        [title]="('Breach Artifacts') | translate"></app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseModule('stealer_logs')) {
         <app-dashboard-sidebar-collapsed
@@ -333,7 +369,7 @@
           [items]="stealerlogsCategories"
           [routePrefix]="'stealerlogs'"
           [selectionStore]="selectionStore"
-        [title]="'Stealer logs'"></app-dashboard-sidebar-collapsed>
+        [title]="('Stealer logs') | translate"></app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseScanning()) {
         <app-dashboard-sidebar-collapsed
@@ -345,7 +381,7 @@
           [items]="scannerCategories"
           [routePrefix]="'scanner'"
           [selectionStore]="selectionStore"
-        [title]="'Web Scans'"></app-dashboard-sidebar-collapsed>
+        [title]="('Web Scans') | translate"></app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseScanning()) {
         <app-dashboard-sidebar-collapsed
@@ -357,64 +393,78 @@
           [items]="apiCategories"
           [routePrefix]="'api'"
           [selectionStore]="selectionStore"
-        [title]="'Entity API'"></app-dashboard-sidebar-collapsed>
+        [title]="('Entity API') | translate"></app-dashboard-sidebar-collapsed>
       }
-      @if (canAccessNetworkIntel() || isDemo()) {
+      @if (isAdmin() || licenseService.canUseModule('osint_advanced') || isDemo()) {
         <li class="my-[6px] rounded-[8px] select-none">
-          <div (click)="requestStandaloneSubscription($event, canAccessNetworkIntel() && !appService.isMobileMode()); canAccessNetworkIntel() && !appService.isMobileMode() && onSectionSelected(category.NETINT)" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.NETINT, 'opacity-20': (isDemo() && !canAccessNetworkIntel()) || appService.isMobileMode() }" [routerLink]="canAccessNetworkIntel() && !appService.isMobileMode() ? 'netint' : null" appTooltip="Network Intel" class="flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-white focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]" queryParamsHandling="merge">
+          <div (click)="requestStandaloneSubscription($event, (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode()); (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() && onSectionSelected(category.NETINT)" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.NETINT, 'opacity-20': (isDemo() && !(isAdmin() || licenseService.canUseModule('osint_advanced'))) || appService.isMobileMode() }" [routerLink]="(isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() ? 'netint' : null" [appTooltip]="'Network Intel' | translate" class="flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-white focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]" queryParamsHandling="merge">
             <img alt="Network Intel" class="h-[20px] w-[20px] shrink-0 opacity-100" height="20" ngSrc="assets/images/sidebar/dump.svg" width="20">
+          </div>
+        </li>
+      }
+      @if (isAdmin() || licenseService.canUseModule('osint_advanced') || isDemo()) {
+        <li class="my-[6px] rounded-[8px] select-none">
+          <div (click)="requestStandaloneSubscription($event, (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode()); (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() && onSectionSelected(category.SATELLITE_INTEL)" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.SATELLITE_INTEL, 'opacity-20': (isDemo() && !(isAdmin() || licenseService.canUseModule('osint_advanced'))) || appService.isMobileMode() }" [routerLink]="(isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() ? 'satelliteint' : null" [appTooltip]="'Satellite Intel' | translate" class="flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-white focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]" queryParamsHandling="merge">
+            <img alt="Satellite Intel" class="h-[20px] w-[20px] shrink-0 opacity-100" height="20" ngSrc="assets/images/sidebar/dump.svg" width="20">
+          </div>
+        </li>
+      }
+      @if (isAdmin() || licenseService.canUseModule('osint_advanced')) {
+        <li class="my-[6px] rounded-[8px] select-none">
+          <div (click)="requestStandaloneSubscription($event, (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode()); (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() && onSectionSelected(category.THREAT_LENS)" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.THREAT_LENS, 'opacity-20': !(isAdmin() || licenseService.canUseModule('osint_advanced')) || appService.isMobileMode() }" [routerLink]="(isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() ? 'threat-lens' : null" [appTooltip]="'Threat Lens' | translate" class="flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-white focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]" queryParamsHandling="merge">
+            <img alt="Threat Lens" class="h-[20px] w-[20px] shrink-0 opacity-100" height="20" ngSrc="/assets/images/sidebar/theme/graph.svg" width="20">
           </div>
         </li>
       }
       @if (isAdmin() || licenseService.canUseCtiGraph() || isDemo()) {
         <li class="my-[6px] rounded-[8px] select-none">
-          <a (click)="requestStandaloneSubscription($event, isAdmin() || licenseService.canUseCtiGraph())" [ngClass]="{ 'opacity-20': isDemo() && !(isAdmin() || licenseService.canUseCtiGraph()) }" appTooltip="CTI Graph" aria-label="Open CTI Graph" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" [attr.href]="isAdmin() || licenseService.canUseCtiGraph() ? '/dashboard/ctigraph' : null" target="_blank">
+          <a (click)="requestStandaloneSubscription($event, isAdmin() || licenseService.canUseCtiGraph())" [ngClass]="{ 'opacity-20': isDemo() && !(isAdmin() || licenseService.canUseCtiGraph()) }" [appTooltip]="'CTI Graph' | translate" [attr.aria-label]="'Open CTI Graph' | translate" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" [attr.href]="isAdmin() || licenseService.canUseCtiGraph() ? '/dashboard/ctigraph' : null" target="_blank">
             <img alt="Links" class="opacity-100" height="20" ngSrc="assets/images/sidebar/graph.svg" width="20">
-            <span class="sr-only">Open CTI Graph</span>
+            <span class="sr-only">{{ 'Open CTI Graph' | translate }}</span>
           </a>
         </li>
       }
-      @if (canAccessSocialIntel() || isDemo()) {
+      @if (isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')) || isDemo()) {
         <li class="my-[6px] rounded-[8px] select-none">
-          <a (click)="requestStandaloneSubscription($event, canAccessSocialIntel())" [ngClass]="{ 'opacity-20': isDemo() && !canAccessSocialIntel() }" appTooltip="Social Intel" aria-label="Open Social Intel" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" [attr.href]="canAccessSocialIntel() ? '/dashboard/social-intel' : null" target="_blank">
+          <a (click)="requestStandaloneSubscription($event, isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')))" [ngClass]="{ 'opacity-20': isDemo() && !(isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper'))) }" [appTooltip]="'Social Intel' | translate" [attr.aria-label]="'Open Social Intel' | translate" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" [attr.href]="isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')) ? '/dashboard/social-intel' : null" target="_blank">
             <img alt="Social Intel" class="opacity-100" height="20" ngSrc="assets/images/sidebar/social.svg" width="20">
-            <span class="sr-only">Open Social Intel</span>
+            <span class="sr-only">{{ 'Open Social Intel' | translate }}</span>
           </a>
         </li>
       }
-      @if (shouldShowWhistleBlowing()) {
+      @if (appService.getConfig().appSettings.home_header_whistle_blowing_allowed) {
         <li class="my-[6px] rounded-[8px] select-none">
-          <a (click)="requestStandaloneSubscription($event, canAccessWhistleBlowing())" appTooltip="Whistle Blowing" aria-label="Open Whistle Blowing" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" [attr.href]="canAccessWhistleBlowing() ? 'https://orionleaks.com/#/' : null" target="_blank">
+          <a (click)="requestStandaloneSubscription($event, isAdmin() || !authService.getIsMobileDemo())" [appTooltip]="'Whistle Blowing' | translate" [attr.aria-label]="'Open Whistle Blowing' | translate" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" [attr.href]="isAdmin() || !authService.getIsMobileDemo() ? 'https://orionleaks.com/#/' : null" target="_blank">
             <img alt="Links" class="opacity-100" height="20" ngSrc="assets/images/sidebar/whistle.svg" width="20">
-            <span class="sr-only">Open Whistle Blowing</span>
+            <span class="sr-only">{{ 'Open Whistle Blowing' | translate }}</span>
           </a>
         </li>
       }
       <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)] w-[50px]"></div>
       @if (appService.getConfig().appSettings.s_onion) {
         <li class="my-[6px] rounded-[8px] select-none">
-          <a appTooltip="Onion Link" aria-label="Open Onion Link" [href]="appService.getConfig().appSettings.s_onion.startsWith('http') ? appService.getConfig().appSettings.s_onion : 'http://' + appService.getConfig().appSettings.s_onion" target="_blank" data-no-proxy class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none">
+          <a [appTooltip]="'Onion Link' | translate" [attr.aria-label]="'Open Onion Link' | translate" [href]="appService.getConfig().appSettings.s_onion.startsWith('http') ? appService.getConfig().appSettings.s_onion : 'http://' + appService.getConfig().appSettings.s_onion" target="_blank" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none">
             <img alt="Documentation" class="opacity-100" height="20" ngSrc="assets/images/sidebar/tor.svg" width="20">
-            <span class="sr-only">Open Onion Link</span>
+            <span class="sr-only">{{ 'Open Onion Link' | translate }}</span>
           </a>
         </li>
       }
       <li class="my-[6px] rounded-[8px] select-none">
-        <div (click)="onSectionSelected(category.DIRECTORY)" appTooltip="Links" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.DIRECTORY }" [routerLink]="'directory'" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" queryParamsHandling="merge">
+        <div (click)="onSectionSelected(category.DIRECTORY)" [appTooltip]="'Links' | translate" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.DIRECTORY }" [routerLink]="'directory'" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" queryParamsHandling="merge">
           <img alt="Links" class="opacity-100" height="20" ngSrc="assets/images/sidebar/directory.svg" width="20">
         </div>
       </li>
       <li class="my-[6px] rounded-[8px] select-none">
         @if (appService.getConfig().appSettings.home_header_pricing_allowed) {
-          <a appTooltip="Documentation" aria-label="Open documentation" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
+          <a [appTooltip]="'Documentation' | translate" [attr.aria-label]="'Open documentation' | translate" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none" href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html" target="_blank">
             <img alt="Documentation" class="opacity-100" height="20" ngSrc="assets/images/sidebar/documentation.svg" width="20">
-            <span class="sr-only">Open documentation</span>
+            <span class="sr-only">{{ 'Open documentation' | translate }}</span>
           </a>
         }
       </li>
       @if (appService.getConfig().appSettings.ai_endpoint_enabled) {
         <li class="my-[6px] rounded-[8px] select-none">
-          <button (click)="sidebarChatWidget.openChat()" appTooltip="Help & Support" aria-label="Open Help and Support" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none" type="button">
+          <button (click)="sidebarChatWidget.openChat()" [appTooltip]="'Help & Support' | translate" [attr.aria-label]="'Open Help and Support' | translate" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none" type="button">
             <img alt="Help and Support" class="h-[20px] w-[20px] opacity-100" src="assets/images/shared/theme/chat.svg">
           </button>
         </li>

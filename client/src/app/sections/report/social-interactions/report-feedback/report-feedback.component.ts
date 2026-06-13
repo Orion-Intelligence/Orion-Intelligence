@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ReportFeedbackModel } from '../../templates/report_general/models/report-feedback.model';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 type FeedbackKey = 'recommended_count' | 'trust_count' | 'untrust_count';
 type FeedbackAction = 'recommended' | 'trust' | 'untrust';
@@ -8,7 +9,7 @@ type FeedbackAction = 'recommended' | 'trust' | 'untrust';
 @Component({
   selector: 'app-report-feedback',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './report-feedback.component.html',
 })
 export class ReportFeedbackComponent {

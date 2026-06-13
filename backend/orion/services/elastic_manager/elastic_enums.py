@@ -7,6 +7,8 @@ class ELASTIC_SEMANTIC_INDEX:
     S_DEFACEMENT_INDEX = "defacement_model"
     S_CHATS_INDEX = "chat_model"
     S_EXPLOIT_INDEX = "exploit_model"
+    S_APT_INDEX = "apt_model"
+    S_MALWARE_INDEX = "malware_model"
     S_SOCIAL_INDEX = "social_model"
 
 
@@ -16,10 +18,13 @@ class ELASTIC_INDEX:
     S_DEFACEMENT_INDEX = "defacement_model"
     S_CHATS_INDEX = "chat_model"
     S_EXPLOIT_INDEX = "exploit_model"
+    S_APT_INDEX = "apt_model"
+    S_MALWARE_INDEX = "malware_model"
     S_SIEM_INDEX = "siem_model"
     S_STEALERLOGS_INDEX = "stealer_model"
     S_SOCIAL_INDEX = "social_model"
     S_OPENSANCTIONS_INDEX = "sanction_model"
+    S_MAP_ENTITIES_INDEX = "geo_fencing_model"
 
 
 class ELASTIC_SEMANTIC:
@@ -79,6 +84,12 @@ class ELASTIC_ENUMS:
     mapping_exploit_model = {"settings": {"number_of_shards": 1, "number_of_replicas": 0, "max_result_window": 1000000}, "mappings": {"dynamic_templates": [
         {"strings_as_keywords": {"match_mapping_type": "string", "mapping": {"type": "keyword"}}}], "properties": {"m_attacker": {"type": "keyword"}, "m_base_url": {"type": "keyword"}, "m_confidence": {"type": "keyword"}, "m_content_type": {"type": "keyword"}, "m_creation_date": {"type": "date"}, "m_cve": {"type": "keyword"}, "m_cve_source": {"type": "keyword"}, "m_cvss": {"type": "keyword"}, "m_cwe": {"type": "keyword"}, "m_leak_date": {"type": "date", "format": "yyyy-MM-dd"}, "m_exploit_year": {"type": "keyword"}, "m_github_links": {"type": "keyword"}, "m_hash": {"type": "keyword"}, "m_ip": {"type": "keyword"}, "m_location": {"type": "keyword"}, "m_mirror_links": {"type": "keyword"}, "m_name": {"type": "keyword"}, "m_network": {"type": "keyword"}, "m_org": {"type": "keyword"}, "m_product": {"type": "keyword"}, "m_remote_type": {"type": "keyword"}, "m_risk": {"type": "keyword"}, "m_screenshot": {"type": "keyword"}, "m_severity": {"type": "keyword"}, "m_solution": {"type": "keyword"}, "m_team": {"type": "keyword"}, "m_version": {"type": "keyword"}, "m_vulnerability": {"type": "keyword"}, "m_web_server": {"type": "keyword"}, "m_web_url": {"type": "keyword"}, "m_weblink": {"type": "keyword"}, "m_websites": {"type": "keyword"}, "m_update_date": {"type": "date"}, "m_url": {"type": "keyword"}, "m_title": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, "m_code_snippet": {"type": "text", "fields": {"keyword": {"type": "keyword", "ignore_above": 600}}}, "m_content": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, "m_important_content": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, "m_mitre_ttp_type": {"type": "keyword"}, "m_embedding": {"type": "dense_vector", "dims": 384, "element_type": "float", "similarity": "cosine", "index": True}}}}
 
+    mapping_apt_model = {"settings": {"number_of_shards": 1, "number_of_replicas": 0, "max_result_window": 1000000}, "mappings": {"dynamic": True, "dynamic_templates": [
+        {"strings_as_keywords": {"match_mapping_type": "string", "mapping": {"type": "keyword"}}}], "properties": {"m_hash": {"type": "keyword"}, "m_title": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, "m_content": {"type": "text"}, "m_family": {"type": "keyword"}, "m_aliases": {"type": "keyword"}, "m_references": {"type": "keyword"}, "m_platform": {"type": "keyword"}, "m_country": {"type": "keyword"}, "m_base_url": {"type": "keyword"}, "m_contact_link": {"type": "keyword"}, "m_leak_date": {"type": "date"}, "m_update_date": {"type": "date"}, "m_creation_date": {"type": "date"}, "m_embedding": {"type": "dense_vector", "dims": 384, "element_type": "float", "similarity": "cosine", "index": True}}}}
+
+    mapping_malware_model = {"settings": {"number_of_shards": 1, "number_of_replicas": 0, "max_result_window": 1000000}, "mappings": {"dynamic": True, "dynamic_templates": [
+        {"strings_as_keywords": {"match_mapping_type": "string", "mapping": {"type": "keyword"}}}], "properties": {"m_hash": {"type": "keyword"}, "m_title": {"type": "text", "fields": {"keyword": {"type": "keyword"}}}, "m_source_url": {"type": "keyword"}, "m_base_url": {"type": "keyword"}, "m_platform": {"type": "keyword"}, "m_content": {"type": "text"}, "m_content_type": {"type": "keyword"}, "m_sha256_hash": {"type": "keyword"}, "m_sha1_hash": {"type": "keyword"}, "m_md5_hash": {"type": "keyword"}, "m_sha3_384_hash": {"type": "keyword"}, "m_first_seen": {"type": "keyword"}, "m_last_seen": {"type": "keyword"}, "m_leak_date": {"type": "date"}, "m_file_name": {"type": "keyword"}, "m_file_size": {"type": "long"}, "m_file_type": {"type": "keyword"}, "m_file_type_mime": {"type": "keyword"}, "m_file_format": {"type": "keyword"}, "m_file_arch": {"type": "keyword"}, "m_signature": {"type": "keyword"}, "m_tags": {"type": "keyword"}, "m_reporter": {"type": "keyword"}, "m_origin_country": {"type": "keyword"}, "m_delivery_method": {"type": "keyword"}, "m_imphash": {"type": "keyword"}, "m_tlsh": {"type": "keyword"}, "m_telfhash": {"type": "keyword"}, "m_gimphash": {"type": "keyword"}, "m_yara_rules": {"type": "keyword"}, "m_references": {"type": "keyword"}, "m_contact_link": {"type": "keyword"}, "m_update_date": {"type": "date"}, "m_creation_date": {"type": "date"}, "m_embedding": {"type": "dense_vector", "dims": 384, "element_type": "float", "similarity": "cosine", "index": True}}}}
+
     mapping_siem_model = {"settings": {"number_of_shards": 1, "number_of_replicas": 0, "max_result_window": 1000000}, "mappings": {"dynamic": True, "dynamic_templates": [
         {"strings_as_keywords": {"match_mapping_type": "string", "mapping": {"type": "keyword"}}}], "properties": {"tenant_id": {"type": "keyword"}, "event_id": {"type": "keyword"}, "hash": {"type": "keyword"}, "raw": {"type": "text"}, "timestamp": {"type": "date"}, "ingested_at": {"type": "date"}, "source": {"type": "keyword"}, "event_type": {"type": "keyword"}, "severity": {"type": "keyword"}, "host": {"type": "keyword"}, "user": {"type": "keyword"}, "tags": {"type": "keyword"}, "m_domain": {"type": "keyword"}, "m_email": {"type": "keyword"}, "m_ip": {"type": "keyword"}, "m_username": {"type": "keyword"}, "m_language": {"type": "keyword"}}}}
 
@@ -126,12 +137,42 @@ class ELASTIC_ENUMS:
         },
     }
 
+    mapping_map_entities_model = {
+        "settings": {
+            "number_of_shards": 1,
+            "number_of_replicas": 0,
+            "max_result_window": 1000000,
+        },
+        "mappings": {
+            "dynamic": True,
+            "properties": {
+                "name": {"type": "text", "fields": {"keyword": {"type": "keyword", "ignore_above": 256}}},
+                "country": {"type": "keyword"},
+                "type": {"type": "keyword"},
+                "capacity_mw": {"type": "float"},
+                "source": {"type": "keyword"},
+                "location": {
+                    "properties": {
+                        "lat": {"type": "float"},
+                        "lon": {"type": "float"},
+                    }
+                },
+                "location_point": {"type": "geo_point"},
+                "aeroway": {"type": "keyword"},
+                "military": {"type": "keyword"},
+                "operator": {"type": "text", "fields": {"keyword": {"type": "keyword", "ignore_above": 256}}},
+                "fuel": {"type": "keyword"},
+                "primary_fuel": {"type": "keyword"},
+            }
+        },
+    }
+
     mapping_stealer_log_field = {
-        "m_domain": "domain.keyword",
-        "m_url": "url.keyword",
-        "m_username": "username.keyword",
-        "m_email": "email.keyword",
-        "m_ip": "ip.keyword",
+        "m_domain": ["domain.keyword"],
+        "m_url": ["url.keyword"],
+        "m_username": ["username.keyword"],
+        "m_email": ["email.keyword"],
+        "m_ip": ["ip.keyword"],
         "m_creditcard": ["credit_card.keyword", "bin.keyword"],
         "m_search_all": ["domain.keyword", "username.keyword", "email.keyword", "bin.keyword"]
     }
@@ -216,7 +257,7 @@ class ELASTIC_ENUMS:
         "m_phone_number": ["m_phone_number"],
         "m_email": ["m_email"],
         "m_domain": ["m_domain", "m_domain.raw"],
-        "m_country": ["m_country"],
+        "m_country": ["m_country", "m_country_name", "m_location", "country", "location"],
         "m_url": ["m_url", "m_url.raw"],
         "m_cve": ["m_cve", "m_cwe"],
         "m_ip": ["m_ip"],

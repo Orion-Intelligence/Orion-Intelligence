@@ -2,11 +2,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 import { ExportChoiceOption } from '../../model/report/export-choice.model';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-export-choice-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './export-choice-modal.component.html'
 })
 export class ExportChoiceModalComponent {

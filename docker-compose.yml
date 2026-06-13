@@ -242,7 +242,7 @@ services:
       - backend
 
   mongo:
-    image: mongo:7.0
+    image: mongo:latest
     container_name: trustly-web-mongodb
     restart: always
     environment:
@@ -252,7 +252,24 @@ services:
       - "27020:27017"
     volumes:
       - mongo:/data/db
-    command: ["mongod", "--auth", "--bind_ip_all", "--wiredTigerCacheSizeGB", "0.25", "--setParameter", "diagnosticDataCollectionEnabled=false"]
+    command: >
+      bash -c "
+      mongod --bind_ip_all --fork --logpath /var/log/mongodb.log &&
+      sleep 10 &&
+      mongosh --eval '
+        db = db.getSiblingDB(\"admin\");
+        if (db.getUser(\"${MONGO_ROOT_USERNAME}\") === null) {
+          db.createUser({
+            user: \"${MONGO_ROOT_USERNAME}\",
+            pwd: \"${MONGO_ROOT_PASSWORD}\",
+            roles: [{ role: \"userAdminAnyDatabase\", db: \"admin\" }, { role: \"readWriteAnyDatabase\", db: \"admin\" }]
+          });
+        }
+      ' &&
+      mongod --shutdown &&
+      sleep 5 &&
+      exec mongod --auth --bind_ip_all
+      "
     networks:
       backend:
         ipv4_address: 172.20.1.14
@@ -264,9 +281,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 3G
-        reservations:
           memory: 512M
+        reservations:
+          memory: 128M
 
 networks:
   shared_bridge:

@@ -1,3 +1,239 @@
+Changelog [1.0.3.2] – 2026-06-08
+*Release date: June 8, 2026*
+
+### Overview
+This update focuses on expanding Orion from a software-only intelligence platform into a broader **cross-domain intelligence system** combining cyber, social, physical, geospatial, network, and operational signals.
+
+The release introduces and tracks major progress across **Swarm Feeder**, feeder support, cross-search, onion access, SIEM/Wazuh integration, antivirus and metadata scanning, phishing/spam detection, AI model pages, Facebook integration, case management, geolocation, tenant-side SMTP/password workflows, multilingual UI support, translation support, and report attachment workflows.
+
+It also captures several important **research and product direction items** for upcoming platform differentiation:
+- **Satellite + social + network fusion** for cyber-physical-geospatial OSINT
+- **Internet-scale intelligence graph / knowledge graph direction**
+- **Hard-to-reach source collection and Swarm Feeder research proposition**
+- **Agentic AI threat intelligence** that auto-generates queries, compares datasets, and produces meaningful insights
+- **HUMINT, forum intelligence, and user intelligence improvements**
+- **Physical intelligence expansion** beyond purely software-based signals
+- **AI-assisted leak verification**
+- **AI content detection across audio, video, image, and text**
+- **Similarity-based content suggestion workflows**
+
+This release also includes production-facing improvements in documentation, demo readiness, website/pitch material, GitHub hardening, vulnerability fixes, and operational UX.
+
+### Featured
+- **Swarm Feeder Delivered:** Swarm Feeder was completed and feeder support was implemented to strengthen source ingestion and intelligence collection workflows.
+- **Cross-Domain OSINT Fusion Direction:** Added a strategic product direction for combining satellite imagery, AIS/ADS-B, weather, shipping, job posts, local chatter, outage signals, and routing anomalies.
+- **Onion Access & Proxy Infrastructure:** HTTPS on localhost, SOCKS reverse proxy, and Tor2Web proxy support were configured to allow direct onion URL access.
+- **Cross Search:** Cross-search capability was implemented to improve investigation workflows across intelligence areas.
+- **Report Collaboration:** Users can now comment on and react to reports, improving analyst collaboration and user intelligence.
+- **Public Profile Intelligence:** User profile visibility controls and profile viewing workflows were added so other users can view public profiles, reactions, and related thread activity.
+- **SIEM/Wazuh Integration:** SIEM logs through Wazuh were integrated and pushed to production.
+- **Detection Stack Expansion:** Antivirus scanning, metadata file scanning, spam detection, phishing detection, and AI model pages were completed or integrated.
+- **Case Management Phase 1:** First production phase of case management was pushed with mobile mode, light/dark theme fixes, minor fixes, and test cases.
+- **Geolocation MVP:** Geolocation MVP phase was completed.
+- **Tenant SMTP & Password Operations:** SMTP verification, tenant-side SMTP layer, tenant password logic, and tenant/account-level password change workflows were added.
+- **Multilingual + Translation Support:** Multilanguage support was pushed, and translation support was added for user-facing UI.
+- **Case Report Attachments:** Case report attachments and multifile support were added.
+
+---
+
+## Added
+
+### Strategic Intelligence & Product Direction
+- **Satellite + Social + Network Fusion research direction:** Defined a cross-domain OSINT fusion capability combining public satellite imagery, AIS/ADS-B, weather, shipping activity, job posts, local chatter, power outage indicators, and internet routing anomalies.
+- **Cyber-physical-geospatial intelligence use cases:** Captured use cases for detecting covert logistics hubs, identifying unusual activity around warehouses or border points, correlating dark-web chatter with physical facility movement, and observing infrastructure anomalies before cyberattacks.
+- **Internet-scale knowledge graph direction:** Added product direction for a large intelligence graph / knowledge graph that connects intelligence records, sources, entities, infrastructure, actors, events, and relationships.
+- **Hard-to-reach source collection direction:** Added competitive research requirement around collecting from open and hard-to-reach adversary spaces.
+- **Swarm Feeder research proposition:** Marked Swarm Feeder as a very high-priority strategic research and platform differentiation area.
+- **Agentic threat intelligence direction:** Added requirement for an agentic AI system that can search inside datasets automatically, generate investigative queries, compare intelligence records, correlate signals, and produce meaningful insights for analysts.
+- **HUMINT and forum intelligence improvements:** Added requirement to improve forums, user intelligence, and human intelligence workflows.
+- **Physical intelligence expansion:** Added requirement to improve physical intelligence collection and avoid relying entirely on software-only signals.
+- **AI leak verification direction:** Added requirement for a system that automatically verifies leaks using an AI model.
+- **Multimodal AI content detection:** Added requirement for AI-based detection across audio, video, image, and text.
+- **Similar content suggestion:** Added requirement for a suggestion feature where opening one item shows related or similar content.
+
+### Swarm Feeder & Feeder Support
+- **Swarm Feeder completed:** Initial Swarm Feeder implementation was completed.
+- **Feeder support implemented:** Feeder support was implemented to improve collection, ingestion, and source-driven intelligence workflows.
+- **External signal source research:** MarineTraffic and ADS-B Exchange were identified as relevant signal sources for future cyber-physical intelligence fusion.
+
+### Documentation, Demo & Developer Pipeline
+- **Automated documentation pipeline:** Documentation generation was converted into an automated pipeline.
+- **Screenshot/manual update reduction:** Documentation changes no longer require manually creating, editing, or managing screenshots for every update.
+- **Git pipeline for documentation:** Git pipeline build support for documentation was added.
+- **Read the Docs documentation updated:** Documentation pipeline now supports ongoing documentation publishing and updates.
+- **Demo tutorial completed:** Demo tutorial was completed for product walkthrough and adoption support.
+- **GitHub main page revamped:** GitHub main page was redesigned and improved.
+- **Technical and marketing pitch pages:** Dedicated pages were added for technical and marketing pitch content on the main website.
+- **Landing page, marketing slides, and documentation updated:** Public-facing and sales-support material was refreshed.
+
+### Proxy, HTTPS & Onion Access
+- **HTTPS configured on localhost:** Local HTTPS support was configured for development and secure local testing.
+- **SOCKS reverse proxy configured:** SOCKS reverse proxy support was configured.
+- **Tor2Web proxy working:** Tor2Web proxy support was completed, allowing onion URLs to be opened directly through the platform.
+
+### Homepage, Search & Navigation
+- **Homepage selector added:** Selector was added to the homepage top bar.
+- **Cross search implemented:** Cross-search capability was implemented for broader intelligence discovery across platform areas.
+- **Section onboarding copy requirement:** Added onboarding requirement for each feature section to show a light/faded one- or two-line explanation at the top, helping first-time users understand what each section provides.
+
+### Reports, Profiles & Collaboration
+- **Report comments added:** Users can now write comments on reports.
+- **Report reactions added:** Users can now react to reports.
+- **Profile visibility controls:** Other users can view profiles when the profile visibility is set to active.
+- **Public profile detail view:** Other users can see the full profile and related activity.
+- **Thread reaction visibility:** User profiles can show all threads a user has reacted to.
+
+### SIEM, Detection & AI Models
+- **SIEM logs integrated:** Wazuh SIEM logs were integrated and pushed to production.
+- **Antivirus scan completed:** Antivirus scanning capability was completed.
+- **Metadata file scan completed:** File metadata scanning capability was completed.
+- **Spam detection integrated:** Spam detection was integrated into the platform.
+- **Phishing detection integrated:** Phishing detection was integrated into the platform.
+- **AI model pages integrated:** AI model pages were integrated into the platform UI/workflows.
+
+### Mail, SMTP, Password & Tenant Operations
+- **Custom mail configuration added:** Custom mail configuration support was added.
+- **Reset password updated:** Reset password workflows were updated from both maintainer and user perspectives.
+- **Tenant/account password change:** Password change support was added at both tenant and account levels.
+- **SMTP verification added:** SMTP verification workflow was added.
+- **Tenant-side SMTP layer added:** SMTP layer was added on the tenant side.
+- **Tenant password logic added:** Password logic was added for tenant-side account flows.
+- **Scanner owner email notification:** Scanner can now send mail to company owners.
+
+### Session Files, Social & Facebook
+- **Session file upload implemented:** System support for uploading session files was implemented.
+- **Facebook integrated:** Facebook integration was added to strengthen social intelligence and profile/source collection workflows.
+
+### Case Management
+- **Case management phase 1 pushed:** First phase of case management was pushed and integrated into production.
+- **Mobile mode support:** Case management was improved with mobile mode support.
+- **Light/dark theme fixes:** Light and dark theme fixes were added around case management and related UI.
+- **Case management test cases:** Test cases were implemented for the first phase.
+- **Reports connection:** Case management was connected to reports.
+- **Report archive connection:** Case management was connected to the report archive.
+- **Case report attachments:** Attachments were added for case reports.
+- **Multifile support:** Multiple file attachment support was added for case reports.
+
+### Availability & Maintenance UX
+- **Temporary unavailable page:** A temporary unavailable page was added for periods when the application is updating on the server.
+
+### Geolocation & Network Intelligence
+- **Geolocation MVP completed:** Geolocation MVP phase was completed.
+- **Network intelligence severity support:** Low, medium, and high severity support was added for network intelligence.
+
+### Multilingual & Translation Support
+- **Multilanguage support added:** Multilanguage support was added and pushed.
+- **User-facing translation support:** Translation support was added for user-facing UI.
+
+### Security, GitHub & Code Quality
+- **GitHub vulnerability scans fixed:** Vulnerability scans in GitHub were fixed.
+- **Complexity reduced:** File complexity and per-file error levels were reduced.
+- **Mass Git-level vulnerability fixes:** Large-scale Git-level vulnerability fixes were completed.
+
+---
+
+## Improved
+
+### User Experience
+- Improved first-time user understanding through planned feature-section tagline/onboarding blocks.
+- Improved report engagement through comments and reactions.
+- Improved profile discovery through active profile visibility and public profile views.
+- Improved homepage navigation through the new top-bar selector.
+- Improved multilingual accessibility through user-facing translation support.
+
+### Intelligence Workflows
+- Improved investigation coverage through cross-search.
+- Improved source ingestion through feeder support.
+- Improved cyber-physical intelligence planning through satellite, AIS/ADS-B, shipping, weather, local chatter, outage, and routing-anomaly fusion direction.
+- Improved HUMINT planning through forum and user intelligence enhancement requirements.
+- Improved future AI-driven investigation workflows through agentic AI requirements.
+
+### Operational Workflows
+- Improved production maintenance experience with a temporary unavailable page during server updates.
+- Improved tenant operations through SMTP verification, tenant SMTP layer, password logic, and tenant/account password change support.
+- Improved case management through report/archive connection, attachments, multifile support, mobile mode, theme fixes, and test cases.
+
+### Security & Detection
+- Improved detection coverage with antivirus scan, metadata scan, spam detection, phishing detection, and AI model pages.
+- Improved security hardening through GitHub vulnerability scan fixes and mass Git-level vulnerability fixes.
+- Improved scanner communication by enabling mail delivery to company owners.
+
+---
+
+## Fixed
+
+### UI & Workflow Fixes
+- **Username underscore issue identified:** Issue recorded where typing an underscore in the username field minimizes the window instead of entering the character.
+- **Subdomain and IP lookup UI issue identified:** Data is returned but not reflected on the UI.
+- **CTI report graph issue identified:** Opening a CTI report currently shows the overall CTI graph instead of the specific report graph.
+- **Defacement naming update identified:** Defacement section to be moved or renamed under Compromise Monitoring.
+- **Scan navigation cleanup identified:** Basic scan and port scan should be removed or replaced with the network scan link.
+- **Stealer log PDF export requirement identified:** Stealer logs should also be downloadable as PDF.
+- **Large CIDR support requirement identified:** Infrastructure and server scaling requirement recorded for handling and visualizing large ranges such as `164.0.0.0/16`.
+
+---
+
+## Platform Enhancements (Integrated)
+
+### Infrastructure & Access
+- **HTTPS localhost support** added for secure local development.
+- **SOCKS reverse proxy** configured.
+- **Tor2Web proxy** completed for direct onion URL access.
+- **Temporary unavailable page** added for update windows.
+- **Wazuh SIEM production integration** completed.
+
+### Documentation & Public Presence
+- **Automated documentation generation** added.
+- **Git-based documentation build pipeline** added.
+- **Read the Docs product documentation** updated.
+- **Demo tutorial** completed.
+- **GitHub main page** revamped.
+- **Technical pitch page** added.
+- **Marketing pitch page** added.
+- **Landing page, marketing slides, and documentation** updated.
+
+### Product Intelligence Expansion
+- **Swarm Feeder** completed.
+- **Feeder support** implemented.
+- **Cross-search** implemented.
+- **Geolocation MVP** completed.
+- **Network intelligence severity levels** added.
+- **Case management report/archive connection** added.
+- **Multilanguage and translation support** added.
+
+### Tenant, Mail & Account Operations
+- **Custom mail configuration** added.
+- **SMTP verification** added.
+- **Tenant SMTP layer** added.
+- **Tenant password logic** added.
+- **Tenant and account password change** integrated.
+- **Reset password workflow** updated for both maintainer and user perspectives.
+- **Scanner owner email notifications** added.
+
+### Detection & AI
+- **Antivirus scanning** completed.
+- **Metadata file scanning** completed.
+- **Spam detection** integrated.
+- **Phishing detection** integrated.
+- **AI model pages** integrated.
+- **AI leak verification** added as future product direction.
+- **AI content detection** added as future product direction across audio, video, image, and text.
+
+### Case Management & Reporting
+- **Case management phase 1** integrated into production.
+- **Mobile mode** included in case management release.
+- **Light/dark theme fixes** added.
+- **Test cases** implemented.
+- **Case report attachments** added.
+- **Multifile support** added.
+
+---
+
+## Notes
+- This release includes both completed product work and strategic research/product-direction items captured for upcoming development.
+- The largest completed gains are in **Swarm Feeder**, **feeder support**, **cross-search**, **onion access**, **SIEM integration**, **case management**, **geolocation**, **tenant SMTP/password flows**, **multilingual support**, and **case report attachments**.
+- The biggest strategic direction items are **cross-domain OSINT fusion**, **agentic threat intelligence**, **internet-scale intelligence graph**, **hard-to-reach source collection**, **HUMINT improvements**, **physical intelligence**, and **AI-based verification/detection**.
+
 Changelog [1.0.3.1] – 2026-03-13
 *Release date: March 13, 2026*
 

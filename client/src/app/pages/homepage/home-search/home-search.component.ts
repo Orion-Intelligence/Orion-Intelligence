@@ -12,15 +12,15 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from '../../../services/home_search/home.search.service';
 import { WorldHeatmapComponent } from '../world-heatmap/world-heatmap.component';
 import { DemoTourComponent } from "../../demo-tour/demo-tour/demo-tour.component";
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-home-search',
   standalone: true,
-  imports: [FormsModule, NgOptimizedImage, CommonModule, RouterLink, SearchFiltersComponent, HomeInsightComponent, WorldHeatmapComponent, DemoTourComponent],
+  imports: [FormsModule, NgOptimizedImage, CommonModule, RouterLink, SearchFiltersComponent, HomeInsightComponent, WorldHeatmapComponent, DemoTourComponent, TranslatePipe],
   templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent implements OnInit {
-  private readonly allowedTabs = ['IOCs', 'Deep Search', 'Network Intelligence'];
   private insightPointerId: number | null = null;
   private insightStartY = 0;
   private insightStartOffset = 0;
@@ -28,6 +28,8 @@ export class HomeSearchComponent implements OnInit {
   private suppressInsightClick = false;
   private insightMax = 0;
   private removeWindowListeners: (() => void) | null = null;
+
+  protected readonly tabs = ['IOCs', 'Deep Search', 'Network Intelligence', 'Geo Fencing'];
 
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
   @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
@@ -53,11 +55,11 @@ export class HomeSearchComponent implements OnInit {
     this.computeInsightMax();
     this.route.queryParams.subscribe(params => {
       const tab = params['tab'];
-      if (typeof tab === 'string' && this.allowedTabs.includes(tab)) {
-        this.selectTab(tab);
+      if (typeof tab === 'string' && this.tabs.includes(tab)) {
+        this.selectedTab = tab;
       }
       else{
-        this.selectTab("IOCs");
+        this.selectedTab = "IOCs";
       }
     });
   }
@@ -296,13 +298,16 @@ export class HomeSearchComponent implements OnInit {
     this.detachWindowPointerListeners();
   }
 
-  selectTab(tab:string){
+  async selectTab(tab:string){
     this.selectedTab=tab;
-    this.router.navigate([], {
+    await this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { tab },
       queryParamsHandling: 'merge',
     });
+    if(tab === 'Geo Fencing'){
+      this.onSearchSubmit();
+    }
   }
 
   @HostListener('document:click', ['$event'])

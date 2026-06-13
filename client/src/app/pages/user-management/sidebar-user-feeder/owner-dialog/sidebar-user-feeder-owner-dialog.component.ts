@@ -6,11 +6,12 @@ import { FeederOwnerUser, FeederScriptItem } from '../../../../shared/model/prof
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { FeederService } from '../feeder.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-sidebar-user-feeder-owner-dialog',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './sidebar-user-feeder-owner-dialog.component.html',
 })
 export class SidebarUserFeederOwnerDialogComponent implements OnChanges {

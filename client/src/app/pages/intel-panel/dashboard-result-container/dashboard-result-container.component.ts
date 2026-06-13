@@ -8,7 +8,7 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { Category } from '../../../shared/constants/pages';
 import { combineLatest, distinctUntilChanged } from 'rxjs';
 import { ResultComponent } from '../../../shared/partials/result/result.component';
-import { general_filters } from '../../../shared/constants/filters';
+import { general_filters, threat_intel_apt_filters, threat_intel_filters, threat_intel_malware_filters } from '../../../shared/constants/filters';
 import { AppService } from '../../../services/core/app/app.service';
 import { DashboardResultExploitComponent } from '../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
 import { DashboardResultSocialComponent } from '../dashboard-results/dashboard-result-social/dashboard-result-social.component';
@@ -19,6 +19,10 @@ import { HelperService } from '../../../shared/services/helper.service';
 import { DashboardResultDefacementComponent } from '../dashboard-results/dashboard-result-defacement/dashboard-result-defacement.component';
 import { ScrollService } from '../../../shared/services/scroll.service';
 import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { FilterModel } from '../../../shared/model/filter/filter.model';
+import { ApiService } from '../../../shared/services/api.service';
+import { applyMalpediaFilterOptions, applyMalwareBazaarFilterOptions, getDashboardFilterModel, isMalpediaRoute, isMalwareBazaarRoute, MALPEDIA_FILTER_OPTIONS_ENDPOINT, MalpediaFilterOptionsResponse, MALWARE_BAZAAR_FILTER_OPTIONS_ENDPOINT, MalwareBazaarFilterOptionsResponse } from '../dashboard-filter.utils';
 
 @Component({
   selector: 'app-dashboard-result-container',
@@ -30,16 +34,20 @@ import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-
     DashboardResultExploitComponent,
     DashboardResultSocialComponent,
     DashboardResultChatComponent,
-    DashboardResultDefacementComponent
-  ],
+    DashboardResultDefacementComponent, TranslatePipe],
   templateUrl: './dashboard-result-container.component.html',
   animations: [fadeInDashboardItem],
 })
 export class DashboardResultContainer implements OnInit, AfterViewInit, AfterViewChecked {
   private pendingScrollRestore = false;
+  private malpediaFilterOptionsLoaded = false;
+  private malwareBazaarFilterOptionsLoaded = false;
 
   protected readonly Math = Math;
   protected readonly general_filters = general_filters;
+  protected readonly threat_intel_apt_filters = threat_intel_apt_filters;
+  protected readonly threat_intel_filters = threat_intel_filters;
+  protected readonly threat_intel_malware_filters = threat_intel_malware_filters;
   protected readonly Category = Category;
   protected readonly alert = alert;
 
@@ -49,9 +57,9 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
   type: Category = Category.STRATEGIC;
   apiEndpoint: string = '';
 
-  constructor(protected helperService: HelperService, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, private scrollService: ScrollService) {
+  constructor(protected helperService: HelperService, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, private scrollService: ScrollService, private apiService: ApiService) {
     this.type = this.route.snapshot.data['type'] as Category;
-    this.apiEndpoint = this.type.toLowerCase() === Category.STRATEGIC.toLowerCase() ? 'search/strategic' : this.type.toLowerCase() === Category.SOCIAL.toLowerCase() ? 'search/social' : this.type.toLowerCase() === Category.EXPLOIT.toLowerCase() ? 'search/exploit' : this.type.toLowerCase() === Category.DEFACEMENT.toLowerCase() ? 'search/defacement' : 'search/breach';
+    this.apiEndpoint = this.getApiEndpoint(this.router.url.split('?')[0]);
   }
 
   get currentParamModel(): ConsolidatedParamModel {
@@ -60,6 +68,16 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
 
   get currentQuery(): string {
     return this.currentParamModel?.q ?? '';
+  }
+
+  get activeFilterModel(): FilterModel {
+    const route = this.router.url.split('?')[0];
+    return getDashboardFilterModel(this.type, route, {
+      general: this.general_filters,
+      threatIntel: this.threat_intel_filters,
+      malpedia: this.threat_intel_apt_filters,
+      malwareBazaar: this.threat_intel_malware_filters
+    });
   }
 
   get shouldShowCrossSearch(): boolean {
@@ -97,7 +115,9 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
 
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
         this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
-        this.dashboardService.consolidatedParamModel.category = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
+        this.dashboardService.consolidatedParamModel.category = this.getApiCategory(urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all');
+        this.apiEndpoint = this.getApiEndpoint(route);
+        this.loadThreatIntelFilterOptions(route);
         const cacheKey = this.buildCacheKey();
         const cachedResult = sessionStorage.getItem(cacheKey);
         if (cachedResult && !this.hasResultData()) {
@@ -164,7 +184,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
     let key: string;
     let order: 'asc' | 'desc' = 'asc';
 
-    if (this.type === Category.BREACH) {
+    if (this.type === Category.BREACH || this.type === Category.THREAT_INTEL) {
       key = 'm_leak_date';
     }
     else {
@@ -203,8 +223,54 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
     ].join('|');
   }
 
+  private loadThreatIntelFilterOptions(route: string): void {
+    if (this.type !== Category.THREAT_INTEL) {
+      return;
+    }
+
+    if (isMalpediaRoute(this.type, route) && !this.malpediaFilterOptionsLoaded) {
+      this.malpediaFilterOptionsLoaded = true;
+      this.apiService.get<MalpediaFilterOptionsResponse>(MALPEDIA_FILTER_OPTIONS_ENDPOINT).subscribe({
+        next: (response) => {
+          applyMalpediaFilterOptions(this.threat_intel_apt_filters, response || {});
+        },
+        error: () => {
+          this.malpediaFilterOptionsLoaded = false;
+        }
+      });
+    }
+
+    if (isMalwareBazaarRoute(this.type, route) && !this.malwareBazaarFilterOptionsLoaded) {
+      this.malwareBazaarFilterOptionsLoaded = true;
+      this.apiService.get<MalwareBazaarFilterOptionsResponse>(MALWARE_BAZAAR_FILTER_OPTIONS_ENDPOINT).subscribe({
+        next: (response) => {
+          applyMalwareBazaarFilterOptions(this.threat_intel_malware_filters, response || {});
+        },
+        error: () => {
+          this.malwareBazaarFilterOptionsLoaded = false;
+        }
+      });
+    }
+  }
+
   private restoreSavedScroll(): void {
     this.cdr.detectChanges();
     this.pendingScrollRestore = true;
+  }
+
+  private getApiEndpoint(route: string): string {
+    if (this.isCompromisedActorsRoute(route)) {
+      return 'search/defacement';
+    }
+
+    return this.type.toLowerCase() === Category.STRATEGIC.toLowerCase() ? 'search/strategic' : this.type.toLowerCase() === Category.SOCIAL.toLowerCase() ? 'search/social' : this.type.toLowerCase() === Category.EXPLOIT.toLowerCase() ? 'search/exploit' : this.type.toLowerCase() === Category.THREAT_INTEL.toLowerCase() ? 'search/threat-intel' : this.type.toLowerCase() === Category.DEFACEMENT.toLowerCase() ? 'search/defacement' : 'search/breach';
+  }
+
+  private getApiCategory(category: string): string {
+    return this.type === Category.THREAT_INTEL && category === 'compromised-actors' ? 'hacked' : category;
+  }
+
+  private isCompromisedActorsRoute(route: string): boolean {
+    return this.type === Category.THREAT_INTEL && route.endsWith('/threat-intel/compromised-actors');
   }
 }

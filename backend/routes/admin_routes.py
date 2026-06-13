@@ -1,15 +1,15 @@
 from fastapi import APIRouter, HTTPException, Query, Request, Depends, UploadFile
 from fastapi.responses import RedirectResponse
 
-from configs.app_dependency import status_required, role_required, get_current_user
+from configs.app_dependency import license_required, status_required, role_required, get_current_user
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.api.server.config_manager.model.config_data import config_data
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
+from orion.services.mail_manager.mail_manager import mail_manager
 
-admin_routes = APIRouter(
-    dependencies=[Depends(status_required([UserStatus.ACTIVE]))], tags=["Orion API"], )
+admin_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 
 
 @admin_routes.get("/admin/api/db_system_model/row-action")
@@ -32,7 +32,8 @@ async def custom_edit_api_trailing(id: str, request: Request):
 
 
 @admin_routes.post(
-    "/api/public/update", summary="Update public configuration", dependencies=[Depends(
+    "/api/public/update",
+    dependencies=[Depends(
         role_required(
             [user_role.ADMIN])), ], )
 async def update_public_config(param: config_data):
@@ -40,7 +41,6 @@ async def update_public_config(param: config_data):
 
 @admin_routes.delete(
     "/api/system/image",
-    summary="Update system",
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))], )
 async def update_user(key: str, current_user=Depends(get_current_user)):
@@ -48,9 +48,24 @@ async def update_user(key: str, current_user=Depends(get_current_user)):
 
 @admin_routes.put(
     "/api/system/image",
-    summary="Upload system image",
     dependencies=[Depends(role_required([user_role.ADMIN]))],
 )
-async def upload_system_image(file: UploadFile,key: str = "logo_url",current_user=Depends(get_current_user),
-):
+async def upload_system_image(file: UploadFile,key: str = "logo_url",current_user=Depends(get_current_user)):
     return await config_controller.getInstance().uploadSystemResource(file, current_user, key)
+
+
+@admin_routes.post(
+    "/api/system/mail/verify",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
+        Depends(license_required("maintainer", bypass_roles=[user_role.ADMIN]))],
+)
+async def verify_mail_configuration(current_user=Depends(get_current_user)):
+    try:
+        tenant_id = None if current_user.role == user_role.ADMIN else str(current_user.tenant_uuid)
+        await mail_manager.get_instance().send_test_mail(tenant_id=tenant_id)
+        return {"status": "working"}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="Mail configuration is not working") from exc

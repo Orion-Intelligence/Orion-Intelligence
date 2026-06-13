@@ -1,3 +1,4 @@
+from .apt_model import AptDataModel
 from .chat_model import chat_data_model
 from .credential_model import credential_data_model
 from .defacement_model import DefacementDataModel
@@ -7,6 +8,7 @@ from .file_model import ScreenshotPayload
 from .general_model import GeneralDataModel
 from .leak_model import LeakDataModel
 from .log_model import InjectionBatchRequestModel, InjectionBatchResponseModel, InjectionLogModel, LogModel, LogBatchModel, SiemSearchRequestModel, SiemSearchResponseModel
+from .malware_model import MalwareDataModel
 from .nlp_data_model import nlp_data_model
 from .open_sanctions_model import open_sanctions_data_model
 from .report_chat_data_model import NexusTextAnalysisRequest, ReportChatRequest
@@ -16,6 +18,7 @@ from ..crawl_enums import CRAWL_PATHS, CRAWL_CALLBACK_RESPONSES
 
 __all__ = [
     "chat_data_model",
+    "AptDataModel",
     "credential_data_model",
     "DefacementDataModel",
     "DumpModel",
@@ -28,6 +31,7 @@ __all__ = [
     "LeakDataModel",
     "LogModel",
     "LogBatchModel",
+    "MalwareDataModel",
     "SiemSearchRequestModel",
     "SiemSearchResponseModel",
     "nlp_data_model",

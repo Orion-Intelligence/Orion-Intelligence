@@ -133,6 +133,8 @@ export class DashboardService {
     return this.apiService.post<ConsolidatedCallbackModel>(apiEndpoint, payload).pipe(takeUntil(this.cancelRequest$), map((response: ConsolidatedCallbackModel) => {
       const hasAnyResults = !!(response?.leak_model?.Result?.length ||
                 response?.exploit_model?.Result?.length ||
+                response?.apt_model?.Result?.length ||
+                response?.malware_model?.Result?.length ||
                 response?.chat_model?.Result?.length ||
                 response?.generic_model?.Result?.length ||
                 response?.defacement_model?.Result?.length);
@@ -210,7 +212,11 @@ export class DashboardService {
       "content_type",
       "safe",
       "content",
-      "mitre"
+      "mitre",
+      "family",
+      "m_country",
+      "m_reporter",
+      "platform_result_count"
     ];
     const params = new URLSearchParams(window.location.search);
     const selected: Record<string, string | null> = {};

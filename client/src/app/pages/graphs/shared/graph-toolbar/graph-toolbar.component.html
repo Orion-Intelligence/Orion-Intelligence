@@ -6,12 +6,12 @@
     <input data-testid="graph-toolbar-search-input" type="text" [placeholder]="searchPlaceholder()" [value]="searchTerm()" (input)="onSearchInput($event)" (keyup.enter)="searchSubmitted.emit(undefined)" (keydown.arrowleft)="$event.stopPropagation()" (keydown.arrowright)="$event.stopPropagation()" (keydown.home)="$event.stopPropagation()" (keydown.end)="$event.stopPropagation()" class="ui-graph-toolbar-input relative z-0 block h-10 w-full rounded-full border-0 bg-[var(--color-blue-800)]/90 pl-11 pr-44 text-[var(--color-text2)] shadow-lg ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6" />
     <div class="ui-graph-toolbar-action-shell absolute inset-y-1 right-1 flex items-center rounded-full bg-[var(--color-blue-720)]/80 py-1 pl-1 pr-0">
       @if (showImageButton()) {
-        <button data-testid="graph-toolbar-image-search" type="button" title="Search by image" (click)="imageSearchClicked.emit(undefined)" class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]">
+        <button data-testid="graph-toolbar-image-search" type="button" [title]="'Search by image' | translate" (click)="imageSearchClicked.emit(undefined)" class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]">
           <i class="bi bi-image"></i>
         </button>
       }
       @if (showClearButton()) {
-        <button data-testid="graph-toolbar-clear-search" type="button" title="Clear search" (click)="clearSearchClicked.emit(undefined)" class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]" [class.ml-1]="showImageButton()">
+        <button data-testid="graph-toolbar-clear-search" type="button" [title]="'Clear search' | translate" (click)="clearSearchClicked.emit(undefined)" class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]" [class.ml-1]="showImageButton()">
           <i class="bi bi-x"></i>
         </button>
       }
@@ -27,26 +27,26 @@
     @if (showViewModeToggle()) {
       <div data-testid="graph-toolbar-view-toggle" (click)="toggleViewMode()" class="ui-graph-toolbar-view-shell relative hidden h-10 items-center rounded-full bg-[var(--color-blue-800)]/90 p-1 ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm lg:flex">
         <div class="absolute top-1 left-1 h-[calc(100%-0.5rem)] w-24 rounded-full bg-indigo-600 transition-transform duration-300 ease-in-out" [class.translate-x-full]="viewMode() === 'list'"></div>
-        <button data-testid="graph-toolbar-view-graph" type="button" title="Graph View" [class]="'relative z-10 flex h-8 w-24 items-center justify-center gap-1.5 px-3 text-sm font-semibold transition-colors ' + (viewMode() === 'graph' ? 'text-white' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]')">
-          <i class="bi bi-share-fill"></i> Graph
+        <button data-testid="graph-toolbar-view-graph" type="button" [title]="'Graph View' | translate" [class]="'relative z-10 flex h-8 w-24 items-center justify-center gap-1.5 px-3 text-sm font-semibold transition-colors ' + (viewMode() === 'graph' ? 'text-white' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]')">
+          <i class="bi bi-share-fill"></i> {{ 'Graph' | translate }}
         </button>
-        <button data-testid="graph-toolbar-view-list" type="button" title="List View" [class]="'relative z-10 flex h-8 w-24 items-center justify-center gap-1.5 px-3 text-sm font-semibold transition-colors ' + (viewMode() === 'list' ? 'text-white' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]')">
-          <i class="bi bi-list-ul"></i> List
+        <button data-testid="graph-toolbar-view-list" type="button" [title]="'List View' | translate" [class]="'relative z-10 flex h-8 w-24 items-center justify-center gap-1.5 px-3 text-sm font-semibold transition-colors ' + (viewMode() === 'list' ? 'text-white' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]')">
+          <i class="bi bi-list-ul"></i> {{ 'List' | translate }}
         </button>
       </div>
     }
 
     @if (viewMode() === 'graph') {
       @if (showPhysicsToggle()) {
-        <button data-testid="graph-toolbar-physics-toggle" type="button" (click)="physicsToggled.emit(undefined)" [class]="'flex h-10 flex-shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm transition-all duration-300 ' + (isPhysicsEnabled() ? 'bg-teal-600 text-white hover:bg-teal-500' : 'bg-[var(--color-blue-800)]/90 text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]')" [title]="isPhysicsEnabled() ? 'Disable Physics Simulation' : 'Enable Physics Simulation'">
+        <button data-testid="graph-toolbar-physics-toggle" type="button" (click)="physicsToggled.emit(undefined)" [class]="'flex h-10 flex-shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm transition-all duration-300 ' + (isPhysicsEnabled() ? 'bg-teal-600 text-white hover:bg-teal-500' : 'bg-[var(--color-blue-800)]/90 text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]')" [title]="(isPhysicsEnabled() ? 'Disable Physics Simulation' : 'Enable Physics Simulation') | translate">
           <i [class]="'bi ' + (isPhysicsEnabled() ? 'bi-pause-fill' : 'bi-play-fill')"></i>
-          <span>Physics</span>
+          <span>{{ 'Physics' | translate }}</span>
         </button>
       }
       @if (showEditToggle() && canEditConnections()) {
         <button data-testid="graph-toolbar-edit-toggle" type="button" (click)="editModeToggled.emit(undefined)" [class]="'flex h-10 flex-shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm transition-all duration-300 ' + (isEditMode() ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-[var(--color-blue-800)]/90 text-[var(--color-text2)] hover:bg-[var(--color-blue-720)]')">
           <i [class]="'bi ' + (isEditMode() ? 'bi-check-circle-fill' : 'bi-pencil-fill')"></i>
-          <span>{{ isEditMode() ? 'Done Editing' : 'Edit Connections' }}</span>
+          <span>{{ (isEditMode() ? 'Done Editing' : 'Edit Connections') | translate }}</span>
         </button>
       }
       <ng-content select="[toolbarExtraActions]"></ng-content>

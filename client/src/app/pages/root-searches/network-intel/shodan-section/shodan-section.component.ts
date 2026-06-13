@@ -4,12 +4,13 @@ import { Router } from '@angular/router';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { IpDetail } from '../../../../shared/model/network-intel/network-intel.model';
 import { IpDetailComponent } from '../ip-detail/ip-detail.component';
-import { ScanHelperMethodsService } from '../network-intel-service.service';
+import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-network-intel-shodan-section',
   standalone: true,
-  imports: [CommonModule, IpDetailComponent],
+  imports: [CommonModule, IpDetailComponent, TranslatePipe],
   templateUrl: './shodan-section.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -24,7 +25,7 @@ export class ShodanSectionComponent {
   readonly hasSearched = input(false);
   shodanResult: IpDetail | null = null;
 
-  constructor(private router: Router, private ui: ScanHelperMethodsService) {
+  constructor(private router: Router, private ui: NetworkIntelScanService) {
     effect(() => {
       this.errorMessage = this.errorMessageInput();
       this.shodanResult = this.shodanResultInput();

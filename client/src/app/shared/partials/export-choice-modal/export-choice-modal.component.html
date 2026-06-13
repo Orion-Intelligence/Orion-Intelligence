@@ -3,7 +3,7 @@
     <div [attr.data-testid]="modalTestId()" class="ui-graph-popup-panel ui-popup-shell w-full max-w-lg rounded-xl p-4">
       <div class="mb-3 flex items-center justify-between">
         <h3 class="ui-popup-title text-base font-semibold">{{ title() }}</h3>
-        <button [attr.data-testid]="closeTestId()" type="button" class="ui-popup-close inline-flex items-center justify-center text-[20px]" (click)="closed.emit(undefined)">
+        <button [attr.data-testid]="closeTestId()" type="button" class="ui-popup-close inline-flex items-center justify-center text-[20px]" [attr.aria-label]="'common.actions.close' | translate" (click)="closed.emit(undefined)">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>

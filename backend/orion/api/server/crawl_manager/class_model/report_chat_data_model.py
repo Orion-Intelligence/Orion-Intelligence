@@ -5,7 +5,7 @@ class ReportChatRequest(BaseModel):
     session_id: str = ""
     message: str
     report: str = ""
-    tool: str = "default"
+    tool: str = "open_chat"
     type: str = "default"
 
 

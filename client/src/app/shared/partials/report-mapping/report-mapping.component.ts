@@ -9,10 +9,12 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { SubscriptionService } from '../../../services/dashboard/subscription.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { ProxyController } from '../../services/proxy-controller';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
 @Component({
   selector: 'app-report-mapping',
   templateUrl: './report-mapping.component.html',
-  imports: [CommonModule, NgClass, TooltipDirective],
+  imports: [CommonModule, NgClass, TooltipDirective, TranslatePipe],
   animations: [fadeInDashboardItem],
 })
 export class ReportMappingComponent {

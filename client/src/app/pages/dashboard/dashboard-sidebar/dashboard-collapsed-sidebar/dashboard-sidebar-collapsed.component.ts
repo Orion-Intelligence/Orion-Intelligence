@@ -6,10 +6,12 @@ import { LowerPipe } from '../../../../shared/pipes/lower.pipe';
 import { sidebarItemTooltips } from '../../../../shared/constants/shared-enums';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { SidebarHomepageService } from '../../../../services/dashboard/sidebar.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-dashboard-sidebar-collapsed',
   standalone: true,
-  imports: [NgClass, AsyncPipe, RouterLink, TooltipDirective, LowerPipe],
+  imports: [NgClass, AsyncPipe, RouterLink, TooltipDirective, LowerPipe, TranslatePipe],
   templateUrl: './dashboard-sidebar-collapsed.component.html',
 })
 export class SidebarSectionComponent {
@@ -50,6 +52,8 @@ export class SidebarSectionComponent {
   getItemIcon(item: string): string {
     const normalized = item.toLowerCase().replace(/\s+/g, '-');
     const mapped = {
+      apt: 'mitre',
+      malware: 'phishing',
       iocs: 'ioc',
       'file-scanner': 'archive',
       'text-analysis': 'phishing',

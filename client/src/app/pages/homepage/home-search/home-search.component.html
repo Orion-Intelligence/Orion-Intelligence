@@ -2,7 +2,7 @@
   (app_service.userSessionData().user.role === 'analyst' && licenseService.getLicenses().includes('enterprise')) || licenseService.getLicenses().includes('enterprise')) {
   <div class="flex flex-nowrap gap-2 overflow-x-auto max-w-full whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]" [ngClass]="compactLayout() ? 'mt-[4px] mx-[2px] mb-[15px] max-[1000px]:mx-0 max-[640px]:mt-0 max-[640px]:mx-[2px]' : 'mt-[24px] mx-[32px] max-[1200px]:m-[15px] max-[943px]:mx-[10px]'">
     @if (licenseService.canUseModule('ai') && app_service.configData().appSettings.ai_endpoint_enabled) {
-      <button type="button" data-testid="ioc-basic-tag-AI" [routerLink]="['/dashboard/profile/ai']" [queryParams]="{ q: searchQuery || null }" queryParamsHandling="merge" class="ui-home-ai-button group flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border border-[rgba(87,165,235,0.18)] bg-[linear-gradient(180deg,rgba(87,165,235,0.14)_0%,rgba(87,165,235,0.08)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-200 hover:border-[rgba(87,165,235,0.3)] hover:bg-[linear-gradient(180deg,rgba(87,165,235,0.18)_0%,rgba(87,165,235,0.12)_100%)]" aria-label="Open AI workspace">
+      <button type="button" data-testid="ioc-basic-tag-AI" [routerLink]="['/dashboard/profile/ai']" [queryParams]="{ q: searchQuery || null }" queryParamsHandling="merge" class="ui-home-ai-button group flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border border-[rgba(87,165,235,0.18)] bg-[linear-gradient(180deg,rgba(87,165,235,0.14)_0%,rgba(87,165,235,0.08)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-200 hover:border-[rgba(87,165,235,0.3)] hover:bg-[linear-gradient(180deg,rgba(87,165,235,0.18)_0%,rgba(87,165,235,0.12)_100%)]" [attr.aria-label]="'Open AI workspace' | translate">
         <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" class="h-[14px] w-[14px] drop-shadow-[0_1px_4px_rgba(255,255,255,0.18)]">
           <defs>
             <linearGradient id="homepage-ai-stars-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -16,7 +16,7 @@
         </svg>
       </button>
     }
-    @for (tab of ["IOCs", "Deep Search", "Network Intelligence"]; track tab) {
+    @for (tab of tabs; track tab) {
       <div [attr.data-testid]="'ioc-basic-tag-' + tab" (click)="selectTab(tab)" [ngClass]="selectedTab === tab ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]'" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors">
         {{ tab }}
       </div>
@@ -38,9 +38,9 @@
             <button class="flex w-[45px] items-center justify-center bg-white transition-colors hover:bg-white" type="submit">
               <img alt="Search" height="16" class="ml-[6px] mb-[1px] opacity-80" ngSrc="../../../../assets/images/shared/theme/magnifyingglassblack.svg" priority width="16">
             </button>
-            <input #searchInput data-testid="homepage-search-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-[42px] flex-1 bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]" maxlength="350" name="q" placeholder="Search ..." type="text" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)">
+            <input #searchInput data-testid="homepage-search-input" [(ngModel)]="searchQuery" autocapitalize="none" autocomplete="off" class="h-[42px] flex-1 bg-white text-[16px] text-[#3C3C43] outline-none placeholder:font-[Roboto] placeholder:text-[15px] placeholder:text-[rgba(0,0,0,0.38)]" maxlength="350" name="q" [placeholder]="'Search ...' | translate" type="text" (focus)="setFilterOverlay(true)" (input)="onSearchInput($event)">
             <input type="hidden" value="1">
-            <button type="button" class="ui-search-clear-btn group flex h-[42px] w-[38px] items-center justify-center bg-white px-0 transition-colors hover:bg-[#f3f4f6]" aria-label="Clear input" title="Clear input" (click)="clearSearchInput()" [disabled]="!searchQuery">
+            <button type="button" class="ui-search-clear-btn group flex h-[42px] w-[38px] items-center justify-center bg-white px-0 transition-colors hover:bg-[#f3f4f6]" [attr.aria-label]="'Clear input' | translate" [title]="'Clear input' | translate" (click)="clearSearchInput()" [disabled]="!searchQuery">
               <svg viewBox="0 0 16 16" aria-hidden="true" class="h-[14px] w-[14px] text-[#374151] transition-colors group-hover:text-[#111827]" [ngClass]="{ 'invisible': !searchQuery }" fill="currentColor">
                 <path d="M8 1.333a6.667 6.667 0 1 0 0 13.334A6.667 6.667 0 0 0 8 1.333Zm2.02 8.687-.96.96L8 8.96l-1.06 1.02-.96-.96L7.04 8 5.98 6.94l.96-.96L8 7.04l1.06-1.06.96.96L8.96 8l1.06 1.02Z" />
               </svg>
@@ -48,9 +48,9 @@
             <div class="flex shrink-0 items-center whitespace-nowrap bg-white font-[Roboto] text-[15px] font-normal text-[#292828] max-[550px]:w-0 max-[550px]:px-0 max-[550px]:overflow-hidden max-[550px]:border-r-0" [ngClass]="hideToolsSection() ? 'pr-[5px]' : ''">
               <ng-container>
                 <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)] max-[550px]:hidden">
-                <span class="inline-flex items-center">Advance&nbsp;&nbsp;</span>
+                <span class="mr-[6px] inline-flex items-center">{{ 'Advance' | translate }}</span>
                 <label class="relative inline-flex cursor-pointer items-center rounded-full bg-white p-[1px]">
-                  <input type="checkbox" class="sr-only peer" aria-label="Advance search" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()" />
+                  <input type="checkbox" class="sr-only peer" [attr.aria-label]="'Advance search' | translate" [checked]="app_service.configData().localSettings.advance_setting_toggle" (change)="onAdvanceSettingToggle()" />
                   <span class="relative h-[20px] w-[32px] rounded-full border border-[var(--color-border)] bg-[#e5e7eb] transition peer-checked:border-[#57A5EB] peer-checked:bg-[#57A5EB]">
                     <span class="absolute left-[1px] top-0 mt-[2px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="app_service.configData().localSettings.advance_setting_toggle ? 'translate-x-[14px]' : 'translate-x-0'"></span>
                   </span>
@@ -58,7 +58,7 @@
                 @if (!hideToolsSection()) {
                   <hr class="mx-[12px] my-[3px] h-[23px] w-px border-0 bg-[rgba(0,0,0,0.12)] max-[550px]:hidden">
                   <button type="button" (click)="onToolToggle($event)" class="inline-flex items-center cursor-pointer">
-                    Tools
+                    {{ 'Tools' | translate }}
                     <img src="assets/images/shared/theme/cheveron-right.svg" width="27" height="27" alt="Toggle Icon" [ngClass]="{ 'rotate-90': app_service.configData().localSettings.enable_advanced_tools }" class="mt-[-1px] px-[10px] transition-transform duration-300">
                   </button>
                 }
@@ -80,17 +80,17 @@
         @if (app_service.configData().localSettings.enable_advanced_tools;) {
           <details #matchTypeDropdown class="relative mt-[8px] w-fit">
             <summary class="flex items-center gap-[6px] cursor-pointer list-none text-[13px] font-[Roboto] font-medium text-[var(--color-text1)]" [ngClass]="{ '[&::-webkit-details-marker]:hidden': true }">
-              search by <b>({{ getMatchType() }})</b>
+              {{ 'search by' | translate }} <b>({{ getMatchType() }})</b>
               <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="chevron" width="16" height="16">
             </summary>
             <div class="ui-result-dropdown-panel absolute z-[10] mt-[12px] w-[260px] rounded-[7px] border p-[7px_12px]">
-              <button type="button" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onSearchSubmit();closeMatchTypeDropdown();">Match any term (OR)</button>
+              <button type="button" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="selectedSearchBy = 'Match any term';onSetMatchType('or');onSearchSubmit();closeMatchTypeDropdown();">{{ 'Match any term (OR)' | translate }}</button>
               <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
-              <button type="button" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onSearchSubmit();closeMatchTypeDropdown();">Match indivisual terms (AND)</button>
+              <button type="button" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="selectedSearchBy = 'Match indivisual terms';onSetMatchType('and');onSearchSubmit();closeMatchTypeDropdown();">{{ 'Match indivisual terms (AND)' | translate }}</button>
               <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
-              <button type="button" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onSearchSubmit();closeMatchTypeDropdown();">Match full query (AND)</button>
+              <button type="button" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="selectedSearchBy = 'Match full query';onSetMatchType('full');onSearchSubmit();closeMatchTypeDropdown();">{{ 'Match full query (AND)' | translate }}</button>
               <div class="ui-result-dropdown-divider mx-[8px] my-[6px] h-px"></div>
-              <button type="button" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="selectedSearchBy = 'Match semantic query';onSetMatchType('or');onSearchSubmit();closeMatchTypeDropdown();">Match semantic query (semantic)</button>
+              <button type="button" class="ui-result-dropdown-item block w-full rounded-[6px] px-[8px] py-[6px] text-left text-[13px]" (click)="selectedSearchBy = 'Match semantic query';onSetMatchType('or');onSearchSubmit();closeMatchTypeDropdown();">{{ 'Match semantic query (semantic)' | translate }}</button>
             </div>
           </details>
         }
@@ -103,13 +103,13 @@
           </div>
           <div class="relative will-change-transform transition-transform duration-300 ease-out" [class.transition-none]="insightDragging" [ngClass]="'ui-translate-y-neg-' + insightTranslateY">
               <div class="absolute left-1/2 top-[-54px] z-[30] -translate-x-1/2 touch-none select-none" (click)="onInsightToggleClick($event)" (pointerdown)="onInsightPointerDown($event)">
-                <button type="button" aria-label="Drag Panel" class="ui-home-insight-drag-btn group flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] px-4 py-2 text-xs font-semibold text-[var(--color-text1)] shadow-[0_12px_28px_rgba(0,0,0,0.28)] transition hover:border-[rgba(148,163,184,0.6)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.32)] active:scale-[0.97]">
+                <button type="button" [attr.aria-label]="'Drag Panel' | translate" class="ui-home-insight-drag-btn group flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] px-4 py-2 text-xs font-semibold text-[var(--color-text1)] shadow-[0_12px_28px_rgba(0,0,0,0.28)] transition hover:border-[rgba(148,163,184,0.6)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.32)] active:scale-[0.97]">
                   <svg class="ui-home-insight-drag-icon h-4 w-4 opacity-80 transition-transform duration-200 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 5v14" />
                     <path d="M8 9l4-4 4 4" />
                     <path d="M16 15l-4 4-4-4" />
                   </svg>
-                  Drag Panel
+                  {{ 'Drag Panel' | translate }}
                 </button>
               </div>
               <app-home-insight></app-home-insight>

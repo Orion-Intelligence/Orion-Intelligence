@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnChanges, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CalendarCell } from '../../../model/filter/calendar-cell.model';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-date-picker',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslatePipe],
   templateUrl: './date-picker.component.html',
 })
 export class DatePickerComponent implements OnChanges {

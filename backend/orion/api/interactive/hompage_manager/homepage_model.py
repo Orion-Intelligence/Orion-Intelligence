@@ -7,8 +7,11 @@ from orion.management.models.insight_model_comparison import InsightComparisonMo
 from orion.services.log_manager.log_controller import log
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
-from orion.services.elastic_manager.elastic_insight_generator import elastic_insight_generator
+from orion.management.jobs.insight_generator import insight_generator
 from orion.services.elastic_manager.elastic_controller import elastic_controller
+
+
+HOMEPAGE_DISPLAY_DATE_FORMAT = "%B %d, %Y"
 
 
 class homepage_model:
@@ -47,7 +50,7 @@ class homepage_model:
             except json.JSONDecodeError:
                 pass
 
-        indices, queries = elastic_insight_generator().on_insight_consolidated_data()
+        indices, queries = insight_generator().on_insight_consolidated_data()
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
 
         leak_hits = []
@@ -96,7 +99,7 @@ class homepage_model:
             except json.JSONDecodeError:
                 pass
 
-        indices, query = elastic_insight_generator().on_insight_consolidated_country()
+        indices, query = insight_generator().on_insight_consolidated_country()
         queries = [query.copy() for _ in indices]
         responses = await elastic_controller.get_instance().search_consolidated_queries(indices, queries)
 
@@ -194,6 +197,7 @@ class homepage_model:
             "leak": ELASTIC_INDEX.S_LEAK_INDEX,
             "generic": ELASTIC_INDEX.S_GENERIC_INDEX,
             "exploit": ELASTIC_INDEX.S_EXPLOIT_INDEX,
+            "apt": ELASTIC_INDEX.S_APT_INDEX,
             "chat": ELASTIC_INDEX.S_CHATS_INDEX,
             "social": ELASTIC_INDEX.S_SOCIAL_INDEX,
             "defacement": ELASTIC_INDEX.S_DEFACEMENT_INDEX,
@@ -276,5 +280,5 @@ class homepage_model:
         for fmt in formats:
             with suppress(ValueError):
                 dt = datetime.strptime(raw_date, fmt)
-                return dt.strftime("%B %d, %Y")
+                return dt.strftime(HOMEPAGE_DISPLAY_DATE_FORMAT)
         return None

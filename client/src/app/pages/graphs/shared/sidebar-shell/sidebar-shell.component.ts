@@ -6,9 +6,12 @@ import { AppService } from '../../../../services/core/app/app.service';
   standalone: true,
   imports: [],
   templateUrl: './sidebar-shell.component.html',
+<<<<<<< HEAD
   host: {
     class: 'block h-full w-full min-h-0',
   },
+=======
+>>>>>>> trusted-main
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarShellComponent {

@@ -13,7 +13,9 @@ import { UrlScanMeta, UrlScanThreatItem, } from '../../../../shared/model/securi
 import { ScannerService } from './scanner-service.service';
 import { ReportExportService } from '../../../../shared/services/report-export.service';
 import { GraphReportPayload } from '../../../../shared/model/report/report-export.model';
-import { ScanHelperMethodsService } from '../network-intel-service.service';
+import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-security-scan',
   standalone: true,
@@ -28,8 +30,7 @@ import { ScanHelperMethodsService } from '../network-intel-service.service';
     NgxPrintDirective,
     FormsModule,
     ReactiveFormsModule,
-    EmptyQueryComponent,
-  ],
+    EmptyQueryComponent, TranslatePipe],
   templateUrl: './security-scan.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -52,7 +53,7 @@ export class SecurityScanComponent implements OnInit {
   trackByCategory = ( _: number, c: { name: string; } ) => c.name;
   trackByItem = (i: number) => i;
 
-  constructor(private router: Router, private route: ActivatedRoute, private scanner: ScannerService, private graphReportExport: ReportExportService, private scanHelperMethodsService: ScanHelperMethodsService) { }
+  constructor(private router: Router, private route: ActivatedRoute, private scanner: ScannerService, private graphReportExport: ReportExportService, private scanHelperMethodsService: NetworkIntelScanService) { }
 
   ngOnInit(): void {
     this.scanType = this.route.snapshot.data['type'];

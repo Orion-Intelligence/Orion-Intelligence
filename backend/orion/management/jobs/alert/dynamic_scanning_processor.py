@@ -1,0 +1,113 @@
+import asyncio
+from typing import Any
+
+from orion.api.interactive.alert_manager.alert_summary_helper import AlertSummaryHelper
+from orion.management.jobs.alert.cancellation_service import CancellationService
+from orion.management.jobs.alert.config import DYNAMIC_SCAN_RULES, DynamicScanRule
+from orion.management.jobs.alert.response_parser import ResponseParser
+from orion.management.jobs.alert.result_mappers import DynamicResultMapper
+
+
+class DynamicScanningProcessor:
+    def __init__(self, alert_manager: Any, search_model: Any, cancellation_service: CancellationService):
+        self._alert_manager = alert_manager
+        self._search_model = search_model
+        self._cancellation_service = cancellation_service
+
+    @staticmethod
+    def matching_rules(ioc_type: str, ioc_value: str) -> list[DynamicScanRule]:
+        return [rule for rule in DYNAMIC_SCAN_RULES if rule.matches(ioc_type, ioc_value)]
+
+    async def process_ioc(self, tenant_id: str, ioc_type: str, values: list[str]) -> dict:
+        summary = AlertSummaryHelper.new_scan_summary()
+        scans: list[tuple[DynamicScanRule, dict[str, Any]]] = []
+        selected_ioc_value = ""
+
+        for ioc_value in values or []:
+            selected_ioc_value = ioc_value
+            scans = [(rule, rule.build_payload(ioc_value)) for rule in self.matching_rules(ioc_type, ioc_value)]
+
+        for rule, payload in scans:
+            scan_summary = await self.handle_dynamic_scanning_alert(
+                tenant_id,
+                ioc_type,
+                selected_ioc_value,
+                rule.scan_type,
+                payload,
+                rule.category,
+                rule.model,
+            )
+            AlertSummaryHelper.merge_scan_summary(summary, scan_summary)
+
+        return summary
+
+    async def handle_dynamic_scanning_alert(
+        self,
+        tenant_id: str,
+        ioc_type: str,
+        ioc_value: str,
+        scan_type: str,
+        search_payload: dict,
+        dynamic_search_category: str,
+        model_cls,
+    ):
+        try:
+            summary = AlertSummaryHelper.new_scan_summary()
+            param_model = model_cls(text=search_payload)
+
+            while True:
+                if self._cancellation_service.is_cancelled(tenant_id):
+                    return summary
+
+                response = await self._search_model.dynamic_search(param_model, dynamic_search_category)
+                scan_result = ResponseParser.to_dict(response, allow_dict_method=False)
+                if scan_result is None:
+                    return summary
+
+                status = scan_result.get("status")
+                if status == "pending":
+                    await asyncio.sleep(5)
+                    continue
+
+                inner_result = scan_result.get("result", {})
+                if isinstance(inner_result, dict):
+                    result_list = inner_result.get("result", [])
+                elif isinstance(inner_result, list):
+                    result_list = inner_result
+                else:
+                    result_list = []
+                break
+
+            if not result_list:
+                return summary
+
+            for result in result_list:
+                if self._cancellation_service.is_cancelled(tenant_id):
+                    return summary
+
+                alert_fields = DynamicResultMapper.to_alert_fields(scan_type, ioc_type, ioc_value, result)
+                if not alert_fields:
+                    continue
+
+                upsert_result = await self._alert_manager.upsert_alert(
+                    tenantId=tenant_id,
+                    category=alert_fields["category"],
+                    ioc_type=alert_fields["ioc_type"],
+                    ioc_value=alert_fields["ioc_value"],
+                    title=alert_fields["title"],
+                    description=alert_fields["description"],
+                    url=alert_fields["url"],
+                    source=alert_fields["source"],
+                    content_types=alert_fields["content_types"],
+                    all_ioc=alert_fields["all_ioc"],
+                )
+
+                AlertSummaryHelper.merge_scan_summary(
+                    summary,
+                    AlertSummaryHelper.scan_result_summary(scan_type, ioc_type, ioc_value, upsert_result),
+                )
+
+            return summary
+
+        except Exception:
+            return AlertSummaryHelper.new_scan_summary()

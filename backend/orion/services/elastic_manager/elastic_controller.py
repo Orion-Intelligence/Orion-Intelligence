@@ -1,13 +1,11 @@
+import json
+import hashlib
 from datetime import datetime, timezone
-from string import capwords
-
-from elasticsearch import AsyncElasticsearch
+from elasticsearch import AsyncElasticsearch, helpers as es_helpers
 from fastapi import HTTPException
-
+from orion.constants import constant
 from orion.helper_manager.env_handler import env_handler
-from orion.management.models.insight_model import InsightData, GENERIC_AGGREGATION_MAPPING, LEAK_AGGREGATION_MAPPING, DEFACEMENT_AGGREGATION_MAPPING
 from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, MANAGE_ELASTIC_MESSAGES, ELASTIC_KEYS, ELASTIC_INDEX, ELASTIC_ENUMS)
-from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
 from orion.services.log_manager.log_controller import log
 
 
@@ -15,7 +13,6 @@ class elastic_controller:
     __instance = None
     __m_core_connection = None
     __m_dump_connection = None
-    __m_elastic_request_generator = None
 
     @staticmethod
     def get_instance():
@@ -25,7 +22,6 @@ class elastic_controller:
 
     def __init__(self):
         elastic_controller.__instance = self
-        self.__m_elastic_request_generator = elastic_request_generator()
 
     async def initialize(self):
         await self.__link_connection()
@@ -62,11 +58,14 @@ class elastic_controller:
             mapping_generic_model = ELASTIC_ENUMS.mapping_generic_model
             mapping_defacement_model = ELASTIC_ENUMS.mapping_defacement_model
             mapping_exploit_model = ELASTIC_ENUMS.mapping_exploit_model
+            mapping_apt_model = ELASTIC_ENUMS.mapping_apt_model
+            mapping_malware_model = ELASTIC_ENUMS.mapping_malware_model
             mapping_siem_model = ELASTIC_ENUMS.mapping_siem_model
             mapping_chat_model = ELASTIC_ENUMS.mapping_chat_model
             mapping_stealer_model = ELASTIC_ENUMS.mapping_stealer_log_model
             mapping_social_model = ELASTIC_ENUMS.mapping_social_model
             mapping_saction_model = ELASTIC_ENUMS.mapping_opensanctions_model
+            mapping_map_entities_model = ELASTIC_ENUMS.mapping_map_entities_model
 
             if not await self.__m_core_connection.indices.exists(index=ELASTIC_INDEX.S_LEAK_INDEX, request_timeout=220):
                 await self.__m_core_connection.indices.create(
@@ -115,6 +114,26 @@ class elastic_controller:
                     request_timeout=220)
 
             if not await self.__m_core_connection.indices.exists(
+                    index=ELASTIC_INDEX.S_APT_INDEX,
+                    request_timeout=220):
+                await self.__m_core_connection.indices.create(
+                    index=ELASTIC_INDEX.S_APT_INDEX, body=mapping_apt_model, request_timeout=220)
+                await self.__m_core_connection.indices.put_settings(
+                    index=ELASTIC_INDEX.S_APT_INDEX,
+                    body={"index.blocks.read_only_allow_delete": False},
+                    request_timeout=220)
+
+            if not await self.__m_core_connection.indices.exists(
+                    index=ELASTIC_INDEX.S_MALWARE_INDEX,
+                    request_timeout=220):
+                await self.__m_core_connection.indices.create(
+                    index=ELASTIC_INDEX.S_MALWARE_INDEX, body=mapping_malware_model, request_timeout=220)
+                await self.__m_core_connection.indices.put_settings(
+                    index=ELASTIC_INDEX.S_MALWARE_INDEX,
+                    body={"index.blocks.read_only_allow_delete": False},
+                    request_timeout=220)
+
+            if not await self.__m_core_connection.indices.exists(
                     index=ELASTIC_INDEX.S_SIEM_INDEX,
                     request_timeout=220):
                 await self.__m_core_connection.indices.create(
@@ -153,38 +172,109 @@ class elastic_controller:
                     body={"index.blocks.read_only_allow_delete": False},
                     request_timeout=220)
 
+            if env_handler.get_instance().env("TESTING_ENABLED", "0") != "1":
+                await self.__initialize_map_entities_data(mapping_map_entities_model)
+
         except Exception as ex:
             log.g().e(f"ELASTIC : Initialization failed: {str(ex)}")
 
+    @staticmethod
+    def prepare_map_entities_document(document: dict) -> dict:
+        prepared = dict(document)
+        location = prepared.get("location")
+        if isinstance(location, dict) and "lat" in location and "lon" in location:
+            try:
+                lat = float(location["lat"])
+                lon = float(location["lon"])
+                prepared["location_point"] = {"lat": lat, "lon": lon}
+            except (ValueError, TypeError):
+                pass
+        return prepared
+
+    @staticmethod
+    def is_map_entity_document(document: dict) -> bool:
+        if not isinstance(document, dict):
+            return False
+
+        location = document.get("location")
+        has_location = isinstance(location, dict) and location.get("lat") is not None and location.get("lon") is not None
+        has_type = bool(str(document.get("type") or "").strip())
+        has_capacity = document.get("capacity_mw") is not None
+
+        return has_location and has_type and has_capacity
+
+    @staticmethod
+    def map_entities_document_id(document: dict) -> str:
+        location = document.get("location") if isinstance(document, dict) else None
+        key_payload = {
+            "name": document.get("name") if isinstance(document, dict) else None,
+            "country": document.get("country") if isinstance(document, dict) else None,
+            "type": document.get("type") if isinstance(document, dict) else None,
+            "lat": location.get("lat") if isinstance(location, dict) else None,
+            "lon": location.get("lon") if isinstance(location, dict) else None,
+        }
+        key_str = json.dumps(key_payload, sort_keys=True, separators=(",", ":"))
+        return hashlib.sha256(key_str.encode("utf-8")).hexdigest()
+
+    async def __initialize_map_entities_data(self, mapping_map_entities_model):
+        index_name = ELASTIC_INDEX.S_MAP_ENTITIES_INDEX
+
+        if not await self.__m_core_connection.indices.exists(index=index_name, request_timeout=220):
+            await self.__m_core_connection.indices.create(index=index_name, body=mapping_map_entities_model, request_timeout=220)
+        else:
+            await self.__m_core_connection.indices.delete(index=index_name, request_timeout=220)
+            await self.__m_core_connection.indices.create(index=index_name, body=mapping_map_entities_model, request_timeout=220)
+
+        raw_data = constant.map_entities_data
+        if isinstance(raw_data, str):
+            raw_data = json.loads(raw_data)
+
+        documents = [
+            document for document in (raw_data if isinstance(raw_data, list) else [])
+        ]
+
+        def action_generator():
+            for document in documents:
+                if not isinstance(document, dict):
+                    continue
+                prepared = self.prepare_map_entities_document(document)
+                yield {
+                    "_op_type": "index",
+                    "_index": index_name,
+                    "_id": self.map_entities_document_id(document),
+                    "_source": prepared,
+                }
+
+        await es_helpers.async_bulk(
+            self.__m_core_connection,
+            action_generator(),
+            chunk_size=2000,
+            request_timeout=220,
+            raise_on_error=False,
+            raise_on_exception=False,
+        )
+
     async def purge_old_records(self):
         try:
-            # m_request_stealer = {
-            #     "query": {
-            #         "range": {
-            #             "timestamp": {
-            #                 "lt": f"now-{CONSTANTS.S_SETTINGS_INDEX_EXPIRY_TIMEOUT}s"
-            #             }
-            #         }
-            #     }
-            # }
-            # await self.__m_dump_connection.delete_by_query(
-            #     index=ELASTIC_INDEX.S_STEALERLOGS_INDEX,
-            #     body=m_request_stealer,
-            #     ignore=[404],
-            #     request_timeout=220
-            # )
-
             m_request_defacement = {"query": {"range": {"m_leak_date": {"lt": "now-6M"}}}}
             await self.__m_core_connection.delete_by_query(
-                index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body=m_request_defacement, ignore=[404], request_timeout=220)
+                index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body=m_request_defacement)
 
         except Exception as ex:
             log.g().e(f"Failed to delete old records: {str(ex)}")
 
+    async def reindex_map_entities_data(self):
+        try:
+            mapping_map_entities_model = ELASTIC_ENUMS.mapping_map_entities_model
+            await self.__initialize_map_entities_data(mapping_map_entities_model)
+            log.g().i("Map entities data re-indexed successfully")
+        except Exception as ex:
+            log.g().e(f"Failed to re-index map entities data: {str(ex)}")
+
     async def get_doc(self, index, doc_id: str):
         try:
             conn = self.__conn_for_index(index)
-            result = await conn.get(index=index, id=doc_id, ignore=[404], request_timeout=220)
+            result = await conn.get(index=index, id=doc_id)
             return [result["_source"]] if result and "_source" in result else []
         except Exception:
             return []
@@ -192,11 +282,11 @@ class elastic_controller:
     async def search_query(self, document, data_filter):
         try:
             conn = self.__conn_for_index(document)
-            m_data = await conn.search(index=document, body=data_filter, request_timeout=220)
+            m_data = await conn.search(index=document, body=data_filter)
             return True, m_data
         except Exception as ex:
             log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
-            return False, str(ex)
+            return False, None
 
     @staticmethod
     def _read_index(i: str) -> str:
@@ -234,7 +324,6 @@ class elastic_controller:
                 return await self.__m_dump_connection.search(
                     index=",".join(read_indices),
                     body=query,
-                    request_timeout=220,
                     allow_no_indices=True,
                     ignore_unavailable=True,
                 )
@@ -243,7 +332,6 @@ class elastic_controller:
                 return await self.__m_core_connection.search(
                     index=",".join(read_indices),
                     body=query,
-                    request_timeout=220,
                     allow_no_indices=True,
                     ignore_unavailable=True,
                 )
@@ -254,7 +342,6 @@ class elastic_controller:
             core_res = await self.__m_core_connection.search(
                 index=",".join(core_indices),
                 body=query,
-                request_timeout=220,
                 allow_no_indices=True,
                 ignore_unavailable=True,
             ) if core_indices else {"hits": {"hits": []}}
@@ -262,7 +349,6 @@ class elastic_controller:
             dump_res = await self.__m_dump_connection.search(
                 index=",".join(dump_indices),
                 body=query,
-                request_timeout=220,
                 allow_no_indices=True,
                 ignore_unavailable=True,
             )
@@ -285,50 +371,12 @@ class elastic_controller:
         for index, query in zip(indices, queries):
             try:
                 conn = self.__conn_for_index(index)
-                res = await conn.search(index=index, body=query, request_timeout=220)
+                res = await conn.search(index=index, body=query)
                 results.append(res)
             except Exception as ex:
                 log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
                 results.append(None)
         return results
-
-    async def get_insight(self):
-        try:
-            insight_queries = self.__m_elastic_request_generator.generate_insight_queries()
-            insight_data = InsightData()
-
-            for query in insight_queries:
-                result = await self.__conn_for_index(query[ELASTIC_KEYS.S_DOCUMENT]).search(index=query[ELASTIC_KEYS.S_DOCUMENT], body=query[ELASTIC_KEYS.S_FILTER], request_timeout=220)
-                aggs = result.get("aggregations", {})
-
-                m_filter = query[ELASTIC_KEYS.S_DOCUMENT]
-
-                for key in aggs:
-                    value = "-"
-                    if "value" in aggs[key]:
-                        value = aggs[key]["value"]
-                    elif "buckets" in aggs[key]:
-                        buckets = aggs[key].get("buckets", [])
-                        value = capwords(buckets[0]["key"]) if buckets else "-"
-
-                    if key in ["Most Recent", "Oldest Update"] and value and isinstance(value, (int, float)):
-                        value = datetime.fromtimestamp(value / 1000, tz=timezone.utc).strftime("%d %b")
-                    if isinstance(value, float):
-                        value = round(value, 2)
-
-                    if value is not None:
-                        if m_filter == ELASTIC_INDEX.S_GENERIC_INDEX and key in GENERIC_AGGREGATION_MAPPING:
-                            setattr(insight_data.general, GENERIC_AGGREGATION_MAPPING[key], value)
-                        elif m_filter == ELASTIC_INDEX.S_LEAK_INDEX and key in LEAK_AGGREGATION_MAPPING:
-                            setattr(insight_data.leak, LEAK_AGGREGATION_MAPPING[key], value)
-                        elif m_filter == ELASTIC_INDEX.S_DEFACEMENT_INDEX and key in DEFACEMENT_AGGREGATION_MAPPING:
-                            setattr(insight_data.defacement, DEFACEMENT_AGGREGATION_MAPPING[key], value)
-
-            return True, insight_data
-
-        except Exception as ex:
-            log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
-            return False, None
 
     async def index_data(self, p_data, bypass_empty_embedding=False):
         try:
@@ -364,7 +412,7 @@ class elastic_controller:
 
                     index = entry[ELASTIC_KEYS.S_DOCUMENT]
                     conn = self.__conn_for_index(index)
-                    exists = await conn.exists(index=index, id=doc_id, request_timeout=220)
+                    exists = await conn.exists(index=index, id=doc_id)
 
                     if not exists and not bypass_empty_embedding and index != ELASTIC_INDEX.S_CHATS_INDEX:
                         emb = entry[ELASTIC_KEYS.S_VALUE].get("m_embedding")
@@ -374,8 +422,7 @@ class elastic_controller:
                     await conn.update(
                         index=index,
                         id=doc_id,
-                        body={"doc": entry[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True},
-                        request_timeout=220)
+                        body={"doc": entry[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True})
 
             else:
                 p_data = ensure_creation_date(p_data)
@@ -386,7 +433,7 @@ class elastic_controller:
 
                 index = p_data[ELASTIC_KEYS.S_DOCUMENT]
                 conn = self.__conn_for_index(index)
-                exists = await conn.exists(index=index, id=doc_id, request_timeout=220)
+                exists = await conn.exists(index=index, id=doc_id)
 
                 if not exists and index != ELASTIC_INDEX.S_CHATS_INDEX:
                     emb = p_data[ELASTIC_KEYS.S_VALUE].get("m_embedding")
@@ -396,8 +443,7 @@ class elastic_controller:
                 await conn.update(
                     index=index,
                     id=doc_id,
-                    body={"doc": p_data[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True},
-                    request_timeout=220)
+                    body={"doc": p_data[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True})
 
             return True, None
 
@@ -415,8 +461,14 @@ class elastic_controller:
                             idx = meta.get("_index")
                             if idx:
                                 target_indices.add(idx)
-            response = await self.__m_dump_connection.bulk(body=p_data, request_timeout=220)
+            response = await self.__m_dump_connection.bulk(body=p_data)
             return response
         except Exception as ex:
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
             raise HTTPException(status_code=500, detail="Failed to index dump data")
+        
+    async def mget_docs(self, index, body):
+        return await self.__m_core_connection.mget(
+            index=self._read_index(index),
+            body=body,
+        )

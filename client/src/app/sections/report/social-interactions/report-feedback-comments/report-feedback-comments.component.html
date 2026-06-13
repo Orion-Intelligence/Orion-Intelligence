@@ -5,22 +5,22 @@
   <div class="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent_0%,rgba(87,165,235,0.22)_18%,rgba(87,165,235,0.45)_50%,rgba(87,165,235,0.22)_82%,transparent_100%)]"></div>
   <div class="flex items-start justify-between gap-4">
     <div class="min-w-0">
-      <div class="text-[16px] font-semibold leading-tight text-[var(--color-text1)]">Comments</div>
-      <p class="mt-1 text-[12px] text-[var(--color-text4)]">Leave context for other analysts while reviewing this report.</p>
+      <div class="text-[16px] font-semibold leading-tight text-[var(--color-text1)]">{{ 'Comments' | translate }}</div>
+      <p class="mt-1 text-[12px] text-[var(--color-text4)]">{{ 'Leave context for other analysts while reviewing this report.' | translate }}</p>
     </div>
     <div class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">
-      {{ feedback.comments.length }} notes
+      {{ feedback.comments.length }} {{ 'notes' | translate }}
     </div>
   </div>
 
   <div class="report-comment-surface relative mt-4 overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-3.5">
     <div class="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent_0%,rgba(87,165,235,0.18)_18%,rgba(87,165,235,0.32)_50%,rgba(87,165,235,0.18)_82%,transparent_100%)]"></div>
-    <textarea data-testid="report-feedback-comment-input" [(ngModel)]="draft" rows="3" placeholder="Add an analyst note, context, or follow-up..." class="min-h-[90px] w-full resize-y rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20"></textarea>
+    <textarea data-testid="report-feedback-comment-input" [(ngModel)]="draft" rows="3" [placeholder]="'Add an analyst note, context, or follow-up...' | translate" class="min-h-[90px] w-full resize-y rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20"></textarea>
 
     <div class="mt-3 flex items-center justify-between gap-3 border-t border-[var(--color-divider)] pt-3">
-      <p class="text-[11px] text-[var(--color-text4)]">Notes are shared on this report.</p>
+      <p class="text-[11px] text-[var(--color-text4)]">{{ 'Notes are shared on this report.' | translate }}</p>
       <button data-testid="report-feedback-comment-save" type="button" [disabled]="!docId || !draft.trim() || isSaving" (click)="submitComment()" class="inline-flex h-9 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-640)] px-3.5 text-[12px] font-semibold text-white transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60">
-        {{ isSaving ? 'Saving...' : 'Save Comment' }}
+        {{ (isSaving ? 'Saving...' : 'Save Comment') | translate }}
       </button>
     </div>
 
@@ -41,7 +41,7 @@
             <div class="min-w-0 flex-1">
               <div class="flex min-w-0 items-center justify-between gap-3">
                 <button data-testid="report-feedback-comment-user-name" type="button" (click)="openUser(comment.user_id)" class="truncate text-[13px] font-semibold text-[var(--color-text1)] transition hover:text-[var(--color-blue-640)]">
-                  {{ comment.username || 'Analyst note' }}
+                  {{ comment.username || ('Analyst note' | translate) }}
                 </button>
                 <div class="shrink-0 text-[11px] text-[var(--color-text4)]">{{ comment.created_at | date:'medium' }}</div>
               </div>
@@ -57,7 +57,7 @@
     </div>
   } @else {
     <div class="mt-4 rounded-[18px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-790)]/50 p-4 text-[13px] text-[var(--color-text4)]">
-      No analyst notes yet.
+      {{ 'No analyst notes yet.' | translate }}
     </div>
   }
 </div>

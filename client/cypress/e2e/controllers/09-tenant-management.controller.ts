@@ -1,0 +1,473 @@
+function scrollTenantTableToBottomLeft() {
+  cy.get('[data-testid="tenant-page-header"]').should('be.visible');
+
+  cy.get('#dashboard-container, [data-testid="dashboard-container"]')
+    .filter(':visible')
+    .first()
+    .then(($dashboard) => {
+      const el = $dashboard.get(0) as HTMLElement;
+      el.scrollTop = el.scrollHeight;
+      el.scrollLeft = el.scrollWidth;
+      el.dispatchEvent(new Event('scroll', {bubbles: true}));
+    });
+
+  cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block')
+    .filter(':visible')
+    .first()
+    .as('tenantDesktopScroller')
+    .then(($scroller) => {
+      const el = $scroller.get(0) as HTMLElement;
+      el.scrollTop = el.scrollHeight;
+      el.scrollLeft = el.scrollWidth;
+      el.dispatchEvent(new Event('scroll', {bubbles: true}));
+    });
+
+  cy.get('@tenantDesktopScroller')
+    .find('tbody:visible tr:last')
+    .scrollIntoView();
+
+  cy.get('@tenantDesktopScroller').then(($scroller) => {
+    const cell = $scroller.find('td:contains("No tenants available.")').first();
+    if (cell.length) {
+      cy.wrap(cell).scrollIntoView();
+    }
+  });
+}
+
+export function clickWhenVisible(selector: string, timeout: number = 30000) {
+  cy.get(selector, {timeout}).scrollIntoView();
+  cy.get(selector, {timeout}).should('be.visible');
+  cy.get(selector, {timeout}).click({waitForAnimations: false, animationDistanceThreshold: 0});
+}
+
+export function submitLogin(username: string, password: string) {
+  cy.visit('/login');
+  cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
+  cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
+  cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+}
+
+export function loginTenant(tenant: any) {
+  submitLogin(tenant.username, tenant.password);
+  cy.get('[data-testid="dashboard-main"]').should('be.visible');
+}
+
+export function openTenantEditor(tenant: any) {
+  cy.contains('tbody tr', tenant.email)
+    .scrollIntoView()
+    .should('be.visible')
+    .within(() => {
+      cy.get('[data-testid="tenant-edit-button"]').first().scrollIntoView().should('be.visible').click();
+    });
+  cy.contains('tbody tr', tenant.email)
+    .next()
+    .as('tenantEditor')
+    .find('[data-testid="tenant-edit-form-panel"]')
+    .filter(':visible')
+    .first()
+    .as('tenantEditFormPanel');
+}
+
+export function setTenantEditorToggle(testId: string, checked: boolean) {
+  cy.get('@tenantEditFormPanel').within(() => {
+    cy.get(`[data-testid="${testId}"]`)
+      .scrollIntoView()
+      .find('input[type="checkbox"]')
+      .then(($checkbox) => {
+        if ($checkbox.is(':checked') !== checked) {
+          cy.wrap($checkbox).click({force: true});
+        }
+      });
+  });
+}
+
+export function setTenantLicense(license: string, checked: boolean) {
+  cy.get('@tenantEditFormPanel').within(() => {
+    cy.get(`[data-testid="tenant-license-${license}"]`)
+      .scrollIntoView()
+      .then(($card) => {
+        const isChecked = $card.find('input[type="checkbox"]').is(':checked');
+        if (isChecked !== checked) {
+          cy.wrap($card).click();
+        }
+      });
+  });
+}
+
+export function saveTenantEditor(alias: string) {
+  cy.scrollDashboardToBottom()
+  cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block')
+    .filter(':visible')
+    .first()
+    .scrollTo('bottomRight', {ensureScrollable: false});
+
+  cy.get('@tenantEditFormPanel')
+    .find('[data-testid="tenant-save-changes"]')
+    .should('be.visible')
+    .and('not.be.disabled')
+    .click();
+  cy.scrollDashboardToBottom()
+}
+
+export function openTenantSettings() {
+  cy.get('body').then(($body) => {
+    if (!$body.find('[data-testid="sidebar-subitem-profile-tenant-settings"]:visible').length) {
+      cy.get('[data-testid="sidebar-group-profile"]').filter(':visible').first().scrollIntoView().click();
+    }
+  });
+  cy.get('[data-testid="sidebar-subitem-profile-tenant-settings"]')
+    .filter(':visible')
+    .first()
+    .scrollIntoView()
+    .click();
+  cy.location('pathname').should('include', '/dashboard/profile/tenant-settings');
+  cy.contains('h1', 'Tenant Data').should('be.visible');
+}
+
+export function fillTenantNetworkConfiguration(server: string, port: string) {
+  cy.contains('app-smtp-settings-block', 'Network Configuration')
+    .scrollIntoView()
+    .should('be.visible')
+    .within(() => {
+      cy.contains('label', /^\s*ACCOUNT MAIL\s*$/)
+        .parent()
+        .find('input')
+        .clear()
+        .type('tenant-mailer@example.test');
+      cy.contains('label', /^\s*ACCOUNT MAIL PASSWORD\s*$/)
+        .parent()
+        .find('input')
+        .clear()
+        .type('1#VSC&cuad)d', {log: false});
+      cy.contains('label', /^\s*ACCOUNT SMTP SERVER\s*$/)
+        .parent()
+        .find('input')
+        .clear()
+        .type(server);
+      cy.contains('label', /^\s*ACCOUNT SMTP PORT\s*$/)
+        .parent()
+        .find('input')
+        .clear()
+        .type(port);
+    });
+}
+
+export function exportFromModal(modalTestId: string, optionTestId: string) {
+  cy.get(`[data-testid="${modalTestId}"]`).should('be.visible');
+  cy.get('body').then($body => {
+    if ($body.find(`[data-testid="${optionTestId}"]`).length > 0) {
+      clickWhenVisible(`[data-testid="${optionTestId}"]`);
+    }
+    else {
+      cy.contains(`[data-testid="${modalTestId}"] button`, 'Export Report (PDF)')
+        .scrollIntoView();
+      cy.contains(`[data-testid="${modalTestId}"] button`, 'Export Report (PDF)')
+        .should('be.visible');
+      cy.contains(`[data-testid="${modalTestId}"] button`, 'Export Report (PDF)')
+        .click({waitForAnimations: false, animationDistanceThreshold: 0});
+    }
+  });
+  cy.get(`[data-testid="${modalTestId}"]`).should('not.exist');
+}
+
+export function closeNotificationSidebar() {
+  cy.get('body').then($body => {
+    if ($body.find('[data-testid="tenant-notification-sidebar"]').length > 0) {
+      if ($body.find('[data-testid="tenant-notification-close"]:visible').length > 0) {
+        clickWhenVisible('[data-testid="tenant-notification-close"]');
+      }
+      else {
+        cy.contains('[data-testid="tenant-notification-sidebar"] button', 'Close')
+          .scrollIntoView()
+          .should('be.visible')
+          .click({waitForAnimations: false, animationDistanceThreshold: 0});
+      }
+    }
+  });
+  cy.get('[data-testid="tenant-notification-sidebar"]').should('not.exist');
+}
+
+export function closeFilterSidebar() {
+  cy.get('body').then($body => {
+    if ($body.find('[data-testid="side-filter-close"]:visible').length > 0) {
+      cy.get('[data-testid="side-filter-close"]')
+        .filter(':visible')
+        .first()
+        .scrollIntoView();
+      cy.get('[data-testid="side-filter-close"]')
+        .filter(':visible')
+        .first()
+        .should('be.visible');
+      cy.get('[data-testid="side-filter-close"]')
+        .filter(':visible')
+        .first()
+        .click({waitForAnimations: false, animationDistanceThreshold: 0});
+    }
+  });
+  cy.get('body').should($body => {
+    expect($body.find('.ui-filter-sidebar-overlay:visible').length).to.eq(0);
+    expect($body.find('[data-testid="side-filter-close"]:visible').length).to.eq(0);
+  });
+}
+
+export function openFilterSidebar() {
+  cy.get('body').then($body => {
+    if ($body.find('[data-testid="side-filter-close"]:visible').length === 0) {
+      clickWhenVisible('[data-testid="tenant-alert-open-sidebar"]');
+    }
+  });
+  cy.get('[data-testid="side-filter-close"]')
+    .filter(':visible')
+    .first()
+    .should('be.visible');
+}
+
+export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
+  if (tries >= 5) return;
+
+  scrollTenantTableToBottomLeft();
+
+  cy.get('tbody:visible tr').should(($rows) => {
+    expect($rows.length, 'tenant rows rendered').to.be.greaterThan(0);
+    const hasNotVerified = $rows.toArray().some((row) =>
+      Cypress.$(row).find('span:contains("Not Verified")').length > 0
+    );
+    expect(hasNotVerified, 'at least one "Not Verified" tenant row present').to.equal(true);
+  });
+
+  cy.get('tbody tr').then($rows => {
+    const rows = $rows.filter((_: number, row: HTMLElement) => {
+      return (
+        Cypress.$(row).find('span:contains("Not Verified")').length > 0 &&
+        !Cypress.$(row).hasClass('!border-t-0')
+      );
+    });
+    if (rows.length === 0) {
+      throw new Error('Expected at least one "Not Verified" tenant row, found none');
+    }
+    if (rows.length !== 1) {
+      throw new Error(`Expected exactly 1 row, found ${rows.length}`);
+    }
+    state.verifiedCount++;
+    cy.wrap(rows.eq(0)).scrollIntoView();
+    cy.wrap(rows.eq(0))
+      .parents()
+      .filter((_, el) => el.scrollWidth > el.clientWidth)
+      .then(($scrollers) => {
+        if ($scrollers.length) {
+          cy.wrap($scrollers).each(($scroller) => {
+            cy.wrap($scroller).scrollTo('right', {ensureScrollable: false, duration: 200});
+          });
+        }
+      });
+
+    cy.wrap(rows.eq(0)).find('td').last().scrollIntoView();
+    cy.wrap(rows.eq(0))
+      .find('[data-testid="tenant-edit-button"], #edit-tenant, #edit-profile')
+      .first()
+      .scrollIntoView()
+      .should('be.visible')
+      .click();
+    cy.wrap(false).as('changed');
+    cy.get('[data-testid="tenant-edit-panel"]').filter(':visible').first().as('tenantEditPanel').should('be.visible');
+
+    cy.get('[data-testid="tenant-edit-form-panel"]')
+      .filter(':visible')
+      .first()
+      .within(() => {
+        cy.get('[data-testid="tenant-verified-toggle"] input[type="checkbox"]')
+          .should('exist')
+          .then(($checkbox) => {
+            if (!$checkbox.prop('checked')) {
+              cy.wrap($checkbox).check({force: true});
+              cy.wrap(true).as('changed');
+            }
+          });
+
+        cy.get('[data-testid="tenant-status-toggle"] input[type="checkbox"]')
+          .should('exist')
+          .then(($checkbox) => {
+            if (!$checkbox.prop('checked')) {
+              cy.wrap($checkbox).check({force: true});
+              cy.wrap(true).as('changed');
+            }
+          });
+      });
+
+    cy.get('#dashboard-container, [data-testid="dashboard-container"]')
+      .filter(':visible')
+      .first()
+      .scrollTo('bottom', {ensureScrollable: false});
+    cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block')
+      .filter(':visible')
+      .first()
+      .scrollTo('bottomRight', {ensureScrollable: false});
+
+    cy.get('[data-testid="tenant-license-enterprise"]').first().scrollIntoView().should('exist').then(($card) => {
+      const $cb = $card.find('input[type="checkbox"], input.license-checkbox').first();
+      if (!$cb.prop('checked')) {
+        const cardEl = $card.get(0) as HTMLElement;
+        cardEl.scrollIntoView();
+        cardEl.click();
+        cy.wrap(true).as('changed');
+      }
+    });
+
+    cy.get('@changed').then((changed: any) => {
+      if (changed) {
+        cy.get('[data-testid="tenant-edit-form-panel"]')
+          .filter(':visible')
+          .first()
+          .then(($panel) => {
+            const panel = $panel.get(0) as HTMLElement;
+            const dashboard = Cypress.$('#dashboard-container, [data-testid="dashboard-container"]')
+              .filter(':visible')
+              .first()
+              .get(0) as HTMLElement | undefined;
+            const parentScroller = panel.closest('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block') as HTMLElement | null;
+
+            if (dashboard) {
+              dashboard.scrollTop = dashboard.scrollHeight;
+              dashboard.dispatchEvent(new Event('scroll', {bubbles: true}));
+            }
+            if (parentScroller) {
+              parentScroller.scrollTop = parentScroller.scrollHeight;
+              parentScroller.scrollLeft = parentScroller.scrollWidth;
+              parentScroller.dispatchEvent(new Event('scroll', {bubbles: true}));
+            }
+          })
+          .find('[data-testid="tenant-save-changes"]')
+          .should('exist')
+          .and('not.be.disabled')
+          .click({force: true});
+      }
+    });
+    openTenantsPage();
+
+    cy.get('body').then($b => {
+      if ($b.find('.badge-false, span:contains("Not Verified")').length) {
+        approveAllTenants(state, tries + 1);
+      }
+    });
+  });
+}
+
+export function openTenantsPage() {
+  cy.viewport(1440, 900);
+  cy.get('[data-testid="sidebar-subitem-profile-tenant"]').filter(':visible').first().scrollIntoView().click();
+  cy.location('pathname').then((path) => {
+    if (!path.includes('/dashboard/profile/tenant')) {
+      cy.visit('/dashboard/profile/tenant');
+    }
+  });
+  cy.location('pathname').should('include', '/dashboard/profile/tenant');
+}
+
+export function openAuditLogPage() {
+  cy.viewport(1440, 900);
+  cy.visit('/dashboard/profile/auditlog');
+  cy.location('pathname').should('include', '/dashboard/profile/auditlog');
+  cy.get('app-auditlog .ui-page-title').should('contain.text', 'Audit Logs');
+}
+
+export function openAuditLogFilter() {
+  cy.get('app-auditlog #top').scrollIntoView();
+  cy.contains('button', 'Filter').filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-close"]').filter(':visible').first().should('be.visible');
+}
+
+export function applyAuditLogDateRange(monthsBack: number) {
+  openAuditLogFilter();
+  cy.get('[data-testid="side-filter-date-toggle"]').filter(':visible').first().scrollIntoView().click();
+
+  for (let i = 0; i < monthsBack; i += 1) {
+    cy.get('[data-testid="side-filter-date-prev-month"]').filter(':visible').first().scrollIntoView().click();
+  }
+
+  cy.get('[data-testid="side-filter-date-day-1"]').filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-date-day-25"]').filter(':visible').first().scrollIntoView().click();
+  // cy.get('[data-testid="side-filter-date-day-11"]').filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().scrollIntoView().click();
+}
+
+export function resetAuditLogFilters() {
+  openAuditLogFilter();
+  cy.get('[data-testid="side-filter-reset"]').filter(':visible').first().scrollIntoView().click();
+}
+
+export function openManageIOCs() {
+  cy.get('[data-testid="sidebar-subitem-profile-ioc"]').filter(':visible').first().scrollIntoView().click();
+  cy.location('pathname').should('include', '/dashboard/profile/ioc');
+}
+
+export function addIOCForAllTabs() {
+  cy.get('[data-testid^="tenant-ioc-tab-"]').then(($tabs) => {
+    const tabs = Cypress._.take($tabs.toArray(), 5);
+    tabs.forEach((tab, index) => {
+      cy.wrap(tab).scrollIntoView().should('be.visible').click();
+      cy.get('[data-testid="tenant-ioc-value-input"]').should('be.visible').clear().type(`test-${index}`);
+      cy.get('[data-testid="tenant-ioc-add-button"]').should('be.visible').and('not.be.disabled').click();
+
+      if ((tab.textContent || '').trim() === 'Emails') {
+        cy.get('[data-testid="tenant-ioc-value-input"]')
+          .should('be.visible')
+          .clear()
+          .type('laverdure700@mail.com');
+        cy.get('[data-testid="tenant-ioc-add-button"]')
+          .should('be.visible')
+          .and('not.be.disabled')
+          .click();
+      }
+    });
+  });
+
+  cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
+  cy.clearAllEmails();
+  cy.get('[data-testid="tenant-home-scan-all"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
+}
+
+export function assertAlertScanCompletedMailPresent() {
+  const timeoutMs = 60000;
+  const intervalMs = 1000;
+  const startedAt = Date.now();
+
+  const waitForMail = (): Cypress.Chainable => {
+    return cy.request('GET', 'http://localhost:8025/api/v1/messages').then((response) => {
+      const messages = (response.body?.messages || []) as any[];
+      const found = messages.some((message) => (
+        String(message.Subject || message.subject || '').includes('Alert scan completed')
+      ));
+
+      if (found) {
+        return;
+      }
+      if (Date.now() - startedAt > timeoutMs) {
+        throw new Error('Alert scan completed email was not sent');
+      }
+      return cy.wait(intervalMs).then(() => waitForMail());
+    });
+  };
+
+  return waitForMail();
+}
+
+export function waitForBlockingOverlayToClose() {
+  cy.get('body').then(($body) => {
+    const $messageDismiss = $body.find('[data-testid="tenant-message-dismiss"]:visible').first();
+    if ($messageDismiss.length) {
+      cy.wrap($messageDismiss).scrollIntoView().click();
+    }
+
+    const $scanCancel = $body.find('[data-testid="tenant-scan-cancel"]:visible').first();
+    if ($scanCancel.length) {
+      cy.wrap($scanCancel).scrollIntoView().then(($btn) => {
+        ($btn.get(0) as HTMLElement).click();
+      });
+    }
+
+    const $overlay = $body.find('div.fixed.inset-0.z-\\[9999\\]');
+    if ($overlay.length) {
+      cy.wrap($overlay.first()).should('not.be.visible');
+    }
+  });
+}

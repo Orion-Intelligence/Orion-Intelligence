@@ -70,4 +70,13 @@ class ToolRouter:
             model = NexusTextAnalysisRequest.model_validate(payload or {})
             return await nexus_manager.getInstance().analyze_text(model, user_id=user_id)
 
+        if api_name == "/api/search/stealer/ioc":
+            from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import (
+                search_credential_param_model,
+            )
+
+            text = (payload or {}).get("text") if isinstance(payload, dict) else {}
+            model = search_credential_param_model(ioc=(text or {}).get("query", ""))
+            return await search_model.getInstance().search_stealer_iocs(model)
+
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tool route not found")

@@ -155,6 +155,8 @@ class FeedbackManager:
             ("leak_model", "leak", lambda: search_model.getInstance().request_leak_doc(doc_id, None)),
             ("generic_model", "general", lambda: search_model.getInstance().request_general_doc(doc_id, None)),
             ("exploit_model", "exploit", lambda: search_model.getInstance().request_exploit_doc(doc_id, None)),
+            ("apt_model", "apt", lambda: search_model.getInstance().request_apt_doc(doc_id, None)),
+            ("malware_model", "malware", lambda: search_model.getInstance().request_malware_doc(doc_id, None)),
             ("chat_model", "chat", lambda: search_model.getInstance().request_chat_doc(doc_id, None)),
             ("social_model", "social", lambda: search_model.getInstance().request_social_doc(doc_id, None)),
             ("defacement_model", "defacement", lambda: search_model.getInstance().request_defacement_doc(doc_id)),

@@ -11,11 +11,11 @@
         <p class="mt-[6px] text-[14px] text-[var(--color-text4)]">{{ description }}</p>
         <button type="button" class="ui-btn ui-btn-primary mt-[16px] inline-flex items-center justify-center rounded-[8px] px-[16px] py-[10px] text-[14px] transition-all duration-150 active:scale-[0.97] active:brightness-110 active:shadow-none" (click)="triggerFileInput()">
           <img ngSrc="../../../../assets/images/shared/theme/ai.svg" alt="Upload" width="24" height="24" class="mr-[10px]" />
-          Choose File
+          {{ 'Choose File' | translate }}
         </button>
         <div class="mt-[16px] text-left text-[12px] text-[var(--color-text4)]">
-          <div><strong>Supported formats:</strong> All file types</div>
-          <div class="mt-[4px]"><strong>Maximum file size:</strong> up to 30 MB</div>
+          <div><strong>{{ 'Supported formats' | translate }}:</strong> {{ 'All file types' | translate }}</div>
+          <div class="mt-[4px]"><strong>{{ 'Maximum file size' | translate }}:</strong> {{ 'up to 30 MB' | translate }}</div>
         </div>
       </div>
     </div>
@@ -24,15 +24,15 @@
   @if (isFetched || isLoading) {
     <div class="relative z-[1] mx-[32px] mt-[16px] flex items-center justify-between">
       <div>
-        <h1 class="text-[20px] font-semibold text-[var(--color-text1)]">Analysis Report</h1>
-        <p class="text-[13px] text-[var(--color-text4)]">File Processing Results</p>
+        <h1 class="text-[20px] font-semibold text-[var(--color-text1)]">{{ 'Analysis Report' | translate }}</h1>
+        <p class="text-[13px] text-[var(--color-text4)]">{{ 'File Processing Results' | translate }}</p>
       </div>
     </div>
 
     @if (!hasError && isLoading && progress() < 100) {
       <div class="relative z-[1] mx-[32px] mt-[12px] max-w-[720px]">
         <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text1)]">
-          {{ currentStep || 'Processing file...' }}
+          {{ currentStep || ('Processing file...' | translate) }}
         </div>
         <div class="ui-progress-track h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
           <div class="ui-progress-indeterminate-bar"></div>
@@ -45,20 +45,20 @@
         <div class="rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] shadow-[0_8px_22px_rgba(0,0,0,0.18)]">
           <div class="mb-[6px] flex items-start justify-between gap-3">
             <div class="min-w-0">
-              <div class="mt-[6px] text-[17px] font-semibold leading-tight text-[var(--color-text1)]">Processing Failed</div>
+              <div class="mt-[6px] text-[17px] font-semibold leading-tight text-[var(--color-text1)]">{{ 'Processing Failed' | translate }}</div>
               <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)]">{{ errorMessage }}</div>
             </div>
-            <button type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-780)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" (click)="closeError()" aria-label="Close error">
+            <button type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-780)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" (click)="closeError()" [attr.aria-label]="'Close error' | translate">
               <i class="bi bi-x-lg text-[13px]"></i>
             </button>
           </div>
           @if (isFileSizeError) {
             <ul class="mt-[8px] list-disc space-y-1 pl-[18px] text-[13px] leading-5 text-[var(--color-text2)]">
-              <li><strong class="text-[var(--color-text1)]">File size limit exceeded</strong></li>
-              <li>Please select a smaller file</li>
+              <li><strong class="text-[var(--color-text1)]">{{ 'File size limit exceeded' | translate }}</strong></li>
+              <li>{{ 'Please select a smaller file' | translate }}</li>
             </ul>
           }
-          <button class="ui-btn ui-btn-danger mt-[10px] rounded-[8px] px-[14px] py-[8px] text-[14px]" (click)="triggerFileInput()">Try Again</button>
+          <button class="ui-btn ui-btn-danger mt-[10px] rounded-[8px] px-[14px] py-[8px] text-[14px]" (click)="triggerFileInput()">{{ 'Try Again' | translate }}</button>
         </div>
       }
 
@@ -69,7 +69,7 @@
               <div class="flex min-w-0 items-center gap-2">
                 <img alt="File" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
                 <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]" [title]="getDisplayFileName()">{{ getDisplayFileName() }}</div>
-                <div class="text-xs text-[var(--color-text4)]">File</div>
+                <div class="text-xs text-[var(--color-text4)]">{{ 'File' | translate }}</div>
               </div>
 
               <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
@@ -77,15 +77,15 @@
               <div class="hidden items-center gap-2 md:flex">
                 <img alt="Results" src="assets/images/shared/results_found.svg" class="h-5 w-5">
                 <div class="text-sm font-semibold text-[var(--color-text1)]">{{ resultSections.length }}</div>
-                <div class="text-xs text-[var(--color-text4)]">Results</div>
+                <div class="text-xs text-[var(--color-text4)]">{{ 'Results' | translate }}</div>
               </div>
 
               <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
 
               <div class="hidden items-center gap-2 lg:flex">
-                <img alt="Type" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
+                <img alt="categoryAlerts.export.type" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
                 <div class="text-sm font-semibold uppercase text-[var(--color-text1)]">{{ getDisplayFileType() }}</div>
-                <div class="text-xs text-[var(--color-text4)]">File Type</div>
+                <div class="text-xs text-[var(--color-text4)]">{{ 'File Type' | translate }}</div>
               </div>
 
               <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
@@ -93,16 +93,16 @@
               <div class="hidden items-center gap-2 xl:flex">
                 <img alt="Fields" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
                 <div class="text-sm font-semibold text-[var(--color-text1)]">{{ getDisplayMetricValue() }}</div>
-                <div class="text-xs text-[var(--color-text4)]">Fields</div>
+                <div class="text-xs text-[var(--color-text4)]">{{ 'Fields' | translate }}</div>
               </div>
 
               <div class="ml-auto flex items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
-                <button data-testid="scan-another-file" type="button" class="inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[12px] font-semibold text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" appTooltip="Scan another file" (click)="triggerFileInput()" aria-label="Scan another file">
+                <button data-testid="scan-another-file" type="button" class="inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[12px] font-semibold text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" [appTooltip]="'Scan another file' | translate" (click)="triggerFileInput()" [attr.aria-label]="'Scan another file' | translate">
                   <img ngSrc="../../../../assets/images/shared/theme/file-search.svg" width="16" height="16" alt="scan" class="ui-action-icon" />
-                  <span>Upload another</span>
+                  <span>{{ 'Upload another' | translate }}</span>
                 </button>
                 <div class="h-6 w-px bg-[var(--color-divider)]"></div>
-                <button data-testid="scan-download-report" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" appTooltip="Download report" (click)="exportReport()" aria-label="Download report">
+                <button data-testid="scan-download-report" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" [appTooltip]="'Download report' | translate" (click)="exportReport()" [attr.aria-label]="'Download report' | translate">
                   <img ngSrc="../../../../assets/images/shared/theme/download.svg" width="16" height="16" alt="download" class="ui-action-icon" />
                 </button>
               </div>
@@ -152,7 +152,7 @@
                       <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
                         <div class="min-w-0">
                           <b data-testid="defacement-report-card-title" class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">{{ section.title }}</b>
-                          <div class="mt-[4px] text-[11px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text6)]">Fields: <span class="font-[600] text-[var(--color-text2)]">{{ section.items.length }}</span></div>
+                          <div class="mt-[4px] text-[11px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text6)]">{{ 'Fields' | translate }}: <span class="font-[600] text-[var(--color-text2)]">{{ section.items.length }}</span></div>
                         </div>
                       </div>
                       <div class="grid grid-cols-1 gap-0 px-[14px] py-[8px] md:grid-cols-2 md:gap-x-[18px] max-[640px]:px-[10px]">
@@ -161,7 +161,7 @@
                             <div class="w-[150px] shrink-0 break-words font-[Inter] text-[10px] font-[700] uppercase leading-[1.25] tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[110px]" [title]="item.label">{{ item.label }}</div>
                             <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                               <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [title]="item.value">{{ item.value }}</div>
-                              <button type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" [appTooltip]="copiedValue() === item.value ? 'Copied' : 'Copy'" (click)="copyValue(item.value)">
+                              <button type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" [appTooltip]="(copiedValue() === item.value ? 'Copied' : 'Copy') | translate" (click)="copyValue(item.value)">
                                 <i class="bi" [ngClass]="copiedValue() === item.value ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                               </button>
                             </div>
@@ -175,9 +175,9 @@
             } @else {
               <div class="mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[20px] text-center">
                 <div class="text-[30px] text-[var(--color-text1)]"><i class="bi bi-shield-check"></i></div>
-                <div class="mt-[6px] text-[16px] font-semibold text-[var(--color-text1)]">No Findings</div>
-                <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">No indicators or suspicious items were detected in the file.</div>
-                <button class="mt-[12px] rounded-[8px] border border-[var(--color-border)] bg-transparent px-[12px] py-[6px] text-[14px] text-[var(--color-text4)] hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)]" (click)="triggerFileInput()">Upload Another File</button>
+                <div class="mt-[6px] text-[16px] font-semibold text-[var(--color-text1)]">{{ 'No Findings' | translate }}</div>
+                <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">{{ 'No indicators or suspicious items were detected in the file.' | translate }}</div>
+                <button class="mt-[12px] rounded-[8px] border border-[var(--color-border)] bg-transparent px-[12px] py-[6px] text-[14px] text-[var(--color-text4)] hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)]" (click)="triggerFileInput()">{{ 'Upload Another File' | translate }}</button>
               </div>
             }
           }
@@ -188,7 +188,7 @@
     <div id="iocReport" class="hidden">
       @if (scanResult) {
         <div class="p-[20px]">
-          <h2>{{ title }} Report</h2>
+          <h2>{{ title }} {{ 'Report' | translate }}</h2>
           <hr/>
         </div>
       }

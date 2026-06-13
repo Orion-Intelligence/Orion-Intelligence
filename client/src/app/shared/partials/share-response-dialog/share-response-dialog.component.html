@@ -1,0 +1,49 @@
+@if (visible()) {
+  <div class="ui-graph-popup-overlay fixed inset-0 z-[1300] flex items-center justify-center p-4" (click)="close()">
+    <section role="dialog" aria-modal="true" aria-labelledby="share-response-dialog-title" class="ui-graph-popup-panel ui-popup-shell w-full max-w-[540px] overflow-hidden rounded-xl border border-[var(--color-border)] shadow-[0_30px_80px_rgba(2,6,23,0.65)]" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between gap-4 border-b border-[var(--color-border)] px-5 py-4">
+        <div class="min-w-0">
+          <h3 id="share-response-dialog-title" class="ui-popup-title text-[16px] font-semibold">{{ title }}</h3>
+          <p class="mt-0.5 text-[12px] leading-5 text-[var(--color-text4)]">{{ description }}</p>
+        </div>
+        <button type="button" (click)="close()" [appTooltip]="'common.actions.close' | translate" class="ui-popup-close inline-flex h-9 w-9 shrink-0 items-center justify-center text-[18px]" [attr.aria-label]="'common.actions.close' | translate">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="px-5 py-5">
+        <div class="mb-5 rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-4 py-3">
+          <div class="mb-2 flex items-center justify-between gap-3">
+            <span class="inline-flex min-w-0 items-center gap-2 text-[12px] font-semibold text-[var(--color-text2)]">
+              <i class="bi bi-body-text text-[13px] leading-none text-[#A7D5FF]"></i>
+              <span>{{ 'Message' | translate }}</span>
+            </span>
+            <span class="shrink-0 text-[11px] text-[var(--color-text5)]">{{ characterCount }} {{ 'chars' | translate }}</span>
+          </div>
+          <p class="max-h-[96px] overflow-y-auto whitespace-pre-wrap break-words text-[12px] leading-5 text-[var(--color-text3)]">{{ shareText }}</p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3 border-b border-[var(--color-border)] pb-5 sm:grid-cols-6">
+          @if (canNativeShare()) {
+            <button type="button" (click)="shareViaNative()" class="group flex min-w-0 flex-col items-center gap-2 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#57A5EB]/45">
+              <span class="inline-flex h-12 w-12 items-center justify-center rounded-full border border-[#57A5EB]/25 bg-[#57A5EB]/15 text-[#A7D5FF] transition group-hover:bg-[#57A5EB]/25 group-active:scale-95">
+                <i class="bi bi-share-fill text-[18px] leading-none"></i>
+              </span>
+              <span class="w-full truncate text-[11px] font-medium text-[var(--color-text3)]">{{ 'System' | translate }}</span>
+            </button>
+          }
+
+          @for (destination of destinations; track destination.target) {
+            <a [href]="shareUrl(destination.target)" [attr.target]="destination.target === 'email' ? null : '_blank'" [attr.rel]="destination.target === 'email' ? null : 'noopener'" (click)="close()" class="group flex min-w-0 flex-col items-center gap-2 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#57A5EB]/45">
+              <span [class]="'inline-flex h-12 w-12 items-center justify-center rounded-full border transition group-active:scale-95 ' + destination.iconShellClass">
+                <i class="bi text-[19px] leading-none" [ngClass]="destination.icon"></i>
+              </span>
+              <span class="w-full truncate text-[11px] font-medium text-[var(--color-text3)]">{{ destination.label }}</span>
+            </a>
+          }
+        </div>
+
+      </div>
+    </section>
+  </div>
+}

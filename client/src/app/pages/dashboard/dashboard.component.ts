@@ -1,6 +1,6 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { NgClass } from '@angular/common';
-import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
+import { AsyncPipe, NgClass } from '@angular/common';
+import { NavigationCancel, NavigationEnd, NavigationError, RouteConfigLoadStart, Router, RouterOutlet } from '@angular/router';
 import { dashboardGlobalAnimation } from '../../shared/animations/dashboard.global.animations';
 import { DashboardSidebarComponent } from './dashboard-sidebar/dashboard-sidebar.component';
 import { DashboardHeaderComponent } from '../../shared/partials/header/dashboard-header/dashboard-header.component';
@@ -9,29 +9,39 @@ import { ProSubscriptionComponent } from '../../shared/partials/pro-subscription
 import { DashboardService } from '../../services/dashboard/dashboard.service';
 import { AppService } from '../../services/core/app/app.service';
 import { AuthService } from '../../services/authetication/auth.service';
-import { filter } from 'rxjs';
+import { filter, Observable } from 'rxjs';
 import { DemoTourComponent } from "../demo-tour/demo-tour/demo-tour.component";
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { SidebarService } from '../../shared/services/sidebar.service';
+import { LoadingFormComponent } from '../../shared/partials/loading-form/loading-form.component';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     DashboardSidebarComponent,
     DashboardHeaderComponent,
+    AsyncPipe,
     NgClass,
     RouterOutlet,
     ScrollingModule,
     ProSubscriptionComponent,
-    DemoTourComponent
-  ],
+    DemoTourComponent,
+    TranslatePipe,
+    LoadingFormComponent],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]
 })
 export class DashboardComponent implements AfterViewInit, OnInit {
+  protected readonly routeConfigLoading = signal(false);
+
   isMenuOpen = true;
   demoTourMounted = false;
   dashboardAnimationsReady = false;
+  isFilterOpen$: Observable<boolean>;
 
-  constructor(protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router, public authService: AuthService, protected appService: AppService) {
+  constructor(protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router, public authService: AuthService, protected appService: AppService, sidebarService: SidebarService) {
+    this.isFilterOpen$ = sidebarService.sidebarState$;
   }
 
   ngOnInit(): void {
@@ -46,6 +56,14 @@ export class DashboardComponent implements AfterViewInit, OnInit {
       .subscribe((event: NavigationEnd) => {
         this.redirectMobileDemoDashboardEntry(event.urlAfterRedirects);
       });
+    this.router.events.subscribe((event) => {
+      if (event instanceof RouteConfigLoadStart) {
+        this.routeConfigLoading.set(true);
+      }
+      if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
+        this.routeConfigLoading.set(false);
+      }
+    });
   }
 
   private redirectMobileDemoDashboardEntry(url: string): void {

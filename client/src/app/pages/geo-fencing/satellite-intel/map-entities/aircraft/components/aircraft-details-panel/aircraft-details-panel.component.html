@@ -1,0 +1,20 @@
+<div class="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3">
+  <div class="ui-section-title">{{ 'Aircraft' | translate }}</div>
+  <div class="ui-section-description">{{ 'Live transponder identity, movement, and position.' | translate }}</div>
+  <div class="mt-3 grid gap-3 sm:grid-cols-2">
+    @for (field of fields; track field.label) {
+      <div>
+        <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">{{ field.label }}</label>
+        <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 min-w-0 break-words [overflow-wrap:anywhere] text-sm text-[var(--color-text1)]" [class.font-mono]="field.mono">{{ field.value }}</div>
+      </div>
+    }
+  </div>
+  <div class="mt-3">
+    <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">{{ 'categoryAlerts.form.description' | translate }}</label>
+    <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 min-w-0 break-words [overflow-wrap:anywhere] text-sm text-[var(--color-text1)]">{{ description }}</div>
+  </div>
+  <div class="mt-3">
+    <label class="mb-1 block text-xs font-semibold uppercase text-[var(--color-text6)]">{{ 'Coordinates' | translate }}</label>
+    <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 min-w-0 break-words [overflow-wrap:anywhere] text-sm text-[var(--color-text1)]">{{ coordinates }}</div>
+  </div>
+</div>

@@ -1,12 +1,12 @@
-from contextlib import asynccontextmanager
 import asyncio
-from pathlib import Path
 
+from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
-
 from configs.token_auth_provider import setup_admin
 from configs.exception_handlers import global_exception_handler, validation_exception_handler
 from configs.swagger_config import configure_swagger
@@ -22,6 +22,7 @@ from routes.api_micros import micro_routes
 from routes.api_routes import api_routes
 from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
+from routes.geo_fencing_routes import geo_fencing_routes
 from routes.public_api_routes import public_routes
 from routes.tenant_routes import tenant_routes
 from routes.test_routes import test_routes
@@ -41,15 +42,15 @@ async def lifespan(p_app: FastAPI):
 
     if env_handler.get_instance().env("PRODUCTION", "0") != "1":
         async def start_services_in_background():
-            await service_manager_instance.init_services()
+            await service_manager_instance.init_services(ANGULAR_BUILD_DIR)
             setup_admin(mongo_controller.get_instance().get_engine()).mount_to(p_app)
+            p_app.include_router(interface)
 
         asyncio.create_task(start_services_in_background())
-        app.include_router(interface)
         yield
         return
 
-    await service_manager_instance.init_services()
+    await service_manager_instance.init_services(ANGULAR_BUILD_DIR)
     setup_admin(mongo_controller.get_instance().get_engine()).mount_to(p_app)
     app.include_router(interface)
     yield
@@ -64,8 +65,18 @@ app.mount("/swagger-static", StaticFiles(directory=SWAGGER_STATIC_DIR), name="sw
 
 @app.get("/docs", include_in_schema=False)
 def custom_swagger_ui():
-    return get_swagger_ui_html(
-        openapi_url=app.openapi_url, title="API Access", swagger_css_url="/swagger-static/swagger-code.css")
+    return get_swagger_ui_html(openapi_url=app.openapi_url or "/openapi.json", title="API Access", swagger_css_url="/swagger-static/swagger-code.css")
+
+
+@app.get("/admin", include_in_schema=False)
+def admin_root_redirect():
+    return RedirectResponse(url="/admin/")
+
+
+@app.get("/dashboard/admin", include_in_schema=False)
+@app.get("/dashboard/admin/", include_in_schema=False)
+def dashboard_admin_redirect():
+    return RedirectResponse(url="/admin/")
 
 
 configure_swagger(app)
@@ -79,8 +90,9 @@ app.include_router(micro_routes, include_in_schema=False)
 app.include_router(ai_routes, include_in_schema=False)
 app.include_router(tenant_routes, include_in_schema=False)
 app.include_router(api_routes)
-app.include_router(social_routes)
-app.include_router(case_routes)
+app.include_router(geo_fencing_routes, include_in_schema=False)
+app.include_router(social_routes, include_in_schema=False)
+app.include_router(case_routes, include_in_schema=False)
 
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)

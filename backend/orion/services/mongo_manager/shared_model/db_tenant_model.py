@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 from typing import List, Optional
 
@@ -31,6 +33,10 @@ class db_tenant_model(Model):
     email: Optional[str] = ""
     profile_visibility_enabled: bool = True
     event_management_enabled: bool = False
+    accounts_mail_password: Optional[str] = None
+    accounts_mail: Optional[str] = None
+    accounts_smtp_server: Optional[str] = None
+    accounts_smtp_port: Optional[str] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -52,3 +58,8 @@ class TenantRequest(BaseModel):
     licenses: List[str] = []
     profile_visibility_enabled: Optional[bool] = None
     event_management_enabled: Optional[bool] = None
+    password_reset_required: Optional[bool] = None
+    accounts_mail_password: Optional[str] = None
+    accounts_mail: Optional[str] = None
+    accounts_smtp_server: Optional[str] = None
+    accounts_smtp_port: Optional[str] = None

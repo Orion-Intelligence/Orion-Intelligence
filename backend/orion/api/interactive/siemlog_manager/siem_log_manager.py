@@ -1,12 +1,17 @@
 import asyncio
+import hashlib
+import re
+from datetime import datetime, timezone
+from typing import Any
 
 import httpx
 from bson import ObjectId
 from fastapi import HTTPException
 
 from orion.services.elastic_manager.elastic_controller import elastic_controller
-from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX, ELASTIC_KEYS
-from orion.services.elastic_manager.elastic_request_generator import elastic_request_generator
+from orion.services.elastic_manager.elastic_enums import ELASTIC_ENUMS, ELASTIC_INDEX, ELASTIC_KEYS
+from orion.api.interactive.search_manager.search_query_generator import search_query_generator
+from orion.helper_manager.helper_controller import helper_controller
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 
 
@@ -40,7 +45,7 @@ class SiemLogManager:
                 "ids": [],
             }
 
-        index_entries = elastic_request_generator.index_query_siem_logs(
+        index_entries = self.index_query_siem_logs(
             enriched_logs,
             tenant_id,
         )
@@ -152,7 +157,7 @@ class SiemLogManager:
     async def search_logs(self, payload, current_user):
         await self._ensure_event_management_enabled(current_user)
         tenant_id = str(current_user.tenant_uuid)
-        document, data_filter = elastic_request_generator.search_query_siem_logs(
+        document, data_filter = self.search_query_siem_logs(
             payload.q,
             tenant_id,
             payload.from_,
@@ -176,6 +181,118 @@ class SiemLogManager:
             "page_count": page_count,
             "batch_size": batch_size,
         }
+
+    @staticmethod
+    def search_query_siem_logs(query_text: str, tenant_id: str, from_: int = 0, size: int = 500, date_range: str | None = None):
+        must_clauses: list[dict[str, Any]] = [{"term": {"tenant_id": tenant_id}}]
+        normalized_query = (query_text or "").strip()
+
+        if not normalized_query:
+            must_clauses.append({"match_all": {}})
+        elif ":" in normalized_query and ("&&" in normalized_query or "||" in normalized_query or re.search(r"\b(?:all|domain|email|ip|event_type|source|host|user|severity):", normalized_query)) is not None:
+            parsed = helper_controller.parse_tagged_logic_query_for_iocs(normalized_query)
+            logic_query = search_query_generator.build_es_from_tagged(parsed, ELASTIC_ENUMS.mapping_siem_iocs)
+            must_clauses.append(logic_query)
+        else:
+            should_clauses: list[dict[str, Any]] = [{
+                "simple_query_string": {
+                    "query": normalized_query,
+                    "fields": [
+                        "raw^5",
+                        "event_type^4",
+                        "source^3",
+                        "severity^2",
+                        "host^3",
+                        "user^3",
+                        "tags^2",
+                        "hash^3",
+                        "event_id^3",
+                        "m_*^4",
+                        "m_domain^4",
+                        "m_email^4",
+                        "m_ip^4",
+                        "*"
+                    ],
+                    "default_operator": "and",
+                    "lenient": True
+                }
+            }]
+
+            exact_value = normalized_query
+            if exact_value:
+                escaped_exact_value = exact_value.replace("\\", "\\\\").replace('"', '\\"')
+                should_clauses.extend([
+                    {"term": {"m_ip": exact_value}},
+                    {"term": {"m_domain": exact_value}},
+                    {"term": {"m_email": exact_value}},
+                    {
+                        "query_string": {
+                            "query": f"\"{escaped_exact_value}\"",
+                            "fields": ["m_*"],
+                            "lenient": True
+                        }
+                    }
+                ])
+
+            must_clauses.append({
+                "bool": {
+                    "should": should_clauses,
+                    "minimum_should_match": 1
+                }
+            })
+
+        if date_range:
+            start_date, end_date = [part.strip() for part in date_range.split(",", 1)]
+            must_clauses.append({
+                "range": {
+                    "timestamp": {
+                        "gte": start_date,
+                        "lte": end_date
+                    }
+                }
+            })
+
+        query_body: dict[str, Any] = {
+            "query": {
+                "bool": {
+                    "must": must_clauses
+                }
+            },
+            "from": from_,
+            "size": size,
+            "sort": [
+                {"timestamp": {"order": "desc", "missing": "_last"}},
+                {"ingested_at": {"order": "desc", "missing": "_last"}}
+            ]
+        }
+        return ELASTIC_INDEX.S_SIEM_INDEX, query_body
+
+    @staticmethod
+    def index_query_siem_logs(logs, tenant_id: str):
+        index_entries = []
+
+        for index, item in enumerate(logs, start=1):
+            now = datetime.now(timezone.utc).isoformat()
+            raw = item["raw"].strip()
+            timestamp = item.get("timestamp") or now
+            ingested_at = item.get("ingested_at") or now
+            doc_id = hashlib.sha256(f"{tenant_id}:{raw}".encode("utf-8")).hexdigest()
+
+            document = dict(item)
+            document["tenant_id"] = tenant_id
+            document["raw"] = raw
+            document["timestamp"] = timestamp
+            document["ingested_at"] = ingested_at
+            document["hash"] = document.get("hash") or doc_id
+            document["event_id"] = document.get("event_id") or f"siem-event-{index:04d}"
+
+            index_entries.append({
+                "doc_id": doc_id,
+                ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_SIEM_INDEX,
+                ELASTIC_KEYS.S_VALUE: document,
+            })
+
+        return index_entries
 
     async def _ensure_event_management_enabled(self, current_user) -> None:
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(current_user.tenant_uuid)))

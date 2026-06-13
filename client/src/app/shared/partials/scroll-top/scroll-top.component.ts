@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
 @Component({
   selector: 'app-scroll-top',
+  imports: [TranslatePipe],
   templateUrl: './scroll-top.component.html'
 })
 export class ScrollTopComponent {

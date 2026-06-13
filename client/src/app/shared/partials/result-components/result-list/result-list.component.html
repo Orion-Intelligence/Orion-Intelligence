@@ -1,17 +1,19 @@
 @if (filteredItems.length > 0) {
-  <div class="mt-4">
-    <div class="flex flex-wrap gap-2">
+  <div class="mt-4 overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
+    <div class="grid sm:grid-cols-2 xl:grid-cols-3">
       @for (item of filteredItems; track $index; let i = $index) {
-        <li (click)="copyText(item, i)" class="relative list-none cursor-pointer rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text3)] transition hover:bg-[var(--color-blue-710)]">
-          {{ item }}
+        <button type="button" (click)="copyText(item, i)" class="group relative min-w-0 border-b border-[var(--color-divider)] px-3 py-2.5 text-left text-[13px] font-medium text-[var(--color-text3)] transition hover:bg-[rgba(87,165,235,0.10)] hover:text-[var(--color-text1)]">
+          <span class="block break-all underline decoration-[var(--color-divider)] underline-offset-4 group-hover:decoration-[var(--color-blue-640)]">
+            {{ item }}
+          </span>
           @if (copiedIndex === i) {
-            <span class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--color-blue-640)] px-2 py-1 text-[10px] font-semibold text-white">Copied!</span>
+            <span class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--color-blue-640)] px-2 py-1 text-[10px] font-semibold text-white">{{ 'Copied!' | translate }}</span>
           }
-        </li>
+        </button>
       }
     </div>
   </div>
 } @else {
-  <div class="mt-3 text-sm font-semibold text-[var(--color-text1)]">No structured records found!</div>
-  <div class="mt-1 text-xs text-[var(--color-text4)]">We’re watching this source — new breach or tracking data will appear here once detected.</div>
+  <div class="mt-3 text-sm font-semibold text-[var(--color-text1)]">{{ 'No structured records found!' | translate }}</div>
+  <div class="mt-1 text-xs text-[var(--color-text4)]">{{ 'We’re watching this source — new breach or tracking data will appear here once detected.' | translate }}</div>
 }

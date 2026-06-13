@@ -23,6 +23,16 @@ export type CaseStatus =
     'resolved' |
     'closed';
 
+export type ArtifactReportSource =
+    'strategic' |
+    'breach' |
+    'defacement' |
+    'social' |
+    'feed' |
+    'exploit' |
+    'stealerlogs';
+
+export type EntityConfidence = 'low' | 'medium' | 'high';
 export type Severity = 'info' | 'low' | 'medium' | 'high' | 'critical';
 export type Priority = 'low' | 'medium' | 'high' | 'critical';
 export type TaskStatus = 'open' | 'in_progress' | 'blocked' | 'done' | 'cancelled';
@@ -149,24 +159,6 @@ export type IdentifierType =
     'cve' |
     'other';
 
-export type EntityAttributeType =
-    'os' |
-    'hostname' |
-    'edr_status' |
-    'asset_criticality' |
-    'last_seen_ip' |
-    'cloud_provider' |
-    'cloud_account_id' |
-    'cloud_resource_id' |
-    'region' |
-    'exposure' |
-    'department' |
-    'country' |
-    'business_unit' |
-    'owner' |
-    'source_system' |
-    'risk_score';
-
 export type CaseTag =
     'vip' |
     'executive' |
@@ -186,6 +178,7 @@ export interface SocialMediaProfile {
     username: string;
     profileUrl?: string;
     displayName?: string;
+    platformOtherValue?: string;
 }
 
 export interface AdditionalIdentifier {
@@ -193,26 +186,23 @@ export interface AdditionalIdentifier {
     value: string;
     issuer?: string;
     verified?: boolean;
-}
-
-export interface CaseEntityAttribute {
-    type: EntityAttributeType | '';
-    value: string;
+    identifierTypeOtherValue?: string;
 }
 
 export interface CaseEntity {
     entityId: string;
     type: EntityType;
     value: string;
-    displayName?: string;
+    entityTypeOtherValue?: string;
+    entitySourceOtherValue?: string;
+    entityDescription?: string;
     role: EntityRole;
-    relationshipToCase: EntityRelationship;
-    confidence: number;
+    confidence: EntityConfidence;
     source: SourceType;
     identifiers: AdditionalIdentifier[];
     socialProfiles: SocialMediaProfile[];
     tags: CaseTag[];
-    attributes: CaseEntityAttribute[];
+    linkedEntityId?: string;
     createdBy?: string;
     updatedBy?: string;
     createdAt?: Date | string;
@@ -223,15 +213,16 @@ export interface CaseEntityRequest {
     entityId: string;
     type: EntityType;
     value: string;
-    displayName?: string;
+    entityTypeOtherValue?: string;
+    entitySourceOtherValue?: string;
+    entityDescription?: string;
     role: EntityRole;
-    relationshipToCase: EntityRelationship;
-    confidence: number;
+    confidence: EntityConfidence;
     source: SourceType;
     identifiers: AdditionalIdentifier[];
     socialProfiles: SocialMediaProfile[];
     tags: CaseTag[];
-    attributes: CaseEntityAttribute[];
+    linkedEntityId?: string;
 }
 
 export interface CaseLink {
@@ -266,20 +257,40 @@ export interface CaseLinkRequest {
     reason: string;
 }
 
+export interface CaseArtifactFile {
+    fileId: string;
+    fileName: string;
+    fileType: string;
+    fileSize: number;
+    fileResourceId: string;
+    fileHash?: string;
+    integrityStatus?: 'unknown' | 'verified' | 'failed';
+    uploadedAt?: Date | string;
+}
+
 export interface CaseArtifact {
     artifactId: string;
     type: ArtifactType;
     title: string;
     description?: string;
     source: SourceType;
+    artifactTypeOtherValue?: string;
+    artifactSourceOtherValue?: string;
     url?: string;
-    fileName?: string;
-    fileType?: string;
+    files: CaseArtifactFile[];
     entityIds: string[];
     tags: CaseTag[];
+    linkedReportSource?: ArtifactReportSource | '';
+    linkedReportId?: string;
+    linkedReportTitle?: string;
     capturedAt?: Date | string | null;
     createdBy?: string;
     createdAt?: Date | string;
+}
+
+export interface ArtifactReportOption {
+    id: string;
+    title: string;
 }
 
 export interface CaseArtifactRequest {
@@ -288,11 +299,15 @@ export interface CaseArtifactRequest {
     title: string;
     description?: string;
     source: SourceType;
+    artifactTypeOtherValue?: string;
+    artifactSourceOtherValue?: string;
     url?: string;
-    fileName?: string;
-    fileType?: string;
+    files: CaseArtifactFile[];
     entityIds: string[];
     tags: CaseTag[];
+    linkedReportSource?: ArtifactReportSource | '';
+    linkedReportId?: string;
+    linkedReportTitle?: string;
     capturedAt?: Date | string | null;
 }
 
@@ -350,6 +365,7 @@ export interface CaseAnalyst {
 }
 
 export interface CaseClosure {
+    closureReasonOtherValue?: string;
     reason: ClosureReason;
     summary?: string;
     resolution?: string;
@@ -358,6 +374,7 @@ export interface CaseClosure {
 }
 
 export interface CaseClosureRequest {
+    closureReasonOtherValue?: string;
     reason: ClosureReason;
     summary?: string;
     resolution?: string;
@@ -365,6 +382,8 @@ export interface CaseClosureRequest {
 
 export interface CaseRequest {
     caseId: string;
+    caseTypeOtherValue?: string;
+    intakeSourceOtherValue?: string;
     title: string;
     description: string;
     caseType: CaseType;
@@ -385,6 +404,8 @@ export interface CaseRequest {
 
 export interface CaseUpdateRequest {
     title: string;
+    caseTypeOtherValue?: string;
+    intakeSourceOtherValue?: string;
     description: string;
     caseType: CaseType;
     status: CaseStatus;
@@ -413,6 +434,8 @@ export interface CaseShareResponse {
 }
 
 export interface SharedCaseArtifact {
+    artifactTypeOtherValue?: string;
+    artifactSourceOtherValue?: string;
     artifactId: string;
     type: string;
     title: string;
@@ -426,6 +449,7 @@ export interface SharedCaseArtifact {
 }
 
 export interface SharedSocialProfile {
+    platformOtherValue?: string;
     platform: string;
     username: string;
     profileUrl?: string;
@@ -433,30 +457,27 @@ export interface SharedSocialProfile {
 }
 
 export interface SharedIdentifier {
+    identifierTypeOtherValue?: string;
     type: string;
     value: string;
     issuer?: string;
     verified?: boolean;
 }
 
-export interface SharedEntityAttribute {
-    type: string;
-    value: string;
-}
-
 export interface SharedCaseEntity {
+    entityTypeOtherValue?: string;
+    entitySourceOtherValue?: string;
     entityId: string;
     type: string;
     value: string;
-    displayName?: string;
+    entityDescription?: string;
     role?: string;
     relationshipToCase?: string;
-    confidence?: number;
+    confidence?: EntityConfidence;
     source?: string;
     identifiers?: SharedIdentifier[];
     socialProfiles?: SharedSocialProfile[];
     tags?: string[];
-    attributes?: SharedEntityAttribute[];
     createdBy?: string;
     updatedBy?: string;
     createdAt?: string;
@@ -485,6 +506,7 @@ export interface SharedCaseLink {
 }
 
 export interface SharedCaseClosure {
+    closureReasonOtherValue?: string;
     reason: string;
     summary?: string;
     resolution?: string;
@@ -492,6 +514,7 @@ export interface SharedCaseClosure {
 }
 
 export interface SharedCaseReport {
+    otherValue?: string;
     shareId: string;
     caseId: string;
     title: string;
@@ -511,11 +534,24 @@ export interface SharedCaseReport {
     artifacts?: SharedCaseArtifact[];
     tasks?: SharedCaseTask[];
     linkedCases?: SharedCaseLink[];
+    comments?: SharedCaseComment[];
+}
+
+export interface SharedCaseComment {
+    commentId: string;
+    body: string;
+    entityIds?: string[];
+    artifactIds?: string[];
+    createdBy?: string;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface Case {
     id?: string;
     caseId: string;
+    caseTypeOtherValue?: string;
+    intakeSourceOtherValue?: string;
     tenant_uuid?: string;
     title: string;
     description: string;
@@ -537,4 +573,7 @@ export interface Case {
     tasks: CaseTask[];
     linkedCases: CaseLink[];
     closure?: CaseClosure | null;
+    isArchived?: boolean;
+    archivedAt?: Date | string | null;
+    archivedBy?: string;
 }
