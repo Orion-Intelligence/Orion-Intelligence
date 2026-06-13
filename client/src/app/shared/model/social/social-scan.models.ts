@@ -34,6 +34,20 @@ export interface SocialPost {
     media_type: string;
     media_url: string;
 }
+export interface SocialOnlinePresenceResult {
+    query: string;
+    total_found: number;
+    timestamp?: string;
+    results: {
+        title?: string;
+        url?: string;
+        snippet?: string;
+        timestamp?: string;
+    }[];
+}
+export interface SocialStealerLogRecord {
+    [key: string]: any;
+}
 export interface PlatformResult {
     keyUsername: string;
     platform: string;
@@ -53,6 +67,8 @@ export interface PlatformResult {
     images?: SocialImage[] | null;
     followers_list?: string[] | null;
     following_list?: string[] | null;
+    onlinePresence?: SocialOnlinePresenceResult | null;
+    stealerLogs?: SocialStealerLogRecord[] | null;
 }
 export type ManagedPlatform = PlatformResult & {
     stableKey: string;

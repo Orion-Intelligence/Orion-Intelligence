@@ -53,6 +53,8 @@ export class SocialScanJobService {
         images: previous.images ?? next.images,
         followers_list: previous.followers_list ?? next.followers_list,
         following_list: previous.following_list ?? next.following_list,
+        onlinePresence: previous.onlinePresence ?? next.onlinePresence,
+        stealerLogs: previous.stealerLogs ?? next.stealerLogs,
         profileDetails: previous.profileDetails ?? next.profileDetails,
         allMetadata: next.allMetadata ?? previous.allMetadata,
       };

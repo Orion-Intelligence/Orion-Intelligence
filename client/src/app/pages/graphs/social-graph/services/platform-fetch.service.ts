@@ -6,7 +6,7 @@ import { FetchingStateService } from './fetching-state.service';
 import { PlatformResult, TabState } from '../../../../shared/model/social/social-scan.models';
 import { SocialMapperStateService } from './social-mapper-state.service';
 type UpdateStateFn = (updater: (state: TabState) => void, shouldScheduleSave?: boolean) => void;
-type FetchStateKey = 'profile' | 'posts' | 'platformImages' | 'followers' | 'following';
+type FetchStateKey = 'profile' | 'posts' | 'platformImages' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs';
 @Injectable({ providedIn: 'root' })
 export class PlatformFetchService {
   private getPlatformIdentityKey(platform: PlatformResult): string {
@@ -33,7 +33,7 @@ export class PlatformFetchService {
     request$.pipe(takeUntil(cancel$), takeUntilDestroyed(destroyRef))
       .subscribe({
         next: (response: any) => {
-          const propertyMap = { profile: 'profileDetails', posts: 'posts', platformImages: 'images', followers: 'followers_list', following: 'following_list' };
+          const propertyMap = { profile: 'profileDetails', posts: 'posts', platformImages: 'images', followers: 'followers_list', following: 'following_list', onlinePresence: 'onlinePresence', stealerLogs: 'stealerLogs' };
           const dataKey = Object.keys(response)[0];
           const data = response[dataKey];
           const hasData = data && (Array.isArray(data) ? data.length > 0 : Object.keys(data).length > 0);
@@ -90,13 +90,15 @@ export class PlatformFetchService {
     fetchingState.setFetching((fetchingState as any)[stateKey], key, false);
   }
 
-  cancelAllFetchesForUser( username: string, scanResults: Map<string, PlatformResult[]>, cancelHandlers: { profile: (p: PlatformResult) => void; posts: (p: PlatformResult) => void; images: (p: PlatformResult) => void; followers: (p: PlatformResult) => void; following: (p: PlatformResult) => void; } ): void {
+  cancelAllFetchesForUser( username: string, scanResults: Map<string, PlatformResult[]>, cancelHandlers: { profile: (p: PlatformResult) => void; posts: (p: PlatformResult) => void; images: (p: PlatformResult) => void; followers: (p: PlatformResult) => void; following: (p: PlatformResult) => void; onlinePresence: (p: PlatformResult) => void; stealerLogs: (p: PlatformResult) => void; } ): void {
     scanResults.get(username)?.forEach(p => {
       cancelHandlers.profile(p);
       cancelHandlers.posts(p);
       cancelHandlers.images(p);
       cancelHandlers.followers(p);
       cancelHandlers.following(p);
+      cancelHandlers.onlinePresence(p);
+      cancelHandlers.stealerLogs(p);
     });
   }
 }

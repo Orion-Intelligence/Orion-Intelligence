@@ -31,12 +31,7 @@
           @for (job of displayJobs(); track job.id) {
             <div class="home-menu-created-item">
               <div class="home-menu-fade-row" [class.home-menu-fade-row-hidden]="!job.matches">
-                <div
-                  [class]="getJobClasses(job)"
-                  [attr.data-selected]="state.activeUsername()?.toLowerCase() === job.username.toLowerCase() ? 'true' : null"
-                  (click)="jobClicked.emit(job)"
-                  class="ui-social-history-job cursor-pointer rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3 shadow-[0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]"
-                >
+                <div [class]="getJobClasses(job)" [attr.data-selected]="state.activeUsername()?.toLowerCase() === job.username.toLowerCase() ? 'true' : null" (click)="jobClicked.emit(job)" class="ui-social-history-job cursor-pointer rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3 shadow-[0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]">
 
                   <div class="flex items-start justify-between gap-2">
                     <div class="flex min-w-0 flex-1 items-center gap-2">
@@ -143,23 +138,9 @@
         @for (job of jobsWithFilter(); track job.id) {
           @if (job.matches) {
             <div class="my-[6px] rounded-[8px] select-none">
-              <button
-                type="button"
-                (click)="jobClicked.emit(job)"
-                [appTooltip]="getJobTooltip(job)"
-                [attr.aria-label]="getJobTooltip(job)"
-                [style.background-color]="isJobSelected(job) ? 'var(--color-blue-870)' : null"
-                class="ui-social-collapsed-job relative flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-visible rounded-[8px] border border-transparent p-0 font-[Inter] text-[14px] font-semibold text-[#A0B8D1] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-white focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]"
-              >
+              <button type="button" (click)="jobClicked.emit(job)" [appTooltip]="getJobTooltip(job)" [attr.aria-label]="getJobTooltip(job)" [class.ui-social-collapsed-job-selected]="isJobSelected(job)" class="ui-social-collapsed-job relative flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-visible rounded-[8px] border border-transparent p-0 font-[Inter] text-[14px] font-semibold text-[#A0B8D1] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-white focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]">
                 {{ getJobInitial(job) }}
-                <span
-                  class="absolute right-[9px] top-[8px] h-2 w-2 rounded-full border border-[var(--color-blue-820-light)]"
-                  [class.bg-amber-400]="job.status === 'queued'"
-                  [class.bg-sky-400]="job.status === 'in_progress'"
-                  [class.bg-emerald-400]="job.status === 'completed'"
-                  [class.bg-red-400]="job.status === 'failed'"
-                  [class.animate-pulse]="job.status === 'queued' || job.status === 'in_progress' || isUserBusy(job.username)"
-                ></span>
+                <span class="absolute right-[9px] top-[8px] h-2 w-2 rounded-full border border-[var(--color-blue-820-light)]" [class.bg-amber-400]="job.status === 'queued'" [class.bg-sky-400]="job.status === 'in_progress'" [class.bg-emerald-400]="job.status === 'completed'" [class.bg-red-400]="job.status === 'failed'" [class.animate-pulse]="job.status === 'queued' || job.status === 'in_progress' || isUserBusy(job.username)"></span>
               </button>
             </div>
           }

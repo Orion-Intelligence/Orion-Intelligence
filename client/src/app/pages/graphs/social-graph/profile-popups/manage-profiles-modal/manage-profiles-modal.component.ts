@@ -23,7 +23,6 @@ export class ManageProfilesModalComponent {
   platforms = signal<ManagedPlatformRow[]>([]);
   searchTerm = signal('');
   visibleCount = signal(20);
-
   filteredPlatforms = computed(() => {
     const term = this.searchTerm().toLowerCase();
     const filtered = !term
@@ -39,7 +38,6 @@ export class ManageProfilesModalComponent {
     const remainingSuggested = suggested.slice(3);
     return [...topSuggested, ...active, ...remainingSuggested, ...informational];
   });
-
   displayPlatforms = computed(() => {
     const filtered = this.filteredPlatforms();
     if (this.searchTerm()) {
@@ -47,7 +45,6 @@ export class ManageProfilesModalComponent {
     }
     return filtered.slice(0, this.visibleCount());
   });
-
   hasMatches = computed(() => this.filteredPlatforms().length > 0);
   areAllVisibleSelected = computed(() => {
     const filtered = this.filteredPlatforms();

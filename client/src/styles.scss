@@ -1505,6 +1505,10 @@ body.demo-tour-scroll-locked {
   animation: ui-social-sidebar-platform-row-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.ui-social-sidebar-platform-row-active {
+  background-color: rgba(87, 165, 235, 0.12);
+}
+
 .ui-social-sidebar-platform-divider {
   background: linear-gradient(
     90deg,
@@ -3151,6 +3155,10 @@ app-world-heatmap .country:not(.can-open-reports) {
 app-home-menu .ui-social-history-job[data-selected='true'] {
   background: var(--color-blue-870) !important;
   background-color: var(--color-blue-870) !important;
+}
+
+app-home-menu .ui-social-collapsed-job-selected {
+  background-color: var(--color-blue-870);
 }
 
 @media (width <= 768px) {

@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewEncapsulation, computed, inject, signal, viewChild } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Subject } from 'rxjs';
-import { Job, PlatformResult, TabState } from '../../../shared/model/social/social-scan.models';
+import { map } from 'rxjs/operators';
+import { Job, PlatformResult, SocialStealerLogRecord, TabState } from '../../../shared/model/social/social-scan.models';
 import { SocialScanService } from '../shared/services/social-scan.service';
 import { TabManagerService } from '../shared/services/tab-manager.service';
 import { HomeMenuComponent } from './home-menu/home-menu.component';
@@ -41,6 +42,8 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   private cancelPlatformImageFetchSubjects = new Map<string, Subject<void>>();
   private cancelFollowersFetchSubjects = new Map<string, Subject<void>>();
   private cancelFollowingFetchSubjects = new Map<string, Subject<void>>();
+  private cancelOnlinePresenceFetchSubjects = new Map<string, Subject<void>>();
+  private cancelStealerLogsFetchSubjects = new Map<string, Subject<void>>();
   private mediaQueryList: MediaQueryList | null = null;
   private readonly mediaQueryListener = (event: MediaQueryListEvent) => {
     this.isSmallScreen.set(event.matches);
@@ -61,15 +64,7 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   effectiveHomeMenuCollapsed = computed(() => this.isSmallScreen() ? !this.isMobileHomeMenuOpen() : this.isHomeMenuCollapsed());
   imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
 
-  constructor(
-    private scanService: SocialScanService,
-    private destroyRef: DestroyRef,
-    public tabManager: TabManagerService,
-    private fetchingState: FetchingStateService,
-    private scanJobService: SocialScanJobService,
-    private platformFetchService: PlatformFetchService,
-    @Inject(PLATFORM_ID) private platformId: object
-  ) {
+  constructor( private scanService: SocialScanService, private destroyRef: DestroyRef, public tabManager: TabManagerService, private fetchingState: FetchingStateService, private scanJobService: SocialScanJobService, private platformFetchService: PlatformFetchService, @Inject(PLATFORM_ID) private platformId: object ) {
     if (isPlatformBrowser(this.platformId)) {
       this.mediaQueryList = window.matchMedia('(max-width: 1023px)');
       this.isSmallScreen.set(this.mediaQueryList.matches);
@@ -249,7 +244,31 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.fetchData(p, 'following', this.scanService.fetchFollowing(p.platform, p.username), this.cancelFollowingFetchSubjects);
   }
 
-  private fetchData(platformResult: PlatformResult, stateKey: 'profile' | 'posts' | 'platformImages' | 'followers' | 'following', request$: any, cancelMap: Map<string, Subject<void>>): void {
+  handleFetchOnlinePresence(request: { platformData: PlatformResult; token?: string }): void {
+    const p = request.platformData;
+    this.cancelAllFetchesForUser(p.keyUsername);
+    const tokens = (request.token || p.platform || '')
+      .split(/[,\s]+/)
+      .map(token => token.trim().toLowerCase())
+      .filter(Boolean);
+    const username = (p.username || p.keyUsername || '').replace(/^@+/, '');
+    this.fetchData(p,
+      'onlinePresence',
+      this.scanService.fetchProfileMetadataTokens(tokens.length > 0 ? tokens : [p.platform], username).pipe(map(onlinePresence => ({ onlinePresence }))),
+      this.cancelOnlinePresenceFetchSubjects);
+  }
+
+  handleFetchStealerLogs(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
+    const username = this.normalizeSocialIdentity(p.username || p.keyUsername);
+    const domain = this.getPlatformDomain(p);
+    this.fetchData(p,
+      'stealerLogs',
+      this.scanService.fetchPlatformStealerLogs(username, domain).pipe(map(stealerLogs => ({ stealerLogs: this.filterStealerLogRecords(stealerLogs, username, domain) }))),
+      this.cancelStealerLogsFetchSubjects);
+  }
+
+  private fetchData(platformResult: PlatformResult, stateKey: 'profile' | 'posts' | 'platformImages' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs', request$: any, cancelMap: Map<string, Subject<void>>): void {
     this.platformFetchService.fetchData({
       platformResult,
       stateKey,
@@ -282,7 +301,15 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.cancelFetch(p, 'following', this.cancelFollowingFetchSubjects);
   }
 
-  private cancelFetch(p: PlatformResult, stateKey: 'profile' | 'posts' | 'platformImages' | 'followers' | 'following', cancelMap: Map<string, Subject<void>>): void {
+  handleCancelFetchOnlinePresence(p: PlatformResult): void {
+    this.cancelFetch(p, 'onlinePresence', this.cancelOnlinePresenceFetchSubjects);
+  }
+
+  handleCancelFetchStealerLogs(p: PlatformResult): void {
+    this.cancelFetch(p, 'stealerLogs', this.cancelStealerLogsFetchSubjects);
+  }
+
+  private cancelFetch(p: PlatformResult, stateKey: 'profile' | 'posts' | 'platformImages' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs', cancelMap: Map<string, Subject<void>>): void {
     this.platformFetchService.cancelFetch(p, stateKey, cancelMap, this.fetchingState);
   }
 
@@ -292,8 +319,124 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       posts: (p: PlatformResult) => this.handleCancelFetchSocialPosts(p),
       images: (p: PlatformResult) => this.handleCancelFetchImagesForPlatform(p),
       followers: (p: PlatformResult) => this.handleCancelFetchFollowers(p),
-      following: (p: PlatformResult) => this.handleCancelFetchFollowing(p)
+      following: (p: PlatformResult) => this.handleCancelFetchFollowing(p),
+      onlinePresence: (p: PlatformResult) => this.handleCancelFetchOnlinePresence(p),
+      stealerLogs: (p: PlatformResult) => this.handleCancelFetchStealerLogs(p)
     });
+  }
+
+  private getPlatformDomain(platformData: PlatformResult): string {
+    const fromUrl = this.normalizeDomain(platformData.url);
+    if (fromUrl) {
+      return fromUrl;
+    }
+    const platform = (platformData.platform || '').toLowerCase();
+    const platformDomains: Record<string, string> = {
+      behance: 'behance.net',
+      facebook: 'facebook.com',
+      github: 'github.com',
+      instagram: 'instagram.com',
+      tiktok: 'tiktok.com',
+      twitter: 'twitter.com',
+      vimeo: 'vimeo.com',
+      x: 'x.com',
+      youtube: 'youtube.com'
+    };
+    return platformDomains[platform] || platform;
+  }
+
+  private filterStealerLogRecords(records: any[], username: string, domain: string): SocialStealerLogRecord[] {
+    if (!Array.isArray(records)) {
+      return [];
+    }
+    const normalizedUsername = this.normalizeSocialIdentity(username).toLowerCase();
+    const normalizedDomain = this.normalizeDomain(domain);
+    return records.filter(record => this.stealerRecordMatchesIdentity(record, normalizedUsername) && this.stealerRecordMatchesDomain(record, normalizedDomain));
+  }
+
+  private stealerRecordMatchesIdentity(record: any, username: string): boolean {
+    if (!username) {
+      return false;
+    }
+    return this.getStealerIdentityCandidates(record).some(candidate => this.identityAppearsInCandidate(candidate, username));
+  }
+
+  private stealerRecordMatchesDomain(record: any, domain: string): boolean {
+    if (!domain) {
+      return true;
+    }
+    return this.getStealerDomainCandidates(record).some(candidate => this.domainAppearsInCandidate(candidate, domain));
+  }
+
+  private getStealerIdentityCandidates(record: any): string[] {
+    return [
+      ...this.expandStealerRecordValue(record?.email),
+      ...this.expandStealerRecordValue(record?.username),
+      ...this.expandStealerRecordValue(record?.user),
+      ...this.expandStealerRecordValue(record?.login),
+      ...this.expandStealerRecordValue(record?.credential),
+      ...this.expandStealerRecordValue(record?.raw),
+    ];
+  }
+
+  private getStealerDomainCandidates(record: any): string[] {
+    return [
+      ...this.expandStealerRecordValue(record?.source_domain),
+      ...this.expandStealerRecordValue(record?.domain),
+      ...this.expandStealerRecordValue(record?.host),
+      ...this.expandStealerRecordValue(record?.url),
+      ...this.expandStealerRecordValue(record?.base_url),
+      ...this.expandStealerRecordValue(record?.raw),
+    ];
+  }
+
+  private identityAppearsInCandidate(candidate: string, username: string): boolean {
+    const value = candidate.toLowerCase();
+    return value === username || value.startsWith(`${username}@`) || value.split(/[^a-z0-9_.-]+/i).some(token => token === username || token.startsWith(`${username}@`));
+  }
+
+  private domainAppearsInCandidate(candidate: string, domain: string): boolean {
+    const candidateDomain = this.normalizeDomain(candidate);
+    return candidateDomain === domain || candidateDomain.endsWith(`.${domain}`) || candidate.toLowerCase().includes(domain);
+  }
+
+  private expandStealerRecordValue(value: any): string[] {
+    if (Array.isArray(value)) {
+      return value.flatMap(item => this.expandStealerRecordValue(item));
+    }
+    if (value && typeof value === 'object') {
+      return Object.values(value).flatMap(item => this.expandStealerRecordValue(item));
+    }
+    const normalized = this.normalizeStealerRecordValue(value);
+    return normalized ? [normalized] : [];
+  }
+
+  private normalizeSocialIdentity(value: string): string {
+    return (value || '').trim().replace(/^@+/, '');
+  }
+
+  private normalizeStealerRecordValue(value: any): string {
+    if (Array.isArray(value)) {
+      return this.normalizeStealerRecordValue(value[0]);
+    }
+    if (value === null || value === undefined || value === '') {
+      return '';
+    }
+    return String(value);
+  }
+
+  private normalizeDomain(value: string): string {
+    const raw = (value || '').trim().toLowerCase();
+    if (!raw) {
+      return '';
+    }
+    const candidate = raw.includes('://') ? raw : `https://${raw}`;
+    try {
+      return new URL(candidate).hostname.replace(/^(www|m)\./, '');
+    }
+    catch {
+      return raw.replace(/^https?:\/\//, '').split(/[/?#]/)[0].replace(/^(www|m)\./, '');
+    }
   }
 
   updateProfilesFromModal(selectedPlatforms: PlatformResult[]): void {
