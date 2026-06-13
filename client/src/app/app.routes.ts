@@ -637,6 +637,17 @@ export const routes: Routes = [
             data: { type: 'Threat Intelligence', animation: 'DataBreach' }
           },
           {
+            path: 'compromised-actors',
+            loadComponent: loadDashboardResultContainer,
+            data: { type: 'Threat Intelligence', animation: 'DataBreach' }
+          },
+          {
+            path: 'compromised-actors/:m_hash',
+            loadComponent: loadReportDefacementComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Threat Intelligence', animation: 'HashPage' }
+          },
+          {
             path: ':category/:m_hash',
             loadComponent: loadReportComponent,
             resolve: { reportdata: ReportResolver },

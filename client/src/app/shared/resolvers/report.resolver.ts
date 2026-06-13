@@ -30,9 +30,14 @@ export class ReportResolver implements Resolve<any> {
         apiUrl = hash ? `search/exploit/${hash}` : `search/exploit`;
         break;
       case 'threat-intel':
-        apiUrl = category_2 === 'apt'
-          ? (hash ? `search/apt/${hash}` : `search/apt`)
-          : (hash ? `search/malware/${hash}` : `search/malware`);
+        if (category_2 === 'compromised-actors') {
+          apiUrl = hash ? `search/defacement/${hash}` : `search/defacement`;
+        }
+        else {
+          apiUrl = category_2 === 'apt'
+            ? (hash ? `search/apt/${hash}` : `search/apt`)
+            : (hash ? `search/malware/${hash}` : `search/malware`);
+        }
         break;
       case 'social':
         if (category_2 == "all") {

@@ -91,6 +91,14 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
     return formatKeyLabelUtil(key);
   }
 
+  getMetadataCount(key: string): number {
+    if (key === 'm_content') {
+      return this.content ? 1 : 0;
+    }
+    const value = (this.defacementData as any)?.[key];
+    return Array.isArray(value) ? value.length : value ? 1 : 0;
+  }
+
   private prepareMetadata(): void {
     this.content = this.defacementData?.m_content || '';
     this.arrayKeys = [];

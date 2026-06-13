@@ -59,7 +59,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
 
   constructor(protected helperService: HelperService, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, private scrollService: ScrollService, private apiService: ApiService) {
     this.type = this.route.snapshot.data['type'] as Category;
-    this.apiEndpoint = this.type.toLowerCase() === Category.STRATEGIC.toLowerCase() ? 'search/strategic' : this.type.toLowerCase() === Category.SOCIAL.toLowerCase() ? 'search/social' : this.type.toLowerCase() === Category.EXPLOIT.toLowerCase() ? 'search/exploit' : this.type.toLowerCase() === Category.THREAT_INTEL.toLowerCase() ? 'search/threat-intel' : this.type.toLowerCase() === Category.DEFACEMENT.toLowerCase() ? 'search/defacement' : 'search/breach';
+    this.apiEndpoint = this.getApiEndpoint(this.router.url.split('?')[0]);
   }
 
   get currentParamModel(): ConsolidatedParamModel {
@@ -115,7 +115,8 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
 
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
         this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
-        this.dashboardService.consolidatedParamModel.category = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
+        this.dashboardService.consolidatedParamModel.category = this.getApiCategory(urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all');
+        this.apiEndpoint = this.getApiEndpoint(route);
         this.loadThreatIntelFilterOptions(route);
         const cacheKey = this.buildCacheKey();
         const cachedResult = sessionStorage.getItem(cacheKey);
@@ -255,5 +256,21 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
   private restoreSavedScroll(): void {
     this.cdr.detectChanges();
     this.pendingScrollRestore = true;
+  }
+
+  private getApiEndpoint(route: string): string {
+    if (this.isCompromisedActorsRoute(route)) {
+      return 'search/defacement';
+    }
+
+    return this.type.toLowerCase() === Category.STRATEGIC.toLowerCase() ? 'search/strategic' : this.type.toLowerCase() === Category.SOCIAL.toLowerCase() ? 'search/social' : this.type.toLowerCase() === Category.EXPLOIT.toLowerCase() ? 'search/exploit' : this.type.toLowerCase() === Category.THREAT_INTEL.toLowerCase() ? 'search/threat-intel' : this.type.toLowerCase() === Category.DEFACEMENT.toLowerCase() ? 'search/defacement' : 'search/breach';
+  }
+
+  private getApiCategory(category: string): string {
+    return this.type === Category.THREAT_INTEL && category === 'compromised-actors' ? 'hacked' : category;
+  }
+
+  private isCompromisedActorsRoute(route: string): boolean {
+    return this.type === Category.THREAT_INTEL && route.endsWith('/threat-intel/compromised-actors');
   }
 }

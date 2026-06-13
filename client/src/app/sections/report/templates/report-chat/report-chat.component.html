@@ -163,17 +163,20 @@
           </div>
         </div>
         @if (isExpandedMetadata) {
-          <div class="mt-4 flex flex-wrap items-center gap-2.5">
-            @for (key of arrayKeys; track key; let last = $last) {
-              <button (click)="setActiveTab(key)" [ngClass]="activeTab === key ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[0_2px_8px_rgba(87,165,235,0.35)]' : 'border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft text-[var(--color-text3)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)]'" [appTooltip]="('Info about' | translate) + ' ' + (key === 'm_person' ? ('Entity' | translate) : formatKeyLabel(key))" class="rounded-full border px-3 py-1 text-[12px] font-semibold tracking-[0.01em] transition-all duration-150">
-                {{ key === 'm_person' ? ('Entity' | translate) : formatKeyLabel(key) }}
-              </button>
-              @if (!last) {
-                <div class="h-4 w-px bg-[var(--color-divider)]/70"></div>
-              }
-            }
+          <div class="mt-4">
+            <div class="-mx-1 overflow-x-auto px-1">
+              <div class="flex min-w-max items-end gap-5 border-b border-[var(--color-divider)]">
+                @for (key of arrayKeys; track key) {
+                  <button (click)="setActiveTab(key)" [ngClass]="activeTab === key ? 'border-[var(--color-blue-640)] text-[var(--color-text1)]' : 'border-transparent text-[var(--color-text4)] hover:text-[var(--color-text2)]'" [appTooltip]="('Info about' | translate) + ' ' + (key === 'm_person' ? ('Entity' | translate) : formatKeyLabel(key))" class="-mb-px flex items-center gap-2 border-b-2 px-0.5 pb-2 pt-1 text-[12px] font-semibold transition-colors duration-150">
+                    <span>{{ key === 'm_person' ? ('Entity' | translate) : formatKeyLabel(key) }}</span>
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--color-text4)]">
+                      {{ getMetadataCount(key) }}
+                    </span>
+                  </button>
+                }
+              </div>
+            </div>
           </div>
-          <div class="mt-3 h-px w-full bg-[var(--color-divider)]"></div>
           @if (activeTab === 'm_content' || activeTab === 'm_summary') {
             <app-result-section @fadeInDashboardItem
             [listItems]="[activeTab === 'm_content' ? content : summary]"></app-result-section>

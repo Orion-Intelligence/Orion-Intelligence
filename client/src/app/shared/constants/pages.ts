@@ -77,7 +77,8 @@ export enum ExploitSubCategory {
 export enum ThreatIntelSubCategory {
     ALL = 'All',
     APT = 'APT',
-    MALWARE_BAZAAR = 'Malware'
+    MALWARE_BAZAAR = 'Malware',
+    COMPROMISED_ACTORS = 'Compromised-Actors'
 }
 export enum FeedSubCategory {
     NEWS = 'News'

@@ -196,6 +196,17 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
     return formatKeyLabelUtil(key);
   }
 
+  getMetadataCount(key: string): number {
+    if (key === 'm_content') {
+      return this.content ? 1 : 0;
+    }
+    if (key === 'm_summary') {
+      return this.summary ? 1 : 0;
+    }
+    const value = (this.resultItem as any)?.[key];
+    return Array.isArray(value) ? value.length : value ? 1 : 0;
+  }
+
   private isLikelyUrl(value: string): boolean {
     return isLikelyUrlUtil(value);
   }
