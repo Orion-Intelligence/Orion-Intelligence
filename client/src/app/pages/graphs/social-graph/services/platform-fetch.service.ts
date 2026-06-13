@@ -5,7 +5,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FetchingStateService } from './fetching-state.service';
 import { PlatformResult, TabState } from '../../../../shared/model/social/social-scan.models';
 import { SocialMapperStateService } from './social-mapper-state.service';
-import { GraphOrchestratorService } from './graph-orchestrator.service';
 type UpdateStateFn = (updater: (state: TabState) => void, shouldScheduleSave?: boolean) => void;
 type FetchStateKey = 'profile' | 'posts' | 'platformImages' | 'followers' | 'following';
 @Injectable({ providedIn: 'root' })
@@ -18,27 +17,8 @@ export class PlatformFetchService {
     return this.getPlatformIdentityKey(left) === this.getPlatformIdentityKey(right);
   }
 
-  private updateUIPopups(state: SocialMapperStateService, p: PlatformResult, data: Partial<PlatformResult>): void {
-    const selectedPlatform = state.selectedPlatformData();
-    if (selectedPlatform && this.isSamePlatformIdentity(selectedPlatform, p)) {
-      state.selectedPlatformData.update(current => current ? { ...current, ...data } : null);
-    }
-    if (state.summaryPopupData()?.username === p.keyUsername) {
-      state.summaryPopupData.update(current => {
-        if (!current) {
-          return null;
-        }
-        return { ...current, platforms: current.platforms.map(platform => this.isSamePlatformIdentity(platform, p) ? { ...platform, ...data } : platform) };
-      });
-    }
-    const followerPopupPlatform = state.followerScanPopupData()?.platform;
-    if (followerPopupPlatform && this.isSamePlatformIdentity(followerPopupPlatform, p)) {
-      state.followerScanPopupData.update(current => current ? { platform: { ...current.platform, ...data } } : null);
-    }
-  }
-
-  fetchData( opts: { platformResult: PlatformResult; stateKey: FetchStateKey; request$: Observable<any>; cancelMap: Map<string, Subject<void>>; fetchingState: FetchingStateService; destroyRef: DestroyRef; updateState: UpdateStateFn; state: SocialMapperStateService; graphOrchestrator: GraphOrchestratorService; activeTabState: () => TabState | undefined; } ): void {
-    const { platformResult, stateKey, request$, cancelMap, fetchingState, destroyRef, updateState, state, graphOrchestrator, activeTabState } = opts;
+  fetchData( opts: { platformResult: PlatformResult; stateKey: FetchStateKey; request$: Observable<any>; cancelMap: Map<string, Subject<void>>; fetchingState: FetchingStateService; destroyRef: DestroyRef; updateState: UpdateStateFn; state: SocialMapperStateService; } ): void {
+    const { platformResult, stateKey, request$, cancelMap, fetchingState, destroyRef, updateState, state } = opts;
     const key = fetchingState.getPlatformUniqueKey(platformResult);
     if (fetchingState.isUserBusy(platformResult.keyUsername)) {
       state.showNotification('busy');
@@ -71,13 +51,6 @@ export class PlatformFetchService {
               return newMap;
             });
           });
-          this.updateUIPopups(state, platformResult, newData);
-          if (stateKey === 'followers' || stateKey === 'following' || stateKey === 'posts') {
-            const tabState = activeTabState();
-            if (tabState) {
-              graphOrchestrator.updateUserConnections(tabState);
-            }
-          }
         },
         complete: () => {
           fetchingState.setFetching((fetchingState as any)[stateKey], key, false);

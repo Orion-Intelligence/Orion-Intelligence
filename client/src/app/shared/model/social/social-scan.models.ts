@@ -1,52 +1,4 @@
 import { WritableSignal } from '@angular/core';
-export interface NetworkNode {
-    id: string | number;
-    label: string;
-    relationshipCount?: number;
-    shape: string;
-    image?: string;
-    icon?: {
-        face: string;
-        code: string;
-        size: number;
-        color: string;
-    };
-    size: number;
-    font: {
-        color: string;
-        size?: number;
-    };
-    color: {
-        border: string;
-        background: string;
-        highlight?: {
-            border: string;
-            background: string;
-        };
-        hover?: {
-            border: string;
-            background: string;
-        };
-    };
-    title?: string;
-    shadow?: boolean | {
-        enabled: boolean;
-        color: string;
-        size: number;
-        x: number;
-        y: number;
-    };
-    groupedPlatforms?: PlatformResult[];
-    borderWidth?: number;
-    borderWidthSelected?: number;
-    x?: number;
-    y?: number;
-    physics?: boolean;
-}
-export interface NetworkData {
-    nodes: NetworkNode[];
-    edges: any[];
-}
 export interface Job {
     id: string;
     username: string;
@@ -117,66 +69,11 @@ export type ScanEvent = {
     type: 'complete';
     payload: PlatformResult[];
 };
-export interface CustomEntity {
-    id: string;
-    type:
-    | 'wallet'
-    | 'email'
-    | 'domain'
-    | 'email-breach'
-    | 'wanted-list'
-    | 'domain-scan'
-    | 'subdomains-scan'
-    | 'dns-scan'
-    | 'wayback-scan'
-    | 'ioc-extract'
-    | 'apk-scan'
-    | 'phone'
-    | 'crypto-scanner';
-    label: string;
-    value: string;
-    onGraph: boolean;
-    status: 'pending' | 'in_progress' | 'added' | 'failed';
-    progress?: number;
-    step?: string;
-    source?: 'manual' | 'api';
-    reportData?: Record<string, any> | null;
-}
-export interface GraphPlatformBatch {
-    all: PlatformResult[];
-    visibleCount: number;
-}
-export interface ProfileLeakSessionData {
-    breachCards: any[];
-    stealerRows: any[];
-}
-export interface ProfileMetadataSessionData {
-    tokens: string[];
-    result: {
-        query: string;
-        total_found: number;
-        timestamp?: string;
-        results: any[];
-    } | null;
-}
 export interface TabState {
-    searchTerm: WritableSignal<string>;
     homeMenuSearchTerm: WritableSignal<string>;
     jobs: WritableSignal<Job[]>;
-    networkData: WritableSignal<NetworkData>;
     scanResults: WritableSignal<Map<string, PlatformResult[]>>;
-    activeUsernames: WritableSignal<Set<string>>;
-    customEntities: WritableSignal<CustomEntity[]>;
-    isEditMode: WritableSignal<boolean>;
     isHomeMenuCollapsed: WritableSignal<boolean>;
-    isEntityMenuCollapsed: WritableSignal<boolean>;
-    activeHomeMenuTab: WritableSignal<'history' | 'entities'>;
-    isPhysicsEnabled: WritableSignal<boolean>;
-    viewMode: WritableSignal<'graph' | 'list'>;
-    expandedGroupDataByUser: WritableSignal<Record<string, NetworkNode | null>>;
-    graphPlatformBatches: WritableSignal<Map<string, GraphPlatformBatch>>;
-    profileLeakIntelligenceByUser: WritableSignal<Record<string, ProfileLeakSessionData>>;
-    profileMetadataByUser: WritableSignal<Record<string, ProfileMetadataSessionData>>;
 }
 export type SerializableTabState = {
     [K in keyof TabState]: ReturnType<TabState[K]>;

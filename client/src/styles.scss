@@ -1485,6 +1485,116 @@ body.demo-tour-scroll-locked {
   color: #fff !important;
 }
 
+@keyframes ui-social-sidebar-platform-row-in {
+  0% {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translate3d(-10px, 8px, 0) scale(0.98);
+  }
+
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.ui-social-sidebar-platform-row {
+  opacity: 0;
+  will-change: opacity, filter, transform;
+  animation: ui-social-sidebar-platform-row-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.ui-social-sidebar-platform-divider {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(148, 163, 184, 0.035) 18%,
+    rgba(148, 163, 184, 0.075) 50%,
+    rgba(148, 163, 184, 0.035) 82%,
+    transparent 100%
+  );
+}
+
+@keyframes ui-profile-dropdown-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0) scale(0.98);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.ui-profile-dropdown {
+  transform-origin: top right;
+  animation: ui-profile-dropdown-in 160ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+
+@keyframes ui-social-profile-overview-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.992);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.ui-social-feed-card-in {
+  animation: ui-social-feed-card-in 190ms ease-out both;
+  will-change: opacity, transform;
+}
+
+@keyframes ui-social-feed-card-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0) scale(0.994);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.ui-social-profile-overview-in {
+  animation: ui-social-profile-overview-in 180ms ease-out both;
+  will-change: opacity, transform;
+}
+
+@for $i from 1 through 30 {
+  .ui-social-sidebar-platform-list > .ui-social-sidebar-platform-row:nth-child(#{$i}) {
+    animation-delay: #{($i - 1) * 22}ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-social-sidebar-platform-row {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    animation: none;
+  }
+
+  .ui-social-profile-overview-in {
+    animation: none;
+  }
+
+  .ui-social-feed-card-in {
+    animation: none;
+  }
+
+  .ui-profile-dropdown {
+    animation: none;
+  }
+}
+
 .ui-popup-input,
 .ui-popup-select,
 .ui-popup-textarea {

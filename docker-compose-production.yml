@@ -136,7 +136,7 @@ services:
       - ENABLE_BROTLI=1
 
   mongo:
-    image: mongo:latest
+    image: mongo:7.0
     container_name: trusted-web-mongodb
     restart: always
     environment:
@@ -146,25 +146,7 @@ services:
       - "27020:27017"
     volumes:
       - mongo:/data/db
-    command: >
-      bash -c "
-      mongod --bind_ip_all --fork --logpath /var/log/mongodb.log &&
-      sleep 10 &&
-      mongosh --eval '
-        db = db.getSiblingDB(\"admin\");
-        if (db.getUser(\"${MONGO_ROOT_USERNAME}\") === null) {
-          db.createUser({
-            user: \"${MONGO_ROOT_USERNAME}\",
-            pwd: \"${MONGO_ROOT_PASSWORD}\",
-            roles: [{ role: \"userAdminAnyDatabase\", db: \"admin\" }, { role: \"readWriteAnyDatabase\", db: \"admin\" }]
-          });
-        }
-      ' &&
-      mongod --shutdown &&
-      sleep 5 &&
-      mongod --auth --bind_ip_all --fork --logpath /var/log/mongodb.log &&
-      tail -f /var/log/mongodb.log
-      "
+    command: ["mongod", "--auth", "--bind_ip_all", "--wiredTigerCacheSizeGB", "0.5", "--setParameter", "diagnosticDataCollectionEnabled=false"]
     networks:
       backend:
         ipv4_address: 172.20.1.14

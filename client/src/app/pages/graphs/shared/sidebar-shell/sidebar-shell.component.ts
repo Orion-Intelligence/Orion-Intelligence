@@ -7,7 +7,7 @@ import { AppService } from '../../../../services/core/app/app.service';
   imports: [],
   templateUrl: './sidebar-shell.component.html',
   host: {
-    class: 'block h-[calc(100vh-3rem)] w-full min-h-0',
+    class: 'block h-full w-full min-h-0',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

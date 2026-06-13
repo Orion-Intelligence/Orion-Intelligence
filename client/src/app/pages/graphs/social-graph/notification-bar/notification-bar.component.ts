@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
-export type NotificationType = 'added' | 'scanned' | 'scanning' | 'busy';
+export type NotificationType = 'scanning' | 'busy';
 export interface NotificationData {
     type: NotificationType;
     message: string;

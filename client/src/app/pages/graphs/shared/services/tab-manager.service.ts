@@ -1,14 +1,14 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { NetworkData, Job, PlatformResult, CustomEntity, TabState, SerializableTabState, Tab, NetworkNode, GraphPlatformBatch, ProfileLeakSessionData, ProfileMetadataSessionData } from '../../../../shared/model/social/social-scan.models';
+import { Job, PlatformResult, TabState, SerializableTabState, Tab } from '../../../../shared/model/social/social-scan.models';
 import { ApiService } from '../../../../shared/services/api.service';
 import { ReportExportService } from '../../../../shared/services/report-export.service';
-import { GraphReportExportType, GraphReportPayload } from '../../../../shared/model/report/report-export.model';
+import { GraphReportExportType, GraphReportPayload, GraphReportTableRow } from '../../../../shared/model/report/report-export.model';
 @Injectable({
   providedIn: 'root',
 })
 export class TabManagerService {
   private readonly maxTabsAllowed = 5;
-  private readonly graphType = 'social';
+  private readonly sessionType = 'social';
   private readonly saveDebounceMs = 300;
   private static tabCounter = 1;
   private hasLoadedState = false;
@@ -29,23 +29,10 @@ export class TabManagerService {
 
   private createNewState(): TabState {
     return {
-      searchTerm: signal(''),
       homeMenuSearchTerm: signal(''),
       jobs: signal<Job[]>([]),
-      networkData: signal<NetworkData>({ nodes: [], edges: [] }),
       scanResults: signal(new Map<string, PlatformResult[]>()),
-      activeUsernames: signal(new Set<string>()),
-      customEntities: signal<CustomEntity[]>([]),
-      isEditMode: signal(false),
       isHomeMenuCollapsed: signal(false),
-      isEntityMenuCollapsed: signal(false),
-      activeHomeMenuTab: signal<'history' | 'entities'>('history'),
-      isPhysicsEnabled: signal(true),
-      viewMode: signal<'graph' | 'list'>('graph'),
-      expandedGroupDataByUser: signal<Record<string, NetworkNode | null>>({}),
-      graphPlatformBatches: signal(new Map<string, GraphPlatformBatch>()),
-      profileLeakIntelligenceByUser: signal<Record<string, ProfileLeakSessionData>>({}),
-      profileMetadataByUser: signal<Record<string, ProfileMetadataSessionData>>({}),
     };
   }
 
@@ -204,7 +191,7 @@ export class TabManagerService {
       return;
     }
     this.isSaveInFlight = true;
-    this.api.post<any>(`social/session/upsert?graph_type=${this.graphType}`, serializableState).subscribe({
+    this.api.post<any>(`social/session/upsert?graph_type=${this.sessionType}`, serializableState).subscribe({
       next: () => {
         this.lastSavedSignature = nextSignature;
         this.hasPendingSave = false;
@@ -236,7 +223,7 @@ export class TabManagerService {
       name: tab.name,
       state: this.serializeTabState(tab.state),
     };
-    this.api.post<any>(`social/session/tab/add?graph_type=${this.graphType}`, tabPayload).subscribe();
+    this.api.post<any>(`social/session/tab/add?graph_type=${this.sessionType}`, tabPayload).subscribe();
   }
 
   private loadState() {
@@ -254,7 +241,7 @@ export class TabManagerService {
       }
       return;
     }
-    this.api.get<any>(`social/session/tabs?graph_type=${this.graphType}`).subscribe({
+    this.api.get<any>(`social/session/tabs?graph_type=${this.sessionType}`).subscribe({
       next: (savedState) => {
         const savedTabs = Array.isArray(savedState?.tabs) ? savedState.tabs : [];
         if (savedTabs.length === 0) {
@@ -309,19 +296,19 @@ export class TabManagerService {
   private deserializeTabState(plainState: SerializableTabState): TabState {
     const newState = this.createNewState();
     for (const key in plainState) {
-      if (key === 'isEditMode') {
-        // Edit mode should never survive a reload/imported tab restore.
+      const target = (newState as any)[key];
+      if (!target) {
         continue;
       }
       let value = (plainState as any)[key];
       if (value && value.__type === 'Map') {
-        (newState as any)[key].set(new Map(value.value));
+        target.set(new Map(value.value));
       }
       else if (value && value.__type === 'Set') {
-        (newState as any)[key].set(new Set(value.value));
+        target.set(new Set(value.value));
       }
-      else if ((newState as any)[key]) {
-        (newState as any)[key].set(value);
+      else {
+        target.set(value);
       }
     }
     return newState;
@@ -332,119 +319,32 @@ export class TabManagerService {
     if (!active) {
       return null;
     }
-    const network = active.state.networkData();
-    const nodes = network.nodes.map(node => ({
-      id: String(node.id ?? ''),
-      label: String(node.label ?? ''),
-      type: this.getNodeType(node)
-    }));
-    const edges = network.edges.map((edge: any) => ({
-      id: String(edge.id ?? `${edge.from}->${edge.to}`),
-      from: String(edge.from ?? ''),
-      to: String(edge.to ?? ''),
-      label: edge.label ? String(edge.label) : ''
-    }));
-    const byType: Record<string, number> = {};
-    nodes.forEach(node => {
-      byType[node.type] = (byType[node.type] ?? 0) + 1;
-    });
     const platforms = Array.from(active.state.scanResults().values()).flat();
-    const activeUsers = active.state.activeUsernames().size;
-    const tables = platforms.length > 0
+    const scannedUsers = active.state.scanResults().size;
+    const completedJobs = active.state.jobs().filter(job => job.status === 'completed').length;
+    const tables: GraphReportTableRow[] = platforms.length > 0
       ? [{
-        title: 'Scan Snapshot',
+        title: 'Social Scan Snapshot',
         values: {
-          platforms: String(platforms.length),
-          activeUsers: String(activeUsers),
-          customEntities: String(active.state.customEntities().length),
-          view: active.state.viewMode()
+          profiles: String(platforms.length),
+          scannedUsers: String(scannedUsers),
+          completedJobs: String(completedJobs),
         }
       }]
       : [];
     return {
       graphKind: 'social',
-      title: 'Social Graph Intelligence Report',
+      title: 'Social Intelligence Report',
       sessionName: active.name,
       generatedAtIso: new Date().toISOString(),
-      nodes,
-      edges,
-      graphImageDataUrl: this.captureSocialGraphSnapshot(),
+      nodes: [],
+      edges: [],
       summary: {
-        totalNodes: nodes.length,
-        totalEdges: edges.length,
-        groupedNodes: byType['group'] ?? 0,
-        customEntities: active.state.customEntities().length,
-        scannedPlatforms: platforms.length
+        scannedUsers,
+        scannedPlatforms: platforms.length,
+        completedJobs
       },
       tables
     };
-  }
-
-  private captureSocialGraphSnapshot(): string | undefined {
-    if (typeof document === 'undefined') {
-      return undefined;
-    }
-    const canvases = document.querySelectorAll('app-network-graph canvas');
-    if (canvases.length === 0) {
-      return undefined;
-    }
-    try {
-      const baseCanvas = canvases[0] as HTMLCanvasElement;
-      const merged = document.createElement('canvas');
-      merged.width = baseCanvas.width;
-      merged.height = baseCanvas.height;
-      const ctx = merged.getContext('2d');
-      if (!ctx) {
-        return undefined;
-      }
-      canvases.forEach(node => {
-        const canvasElement = node as HTMLCanvasElement;
-        if (canvasElement.width === merged.width && canvasElement.height === merged.height) {
-          ctx.drawImage(canvasElement, 0, 0);
-        }
-      });
-      const pad = Math.round(Math.max(merged.width, merged.height) * 0.06);
-      const padded = document.createElement('canvas');
-      padded.width = merged.width + (pad * 2);
-      padded.height = merged.height + (pad * 2);
-      const pctx = padded.getContext('2d');
-      if (!pctx) {
-        return merged.toDataURL('image/jpeg', 0.92);
-      }
-      pctx.fillStyle = '#0f172a';
-      pctx.fillRect(0, 0, padded.width, padded.height);
-      pctx.drawImage(merged, pad, pad);
-      return padded.toDataURL('image/jpeg', 0.92);
-    }
-    catch {
-      return undefined;
-    }
-  }
-
-  private getNodeType(node: NetworkNode): string {
-    const nodeId = String(node.id ?? '');
-    if ((node.groupedPlatforms?.length ?? 0) > 0) {
-      return 'group';
-    }
-    if (nodeId.startsWith('user-')) {
-      return 'user';
-    }
-    if (nodeId.startsWith('platform-')) {
-      return 'platform';
-    }
-    if (nodeId.startsWith('entity-')) {
-      return 'entity';
-    }
-    if (nodeId.startsWith('relationship-node-')) {
-      return 'relationship';
-    }
-    if (node.shape) {
-      const shape = String(node.shape).toLowerCase();
-      if (shape === 'icon' || shape === 'circularimage') {
-        return 'entity';
-      }
-      return shape;
-    }
-    return 'node';
   }
 }

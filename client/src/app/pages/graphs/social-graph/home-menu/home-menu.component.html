@@ -1,38 +1,40 @@
-<div class="h-full flex flex-col transition-all duration-300 ease-in-out" [class.w-80]="!isCollapsed()" [class.w-16]="isCollapsed()">
+<div [class]="isCollapsed() ? 'flex h-full w-[70px] min-w-[70px] flex-col overflow-hidden bg-[var(--color-blue-900)] px-[7px] py-[8px] transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]' : 'flex h-full w-[300px] min-w-[300px] flex-col overflow-y-auto bg-[var(--color-blue-900)] p-0 transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]'">
   <app-graph-sidebar-shell [isCollapsed]="isCollapsed()" (toggleClicked)="toggle.emit(undefined)">
 
-    <div sidebar-expanded class="h-full flex flex-col bg-white dark:bg-[#242526]">
+    <div sidebar-expanded class="flex h-full flex-col bg-[var(--color-blue-820-light)]">
 
-              <div class="flex-shrink-0 h-14 bg-white dark:bg-[#242526] border-b border-gray-200 dark:border-[#3a3b3c] px-2 flex items-center gap-2 shadow-sm z-10">
+              <div class="z-10 flex min-h-14 flex-shrink-0 items-center border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 px-3 py-2 shadow-[0_1px_0_rgba(255,255,255,0.03)] backdrop-blur-sm">
 
-                <div class="flex flex-1 items-center gap-2 bg-gray-100 dark:bg-[#3a3b3c] rounded-full px-2 h-9 border border-transparent focus-within:ring-2 focus-within:ring-[#1877f2]/40 transition-shadow">
-                  <i class="bi bi-search text-gray-400 text-sm flex-shrink-0"></i>
-                  <input type="text" placeholder="Scan username..." [value]="searchTerm()" (input)="onSearchInput($event)" (keydown.enter)="scanRequested.emit(undefined)" class="flex-1 bg-transparent text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 outline-none min-w-0">
-                     <button type="button" title="Search by image" (click)="$event.stopPropagation(); imageUploadRequested.emit(undefined)" class="w-6 h-6 flex items-center justify-center rounded bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors flex-shrink-0">
-                       <i class="bi bi-image text-xs text-gray-500 dark:text-gray-300"></i>
-                     </button>
-                       <button (click)="scanRequested.emit(undefined)" [disabled]="searchTerm().trim().length === 0" class="flex-shrink-0 h-7 px-3 rounded-full text-sm font-semibold bg-[#1877f2] text-white hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm">Scan</button>
+                <div class="flex h-11 w-full min-w-0 items-center gap-1 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-1.5 shadow-[0_8px_18px_rgba(15,23,42,0.10)] transition-shadow focus-within:border-sky-400/35 focus-within:ring-2 focus-within:ring-sky-400/20">
+                  <span class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[8px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+                    <i class="bi bi-crosshair text-xs leading-none"></i>
+                  </span>
+                  <input type="text" placeholder="Scan username" [value]="searchTerm()" (input)="onSearchInput($event)" (keydown.enter)="scanRequested.emit(undefined)" class="h-8 min-w-0 flex-1 bg-transparent text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]">
+                  <button type="button" title="Scan by image" (click)="$event.stopPropagation(); imageUploadRequested.emit(undefined)" class="flex h-8 w-9 flex-shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
+                    <i class="bi bi-image text-xs"></i>
+                  </button>
+                  <button (click)="scanRequested.emit(undefined)" [disabled]="searchTerm().trim().length === 0" class="h-8 flex-shrink-0 rounded-[8px] bg-[var(--color-blue-640)] px-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--color-blue-630)] disabled:cursor-not-allowed disabled:opacity-40">Scan</button>
                 </div>
 
               </div>
 
-      <div class="flex border-b border-gray-200 dark:border-[#3a3b3c] shrink-0">
-        <button (click)="historyTabClicked.emit(undefined)" data-testid="home-menu-tab-history" class="flex-1 py-2.5 text-sm font-semibold transition-colors border-b-2 border-[#1877f2] text-[#1877f2]">
+      <div class="flex shrink-0 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 backdrop-blur-sm">
+        <button (click)="historyTabClicked.emit(undefined)" data-testid="home-menu-tab-history" class="flex-1 border-b-2 border-[var(--color-blue-640)] py-2.5 text-sm font-semibold text-[var(--color-blue-640)] transition-colors">
           Scan History
         </button>
       </div>
 
-      <div class="flex-grow overflow-y-auto px-3 py-3">
+      <div class="flex-grow overflow-y-auto px-3 py-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
 
         <div class="flex flex-col gap-2">
 
           @for (job of displayJobs(); track job.id) {
             <div class="home-menu-created-item">
               <div class="home-menu-fade-row" [class.home-menu-fade-row-hidden]="!job.matches">
-                <div [class]="getJobClasses(job)" (click)="jobClicked.emit(job)" class="rounded-xl border border-gray-200 dark:border-[#3a3b3c] bg-white dark:bg-[#3a3b3c] p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#4a4b4c] transition-colors">
+                <div [class]="getJobClasses(job)" (click)="jobClicked.emit(job)" class="cursor-pointer rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3 shadow-[0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]">
 
-                  <div class="flex justify-between items-start gap-2">
-                    <div class="flex items-center gap-2 min-w-0 flex-1">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="flex min-w-0 flex-1 items-center gap-2">
 
                       <div class="flex-shrink-0">
                         @switch (job.status) {
@@ -40,7 +42,7 @@
                             <i class="bi bi-hourglass-split text-amber-400 text-base leading-none"></i>
                           }
                           @case ('in_progress') {
-                            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1877f2]"></div>
+                            <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-[var(--color-blue-640)]"></div>
                           }
                           @case ('completed') {
                             <i class="bi bi-check-circle-fill text-green-500 text-base leading-none"></i>
@@ -50,25 +52,25 @@
                           }
                         }
                       </div>
-                      <p class="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate mb-0">
+                      <p class="mb-0 truncate text-sm font-semibold text-[var(--color-text1)]">
                         {{ job.displayName || job.username }}
                       </p>
                     </div>
 
 
                     @if (job.status === 'in_progress' || job.status === 'queued') {
-                      <div class="flex items-center gap-1.5 shrink-0">
-                        <span class="font-mono text-xs text-gray-400">{{ getAnimatedProgress(job) }}%</span>
-                        <button (click)="$event.stopPropagation(); cancelScan.emit(job.id)" title="Cancel Scan" class="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors">
+                      <div class="flex shrink-0 items-center gap-1.5">
+                        <span class="font-mono text-xs text-[var(--color-text4)]">{{ getAnimatedProgress(job) }}%</span>
+                        <button (click)="$event.stopPropagation(); cancelScan.emit(job.id)" title="Cancel Scan" class="flex h-6 w-6 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-colors hover:bg-red-500/10 hover:text-red-500">
                           <i class="bi bi-x-lg text-xs leading-none"></i>
                         </button>
                       </div>
                     }
 
                     @if (job.status !== 'in_progress' && job.status !== 'queued' && isUserBusy(job.username)) {
-                      <div class="flex items-center gap-1.5 shrink-0">
-                        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
-                        <button (click)="$event.stopPropagation(); cancelAllFetches.emit(job.username)" title="Cancel active fetches" class="w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors">
+                      <div class="flex shrink-0 items-center gap-1.5">
+                        <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-[var(--color-text4)]"></div>
+                        <button (click)="$event.stopPropagation(); cancelAllFetches.emit(job.username)" title="Cancel active fetches" class="flex h-6 w-6 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-colors hover:bg-red-500/10 hover:text-red-500">
                           <i class="bi bi-x-lg text-xs leading-none"></i>
                         </button>
                       </div>
@@ -79,23 +81,23 @@
                     <progress class="home-menu-progress-track mt-2" max="100" [value]="getAnimatedProgress(job)"></progress>
                   }
 
-                  <p class="text-xs text-gray-400 dark:text-gray-500 truncate mt-1 mb-0">{{ job.step }}</p>
+                  <p class="mb-0 mt-1 truncate text-xs text-[var(--color-text4)]">{{ job.step }}</p>
 
                   @if (job.status === 'completed' || job.status === 'failed') {
-                    <div class="flex justify-between items-center mt-2.5">
+                    <div class="mt-2.5 flex items-center justify-between">
 
-                      @if (activeUsernames().has(job.username)) {
-                        <span class="inline-flex items-center gap-1 text-[11px] font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-2 py-0.5 rounded-full">
-                          <i class="bi bi-check-circle-fill text-[10px]"></i> On Feed
+                      @if (hasResults(job.username)) {
+                        <span class="inline-flex items-center gap-1 rounded-full border border-green-500/20 bg-green-500/10 px-2 py-0.5 text-[11px] font-medium text-green-500">
+                          <i class="bi bi-check-circle-fill text-[10px]"></i> Results Ready
                         </span>
                       } @else {
-                        <span class="inline-flex items-center gap-1 text-[11px] font-medium text-gray-400 bg-gray-100 dark:bg-gray-700/30 px-2 py-0.5 rounded-full">
-                          <i class="bi bi-dash-circle text-[10px]"></i> Not on Feed
+                        <span class="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text4)]">
+                          <i class="bi bi-dash-circle text-[10px]"></i> No Results
                         </span>
                       }
 
                       <div class="flex items-center gap-1">
-                        <button (click)="$event.stopPropagation(); state.openDeleteConfirmation(job.username)" title="Delete Profile" class="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 transition-colors">
+                        <button (click)="$event.stopPropagation(); state.openDeleteConfirmation(job.username)" title="Delete Profile" class="flex h-7 w-7 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-colors hover:bg-red-500/10 hover:text-red-500">
                           <i class="bi bi-trash3 text-sm leading-none"></i>
                         </button>
                       </div>
@@ -107,22 +109,22 @@
           }
 
           @if (displayJobs().length < jobsWithFilter().length) {
-            <button (click)="loadMoreJobs()" class="w-full mt-2 rounded-xl bg-gray-100 dark:bg-[#3a3b3c] px-4 py-2 text-sm font-semibold text-[#1877f2] hover:bg-gray-200 dark:hover:bg-[#4a4b4c] transition-colors">
+            <button (click)="loadMoreJobs()" class="mt-2 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-2 text-sm font-semibold text-[var(--color-blue-640)] transition-colors hover:bg-[var(--color-blue-710)]">
               Load More
             </button>
           }
 
           @if (jobs().length === 0) {
-            <div class="flex flex-col items-center text-center py-10 opacity-50">
-              <i class="bi bi-clock-history text-3xl text-gray-300 dark:text-gray-600"></i>
-              <p class="text-sm text-gray-400 mt-2">Scan history is empty.</p>
+            <div class="flex flex-col items-center py-10 text-center opacity-70">
+              <i class="bi bi-clock-history text-3xl text-[var(--color-text4)]"></i>
+              <p class="mt-2 text-sm text-[var(--color-text4)]">Scan history is empty.</p>
             </div>
           }
           @if (!hasJobMatches() && jobs().length > 0) {
-            <div class="flex flex-col items-center text-center py-10">
-              <i class="bi bi-search text-3xl text-gray-300 dark:text-gray-600"></i>
-              <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mt-2">No Results Found</p>
-              <p class="text-xs text-gray-400">No scans match "{{ searchTerm() }}"</p>
+            <div class="flex flex-col items-center py-10 text-center">
+              <i class="bi bi-search text-3xl text-[var(--color-text4)]"></i>
+              <p class="mt-2 text-sm font-semibold text-[var(--color-text2)]">No Results Found</p>
+              <p class="text-xs text-[var(--color-text4)]">No scans match "{{ searchTerm() }}"</p>
             </div>
           }
         </div>
@@ -131,9 +133,9 @@
 
     </div>
 
-    <div sidebar-collapsed class="h-full flex flex-col items-center bg-white dark:bg-[#242526]">
-      <div class="py-4 flex flex-col items-center gap-3">
-        <button (click)="historyTabClicked.emit(undefined)" data-testid="home-menu-tab-history-collapsed" title="Scan History" class="w-9 h-9 flex items-center justify-center rounded-xl transition-colors bg-[#1877f2] text-white">
+    <div sidebar-collapsed class="flex h-full flex-col items-center bg-[var(--color-blue-820-light)]">
+      <div class="flex flex-col items-center gap-3 py-4">
+        <button (click)="historyTabClicked.emit(undefined)" data-testid="home-menu-tab-history-collapsed" title="Scan History" class="flex h-9 w-9 items-center justify-center rounded-[8px] bg-[var(--color-blue-640)] text-white transition-colors hover:bg-[var(--color-blue-630)]">
           <i class="bi bi-clock-history text-lg leading-none"></i>
         </button>
       </div>

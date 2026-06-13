@@ -3,7 +3,6 @@ import { Component, ChangeDetectionStrategy, input, output, computed, signal, in
 import { Job } from '../../../../shared/model/social/social-scan.models';
 import { FetchingStateService } from '../services/fetching-state.service';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
-import { SocialEntityUiService } from '../services/social-entity-ui.service';
 import { SidebarShellComponent } from '../../shared/sidebar-shell/sidebar-shell.component';
 @Component({
   selector: 'app-home-menu',
@@ -16,12 +15,11 @@ export class HomeMenuComponent implements OnDestroy {
   private fetchingState = inject(FetchingStateService);
   private animationFrameId: number | null = null;
 
-  readonly socialEntityUiService = inject(SocialEntityUiService);
   isCollapsed = input.required<boolean>();
   activeTab = signal<'history'>('history');
   searchTerm = input.required<string>();
   jobs = input.required<Job[]>();
-  activeUsernames = input.required<Set<string>>();
+  resultUsernames = input.required<Set<string>>();
   isSmallScreen = input.required<boolean>();
   toggle = output<undefined>();
   historyTabClicked = output<undefined>();
@@ -106,9 +104,24 @@ export class HomeMenuComponent implements OnDestroy {
     return this.fetchingState.isUserBusy(username);
   }
 
+  hasResults(username: string): boolean {
+    return this.resultUsernames().has(username);
+  }
+
   private pruneAnimatedProgress(jobs: Job[]) {
-    const next = this.socialEntityUiService.pruneAnimatedProgressMap(jobs, this.animatedProgressByJobId());
-    if (next) {
+    const activeJobIds = new Set(jobs.map(job => job.id));
+    const current = this.animatedProgressByJobId();
+    const next: Record<string, number> = {};
+    let changed = false;
+    for (const [jobId, progress] of Object.entries(current)) {
+      if (activeJobIds.has(jobId)) {
+        next[jobId] = progress;
+      }
+      else {
+        changed = true;
+      }
+    }
+    if (changed) {
       this.animatedProgressByJobId.set(next);
     }
   }

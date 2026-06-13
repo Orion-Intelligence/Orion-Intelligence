@@ -449,9 +449,9 @@ fi
 
 docker network create --driver bridge shared_bridge 2>/dev/null || true
 if [ "$COMPOSE_FILE" = "docker-compose.yml" ]; then
-    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d web nginx
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up web nginx
 else
-    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up
 fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && [ "$EXTRA_FLAG" = "-full" ]; then

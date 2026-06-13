@@ -4,7 +4,8 @@
   "packageManager": "npm@11.12.0",
   "scripts": {
     "ng": "ng",
-    "build": "npm run prebuild && NO_COLOR=1 NG_BUILD_MAX_ERRORS=1000 ng build --configuration=production && node post-build.js",
+    "prebuild": "node -e \"\"",
+    "build": "NO_COLOR=1 NG_BUILD_MAX_ERRORS=1000 ng build --configuration=production && node post-build.js",
     "production": "npm run prebuild && NO_COLOR=1 NG_BUILD_MAX_ERRORS=1000 ng build --configuration=production && node post-build.js",
     "test": "cypress",
     "lint": "npx eslint src/app --ext .ts,.html --max-warnings=1000",

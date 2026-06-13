@@ -1,18 +1,16 @@
-<div data-testid="social-graph-root" class="flex h-screen w-screen flex-col overflow-hidden bg-gray-100 dark:bg-[#18191a]">
+<div data-testid="social-graph-root" class="ui-dashboard-grid-bg flex h-screen w-screen flex-col overflow-hidden text-[var(--color-text2)]">
   @if (isTailwindReady()) {
-    @if (tabManager.activeTab(); as activeTab) {
-      <main class="flex-grow min-h-0 relative">
+    @if (tabManager.activeTab()) {
+      <main class="relative min-h-0 flex-grow">
         <input type="file" #imageInput class="hidden" (change)="onImageSelected($event)" accept="image/png, image/jpeg, image/webp, image/gif">
-        <div class="h-full w-full min-h-0 flex flex-col overflow-hidden" (click)="state.closeContextMenu()">
-          <div class="flex-grow min-h-0 flex flex-col lg:flex-row relative">
-
-            
+        <div class="flex h-full min-h-0 w-full flex-col overflow-hidden">
+          <div class="relative flex min-h-0 flex-grow flex-col lg:flex-row">
             <app-home-menu
-              class="hidden flex-shrink-0 flex-col overflow-hidden border-r border-gray-200 dark:border-[#3a3b3c] bg-white dark:bg-[#242526] lg:flex"
+              class="hidden flex-shrink-0 flex-col overflow-hidden border-r border-[var(--color-border)] bg-[var(--color-blue-820-light)] lg:flex"
               [isCollapsed]="isHomeMenuCollapsed()"
               [searchTerm]="homeMenuSearchTerm()"
               [jobs]="jobs()"
-              [activeUsernames]="activeUsernames()"
+              [resultUsernames]="resultUsernames()"
               [isSmallScreen]="isSmallScreen()"
               (toggle)="onHomeMenuToggled()"
               (historyTabClicked)="onHomeMenuHistoryTabClicked()"
@@ -24,241 +22,59 @@
               (imageUploadRequested)="triggerImageUpload()">
             </app-home-menu>
 
-            
-            <main class="relative flex min-h-0 flex-grow flex-col bg-gray-100 dark:bg-[#18191a]">
-
-              
-              <div class="flex-shrink-0 h-14 bg-white dark:bg-[#242526] border-b border-gray-200 dark:border-[#3a3b3c] px-4 flex items-center gap-3 shadow-sm z-10">
-
-                
-
-
-
-
-
-
-
-
-
-
-
-
-                
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                
-
-
-
-
+            <main class="relative flex min-h-0 flex-grow flex-col bg-transparent">
+              <div class="relative z-[1100] flex h-[60px] w-full flex-shrink-0 items-center justify-between overflow-visible border-b border-[var(--color-border)] bg-[var(--color-mono)] p-0">
                 <div class="flex-1"></div>
 
-                
-                <button (click)="onEntityMenuToggled()" class="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors" title="Toggle entity panel">
-                  <i class="bi bi-layout-sidebar-reverse text-base"></i>
-                </button>
-
-                
-                <button (click)="onHomeMenuToggled()" class="lg:hidden flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors">
+                <button (click)="onHomeMenuToggled()" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] lg:hidden">
                   <i class="bi bi-layout-sidebar text-base"></i>
                 </button>
+
+                <div class="mr-0 flex shrink-0 items-center">
+                  <app-profile></app-profile>
+                </div>
               </div>
 
-              
-              <div class="flex-grow min-h-0">
+              <div class="min-h-0 flex-grow">
                 <app-list-view
-                  [networkData]="networkData()"
                   [scanResults]="scanResults()"
-                  [customEntities]="customEntities()"
-                  (nodeClicked)="onNodeClicked($event)"
-                  (platformNodeClicked)="onPlatformNodeClicked($event)"
                   (sidebarPlatformClicked)="onSidebarPlatformClicked($event)"
-                  (deleteCustomEntity)="deleteCustomEntity($event)"
-                  (cancelEntityScan)="entityManager()?.cancelEntityScan($event)"
-                  (addEntityRequested)="entityManager()?.openAddEntityModal($event)"
-                  (fetchPostsInline)="handleFetchPostsInline($event)"
-                  (fetchImagesInline)="handleFetchImagesInline($event)"
-                  (fetchFollowersInline)="handleFetchFollowersInline($event)"
-                  (fetchFollowingInline)="handleFetchFollowingInline($event)"
-                  (fetchMetadataInline)="handleFetchMetadataInline($event)">
+                  (fetchPostsInline)="handleFetchSocialPosts($event)"
+                  (fetchImagesInline)="handleFetchImagesForPlatform($event)"
+                  (fetchFollowersInline)="handleFetchFollowers($event)"
+                  (fetchFollowingInline)="handleFetchFollowing($event)"
+                  (fetchMetadataInline)="fetchProfileDetails($event)">
                 </app-list-view>
               </div>
             </main>
-
-            
-            <app-entity-manager
-              class="flex h-full min-h-0 flex-shrink-0 flex-col overflow-hidden border-l border-gray-200 dark:border-[#3a3b3c] bg-white dark:bg-[#242526] transition-all duration-300"
-              [isCollapsed]="isEntityMenuCollapsed()"
-              [isSmallScreen]="isSmallScreen()"
-              [activeTabState]="activeTab.state"
-              (toggle)="onEntityMenuToggled()"
-              (deleteEntityRequested)="deleteCustomEntity($event)">
-            </app-entity-manager>
           </div>
 
           @if (state.notification()) {
             <app-notification-bar [data]="state.notification()"></app-notification-bar>
-          }
-          @if (state.contextMenuData()) {
-            <app-context-menu data-testid="social-context-menu" [data]="state.contextMenuData()" (action)="handleContextMenuAction($event)"></app-context-menu>
-          }
-
-          
-          @if (platformAliasModalData(); as aliasData) {
-            <div data-testid="social-alias-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" (click)="closePlatformAliasModal()">
-              <div data-testid="social-alias-modal" class="w-full max-w-md rounded-2xl border border-gray-200 dark:border-[#3a3b3c] bg-white dark:bg-[#242526] p-5 shadow-2xl" (click)="$event.stopPropagation()">
-                <div class="flex items-start justify-between gap-3 mb-4">
-                  <div class="min-w-0">
-                    <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Set Display Alias</h3>
-                    <p class="text-xs text-gray-400 truncate mt-0.5">Profile: &#64;{{ aliasData.username }}</p>
-                  </div>
-                  <button type="button" (click)="closePlatformAliasModal()" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors">
-                    <i class="bi bi-x-lg text-sm leading-none"></i>
-                  </button>
-                </div>
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Alias (display label only)</label>
-                <input data-testid="social-alias-input" type="text" [value]="platformAliasInput()" (input)="onPlatformAliasInputChanged($event)" placeholder="Leave empty to reset" class="block w-full rounded-xl border border-gray-200 dark:border-[#3a3b3c] bg-gray-50 dark:bg-[#3a3b3c] px-3 py-2 text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-[#1877f2]/30">
-                <div class="mt-4 flex items-center justify-end gap-2">
-                  <button data-testid="social-alias-cancel" type="button" (click)="closePlatformAliasModal()" class="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-[#3a3b3c] hover:bg-gray-200 dark:hover:bg-[#4a4b4c] transition-colors">Cancel</button>
-                  <button data-testid="social-alias-save" type="button" (click)="savePlatformAlias()" class="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#1877f2] hover:bg-blue-600 transition-colors">Save</button>
-                </div>
-              </div>
-            </div>
           }
         </div>
       </main>
     } @else {
       <app-graph-loading
         [title]="'Restoring Social Session'"
-        [subtitle]="'Loading tabs, profile state, and saved selections.'">
+        [subtitle]="'Loading saved scan state.'">
       </app-graph-loading>
     }
 
-    @if (state.isMetadataPopupVisible() && state.selectedPlatformData()) {
-      <app-metadata-popup
-        [data]="state.selectedPlatformData()!"
-        [isScanInProgress]="isMetadataUserScanInProgress()"
-        (close)="state.closeMetadataPopup()"
-        (fetchProfile)="fetchProfileDetails($event)"
-        (fetchPosts)="handleFetchSocialPosts($event)"
-        (fetchImages)="handleFetchImagesForPlatform($event)"
-        (fetchFollowers)="handleFetchFollowers($event)"
-        (fetchFollowing)="handleFetchFollowing($event)"
-        (cancelFetchProfile)="cancelFetchProfileDetails($event)"
-        (cancelFetchPosts)="handleCancelFetchSocialPosts($event)"
-        (cancelFetchImages)="handleCancelFetchImagesForPlatform($event)"
-        (cancelFetchFollowers)="handleCancelFetchFollowers($event)"
-        (cancelFetchFollowing)="handleCancelFetchFollowing($event)">
-      </app-metadata-popup>
-    }
-    @if (state.summaryPopupData(); as data) {
-      <app-profile-summary-popup
-        [username]="data.username"
-        [platforms]="data.platforms"
-        [email]="data.email"
-        [isScanInProgress]="isUserScanInProgress()"
-        (close)="state.closeSummaryPopup()"
-        (fetchProfile)="fetchProfileDetails($event)"
-        (fetchPosts)="handleFetchSocialPosts($event)"
-        (fetchFollowers)="handleFetchFollowers($event)"
-        (fetchFollowing)="handleFetchFollowing($event)"
-        (fetchPlatformImages)="handleFetchImagesForPlatform($event)"
-        (rescan)="handleRescan($event)"
-        (cancelFetchProfile)="cancelFetchProfileDetails($event)"
-        (cancelFetchPosts)="handleCancelFetchSocialPosts($event)"
-        (cancelFetchFollowers)="handleCancelFetchFollowers($event)"
-        (cancelFetchFollowing)="handleCancelFetchFollowing($event)"
-        (cancelFetchPlatformImages)="handleCancelFetchImagesForPlatform($event)"
-        (cancelAllFetches)="cancelAllFetchesForUser($event)">
-      </app-profile-summary-popup>
-    }
-    @if (state.followerScanPopupData(); as data) {
-      <app-follower-scan-popup
-        [platform]="data.platform"
-        (close)="state.closeFollowerScanPopup()"
-        (scan)="handleFollowerScan($event)"
-        (fetchFollowers)="handleFetchFollowers(data.platform)"
-        (fetchFollowing)="handleFetchFollowing(data.platform)">
-      </app-follower-scan-popup>
+    @if (state.deleteConfirmationData(); as data) {
+      <app-confirmation-popup [message]="data.message" (confirmed)="onDeleteConfirmation($event)"></app-confirmation-popup>
     }
     @if (state.manageProfilesModalData(); as data) {
       <app-manage-profiles-modal
         [data]="data"
         (close)="state.closeManageProfilesModal()"
-        (updateGraph)="updateGraphFromModal($event)"
+        (updateGraph)="updateProfilesFromModal($event)"
         (searchUsername)="handleImageFlowSearch($event)">
       </app-manage-profiles-modal>
     }
-    @if (entityManager()?.addEntityModalData(); as data) {
-      <app-add-entity-modal
-        [data]="data"
-        (close)="entityManager()?.closeAddEntityModal()"
-        (addEntity)="entityManager()?.confirmAddEntity($event)">
-      </app-add-entity-modal>
-    }
-    @if (selectedEntityReport(); as entity) {
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm" (click)="closeEntityReportPopup()">
-        <div class="flex w-full max-w-3xl max-h-[85vh] flex-col overflow-hidden rounded-2xl border border-gray-200 dark:border-[#3a3b3c] bg-white dark:bg-[#242526] shadow-2xl" (click)="$event.stopPropagation()">
-          <div class="flex items-center justify-between border-b border-gray-100 dark:border-[#3a3b3c] px-5 py-4">
-            <div class="min-w-0">
-              <h2 class="truncate text-lg font-semibold text-gray-900 dark:text-gray-100">{{ entity.label }}</h2>
-              <p class="text-xs text-gray-400 mt-0.5">Type: {{ entity.type }} | Value: {{ entity.value }}</p>
-            </div>
-            <button type="button" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors" (click)="closeEntityReportPopup()">
-              <i class="bi bi-x-lg text-sm"></i>
-            </button>
-          </div>
-          <div class="overflow-y-auto px-5 py-4">
-            @if (getEntityReportRecords(entity).length === 0) {
-              <p class="text-sm text-gray-400 text-center py-8">No report data available for this entity.</p>
-            }
-            @for (record of getEntityReportRecords(entity); track $index; let recordIndex = $index) {
-              <div class="rounded-xl border border-gray-100 dark:border-[#3a3b3c] bg-gray-50 dark:bg-[#3a3b3c] p-3 mb-3">
-                @if (getEntityReportRecords(entity).length > 1) {
-                  <div class="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-2">Record {{ recordIndex + 1 }}</div>
-                }
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  @for (item of getEntityRecordEntries(record); track $index) {
-                    <div class="rounded-lg bg-white dark:bg-[#242526] border border-gray-100 dark:border-[#3a3b3c] p-2.5">
-                      <div class="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-1">{{ item.label }}</div>
-                      @for (valueItem of item.values; track $index) {
-                        <div class="text-sm break-words text-gray-800 dark:text-gray-200">{{ valueItem }}</div>
-                      }
-                    </div>
-                  }
-                </div>
-              </div>
-            }
-          </div>
-        </div>
-      </div>
-    }
-    @if (state.deleteConfirmationData(); as data) {
-      <app-confirmation-popup [message]="data.message" (confirmed)="onDeleteConfirmation($event)"></app-confirmation-popup>
-    }
-    @if (state.infoModalData(); as data) {
-      <app-message-popup [message]="data.message" (confirmed)="onInfoPopupConfirmed($event)"></app-message-popup>
-    }
-    @if (state.relationshipPopupData(); as data) {
-      <app-relationship-details-popup [data]="data" (close)="state.closeRelationshipPopup()"></app-relationship-details-popup>
-    }
   } @else {
     <app-graph-loading
-      [title]="'Loading Social Mapper'"
+      [title]="'Loading Social Intelligence'"
       [subtitle]="'Loading styles.'">
     </app-graph-loading>
   }
