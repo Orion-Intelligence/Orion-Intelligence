@@ -4,10 +4,10 @@
       <main class="relative min-h-0 flex-grow">
         <input type="file" #imageInput class="hidden" (change)="onImageSelected($event)" accept="image/png, image/jpeg, image/webp, image/gif">
         <div class="flex h-full min-h-0 w-full flex-col overflow-hidden">
-          <div class="relative flex min-h-0 flex-grow flex-col lg:flex-row">
+          <div class="relative flex min-h-0 flex-grow flex-row">
             <app-home-menu
-              class="hidden flex-shrink-0 flex-col overflow-hidden border-r border-[var(--color-border)] bg-[var(--color-blue-820-light)] lg:flex"
-              [isCollapsed]="isHomeMenuCollapsed()"
+              class="flex flex-shrink-0 flex-col overflow-hidden border-r border-[var(--color-border)] bg-[var(--color-blue-820-light)]"
+              [isCollapsed]="effectiveHomeMenuCollapsed()"
               [searchTerm]="homeMenuSearchTerm()"
               [jobs]="jobs()"
               [resultUsernames]="resultUsernames()"
@@ -22,13 +22,10 @@
               (imageUploadRequested)="triggerImageUpload()">
             </app-home-menu>
 
+            @if (!(isSmallScreen() && isMobileHomeMenuOpen())) {
             <main class="relative flex min-h-0 flex-grow flex-col bg-transparent">
               <div class="relative z-[1100] flex h-[60px] w-full flex-shrink-0 items-center justify-between overflow-visible border-b border-[var(--color-border)] bg-[var(--color-mono)] p-0">
                 <div class="flex-1"></div>
-
-                <button (click)="onHomeMenuToggled()" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] lg:hidden">
-                  <i class="bi bi-layout-sidebar text-base"></i>
-                </button>
 
                 <div class="mr-0 flex shrink-0 items-center">
                   <app-profile></app-profile>
@@ -47,6 +44,7 @@
                 </app-list-view>
               </div>
             </main>
+            }
           </div>
 
           @if (state.notification()) {

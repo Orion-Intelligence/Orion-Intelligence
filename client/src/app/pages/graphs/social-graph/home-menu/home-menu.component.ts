@@ -4,11 +4,12 @@ import { Job } from '../../../../shared/model/social/social-scan.models';
 import { FetchingStateService } from '../services/fetching-state.service';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
 import { SidebarShellComponent } from '../../shared/sidebar-shell/sidebar-shell.component';
+import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 @Component({
   selector: 'app-home-menu',
   templateUrl: './home-menu.component.html',
   standalone: true,
-  imports: [SidebarShellComponent],
+  imports: [SidebarShellComponent, TooltipDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeMenuComponent implements OnDestroy {
@@ -71,10 +72,10 @@ export class HomeMenuComponent implements OnDestroy {
   getJobClasses(job: Job): string {
     const baseClasses = 'p-3 rounded-lg relative border bg-slate-800/50 transition-all duration-200';
     if (job.status === 'completed') {
-      return `${baseClasses} border-slate-700 cursor-pointer hover:border-indigo-500 hover:bg-slate-800`;
+      return `${baseClasses} border-slate-700 cursor-pointer hover:border-[var(--color-blue-640)] hover:bg-slate-800`;
     }
     if (job.status === 'in_progress' || job.status === 'queued') {
-      return `${baseClasses} border-indigo-500/50`;
+      return `${baseClasses} border-[rgba(87,165,235,0.5)]`;
     }
     if (job.status === 'failed') {
       return `${baseClasses} border-red-500/50`;
@@ -106,6 +107,21 @@ export class HomeMenuComponent implements OnDestroy {
 
   hasResults(username: string): boolean {
     return this.resultUsernames().has(username);
+  }
+
+  getJobInitial(job: Job): string {
+    const label = (job.displayName || job.username || '').trim();
+    return (label.charAt(0) || '?').toUpperCase();
+  }
+
+  getJobTooltip(job: Job): string {
+    return job.displayName && job.displayName !== job.username
+      ? `${job.displayName} (${job.username})`
+      : job.username;
+  }
+
+  isJobSelected(job: Job): boolean {
+    return this.state.isActiveUser(job.username);
   }
 
   private pruneAnimatedProgress(jobs: Job[]) {

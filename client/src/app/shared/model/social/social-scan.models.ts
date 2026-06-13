@@ -74,6 +74,7 @@ export interface TabState {
     jobs: WritableSignal<Job[]>;
     scanResults: WritableSignal<Map<string, PlatformResult[]>>;
     isHomeMenuCollapsed: WritableSignal<boolean>;
+    activeUsername: WritableSignal<string | null>;
 }
 export type SerializableTabState = {
     [K in keyof TabState]: ReturnType<TabState[K]>;

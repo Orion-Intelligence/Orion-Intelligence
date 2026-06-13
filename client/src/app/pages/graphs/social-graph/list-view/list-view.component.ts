@@ -6,17 +6,20 @@ import { SocialMapperStateService } from '../services/social-mapper-state.servic
 import { FetchingStateService } from '../services/fetching-state.service';
 import { getMetadataEntries, getProfileDetailEntries } from '../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
+import { StealerlogSectionComponent } from '../stealerlog-section/stealerlog-section.component';
 
 interface FeedUser {
   username: string;
   platforms: PlatformResult[];
 }
 
+type FetchTabKey = 'details' | 'posts' | 'images' | 'connections' | 'followers' | 'following';
+
 @Component({
   selector: 'app-list-view',
   templateUrl: './list-view.component.html',
   standalone: true,
-  imports: [SocialIconComponent],
+  imports: [SocialIconComponent, StealerlogSectionComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListViewComponent {
@@ -32,9 +35,9 @@ export class ListViewComponent {
 
   public state = inject(SocialMapperStateService);
   public fetchingState = inject(FetchingStateService);
-  activeTabs = signal<Record<string, string | null>>({});
+  activeTabs = signal<Record<string, FetchTabKey | null>>({});
   profileOverviewIds = signal<Set<string>>(new Set<string>());
-  fetchTabs = [
+  fetchTabs: { key: FetchTabKey; label: string; icon: string; }[] = [
     { key: 'details', label: 'Details', icon: 'bi bi-person-vcard' },
     { key: 'posts', label: 'Posts', icon: 'bi bi-file-post' },
     { key: 'images', label: 'Images', icon: 'bi bi-images' },
@@ -59,32 +62,41 @@ export class ListViewComponent {
   hasResults = computed(() => this.activeUsers().length > 0);
   activeUser = computed(() => {
     const users = this.activeUsers();
-    const index = Math.min(this.state.activeUserIndex(), Math.max(users.length - 1, 0));
-    return users[index] ?? null;
+    const activeUsername = this.state.activeUsername();
+    if (activeUsername) {
+      const matchingUser = users.find(user => user.username.toLowerCase() === activeUsername.toLowerCase());
+      if (matchingUser) {
+        return matchingUser;
+      }
+    }
+    return users[0] ?? null;
   });
 
-  setActiveTab(platformId: string, tabKey: string): void {
+  setActiveTab(platformId: string, tabKey: FetchTabKey, platformData?: PlatformResult): void {
     this.activeTabs.update(current => ({ ...current, [platformId]: tabKey }));
+    if (platformData) {
+      this.fetchTabData(platformData, tabKey);
+    }
   }
 
-  openProfileOverviewTab(platformId: string, tabKey: string): void {
+  openProfileOverviewTab(platformId: string, tabKey: FetchTabKey, platformData?: PlatformResult): void {
     this.profileOverviewIds.set(new Set<string>([platformId]));
-    this.setActiveTab(platformId, tabKey);
+    this.setActiveTab(platformId, tabKey, platformData);
   }
 
-  openConnectionsOverview(platformId: string): void {
-    this.openProfileOverviewTab(platformId, 'connections');
+  openConnectionsOverview(platformId: string, platformData?: PlatformResult): void {
+    this.openProfileOverviewTab(platformId, 'connections', platformData);
   }
 
   openManageProfiles(user: FeedUser): void {
     this.state.openManageProfilesModal(user.username);
   }
 
-  getActiveTab(platformId: string): string {
+  getActiveTab(platformId: string): FetchTabKey {
     return this.activeTabs()[platformId] ?? 'details';
   }
 
-  isTabLoading(platformData: PlatformResult, tabKey: string): boolean {
+  isTabLoading(platformData: PlatformResult, tabKey: FetchTabKey): boolean {
     const key = this.fetchingState.getPlatformUniqueKey(platformData);
     switch (tabKey) {
       case 'details':
@@ -100,6 +112,51 @@ export class ListViewComponent {
         return !!this.fetchingState.following()[key];
       default:
         return false;
+    }
+  }
+
+  private fetchTabData(platformData: PlatformResult, tabKey: FetchTabKey): void {
+    if (this.hasTabData(platformData, tabKey) && !this.isTabLoading(platformData, tabKey)) {
+      return;
+    }
+    this.refetchTabData(platformData, tabKey);
+  }
+
+  refetchTabData(platformData: PlatformResult, tabKey: FetchTabKey): void {
+    switch (tabKey) {
+      case 'details':
+        this.fetchMetadataInline.emit(platformData);
+        break;
+      case 'posts':
+      case 'connections':
+        this.fetchPostsInline.emit(platformData);
+        break;
+      case 'images':
+        this.fetchImagesInline.emit(platformData);
+        break;
+      case 'followers':
+        this.fetchFollowersInline.emit(platformData);
+        break;
+      case 'following':
+        this.fetchFollowingInline.emit(platformData);
+        break;
+    }
+  }
+
+  private hasTabData(platformData: PlatformResult, tabKey: FetchTabKey): boolean {
+    switch (tabKey) {
+      case 'details':
+        return this.getProfileDetailEntries(platformData).length > 0;
+      case 'posts':
+        return this.getUniquePosts(platformData).length > 0;
+      case 'connections':
+        return this.getPostConnections(platformData).length > 0;
+      case 'images':
+        return (platformData.images || []).length > 0;
+      case 'followers':
+        return this.getFollowers(platformData).length > 0;
+      case 'following':
+        return this.getFollowing(platformData).length > 0;
     }
   }
 
@@ -154,11 +211,6 @@ export class ListViewComponent {
     return this.PRIORITY_PLATFORMS.includes(platformName.toLowerCase());
   }
 
-  setActiveUserIndex(index: number): void {
-    this.state.activeUserIndex.set(index);
-    this.profileOverviewIds.set(new Set<string>());
-  }
-
   getFollowers(platformData: PlatformResult): string[] {
     return platformData.followers_list || [];
   }
@@ -189,10 +241,6 @@ export class ListViewComponent {
 
   getPlatformTrackKey(_index: number, platformData: PlatformResult): string {
     return this.getPlatformCardId(platformData);
-  }
-
-  getUserTrackKey(_index: number, user: FeedUser): string {
-    return user.username;
   }
 
   getProfileBio(platformData: PlatformResult): string {
@@ -283,14 +331,13 @@ export class ListViewComponent {
     return username;
   }
 
-  toggleProfileOverview(platformId: string): void {
-    this.profileOverviewIds.update(current => {
-      if (current.has(platformId)) {
-        return new Set<string>();
-      }
-      this.setActiveTab(platformId, 'details');
-      return new Set<string>([platformId]);
-    });
+  toggleProfileOverview(platformId: string, platformData?: PlatformResult): void {
+    if (this.profileOverviewIds().has(platformId)) {
+      this.profileOverviewIds.set(new Set<string>());
+      return;
+    }
+    this.profileOverviewIds.set(new Set<string>([platformId]));
+    this.setActiveTab(platformId, 'details', platformData);
   }
 
   isProfileOverviewActive(platformId: string): boolean {
@@ -303,11 +350,21 @@ export class ListViewComponent {
 
   handleSidebarPlatformClick(platformId: string): void {
     if (this.profileOverviewIds().size > 0) {
-      this.setActiveTab(platformId, 'details');
+      this.setActiveTab(platformId, 'details', this.getPlatformById(platformId));
       this.profileOverviewIds.set(new Set([platformId]));
       return;
     }
     this.sidebarPlatformClicked.emit(platformId);
+  }
+
+  private getPlatformById(platformId: string): PlatformResult | undefined {
+    for (const user of this.activeUsers()) {
+      const platform = user.platforms.find(current => this.getPlatformCardId(current) === platformId);
+      if (platform) {
+        return platform;
+      }
+    }
+    return undefined;
   }
 
   private comparePlatforms(a: PlatformResult, b: PlatformResult): number {

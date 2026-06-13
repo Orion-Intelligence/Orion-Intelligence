@@ -28,15 +28,46 @@ export class SocialMapperStateService {
   deleteUsername = signal<string | null>(null);
   infoModalData = signal<InfoPopupData | null>(null);
   manageProfilesModalData = signal<ManageProfilesModalData | null>(null);
-  activeUserIndex = signal<number>(0);
+  activeUsername = computed(() => {
+    const usernames = this.scannedUsernames();
+    const selectedUsername = this.activeTabState()?.activeUsername() ?? null;
+    if (selectedUsername) {
+      const matchingUsername = usernames.find(username => username.toLowerCase() === selectedUsername.toLowerCase());
+      if (matchingUsername) {
+        return matchingUsername;
+      }
+    }
+    return usernames[0] ?? null;
+  });
+  activeUserIndex = computed(() => {
+    const activeUsername = this.activeUsername();
+    if (!activeUsername) {
+      return 0;
+    }
+    const index = this.scannedUsernames().findIndex(username => username.toLowerCase() === activeUsername.toLowerCase());
+    return index === -1 ? 0 : index;
+  });
   highlightedNodeId = signal<string | null>(null);
 
   setActiveUserByUsername(username: string): void {
     const normalizedUsername = username.toLowerCase();
     const index = this.scannedUsernames().findIndex(current => current.toLowerCase() === normalizedUsername);
     if (index !== -1) {
-      this.activeUserIndex.set(index);
+      this.activeTabState()?.activeUsername.set(this.scannedUsernames()[index] ?? username);
+      this.tabManager.scheduleSave();
     }
+  }
+
+  setActiveUserIndex(index: number): void {
+    const usernames = this.scannedUsernames();
+    const boundedIndex = Math.min(Math.max(index, 0), Math.max(usernames.length - 1, 0));
+    this.activeTabState()?.activeUsername.set(usernames[boundedIndex] ?? null);
+    this.tabManager.scheduleSave();
+  }
+
+  isActiveUser(username: string): boolean {
+    const activeUsername = this.activeUsername();
+    return !!activeUsername && activeUsername.toLowerCase() === username.toLowerCase();
   }
 
   openDeleteConfirmation(username: string): void {

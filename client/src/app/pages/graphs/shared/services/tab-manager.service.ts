@@ -33,6 +33,7 @@ export class TabManagerService {
       jobs: signal<Job[]>([]),
       scanResults: signal(new Map<string, PlatformResult[]>()),
       isHomeMenuCollapsed: signal(false),
+      activeUsername: signal<string | null>(null),
     };
   }
 

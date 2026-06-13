@@ -1,13 +1,18 @@
 <div class="flex h-full w-full flex-col">
   @if (isCollapsed()) {
-    <div class="mt-[10px] flex w-full shrink-0 items-center justify-center px-0 py-[10px] text-[24px] font-medium">
-      <button (click)="toggleClicked.emit(undefined)" aria-label="Expand sidebar" title="Expand sidebar" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-transparent bg-transparent p-0 transition-colors hover:bg-[var(--color-blue-870)]">
+    <div class="flex w-full shrink-0 items-center justify-center pt-0 text-[24px] font-medium">
+      <button (click)="toggleClicked.emit(undefined)" aria-label="Expand sidebar" title="Expand sidebar" class="mx-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-transparent bg-transparent p-0 transition-colors hover:bg-[var(--color-blue-870)]">
         <img alt="Menu" class="block h-5 w-5 shrink-0 max-w-none object-contain" height="20" src="assets/images/sidebar/menu-mini.svg" width="20" />
       </button>
     </div>
+    <div class="mt-1 flex w-full shrink-0 items-center justify-center px-2 py-2 text-[24px] font-medium">
+      <a [href]="homeHref()" [title]="logoAlt()" aria-label="Go to homepage" class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-[8px] transition-colors hover:bg-[var(--color-blue-870)]">
+        <img [alt]="logoAlt()" class="block h-[30px] w-[30px] shrink-0 max-w-none object-contain" height="30" src="assets/images/shared/logo-min.svg" width="30" />
+      </a>
+    </div>
   } @else {
     <div class="mt-[10px] flex w-full shrink-0 items-center justify-between px-[20px] py-[10px] text-[24px] font-medium">
-      <a [href]="homeHref()" [title]="logoAlt()" aria-label="Go to homepage" class="hidden min-h-[48px] max-w-full items-center pr-[8px] lg:inline-flex">
+      <a [href]="homeHref()" [title]="logoAlt()" aria-label="Go to homepage" class="inline-flex min-h-[48px] max-w-full items-center pr-[8px]">
         <img [src]="logoSrc" [alt]="logoAlt()" class="block max-h-[36px] w-auto max-w-full object-contain" height="44" width="246">
       </a>
       <button (click)="toggleClicked.emit(undefined)" aria-label="Collapse sidebar" title="Collapse sidebar" class="inline-flex h-[48px] w-[48px] shrink-0 cursor-pointer items-center justify-center rounded-[8px] border-0 bg-transparent p-0">

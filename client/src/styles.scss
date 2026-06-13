@@ -1516,6 +1516,46 @@ body.demo-tour-scroll-locked {
   );
 }
 
+.ui-social-manage-platform-card {
+  background: rgba(15, 23, 42, 0.12);
+}
+
+.ui-social-manage-platform-card:hover,
+.ui-social-manage-platform-card[data-selected='true'] {
+  border-color: rgba(16, 185, 129, 0.18) !important;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(16, 185, 129, 0.07) 0%,
+      rgba(34, 197, 94, 0.035) 42%,
+      rgba(16, 185, 129, 0.018) 68%,
+      var(--color-blue-820-light) 100%
+    ) !important;
+}
+
+.ui-social-manage-platform-card[data-selected='true'] {
+  box-shadow:
+    0 10px 24px var(--color-shadow-light),
+    inset 0 0 0 1px rgba(16, 185, 129, 0.08);
+}
+
+.ui-social-manage-switch {
+  background: var(--color-blue-720);
+}
+
+.ui-social-manage-switch:hover {
+  background: rgba(16, 185, 129, 0.14);
+}
+
+.ui-social-manage-switch[data-selected='true'] {
+  background: #059669;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+}
+
+.ui-social-manage-switch[data-selected='true']:hover {
+  background: #10b981;
+}
+
 @keyframes ui-profile-dropdown-in {
   0% {
     opacity: 0;
@@ -2413,9 +2453,9 @@ select:not(.ui-popup-select):not(.ui-select)::-ms-expand {
 }
 
 .light-theme [data-testid='social-manage-profiles-modal'] {
-  border-color: var(--color-border) !important;
-  background: var(--color-blue-820-light) !important;
-  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.12) !important;
+  border-color: #d2deec !important;
+  background: rgba(247, 251, 255, 0.95) !important;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.14) !important;
 }
 
 .light-theme [data-testid='social-manage-profiles-modal'] > .bg-slate-850\/90,
@@ -2459,6 +2499,12 @@ select:not(.ui-popup-select):not(.ui-select)::-ms-expand {
   color: var(--color-text1) !important;
 }
 
+.light-theme [data-testid='social-manage-profiles-modal'] input[data-testid='social-manage-profiles-filter']:focus,
+.light-theme [data-testid='social-manage-profiles-modal'] .social-mapper-input:focus {
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.14) !important;
+}
+
 .light-theme [data-testid='social-manage-profiles-modal'] input[data-testid='social-manage-profiles-filter']::placeholder,
 .light-theme [data-testid='social-manage-profiles-modal'] .social-mapper-input::placeholder {
   color: var(--color-text4) !important;
@@ -2488,6 +2534,23 @@ select:not(.ui-popup-select):not(.ui-select)::-ms-expand {
 .light-theme [data-testid='social-manage-profiles-modal'] .hover\:bg-slate-600:hover,
 .light-theme [data-testid='social-manage-profiles-modal'] .hover\:bg-slate-700:hover {
   background: var(--color-blue-720) !important;
+}
+
+.light-theme [data-testid='social-manage-profiles-modal'] .ui-social-manage-switch {
+  background: var(--color-blue-720) !important;
+}
+
+.light-theme [data-testid='social-manage-profiles-modal'] .ui-social-manage-switch:hover {
+  background: rgba(16, 185, 129, 0.14) !important;
+}
+
+.light-theme [data-testid='social-manage-profiles-modal'] .ui-social-manage-switch[data-selected='true'] {
+  background: #059669 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12) !important;
+}
+
+.light-theme [data-testid='social-manage-profiles-modal'] .ui-social-manage-switch[data-selected='true']:hover {
+  background: #10b981 !important;
 }
 
 .light-theme [data-testid='social-manage-profiles-modal'] .bg-green-500\/10,
@@ -3083,6 +3146,11 @@ app-world-heatmap .country:not(.can-open-reports) {
 .home-menu-progress-track::-moz-progress-bar {
   background: linear-gradient(90deg, #fb923c 0%, #f97316 100%);
   border-radius: 999px;
+}
+
+app-home-menu .ui-social-history-job[data-selected='true'] {
+  background: var(--color-blue-870) !important;
+  background-color: var(--color-blue-870) !important;
 }
 
 @media (width <= 768px) {

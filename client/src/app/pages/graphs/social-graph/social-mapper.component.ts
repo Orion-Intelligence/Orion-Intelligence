@@ -15,7 +15,7 @@ import { PlatformFetchService } from './services/platform-fetch.service';
 import { GraphLoadingComponent } from '../shared/graph-loading/graph-loading.component';
 import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/utils/file-input.util';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
-import { ManageProfilesModalComponent } from './profile-summary-popup/manage-profiles-modal/manage-profiles-modal.component';
+import { ManageProfilesModalComponent } from './profile-popups/manage-profiles-modal/manage-profiles-modal.component';
 
 @Component({
   selector: 'app-social-graph',
@@ -42,7 +42,12 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   private cancelFollowersFetchSubjects = new Map<string, Subject<void>>();
   private cancelFollowingFetchSubjects = new Map<string, Subject<void>>();
   private mediaQueryList: MediaQueryList | null = null;
-  private readonly mediaQueryListener = (event: MediaQueryListEvent) => this.isSmallScreen.set(event.matches);
+  private readonly mediaQueryListener = (event: MediaQueryListEvent) => {
+    this.isSmallScreen.set(event.matches);
+    if (!event.matches) {
+      this.closeMobileHomeMenu();
+    }
+  };
 
   public state = inject(SocialMapperStateService);
   isTailwindReady = signal(true);
@@ -52,6 +57,8 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   resultUsernames = computed(() => new Set(Array.from(this.scanResults().keys())));
   isHomeMenuCollapsed = computed(() => this.activeTabState()?.isHomeMenuCollapsed() ?? false);
   isSmallScreen = signal(false);
+  isMobileHomeMenuOpen = signal(false);
+  effectiveHomeMenuCollapsed = computed(() => this.isSmallScreen() ? !this.isMobileHomeMenuOpen() : this.isHomeMenuCollapsed());
   imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
 
   constructor(
@@ -95,11 +102,22 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
   }
 
   onHomeMenuToggled(): void {
+    if (this.isSmallScreen()) {
+      this.isMobileHomeMenuOpen.update(isOpen => !isOpen);
+      return;
+    }
     this.updateState(state => state.isHomeMenuCollapsed.update(v => !v), false);
   }
 
+  closeMobileHomeMenu(): void {
+    this.isMobileHomeMenuOpen.set(false);
+  }
+
   onHomeMenuHistoryTabClicked(): void {
-    this.state.activeUserIndex.set(0);
+    this.state.setActiveUserIndex(0);
+    if (this.isSmallScreen()) {
+      this.closeMobileHomeMenu();
+    }
   }
 
   triggerScan(): void {
@@ -157,6 +175,9 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       return;
     }
     this.state.setActiveUserByUsername(job.username);
+    if (this.isSmallScreen()) {
+      this.closeMobileHomeMenu();
+    }
   }
 
   private initiateScan(username: string): void {
@@ -200,26 +221,31 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
         return newMap;
       });
     });
-    this.state.activeUserIndex.set(0);
+    this.state.setActiveUserIndex(0);
   }
 
   fetchProfileDetails(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
     this.fetchData(p, 'profile', this.scanService.fetchProfileInfo(p.platform, p.username), this.cancelProfileFetchSubjects);
   }
 
   handleFetchSocialPosts(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
     this.fetchData(p, 'posts', this.scanService.fetchSocialPosts(p.platform, p.username), this.cancelPostFetchSubjects);
   }
 
   handleFetchImagesForPlatform(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
     this.fetchData(p, 'platformImages', this.scanService.fetchPlatformImages(p.platform, p.username), this.cancelPlatformImageFetchSubjects);
   }
 
   handleFetchFollowers(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
     this.fetchData(p, 'followers', this.scanService.fetchFollowers(p.platform, p.username), this.cancelFollowersFetchSubjects);
   }
 
   handleFetchFollowing(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
     this.fetchData(p, 'following', this.scanService.fetchFollowing(p.platform, p.username), this.cancelFollowingFetchSubjects);
   }
 

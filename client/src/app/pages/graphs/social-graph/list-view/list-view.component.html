@@ -8,24 +8,8 @@
       </div>
     </div>
   } @else {
-    @if (activeUsers().length > 1) {
-      <div class="flex-shrink-0 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
-        <div class="flex gap-0 overflow-x-auto scrollbar-none">
-          @for (user of activeUsers(); track getUserTrackKey($index, user); let i = $index) {
-            <button (click)="setActiveUserIndex(i)" class="flex flex-shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold transition-colors hover:text-[var(--color-text1)]" [class.border-sky-400]="state.activeUserIndex() === i" [class.text-sky-400]="state.activeUserIndex() === i" [class.border-transparent]="state.activeUserIndex() !== i" [class.text-slate-400]="state.activeUserIndex() !== i">
-              <div class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-[8px] bg-[var(--color-blue-640)] text-[10px] font-bold text-white">
-                {{ user.username.charAt(0).toUpperCase() }}
-              </div>
-              {{ user.username }}
-              <span class="rounded-full px-1.5 py-0.5 text-[10px] font-medium" [class.bg-sky-500]="state.activeUserIndex() === i" [class.text-white]="state.activeUserIndex() === i" [class.bg-gray-100]="state.activeUserIndex() !== i" [class.text-slate-400]="state.activeUserIndex() !== i">{{ user.platforms.length }}</span>
-            </button>
-          }
-        </div>
-      </div>
-    }
-
     <div class="min-h-0 flex-1 overflow-y-auto bg-transparent [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
-      <div class="mx-auto flex max-w-6xl items-start gap-4 p-4">
+      <div class="mx-auto flex max-w-[1480px] items-start gap-4 p-4">
         <aside class="sticky top-4 hidden max-h-[calc(100vh-5rem)] w-[240px] flex-shrink-0 flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar lg:flex">
           @if (activeUser(); as user) {
             <div class="flex-shrink-0 overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]">
@@ -117,10 +101,10 @@
                   }
 
                   <div class="mt-3 flex flex-wrap items-center gap-3 border-t border-[var(--color-border)] px-4 py-3">
-                    <button (click)="toggleProfileOverview(getPlatformCardId(platformData))" class="inline-flex items-center gap-2 rounded-[8px] bg-[var(--color-blue-640)] px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+                    <button (click)="toggleProfileOverview(getPlatformCardId(platformData), platformData)" class="inline-flex items-center gap-2 rounded-[8px] bg-[var(--color-blue-640)] px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
                       <i class="bi bi-person-lines-fill"></i> Profile Overview
                     </button>
-                    <button data-testid="social-list-followers-following" (click)="openConnectionsOverview(getPlatformCardId(platformData))" class="inline-flex items-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-1.5 text-xs font-semibold text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
+                    <button data-testid="social-list-followers-following" (click)="openConnectionsOverview(getPlatformCardId(platformData), platformData)" class="inline-flex items-center gap-2 rounded-[8px] border border-emerald-500/20 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/15 hover:text-emerald-100">
                       <i class="bi bi-people-fill"></i> Connections
                     </button>
                   </div>
@@ -181,22 +165,16 @@
                           <i class="bi bi-person-vcard text-sm text-[var(--color-text4)]"></i>
                           <p class="mb-0 truncate text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Profile Details</p>
                         </div>
-                        <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-text4)]">{{ getProfileDetailEntries(platformData).length }} fields</span>
                       </div>
-                      <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      <div class="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)]">
                         @for (item of getProfileDetailEntries(platformData); track trackByKey($index, item)) {
-                          <div class="group rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 py-2.5 transition-colors hover:border-sky-400/35 hover:bg-[var(--color-blue-710)]">
-                            <div class="mb-1.5 flex items-center justify-between gap-2">
-                              <div class="flex min-w-0 items-center gap-2">
-                                <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full" [class.bg-sky-500]="isUrl(item.value) && !isImageUrl(item.value)" [class.bg-emerald-500]="isImageUrl(item.value)" [class.bg-amber-500]="isNumeric(item.value) && !isImageUrl(item.value) && !isUrl(item.value)" [class.bg-rose-400]="isBool(item.value)" [class.bg-slate-300]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)">
-                                </span>
-                                <span class="truncate text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ formatKey(item.key) }}</span>
-                              </div>
-                              <button (click)="copyToClipboard(item.value)" class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text4)] opacity-0 transition-all hover:bg-[var(--color-blue-720)] hover:text-[var(--color-blue-640)] group-hover:opacity-100" title="Copy value">
-                                <i class="bi bi-clipboard text-[10px]"></i>
-                              </button>
+                          <div class="group flex items-start gap-3 border-b border-[rgba(148,163,184,0.08)] bg-[rgba(15,23,42,0.05)] px-3 py-2.5 transition-colors last:border-b-0 hover:bg-[rgba(87,165,235,0.07)]">
+                            <div class="flex w-[128px] flex-shrink-0 items-center gap-2 pt-0.5">
+                              <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full" [class.bg-sky-500]="isUrl(item.value) && !isImageUrl(item.value)" [class.bg-emerald-500]="isImageUrl(item.value)" [class.bg-amber-500]="isNumeric(item.value) && !isImageUrl(item.value) && !isUrl(item.value)" [class.bg-rose-400]="isBool(item.value)" [class.bg-slate-300]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)">
+                              </span>
+                              <span class="min-w-0 truncate text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ formatKey(item.key) }}</span>
                             </div>
-                            <div class="min-h-[22px] break-words font-mono text-[12px] leading-5 text-[var(--color-text2)]">
+                            <div class="min-w-0 flex-1 break-words text-[13px] font-medium leading-5 text-[var(--color-text2)]" [class.tabular-nums]="isNumeric(item.value)">
                               @if (isImageUrl(item.value)) {
                                 <div class="flex items-center gap-2">
                                   <img [src]="item.value" [alt]="item.key" class="h-8 w-8 flex-shrink-0 rounded-[6px] object-cover">
@@ -208,6 +186,9 @@
                                 {{ item.value }}
                               }
                             </div>
+                            <button (click)="copyToClipboard(item.value)" class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text4)] opacity-0 transition-all hover:bg-emerald-500/10 hover:text-emerald-300 group-hover:opacity-100" title="Copy value">
+                              <i class="bi bi-clipboard text-[10px]"></i>
+                            </button>
                           </div>
                         }
                       </div>
@@ -257,7 +238,7 @@
                 } @else {
                   <div class="ui-social-profile-overview-in">
                     <div class="flex items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
-                      <button (click)="toggleProfileOverview(getPlatformCardId(platformData))" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]" title="Back to feed">
+                      <button (click)="toggleProfileOverview(getPlatformCardId(platformData), platformData)" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[8px] border border-emerald-500/20 bg-emerald-500/10 text-emerald-300 transition-colors hover:bg-emerald-500/15 hover:text-emerald-100" title="Back to feed">
                         <i class="bi bi-arrow-left text-base"></i>
                       </button>
                       <div class="flex min-w-0 flex-1 items-center gap-3">
@@ -272,14 +253,11 @@
                           <div class="mt-1 text-[11px] font-medium text-[var(--color-text4)]">{{ platformData.platform }}</div>
                         </div>
                       </div>
-                      <button (click)="fetchMetadataInline.emit(platformData)" class="flex h-8 items-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 text-[11px] font-bold text-white shadow-sm shadow-blue-500/20 transition-all hover:bg-[var(--color-blue-630)] active:scale-95">
-                        <i class="bi bi-lightning-fill"></i> Fetch Details
-                      </button>
                     </div>
 
                     <div class="flex overflow-x-auto border-b border-[var(--color-border)] bg-[var(--color-blue-700)] px-2">
                       @for (tab of fetchTabs; track tab.key) {
-                        <button (click)="setActiveTab(getPlatformCardId(platformData), tab.key)" class="relative flex items-center gap-1.5 px-4 py-3 text-xs font-semibold transition-colors" [class.text-sky-400]="getActiveTab(getPlatformCardId(platformData)) === tab.key" [class.text-slate-400]="getActiveTab(getPlatformCardId(platformData)) !== tab.key">
+                        <button (click)="setActiveTab(getPlatformCardId(platformData), tab.key, platformData)" class="relative flex items-center gap-1.5 px-4 py-3 text-xs font-semibold transition-colors" [class.text-sky-400]="getActiveTab(getPlatformCardId(platformData)) === tab.key" [class.text-slate-400]="getActiveTab(getPlatformCardId(platformData)) !== tab.key">
                           <i [class]="tab.icon"></i>
                           {{ tab.label }}
                           @if (isTabLoading(platformData, tab.key)) {
@@ -292,18 +270,56 @@
                     <div class="min-h-[220px] bg-[var(--color-blue-820-light)]">
                       @if (getActiveTab(getPlatformCardId(platformData)) === 'details') {
                         <div class="px-4 py-3">
-                          @if (getProfileDetailEntries(platformData).length === 0) {
-                            <div class="flex flex-col items-center justify-center gap-2 py-10 text-center">
-                              <i class="bi bi-person-vcard text-2xl text-[var(--color-text4)]"></i>
-                              <p class="text-sm text-[var(--color-text4)]">No fetched profile details yet.</p>
-                              <button (click)="fetchMetadataInline.emit(platformData)" class="rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white">Fetch Details</button>
+                          @if (isTabLoading(platformData, 'details') && getProfileDetailEntries(platformData).length === 0) {
+                            <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                              <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+                                <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                              </div>
+                              <div>
+                                <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">Loading profile details</p>
+                                <p class="mb-0 text-xs text-[var(--color-text4)]">Fetching the latest profile metadata.</p>
+                              </div>
+                              <button (click)="refetchTabData(platformData, 'details')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/15 hover:text-emerald-100">
+                                <i class="bi bi-arrow-clockwise text-[11px]"></i> Restart fetch
+                              </button>
+                            </div>
+                          } @else if (getProfileDetailEntries(platformData).length === 0) {
+                            <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                              <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
+                                <i class="bi bi-person-vcard text-base"></i>
+                              </div>
+                              <div>
+                                <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No profile details found</p>
+                                <p class="mb-0 text-xs text-[var(--color-text4)]">Try fetching this section again.</p>
+                              </div>
+                              <button (click)="refetchTabData(platformData, 'details')" class="inline-flex items-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+                                <i class="bi bi-arrow-clockwise text-[11px]"></i> Retry fetch
+                              </button>
                             </div>
                           } @else {
-                            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            <div class="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)]">
                               @for (item of getProfileDetailEntries(platformData); track trackByKey($index, item)) {
-                                <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2">
-                                  <div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ formatKey(item.key) }}</div>
-                                  <div class="break-words text-sm text-[var(--color-text2)]">{{ item.value }}</div>
+                                <div class="group flex items-start gap-3 border-b border-[rgba(148,163,184,0.08)] bg-[rgba(15,23,42,0.05)] px-3 py-2.5 transition-colors last:border-b-0 hover:bg-[rgba(87,165,235,0.07)]">
+                                  <div class="flex w-[128px] flex-shrink-0 items-center gap-2 pt-0.5">
+                                    <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full" [class.bg-sky-500]="isUrl(item.value) && !isImageUrl(item.value)" [class.bg-emerald-500]="isImageUrl(item.value)" [class.bg-amber-500]="isNumeric(item.value) && !isImageUrl(item.value) && !isUrl(item.value)" [class.bg-rose-400]="isBool(item.value)" [class.bg-slate-300]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)">
+                                    </span>
+                                    <span class="min-w-0 truncate text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ formatKey(item.key) }}</span>
+                                  </div>
+                                  <div class="min-w-0 flex-1 break-words text-[13px] font-medium leading-5 text-[var(--color-text2)]" [class.tabular-nums]="isNumeric(item.value)">
+                                    @if (isImageUrl(item.value)) {
+                                      <div class="flex items-center gap-2">
+                                        <img [src]="item.value" [alt]="item.key" class="h-8 w-8 flex-shrink-0 rounded-[6px] object-cover">
+                                        <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-[11px] text-[var(--color-blue-640)] hover:underline">view image</a>
+                                      </div>
+                                    } @else if (isUrl(item.value)) {
+                                      <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="break-all text-[var(--color-blue-640)] hover:underline">{{ item.value }}</a>
+                                    } @else {
+                                      {{ item.value }}
+                                    }
+                                  </div>
+                                  <button (click)="copyToClipboard(item.value)" class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text4)] opacity-0 transition-all hover:bg-emerald-500/10 hover:text-emerald-300 group-hover:opacity-100" title="Copy value">
+                                    <i class="bi bi-clipboard text-[10px]"></i>
+                                  </button>
                                 </div>
                               }
                             </div>
@@ -315,39 +331,64 @@
                         <div class="px-4 py-3">
                           <div class="mb-3 flex items-center justify-between gap-3">
                             <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Posts</p>
-                            <button (click)="fetchPostsInline.emit(platformData)" class="rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white">Fetch Posts</button>
                           </div>
-                          @if (getUniquePosts(platformData).length === 0) {
-                            <div class="rounded-[8px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-700)] px-4 py-8 text-center text-sm text-[var(--color-text4)]">No posts loaded.</div>
+                          @if (isTabLoading(platformData, 'posts') && getUniquePosts(platformData).length === 0) {
+                            <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                              <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+                                <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                              </div>
+                              <div>
+                                <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">Loading posts</p>
+                                <p class="mb-0 text-xs text-[var(--color-text4)]">Fetching posts for this profile.</p>
+                              </div>
+                              <button (click)="refetchTabData(platformData, 'posts')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/15 hover:text-emerald-100">
+                                <i class="bi bi-arrow-clockwise text-[11px]"></i> Restart fetch
+                              </button>
+                            </div>
+                          } @else if (getUniquePosts(platformData).length === 0) {
+                            <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                              <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
+                                <i class="bi bi-file-post text-base"></i>
+                              </div>
+                              <div>
+                                <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No posts found</p>
+                                <p class="mb-0 text-xs text-[var(--color-text4)]">Run the post fetch again for this profile.</p>
+                              </div>
+                              <button (click)="refetchTabData(platformData, 'posts')" class="inline-flex items-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+                                <i class="bi bi-arrow-clockwise text-[11px]"></i> Retry fetch
+                              </button>
+                            </div>
                           } @else {
-                            <div class="flex flex-col gap-3">
+                            <div class="flex flex-col gap-2.5">
                               @for (post of getUniquePosts(platformData); track post.post_url || $index) {
-                                <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3">
+                                <div class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3 transition-colors hover:bg-[rgba(87,165,235,0.06)]">
                                   <div class="flex items-start justify-between gap-3">
                                     <div class="min-w-0">
-                                      <p class="mb-1 text-sm text-[var(--color-text2)]">{{ getPostCaption(post) || 'Untitled post' }}</p>
-                                      <p class="mb-0 text-xs text-[var(--color-text4)]">{{ post.datetime }}</p>
+                                      <p class="mb-1 break-words text-sm font-medium leading-5 text-[var(--color-text2)]">{{ getPostCaption(post) || 'Untitled post' }}</p>
+                                      @if (post.datetime) {
+                                        <p class="mb-0 text-[11px] text-[var(--color-text4)]">{{ post.datetime }}</p>
+                                      }
                                     </div>
                                     @if (post.post_url) {
-                                      <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[8px] bg-[var(--color-blue-720)] text-[var(--color-text4)] hover:text-[var(--color-blue-640)]">
+                                      <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[8px] border border-emerald-500/20 bg-emerald-500/10 text-emerald-300 transition-colors hover:bg-emerald-500/15 hover:text-emerald-100" title="Open post">
                                         <i class="bi bi-box-arrow-up-right text-xs"></i>
                                       </a>
                                     }
                                   </div>
                                   @if (hasPostMedia(post)) {
-                                    <div class="mt-3 overflow-hidden rounded-[8px] border border-[var(--color-border)]">
+                                    <div class="mt-3 overflow-hidden rounded-[8px] border border-[rgba(148,163,184,0.16)] bg-[var(--color-blue-700)]">
                                       @if (isVideoPost(post)) {
-                                        <video [src]="post.media_url" controls class="max-h-96 w-full bg-black"></video>
+                                        <video [src]="post.media_url" controls class="max-h-[420px] w-full bg-black"></video>
                                       } @else {
-                                        <img [src]="post.media_url" [alt]="getPostMediaTypeLabel(post)" class="max-h-96 w-full object-cover">
+                                        <img [src]="post.media_url" [alt]="getPostMediaTypeLabel(post)" class="max-h-[420px] w-full object-cover">
                                       }
                                     </div>
                                   }
-                                  <div class="mt-3 flex flex-wrap gap-2 text-[11px] text-[var(--color-text4)]">
-                                    <span>{{ formatPostMetric(post.likes) }} likes</span>
-                                    <span>{{ formatPostMetric(post.comments) }} comments</span>
-                                    <span>{{ formatPostMetric(post.shares) }} shares</span>
-                                    <span>{{ formatPostMetric(post.views) }} views</span>
+                                  <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[rgba(148,163,184,0.10)] pt-2 text-[11px] font-medium text-[var(--color-text4)]">
+                                    <span class="tabular-nums">{{ formatPostMetric(post.likes) }} likes</span>
+                                    <span class="tabular-nums">{{ formatPostMetric(post.comments) }} comments</span>
+                                    <span class="tabular-nums">{{ formatPostMetric(post.shares) }} shares</span>
+                                    <span class="tabular-nums">{{ formatPostMetric(post.views) }} views</span>
                                   </div>
                                 </div>
                               }
@@ -360,15 +401,44 @@
                         <div class="px-4 py-3">
                           <div class="mb-3 flex items-center justify-between gap-3">
                             <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Images</p>
-                            <button (click)="fetchImagesInline.emit(platformData)" class="rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white">Fetch Images</button>
                           </div>
-                          @if ((platformData.images || []).length === 0) {
-                            <div class="rounded-[8px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-700)] px-4 py-8 text-center text-sm text-[var(--color-text4)]">No images loaded.</div>
+                          @if (isTabLoading(platformData, 'images') && (platformData.images || []).length === 0) {
+                            <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                              <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+                                <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                              </div>
+                              <div>
+                                <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">Loading images</p>
+                                <p class="mb-0 text-xs text-[var(--color-text4)]">Fetching media results for this profile.</p>
+                              </div>
+                              <button (click)="refetchTabData(platformData, 'images')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/15 hover:text-emerald-100">
+                                <i class="bi bi-arrow-clockwise text-[11px]"></i> Restart fetch
+                              </button>
+                            </div>
+                          } @else if ((platformData.images || []).length === 0) {
+                            <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                              <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
+                                <i class="bi bi-images text-base"></i>
+                              </div>
+                              <div>
+                                <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No images found</p>
+                                <p class="mb-0 text-xs text-[var(--color-text4)]">Run the image fetch again for this profile.</p>
+                              </div>
+                              <button (click)="refetchTabData(platformData, 'images')" class="inline-flex items-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+                                <i class="bi bi-arrow-clockwise text-[11px]"></i> Retry fetch
+                              </button>
+                            </div>
                           } @else {
-                            <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                            <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                               @for (image of platformData.images || []; track image.image_url || image.thumbnail || $index) {
-                                <a [href]="image.image_url || image.thumbnail" target="_blank" rel="noopener noreferrer" class="group relative overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)]">
-                                  <img [src]="image.thumbnail || image.image_url" [alt]="image.title || image.source || 'Social image'" class="aspect-square w-full object-cover transition-transform group-hover:scale-105">
+                                <a [href]="image.image_url || image.thumbnail" target="_blank" rel="noopener noreferrer" class="group relative block overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] shadow-[0_8px_18px_var(--color-shadow-light)] transition-colors hover:border-sky-400/35 hover:bg-[rgba(87,165,235,0.06)]">
+                                  <img [src]="image.thumbnail || image.image_url" [alt]="image.title || image.source || 'Social image'" class="aspect-[4/5] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
+                                  <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
+                                    <p class="mb-0 truncate text-[10px] font-semibold text-white">{{ image.title || image.source || 'Image result' }}</p>
+                                  </div>
+                                  <span class="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-[8px] bg-black/45 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                  </span>
                                 </a>
                               }
                             </div>
@@ -380,10 +450,33 @@
                         <div class="px-4 py-3">
                           <div class="mb-3 flex items-center justify-between gap-3">
                             <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Post Mentions</p>
-                            <button (click)="fetchPostsInline.emit(platformData)" class="rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white">Fetch Posts</button>
                           </div>
-                          @if (getPostConnections(platformData).length === 0) {
-                            <div class="rounded-[8px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-700)] px-4 py-8 text-center text-sm text-[var(--color-text4)]">No post mentions loaded.</div>
+                          @if (isTabLoading(platformData, 'connections') && getPostConnections(platformData).length === 0) {
+                            <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                              <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+                                <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                              </div>
+                              <div>
+                                <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">Loading post mentions</p>
+                                <p class="mb-0 text-xs text-[var(--color-text4)]">Fetching post data for connections.</p>
+                              </div>
+                              <button (click)="refetchTabData(platformData, 'connections')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/15 hover:text-emerald-100">
+                                <i class="bi bi-arrow-clockwise text-[11px]"></i> Restart fetch
+                              </button>
+                            </div>
+                          } @else if (getPostConnections(platformData).length === 0) {
+                            <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                              <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
+                                <i class="bi bi-diagram-3 text-base"></i>
+                              </div>
+                              <div>
+                                <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No post mentions found</p>
+                                <p class="mb-0 text-xs text-[var(--color-text4)]">Run the post fetch again for this profile.</p>
+                              </div>
+                              <button (click)="refetchTabData(platformData, 'connections')" class="inline-flex items-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+                                <i class="bi bi-arrow-clockwise text-[11px]"></i> Retry fetch
+                              </button>
+                            </div>
                           } @else {
                             <div class="flex flex-wrap gap-2">
                               @for (connection of getPostConnections(platformData); track trackByUsername($index, connection)) {
@@ -398,10 +491,33 @@
                         <div class="px-4 py-3">
                           <div class="mb-3 flex items-center justify-between gap-3">
                             <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Followers</p>
-                            <button (click)="fetchFollowersInline.emit(platformData)" class="rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white">Fetch Followers</button>
                           </div>
-                          @if (getFollowers(platformData).length === 0) {
-                            <div class="rounded-[8px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-700)] px-4 py-8 text-center text-sm text-[var(--color-text4)]">No followers loaded.</div>
+                          @if (isTabLoading(platformData, 'followers') && getFollowers(platformData).length === 0) {
+                            <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                              <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+                                <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                              </div>
+                              <div>
+                                <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">Loading followers</p>
+                                <p class="mb-0 text-xs text-[var(--color-text4)]">Fetching followers for this profile.</p>
+                              </div>
+                              <button (click)="refetchTabData(platformData, 'followers')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/15 hover:text-emerald-100">
+                                <i class="bi bi-arrow-clockwise text-[11px]"></i> Restart fetch
+                              </button>
+                            </div>
+                          } @else if (getFollowers(platformData).length === 0) {
+                            <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                              <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
+                                <i class="bi bi-people text-base"></i>
+                              </div>
+                              <div>
+                                <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No followers found</p>
+                                <p class="mb-0 text-xs text-[var(--color-text4)]">Run the followers fetch again for this profile.</p>
+                              </div>
+                              <button (click)="refetchTabData(platformData, 'followers')" class="inline-flex items-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+                                <i class="bi bi-arrow-clockwise text-[11px]"></i> Retry fetch
+                              </button>
+                            </div>
                           } @else {
                             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                               @for (follower of getFollowers(platformData); track trackByUsername($index, follower)) {
@@ -416,10 +532,33 @@
                         <div class="px-4 py-3">
                           <div class="mb-3 flex items-center justify-between gap-3">
                             <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Following</p>
-                            <button (click)="fetchFollowingInline.emit(platformData)" class="rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white">Fetch Following</button>
                           </div>
-                          @if (getFollowing(platformData).length === 0) {
-                            <div class="rounded-[8px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-700)] px-4 py-8 text-center text-sm text-[var(--color-text4)]">No following list loaded.</div>
+                          @if (isTabLoading(platformData, 'following') && getFollowing(platformData).length === 0) {
+                            <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                              <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+                                <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                              </div>
+                              <div>
+                                <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">Loading following</p>
+                                <p class="mb-0 text-xs text-[var(--color-text4)]">Fetching following list for this profile.</p>
+                              </div>
+                              <button (click)="refetchTabData(platformData, 'following')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/15 hover:text-emerald-100">
+                                <i class="bi bi-arrow-clockwise text-[11px]"></i> Restart fetch
+                              </button>
+                            </div>
+                          } @else if (getFollowing(platformData).length === 0) {
+                            <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                              <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
+                                <i class="bi bi-person-plus text-base"></i>
+                              </div>
+                              <div>
+                                <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No following results found</p>
+                                <p class="mb-0 text-xs text-[var(--color-text4)]">Run the following fetch again for this profile.</p>
+                              </div>
+                              <button (click)="refetchTabData(platformData, 'following')" class="inline-flex items-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+                                <i class="bi bi-arrow-clockwise text-[11px]"></i> Retry fetch
+                              </button>
+                            </div>
                           } @else {
                             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                               @for (following of getFollowing(platformData); track trackByUsername($index, following)) {
@@ -437,6 +576,11 @@
             }
           }
         </div>
+        <aside class="sticky top-4 hidden w-[260px] flex-shrink-0 lg:block">
+          @if (activeUser(); as user) {
+            <app-social-stealerlog-section [username]="user.username"></app-social-stealerlog-section>
+          }
+        </aside>
       </div>
     </div>
   }
