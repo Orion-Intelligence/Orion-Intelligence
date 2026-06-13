@@ -6,7 +6,6 @@ import { SocialMapperStateService } from '../services/social-mapper-state.servic
 import { FetchingStateService } from '../services/fetching-state.service';
 import { getMetadataEntries, getProfileDetailEntries } from '../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
-<<<<<<< HEAD
 import { StealerlogSectionComponent } from '../stealerlog-section/stealerlog-section.component';
 
 interface FeedUser {
@@ -17,20 +16,12 @@ interface FeedUser {
 type FetchTabKey = 'details' | 'posts' | 'images' | 'connections' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs';
 type FetchTab = { key: FetchTabKey; label: string; icon: string; };
 type OnlinePresenceFetchRequest = { platformData: PlatformResult; token: string; };
-=======
-import { getEntityRecordEntries, getEntityReportRecords, getScanResultsByUsername, parsePlatformNodeId } from '../utils/social-graph-view.util';
-import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
->>>>>>> trusted-main
 
 @Component({
   selector: 'app-list-view',
   templateUrl: './list-view.component.html',
   standalone: true,
-<<<<<<< HEAD
   imports: [SocialIconComponent, StealerlogSectionComponent],
-=======
-  imports: [SocialIconComponent, TranslatePipe],
->>>>>>> trusted-main
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListViewComponent {

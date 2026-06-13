@@ -21,7 +21,6 @@
               (scanRequested)="triggerScan()"
               (imageUploadRequested)="triggerImageUpload()">
             </app-home-menu>
-<<<<<<< HEAD
 
             @if (!(isSmallScreen() && isMobileHomeMenuOpen())) {
             <main class="relative flex min-h-0 flex-grow flex-col bg-transparent">
@@ -45,138 +44,6 @@
                   (fetchStealerLogsInline)="handleFetchStealerLogs($event)"
                   (fetchMetadataInline)="fetchProfileDetails($event)">
                 </app-list-view>
-=======
-            <main class="relative flex min-h-0 flex-grow flex-col bg-[var(--color-blue-850)] bg-[radial-gradient(circle,rgba(100,116,139,0.15)_1px,transparent_1px)] bg-[length:2rem_2rem]">
-              <app-graph-toolbar
-                [searchTerm]="searchTerm()"
-                [isSearchDisabled]="isSearchDisabled()"
-                [searchPlaceholder]="('Enter username to scan...') | translate"
-                [searchActionLabel]="('Scan') | translate"
-                [showImageButton]="true"
-                [showEditToggle]="true"
-                [viewMode]="viewMode()"
-                [isPhysicsEnabled]="isPhysicsEnabled()"
-                [isEditMode]="isEditMode()"
-                [canEditConnections]="canEditConnections()"
-                (searchChanged)="onSearchChanged($event)"
-                (searchSubmitted)="triggerScan()"
-                (imageSearchClicked)="triggerImageUpload()"
-                (viewModeChanged)="onViewModeChanged($event)"
-                (physicsToggled)="onPhysicsToggled()"
-                (editModeToggled)="onEditModeToggled()">
-              </app-graph-toolbar>
-              <div class="flex-grow min-h-0 w-full relative overflow-hidden">
-                @if (viewMode() === 'graph') {
-                  @if (networkData().nodes.length > 0) {
-                    <div class="absolute top-2 left-2 z-10 animate-[social-mapper-fade-in_0.4s_ease-in-out] sm:top-4 sm:left-4">
-                      <div class="relative h-10">
-                        <app-graph-search-trigger [isExpanded]="isGraphSearchExpanded()" (triggered)="expandGraphSearch()"></app-graph-search-trigger>
-                        <div class="absolute top-0 left-0 w-[22rem] max-w-[calc(100vw-2rem)] transition-all duration-300 ease-out origin-top-left" [class.opacity-100]="isGraphSearchExpanded()" [class.opacity-0]="!isGraphSearchExpanded()" [class.scale-100]="isGraphSearchExpanded()" [class.scale-95]="!isGraphSearchExpanded()" [class.pointer-events-auto]="isGraphSearchExpanded()" [class.pointer-events-none]="!isGraphSearchExpanded()">
-                          <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
-                            <i class="bi bi-search w-5 h-5 text-[var(--color-text4)] leading-none"></i>
-                          </div>
-                          <input data-testid="social-graph-search-input" type="text" [placeholder]="'Search on graph...' | translate" [value]="graphSearchTerm()" (input)="onGraphSearchChanged($event)" (blur)="collapseGraphSearch()" class="relative z-0 block w-full rounded-full border border-[var(--color-border)] bg-white py-2.5 pl-11 pr-10 text-[var(--color-text2)] shadow-lg placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6" />
-                          @if (graphSearchTerm()) {
-                            <button data-testid="social-graph-search-clear" (click)="clearGraphSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--color-text4)] hover:text-[var(--color-text2)] transition-colors">
-                              <i class="bi bi-x-circle-fill"></i>
-                            </button>
-                          }
-                          @if (!graphSearchTerm()) {
-                            <button (click)="toggleGraphSearch()" class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--color-text4)] hover:text-[var(--color-text2)] transition-colors">
-                              <i class="bi bi-x-lg text-sm"></i>
-                            </button>
-                          }
-                        </div>
-                      </div>
-                    </div>
-                  }
-                  <app-network-graph
-                    [data]="networkData()"
-                    [focusNodeId]="state.nodeToFocus()"
-                    [editMode]="isEditMode()"
-                    [physicsEnabled]="isPhysicsEnabled()"
-                    [searchTerm]="graphSearchTerm()"
-                    [nodesWithFollows]="nodesWithFollows()"
-                    (nodeClicked)="onNodeClicked($event)"
-                    (platformNodeClicked)="onPlatformNodeClicked($event)"
-                    (relationshipNodeClicked)="onRelationshipNodeClicked($event)"
-                    (groupClicked)="handleGroupNodeClicked($event)"
-                    (followersShortcutClicked)="openFollowerScanFromNode($event)"
-                    (dragStart)="state.closeContextMenu()"
-                    (zoom)="state.closeContextMenu()"
-                    (edgeAdded)="handleEdgeAdded($event)"
-                    (edgeDeleted)="handleEdgeDeleted($event)">
-                  </app-network-graph>
-                  @if (networkData().nodes.length === 0) {
-                    <div class="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none text-center text-[var(--color-text4)]">
-                      <div class="text-center opacity-[0.3]">
-                        <i class="bi bi-share mx-auto text-5xl text-[var(--color-text4)]"></i>
-                        <p class="mt-3 text-2xl font-semibold text-[var(--color-text2)]">{{ 'Graph is Waiting for Data' | translate }}</p>
-                        <p class="text-[var(--color-text4)]">{{ 'Complete a scan or add an entity to begin visualization.' | translate }}</p>
-                      </div>
-                    </div>
-                  }
-                  @if (networkData().nodes.length > 0) {
-                    <div class="ui-graph-legend-shell absolute bottom-4 left-4 animate-[social-mapper-fade-in_0.4s_ease-in-out] select-none rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/90 p-3 shadow-lg backdrop-blur-sm">
-                      <h3 class="mb-2 border-b border-[var(--color-border)] pb-1 text-sm font-semibold text-[var(--color-text2)]">{{ 'Legend' | translate }}</h3>
-                      <div class="flex flex-col gap-2">
-                        <div class="flex items-center gap-2">
-                          <div class="w-4 h-4 rounded-full border-2 border-indigo-400 bg-indigo-800 flex-shrink-0"></div>
-                          <span class="text-xs text-[var(--color-text4)]">{{ 'User Profile' | translate }}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                          <div class="w-4 h-4 rounded-full border-2 border-teal-500 bg-[var(--color-blue-720)] flex-shrink-0 flex items-center justify-center">
-                            <i class="bi bi-at text-white text-[10px]"></i>
-                          </div>
-                          <span class="text-xs text-[var(--color-text4)]">{{ 'Social Platform' | translate }}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                          <div class="w-4 h-4 flex items-center justify-center text-sky-400">
-                            <i class="bi bi-stack"></i>
-                          </div>
-                          <span class="text-xs text-[var(--color-text4)]">{{ 'Platform Group' | translate }}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                          <div class="w-4 h-4 rounded-md border-2 border-green-400 bg-green-800 flex-shrink-0"></div>
-                          <span class="text-xs text-[var(--color-text4)]">{{ 'Custom Entity' | translate }}</span>
-                        </div>
-                        <div class="my-1 h-px bg-[var(--color-border)]"></div>
-                        <div class="flex items-center gap-2">
-                          <div class="w-4 h-4 rounded-full border-2 border-sky-500 bg-[var(--color-blue-720)] flex-shrink-0 flex items-center justify-center p-0.5">
-                            <i class="bi bi-twitter-x text-[8px] text-white"></i>
-                          </div>
-                          <span class="text-xs text-[var(--color-text4)]">{{ 'Platform Connection' | translate }}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                          <div class="flex w-4 items-center text-[var(--color-text4)]">
-                            &rarr;
-                          </div>
-                          <span class="text-xs text-[var(--color-text4)]">{{ 'Connection Direction' | translate }}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                          <div class="w-4 flex items-center">
-                            <div class="h-px w-full border-t-2 border-dashed border-[#a78bfa]"></div>
-                          </div>
-                          <span class="text-xs text-[var(--color-text4)]">{{ 'Entity Connection' | translate }}</span>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                } @else {
-                  @if (viewMode() === 'list') {
-                    <app-list-view
-                      [networkData]="networkData()"
-                      [scanResults]="scanResults()"
-                      [customEntities]="customEntities()"
-                      [isSmallScreen]="isSmallScreen()"
-                      [expandedPlatformNodeId]="expandedPlatformNodeId()"
-                      (nodeClicked)="onNodeClicked($event)"
-                      (platformNodeClicked)="onPlatformNodeClicked($event)"
-                      (deleteCustomEntity)="deleteCustomEntity($event)">
-                    </app-list-view>
-                  }
-                }
->>>>>>> trusted-main
               </div>
             </main>
             }
@@ -185,44 +52,12 @@
           @if (state.notification()) {
             <app-notification-bar [data]="state.notification()"></app-notification-bar>
           }
-<<<<<<< HEAD
-=======
-          @if (state.contextMenuData()) {
-            <app-context-menu data-testid="social-context-menu" [data]="state.contextMenuData()" (action)="handleContextMenuAction($event)"></app-context-menu>
-          }
-          @if (platformAliasModalData(); as aliasData) {
-            <div data-testid="social-alias-modal-overlay" class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center" (click)="closePlatformAliasModal()">
-              <div data-testid="social-alias-modal" class="ui-graph-popup-panel w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-850)] p-4 shadow-2xl" (click)="$event.stopPropagation()">
-                <div class="flex items-start justify-between gap-3">
-                  <div class="min-w-0">
-                    <h3 class="text-base font-semibold text-[var(--color-text1)] mb-1">{{ 'Set Graph Alias' | translate }}</h3>
-                    <p class="text-xs text-[var(--color-text4)] truncate mb-0">Profile: @{{ aliasData.username }}</p>
-                  </div>
-                  <button type="button" (click)="closePlatformAliasModal()" class="ui-social-popup-icon-btn" [title]="'common.actions.close' | translate"><i class="bi bi-x-lg text-[15px] leading-none"></i></button>
-                </div>
-                <div class="mt-4">
-                  <label class="block text-xs font-medium text-[var(--color-text4)] mb-1">{{ 'Alias (graph label only)' | translate }}</label>
-                  <input data-testid="social-alias-input" type="text" [value]="platformAliasInput()" (input)="onPlatformAliasInputChanged($event)" [placeholder]="'Leave empty to reset' | translate" class="block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] px-3 py-2 text-white shadow-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:text-sm sm:leading-6" />
-                </div>
-                <div class="mt-4 flex items-center justify-end gap-2">
-                  <button data-testid="social-alias-cancel" type="button" (click)="closePlatformAliasModal()" class="rounded-lg bg-[var(--color-blue-720)] px-3 py-2 text-sm font-medium text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]">{{ 'common.actions.cancel' | translate }}</button>
-                  <button data-testid="social-alias-save" type="button" (click)="savePlatformAlias()" class="rounded-lg bg-sky-700 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-sky-600">{{ 'Save' | translate }}</button>
-                </div>
-              </div>
-            </div>
-          }
->>>>>>> trusted-main
         </div>
       </main>
     } @else {
       <app-graph-loading
-<<<<<<< HEAD
         [title]="'Restoring Social Session'"
         [subtitle]="'Loading saved scan state.'">
-=======
-        [title]="('Restoring Social Session') | translate"
-        [subtitle]="('Loading tabs, profile state, graph data, and saved selections.') | translate">
->>>>>>> trusted-main
       </app-graph-loading>
     }
 
@@ -237,87 +72,10 @@
         (searchUsername)="handleImageFlowSearch($event)">
       </app-manage-profiles-modal>
     }
-<<<<<<< HEAD
   } @else {
     <app-graph-loading
       [title]="'Loading Social Intelligence'"
       [subtitle]="'Loading styles.'">
-=======
-    @if (entityManager()?.addEntityModalData(); as data) {
-      <app-add-entity-modal
-        [data]="data"
-        (close)="entityManager()?.closeAddEntityModal()"
-        (addEntity)="entityManager()?.confirmAddEntity($event)">
-      </app-add-entity-modal>
-    }
-    @if (selectedEntityReport(); as entity) {
-      <div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-[30px]" (click)="closeEntityReportPopup()">
-        <div class="ui-graph-popup-panel flex w-full max-w-3xl max-h-[85vh] flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-2xl" (click)="$event.stopPropagation()">
-          <div class="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
-            <div class="min-w-0">
-              <h2 class="truncate text-lg font-semibold text-[var(--color-text1)] mb-0">{{ entity.label }}</h2>
-              <p class="text-xs text-[var(--color-text4)] mb-0">{{ 'categoryAlerts.export.type' | translate }}: {{ entity.type }} |{{ 'Value' | translate }}: {{ entity.value }}</p>
-            </div>
-            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-[var(--color-text4)] transition hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]" (click)="closeEntityReportPopup()">
-              <i class="bi bi-x-lg"></i>
-            </button>
-          </div>
-          <div class="overflow-y-auto px-5 py-4">
-            @if (getEntityReportRecords(entity).length === 0) {
-              <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-830)] p-4 text-sm text-[var(--color-text4)]">
-                {{ 'No report data available for this entity.' | translate }}
-              </div>
-            }
-            @if (getEntityReportRecords(entity).length > 0) {
-              <div class="space-y-3">
-                @for (record of getEntityReportRecords(entity); track $index; let recordIndex = $index) {
-                  <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-830)] p-3">
-                    @if (getEntityReportRecords(entity).length > 1) {
-                      <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Record' | translate }} {{ recordIndex + 1 }}</div>
-                    }
-                    <div class="space-y-2">
-                      @for (item of getEntityRecordEntries(record); track $index) {
-                        <div class="rounded-md border border-[rgba(148,163,184,0.12)] bg-[var(--color-blue-800)]/50 p-2">
-                          <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ item.label }}</div>
-                          <div class="mt-1 space-y-1">
-                            @for (valueItem of item.values; track $index) {
-                              <div class="text-sm break-words text-[var(--color-text1)]">{{ valueItem }}</div>
-                            }
-                          </div>
-                        </div>
-                      }
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-          </div>
-        </div>
-      </div>
-    }
-    @if (state.deleteConfirmationData(); as data) {
-      <app-confirmation-popup
-        [message]="data.message"
-        (confirmed)="onDeleteConfirmation($event)">
-      </app-confirmation-popup>
-    }
-    @if (state.infoModalData(); as data) {
-      <app-message-popup
-        [message]="data.message"
-        (confirmed)="onInfoPopupConfirmed($event)">
-      </app-message-popup>
-    }
-    @if (state.relationshipPopupData(); as data) {
-      <app-relationship-details-popup
-        [data]="data"
-        (close)="state.closeRelationshipPopup()">
-      </app-relationship-details-popup>
-    }
-  } @else {
-    <app-graph-loading
-      [title]="('Loading Social Mapper') | translate"
-      [subtitle]="('Loading graph styles.') | translate">
->>>>>>> trusted-main
     </app-graph-loading>
   }
 </div>

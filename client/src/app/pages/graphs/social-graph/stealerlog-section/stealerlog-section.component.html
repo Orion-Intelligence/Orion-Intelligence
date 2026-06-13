@@ -1,8 +1,4 @@
-<div
-  data-testid="social-stealerlog-section"
-  class="social-stealerlog-section w-full min-w-[220px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 py-3 shadow-[0_8px_18px_var(--color-shadow-light)] md:w-[238px]"
-  [attr.data-state]="hasRecords() ? 'found' : 'clear'"
->
+<div data-testid="social-stealerlog-section" class="w-full min-w-[220px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 py-3 shadow-[0_8px_18px_var(--color-shadow-light)] md:w-[238px]">
   <div class="flex items-center gap-3">
     <span class="min-w-0 flex-1">
       <span class="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text2)]">Stealer Logs</span>
@@ -22,7 +18,7 @@
     </div>
   } @else if (hasRecords()) {
     <div class="mt-3 flex items-center gap-2 border-t border-[var(--color-border)] pt-3">
-      <span class="h-2 w-2 flex-shrink-0 rounded-full bg-rose-300 shadow-[0_0_0_3px_rgba(244,63,94,0.15)]"></span>
+      <span class="h-2 w-2 flex-shrink-0 rounded-full bg-amber-400 shadow-[0_0_0_3px_rgba(245,158,11,0.14)]"></span>
       <span class="text-[12px] font-semibold text-[var(--color-text2)]">Exposure found</span>
     </div>
     <div class="mt-2 overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)]">

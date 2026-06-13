@@ -4,21 +4,12 @@ import { Job } from '../../../../shared/model/social/social-scan.models';
 import { FetchingStateService } from '../services/fetching-state.service';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
 import { SidebarShellComponent } from '../../shared/sidebar-shell/sidebar-shell.component';
-<<<<<<< HEAD
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
-=======
-import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-
->>>>>>> trusted-main
 @Component({
   selector: 'app-home-menu',
   templateUrl: './home-menu.component.html',
   standalone: true,
-<<<<<<< HEAD
   imports: [SidebarShellComponent, TooltipDirective],
-=======
-  imports: [SidebarShellComponent, TranslatePipe],
->>>>>>> trusted-main
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeMenuComponent implements OnDestroy {

@@ -6,7 +6,6 @@ import { SocialScanService } from '../../shared/services/social-scan.service';
   selector: 'app-social-stealerlog-section',
   standalone: true,
   templateUrl: './stealerlog-section.component.html',
-  styleUrls: ['./stealerlog-section.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StealerlogSectionComponent {

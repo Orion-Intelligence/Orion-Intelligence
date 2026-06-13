@@ -15,13 +15,8 @@ import { SocialScanJobService } from './services/social-scan-job.service';
 import { PlatformFetchService } from './services/platform-fetch.service';
 import { GraphLoadingComponent } from '../shared/graph-loading/graph-loading.component';
 import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/utils/file-input.util';
-<<<<<<< HEAD
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 import { ManageProfilesModalComponent } from './profile-popups/manage-profiles-modal/manage-profiles-modal.component';
-=======
-import { getEntityRecordEntries, getEntityReportRecords, getScanResultsByUsername, parsePlatformNodeId } from './utils/social-graph-view.util';
-import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
->>>>>>> trusted-main
 
 @Component({
   selector: 'app-social-graph',
@@ -34,19 +29,10 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
     ListViewComponent,
     ConfirmationPopupComponent,
     NotificationBarComponent,
-<<<<<<< HEAD
     GraphLoadingComponent,
     ProfileComponent,
     ManageProfilesModalComponent
   ]
-=======
-    EntityManagerComponent,
-    AddEntityModalComponent,
-    RelationshipDetailsPopupComponent,
-    GraphToolbarComponent,
-    GraphSearchTriggerComponent,
-    GraphLoadingComponent, TranslatePipe]
->>>>>>> trusted-main
 })
 export class SocialMapperComponent implements OnInit, OnDestroy {
   private activeTabState = computed(() => this.tabManager.activeTab()?.state);

@@ -48,6 +48,7 @@
     "simple-icons": "^16.20.0",
     "tldts": "^7.0.30",
     "topojson-client": "3.1.0",
+    "vis-data": "^8.0.4",
     "vis-network": "^10.1.0",
     "zone.js": "0.16.1"
   },

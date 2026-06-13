@@ -2,10 +2,6 @@ import { ChangeDetectionStrategy, Component, computed, effect, input, output, si
 import { ManagedPlatform, ManageProfilesModalData, PlatformResult } from '../../../../../shared/model/social/social-scan.models';
 import { SocialIconComponent } from '../../../../../shared/components/social-icon/social-icon.component';
 import { PlatformIconBgDirective } from '../../directives/platform-icon-bg.directive';
-<<<<<<< HEAD:client/src/app/pages/graphs/social-graph/profile-popups/manage-profiles-modal/manage-profiles-modal.component.ts
-=======
-import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
->>>>>>> trusted-main:client/src/app/pages/graphs/social-graph/profile-summary-popup/manage-profiles-modal/manage-profiles-modal.component.ts
 
 type ManagedPlatformRow = ManagedPlatform & {
   draftUsername: string;
@@ -15,7 +11,7 @@ type ManagedPlatformRow = ManagedPlatform & {
 @Component({
   selector: 'app-manage-profiles-modal',
   standalone: true,
-  imports: [SocialIconComponent, PlatformIconBgDirective, TranslatePipe],
+  imports: [SocialIconComponent, PlatformIconBgDirective],
   templateUrl: './manage-profiles-modal.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
