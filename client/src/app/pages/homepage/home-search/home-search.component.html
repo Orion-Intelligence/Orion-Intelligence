@@ -17,9 +17,20 @@
       </button>
     }
     @for (tab of tabs; track tab) {
-      <div [attr.data-testid]="'ioc-basic-tag-' + tab" (click)="selectTab(tab)" [ngClass]="selectedTab === tab ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]'" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors">
-        {{ tab }}
-      </div>
+      @if (tab === 'Geo Fencing') {
+        <a [attr.data-testid]="'ioc-basic-tag-' + tab" href="/dashboard/profile/consolidated/all?tab=Geo%20Fencing" target="_blank" rel="noopener noreferrer" class="cursor-pointer rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-1.5 text-[12px] font-semibold text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
+          {{ tab }}
+        </a>
+      } @else {
+        <div [attr.data-testid]="'ioc-basic-tag-' + tab" (click)="selectTab(tab)" [ngClass]="selectedTab === tab ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]'" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors">
+          {{ tab }}
+        </div>
+      }
+    }
+    @if (canViewSocialIntel()) {
+      <a data-testid="ioc-basic-tag-Social Intel" href="/dashboard/social-intel" target="_blank" rel="noopener noreferrer" class="cursor-pointer rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-1.5 text-[12px] font-semibold text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
+        {{ 'Social Intel' | translate }}
+      </a>
     }
   </div>
 }

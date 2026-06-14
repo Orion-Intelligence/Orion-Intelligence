@@ -2,7 +2,7 @@
   <div class="absolute inset-0 z-30 bg-slate-950/60 backdrop-blur-sm [body.light-theme_&]:bg-[var(--color-blue-850)]/20 md:hidden" (click)="onMobileBackdropClick()"></div>
 }
 
-<aside class="relative h-full z-40 border-r border-slate-800 bg-slate-900/90 backdrop-blur-md transition-all duration-300 ease-in-out [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-[var(--color-blue-820-light)]" [class.w-80]="!isCollapsed" [class.w-20]="isCollapsed && !isMobile" [class.w-16]="isCollapsed && isMobile">
+<aside class="relative z-40 h-full border-r border-slate-800 bg-slate-900/90 backdrop-blur-md transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-[var(--color-blue-820-light)]" [class.w-[300px]]="!isCollapsed" [class.min-w-[300px]]="!isCollapsed" [class.w-[70px]]="isCollapsed && !isMobile" [class.min-w-[70px]]="isCollapsed && !isMobile" [class.w-[68px]]="isCollapsed && isMobile" [class.min-w-[68px]]="isCollapsed && isMobile">
   <app-graph-sidebar-shell [isCollapsed]="isCollapsed" (toggleClicked)="toggleCollapsed()">
     <form sidebar-expanded class="h-full p-3 flex flex-col gap-3 overflow-y-auto">
       <div class="rounded-lg border border-slate-700 bg-slate-800/50 p-3 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white/90 [body.light-theme_&]:shadow-[0_8px_24px_rgba(15,23,42,0.06)]">

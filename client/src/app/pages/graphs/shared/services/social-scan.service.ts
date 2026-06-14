@@ -284,6 +284,30 @@ export class SocialScanService {
     catchError(() => throwError(() => new Error('Failed to fetch stealer logs'))));
   }
 
+  fetchPlatformStealerLogs(username: string, domain: string): Observable<any[]> {
+    const payload = {
+      daterange: '',
+      q: '',
+      url: domain || '',
+      user: username,
+      ioc: '',
+      type: 'c',
+      page: 1,
+      category: '',
+      fullsearch: false
+    };
+    return this.api.post<any>('search/stealer/ioc', payload).pipe(map((res) => {
+      if (Array.isArray(res?.Result)) {
+        return res.Result;
+      }
+      if (Array.isArray(res?.result?.Result)) {
+        return res.result.Result;
+      }
+      return [];
+    }),
+    catchError(() => throwError(() => new Error('Failed to fetch stealer logs'))));
+  }
+
   fetchProfileMetadataTokens(tokens: string[], username: string, platform?: string): Observable<{
         query: string;
         total_found: number;

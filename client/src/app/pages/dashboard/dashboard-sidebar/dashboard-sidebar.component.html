@@ -23,7 +23,7 @@
       </app-dashboard-sidebar-items>
       </div>
       @if (licenseService.canUseModule('free') || licenseService.canUseModule('osint_basic') || licenseService.canUseModule('osint_advanced') || licenseService.canUseModule('enterprise')) {
-        <div class="mt-[20px] text-[13px] font-bold text-white">{{ 'Search API\'s' | translate }}</div>
+        <div class="mt-[20px] text-[13px] font-bold text-white">{{ 'Darkweb Chatter' | translate }}</div>
         <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
       }
       @if (isAdmin() || licenseService.canUseModule('general')) {
@@ -147,7 +147,7 @@
           [icon]="'assets/images/sidebar/live_api.svg'"
           [items]="apiCategories"
           [routePrefix]="'api'"
-        [title]="('Entity API') | translate"></app-dashboard-sidebar-items>
+        [title]="('Darkweb Chatter') | translate"></app-dashboard-sidebar-items>
         </div>
       }
       @if (licenseService.canUseScanning() || licenseService.canUseModule('stealer_logs') || isAdmin() || licenseService.canUseModule('osint_advanced') || licenseService.canUseCtiGraph() || (!isDemo() && licenseService.canUseModule('social_mapper')) || appService.getConfig().appSettings.home_header_whistle_blowing_allowed || isDemo()) {
@@ -393,7 +393,7 @@
           [items]="apiCategories"
           [routePrefix]="'api'"
           [selectionStore]="selectionStore"
-        [title]="('Entity API') | translate"></app-dashboard-sidebar-collapsed>
+        [title]="('Darkweb Chatter') | translate"></app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseModule('osint_advanced') || isDemo()) {
         <li class="my-[6px] rounded-[8px] select-none">

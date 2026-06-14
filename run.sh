@@ -270,3 +270,4 @@ fi
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-tb" ]; then
     run_backend_tests_protected
 fi
+wi

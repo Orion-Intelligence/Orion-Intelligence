@@ -1,5 +1,6 @@
 import { Directive, HostBinding, effect, inject, input } from '@angular/core';
 import { IconService } from '../../../../shared/services/icon.service';
+
 @Directive({
   selector: '[socialMapperPlatformBg]',
   standalone: true,
