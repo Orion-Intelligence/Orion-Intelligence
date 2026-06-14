@@ -302,7 +302,7 @@ export class IocSearchComponent implements OnInit {
   }
 
   stripUrlPrefixes(value: string): string {
-    return String(value || '').replace(/\bhttps?:\/\//gi, '').replace(/\bwww\./gi, '');
+    return String(value || '').replace(/\bhttps?:\/\//gi, '').replace(/\bwww\./gi, '').replace(/\/$/, '');
   }
 
   private updateBasicInput(inputElement: HTMLInputElement, value: string): void {
