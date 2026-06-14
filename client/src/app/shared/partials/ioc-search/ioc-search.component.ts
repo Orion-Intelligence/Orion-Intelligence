@@ -52,7 +52,7 @@ export class IocSearchComponent implements OnInit {
       this.route.queryParams.subscribe(params => {
         const q = params['q'];
         if (q) {
-          this.basicQuery = q;
+          this.basicQuery = this.stripUrlPrefixes(q);
         }
       });
     }
@@ -89,6 +89,7 @@ export class IocSearchComponent implements OnInit {
     this.basicSubmitted = true;
     let finalQuery = '';
     if (this.isAdvanced) {
+      this.advancedFilters = this.advancedFilters.map(f => ({ ...f, value: this.stripUrlPrefixes(f.value) }));
       const invalidFilter = this.advancedFilters.find(f => f.value && !this.validateValue(f.tag, f.value));
       if (invalidFilter) {
         return;
@@ -200,6 +201,7 @@ export class IocSearchComponent implements OnInit {
   }
 
   private normalizeBasicQuery(tag: string, input: string): string {
+    input = this.stripUrlPrefixes(input);
     if (!input.trim()) {
       return '';
     }
@@ -264,8 +266,8 @@ export class IocSearchComponent implements OnInit {
   }
 
   onBasicQueryChange(value: string): void {
-    this.basicQuery = value;
-    if (!this.basicTouched && value.trim().length > 0) {
+    this.basicQuery = this.stripUrlPrefixes(value);
+    if (!this.basicTouched && this.basicQuery.trim().length > 0) {
       this.basicTouched = true;
     }
     this.basicSubmitted = this.basicTouched;
@@ -273,8 +275,9 @@ export class IocSearchComponent implements OnInit {
 
   filterBasicInput(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
+    const value = this.stripUrlPrefixes(inputElement.value);
     if (this.selectedTag === this.allTag()) {
-      this.basicQuery = inputElement.value;
+      this.updateBasicInput(inputElement, value);
       return;
     }
     let regex: RegExp;
@@ -294,12 +297,20 @@ export class IocSearchComponent implements OnInit {
       default:
         regex = /[^a-zA-Z0-9&|@.\s]/g;
     }
-    const sanitized = inputElement.value.replace(regex, '');
-    if (sanitized !== inputElement.value) {
-      const cursor = inputElement.selectionStart ?? sanitized.length;
-      inputElement.value = sanitized;
-      this.basicQuery = sanitized;
-      inputElement.setSelectionRange(cursor - 1, cursor - 1);
+    const sanitized = value.replace(regex, '');
+    this.updateBasicInput(inputElement, sanitized);
+  }
+
+  stripUrlPrefixes(value: string): string {
+    return String(value || '').replace(/\bhttps?:\/\//gi, '').replace(/\bwww\./gi, '');
+  }
+
+  private updateBasicInput(inputElement: HTMLInputElement, value: string): void {
+    if (value !== inputElement.value) {
+      const cursor = Math.min(inputElement.selectionStart ?? value.length, value.length);
+      inputElement.value = value;
+      this.basicQuery = value;
+      inputElement.setSelectionRange(cursor, cursor);
     }
   }
 
