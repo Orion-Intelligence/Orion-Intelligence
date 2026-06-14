@@ -15,7 +15,6 @@
         "declaration-property-value-keyword-no-deprecated": null,
         "import-notation": null,
         "length-zero-no-unit": null,
-        "media-feature-range-notation": null,
         "no-invalid-position-at-import-rule": null,
         "number-max-precision": null,
         "property-no-unknown": null,
@@ -26,6 +25,15 @@
     }
   ],
   "rules": {
+    "alpha-value-notation": "percentage",
+    "color-function-alias-notation": "without-alpha",
+    "color-function-notation": "modern",
+    "color-hex-length": "short",
+    "media-feature-range-notation": "context",
+    "rule-empty-line-before": ["always", {
+      "except": ["first-nested"],
+      "ignore": ["after-comment"]
+    }],
     "selector-id-pattern": null,
     "selector-class-pattern": null,
     "no-descending-specificity": null,

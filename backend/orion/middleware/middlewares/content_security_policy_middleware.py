@@ -36,7 +36,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                                                            "report-to csp-endpoint;")
         elif self.DEBUG:
             response.headers["Content-Security-Policy"] = ("default-src 'self' data: blob:; "
-                                                           "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+                                                           "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.arcgis.com; "
                                                            "script-src-elem 'self' 'unsafe-inline' https://js.arcgis.com; "
                                                            "script-src-attr 'none'; "
                                                            "style-src 'self' 'unsafe-inline' https://js.arcgis.com; "
@@ -88,7 +88,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                                                            "report-to csp-endpoint;")
         else:
             response.headers["Content-Security-Policy"] = ("default-src 'self'; "
-                                                           "script-src 'self' 'wasm-unsafe-eval'; "
+                                                           "script-src 'self' 'wasm-unsafe-eval' https://js.arcgis.com; "
                                                            "script-src-elem 'self' https://js.arcgis.com; "
                                                            "script-src-attr 'none'; "
                                                            "style-src 'self' 'unsafe-inline' https://js.arcgis.com; "
@@ -96,7 +96,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                                                            "style-src-attr 'none'; "
                                                            "img-src 'self' data: blob: https://try.orionintelligence.org https://*.basemaps.cartocdn.com https://*.arcgis.com https://*.arcgisonline.com; "
                                                            "font-src 'self' data: https://js.arcgis.com; "
-                                                           "connect-src 'self' https://*.arcgis.com https://*.arcgisonline.com; "
+                                                           "connect-src 'self' https://js.arcgis.com https://*.arcgis.com https://*.arcgisonline.com; "
                                                            "media-src 'self'; "
                                                            "worker-src 'self' blob:; "
                                                            "frame-ancestors 'self'; "

@@ -24,7 +24,7 @@
 
             @if (!(isSmallScreen() && isMobileHomeMenuOpen())) {
             <main class="ui-social-dashboard-shell relative flex min-h-0 flex-grow flex-col bg-transparent">
-              <div class="ui-social-topbar relative z-[1100] flex h-[60px] w-full flex-shrink-0 items-center justify-between overflow-visible border-b border-[var(--color-border)] bg-[var(--color-blue-850)] p-0">
+              <div class="ui-social-topbar relative z-[1100] flex h-[60px] w-full flex-shrink-0 items-center justify-between overflow-visible border-b border-[var(--color-border)] bg-[var(--color-mono)] p-0">
                 <div data-testid="social-header-breadcrumb" class="ml-[10px] flex min-w-0 flex-1 items-center overflow-hidden pr-[20px] pl-3 text-[15px] text-white max-[943px]:ml-0 max-[943px]:pl-3">
                   <img routerLink="/dashboard/home" data-testid="social-header-back" alt="Back" aria-label="Back to homepage" title="Back to homepage" class="ui-breadcrumb-chevron mt-[-1px] mr-[10px] h-[50px] w-[50px] cursor-pointer p-[10px]" height="30" ngSrc="assets/images/shared/theme/arrow.svg" width="30" />
                   <span class="inline-flex min-w-0 items-center font-[Inter,sans-serif] text-[16px] font-medium text-[var(--color-text1)]">
@@ -39,7 +39,7 @@
                 </div>
               </div>
 
-              <div class="ui-social-dashboard-body min-h-0 flex-grow">
+              <div class="ui-social-dashboard-body ui-dashboard-grid-bg min-h-0 flex-grow">
                 <app-list-view
                   [scanResults]="scanResults()"
                   (sidebarPlatformClicked)="onSidebarPlatformClicked($event)"

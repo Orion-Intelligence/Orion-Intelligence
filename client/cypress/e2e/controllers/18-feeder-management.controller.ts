@@ -167,7 +167,7 @@ function expectWrongValueUploadError(fixturePath: string) {
       return;
     }
 
-    cy.get('[data-testid="feeder-values-input"]').should('be.visible').clear().type(firstValue, { delay: 0 });
+    cy.get('[data-testid="feeder-values-input"]').should('be.visible').clear().type(firstValue, { delayrevert: 0 });
     cy.get('[data-testid="feeder-upload-values-button"]').should('be.visible').click();
   });
 }

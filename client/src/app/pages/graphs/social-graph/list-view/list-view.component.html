@@ -1,10 +1,8 @@
 <div data-testid="social-list-view" class="flex h-full w-full flex-col overflow-hidden bg-transparent">
   @if (!hasResults()) {
-    <div data-testid="social-list-empty" class="pointer-events-none flex flex-1 select-none items-center justify-center p-6 text-center">
-      <div class="flex max-w-sm flex-col items-center gap-3 rounded-[10px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-700)] px-8 py-10">
-        <i class="bi bi-people text-4xl text-[var(--color-text4)]"></i>
-        <p class="text-lg font-semibold text-[var(--color-text2)]">Feed is Waiting for Data</p>
-        <p class="text-sm text-[var(--color-text4)]">Complete a scan to begin.</p>
+    <div data-testid="social-list-empty" class="pointer-events-none flex flex-1 select-none items-center justify-center px-4 py-7 text-center">
+      <div class="flex w-full max-w-[340px] -translate-y-8 flex-col items-center justify-center text-center">
+        <img alt="No data" class="h-40 w-auto opacity-90" src="assets/images/shared/cti-empty.svg">
       </div>
     </div>
   } @else {
