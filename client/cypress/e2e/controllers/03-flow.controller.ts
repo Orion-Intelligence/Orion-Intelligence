@@ -192,6 +192,7 @@ export function applyDateRange(monthsBack: number) {
 
 export function assertFreeModeDashboardChrome() {
   cy.location('pathname').should('eq', '/dashboard/strategic/all');
+  cy.get('[data-testid="dashboard-body"]').should('be.visible');
 
   cy.window().then((win) => {
     expect(win.localStorage.getItem('mobileDemo')).to.equal('true');

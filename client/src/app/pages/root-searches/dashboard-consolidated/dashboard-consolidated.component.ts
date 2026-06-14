@@ -151,7 +151,12 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.isStealerLogLoading.set(false);
       this.dashboardService.consolidatedParamModel.q = '';
       this.dashboardService.consolidatedParamModel.ioc='';
-      this.router.navigate([], { queryParams: {}, queryParamsHandling: '' }).then();
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { tab: this.getActiveConsolidatedTab() },
+        queryParamsHandling: '',
+        replaceUrl: true,
+      }).then();
     }
     const cleanedParams: any = {};
     Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
@@ -159,6 +164,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         cleanedParams[key] = value;
       }
     });
+    cleanedParams.tab = this.getActiveConsolidatedTab();
     this.router.navigate([], {
       queryParams: cleanedParams, queryParamsHandling: 'merge', replaceUrl: true, relativeTo: this.route
     }).then(() => {
@@ -408,6 +414,19 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.isGrouped = false;
       this.isGeoFencing = true;
     }
+  }
+
+  private getActiveConsolidatedTab(): string {
+    if (this.isNetworkIntel) {
+      return 'Network Intelligence';
+    }
+    if (this.isGeoFencing) {
+      return 'Geo Fencing';
+    }
+    if (this.isGrouped || !this.isIOC) {
+      return 'Deep Search';
+    }
+    return 'IOCs';
   }
 
   private restoreDeepSearchQuery(): void {

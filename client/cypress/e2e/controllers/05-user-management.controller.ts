@@ -122,7 +122,9 @@ export function loginAsUser(username: string, password: string) {
 
 export function openFirstStrategicReportFromSearch(searchTerm = 'data') {
   cy.visit('/dashboard/strategic/all?page=1');
+  cy.scrollDashboardToTop();
   cy.location('pathname').should('eq', '/dashboard/strategic/all');
+  cy.get('[data-testid="dashboard-body"]').should('be.visible');
   cy.scrollDashboardToTop();
   cy.get('[data-testid="dashboard-general-input"]').should('be.visible').clear().type(searchTerm);
   cy.get('[data-testid="dashboard-search-submit"]').click();

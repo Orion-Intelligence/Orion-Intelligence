@@ -1,5 +1,5 @@
 import { Component, effect, signal } from '@angular/core';
-import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { NavigationCancel, NavigationEnd, NavigationError, RouteConfigLoadEnd, RouteConfigLoadStart, Router, RouterOutlet } from '@angular/router';
 import { ErrorStoreService } from '../../shared/services/error-store.service';
 import { filter, map, Observable } from 'rxjs';
 
@@ -9,6 +9,7 @@ import { MessageNotificationComponent } from '../../shared/partials/message-noti
 import { LoaderComponent } from '../../shared/partials/loader/loader.component';
 import { TrailNotificationComponent } from '../../shared/partials/trail-notification/trail-notification.component';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { LoadingService } from '../../shared/services/loading.service';
 
 @Component({
   selector: 'app-root',
@@ -18,13 +19,15 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
   animations: [appAnimation, quotaBannerAnimation],
 })
 export class AppComponent {
+  private activeRouteConfigLoads = 0;
+
   protected readonly JSON = JSON;
 
   currentRoute = signal('');
   error$: Observable<boolean>;
   isVisible = true;
 
-  constructor(private router: Router, private errorStore: ErrorStoreService, protected appService: AppService) {
+  constructor(private router: Router, private errorStore: ErrorStoreService, protected appService: AppService, private loadingService: LoadingService) {
     effect(() => {
       const theme = this.appService.userSessionData()?.user?.theme ?? 'dark-theme';
       this.applyTheme(theme);
@@ -35,6 +38,17 @@ export class AppComponent {
       return `/${path}`;
     })).subscribe((path) => {
       this.currentRoute.set(path);
+    });
+    this.router.events.subscribe((event) => {
+      if (event instanceof RouteConfigLoadStart) {
+        this.showRouteLoader();
+      }
+      if (event instanceof RouteConfigLoadEnd) {
+        this.hideRouteLoader();
+      }
+      if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
+        this.hideRouteLoader(true);
+      }
     });
   }
 
@@ -53,5 +67,20 @@ export class AppComponent {
   private applyTheme(theme: 'light-theme' | 'dark-theme'): void {
     document.body.classList.remove('light-theme', 'dark-theme');
     document.body.classList.add(theme);
+  }
+
+  private showRouteLoader(): void {
+    this.activeRouteConfigLoads++;
+    this.loadingService.setRouteLoading(true);
+  }
+
+  private hideRouteLoader(force = false): void {
+    if (this.activeRouteConfigLoads === 0) {
+      return;
+    }
+    this.activeRouteConfigLoads = force ? 0 : Math.max(0, this.activeRouteConfigLoads - 1);
+    if (this.activeRouteConfigLoads === 0) {
+      this.loadingService.setRouteLoading(false);
+    }
   }
 }
