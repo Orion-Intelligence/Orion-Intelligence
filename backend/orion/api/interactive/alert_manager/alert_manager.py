@@ -108,7 +108,7 @@ class AlertManager:
             })
         for ioc in alert.all_ioc or []:
             for value in ioc.values or []:
-                row = {"type": allowed_key_titles.get(ioc.type, ioc.type or AlertMailLabel.IOC_FALLBACK.value), "value": value}
+                row = {"type": allowed_key_titles.get(ioc.name, ioc.name or AlertMailLabel.IOC_FALLBACK.value), "value": value}
                 if row not in rows:
                     rows.append(row)
         return rows[:10]

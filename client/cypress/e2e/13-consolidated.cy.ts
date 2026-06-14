@@ -179,7 +179,7 @@ describe('Consolidated - IOC Basic Flow', () => {
     cy.get('[data-testid="result-card"]').should('exist');
 
     cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
-    searchDeepFromTop('example.com');
+    searchDeepFromTop('carderland.com');
 
     cy.get('[data-testid="consolidated-scan-title"]').should('contain.text', 'Threats Scans Report:');
     cy.get('[data-testid="consolidated-scan-openweb-title"]').should('be.visible');
@@ -198,7 +198,7 @@ describe('Consolidated - IOC Basic Flow', () => {
     openHomepageAndSearch('{enter}');
     switchToDeepSearchTab();
     cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
-    searchDeepFromTop('example.com');
+    searchDeepFromTop('carderland.com');
     cy.get('[data-testid="consolidated-scan-title"]').should('contain.text', 'Threats Scans Report:');
 
     cy.get('[data-testid="consolidated-section-social"]').scrollIntoView().should('be.visible');
@@ -208,6 +208,8 @@ describe('Consolidated - IOC Basic Flow', () => {
     cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select('4: clearnet');
     cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
     cy.get('[data-testid="result-card"]').should('have.length.greaterThan', 0);
+
+    cy.wait(1000);
     cy.get('[data-testid="result-card"]').then(($cards) => {
       const cardWithNetwork = [...$cards].find((el) => (el.textContent || '').includes('Network:'));
       expect(cardWithNetwork, 'result card with Network field').to.exist;

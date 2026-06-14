@@ -4,7 +4,20 @@ export type FilterCategoryKey =
 
 export type AdvancedFilterFixture = {section_title: 'General Intelligence' | 'Data Breach' | 'Defacement' | 'Social' | 'Exploit' | 'Feed'; subitem_title: 'All' | 'News'; filters: Partial<Record<FilterCategoryKey, string[]>>; };
 
-const CATEGORY_TO_TAB_TEXT: Record<string, string> = {
+const CATEGORY_TO_METADATA_KEY: Partial<Record<FilterCategoryKey, string>> = {
+  currencies: 'm_currencies',
+  language: 'm_language',
+  domains: 'm_domain',
+  country: 'm_country',
+  organizations: 'm_org',
+  locations: 'm_location',
+  ip_addresses: 'm_ip',
+  hashtags: 'm_hashtag',
+  author: 'm_author',
+  cve_cwe: 'm_cve',
+};
+
+const CATEGORY_TO_TAB_TEXT: Partial<Record<FilterCategoryKey, string>> = {
   currencies: 'Currencies',
   language: 'Language',
   domains: 'Domain',
@@ -130,50 +143,43 @@ export function openReportDetail18(sectionTitle: string) {
 }
 
 export function assertValuesInMetadata18(category: FilterCategoryKey, values: string[]) {
+  const metadataKey = CATEGORY_TO_METADATA_KEY[category];
   const primaryTabLabel = CATEGORY_TO_TAB_TEXT[category];
 
-  cy.contains('span', 'Metadata').should('be.visible');
+  cy.get('[data-testid="report-metadata-card"]').should('be.visible');
 
   values.forEach((val) => {
     const targetVal = val.replace(/^#/, '').toLowerCase();
 
-    const getMetadataTabs = () => cy.contains('span', 'Metadata')
-      .closest('.ui-result-card')
-      .find('div.flex-wrap button');
+    const getMetadataTabs = () => cy.get('[data-testid="report-metadata-card"]')
+      .find('[data-testid="report-metadata-tab"]');
 
-    cy.get('body').then(($body) => {
-      if ($body.text().toLowerCase().includes(targetVal)) {
-        cy.log(`Value "${val}" found.`);
-        return;
+    const getMetadataValues = () => cy.get('[data-testid="report-metadata-card"]')
+      .find('[data-testid="report-metadata-value"], [data-testid="report-metadata-section-value"]');
+
+    getMetadataTabs().then(($tabs) => {
+      const tabs = [...$tabs];
+      let targetTab = metadataKey
+        ? tabs.find((tab) => tab.getAttribute('data-metadata-key') === metadataKey)
+        : undefined;
+
+      if (!targetTab && primaryTabLabel) {
+        targetTab = tabs.find((tab) => (tab.textContent || '').trim().toLowerCase().startsWith(primaryTabLabel.toLowerCase()));
       }
 
-      if (primaryTabLabel) {
-        getMetadataTabs().each(($btn) => {
-          if ($btn.text().trim().toLowerCase() === primaryTabLabel.toLowerCase()) {
-            cy.wrap($btn).click();
-          }
-        });
+      if (targetTab) {
+        return cy.wrap(targetTab).click();
       }
 
-      cy.get('body').then(($newBody) => {
-        if (!$newBody.text().toLowerCase().includes(targetVal)) {
-          getMetadataTabs().each(($btn) => {
-            cy.wrap($btn).click();
-          });
-        }
-      });
+      return undefined;
+    });
 
-     cy.contains('span', 'Metadata')
-  .closest('.ui-result-card')
-  .within(() => {
-    cy.get('li')
+    getMetadataValues()
       .should('exist')
-      .should(($els) => {
-        const text = $els.text().toLowerCase();
+      .should(($values) => {
+        expect($values.text().toLowerCase()).to.include(targetVal);
       });
   });
-      });
-    });
 
 }
 

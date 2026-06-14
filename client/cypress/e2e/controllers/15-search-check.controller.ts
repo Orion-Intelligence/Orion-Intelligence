@@ -136,21 +136,25 @@ export function typeDashboardSearch15(value: string) {
 }
 
 export function assertFirstResultCard(data: SearchResultData) {
-  cy.wait(1000)
+  const findMatchingCard = ($cards: JQuery<HTMLElement>) => Array.from($cards).find((card) => {
+    const text = (card.textContent || '').trim();
+    const hrefs = Array.from(card.querySelectorAll('a[href]'))
+      .map((link) => link.getAttribute('href') || '')
+      .filter(Boolean);
+    const matchesLink = hrefs.some((href) => href.includes(data.link_address.trim())) || text.includes(data.link_address.trim());
+    const matchesDescription = data.description ? text.includes(data.description.trim().substring(0, 60)) : true;
+    const matchesDate = data.date ? text.includes(data.date) : true;
+
+    return matchesLink && matchesDescription && matchesDate;
+  });
+
   cy.get('[data-testid="result-card"], .ui-result-card', {timeout: 35000})
     .should('have.length.at.least', 1)
+    .should(($cards) => {
+      expect(findMatchingCard($cards), `result card matching ${data.link_address}`).to.exist;
+    })
     .then(($cards) => {
-      const matchingCard = Array.from($cards).find((card) => {
-        const text = (card.textContent || '').trim();
-        const hrefs = Array.from(card.querySelectorAll('a[href]'))
-          .map((link) => link.getAttribute('href') || '')
-          .filter(Boolean);
-        const matchesLink = hrefs.some((href) => href.includes(data.link_address.trim())) || text.includes(data.link_address.trim());
-        const matchesDescription = data.description ? text.includes(data.description.trim().substring(0, 60)) : true;
-        const matchesDate = data.date ? text.includes(data.date) : true;
-
-        return matchesLink && matchesDescription && matchesDate;
-      });
+      const matchingCard = findMatchingCard($cards);
       expect(matchingCard, `result card matching ${data.link_address}`).to.exist;
       cy.wrap(matchingCard as HTMLElement)
         .scrollIntoView()

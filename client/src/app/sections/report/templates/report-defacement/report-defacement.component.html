@@ -56,7 +56,7 @@
   </div>
 
   @if (filteredArrayKeys.length) {
-    <div class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4">
+    <div data-testid="report-metadata-card" class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4">
       <div (click)="metaadataToggleContent()" class="flex cursor-pointer items-start justify-between gap-3">
         <div class="min-w-0">
           <div class="flex items-center gap-2 text-[16px] font-semibold leading-tight text-[var(--color-text1)]">
@@ -74,7 +74,7 @@
           <div class="-mx-1 overflow-x-auto px-1">
             <div class="flex min-w-max items-end gap-5 border-b border-[var(--color-divider)]">
               @for (key of filteredArrayKeys; track key) {
-                <button (click)="setActiveTab(key)" [ngClass]="activeTab === key ? 'border-[var(--color-blue-640)] text-[var(--color-text1)]' : 'border-transparent text-[var(--color-text4)] hover:text-[var(--color-text2)]'" [appTooltip]="('Info about' | translate) + ' ' + (key === 'm_person' ? ('Entity' | translate) : formatKeyLabel(key))" class="-mb-px flex items-center gap-2 border-b-2 px-0.5 pb-2 pt-1 text-[12px] font-semibold transition-colors duration-150">
+                <button data-testid="report-metadata-tab" [attr.data-metadata-key]="key" (click)="setActiveTab(key)" [ngClass]="activeTab === key ? 'border-[var(--color-blue-640)] text-[var(--color-text1)]' : 'border-transparent text-[var(--color-text4)] hover:text-[var(--color-text2)]'" [appTooltip]="('Info about' | translate) + ' ' + (key === 'm_person' ? ('Entity' | translate) : formatKeyLabel(key))" class="-mb-px flex items-center gap-2 border-b-2 px-0.5 pb-2 pt-1 text-[12px] font-semibold transition-colors duration-150">
                   <span>{{ key === 'm_person' ? ('Entity' | translate) : formatKeyLabel(key) }}</span>
                   <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--color-text4)]">
                     {{ getMetadataCount(key) }}

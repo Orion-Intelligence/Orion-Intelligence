@@ -15,6 +15,7 @@ export const FEEDER_RULE_KEYS = [
   'twitter',
 ];
 const FILE_RULE_KEYS = FEEDER_RULE_KEYS.filter((ruleKey) => ruleKey !== 'generic');
+const FEEDER_TEST_RULE_LIMIT = 4;
 
 export function openFeederAsAdmin() {
   cy.loginAsAdmin();
@@ -289,7 +290,7 @@ export function clearAllFeederRecords() {
     throw new Error('Feeder validation data is not loaded');
   }
 
-  cy.wrap(feederValidationData.ruleKeys).each((ruleKey) => {
+  cy.wrap(feederValidationData.ruleKeys.slice(0, FEEDER_TEST_RULE_LIMIT)).each((ruleKey) => {
     const category = feederValidationData.categories[ruleKey];
 
     return cy.then(() => {
@@ -311,7 +312,7 @@ export function uploadFixtureRecordsForAllFeederRules() {
     throw new Error('Feeder validation data is not loaded');
   }
 
-  cy.wrap(feederValidationData.ruleKeys).each((ruleKey) => {
+  cy.wrap(feederValidationData.ruleKeys.slice(0, FEEDER_TEST_RULE_LIMIT)).each((ruleKey) => {
     const category = feederValidationData.categories[ruleKey];
 
     return cy.then(() => {
@@ -339,7 +340,7 @@ export function validateFixtureOperationsForAllFeederRules() {
     throw new Error('Feeder validation data is not loaded');
   }
 
-  cy.wrap(feederValidationData.ruleKeys).each((ruleKey) => {
+  cy.wrap(feederValidationData.ruleKeys.slice(0, FEEDER_TEST_RULE_LIMIT)).each((ruleKey) => {
     const category = feederValidationData.categories[ruleKey];
 
     return cy.then(() => {

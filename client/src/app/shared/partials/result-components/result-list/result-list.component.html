@@ -1,8 +1,8 @@
 @if (filteredItems.length > 0) {
-  <div class="mt-4 overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
+  <div data-testid="report-metadata-values" class="mt-4 overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
     <div class="grid sm:grid-cols-2 xl:grid-cols-3">
       @for (item of filteredItems; track $index; let i = $index) {
-        <button type="button" (click)="copyText(item, i)" class="group relative min-w-0 border-b border-[var(--color-divider)] px-3 py-2.5 text-left text-[13px] font-medium text-[var(--color-text3)] transition hover:bg-[rgba(87,165,235,0.10)] hover:text-[var(--color-text1)]">
+        <button data-testid="report-metadata-value" type="button" (click)="copyText(item, i)" class="group relative min-w-0 border-b border-[var(--color-divider)] px-3 py-2.5 text-left text-[13px] font-medium text-[var(--color-text3)] transition hover:bg-[rgba(87,165,235,0.10)] hover:text-[var(--color-text1)]">
           <span class="block break-all underline decoration-[var(--color-divider)] underline-offset-4 group-hover:decoration-[var(--color-blue-640)]">
             {{ item }}
           </span>
