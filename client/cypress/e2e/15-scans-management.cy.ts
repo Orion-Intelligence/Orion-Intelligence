@@ -1,4 +1,4 @@
-import {clickSearch, fillPrimaryScanInput, fillSecondaryScanInput, makeFileInputInteractable} from './controllers/14-scans-management.controller';
+import {clickSearch, fillPrimaryScanInput, fillSecondaryScanInput, makeFileInputInteractable} from './controllers/15-scans-management.controller';
 
 describe('Scans Management - Web Scans Flow', () => {
   beforeEach(() => {

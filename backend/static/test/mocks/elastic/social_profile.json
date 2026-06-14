@@ -2,13 +2,13 @@
   "job_id": "mock-social-profile",
   "result": {
     "profile": {
-      "real_name": "Abdul Mannan",
-      "bio": "Sample profile for testing",
-      "location": "Lahore, PK",
-      "total_posts": "120",
-      "total_followers": "12500",
-      "total_following": "321",
-      "profile_url": "https://x.com/msmannan00"
+      "real_name": "Clark Kent",
+      "bio": "Daily Planet field reporter",
+      "location": "Metropolis",
+      "total_posts": "48",
+      "total_followers": "7421",
+      "total_following": "118",
+      "profile_url": "https://twitter.com/superman0011"
     }
   }
 }

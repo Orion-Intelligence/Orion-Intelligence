@@ -1,4 +1,4 @@
-import {assertFirstDefacementRow, assertFirstResultCard, clickSidebarSubItem15, openSidebarGroup15, SEARCH_FIXTURES, typeDashboardSearch15, waitForSearchReady15,} from './controllers/15-search-check.controller';
+import {assertFirstDefacementRow, assertFirstResultCard, clickSidebarSubItem15, openSidebarGroup15, SEARCH_FIXTURES, typeDashboardSearch15, waitForSearchReady15,} from './controllers/16-search-check.controller';
 
 export interface SearchResultData { search_query: string;link_address: string;date: string;description: string | null;}
 

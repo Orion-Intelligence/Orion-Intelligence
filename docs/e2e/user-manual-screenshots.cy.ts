@@ -1,16 +1,18 @@
 import { openSidebarGroup, clickSidebarSubItem, openCountryReportFromMap, waitForDirectoryRequest } from '../../client/cypress/e2e/controllers/03-flow.controller';
 import { typeDashboardSearch, clickOpenReport, exerciseJsonViewerOnce } from '../../client/cypress/e2e/controllers/04-searching.controller';
 import {
-  setupSocialGraphInterceptors,
   visitCtiGraph,
-  visitSocialGraph,
   waitForCtiGraphReady,
   waitForToolbarSearchReady
 } from '../../client/cypress/e2e/controllers/07-cti-management.controller';
-import { openManageIOCs } from '../../client/cypress/e2e/controllers/09-tenant-management.controller';
-import { switchToDeepSearchTab, searchDeepFromTop, setAllInsightsExpanded } from '../../client/cypress/e2e/controllers/13-consolidated.controller';
-import { fillPrimaryScanInput, fillSecondaryScanInput, clickSearch, makeFileInputInteractable } from '../../client/cypress/e2e/controllers/14-scans-management.controller';
-import { openSystemSettings } from '../../client/cypress/e2e/controllers/08-system-management.controller';
+import {
+  scanKnownSocialUsername,
+  visitSocialIntel
+} from '../../client/cypress/e2e/controllers/08-social-management.controller';
+import { openManageIOCs } from '../../client/cypress/e2e/controllers/10-tenant-management.controller';
+import { switchToDeepSearchTab, searchDeepFromTop, setAllInsightsExpanded } from '../../client/cypress/e2e/controllers/14-consolidated.controller';
+import { fillPrimaryScanInput, fillSecondaryScanInput, clickSearch, makeFileInputInteractable } from '../../client/cypress/e2e/controllers/15-scans-management.controller';
+import { openSystemSettings } from '../../client/cypress/e2e/controllers/09-system-management.controller';
 
 describe('User Manual Screenshot Flow', () => {
   let testData: any = {};
@@ -178,6 +180,18 @@ describe('User Manual Screenshot Flow', () => {
 
   const selectByTestId = (testId: string, value: string) => {
     visibleByTestId(testId).scrollIntoView().should('be.visible').select(value, { force: true });
+  };
+
+  const ensureHomepageSearchReady = () => {
+    resetScreenshotZoom();
+    cy.scrollTo('top', { ensureScrollable: false });
+    cy.scrollDashboardToTop();
+    cy.location('pathname').should('include', '/dashboard/profile/homepage');
+    cy.get('[data-testid="homepage-search-input"]', { timeout: 60000 })
+      .filter(':visible')
+      .first()
+      .scrollIntoView({ block: 'center' })
+      .should('be.visible');
   };
 
   const captureCaseManagementScreenshots = () => {
@@ -708,13 +722,14 @@ describe('User Manual Screenshot Flow', () => {
 
     cy.visit('/dashboard/profile/homepage');
     ensureDashboardReady();
-    cy.get('[data-testid="homepage-search-input"]').should('be.visible');
+    ensureHomepageSearchReady();
     capture('homepage-overview');
     openCountryReportFromMap();
     cy.get('[data-testid="heatmap-report"]').should('be.visible');
     capture('heatmap-report');
     cy.get('[data-testid="heatmap-report-close"]').click();
-    cy.get('[data-testid="homepage-search-input"]').click().type('orion');
+    ensureHomepageSearchReady();
+    cy.get('[data-testid="homepage-search-input"]').filter(':visible').first().click().type('orion');
     capture('homepage-searchbar');
     cy.get('[data-testid="homepage-search-input"]').filter(':visible').first().type('{selectall}{backspace}', { force: true });
 
@@ -753,7 +768,8 @@ describe('User Manual Screenshot Flow', () => {
 
     cy.visit('/dashboard/profile/homepage');
     ensureDashboardReady();
-    cy.get('[data-testid="homepage-search-input"]').should('be.visible').click().type('{enter}');
+    ensureHomepageSearchReady();
+    cy.get('[data-testid="homepage-search-input"]').filter(':visible').first().click().type('{enter}');
     switchToDeepSearchTab();
     searchDeepFromTop('data');
     cy.get('[data-testid="consolidated-section-social"], [data-testid="defacement-report"]').should('exist');
@@ -1012,84 +1028,34 @@ describe('User Manual Screenshot Flow', () => {
     capture('cti-context-menu');
     cy.get('body').click(20, 20);
 
-    visitSocialGraph();
-    setupSocialGraphInterceptors();
-    waitForToolbarSearchReady();
-    cy.get('[data-testid="graph-toolbar-search-input"]').should('be.visible').click().type(`{selectall}{backspace}${testData.cti_social_username || 'orion_demo_actor'}`);
-    cy.get('[data-testid="graph-toolbar-search-button"]').click();
-    cy.get('[data-testid="social-graph-root"]').should('be.visible');
+    visitSocialIntel();
+    scanKnownSocialUsername();
     capture('social-intel');
 
-    cy.get('[data-testid="graph-toolbar-image-search"]').click();
-    cy.get('[data-testid="social-graph-root"] input[type="file"][accept*="image/png"]').first()
-      .invoke('removeClass', 'hidden')
-      .invoke('css', 'display', 'block')
-      .invoke('css', 'visibility', 'visible')
-      .invoke('css', 'position', 'fixed')
-      .invoke('css', 'left', '0')
-      .invoke('css', 'top', '0')
-      .invoke('css', 'width', '1px')
-      .invoke('css', 'height', '1px')
-      .invoke('css', 'opacity', '1')
-      .selectFile('cypress/fixtures/profile.png', { force: true });
-    cy.wait('@imageRecon');
+    cy.get('[data-testid="social-list-manage-profiles"]').first().click();
     cy.get('[data-testid="social-manage-profiles-modal"]').should('be.visible');
     capture('social-manage-profiles');
-    cy.get('[data-testid="social-manage-profiles-modal"]').within(() => {
-      cy.contains('button', 'Fetch profile').first().click();
-    });
-    cy.wait('@socialRecon');
+    cy.get('[data-testid="social-manage-profiles-close"]').click();
     cy.get('[data-testid="social-manage-profiles-modal"]').should('not.exist');
-    cy.contains('.home-menu-created-item', 'image_scan_user').should('contain.text', 'Completed').click();
-    cy.get('[data-testid="social-manage-profiles-modal"]').should('be.visible');
-    cy.get('[data-testid="social-manage-profiles-modal"]').within(() => {
-      cy.get('[data-testid="social-manage-profiles-select-all"]').scrollIntoView().click();
-      cy.get('[data-testid="social-manage-profiles-update-graph"]').scrollIntoView().click();
-    });
-    cy.get('[data-testid="social-manage-profiles-modal"]').should('not.exist');
-    cy.get('[data-testid="graph-toolbar-view-list"]').click();
+
+    cy.get('[data-testid="social-list-view"]').should('be.visible');
     cy.get('[data-testid="social-list-manage-profiles"]').should('be.visible');
     capture('social-intel-list-view');
-    cy.get('[data-testid="social-list-user-summary-trigger"]').first().click();
-    cy.get('[data-testid="social-summary-popup"]').should('be.visible');
+
+    cy.contains('[data-testid="social-platform-card"]', /twitter/i, { timeout: 120000 })
+      .scrollIntoView()
+      .within(() => {
+        cy.get('[data-testid="social-profile-overview-button"]').click();
+      });
+    cy.get('[data-testid="social-profile-overview-back"]').should('be.visible');
+    cy.get('[data-testid="social-tab-panel-details"]', { timeout: 120000 }).should('contain.text', 'Clark Kent');
     capture('social-summary-popup');
     capture('social-metadata-results');
-    cy.get('[data-testid="social-summary-popup-overlay"]').click('topLeft', { force: true });
-    cy.get('[data-testid="social-summary-popup"]').should('not.exist');
-    cy.get('[data-testid="social-list-followers-following"]').first().click();
-    cy.get('[data-testid="social-follower-scan-popup"]').should('be.visible');
+
+    cy.get('[data-testid="social-fetch-tab"][data-tab-key="followers"]').click();
+    cy.get('[data-testid="social-follower-row"]', { timeout: 120000 }).should('contain.text', '@loislane');
     capture('social-followers-popup');
-    cy.get('[data-testid="social-follower-scan-cancel"]').click();
-    cy.get('[data-testid="social-follower-scan-popup"]').should('not.exist');
-    cy.get('[data-testid="graph-toolbar-view-graph"]').click();
-    cy.get('[data-testid="social-network-container"] canvas').first().then(($canvas) => {
-      const rect = $canvas[0].getBoundingClientRect();
-      cy.wrap($canvas).trigger('contextmenu', {
-        button: 2,
-        clientX: rect.left + rect.width / 2,
-        clientY: rect.top + rect.height / 2
-      });
-    });
-    cy.get('body').then(($body) => {
-      const panel = $body.find('[data-testid="social-context-menu-panel"]:visible').first();
-      if (panel.length) {
-        cy.wrap(panel).should('be.visible');
-        capture('social-context-menu');
-        cy.contains('[data-testid="social-context-menu-panel"] button', 'Set Alias').click();
-        cy.get('[data-testid="social-alias-modal"]').should('be.visible');
-        capture('social-alias-modal');
-        cy.get('[data-testid="social-alias-cancel"]').click();
-      }
-    });
-    cy.get('body').then(($body) => {
-      const relationshipTrigger = $body.find('[data-testid="social-relationship-node-trigger"]').first();
-      if (relationshipTrigger.length) {
-        cy.wrap(relationshipTrigger).click();
-        cy.get('[data-testid="social-relationship-popup"]').should('be.visible');
-        capture('social-relationship-popup');
-        cy.get('[data-testid="social-relationship-close"]').click();
-      }
-    });
+    cy.get('[data-testid="social-profile-overview-back"]').click();
 
     cy.then(() => {
       if (!hasAdminSession) {

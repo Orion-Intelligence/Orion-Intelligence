@@ -9,7 +9,7 @@ import {
   openFeederAsUser,
   transferFirstVisibleScriptOwner,
   validateFixtureOperationsForAllFeederRules,
-} from './controllers/17-feeder-management.controller';
+} from './controllers/18-feeder-management.controller';
 
 let testUsers: any = {};
 let adminUsername = '';

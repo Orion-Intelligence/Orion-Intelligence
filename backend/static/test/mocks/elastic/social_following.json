@@ -2,14 +2,14 @@
   "job_id": "mock-social-following",
   "result": {
     "following": [
-      "elonmusk",
-      "troyhunt",
-      "reactnative",
-      "pycoders",
-      "geoffkeighley"
+      "loislane",
+      "dailyplanet",
+      "metropoliswatch",
+      "clarkkent",
+      "smallvillebeat"
     ],
     "platform": "twitter",
-    "username": "msmannan00",
+    "username": "superman0011",
     "status": "active"
   }
 }

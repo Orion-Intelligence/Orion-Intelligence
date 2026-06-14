@@ -19,7 +19,7 @@ import {
   setTenantLicense,
   submitLogin,
   waitForBlockingOverlayToClose
-} from './controllers/09-tenant-management.controller';
+} from './controllers/10-tenant-management.controller';
 
 describe('Tenant Management - End-to-End Provisioning Flows', () => {
   let tenant: any;

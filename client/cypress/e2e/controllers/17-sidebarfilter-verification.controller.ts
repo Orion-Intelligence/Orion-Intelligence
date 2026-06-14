@@ -1,6 +1,6 @@
 export {
   applyEntityFilter, selectDateRangeAndReopen, selectDateRangeResetAndReopen
-} from './12-filter-management.controller';
+} from './13-filter-management.controller';
 
 export function waitForSidebar() {
   cy.get('[data-testid="side-filter-apply"]')

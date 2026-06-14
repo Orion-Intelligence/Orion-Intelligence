@@ -1,4 +1,4 @@
-import {ensureSystemSettingsEditing, fillSystemMailConfiguration, openSystemSettings} from './controllers/08-system-management.controller';
+import {ensureSystemSettingsEditing, fillSystemMailConfiguration, openSystemSettings} from './controllers/09-system-management.controller';
 
 describe('System Settings - Admin Update Flow', () => {
   after(() => {

@@ -5,15 +5,15 @@
 
               <div class="z-10 flex min-h-14 flex-shrink-0 items-center border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 px-3 py-2 shadow-[0_1px_0_rgba(255,255,255,0.03)] backdrop-blur-sm">
 
-                <div class="flex h-11 w-full min-w-0 items-center gap-1 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-1.5 shadow-[0_8px_18px_rgba(15,23,42,0.10)] transition-shadow focus-within:border-sky-400/35 focus-within:ring-2 focus-within:ring-sky-400/20">
+                <div data-testid="social-scan-control" class="flex h-11 w-full min-w-0 items-center gap-1 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-1.5 shadow-[0_8px_18px_rgba(15,23,42,0.10)] transition-shadow focus-within:border-sky-400/35 focus-within:ring-2 focus-within:ring-sky-400/20">
                   <span class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[8px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
                     <i class="bi bi-crosshair text-xs leading-none"></i>
                   </span>
-                  <input type="text" placeholder="Scan username" [value]="searchTerm()" (input)="onSearchInput($event)" (keydown.enter)="scanRequested.emit(undefined)" class="h-8 min-w-0 flex-1 bg-transparent text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]">
-                  <button type="button" title="Scan by image" (click)="$event.stopPropagation(); imageUploadRequested.emit(undefined)" class="flex h-8 w-9 flex-shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
+                  <input data-testid="social-scan-input" type="text" placeholder="Scan username" [value]="searchTerm()" (input)="onSearchInput($event)" (keydown.enter)="scanRequested.emit(undefined)" class="h-8 min-w-0 flex-1 bg-transparent text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]">
+                  <button data-testid="social-image-upload-trigger" type="button" title="Scan by image" (click)="$event.stopPropagation(); imageUploadRequested.emit(undefined)" class="flex h-8 w-9 flex-shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
                     <i class="bi bi-image text-xs"></i>
                   </button>
-                  <button (click)="scanRequested.emit(undefined)" [disabled]="searchTerm().trim().length === 0" class="h-8 flex-shrink-0 rounded-[8px] bg-[var(--color-blue-640)] px-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--color-blue-630)] disabled:cursor-not-allowed disabled:opacity-40">Scan</button>
+                  <button data-testid="social-scan-submit" (click)="scanRequested.emit(undefined)" [disabled]="searchTerm().trim().length === 0" class="h-8 flex-shrink-0 rounded-[8px] bg-[var(--color-blue-640)] px-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--color-blue-630)] disabled:cursor-not-allowed disabled:opacity-40">Scan</button>
                 </div>
 
               </div>
@@ -31,7 +31,7 @@
           @for (job of displayJobs(); track job.id) {
             <div class="home-menu-created-item">
               <div class="home-menu-fade-row" [class.home-menu-fade-row-hidden]="!job.matches">
-                <div [class]="getJobClasses(job)" [attr.data-selected]="state.activeUsername()?.toLowerCase() === job.username.toLowerCase() ? 'true' : null" (click)="jobClicked.emit(job)" class="ui-social-history-job cursor-pointer rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3 shadow-[0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]">
+                <div data-testid="social-history-job" [class]="getJobClasses(job)" [attr.data-selected]="state.activeUsername()?.toLowerCase() === job.username.toLowerCase() ? 'true' : null" (click)="jobClicked.emit(job)" class="ui-social-history-job cursor-pointer rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3 shadow-[0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]">
 
                   <div class="flex items-start justify-between gap-2">
                     <div class="flex min-w-0 flex-1 items-center gap-2">
@@ -109,19 +109,19 @@
           }
 
           @if (displayJobs().length < jobsWithFilter().length) {
-            <button (click)="loadMoreJobs()" class="mt-2 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-2 text-sm font-semibold text-[var(--color-blue-640)] transition-colors hover:bg-[var(--color-blue-710)]">
+            <button data-testid="social-history-load-more" (click)="loadMoreJobs()" class="mt-2 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-2 text-sm font-semibold text-[var(--color-blue-640)] transition-colors hover:bg-[var(--color-blue-710)]">
               Load More
             </button>
           }
 
           @if (jobs().length === 0) {
-            <div class="flex flex-col items-center py-10 text-center opacity-70">
+            <div data-testid="social-history-empty" class="flex flex-col items-center py-10 text-center opacity-70">
               <i class="bi bi-clock-history text-3xl text-[var(--color-text4)]"></i>
               <p class="mt-2 text-sm text-[var(--color-text4)]">Scan history is empty.</p>
             </div>
           }
           @if (!hasJobMatches() && jobs().length > 0) {
-            <div class="flex flex-col items-center py-10 text-center">
+            <div data-testid="social-history-no-matches" class="flex flex-col items-center py-10 text-center">
               <i class="bi bi-search text-3xl text-[var(--color-text4)]"></i>
               <p class="mt-2 text-sm font-semibold text-[var(--color-text2)]">No Results Found</p>
               <p class="text-xs text-[var(--color-text4)]">No scans match "{{ searchTerm() }}"</p>
@@ -138,7 +138,7 @@
         @for (job of jobsWithFilter(); track job.id) {
           @if (job.matches) {
             <div class="my-[6px] rounded-[8px] select-none">
-              <button type="button" (click)="jobClicked.emit(job)" [appTooltip]="getJobTooltip(job)" [attr.aria-label]="getJobTooltip(job)" [class.ui-social-collapsed-job-selected]="isJobSelected(job)" class="ui-social-collapsed-job relative flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-visible rounded-[8px] border border-transparent p-0 font-[Inter] text-[14px] font-semibold text-[var(--color-text4)] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-[var(--color-text1)] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]">
+              <button data-testid="social-collapsed-history-job" type="button" (click)="jobClicked.emit(job)" [appTooltip]="getJobTooltip(job)" [attr.aria-label]="getJobTooltip(job)" [class.ui-social-collapsed-job-selected]="isJobSelected(job)" class="ui-social-collapsed-job relative flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-visible rounded-[8px] border border-transparent p-0 font-[Inter] text-[14px] font-semibold text-[var(--color-text4)] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-[var(--color-text1)] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]">
                 {{ getJobInitial(job) }}
                 <span class="absolute right-[9px] top-[8px] h-2 w-2 rounded-full border border-[var(--color-blue-820-light)]" [class.bg-amber-400]="job.status === 'queued'" [class.bg-sky-400]="job.status === 'in_progress'" [class.bg-emerald-400]="job.status === 'completed'" [class.bg-red-400]="job.status === 'failed'" [class.animate-pulse]="job.status === 'queued' || job.status === 'in_progress' || isUserBusy(job.username)"></span>
               </button>

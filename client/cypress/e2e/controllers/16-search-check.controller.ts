@@ -1,4 +1,4 @@
-import {SearchResultData} from '../15-search-check.cy';
+import {SearchResultData} from '../16-search-check.cy';
 
 export const SEARCH_FIXTURES = {
   general_intelligence_data: {

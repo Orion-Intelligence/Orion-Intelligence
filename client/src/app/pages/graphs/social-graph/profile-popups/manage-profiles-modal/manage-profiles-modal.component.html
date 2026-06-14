@@ -10,7 +10,7 @@
           {{ data()!.username }} · {{ data()!.platforms.length }} platforms found
         </div>
       </div>
-      <button type="button" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]" aria-label="Close manage profiles" title="Close" (click)="close.emit(undefined)">
+      <button data-testid="social-manage-profiles-close" type="button" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]" aria-label="Close manage profiles" title="Close" (click)="close.emit(undefined)">
         <i class="bi bi-x-lg text-[13px]"></i>
       </button>
     </div>
@@ -65,7 +65,7 @@
               </div>
             }
 
-            <div (click)="onPlatformCardClick($event, platform)" class="ui-social-manage-platform-card rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)]/35 p-3 shadow-[0_10px_24px_var(--color-shadow-light)] transition-colors" [attr.data-selected]="platform.isSelected && !isImageExtractedFlow() ? 'true' : 'false'" [class.cursor-pointer]="!isImageExtractedFlow()">
+            <div data-testid="social-manage-profile-card" (click)="onPlatformCardClick($event, platform)" class="ui-social-manage-platform-card rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)]/35 p-3 shadow-[0_10px_24px_var(--color-shadow-light)] transition-colors" [attr.data-selected]="platform.isSelected && !isImageExtractedFlow() ? 'true' : 'false'" [class.cursor-pointer]="!isImageExtractedFlow()">
               <div class="flex items-center gap-3">
                 <div [socialMapperPlatformBg]="platform.platform" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-2 text-lg font-bold text-white">
                   <app-social-icon [platformName]="platform.platform"></app-social-icon>
@@ -100,7 +100,7 @@
                 </div>
                 @if (!isImageExtractedFlow() && !isInformational(platform)) {
                   <div class="ml-1 flex-shrink-0">
-                    <button type="button" (click)="onSelectionSwitchClick($event, platform)" class="ui-social-manage-switch relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-400/35 disabled:cursor-not-allowed disabled:opacity-40" role="switch" [attr.aria-checked]="platform.isSelected" [attr.data-selected]="platform.isSelected ? 'true' : 'false'">
+                    <button data-testid="social-manage-profile-switch" type="button" (click)="onSelectionSwitchClick($event, platform)" class="ui-social-manage-switch relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-400/35 disabled:cursor-not-allowed disabled:opacity-40" role="switch" [attr.aria-checked]="platform.isSelected" [attr.data-selected]="platform.isSelected ? 'true' : 'false'">
                       <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform duration-300 ease-in-out" [class.translate-x-5]="platform.isSelected" [class.translate-x-0]="!platform.isSelected"></span>
                     </button>
                   </div>
@@ -122,13 +122,13 @@
           }
 
           @if (!searchTerm() && displayPlatforms().length < filteredPlatforms().length) {
-            <button (click)="loadMore()" class="h-9 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 text-sm font-semibold text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
+            <button data-testid="social-manage-profiles-load-more" (click)="loadMore()" class="h-9 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 text-sm font-semibold text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
               Load More
             </button>
           }
         </div>
       } @else {
-        <div class="m-4 rounded-[10px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-700)]/35 px-4 py-8 text-center text-[13px] text-[var(--color-text3)]">
+        <div data-testid="social-manage-profiles-no-matches" class="m-4 rounded-[10px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-700)]/35 px-4 py-8 text-center text-[13px] text-[var(--color-text3)]">
           No platforms match your search.
         </div>
       }

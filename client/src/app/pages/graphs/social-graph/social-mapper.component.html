@@ -2,7 +2,7 @@
   @if (isTailwindReady()) {
     @if (tabManager.activeTab()) {
       <main class="relative min-h-0 flex-grow">
-        <input type="file" #imageInput class="hidden" (change)="onImageSelected($event)" accept="image/png, image/jpeg, image/webp, image/gif">
+        <input data-testid="social-image-file-input" type="file" #imageInput class="hidden" (change)="onImageSelected($event)" accept="image/png, image/jpeg, image/webp, image/gif">
         <div class="flex h-full min-h-0 w-full flex-col overflow-hidden">
           <div class="relative flex min-h-0 flex-grow flex-row">
             <app-home-menu
@@ -25,12 +25,12 @@
             @if (!(isSmallScreen() && isMobileHomeMenuOpen())) {
             <main class="ui-social-dashboard-shell relative flex min-h-0 flex-grow flex-col bg-transparent">
               <div class="ui-social-topbar relative z-[1100] flex h-[60px] w-full flex-shrink-0 items-center justify-between overflow-visible border-b border-[var(--color-border)] bg-[var(--color-blue-850)] p-0">
-                <div class="ml-[10px] flex min-w-0 flex-1 items-center overflow-hidden pr-[20px] pl-3 text-[15px] text-white max-[943px]:ml-0 max-[943px]:pl-3">
+                <div data-testid="social-header-breadcrumb" class="ml-[10px] flex min-w-0 flex-1 items-center overflow-hidden pr-[20px] pl-3 text-[15px] text-white max-[943px]:ml-0 max-[943px]:pl-3">
                   <img routerLink="/dashboard/home" data-testid="social-header-back" alt="Back" aria-label="Back to homepage" title="Back to homepage" class="ui-breadcrumb-chevron mt-[-1px] mr-[10px] h-[50px] w-[50px] cursor-pointer p-[10px]" height="30" ngSrc="assets/images/shared/theme/arrow.svg" width="30" />
                   <span class="inline-flex min-w-0 items-center font-[Inter,sans-serif] text-[16px] font-medium text-[var(--color-text1)]">
-                    <span class="max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap max-[943px]:max-w-[110px]">Social</span>
+                    <span data-testid="social-header-breadcrumb-root" class="max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap max-[943px]:max-w-[110px]">Social</span>
                     <img alt="breadcrumb" class="ui-breadcrumb-chevron ml-[5px] mr-[5px] inline-block" height="20" ngSrc="assets/images/shared/theme/nav-next.svg" priority width="20" />
-                    <span class="max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap max-[943px]:max-w-[130px]">Intel</span>
+                    <span data-testid="social-header-breadcrumb-current" class="max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap max-[943px]:max-w-[130px]">Intel</span>
                   </span>
                 </div>
 

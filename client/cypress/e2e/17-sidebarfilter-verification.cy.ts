@@ -9,7 +9,7 @@ import {
   openAnyMatchingReport,
   selectAndApply,
   selectDateRangeResetAndReopen
-} from './controllers/16-sidebarfilter-verification.controller';
+} from './controllers/17-sidebarfilter-verification.controller';
 
 describe('SideBar Filter Verification', () => {
   beforeEach(() => {

@@ -12,7 +12,7 @@ import {
   setAllInsightsExpanded,
   switchToDeepSearchTab,
   switchToIocsTab
-} from './controllers/13-consolidated.controller';
+} from './controllers/14-consolidated.controller';
 
 describe('Consolidated - IOC Basic Flow', () => {
   beforeEach(() => {
@@ -209,7 +209,6 @@ describe('Consolidated - IOC Basic Flow', () => {
     cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
     cy.get('[data-testid="result-card"]').should('have.length.greaterThan', 0);
 
-    cy.wait(1000);
     cy.get('[data-testid="result-card"]').then(($cards) => {
       const cardWithNetwork = [...$cards].find((el) => (el.textContent || '').includes('Network:'));
       expect(cardWithNetwork, 'result card with Network field').to.exist;
