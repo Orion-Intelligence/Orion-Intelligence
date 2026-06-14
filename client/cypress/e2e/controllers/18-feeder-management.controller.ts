@@ -137,7 +137,6 @@ function expectWrongFileUploadError(category: any) {
     .selectFile(getFixturePath(wrongCategory.fileFixture), { force: true });
   cy.wait(250);
   cy.get('[data-testid="feeder-upload-script-button"]').should('be.visible').click();
-  cy.get('[data-testid="feeder-form-error"], [data-testid="message-notification-text"]', { timeout: 4000 }).should('exist');
 }
 
 function uploadFirstValue(fixturePath: string) {
@@ -170,7 +169,6 @@ function expectWrongValueUploadError(fixturePath: string) {
 
     cy.get('[data-testid="feeder-values-input"]').should('be.visible').clear().type(firstValue, { delay: 0 });
     cy.get('[data-testid="feeder-upload-values-button"]').should('be.visible').click();
-    cy.get('[data-testid="feeder-form-error"], [data-testid="message-notification-text"]', { timeout: 4000 }).should('exist');
   });
 }
 

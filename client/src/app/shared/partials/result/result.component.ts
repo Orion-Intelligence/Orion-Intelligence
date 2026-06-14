@@ -194,7 +194,6 @@ export class ResultComponent implements OnInit, OnChanges {
     event?.preventDefault();
     this.scrollService.resetOnReload();
     this.dashboardService.consolidatedParamModel.page = 1;
-    this.dashboardService.consolidatedParamModel.tab = "";
     const query = (this.local_query || this.searchQuery || '').trim();
     this.searchInputRef?.nativeElement.blur();
     this.searchQuery = query;

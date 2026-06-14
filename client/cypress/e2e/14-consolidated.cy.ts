@@ -198,7 +198,7 @@ describe('Consolidated - IOC Basic Flow', () => {
     openHomepageAndSearch('{enter}');
     switchToDeepSearchTab();
     cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
-    searchDeepFromTop('carderland.com');
+    searchDeepFromTop('example.test');
     cy.get('[data-testid="consolidated-scan-title"]').should('contain.text', 'Threats Scans Report:');
 
     cy.get('[data-testid="consolidated-section-social"]').scrollIntoView().should('be.visible');

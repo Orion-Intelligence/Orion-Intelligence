@@ -196,10 +196,13 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     });
     if (this.isEmailOrUrl(this.dashboardService.consolidatedParamModel.q)) {
       this.isStealerLogLoading.set(true);
-      this.dashboardService.consolidatedParamModel.url = this.dashboardService.consolidatedParamModel.q;
-      this.dashboardService.consolidatedParamModel.ioc = `m_search_all:${this.dashboardService.consolidatedParamModel.q}`;
-      this.dashboardService.consolidatedParamModel.category = "credential";
-      this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealer/ioc', this.dashboardService.consolidatedParamModel)
+      const stealerLogParams = {
+        ...this.dashboardService.consolidatedParamModel,
+        url: this.dashboardService.consolidatedParamModel.q,
+        ioc: `m_search_all:${this.dashboardService.consolidatedParamModel.q}`,
+        category: 'credential',
+      };
+      this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealer/ioc', stealerLogParams, '', false)
         .pipe(switchMap(response => timer(300).pipe(map(() => response))))
         .subscribe(response => {
           if (response.success && response.data) {
@@ -280,6 +283,10 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   onUpdateQuery(query: string) {
     this.dashboardService.consolidatedParamModel.q = query;
+    this.dashboardService.consolidatedParamModel.category = this.route.snapshot.routeConfig?.path || 'all';
+    this.dashboardService.consolidatedParamModel.url = '';
+    this.dashboardService.consolidatedParamModel.user = '';
+    this.dashboardService.consolidatedParamModel.ioc = '';
     this.query = query;
   }
 

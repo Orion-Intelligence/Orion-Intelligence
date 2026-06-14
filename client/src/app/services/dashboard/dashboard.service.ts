@@ -48,7 +48,7 @@ export class DashboardService {
   fetchSearchResults<T extends {
         Result?: any[];
         cards_data?: any[];
-    }>(apiEndpoint: string, paramModel: any, semantic = ""): Observable<{
+    }>(apiEndpoint: string, paramModel: any, semantic = "", syncUrl = true): Observable<{
         success: boolean;
         isEmpty: boolean;
         data: T | null;
@@ -58,7 +58,9 @@ export class DashboardService {
     this.cancelOngoingRequest();
     paramModel.page = this.consolidatedParamModel.page;
     let baseParams: any = { ...paramModel, ...this.selectedFilters() };
-    this.syncQueryParamsToUrl(baseParams);
+    if (syncUrl) {
+      this.syncQueryParamsToUrl(baseParams);
+    }
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
     if (semantic) {
       baseParams['matchtype'] = semantic;
@@ -68,7 +70,9 @@ export class DashboardService {
     }
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
     baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
-    this.syncQueryParamsToUrl(baseParams);
+    if (syncUrl) {
+      this.syncQueryParamsToUrl(baseParams);
+    }
     if (entityCategories) {
       baseParams['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, v]) => Array.isArray(v) ? v.length > 0 : true));
     }
