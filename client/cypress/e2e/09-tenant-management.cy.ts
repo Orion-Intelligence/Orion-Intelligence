@@ -267,7 +267,6 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.contains('div', 'Profile').should('be.visible');
     cy.contains('div', 'Contacts').should('be.visible');
     cy.contains('div', 'Users').should('be.visible');
-    cy.wait(1000)
     cy.scrollDashboardToBottom()
     cy.contains('div', 'Privacy').should('be.visible');
     cy.contains('div', 'Address').should('be.visible');
