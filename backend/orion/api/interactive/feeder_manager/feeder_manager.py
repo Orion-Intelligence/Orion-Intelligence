@@ -112,6 +112,8 @@ class FeederManager:
             raise HTTPException(status_code=400, detail="Invalid upload mode")
         if rule_type == "generic":
             raise HTTPException(status_code=400, detail="Generic rules only support URL value uploads")
+        if session_file and not (session_file.filename or "").lower().endswith(".zip"):
+            raise HTTPException(status_code=400, detail="Only ZIP session files are allowed")
         if session_file and not file:
             records = await self._engine.find(
                 self._helper.model,

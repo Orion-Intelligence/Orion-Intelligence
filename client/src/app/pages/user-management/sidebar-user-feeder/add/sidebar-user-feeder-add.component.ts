@@ -98,7 +98,15 @@ export class SidebarUserFeederAddComponent implements OnChanges {
 
   onSessionFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.selectedSessionFile = input.files?.[0] || null;
+    const file = input.files?.[0] || null;
+    if (file && !file.name.toLowerCase().endsWith('.zip')) {
+      this.formError = 'Only ZIP session files are allowed';
+      input.value = '';
+      this.selectedSessionFile = null;
+      return;
+    }
+    this.formError = '';
+    this.selectedSessionFile = file;
   }
 
   supportsValueUpload(): boolean {
@@ -156,6 +164,10 @@ export class SidebarUserFeederAddComponent implements OnChanges {
     }
     if (!this.selectedFiles.length && !this.selectedSessionFile) {
       this.formError = 'Python file is required';
+      return;
+    }
+    if (this.selectedSessionFile && !this.selectedSessionFile.name.toLowerCase().endsWith('.zip')) {
+      this.formError = 'Only ZIP session files are allowed';
       return;
     }
     for (const file of this.selectedFiles) {
