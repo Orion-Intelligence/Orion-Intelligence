@@ -46,12 +46,12 @@ export const INTAKE_SOURCE_OPTIONS: CaseOption<IntakeSource>[] = [
 
 export const CASE_STATUS_OPTIONS: CaseOption<CaseStatus>[] = [
   { value: 'new', label: 'New' },
-  { value: 'triaged', label: 'Triaged' },
-  { value: 'assigned', label: 'Assigned' },
-  { value: 'investigating', label: 'Investigating' },
-  { value: 'waiting_on_response', label: 'Waiting on Response' },
-  { value: 'remediating', label: 'Remediating' },
-  { value: 'review', label: 'Review' },
+  { value: 'intake_review', label: 'Intake Review' },
+  { value: 'under_investigation', label: 'Under Investigation' },
+  { value: 'evidence_collection', label: 'Evidence Collection' },
+  { value: 'verification', label: 'Verification' },
+  { value: 'regulatory_action', label: 'Regulatory Action' },
+  { value: 'legal_review', label: 'Legal Review' },
   { value: 'resolved', label: 'Resolved' },
   { value: 'closed', label: 'Closed' }
 ];

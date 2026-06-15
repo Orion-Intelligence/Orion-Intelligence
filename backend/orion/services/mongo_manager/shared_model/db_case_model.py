@@ -34,12 +34,12 @@ class CaseType(str, Enum):
 
 class CaseStatus(str, Enum):
     NEW = "new"
-    TRIAGED = "triaged"
-    ASSIGNED = "assigned"
-    INVESTIGATING = "investigating"
-    WAITING_ON_RESPONSE = "waiting_on_response"
-    REMEDIATING = "remediating"
-    REVIEW = "review"
+    INTAKE_REVIEW = "intake_review"
+    UNDER_INVESTIGATION = "under_investigation"
+    EVIDENCE_COLLECTION = "evidence_collection"
+    VERIFICATION = "verification"
+    REGULATORY_ACTION = "regulatory_action"
+    LEGAL_REVIEW = "legal_review"
     RESOLVED = "resolved"
     CLOSED = "closed"
 
