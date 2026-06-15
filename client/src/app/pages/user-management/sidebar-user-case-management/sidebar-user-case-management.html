@@ -14,6 +14,10 @@
                         {{ (showArchivedCases ? 'Hide Archives' : 'Show Archived') | translate }}
                     </button>
 
+                    <button type="button" data-testid="case-tracking-board-button" class="ui-btn ui-btn-secondary" (click)="openTrackingBoard()">
+                        {{ 'Status Tracking Board' | translate }}
+                    </button>
+
                     <button type="button" data-testid="add-case-button" class="ui-btn ui-btn-primary" (click)="addCase()">
                         {{ 'Add Case' | translate }}
                     </button>
@@ -28,14 +32,22 @@
                     <table class="w-full min-w-[1120px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]" data-testid="case-management-table">
                         <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
                             <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
-                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Case ID' | translate }}</th>
-                                <th class="w-[220px] overflow-clip align-middle px-4 py-3.5">{{ 'categoryAlerts.form.title' | translate }}</th>
-                                <th class="w-[160px] overflow-clip align-middle px-4 py-3.5">{{ 'Case Type' | translate }}</th>
-                                <th class="w-[120px] overflow-clip align-middle px-4 py-3.5">{{ 'Status' | translate }}</th>
-                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Severity' | translate }}</th>
-                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Priority' | translate }}</th>
-                                <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">{{ 'Updated' | translate }}</th>
-                                <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">{{ 'Action' | translate }}</th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Case ID' | translate }}
+                                </th>
+                                <th class="w-[220px] overflow-clip align-middle px-4 py-3.5">{{
+                                    'categoryAlerts.form.title' | translate }}</th>
+                                <th class="w-[160px] overflow-clip align-middle px-4 py-3.5">{{ 'Case Type' | translate
+                                    }}</th>
+                                <th class="w-[120px] overflow-clip align-middle px-4 py-3.5">{{ 'Status' | translate }}
+                                </th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Severity' | translate
+                                    }}</th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Priority' | translate
+                                    }}</th>
+                                <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">{{ 'Updated' | translate }}
+                                </th>
+                                <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">{{ 'Action' |
+                                    translate }}</th>
                             </tr>
                         </thead>
 
@@ -51,7 +63,7 @@
                                     formatLabel(case.caseType) }}
                                 </td>
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                                    <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="{ 'bg-blue-500/10 text-blue-300 [body.light-theme_&]:bg-blue-100 [body.light-theme_&]:text-blue-800': case.status === 'new' || case.status === 'triaged' || case.status === 'assigned', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': case.status === 'investigating' || case.status === 'waiting_on_response' || case.status === 'remediating' || case.status === 'review', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': case.status === 'resolved', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700': case.status !== 'new' && case.status !== 'triaged' && case.status !== 'assigned' && case.status !== 'investigating' && case.status !== 'waiting_on_response' && case.status !== 'remediating' && case.status !== 'review' && case.status !== 'resolved' }">
+                                    <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="{ 'bg-blue-500/10 text-blue-300 [body.light-theme_&]:bg-blue-100 [body.light-theme_&]:text-blue-800': case.status === 'new' || case.status === 'intake_review', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': case.status === 'under_investigation' || case.status === 'evidence_collection' || case.status === 'verification' || case.status === 'regulatory_action' || case.status === 'legal_review', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': case.status === 'resolved', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700': case.status === 'closed' }">
                                         {{ formatLabel(case.status) }}
                                     </span>
                                 </td>
@@ -90,7 +102,8 @@
                         @if ((cases?.length || 0) === 0) {
                         <tbody>
                             <tr class="border-t !border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]" data-testid="case-management-empty">
-                                <td class="px-4 py-12 text-center text-sm text-[var(--color-text4)]" colspan="8">{{ 'No case available.' | translate }}</td>
+                                <td class="px-4 py-12 text-center text-sm text-[var(--color-text4)]" colspan="8">{{ 'No
+                                    case available.' | translate }}</td>
                             </tr>
                         </tbody>
                         }
@@ -120,25 +133,29 @@
                         </div>
                         <div class="divide-y divide-[var(--tenant-line)] px-3 py-2.5 text-sm text-[var(--color-text2)]">
                             <div class="flex items-center justify-between gap-3 py-2">
-                                <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Status' | translate }}</span>
-                                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="{ 'bg-blue-500/10 text-blue-300 [body.light-theme_&]:bg-blue-100 [body.light-theme_&]:text-blue-800': case.status === 'new' || case.status === 'triaged' || case.status === 'assigned', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': case.status === 'investigating' || case.status === 'waiting_on_response' || case.status === 'remediating' || case.status === 'review', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': case.status === 'resolved', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700': case.status !== 'new' && case.status !== 'triaged' && case.status !== 'assigned' && case.status !== 'investigating' && case.status !== 'waiting_on_response' && case.status !== 'remediating' && case.status !== 'review' && case.status !== 'resolved' }">
+                                <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
+                                    'Status' | translate }}</span>
+                                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="{ 'bg-blue-500/10 text-blue-300 [body.light-theme_&]:bg-blue-100 [body.light-theme_&]:text-blue-800': case.status === 'new' || case.status === 'intake_review', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': case.status === 'under_investigation' || case.status === 'evidence_collection' || case.status === 'verification' || case.status === 'regulatory_action' || case.status === 'legal_review', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': case.status === 'resolved', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700': case.status === 'closed' }">
                                     {{ formatLabel(case.status) }}
                                 </span>
                             </div>
                             <div class="flex items-center justify-between gap-3 py-2">
-                                <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Severity' | translate }}</span>
+                                <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
+                                    'Severity' | translate }}</span>
                                 <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="{ 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': case.severity === 'critical', 'bg-orange-500/10 text-orange-300 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': case.severity === 'high', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': case.severity === 'medium', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': case.severity !== 'critical' && case.severity !== 'high' && case.severity !== 'medium' }">
                                     {{ case.severity }}
                                 </span>
                             </div>
                             <div class="flex items-center justify-between gap-3 py-2">
-                                <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Priority' | translate }}</span>
+                                <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
+                                    'Priority' | translate }}</span>
                                 <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="{ 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': case.priority === 'critical', 'bg-orange-500/10 text-orange-300 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': case.priority === 'high', 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': case.priority === 'medium', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': case.priority !== 'critical' && case.priority !== 'high' && case.priority !== 'medium' }">
                                     {{ case.priority }}
                                 </span>
                             </div>
                             <div class="flex items-center justify-between gap-3 py-2">
-                                <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Updated' | translate }}</span>
+                                <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
+                                    'Updated' | translate }}</span>
                                 <span class="text-right text-xs font-medium text-[var(--color-text1)]">{{
                                     getFormattedDate(case.updatedAt) }} &middot; {{ getFormattedTime(case.updatedAt)
                                     }}</span>
@@ -158,14 +175,22 @@
                     <table class="w-full min-w-[1120px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]">
                         <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
                             <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
-                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Case ID' | translate }}</th>
-                                <th class="w-[220px] overflow-clip align-middle px-4 py-3.5">{{ 'categoryAlerts.form.title' | translate }}</th>
-                                <th class="w-[160px] overflow-clip align-middle px-4 py-3.5">{{ 'Case Type' | translate }}</th>
-                                <th class="w-[120px] overflow-clip align-middle px-4 py-3.5">{{ 'Status' | translate }}</th>
-                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Severity' | translate }}</th>
-                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Priority' | translate }}</th>
-                                <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">{{ 'Updated' | translate }}</th>
-                                <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">{{ 'Action' | translate }}</th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Case ID' | translate }}
+                                </th>
+                                <th class="w-[220px] overflow-clip align-middle px-4 py-3.5">{{
+                                    'categoryAlerts.form.title' | translate }}</th>
+                                <th class="w-[160px] overflow-clip align-middle px-4 py-3.5">{{ 'Case Type' | translate
+                                    }}</th>
+                                <th class="w-[120px] overflow-clip align-middle px-4 py-3.5">{{ 'Status' | translate }}
+                                </th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Severity' | translate
+                                    }}</th>
+                                <th class="w-[100px] overflow-clip align-middle px-4 py-3.5">{{ 'Priority' | translate
+                                    }}</th>
+                                <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">{{ 'Updated' | translate }}
+                                </th>
+                                <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">{{ 'Action' |
+                                    translate }}</th>
                             </tr>
                         </thead>
                         <tbody class="text-[15px] font-normal text-[var(--color-text3)]">

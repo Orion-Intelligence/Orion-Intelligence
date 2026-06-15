@@ -54,7 +54,8 @@ const loadSidebarUserCaseManagement = () => import('./pages/user-management/side
 const loadUserProfileActivityComponent = () => import('./pages/profile/user-profile-activity/user-profile-activity.component').then(m => m.UserProfileActivityComponent);
 const loadCaseDetailsComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-details/case-details').then(m => m.CaseDetails);
 const loadCaseShareComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-share/case-share.component').then(m => m.CaseShareComponent);
-const loadSatelliteIntelComponent =()=>import('./pages/geo-fencing/satellite-intel/satellite-intel').then(m=>m.SatelliteIntel);
+const loadSatelliteIntelComponent = () => import('./pages/geo-fencing/satellite-intel/satellite-intel').then(m => m.SatelliteIntel);
+const loadCaseTrackingBoardComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-tracking-board/case-tracking-board').then(m => m.CaseTrackingBoard);
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
   data: { type: 'consolidated', animation: 'HashPage' }
@@ -880,6 +881,11 @@ export const routes: Routes = [
                 path: 'case-details',
                 loadComponent: loadCaseDetailsComponent,
                 data: { type: 'case-details', animation: 'CaseDetailsPage' }
+              },
+              {
+                path: 'tracking-board',
+                loadComponent: loadCaseTrackingBoardComponent,
+                data: { type: 'case-tracking-board', animation: 'CaseTrackingBoardPage' }
               }
             ]
           },

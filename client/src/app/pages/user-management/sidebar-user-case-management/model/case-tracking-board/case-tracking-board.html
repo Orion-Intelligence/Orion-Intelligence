@@ -1,0 +1,82 @@
+<div class="w-full max-w-[2400px] p-5">
+    <div class="ui-page-container p-5" data-testid="case-tracking-board-page">
+        <div class="mb-4 flex items-center justify-between">
+            <div>
+                <h1 class="ui-page-title">Status Tracking Board</h1>
+                <p class="ui-page-description">Track case lifecycle progress</p>
+            </div>
+            <button type="button" class="ui-btn ui-btn-secondary" (click)="loadCases()">
+                Refresh
+            </button>
+        </div>
+
+        @if (isLoading) {
+        <div class="text-sm text-[var(--color-text4)]">Loading cases...</div>
+        } @else {
+        <div class="flex gap-4 overflow-x-auto pb-4">
+            @for (column of workflow; track column.value) {
+            <div class="min-w-[280px] rounded-[10px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]">
+                <div class="border-b border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] px-4 py-3">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-sm font-bold text-[var(--color-text1)]">{{ column.label }}</h2>
+                        <span class="rounded-full bg-[var(--tenant-chip-bg)] px-2 py-1 text-xs text-[var(--color-text3)]">
+                            {{ getCasesByStatus(column.value).length }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="space-y-3 p-3 min-h-[500px]">
+                    @for (caseItem of getCasesByStatus(column.value); track caseItem.caseId) {
+                    <div class="cursor-pointer rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-3 transition hover:bg-[var(--tenant-chip-hover)]" [attr.data-testid]="'case-board-card-' + caseItem.caseId" (click)="openCaseDetails(caseItem.caseId)">
+
+                        <div class="text-xs font-semibold text-[var(--color-text4)]">
+                            {{ caseItem.caseId }}
+                        </div>
+
+                        <div class="mt-1 text-sm font-bold text-[var(--color-text1)]">
+                            {{ caseItem.title }}
+                        </div>
+
+                        <div class="mt-2 line-clamp-3 text-xs text-[var(--color-text3)]">
+                            {{ caseItem.description || 'No description' }}
+                        </div>
+
+                        @if (getNextStatus(caseItem.status)) {
+                        <button type="button" class="mt-3 w-full rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-xs font-semibold text-[var(--color-text2)] hover:bg-[var(--tenant-chip-hover)]" (click)="$event.stopPropagation(); requestMove(caseItem, getNextStatus(caseItem.status)!)">
+                            Move to {{ formatLabel(getNextStatus(caseItem.status)) }}
+                        </button>
+                        }
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+        }
+
+        @if (isReasonModalOpen) {
+        <div class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 p-4">
+            <div class="w-full max-w-md rounded-[12px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)] p-5">
+                <h3 class="text-lg font-bold text-[var(--color-text1)]">
+                    Move Case
+                </h3>
+
+                <p class="mt-2 text-sm text-[var(--color-text3)]">
+                    Why are you moving this case to {{ formatLabel(targetStatus) }}?
+                </p>
+
+                <textarea [(ngModel)]="statusReason" class="mt-4 min-h-28 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none" placeholder="Enter mandatory reason"></textarea>
+
+                <div class="mt-4 flex justify-end gap-2">
+                    <button type="button" class="ui-btn ui-btn-secondary" (click)="closeReasonModal()" [disabled]="isSavingMove">
+                        Cancel
+                    </button>
+                    <button type="button" class="ui-btn ui-btn-primary" (click)="confirmMove()" [disabled]="isSavingMove">
+                        Save Move
+                    </button>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</div>

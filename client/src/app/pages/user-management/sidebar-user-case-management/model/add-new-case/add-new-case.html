@@ -1,130 +1,135 @@
-<app-case-edit-drawer [title]="'Add New Case' | translate" [subtitle]="'Create case details and primary entity.' | translate" [saveLabel]="'Save Case' | translate" saveTestId="case-add-save" cancelTestId="case-add-cancel" drawerTestId="case-add-drawer" (save)="onSubmit()" (cancel)="closePopup()">
-        <div class="bg-[var(--color-blue-830)] p-6">
-            <form (ngSubmit)="onSubmit()" class="space-y-5">
+<app-case-edit-drawer [title]="'Add New Case' | translate"
+    [subtitle]="'Create case details and primary entity.' | translate" [saveLabel]="'Save Case' | translate"
+    saveTestId="case-add-save" cancelTestId="case-add-cancel" drawerTestId="case-add-drawer" (save)="onSubmit()"
+    (cancel)="closePopup()">
+    <div class="bg-[var(--color-blue-830)] p-6">
+        <form (ngSubmit)="onSubmit()" class="space-y-5">
 
-                <div class="space-y-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
-                    <h3 class="text-[15px] font-bold leading-tight text-[var(--color-text1)] mb-4">{{ 'Case Details' | translate }}</h3>
+            <div class="space-y-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
+                <h3 class="text-[15px] font-bold leading-tight text-[var(--color-text1)] mb-4">{{ 'Case Details' |
+                    translate }}</h3>
 
-                    <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Case ID' | translate }}</label>
-                        <input type="text" [value]="caseForm.caseId" disabled class="mt-1 w-full cursor-not-allowed rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[var(--color-text4)] outline-none" data-testid="case-add-id-input" />
-                        @if (validationErrors['caseId']) {
-                        <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['caseId'] }}</p>
+                <div>
+                    <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{
+                        'Case ID' | translate }}</label>
+                    <input type="text" [value]="caseForm.caseId" disabled class="mt-1 w-full cursor-not-allowed rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[var(--color-text4)] outline-none" data-testid="case-add-id-input" />
+                    @if (validationErrors['caseId']) {
+                    <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['caseId'] }}</p>
+                    }
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
+                        {{ 'categoryAlerts.form.title' | translate }} <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" [(ngModel)]="caseForm.title" name="title" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" [placeholder]="'Brief case title' | translate" data-testid="case-add-title-input" />
+                    @if (validationErrors['title']) {
+                    <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['title'] }}</p>
+                    }
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{
+                        'categoryAlerts.form.description' | translate }}</label>
+                    <textarea [(ngModel)]="caseForm.description" name="description" class="mt-1 min-h-24 w-full resize-y rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" [placeholder]="'Optional investigation context' | translate" data-testid="case-add-description-input"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{
+                        'Case Type' | translate }} <span class="text-red-500">*</span></label>
+                    <select [(ngModel)]="caseForm.caseType" name="caseType" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-type-select">
+                        @for (type of caseTypeOptions; track type.value) {
+                        <option [value]="type.value">{{ type.label }}</option>
                         }
-                    </div>
+                    </select>
+                </div>
 
-                    <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
-                            {{ 'categoryAlerts.form.title' | translate }} <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" [(ngModel)]="caseForm.title" name="title" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" [placeholder]="'Brief case title' | translate" data-testid="case-add-title-input" />
-                        @if (validationErrors['title']) {
-                        <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['title'] }}</p>
+                @if (caseForm.caseType === 'other') {
+                <div class="mt-3">
+                    <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
+                        {{ 'Other Case Type' | translate }} <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" [(ngModel)]="caseForm.caseTypeOtherValue" name="caseTypeOtherValue" class="mt-1 mb-5 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" [placeholder]="'Specify other case type' | translate" />
+                    @if (validationErrors['caseTypeOther']) {
+                    <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['caseTypeOther'] }}</p>
+                    }
+                </div>
+                }
+
+                <div>
+                    <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{
+                        'Intake Source' | translate }} <span class="text-red-500">*</span></label>
+                    <select [(ngModel)]="caseForm.intakeSource" name="intakeSource" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-intake-source-select">
+                        @for (source of intakeSourceOptions; track source.value) {
+                        <option [value]="source.value">{{ source.label }}</option>
                         }
+                    </select>
+                </div>
+
+                @if (caseForm.intakeSource === 'other') {
+                <div class="mt-3">
+                    <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
+                        {{ 'Other Intake Source' | translate }} <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" [(ngModel)]="caseForm.intakeSourceOtherValue" name="intakeSourceOtherValue" class="mt-1 mb-5 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" [placeholder]="'Specify other intake source' | translate" />
+                    @if (validationErrors['intakeSourceOther']) {
+                    <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['intakeSourceOther'] }}
+                    </p>
+                    }
+                </div>
+                }
+
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[var(--color-text4)]" data-testid="case-add-status-readonly">
+                        {{ 'New' }}
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'categoryAlerts.form.description' | translate }}</label>
-                        <textarea [(ngModel)]="caseForm.description" name="description" class="mt-1 min-h-24 w-full resize-y rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" [placeholder]="'Optional investigation context' | translate" data-testid="case-add-description-input"></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Case Type' | translate }} <span class="text-red-500">*</span></label>
-                        <select [(ngModel)]="caseForm.caseType" name="caseType" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-type-select">
-                            @for (type of caseTypeOptions; track type.value) {
-                            <option [value]="type.value">{{ type.label }}</option>
+                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{
+                            'Severity' | translate }}
+                            <span class="text-red-500">*</span></label>
+                        <select [(ngModel)]="caseForm.severity" name="severity" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-severity-select">
+                            @for (severity of severityOptions; track severity) {
+                            <option [value]="severity" class="capitalize">{{ severity }}</option>
                             }
                         </select>
                     </div>
 
-                    @if (caseForm.caseType === 'other') {
-                    <div class="mt-3">
-                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
-                            {{ 'Other Case Type' | translate }} <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" [(ngModel)]="caseForm.caseTypeOtherValue" name="caseTypeOtherValue" class="mt-1 mb-5 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" [placeholder]="'Specify other case type' | translate" />
-                        @if (validationErrors['caseTypeOther']) {
-                        <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['caseTypeOther'] }}</p>
-                        }
-                    </div>
-                    }
-
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Intake Source' | translate }} <span class="text-red-500">*</span></label>
-                        <select [(ngModel)]="caseForm.intakeSource" name="intakeSource" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-intake-source-select">
-                            @for (source of intakeSourceOptions; track source.value) {
-                            <option [value]="source.value">{{ source.label }}</option>
+                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{
+                            'Priority' | translate }}
+                            <span class="text-red-500">*</span></label>
+                        <select [(ngModel)]="caseForm.priority" name="priority" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-priority-select">
+                            @for (p of priorityOptions; track p) {
+                            <option [value]="p" class="capitalize">{{ p }}</option>
                             }
                         </select>
-                    </div>
-
-                    @if (caseForm.intakeSource === 'other') {
-                    <div class="mt-3">
-                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
-                            {{ 'Other Intake Source' | translate }} <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" [(ngModel)]="caseForm.intakeSourceOtherValue" name="intakeSourceOtherValue" class="mt-1 mb-5 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" [placeholder]="'Specify other intake source' | translate" />
-                        @if (validationErrors['intakeSourceOther']) {
-                        <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['intakeSourceOther'] }}
-                        </p>
-                        }
-                    </div>
-                    }
-
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Status' | translate }}
-                                <span class="text-red-500">*</span></label>
-                            <select [(ngModel)]="caseForm.status" name="status" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-status-select">
-                                @for (s of statusOptions; track s.value) {
-                                <option [value]="s.value">{{ s.label }}</option>
-                                }
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Severity' | translate }}
-                                <span class="text-red-500">*</span></label>
-                            <select [(ngModel)]="caseForm.severity" name="severity" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-severity-select">
-                                @for (severity of severityOptions; track severity) {
-                                <option [value]="severity" class="capitalize">{{ severity }}</option>
-                                }
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Priority' | translate }}
-                                <span class="text-red-500">*</span></label>
-                            <select [(ngModel)]="caseForm.priority" name="priority" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-priority-select">
-                                @for (p of priorityOptions; track p) {
-                                <option [value]="p" class="capitalize">{{ p }}</option>
-                                }
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/40 p-4">
-                        <label class="mb-3 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Tags' | translate }}</label>
-                        <div class="flex flex-wrap gap-2">
-                            @for (tag of tagOptions; track tag.value) {
-                            <button type="button" (click)="toggleTag(tag.value)" class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isTagSelected(tag.value) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200 [body.light-theme_&]:border-sky-600/40 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
-                                {{ tag.label }}
-                            </button>
-                            }
-                        </div>
                     </div>
                 </div>
 
-                <app-entity-details [entity]="primaryEntity" [isMainEntity]="true" [showRoleRelationshipFields]="false"
-                    [entityValueError]="validationErrors['entityValue'] || ''" [entityIndex]="0"
-                    [showInlineSaveButtons]="false"></app-entity-details>
+                <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/40 p-4">
+                    <label class="mb-3 block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{
+                        'Tags' | translate }}</label>
+                    <div class="flex flex-wrap gap-2">
+                        @for (tag of tagOptions; track tag.value) {
+                        <button type="button" (click)="toggleTag(tag.value)" class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isTagSelected(tag.value) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200 [body.light-theme_&]:border-sky-600/40 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
+                            {{ tag.label }}
+                        </button>
+                        }
+                    </div>
+                </div>
+            </div>
 
-                @if (validationErrors['identifier']) {
-                <p class="case-form-error text-xs text-red-400">{{ validationErrors['identifier'] }}</p>
-                }
-                @if (validationErrors['socialProfile']) {
-                <p class="case-form-error text-xs text-red-400">{{ validationErrors['socialProfile'] }}</p>
-                }
-            </form>
-        </div>
+            <app-entity-details [entity]="primaryEntity" [isMainEntity]="true" [showRoleRelationshipFields]="false"
+                [entityValueError]="validationErrors['entityValue'] || ''" [entityIndex]="0"
+                [showInlineSaveButtons]="false"></app-entity-details>
+
+            @if (validationErrors['identifier']) {
+            <p class="case-form-error text-xs text-red-400">{{ validationErrors['identifier'] }}</p>
+            }
+            @if (validationErrors['socialProfile']) {
+            <p class="case-form-error text-xs text-red-400">{{ validationErrors['socialProfile'] }}</p>
+            }
+        </form>
+    </div>
 </app-case-edit-drawer>

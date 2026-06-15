@@ -12,7 +12,7 @@ from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
-from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifactFile
+from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifactFile, CaseStatus
 from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifact
 from orion.services.mongo_manager.shared_model.db_case_model import CaseClosure
 from orion.services.mongo_manager.shared_model.db_case_model import CaseComment
@@ -26,6 +26,17 @@ from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 
+CASE_STATUS_FLOW = [
+    CaseStatus.NEW,
+    CaseStatus.INTAKE_REVIEW,
+    CaseStatus.UNDER_INVESTIGATION,
+    CaseStatus.EVIDENCE_COLLECTION,
+    CaseStatus.VERIFICATION,
+    CaseStatus.REGULATORY_ACTION,
+    CaseStatus.LEGAL_REVIEW,
+    CaseStatus.RESOLVED,
+    CaseStatus.CLOSED,
+]
 
 class CaseManager:
     __instance = None
@@ -180,7 +191,7 @@ class CaseManager:
             title=data.title,
             description=data.description,
             caseType=data.caseType,
-            status=data.status,
+            status=CaseStatus.NEW,
             severity=data.severity,
             priority=data.priority,
             intakeSource=data.intakeSource,
@@ -328,6 +339,13 @@ class CaseManager:
             )
             for entity in data.entities
         ]
+
+        if data.status != record.status:
+            raise HTTPException(
+                status_code=400,
+                detail="Case status can only be changed from the tracking board"
+            )
+
         record.title = data.title
         record.description = data.description
         record.caseType = data.caseType
@@ -851,4 +869,49 @@ class CaseManager:
             "success": is_valid,
             "status": artifact_file.integrityStatus,
         }
+    
+    async def update_case_status(self, case_id: str, data, current_user) -> CaseResponse:
+        record = await self._engine.find_one(db_case_model, (db_case_model.caseId == case_id)
+            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)))
+
+        if not record:
+            raise HTTPException(status_code=404, detail="Case not found")
+
+        if not CaseHelperMethods.can_view_case(record, current_user):
+            raise HTTPException(status_code=403, detail="Access forbidden")
+
+        if record.isArchived:
+            raise HTTPException(status_code=403, detail="Archived cases cannot be updated")
+
+        reason = data.reason.strip()
+        if not reason:
+            raise HTTPException(status_code=400, detail="Status change reason is required")
+
+        current_status = record.status
+        next_status = data.nextStatus
+
+        current_index = CASE_STATUS_FLOW.index(current_status)
+        next_index = CASE_STATUS_FLOW.index(next_status)
+
+        if next_index != current_index + 1:
+            raise HTTPException(
+                status_code=400,
+                detail="Case can only move one step forward"
+            )
+
+        record.status = next_status
+        record.updatedAt = utc_now()
+
+        if next_status == CaseStatus.CLOSED:
+            record.closedAt = utc_now()
+
+        await self._engine.save(record)
+
+        await AuditLogManager.get_instance().register(
+            str(current_user.tenant_uuid),
+            str(current_user.id),
+            f"Case status changed: caseId={case_id}, from={current_status}, to={next_status}, reason={reason}",
+        )
+
+        return await self._to_response(record, current_user)
     

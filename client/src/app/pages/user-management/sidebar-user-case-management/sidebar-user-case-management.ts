@@ -121,4 +121,12 @@ export class SidebarUserCaseManagement implements OnInit {
     this.showArchivedCases = !this.showArchivedCases;
     this.loadCases();
   }
+
+  openTrackingBoard(): void {
+    const url = this.router.createUrlTree([
+      '/dashboard/profile/case-management/tracking-board'
+    ]).toString();
+
+    window.open(url, '_blank');
+  }
 }

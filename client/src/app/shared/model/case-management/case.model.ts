@@ -14,14 +14,19 @@ export type CaseType =
 
 export type CaseStatus =
     'new' |
-    'triaged' |
-    'assigned' |
-    'investigating' |
-    'waiting_on_response' |
-    'remediating' |
-    'review' |
+    'intake_review' |
+    'under_investigation' |
+    'evidence_collection' |
+    'verification' |
+    'regulatory_action' |
+    'legal_review' |
     'resolved' |
     'closed';
+
+export interface CaseStatusUpdateRequest {
+    nextStatus: CaseStatus;
+    reason: string;
+}
 
 export type ArtifactReportSource =
     'strategic' |

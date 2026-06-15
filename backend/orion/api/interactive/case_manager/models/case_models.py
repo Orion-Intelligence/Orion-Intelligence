@@ -319,3 +319,16 @@ class CaseShareResponse(BaseModel):
     token: str
     path: str
     expiresAt: datetime
+
+
+class UpdateCaseStatusRequest(CaseRequestModel):
+    nextStatus: CaseStatus
+    reason: str
+
+    @field_validator("reason")
+    @classmethod
+    def validate_reason(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Status change reason is required")
+        return value

@@ -7,7 +7,7 @@ from configs.app_dependency import role_required, get_current_user, status_requi
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
 from orion.api.interactive.case_manager.case_manager import CaseManager
 from orion.api.interactive.case_manager.case_share_manager import CaseShareManager
-from orion.api.interactive.case_manager.models.case_models import CreateCaseRequest
+from orion.api.interactive.case_manager.models.case_models import CreateCaseRequest, UpdateCaseStatusRequest
 from orion.api.interactive.case_manager.models.case_models import CreateCaseShareRequest
 from orion.api.interactive.case_manager.models.case_models import UpdateCaseRequest
 
@@ -198,3 +198,18 @@ async def delete_artifact_file(
 )
 async def delete_case(case_id: str, current_user=Depends(get_current_user)):
     return await CaseManager.get_instance().delete_case(case_id, current_user)
+
+
+@case_routes.put(
+    "/api/profile/cases/{case_id}/status",
+    status_code=200,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+    ],
+)
+async def update_case_status(
+    case_id: str,
+    payload: UpdateCaseStatusRequest = Body(...),
+    current_user=Depends(get_current_user),
+):
+    return await CaseManager.get_instance().update_case_status(case_id, payload, current_user)
