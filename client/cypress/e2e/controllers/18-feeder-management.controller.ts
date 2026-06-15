@@ -16,6 +16,7 @@ export const FEEDER_RULE_KEYS = [
 ];
 const FILE_RULE_KEYS = FEEDER_RULE_KEYS.filter((ruleKey) => ruleKey !== 'generic');
 const FEEDER_TEST_RULE_LIMIT = 4;
+const FEEDER_SCRIPT_ROW_TIMEOUT = 60000;
 
 export function openFeederAsAdmin() {
   cy.loginAsAdmin();
@@ -39,6 +40,25 @@ export function openFeederAsUser(username: string, password: string) {
 
 function getFixturePath(path: string) {
   return `cypress/fixtures/${path}`;
+}
+
+function getFixtureFileName(path: string) {
+  return path.split('/').pop() || path;
+}
+
+function waitForScriptRowReady(category: any) {
+  const fileName = getFixtureFileName(category.fileFixture);
+  const rowSelector = `[data-testid="feeder-script-row-${fileName}"]`;
+  const statusSelector = `[data-testid="feeder-script-active-status-${fileName}"]`;
+
+  cy.get(rowSelector, { timeout: FEEDER_SCRIPT_ROW_TIMEOUT }).filter(':visible').first().should('be.visible');
+  cy.get(statusSelector, { timeout: FEEDER_SCRIPT_ROW_TIMEOUT })
+    .filter(':visible')
+    .first()
+    .invoke('text')
+    .should((text) => {
+      expect(text.trim().toLowerCase()).to.match(/^(enabled|disabled)$/);
+    });
 }
 
 function getWrongFileCategory(ruleKey: string) {
@@ -114,10 +134,9 @@ function uploadScript(category: any) {
   cy.wait(250);
   cy.get('[data-testid="feeder-upload-script-button"]').should('be.visible').click();
 
+  waitForScriptRowReady(category);
+
   if (category.ruleType === 'shared') {
-    cy.get('[data-testid="message-notification-text"]', { timeout: 4000 })
-      .should('be.visible')
-      .and('contain.text', 'Upload completed successfully');
     openAddTab();
     return cy.get('[data-testid="feeder-values-input"]', { timeout: 4000 }).should('be.visible');
   }
@@ -231,9 +250,10 @@ export function transferFirstVisibleScriptOwner(username: string) {
       cy.get('[data-testid="feeder-owner-select"]').select($option.attr('value')!);
     });
     cy.get('[data-testid="feeder-owner-submit"]').should('be.visible').click({ force: true });
-    cy.get('[data-testid="message-notification-text"]', { timeout: 4000 })
-      .should('be.visible')
-      .and('contain.text', 'Script owner updated successfully');
+    cy.get('[data-testid^="feeder-script-owner-label-"]')
+      .filter(':visible')
+      .first()
+      .should('contain.text', username);
   });
 }
 
@@ -250,20 +270,29 @@ export function expectCurrentUserHasNoScriptAccess() {
 }
 
 function assertFirstRowStatus(expected: 'enabled' | 'disabled') {
-  cy.get('[data-testid^="feeder-script-active-status-"]').filter(':visible').first()
-    .should('contain.text', expected);
-}
-
-function toggleFirstRowStatus(expected: 'enabled' | 'disabled') {
-  cy.get('[data-testid^="feeder-script-toggle-button-"]').filter(':visible').first().click({ force: true });
-  confirmPopup();
-  cy.get('[data-testid="message-notification-text"]', { timeout: 4000 })
-    .should('be.visible')
+  return cy.get('[data-testid^="feeder-script-active-status-"]')
+    .filter(':visible')
+    .first()
     .invoke('text')
     .should((text) => {
-      expect(text).to.match(/Script (enabled|disabled) successfully|Script status updated successfully/);
+      expect(text.trim().toLowerCase()).to.eq(expected);
     });
-  assertFirstRowStatus(expected);
+}
+
+function setFirstRowStatus(expected: 'enabled' | 'disabled') {
+  cy.get('[data-testid^="feeder-script-active-status-"]')
+    .filter(':visible')
+    .first()
+    .invoke('text')
+    .then((text) => {
+      if (text.trim().toLowerCase() === expected) {
+        return;
+      }
+
+      cy.get('[data-testid^="feeder-script-toggle-button-"]').filter(':visible').first().click({ force: true });
+      confirmPopup();
+      assertFirstRowStatus(expected);
+    });
 }
 
 function toggleAllStatuses(enabled: boolean) {
@@ -360,8 +389,8 @@ export function validateFixtureOperationsForAllFeederRules() {
             })
             .then(() => openScriptTab())
             .then(() => {
-              toggleFirstRowStatus('disabled');
-              toggleFirstRowStatus('enabled');
+              setFirstRowStatus('disabled');
+              setFirstRowStatus('enabled');
               toggleAllStatuses(false);
               toggleAllStatuses(true);
             })

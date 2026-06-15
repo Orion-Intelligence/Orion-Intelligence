@@ -207,10 +207,12 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.contains('p', blockedCommentText).should('not.exist');
 
     cy.visit('/dashboard/profile/account');
+    cy.intercept('POST', '**/api/update/current/user').as('profileVisibilityUpdate');
     cy.get('[data-testid="account-settings-profile-visibility-toggle"]').should('be.visible').then(($toggle) => {
       const label = $toggle.text();
       if (label.includes('Visible to other users')) {
         cy.wrap($toggle).scrollIntoView().click();
+        cy.wait('@profileVisibilityUpdate');
       }
     });
     cy.contains('[data-testid="account-settings-profile-visibility-toggle"] p', 'Hidden from other users').should('be.visible');

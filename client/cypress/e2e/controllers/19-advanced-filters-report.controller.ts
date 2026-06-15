@@ -121,6 +121,7 @@ export function addAdvancedFilterValue18(value: string) {
 export function submitSearchByEnter18() {
   cy.get('body').type('{esc}');
   cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().click().type('{enter}');
+  cy.wait(1000);
 }
 
 

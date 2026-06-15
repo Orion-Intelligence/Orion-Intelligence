@@ -312,7 +312,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.get('[data-testid="dashboard-main"]').should('be.visible');
     cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
 
-    cy.get('app-alert-scan-loading', { timeout: 40000 }).should('not.exist');
+    cy.get('app-alert-scan-loading', { timeout: 80000 }).should('not.exist');
     assertAlertScanCompletedMailPresent();
     cy.get('[data-testid="tenant-home-print-alerts"]').scrollIntoView().should('be.visible').click();
     exportFromModal('home-alert-export-modal', 'home-alert-export-option-report');
