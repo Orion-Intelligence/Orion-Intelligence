@@ -80,8 +80,14 @@
                 }
 
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[var(--color-text4)]" data-testid="case-add-status-readonly">
-                        {{ 'New' }}
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
+                            {{ 'Status' | translate }}
+                        </label>
+
+                        <div class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[var(--color-text4)]" data-testid="case-add-status-readonly">
+                            {{ 'New' | translate }}
+                        </div>
                     </div>
 
                     <div>

@@ -340,7 +340,13 @@ class CaseManager:
             for entity in data.entities
         ]
 
-        if data.status != record.status:
+        is_closing_from_details = (
+            data.status == CaseStatus.CLOSED
+            and record.status != CaseStatus.CLOSED
+            and data.closure is not None
+        )
+
+        if data.status != record.status and not is_closing_from_details:
             raise HTTPException(
                 status_code=400,
                 detail="Case status can only be changed from the tracking board"
@@ -415,6 +421,7 @@ class CaseManager:
             ]
         if closure_provided and data.closure is not None:
             record.closure = CaseClosure(**data.closure.model_dump(), closedBy=current_actor_id, closedAt=server_now)
+            record.status = CaseStatus.CLOSED
             record.closedAt = server_now
         elif closure_provided:
             record.closure = None
@@ -889,6 +896,12 @@ class CaseManager:
 
         current_status = record.status
         next_status = data.nextStatus
+
+        if next_status == CaseStatus.CLOSED:
+            raise HTTPException(
+                status_code=400,
+                detail="Case must be closed from the case details closure section"
+            )
 
         current_index = CASE_STATUS_FLOW.index(current_status)
         next_index = CASE_STATUS_FLOW.index(next_status)

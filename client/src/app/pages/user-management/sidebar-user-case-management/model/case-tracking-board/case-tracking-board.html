@@ -25,7 +25,7 @@
                     </div>
                 </div>
 
-                <div class="space-y-3 p-3 min-h-[500px]">
+                <div class="space-y-3 p-3 h-[500px] overflow-y-auto">
                     @for (caseItem of getCasesByStatus(column.value); track caseItem.caseId) {
                     <div class="cursor-pointer rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-3 transition hover:bg-[var(--tenant-chip-hover)]" [attr.data-testid]="'case-board-card-' + caseItem.caseId" (click)="openCaseDetails(caseItem.caseId)">
 

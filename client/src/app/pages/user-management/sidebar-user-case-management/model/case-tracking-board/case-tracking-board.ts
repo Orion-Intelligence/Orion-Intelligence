@@ -19,9 +19,9 @@ export class CaseTrackingBoard implements OnInit {
   statusReason = '';
   isReasonModalOpen = false;
   isSavingMove = false;
-  readonly workflow: { value: CaseStatus; label: string }[] = [ { value: 'new', label: 'New' }, { value: 'intake_review', label: 'Intake Review' }, { value: 'under_investigation', label: 'Under Investigation' }, { value: 'evidence_collection', label: 'Evidence Collection' }, { value: 'verification', label: 'Verification' }, { value: 'regulatory_action', label: 'Regulatory Action' }, { value: 'legal_review', label: 'Legal Review' }, { value: 'resolved', label: 'Resolved' }, { value: 'closed', label: 'Closed' } ];
+  readonly workflow: { value: CaseStatus; label: string }[] = [{ value: 'new', label: 'New' }, { value: 'intake_review', label: 'Intake Review' }, { value: 'under_investigation', label: 'Under Investigation' }, { value: 'evidence_collection', label: 'Evidence Collection' }, { value: 'verification', label: 'Verification' }, { value: 'regulatory_action', label: 'Regulatory Action' }, { value: 'legal_review', label: 'Legal Review' }, { value: 'resolved', label: 'Resolved' }, { value: 'closed', label: 'Closed' }];
 
-  constructor( private router: Router, private caseService: CaseManagement, private messageNotificationService: MessageNotificationService ) { }
+  constructor(private router: Router, private caseService: CaseManagement, private messageNotificationService: MessageNotificationService) { }
 
   ngOnInit(): void {
     this.loadCases();
@@ -48,7 +48,13 @@ export class CaseTrackingBoard implements OnInit {
 
   getNextStatus(status: CaseStatus): CaseStatus | null {
     const index = this.workflow.findIndex(item => item.value === status);
-    return this.workflow[index + 1]?.value || null;
+    const nextStatus = this.workflow[index + 1]?.value || null;
+
+    if (nextStatus === 'closed') {
+      return null;
+    }
+
+    return nextStatus;
   }
 
   requestMove(caseItem: Case, nextStatus: CaseStatus): void {
