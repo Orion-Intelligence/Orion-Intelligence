@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewEncapsulation, computed, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, Inject, OnDestroy, PLATFORM_ID, ViewEncapsulation, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { isPlatformBrowser, NgOptimizedImage } from '@angular/common';
 import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -37,8 +37,9 @@ import { ManageProfilesModalComponent } from './profile-popups/manage-profiles-m
     RouterLink
   ]
 })
-export class SocialMapperComponent implements OnInit, OnDestroy {
+export class SocialMapperComponent implements OnDestroy {
   private activeTabState = computed(() => this.tabManager.activeTab()?.state);
+  private resumedScanTabIds = new Set<string>();
   private cancelScanSubjects = new Map<string, Subject<void>>();
   private cancelProfileFetchSubjects = new Map<string, Subject<void>>();
   private cancelPostFetchSubjects = new Map<string, Subject<void>>();
@@ -74,10 +75,14 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       this.isSmallScreen.set(this.mediaQueryList.matches);
       this.mediaQueryList.addEventListener('change', this.mediaQueryListener);
     }
-  }
-
-  ngOnInit(): void {
-    this.resumeIncompleteScans();
+    effect(() => {
+      const activeTab = this.tabManager.activeTab();
+      if (!activeTab || this.resumedScanTabIds.has(activeTab.id)) {
+        return;
+      }
+      this.resumedScanTabIds.add(activeTab.id);
+      queueMicrotask(() => this.resumeIncompleteScansForState(activeTab.state));
+    });
   }
 
   ngOnDestroy(): void {
@@ -98,6 +103,11 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
 
   onHomeMenuSearchChanged(term: string): void {
     this.updateState(state => state.homeMenuSearchTerm.set(term), false);
+  }
+
+  onDashboardScanInput(event: Event): void {
+    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.onHomeMenuSearchChanged(nextValue);
   }
 
   onHomeMenuToggled(): void {
@@ -192,14 +202,34 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.scanJobService.cancelScan(jobId, this.buildScanJobOptions());
   }
 
-  private resumeIncompleteScans(): void {
-    this.scanJobService.resumeIncompleteScans(() => this.jobs(), this.buildScanJobOptions());
+  private resumeIncompleteScansForState(tabState: TabState): void {
+    this.scanJobService.resumeIncompleteScans(() => tabState.jobs(), this.buildScanJobOptionsForState(tabState));
   }
 
   private buildScanJobOptions() {
+    const state = this.activeTabState();
+    if (state) {
+      return this.buildScanJobOptionsForState(state);
+    }
     return {
       jobs: () => this.jobs(),
       updateState: this.updateState.bind(this),
+      state: this.state,
+      scanService: this.scanService,
+      destroyRef: this.destroyRef,
+      cancelScanSubjects: this.cancelScanSubjects
+    };
+  }
+
+  private buildScanJobOptionsForState(tabState: TabState) {
+    return {
+      jobs: () => tabState.jobs(),
+      updateState: (updater: (state: TabState) => void, shouldScheduleSave: boolean = true) => {
+        updater(tabState);
+        if (shouldScheduleSave) {
+          this.tabManager.scheduleSave();
+        }
+      },
       state: this.state,
       scanService: this.scanService,
       destroyRef: this.destroyRef,

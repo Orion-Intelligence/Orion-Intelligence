@@ -1,4 +1,4 @@
-<div data-testid="social-graph-root" class="ui-social-root-bg flex h-screen w-screen flex-col overflow-hidden text-[var(--color-text2)]">
+<div data-testid="social-graph-root" class="ui-social-root-bg flex h-[100dvh] min-h-0 w-screen flex-col overflow-hidden text-[var(--color-text2)]">
   @if (isTailwindReady()) {
     @if (tabManager.activeTab()) {
       <main class="relative min-h-0 flex-grow">
@@ -39,8 +39,38 @@
                 </div>
               </div>
 
-              <div class="ui-social-dashboard-body ui-dashboard-grid-bg min-h-0 flex-grow">
+              <div class="ui-social-dashboard-body ui-dashboard-grid-bg flex min-h-0 flex-1 flex-col overflow-hidden">
+                <div class="flex-shrink-0 py-4">
+                  <div class="mx-auto w-full max-w-[1480px] px-4">
+                  <div data-testid="social-scan-control" class="relative w-full lg:w-full lg:max-w-md">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
+                      <i class="bi bi-search h-5 w-5 leading-none text-[var(--color-text4)]"></i>
+                    </div>
+                    <input
+                      data-testid="social-scan-input"
+                      type="text"
+                      placeholder="Search username or handle..."
+                      [value]="homeMenuSearchTerm()"
+                      (input)="onDashboardScanInput($event)"
+                      (keyup.enter)="triggerScan()"
+                      (keydown.arrowleft)="$event.stopPropagation()"
+                      (keydown.arrowright)="$event.stopPropagation()"
+                      (keydown.home)="$event.stopPropagation()"
+                      (keydown.end)="$event.stopPropagation()"
+                      class="ui-graph-toolbar-input relative z-0 block h-10 w-full rounded-full border-0 bg-[var(--color-blue-800)]/90 pl-11 pr-36 text-[var(--color-text2)] shadow-lg ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-[var(--color-blue-640)] sm:text-sm sm:leading-6" />
+                    <div class="ui-graph-toolbar-action-shell absolute inset-y-1 right-1 flex items-center rounded-full bg-[var(--color-blue-720)]/80 py-1 pl-1 pr-0">
+                      <button data-testid="social-image-upload-trigger" type="button" title="Scan by image" aria-label="Scan by image" (click)="$event.stopPropagation(); triggerImageUpload()" class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]">
+                        <i class="bi bi-image"></i>
+                      </button>
+                      <button data-testid="social-scan-submit" type="button" (click)="triggerScan()" [disabled]="homeMenuSearchTerm().trim().length === 0" [class.has-value]="!!homeMenuSearchTerm().trim()" class="ui-graph-toolbar-search-btn ml-1 flex h-8 items-center rounded-full bg-[var(--color-blue-640)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)] disabled:cursor-not-allowed disabled:bg-[var(--color-blue-710)] disabled:text-[var(--color-text4)]">
+                        Search
+                      </button>
+                    </div>
+                  </div>
+                  </div>
+                </div>
                 <app-list-view
+                  class="block min-h-0 flex-1"
                   [scanResults]="scanResults()"
                   (sidebarPlatformClicked)="onSidebarPlatformClicked($event)"
                   (fetchPostsInline)="handleFetchSocialPosts($event)"

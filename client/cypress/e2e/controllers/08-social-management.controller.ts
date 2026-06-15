@@ -1,5 +1,7 @@
 const SOCIAL_ROOT = '[data-testid="social-graph-root"]';
 const SOCIAL_LIST_EMPTY = '[data-testid="social-list-empty"]';
+const SOCIAL_PROFILE_EMPTY_CARD = '[data-testid="social-profile-empty-card"]';
+const SOCIAL_PROFILE_EMPTY_DETAIL_SECTION = '[data-testid="social-profile-empty-detail-section"]';
 const SOCIAL_PLATFORM_CARD = '[data-testid="social-platform-card"]';
 const SOCIAL_SCAN_TIMEOUT = 180000;
 const SOCIAL_FETCH_TIMEOUT = 120000;
@@ -15,6 +17,8 @@ export function visitSocialIntel() {
   cy.get(SOCIAL_ROOT).should('be.visible');
   cy.get('[data-testid="social-header-breadcrumb"]').should('contain.text', 'Social').and('contain.text', 'Intel');
   cy.get('[data-testid="social-scan-control"]').should('be.visible');
+  cy.get('[data-testid="social-scan-input"]').should('have.attr', 'placeholder', 'Search username or handle...');
+  cy.get('[data-testid="social-scan-submit"]').should('contain.text', 'Search');
   cy.get('[data-testid="social-list-view"]').should('be.visible');
 }
 
@@ -143,7 +147,12 @@ export function assertSocialSidebarAndBackNavigation() {
 export function assertSocialEmptyStateIfNoResults() {
   cy.get('body').then(($body) => {
     if ($body.find(SOCIAL_PLATFORM_CARD).length === 0) {
-      cy.get(SOCIAL_LIST_EMPTY).should('exist');
+      cy.get(SOCIAL_LIST_EMPTY).within(() => {
+        cy.get(SOCIAL_PROFILE_EMPTY_CARD).should('be.visible');
+        cy.get(SOCIAL_PROFILE_EMPTY_DETAIL_SECTION).should('contain.text', 'Profile Details');
+        cy.get('[data-testid="social-platform-search-empty"]').should('be.disabled');
+        cy.get('[data-testid="social-list-empty-manage-profiles"]').should('be.disabled');
+      });
     }
   });
 }

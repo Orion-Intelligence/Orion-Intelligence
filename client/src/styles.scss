@@ -138,6 +138,20 @@ body *::after {
   background: var(--color-blue-720) !important;
 }
 
+.ui-scroll-mask-y {
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18px, #000 calc(100% - 18px), transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 18px, #000 calc(100% - 18px), transparent);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.ui-scroll-mask-y-bottom {
+  -webkit-mask-image: linear-gradient(to bottom, #000, #000 calc(100% - 18px), transparent);
+  mask-image: linear-gradient(to bottom, #000, #000 calc(100% - 18px), transparent);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
 p {
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -1418,6 +1432,12 @@ body.demo-tour-scroll-locked {
   background-color: rgb(13 148 136 / 100%) !important;
 }
 
+.dark-theme .ui-graph-toolbar-action-shell button[data-testid='social-scan-submit'].ui-graph-toolbar-search-btn.has-value,
+.dark-theme .ui-graph-toolbar-action-shell button[data-testid='social-scan-submit'].ui-graph-toolbar-search-btn.has-value:hover,
+.dark-theme .ui-graph-toolbar-action-shell button[data-testid='social-scan-submit'].ui-graph-toolbar-search-btn.has-value:active {
+  background-color: var(--color-blue-640) !important;
+}
+
 .ui-graph-toolbar-search-btn:disabled:hover {
   color: #fff !important;
 }
@@ -1441,6 +1461,12 @@ body.demo-tour-scroll-locked {
 .light-theme .ui-graph-toolbar-action-shell .ui-graph-toolbar-search-btn.has-value,
 .light-theme .ui-graph-toolbar-action-shell .ui-graph-toolbar-search-btn.has-value:hover {
   background-color: rgb(13 148 136 / 100%) !important;
+}
+
+.light-theme .ui-graph-toolbar-action-shell button[data-testid='social-scan-submit'].ui-graph-toolbar-search-btn.has-value,
+.light-theme .ui-graph-toolbar-action-shell button[data-testid='social-scan-submit'].ui-graph-toolbar-search-btn.has-value:hover,
+.light-theme .ui-graph-toolbar-action-shell button[data-testid='social-scan-submit'].ui-graph-toolbar-search-btn.has-value:active {
+  background-color: var(--color-blue-640) !important;
 }
 
 .light-theme .ui-graph-toolbar-search-btn:hover {
