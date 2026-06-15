@@ -1,7 +1,7 @@
 <section data-testid="threat-lens-page" class="ui-consolidated-theme relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-black [body.light-theme_&]:![background:#e7eff9]">
 	<div class="flex min-h-0 flex-1 flex-col overflow-hidden max-[1100px]:overflow-x-hidden max-[1100px]:overflow-y-auto max-[1100px]:pb-3">
 		<div class="relative grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden max-[1100px]:block max-[1100px]:overflow-visible">
-			<div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:min-h-[380px]">
+			<div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:!h-[70vh] max-[1100px]:!min-h-[70vh] max-[1100px]:shrink-0">
 
 	<app-threat-lens-map-renderer
 		data-testid="threat-lens-map-renderer"
@@ -20,6 +20,15 @@
 	<div class="pointer-events-none absolute inset-0 bg-[var(--color-mono)] opacity-15 max-[1100px]:hidden [body.light-theme_&]:hidden"></div>
 
 	<app-map-loading-badges [items]="ipScanLoadingBadges"></app-map-loading-badges>
+
+	<div class="absolute bottom-3 right-3 z-[930] hidden gap-2 p-px max-[1100px]:flex">
+		<button data-testid="threat-lens-reset-position-mobile" type="button" (click)="resetGlobePosition()" [attr.aria-label]="'Reset View' | translate" [appTooltip]="'Reset View' | translate" class="flex h-8 w-8 items-center justify-center rounded-[6px] border border-[var(--color-blue-790)] bg-[var(--color-blue-790)] text-[13px] text-[var(--color-text1)] transition active:translate-y-px [body.light-theme_&]:!bg-white">
+			<i class="bi bi-crosshair" aria-hidden="true"></i>
+		</button>
+		<button data-testid="threat-lens-reset-country-mobile" type="button" (click)="resetSelectedCountry()" [attr.aria-label]="'Clear Country' | translate" [appTooltip]="'Clear Country' | translate" class="flex h-8 w-8 items-center justify-center rounded-[6px] border border-[var(--color-blue-790)] bg-[var(--color-blue-790)] text-[13px] text-[var(--color-text1)] transition active:translate-y-px [body.light-theme_&]:!bg-white">
+			<i class="bi bi-x-lg" aria-hidden="true"></i>
+		</button>
+	</div>
 
 	@if (isLoading) {
 		<div data-testid="threat-lens-loading" class="absolute inset-0 z-[960] flex items-center justify-center bg-[rgba(8,16,27,0.58)] px-4 backdrop-blur-[2px] [body.light-theme_&]:![background:rgba(249,251,255,0.5)]">

@@ -18,9 +18,9 @@
     </div>
   }
 
-  <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
-    <div class="relative grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden">
-      <div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:min-h-[380px]">
+  <div class="flex min-h-0 flex-1 flex-col overflow-hidden max-[1100px]:overflow-y-auto">
+    <div class="relative grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden max-[1100px]:block max-[1100px]:overflow-visible">
+      <div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:overflow-visible" [ngClass]="isMapView ? 'max-[1100px]:!h-[70vh] max-[1100px]:!min-h-[70vh] max-[1100px]:shrink-0 max-[1100px]:!overflow-hidden' : ''">
         <div data-testid="geo-fencing-map-view" class="absolute inset-0 transition-opacity duration-150" [ngClass]="isMapView ? 'opacity-100 animate-[slideUp_220ms_ease-out_both]' : 'pointer-events-none opacity-0'">
           <app-satellite-map-renderer #mapRenderer data-testid="geo-fencing-map-renderer" class="block h-full min-h-0 min-w-0 overflow-hidden"
             [lat]="lat"
@@ -84,8 +84,8 @@
           }
 
         @if(isThreatView){
-          <div data-testid="geo-fencing-threat-view" class="h-full min-h-0 w-full overflow-hidden animate-[ui-overlay-fade-in_180ms_ease-out_both]">
-            <app-threat-lens class="block h-full min-h-0 w-full" [showFilterButton]="false" (loadingChange)="onThreatLensLoadingChange($event)" (detailOverlayOpenChange)="onThreatLensDetailOverlayOpenChange($event)"></app-threat-lens>
+          <div data-testid="geo-fencing-threat-view" class="h-full min-h-0 w-full overflow-hidden animate-[ui-overlay-fade-in_180ms_ease-out_both] max-[1100px]:h-auto max-[1100px]:overflow-visible">
+            <app-threat-lens class="block h-full min-h-0 w-full max-[1100px]:h-auto" [showFilterButton]="false" (loadingChange)="onThreatLensLoadingChange($event)" (detailOverlayOpenChange)="onThreatLensDetailOverlayOpenChange($event)"></app-threat-lens>
           </div>
         }
       </div>
@@ -97,6 +97,7 @@
         </app-entity-description-popup>
       }
       <app-satellite-panel-shell
+        class="block max-[1100px]:w-full"
         [isMapView]="isMapView"
         [isThreatView]="isThreatView"
         [isPanelMenuOpen]="isPanelMenuOpen"

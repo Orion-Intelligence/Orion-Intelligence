@@ -945,14 +945,17 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   }
 
   private syncArcgisCanvasBackingSize(): void {
-    const canvas = this.mapContainer?.nativeElement.querySelector('canvas');
-    if (!canvas) {
+    const element = this.mapContainer?.nativeElement;
+    const canvas = element?.querySelector('canvas');
+    if (!element || !canvas) {
       return;
     }
 
+    const renderedBackingHeight = Math.round(element.clientHeight * (window.devicePixelRatio || 1));
     const aspectBackingHeight = Math.round(canvas.width / this.maxGlobeCanvasAspectRatio);
-    if (aspectBackingHeight > canvas.height) {
-      canvas.height = aspectBackingHeight;
+    const nextBackingHeight = Math.max(renderedBackingHeight, aspectBackingHeight);
+    if (nextBackingHeight > canvas.height) {
+      canvas.height = nextBackingHeight;
       this.view?.requestRender?.();
     }
   }
