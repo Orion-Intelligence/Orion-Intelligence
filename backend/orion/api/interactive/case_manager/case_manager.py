@@ -325,6 +325,13 @@ class CaseManager:
         closure_provided = "closure" in data.model_fields_set
         if closure_provided and (data.closure is not None or record.closure is not None) and not CaseHelperMethods.can_close_case(record, current_user):
             raise HTTPException(status_code=403, detail="Only assigned analysts, admins, or maintainers can close cases")
+        
+        if closure_provided and data.closure is not None and record.status != CaseStatus.RESOLVED:
+            raise HTTPException(
+                status_code=400,
+                detail="Case cannot be closed until it reaches resolved status"
+            )
+        
         existing_entities = {
             entity.entityId: entity
             for entity in record.entities
