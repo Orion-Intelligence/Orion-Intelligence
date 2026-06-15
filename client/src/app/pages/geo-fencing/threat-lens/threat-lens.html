@@ -99,7 +99,15 @@
 		}
 	</div>
 
-	<div class="absolute right-4 top-4 bottom-4 z-20 flex min-h-0 w-[min(25rem,calc(100%-2rem))] flex-col gap-0 overflow-hidden max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:right-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:mt-3 max-[1100px]:w-full max-[1100px]:overflow-visible max-[1100px]:px-3 max-[1100px]:pb-3">
+	<div class="absolute right-4 top-4 bottom-4 z-20 flex min-h-0 w-[min(25rem,calc(100%-2rem))] flex-col gap-0 overflow-visible max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:right-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:mt-3 max-[1100px]:w-full max-[1100px]:overflow-visible max-[1100px]:px-3 max-[1100px]:pb-3">
+		<div class="absolute -left-11 top-[54px] z-[930] flex flex-col gap-2 p-px max-[1100px]:hidden">
+			<button data-testid="threat-lens-reset-position" type="button" (click)="resetGlobePosition()" [attr.aria-label]="'Reset View' | translate" [appTooltip]="'Reset View' | translate" class="flex h-8 w-8 items-center justify-center rounded-[6px] border border-[var(--color-blue-790)] bg-[var(--color-blue-790)] text-[13px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition active:translate-y-px">
+				<i class="bi bi-crosshair" aria-hidden="true"></i>
+			</button>
+			<button data-testid="threat-lens-reset-country" type="button" (click)="resetSelectedCountry()" [attr.aria-label]="'Clear Country' | translate" [appTooltip]="'Clear Country' | translate" class="flex h-8 w-8 items-center justify-center rounded-[6px] border border-[var(--color-blue-790)] bg-[var(--color-blue-790)] text-[13px] text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition active:translate-y-px">
+				<i class="bi bi-x-lg" aria-hidden="true"></i>
+			</button>
+		</div>
 		@if (showFilterButton) {
 		<div class="flex justify-end gap-2 max-[550px]:flex-col">
 				<label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" [appTooltip]="'Customize Results' | translate" class="map-overlay-menu inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] shadow-[0_8px_24px_rgba(2,6,23,.35)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,.12)] max-[550px]:w-full max-[550px]:justify-center">

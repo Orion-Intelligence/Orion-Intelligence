@@ -241,6 +241,32 @@ export class ThreatLensComponent implements OnDestroy {
     this.cdr.detectChanges();
   }
 
+  resetGlobePosition(): void {
+    const reset = this.mapRenderer?.resetGlobePosition();
+    if (!reset) {
+      this.refreshIpScan();
+      return;
+    }
+
+    void reset.then(() => this.refreshIpScan());
+  }
+
+  resetSelectedCountry(): void {
+    this.selectedCountryName = '';
+    this.selectedCountryIpScanRequest = null;
+    this.mapRenderer?.clearSelections();
+    this.statusMessage = 'Country selection cleared.';
+    this.cdr.detectChanges();
+    this.refreshIpScan();
+  }
+
+  private refreshIpScan(): void {
+    this.lastAutomaticIpScanKey = '';
+    if (!this.mapRenderer?.requestViewportIpScan()) {
+      this.startDefaultIpScan(true);
+    }
+  }
+
   clearAllSelections(): void {
     const hadSelectedCountry = Boolean(this.selectedCountryName || this.selectedCountryIpScanRequest);
     this.closeArcReportPanel(false);

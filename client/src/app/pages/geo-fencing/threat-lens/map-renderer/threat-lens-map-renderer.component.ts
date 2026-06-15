@@ -52,6 +52,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private readonly streetBasemapId = 'streets-night-vector';
   private readonly streetBasemapMinZoom = 6;
   private readonly hoverHitTestMinIntervalMs = 80;
+  private readonly maxGlobeCanvasAspectRatio = 1.62;
 
   @Output() mapReady = new EventEmitter<void>();
   @Output() mapError = new EventEmitter<string>();
@@ -171,6 +172,17 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.countryRenderer.setSelectedCountryKey('');
     this.clearHoverHighlight();
     this.tooltipRenderer.hide();
+  }
+
+  async resetGlobePosition(): Promise<void> {
+    if (!this.view) {
+      return;
+    }
+
+    await this.view.goTo({
+      position: { longitude: 0, latitude: 0, z: 25000000 },
+      tilt: 0,
+    }, { duration: 500 }).then(() => undefined, () => undefined);
   }
 
   requestViewportIpScan(): boolean {
@@ -294,7 +306,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       this.tooltipRenderer.init();
       this.observeMapResize();
       this.scheduleMapResize();
-      window.setTimeout(() => this.view?.resize?.(), 150);
+      [0, 150, 500, 1000, 2000].forEach((delay) => window.setTimeout(() => this.scheduleMapResize(), delay));
       this.registerViewScaleWatcher();
       this.registerBasemapWatcher();
       this.registerViewInteractingWatcher();
@@ -878,7 +890,21 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.mapResizeFrame = requestAnimationFrame(() => {
       this.mapResizeFrame = null;
       this.view?.resize?.();
+      this.syncArcgisCanvasBackingSize();
     });
+  }
+
+  private syncArcgisCanvasBackingSize(): void {
+    const canvas = this.mapContainer?.nativeElement.querySelector('canvas');
+    if (!canvas) {
+      return;
+    }
+
+    const aspectBackingHeight = Math.round(canvas.width / this.maxGlobeCanvasAspectRatio);
+    if (aspectBackingHeight > canvas.height) {
+      canvas.height = aspectBackingHeight;
+      this.view?.requestRender?.();
+    }
   }
 
   private clearHoverHighlight(): void {
