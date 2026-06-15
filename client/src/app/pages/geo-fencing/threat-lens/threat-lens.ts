@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnDestroy, Output, ViewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { FilterModel } from '../../../shared/model/filter/filter.model';
 import { GeoCameraResponse } from '../../../shared/model/network-intel/network-intel-api.models';
@@ -14,6 +13,9 @@ import { ThreatLensIpScanModeEnum } from '../enums/geo-fencing.enums';
 import { IpDetailPopupComponent } from './ui-overlays/ip-detail-popup/ip-detail-popup.component';
 import { ArcReportPopupComponent } from './ui-overlays/arc-report-popup/arc-report-popup.component';
 import { ThreatLensFeedPanelComponent } from './ui-overlays/feed-panel/threat-lens-feed-panel.component';
+import { ThreatLensTopicSearchPanelComponent } from './ui-overlays/topic-search-panel/threat-lens-topic-search-panel.component';
+import { ThreatLensCountrySearchPanelComponent, ThreatLensArcRangeOption } from './ui-overlays/country-search-panel/threat-lens-country-search-panel.component';
+import { ThreatLensSummaryPanelComponent } from './ui-overlays/summary-panel/threat-lens-summary-panel.component';
 import { ThreatLensMapRendererComponent } from './map-renderer/threat-lens-map-renderer.component';
 import { ThreatLensArcBatchStatus, ThreatLensArcSelection, ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensCountrySelection, ThreatLensIpViewportScanRequest } from './models/threat-lens-map.types';
 import { ThreatLensService } from './threat-lens.service';
@@ -21,21 +23,16 @@ import { ThreatLensGeoUtils } from './map-utils/threat-lens-geo.utils';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 
-interface ThreatLensArcRangeOption {
-  index: number;
-  label: string;
-  start: number;
-  end: number;
-}
-
 @Component({
   selector: 'app-threat-lens',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     FiltersComponent,
     ThreatLensFeedPanelComponent,
+    ThreatLensTopicSearchPanelComponent,
+    ThreatLensCountrySearchPanelComponent,
+    ThreatLensSummaryPanelComponent,
     IpDetailPopupComponent,
     ArcReportPopupComponent,
     ThreatLensMapRendererComponent,
@@ -65,10 +62,8 @@ export class ThreatLensComponent implements OnDestroy {
   protected readonly arcBatchSizeOptions = [5, 10, 20, 50, 100];
 
   isFilterOpen$: Observable<boolean>;
-  topicSearchTerm = '';
-  currentTopicQuery = '';
-  searchTerm = '';
-  currentQuery = '';
+  activeTopicQuery = '';
+  activeCountryQuery = '';
   selectedCountryName = '';
   statusMessage = 'Loading threat lens results...';
   isLoading = true;
@@ -82,8 +77,6 @@ export class ThreatLensComponent implements OnDestroy {
   categoryLegend: ThreatLensLegendItem[] = [];
   selectedCountryBreakdown: SelectedCountryCategoryCount[] = [];
   feedItems: ThreatLensFeedItem[] = [];
-  isSearchPanelCollapsed = false;
-  isThreatPanelCollapsed = false;
   ipScanStatusMessage = 'Loading default IP exposure map...';
   ipScanErrorMessage: string | null = null;
   ipScanResultCount = 0;
@@ -127,17 +120,22 @@ export class ThreatLensComponent implements OnDestroy {
   }
 
   async onSearch(): Promise<void> {
-    await this.loadThreatLensData(this.topicSearchTerm.trim(), this.searchTerm.trim());
+    await this.loadThreatLensData(this.activeTopicQuery, this.activeCountryQuery);
   }
 
-  async onTopicSearch(): Promise<void> {
-    await this.loadThreatLensData(this.topicSearchTerm.trim(), this.searchTerm.trim());
+  async onTopicSearch(topicQuery: string): Promise<void> {
+    this.activeTopicQuery = topicQuery.trim();
+    await this.loadThreatLensData(this.activeTopicQuery, this.activeCountryQuery);
+  }
+
+  async onCountrySearch(countryQuery: string): Promise<void> {
+    this.activeCountryQuery = countryQuery.trim();
+    await this.loadThreatLensData(this.activeTopicQuery, this.activeCountryQuery);
   }
 
   async onTopCountrySelect(country: string): Promise<void> {
-    const normalizedCountry = this.threatLensService.normalizeCountryLabel(country);
-    this.searchTerm = normalizedCountry;
-    await this.loadThreatLensData(this.topicSearchTerm.trim(), normalizedCountry);
+    this.activeCountryQuery = this.threatLensService.normalizeCountryLabel(country);
+    await this.loadThreatLensData(this.activeTopicQuery, this.activeCountryQuery);
   }
 
   onCountrySelected(selection: ThreatLensCountrySelection): void {
@@ -255,34 +253,6 @@ export class ThreatLensComponent implements OnDestroy {
     return !this.isLoading && this.isIpScanRunning ? [`IP scan: ${this.ipScanScopeLabel}`] : [];
   }
 
-  get showIpScanPanel(): boolean {
-    return this.isIpScanRunning || this.hasIpScanResult || this.hasIpScanCompleted || Boolean(this.ipScanErrorMessage);
-  }
-
-  get ipScanStateLabel(): string {
-    if (this.ipScanErrorMessage) {
-      return 'Error';
-    }
-    if (this.isIpScanRunning) {
-      return this.ipScanProgress !== null ? `${this.ipScanProgress}%` : 'Scanning';
-    }
-    if (this.hasIpScanResult) {
-      return 'Ready';
-    }
-    if (this.hasIpScanCompleted) {
-      return 'Complete';
-    }
-    return 'Idle';
-  }
-
-  get arcBatchStatusText(): string {
-    if (!this.arcBatchStatus || !this.arcBatchStatus.visibleCount) {
-      return 'No arcs visible for the selected range.';
-    }
-
-    return `Showing ${this.arcBatchStatus.categoryLabel} arcs ${this.arcBatchStatus.start}-${this.arcBatchStatus.end} of ${this.arcBatchStatus.categoryArcCount}`;
-  }
-
   get selectedArcCategoryLabel(): string {
     return this.getSelectedArcCategory()?.label || 'News';
   }
@@ -321,15 +291,6 @@ export class ThreatLensComponent implements OnDestroy {
     }
   }
 
-  togglePanel(panel: 'search' | 'threat'): void {
-    if (panel === 'search') {
-      this.isSearchPanelCollapsed = !this.isSearchPanelCollapsed;
-      return;
-    }
-
-    this.isThreatPanelCollapsed = !this.isThreatPanelCollapsed;
-  }
-
   private async loadThreatLensData(topicQuery: string, countryQuery: string): Promise<void> {
     if (!this.mapRenderer) {
       return;
@@ -339,8 +300,8 @@ export class ThreatLensComponent implements OnDestroy {
     const requestId = ++this.loadRequestId;
     const activeTopicQuery = topicQuery.trim();
     const activeCountryQuery = countryQuery.trim();
-    this.currentTopicQuery = activeTopicQuery;
-    this.currentQuery = activeCountryQuery;
+    this.activeTopicQuery = activeTopicQuery;
+    this.activeCountryQuery = activeCountryQuery;
     this.activeArcCountryFilterKey = this.getSearchedCountryKey(activeCountryQuery);
     const searchLabel = this.getSearchLabel(activeTopicQuery, activeCountryQuery);
 
