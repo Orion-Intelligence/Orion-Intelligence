@@ -302,7 +302,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         (value) => this.toCountryKey(value),
         (count) => this.arcCountChange.emit(count),
         (status) => this.arcBatchStatusChange.emit(status),);
-      this.ipMarkerRenderer = new ThreatLensIpMarkerRenderer(this.view, this.ipScanGraphicsLayer, geometryEngine);
+      this.ipMarkerRenderer = new ThreatLensIpMarkerRenderer(this.view, this.ipScanGraphicsLayer);
 
       this.tooltipRenderer.init();
       this.observeMapResize();

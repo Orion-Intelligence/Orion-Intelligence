@@ -508,7 +508,12 @@ export class ThreatLensComponent implements OnDestroy {
     }
 
     const payload = (done.result ?? done) as GeoCameraResponse & Record<string, any>;
-    const status = String(payload?.status || done?.status || '').toLowerCase();
+    const rawStatus = String(payload?.status || done?.status || '').toLowerCase();
+    const progress = Number(payload?.progress ?? done?.progress);
+    const step = String(payload?.step ?? done?.step ?? '').toLowerCase();
+    const status = (rawStatus === 'pending' || rawStatus === 'busy') && progress >= 100 && step.includes('done')
+      ? 'done'
+      : rawStatus;
 
     if (status === 'pending' || status === 'busy') {
       return false;
@@ -516,10 +521,10 @@ export class ThreatLensComponent implements OnDestroy {
 
     const records = ThreatLensGeoUtils.extractThreatLensIpScanRecords(payload);
     const resultKey = `${this.getIpScanRequestKey(center, radiusKm, scope)}:${records.map((record) => record.ip).join('|')}`;
-    const hasRenderableRecords = records.length > 0;
+    const hasIpRecords = records.length > 0;
     let renderedMarkers = false;
 
-    if (hasRenderableRecords) {
+    if (hasIpRecords) {
       renderedMarkers = this.mapRenderer?.renderIpScanMarkers(records, center, radiusKm, boundary) ?? false;
       if (renderedMarkers) {
         this.ipScanResultKey = resultKey;
@@ -529,6 +534,14 @@ export class ThreatLensComponent implements OnDestroy {
     this.ngZone.run(() => {
       if (renderedMarkers) {
         this.hasIpScanResult = true;
+      }
+      else if (hasIpRecords) {
+        this.hasIpScanResult = false;
+        this.statusMessage = 'IP scan returned IPs without exact coordinates.';
+      }
+      else {
+        this.hasIpScanResult = false;
+        this.statusMessage = 'IP scan did not return exact coordinate data.';
       }
       this.cdr.detectChanges();
     });

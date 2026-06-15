@@ -11,21 +11,20 @@ type IpDistributionCell = {
 export class ThreatLensIpMarkerRenderer {
   private markerGraphics: any[] = [];
   private visibleMarkerGraphics: any[] = [];
-  private radiusGraphic: any | null = null;
   private renderKey = '';
   private readonly minimumVisibleMarkers = 20;
   private readonly maximumVisibleMarkers = 200;
 
-  constructor(private view: any, private graphicsLayer: any, private geometryEngine: any | null = null) {}
+  constructor(private view: any, private graphicsLayer: any) {}
 
-  render(records: ThreatLensIpRecord[], center: ThreatLensCoordinates, radiusKm: number, boundary: ThreatLensCountryBoundary | null = null): boolean {
+  render(records: ThreatLensIpRecord[], _center: ThreatLensCoordinates, _radiusKm: number, _boundary: ThreatLensCountryBoundary | null = null): boolean {
     if (!this.graphicsLayer) {
       return false;
     }
 
     const markerGraphics: any[] = [];
-    records.forEach((record, index) => {
-      const point = this.resolveMarkerPoint(record, index, records.length, center, radiusKm, boundary);
+    records.forEach((record) => {
+      const point = this.resolveMarkerPoint(record);
       if (!point) {
         return;
       }
@@ -50,27 +49,8 @@ export class ThreatLensIpMarkerRenderer {
     }
 
     this.clear();
-    this.radiusGraphic = boundary
-      ? null
-      : {
-        geometry: this.buildRadiusGeometry(center, radiusKm),
-        attributes: {
-          role: 'ip-scan-radius',
-        },
-        symbol: {
-          type: 'simple-fill',
-          color: [14, 165, 233, 0.08],
-          outline: {
-            color: [56, 189, 248, 0.72],
-            width: 1.25,
-          },
-        },
-      };
 
     this.markerGraphics = markerGraphics;
-    if (this.radiusGraphic) {
-      this.graphicsLayer.add(this.radiusGraphic);
-    }
     this.updateSymbols(true);
     return true;
   }
@@ -79,7 +59,6 @@ export class ThreatLensIpMarkerRenderer {
     this.graphicsLayer?.removeAll();
     this.markerGraphics = [];
     this.visibleMarkerGraphics = [];
-    this.radiusGraphic = null;
     this.renderKey = '';
   }
 
@@ -104,9 +83,6 @@ export class ThreatLensIpMarkerRenderer {
     }
 
     this.graphicsLayer.removeAll();
-    if (this.radiusGraphic) {
-      this.graphicsLayer.add(this.radiusGraphic);
-    }
     if (nextMarkers.length) {
       this.graphicsLayer.addMany(nextMarkers);
     }
@@ -119,86 +95,17 @@ export class ThreatLensIpMarkerRenderer {
     return graphic?.attributes?.role === 'ip-scan-marker';
   }
 
-  private resolveMarkerPoint(record: ThreatLensIpRecord, index: number, total: number, center: ThreatLensCoordinates, radiusKm: number, boundary: ThreatLensCountryBoundary | null): ThreatLensCoordinates | null {
-    if (boundary) {
-      return this.resolveBoundaryMarkerPoint(record, index, total, center, radiusKm, boundary);
-    }
-
-    const hash = ThreatLensGeoUtils.hashThreatLensString(`${record.ip}:${index}:${total}`);
-    const angle = ((hash % 36000) / 36000) * Math.PI * 2;
-    const radialSeed = ((Math.floor(hash / 36000) % 10000) + 1) / 10001;
-    const distanceKm = Math.max(0.35, radiusKm * 0.92 * Math.sqrt(radialSeed));
-    const latOffset = (distanceKm * Math.cos(angle)) / 111.32;
-    const lonScale = Math.max(0.12, Math.cos(center.lat * Math.PI / 180));
-    const lonOffset = (distanceKm * Math.sin(angle)) / (111.32 * lonScale);
-
-    return {
-      lat: Math.max(-89.9, Math.min(89.9, center.lat + latOffset)),
-      lon: ThreatLensGeoUtils.normalizeThreatLensLongitude(center.lon + lonOffset),
-    };
-  }
-
-  private resolveBoundaryMarkerPoint(record: ThreatLensIpRecord, index: number, total: number, center: ThreatLensCoordinates, radiusKm: number, boundary: ThreatLensCountryBoundary): ThreatLensCoordinates | null {
-    const radiusLat = radiusKm / 111.32;
-    const lonScale = Math.max(0.12, Math.cos(center.lat * Math.PI / 180));
-    const radiusLon = radiusKm / (111.32 * lonScale);
-    const extent = {
-      minLat: Math.max(boundary.extent.minLat, center.lat - radiusLat),
-      maxLat: Math.min(boundary.extent.maxLat, center.lat + radiusLat),
-      minLon: Math.max(boundary.extent.minLon, center.lon - radiusLon),
-      maxLon: Math.min(boundary.extent.maxLon, center.lon + radiusLon),
-    };
-    const latSpan = extent.maxLat - extent.minLat;
-    const lonSpan = extent.maxLon - extent.minLon;
-    if (!boundary.rings.length || latSpan <= 0 || lonSpan <= 0) {
+  private resolveMarkerPoint(record: ThreatLensIpRecord): ThreatLensCoordinates | null {
+    const lat = Number(record.lat);
+    const lon = Number(record.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90) {
       return null;
     }
 
-    for (let attempt = 0; attempt < 96; attempt += 1) {
-      const latSeed = this.seedUnit(`${record.ip}:${index}:${total}:lat:${attempt}`);
-      const lonSeed = this.seedUnit(`${record.ip}:${index}:${total}:lon:${attempt}`);
-      const point = {
-        lat: extent.minLat + (latSeed * latSpan),
-        lon: ThreatLensGeoUtils.normalizeThreatLensLongitude(extent.minLon + (lonSeed * lonSpan)),
-      };
-
-      if (this.isPointInBoundary(point, boundary) && ThreatLensGeoUtils.getThreatLensDistanceKm(center, point) <= radiusKm * 1.04) {
-        return point;
-      }
-    }
-
-    return null;
-  }
-
-  private seedUnit(value: string): number {
-    return (ThreatLensGeoUtils.hashThreatLensString(value) % 1000000) / 1000000;
-  }
-
-  private isPointInBoundary(point: ThreatLensCoordinates, boundary: ThreatLensCountryBoundary): boolean {
-    return boundary.rings.some((ring) => this.isPointInRing(point, ring));
-  }
-
-  private isPointInRing(point: ThreatLensCoordinates, ring: ThreatLensCoordinates[]): boolean {
-    if (ring.length < 3) {
-      return false;
-    }
-
-    let inside = false;
-    for (let i = 0, j = ring.length - 1; i < ring.length; j = i, i += 1) {
-      const current = ring[i];
-      const previous = ring[j];
-      const crossesLatitude = (current.lat > point.lat) !== (previous.lat > point.lat);
-      if (!crossesLatitude) {
-        continue;
-      }
-
-      const crossingLon = ((previous.lon - current.lon) * (point.lat - current.lat)) / ((previous.lat - current.lat) || 1e-9) + current.lon;
-      if (point.lon < crossingLon) {
-        inside = !inside;
-      }
-    }
-
-    return inside;
+    return {
+      lat,
+      lon: ThreatLensGeoUtils.normalizeThreatLensLongitude(lon),
+    };
   }
 
   private getVisibleMarkerGraphics(): any[] {
@@ -423,61 +330,6 @@ export class ThreatLensIpMarkerRenderer {
       selected.push(cells[Math.min(cells.length - 1, Math.floor((index + 0.5) * step))]);
     }
     return selected;
-  }
-
-  private buildRadiusGeometry(center: ThreatLensCoordinates, radiusKm: number): any {
-    const point = {
-      type: 'point',
-      longitude: center.lon,
-      latitude: center.lat,
-      spatialReference: { wkid: 4326 },
-    };
-
-    if (this.geometryEngine?.geodesicBuffer) {
-      try {
-        const buffer = this.geometryEngine.geodesicBuffer(point, radiusKm, 'kilometers');
-        const geometry = Array.isArray(buffer) ? buffer[0] : buffer;
-        if (geometry) {
-          return geometry;
-        }
-      }
-      catch {
-      }
-    }
-
-    const ring: number[][] = [];
-    const latRad = center.lat * Math.PI / 180;
-    const lonRad = center.lon * Math.PI / 180;
-    const angularDistance = radiusKm / 6371.0088;
-
-    for (let step = 0; step <= 96; step += 1) {
-      const bearing = (step / 96) * Math.PI * 2;
-      const pointLat = Math.asin(Math.sin(latRad) * Math.cos(angularDistance) + Math.cos(latRad) * Math.sin(angularDistance) * Math.cos(bearing));
-      const pointLon = lonRad + Math.atan2(Math.sin(bearing) * Math.sin(angularDistance) * Math.cos(latRad), Math.cos(angularDistance) - Math.sin(latRad) * Math.sin(pointLat));
-      ring.push([this.unwrapLongitude(pointLon * 180 / Math.PI, ring), pointLat * 180 / Math.PI]);
-    }
-
-    return {
-      type: 'polygon',
-      rings: [ring],
-      spatialReference: { wkid: 4326 },
-    };
-  }
-
-  private unwrapLongitude(value: number, ring: number[][]): number {
-    if (!ring.length) {
-      return ThreatLensGeoUtils.normalizeThreatLensLongitude(value);
-    }
-
-    let lon = value;
-    const previousLon = ring[ring.length - 1][0];
-    while (lon - previousLon > 180) {
-      lon -= 360;
-    }
-    while (lon - previousLon < -180) {
-      lon += 360;
-    }
-    return lon;
   }
 
   private buildMarkerSymbol(size: number): any {

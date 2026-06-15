@@ -33,6 +33,8 @@ export interface ThreatLensIpViewportScanRequest {
 
 export interface ThreatLensIpRecord {
   ip: string;
+  lat?: number;
+  lon?: number;
 }
 
 export interface ThreatLensCountrySelection {

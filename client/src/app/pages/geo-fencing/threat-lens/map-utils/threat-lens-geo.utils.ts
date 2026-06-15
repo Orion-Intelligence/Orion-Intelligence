@@ -42,6 +42,33 @@ export class ThreatLensGeoUtils {
 
   static extractThreatLensIpScanRecords(payload: any): ThreatLensIpRecord[] {
     const records = new Map<string, ThreatLensIpRecord>();
+    const readCoordinate = (source: any, keys: string[]): number | undefined => {
+      if (!source || typeof source !== 'object') {
+        return undefined;
+      }
+      for (const key of keys) {
+        const value = source[key];
+        if (value === null || value === undefined || value === '') {
+          continue;
+        }
+        const coordinate = Number(value);
+        if (Number.isFinite(coordinate)) {
+          return coordinate;
+        }
+      }
+      return undefined;
+    };
+    const readCoordinates = (value: any): Pick<ThreatLensIpRecord, 'lat' | 'lon'> => {
+      const sources = [value, value?.ip_info, value?.geo, value?.location, value?.data];
+      for (const source of sources) {
+        const lat = readCoordinate(source, ['lat', 'latitude', 'geo_lat']);
+        const lon = readCoordinate(source, ['lon', 'lng', 'longitude', 'geo_lon', 'geo_lng']);
+        if (lat !== undefined && lon !== undefined && lat >= -90 && lat <= 90) {
+          return { lat, lon };
+        }
+      }
+      return {};
+    };
     const addRecord = (value: any) => {
       if (typeof value === 'string') {
         const ip = value.trim();
@@ -60,7 +87,7 @@ export class ThreatLensGeoUtils {
         return;
       }
 
-      records.set(ip, { ip });
+      records.set(ip, { ip, ...readCoordinates(value) });
     };
 
     [
