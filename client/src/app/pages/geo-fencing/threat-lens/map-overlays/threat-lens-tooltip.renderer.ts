@@ -1,5 +1,3 @@
-import { SelectedCountryCategoryCount } from '../../models/geo-fencing.models';
-
 export class ThreatLensTooltipRenderer {
   private tooltipEl: HTMLDivElement | null = null;
   private tooltipPlacement: 'above' | 'below' = 'below';
@@ -37,7 +35,7 @@ export class ThreatLensTooltipRenderer {
     this.show(event, tooltipContent);
   }
 
-  showCountry(event: any, countryName: string, threatCount: number, breakdown: SelectedCountryCategoryCount[]): void {
+  showCountry(event: any, countryName: string): void {
     if (!this.tooltipEl) {
       return;
     }
@@ -49,32 +47,7 @@ export class ThreatLensTooltipRenderer {
     countryTitle.className = 'threat-lens-tooltip__country-title';
     countryTitle.textContent = countryName;
 
-    const totalRow = document.createElement('div');
-    totalRow.className = 'threat-lens-tooltip__total-row';
-
-    const totalLabel = document.createElement('span');
-    totalLabel.className = 'threat-lens-tooltip__total-label';
-    totalLabel.textContent = 'Total Threats';
-
-    const totalValue = document.createElement('span');
-    totalValue.className = 'threat-lens-tooltip__total-value';
-    totalValue.textContent = String(threatCount);
-
-    totalRow.append(totalLabel, totalValue);
-    tooltipContent.append(countryTitle, totalRow);
-
-    if (breakdown.length) {
-      for (const item of breakdown) {
-        tooltipContent.append(this.buildBreakdownTooltipRow(item));
-      }
-    }
-    else {
-      const emptyMessage = document.createElement('div');
-      emptyMessage.className = 'threat-lens-tooltip__empty';
-      emptyMessage.textContent = 'No data found';
-      tooltipContent.append(emptyMessage);
-    }
-
+    tooltipContent.append(countryTitle);
     this.show(event, tooltipContent, 'above');
   }
 
@@ -126,29 +99,4 @@ export class ThreatLensTooltipRenderer {
     return row;
   }
 
-  private buildBreakdownTooltipRow(item: SelectedCountryCategoryCount): HTMLDivElement {
-    const row = document.createElement('div');
-    row.className = 'threat-lens-tooltip__breakdown-row';
-
-    const labelWrap = document.createElement('div');
-    labelWrap.className = 'threat-lens-tooltip__breakdown-label-wrap';
-
-    const dot = document.createElement('span');
-    dot.setAttribute('aria-hidden', 'true');
-    dot.className = 'threat-lens-tooltip__breakdown-dot';
-    dot.style.setProperty('--threat-lens-dot-color', item.colorHex);
-
-    const label = document.createElement('span');
-    label.className = 'threat-lens-tooltip__breakdown-label';
-    label.textContent = item.label;
-
-    const count = document.createElement('span');
-    count.className = 'threat-lens-tooltip__breakdown-count';
-    count.textContent = String(item.count);
-
-    labelWrap.append(dot, label);
-    row.append(labelWrap, count);
-
-    return row;
-  }
 }

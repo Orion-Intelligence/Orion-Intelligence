@@ -1,4 +1,4 @@
-import { AnimatedArcDescriptor, SelectedCountryCategoryCount, ThreatLensCategoryModelKey } from '../../models/geo-fencing.models';
+import { AnimatedArcDescriptor, ThreatLensCategoryModelKey } from '../../models/geo-fencing.models';
 
 export type LngLat = [number, number];
 
@@ -38,8 +38,6 @@ export interface ThreatLensIpRecord {
 export interface ThreatLensCountrySelection {
   name: string;
   key: string;
-  count: number;
-  breakdown: SelectedCountryCategoryCount[];
   ipScanRequest?: ThreatLensIpViewportScanRequest | null;
 }
 

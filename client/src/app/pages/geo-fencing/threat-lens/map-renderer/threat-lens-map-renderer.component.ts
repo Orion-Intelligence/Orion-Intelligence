@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, NgZone, OnDestroy, Output, ViewChild } from '@angular/core';
 import { loadModules, setDefaultOptions } from 'esri-loader';
-import { ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensLegendItem } from '../../models/geo-fencing.models';
+import { ThreatLensCategoryMapData, ThreatLensCategoryModelKey } from '../../models/geo-fencing.models';
 import { ThreatLensService } from '../threat-lens.service';
 import { ThreatLensGeoUtils } from '../map-utils/threat-lens-geo.utils';
 import { ThreatLensMapUtils } from '../map-utils/threat-lens-map.utils';
@@ -48,9 +48,6 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private hasPendingViewportNavigation = false;
   private destroyed = false;
   private cypressMapFallback = false;
-  private categoryLegend: ThreatLensLegendItem[] = [];
-  private countryNewsCountByKey = new Map<string, number>();
-  private categoryCountryNewsCountByKey = new Map();
   private readonly threatBasemapId = 'dark-gray-vector';
   private readonly streetBasemapId = 'streets-night-vector';
   private readonly streetBasemapMinZoom = 6;
@@ -111,12 +108,9 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     return this.countryRenderer.getCountryName(countryKey);
   }
 
-  renderThreatData(categoryData: ThreatLensCategoryMapData[], countryCounts: ThreatCountryCount[], activeCountryFilterKey: string): ThreatLensArcRenderResult {
-    this.countryNewsCountByKey = new Map(countryCounts.map((item) => [this.toCountryKey(item.country), item.count]));
-    this.categoryCountryNewsCountByKey = ThreatLensGeoUtils.buildThreatLensCategoryCountryCounts(categoryData, (value) => this.toCountryKey(value));
+  renderThreatData(categoryData: ThreatLensCategoryMapData[], activeCountryFilterKey: string): ThreatLensArcRenderResult {
     this.countryRenderer.setSelectedCountryKey(activeCountryFilterKey);
     const arcResult = this.arcRenderer?.render(categoryData, activeCountryFilterKey) ?? { totalArcCount: 0, arcCountByCategory: new Map() };
-    this.categoryLegend = ThreatLensGeoUtils.buildThreatLensLegend(categoryData, arcResult.arcCountByCategory);
     return arcResult;
   }
 
@@ -130,10 +124,6 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
   setArcCategoryFilter(categoryKey: ThreatLensCategoryModelKey | null): void {
     this.arcRenderer?.setActiveCategory(categoryKey);
-  }
-
-  getSelectedCountryBreakdown(countryKey: string): ThreatLensCountrySelection['breakdown'] {
-    return ThreatLensGeoUtils.getThreatLensSelectedCountryBreakdown(countryKey, this.categoryLegend, this.categoryCountryNewsCountByKey);
   }
 
   async focusCountryByKey(countryKey: string): Promise<ThreatLensCountrySelection | null> {
@@ -460,7 +450,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       this.clearHoverHighlight();
       this.hoveredCountryKey = selection.key;
       this.countryRenderer.applyHoverHighlight(countryGraphic);
-      this.tooltipRenderer.showCountry(event, selection.name, selection.count, selection.breakdown);
+      this.tooltipRenderer.showCountry(event, selection.name);
     });
   }
 
@@ -507,8 +497,6 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     return {
       name,
       key,
-      count: this.countryNewsCountByKey.get(key) || 0,
-      breakdown: this.getSelectedCountryBreakdown(key),
       ipScanRequest: includeIpScanRequest ? this.getCountryIpScanRequest(countryGraphic) : null,
     };
   }

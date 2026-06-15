@@ -1,4 +1,4 @@
-import { SelectedCountryCategoryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensLegendItem } from '../../models/geo-fencing.models';
+import { ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensLegendItem } from '../../models/geo-fencing.models';
 import { ThreatLensCoordinates, ThreatLensIpRecord } from '../models/threat-lens-map.types';
 
 export class ThreatLensGeoUtils {
@@ -27,31 +27,6 @@ export class ThreatLensGeoUtils {
 
   static toThreatLensHexColor(color: [number, number, number]): string {
     return `#${color.map((value) => value.toString(16).padStart(2, '0')).join('')}`;
-  }
-
-  static buildThreatLensCategoryCountryCounts( categoryData: ThreatLensCategoryMapData[], toCountryKey: (value: string) => string, ): Map<ThreatLensCategoryModelKey, Map<string, number>> {
-    const categoryCountryNewsCountByKey = new Map<ThreatLensCategoryModelKey, Map<string, number>>();
-
-    for (const category of categoryData) {
-      const countsByCountry = new Map<string, number>();
-      for (const item of category.countryCounts) {
-        countsByCountry.set(toCountryKey(item.country), item.count);
-      }
-      categoryCountryNewsCountByKey.set(category.categoryKey, countsByCountry);
-    }
-
-    return categoryCountryNewsCountByKey;
-  }
-
-  static getThreatLensSelectedCountryBreakdown( countryKey: string, categoryLegend: ThreatLensLegendItem[], categoryCountryNewsCountByKey: Map<ThreatLensCategoryModelKey, Map<string, number>>, ): SelectedCountryCategoryCount[] {
-    return categoryLegend
-      .map((category) => ({
-        label: category.label,
-        colorHex: category.colorHex,
-        count: categoryCountryNewsCountByKey.get(category.categoryKey)?.get(countryKey) || 0,
-      }))
-      .filter((item) => item.count > 0)
-      .sort((a, b) => b.count - a.count);
   }
 
   static buildThreatLensLegend( categoryData: ThreatLensCategoryMapData[], arcCountByCategory: Map<ThreatLensCategoryModelKey, number>, ): ThreatLensLegendItem[] {
