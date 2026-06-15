@@ -105,6 +105,7 @@ export function openAdvancedFiltersPanel18() {
 export function clearAdvancedFilters18() {
   openAdvancedFiltersPanel18();
   cy.get('[data-testid="entity-filter-clear-selection"]').should('be.visible').click();
+  cy.waitForIntercepts();
 }
 
 export function selectAdvancedFilterCategory18(category: FilterCategoryKey) {
@@ -116,12 +117,13 @@ export function selectAdvancedFilterCategory18(category: FilterCategoryKey) {
 export function addAdvancedFilterValue18(value: string) {
   cy.get('[data-testid="entity-filter-value-input"]').scrollIntoView().type(value);
   cy.get('[data-testid="entity-filter-add-value"]').click();
+  cy.waitForIntercepts();
 }
 
 export function submitSearchByEnter18() {
   cy.get('body').type('{esc}');
   cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().click().type('{enter}');
-  cy.wait(1000);
+  cy.waitForIntercepts();
 }
 
 

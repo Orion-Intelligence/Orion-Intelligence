@@ -17,6 +17,7 @@ export function openHomepageAndSearch(query = '{enter}') {
   cy.get('[data-testid="sidebar-group-profile"]').should('be.visible').click();
   cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().should('be.visible').click();
   cy.get('[data-testid="homepage-search-input"]').should('be.visible').click().type(query);
+  cy.waitForIntercepts();
 }
 
 export function switchToDeepSearchTab() {
@@ -49,6 +50,7 @@ export function searchInIocs(query: string) {
       } else {
         cy.wrap(target).type('{enter}');
       }
+      cy.waitForIntercepts();
     });
 }
 
@@ -181,6 +183,7 @@ export function clearSideFilters() {
 export function searchDeepFromTop(query: string) {
   cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
   cy.get('[data-testid="dashboard-general-input"]').filter(':visible').first().scrollIntoView().clear().type(`${query}{enter}`);
+  cy.waitForIntercepts();
 }
 
 export function setAllInsightsExpanded(expand: boolean) {

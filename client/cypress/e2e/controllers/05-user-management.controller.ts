@@ -251,9 +251,12 @@ export function deleteUsersByUsername(usernames: string[], usersUrl = '/dashboar
           cy.get('[data-testid="tenant-delete-user-button"]').filter(':visible').first().should('be.visible').click();
         });
 
+      cy.intercept('POST', '**/api/delete/user').as('deleteUserApi');
       cy.get('.ui-graph-popup-panel').should('be.visible').within(() => {
         cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click();
       });
+      cy.wait('@deleteUserApi');
+      cy.wait('@usersApi');
       cy.get('.ui-graph-popup-panel').should('not.exist');
 
       deleteNext(rest);

@@ -78,6 +78,7 @@ describe('Orion Intelligence – Search Result Validation', () => {
       .should('not.be.disabled')
       .clear()
       .type(`${SEARCH_FIXTURES.feed.search_query}{enter}`);
+    cy.waitForIntercepts();
 
     assertFirstResultCard(SEARCH_FIXTURES.feed);
   });

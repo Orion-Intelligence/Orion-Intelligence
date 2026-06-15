@@ -263,7 +263,8 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.get('[data-testid="dashboard-main"]').should('be.visible');
 
     cy.visit('/dashboard/profile/tenant-settings');
-    cy.contains('h1', 'Tenant Data').should('be.visible');
+    cy.scrollDashboardToTop();
+    cy.contains('h1', 'Tenant Data').scrollIntoView().should('be.visible');
     cy.contains('div', 'Profile').should('be.visible');
     cy.contains('div', 'Contacts').should('be.visible');
     cy.contains('div', 'Users').should('be.visible');
