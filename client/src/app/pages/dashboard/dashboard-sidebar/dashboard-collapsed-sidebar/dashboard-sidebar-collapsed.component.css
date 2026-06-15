@@ -10,5 +10,5 @@
 
 .dashboard-scanner-collapsed-icon {
   filter: brightness(0) saturate(100%) invert(100%) !important;
-  opacity: 1 !important;
+  opacity: 100% !important;
 }

@@ -1,0 +1,39 @@
+<div data-testid="threat-lens-category-layers">
+  <div class="flex items-center justify-between gap-2">
+    <h3 class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">{{ 'Category Layers' | translate }}</h3>
+  </div>
+  <div class="mt-3 grid grid-cols-2 gap-2 max-[420px]:grid-cols-1">
+    <label class="flex min-w-0 items-center gap-2 text-[11px] text-[var(--color-text4)]">
+      <span>{{ 'Limit' | translate }}</span>
+      <select data-testid="threat-lens-arc-batch-size" [ngModel]="arcBatchSize" (ngModelChange)="arcBatchSizeChange.emit($event)" class="h-8 min-w-0 flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 text-[12px] font-semibold text-[var(--color-text1)] outline-none focus:border-[var(--color-blue-640)]">
+        @for (size of arcBatchSizeOptions; track size) {
+          <option [ngValue]="size">{{ size }}</option>
+        }
+      </select>
+    </label>
+    <label class="flex min-w-0 items-center gap-2 text-[11px] text-[var(--color-text4)]">
+      <span>{{ 'Range' | translate }}</span>
+      <select data-testid="threat-lens-arc-range" [ngModel]="selectedArcRangeIndex" (ngModelChange)="arcRangeChange.emit($event)" [disabled]="!arcRangeOptions.length" class="h-8 min-w-0 flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 text-[12px] font-semibold text-[var(--color-text1)] outline-none focus:border-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-60">
+        @for (range of arcRangeOptions; track range.index) {
+          <option [ngValue]="range.index">{{ range.label }}</option>
+        }
+      </select>
+    </label>
+  </div>
+</div>
+<div class="mt-2 max-h-[220px] space-y-1 overflow-auto pr-1 max-[640px]:max-h-[160px]">
+  @for (item of categoryLegend; track item.categoryKey) {
+    <button data-testid="threat-lens-category-layer" type="button" (click)="arcCategorySelect.emit(item.categoryKey)" [disabled]="!item.arcCount" class="w-full rounded-[10px] border px-3 py-2 text-left text-[12px] text-[var(--color-text2)] transition-colors disabled:cursor-not-allowed disabled:opacity-55" [ngClass]="selectedArcCategoryKey === item.categoryKey ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-710)]' : 'border-[var(--color-border)] bg-[var(--color-blue-760)] hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]'">
+      <div class="flex items-center justify-between gap-3">
+        <span class="flex min-w-0 items-center gap-2">
+          <svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0 drop-shadow-[0_0_6px_currentColor]" [attr.color]="item.colorHex" aria-hidden="true">
+            <circle cx="6" cy="6" r="5" [attr.fill]="item.colorHex"></circle>
+          </svg>
+          <span class="truncate font-semibold text-[var(--color-text1)]">{{ item.label }}</span>
+        </span>
+        <span>{{ item.arcCount }} {{ 'arcs' | translate }}</span>
+      </div>
+      <p class="mt-1 text-[11px] text-[var(--color-text4)]">{{ item.totalResults }} {{ 'results' | translate }}, {{ item.countryCount }} {{ 'countries' | translate }}</p>
+    </button>
+  }
+</div>

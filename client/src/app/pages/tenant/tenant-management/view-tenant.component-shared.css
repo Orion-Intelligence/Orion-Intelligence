@@ -3,12 +3,19 @@
 }
 
 .col-sr { width: 5%; }
+
 .col-company { width: 20%; }
+
 .col-country { width: 10%; }
+
 .col-verified { width: 10%; }
+
 .col-quota { width: 10%; }
+
 .col-status { width: 10%; }
+
 .col-licenses { width: 20%; }
+
 .col-action { width: 10%; }
 
 .license-truncate { max-width: 180px; }
@@ -183,6 +190,7 @@
   font-weight: 600;
   color: var(--color-text3);
 }
+
 .pill-on .pill-text { color: #fff; }
 
 .no-hover-row:hover,
@@ -252,7 +260,7 @@
 }
 
 .license-disabled{
-  opacity: 0.5;
+  opacity: 50%;
   cursor: not-allowed;
   border-color: rgb(255 255 255 / 5%);
   color: var(--color-text4);
@@ -268,5 +276,5 @@
 }
 
 .license-disabled{
-  opacity: 0.3 !important;
+  opacity: 30% !important;
 }

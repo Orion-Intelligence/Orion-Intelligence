@@ -14,6 +14,7 @@ import { ThreatLensIpScanModeEnum } from '../enums/geo-fencing.enums';
 import { IpDetailPopupComponent } from './ui-overlays/ip-detail-popup/ip-detail-popup.component';
 import { ArcReportPopupComponent } from './ui-overlays/arc-report-popup/arc-report-popup.component';
 import { ThreatLensFeedPanelComponent } from './ui-overlays/feed-panel/threat-lens-feed-panel.component';
+import { ThreatLensCategoryLayersComponent } from './ui-overlays/category-layers/threat-lens-category-layers.component';
 import { ThreatLensMapRendererComponent } from './map-renderer/threat-lens-map-renderer.component';
 import { ThreatLensArcBatchStatus, ThreatLensArcSelection, ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensCountrySelection, ThreatLensIpViewportScanRequest } from './models/threat-lens-map.types';
 import { ThreatLensService } from './threat-lens.service';
@@ -36,6 +37,7 @@ interface ThreatLensArcRangeOption {
     FormsModule,
     FiltersComponent,
     ThreatLensFeedPanelComponent,
+    ThreatLensCategoryLayersComponent,
     IpDetailPopupComponent,
     ArcReportPopupComponent,
     ThreatLensMapRendererComponent,
@@ -269,18 +271,6 @@ export class ThreatLensComponent implements OnDestroy {
     return 'Idle';
   }
 
-  get arcBatchStatusText(): string {
-    if (!this.arcBatchStatus || !this.arcBatchStatus.visibleCount) {
-      return 'No arcs visible for the selected range.';
-    }
-
-    return `Showing ${this.arcBatchStatus.categoryLabel} arcs ${this.arcBatchStatus.start}-${this.arcBatchStatus.end} of ${this.arcBatchStatus.categoryArcCount}`;
-  }
-
-  get selectedArcCategoryLabel(): string {
-    return this.getSelectedArcCategory()?.label || 'News';
-  }
-
   onIpDetailPopupClose(): void {
     this.selectedIp = '';
     this.emitDetailOverlayOpenChange();
@@ -414,7 +404,6 @@ export class ThreatLensComponent implements OnDestroy {
 
   private applyLoadedDataState(stats: ThreatLensMapData, activeQuery: string, totalArcCount: number): void {
     const mostActive = stats.countryCounts[0];
-    const queryLabel = activeQuery ? ` for "${activeQuery}"` : '';
 
     this.ngZone.run(() => {
       this.feedItems = stats.feedItems;
@@ -431,18 +420,16 @@ export class ThreatLensComponent implements OnDestroy {
       }
 
       if (!mostActive) {
-        this.statusMessage = `Loaded ${stats.totalResults} records${queryLabel}, but no country metadata was found.`;
+        this.statusMessage = 'No country metadata found.';
         this.setLoading(false);
         return;
       }
 
       this.statusMessage = totalArcCount > 0
-        ? this.activeArcCountryFilterKey
-          ? `Loaded ${stats.totalResults} records${queryLabel}. Showing selected ${this.selectedArcCategoryLabel.toLowerCase()} arc connections linked to ${this.selectedCountryName || activeQuery}.`
-          : `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries. Showing selected ${this.selectedArcCategoryLabel.toLowerCase()} arcs by range. Most active: ${mostActive.country} (${mostActive.count}).`
+        ? ''
         : this.activeArcCountryFilterKey
-          ? `Loaded ${stats.totalResults} records${queryLabel}, but no arc connections were found for ${this.selectedCountryName || activeQuery}.`
-          : `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries, but no multi-country co-occurrence was found for arcs.`;
+          ? 'No arc connections found.'
+          : 'No multi-country arc co-occurrence found.';
       this.setLoading(false);
     });
   }
@@ -619,9 +606,7 @@ export class ThreatLensComponent implements OnDestroy {
       this.hasIpScanCompleted = true;
       this.ipScanProgress = null;
       this.ipScanStatusMessage = renderedMarkers
-        ? mode === ThreatLensIpScanModeEnum.Default
-          ? `Rendered ${records.length} default IP marker(s). Zoom in to reveal more.`
-          : `Rendered ${records.length} IP marker(s) for the selected country.`
+        ? ''
         : hadExistingResult
           ? 'No new IP markers returned. Keeping the previous scan visible.'
           : mode === ThreatLensIpScanModeEnum.Default

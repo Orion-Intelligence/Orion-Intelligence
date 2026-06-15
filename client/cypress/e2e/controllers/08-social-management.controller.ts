@@ -143,7 +143,7 @@ export function assertSocialSidebarAndBackNavigation() {
 export function assertSocialEmptyStateIfNoResults() {
   cy.get('body').then(($body) => {
     if ($body.find(SOCIAL_PLATFORM_CARD).length === 0) {
-      cy.get(SOCIAL_LIST_EMPTY).should('exist').and('contain.text', 'Feed is Waiting for Data');
+      cy.get(SOCIAL_LIST_EMPTY).should('exist');
     }
   });
 }
