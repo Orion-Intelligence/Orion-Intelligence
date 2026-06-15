@@ -38,6 +38,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private viewportDragHandle: { remove: () => void } | null = null;
   private viewportWheelHandle: { remove: () => void } | null = null;
   private mapResizeObserver: ResizeObserver | null = null;
+  private themeObserver: MutationObserver | null = null;
   private mapResizeFrame: number | null = null;
   private viewportIpScanTimer: ReturnType<typeof setTimeout> | null = null;
   private hoverHitTestPending = false;
@@ -48,8 +49,10 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private hasPendingViewportNavigation = false;
   private destroyed = false;
   private cypressMapFallback = false;
-  private readonly threatBasemapId = 'dark-gray-vector';
-  private readonly streetBasemapId = 'streets-night-vector';
+  private readonly darkThreatBasemapId = 'dark-gray-vector';
+  private readonly darkStreetBasemapId = 'streets-night-vector';
+  private readonly lightThreatBasemapId = 'gray-vector';
+  private readonly lightStreetBasemapId = 'streets-vector';
   private readonly streetBasemapMinZoom = 6;
   private readonly hoverHitTestMinIntervalMs = 80;
   private readonly maxGlobeCanvasAspectRatio = 1.62;
@@ -84,6 +87,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.viewportDragHandle?.remove();
     this.viewportWheelHandle?.remove();
     this.mapResizeObserver?.disconnect();
+    this.themeObserver?.disconnect();
     this.arcRenderer?.destroy();
     this.ipMarkerRenderer?.clear();
     this.countryRenderer.destroy();
@@ -241,7 +245,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       this.ipScanGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens IP Scan Markers' });
 
       const map = new EsriMap({
-        basemap: this.threatBasemapId,
+        basemap: this.getThreatBasemapId(),
         layers: [
           countryLayer,
           this.countryFillGraphicsLayer,
@@ -270,10 +274,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
             dragTertiary: 'none',
           },
         },
-        environment: {
-          atmosphereEnabled: false,
-          starsEnabled: true,
-        },
+        environment: this.getSceneEnvironment(),
       });
 
       await this.view.when();
@@ -305,6 +306,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
       this.tooltipRenderer.init();
       this.observeMapResize();
+      this.observeThemeChanges();
       this.scheduleMapResize();
       [0, 150, 500, 1000, 2000].forEach((delay) => window.setTimeout(() => this.scheduleMapResize(), delay));
       this.registerViewScaleWatcher();
@@ -862,13 +864,61 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       return;
     }
 
-    const nextBasemapId = (this.view.zoom ?? 0) >= this.streetBasemapMinZoom ? this.streetBasemapId : this.threatBasemapId;
+    const nextBasemapId = (this.view.zoom ?? 0) >= this.streetBasemapMinZoom ? this.getStreetBasemapId() : this.getThreatBasemapId();
     if (nextBasemapId === this.activeBasemapId) {
       return;
     }
 
     this.activeBasemapId = nextBasemapId;
     this.view.map.basemap = nextBasemapId;
+  }
+
+  private observeThemeChanges(): void {
+    if (typeof MutationObserver === 'undefined' || typeof document === 'undefined') {
+      return;
+    }
+
+    this.themeObserver?.disconnect();
+    this.themeObserver = new MutationObserver(() => this.applyThemeMode());
+    this.themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  private applyThemeMode(): void {
+    if (!this.view) {
+      return;
+    }
+
+    this.view.environment = this.getSceneEnvironment();
+    this.activeBasemapId = '';
+    this.updateBasemapForZoom();
+    this.view.requestRender?.();
+  }
+
+  private getThreatBasemapId(): string {
+    return this.isLightTheme() ? this.lightThreatBasemapId : this.darkThreatBasemapId;
+  }
+
+  private getStreetBasemapId(): string {
+    return this.isLightTheme() ? this.lightStreetBasemapId : this.darkStreetBasemapId;
+  }
+
+  private getSceneEnvironment(): any {
+    if (this.isLightTheme()) {
+      return {
+        background: { type: 'color', color: [231, 239, 249, 1] },
+        atmosphereEnabled: false,
+        starsEnabled: false,
+      };
+    }
+
+    return {
+      atmosphereEnabled: false,
+      starsEnabled: true,
+    };
+  }
+
+  private isLightTheme(): boolean {
+    return typeof document !== 'undefined' && document.body.classList.contains('light-theme');
   }
 
   private observeMapResize(): void {
