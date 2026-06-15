@@ -43,12 +43,29 @@
 
 	<div class="absolute left-4 top-4 bottom-4 z-20 flex min-h-0 w-[min(24rem,calc(100%-5rem))] flex-col gap-3 overflow-hidden max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:overflow-visible max-[1100px]:px-3 max-[1100px]:pt-3">
 		<div class="h-[40px] shrink-0 max-[1100px]:hidden"></div>
+    <div data-testid="threat-lens-topic-search-panel" class="map-overlay-menu shrink-0 rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] p-3 shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[640px]:rounded-[12px]">
+			<div class="min-w-0">
+				<p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">{{ 'Topic Search' | translate }}</p>
+				<p class="mt-1 truncate text-[11px] text-[var(--color-text4)]">
+					{{ 'Semantic search across threat records' | translate }}
+				</p>
+			</div>
+			<div class="mt-3 flex items-center gap-2 max-[520px]:flex-col">
+				<input data-testid="threat-lens-topic-search-input" [(ngModel)]="topicSearchTerm" (keyup.enter)="onTopicSearch()" type="text" [placeholder]="'Search topic (e.g. ransomware attack)' | translate" class="h-10 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[13px] text-[var(--color-text1)] outline-none ring-0 transition focus:border-[var(--color-blue-640)] placeholder:text-[var(--color-text3)] [body.light-theme_&]:bg-[var(--color-white)] [body.light-theme_&]:text-[var(--color-gray-900)]" />
+				<button data-testid="threat-lens-topic-search-submit" (click)="onTopicSearch()" [disabled]="isLoading" class="h-10 rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 text-[13px] font-semibold text-[var(--color-white)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 max-[520px]:w-full">
+					{{ 'Search' | translate }}
+				</button>
+			</div>
+			@if (currentTopicQuery) {
+				<p data-testid="threat-lens-active-topic" class="mt-2 text-[12px] text-[var(--color-text2)]">{{ 'Active topic' | translate }}: <span class="font-semibold">{{ currentTopicQuery }}</span></p>
+			}
+		</div>
     <div data-testid="threat-lens-search-panel" class="map-overlay-menu min-h-0 overflow-y-auto rounded-[14px] border border-white/15 bg-[rgba(8,16,27,0.94)] p-3 shadow-[0_20px_48px_rgba(2,6,23,.55)] backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:bg-[#f7fbff]/95 [body.light-theme_&]:shadow-[0_18px_44px_rgba(15,23,42,.14)] max-[1100px]:overflow-visible max-[640px]:rounded-[12px]">
 			<div class="flex items-center justify-between gap-3">
 				<div class="min-w-0">
-					<p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">{{ 'Search' | translate }}</p>
+					<p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">{{ 'Country Search' | translate }}</p>
 					<p class="mt-1 truncate text-[11px] text-[var(--color-text4)]">
-						@if (currentQuery) { {{ 'Active keyword:' | translate }} {{ currentQuery }} } @else { {{ 'All threat records' | translate }} }
+						@if (currentQuery) { {{ 'Active country:' | translate }} {{ currentQuery }} } @else { {{ 'All countries' | translate }} }
 					</p>
 				</div>
 				<button data-testid="threat-lens-search-toggle" type="button" (click)="togglePanel('search')" [attr.aria-label]="(isSearchPanelCollapsed ? 'Expand' : 'Collapse') | translate" class="ui-consolidated-sub flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)]">
@@ -57,19 +74,19 @@
 			</div>
 			@if (!isSearchPanelCollapsed) {
 				<div class="mt-3 flex items-center gap-2 max-[520px]:flex-col">
-					<input data-testid="threat-lens-search-input" [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" type="text" [placeholder]="'Search keyword (e.g. china)' | translate" class="h-10 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[13px] text-[var(--color-text1)] outline-none ring-0 transition focus:border-[var(--color-blue-640)] placeholder:text-[var(--color-text3)] [body.light-theme_&]:bg-[var(--color-white)] [body.light-theme_&]:text-[var(--color-gray-900)]" />
+					<input data-testid="threat-lens-search-input" [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" type="text" [placeholder]="'Search country (e.g. China)' | translate" class="h-10 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-[13px] text-[var(--color-text1)] outline-none ring-0 transition focus:border-[var(--color-blue-640)] placeholder:text-[var(--color-text3)] [body.light-theme_&]:bg-[var(--color-white)] [body.light-theme_&]:text-[var(--color-gray-900)]" />
 					<button data-testid="threat-lens-search-submit" (click)="onSearch()" [disabled]="isLoading" class="h-10 rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 text-[13px] font-semibold text-[var(--color-white)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 max-[520px]:w-full">
 						{{ 'Search' | translate }}
 					</button>
 				</div>
 
 				@if (currentQuery) {
-					<p data-testid="threat-lens-active-keyword" class="mt-2 text-[12px] text-[var(--color-text2)]">{{ 'Active keyword' | translate }}: <span class="font-semibold">{{ currentQuery }}</span></p>
+					<p data-testid="threat-lens-active-keyword" class="mt-2 text-[12px] text-[var(--color-text2)]">{{ 'Active country' | translate }}: <span class="font-semibold">{{ currentQuery }}</span></p>
 				}
 
 				@if (topCountries.length) {
 					<h3 class="mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">{{ 'Top Highlighted Countries' | translate }}</h3>
-					<div class="mt-2 max-h-[260px] space-y-1 overflow-auto pr-1 max-[640px]:max-h-[180px]">
+					<div class="mt-2 max-h-[155px] space-y-1 overflow-auto pr-1 max-[640px]:max-h-[180px]">
 						@for (item of topCountries; track item.country) {
 							<button data-testid="threat-lens-top-country" type="button" (click)="onTopCountrySelect(item.country)" class="flex w-full items-center justify-between rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-left text-[12px] text-[var(--color-text2)] transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]">
 								<span class="truncate pr-2">{{ item.country }}</span>

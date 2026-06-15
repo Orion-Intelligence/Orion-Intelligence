@@ -65,6 +65,8 @@ export class ThreatLensComponent implements OnDestroy {
   protected readonly arcBatchSizeOptions = [5, 10, 20, 50, 100];
 
   isFilterOpen$: Observable<boolean>;
+  topicSearchTerm = '';
+  currentTopicQuery = '';
   searchTerm = '';
   currentQuery = '';
   selectedCountryName = '';
@@ -116,7 +118,7 @@ export class ThreatLensComponent implements OnDestroy {
     this.mapRenderer?.setArcBatchSize(this.arcBatchSize);
     this.mapRenderer?.setArcCategoryFilter(this.selectedArcCategoryKey);
     this.mapRenderer?.setArcRangeIndex(this.selectedArcRangeIndex);
-    await this.loadThreatLensData('');
+    await this.loadThreatLensData('', '');
   }
 
   onMapError(message: string): void {
@@ -125,13 +127,17 @@ export class ThreatLensComponent implements OnDestroy {
   }
 
   async onSearch(): Promise<void> {
-    await this.loadThreatLensData(this.searchTerm.trim());
+    await this.loadThreatLensData(this.topicSearchTerm.trim(), this.searchTerm.trim());
+  }
+
+  async onTopicSearch(): Promise<void> {
+    await this.loadThreatLensData(this.topicSearchTerm.trim(), this.searchTerm.trim());
   }
 
   async onTopCountrySelect(country: string): Promise<void> {
     const normalizedCountry = this.threatLensService.normalizeCountryLabel(country);
     this.searchTerm = normalizedCountry;
-    await this.loadThreatLensData(normalizedCountry);
+    await this.loadThreatLensData(this.topicSearchTerm.trim(), normalizedCountry);
   }
 
   onCountrySelected(selection: ThreatLensCountrySelection): void {
@@ -324,33 +330,36 @@ export class ThreatLensComponent implements OnDestroy {
     this.isThreatPanelCollapsed = !this.isThreatPanelCollapsed;
   }
 
-  private async loadThreatLensData(query: string): Promise<void> {
+  private async loadThreatLensData(topicQuery: string, countryQuery: string): Promise<void> {
     if (!this.mapRenderer) {
       return;
     }
 
     this.closeArcReportPanel();
     const requestId = ++this.loadRequestId;
-    const activeQuery = query.trim();
-    this.currentQuery = activeQuery;
-    this.activeArcCountryFilterKey = this.getSearchedCountryKey(activeQuery);
+    const activeTopicQuery = topicQuery.trim();
+    const activeCountryQuery = countryQuery.trim();
+    this.currentTopicQuery = activeTopicQuery;
+    this.currentQuery = activeCountryQuery;
+    this.activeArcCountryFilterKey = this.getSearchedCountryKey(activeCountryQuery);
+    const searchLabel = this.getSearchLabel(activeTopicQuery, activeCountryQuery);
 
     this.ngZone.run(() => {
       this.setLoading(true);
-      this.statusMessage = activeQuery
-        ? `Searching threat lens results for "${activeQuery}"...`
+      this.statusMessage = searchLabel
+        ? `Searching threat lens results ${searchLabel}...`
         : 'Loading complete threat lens dataset...';
     });
 
-    const stats = await this.fetchMapData(activeQuery);
+    const stats = await this.fetchMapData(activeTopicQuery, activeCountryQuery);
     if (!this.isActiveRequest(requestId)) {
       return;
     }
 
     if (!stats) {
       this.mapRenderer.renderThreatData([], [], '');
-      this.applyEmptyDataState(activeQuery);
-      if (!activeQuery) {
+      this.applyEmptyDataState(activeTopicQuery, activeCountryQuery);
+      if (!activeTopicQuery && !activeCountryQuery) {
         this.startDefaultIpScan();
       }
       return;
@@ -373,7 +382,7 @@ export class ThreatLensComponent implements OnDestroy {
     this.mapRenderer?.setArcCategoryFilter(this.selectedArcCategoryKey);
     this.mapRenderer?.setArcRangeIndex(this.selectedArcRangeIndex);
     const hasRenderableArcs = this.categoryLegend.some((item) => item.arcCount > 0);
-    this.applyLoadedDataState(stats, activeQuery, hasRenderableArcs ? Math.max(totalArcCount, 1) : 0);
+    this.applyLoadedDataState(stats, activeTopicQuery, activeCountryQuery, hasRenderableArcs ? Math.max(totalArcCount, 1) : 0);
 
     if (this.activeArcCountryFilterKey) {
       await this.focusCountryByKey(this.activeArcCountryFilterKey);
@@ -383,10 +392,10 @@ export class ThreatLensComponent implements OnDestroy {
     }
   }
 
-  private async fetchMapData(activeQuery: string): Promise<ThreatLensMapData | null> {
+  private async fetchMapData(activeTopicQuery: string, activeCountryQuery: string): Promise<ThreatLensMapData | null> {
     try {
       const loadAllPages = false;
-      return await firstValueFrom(this.threatLensService.getThreatLensMapData(this.buildSearchPayload(activeQuery), loadAllPages),);
+      return await firstValueFrom(this.threatLensService.getThreatLensMapData(this.buildSearchPayload(activeTopicQuery, activeCountryQuery), loadAllPages),);
     }
     catch (error) {
       console.error('Failed to load threat lens data', error);
@@ -394,7 +403,7 @@ export class ThreatLensComponent implements OnDestroy {
     }
   }
 
-  private applyEmptyDataState(activeQuery: string): void {
+  private applyEmptyDataState(activeTopicQuery: string, activeCountryQuery: string): void {
     this.arcCount = 0;
     this.arcBatchStatus = null;
     this.selectedArcCategoryKey = this.defaultArcCategoryKey;
@@ -405,16 +414,18 @@ export class ThreatLensComponent implements OnDestroy {
       this.categoryLegend = [];
       this.selectedCountryBreakdown = [];
       this.feedItems = [];
-      this.statusMessage = activeQuery
-        ? `Failed to load threat lens data for "${activeQuery}" from /api/threat/lens.`
+      const searchLabel = this.getSearchLabel(activeTopicQuery, activeCountryQuery);
+      this.statusMessage = searchLabel
+        ? `Failed to load threat lens data ${searchLabel} from /api/threat/lens.`
         : 'Failed to load threat lens data from /api/threat/lens.';
       this.setLoading(false);
     });
   }
 
-  private applyLoadedDataState(stats: ThreatLensMapData, activeQuery: string, totalArcCount: number): void {
+  private applyLoadedDataState(stats: ThreatLensMapData, activeTopicQuery: string, activeCountryQuery: string, totalArcCount: number): void {
     const mostActive = stats.countryCounts[0];
-    const queryLabel = activeQuery ? ` for "${activeQuery}"` : '';
+    const queryLabel = this.getSearchLabel(activeTopicQuery, activeCountryQuery);
+    const querySuffix = queryLabel ? ` ${queryLabel}` : '';
 
     this.ngZone.run(() => {
       this.feedItems = stats.feedItems;
@@ -431,18 +442,18 @@ export class ThreatLensComponent implements OnDestroy {
       }
 
       if (!mostActive) {
-        this.statusMessage = `Loaded ${stats.totalResults} records${queryLabel}, but no country metadata was found.`;
+        this.statusMessage = `Loaded ${stats.totalResults} records${querySuffix}, but no country metadata was found.`;
         this.setLoading(false);
         return;
       }
 
       this.statusMessage = totalArcCount > 0
         ? this.activeArcCountryFilterKey
-          ? `Loaded ${stats.totalResults} records${queryLabel}. Showing selected ${this.selectedArcCategoryLabel.toLowerCase()} arc connections linked to ${this.selectedCountryName || activeQuery}.`
-          : `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries. Showing selected ${this.selectedArcCategoryLabel.toLowerCase()} arcs by range. Most active: ${mostActive.country} (${mostActive.count}).`
+          ? `Loaded ${stats.totalResults} records${querySuffix}. Showing selected ${this.selectedArcCategoryLabel.toLowerCase()} arc connections linked to ${this.selectedCountryName || activeCountryQuery}.`
+          : `Loaded ${stats.totalResults} records${querySuffix} across ${stats.countryCounts.length} countries. Showing selected ${this.selectedArcCategoryLabel.toLowerCase()} arcs by range. Most active: ${mostActive.country} (${mostActive.count}).`
         : this.activeArcCountryFilterKey
-          ? `Loaded ${stats.totalResults} records${queryLabel}, but no arc connections were found for ${this.selectedCountryName || activeQuery}.`
-          : `Loaded ${stats.totalResults} records${queryLabel} across ${stats.countryCounts.length} countries, but no multi-country co-occurrence was found for arcs.`;
+          ? `Loaded ${stats.totalResults} records${querySuffix}, but no arc connections were found for ${this.selectedCountryName || activeCountryQuery}.`
+          : `Loaded ${stats.totalResults} records${querySuffix} across ${stats.countryCounts.length} countries, but no multi-country co-occurrence was found for arcs.`;
       this.setLoading(false);
     });
   }
@@ -648,22 +659,37 @@ export class ThreatLensComponent implements OnDestroy {
     this.runCountryIpScan(selection.name, this.selectedCountryIpScanRequest);
   }
 
-  private buildSearchPayload(query: string): Partial<ThreatLensRequestPayload> {
-    const payload: Partial<ThreatLensRequestPayload> = { q: query };
-    if (!query) {
+  private buildSearchPayload(topicQuery: string, countryQuery: string): Partial<ThreatLensRequestPayload> {
+    const payload: Partial<ThreatLensRequestPayload> = { q: topicQuery };
+
+    if (topicQuery) {
+      payload.matchtype = 'semantic';
+    }
+
+    if (!countryQuery) {
       return payload;
     }
 
-    const normalizedCountry = this.threatLensService.normalizeCountryLabel(query);
+    const normalizedCountry = this.threatLensService.normalizeCountryLabel(countryQuery);
     const countryKey = this.toCountryKey(normalizedCountry);
     if (countryKey && this.mapRenderer?.hasCountryKey(countryKey)) {
-      payload.q = '';
       payload.entity_filter = { m_country: [normalizedCountry] };
       payload.must = true;
       payload.fullsearch = false;
     }
 
     return payload;
+  }
+
+  private getSearchLabel(topicQuery: string, countryQuery: string): string {
+    const parts: string[] = [];
+    if (topicQuery) {
+      parts.push(`for topic "${topicQuery}"`);
+    }
+    if (countryQuery) {
+      parts.push(`in country "${countryQuery}"`);
+    }
+    return parts.join(' ');
   }
 
   private getSearchedCountryKey(query: string): string {

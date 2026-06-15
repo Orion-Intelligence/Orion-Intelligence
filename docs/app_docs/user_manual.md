@@ -1040,23 +1040,25 @@ The map data builder then produces:
 - document country groups used for arc generation
 - feed items sorted by timestamp
 
-#### Search Panel
+#### Search Panels
 
-The search panel supports free-text keyword searches and country pivots.
+Threat Lens keeps topic search and country search separate.
 
 Search actions:
 
-- type a keyword and press `Enter`
-- type a keyword and click `Search`
+- type a topic such as `ransomware attack`, `data leak`, `bank breach`, or `protest` and press `Enter`
+- type a topic and click `Search`
+- type a country and press `Enter`
+- type a country and click `Search`
 - click a top highlighted country
 
-When the keyword matches a country known by the map layer, Threat Lens converts the search into a country-filtered request. In that case it sends an entity filter for `m_country`, enables strict matching, disables full search, and focuses the country on the map. For other keywords, the value is sent as `q`.
+Topic search is sent as `q` with semantic matching enabled. Country search is sent separately as an entity filter for `m_country`, enables strict matching, disables full search, and focuses the country on the map when the country is known by the map layer.
 
 ```{figure} ../screenshots/threat-lens-search-20260326.png
 :alt: Threat Lens search
 :width: 100%
 
-Threat Lens keyword search with active keyword state and refreshed country/category context.
+Threat Lens topic and country search with refreshed country/category context.
 ```
 
 #### Map, Countries, and Arcs

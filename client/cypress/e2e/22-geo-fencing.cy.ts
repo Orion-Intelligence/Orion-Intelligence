@@ -94,6 +94,9 @@ describe('Geo Fencing - Satellite Intel and Threat Lens', () => {
     cy.get('[data-testid="threat-lens-page"]', { timeout: 120000 }).should('be.visible');
 
     cy.get('[data-testid="threat-lens-loading"]', { timeout: 180000 }).should('not.exist');
+    cy.get('[data-testid="threat-lens-topic-search-panel"]').should('be.visible');
+    cy.get('[data-testid="threat-lens-topic-search-input"]').should('be.visible');
+    cy.get('[data-testid="threat-lens-search-panel"]').should('be.visible');
     cy.get('[data-testid="threat-lens-status"]', { timeout: 180000 }).should(($element) => {
       expect($element.text().replace(/\s+/g, ' ').trim()).to.match(/(loaded|failed|no country metadata|no multi-country)/i);
     });
