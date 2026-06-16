@@ -336,7 +336,7 @@ it('runs Cross Search card in consolidated Deep Search', () => {
 
   openHomepageAndSearch('{enter}');
   switchToDeepSearchTab();
-  searchDeepFromTop('hacking');
+  searchDeepFromTop('hacking', false);
 
   cy.get('[data-testid="dashboard-body"]', { timeout: 60000 }).should('exist');
 

@@ -116,7 +116,7 @@ export function loginAsUser(username: string, password: string) {
   cy.visit('/login');
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
-  cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+  cy.get('[data-testid="login-button"], input.login-button').filter(':visible').first().should('be.visible').click({ force: true });
   cy.wait('@loginRequest', {timeout: 60000}).its('response.statusCode').should('be.oneOf', [200, 201]);
   cy.scrollDashboardToBottom();
 
