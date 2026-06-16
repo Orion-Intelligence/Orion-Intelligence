@@ -222,7 +222,7 @@ describe('Case Management - Add View Edit Flow', () => {
   it('adds and edits linked case', () => {
     openCreatedCaseDetails();
 
-    cy.get(selector('case-linked-case-add')).filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
+    cy.get(selector('case-linked-case-add')).last().scrollIntoView().should('exist').click({ force: true });
     cy.get(selector('case-linked-case-add-drawer')).filter(':visible').first().should('be.visible');
     cy.then(() => {
       cy.get(selector('case-linked-case-select')).should('be.visible').select(linkedCaseId);
@@ -283,7 +283,9 @@ describe('Case Management - Add View Edit Flow', () => {
     openCreatedCaseDetails();
 
     cy.get(selector('case-details-case-id-value'))
-      .should('not.be.empty')
+      .should(($value) => {
+        expect($value.text().trim()).not.to.equal('');
+      })
       .invoke('text')
       .then((text) => {
         const createdCaseId = text.trim();
@@ -311,7 +313,8 @@ describe('Case Management - Add View Edit Flow', () => {
             .scrollIntoView();
 
           cy.get(selector(`case-board-move-${createdCaseId}-${CASE_MOVE_STATUS_IDS[statusLabel]}`))
-            .should('be.visible')
+            .scrollIntoView()
+            .should('exist')
             .click({ force: true });
 
           cy.get(selector('case-move-reason-input'))

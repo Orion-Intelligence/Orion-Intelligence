@@ -85,4 +85,10 @@ export function openCreatedCaseDetails() {
     cy.visit(`/dashboard/profile/case-management/case-details?caseId=${caseId}`);
   });
   cy.get(selector('case-details-page')).should('be.visible');
+  cy.then(() => {
+    cy.get(selector('case-details-case-id-value'), { timeout: 60000 })
+      .should(($value) => {
+        expect($value.text().trim()).to.equal(caseId);
+      });
+  });
 }
