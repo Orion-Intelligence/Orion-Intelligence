@@ -340,6 +340,8 @@ export function moveCaseFromNewToResolved() {
       const moves = [
         'Intake Review',
         'Under Investigation',
+        'Move back to Intake Review',
+        'Under Investigation',
         'Evidence Collection',
         'Verification',
         'Regulatory Action',
@@ -353,7 +355,9 @@ export function moveCaseFromNewToResolved() {
           .scrollIntoView();
 
         cy.get(selector(`case-board-card-${createdCaseId}`))
-          .contains(`Move to ${statusLabel}`)
+          .contains(statusLabel.includes('Move back')
+            ? statusLabel
+            : `Move to ${statusLabel}`)
           .click({ force: true });
 
         cy.get('textarea[placeholder="Enter mandatory reason"]')
