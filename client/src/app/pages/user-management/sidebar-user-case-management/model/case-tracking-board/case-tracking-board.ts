@@ -53,7 +53,7 @@ export class CaseTrackingBoard implements OnInit {
     const previousStatus = this.workflow[index - 1]?.value || null;
     const nextStatus = this.workflow[index + 1]?.value || null;
 
-    if (previousStatus) {
+    if (previousStatus && previousStatus !== 'new') {
       statuses.push(previousStatus);
     }
 
@@ -130,5 +130,16 @@ export class CaseTrackingBoard implements OnInit {
     }
 
     return value.replace(/[_-]/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  getMoveButtonLabel(currentStatus: CaseStatus, targetStatus: CaseStatus): string {
+    const currentIndex = this.workflow.findIndex(item => item.value === currentStatus);
+    const targetIndex = this.workflow.findIndex(item => item.value === targetStatus);
+
+    if (targetIndex < currentIndex) {
+      return `Move back to ${this.formatLabel(targetStatus)}`;
+    }
+
+    return `Move to ${this.formatLabel(targetStatus)}`;
   }
 }

@@ -904,6 +904,12 @@ class CaseManager:
         current_status = record.status
         next_status = data.status
 
+        if next_status == CaseStatus.NEW:
+            raise HTTPException(
+                status_code=400,
+                detail="Case cannot be moved back to new"
+            )
+
         if next_status == CaseStatus.CLOSED:
             raise HTTPException(
                 status_code=400,
