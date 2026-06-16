@@ -131,7 +131,10 @@ export function typeDashboardSearch15(value: string) {
       if (currentValue.length > 0) {
         cy.wrap($input).clear();
       }
-    })
+    });
+  cy.startInterceptTracking();
+  cy.get('input[data-testid="dashboard-general-input"][name="q"]')
+    .first()
     .type(`${value}{enter}`);
   cy.waitForIntercepts();
 }

@@ -253,7 +253,6 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
     cy.get('[data-testid="sidebar-group-profile"]').should('be.visible').scrollIntoView().click();
     cy.get('[data-testid="sidebar-subitem-profile-users"]').should('be.visible').scrollIntoView().click();
     cy.url().should('include', '/dashboard/profile/users');
-    cy.wait('@usersApi');
     addUser(enterpriseUser);
     setPasswordResetRequired(enterpriseUser.username, false);
     cy.logout();

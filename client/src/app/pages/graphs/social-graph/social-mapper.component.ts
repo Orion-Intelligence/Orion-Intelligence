@@ -467,10 +467,12 @@ export class SocialMapperComponent implements OnDestroy {
     }
     const candidate = raw.includes('://') ? raw : `https://${raw}`;
     try {
-      return new URL(candidate).hostname.replace(/^(www|m)\./, '');
+      const host = new URL(candidate).hostname.replace(/^(www|m)\./, '');
+      return host === 'x.com' ? 'twitter.com' : host;
     }
     catch {
-      return raw.replace(/^https?:\/\//, '').split(/[/?#]/)[0].replace(/^(www|m)\./, '');
+      const host = raw.replace(/^https?:\/\//, '').split(/[/?#]/)[0].replace(/^(www|m)\./, '');
+      return host === 'x.com' ? 'twitter.com' : host;
     }
   }
 

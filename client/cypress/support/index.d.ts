@@ -3,6 +3,7 @@ declare global {
     namespace Cypress {
         interface Chainable {
             loginAsAdmin(): Chainable<void>;
+            startInterceptTracking(): Chainable<void>;
             waitForIntercepts(options?: { timeout?: number; idleMs?: number }): Chainable<void>;
             openSideFilter(): Chainable<void>;
             closeSideFilter(): Chainable<void>;

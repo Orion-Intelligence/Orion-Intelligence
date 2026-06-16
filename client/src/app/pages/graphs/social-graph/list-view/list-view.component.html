@@ -1,7 +1,7 @@
 <div data-testid="social-list-view" class="flex h-full w-full flex-col overflow-hidden bg-transparent">
   @if (!hasResults()) {
     <div data-testid="social-list-empty" class="min-h-0 flex-1 overflow-y-auto bg-transparent [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
-      <div class="flex w-full items-stretch gap-4 px-4 py-3">
+      <div class="mx-auto flex w-full max-w-[1480px] items-stretch gap-4 px-4 py-3">
         <aside class="sticky top-4 hidden max-h-[calc(100vh-5rem)] w-[240px] flex-shrink-0 self-stretch flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar lg:flex">
           <div class="flex-shrink-0 overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]">
             <div class="h-14 border-b border-[var(--color-border)] bg-[var(--color-blue-700)]"></div>

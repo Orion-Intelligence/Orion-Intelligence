@@ -76,7 +76,10 @@ describe('Orion Intelligence – Search Result Validation', () => {
       .scrollIntoView()
       .should('be.visible')
       .should('not.be.disabled')
-      .clear()
+      .clear();
+    cy.startInterceptTracking();
+    cy.get('input[data-testid="dashboard-general-input"][name="q"]')
+      .first()
       .type(`${SEARCH_FIXTURES.feed.search_query}{enter}`);
     cy.waitForIntercepts();
 

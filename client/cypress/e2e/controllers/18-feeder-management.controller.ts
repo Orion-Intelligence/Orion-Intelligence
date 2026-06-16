@@ -17,6 +17,7 @@ export const FEEDER_RULE_KEYS = [
 const FILE_RULE_KEYS = FEEDER_RULE_KEYS.filter((ruleKey) => ruleKey !== 'generic');
 const FEEDER_TEST_RULE_LIMIT = 4;
 const FEEDER_SCRIPT_ROW_TIMEOUT = 60000;
+const FEEDER_QUERY_TIMEOUT = 60000;
 
 export function openFeederAsAdmin() {
   cy.loginAsAdmin();
@@ -191,10 +192,10 @@ function clearVisibleValueRows(): Cypress.Chainable {
     if (!button.length) {
       return cy.wrap(null, { log: false });
     }
+    cy.intercept('GET', '**/api/profile/feeder/scripts**').as('feederScriptsQueryAfterClear');
     cy.wrap(button).click();
     cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click();
-    cy.wait(250);
-    return clearVisibleValueRows();
+    return cy.wait('@feederScriptsQueryAfterClear', { timeout: FEEDER_QUERY_TIMEOUT }).then(() => clearVisibleValueRows());
   });
 }
 
@@ -213,11 +214,14 @@ function clearScripts(): Cypress.Chainable {
       .then(($body) => {
         const enabledClearButton = $body.find('[data-testid="feeder-clear-all-button"]:visible:not(:disabled)').first();
         if (enabledClearButton.length) {
+          cy.intercept('GET', '**/api/profile/feeder/scripts**').as('feederScriptsQueryAfterClear');
           cy.wrap(enabledClearButton).click({ force: true });
           cy.get('[data-testid="confirmation-popup"]').should('be.visible');
           cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click({ force: true });
-          return cy.get('[data-testid="feeder-empty-scripts"], [data-testid="feeder-clear-all-button"]:disabled', { timeout: 4000 })
-            .should('exist');
+          return cy.wait('@feederScriptsQueryAfterClear', { timeout: FEEDER_QUERY_TIMEOUT }).then(() => {
+            return cy.get('[data-testid="feeder-empty-scripts"], [data-testid="feeder-clear-all-button"]:disabled', { timeout: 4000 })
+              .should('exist');
+          });
         }
 
         const hasEmptyState = $body.find('[data-testid="feeder-empty-scripts"]:visible').length > 0;

@@ -1,10 +1,13 @@
 import {
   applyDateRangeFilter,
   applyPasswordSchemeAndValidate,
+  clickConsolidatedSectionToggle,
   clearSideFilters,
+  CONSOLIDATED_TOGGLE_SELECTOR,
   ensureInsightSectionExpanded,
   openFirstReportAndGoBack,
   openHomepageAndSearch,
+  RESULT_CARD_SELECTOR,
   runAdvancedFilterFlow,
   runDomainScannerFlow,
   searchDeepFromTop,
@@ -123,44 +126,27 @@ describe('Consolidated - IOC Basic Flow', () => {
     });
 
     consolidatedSections.forEach((sectionId) => {
-      cy.get(`[data-testid="${sectionId}"]`).scrollIntoView().should('be.visible');
-      cy.get(`[data-testid="${sectionId}"]`).within(() => {
-        cy.get(`[data-testid^="consolidated-section-count-"]`).should('be.visible');
+      const sectionSelector = `[data-testid="${sectionId}"]`;
 
-        cy.get('[data-testid="consolidated-section-see-more"]').then(($toggles) => {
-          const hasPagination = $toggles.filter(':visible').length > 0;
-          if (!hasPagination) {
-            return;
-          }
+      cy.get(sectionSelector).scrollIntoView().should('be.visible');
+      cy.get(sectionSelector).find('[data-testid^="consolidated-section-count-"]').should('be.visible');
 
-          cy.get('[data-testid="result-card"]').then(($cardsBefore) => {
-            const before = $cardsBefore.length;
-            cy.get('[data-testid="consolidated-section-see-more"]')
-              .filter(':visible')
-              .first()
-              .scrollIntoView()
-              .click();
+      cy.get(sectionSelector).then(($section) => {
+        const hasPagination = $section.find(CONSOLIDATED_TOGGLE_SELECTOR).length > 0;
+        if (!hasPagination) {
+          return;
+        }
 
-            cy.get('[data-testid="result-card"]').then(($cardsAfterExpand) => {
-              const expanded = $cardsAfterExpand.length;
-              expect(expanded).to.be.at.least(before);
+        cy.get(sectionSelector).find(RESULT_CARD_SELECTOR).then(($cardsBefore) => {
+          const before = $cardsBefore.length;
+          clickConsolidatedSectionToggle(sectionId, /see\s+more/i);
 
-              cy.get('[data-testid="consolidated-section-see-more"]')
-                .filter(':visible')
-                .first()
-                .invoke('text')
-                .then((toggleText) => {
-                  const label = toggleText.trim().toLowerCase();
-                  if (label.includes('less')) {
-                    cy.get('[data-testid="consolidated-section-see-more"]')
-                      .filter(':visible')
-                      .first()
-                      .scrollIntoView()
-                      .click();
-                    cy.get('[data-testid="result-card"]').its('length').should('be.at.most', expanded);
-                  }
-                });
-            });
+          cy.get(sectionSelector).find(RESULT_CARD_SELECTOR).then(($cardsAfterExpand) => {
+            const expanded = $cardsAfterExpand.length;
+            expect(expanded).to.be.at.least(before);
+
+            clickConsolidatedSectionToggle(sectionId, /see\s+less/i);
+            cy.get(sectionSelector).find(RESULT_CARD_SELECTOR).its('length').should('be.at.most', expanded);
           });
         });
       });
@@ -179,7 +165,7 @@ describe('Consolidated - IOC Basic Flow', () => {
     cy.get('[data-testid="result-card"]').should('exist');
 
     cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
-    searchDeepFromTop('carderland.com');
+    searchDeepFromTop('example.com');
 
     cy.get('[data-testid="consolidated-scan-title"]').should('contain.text', 'Threats Scans Report:');
     cy.get('[data-testid="consolidated-scan-openweb-title"]').should('be.visible');

@@ -11,7 +11,7 @@ export const SOCIAL_STEALER_PLATFORM = /twitter/i;
 const SOCIAL_STEALER_DOMAIN = 'twitter.com';
 
 export function visitSocialIntel() {
-  cy.viewport(1440, 900);
+  setViewportToCurrentScreen();
   cy.visit('/dashboard/social-intel');
   cy.location('pathname').should('include', '/dashboard/social-intel');
   cy.get(SOCIAL_ROOT).should('be.visible');
@@ -20,6 +20,19 @@ export function visitSocialIntel() {
   cy.get('[data-testid="social-scan-input"]').should('have.attr', 'placeholder', 'Search username or handle...');
   cy.get('[data-testid="social-scan-submit"]').should('contain.text', 'Search');
   cy.get('[data-testid="social-list-view"]').should('be.visible');
+}
+
+function setViewportToCurrentScreen() {
+  cy.window({ log: false }).then((win) => {
+    const configuredWidth = Number(Cypress.config('viewportWidth'));
+    const configuredHeight = Number(Cypress.config('viewportHeight'));
+    const screenWidth = Math.floor(win.screen.availWidth || win.screen.width || configuredWidth);
+    const screenHeight = Math.floor(win.screen.availHeight || win.screen.height || configuredHeight);
+    const width = Math.max(screenWidth, configuredWidth);
+    const height = Math.max(screenHeight, configuredHeight);
+
+    cy.viewport(width, height);
+  });
 }
 
 export function scanKnownSocialUsername(username = SOCIAL_STEALER_USERNAME) {

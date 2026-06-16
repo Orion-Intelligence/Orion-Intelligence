@@ -266,20 +266,14 @@ export class SocialScanService {
       q: '',
       url: '',
       user: query,
-      ioc: '',
+      ioc: `m_search_all:${query}`,
       type: 'c',
       page: 1,
       category: '',
       fullsearch: false
     };
     return this.api.post<any>('search/stealer/ioc', payload).pipe(map((res) => {
-      if (Array.isArray(res?.Result)) {
-        return res.Result;
-      }
-      if (Array.isArray(res?.result?.Result)) {
-        return res.result.Result;
-      }
-      return [];
+      return this.extractStealerLogResults(res);
     }),
     catchError(() => throwError(() => new Error('Failed to fetch stealer logs'))));
   }
@@ -290,22 +284,29 @@ export class SocialScanService {
       q: '',
       url: domain || '',
       user: username,
-      ioc: '',
+      ioc: domain ? `m_username:${username} AND m_domain:${domain}` : `m_search_all:${username}`,
       type: 'c',
       page: 1,
       category: '',
       fullsearch: false
     };
     return this.api.post<any>('search/stealer/ioc', payload).pipe(map((res) => {
-      if (Array.isArray(res?.Result)) {
-        return res.Result;
-      }
-      if (Array.isArray(res?.result?.Result)) {
-        return res.result.Result;
-      }
-      return [];
+      return this.extractStealerLogResults(res);
     }),
     catchError(() => throwError(() => new Error('Failed to fetch stealer logs'))));
+  }
+
+  private extractStealerLogResults(res: any): any[] {
+    if (Array.isArray(res?.Result)) {
+      return res.Result;
+    }
+    if (Array.isArray(res?.result?.Result)) {
+      return res.result.Result;
+    }
+    if (Array.isArray(res?.data?.Result)) {
+      return res.data.Result;
+    }
+    return [];
   }
 
   fetchProfileMetadataTokens(tokens: string[], username: string, platform?: string): Observable<{

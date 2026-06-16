@@ -5,6 +5,7 @@ declare global {
             loginAsAdmin(): Chainable<void>;
             loginAsTest1(): Chainable<void>;
             logout(): Chainable<void>;
+            startInterceptTracking(): Chainable<void>;
             waitForIntercepts(options?: { timeout?: number; idleMs?: number }): Chainable<void>;
             openSideFilter(): Chainable<void>;
             closeSideFilter(): Chainable<void>;
@@ -108,13 +109,15 @@ const waitForInterceptsPromise = (options: { timeout?: number; idleMs?: number }
     });
 };
 
-Cypress.Commands.add("waitForIntercepts", (options = {}) => {
-    const timeout = options.timeout ?? Number(Cypress.config("responseTimeout") ?? 60000);
-    return cy.then({ timeout }, () => waitForInterceptsPromise(options));
-});
-
-beforeEach(() => {
+Cypress.Commands.add("startInterceptTracking", () => {
     resetNetworkIdleState();
+    const currentTest = (Cypress as any).currentTest;
+    const titlePath = typeof currentTest?.titlePath === "function" ? currentTest.titlePath().join(" > ") : currentTest?.title ?? "__unknown__";
+
+    if ((Cypress as any).__networkIdleRouteTestKey === titlePath) {
+        return;
+    }
+    (Cypress as any).__networkIdleRouteTestKey = titlePath;
 
     cy.intercept({ url: "**", middleware: true }, (req) => {
         if (!shouldTrackRequest(req.url)) {
@@ -125,6 +128,11 @@ beforeEach(() => {
         (req as any).on("response", finish);
         (req as any).on("after:response", finish);
     });
+});
+
+Cypress.Commands.add("waitForIntercepts", (options = {}) => {
+    const timeout = options.timeout ?? Number(Cypress.config("responseTimeout") ?? 60000);
+    return cy.then({ timeout }, () => waitForInterceptsPromise(options));
 });
 
 Cypress.Commands.add("loginAsAdmin", () => {

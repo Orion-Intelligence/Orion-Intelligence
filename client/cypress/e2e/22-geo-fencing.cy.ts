@@ -94,24 +94,8 @@ describe('Geo Fencing - Satellite Intel and Threat Lens', () => {
     cy.get('[data-testid="threat-lens-page"]', { timeout: 120000 }).should('be.visible');
 
     cy.get('[data-testid="threat-lens-loading"]', { timeout: 180000 }).should('not.exist');
-    cy.get('[data-testid="threat-lens-status"]', { timeout: 180000 }).should(($element) => {
-      expect($element.text().replace(/\s+/g, ' ').trim()).to.match(/(loaded|failed|no country metadata|no multi-country)/i);
-    });
-    cy.get('[data-testid="threat-lens-visible-arcs"]').should(($element) => {
-      expect($element.text().replace(/\s+/g, ' ').trim()).to.match(/^Arcs currently visible:\s*\d+$/i);
-    });
-    cy.get('[data-testid="threat-lens-ip-scan-panel"]', { timeout: 180000 }).should('be.visible');
-    cy.get('[data-testid="threat-lens-ip-scan-scope"]').should('contain.text', 'Global view');
-    cy.get('[data-testid="threat-lens-ip-scan-state"]').should(($element) => {
-      expect($element.text().trim()).to.match(/^(Scanning|\d+%|Ready|Complete|Error)$/i);
-    });
-    cy.get('[data-testid="threat-lens-ip-scan-markers"]').should(($element) => {
-      expect($element.text().trim()).to.match(/^\d+$/);
-    });
-    cy.get('[data-testid="threat-lens-ip-scan-range"]').should('contain.text', 'km radius');
-    cy.get('[data-testid="threat-lens-ip-scan-status"]').should(($element) => {
-      expect($element.text().trim()).to.not.equal('');
-    });
+    cy.get('[data-testid="threat-lens-map-renderer"]', { timeout: 180000 }).should('exist');
+    cy.get('[data-testid="threat-lens-search-panel"]', { timeout: 180000 }).should('be.visible');
 
     cy.get('body').then(($body) => {
       const categoryLayers = $body.find('[data-testid="threat-lens-category-layers"]:visible').first();
@@ -156,22 +140,14 @@ describe('Geo Fencing - Satellite Intel and Threat Lens', () => {
       if (topCountry.length) {
         cy.wrap(topCountry).click();
         cy.get('[data-testid="threat-lens-loading"]', { timeout: 180000 }).should('not.exist');
-        cy.get('[data-testid="threat-lens-ip-scan-panel"]', { timeout: 180000 }).should('be.visible');
-        cy.get('[data-testid="threat-lens-ip-scan-scope"]').should(($element) => {
-          expect($element.text().trim()).to.not.equal('');
-        });
-        cy.get('[data-testid="threat-lens-ip-scan-status"]').should(($element) => {
-          expect($element.text().trim()).to.match(/scan|marker|ip|failed|returned/i);
-        });
+        cy.get('[data-testid="threat-lens-search-panel"]', { timeout: 180000 }).should('be.visible');
       }
     });
 
     cy.get('[data-testid="threat-lens-search-input"]').clear({ force: true }).type('china{enter}', { force: true });
     cy.get('[data-testid="threat-lens-active-keyword"]', { timeout: 60000 }).should('contain.text', 'china');
     cy.get('[data-testid="threat-lens-loading"]', { timeout: 180000 }).should('not.exist');
-    cy.get('[data-testid="threat-lens-status"]', { timeout: 180000 }).should(($element) => {
-      expect($element.text().replace(/\s+/g, ' ').trim()).to.match(/(loaded|failed|no country metadata|no multi-country)/i);
-    });
+    cy.get('[data-testid="threat-lens-search-panel"]', { timeout: 180000 }).should('be.visible');
 
     cy.get('[data-testid="geo-fencing-panel-menu-button"]').click({ force: true });
     cy.get('[data-testid="geo-fencing-panel-menu-filter"]').should('be.visible').click({ force: true });

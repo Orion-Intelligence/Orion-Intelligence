@@ -25,7 +25,6 @@ describe('System Settings - Admin Update Flow', () => {
         lastModified: Date.now()
       }, {force: true});
 
-    cy.wait('@uploadAuthDashboardIcon');
     cy.contains('[role="alert"]', 'File too large! Maximum allowed size is 1 MB.')
       .should('be.visible');
 

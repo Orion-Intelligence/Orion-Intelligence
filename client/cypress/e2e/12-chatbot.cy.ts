@@ -8,8 +8,16 @@ describe('Chatbot - General Intelligence Report Flow', () => {
   });
 
   it('opens first report and sends a chatbot message', () => {
-    cy.get('[data-testid="sidebar-group-strategic"]').first().scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="open-report"]').filter(':visible').first().scrollIntoView().should('be.visible').click();
+    cy.visit('/dashboard/strategic/all?page=1');
+    cy.get('[data-testid="result-card"]').should('have.length.greaterThan', 0);
+    cy.get('[data-testid="result-card"]')
+      .first()
+      .scrollIntoView()
+      .within(() => {
+        cy.get('[data-testid="open-report"]').should('exist').click({force: true});
+      });
+    cy.url().should('match', /\/dashboard\/strategic\/all\/[^/?]+/);
+    cy.get('#report-detail').should('be.visible');
     cy.get('[data-testid="chat-widget-open"]').filter(':visible').first().scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="chat-widget-input"]').filter(':visible').first().should('be.enabled').type('hey');
     cy.get('[data-testid="chat-widget-send"]').filter(':visible').first().should('be.enabled').click();

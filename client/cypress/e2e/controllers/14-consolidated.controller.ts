@@ -2,6 +2,16 @@ const DOMAIN_SCANNER_MODAL_TIMEOUT = 90000;
 const DOMAIN_SCANNER_SELECTOR = '[data-testid="domain-scanner-modal"]';
 const DOMAIN_SCANNER_TEST_DOMAINS = ['example.com', 'bbc.com', 'cnn.com'];
 const DOMAIN_SCANNER_INPUT_SELECTOR = '[data-testid="domain-scanner-input"]';
+export const CONSOLIDATED_TOGGLE_SELECTOR = '[data-testid="consolidated-section-see-more"]';
+export const RESULT_CARD_SELECTOR = '[data-testid="result-card"]';
+
+export function clickConsolidatedSectionToggle(sectionId: string, labelPattern: RegExp) {
+  cy.get(`[data-testid="${sectionId}"]`)
+    .contains(CONSOLIDATED_TOGGLE_SELECTOR, labelPattern)
+    .scrollIntoView({ offset: { top: -120, left: 0 } })
+    .should('be.visible')
+    .click();
+}
 
 function executeIocAdvancedSearch() {
   cy.get('[data-testid="ioc-adv-execute"]')
@@ -16,6 +26,7 @@ function executeIocAdvancedSearch() {
 export function openHomepageAndSearch(query = '{enter}') {
   cy.get('[data-testid="sidebar-group-profile"]').should('be.visible').click();
   cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().should('be.visible').click();
+  cy.startInterceptTracking();
   cy.get('[data-testid="homepage-search-input"]').should('be.visible').click().type(query);
   cy.waitForIntercepts();
 }
@@ -43,6 +54,7 @@ export function searchInIocs(query: string) {
         .click()
         .type('{selectAll}{backspace}');
 
+      cy.startInterceptTracking();
       if (query && query.length > 0) {
         cy.wrap(target)
           .type(query, {delay: 0})
@@ -180,10 +192,15 @@ export function clearSideFilters() {
   });
 }
 
-export function searchDeepFromTop(query: string) {
+export function searchDeepFromTop(query: string, waitForNetwork = true) {
   cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
+  if (waitForNetwork) {
+    cy.intercept('POST', '**/api/search/consolidated').as('consolidatedSearchAfterDeepSearch');
+  }
   cy.get('[data-testid="dashboard-general-input"]').filter(':visible').first().scrollIntoView().clear().type(`${query}{enter}`);
-  cy.waitForIntercepts();
+  if (waitForNetwork) {
+    cy.wait('@consolidatedSearchAfterDeepSearch', {timeout: 60000});
+  }
 }
 
 export function setAllInsightsExpanded(expand: boolean) {

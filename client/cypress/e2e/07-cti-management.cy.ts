@@ -57,13 +57,16 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
     });
     cy.get('[data-testid="cti-tab-session-menu"]').filter(':visible').first().should('be.visible');
     cy.get('[data-testid="cti-tab-add-menu"]').filter(':visible').first().click();
+    cy.startInterceptTracking();
     cy.get('[data-testid="cti-tab-add-new-session"]').filter(':visible').first().click();
+    cy.waitForIntercepts({ timeout: 60000, idleMs: 250 });
     const newName = `CTI Session ${Date.now()}`;
-    cy.get('[data-testid="cti-tab-name"]').filter(':visible').last().scrollIntoView().dblclick();
-    cy.get('body').then(($body) => {
-      if ($body.find('[data-testid="cti-tab-rename-input"]:visible').length === 0) {
-        cy.get('[data-testid="cti-tab-name"]').filter(':visible').last().scrollIntoView().dblclick();
-      }
+    cy.get('[data-testid="cti-tab-name"]').filter(':visible').should(($tabs) => {
+      const editableTabs = $tabs.toArray().filter(tab => tab.textContent?.trim() !== 'Playground');
+      expect(editableTabs.length).to.be.greaterThan(0);
+    }).then(($tabs) => {
+      const editableTabs = $tabs.toArray().filter(tab => tab.textContent?.trim() !== 'Playground');
+      cy.wrap(editableTabs[editableTabs.length - 1]).scrollIntoView().dblclick({ force: true });
     });
     cy.get('[data-testid="cti-tab-rename-input"]').filter(':visible').last().clear().type(`${newName}{enter}`);
     cy.contains(newName).should('exist');
