@@ -2850,6 +2850,83 @@ select:not(.ui-popup-select):not(.ui-select)::-ms-expand {
   visibility: visible;
 }
 
+.threat-lens-tooltip {
+  position: fixed;
+  z-index: 2147483000;
+  max-width: 340px;
+  border: 1px solid rgb(74 222 128 / 32%);
+  border-radius: 8px;
+  background: rgb(8 16 27 / 96%);
+  color: #eef7f1;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 34%);
+  pointer-events: none;
+}
+
+.threat-lens-tooltip[hidden] {
+  display: none !important;
+}
+
+.threat-lens-tooltip__content {
+  display: grid;
+  gap: 6px;
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.threat-lens-tooltip__arc-title,
+.threat-lens-tooltip__country-title {
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.threat-lens-tooltip__row {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.threat-lens-tooltip__label {
+  flex: none;
+  color: rgb(203 213 225 / 72%);
+}
+
+.threat-lens-tooltip__value {
+  min-width: 0;
+  max-width: 210px;
+  overflow: hidden;
+  color: #bbf7d0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.light-theme .threat-lens-tooltip {
+  border-color: #b9dbc7;
+  background: rgb(249 251 255 / 98%);
+  color: #172235;
+  box-shadow: 0 8px 22px rgb(15 23 42 / 12%);
+}
+
+.light-theme .threat-lens-tooltip__arc-title,
+.light-theme .threat-lens-tooltip__country-title {
+  color: #172235;
+}
+
+.light-theme .threat-lens-tooltip__label {
+  color: #5f738f;
+}
+
+.light-theme .threat-lens-tooltip__value {
+  color: #146f52;
+}
+
 [data-platform-bg='slate'] { background-color: #475569 !important; }
 
 [data-platform-bg='red'] { background-color: #b91c1c !important; }

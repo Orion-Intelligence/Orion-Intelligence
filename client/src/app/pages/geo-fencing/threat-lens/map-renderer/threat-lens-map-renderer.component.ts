@@ -358,6 +358,13 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
           this.countryRenderer.layer,
         ].filter(Boolean),
       });
+      const clusterGraphic = hit.results.find((result: any) => this.ipMarkerRenderer?.isClusterGraphic(result.graphic))?.graphic;
+      if (clusterGraphic) {
+        this.tooltipRenderer.hide();
+        this.clearHoverHighlight();
+        return;
+      }
+
       const ipGraphic = hit.results.find((result: any) => this.ipMarkerRenderer?.isMarkerGraphic(result.graphic))?.graphic;
 
       if (ipGraphic) {
@@ -367,6 +374,16 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
           this.clearHoverHighlight();
           this.ngZone.run(() => this.ipSelected.emit(ip));
         }
+        return;
+      }
+
+      const countryGraphic = hit.results.find((result: any) => result.graphic?.layer === this.countryRenderer.layer)?.graphic;
+
+      if (countryGraphic) {
+        const selection = this.buildCountrySelection(countryGraphic);
+        this.ngZone.run(() => this.countrySelected.emit(selection));
+        await this.focusCountryByKey(selection.key);
+        this.emitViewportIpScanRequest(true);
         return;
       }
 
@@ -381,18 +398,9 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         return;
       }
 
-      const countryGraphic = hit.results.find((result: any) => result.graphic?.layer === this.countryRenderer.layer)?.graphic;
-
-      if (!countryGraphic) {
-        this.countryRenderer.clearHighlight();
-        this.countryRenderer.setSelectedCountryKey('');
-        this.ngZone.run(() => this.emptySelection.emit());
-        return;
-      }
-
-      const selection = this.buildCountrySelection(countryGraphic);
-      this.ngZone.run(() => this.countrySelected.emit(selection));
-      await this.focusCountryByKey(selection.key);
+      this.countryRenderer.clearHighlight();
+      this.countryRenderer.setSelectedCountryKey('');
+      this.ngZone.run(() => this.emptySelection.emit());
     });
   }
 
@@ -428,9 +436,18 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         this.hoverHitTestPending = false;
       });
 
+      const clusterGraphic = hit.results.find((result: any) => this.ipMarkerRenderer?.isClusterGraphic(result.graphic))?.graphic;
+      if (clusterGraphic) {
+        this.clearHoverHighlight();
+        this.ipMarkerRenderer?.showAccuracyRadius(clusterGraphic);
+        this.tooltipRenderer.showIpCluster(event, clusterGraphic.attributes || {});
+        return;
+      }
+
       const ipGraphic = hit.results.find((result: any) => this.ipMarkerRenderer?.isMarkerGraphic(result.graphic))?.graphic;
       if (ipGraphic) {
         this.clearHoverHighlight();
+        this.ipMarkerRenderer?.showAccuracyRadius(ipGraphic);
         this.tooltipRenderer.showIpScan(event, ipGraphic.attributes || {});
         return;
       }
@@ -438,6 +455,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       const arcGraphic = hit.results.find((result: any) => this.arcRenderer?.isTooltipGraphic(result.graphic))?.graphic;
       if (arcGraphic) {
         this.clearCountryHoverHighlight();
+        this.ipMarkerRenderer?.clearAccuracyRadius();
         if (this.arcRenderer?.isEndpointGraphic(arcGraphic)) {
           this.arcRenderer.setHoveredEndpointGraphic(arcGraphic);
         }
@@ -543,9 +561,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.viewScaleWatchHandle?.remove();
     this.viewScaleWatchHandle = this.view.watch('scale', () => {
       this.ipMarkerRenderer?.updateSymbols();
-      if (this.view?.interacting) {
-        this.markViewportNavigation();
-      }
+      this.markViewportNavigation();
     });
   }
 
@@ -558,9 +574,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.viewZoomWatchHandle = this.view.watch('zoom', () => {
       this.updateBasemapForZoom();
       this.ipMarkerRenderer?.updateSymbols();
-      if (this.view?.interacting) {
-        this.markViewportNavigation();
-      }
+      this.markViewportNavigation();
     });
   }
 
@@ -963,6 +977,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private clearHoverHighlight(): void {
     this.clearCountryHoverHighlight();
     this.arcRenderer?.clearEndpointHover();
+    this.ipMarkerRenderer?.clearAccuracyRadius();
   }
 
   private clearCountryHoverHighlight(): void {

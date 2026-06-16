@@ -3,20 +3,7 @@
     <h3 class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">{{ 'Category Layers' | translate }}</h3>
   </div>
   <div class="relative mt-3">
-    <input
-      data-testid="threat-lens-arc-range"
-      type="text"
-      inputmode="numeric"
-      pattern="[0-9]*"
-      [ngModel]="rangeSearchTerm"
-      (ngModelChange)="onRangeSearchChange($event)"
-      (focus)="openRangePicker()"
-      (click)="openRangePicker()"
-      (blur)="closeRangePicker()"
-      (keydown.enter)="onRangeSearchCommit()"
-      [disabled]="!arcRangeOptions.length"
-      placeholder="100"
-      class="h-8 w-full rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-790)] py-0 pl-2 pr-8 text-[12px] font-semibold text-[var(--color-text1)] outline-none focus:border-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-60 placeholder:text-[var(--color-text4)] [body.light-theme_&]:!bg-white" />
+    <input data-testid="threat-lens-arc-range" type="text" inputmode="numeric" pattern="[0-9]*" [ngModel]="rangeSearchTerm" (ngModelChange)="onRangeSearchChange($event)" (focus)="openRangePicker()" (click)="openRangePicker()" (blur)="closeRangePicker()" (keydown.enter)="onRangeSearchCommit()" [disabled]="!arcRangeOptions.length" placeholder="100" class="h-8 w-full rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-790)] py-0 pl-2 pr-8 text-[12px] font-semibold text-[var(--color-text1)] outline-none focus:border-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-60 placeholder:text-[var(--color-text4)] [body.light-theme_&]:!bg-white" />
     <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="" aria-hidden="true" class="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 transition duration-200 ui-action-icon" [ngClass]="{ 'rotate-180': isRangePickerOpen }" />
     @if (isRangePickerOpen && filteredArcRangeOptions.length) {
       <div class="absolute left-0 right-0 top-[calc(100%+4px)] z-30 max-h-[180px] overflow-y-auto rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-790)] py-1 [body.light-theme_&]:!bg-white">

@@ -93,38 +93,32 @@ export function openFeederRule(ruleKey: string) {
   return selectFeederRule(ruleKey);
 }
 
-function openAddTab() {
-  return openTabIfPresent('feeder-tab-add', () => {
-    cy.wait(250);
-  });
+function openAddTab(): Cypress.Chainable {
+  return openTabIfPresent('feeder-tab-add', () => cy.wait(250));
 }
 
-function openScriptTab() {
-  return openTabIfPresent('feeder-tab-script', () => {
-    cy.wait(250);
-  });
+function openScriptTab(): Cypress.Chainable {
+  return openTabIfPresent('feeder-tab-script', () => cy.wait(250));
 }
 
 export function openFeederScriptTab() {
   return openScriptTab();
 }
 
-function openTabIfPresent(testId: string, callback: () => void) {
-  return cy.get('body').then(($body) => {
+function openTabIfPresent(testId: string, callback: () => Cypress.Chainable): Cypress.Chainable {
+  return cy.get('body').then(($body): Cypress.Chainable => {
     const tab = $body.find(`[data-testid="${testId}"]:visible`).first();
     if (!tab.length) {
-      return;
+      return cy.wrap(null, { log: false });
     }
     cy.wrap(tab).click();
-    return cy.then(() => {
-      return callback();
-    });
+    return cy.then(callback);
   });
 }
 
-function uploadScript(category: any) {
+function uploadScript(category: any): Cypress.Chainable {
   if (!category.fileFixture || !category.fileName) {
-    return;
+    return cy.wrap(null, { log: false });
   }
 
   cy.get('[data-testid="feeder-select-file-button"]').filter(':visible').first().should('be.visible');
@@ -144,10 +138,10 @@ function uploadScript(category: any) {
   return cy.wait(250);
 }
 
-function expectWrongFileUploadError(category: any) {
+function expectWrongFileUploadError(category: any): Cypress.Chainable {
   const wrongCategory = getWrongFileCategory(category.ruleKey);
   if (!wrongCategory?.fileFixture) {
-    return;
+    return cy.wrap(null, { log: false });
   }
 
   cy.get('[data-testid="feeder-select-file-button"]').filter(':visible').first().should('be.visible');
@@ -155,47 +149,47 @@ function expectWrongFileUploadError(category: any) {
     .last()
     .selectFile(getFixturePath(wrongCategory.fileFixture), { force: true });
   cy.wait(250);
-  cy.get('[data-testid="feeder-upload-script-button"]').should('be.visible').click();
+  return cy.get('[data-testid="feeder-upload-script-button"]').should('be.visible').click();
 }
 
-function uploadFirstValue(fixturePath: string) {
-  return cy.fixture(fixturePath, 'utf8').then((text) => {
+function uploadFirstValue(fixturePath: string): Cypress.Chainable {
+  return cy.fixture(fixturePath, 'utf8').then((text: string): Cypress.Chainable => {
     const firstValue = text
       .split(/\r?\n/)
       .map((line) => line.trim())
       .find(Boolean);
 
     if (!firstValue) {
-      return;
+      return cy.wrap(null, { log: false });
     }
 
     cy.get('[data-testid="feeder-values-input"]').should('be.visible').clear().type(firstValue, { delay: 0 });
     cy.get('[data-testid="feeder-upload-values-button"]').should('be.visible').click();
-    cy.wait(250);
+    return cy.wait(250);
   });
 }
 
-function expectWrongValueUploadError(fixturePath: string) {
-  return cy.fixture(fixturePath, 'utf8').then((text) => {
+function expectWrongValueUploadError(fixturePath: string): Cypress.Chainable {
+  return cy.fixture(fixturePath, 'utf8').then((text: string): Cypress.Chainable => {
     const firstValue = text
       .split(/\r?\n/)
       .map((line) => line.trim())
       .find(Boolean);
 
     if (!firstValue) {
-      return;
+      return cy.wrap(null, { log: false });
     }
 
-    cy.get('[data-testid="feeder-values-input"]').should('be.visible').clear().type(firstValue, { delayrevert: 0 });
-    cy.get('[data-testid="feeder-upload-values-button"]').should('be.visible').click();
+    cy.get('[data-testid="feeder-values-input"]').should('be.visible').clear().type(firstValue, { delay: 0 });
+    return cy.get('[data-testid="feeder-upload-values-button"]').should('be.visible').click();
   });
 }
 
-function clearVisibleValueRows() {
-  return cy.get('body').then(($body) => {
+function clearVisibleValueRows(): Cypress.Chainable {
+  return cy.get('body').then(($body): Cypress.Chainable => {
     const button = $body.find('[data-testid^="feeder-value-delete-button-"]:visible').first();
     if (!button.length) {
-      return;
+      return cy.wrap(null, { log: false });
     }
     cy.wrap(button).click();
     cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click();
@@ -204,7 +198,7 @@ function clearVisibleValueRows() {
   });
 }
 
-function clearScripts() {
+function clearScripts(): Cypress.Chainable {
   return cy.contains('.ui-section-title', 'Your Scripts', { timeout: 4000 }).should('be.visible').then(() => {
     return cy.get('[data-testid="feeder-empty-scripts"], [data-testid^="feeder-script-row-"], [data-testid="feeder-clear-all-button"]', { timeout: 4000 })
       .should('exist')
@@ -222,14 +216,13 @@ function clearScripts() {
           cy.wrap(enabledClearButton).click({ force: true });
           cy.get('[data-testid="confirmation-popup"]').should('be.visible');
           cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click({ force: true });
-          cy.get('[data-testid="feeder-empty-scripts"], [data-testid="feeder-clear-all-button"]:disabled', { timeout: 4000 })
+          return cy.get('[data-testid="feeder-empty-scripts"], [data-testid="feeder-clear-all-button"]:disabled', { timeout: 4000 })
             .should('exist');
-          return;
         }
 
         const hasEmptyState = $body.find('[data-testid="feeder-empty-scripts"]:visible').length > 0;
         if (hasEmptyState) {
-          return;
+          return cy.wrap(null, { log: false });
         }
 
         throw new Error('Script panel has neither a visible clear button nor an empty state');
@@ -279,19 +272,19 @@ function assertFirstRowStatus(expected: 'enabled' | 'disabled') {
     });
 }
 
-function setFirstRowStatus(expected: 'enabled' | 'disabled') {
-  cy.get('[data-testid^="feeder-script-active-status-"]')
+function setFirstRowStatus(expected: 'enabled' | 'disabled'): Cypress.Chainable {
+  return cy.get('[data-testid^="feeder-script-active-status-"]')
     .filter(':visible')
     .first()
     .invoke('text')
-    .then((text) => {
+    .then((text): Cypress.Chainable => {
       if (text.trim().toLowerCase() === expected) {
-        return;
+        return cy.wrap(null, { log: false });
       }
 
       cy.get('[data-testid^="feeder-script-toggle-button-"]').filter(':visible').first().click({ force: true });
       confirmPopup();
-      assertFirstRowStatus(expected);
+      return assertFirstRowStatus(expected);
     });
 }
 
@@ -317,7 +310,8 @@ export function clearAllFeederRecords() {
     throw new Error('Feeder validation data is not loaded');
   }
 
-  cy.wrap(feederValidationData.ruleKeys.slice(0, FEEDER_TEST_RULE_LIMIT)).each((ruleKey) => {
+  const ruleKeys: string[] = feederValidationData.ruleKeys.slice(0, FEEDER_TEST_RULE_LIMIT);
+  cy.wrap(ruleKeys).each((ruleKey: string) => {
     const category = feederValidationData.categories[ruleKey];
 
     return cy.then(() => {
@@ -339,7 +333,8 @@ export function uploadFixtureRecordsForAllFeederRules() {
     throw new Error('Feeder validation data is not loaded');
   }
 
-  cy.wrap(feederValidationData.ruleKeys.slice(0, FEEDER_TEST_RULE_LIMIT)).each((ruleKey) => {
+  const ruleKeys: string[] = feederValidationData.ruleKeys.slice(0, FEEDER_TEST_RULE_LIMIT);
+  cy.wrap(ruleKeys).each((ruleKey: string) => {
     const category = feederValidationData.categories[ruleKey];
 
     return cy.then(() => {
@@ -349,12 +344,11 @@ export function uploadFixtureRecordsForAllFeederRules() {
             return uploadFirstValue(category.valuesFixture);
           }
 
-          return cy.then(() => {
-            return uploadScript(category);
-          }).then(() => {
+          return cy.then(() => uploadScript(category)).then(() => {
             if (category.ruleType === 'shared' && category.valuesFixture) {
               return uploadFirstValue(category.valuesFixture);
             }
+            return cy.wrap(null, { log: false });
           });
         });
       });
@@ -367,18 +361,20 @@ export function validateFixtureOperationsForAllFeederRules() {
     throw new Error('Feeder validation data is not loaded');
   }
 
-  cy.wrap(feederValidationData.ruleKeys.slice(0, FEEDER_TEST_RULE_LIMIT)).each((ruleKey) => {
+  const ruleKeys: string[] = feederValidationData.ruleKeys.slice(0, FEEDER_TEST_RULE_LIMIT);
+  cy.wrap(ruleKeys).each((ruleKey: string) => {
     const category = feederValidationData.categories[ruleKey];
 
     return cy.then(() => {
       return selectFeederRule(category.ruleKey).then(() => {
         return openAddTab().then(() => {
           if (category.ruleType === 'generic') {
-            uploadFirstValue(category.valuesFixture);
-            if (category.invalidValuesFixture) {
-              expectWrongValueUploadError(category.invalidValuesFixture);
-            }
-            return;
+            return uploadFirstValue(category.valuesFixture).then(() => {
+              if (category.invalidValuesFixture) {
+                return expectWrongValueUploadError(category.invalidValuesFixture);
+              }
+              return cy.wrap(null, { log: false });
+            });
           }
 
           return cy.then(() => uploadScript(category))
@@ -386,13 +382,16 @@ export function validateFixtureOperationsForAllFeederRules() {
               if (category.ruleType === 'shared' && category.valuesFixture) {
                 return uploadFirstValue(category.valuesFixture);
               }
+              return cy.wrap(null, { log: false });
             })
             .then(() => openScriptTab())
             .then(() => {
-              setFirstRowStatus('disabled');
-              setFirstRowStatus('enabled');
-              toggleAllStatuses(false);
-              toggleAllStatuses(true);
+              return setFirstRowStatus('disabled')
+                .then(() => setFirstRowStatus('enabled'))
+                .then(() => {
+                  toggleAllStatuses(false);
+                  toggleAllStatuses(true);
+                });
             })
             .then(() => openAddTab())
             .then(() => expectWrongFileUploadError(category));

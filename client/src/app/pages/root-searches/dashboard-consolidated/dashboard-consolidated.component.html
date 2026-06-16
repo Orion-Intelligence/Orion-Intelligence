@@ -38,7 +38,7 @@
                   </div>
                 </div>
               } @else {
-                @if ((consolidatedCallbackModel.defacement_model?.Result?.length ?? 0 || stealerlogCallbackModel?.Result?.length ?? 0) > 0) {
+                @if (hasDefacementOrStealerResults) {
                   <app-defacement-results
                     @scanAnimation
                     [isExpandable]="false"
@@ -46,11 +46,11 @@
                     [results_stealerlog]="stealerlogCallbackModel">
                   </app-defacement-results>
                 }
-                @if ((((consolidatedCallbackModel.defacement_model?.Result?.length ?? 0) || (stealerlogCallbackModel?.Result?.length ?? 0))) >= 0) {
+                @if ((defacementResultCount + stealerlogResultCount) >= 0) {
                   <app-cross-search-card [query]="query" [consolidated]="true"></app-cross-search-card>
                 }
               }
-              @for (index of groupedResults | sortGroupedResults; track index.key) {
+              @for (index of (groupedResults | sortGroupedResults); track index.key) {
                 @if (index.key !== 'defacement_model' && index.key !== 'stealer_model') {
                   <div class="ui-consolidated-main min-w-0 rounded-xl border border-[var(--color-border)] p-4 max-[640px]:p-3" [attr.data-testid]="'consolidated-section-' + index.key.replace('_model', '')">
                     <div class="flex items-center justify-between">

@@ -46,18 +46,7 @@
                     <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
                       <i class="bi bi-search h-5 w-5 leading-none text-[var(--color-text4)]"></i>
                     </div>
-                    <input
-                      data-testid="social-scan-input"
-                      type="text"
-                      placeholder="Search username or handle..."
-                      [value]="homeMenuSearchTerm()"
-                      (input)="onDashboardScanInput($event)"
-                      (keyup.enter)="triggerScan()"
-                      (keydown.arrowleft)="$event.stopPropagation()"
-                      (keydown.arrowright)="$event.stopPropagation()"
-                      (keydown.home)="$event.stopPropagation()"
-                      (keydown.end)="$event.stopPropagation()"
-                      class="ui-graph-toolbar-input relative z-0 block h-10 w-full rounded-full border-0 bg-[var(--color-blue-800)]/90 pl-11 pr-36 text-[var(--color-text2)] shadow-lg ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-[var(--color-blue-640)] sm:text-sm sm:leading-6" />
+                    <input data-testid="social-scan-input" type="text" placeholder="Search username or handle..." [value]="homeMenuSearchTerm()" (input)="onDashboardScanInput($event)" (keyup.enter)="triggerScan()" (keydown.arrowleft)="$event.stopPropagation()" (keydown.arrowright)="$event.stopPropagation()" (keydown.home)="$event.stopPropagation()" (keydown.end)="$event.stopPropagation()" class="ui-graph-toolbar-input relative z-0 block h-10 w-full rounded-full border-0 bg-[var(--color-blue-800)]/90 pl-11 pr-36 text-[var(--color-text2)] shadow-lg ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-[var(--color-blue-640)] sm:text-sm sm:leading-6" />
                     <div class="ui-graph-toolbar-action-shell absolute inset-y-1 right-1 flex items-center rounded-full bg-[var(--color-blue-720)]/80 py-1 pl-1 pr-0">
                       <button data-testid="social-image-upload-trigger" type="button" title="Scan by image" aria-label="Scan by image" (click)="$event.stopPropagation(); triggerImageUpload()" class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]">
                         <i class="bi bi-image"></i>

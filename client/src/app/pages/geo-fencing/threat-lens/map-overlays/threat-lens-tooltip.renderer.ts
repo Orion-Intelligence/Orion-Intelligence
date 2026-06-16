@@ -24,14 +24,63 @@ export class ThreatLensTooltipRenderer {
     }
 
     const ip = typeof attributes['ip'] === 'string' ? attributes['ip'] : 'Unknown IP';
+    const network = typeof attributes['network'] === 'string' ? attributes['network'] : '';
+    const accuracyRadius = this.toFiniteNumber(attributes['accuracyRadius']);
     const tooltipContent = document.createElement('div');
     tooltipContent.className = 'threat-lens-tooltip__content threat-lens-tooltip__content--ip';
 
     const title = document.createElement('div');
     title.className = 'threat-lens-tooltip__arc-title';
-    title.textContent = 'IP Scan';
+    title.textContent = 'Approximate location';
 
     tooltipContent.append(title, this.buildTooltipRow('IP address', ip));
+    if (network) {
+      tooltipContent.append(this.buildTooltipRow('Network', network));
+    }
+    if (accuracyRadius !== undefined) {
+      tooltipContent.append(this.buildTooltipRow('Approx. radius', this.formatKm(accuracyRadius)));
+    }
+    this.show(event, tooltipContent);
+  }
+
+  showIpCluster(event: any, attributes: Record<string, unknown>): void {
+    if (!this.tooltipEl) {
+      return;
+    }
+
+    const count = Number(attributes['count'] || 0);
+    const networkCount = Number(attributes['networkCount'] || 0);
+    const accuracyRadius = this.toFiniteNumber(attributes['accuracyRadius']);
+    const accuracyMin = this.toFiniteNumber(attributes['accuracyMin']);
+    const accuracyMax = this.toFiniteNumber(attributes['accuracyMax']);
+    const records = Array.isArray(attributes['records']) ? attributes['records'] : [];
+    const tooltipContent = document.createElement('div');
+    tooltipContent.className = 'threat-lens-tooltip__content threat-lens-tooltip__content--ip';
+
+    const title = document.createElement('div');
+    title.className = 'threat-lens-tooltip__arc-title';
+    title.textContent = 'Stacked approximate IPs';
+
+    tooltipContent.append(title);
+    tooltipContent.append(this.buildTooltipRow('Why stacked', String(attributes['stackReason'] || 'Same MaxMind coordinate')));
+    tooltipContent.append(this.buildTooltipRow('IP records', String(count || records.length)));
+    if (networkCount > 0) {
+      tooltipContent.append(this.buildTooltipRow('Prefixes', String(networkCount)));
+    }
+    if (accuracyMin !== undefined && accuracyMax !== undefined) {
+      tooltipContent.append(this.buildTooltipRow('Approx. radius', this.formatKmRange(accuracyMin, accuracyMax)));
+    }
+    else if (accuracyRadius !== undefined) {
+      tooltipContent.append(this.buildTooltipRow('Approx. radius', this.formatKm(accuracyRadius)));
+    }
+    const sampleIps = records
+      .map((record: any) => String(record?.ip || '').trim())
+      .filter(Boolean)
+      .slice(0, 3)
+      .join(', ');
+    if (sampleIps) {
+      tooltipContent.append(this.buildTooltipRow('Sample', sampleIps));
+    }
     this.show(event, tooltipContent);
   }
 
@@ -97,6 +146,25 @@ export class ThreatLensTooltipRenderer {
     row.append(labelEl, valueEl);
 
     return row;
+  }
+
+  private toFiniteNumber(value: unknown): number | undefined {
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue) ? numericValue : undefined;
+  }
+
+  private formatKm(value: number): string {
+    if (value >= 100) {
+      return `${Math.round(value)} km`;
+    }
+    return `${Math.round(value * 10) / 10} km`;
+  }
+
+  private formatKmRange(min: number, max: number): string {
+    if (Math.abs(max - min) < 0.1) {
+      return this.formatKm(max);
+    }
+    return `${this.formatKm(min)}-${this.formatKm(max)}`;
   }
 
 }

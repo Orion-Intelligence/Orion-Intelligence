@@ -15,19 +15,12 @@ import { ArcReportPopupComponent } from './ui-overlays/arc-report-popup/arc-repo
 import { ThreatLensFeedPanelComponent } from './ui-overlays/feed-panel/threat-lens-feed-panel.component';
 import { ThreatLensCategoryLayersComponent } from './ui-overlays/category-layers/threat-lens-category-layers.component';
 import { ThreatLensMapRendererComponent } from './map-renderer/threat-lens-map-renderer.component';
-import { ThreatLensArcBatchStatus, ThreatLensArcSelection, ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensCountrySelection, ThreatLensIpViewportScanRequest } from './models/threat-lens-map.types';
+import { ThreatLensArcBatchStatus, ThreatLensArcRangeOption, ThreatLensArcSelection, ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensCountrySelection, ThreatLensIpViewportScanRequest } from './models/threat-lens-map.types';
 import { ThreatLensService } from './threat-lens.service';
 import { ThreatLensGeoUtils } from './map-utils/threat-lens-geo.utils';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { MapLoadingBadgesComponent } from '../../../shared/partials/map-loading-badges/map-loading-badges.component';
-
-interface ThreatLensArcRangeOption {
-  index: number;
-  label: string;
-  start: number;
-  end: number;
-}
 
 @Component({
   selector: 'app-threat-lens',
@@ -59,12 +52,13 @@ export class ThreatLensComponent implements OnDestroy {
   private readonly defaultIpScanCoordinates = '20, 0';
   private readonly defaultIpScanCenter: ThreatLensCoordinates = { lat: 20, lon: 0 };
   private readonly defaultIpScanRadiusKm = 12000;
-  private readonly defaultIpScanMaxIps = 200;
+  private readonly defaultIpScanMaxIps = 500;
   private readonly arcRangeMax = 3000;
   private readonly defaultArcCategoryKey: ThreatLensCategoryModelKey = 'news_model';
   private detailOverlayOpenNotified = false;
 
   protected readonly filterModel: FilterModel = threat_lens_filters;
+
   isFilterOpen$: Observable<boolean>;
   searchTerm = '';
   currentQuery = '';
@@ -127,22 +121,26 @@ export class ThreatLensComponent implements OnDestroy {
   }
 
   onCountrySelected(selection: ThreatLensCountrySelection): void {
-    this.closeArcReportPanel();
+    this.closeArcReportPanel(false);
+    this.selectedIp = '';
     this.selectedCountryName = selection.name;
     this.selectedCountryIpScanRequest = selection.ipScanRequest ?? null;
+    this.mapRenderer?.clearIpScanMarkers();
     this.statusMessage = selection.name
       ? `${selection.name} selected.`
       : 'Country selected.';
+    this.emitDetailOverlayOpenChange(false);
     this.cdr.detectChanges();
-    this.runCountryIpScan(selection.name, this.selectedCountryIpScanRequest);
   }
 
   onMapEmptySelection(): void {
-    this.closeArcReportPanel();
+    this.closeArcReportPanel(false);
+    this.selectedIp = '';
     const hadSelectedCountry = Boolean(this.selectedCountryName || this.selectedCountryIpScanRequest);
     this.selectedCountryName = '';
     this.selectedCountryIpScanRequest = null;
     this.statusMessage = 'No country detected at clicked point.';
+    this.emitDetailOverlayOpenChange(false);
     this.cdr.detectChanges();
 
     if (hadSelectedCountry) {
@@ -197,12 +195,16 @@ export class ThreatLensComponent implements OnDestroy {
       return;
     }
 
-    if (this.selectedCountryIpScanRequest && this.isIpScanRunning) {
-      return;
-    }
-
-    const effectiveRequest = this.selectedCountryIpScanRequest
-      ? { ...request, boundary: this.selectedCountryIpScanRequest.boundary ?? null }
+    const selectedCountryRequest = this.selectedCountryIpScanRequest;
+    const effectiveRequest = selectedCountryRequest
+      ? {
+        ...request,
+        center: ThreatLensGeoUtils.isThreatLensPointInBoundary(request.center, selectedCountryRequest.boundary)
+          ? request.center
+          : selectedCountryRequest.center,
+        radiusKm: Math.min(request.radiusKm, selectedCountryRequest.radiusKm),
+        boundary: selectedCountryRequest.boundary ?? null,
+      }
       : request;
     const center = this.normalizeIpScanCenter(effectiveRequest.center);
     const radiusKm = Math.round(Math.max(25, Math.min(this.defaultIpScanRadiusKm, effectiveRequest.radiusKm)));
@@ -560,7 +562,9 @@ export class ThreatLensComponent implements OnDestroy {
       this.selectedCountryIpScanRequest = selection.ipScanRequest ?? null;
       this.cdr.detectChanges();
     });
-    this.runCountryIpScan(selection.name, this.selectedCountryIpScanRequest);
+    if (!this.mapRenderer?.requestViewportIpScan()) {
+      this.runCountryIpScan(selection.name, this.selectedCountryIpScanRequest);
+    }
   }
 
   private buildSearchPayload(query: string): Partial<ThreatLensRequestPayload> {

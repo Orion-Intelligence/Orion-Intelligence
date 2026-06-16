@@ -34,6 +34,7 @@ export class ThreatLensArcRenderer {
   private readonly endpointBaseSize = 18;
   private readonly endpointHitTargetSize = 30;
   private readonly endpointHoverColor = [250, 0, 0];
+  private readonly arcElevationMeters = 98000;
 
   constructor( private ngZone: NgZone, private countryRenderer: ThreatLensCountryLayerRenderer, private arcGraphicsLayer: any, private animatedArcGraphicsLayer: any, private geometryEngine: any, private webMercatorUtils: any, private toCountryKey: (value: string) => string, private onVisibleArcCountChange: (count: number) => void, private onBatchStatusChange: (status: ThreatLensArcBatchStatus | null) => void, ) {}
 
@@ -286,12 +287,7 @@ export class ThreatLensArcRenderer {
 
           if (point && graphic) {
             const [lon, lat] = point;
-            graphic.geometry = {
-              type: 'point',
-              longitude: lon,
-              latitude: lat,
-              spatialReference: { wkid: 4326 },
-            };
+            graphic.geometry = this.buildPointGeometry([lon, lat]);
             this.updateDataPacketSymbol(graphic, arc, progress);
           }
 
@@ -508,18 +504,10 @@ export class ThreatLensArcRenderer {
       const linearProgress = Math.max(0, Math.min(1, elapsed / this.arcDrawDuration));
       const progress = this.easeOutCubic(linearProgress);
 
-      state.graphic.geometry = {
-        type: 'polyline',
-        paths: this.getArcDrawPaths(state.arc, progress),
-        spatialReference: { wkid: 4326 },
-      };
+      state.graphic.geometry = this.buildPolylineGeometry(this.getArcDrawPaths(state.arc, progress));
 
       if (linearProgress >= 1) {
-        state.graphic.geometry = {
-          type: 'polyline',
-          paths: state.arc.surfacePaths,
-          spatialReference: { wkid: 4326 },
-        };
+        state.graphic.geometry = this.buildPolylineGeometry(state.arc.surfacePaths);
         state.completed = true;
       }
     }
@@ -527,11 +515,7 @@ export class ThreatLensArcRenderer {
 
   private buildArcGraphic(arc: AnimatedArcDescriptor, drawProgress = 1): any {
     return {
-      geometry: {
-        type: 'polyline',
-        paths: this.getArcDrawPaths(arc, drawProgress),
-        spatialReference: { wkid: 4326 },
-      },
+      geometry: this.buildPolylineGeometry(this.getArcDrawPaths(arc, drawProgress)),
       attributes: this.buildArcAttributes(arc, 'arc'),
       symbol: {
         type: 'simple-line',
@@ -551,6 +535,25 @@ export class ThreatLensArcRenderer {
     return ThreatLensMapUtils.extractSurfaceSegment(arc.arcPoints, 0, Math.max(0.001, progress));
   }
 
+  private buildPolylineGeometry(paths: [number, number][][]): Record<string, unknown> {
+    return {
+      type: 'polyline',
+      hasZ: true,
+      paths: paths.map((path) => path.map(([lon, lat]) => [lon, lat, this.arcElevationMeters])),
+      spatialReference: { wkid: 4326 },
+    };
+  }
+
+  private buildPointGeometry(point: [number, number], elevation = this.arcElevationMeters): Record<string, unknown> {
+    return {
+      type: 'point',
+      longitude: point[0],
+      latitude: point[1],
+      z: elevation,
+      spatialReference: { wkid: 4326 },
+    };
+  }
+
   private easeOutCubic(value: number): number {
     const progress = Math.max(0, Math.min(1, value));
     return 1 - Math.pow(1 - progress, 3);
@@ -558,11 +561,7 @@ export class ThreatLensArcRenderer {
 
   private buildSurfaceGraphic(arc: AnimatedArcDescriptor): any {
     return {
-      geometry: {
-        type: 'polyline',
-        paths: arc.surfacePaths,
-        spatialReference: { wkid: 4326 },
-      },
+      geometry: this.buildPolylineGeometry(arc.surfacePaths),
       attributes: this.buildArcAttributes(arc, 'arc-surface'),
       symbol: {
         type: 'simple-line',
@@ -574,14 +573,9 @@ export class ThreatLensArcRenderer {
     };
   }
 
-  private buildEndpointGraphic(arc: AnimatedArcDescriptor, point: [number, number], role: string, size: number, opacity: number): any {
+  private buildEndpointGraphic(arc: AnimatedArcDescriptor, point: [number, number], role: string, elevation: number, opacity: number): any {
     return {
-      geometry: {
-        type: 'point',
-        longitude: point[0],
-        latitude: point[1],
-        spatialReference: { wkid: 4326 },
-      },
+      geometry: this.buildPointGeometry(point, elevation),
       attributes: {
         ...this.buildArcAttributes(arc, role),
         endpoint_color: arc.color,
@@ -603,12 +597,7 @@ export class ThreatLensArcRenderer {
 
   private buildEndpointHitTargetGraphic(arc: AnimatedArcDescriptor, point: [number, number], role: string, endpointRole: 'arc-start' | 'arc-end'): any {
     return {
-      geometry: {
-        type: 'point',
-        longitude: point[0],
-        latitude: point[1],
-        spatialReference: { wkid: 4326 },
-      },
+      geometry: this.buildPointGeometry(point),
       attributes: {
         ...this.buildArcAttributes(arc, role),
         endpoint_color: arc.color,
@@ -631,12 +620,7 @@ export class ThreatLensArcRenderer {
 
   private buildMovingDotGraphic(arc: AnimatedArcDescriptor, point: [number, number]): any {
     return {
-      geometry: {
-        type: 'point',
-        longitude: point[0],
-        latitude: point[1],
-        spatialReference: { wkid: 4326 },
-      },
+      geometry: this.buildPointGeometry(point),
       attributes: this.buildArcAttributes(arc, 'arc-traveler'),
       symbol: {
         type: 'simple-marker',
@@ -653,12 +637,7 @@ export class ThreatLensArcRenderer {
 
   private buildReceiverPulseGraphic(arc: AnimatedArcDescriptor, point: [number, number]): any {
     return {
-      geometry: {
-        type: 'point',
-        longitude: point[0],
-        latitude: point[1],
-        spatialReference: { wkid: 4326 },
-      },
+      geometry: this.buildPointGeometry(point),
       attributes: this.buildArcAttributes(arc, 'arc-receiver-pulse'),
       symbol: {
         type: 'simple-marker',

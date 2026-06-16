@@ -97,6 +97,18 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     this.pageCounts = {};
   }
 
+  get defacementResultCount(): number {
+    return this.consolidatedCallbackModel.defacement_model?.Result?.length ?? 0;
+  }
+
+  get stealerlogResultCount(): number {
+    return this.stealerlogCallbackModel?.Result?.length ?? 0;
+  }
+
+  get hasDefacementOrStealerResults(): boolean {
+    return (this.defacementResultCount + this.stealerlogResultCount) > 0;
+  }
+
   ngAfterViewInit(): void {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page);
     if (isRouteChanged(this.router.url, this.dashboardService.m_current_route)) {

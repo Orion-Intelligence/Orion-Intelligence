@@ -2,13 +2,20 @@ import { AnimatedArcDescriptor, ThreatLensCategoryModelKey } from '../../models/
 
 export type LngLat = [number, number];
 
-export type ArcPair = {
+export interface ArcPair {
   countryAKey: string;
   countryBKey: string;
   weight: number;
-};
+}
 
 export type ArcPoint2D = [number, number];
+
+export type ThreatLensFeedPanelType = 'news' | 'archive';
+
+export interface ThreatLensScreenPoint {
+  x: number;
+  y: number;
+}
 
 export interface ThreatLensCoordinates {
   lat: number;
@@ -35,6 +42,65 @@ export interface ThreatLensIpRecord {
   ip: string;
   lat?: number;
   lon?: number;
+  network?: string;
+  accuracyRadius?: number;
+  distanceKm?: number;
+}
+
+export interface ThreatLensMapGraphicAttributes {
+  role?: string;
+  ip?: string;
+  count?: number;
+  networkCount?: number;
+  records?: ThreatLensIpRecord[];
+  stackReason?: string;
+  network?: string;
+  accuracyRadius?: number;
+  accuracyMin?: number;
+  accuracyMax?: number;
+  distanceKm?: number;
+  [key: string]: unknown;
+}
+
+export interface ThreatLensMapGraphic {
+  geometry?: any;
+  attributes?: ThreatLensMapGraphicAttributes;
+  symbol?: any;
+}
+
+export interface ThreatLensIpDistributionCellRef {
+  key: string;
+  row: number;
+  col: number;
+  centerScore: number;
+}
+
+export interface ThreatLensIpDistributionCell extends ThreatLensIpDistributionCellRef {
+  items: ThreatLensMapGraphic[];
+}
+
+export interface ThreatLensIpPointGroup {
+  point: ThreatLensCoordinates;
+  records: ThreatLensIpRecord[];
+}
+
+export interface ThreatLensIpScreenGroup {
+  point: ThreatLensCoordinates;
+  records: ThreatLensIpRecord[];
+  items: ThreatLensMapGraphic[];
+}
+
+export interface ThreatLensIpGroupStats {
+  networkCount: number;
+  accuracyMin?: number;
+  accuracyMax?: number;
+}
+
+export interface ThreatLensArcRangeOption {
+  index: number;
+  label: string;
+  start: number;
+  end: number;
 }
 
 export interface ThreatLensCountrySelection {
