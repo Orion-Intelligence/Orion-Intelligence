@@ -288,6 +288,7 @@ class CaseResponse(BaseModel):
     caseType: CaseType = Field(default=CaseType.OTHER)
     caseTypeOtherValue: str = ""
     status: CaseStatus = Field(default=CaseStatus.NEW)
+    statusReasons: List[dict] = Field(default_factory=list)
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
     intakeSource: IntakeSource = Field(default=IntakeSource.MANUAL)
@@ -319,3 +320,16 @@ class CaseShareResponse(BaseModel):
     token: str
     path: str
     expiresAt: datetime
+
+
+class UpdateCaseStatusRequest(CaseRequestModel):
+    status: CaseStatus
+    reason: str
+
+    @field_validator("reason")
+    @classmethod
+    def validate_reason(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Status change reason is required")
+        return value

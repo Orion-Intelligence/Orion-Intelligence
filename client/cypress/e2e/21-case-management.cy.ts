@@ -6,10 +6,12 @@ import {
   addCommentToCreatedCase,
   addLinkTargetCase,
   archiveClosedCaseAndShowArchived,
+  assertCaseClosureDisabledBeforeResolved,
   assertCreatedCaseDetails,
   closeCreatedCase,
   editCreatedCase,
   exportCreatedCasePdf,
+  moveCaseFromNewToResolved,
   openCaseManagement,
   openCreatedCaseFromList,
   shareAndRevokeCreatedCaseLink
@@ -20,7 +22,7 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.logout();
   });
 
-  it('adds a case, opens the detail view, and edits it', () => {
+  it('creates, edits, tracks, resolves, closes, and archives a case', () => {
     cy.loginAsAdmin();
 
     openCaseManagement();
@@ -28,6 +30,7 @@ describe('Case Management - Add View Edit Flow', () => {
     addLinkTargetCase();
     openCreatedCaseFromList();
     assertCreatedCaseDetails();
+    assertCaseClosureDisabledBeforeResolved();
     editCreatedCase();
     addAndEditRelatedEntity();
     addAndEditArtifactAndTask();
@@ -35,6 +38,7 @@ describe('Case Management - Add View Edit Flow', () => {
     addCommentToCreatedCase();
     exportCreatedCasePdf();
     shareAndRevokeCreatedCaseLink();
+    moveCaseFromNewToResolved();
     closeCreatedCase();
     archiveClosedCaseAndShowArchived();
   });

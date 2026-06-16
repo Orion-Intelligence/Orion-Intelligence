@@ -41,6 +41,18 @@ export class CaseClosureSectionComponent {
     return this.store.analysts;
   }
 
+  canCloseCase(): boolean {
+    return this.caseData?.status === 'resolved';
+  }
+
+  getCloseCaseTooltip(): string {
+    if (this.canCloseCase()) {
+      return 'Closure';
+    }
+
+    return 'Case cannot be closed until it reaches Resolved status';
+  }
+
   getDisplayLabel(value?: string | null, otherValue?: string | null): string {
     return getCaseDisplayLabel(value, otherValue);
   }
