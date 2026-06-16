@@ -12,7 +12,7 @@ from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
-from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifactFile, CaseStatus
+from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifactFile, CaseStatus, CaseStatusReason
 from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifact
 from orion.services.mongo_manager.shared_model.db_case_model import CaseClosure
 from orion.services.mongo_manager.shared_model.db_case_model import CaseComment
@@ -25,18 +25,7 @@ from orion.api.interactive.case_manager.case_artifact_helper import CaseArtifact
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
-
-CASE_STATUS_FLOW = [
-    CaseStatus.NEW,
-    CaseStatus.INTAKE_REVIEW,
-    CaseStatus.UNDER_INVESTIGATION,
-    CaseStatus.EVIDENCE_COLLECTION,
-    CaseStatus.VERIFICATION,
-    CaseStatus.REGULATORY_ACTION,
-    CaseStatus.LEGAL_REVIEW,
-    CaseStatus.RESOLVED,
-    CaseStatus.CLOSED,
-]
+from orion.api.interactive.case_manager.case_config import CASE_STATUS_FLOW
 
 class CaseManager:
     __instance = None
@@ -902,7 +891,13 @@ class CaseManager:
             raise HTTPException(status_code=400, detail="Status change reason is required")
 
         current_status = record.status
-        next_status = data.nextStatus
+        next_status = data.status
+
+        if next_status == CaseStatus.NEW:
+            raise HTTPException(
+                status_code=400,
+                detail="Case cannot be moved back to new"
+            )
 
         if next_status == CaseStatus.CLOSED:
             raise HTTPException(
@@ -913,17 +908,21 @@ class CaseManager:
         current_index = CASE_STATUS_FLOW.index(current_status)
         next_index = CASE_STATUS_FLOW.index(next_status)
 
-        if next_index != current_index + 1:
+        if abs(next_index - current_index) != 1:
             raise HTTPException(
                 status_code=400,
-                detail="Case can only move one step forward"
+                detail="Case can only move one step forward or backward"
             )
 
         record.status = next_status
         record.updatedAt = utc_now()
 
-        if next_status == CaseStatus.CLOSED:
-            record.closedAt = utc_now()
+        record.statusReasons.append(
+            CaseStatusReason(
+                status=next_status,
+                reason=reason
+            )
+        )
 
         await self._engine.save(record)
 

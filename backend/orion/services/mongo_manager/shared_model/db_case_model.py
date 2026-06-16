@@ -362,6 +362,11 @@ class CaseClosure(BaseModel):
     closedAt: datetime = PydanticField(default_factory=utc_now)
 
 
+class CaseStatusReason(EmbeddedModel):
+    status: CaseStatus
+    reason: str
+
+
 class CaseShare(EmbeddedModel):
     shareId: str
     tokenHash: str
@@ -380,6 +385,7 @@ class db_case_model(Model):
     caseType: CaseType = Field(default=CaseType.OTHER)
     caseTypeOtherValue: str = ""
     status: CaseStatus = Field(default=CaseStatus.NEW)
+    statusReasons: List[CaseStatusReason] = Field(default_factory=list)
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
     tags: List[CaseTag] = Field(default_factory=list)

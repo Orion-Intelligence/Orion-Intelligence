@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Case, CaseStatus } from '../../../../../shared/model/case-management/case.model';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
+import { CASE_STATUS_WORKFLOW } from '../../../../../shared/model/case-management/case.config';
 
 @Component({
   selector: 'app-case-tracking-board',
@@ -19,7 +20,7 @@ export class CaseTrackingBoard implements OnInit {
   statusReason = '';
   isReasonModalOpen = false;
   isSavingMove = false;
-  readonly workflow: { value: CaseStatus; label: string }[] = [{ value: 'new', label: 'New' }, { value: 'intake_review', label: 'Intake Review' }, { value: 'under_investigation', label: 'Under Investigation' }, { value: 'evidence_collection', label: 'Evidence Collection' }, { value: 'verification', label: 'Verification' }, { value: 'regulatory_action', label: 'Regulatory Action' }, { value: 'legal_review', label: 'Legal Review' }, { value: 'resolved', label: 'Resolved' }, { value: 'closed', label: 'Closed' }];
+  readonly workflow = CASE_STATUS_WORKFLOW;
 
   constructor(private router: Router, private caseService: CaseManagement, private messageNotificationService: MessageNotificationService) { }
 
@@ -46,22 +47,29 @@ export class CaseTrackingBoard implements OnInit {
     return this.cases.filter(item => item.status === status);
   }
 
-  getNextStatus(status: CaseStatus): CaseStatus | null {
+  getAllowedStatuses(status: CaseStatus): CaseStatus[] {
     const index = this.workflow.findIndex(item => item.value === status);
+    const statuses: CaseStatus[] = [];
+
+    const previousStatus = this.workflow[index - 1]?.value || null;
     const nextStatus = this.workflow[index + 1]?.value || null;
 
-    if (nextStatus === 'closed') {
-      return null;
+    if (previousStatus && previousStatus !== 'new') {
+      statuses.push(previousStatus);
     }
 
-    return nextStatus;
+    if (nextStatus && nextStatus !== 'closed') {
+      statuses.push(nextStatus);
+    }
+
+    return statuses;
   }
 
   requestMove(caseItem: Case, nextStatus: CaseStatus): void {
-    const allowedNextStatus = this.getNextStatus(caseItem.status);
+    const allowedStatuses = this.getAllowedStatuses(caseItem.status);
 
-    if (allowedNextStatus !== nextStatus) {
-      this.messageNotificationService.show('Case can only move one step forward');
+    if (!allowedStatuses.includes(nextStatus)) {
+      this.messageNotificationService.show('Case can only move one step forward or backward');
       return;
     }
 
@@ -84,7 +92,7 @@ export class CaseTrackingBoard implements OnInit {
     this.isSavingMove = true;
 
     this.caseService.updateCaseStatus(this.selectedCase.caseId, {
-      nextStatus: this.targetStatus,
+      status: this.targetStatus,
       reason: this.statusReason.trim()
     }).subscribe({
       next: updatedCase => {
@@ -123,5 +131,16 @@ export class CaseTrackingBoard implements OnInit {
     }
 
     return value.replace(/[_-]/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  getMoveButtonLabel(currentStatus: CaseStatus, targetStatus: CaseStatus): string {
+    const currentIndex = this.workflow.findIndex(item => item.value === currentStatus);
+    const targetIndex = this.workflow.findIndex(item => item.value === targetStatus);
+
+    if (targetIndex < currentIndex) {
+      return `Move back to ${this.formatLabel(targetStatus)}`;
+    }
+
+    return `Move to ${this.formatLabel(targetStatus)}`;
   }
 }
