@@ -13,6 +13,7 @@ import { ThreatLensIpScanModeEnum } from '../enums/geo-fencing.enums';
 import { IpDetailPopupComponent } from './ui-overlays/ip-detail-popup/ip-detail-popup.component';
 import { ArcReportPopupComponent } from './ui-overlays/arc-report-popup/arc-report-popup.component';
 import { ThreatLensFeedPanelComponent } from './ui-overlays/feed-panel/threat-lens-feed-panel.component';
+import { ThreatLensTopicSearchPanelComponent } from './ui-overlays/topic-search-panel/threat-lens-topic-search-panel.component';
 import { ThreatLensCategoryLayersComponent } from './ui-overlays/category-layers/threat-lens-category-layers.component';
 import { ThreatLensMapRendererComponent } from './map-renderer/threat-lens-map-renderer.component';
 import { ThreatLensArcBatchStatus, ThreatLensArcRangeOption, ThreatLensArcSelection, ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensCountrySelection, ThreatLensIpViewportScanRequest } from './models/threat-lens-map.types';
@@ -30,6 +31,7 @@ import { MapLoadingBadgesComponent } from '../../../shared/partials/map-loading-
     FormsModule,
     FiltersComponent,
     ThreatLensFeedPanelComponent,
+    ThreatLensTopicSearchPanelComponent,
     ThreatLensCategoryLayersComponent,
     IpDetailPopupComponent,
     ArcReportPopupComponent,
@@ -62,6 +64,7 @@ export class ThreatLensComponent implements OnDestroy {
   isFilterOpen$: Observable<boolean>;
   searchTerm = '';
   currentQuery = '';
+  currentTopicQuery = '';
   selectedCountryName = '';
   statusMessage = 'Loading threat lens results...';
   isLoading = true;
@@ -112,6 +115,11 @@ export class ThreatLensComponent implements OnDestroy {
 
   async onSearch(): Promise<void> {
     await this.loadThreatLensData(this.searchTerm.trim());
+  }
+
+  async onTopicSearch(topicQuery: string): Promise<void> {
+    this.currentTopicQuery = topicQuery.trim();
+    await this.loadThreatLensData(this.currentQuery);
   }
 
   async onTopCountrySelect(country: string): Promise<void> {
@@ -304,14 +312,17 @@ export class ThreatLensComponent implements OnDestroy {
     this.closeArcReportPanel();
     const requestId = ++this.loadRequestId;
     const activeQuery = query.trim();
+    const activeTopicQuery = this.currentTopicQuery.trim();
     this.currentQuery = activeQuery;
     this.activeArcCountryFilterKey = this.getSearchedCountryKey(activeQuery);
 
     this.ngZone.run(() => {
       this.setLoading(true);
-      this.statusMessage = activeQuery
-        ? `Searching threat lens results for "${activeQuery}"...`
-        : 'Loading complete threat lens dataset...';
+      this.statusMessage = activeTopicQuery
+        ? `Searching threat lens results for topic "${activeTopicQuery}"...`
+        : activeQuery
+          ? `Searching threat lens results for "${activeQuery}"...`
+          : 'Loading complete threat lens dataset...';
     });
 
     const stats = await this.fetchMapData(activeQuery);
@@ -373,9 +384,12 @@ export class ThreatLensComponent implements OnDestroy {
       this.topCountries = [];
       this.categoryLegend = [];
       this.feedItems = [];
-      this.statusMessage = activeQuery
-        ? `Failed to load threat lens data for "${activeQuery}" from /api/threat/lens.`
-        : 'Failed to load threat lens data from /api/threat/lens.';
+      const activeTopicQuery = this.currentTopicQuery.trim();
+      this.statusMessage = activeTopicQuery
+        ? `Failed to load threat lens data for topic "${activeTopicQuery}" from /api/threat/lens.`
+        : activeQuery
+          ? `Failed to load threat lens data for "${activeQuery}" from /api/threat/lens.`
+          : 'Failed to load threat lens data from /api/threat/lens.';
       this.setLoading(false);
     });
   }
@@ -568,7 +582,13 @@ export class ThreatLensComponent implements OnDestroy {
   }
 
   private buildSearchPayload(query: string): Partial<ThreatLensRequestPayload> {
-    const payload: Partial<ThreatLensRequestPayload> = { q: query };
+    const activeTopicQuery = this.currentTopicQuery.trim();
+    const payload: Partial<ThreatLensRequestPayload> = { q: activeTopicQuery || query };
+
+    if (activeTopicQuery) {
+      payload.matchtype = 'semantic';
+    }
+
     if (!query) {
       return payload;
     }
@@ -576,7 +596,9 @@ export class ThreatLensComponent implements OnDestroy {
     const normalizedCountry = this.threatLensService.normalizeCountryLabel(query);
     const countryKey = this.toCountryKey(normalizedCountry);
     if (countryKey && this.mapRenderer?.hasCountryKey(countryKey)) {
-      payload.q = '';
+      if (!activeTopicQuery) {
+        payload.q = '';
+      }
       payload.entity_filter = { m_country: [normalizedCountry] };
       payload.must = true;
       payload.fullsearch = false;

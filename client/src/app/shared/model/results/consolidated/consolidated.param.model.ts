@@ -12,6 +12,7 @@ export class ConsolidatedParamModel {
   email?: string;
   username?: string;
   must = true;
+  matchtype = "";
   url = "";
   user = "";
   ioc = "";
@@ -31,6 +32,7 @@ export class ConsolidatedParamModel {
     this.m_reporter = "all";
     this.email = undefined;
     this.username = undefined;
+    this.matchtype = "";
     this.url = "";
     this.user = "";
     this.ioc = "";

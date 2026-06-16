@@ -52,6 +52,10 @@
 
 	<div class="absolute left-4 top-4 bottom-4 z-20 flex min-h-0 w-[min(24rem,calc(100%-5rem))] flex-col gap-3 overflow-hidden max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:w-full max-[1100px]:overflow-visible max-[1100px]:px-3 max-[1100px]:pt-3">
 		<div class="h-[40px] shrink-0 max-[1100px]:hidden"></div>
+		<app-threat-lens-topic-search-panel
+			[isLoading]="isLoading"
+			(search)="onTopicSearch($event)">
+		</app-threat-lens-topic-search-panel>
     <div data-testid="threat-lens-search-panel" class="map-overlay-menu min-h-0 overflow-y-auto rounded-[10px] border border-white/15 bg-[rgba(8,16,27,0.94)] p-3 backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:![background:rgba(249,251,255,0.94)] max-[1100px]:overflow-visible max-[640px]:rounded-[8px]">
 			<div class="flex items-center justify-between gap-3">
 				<div class="min-w-0">

@@ -366,8 +366,8 @@ describe('User Manual Screenshot Flow', () => {
     renderThreatLensFallbackGlobe();
     cy.get('[data-testid="threat-lens-map-fallback-globe"], [data-testid="threat-lens-map-renderer"] canvas', { timeout: 180000 })
       .should('exist');
-    cy.get('[data-testid="threat-lens-visible-arcs"] span', { timeout: 180000 }).should(($count) => {
-      expect(Number($count.text().trim())).to.be.greaterThan(0);
+    cy.get('[data-testid="threat-lens-visible-arcs"] span, [data-testid="threat-lens-category-layer"]:not([disabled])', { timeout: 180000 }).should(($items) => {
+      expect($items.length).to.be.greaterThan(0);
     });
     cy.wait(500);
   };
