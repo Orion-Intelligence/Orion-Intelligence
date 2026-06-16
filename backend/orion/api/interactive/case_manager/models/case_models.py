@@ -288,6 +288,7 @@ class CaseResponse(BaseModel):
     caseType: CaseType = Field(default=CaseType.OTHER)
     caseTypeOtherValue: str = ""
     status: CaseStatus = Field(default=CaseStatus.NEW)
+    statusReasons: List[dict] = Field(default_factory=list)
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
     intakeSource: IntakeSource = Field(default=IntakeSource.MANUAL)
@@ -322,7 +323,7 @@ class CaseShareResponse(BaseModel):
 
 
 class UpdateCaseStatusRequest(CaseRequestModel):
-    nextStatus: CaseStatus
+    status: CaseStatus
     reason: str
 
     @field_validator("reason")

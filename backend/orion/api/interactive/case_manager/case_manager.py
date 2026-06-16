@@ -12,7 +12,7 @@ from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
-from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifactFile, CaseStatus
+from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifactFile, CaseStatus, CaseStatusReason
 from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifact
 from orion.services.mongo_manager.shared_model.db_case_model import CaseClosure
 from orion.services.mongo_manager.shared_model.db_case_model import CaseComment
@@ -902,7 +902,7 @@ class CaseManager:
             raise HTTPException(status_code=400, detail="Status change reason is required")
 
         current_status = record.status
-        next_status = data.nextStatus
+        next_status = data.status
 
         if next_status == CaseStatus.CLOSED:
             raise HTTPException(
@@ -913,17 +913,21 @@ class CaseManager:
         current_index = CASE_STATUS_FLOW.index(current_status)
         next_index = CASE_STATUS_FLOW.index(next_status)
 
-        if next_index != current_index + 1:
+        if abs(next_index - current_index) != 1:
             raise HTTPException(
                 status_code=400,
-                detail="Case can only move one step forward"
+                detail="Case can only move one step forward or backward"
             )
 
         record.status = next_status
         record.updatedAt = utc_now()
 
-        if next_status == CaseStatus.CLOSED:
-            record.closedAt = utc_now()
+        record.statusReasons.append(
+            CaseStatusReason(
+                status=next_status,
+                reason=reason
+            )
+        )
 
         await self._engine.save(record)
 

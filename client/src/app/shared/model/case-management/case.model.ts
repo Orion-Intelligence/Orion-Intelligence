@@ -23,8 +23,8 @@ export type CaseStatus =
     'resolved' |
     'closed';
 
-export interface CaseStatusUpdateRequest {
-    nextStatus: CaseStatus;
+export interface CaseStatusReason {
+    status: CaseStatus;
     reason: string;
 }
 
@@ -562,6 +562,7 @@ export interface Case {
     description: string;
     caseType: CaseType;
     status: CaseStatus;
+    statusReasons?: CaseStatusReason[];
     severity: Severity;
     priority: Priority;
     intakeSource: IntakeSource;

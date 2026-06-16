@@ -46,22 +46,29 @@ export class CaseTrackingBoard implements OnInit {
     return this.cases.filter(item => item.status === status);
   }
 
-  getNextStatus(status: CaseStatus): CaseStatus | null {
+  getAllowedStatuses(status: CaseStatus): CaseStatus[] {
     const index = this.workflow.findIndex(item => item.value === status);
+    const statuses: CaseStatus[] = [];
+
+    const previousStatus = this.workflow[index - 1]?.value || null;
     const nextStatus = this.workflow[index + 1]?.value || null;
 
-    if (nextStatus === 'closed') {
-      return null;
+    if (previousStatus) {
+      statuses.push(previousStatus);
     }
 
-    return nextStatus;
+    if (nextStatus && nextStatus !== 'closed') {
+      statuses.push(nextStatus);
+    }
+
+    return statuses;
   }
 
   requestMove(caseItem: Case, nextStatus: CaseStatus): void {
-    const allowedNextStatus = this.getNextStatus(caseItem.status);
+    const allowedStatuses = this.getAllowedStatuses(caseItem.status);
 
-    if (allowedNextStatus !== nextStatus) {
-      this.messageNotificationService.show('Case can only move one step forward');
+    if (!allowedStatuses.includes(nextStatus)) {
+      this.messageNotificationService.show('Case can only move one step forward or backward');
       return;
     }
 
@@ -84,7 +91,7 @@ export class CaseTrackingBoard implements OnInit {
     this.isSavingMove = true;
 
     this.caseService.updateCaseStatus(this.selectedCase.caseId, {
-      nextStatus: this.targetStatus,
+      status: this.targetStatus,
       reason: this.statusReason.trim()
     }).subscribe({
       next: updatedCase => {

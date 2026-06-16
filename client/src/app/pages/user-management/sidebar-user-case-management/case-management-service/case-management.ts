@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../../shared/services/api.service';
-import { ArtifactReportOption, Case, CaseAnalyst, CaseRequest, CaseShareRequest, CaseShareResponse, CaseStatusUpdateRequest, CaseUpdateRequest } from '../../../../shared/model/case-management/case.model';
+import { ArtifactReportOption, Case, CaseAnalyst, CaseRequest, CaseShareRequest, CaseShareResponse, CaseStatusReason, CaseUpdateRequest } from '../../../../shared/model/case-management/case.model';
 
 type ArtifactFileIntegrityResult = {
   fileId: string;
@@ -53,7 +53,7 @@ export class CaseManagement {
     return this.api.put<Case>(`profile/cases/${caseId}`, caseData);
   }
 
-  updateCaseStatus(caseId: string, payload: CaseStatusUpdateRequest): Observable<Case> {
+  updateCaseStatus(caseId: string, payload: CaseStatusReason): Observable<Case> {
     return this.api.put<Case>(`profile/cases/${caseId}/status`, payload);
   }
 
