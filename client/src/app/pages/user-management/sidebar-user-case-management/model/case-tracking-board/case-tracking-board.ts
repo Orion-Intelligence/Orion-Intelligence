@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Case, CaseStatus } from '../../../../../shared/model/case-management/case.model';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
+import { CASE_STATUS_WORKFLOW } from '../../../../../shared/model/case-management/case.config';
 
 @Component({
   selector: 'app-case-tracking-board',
@@ -19,7 +20,7 @@ export class CaseTrackingBoard implements OnInit {
   statusReason = '';
   isReasonModalOpen = false;
   isSavingMove = false;
-  readonly workflow: { value: CaseStatus; label: string }[] = [{ value: 'new', label: 'New' }, { value: 'intake_review', label: 'Intake Review' }, { value: 'under_investigation', label: 'Under Investigation' }, { value: 'evidence_collection', label: 'Evidence Collection' }, { value: 'verification', label: 'Verification' }, { value: 'regulatory_action', label: 'Regulatory Action' }, { value: 'legal_review', label: 'Legal Review' }, { value: 'resolved', label: 'Resolved' }, { value: 'closed', label: 'Closed' }];
+  readonly workflow = CASE_STATUS_WORKFLOW;
 
   constructor(private router: Router, private caseService: CaseManagement, private messageNotificationService: MessageNotificationService) { }
 
