@@ -8,17 +8,11 @@
     {
       "files": ["src/styles.scss"],
       "rules": {
-        "custom-property-empty-line-before": null,
-        "declaration-block-no-redundant-longhand-properties": null,
-        "declaration-empty-line-before": null,
         "declaration-property-value-keyword-no-deprecated": null,
         "import-notation": null,
         "no-invalid-position-at-import-rule": null,
         "number-max-precision": null,
-        "property-no-unknown": null,
-        "property-no-vendor-prefix": null,
-        "selector-not-notation": null,
-        "value-keyword-case": null
+        "property-no-unknown": null
       }
     }
   ],
