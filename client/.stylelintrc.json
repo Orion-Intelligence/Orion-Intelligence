@@ -8,11 +8,9 @@
     {
       "files": ["src/styles.scss"],
       "rules": {
-        "declaration-property-value-keyword-no-deprecated": null,
         "import-notation": null,
         "no-invalid-position-at-import-rule": null,
-        "number-max-precision": null,
-        "property-no-unknown": null
+        "number-max-precision": null
       }
     }
   ],

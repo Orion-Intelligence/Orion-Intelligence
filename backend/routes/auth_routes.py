@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Body, Response, Request, HTTPException, 
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from starlette.responses import JSONResponse
 
-from configs.auth_cookie import ACCESS_COOKIE, COOKIE_CIPHER, COOKIE_MAX_AGE, set_access_cookie, token_from_request
+from configs.auth_cookie import ACCESS_COOKIE, set_access_cookie, token_from_request
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.payment_manager.model.payment_param_model import PaymentParamModel
 from orion.api.interactive.payment_manager.payment_manager import PaymentManager

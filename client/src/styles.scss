@@ -150,7 +150,6 @@ body *::after {
 
 p {
   overflow-wrap: anywhere;
-  word-break: break-word;
 }
 
 html.light-theme,
@@ -2619,7 +2618,6 @@ select:not(.ui-popup-select, .ui-select)::-ms-expand {
   border: 1px solid var(--color-border) !important;
   background: #64748b !important;
   box-shadow: none !important;
-  ring-color: transparent !important;
 }
 
 .light-theme [data-testid='social-manage-profiles-modal'] .bi-person-fill,
@@ -2803,7 +2801,7 @@ select:not(.ui-popup-select, .ui-select)::-ms-expand {
   color: #fff;
   box-shadow: 0 8px 22px rgb(0 0 0 / 35%);
   white-space: normal;
-  word-break: break-word;
+  overflow-wrap: anywhere;
   pointer-events: none;
   opacity: 0%;
   visibility: hidden;

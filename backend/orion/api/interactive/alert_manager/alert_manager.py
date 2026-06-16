@@ -131,7 +131,7 @@ class AlertManager:
 
             await mail_manager.get_instance().send_verification_mail(to=to_email, subject=subject, body=html_content)
             return True
-        except Exception as ex:
+        except Exception:
             return False
 
     async def send_scan_completed_mail(self, tenant_id: str, scan_status: str, summary: dict[str, Any], current_user=None, tenant=None):
