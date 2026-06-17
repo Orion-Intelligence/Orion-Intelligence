@@ -203,6 +203,7 @@ describe('User Manual Screenshot Flow', () => {
     cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(adminPassword, { log: false });
     cy.get('[data-testid="login-button"], input.login-button').first().click();
     ensureDashboardReady();
+    cy.wait(2000);
     cy.window().then((win) => {
       hasAdminSession = Boolean(win.localStorage.getItem('token'));
       expect(hasAdminSession, 'admin session').to.equal(true);
@@ -243,13 +244,14 @@ describe('User Manual Screenshot Flow', () => {
     typeByTestId('case-add-description-input', 'Documentation sample case used to demonstrate case intake, evidence, notes, and closure.');
     selectByTestId('case-add-type-select', 'data_leak');
     selectByTestId('case-add-intake-source-select', 'breach_search');
-    selectByTestId('case-add-status-select', 'investigating');
+    visibleByTestId('case-add-status-readonly').should('contain.text', 'New');
     selectByTestId('case-add-severity-select', 'high');
     selectByTestId('case-add-priority-select', 'high');
     typeByTestId('case-primary-entity-value-input', 'docs.example.com');
     capture('case-management-add');
     resetScreenshotZoom();
     clickByTestId('case-add-save');
+    cy.contains('Case added successfully', { timeout: 60000 }).should('exist');
     cy.get(byTestId('case-add-drawer')).should('not.exist');
 
     cy.then(() => {
@@ -276,6 +278,7 @@ describe('User Manual Screenshot Flow', () => {
     typeByTestId('case-artifact-description-input', 'Reference URL captured for the documentation case evidence trail.');
     typeByTestId('case-artifact-url-input', 'https://example.com/intel/case-evidence');
     clickByTestId('case-artifact-add-save');
+    cy.contains('Artifact added successfully', { timeout: 60000 }).should('exist');
     cy.get(byTestId('case-artifact-add-drawer')).should('not.exist');
     visibleByTestId('case-artifact-card-0').should('contain.text', 'Credential Exposure Evidence');
 
@@ -285,19 +288,13 @@ describe('User Manual Screenshot Flow', () => {
 
     cy.then(() => cy.visit(`/dashboard/profile/case-management/case-details?caseId=${docsCaseId}`));
     cy.get(byTestId('case-details-title-value'), { timeout: 60000 }).should('contain.text', docsCaseTitle);
+    cy.get(byTestId('case-details-status-value'), { timeout: 60000 }).should('contain.text', 'New');
+    cy.get(byTestId('case-artifact-card-0'), { timeout: 60000 }).should('contain.text', 'Credential Exposure Evidence');
+    cy.contains('p', 'Documentation analyst note for case review.').should('exist');
     cy.get(byTestId('case-closure-add'), { timeout: 60000 })
       .scrollIntoView()
       .should('be.visible')
-      .click({ force: true });
-    cy.get(byTestId('case-closure-drawer'), { timeout: 60000 }).should('be.visible');
-    selectByTestId('case-closure-reason-select', 'remediated');
-    typeByTestId('case-closure-summary-input', 'Exposure reviewed and remediation ownership recorded.');
-    typeByTestId('case-closure-resolution-input', 'Evidence was captured, analyst context was added, and the case outcome was recorded for reporting.');
-    clickByTestId('case-closure-save');
-    cy.get(byTestId('case-closure-drawer')).should('not.exist');
-    cy.then(() => cy.visit(`/dashboard/profile/case-management/case-details?caseId=${docsCaseId}`));
-    cy.get(byTestId('case-details-title-value'), { timeout: 60000 }).should('contain.text', docsCaseTitle);
-    cy.get(byTestId('case-closure-summary-value'), { timeout: 60000 }).should('contain.text', 'Exposure reviewed');
+      .and('be.disabled');
     cy.scrollTo('top', { ensureScrollable: false });
     capture('case-management-view');
   };
@@ -375,11 +372,6 @@ describe('User Manual Screenshot Flow', () => {
           </svg>`;
         fallback.replaceChildren(globe);
       }
-
-      const visibleArcCount = doc.querySelector('[data-testid="threat-lens-visible-arcs"] span');
-      if (visibleArcCount && Number(visibleArcCount.textContent?.trim()) === 0) {
-        visibleArcCount.textContent = '5';
-      }
     });
   };
 
@@ -393,7 +385,7 @@ describe('User Manual Screenshot Flow', () => {
     renderThreatLensFallbackGlobe();
     cy.get('[data-testid="threat-lens-map-fallback-globe"], [data-testid="threat-lens-map-renderer"] canvas', { timeout: 180000 })
       .should('exist');
-    cy.get('[data-testid="threat-lens-visible-arcs"] span, [data-testid="threat-lens-category-layer"]:not([disabled])', { timeout: 180000 }).should(($items) => {
+    cy.get('[data-testid="threat-lens-category-layer"]', { timeout: 180000 }).should(($items) => {
       expect($items.length).to.be.greaterThan(0);
     });
     cy.wait(500);
@@ -975,13 +967,11 @@ describe('User Manual Screenshot Flow', () => {
     cy.get('[data-testid="threat-lens-top-country"]').should('have.length.greaterThan', 0);
     cy.get('[data-testid="threat-lens-feed-item-news"]').should('have.length.greaterThan', 0);
     cy.wait('@threatLensIpScan');
-    cy.get('[data-testid="threat-lens-ip-scan-panel"]').should('be.visible');
-    cy.get('[data-testid="threat-lens-ip-scan-markers"]').should('contain.text', '3');
+    cy.get('[data-testid="threat-lens-category-layers-panel"]').should('be.visible');
     waitForThreatGlobeReady();
     captureFullWidth('threat-lens-overview');
 
-    cy.get('[data-testid="threat-lens-search-input"]').should('be.visible').click().type('{selectall}{backspace}china');
-    cy.get('[data-testid="threat-lens-search-submit"]').click();
+    cy.get('[data-testid="threat-lens-search-input"]').should('be.visible').click().type('{selectall}{backspace}china{enter}');
     cy.wait('@threatLens');
     cy.get('[data-testid="threat-lens-active-keyword"]').should('contain.text', 'china');
     waitForThreatGlobeReady();
