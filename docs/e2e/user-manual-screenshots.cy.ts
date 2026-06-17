@@ -194,6 +194,21 @@ describe('User Manual Screenshot Flow', () => {
       .should('be.visible');
   };
 
+  const loginAdminFresh = () => {
+    hasAdminSession = false;
+    cy.clearCookies();
+    cy.clearLocalStorage();
+    cy.visit('/login');
+    cy.get('[data-testid="login-user"]').should('be.visible').clear().type(adminUsername);
+    cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(adminPassword, { log: false });
+    cy.get('[data-testid="login-button"], input.login-button').first().click();
+    ensureDashboardReady();
+    cy.window().then((win) => {
+      hasAdminSession = Boolean(win.localStorage.getItem('token'));
+      expect(hasAdminSession, 'admin session').to.equal(true);
+    });
+  };
+
   const visitWithAdminSession = (path: string) => {
     cy.visit(path);
     cy.location('pathname').then((pathname) => {
@@ -201,10 +216,7 @@ describe('User Manual Screenshot Flow', () => {
         return;
       }
 
-      cy.get('[data-testid="login-user"]').should('be.visible').clear().type(adminUsername);
-      cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(adminPassword, { log: false });
-      cy.get('[data-testid="login-button"], input.login-button').first().click();
-      ensureDashboardReady();
+      loginAdminFresh();
       cy.visit(path);
     });
   };
@@ -718,24 +730,8 @@ describe('User Manual Screenshot Flow', () => {
     cy.get('[data-testid="reset-companymail"]').should('be.visible');
     capture('password-reset');
 
-    cy.visit('/login');
-    cy.get('[data-testid="login-user"]').type(adminUsername);
-    cy.get('[data-testid="login-pass"]').type(adminPassword, { log: false });
-    cy.get('[data-testid="login-button"], input.login-button').first().click();
-    cy.wait(2000);
-    cy.window().then((win) => {
-      hasAdminSession = Boolean(win.localStorage.getItem('token'));
-    });
-
-    cy.then(() => {
-      if (!hasAdminSession) {
-        cy.visit('/login?mode=free');
-        cy.wait(3000);
-        cy.window().its('localStorage').invoke('getItem', 'token').should('be.a', 'string').and('not.be.empty');
-      }
-    });
-
-    cy.visit('/dashboard/profile/homepage');
+    loginAdminFresh();
+    visitWithAdminSession('/dashboard/profile/homepage');
     ensureDashboardReady();
     ensureHomepageSearchReady();
     capture('homepage-overview');
