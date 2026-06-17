@@ -70,7 +70,6 @@ export function typeDashboardSearch(value: string) {
   cy.scrollDashboardToTop();
   waitForSearchReady();
   cy.scrollDashboardToTop();
-  cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().should('be.visible').and('be.enabled').click();
   cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().should('be.visible').and('be.enabled').type(`{selectall}{backspace}${value}{enter}`, { force: true });
 }
 

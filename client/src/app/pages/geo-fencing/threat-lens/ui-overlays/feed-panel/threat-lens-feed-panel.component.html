@@ -1,5 +1,5 @@
-<div [attr.data-testid]="'threat-lens-feed-panel-' + feedType" class="map-overlay-menu flex h-full flex-col overflow-hidden rounded-[10px] border border-white/15 bg-[rgba(8,16,27,0.94)] backdrop-blur-md [body.light-theme_&]:border-[#d2deec] [body.light-theme_&]:![background:rgba(249,251,255,0.94)] max-[1100px]:h-auto max-[1100px]:overflow-visible max-[640px]:rounded-[8px]">
-  <div class="border-b border-white/10 px-3 py-2 [body.light-theme_&]:border-[#d8e3f0]" [ngClass]="{ '!border-b-0': collapsed }">
+<div [attr.data-testid]="'threat-lens-feed-panel-' + feedType" class="map-overlay-menu flex h-full flex-col overflow-hidden rounded-[10px] border-0 bg-[rgba(28,39,53,0.94)] text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm [body.light-theme_&]:!bg-white max-[1100px]:h-auto max-[1100px]:overflow-visible max-[640px]:rounded-[12px]">
+  <div class="border-b border-[rgba(143,166,190,0.20)] px-3 py-2" [ngClass]="{ '!border-b-0': collapsed }">
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0">
         <div class="flex items-center gap-2">
@@ -13,15 +13,17 @@
         </p>
       </div>
 
-      <button [attr.data-testid]="'threat-lens-feed-toggle-' + feedType" type="button" (click)="toggleCollapsed()" [attr.aria-label]="(collapsed ? 'Expand' : 'Collapse') | translate" class="ui-consolidated-sub flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-790)] transition hover:bg-[var(--color-blue-780)] [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white">
-        <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 transition duration-200 ui-action-icon" [ngClass]="{ 'rotate-180': !collapsed }" />
+      <button [attr.data-testid]="'threat-lens-feed-toggle-' + feedType" type="button" (click)="toggleCollapsed()" [attr.aria-label]="(collapsed ? 'Expand' : 'Collapse') | translate" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[rgba(22,34,48,0.88)] text-[#C4D4E6] shadow-sm ring-1 ring-inset ring-[rgba(143,166,190,0.20)] transition hover:bg-[rgba(65,86,110,0.64)] hover:text-white [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white">
+        <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 opacity-80 transition duration-200 [filter:saturate(0.55)_brightness(1.12)] [body.light-theme_&]:opacity-100 [body.light-theme_&]:filter-none" [ngClass]="{ 'rotate-180': !collapsed }" />
       </button>
     </div>
 
     @if (!collapsed) {
-      <div class="mt-3 flex items-center gap-2 rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 [body.light-theme_&]:!bg-white">
-        <i class="bi bi-search text-[12px] text-[var(--color-text3)]"></i>
-        <input [attr.data-testid]="'threat-lens-feed-search-' + feedType" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" type="text" [placeholder]="searchPlaceholder" class="w-full bg-transparent text-[12px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text3)]" />
+      <div class="relative mt-3">
+        <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
+          <i class="bi bi-search h-5 w-5 leading-none text-[var(--color-text4)]" aria-hidden="true"></i>
+        </div>
+        <input [attr.data-testid]="'threat-lens-feed-search-' + feedType" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" type="text" [placeholder]="searchPlaceholder" class="relative z-0 block h-10 w-full rounded-[10px] border-0 bg-[rgba(22,34,48,0.88)] pl-11 pr-4 text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-[rgba(124,154,186,0.48)] [body.light-theme_&]:!bg-white [body.light-theme_&]:text-[var(--color-gray-900)] [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,0.08)] [body.light-theme_&]:ring-[#d7e2ef] sm:text-sm sm:leading-6" />
       </div>
 
       @if (searchTerm) {
@@ -32,7 +34,7 @@
 
       <div class="mt-3 flex flex-wrap gap-2">
         @for (range of ranges; track range.key) {
-          <button [attr.data-testid]="'threat-lens-feed-range-' + feedType + '-' + range.key" type="button" (click)="setRange(range.key)" class="rounded-[6px] border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white" [ngClass]="selectedRange === range.key ? [ 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text1)]' ] : [ 'border-[var(--color-border)]', 'bg-[var(--color-blue-790)]', 'text-[var(--color-text4)]', 'hover:text-[var(--color-text1)]', 'hover:bg-[var(--color-blue-710)]' ]">
+          <button [attr.data-testid]="'threat-lens-feed-range-' + feedType + '-' + range.key" type="button" (click)="setRange(range.key)" class="rounded-[9px] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ring-1 ring-inset ring-[rgba(143,166,190,0.20)] transition-colors [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white" [ngClass]="selectedRange === range.key ? [ 'bg-[rgba(78,102,130,0.52)]', 'text-white' ] : [ 'bg-[rgba(22,34,48,0.88)]', 'text-[#C4D4E6]', 'hover:text-white', 'hover:bg-[rgba(65,86,110,0.64)]' ]">
             {{ range.label }}
           </button>
         }
@@ -47,7 +49,7 @@
         @if (displayItems.length) {
           <div class="grid grid-cols-1 gap-2 max-[1100px]:grid-cols-2 max-[640px]:grid-cols-1">
             @for (item of displayItems; track item.id) {
-              <button [attr.data-testid]="'threat-lens-feed-item-' + feedType" type="button" (click)="openFeedItem(item)" class="block w-full rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3 text-left transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white">
+              <button [attr.data-testid]="'threat-lens-feed-item-' + feedType" type="button" (click)="openFeedItem(item)" class="block w-full rounded-[10px] bg-[rgba(22,34,48,0.88)] p-3 text-left ring-1 ring-inset ring-[rgba(143,166,190,0.20)] transition-colors hover:bg-[rgba(65,86,110,0.64)] [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white">
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
                     <div class="flex items-center gap-2">
@@ -76,7 +78,7 @@
                 @if (item.highlights.length) {
                   <div class="mt-3 flex flex-wrap gap-1.5">
                     @for (highlight of item.highlights; track highlight) {
-                      <span class="rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 py-1 text-[10px] text-[var(--color-text2)] [body.light-theme_&]:!bg-white">
+                      <span class="rounded-[8px] bg-[rgba(22,34,48,0.88)] px-2 py-1 text-[10px] text-[#C4D4E6] ring-1 ring-inset ring-[rgba(143,166,190,0.20)] [body.light-theme_&]:!bg-white">
                         {{ highlight }}
                       </span>
                     }
@@ -87,13 +89,13 @@
           </div>
         }
         @else {
-          <div [attr.data-testid]="'threat-lens-feed-empty-' + feedType" class="flex h-full min-h-[140px] items-center justify-center rounded-[6px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-760)] px-4 text-center text-[12px] text-[var(--color-text4)] [body.light-theme_&]:!bg-white max-[1100px]:h-auto">
+          <div [attr.data-testid]="'threat-lens-feed-empty-' + feedType" class="flex h-full min-h-[140px] items-center justify-center rounded-[10px] bg-[rgba(22,34,48,0.88)] px-4 text-center text-[12px] text-[var(--color-text4)] ring-1 ring-inset ring-[rgba(143,166,190,0.20)] [body.light-theme_&]:!bg-white max-[1100px]:h-auto">
             {{ emptyMessage }}
           </div>
         }
       </div>
-      <div class="pointer-events-none absolute inset-x-0 top-0 z-20 h-8 bg-gradient-to-b from-[rgba(8,16,27,0.96)] via-[rgba(8,16,27,0.72)] to-transparent [body.light-theme_&]:from-[#F9FBFF] [body.light-theme_&]:via-[rgba(249,251,255,0.8)]"></div>
-      <div class="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-8 bg-gradient-to-t from-[rgba(8,16,27,0.96)] via-[rgba(8,16,27,0.72)] to-transparent [body.light-theme_&]:from-[#F9FBFF] [body.light-theme_&]:via-[rgba(249,251,255,0.8)]"></div>
+      <div class="pointer-events-none absolute inset-x-0 top-0 z-20 h-8 bg-gradient-to-b from-[rgba(28,39,53,0.94)] via-[rgba(28,39,53,0.56)] to-transparent [body.light-theme_&]:from-[#F9FBFF] [body.light-theme_&]:via-[rgba(249,251,255,0.8)]"></div>
+      <div class="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-8 bg-gradient-to-t from-[rgba(28,39,53,0.94)] via-[rgba(28,39,53,0.56)] to-transparent [body.light-theme_&]:from-[#F9FBFF] [body.light-theme_&]:via-[rgba(249,251,255,0.8)]"></div>
     </div>
   }
 </div>

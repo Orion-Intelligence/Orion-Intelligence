@@ -194,6 +194,21 @@ describe('User Manual Screenshot Flow', () => {
       .should('be.visible');
   };
 
+  const visitWithAdminSession = (path: string) => {
+    cy.visit(path);
+    cy.location('pathname').then((pathname) => {
+      if (!pathname.includes('/login')) {
+        return;
+      }
+
+      cy.get('[data-testid="login-user"]').should('be.visible').clear().type(adminUsername);
+      cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(adminPassword, { log: false });
+      cy.get('[data-testid="login-button"], input.login-button').first().click();
+      ensureDashboardReady();
+      cy.visit(path);
+    });
+  };
+
   const captureCaseManagementScreenshots = () => {
     let docsCaseId = '';
     let docsCaseTitle = 'Docs Exposure Review';
@@ -857,8 +872,8 @@ describe('User Manual Screenshot Flow', () => {
     captureFullWidth('satellite-map-imagery-analysis');
     cy.wait(1000);
 
-    openSidebarGroup('Exploit');
-    clickSidebarSubItem('Exploit', 'All');
+    visitWithAdminSession('/dashboard/exploit/all');
+    ensureDashboardReady();
     typeDashboardSearch('exploit');
     cy.get('[data-testid="open-report"], [data-testid="result-card"], tbody tr.cursor-pointer[id^="item-"]')
       .filter(':visible')
@@ -899,7 +914,7 @@ describe('User Manual Screenshot Flow', () => {
     cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
     capture('entity-api-email-breach');
 
-    cy.visit('/dashboard/scanner/network-scan');
+    visitWithAdminSession('/dashboard/scanner/network-scan');
     ensureDashboardReady();
     cy.get('[data-testid="network-intel-tab-host-recon"]').should('be.visible');
     cy.get('[data-testid="network-intel-search-input"]').should('be.visible').click().type('{selectall}{backspace}ucp.edu.pk{enter}');

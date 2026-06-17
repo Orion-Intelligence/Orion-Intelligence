@@ -3,12 +3,14 @@
     <h3 class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">{{ 'Category Layers' | translate }}</h3>
   </div>
   <div class="relative mt-3">
-    <input data-testid="threat-lens-arc-range" type="text" inputmode="numeric" pattern="[0-9]*" [ngModel]="rangeSearchTerm" (ngModelChange)="onRangeSearchChange($event)" (focus)="openRangePicker()" (click)="openRangePicker()" (blur)="closeRangePicker()" (keydown.enter)="onRangeSearchCommit()" [disabled]="!arcRangeOptions.length" placeholder="100" class="h-8 w-full rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-790)] py-0 pl-2 pr-8 text-[12px] font-semibold text-[var(--color-text1)] outline-none focus:border-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-60 placeholder:text-[var(--color-text4)] [body.light-theme_&]:!bg-white" />
-    <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="" aria-hidden="true" class="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 transition duration-200 ui-action-icon" [ngClass]="{ 'rotate-180': isRangePickerOpen }" />
+    <input data-testid="threat-lens-arc-range" type="text" inputmode="numeric" pattern="[0-9]*" [ngModel]="rangeSearchTerm" (ngModelChange)="onRangeSearchChange($event)" (focus)="openRangePicker()" (click)="openRangePicker()" (blur)="closeRangePicker()" (keydown.enter)="onRangeSearchCommit()" [disabled]="!arcRangeOptions.length" placeholder="100" class="h-9 w-full rounded-[10px] border-0 bg-[rgba(22,34,48,0.88)] py-0 pl-3 pr-9 text-[12px] font-semibold text-[#C4D4E6] shadow-sm ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm outline-none focus:ring-2 focus:ring-[rgba(124,154,186,0.48)] disabled:cursor-not-allowed disabled:opacity-60 placeholder:text-[var(--color-text4)] [body.light-theme_&]:!bg-white [body.light-theme_&]:text-[var(--color-gray-900)] [body.light-theme_&]:ring-[#d7e2ef]" />
+    <span class="pointer-events-none absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center">
+      <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="" aria-hidden="true" class="h-4 w-4 opacity-80 transition duration-200 [filter:saturate(0.55)_brightness(1.12)] [body.light-theme_&]:opacity-100 [body.light-theme_&]:filter-none" [ngClass]="{ 'rotate-180': isRangePickerOpen }" />
+    </span>
     @if (isRangePickerOpen && filteredArcRangeOptions.length) {
-      <div class="absolute left-0 right-0 top-[calc(100%+4px)] z-30 max-h-[180px] overflow-y-auto rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-790)] py-1 [body.light-theme_&]:!bg-white">
+      <div class="absolute left-0 right-0 top-[calc(100%+4px)] z-30 max-h-[180px] overflow-y-auto rounded-[10px] border-0 bg-[rgba(28,39,53,0.94)] py-1 shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm [body.light-theme_&]:!bg-white">
         @for (range of filteredArcRangeOptions; track range.index) {
-          <button type="button" (mousedown)="onRangeOptionMouseDown($event, range)" class="block w-full px-2.5 py-1.5 text-left text-[12px] font-semibold text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white" [ngClass]="range.index === selectedArcRangeIndex ? 'bg-[var(--color-blue-720)] text-[var(--color-text1)]' : ''">
+          <button type="button" (mousedown)="onRangeOptionMouseDown($event, range)" class="block w-full px-3 py-1.5 text-left text-[12px] font-semibold text-[#C4D4E6] transition-colors hover:bg-[rgba(65,86,110,0.64)] hover:text-white [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white" [ngClass]="range.index === selectedArcRangeIndex ? 'bg-[rgba(78,102,130,0.52)] text-white' : ''">
             {{ range.label }}
           </button>
         }
@@ -18,7 +20,7 @@
 </div>
 <div class="mt-2 grid max-h-[220px] grid-cols-2 gap-2 overflow-auto pr-1 max-[640px]:max-h-[160px] max-[420px]:grid-cols-1">
   @for (item of categoryLegend; track item.categoryKey) {
-    <button data-testid="threat-lens-category-layer" type="button" (click)="arcCategorySelect.emit(item.categoryKey)" [disabled]="!item.arcCount" class="w-full rounded-[6px] border px-3 py-2 text-left text-[12px] text-[var(--color-text2)] transition-colors disabled:cursor-not-allowed disabled:opacity-55 [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white" [ngClass]="selectedArcCategoryKey === item.categoryKey ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-710)]' : 'border-[var(--color-border)] bg-[var(--color-blue-760)] hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]'">
+    <button data-testid="threat-lens-category-layer" type="button" (click)="arcCategorySelect.emit(item.categoryKey)" [disabled]="!item.arcCount" class="w-full rounded-[10px] px-3 py-2 text-left text-[12px] text-[#C4D4E6] ring-1 ring-inset ring-[rgba(143,166,190,0.20)] transition-colors disabled:cursor-not-allowed disabled:opacity-55 [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white" [ngClass]="selectedArcCategoryKey === item.categoryKey ? 'bg-[rgba(78,102,130,0.52)] text-white' : 'bg-[rgba(22,34,48,0.88)] hover:bg-[rgba(65,86,110,0.64)] hover:text-white'">
       <div class="flex items-center gap-3">
         <span class="flex min-w-0 items-center gap-2">
           <svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0" [attr.color]="item.colorHex" aria-hidden="true">

@@ -11,7 +11,6 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 })
 export class ThreatLensTopicSearchPanelComponent {
   term = '';
-  currentTopicQuery = '';
 
   @Input() isLoading = false;
 
@@ -23,7 +22,6 @@ export class ThreatLensTopicSearchPanelComponent {
 
   onSearch(): void {
     const query = this.term.trim();
-    this.currentTopicQuery = query;
     this.search.emit(query);
   }
 }
