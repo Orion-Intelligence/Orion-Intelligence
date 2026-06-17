@@ -2829,6 +2829,12 @@ select:not(.ui-popup-select, .ui-select)::-ms-expand {
   display: none !important;
 }
 
+.threat-lens-map canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .threat-lens-tooltip__content {
   display: grid;
   gap: 6px;
