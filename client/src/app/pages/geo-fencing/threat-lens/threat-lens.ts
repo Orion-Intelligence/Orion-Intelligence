@@ -68,7 +68,7 @@ export class ThreatLensComponent implements OnDestroy {
   selectedCountryName = '';
   statusMessage = 'Loading threat lens results...';
   isLoading = true;
-  arcBatchSize = 100;
+  arcBatchSize = 50;
   selectedArcCategoryKey: ThreatLensCategoryModelKey = this.defaultArcCategoryKey;
   selectedArcRangeIndex = 0;
   arcRangeOptions: ThreatLensArcRangeOption[] = [];
