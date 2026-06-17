@@ -31,7 +31,7 @@ ensure_local_ssl_cert() {
 
 client_build() {
     cd client || exit
-        npm install
+    npm ci
     npm run lint
     rm -rf build-next
     if [ "$1" = "-t" ]; then
@@ -175,7 +175,7 @@ if [ "$COMMAND" = "build" ]; then
     fi
 
     docker pull python:3.11-slim
-    npm --prefix client install
+    npm --prefix client ci
     npm --prefix client run lint
 
     case "$FLAG" in
