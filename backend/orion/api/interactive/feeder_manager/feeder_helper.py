@@ -177,6 +177,16 @@ class FeederHelper:
 
         return list(merged_by_url.values())
 
+    def replace_value_entries(self, existing_values: list[dict], urls: list[str]) -> list[dict]:
+        merged_by_url = {
+            str(value.get("url") or "").strip(): value
+            for value in self.merge_value_entries(existing_values, [])
+        }
+        return [
+            merged_by_url[url] if url in merged_by_url else {"url": url, "status": "pending"}
+            for url in urls
+        ]
+
     @staticmethod
     def value_record_name(rule_key: str) -> str:
         return f"_{rule_key}__values"
@@ -198,11 +208,20 @@ class FeederHelper:
             record = await self._engine.find_one(self.model, self.model.name == record_name)
 
         if record:
+            if rule_type == "generic" and not normalized_urls:
+                await self._engine.delete(record)
+                return
             record.rule_key = rule_key
-            record.values = self.merge_value_entries(record.values or [], normalized_urls)
+            record.values = (
+                self.replace_value_entries(record.values or [], normalized_urls)
+                if rule_type == "generic"
+                else self.merge_value_entries(record.values or [], normalized_urls)
+            )
             if rule_type != "shared":
                 record.url = None
                 record.entry_kind = "values"
+        elif rule_type == "generic" and not normalized_urls:
+            return
         else:
             record = self.model(
                 name=record_name,
