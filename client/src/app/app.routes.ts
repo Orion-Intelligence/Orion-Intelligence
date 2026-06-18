@@ -21,7 +21,6 @@ const loadDashboardResultContainer = () => import('./pages/intel-panel/dashboard
 const loadReportComponent = () => import('./sections/report/templates/report_general/report.component').then(m => m.ReportComponent);
 const loadReportDefacementComponent = () => import('./sections/report/templates/report-defacement/report-defacement.component').then(m => m.ReportDefacementComponent);
 const loadReportChatComponent = () => import('./sections/report/templates/report-chat/report-chat.component').then(m => m.ReportChatComponent);
-const loadDumpComponent = () => import('./pages/dump/dump.component').then(m => m.DumpComponent);
 const loadCredentialComponent = () => import('./pages/root-searches/credentials/credential.component').then(m => m.CredentialComponent);
 const loadErrorHandlerComponent = () => import('./shared/partials/error-handler/error-handler.component').then(m => m.ErrorHandlerComponent);
 const loadDashboardConsolidatedComponent = () => import('./pages/root-searches/dashboard-consolidated/dashboard-consolidated.component').then(m => m.DashboardConsolidatedComponent);
@@ -684,28 +683,6 @@ export const routes: Routes = [
               title: 'APK Analysis',
               description: 'Upload an Android APK to perform static analysis, extract Indicators of Compromise (IOCs), and inspect permissions and behaviors'
             }
-          }
-        ]
-      },
-      {
-        canActivate: [subscriptionGuard],
-        path: 'dump',
-        data: { animation: 'DumpPage' },
-        children: [
-          {
-            path: '',
-            redirectTo: 'listing',
-            pathMatch: 'full'
-          },
-          {
-            path: 'listing',
-            loadComponent: loadDumpComponent,
-            data: { type: 'listing', animation: 'CategoryPage' }
-          },
-          {
-            path: 'credential',
-            loadComponent: loadCredentialComponent,
-            data: { type: 'credential', animation: 'CategoryPage' }
           }
         ]
       },

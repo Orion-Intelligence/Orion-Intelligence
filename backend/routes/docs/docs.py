@@ -34,44 +34,7 @@ SYSTEM_INFO_DOCS = {"directory": {"description": (
     "}\n"
     "```\n"), },
 
-    "dumps": {"description": (
-        "Retrieve the complete catalog of breach dumps collected from Telegram channels and monitored websites.\n\n"
-        "Supported filters:\n"
-        "- **page:** page number of the result set\n"
-        "- **source:** all, telegram, websites (origin of the leak, e.g., Telegram or monitored websites)\n"
-        "- **group:** leak group or channel name derived from the source (e.g., Telegram channel name)\n"
-        "- **status:** all, parsed, unparsed\n"
-        "- **daterange:** optional date range string (e.g., `2025-01-01,2025-01-15`)\n"
-        "- **q:** free-text search query applied to `leak_url`, `source`, `group`, and other indexed fields (default: `*`)\n\n"
-        "Common use-cases include identifying newly leaked dumps, retrieving unparsed dumps for analysis, "
-        "or filtering dumps from specific threat groups or Telegram channels."), "response_description": (
-        "Paginated dump catalog response containing:\n"
-        "- **total_count** — total number of dumps matching filters\n"
-        "- **page** — current page number\n"
-        "- **mDumpCallbackLinks** — list of dump entries, each containing:\n"
-        "  - **leak_url** — raw dump reference or asset URL\n"
-        "  - **source** — origin of the leak (e.g., telegram, websites)\n"
-        "  - **group** — associated leak group or channel name derived from the source (e.g., Telegram channel name)\n"
-        "  - **link** — direct reference link to the dump message or file\n"
-        "  - **parsed_status** — whether the dump has been parsed/processed\n"
-        "  - **created_at** — first-seen timestamp of the dump"
-        "\n\nExample response:\n"
-        "```json\n"
-        "{\n"
-        '  "total_count": 152,\n'
-        '  "page": 1,\n'
-        '  "mDumpCallbackLinks": [\n'
-        "    {\n"
-        '      "leak_url": "https://t.me/example_leaks/1234",\n'
-        '      "source": "telegram",\n'
-        '      "group": "example_leak_group",\n'
-        '      "link": "https://t.me/example_leaks/1234",\n'
-        '      "parsed_status": "parsed",\n'
-        '      "created_at": "2025-12-03T21:15:23Z"\n'
-        "    }\n"
-        "  ]\n"
-        "}\n"
-        "```\n"), }, "insight": {"description": (
+    "insight": {"description": (
         "Retrieve system-wide analytics and high-level intelligence metrics across all monitored data sources.\n\n"
         "This endpoint does not take any parameters and returns pre-aggregated insights computed by Orion.\n\n"
         "Returned analytics include (per data type such as general, leak, defacement):\n"
@@ -2367,8 +2330,7 @@ def _doc(rel_path: str) -> dict:
     return {"description": text, "response_description": response_description}
 
 
-SYSTEM_INFO_DOCS = {"directory": _doc("system-info/directory.md"), "dumps": _doc(
-    "system-info/dumps.md"), "insight": _doc("system-info/insight.md"), }
+SYSTEM_INFO_DOCS = {"directory": _doc("system-info/directory.md"), "insight": _doc("system-info/insight.md"), }
 
 REPORT_DOCS = {"defacement": _doc("reports/defacement.md"), "breach": _doc("reports/breach.md"), "news": _doc(
     "reports/news.md"), "exploit": _doc("reports/exploit.md"), "strategic": _doc("reports/strategic.md"), "chat": _doc(

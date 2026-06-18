@@ -23,7 +23,6 @@ from orion.api.server.crawl_manager.crawl_index_generator import crawl_index_gen
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
 from orion.services.mongo_manager.shared_model.db_feeder_script_model import db_feeder_script_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 from orion.api.server.crawl_manager.class_model.CTITextRequest import CTITextRequest
@@ -540,29 +539,6 @@ class crawl_model:
                 {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_STEALERLOGS_INDEX, ELASTIC_KEYS.S_VALUE: doc})
 
         return JSONResponse(content={"message": "Logs indexed successfully"}, status_code=200)
-
-    async def invoke_dump_index(self, dump_model: DumpModel):
-        try:
-            batch_id = dump_model.id
-            if not dump_model.status:
-                dump_model.status = False
-
-            for index, url in enumerate(dump_model.leak_url):
-                record_id = f"{batch_id}_{index}"
-
-                dump_record = db_dump_record_model(
-                    id=record_id,
-                    parsed_status=dump_model.status,
-                    leak_url=url,
-                    source=dump_model.source,
-                    group=dump_model.group,
-                    link=dump_model.link)
-                await self._engine.save(dump_record)
-
-            return JSONResponse(content={"message": "Dump records saved successfully"}, status_code=200)
-
-        except Exception:
-            return JSONResponse(content={"error": "Failed to save dump records"}, status_code=500)
 
     @staticmethod
     async def fetch_cti_label(payload: CTITextRequest):

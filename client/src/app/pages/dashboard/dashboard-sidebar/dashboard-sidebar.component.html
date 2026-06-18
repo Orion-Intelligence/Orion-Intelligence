@@ -100,16 +100,6 @@
           [routePrefix]="'feed'"
         [title]="('News Feed') | translate"></app-dashboard-sidebar-items>
       }
-      @if (isAdmin() || licenseService.canUseModule('dumps')) {
-        <app-dashboard-sidebar-items
-          (optionSelected)="onOptionSelected($event)"
-          (sectionSelected)="onSectionSelected($event)"
-          [category]="category.DUMP"
-          [icon]="'assets/images/sidebar/dump.svg'"
-          [items]="dumpCategories"
-          [routePrefix]="'dump'"
-        [title]="('Breach Artifacts') | translate"></app-dashboard-sidebar-items>
-      }
       @if (licenseService.canUseScanning() || licenseService.canUseModule('stealer_logs')) {
         <div class="mt-[20px] text-[13px] font-bold text-white">{{ 'Webscans' | translate }}</div>
         <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
@@ -347,17 +337,6 @@
           [selectionStore]="selectionStore"
           [title]="('News Feed') | translate">
         </app-dashboard-sidebar-collapsed>
-      }
-      @if (isAdmin() || licenseService.canUseModule('dumps')) {
-        <app-dashboard-sidebar-collapsed
-          (optionSelected)="onOptionSelected($event)"
-          (sectionSelected)="onSectionSelected($event)"
-          [category]="category.DUMP"
-          [icon]="'assets/images/sidebar/dump.svg'"
-          [items]="dumpCategories"
-          [routePrefix]="'dump'"
-          [selectionStore]="selectionStore"
-        [title]="('Breach Artifacts') | translate"></app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseModule('stealer_logs')) {
         <app-dashboard-sidebar-collapsed

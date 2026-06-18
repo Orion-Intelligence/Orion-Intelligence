@@ -2,7 +2,6 @@ from .apt_model import AptDataModel
 from .chat_model import chat_data_model
 from .credential_model import credential_data_model
 from .defacement_model import DefacementDataModel
-from .dump_model import DumpModel
 from .exploit_model import ExploitDataModel
 from .file_model import ScreenshotPayload
 from .general_model import GeneralDataModel
@@ -21,7 +20,6 @@ __all__ = [
     "AptDataModel",
     "credential_data_model",
     "DefacementDataModel",
-    "DumpModel",
     "ExploitDataModel",
     "ScreenshotPayload",
     "GeneralDataModel",

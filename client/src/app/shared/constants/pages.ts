@@ -3,7 +3,6 @@ export enum Category {
     BREACH = 'Breach',
     HOMEPAGE = 'Home',
     DIRECTORY = 'Directory',
-    DUMP = 'Dump',
     DEFACEMENT = 'Defacement',
     SOCIAL = 'Social',
     API = 'Api',
@@ -72,9 +71,6 @@ export enum ScannerSubCategory {
     NETWORK = 'Network-Scan',
     REPOSITORY = 'Repository-Scan',
     SEO = 'SEO-Scan'
-}
-export enum DumpSubCategory {
-    LISTING = 'Listing'
 }
 export enum StealerlogsSubCategory {
     IOC = 'IOCS'

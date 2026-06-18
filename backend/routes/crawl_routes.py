@@ -266,12 +266,6 @@ async def index_entities(_: Request, entities: List[entity_model] = Body(...)):
     return results
 
 
-@crawl_routes.post("/api/index/dump", dependencies=[Depends(limiter_dependency)])
-async def index_dump(request: Request):
-    body = await request.json()
-    return await crawl_model.getInstance().invoke_dump_index(DumpModel(**body))
-
-
 @crawl_routes.post("/api/index/stealerlog", dependencies=[Depends(limiter_dependency)])
 async def index_stealerlog(model: LogBatchModel):
     return await crawl_model.getInstance().invoke_stealerlog_index(model)

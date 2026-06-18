@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, output } from '@angular/core';
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
-import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, StealerlogsSubCategory, ScannerSubCategory, TenantSubCategory, ProfileSubCategory, ThreatIntelSubCategory } from '../../../shared/constants/pages';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, StealerlogsSubCategory, ScannerSubCategory, TenantSubCategory, ProfileSubCategory, ThreatIntelSubCategory } from '../../../shared/constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
@@ -36,7 +36,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   apiCategories = Object.values(ApiSubCategory);
   exploitCategories = Object.values(ExploitSubCategory);
   threatIntelCategories = Object.values(ThreatIntelSubCategory);
-  dumpCategories = Object.values(DumpSubCategory);
   newsCategories = Object.values(FeedSubCategory);
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
@@ -123,9 +122,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
           break;
         case Category.THREAT_INTEL:
           firstSubcategory = this.threatIntelCategories[0];
-          break;
-        case Category.DUMP:
-          firstSubcategory = this.dumpCategories[0];
           break;
         case Category.FEED:
           firstSubcategory = this.newsCategories[0];

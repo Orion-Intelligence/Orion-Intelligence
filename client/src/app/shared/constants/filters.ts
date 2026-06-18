@@ -77,11 +77,6 @@ const DATERANGE_DEFAULT = {
   title: "Date Range",
   tooltip: "Date Range"
 };
-const DATERANGE_DUMP = {
-  ...BASE_DATERANGE,
-  title: "Date Range",
-  tooltip: "Select Range"
-};
 const DATERANGE_CREATION = {
   ...BASE_DATERANGE,
   title: "Creation Date Range",
@@ -105,28 +100,6 @@ function createGeneralContent() {
     selected: "all"
   };
 }
-const SOURCE_FILTER = {
-  title: "Source",
-  options: [
-    { key: "all", label: "All" },
-    { key: "telegram", label: "Telegram" },
-    { key: "websites", label: "Websites" }
-  ],
-  type: "dropdown" as const,
-  tooltip: "Leak origin sources",
-  selected: "all"
-};
-const STATUS_FILTER = {
-  title: "Status",
-  options: [
-    { key: "all", label: "All" },
-    { key: "parsed", label: "True" },
-    { key: "unparsed", label: "False" }
-  ],
-  type: "dropdown" as const,
-  tooltip: "Status filter (True/False)",
-  selected: "all"
-};
 const SAFE_FILTER = {
   title: "Safe Search",
   options: [
@@ -200,13 +173,6 @@ const PLATFORM_RESULT_COUNT_FILTER = {
   min: 1,
   max: 50,
   placeholder: "Enter platforms result count"
-};
-export const dump_filters: FilterModel = {
-  filters: {
-    source: SOURCE_FILTER,
-    daterange: DATERANGE_DUMP,
-    status: STATUS_FILTER
-  }
 };
 export const audit_filters: FilterModel = {
   filters: {

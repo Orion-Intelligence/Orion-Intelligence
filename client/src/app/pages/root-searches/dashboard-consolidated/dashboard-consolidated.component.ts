@@ -11,7 +11,7 @@ import { ConsolidatedCallbackModel } from '../../../shared/model/results/consoli
 import { DashboardResultExploitComponent } from '../../intel-panel/dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
 import { DashboardResultChatComponent } from '../../intel-panel/dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
 import { SortGroupedResultsPipe } from '../../../shared/pipes/sort-grouped-results.pipe';
-import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, FeedSubCategory, SocialSubCategory, ThreatIntelSubCategory } from '../../../shared/constants/pages';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, FeedSubCategory, SocialSubCategory, ThreatIntelSubCategory } from '../../../shared/constants/pages';
 import { SelectionStoreService } from '../../../services/dashboard/selection.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { DashboardResultSocialComponent } from '../../intel-panel/dashboard-results/dashboard-result-social/dashboard-result-social.component';
@@ -62,7 +62,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   firstTrigger = true;
   result_count = 0;
   apiCategories = Object.values(ApiSubCategory);
-  dumpCategories = Object.values(DumpSubCategory);
   threatIntelCategories = Object.values(ThreatIntelSubCategory);
   newsCategories = Object.values(FeedSubCategory);
   socialCategories = Object.values(SocialSubCategory);
@@ -313,9 +312,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         break;
       case Category.THREAT_INTEL:
         firstSubcategory = this.threatIntelCategories[0];
-        break;
-      case Category.DUMP:
-        firstSubcategory = this.dumpCategories[0];
         break;
       case Category.FEED:
         firstSubcategory = this.newsCategories[0];

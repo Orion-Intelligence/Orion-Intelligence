@@ -9,8 +9,6 @@ from orion.api.interactive.feedback_manager.feedback_manager import FeedbackMana
 from orion.api.interactive.feedback_manager.models.feedback_param_model import feedback_comment_param_model
 from orion.api.interactive.directory_manager.directory_model import directory_model
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
-from orion.api.interactive.dump_manager.dump_model import dump_model
-from orion.api.interactive.dump_manager.dump_shared_model.dump_param_model import dump_param_model
 from orion.api.interactive.hompage_manager.homepage_model import homepage_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
@@ -309,19 +307,6 @@ async def get_public_user_activity(user_id: str, current_user=Depends(get_curren
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))])
 async def get_directory(param: directory_param_model = Depends()):
     return await directory_model.getInstance().invoke_directory(param)
-
-
-@api_routes.get(
-    "/api/dumps",
-    summary="Get breach dump catalog",
-    description=SYSTEM_INFO_DOCS["dumps"]["description"],
-    tags=["System Info"],
-    operation_id="getBreachDumpCatalog",
-    response_description=SYSTEM_INFO_DOCS["dumps"]["response_description"],
-    status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:dumps")), ], )
-async def get_dumps(param: dump_param_model = Depends()):
-    return await dump_model.getInstance().invoke_dump(param)
 
 
 @api_routes.get(
