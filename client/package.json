@@ -58,7 +58,7 @@
     "@angular-eslint/template-parser": "21.3.1",
     "@angular/cli": "21.2.5",
     "@angular/compiler-cli": "21.2.17",
-    "@babel/core": "7.29.0",
+    "@babel/core": "7.29.7",
     "@babel/preset-env": "^7.29.5",
     "@babel/preset-typescript": "7.28.5",
     "@eslint/js": "10.0.1",
@@ -105,7 +105,7 @@
     "test-exclude": {
       "brace-expansion": "1.1.13"
     },
-    "tar": "7.5.12",
+    "tar": "7.5.16",
     "webpack": "5.105.4",
     "webpack-dev-server": "5.2.4",
     "vite": "7.3.2",
@@ -114,7 +114,7 @@
     "yaml": "2.8.3",
     "brace-expansion": "5.0.6",
     "pacote": {
-      "tar": "7.5.12"
+      "tar": "7.5.16"
     },
     "@cypress/code-coverage": {
       "js-yaml": "4.1.1"
