@@ -424,7 +424,7 @@ class search_query_generator:
         m_network = p_query_model.network
         m_platform = p_query_model.platform
         m_page_number = getattr(p_query_model, "page", 1)
-        m_content_type = p_query_model.content
+        m_content_type = str(p_query_model.content or "all").strip().lower()
         m_platform = (p_query_model.platform or "").strip().lower()
         m_safe_search = p_query_model.safe
         result_size = p_query_model.platform_result_count
@@ -500,7 +500,8 @@ class search_query_generator:
         elif m_content_type == "databases":
             must_not_clause.append({"terms": {"m_ioc_type": ["phishing", "hacked"]}})
 
-        if m_content_type and m_content_type.lower() not in ("", "all"):
+        is_defacement_ioc_filter = search_type == "defacement" and m_content_type in ("phishing", "hacked", "databases")
+        if m_content_type and m_content_type.lower() not in ("", "all") and not is_defacement_ioc_filter:
             if m_content_type.lower() == "swarm":
                 must_clauses.append(
                     {"bool": {"should": [

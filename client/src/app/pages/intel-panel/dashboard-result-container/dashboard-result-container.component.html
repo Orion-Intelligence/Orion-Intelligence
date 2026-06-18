@@ -11,19 +11,6 @@
   [type]="type">
 </app-result>
 
-@if (!isResponseLoading() && currentResultModel?.length > 0) {
-  <div @fadeInDashboardItem>
-    @if (currentResultModel[0].rank_index === 'defacement_model') {
-      <app-dashboard-result-defacement
-        [isLoading]="isResponseLoading()"
-        [isExpandAble]="false"
-        [isList]="true"
-        [searchResults]="currentResultModel">
-      </app-dashboard-result-defacement>
-    }
-  </div>
-}
-
 @if (!isResponseLoading()) {
   <div @fadeInDashboardItem>
     <div class="mx-[32px] max-w-[1220px] pb-[16px] max-[1000px]:mx-[15px]">
@@ -54,6 +41,14 @@
               [isExpandAble]="false"
               [searchResults]="[item]">
             </app-dashboard-result-chat>
+          }
+          @if (item.rank_index === 'defacement_model' && $index === 0) {
+            <app-dashboard-result-defacement
+              [isLoading]="isResponseLoading()"
+              [groupedResults]="defacementGroups"
+              [searchQuery]="currentQuery"
+              [searchResults]="currentResultModel">
+            </app-dashboard-result-defacement>
           }
           @if ($index === 1 && shouldShowCrossSearch) {
             <div class="w-full max-w-[910px] pb-[20px]">

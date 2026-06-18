@@ -159,7 +159,7 @@ services:
       - backend
 
   mongo:
-    image: mongo:7.0
+    image: mongo:latest
     container_name: trustly-web-mongodb
     restart: always
     environment:

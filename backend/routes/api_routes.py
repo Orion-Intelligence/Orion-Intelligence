@@ -15,6 +15,8 @@ from orion.api.interactive.hompage_manager.homepage_model import homepage_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_crack_model, search_dynamic_crypto_model, search_dynamic_onion_search, search_dynamic_param_model, search_dynamic_social_model
+from orion.api.interactive.search_manager.internal.search_defacement_controller import search_defacement_controller
+from orion.api.interactive.search_manager.internal.search_generic_controller import search_generic_controller
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.interactive.siemlog_manager.siem_log_manager import SiemLogManager
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest, UrlVulnerabilityScanRequest
@@ -104,7 +106,7 @@ async def search_general(param: search_consolidated_param_model = Body(...), cur
             ELASTIC_INDEX.S_CHATS_INDEX,
             ELASTIC_INDEX.S_SOCIAL_INDEX,
         ]
-    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
+    return await search_generic_controller.getInstance().search_ranked_result(param, base_index, [], [])
 
 
 @api_routes.post(
@@ -223,9 +225,8 @@ async def search_threat_intel(param: search_consolidated_param_model = Body(...)
 async def search_defacement(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
-    param.content = param.category
     base_index = [ELASTIC_INDEX.S_DEFACEMENT_INDEX]
-    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category],"defacement")
+    return await search_defacement_controller.getInstance().search_grouped_result(param, base_index)
 
 @api_routes.post(
     "/api/feedback/comment/{doc_id}",

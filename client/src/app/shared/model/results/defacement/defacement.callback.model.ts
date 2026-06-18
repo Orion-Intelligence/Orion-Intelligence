@@ -20,13 +20,58 @@ export class DefacementResultItem {
     Object.assign(this, init);
   }
 }
+export interface DefacementGroupCallbackItem {
+  key: string;
+  title: string;
+  subtitle?: string;
+  records: DefacementResultItem[];
+  record_count?: number;
+  affected_sites?: number;
+  ip_count?: number;
+  servers?: string[];
+  latest_seen?: string | null;
+}
+export type DefacementRisk = 'High' | 'Medium' | 'Low';
+
+export interface DefacementRecord {
+  item: DefacementResultItem;
+  title: string;
+  ipSummary: string;
+  webServerSummary: string;
+  sourceUrl: string;
+  leakDate: string | null;
+}
+
+export interface DefacementGroup {
+  key: string;
+  title: string;
+  subtitle: string;
+  risk: DefacementRisk;
+  records: DefacementRecord[];
+  affectedSites: number;
+  ipCount: number;
+  servers: string[];
+  latestSeen: string | null;
+}
+
+export interface DefacementSummary {
+  campaigns: number;
+  records: number;
+  affectedSites: number;
+  latestSeen: string | null;
+}
 export class DefacementCallbackModel {
   Result: DefacementResultItem[] = [];
+  Defacement_Groups: DefacementGroupCallbackItem[] = [];
   Page_Count!: number;
 
   constructor(init?: Partial<DefacementCallbackModel>) {
     if (init) {
       initCallbackModel(this, init, r => new DefacementResultItem(r));
+      this.Defacement_Groups = init.Defacement_Groups?.map(group => ({
+        ...group,
+        records: group.records?.map(record => new DefacementResultItem(record)) ?? []
+      })) ?? [];
     }
   }
 }

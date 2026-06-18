@@ -19,7 +19,7 @@ import { HelperService } from '../../../shared/services/helper.service';
 import { DashboardResultDefacementComponent } from '../dashboard-results/dashboard-result-defacement/dashboard-result-defacement.component';
 import { ScrollService } from '../../../shared/services/scroll.service';
 import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
-import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { DefacementGroupCallbackItem } from '../../../shared/model/results/defacement/defacement.callback.model';
 
 @Component({
   selector: 'app-dashboard-result-container',
@@ -31,7 +31,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
     DashboardResultExploitComponent,
     DashboardResultSocialComponent,
     DashboardResultChatComponent,
-    DashboardResultDefacementComponent, TranslatePipe],
+    DashboardResultDefacementComponent],
   templateUrl: './dashboard-result-container.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -44,6 +44,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
   protected readonly alert = alert;
 
   public currentResultModel: any = null;
+  public defacementGroups: DefacementGroupCallbackItem[] = [];
   public maxPages = 1;
   public isResponseLoading = signal(false);
   type: Category = Category.STRATEGIC;
@@ -93,17 +94,23 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
         const route = this.router.url.split('?')[0];
         if (String(route) !== this.dashboardService.m_current_route) {
           this.currentResultModel = null;
+          this.defacementGroups = [];
         }
 
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
         this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
-        this.dashboardService.consolidatedParamModel.category = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
+        const routeCategory = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
+        this.dashboardService.consolidatedParamModel.category = routeCategory;
+        this.dashboardService.consolidatedParamModel.content = this.apiEndpoint === 'search/defacement'
+          ? this.getDefacementContent(routeCategory)
+          : 'all';
         const cacheKey = this.buildCacheKey();
         const cachedResult = sessionStorage.getItem(cacheKey);
         if (cachedResult && !this.hasResultData()) {
           try {
             const parsedCache = JSON.parse(cachedResult);
             this.currentResultModel = parsedCache?.result ?? parsedCache;
+            this.defacementGroups = parsedCache?.defacementGroups ?? [];
             this.maxPages = Number(parsedCache?.maxPages ?? 1) || 1;
             this.restoreSavedScroll();
           }
@@ -130,15 +137,20 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
 
     this.isResponseLoading.set(true);
     this.currentResultModel = null;
+    this.defacementGroups = [];
 
     this.dashboardService.fetchSearchResults<any>(this.apiEndpoint,
       this.dashboardService.consolidatedParamModel)
       .subscribe((response) => {
         if (response.success && response.data) {
           this.currentResultModel = response.data["Result"];
+          this.defacementGroups = this.apiEndpoint === 'search/defacement'
+            ? (response.data["Defacement_Groups"] ?? [])
+            : [];
           this.maxPages = Number(response.data["Page_Count"] ?? 1) || 1;
           sessionStorage.setItem(this.buildCacheKey(), JSON.stringify({
             result: this.currentResultModel,
+            defacementGroups: this.defacementGroups,
             maxPages: this.maxPages,
           }));
           this.restoreSavedScroll();
@@ -201,6 +213,13 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
       this.dashboardService.consolidatedParamModel.page || '1',
       this.dashboardService.consolidatedParamModel.q || ''
     ].join('|');
+  }
+
+  private getDefacementContent(category: string): string {
+    const normalizedCategory = String(category || 'all').toLowerCase();
+    return ['hacked', 'phishing', 'databases'].includes(normalizedCategory)
+      ? normalizedCategory
+      : 'all';
   }
 
   private restoreSavedScroll(): void {

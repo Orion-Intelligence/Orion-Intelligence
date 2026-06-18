@@ -58,6 +58,10 @@ export class DashboardService {
     this.cancelOngoingRequest();
     paramModel.page = this.consolidatedParamModel.page;
     let baseParams: any = { ...paramModel, ...this.selectedFilters() };
+    if (apiEndpoint === 'search/defacement') {
+      baseParams.category = paramModel.category || 'all';
+      baseParams.content = paramModel.content || 'all';
+    }
     this.syncQueryParamsToUrl(baseParams);
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
     if (semantic) {
