@@ -59,7 +59,7 @@ export class SelectionStoreService {
         ? 'NETINT'
         : section === 'threat-intel'
           ? 'Threat Intelligence'
-        : section.charAt(0).toUpperCase() + section.slice(1);
+          : section.charAt(0).toUpperCase() + section.slice(1);
       this.setSelectedSection(capitalizedSection);
       if (this.router.url.includes('profile') && option == "homepage") {
         option = "Homepage";
