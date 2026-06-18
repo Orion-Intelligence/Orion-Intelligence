@@ -144,7 +144,7 @@ services:
           memory: 128M
 
   mongo:
-    image: mongo:latest
+    image: mongo:7.0
     container_name: trustly-web-mongodb
     restart: always
     environment:
