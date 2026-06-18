@@ -222,7 +222,7 @@ class elastic_controller:
         if not await self.__m_core_connection.indices.exists(index=index_name, request_timeout=220):
             await self.__m_core_connection.indices.create(index=index_name, body=mapping_map_entities_model, request_timeout=220)
         else:
-            await self.__m_core_connection.indices.delete(index=index_name, request_timeout=220)
+            await self.__m_core_connection.indices.delete(index=index_name, ignore_unavailable=True, request_timeout=220)
             await self.__m_core_connection.indices.create(index=index_name, body=mapping_map_entities_model, request_timeout=220)
 
         raw_data = constant.map_entities_data
