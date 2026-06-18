@@ -272,9 +272,11 @@ if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     disable_maintenance_mode
 fi
 
-if [ "$COMMAND" = "build" ] && { [ "$FLAG" = "-t" ] || [ "$FLAG" = "-tb" ]; }; then
-    wait_for_test_service
-fi
+case "$COMMAND:$FLAG" in
+    build:-t|build:-tb)
+        wait_for_test_service
+        ;;
+esac
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-tb" ]; then
     run_backend_tests_protected
