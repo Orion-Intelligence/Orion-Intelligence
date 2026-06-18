@@ -885,6 +885,12 @@ class CaseManager:
 
         if record.isArchived:
             raise HTTPException(status_code=403, detail="Archived cases cannot be updated")
+        
+        if record.status == "closed":
+            raise HTTPException(
+                status_code=400,
+                detail="Closed cases cannot be moved to another status"
+            )
 
         reason = data.reason.strip()
         if not reason:
