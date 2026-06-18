@@ -8,7 +8,7 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { Category } from '../../../shared/constants/pages';
 import { combineLatest, distinctUntilChanged } from 'rxjs';
 import { ResultComponent } from '../../../shared/partials/result/result.component';
-import { general_filters } from '../../../shared/constants/filters';
+import { general_filters, leak_filters } from '../../../shared/constants/filters';
 import { AppService } from '../../../services/core/app/app.service';
 import { DashboardResultExploitComponent } from '../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
 import { DashboardResultSocialComponent } from '../dashboard-results/dashboard-result-social/dashboard-result-social.component';
@@ -40,6 +40,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
 
   protected readonly Math = Math;
   protected readonly general_filters = general_filters;
+  protected readonly leak_filters = leak_filters;
   protected readonly Category = Category;
   protected readonly alert = alert;
 

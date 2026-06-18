@@ -1,9 +1,9 @@
-import { Component, OnDestroy, OnInit, computed } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EMPTY, Subject, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, concatMap, tap } from 'rxjs/operators';
+import { catchError, concatMap, finalize, tap } from 'rxjs/operators';
 import { NetworkIntelScanService } from '../../../shared/services/network-intel/network-intel-scan.service';
 import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats, VulnerabilityScanDepth } from '../../../shared/model/network-intel/network-intel.model';
 import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
@@ -15,30 +15,37 @@ import { DnsSectionComponent } from './dns-section/dns-section.component';
 import { ShodanSectionComponent } from './shodan-section/shodan-section.component';
 import { VulnerabilitySectionComponent } from './vulnerability-section/vulnerability-section.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { ScannerService } from './security-scan/scanner-service.service';
+import { UrlScanMeta, UrlScanThreatItem } from '../../../shared/model/security-scan/security.scan.results.model';
+import { NetworkIntelSeoRepoScanCategory, SeoRepoScanSectionComponent } from './seo-repo-scan-section/seo-repo-scan-section.component';
+
+type NetworkIntelTab = 'dns' | 'shodan' | 'vuln' | 'geo' | 'seo' | 'repo';
 
 @Component({
   selector:    'app-network-intel',
   templateUrl: './network-intel.html',
   standalone:  true,
-  imports:     [CommonModule, FormsModule, EmptyQueryComponent, GeoCoordinatesModalComponent, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent, TranslatePipe],
+  imports:     [CommonModule, FormsModule, EmptyQueryComponent, GeoCoordinatesModalComponent, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent, SeoRepoScanSectionComponent, TranslatePipe],
   animations:  [fadeInDashboardItem],
 })
 export class NetworkIntel implements OnInit, OnDestroy {
   private sub?: Subscription;
+  private seoRepoScanSub?: Subscription;
   private _intervals: ReturnType<typeof setInterval>[] = [];
   private readonly dnsIpDetailQueue$ = new Subject<IpRowState>();
   private dnsIpDetailQueueSub?: Subscription;
-  private readonly sectionToTab: Record<string, 'dns' | 'shodan' | 'vuln' | 'geo'> = { 'host-recon': 'dns', 'deep-scan': 'shodan', 'vulnerability-scan': 'vuln', 'geo-cameras': 'geo', };
-  private readonly tabToSection: Record<'dns' | 'shodan' | 'vuln' | 'geo', string> = { dns: 'host-recon', shodan: 'deep-scan', vuln: 'vulnerability-scan', geo: 'geo-cameras', };
+  private readonly sectionToTab: Record<string, NetworkIntelTab> = { 'host-recon': 'dns', 'deep-scan': 'shodan', 'vulnerability-scan': 'vuln', 'geo-cameras': 'geo', 'seo-scan': 'seo', 'repository-scan': 'repo', };
+  private readonly tabToSection: Record<NetworkIntelTab, string> = { dns: 'host-recon', shodan: 'deep-scan', vuln: 'vulnerability-scan', geo: 'geo-cameras', seo: 'seo-scan', repo: 'repository-scan', };
 
   readonly progressSegments = Array.from({ length: 20 }, (_, index) => index);
-  activeTab: 'dns' | 'shodan' | 'vuln' | 'geo' = 'dns';
+  activeTab: NetworkIntelTab = 'dns';
   lastPrimaryTab: 'dns' | 'shodan' | 'vuln' = 'dns';
   geoMode:   'coords' | 'ranges'      = 'coords';
   dnsForm    = { domain: '' };
   shodanForm = { ip: '' };
   vulnForm   = { ip: '' };
   geoForm    = { coordinates: '', radius_km: 25, max_ips: 200, ip_ranges: '' };
+  seoRepoScanForm = { target: '' };
   formError: string | null = null;
   parsedRanges: { value: string; valid: boolean }[] = [];
   dnsResult:       DnsResult | null = null;
@@ -51,6 +58,15 @@ export class NetworkIntel implements OnInit, OnDestroy {
   geoIpRows:       IpRowState[]     = [];
   geoResult:       GeoResult | null    = null;
   geoLiveStats:    GeoLiveStats | null = null;
+  seoRepoScanMeta: UrlScanMeta | null = null;
+  seoRepoScanCategories: NetworkIntelSeoRepoScanCategory[] = [];
+  seoRepoScanErrorMessage: string | null = null;
+  seoRepoScanGrade = '';
+  seoRepoScanGradeCounts: { high: number; medium: number; low: number; informational: number; } = { high: 0, medium: 0, low: 0, informational: 0 };
+  seoRepoScanRequestedUrl = '';
+  seoRepoScanRequestedDomain = '';
+  seoRepoScanProgress = signal(0);
+  seoRepoScanLoading = signal(false);
   currentStep      = '';
   exportCurrentStep = '';
   lastResultCount = 0;
@@ -61,6 +77,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   isExportingReport = false;
   exportProgress = 0;
   isScanning = computed(() =>
+    this.seoRepoScanLoading() ||
     this.scanHelper.isRunning() &&
     !this.scanHelper.onError());
 
@@ -76,18 +93,18 @@ export class NetworkIntel implements OnInit, OnDestroy {
     return '-';
   }
 
-  constructor( public scanHelper: NetworkIntelScanService, private route: ActivatedRoute, private router: Router, private reportExport: ReportExportService, ) {}
+  constructor( public scanHelper: NetworkIntelScanService, private route: ActivatedRoute, private router: Router, private reportExport: ReportExportService, private scanner: ScannerService, ) {}
 
   ngOnInit(): void {
     this.scanHelper.resetState();
     this.bindDnsIpDetailQueue();
 
     const section = this.route.snapshot.queryParamMap.get('section');
-    const q = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
+    const q = (this.route.snapshot.queryParamMap.get('q') || this.route.snapshot.queryParamMap.get('domain') || '').trim();
 
     if (section && this.sectionToTab[section]) {
       this.activeTab = this.sectionToTab[section];
-      if (this.activeTab !== 'geo') {
+      if (this.activeTab === 'dns' || this.activeTab === 'shodan' || this.activeTab === 'vuln') {
         this.lastPrimaryTab = this.activeTab;
       }
     }
@@ -108,6 +125,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
     else if (this.activeTab === 'vuln') {
       this.vulnForm.ip = q;
       this.validateVulnerability();
+    }
+    else if (this.activeTab === 'seo' || this.activeTab === 'repo') {
+      this.seoRepoScanForm.target = q;
+      this.validateSeoRepoScan();
     }
     else {
       this.geoForm.coordinates = q;
@@ -140,7 +161,12 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.formError = this.scanHelper.validateGeoCoordinatesInput(this.geoForm.coordinates);
   }
 
-  setTab(id: 'dns' | 'shodan' | 'vuln' | 'geo'): void {
+  validateSeoRepoScan(): void {
+    const target = this.seoRepoScanForm.target.trim();
+    this.formError = target ? null : 'Please enter a target';
+  }
+
+  setTab(id: NetworkIntelTab): void {
     if (this.activeTab === id) {
       return;
     }
@@ -148,7 +174,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       this.cancel();
     }
     this.activeTab = id;
-    if (id !== 'geo') {
+    if (id === 'dns' || id === 'shodan' || id === 'vuln') {
       this.lastPrimaryTab = id;
     }
     this.clearAll();
@@ -215,6 +241,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (this.activeTab === 'vuln') {
       return this.vulnForm.ip;
     }
+    if (this.activeTab === 'seo' || this.activeTab === 'repo') {
+      return this.seoRepoScanForm.target;
+    }
     return this.geoForm.coordinates;
   }
 
@@ -237,6 +266,12 @@ export class NetworkIntel implements OnInit, OnDestroy {
       this.syncUrl();
       return;
     }
+    if (this.activeTab === 'seo' || this.activeTab === 'repo') {
+      this.seoRepoScanForm.target = value;
+      this.validateSeoRepoScan();
+      this.syncUrl();
+      return;
+    }
     this.geoForm.coordinates = value;
     this.validateGeo();
     this.syncUrl();
@@ -251,6 +286,12 @@ export class NetworkIntel implements OnInit, OnDestroy {
     }
     if (this.activeTab === 'vuln') {
       return 'Search domain...';
+    }
+    if (this.activeTab === 'seo') {
+      return 'Search domain...';
+    }
+    if (this.activeTab === 'repo') {
+      return 'Search repository URL...';
     }
     return 'Search coordinates...';
   }
@@ -285,6 +326,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
     }
     if (this.activeTab === 'vuln') {
       return Boolean(this.vulnerabilityResult);
+    }
+    if (this.activeTab === 'seo' || this.activeTab === 'repo') {
+      return Boolean(this.seoRepoScanMeta && !this.seoRepoScanErrorMessage);
     }
     return Boolean(this.geoIpListResult?.ips?.length || this.geoResult?.cameras?.length || this.geoResult || this.geoLiveStats);
   }
@@ -330,6 +374,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
       this.startVulnerabilityScan();
       return;
     }
+    if (this.activeTab === 'seo' || this.activeTab === 'repo') {
+      this.startSeoRepoScan();
+      return;
+    }
     if (this.geoMode === 'coords') {
       this.startGeoScan();
     }
@@ -352,6 +400,14 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.geoIpRows       = [];
     this.geoResult       = null;
     this.geoLiveStats    = null;
+    this.seoRepoScanMeta = null;
+    this.seoRepoScanCategories = [];
+    this.seoRepoScanErrorMessage = null;
+    this.seoRepoScanGrade = '';
+    this.seoRepoScanGradeCounts = { high: 0, medium: 0, low: 0, informational: 0 };
+    this.seoRepoScanRequestedUrl = '';
+    this.seoRepoScanRequestedDomain = '';
+    this.seoRepoScanProgress.set(0);
     this.currentStep     = '';
     this.lastResultCount = 0;
     this.formError       = null;
@@ -367,8 +423,12 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
   cancel(): void {
     this.scanHelper.cancelCurrentScan();
+    this.scanner.cancel();
     this.sub?.unsubscribe();
+    this.seoRepoScanSub?.unsubscribe();
     this.sub          = undefined;
+    this.seoRepoScanSub = undefined;
+    this.seoRepoScanLoading.set(false);
     this.geoLiveStats = null;
     this.currentStep  = '';
   }
@@ -463,6 +523,133 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.syncUrl();
     this.sub = this.scanHelper.scanUrlVulnerability(normalizedTarget, depth);
     this.watchResult(this.parseVulnerabilityResult.bind(this));
+  }
+
+  startSeoRepoScan(): void {
+    if (this.activeTab !== 'seo' && this.activeTab !== 'repo') {
+      return;
+    }
+    this.validateSeoRepoScan();
+    if (this.formError || !this.seoRepoScanForm.target.trim() || this.isScanning()) {
+      return;
+    }
+
+    const resolvedTarget = this.resolveSeoRepoScanTarget(this.seoRepoScanForm.target);
+    const host = this.extractSeoRepoScanHost(resolvedTarget);
+    if (!host || (host !== 'localhost' && !host.includes('.') && !/^\d{1,3}(\.\d{1,3}){3}$/.test(host))) {
+      this.formError = 'Enter a valid URL or host';
+      return;
+    }
+
+    this.resetActiveWork();
+    this.hasSearched = true;
+    this.clearAll(false);
+    this.seoRepoScanRequestedUrl = resolvedTarget;
+    this.seoRepoScanRequestedDomain = host;
+    this.seoRepoScanLoading.set(true);
+    this.seoRepoScanProgress.set(8);
+    this.currentStep = 'queued';
+    this.syncUrl();
+    this.seoRepoScanSub = this.scanner
+      .scanDomain(resolvedTarget, this.activeTab)
+      .pipe(finalize(() => this.seoRepoScanLoading.set(false)))
+      .subscribe({
+        next: (response: any) => this.parseSeoRepoScanResult(response),
+        error: (error) => {
+          this.seoRepoScanErrorMessage = (error && (error.error?.detail || error.message)) || 'Failed to fetch scan results.';
+          this.seoRepoScanProgress.set(0);
+        },
+      });
+  }
+
+  private parseSeoRepoScanResult(response: any): void {
+    const status = String(response?.result?.status || response?.status || '').toLowerCase();
+    const progress = response?.result?.progress ?? response?.progress;
+    if (typeof progress === 'number' && Number.isFinite(progress)) {
+      this.seoRepoScanProgress.set(Math.max(8, Math.min(99, Math.round(progress))));
+    }
+
+    if (status === 'busy' || status === 'pending') {
+      const step = response?.result?.step ?? response?.step;
+      this.currentStep = typeof step === 'string' && step ? step : this.currentStep;
+      return;
+    }
+
+    const result = response?.result;
+    if (!result?.meta) {
+      this.seoRepoScanErrorMessage = 'No data received from scanner.';
+      this.seoRepoScanProgress.set(0);
+      return;
+    }
+
+    const meta = result.meta;
+    this.seoRepoScanMeta = {
+      ...meta,
+      Host: meta?.Host?.trim() || this.extractSeoRepoScanHost(meta?.URL) || this.seoRepoScanRequestedDomain,
+      URL: meta?.URL || this.seoRepoScanRequestedUrl,
+    };
+    this.seoRepoScanGrade = result.grade || '';
+    this.seoRepoScanGradeCounts = result.grade_counts || { high: 0, medium: 0, low: 0, informational: 0 };
+    this.seoRepoScanCategories = this.buildSeoRepoScanCategories(result.threats, result.proofs);
+    this.lastResultCount = this.seoRepoScanCategories.reduce((total, category) => total + category.items.length, 0);
+    this.currentStep = 'Done';
+    this.seoRepoScanProgress.set(100);
+  }
+
+  private buildSeoRepoScanCategories(threats: unknown, proofs: unknown): NetworkIntelSeoRepoScanCategory[] {
+    const proofMap = new Map<string, string>();
+    Object.entries((proofs || {}) as Record<string, any[]>).forEach(([category, items]) => {
+      (Array.isArray(items) ? items : []).forEach((item: any) => {
+        const key = `${category}|${String(item?.header || '').trim().toLowerCase()}`;
+        if (item?.proof && !proofMap.has(key)) {
+          proofMap.set(key, item.proof);
+        }
+      });
+    });
+
+    return Object.entries((threats || {}) as Record<string, any[]>)
+      .map(([name, items]) => {
+        const list = Array.isArray(items) ? items : [];
+        const seen = new Set<string>();
+        const uniqueItems = list
+          .filter((item) => {
+            const key = String(item?.header || '').trim().toLowerCase();
+            if (!key || seen.has(key)) {
+              return false;
+            }
+            seen.add(key);
+            return true;
+          })
+          .map((item) => {
+            const key = String(item?.header || '').trim().toLowerCase();
+            const proof = proofMap.get(`${name}|${key}`);
+            return proof ? { ...item, proof } : item;
+          });
+        return { name, total: list.length, items: uniqueItems as UrlScanThreatItem[] };
+      })
+      .filter((category) => category.items.length > 0);
+  }
+
+  private resolveSeoRepoScanTarget(input: string): string {
+    const value = decodeURIComponent(input || '').trim();
+    if (!value) {
+      return '';
+    }
+    try {
+      return new URL(value.match(/^https?:\/\//i) ? value : `https://${value.replace(/^\/+/, '')}`).toString();
+    }
+    catch {
+      return `https://${value.replace(/^https?:\/\//i, '').replace(/^\/+/, '')}`;
+    }
+  }
+
+  private extractSeoRepoScanHost(url?: string): string {
+    try {
+      return url ? new URL(url).hostname : '';
+    }
+    catch {
+      return '';
+    }
   }
 
   private parseShodanResult(): void {
@@ -933,6 +1120,96 @@ export class NetworkIntel implements OnInit, OnDestroy {
       };
     }
 
+    if ((this.activeTab === 'seo' || this.activeTab === 'repo') && this.seoRepoScanMeta) {
+      const now = new Date().toISOString();
+      const host = this.seoRepoScanMeta.Host || this.extractSeoRepoScanHost(this.seoRepoScanMeta.URL) || 'scan-target';
+      const scanLabel = this.activeTab === 'repo' ? 'Repository Scan' : 'SEO Scan';
+      const findings = this.seoRepoScanCategories.flatMap((category) => category.items.map((item) => ({ category: category.name, item })));
+      const nodes = [
+        { id: `host-${host}`, label: host, type: 'domain' as const },
+        ...this.seoRepoScanCategories.slice(0, 30).map((category) => ({
+          id: `category-${category.name}`,
+          label: category.name,
+          type: 'category' as const
+        })),
+        ...findings.slice(0, 60).map(({ item }, index) => ({
+          id: `finding-${index + 1}`,
+          label: item.header || `Finding ${index + 1}`,
+          type: 'finding' as const
+        }))
+      ];
+      const categoryEdges = this.seoRepoScanCategories.slice(0, 30).map((category) => ({
+        id: `host-${host}-category-${category.name}`,
+        from: `host-${host}`,
+        to: `category-${category.name}`,
+        label: 'has'
+      }));
+      const findingEdges = findings.slice(0, 60).map(({ category }, index) => ({
+        id: `category-${category}-finding-${index + 1}`,
+        from: `category-${category}`,
+        to: `finding-${index + 1}`,
+        label: 'contains'
+      }));
+
+      return {
+        graphKind: 'cti',
+        title: `${scanLabel} Report`,
+        sessionName: host,
+        generatedAtIso: now,
+        nodes,
+        edges: [...categoryEdges, ...findingEdges],
+        summary: {
+          target_url: this.seoRepoScanMeta.URL || '-',
+          host,
+          scan_type: this.activeTab,
+          grade: this.seoRepoScanGrade || '-',
+          high: this.seoRepoScanGradeCounts.high ?? 0,
+          medium: this.seoRepoScanGradeCounts.medium ?? 0,
+          low: this.seoRepoScanGradeCounts.low ?? 0,
+          informational: this.seoRepoScanGradeCounts.informational ?? 0,
+          total_findings: findings.length,
+          exported_at: now
+        },
+        tables: [
+          {
+            title: 'Scan Summary',
+            values: {
+              URL: this.seoRepoScanMeta.URL || '-',
+              Host: host,
+              Port: this.normalizeReportValue(this.seoRepoScanMeta.Port),
+              TLS: /ssl/i.test(this.seoRepoScanMeta.Port || '') ? 'Enabled' : 'Not detected',
+              'Scanned On': this.normalizeReportValue(this.seoRepoScanMeta.Scanned_on_date),
+              Grade: this.seoRepoScanGrade || '-'
+            }
+          },
+          {
+            title: 'Severity Summary',
+            values: {
+              High: String(this.seoRepoScanGradeCounts.high ?? 0),
+              Medium: String(this.seoRepoScanGradeCounts.medium ?? 0),
+              Low: String(this.seoRepoScanGradeCounts.low ?? 0),
+              Informational: String(this.seoRepoScanGradeCounts.informational ?? 0),
+              Total: String(findings.length)
+            }
+          },
+          ...this.seoRepoScanCategories.slice(0, 20).map((category) => {
+            const values = category.items.slice(0, 25).reduce<Record<string, string>>((acc, item, index) => {
+              acc[`${index + 1}. ${item.header}`] = [
+                item.risk ? `${item.risk} risk` : '',
+                item.confidence ? `${item.confidence} confidence` : '',
+                this.truncateReportText(item.description, 700)
+              ].filter(Boolean).join(' | ');
+              return acc;
+            }, {});
+            return { title: `${category.name} Findings`, values };
+          })
+        ].filter(table => Object.values(table.values).some((value) => {
+          const normalized = typeof value === 'string' ? value.trim() : String(value ?? '').trim();
+          return Boolean(normalized) && normalized !== '-';
+        }))
+      };
+    }
+
     return null;
   }
 
@@ -976,7 +1253,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this._intervals.forEach(clearInterval);
     this._intervals = [];
     this.sub?.unsubscribe();
+    this.seoRepoScanSub?.unsubscribe();
     this.sub = undefined;
+    this.seoRepoScanSub = undefined;
+    this.scanner.cancel();
+    this.seoRepoScanLoading.set(false);
   }
 
   private enqueueDnsIpDetail(row: IpRowState): void {

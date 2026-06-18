@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, output } from '@angular/core';
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
-import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, ScannerSubCategory, TenantSubCategory, ProfileSubCategory, ThreatIntelSubCategory } from '../../../shared/constants/pages';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, TenantSubCategory, ProfileSubCategory, ThreatIntelSubCategory } from '../../../shared/constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
@@ -40,7 +40,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
   socialCategories = Object.values(SocialSubCategory);
-  scannerCategories = Object.values(ScannerSubCategory);
   tenantCategories = Object.values(TenantSubCategory);
   category = Category;
   readonly menuToggle = output<undefined>();
@@ -127,9 +126,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
           break;
         case Category.TENANT:
           firstSubcategory = this.tenantCategories[0];
-          break;
-        case Category.SCANNER:
-          firstSubcategory = this.scannerCategories[0];
           break;
         case Category.PROFILE:
           firstSubcategory = this.getProfileCategories()[0];

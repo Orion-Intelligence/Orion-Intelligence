@@ -389,19 +389,20 @@ export class CategoryAlertReportComponent implements OnInit {
 
             case "seo scanning":
               scanType = "seo";
-              route = "/dashboard/scanner/seo-scan";
+              route = "/dashboard/scanner/network-scan";
               this.router.navigate([route], {
-                queryParams: { page: 1, domain: encodeURIComponent(value), canType: scanType }
+                queryParams: { page: 1, q: value, scanType, section: 'seo-scan' }
               });
               break;
 
             case "repo scanning":
               scanType = "repo";
-              route = "/dashboard/scanner/repository-scan";
+              route = "/dashboard/scanner/network-scan";
               this.router.navigate([route], {
-                queryParams: { page: 1, domain: encodeURIComponent(value), canType: scanType }
+                queryParams: { page: 1, q: value, scanType, section: 'repository-scan' }
               });
               break;
+
             case "email-breach":
               const _username = value.split('@')[0];
               scanType = "repo";

@@ -91,8 +91,8 @@
             <span [ngClass]="{ 'bg-[#22c55e]': item.m_crawl_status === 'active', 'bg-[#f59e0b]': item.m_crawl_status === 'stale', 'bg-[#ef4444]': item.m_crawl_status !== 'active' && item.m_crawl_status !== 'stale' }" class="mr-2 inline-block h-[8px] w-[8px] shrink-0 rounded-full"></span>
             <span class="font-medium text-[var(--color-text1)]">{{ item.m_crawl_status || 'inactive' }}</span>
             } @else {
-            <span [ngClass]="{ 'bg-[#22c55e]': isWithinDays(item.m_update_date, 5), 'bg-[#f59e0b]': isWithinDays(item.m_update_date, 10) && !isWithinDays(item.m_update_date, 5), 'bg-[#ef4444]': !isWithinDays(item.m_update_date, 10) }" class="mr-2 inline-block h-[8px] w-[8px] shrink-0 rounded-full"></span>
-            <span class="font-medium text-[var(--color-text1)]">{{ isWithinDays(item.m_update_date, 5) ? 'active' : 'inactive' }}</span>
+            <span [ngClass]="{ 'bg-[#22c55e]': isWithinDays(item.m_leak_date || '', 183), 'bg-[#f59e0b]': isWithinDays(item.m_leak_date || '', 365) && !isWithinDays(item.m_leak_date || '', 183), 'bg-[#ef4444]': !isWithinDays(item.m_leak_date || '', 365) }" class="mr-2 inline-block h-[8px] w-[8px] shrink-0 rounded-full"></span>
+            <span class="font-medium text-[var(--color-text1)]">{{ isWithinDays(item.m_leak_date || '', 183) ? 'recent' : (isWithinDays(item.m_leak_date || '', 365) ? 'tracked' : 'archive') }}</span>
             }
           </div>
         </div>

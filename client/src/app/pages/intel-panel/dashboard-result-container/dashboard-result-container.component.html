@@ -3,7 +3,7 @@
   (reloadData)="fetchSearchResults()"
   (reloadFilters)="reloadFilters($event)"
   (updateQuery)="onUpdateQuery($event)"
-  [filterModel]="general_filters"
+  [filterModel]="type === Category.BREACH ? leak_filters : general_filters"
   [isLoading]="isResponseLoading()"
   [activeTab]="'default'"
   [result_count]="Math.ceil(currentResultModel?.length ?? 0)"
@@ -13,7 +13,7 @@
 
 @if (!isResponseLoading()) {
   <div @fadeInDashboardItem>
-    <div class="mx-[32px] max-w-[1220px] pb-[16px] max-[1000px]:mx-[15px]">
+    <div [class]="apiEndpoint === 'search/defacement' ? 'w-full max-w-none pb-[16px]' : 'mx-[32px] max-w-[1220px] pb-[16px] max-[1000px]:mx-[15px]'">
       @for (item of currentResultModel; track (item.m_hash || item.m_message_id || item.id || item.m_url || 'item') + '-' + $index) {
         <div class="space-y-6">
           @if (item.rank_index === 'leak_model' || item.rank_index === 'generic_model' || item.rank_index === 'apt_model' || item.rank_index === 'malware_model') {

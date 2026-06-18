@@ -44,7 +44,7 @@
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.BREACH"
           [icon]="'assets/images/sidebar/data_breach.svg'"
-          [items]="leakCategories"
+          [items]="[]"
           [routePrefix]="'breach'"
         [title]="('Data Breach') | translate"></app-dashboard-sidebar-items>
       }
@@ -54,7 +54,7 @@
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.DEFACEMENT"
           [icon]="'assets/images/sidebar/defacement.svg'"
-          [items]="defacementCategories"
+          [items]="[]"
           [routePrefix]="'defacement'"
         [title]="('Compromise Monitoring') | translate"></app-dashboard-sidebar-items>
       }
@@ -100,22 +100,6 @@
           [routePrefix]="'feed'"
         [title]="('News Feed') | translate"></app-dashboard-sidebar-items>
       }
-      @if (licenseService.canUseScanning()) {
-        <div class="mt-[20px] text-[13px] font-bold text-white">{{ 'Webscans' | translate }}</div>
-        <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
-      }
-      @if (isAdmin() || licenseService.canUseScanning()) {
-        <div id="sidebar-web-scan">
-        <app-dashboard-sidebar-items
-          (optionSelected)="onOptionSelected($event)"
-          (sectionSelected)="onSectionSelected($event)"
-          [category]="category.SCANNER"
-          [icon]="'assets/images/sidebar/theme/scanner.svg'"
-          [items]="scannerCategories"
-          [routePrefix]="'scanner'"
-        [title]="('Web Scans') | translate"></app-dashboard-sidebar-items>
-        </div>
-      }
       @if (isAdmin() || licenseService.canUseScanning()) {
         <div id="sidebar-entity-api">
         <app-dashboard-sidebar-items
@@ -153,7 +137,7 @@
         </div>
       }
       @if (isAdmin() || licenseService.canUseModule('osint_advanced') || isDemo()) {
-        <div id="sidebar-satellite-intel" class="my-[6px] rounded-[8px] select-none">
+        <div id="sidebar-geo-fencing" class="my-[6px] rounded-[8px] select-none">
           <div (click)="requestStandaloneSubscription($event, (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode()); (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() && onSectionSelected(category.SATELLITE_INTEL)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.SATELLITE_INTEL, 'opacity-20': (isDemo() && !(isAdmin() || licenseService.canUseModule('osint_advanced'))) || appService.isMobileMode() }" [routerLink]="(isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() ? 'satellite-intel' : null" class="flex h-[46px] items-center gap-[8px] rounded-[8px] border border-transparent px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
             <img alt="Geo Fencing" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/dump.svg" width="20">
             {{ 'Geo Fencing' | translate }}
@@ -263,7 +247,7 @@
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.BREACH"
           [icon]="'assets/images/sidebar/data_breach.svg'"
-          [items]="leakCategories"
+          [items]="[]"
           [routePrefix]="'breach'"
           [selectionStore]="selectionStore"
           [title]="('Data Breach') | translate">
@@ -275,10 +259,10 @@
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.DEFACEMENT"
           [icon]="'assets/images/sidebar/defacement.svg'"
-          [items]="defacementCategories"
+          [items]="[]"
           [routePrefix]="'defacement'"
           [selectionStore]="selectionStore"
-          [title]="('Defacement') | translate">
+          [title]="('Compromise Monitoring') | translate">
         </app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseModule('social')) {
@@ -329,18 +313,6 @@
           [selectionStore]="selectionStore"
           [title]="('News Feed') | translate">
         </app-dashboard-sidebar-collapsed>
-      }
-      @if (isAdmin() || licenseService.canUseScanning()) {
-        <app-dashboard-sidebar-collapsed
-          id="sidebar-web-scan"
-          (optionSelected)="onOptionSelected($event)"
-          (sectionSelected)="onSectionSelected($event)"
-          [category]="category.SCANNER"
-          [icon]="'assets/images/sidebar/theme/scanner.svg'"
-          [items]="scannerCategories"
-          [routePrefix]="'scanner'"
-          [selectionStore]="selectionStore"
-        [title]="('Web Scans') | translate"></app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseScanning()) {
         <app-dashboard-sidebar-collapsed

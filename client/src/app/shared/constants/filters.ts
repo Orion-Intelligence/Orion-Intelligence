@@ -209,6 +209,13 @@ export const general_filters: FilterModel = {
     content: createGeneralContent()
   }
 };
+export const leak_filters: FilterModel = {
+  filters: {
+    network: COMMON_NETWORK,
+    safe: SAFE_FILTER,
+    daterange: DATERANGE_CREATION
+  }
+};
 export const consolidated_filters: FilterModel = {
   filters: {
     network: COMMON_NETWORK,

@@ -1,10 +1,9 @@
-<div class="mt-4 mx-[30px] w-[calc(100%-60px)] max-[1000px]:mx-[15px] max-[1000px]:w-[calc(100%-30px)]" @fadeInDashboardItem>
+<div class="mt-4 w-full" @fadeInDashboardItem>
     @if (!isLoading) {
       @if (getDefacementGroups(); as headerGroups) {
         @if (getDefacementSummary(headerGroups); as headerSummary) {
           <div class="mb-3 flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
-            <div class="flex items-center gap-2">
-              <img alt="Latest Leak" src="assets/images/shared/theme/calendar.png" class="h-5 w-5 ui-action-icon">
+            <div class="flex min-w-0 items-center gap-2">
               <div class="max-w-[110px] truncate text-sm font-semibold text-[var(--color-text1)]">{{ headerSummary.latestSeen ? (headerSummary.latestSeen | date:'MMM d, y') : '-' }}</div>
               <div class="text-xs text-[var(--color-text4)]">{{ 'Latest Leak' | translate }}</div>
             </div>

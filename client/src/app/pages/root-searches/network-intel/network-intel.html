@@ -6,6 +6,8 @@
         <button data-testid="network-intel-tab-ip-scan" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'shodan' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('shodan')">{{ 'IP Scan' | translate }}</button>
         <button data-testid="network-intel-tab-vulnerability-scan" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'vuln' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('vuln')">{{ 'Vulnerability Scan' | translate }}</button>
         <button data-testid="network-intel-tab-geo-fencing" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'geo' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setGeoTab()">{{ 'Geo Fencing' | translate }}</button>
+        <button data-testid="network-intel-tab-seo-scan" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'seo' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('seo')">{{ 'SEO Scan' | translate }}</button>
+        <button data-testid="network-intel-tab-repository-scan" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === 'repo' ? ['border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border-[var(--color-border)]', 'bg-[var(--color-blue-720)]', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-710)]', 'hover:text-[var(--color-text1)]']" (click)="setTab('repo')">{{ 'Repository Scan' | translate }}</button>
       </div>
     </div>
 
@@ -38,7 +40,7 @@
 
       <div class="hidden items-center gap-2 lg:flex">
         <img alt="Search" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
-        <div class="text-sm font-semibold text-[var(--color-text1)]">{{ (isScanning() ? 'Scanning' : (scanHelper.onError() ? 'Error' : 'Idle')) | translate }}</div>
+        <div class="text-sm font-semibold text-[var(--color-text1)]">{{ (isScanning() ? 'Scanning' : ((scanHelper.onError() || seoRepoScanErrorMessage) ? 'Error' : 'Idle')) | translate }}</div>
         <div class="text-xs text-[var(--color-text4)]">{{ 'Status' | translate }}</div>
       </div>
 
@@ -132,6 +134,23 @@
       (selectTarget)="startVulnerabilityScanForTarget($event.target, $event.depth)"
       @fadeInDashboardItem>
     </app-network-intel-vulnerability-section>
+  }
+
+  @if (activeTab === 'seo' || activeTab === 'repo') {
+    <app-network-intel-seo-repo-scan-section
+      [isEmbedded]="isEmbeddedInConsolidated"
+      [isScanning]="isScanning()"
+      [progress]="seoRepoScanProgress()"
+      [currentStep]="currentStep"
+      [errorMessage]="seoRepoScanErrorMessage"
+      [hasSearched]="hasSearched"
+      [meta]="seoRepoScanMeta"
+      [categories]="seoRepoScanCategories"
+      [grade]="seoRepoScanGrade"
+      [gradeCounts]="seoRepoScanGradeCounts"
+      [scanType]="activeTab"
+      @fadeInDashboardItem>
+    </app-network-intel-seo-repo-scan-section>
   }
 
   <app-geo-coordinates-modal

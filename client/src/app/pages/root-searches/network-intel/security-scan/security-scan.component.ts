@@ -82,7 +82,7 @@ export class SecurityScanComponent implements OnInit {
       this.scanner.first_load = false;
     }
     catch {
-      // Ignore invalid prefilled scanner URL state.
+      return;
     }
   }
 

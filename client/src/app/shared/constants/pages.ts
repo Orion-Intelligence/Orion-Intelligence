@@ -11,17 +11,13 @@ export enum Category {
     FEED = 'Feed',
     CONSOLIDATED = 'Consolidated',
     STEALERLOGS = 'Stealerlogs',
-    SCANNER = 'Scanner',
     TENANT = 'Tenant',
     PROFILE = 'Profile',
     NETINT = 'NETINT',
-    SATELLITE_INTEL = 'SATELLITE_INTEL',
-    THREAT_LENS = 'THREAT_LENS'
+    SATELLITE_INTEL = 'SATELLITE_INTEL'
 }
 export enum BreachSubCategory {
-    ALL = 'All',
-    DATABASES = 'Databases',
-    TRACKING = 'Tracking'
+    DATABASES = 'Databases'
 }
 export enum DefacementSubCategory {
     ALL = 'All',
@@ -65,12 +61,8 @@ export enum ThreatIntelSubCategory {
     MALWARE_BAZAAR = 'Malware-Bazaar'
 }
 export enum FeedSubCategory {
-    NEWS = 'News'
-}
-export enum ScannerSubCategory {
-    NETWORK = 'Network-Scan',
-    REPOSITORY = 'Repository-Scan',
-    SEO = 'SEO-Scan'
+    NEWS = 'News',
+    TRACKING = 'Tracking'
 }
 export enum TenantSubCategory {
     VIEW_PROFILE = 'View-Profiles',

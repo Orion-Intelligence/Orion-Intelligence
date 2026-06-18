@@ -304,7 +304,7 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'all',
+            redirectTo: 'databases',
             pathMatch: 'full'
           },
           {
@@ -662,16 +662,6 @@ export const routes: Routes = [
             path: 'network-scan',
             loadComponent: loadNetworkIntelComponent,
             data: { animation: 'CategoryPage' }
-          },
-          {
-            path: 'repository-scan',
-            loadComponent: loadSecurityScanComponent,
-            data: { type: 'repo', animation: 'CategoryPage' }
-          },
-          {
-            path: 'seo-scan',
-            loadComponent: loadSecurityScanComponent,
-            data: { type: 'seo', animation: 'CategoryPage' }
           },
           {
             path: 'apk-scan',
