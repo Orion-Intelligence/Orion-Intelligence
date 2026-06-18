@@ -19,19 +19,6 @@ export enum Category {
     SATELLITE_INTEL = 'SATELLITE_INTEL',
     THREAT_LENS = 'THREAT_LENS'
 }
-export enum GeneralSubCategory {
-    ALL = 'All',
-    GENERAL = 'General',
-    SWARM = 'Swarm',
-    FORUMS = 'Forums',
-    NEWS = 'News',
-    STOLEN = 'Stolen',
-    DRUGS = 'Drugs',
-    HACKING = 'Hacking',
-    MARKETPLACES = 'Marketplaces',
-    CRYPTOCURRENCY = 'Cryptocurrency',
-    LEAKS = 'Leaks'
-}
 export enum BreachSubCategory {
     ALL = 'All',
     DATABASES = 'Databases',
@@ -82,8 +69,6 @@ export enum FeedSubCategory {
     NEWS = 'News'
 }
 export enum ScannerSubCategory {
-    // BASIC = 'Basic-Scan',
-    // FULL = 'Port-Scan',
     NETWORK = 'Network-Scan',
     REPOSITORY = 'Repository-Scan',
     SEO = 'SEO-Scan'

@@ -54,6 +54,19 @@ const COMMON_THREAT_OPTIONS = [
   { key: "credentials_common", label: "Credentials (Common)" },
   { key: "war", label: "War" }
 ];
+const GENERAL_CONTENT_OPTIONS = [
+  { key: "all", label: "All" },
+  { key: "general", label: "General" },
+  { key: "swarm", label: "Swarm" },
+  { key: "forums", label: "Forums" },
+  { key: "news", label: "News" },
+  { key: "stolen", label: "Stolen" },
+  { key: "drugs", label: "Drugs" },
+  { key: "hacking", label: "Hacking" },
+  { key: "marketplaces", label: "Marketplaces" },
+  { key: "cryptocurrency", label: "Cryptocurrency" },
+  { key: "leaks", label: "Leaks" }
+];
 const BASE_DATERANGE = {
   options: [],
   type: 'daterange' as const,
@@ -81,6 +94,15 @@ function createThreatContent() {
     type: 'dropdown' as const,
     tooltip: "Content Filter",
     selected: "attack-pattern"
+  };
+}
+function createGeneralContent() {
+  return {
+    title: "Content Type",
+    options: GENERAL_CONTENT_OPTIONS,
+    type: 'dropdown' as const,
+    tooltip: "Content Filter",
+    selected: "all"
   };
 }
 const SOURCE_FILTER = {
@@ -218,7 +240,7 @@ export const general_filters: FilterModel = {
     network: COMMON_NETWORK,
     safe: SAFE_FILTER,
     daterange: DATERANGE_CREATION,
-    content: createThreatContent()
+    content: createGeneralContent()
   }
 };
 export const consolidated_filters: FilterModel = {

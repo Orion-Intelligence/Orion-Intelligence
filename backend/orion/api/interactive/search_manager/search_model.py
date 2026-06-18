@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from starlette import status
 from starlette.responses import JSONResponse
 from orion.api.interactive.search_manager.search_callback_model import search_callback
+from orion.api.interactive.feeder_manager.feeder_manager import FeederManager
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_callback_model import grouped_consolidated_search_callback_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
@@ -153,7 +154,15 @@ class search_model:
         return await self._request_doc(ELASTIC_INDEX.S_SOCIAL_INDEX, doc_id, lang, ["m_content"])
 
     async def request_general_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
-        return await self._request_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id, lang, ["m_content", "m_important_content"])
+        result = await self._request_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id, lang, ["m_content", "m_important_content"])
+        if result:
+            crawl_status = await FeederManager.get_instance().get_value_crawl_status(
+                "_generic__values",
+                result.get("m_base_url") or result.get("m_url") or "",
+            )
+            result["m_crawl_status"] = crawl_status["status"]
+            result["m_last_crawled_at"] = crawl_status["last_checked_at"]
+        return result
 
     @staticmethod
     def _build_ranked_response(response, query, default_size: int, approximate_page_count: bool = False):

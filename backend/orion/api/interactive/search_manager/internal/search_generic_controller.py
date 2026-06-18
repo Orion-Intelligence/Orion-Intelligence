@@ -1,3 +1,4 @@
+from orion.api.interactive.feeder_manager.feeder_manager import FeederManager
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_query_generator import search_query_generator
 from orion.services.elastic_manager.elastic_controller import elastic_controller
@@ -156,6 +157,12 @@ class search_generic_controller:
         page_results = results[start:end]
         for rank, item in enumerate(page_results, start=start + 1):
             item["_rank"] = rank
+            crawl_status = await FeederManager.get_instance().get_value_crawl_status(
+                "_generic__values",
+                item.get("m_base_url") or item.get("m_url") or "",
+            )
+            item["m_crawl_status"] = crawl_status["status"]
+            item["m_last_crawled_at"] = crawl_status["last_checked_at"]
 
         total_pages = (total + result_size - 1) // result_size if result_size > 0 else 0
         return {"Result": page_results, "Page_Count": total_pages, "Total_Hits": total}

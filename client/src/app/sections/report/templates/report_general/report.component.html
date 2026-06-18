@@ -49,7 +49,11 @@
     <div class="mt-5 grid gap-x-6 border-t border-[var(--color-divider)] pt-2 text-sm md:grid-cols-2">
       <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
         <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Published on' | translate }}</p>
+        @if (type === 'strategic') {
+        <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem?.m_last_crawled_at ? (resultItem.m_last_crawled_at | date: 'MMM d, y':'UTC') : '-' }}</span>
+        } @else {
         <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ getReportDate() ? (getReportDate() | date: 'MMM d, y') : '-' }}</span>
+        }
       </div>
       <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
         <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Network' | translate }}</p>
@@ -57,7 +61,11 @@
       </div>
       <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
         <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Last checked on' | translate }}</p>
+        @if (type === 'strategic') {
+        <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem?.m_last_crawled_at ? (resultItem.m_last_crawled_at | date: 'mediumDate':'UTC') : '-' }}</span>
+        } @else {
         <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem?.m_update_date | date: 'mediumDate':'UTC' }}</span>
+        }
       </div>
       <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
         <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Tags' | translate }}</p>
@@ -72,8 +80,13 @@
       <div class="flex items-start justify-between gap-3 py-2">
         <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Status' | translate }}</p>
         <div class="flex items-center gap-2">
+          @if (type === 'strategic') {
+          <span class="h-2.5 w-2.5 rounded-full" [ngClass]="{ 'bg-green-500': resultItem?.m_crawl_status === 'active', 'bg-yellow-500': resultItem?.m_crawl_status === 'stale', 'bg-red-500': resultItem?.m_crawl_status !== 'active' && resultItem?.m_crawl_status !== 'stale' }"></span>
+          <span class="text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem?.m_crawl_status || 'inactive' }}</span>
+          } @else {
           <span class="h-2.5 w-2.5 rounded-full" [ngClass]="{ 'bg-green-500': isWithinDays(getStatusDate(), 5), 'bg-yellow-500': isWithinDays(getStatusDate(), 10) && !isWithinDays(getStatusDate(), 5), 'bg-red-500': !isWithinDays(getStatusDate(), 10) }"></span>
           <span class="text-[14px] font-medium text-[var(--color-text1)]">{{ getStatusText(getStatusDate()) }}</span>
+          }
         </div>
       </div>
       <div class="flex items-start justify-between gap-3 py-2">

@@ -19,6 +19,8 @@ export class GeneralResultItem {
   m_leak_date?: string | null;
   m_dumplink!: string[];
   m_update_date!: string;
+  m_crawl_status?: string | null;
+  m_last_crawled_at?: string | null;
   m_hash!: string;
   m_creation_date!: string;
   rank_index?: string;

@@ -11,7 +11,7 @@ import { ConsolidatedCallbackModel } from '../../../shared/model/results/consoli
 import { DashboardResultExploitComponent } from '../../intel-panel/dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
 import { DashboardResultChatComponent } from '../../intel-panel/dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
 import { SortGroupedResultsPipe } from '../../../shared/pipes/sort-grouped-results.pipe';
-import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, FeedSubCategory, GeneralSubCategory, SocialSubCategory, ThreatIntelSubCategory } from '../../../shared/constants/pages';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, FeedSubCategory, SocialSubCategory, ThreatIntelSubCategory } from '../../../shared/constants/pages';
 import { SelectionStoreService } from '../../../services/dashboard/selection.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { DashboardResultSocialComponent } from '../../intel-panel/dashboard-results/dashboard-result-social/dashboard-result-social.component';
@@ -66,7 +66,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   threatIntelCategories = Object.values(ThreatIntelSubCategory);
   newsCategories = Object.values(FeedSubCategory);
   socialCategories = Object.values(SocialSubCategory);
-  generalCategories = Object.values(GeneralSubCategory);
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
@@ -301,7 +300,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     let second_category = "all";
     switch (section) {
       case Category.STRATEGIC:
-        firstSubcategory = this.generalCategories[0];
+        firstSubcategory = 'All';
         break;
       case Category.BREACH:
         firstSubcategory = this.leakCategories[0];

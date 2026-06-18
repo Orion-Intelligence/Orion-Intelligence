@@ -25,6 +25,8 @@ export class LeakResultItem {
   m_country_name?: string | null;
   m_revenue?: string | null;
   m_update_date!: string;
+  m_crawl_status?: string | null;
+  m_last_crawled_at?: string | null;
   m_hash!: string;
   m_creation_date!: string;
   rank_index?: string;
