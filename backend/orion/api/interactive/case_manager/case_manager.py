@@ -934,3 +934,37 @@ class CaseManager:
 
         return await self._to_response(record, current_user)
     
+    async def assign_case_analyst(self, case_id: str, data, current_user) -> CaseResponse:
+        record = await self._engine.find_one(
+            db_case_model,
+            (db_case_model.caseId == case_id)
+            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
+        )
+
+        if not record:
+            raise HTTPException(status_code=404, detail="Case not found")
+
+        if record.isArchived:
+            raise HTTPException(status_code=403, detail="Archived cases cannot be updated")
+
+        if not CaseHelperMethods.can_manage_case_assignments(record, current_user):
+            raise HTTPException(
+                status_code=403,
+                detail="Only admins, maintainers, or the case creator can assign analysts"
+            )
+
+        await self._validate_case_analysts([data.analystId], current_user)
+
+        record.assignedAnalystIds = [data.analystId]
+        record.updatedAt = utc_now()
+
+        await self._engine.save(record)
+
+        await AuditLogManager.get_instance().register(
+            str(current_user.tenant_uuid),
+            str(current_user.id),
+            f"Case analyst assigned: caseId={case_id}, analystId={data.analystId}",
+        )
+
+        return await self._to_response(record, current_user)
+    

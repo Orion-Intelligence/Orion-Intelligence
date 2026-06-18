@@ -333,3 +333,15 @@ class UpdateCaseStatusRequest(CaseRequestModel):
         if not value:
             raise ValueError("Status change reason is required")
         return value
+
+
+class AssignCaseAnalystRequest(CaseRequestModel):
+    analystId: str
+
+    @field_validator("analystId")
+    @classmethod
+    def validate_analyst_id(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Analyst ID is required")
+        return value
