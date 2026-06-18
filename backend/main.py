@@ -1,14 +1,6 @@
 import asyncio
-import warnings
-
 from contextlib import asynccontextmanager
 from pathlib import Path
-
-warnings.filterwarnings(
-    "ignore",
-    message=r"'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated\..*",
-    module=r"starlette_admin(\.|$)",
-)
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
