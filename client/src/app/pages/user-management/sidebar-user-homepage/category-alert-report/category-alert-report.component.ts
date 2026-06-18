@@ -425,7 +425,7 @@ export class CategoryAlertReportComponent implements OnInit {
               });
               break;
             case "stealerlogs":
-              route = "/dashboard/stealerlogs/credential";
+              route = "/dashboard/stealerlogs";
               const queryParams: any = {
                 q: "",
                 page: 1,

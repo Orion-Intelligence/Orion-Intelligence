@@ -71,7 +71,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   isFilterOpen$!: Observable<boolean>;
   fetchGeocodeResults = (query: string) => this.geocodeService.fetchGeocodeResults(query);
 
-  @Input() toolbarMode: 'hidden' | 'geo' = 'hidden';
+  @Input() toolbarMode: 'hidden' | 'geo' = 'geo';
 
   constructor( satelliteService: SatelliteIntelService, private geocodeService: GeoFencingGeocodeService, route: ActivatedRoute, sidebarService: SidebarService, aircraftTrackingService: SatelliteAircraftTrackingService, shipTrackingService: SatelliteShipTrackingService, facilitiesService: SatelliteFacilitiesService, monthCompareService: MonthCompareService, ) {
     this.satelliteService = satelliteService;
@@ -98,8 +98,12 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.initialMapLoadingId = this.loadingState.begin('Loading Satellite Map', 'Rendering satellite map...');
     const section = this.route.snapshot.queryParamMap.get('section');
     const q = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
+    const requestedView = this.route.snapshot.queryParamMap.get('view') || this.route.snapshot.data['view'];
     this.setPanel(this.isPanelId(section) ? section : SatelliteIntelPanelEnum.Dashboard);
     this.isPanelPopupOpen = true;
+    if (requestedView === 'threat') {
+      this.setActiveView('threat');
+    }
     if (q) {
       this.locationState.setInitialQuery(q, parseCoordinates(q));
     }
@@ -307,10 +311,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   setActiveView(view: 'map' | 'threat'): void {
-    if (view === 'threat' && this.isThreatToolbarDisabled) {
-      return;
-    }
-
     this.activeTab = view;
     if (view === 'map') {
       this.activePanel = SatelliteIntelPanelEnum.Dashboard;
@@ -322,10 +322,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     if (view === 'threat') {
       this.isPanelPopupOpen = false;
     }
-  }
-
-  get isThreatToolbarDisabled(): boolean {
-    return this.isThreatView && this.isThreatLensLoading;
   }
 
   onThreatLensLoadingChange(isLoading: boolean): void {

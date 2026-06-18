@@ -87,7 +87,7 @@ export class CredentialComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.isStandaloneStealerlogsRoute = this.router.url.includes('/stealerlogs/');
+    this.isStandaloneStealerlogsRoute = this.router.url.includes('/stealerlogs');
     this.stealerlogCallbackModel = { ...this.dashboardService.stealerlogCallbackModel };
     this.dashboardService.consolidatedParamModel.fullsearch = false;
     combineLatest([this.route.queryParams, this.route.url])

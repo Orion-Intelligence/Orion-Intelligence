@@ -72,9 +72,6 @@ export enum ScannerSubCategory {
     REPOSITORY = 'Repository-Scan',
     SEO = 'SEO-Scan'
 }
-export enum StealerlogsSubCategory {
-    IOC = 'IOCS'
-}
 export enum TenantSubCategory {
     VIEW_PROFILE = 'View-Profiles',
     VIEW_TENANT = 'View-Tenants',

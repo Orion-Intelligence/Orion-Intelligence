@@ -131,7 +131,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
     }
     else if (type === 'stealerlog') {
       let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
-      const finalUrl = `/dashboard/stealerlogs/iocs?q=${encodeURIComponent(query)}&user=`;
+      const finalUrl = `/dashboard/stealerlogs?q=${encodeURIComponent(query)}&user=`;
       this.proxied_resource.open(finalUrl);
     }
   }
