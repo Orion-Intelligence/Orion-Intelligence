@@ -453,7 +453,7 @@ export class ThreatLensComponent implements OnDestroy {
       this.cdr.detectChanges();
     });
 
-    this.ipScanSub = this.networkIntelService.scanGeoCamera(coordinates, radiusKm, maxIps);
+    this.ipScanSub = this.networkIntelService.scanThreatLensGeoCamera(coordinates, radiusKm, maxIps);
     this.watchIpScanResult(center, radiusKm, boundary, scope);
   }
 

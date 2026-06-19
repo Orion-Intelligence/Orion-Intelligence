@@ -1,5 +1,5 @@
 import asyncio
-from typing import Optional
+from typing import Any, Dict, Optional
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, UploadFile, File
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from configs.app_dependency import license_required, role_required, status_required, get_current_role, get_current_user, get_is_free_token
@@ -7,6 +7,7 @@ from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.feedback_manager.feedback_manager import FeedbackManager
 from orion.api.interactive.feedback_manager.models.feedback_param_model import feedback_comment_param_model
+from orion.api.interactive.scan_job_manager.scan_job_manager import ScanJobManager
 from orion.api.interactive.directory_manager.directory_model import directory_model
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
 from orion.api.interactive.dump_manager.dump_model import dump_model
@@ -21,6 +22,7 @@ from orion.api.server.crawl_manager.class_model.domain_scan_request_model import
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import IPScanRequest, NetIntelDeepScanRequest, ResolveIPRequest
 from orion.api.server.crawl_manager.class_model.log_model import SiemSearchRequestModel, SiemSearchResponseModel
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import SocialScrapeRequest
+from orion.services.mongo_manager.shared_model.db_scan_job_model import ScanJobCreateRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
@@ -945,3 +947,56 @@ async def convert_stix_batch(kind: str, payloads: list[dict] = Body(...)):
     if kind_normalized not in STIX_KIND_VALUES:
         return {"error": "Unsupported STIX kind", "supported_kinds": sorted(STIX_KIND_VALUES)}
     return {"items": [convert_to_stix(kind_normalized, payload) for payload in payloads]}
+
+@api_routes.post(
+    "/api/scan-jobs/create",
+    include_in_schema=False,
+    dependencies=SCANNING_DEPS,
+)
+async def create_scan_job(request: ScanJobCreateRequest = Body(...), current_user=Depends(get_current_user)):
+    return await ScanJobManager.get_instance().create_job(current_user=current_user, api_reference=request.api_reference, payload=request.payload, metadata=request.metadata)
+
+
+@api_routes.get(
+    "/api/scan-jobs/notifications",
+    include_in_schema=False,
+    dependencies=SCANNING_DEPS,
+)
+async def list_scan_job_notifications(page: int = Query(1, ge=1), limit: int = Query(8, ge=1, le=100), current_user=Depends(get_current_user)):
+    return await ScanJobManager.get_instance().list_scan_notifications(current_user, page=page, limit=limit)
+
+
+@api_routes.get(
+    "/api/scan-jobs/incomplete",
+    include_in_schema=False,
+    dependencies=SCANNING_DEPS,
+)
+async def list_incomplete_scan_jobs(limit: int = Query(1, ge=1, le=100), current_user=Depends(get_current_user)):
+    return await ScanJobManager.get_instance().list_incomplete_scans(current_user, limit=limit)
+
+
+@api_routes.get(
+    "/api/scan-jobs/count",
+    include_in_schema=False,
+    dependencies=SCANNING_DEPS,
+)
+async def count_scan_jobs(current_user=Depends(get_current_user)):
+    return await ScanJobManager.get_instance().count_jobs(current_user)
+
+
+@api_routes.post(
+    "/api/scan-jobs/{scan_id}/poll",
+    include_in_schema=False,
+    dependencies=SCANNING_DEPS,
+)
+async def poll_scan_job(scan_id: str, current_user=Depends(get_current_user)):
+    return await ScanJobManager.get_instance().poll_job(scan_id, current_user)
+
+
+@api_routes.post(
+    "/api/scan-jobs/{scan_id}/seen",
+    include_in_schema=False,
+    dependencies=SCANNING_DEPS,
+)
+async def mark_scan_job_seen(scan_id: str, current_user=Depends(get_current_user)):
+    return await ScanJobManager.get_instance().mark_seen(scan_id, current_user)

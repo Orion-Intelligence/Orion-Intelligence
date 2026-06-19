@@ -10,6 +10,11 @@ import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice
 import { ExportChoiceOption } from '../../model/report/export-choice.model';
 import { AlertExportService } from '../../services/export/alert-export.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { ScanNotificationService } from '../../services/scan-notification.service';
+import { ScanJob } from '../../model/scan-jobs/scan-job.model';
+import { ScanExportService } from '../../services/export/scan-export.service';
+
+type NotificationMode = 'alerts' | 'scans';
 
 @Component({
   selector: 'app-alert-notification',
@@ -32,12 +37,15 @@ export class AlertNotificationComponent implements OnChanges {
   isLoadMoreTriggered: boolean = false;
   isFetchingDetail: boolean = false;
   alertToShowReport: AlertModel | null = null;
+  scanToExport: ScanJob | null = null;
   isExportChoiceOpen: boolean = false;
   readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.', testId: 'notification-alert-export-option-report' }];
+  readonly scanExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate a PDF report from this scan result.', testId: 'notification-scan-export-option-report' }];
   readonly isNotificationOpen = input.required<boolean | null>();
+  readonly notificationMode = input<NotificationMode>('alerts');
   readonly closeNotification = output<undefined>();
 
-  constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService, private alertExportService: AlertExportService) {
+  constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService, private alertExportService: AlertExportService, private scanExportService: ScanExportService, public scanNotificationService: ScanNotificationService) {
   }
 
   private decrementUnseenSummary(by: number = 1): void {
@@ -54,13 +62,30 @@ export class AlertNotificationComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isNotificationOpen']) {
       const value = changes['isNotificationOpen'].currentValue;
-      if (value === true && this.alertNotifications.length === 0) {
+      if (value === true && this.isAlertMode() && this.alertNotifications.length === 0) {
         this.fetchNotifications(true);
+      }
+      if (value === true && this.isScanMode()) {
+        this.scanNotificationService.openPanel();
+      }
+      if (value === false && this.isScanMode()) {
+        this.scanNotificationService.closePanel();
       }
     }
   }
 
+  isAlertMode(): boolean {
+    return this.notificationMode() === 'alerts';
+  }
+
+  isScanMode(): boolean {
+    return this.notificationMode() === 'scans';
+  }
+
   canLoadMore(): boolean {
+    if (this.isScanMode()) {
+      return this.scanNotificationService.hasMore();
+    }
     return this.hasMore || this.alertNotifications.length < this.totalCount;
   }
 
@@ -105,6 +130,10 @@ export class AlertNotificationComponent implements OnChanges {
     if (!this.canLoadMore()) {
       return;
     }
+    if (this.isScanMode()) {
+      this.scanNotificationService.loadMore();
+      return;
+    }
     this.isLoadMoreTriggered = true;
     this.fetchNotifications(false);
   }
@@ -141,7 +170,7 @@ export class AlertNotificationComponent implements OnChanges {
     requestAnimationFrame(appendNext);
   }
 
-  timeAgo(date: Date | string): string {
+  timeAgo(date: Date | string | null | undefined): string {
     if (!date) {
       return '';
     }
@@ -211,6 +240,15 @@ export class AlertNotificationComponent implements OnChanges {
 
   closeExportChoice(): void {
     this.isExportChoiceOpen = false;
+    this.scanToExport = null;
+  }
+
+  exportSelectedNotification(type: string): void {
+    if (this.isScanMode()) {
+      this.exportSelectedScan(type);
+      return;
+    }
+    this.exportSelectedAlert(type);
   }
 
   exportSelectedAlert(_type: string): void {
@@ -222,7 +260,88 @@ export class AlertNotificationComponent implements OnChanges {
     this.closeExportChoice();
   }
 
+  openScanExport(job: ScanJob): void {
+    if (!this.isScanCompleted(job)) {
+      return;
+    }
+    this.scanToExport = job;
+    this.scanNotificationService.markSeen(job);
+    this.openExportChoice();
+  }
+
+  markScanSeen(job: ScanJob, event?: Event): void {
+    event?.stopPropagation();
+    this.scanNotificationService.markSeen(job);
+  }
+
+  exportSelectedScan(_type: string): void {
+    if (!this.scanToExport) {
+      this.closeExportChoice();
+      return;
+    }
+    this.scanExportService.exportPdf(this.scanToExport, this.scanToExport.title || 'Scan Report');
+    this.closeExportChoice();
+  }
+
+  statusLabel(job: ScanJob): string {
+    const status = this.scanNotificationService.getStatus(job);
+    if (status === 'done') {
+      return 'Completed';
+    }
+    if (status === 'error') {
+      return 'Failed';
+    }
+    if (status === 'queued') {
+      return 'Queued';
+    }
+    if (status === 'running') {
+      return 'Running';
+    }
+    return status || 'Unknown';
+  }
+
+  isScanCompleted(job: ScanJob): boolean {
+    const status = this.scanNotificationService.getStatus(job);
+    return status === 'done';
+  }
+
+  isScanPending(job: ScanJob): boolean {
+    const status = this.scanNotificationService.getStatus(job);
+    return status === 'running' || status === 'queued';
+  }
+
+  isScanFailed(job: ScanJob): boolean {
+    return this.scanNotificationService.getStatus(job) === 'error';
+  }
+
+  getProgress(job: ScanJob): number {
+    return this.scanNotificationService.getProgress(job);
+  }
+
+  getScanStep(job: ScanJob): string {
+    return this.scanNotificationService.getStep(job);
+  }
+
+  getScanError(job: ScanJob): string {
+    return this.scanNotificationService.getError(job);
+  }
+
+  exportTitle(): string {
+    return this.isScanMode() ? 'Export Scan' : 'Export Alert';
+  }
+
+  exportSubtitle(): string {
+    return this.isScanMode() ? 'Choose the export format for this scan.' : 'Choose the export format.';
+  }
+
+  exportOptions(): ExportChoiceOption[] {
+    return this.isScanMode() ? this.scanExportOptions : this.alertExportOptions;
+  }
+
   close() {
+    if (this.isScanMode()) {
+      this.scanNotificationService.closePanel();
+    }
     // TODO: The 'emit' function requires a mandatory void argument
     this.closeNotification.emit(undefined);
   }

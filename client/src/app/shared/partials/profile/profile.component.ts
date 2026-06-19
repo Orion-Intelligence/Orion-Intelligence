@@ -12,6 +12,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { LANGUAGE_OPTIONS, LanguageOption } from '../../constants/shared-enums';
 import { ApiService } from '../../services/api.service';
 import { TranslationService } from '../../services/translation.service';
+import { ScanNotificationService } from '../../services/scan-notification.service';
 
 type ThemeMode = 'dark-theme' | 'light-theme';
 
@@ -22,7 +23,8 @@ type ThemeMode = 'dark-theme' | 'light-theme';
     NgOptimizedImage,
     TooltipDirective,
     NgClass,
-    AlertNotificationComponent, TranslatePipe],
+    AlertNotificationComponent,
+    TranslatePipe],
   templateUrl: './profile.component.html'
 })
 export class ProfileComponent implements AfterViewInit, OnDestroy {
@@ -37,6 +39,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
   username = signal<string>('');
   role = signal<string>('');
   isNotificationOpen = signal<boolean>(false);
+  isScanNotificationOpen = signal<boolean>(false);
   profile_image: string = "";
   licences: string = '';
   dropdownOpen = signal(false);
@@ -46,9 +49,12 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
   languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
   readonly openPopup = output<undefined>();
 
-  constructor(protected authService: AuthService, public router: Router, public dashboardService: DashboardService, public appService: AppService, protected licenseService: LicenseService, private apiService: ApiService, private translationService: TranslationService) {
+  constructor(protected authService: AuthService, public router: Router, public dashboardService: DashboardService, public appService: AppService, protected licenseService: LicenseService, private apiService: ApiService, private translationService: TranslationService, public scanNotificationService: ScanNotificationService) {
     this.username.set(this.appService.userSessionData()?.user?.username);
     this.role.set(this.appService.userSessionData()?.user?.role);
+    if(this.licenseService.canUseScanning()){
+      this.scanNotificationService.startPendingScans();
+    }
     effect(() => {
       if (this.dropdownOpen()) {
         this.onDropdownOpen();
@@ -90,6 +96,10 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 
   isMember(): boolean {
     return this.licenseService.isMember();
+  }
+
+  canViewScanNotifications(): boolean {
+    return this.licenseService.canUseScanning();
   }
 
   toggleDropdown(event: Event) {
@@ -186,6 +196,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
   }
 
   logout() {
+    this.scanNotificationService.stopAll();
     this.dashboardService.resetParams();
     this.dashboardService.clearCallback();
     this.appService.configData.set(new ConfigSettings({}, {}));
@@ -204,6 +215,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
   }
 
   openNotifications(): void {
+    this.isScanNotificationOpen.set(false);
     this.dropdownOpen.set(false);
     this.languageDropdownOpen.set(false);
     this.isNotificationOpen.set(true);
@@ -211,6 +223,17 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 
   closeNotifications(): void {
     this.isNotificationOpen.set(false);
+  }
+
+  openScanNotifications(): void {
+    this.isNotificationOpen.set(false);
+    this.dropdownOpen.set(false);
+    this.languageDropdownOpen.set(false);
+    this.isScanNotificationOpen.set(true);
+  }
+
+  closeScanNotifications(): void {
+    this.isScanNotificationOpen.set(false);
   }
 
   getUnseenAlertCount(): number {
@@ -234,5 +257,4 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
   private getCurrentTheme(userTheme?: string): ThemeMode {
     return userTheme === 'light-theme' ? 'light-theme' : 'dark-theme';
   }
-
 }
