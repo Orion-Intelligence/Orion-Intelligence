@@ -76,7 +76,7 @@
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.EXPLOIT"
           [icon]="'assets/images/sidebar/exploits.svg'"
-          [items]="exploitCategories"
+          [items]="[]"
           [routePrefix]="'exploit'"
         [title]="('Exploit') | translate"></app-dashboard-sidebar-items>
       }
@@ -100,6 +100,10 @@
           [routePrefix]="'feed'"
         [title]="('News Feed') | translate"></app-dashboard-sidebar-items>
       }
+      @if (licenseService.canUseScanning() || licenseService.canUseModule('stealer_logs') || isAdmin() || licenseService.canUseModule('osint_advanced') || licenseService.canUseCtiGraph() || (!isDemo() && licenseService.canUseModule('social_mapper')) || appService.getConfig().appSettings.home_header_whistle_blowing_allowed || isDemo()) {
+        <div class="mt-[20px] text-[13px] font-bold text-white">{{ 'Data Collection API\'s' | translate }}</div>
+        <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
+      }
       @if (isAdmin() || licenseService.canUseScanning()) {
         <div id="sidebar-entity-api">
         <app-dashboard-sidebar-items
@@ -111,10 +115,6 @@
           [routePrefix]="'api'"
         [title]="('Entity API') | translate"></app-dashboard-sidebar-items>
         </div>
-      }
-      @if (licenseService.canUseScanning() || licenseService.canUseModule('stealer_logs') || isAdmin() || licenseService.canUseModule('osint_advanced') || licenseService.canUseCtiGraph() || (!isDemo() && licenseService.canUseModule('social_mapper')) || appService.getConfig().appSettings.home_header_whistle_blowing_allowed || isDemo()) {
-        <div class="mt-[20px] text-[13px] font-bold text-white">{{ 'Data Collection' | translate }}</div>
-        <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
       }
       @if (isAdmin() || licenseService.canUseModule('stealer_logs')) {
         <div id="sidebar-stealer-logs">
@@ -284,7 +284,7 @@
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.EXPLOIT"
           [icon]="'assets/images/sidebar/exploits.svg'"
-          [items]="exploitCategories"
+          [items]="[]"
           [routePrefix]="'exploit'"
           [selectionStore]="selectionStore"
           [title]="('Exploit') | translate">

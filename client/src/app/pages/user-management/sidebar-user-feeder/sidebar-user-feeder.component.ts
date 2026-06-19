@@ -1,6 +1,5 @@
 import { NgClass } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
@@ -10,11 +9,12 @@ import { SidebarUserFeederAddComponent } from './add/sidebar-user-feeder-add.com
 import { SidebarUserFeederViewComponent } from './view/sidebar-user-feeder-view.component';
 import { supportsFileUploadForRuleType, supportsValueUploadForRuleType } from './feeder-rule.utils';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { UiDropdownComponent, UiDropdownOption } from '../../../shared/components/ui-dropdown/ui-dropdown.component';
 
 @Component({
   selector: 'app-sidebar-user-feeder',
   standalone: true,
-  imports: [NgClass, FormsModule, SidebarUserFeederAddComponent, SidebarUserFeederViewComponent, TranslatePipe],
+  imports: [NgClass, SidebarUserFeederAddComponent, SidebarUserFeederViewComponent, TranslatePipe, UiDropdownComponent],
   templateUrl: './sidebar-user-feeder.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -41,6 +41,13 @@ export class SidebarUserFeederComponent implements OnInit {
     return this.selectedRule?.rule_type || '';
   }
 
+  get ruleDropdownOptions(): UiDropdownOption[] {
+    return this.rules.map(rule => ({
+      key: rule.key,
+      label: this.getRuleLabel(rule.key),
+    }));
+  }
+
   hasScriptTab(): boolean {
     return supportsFileUploadForRuleType(this.selectedRuleType);
   }
@@ -64,6 +71,14 @@ export class SidebarUserFeederComponent implements OnInit {
     this.highlightedScript = null;
     this.ensureValidActiveTab();
     this.syncRuleQueryParam();
+  }
+
+  onRuleSelect(ruleKey: string | null): void {
+    if (!ruleKey || this.selectedRuleKey === ruleKey) {
+      return;
+    }
+    this.selectedRuleKey = ruleKey;
+    this.onRuleChange();
   }
 
   getRuleLabel(ruleKey: string): string {

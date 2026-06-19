@@ -8,7 +8,7 @@
 </div>
 
 <form class="flex h-[calc(100vh-61px)] flex-col overflow-hidden bg-[var(--color-blue-830)] px-5 overflow-x-hidden">
-  <div class="flex-1 overflow-y-auto overflow-x-hidden pb-4">
+  <div class="flex-1 overflow-y-auto overflow-x-hidden pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
     @for (key of Object.keys(filterModel.filters); track key) {
     <div>
       <label [attr.for]="'side-filter-' + key" [appTooltip]="filterModel.filters[key].tooltip" class="mb-[10px] mt-5 block text-[14px] font-medium text-[var(--color-text1)]">
@@ -19,55 +19,20 @@
         [filterModel]="filterModel" [key]="key" [mSelectedFilters]="selectedFilters"></app-date-picker>
       }
       @if (filterModel.filters[key].type === 'dropdown') {
-      <div class="relative mb-2" (click)="$event.stopPropagation()">
-        <button [attr.aria-expanded]="openDropdownKey === key" [attr.aria-controls]="'side-filter-menu-' + key" [attr.data-testid]="'side-filter-select-' + key" [id]="'side-filter-' + key" aria-haspopup="listbox" class="flex h-10 w-full items-center justify-between rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[15px] text-left text-xs font-medium text-[var(--color-text1)] shadow-[0_1px_2px_0_#1018280d] outline-none transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-810)] focus:border-[var(--color-blue-640)]" type="button" (click)="toggleDropdown(key, $event)">
-          <span class="min-w-0 truncate">
-            @if (selectedFilters[key]) {
-            {{ getOptionLabel(key) }}
-            }
-            @else {
-            {{ 'Select' | translate }}
-            }
-          </span>
-          @if (openDropdownKey === key) {
-          <span class="ml-3 h-2 w-2 shrink-0 rotate-[225deg] translate-y-1 border-b-2 border-r-2 border-[var(--color-text3)] transition-transform duration-150"></span>
-          }
-          @else {
-          <span class="ml-3 h-2 w-2 shrink-0 rotate-45 border-b-2 border-r-2 border-[var(--color-text3)] transition-transform duration-150"></span>
-          }
-        </button>
-        @if (openDropdownKey === key) {
-        <div [id]="'side-filter-menu-' + key" class="absolute left-0 right-0 top-[calc(100%+6px)] z-[1250] max-h-[220px] overflow-y-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820)] p-1 shadow-[0_8px_18px_rgba(0,0,0,0.22)] [scrollbar-width:thin]" role="listbox">
-          @if (!selectedFilters[key]) {
-          <button aria-selected="true" class="flex h-9 w-full items-center rounded-[6px] bg-[var(--color-blue-720)] px-3 text-left text-xs font-semibold text-[var(--color-text1)]" role="option" type="button" (click)="selectDropdownOption(key, '', $event)">
-            <span class="min-w-0 truncate">{{ 'Select' | translate }}</span>
-          </button>
-          }
-          @else {
-          <button aria-selected="false" class="flex h-9 w-full items-center rounded-[6px] px-3 text-left text-xs font-medium text-[var(--color-text4)] transition hover:bg-[var(--color-blue-780)] hover:text-[var(--color-text1)]" role="option" type="button" (click)="selectDropdownOption(key, '', $event)">
-            <span class="min-w-0 truncate">{{ 'Select' | translate }}</span>
-          </button>
-          }
-          <div class="my-1 h-px bg-[rgba(255,255,255,0.08)]"></div>
-          @for (option of filterModel.filters[key].options; track option.key) {
-          @if (selectedFilters[key] === option.key) {
-          <button aria-selected="true" class="mt-1 flex h-9 w-full items-center rounded-[6px] bg-[var(--color-blue-720)] px-3 text-left text-xs font-semibold text-[var(--color-text1)]" role="option" type="button" (click)="selectDropdownOption(key, option.key, $event)">
-            <span class="min-w-0 truncate">{{ option.label }}</span>
-          </button>
-          }
-          @else {
-          <button aria-selected="false" class="mt-1 flex h-9 w-full items-center rounded-[6px] px-3 text-left text-xs font-medium text-[var(--color-text3)] transition hover:bg-[var(--color-blue-780)] hover:text-[var(--color-text1)]" role="option" type="button" (click)="selectDropdownOption(key, option.key, $event)">
-            <span class="min-w-0 truncate">{{ option.label }}</span>
-          </button>
-          }
-          }
-        </div>
-        }
-      </div>
+      <app-ui-dropdown
+        class="mb-2"
+        [id]="'side-filter-' + key"
+        [menuId]="'side-filter-menu-' + key"
+        [testId]="'side-filter-select-' + key"
+        [options]="filterModel.filters[key].options"
+        [selected]="selectedFilters[key]"
+        [placeholder]="'Select' | translate"
+        [allowEmpty]="true"
+        (valueChange)="onSelectionChange(key, $event)"></app-ui-dropdown>
       }
       @if (filterModel.filters[key].type === 'text') {
       <div class="mb-2">
-        <input [id]="'side-filter-' + key" (ngModelChange)="onSelectionChange(key, selectedFilters[key])" [(ngModel)]="selectedFilters[key]" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" name="{{ key }}" [placeholder]="filterModel.filters[key].title" type="text" />
+        <input [id]="'side-filter-' + key" [ngModel]="selectedFilters[key] ?? ''" (ngModelChange)="onSelectionChange(key, $event)" class="h-10 w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-white)] px-[15px] text-left text-xs font-medium text-[var(--color-gray-900)] shadow-[0_1px_2px_0_#1018280d] outline-none" name="{{ key }}" [placeholder]="filterModel.filters[key].placeholder || filterModel.filters[key].title" type="text" />
       </div>
       }
       @if (filterModel.filters[key].type === 'number') {

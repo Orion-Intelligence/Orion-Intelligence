@@ -111,15 +111,94 @@ function createGeneralContent() {
     selected: "all"
   };
 }
-function createDefacementContent() {
-  return {
-    title: "Type of Content",
-    options: DEFACEMENT_CONTENT_OPTIONS,
-    type: 'dropdown' as const,
-    tooltip: "Type of Content",
-    selected: ""
-  };
-}
+const DEFACEMENT_CONTENT_FILTER = {
+  title: "Type of Content",
+  options: DEFACEMENT_CONTENT_OPTIONS,
+  type: 'dropdown' as const,
+  tooltip: "Type of Content",
+  selected: ""
+};
+const EXPLOIT_TYPE_FILTER = {
+  title: "Type",
+  options: COMMON_THREAT_OPTIONS,
+  type: 'dropdown' as const,
+  tooltip: "Type",
+  selected: "all"
+};
+const EXPLOIT_TEXT_FILTERS = {
+  m_cve: {
+    title: "CVE",
+    options: [],
+    type: 'text' as const,
+    tooltip: "CVE",
+    selected: "",
+    placeholder: "CVE-2024-12345"
+  },
+  m_cwe: {
+    title: "CWE",
+    options: [],
+    type: 'text' as const,
+    tooltip: "CWE",
+    selected: "",
+    placeholder: "CWE-79"
+  },
+  m_product: {
+    title: "Product",
+    options: [],
+    type: 'text' as const,
+    tooltip: "Product",
+    selected: "",
+    placeholder: "Product name"
+  },
+  m_version: {
+    title: "Version",
+    options: [],
+    type: 'text' as const,
+    tooltip: "Version",
+    selected: "",
+    placeholder: "Affected version"
+  },
+  m_platform: {
+    title: "Platform",
+    options: [],
+    type: 'text' as const,
+    tooltip: "Platform",
+    selected: "",
+    placeholder: "Windows, Linux, etc."
+  },
+  m_cvss: {
+    title: "CVSS",
+    options: [],
+    type: 'text' as const,
+    tooltip: "CVSS",
+    selected: "",
+    placeholder: "9.8"
+  },
+  m_severity: {
+    title: "Severity",
+    options: [],
+    type: 'text' as const,
+    tooltip: "Severity",
+    selected: "",
+    placeholder: "critical, high, medium"
+  },
+  m_remote_type: {
+    title: "Remote Type",
+    options: [],
+    type: 'text' as const,
+    tooltip: "Remote Type",
+    selected: "",
+    placeholder: "remote, local, adjacent"
+  },
+  m_tags: {
+    title: "Tags",
+    options: [],
+    type: 'text' as const,
+    tooltip: "Tags",
+    selected: "",
+    placeholder: "rce, poc, exploit"
+  }
+};
 const SAFE_FILTER = {
   title: "Safe Search",
   options: [
@@ -236,11 +315,26 @@ export const leak_filters: FilterModel = {
     daterange: DATERANGE_CREATION
   }
 };
+export const feed_filters: FilterModel = {
+  filters: {
+    network: COMMON_NETWORK,
+    daterange: DATERANGE_CREATION,
+    content: createThreatContent()
+  }
+};
 export const defacement_filters: FilterModel = {
   filters: {
     network: COMMON_NETWORK,
     daterange: DATERANGE_CREATION,
-    content: createDefacementContent()
+    content: DEFACEMENT_CONTENT_FILTER
+  }
+};
+export const exploit_filters: FilterModel = {
+  filters: {
+    network: COMMON_NETWORK,
+    daterange: DATERANGE_CREATION,
+    content: EXPLOIT_TYPE_FILTER,
+    ...EXPLOIT_TEXT_FILTERS
   }
 };
 export const consolidated_filters: FilterModel = {
@@ -275,5 +369,14 @@ export const filter_mapping: Record<string, string> = {
   safe: "Safe Search",
   content: "Content Type",
   mitre: "Mitre TTP",
-  platform_result_count: "Platform Results Count"
+  platform_result_count: "Platform Results Count",
+  m_cve: "CVE",
+  m_cwe: "CWE",
+  m_product: "Product",
+  m_version: "Version",
+  m_platform: "Platform",
+  m_cvss: "CVSS",
+  m_severity: "Severity",
+  m_remote_type: "Remote Type",
+  m_tags: "Tags"
 };

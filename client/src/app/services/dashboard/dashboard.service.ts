@@ -59,7 +59,6 @@ export class DashboardService {
     paramModel.page = this.consolidatedParamModel.page;
     let baseParams: any = { ...paramModel, ...this.selectedFilters() };
     if (apiEndpoint === 'search/defacement') {
-      delete baseParams.safe;
       baseParams.category = paramModel.category || 'all';
       baseParams.content = baseParams.content || paramModel.content || 'all';
     }
@@ -218,7 +217,16 @@ export class DashboardService {
       "safe",
       "content",
       "mitre",
-      "platform_result_count"
+      "platform_result_count",
+      "m_cve",
+      "m_cwe",
+      "m_product",
+      "m_version",
+      "m_platform",
+      "m_cvss",
+      "m_severity",
+      "m_remote_type",
+      "m_tags"
     ];
     const params = new URLSearchParams(window.location.search);
     const selected: Record<string, string | null> = {};

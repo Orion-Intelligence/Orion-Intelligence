@@ -1,4 +1,4 @@
-import { Component, effect, HostListener, OnInit, input, output } from '@angular/core';
+import { Component, effect, OnInit, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgOptimizedImage } from '@angular/common';
 import { FilterModel } from '../../model/filter/filter.model';
@@ -9,12 +9,13 @@ import { DatePickerComponent } from './date-picker/date-picker.component';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { ScrollService } from '../../services/scroll.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { UiDropdownComponent } from '../../components/ui-dropdown/ui-dropdown.component';
 
 @Component({
   selector: 'app-filters',
   templateUrl: './filters.component.html',
   standalone: true,
-  imports: [FormsModule, NgOptimizedImage, TooltipDirective, DatePickerComponent, TranslatePipe],
+  imports: [FormsModule, NgOptimizedImage, TooltipDirective, DatePickerComponent, TranslatePipe, UiDropdownComponent],
   animations: [filterAnimation],
 })
 export class FiltersComponent implements OnInit {
@@ -25,7 +26,6 @@ export class FiltersComponent implements OnInit {
   selectedFilters: Record<string, string | null> = {};
   initialModel!: FilterModel;
   filterModel!: FilterModel;
-  openDropdownKey: string | null = null;
   readonly isFilterOpen = input.required<boolean | null>();
   readonly filterChanged = output<Record<string, string | null>>();
   readonly filterReset = output<undefined>();
@@ -66,17 +66,6 @@ export class FiltersComponent implements OnInit {
     }
   }
 
-  toggleDropdown(key: string, event: Event) {
-    event.stopPropagation();
-    this.openDropdownKey = this.openDropdownKey === key ? null : key;
-  }
-
-  selectDropdownOption(key: string, value: string | null, event: Event) {
-    event.stopPropagation();
-    this.onSelectionChange(key, value);
-    this.openDropdownKey = null;
-  }
-
   onNumberInputChange(key: string, rawValue: string | null) {
     const filter = this.filterModel.filters[key];
     const digitsOnly = String(rawValue ?? '').replace(/\D+/g, '');
@@ -111,7 +100,6 @@ export class FiltersComponent implements OnInit {
   }
 
   closeFilter() {
-    this.openDropdownKey = null;
     // TODO: The 'emit' function requires a mandatory void argument
     this.filterClose.emit(undefined);
   }
@@ -125,19 +113,4 @@ export class FiltersComponent implements OnInit {
     this.closeFilter();
   }
 
-  getOptionLabel(filterKey: string): string {
-    let selectedKey = this.selectedFilters[filterKey];
-    if (!selectedKey) {
-      return 'Select';
-    }
-    selectedKey = selectedKey === "true" ? "yes" : selectedKey === "false" ? "no" : selectedKey;
-    const options = this.filterModel.filters[filterKey].options;
-    const option = options.find(opt => opt.key === selectedKey);
-    return option ? option.label : 'Select';
-  }
-
-  @HostListener('document:click')
-  closeDropdown() {
-    this.openDropdownKey = null;
-  }
 }

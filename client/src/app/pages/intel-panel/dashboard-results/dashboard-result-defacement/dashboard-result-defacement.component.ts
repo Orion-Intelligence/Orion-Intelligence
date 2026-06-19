@@ -70,8 +70,8 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
 
         return {
           key: group.key || this.normalizeGroupKey(group.title),
-          title: group.title || 'Unknown team',
-          subtitle: group.subtitle || 'Team / actor group',
+          title: group.title || 'Unknown actor',
+          subtitle: group.subtitle || 'Actor / campaign',
           risk: this.getDefacementRisk(records.length, ipCount),
           records,
           affectedSites,

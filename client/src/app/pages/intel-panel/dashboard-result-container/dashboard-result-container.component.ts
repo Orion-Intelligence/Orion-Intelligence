@@ -8,7 +8,7 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { Category } from '../../../shared/constants/pages';
 import { combineLatest, distinctUntilChanged } from 'rxjs';
 import { ResultComponent } from '../../../shared/partials/result/result.component';
-import { defacement_filters, general_filters, leak_filters } from '../../../shared/constants/filters';
+import { defacement_filters, exploit_filters, feed_filters, general_filters, leak_filters } from '../../../shared/constants/filters';
 import { AppService } from '../../../services/core/app/app.service';
 import { DashboardResultExploitComponent } from '../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
 import { DashboardResultSocialComponent } from '../dashboard-results/dashboard-result-social/dashboard-result-social.component';
@@ -20,6 +20,7 @@ import { DashboardResultDefacementComponent } from '../dashboard-results/dashboa
 import { ScrollService } from '../../../shared/services/scroll.service';
 import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
 import { DefacementGroupCallbackItem } from '../../../shared/model/results/defacement/defacement.callback.model';
+import { FilterModel } from '../../../shared/model/filter/filter.model';
 
 @Component({
   selector: 'app-dashboard-result-container',
@@ -41,7 +42,9 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
   protected readonly Math = Math;
   protected readonly general_filters = general_filters;
   protected readonly leak_filters = leak_filters;
+  protected readonly feed_filters = feed_filters;
   protected readonly defacement_filters = defacement_filters;
+  protected readonly exploit_filters = exploit_filters;
   protected readonly Category = Category;
   protected readonly alert = alert;
 
@@ -65,11 +68,27 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
     return this.currentParamModel?.q ?? '';
   }
 
+  get activeFilterModel(): FilterModel {
+    switch (this.type) {
+      case Category.DEFACEMENT:
+        return this.defacement_filters;
+      case Category.EXPLOIT:
+        return this.exploit_filters;
+      case Category.FEED:
+        return this.feed_filters;
+      case Category.BREACH:
+        return this.leak_filters;
+      default:
+        return this.general_filters;
+    }
+  }
+
   get shouldShowCrossSearch(): boolean {
     return !this.isResponseLoading()
       && !this.appService.isMobileMode()
       && !!this.currentQuery.trim()
       && this.apiEndpoint !== 'search/defacement'
+      && this.apiEndpoint !== 'search/exploit'
       && !this.router.url.toLowerCase().includes('/defacement');
   }
 
@@ -144,7 +163,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
       this.dashboardService.consolidatedParamModel)
       .subscribe((response) => {
         if (response.success && response.data) {
-          this.currentResultModel = response.data["Result"];
+          this.currentResultModel = response.data["Result"] ?? [];
           this.defacementGroups = this.apiEndpoint === 'search/defacement'
             ? (response.data["Defacement_Groups"] ?? [])
             : [];
@@ -207,9 +226,12 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
   }
 
   private buildCacheKey(): string {
+    const filterKey = JSON.stringify(Object.entries(this.dashboardService.selectedFilters()).sort(([left], [right]) => left.localeCompare(right)));
     return [
       'dashboard-results-cache',
       this.type,
+      this.apiEndpoint,
+      filterKey,
       this.dashboardService.consolidatedParamModel.category || 'all',
       this.dashboardService.consolidatedParamModel.page || '1',
       this.dashboardService.consolidatedParamModel.q || ''

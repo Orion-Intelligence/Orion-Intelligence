@@ -14,6 +14,7 @@ from orion.api.interactive.search_manager.search_data_model.consolidated.search_
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_crack_model, search_dynamic_crypto_model, search_dynamic_onion_search, search_dynamic_param_model, search_dynamic_social_model
 from orion.api.interactive.search_manager.internal.search_defacement_controller import search_defacement_controller
+from orion.api.interactive.search_manager.internal.search_exploit_controller import search_exploit_controller
 from orion.api.interactive.search_manager.internal.search_generic_controller import search_generic_controller
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.interactive.siemlog_manager.siem_log_manager import SiemLogManager
@@ -169,7 +170,7 @@ async def search_exploit(param: search_consolidated_param_model = Body(...), cur
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
     base_index = [ELASTIC_INDEX.S_EXPLOIT_INDEX]
-    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
+    return await search_exploit_controller.getInstance().search_result(param, base_index)
 
 
 @api_routes.post(

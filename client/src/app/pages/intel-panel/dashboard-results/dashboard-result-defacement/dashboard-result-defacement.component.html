@@ -5,7 +5,7 @@
           <div class="mb-3 flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
             <div class="flex min-w-0 items-center gap-2">
               <div class="max-w-[110px] truncate text-sm font-semibold text-[var(--color-text1)]">{{ headerSummary.latestSeen ? (headerSummary.latestSeen | date:'MMM d, y') : '-' }}</div>
-              <div class="text-xs text-[var(--color-text4)]">{{ 'Latest Leak' | translate }}</div>
+              <div class="text-xs text-[var(--color-text4)]">{{ 'Latest Compromise' | translate }}</div>
             </div>
 
             <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
@@ -13,27 +13,27 @@
             <div class="hidden items-center gap-2 md:flex">
               <img alt="Results" src="assets/images/shared/results_found.svg" class="h-5 w-5">
               <div class="text-sm font-semibold text-[var(--color-text1)]">{{ headerSummary.records }}</div>
-              <div class="text-xs text-[var(--color-text4)]">{{ 'Results' | translate }}</div>
+              <div class="text-xs text-[var(--color-text4)]">{{ 'Records' | translate }}</div>
             </div>
 
             <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
 
             <div class="hidden items-center gap-2 lg:flex">
-              <img alt="Assets" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
+              <img alt="Affected Sites" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
               <div class="text-sm font-semibold text-[var(--color-text1)]">{{ headerSummary.affectedSites }}</div>
-              <div class="text-xs text-[var(--color-text4)]">{{ 'Assets' | translate }}</div>
+              <div class="text-xs text-[var(--color-text4)]">{{ 'Affected Sites' | translate }}</div>
             </div>
 
             <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
 
             <div class="hidden items-center gap-2 xl:flex">
-              <img alt="Aggregated" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
+              <img alt="Actor Groups" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
               <div class="text-sm font-semibold text-[var(--color-text1)]">{{ headerSummary.campaigns }}</div>
-              <div class="text-xs text-[var(--color-text4)]">{{ 'Aggregated' | translate }}</div>
+              <div class="text-xs text-[var(--color-text4)]">{{ 'Actor Groups' | translate }}</div>
             </div>
 
             <div class="ml-auto flex items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
-              <button data-testid="defacement-open-record-sidebar" type="button" class="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[12px] font-semibold text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" (click)="openAllRecordSidebar()" [appTooltip]="'Defacement Records' | translate">
+              <button data-testid="defacement-open-record-sidebar" type="button" class="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[12px] font-semibold text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" (click)="openAllRecordSidebar()" [appTooltip]="'Compromise Records' | translate">
                 <img alt="records" src="assets/images/shared/list.svg" class="h-4 w-4 ui-action-icon">
                 <span>{{ headerSummary.records }}</span>
               </button>
@@ -67,7 +67,7 @@
           @if (getDefacementGroups(); as groups) {
             @if (groups.length === 0) {
               <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-800)] px-4 py-5 text-sm text-[var(--color-text4)]">
-                {{ 'No defacement records found for this scope.' | translate }}
+                {{ 'No compromise records found for this scope.' | translate }}
               </div>
             }
             @if (groups.length > 0) {
@@ -159,7 +159,7 @@
                 <div class="border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-5 py-3">
                   <div class="flex items-center justify-between gap-3">
                     <div class="min-w-0">
-                      <h2 class="truncate text-base font-bold text-[var(--color-text1)]">{{ 'Defacement Records' | translate }}</h2>
+                      <h2 class="truncate text-base font-bold text-[var(--color-text1)]">{{ 'Compromise Records' | translate }}</h2>
                       @if (getSelectedGroup(); as selectedGroup) {
                         <p class="mt-1 truncate text-[12px] text-[var(--color-text4)]" [title]="selectedGroup.title">
                           {{ selectedGroup.records.length }} {{ 'records' | translate }} / {{ selectedGroup.title }}

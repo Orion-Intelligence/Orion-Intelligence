@@ -1,3 +1,4 @@
+from orion.api.interactive.feeder_manager.feeder_manager import FeederManager
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_query_generator import search_query_generator
 from orion.services.elastic_manager.elastic_controller import elastic_controller
@@ -15,6 +16,23 @@ class search_defacement_controller:
     def __init__(self):
         if search_defacement_controller.__instance is None:
             search_defacement_controller.__instance = self
+
+    @staticmethod
+    def _crawl_lookup_url(item):
+        source_url = item.get("m_source_url") or []
+        if isinstance(source_url, list):
+            source_url = source_url[0] if source_url else ""
+        return item.get("m_base_url") or item.get("m_url") or source_url or ""
+
+    @classmethod
+    async def _add_crawl_status(cls, records):
+        for item in records:
+            crawl_status = await FeederManager.get_instance().get_value_crawl_status(
+                "_defacement__values",
+                cls._crawl_lookup_url(item),
+            )
+            item["m_crawl_status"] = crawl_status["status"]
+            item["m_last_crawled_at"] = crawl_status["last_checked_at"]
 
     @staticmethod
     def _title(item):
@@ -150,6 +168,7 @@ class search_defacement_controller:
         response = await elastic_controller.get_instance().search_consolidated_ranked_query(
             indices, query, indices_boost)
         records, total = self._records(response)
+        await self._add_crawl_status(records)
         return {
             "Result": records,
             "Page_Count": 1,

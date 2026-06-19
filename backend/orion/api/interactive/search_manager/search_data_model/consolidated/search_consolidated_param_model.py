@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict, Annotated
+from typing import Optional, List, Dict, Annotated, Union
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
@@ -22,6 +22,15 @@ class search_consolidated_param_model(BaseModel):
     ioc: Optional[str] = ""
     platform_result_count: Optional[int] = 15
     sort_latest: Optional[bool] = False
+    m_cve: Optional[Union[str, List[str]]] = ""
+    m_cwe: Optional[Union[str, List[str]]] = ""
+    m_product: Optional[Union[str, List[str]]] = ""
+    m_version: Optional[Union[str, List[str]]] = ""
+    m_platform: Optional[Union[str, List[str]]] = ""
+    m_cvss: Optional[Union[str, List[str]]] = ""
+    m_severity: Optional[Union[str, List[str]]] = ""
+    m_remote_type: Optional[Union[str, List[str]]] = ""
+    m_tags: Optional[Union[str, List[str]]] = ""
     daterange: Annotated[str, StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")] = ""
     entity_filter: Optional[Dict[str, List[str]]] = Field(
         default=None, examples=[{"m_country": ["pakistan"]}])

@@ -1,0 +1,30 @@
+<div class="relative" (click)="$event.stopPropagation()">
+  <button [id]="id()" [attr.data-testid]="testId()" [attr.aria-expanded]="isOpen" [attr.aria-controls]="resolvedMenuId" [attr.aria-activedescendant]="isOpen && activeIndex >= 0 ? optionId(activeIndex) : null" [disabled]="disabled() || (!options().length && !allowEmpty())" aria-haspopup="listbox" type="button" class="flex w-full items-center justify-between border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-left font-medium text-[var(--color-text1)] shadow-[0_1px_2px_0_#1018280d] outline-none transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-810)] focus:border-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="size() === 'large' ? 'h-11 rounded-[10px] px-3 text-sm' : 'h-10 rounded-[7px] px-[15px] text-xs'" (click)="toggle($event)" (keydown)="onButtonKeydown($event)">
+    <span class="min-w-0 truncate">{{ selectedLabel }}</span>
+    @if (isOpen) {
+      <span class="ml-3 h-2 w-2 shrink-0 rotate-[225deg] translate-y-1 border-b-2 border-r-2 border-[var(--color-text3)] transition-transform duration-150"></span>
+    } @else {
+      <span class="ml-3 h-2 w-2 shrink-0 rotate-45 border-b-2 border-r-2 border-[var(--color-text3)] transition-transform duration-150"></span>
+    }
+  </button>
+
+  @if (isOpen) {
+    <div class="absolute left-0 right-0 top-[calc(100%+6px)] z-[1250] rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820)] p-1 shadow-[0_8px_18px_rgba(0,0,0,0.22)]">
+      @if (searchable()) {
+        <div class="border-b border-white/[0.035] p-1 pb-2">
+          <input #searchInput [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)" (keydown)="onSearchKeydown($event)" class="h-9 w-full rounded-[6px] border border-white/[0.07] bg-[var(--color-blue-820-light)] px-3 text-xs font-medium text-[var(--color-text1)] outline-none transition placeholder:text-[var(--color-text5)] focus:border-white/[0.14] focus:bg-[var(--color-blue-810)]" [placeholder]="searchPlaceholder()" type="text" autocomplete="off">
+        </div>
+      }
+
+      <div #listbox [id]="resolvedMenuId" class="overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" [ngClass]="size() === 'large' ? 'max-h-[230px]' : 'max-h-[190px]'" role="listbox">
+        @for (option of visibleOptions; track option.trackKey; let index = $index) {
+          <button [id]="optionId(index)" [attr.data-dropdown-option-index]="index" [attr.data-testid]="optionTestIdPrefix() && option.testKey ? optionTestIdPrefix() + option.testKey : null" [attr.aria-selected]="isSelected(option.key)" class="mt-1 flex h-9 w-full items-center rounded-[6px] px-3 text-left text-xs transition first:mt-0" [ngClass]="optionClass(option, index)" role="option" type="button" (mouseenter)="setActiveIndex(index)" (keydown)="onOptionKeydown($event)" (click)="select(option.key, $event)">
+            <span class="min-w-0 truncate">{{ option.label }}</span>
+          </button>
+        } @empty {
+          <div class="px-3 py-3 text-xs font-medium text-[var(--color-text5)]">No results</div>
+        }
+      </div>
+    </div>
+  }
+</div>
