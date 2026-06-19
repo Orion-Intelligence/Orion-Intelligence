@@ -136,11 +136,10 @@ class test_manager:
 
 
     async def reset_test_elastic_and_import_mocks(self):
-        print("reset_test_elastic_and_import_mocks: start", flush=True)
-
         if env_handler.get_instance().env("TESTING_ENABLED", "0") != "1":
-            print("TESTING_ENABLED != 1, exiting", flush=True)
             return
+
+        print("reset_test_elastic_and_import_mocks: start", flush=True)
 
         es_host = ELASTIC_CONNECTIONS.S_DATABASE_IP or "localhost"
         es_port = int(ELASTIC_CONNECTIONS.S_DATABASE_PORT or 9400)

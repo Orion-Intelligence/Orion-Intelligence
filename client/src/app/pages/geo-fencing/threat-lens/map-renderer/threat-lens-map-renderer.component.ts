@@ -244,8 +244,11 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       });
       this.ipScanGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens IP Scan Markers' });
 
+      const initialBasemapId = this.getThreatBasemapId();
+      this.activeBasemapId = initialBasemapId;
+
       const map = new EsriMap({
-        basemap: this.getThreatBasemapId(),
+        basemap: initialBasemapId,
         layers: [
           countryLayer,
           this.countryFillGraphicsLayer,

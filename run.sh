@@ -31,8 +31,6 @@ ensure_local_ssl_cert() {
 
 client_build() {
     cd client || exit
-        npm install
-    npm run lint
     rm -rf build-next
     if [ "$1" = "-t" ]; then
         npx ng build --configuration instrumented --output-path build-next
@@ -47,6 +45,18 @@ client_build() {
     rm -rf backend/build
     mkdir -p backend/build
     cp -r client/build/* backend/build/
+}
+
+install_client_dependencies() {
+    cd client || exit
+    if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+        npm ci
+    else
+        rm -rf node_modules
+        npm install
+    fi
+    npm run lint
+    cd ..
 }
 
 use_compose_file() {
@@ -175,8 +185,7 @@ if [ "$COMMAND" = "build" ]; then
     fi
 
     docker pull python:3.11-slim
-    npm --prefix client install
-    npm --prefix client run lint
+    install_client_dependencies
 
     case "$FLAG" in
         -t)
@@ -253,7 +262,7 @@ fi
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && [ "$EXTRA_FLAG" = "-full" ]; then
     docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --force-recreate "${compose_up_services[@]}"
 else
-    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d  "${compose_up_services[@]}"
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d "${compose_up_services[@]}"
 fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
@@ -263,9 +272,11 @@ if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     disable_maintenance_mode
 fi
 
-if [ "$COMMAND" = "build" ] && { [ "$FLAG" = "-t" ] || [ "$FLAG" = "-tb" ]; }; then
-    wait_for_test_service
-fi
+case "$COMMAND:$FLAG" in
+    build:-t|build:-tb)
+        wait_for_test_service
+        ;;
+esac
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-tb" ]; then
     run_backend_tests_protected

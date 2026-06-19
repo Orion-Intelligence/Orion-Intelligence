@@ -1,6 +1,7 @@
 import json
 import hashlib
 from datetime import datetime, timezone
+from elastic_transport import ApiError
 from elasticsearch import AsyncElasticsearch, helpers as es_helpers
 from fastapi import HTTPException
 from orion.constants import constant
@@ -219,11 +220,12 @@ class elastic_controller:
     async def __initialize_map_entities_data(self, mapping_map_entities_model):
         index_name = ELASTIC_INDEX.S_MAP_ENTITIES_INDEX
 
-        if not await self.__m_core_connection.indices.exists(index=index_name, request_timeout=220):
-            await self.__m_core_connection.indices.create(index=index_name, body=mapping_map_entities_model, request_timeout=220)
-        else:
-            await self.__m_core_connection.indices.delete(index=index_name, request_timeout=220)
-            await self.__m_core_connection.indices.create(index=index_name, body=mapping_map_entities_model, request_timeout=220)
+        try:
+            if not await self.__m_core_connection.indices.exists(index=index_name, request_timeout=220):
+                await self.__m_core_connection.indices.create(index=index_name, body=mapping_map_entities_model, request_timeout=220)
+        except ApiError as ex:
+            if getattr(ex, "status_code", None) != 400 or "resource_already_exists_exception" not in str(ex):
+                raise
 
         raw_data = constant.map_entities_data
         if isinstance(raw_data, str):
