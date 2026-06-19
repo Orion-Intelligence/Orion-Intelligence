@@ -1,8 +1,15 @@
 import { Injectable, signal } from '@angular/core';
-import { Observable, Subject, Subscription, of, timer } from 'rxjs';
+import { EMPTY, Observable, Subject, Subscription, of, timer } from 'rxjs';
 import { catchError, filter, finalize, map, switchMap, takeWhile, tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
-import { ScanJob, ScanJobApiItem, ScanJobCountResponse, ScanJobCreateResponse, ScanJobIncompleteResponse, ScanJobListResponse, ScanJobNotificationResponse, ScanJobPollResponse, ScanJobSeenResponse, ScanJobStartRequest, ScanJobStatus } from '../model/scan-jobs/scan-job.model';
+import { ScanJob, ScanJobApiItem, ScanJobCountResponse, ScanJobCreateApiResponse, ScanJobCreateResponse, ScanJobDeleteResponse, ScanJobDuplicateChoiceResponse, ScanJobIncompleteResponse, ScanJobListResponse, ScanJobNotificationResponse, ScanJobPollResponse, ScanJobSeenResponse, ScanJobStartRequest, ScanJobStatus } from '../model/scan-jobs/scan-job.model';
+
+type DuplicateScanChoice = 'previous' | 'new' | 'cancel';
+
+interface DuplicateScanPrompt {
+  message: string;
+  previousScan: ScanJob;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ScanNotificationService {
@@ -13,7 +20,7 @@ export class ScanNotificationService {
   private readonly queuedPollIds = new Set<string>();
   private readonly pollDelayByJob = new Map<string, number>();
   private readonly jobCache = new Map<string, ScanJob>();
-  private bootstrapped = false;
+  private isPendingScanning = false;
   private currentPage = 0;
   private activePollerId: string | null = null;
   private loadingNextActive = false;
@@ -23,14 +30,16 @@ export class ScanNotificationService {
   readonly isLoading = signal(false);
   readonly hasMore = signal(false);
   readonly totalScanCount = signal(0);
+  readonly duplicateScanPrompt = signal<DuplicateScanPrompt | null>(null);
+  private duplicateScanChoice$?: Subject<DuplicateScanChoice>;
 
   constructor(private api: ApiService) {}
 
   startPendingScans(): void {
-    if (this.bootstrapped) {
+    if (this.isPendingScanning) {
       return;
     }
-    this.bootstrapped = true;
+    this.isPendingScanning = true;
     this.refreshCounts();
     this.resumeNextIncompleteJob();
   }
@@ -50,7 +59,7 @@ export class ScanNotificationService {
       return;
     }
     this.loadingNextActive = true;
-    this.api.get<ScanJobListResponse<ScanJobIncompleteResponse>>('scan-jobs/incomplete?limit=1').subscribe({
+    this.api.get<ScanJobListResponse<ScanJobIncompleteResponse>>('scan-jobs/incomplete?limit=4').subscribe({
       next: response => {
         const job = (response?.items || [])[0];
         if (job) {
@@ -119,7 +128,7 @@ export class ScanNotificationService {
     this.pollers.clear();
     this.queuedPollIds.clear();
     this.pollDelayByJob.clear();
-    this.bootstrapped = false;
+    this.isPendingScanning = false;
     this.currentPage = 0;
     this.activePollerId = null;
     this.loadingNextActive = false;
@@ -131,15 +140,60 @@ export class ScanNotificationService {
   }
 
   createJob(request: ScanJobStartRequest): Observable<ScanJob> {
-    return this.api.post<ScanJobCreateResponse>('scan-jobs/create', {
+    return this.createJobRequest(request).pipe(switchMap(response => this.resolveCreateResponse(response, request)), map(job => this.normalizeJobView(job)), tap(job => {
+      const alreadyCached = this.jobCache.has(job.id);
+      this.cacheJob(job);
+      if (!alreadyCached) {
+        this.upsertVisibleJob(job);
+      }
+      this.refreshCounts();
+      this.ensurePolling(job, request.pollDelayMs);
+    }));
+  }
+
+  private createJobRequest(request: ScanJobStartRequest): Observable<ScanJobCreateApiResponse> {
+    return this.api.post<ScanJobCreateApiResponse>('scan-jobs/create', {
       api_reference: request.apiReference,
       payload: request.payload,
       metadata: request.metadata || {},
-    }).pipe(map(job => this.normalizeJobView(job)), tap(job => {
-      this.cacheJob(job);
-      this.totalScanCount.update(value => value + 1);
-      this.ensurePolling(job, request.pollDelayMs);
+      force_new: !!request.forceNew,
+    });
+  }
+
+  private resolveCreateResponse(response: ScanJobCreateApiResponse, request: ScanJobStartRequest): Observable<ScanJobCreateResponse> {
+    if (!this.isDuplicateChoiceResponse(response)) {
+      return of(response);
+    }
+    return this.askDuplicateScanChoice(response).pipe(switchMap(choice => {
+      if (choice === 'previous') {
+        return of(response.previous_scan);
+      }
+      if (choice === 'new') {
+        return this.createJobRequest({ ...request, forceNew: true }).pipe(switchMap(nextResponse => this.resolveCreateResponse(nextResponse, { ...request, forceNew: true })));
+      }
+      return EMPTY;
     }));
+  }
+
+  private isDuplicateChoiceResponse(response: ScanJobCreateApiResponse): response is ScanJobDuplicateChoiceResponse {
+    return !!(response as ScanJobDuplicateChoiceResponse)?.requires_confirmation;
+  }
+
+  private askDuplicateScanChoice(response: ScanJobDuplicateChoiceResponse): Observable<DuplicateScanChoice> {
+    this.duplicateScanChoice$?.complete();
+    this.duplicateScanChoice$ = new Subject<DuplicateScanChoice>();
+    this.duplicateScanPrompt.set({
+      message: response.message,
+      previousScan: this.normalizeJobView(response.previous_scan),
+    });
+    return this.duplicateScanChoice$.asObservable();
+  }
+
+  resolveDuplicateScanChoice(choice: DuplicateScanChoice): void {
+    this.duplicateScanPrompt.set(null);
+    this.duplicateScanChoice$?.next(choice);
+    this.duplicateScanChoice$?.complete();
+    this.duplicateScanChoice$ = undefined;
   }
 
   runScanAsResponse<T>(request: ScanJobStartRequest): Observable<T> {
@@ -156,6 +210,25 @@ export class ScanNotificationService {
       },
       error: () => void 0,
     });
+  }
+
+  deleteScan(job: ScanJob): Observable<ScanJobDeleteResponse> {
+    return this.api.delete<ScanJobDeleteResponse>(`scan-jobs/delete/${job.id}`).pipe(tap(() => {
+      this.removeJob(job.id);
+      this.refreshCounts();
+      this.resumeNextIncompleteJob();
+    }));
+  }
+
+  clearCompletedScans(): Observable<ScanJobDeleteResponse> {
+    return this.api.delete<ScanJobDeleteResponse>('scan-jobs/clear-all').pipe(tap(() => {
+      const runningJobs = this.jobs().filter(job => this.isIncomplete(job));
+      this.jobCache.clear();
+      runningJobs.forEach(job => this.jobCache.set(job.id, job));
+      this.jobs.set(runningJobs);
+      this.refreshCounts();
+      this.resumeNextIncompleteJob();
+    }));
   }
 
   private watchJob(scanId: string): Observable<ScanJob> {
@@ -350,6 +423,18 @@ export class ScanNotificationService {
       return;
     }
     this.jobs.set(current.map(item => item.id === job.id ? job : item));
+  }
+
+  private removeJob(scanId: string): void {
+    this.pollers.get(scanId)?.unsubscribe();
+    this.pollers.delete(scanId);
+    this.queuedPollIds.delete(scanId);
+    this.pollDelayByJob.delete(scanId);
+    if (this.activePollerId === scanId) {
+      this.activePollerId = null;
+    }
+    this.jobCache.delete(scanId);
+    this.jobs.set(this.jobs().filter(job => job.id !== scanId));
   }
 
   private isIncomplete(job: ScanJob): boolean {

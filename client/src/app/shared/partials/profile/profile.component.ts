@@ -19,12 +19,7 @@ type ThemeMode = 'dark-theme' | 'light-theme';
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [
-    NgOptimizedImage,
-    TooltipDirective,
-    NgClass,
-    AlertNotificationComponent,
-    TranslatePipe],
+  imports: [NgOptimizedImage, TooltipDirective, NgClass, AlertNotificationComponent, TranslatePipe],
   templateUrl: './profile.component.html'
 })
 export class ProfileComponent implements AfterViewInit, OnDestroy {

@@ -954,7 +954,7 @@ async def convert_stix_batch(kind: str, payloads: list[dict] = Body(...)):
     dependencies=SCANNING_DEPS,
 )
 async def create_scan_job(request: ScanJobCreateRequest = Body(...), current_user=Depends(get_current_user)):
-    return await ScanJobManager.get_instance().create_job(current_user=current_user, api_reference=request.api_reference, payload=request.payload, metadata=request.metadata)
+    return await ScanJobManager.get_instance().create_job(current_user=current_user, api_reference=request.api_reference, payload=request.payload, metadata=request.metadata, force_new=request.force_new)
 
 
 @api_routes.get(
@@ -1000,3 +1000,21 @@ async def poll_scan_job(scan_id: str, current_user=Depends(get_current_user)):
 )
 async def mark_scan_job_seen(scan_id: str, current_user=Depends(get_current_user)):
     return await ScanJobManager.get_instance().mark_seen(scan_id, current_user)
+
+
+@api_routes.delete(
+    "/api/scan-jobs/clear-all",
+    include_in_schema=False,
+    dependencies=SCANNING_DEPS,
+)
+async def delete_completed_scan_jobs(current_user=Depends(get_current_user)):
+    return await ScanJobManager.get_instance().delete_completed_jobs(current_user)
+
+
+@api_routes.delete(
+    "/api/scan-jobs/delete/{scan_id}",
+    include_in_schema=False,
+    dependencies=SCANNING_DEPS,
+)
+async def delete_scan_job(scan_id: str, current_user=Depends(get_current_user)):
+    return await ScanJobManager.get_instance().delete_job(scan_id, current_user)

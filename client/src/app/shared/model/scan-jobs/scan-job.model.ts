@@ -18,7 +18,21 @@ export interface ScanJobCreateResponse {
   target: string;
   payload: Record<string, any>;
   status: ScanJobStatus;
+  response?: any;
+  seen?: boolean;
+  source?: 'new' | 'existing_running' | 'previous_completed';
+  created_at?: string | Date;
+  updated_at?: string | Date;
+  completed_at?: string | Date | null;
 }
+
+export interface ScanJobDuplicateChoiceResponse {
+  requires_confirmation: true;
+  message: string;
+  previous_scan: ScanJobCreateResponse;
+}
+
+export type ScanJobCreateApiResponse = ScanJobCreateResponse | ScanJobDuplicateChoiceResponse;
 
 export interface ScanJobNotificationResponse {
   scan_id: string;
@@ -64,6 +78,12 @@ export interface ScanJobSeenResponse {
   message: string;
 }
 
+export interface ScanJobDeleteResponse {
+  message: string;
+  deleted?: number;
+  skipped?: number;
+}
+
 export interface ScanJobStartRequest {
   apiReference: string;
   payload: Record<string, any>;
@@ -73,4 +93,5 @@ export interface ScanJobStartRequest {
     target?: string;
   };
   pollDelayMs?: number;
+  forceNew?: boolean;
 }

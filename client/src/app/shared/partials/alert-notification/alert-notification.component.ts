@@ -13,12 +13,14 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ScanNotificationService } from '../../services/scan-notification.service';
 import { ScanJob } from '../../model/scan-jobs/scan-job.model';
 import { ScanExportService } from '../../services/export/scan-export.service';
+import { ConfirmationPopupComponent } from '../confirmation-popup/confirmation-popup.component';
 
 type NotificationMode = 'alerts' | 'scans';
+type ScanDeleteMode = 'single' | 'all';
 
 @Component({
   selector: 'app-alert-notification',
-  imports: [CommonModule, NgClass, ExportChoiceModalComponent, TranslatePipe],
+  imports: [CommonModule, NgClass, ExportChoiceModalComponent, ConfirmationPopupComponent, TranslatePipe],
   templateUrl: './alert-notification.component.html',
   animations: [sidebarAnimation, overlayAnimation],
 })
@@ -39,6 +41,10 @@ export class AlertNotificationComponent implements OnChanges {
   alertToShowReport: AlertModel | null = null;
   scanToExport: ScanJob | null = null;
   isExportChoiceOpen: boolean = false;
+  isScanDeleteConfirmationOpen: boolean = false;
+  isScanDeleting: boolean = false;
+  scanDeleteTarget: ScanJob | null = null;
+  scanDeleteMode: ScanDeleteMode | null = null;
   readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.', testId: 'notification-alert-export-option-report' }];
   readonly scanExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate a PDF report from this scan result.', testId: 'notification-scan-export-option-report' }];
   readonly isNotificationOpen = input.required<boolean | null>();
@@ -272,6 +278,78 @@ export class AlertNotificationComponent implements OnChanges {
   markScanSeen(job: ScanJob, event?: Event): void {
     event?.stopPropagation();
     this.scanNotificationService.markSeen(job);
+  }
+
+  requestDeleteScan(job: ScanJob, event?: Event): void {
+    event?.stopPropagation();
+    if (this.isScanPending(job)) {
+      return;
+    }
+    this.scanDeleteTarget = job;
+    this.scanDeleteMode = 'single';
+    this.isScanDeleteConfirmationOpen = true;
+  }
+
+  requestClearAllScans(): void {
+    if (!this.scanNotificationService.jobs().length) {
+      return;
+    }
+    this.scanDeleteTarget = null;
+    this.scanDeleteMode = 'all';
+    this.isScanDeleteConfirmationOpen = true;
+  }
+
+  scanDeleteConfirmationMessage(): string {
+    if (this.scanDeleteMode === 'all') {
+      return 'Are you sure you want to delete all completed scan notifications? Running scans will not be deleted.';
+    }
+    return 'Are you sure you want to delete this scan notification?';
+  }
+
+  handleScanDeleteConfirmation(confirmed: boolean): void {
+    if (!confirmed || !this.scanDeleteMode) {
+      this.closeScanDeleteConfirmation();
+      return;
+    }
+    if (this.scanDeleteMode === 'single' && this.scanDeleteTarget) {
+      this.isScanDeleting = true;
+      this.scanNotificationService.deleteScan(this.scanDeleteTarget).subscribe({
+        next: () => {
+          this.messageNotificationService.show('Scan deleted successfully!', 'success');
+          this.closeScanDeleteConfirmation();
+        },
+        error: err => {
+          this.messageNotificationService.show(err?.error?.detail || 'Failed to delete scan');
+          this.closeScanDeleteConfirmation();
+        },
+      });
+      return;
+    }
+
+    this.isScanDeleting = true;
+    this.scanNotificationService.clearCompletedScans().subscribe({
+      next: response => {
+        const deleted = Number(response?.deleted || 0);
+        if (deleted > 0) {
+          this.messageNotificationService.show('Scans deleted successfully!', 'success');
+        }
+        else {
+          this.messageNotificationService.show('No completed scans to delete');
+        }
+        this.closeScanDeleteConfirmation();
+      },
+      error: err => {
+        this.messageNotificationService.show(err?.error?.detail || 'Failed to delete scans');
+        this.closeScanDeleteConfirmation();
+      },
+    });
+  }
+
+  private closeScanDeleteConfirmation(): void {
+    this.isScanDeleteConfirmationOpen = false;
+    this.isScanDeleting = false;
+    this.scanDeleteTarget = null;
+    this.scanDeleteMode = null;
   }
 
   exportSelectedScan(_type: string): void {

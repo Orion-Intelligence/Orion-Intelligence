@@ -109,12 +109,15 @@
 
               <div class="mt-2 flex items-center justify-between gap-2 text-[12px] text-[#a0b8d1]">
                 <span>{{ timeAgo(job.created_at) }}</span>
-                @if (isScanCompleted(job)) {
-                  <span class="font-semibold text-[#57a5eb]">{{ 'Export' | translate }}</span>
-                }
-                @else if (!job.seen && isScanFailed(job)) {
-                  <button type="button" class="border-0 bg-transparent text-[12px] font-semibold text-[#57a5eb]" (click)="markScanSeen(job, $event)">{{ 'Mark seen' | translate }}</button>
-                }
+                <div class="flex shrink-0 items-center gap-2">
+                  @if (isScanCompleted(job)) {
+                    <span class="font-semibold text-[#57a5eb]">{{ 'Export' | translate }}</span>
+                  }
+                  @else if (!job.seen && isScanFailed(job)) {
+                    <button type="button" class="border-0 bg-transparent text-[12px] font-semibold text-[#57a5eb]" (click)="markScanSeen(job, $event)">{{ 'Mark seen' | translate }}</button>
+                  }
+                  <button type="button" [disabled]="isScanPending(job) || isScanDeleting" class="rounded-md border border-[rgba(255,77,79,0.35)] bg-[rgba(255,77,79,0.08)] px-2 py-1 text-[12px] font-semibold text-[#ff8a8c] transition hover:bg-[rgba(255,77,79,0.14)] disabled:cursor-not-allowed disabled:opacity-45" (click)="requestDeleteScan(job, $event)">{{ 'Delete' | translate }}</button>
+                </div>
               </div>
 
               @if (getScanError(job)) {
@@ -140,9 +143,16 @@
         @if (isAlertMode() && alertNotifications.length>0) {
           <button data-testid="tenant-notification-clear-all" (click)="clearAll()" class="w-full rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110" type="button">{{ 'Clear All' | translate }}</button>
         }
+        @if (isScanMode() && scanNotificationService.jobs().length>0) {
+          <button data-testid="scan-notification-clear-all" [disabled]="isScanDeleting" (click)="requestClearAllScans()" class="w-full rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" type="button">{{ 'Clear All' | translate }}</button>
+        }
       </div>
     </div>
   </div>
+}
+
+@if (isScanDeleteConfirmationOpen) {
+  <app-confirmation-popup [message]="scanDeleteConfirmationMessage()" (confirmed)="handleScanDeleteConfirmation($event)"></app-confirmation-popup>
 }
 
 <app-export-choice-modal
