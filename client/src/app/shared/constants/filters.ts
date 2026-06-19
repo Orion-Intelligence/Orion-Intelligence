@@ -67,6 +67,17 @@ const GENERAL_CONTENT_OPTIONS = [
   { key: "cryptocurrency", label: "Cryptocurrency" },
   { key: "leaks", label: "Leaks" }
 ];
+const DEFACEMENT_CONTENT_OPTIONS = [
+  { key: "hacked", label: "hacked" },
+  { key: "malicious_redirect", label: "malicious_redirect" },
+  { key: "malware_url", label: "malware_url" },
+  { key: "open_directory", label: "open_directory" },
+  { key: "phishing", label: "phishing" },
+  { key: "phishing_domain", label: "phishing_domain" },
+  { key: "scam", label: "scam" },
+  { key: "spam_url", label: "spam_url" },
+  { key: "typosquatting", label: "typosquatting" }
+];
 const BASE_DATERANGE = {
   options: [],
   type: 'daterange' as const,
@@ -98,6 +109,15 @@ function createGeneralContent() {
     type: 'dropdown' as const,
     tooltip: "Content Filter",
     selected: "all"
+  };
+}
+function createDefacementContent() {
+  return {
+    title: "Type of Content",
+    options: DEFACEMENT_CONTENT_OPTIONS,
+    type: 'dropdown' as const,
+    tooltip: "Type of Content",
+    selected: ""
   };
 }
 const SAFE_FILTER = {
@@ -214,6 +234,13 @@ export const leak_filters: FilterModel = {
     network: COMMON_NETWORK,
     safe: SAFE_FILTER,
     daterange: DATERANGE_CREATION
+  }
+};
+export const defacement_filters: FilterModel = {
+  filters: {
+    network: COMMON_NETWORK,
+    daterange: DATERANGE_CREATION,
+    content: createDefacementContent()
   }
 };
 export const consolidated_filters: FilterModel = {

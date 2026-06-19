@@ -125,9 +125,10 @@ class search_defacement_controller:
         filter_dict = param.entity_filter if param.entity_filter else {}
         content = str(param.content or "all").strip().lower()
         category = str(param.category or "all").strip().lower()
-        if content in ("", "all") and category in ("hacked", "phishing", "databases"):
+        allowed_content = ("hacked", "malicious_redirect", "malware_url", "open_directory", "phishing", "phishing_domain", "scam", "spam_url", "typosquatting", "databases")
+        if content in ("", "all") and category in allowed_content:
             content = category
-        if content not in ("hacked", "phishing", "databases"):
+        if content not in allowed_content:
             content = "all"
 
         grouped_param = param.model_copy(deep=True)

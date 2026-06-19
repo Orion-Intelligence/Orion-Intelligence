@@ -59,8 +59,9 @@ export class DashboardService {
     paramModel.page = this.consolidatedParamModel.page;
     let baseParams: any = { ...paramModel, ...this.selectedFilters() };
     if (apiEndpoint === 'search/defacement') {
+      delete baseParams.safe;
       baseParams.category = paramModel.category || 'all';
-      baseParams.content = paramModel.content || 'all';
+      baseParams.content = baseParams.content || paramModel.content || 'all';
     }
     this.syncQueryParamsToUrl(baseParams);
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
