@@ -5,7 +5,7 @@ import { map, tap } from 'rxjs/operators';
 import { ApiService } from '../../shared/services/api.service';
 @Injectable({ providedIn: 'root' })
 export class SuggestionService {
-  private readonly suggestionSources: Record<string, { endpoint: string; fields: Set<string>; }> = { exploit: { endpoint: 'search/exploit/suggestions', fields: new Set(['m_cve', 'm_cwe', 'm_product', 'm_version', 'm_tags']) } };
+  private readonly suggestionSources: Record<string, { endpoint: string; fields: Set<string>; }> = { exploit: { endpoint: 'search/exploit/suggestions', fields: new Set(['m_cve', 'm_cwe', 'm_product', 'm_tags']) } };
   private cache?: Record<string, string[]>;
 
   constructor(private http: HttpClient, private apiService: ApiService) {
@@ -21,14 +21,13 @@ export class SuggestionService {
 
   loadSuggestion(source: string, field: string, query: string): Observable<string[]> {
     const suggestionSource = this.suggestionSources[source];
-    const normalizedQuery = query.trim().toLowerCase();
-    if (!suggestionSource || !suggestionSource.fields.has(field) || !normalizedQuery) {
+    if (!suggestionSource || !suggestionSource.fields.has(field)) {
       return of([]);
     }
     const params = new HttpParams()
       .set('field', field)
       .set('q', query.trim())
-      .set('limit', '25');
+      .set('limit', query.trim() ? '25' : '20');
     return this.apiService.get<{ values: string[] }>(suggestionSource.endpoint, { params })
       .pipe(map(response => response.values || []));
   }

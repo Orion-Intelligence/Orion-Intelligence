@@ -4,7 +4,7 @@ SYSTEM_INFO_DOCS = {"directory": {"description": (
     "- **page:** page number of the result\n"
     "- **network:** all, onion, i2p, clearnet\n"
     "- **index:** all, general, leak, defacement, chat, exploit, twitter, reddit\n"
-    "- **content_type:** all, general, forums, news, stolen, drugs, hacking, marketplaces, cryptocurrency, "
+    "- **content_type:** all, general, swarm, forums, news, stolen, drugs, hacking, marketplaces, cryptocurrency, "
     "leaks, adult, tracking, chat, social\n"
     "- **daterange:** optional date range (e.g., `2025-12-03,2025-12-18`)\n\n"
     "Results include URL, detected content type(s), index classification, network layer, and last-update metadata."), "response_description": (

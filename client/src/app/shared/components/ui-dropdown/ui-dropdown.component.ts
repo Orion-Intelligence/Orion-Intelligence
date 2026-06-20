@@ -211,9 +211,7 @@ export class UiDropdownComponent {
   private open(searchTerm = ''): void {
     this.isOpen = true;
     this.searchTerm = searchTerm;
-    if (searchTerm) {
-      this.searchChange.emit(searchTerm);
-    }
+    this.searchChange.emit(searchTerm);
     const selectedIndex = this.visibleOptions.findIndex(option => this.isSelected(option.key));
     this.activeIndex = selectedIndex >= 0 ? selectedIndex : (this.visibleOptions.length ? 0 : -1);
     this.focusSearch();

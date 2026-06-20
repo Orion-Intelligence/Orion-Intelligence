@@ -217,15 +217,6 @@ const EXPLOIT_TEXT_FILTERS = {
     suggestionSource: "exploit",
     placeholder: "Product name"
   },
-  m_version: {
-    title: "Version",
-    options: [],
-    type: 'dropdown' as const,
-    tooltip: "Version",
-    selected: "",
-    suggestionSource: "exploit",
-    placeholder: "Affected version"
-  },
   m_tags: {
     title: "Tags",
     options: [],
@@ -411,7 +402,6 @@ export const filter_mapping: Record<string, string> = {
   m_cve: "CVE",
   m_cwe: "CWE",
   m_product: "Product",
-  m_version: "Version",
   m_severity: "Severity",
   m_risk: "Risk",
   m_remote_type: "Remote Type",

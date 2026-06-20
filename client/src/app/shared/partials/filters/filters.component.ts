@@ -79,7 +79,7 @@ export class FiltersComponent implements OnInit {
     const trimmedQuery = query.trim();
     const requestId = (this.suggestionRequestIds[key] || 0) + 1;
     this.suggestionRequestIds[key] = requestId;
-    if (!trimmedQuery) {
+    if (!trimmedQuery && filter.options.length) {
       this.dropdownLoading = { ...this.dropdownLoading, [key]: false };
       return;
     }

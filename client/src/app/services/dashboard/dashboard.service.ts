@@ -225,7 +225,6 @@ export class DashboardService {
       "m_cve",
       "m_cwe",
       "m_product",
-      "m_version",
       "m_severity",
       "m_risk",
       "m_remote_type",
