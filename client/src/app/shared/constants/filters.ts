@@ -125,6 +125,70 @@ const EXPLOIT_TYPE_FILTER = {
   tooltip: "Type",
   selected: "all"
 };
+const EXPLOIT_SEVERITY_OPTIONS = [
+  { key: "critical", label: "Critical" },
+  { key: "high", label: "High" },
+  { key: "medium", label: "Medium" },
+  { key: "low", label: "Low" },
+  { key: "info", label: "Info" },
+  { key: "unknown", label: "Unknown" }
+];
+const EXPLOIT_RISK_OPTIONS = [
+  { key: "critical", label: "Critical" },
+  { key: "high", label: "High" },
+  { key: "medium", label: "Medium" },
+  { key: "low", label: "Low" },
+  { key: "info", label: "Info" }
+];
+const EXPLOIT_REMOTE_TYPE_OPTIONS = [
+  { key: "remote", label: "Remote" },
+  { key: "local", label: "Local" },
+  { key: "physical", label: "Physical" },
+  { key: "adjacent", label: "Adjacent" },
+  { key: "unknown", label: "Unknown" }
+];
+const EXPLOIT_PLATFORM_OPTIONS = [
+  { key: "windows", label: "Windows" },
+  { key: "linux", label: "Linux" },
+  { key: "macos", label: "macOS" },
+  { key: "android", label: "Android" },
+  { key: "ios", label: "iOS" },
+  { key: "web", label: "Web" },
+  { key: "php", label: "PHP" },
+  { key: "java", label: "Java" },
+  { key: "multiple", label: "Multiple" },
+  { key: "unknown", label: "Unknown" }
+];
+const EXPLOIT_STRICT_FILTERS = {
+  m_severity: {
+    title: "Severity",
+    options: EXPLOIT_SEVERITY_OPTIONS,
+    type: 'dropdown' as const,
+    tooltip: "Severity",
+    selected: ""
+  },
+  m_risk: {
+    title: "Risk",
+    options: EXPLOIT_RISK_OPTIONS,
+    type: 'dropdown' as const,
+    tooltip: "Risk",
+    selected: ""
+  },
+  m_remote_type: {
+    title: "Remote Type",
+    options: EXPLOIT_REMOTE_TYPE_OPTIONS,
+    type: 'dropdown' as const,
+    tooltip: "Remote Type",
+    selected: ""
+  },
+  m_platform: {
+    title: "Platform",
+    options: EXPLOIT_PLATFORM_OPTIONS,
+    type: 'dropdown' as const,
+    tooltip: "Platform",
+    selected: ""
+  }
+};
 const EXPLOIT_TEXT_FILTERS = {
   m_cve: {
     title: "CVE",
@@ -157,38 +221,6 @@ const EXPLOIT_TEXT_FILTERS = {
     tooltip: "Version",
     selected: "",
     placeholder: "Affected version"
-  },
-  m_platform: {
-    title: "Platform",
-    options: [],
-    type: 'text' as const,
-    tooltip: "Platform",
-    selected: "",
-    placeholder: "Windows, Linux, etc."
-  },
-  m_cvss: {
-    title: "CVSS",
-    options: [],
-    type: 'text' as const,
-    tooltip: "CVSS",
-    selected: "",
-    placeholder: "9.8"
-  },
-  m_severity: {
-    title: "Severity",
-    options: [],
-    type: 'text' as const,
-    tooltip: "Severity",
-    selected: "",
-    placeholder: "critical, high, medium"
-  },
-  m_remote_type: {
-    title: "Remote Type",
-    options: [],
-    type: 'text' as const,
-    tooltip: "Remote Type",
-    selected: "",
-    placeholder: "remote, local, adjacent"
   },
   m_tags: {
     title: "Tags",
@@ -334,6 +366,7 @@ export const exploit_filters: FilterModel = {
     network: COMMON_NETWORK,
     daterange: DATERANGE_CREATION,
     content: EXPLOIT_TYPE_FILTER,
+    ...EXPLOIT_STRICT_FILTERS,
     ...EXPLOIT_TEXT_FILTERS
   }
 };
@@ -374,9 +407,9 @@ export const filter_mapping: Record<string, string> = {
   m_cwe: "CWE",
   m_product: "Product",
   m_version: "Version",
-  m_platform: "Platform",
-  m_cvss: "CVSS",
   m_severity: "Severity",
+  m_risk: "Risk",
   m_remote_type: "Remote Type",
+  m_platform: "Platform",
   m_tags: "Tags"
 };
