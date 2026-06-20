@@ -275,10 +275,10 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.contains('button', /^Search$/).should('be.visible').and('not.be.disabled').click();
   });
 
-  it('opens Playstore Scanner under Entity API', () => {
+  it('opens Playstore Scanner under Entity Lookup', () => {
     cy.loginAsAdmin();
-    openSidebarGroup('Entity API');
-    clickSidebarSubItem('Entity API', 'Playstore Scanner');
+    openSidebarGroup('Entity Lookup');
+    clickSidebarSubItem('Entity Lookup', 'Playstore Scanner');
   });
 
   it('runs Dump Listing search flow', () => {

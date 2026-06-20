@@ -8,7 +8,7 @@ const SIDEBAR_GROUP_ROUTE_PREFIX: Record<string, string> = {
   Feed: 'feed',
   'Stealer logs': 'stealerlogs',
   'Web Scans': 'scanner',
-  'Entity API': 'api',
+  'Entity Lookup': 'api',
 };
 
 const SIDEBAR_SUBITEM_TEST_ID_ALIAS: Record<string, Record<string, string>> = {
@@ -30,12 +30,6 @@ export const DIRECTORY_CONTENT_OPTION = {label: 'Forums', value: 'forums'};
 
 export function openSidebarGroup(title: string) {
   const groupTestId = getSidebarGroupTestId(title);
-  if (title === 'Entity API') {
-    cy.get('[data-testid="sidebar-group-stealerlogs"]')
-      .scrollIntoView()
-      .should('be.visible')
-      .click({ force: true });
-  }
   cy.get(`[data-testid="${groupTestId}"]`).then(($group) => {
     cy.wrap($group).scrollIntoView();
     let group = $group.parent('div');

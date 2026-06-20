@@ -7,7 +7,7 @@ const SIDEBAR_GROUP_ROUTE_PREFIX: Record<string, string> = {
   Feed: 'feed',
   'Stealer logs': 'stealerlogs',
   'Web Scans': 'scanner',
-  'Entity API': 'api',
+  'Entity Lookup': 'api',
   Dump: 'dump',
 };
 
@@ -26,13 +26,6 @@ function getSidebarGroupTestId(title: string): string {
 
 export function openSidebarGroup(title: string) {
   const groupTestId = getSidebarGroupTestId(title);
-  if (title === 'Entity API') {
-    cy.get('[data-testid="dashboard-sidebar"]').scrollTo('bottom', { ensureScrollable: false });
-    cy.get('[data-testid="sidebar-group-stealerlogs"]')
-      .scrollIntoView()
-      .should('be.visible')
-      .click();
-  }
   cy.get(`[data-testid="${groupTestId}"]`).scrollIntoView().should('be.visible').click();
   cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
     expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');

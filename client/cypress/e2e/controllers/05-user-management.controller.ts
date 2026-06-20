@@ -15,7 +15,7 @@ const SIDEBAR_GROUP_ROUTE_PREFIX: Record<string, string> = {
   Feed: 'feed',
   'Stealer logs': 'stealerlogs',
   'Web Scans': 'scanner',
-  'Entity API': 'api',
+  'Entity Lookup': 'api',
   Dump: 'dump',
 };
 

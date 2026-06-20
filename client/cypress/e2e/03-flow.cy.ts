@@ -79,8 +79,8 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     openSidebarGroup('Web Scans');
     FLOW_WEB_SCANS_SECTIONS.forEach((s) => clickSidebarSubItem('Web Scans', s));
 
-    openSidebarGroup('Entity API');
-    FLOW_ENTITY_API_SECTIONS.forEach((item) => clickSidebarSubItem('Entity API', item));
+    openSidebarGroup('Entity Lookup');
+    FLOW_ENTITY_API_SECTIONS.forEach((item) => clickSidebarSubItem('Entity Lookup', item));
   });
 
   it('covers world heatmap render, interactions, and popup close paths', () => {

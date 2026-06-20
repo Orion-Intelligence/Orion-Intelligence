@@ -31,7 +31,7 @@ describe('Scans Management - Web Scans Flow', () => {
   });
 });
 
-describe('Scans Management - Entity API Flow', () => {
+describe('Scans Management - Entity Lookup Flow', () => {
   let testData: any = {};
 
   before(() => {

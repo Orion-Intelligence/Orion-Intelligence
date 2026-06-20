@@ -69,14 +69,15 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
   }
 
   get activeFilterModel(): FilterModel {
-    switch (this.type) {
-      case Category.DEFACEMENT:
+    const type = String(this.type || '').toLowerCase();
+    switch (type) {
+      case Category.DEFACEMENT.toLowerCase():
         return this.defacement_filters;
-      case Category.EXPLOIT:
+      case Category.EXPLOIT.toLowerCase():
         return this.exploit_filters;
-      case Category.FEED:
+      case Category.FEED.toLowerCase():
         return this.feed_filters;
-      case Category.BREACH:
+      case Category.BREACH.toLowerCase():
         return this.leak_filters;
       default:
         return this.general_filters;

@@ -121,7 +121,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
   });
 
   it('logs in as testing4 and verifies scanner and api sidebar groups', () => {
-    loginAndClickSidebar(testUsers.testing4.username, ['Web Scans', 'Entity API'], testUsers, testData);
+    loginAndClickSidebar(testUsers.testing4.username, ['Web Scans', 'Entity Lookup'], testUsers, testData);
   });
 
   it('logs in as testing5 and completes the stealer logs subscription paywall flow', () => {
