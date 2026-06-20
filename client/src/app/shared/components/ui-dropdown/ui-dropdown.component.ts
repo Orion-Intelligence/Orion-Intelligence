@@ -41,7 +41,9 @@ export class UiDropdownComponent {
   readonly allowEmpty = input(false);
   readonly disabled = input(false);
   readonly size = input<'default' | 'large'>('default');
+  readonly loading = input(false);
   readonly valueChange = output<string | null>();
+  readonly searchChange = output<string>();
   isOpen = false;
   searchTerm = '';
   activeIndex = -1;
@@ -62,7 +64,7 @@ export class UiDropdownComponent {
       testKey: option.key,
     }));
 
-    if (this.allowEmpty()) {
+    if (this.shouldShowEmptyOption()) {
       options.unshift({
         key: null,
         label: this.placeholder(),
@@ -80,6 +82,10 @@ export class UiDropdownComponent {
 
   get resolvedMenuId(): string {
     return this.menuId() || `${this.fallbackId}-menu`;
+  }
+
+  shouldShowEmptyOption(): boolean {
+    return this.allowEmpty() && this.options().length > 0;
   }
 
   toggle(event: MouseEvent): void {
@@ -135,6 +141,7 @@ export class UiDropdownComponent {
 
   onSearchChange(value: string): void {
     this.searchTerm = value;
+    this.searchChange.emit(value);
     this.setActiveIndex(this.visibleOptions.length ? 0 : -1);
   }
 
@@ -204,6 +211,9 @@ export class UiDropdownComponent {
   private open(searchTerm = ''): void {
     this.isOpen = true;
     this.searchTerm = searchTerm;
+    if (searchTerm) {
+      this.searchChange.emit(searchTerm);
+    }
     const selectedIndex = this.visibleOptions.findIndex(option => this.isSelected(option.key));
     this.activeIndex = selectedIndex >= 0 ? selectedIndex : (this.visibleOptions.length ? 0 : -1);
     this.focusSearch();

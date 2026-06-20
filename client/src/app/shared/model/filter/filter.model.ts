@@ -10,6 +10,7 @@ export interface FilterOption {
     min?: number;
     max?: number;
     placeholder?: string;
+    suggestionSource?: string;
 }
 export interface FilterModel {
     filters: Record<string, FilterOption>;

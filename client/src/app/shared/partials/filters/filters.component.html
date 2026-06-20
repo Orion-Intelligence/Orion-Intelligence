@@ -28,6 +28,8 @@
         [selected]="selectedFilters[key]"
         [placeholder]="'Select' | translate"
         [allowEmpty]="true"
+        [loading]="dropdownLoading[key] || false"
+        (searchChange)="onDropdownSearch(key, $event)"
         (valueChange)="onSelectionChange(key, $event)"></app-ui-dropdown>
       }
       @if (filterModel.filters[key].type === 'text') {

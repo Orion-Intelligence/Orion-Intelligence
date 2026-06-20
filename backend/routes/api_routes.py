@@ -173,6 +173,16 @@ async def search_exploit(param: search_consolidated_param_model = Body(...), cur
     return await search_exploit_controller.getInstance().search_result(param, base_index)
 
 
+@api_routes.get(
+    "/api/search/exploit/suggestions",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=GENERAL_MODULE_DEPS, )
+async def get_exploit_filter_suggestions(field: str = Query(...), q: str = Query(""), limit: int = Query(25, ge=1, le=50)):
+    values = await search_exploit_controller.getInstance().get_filter_suggestions(field, q, limit)
+    return {"values": values}
+
+
 @api_routes.post(
     "/api/search/malware",
     summary="Search malware reports",

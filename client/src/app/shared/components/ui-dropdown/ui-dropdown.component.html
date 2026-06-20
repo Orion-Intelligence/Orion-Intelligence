@@ -9,20 +9,27 @@
   </button>
 
   @if (isOpen) {
-    <div class="absolute left-0 right-0 top-[calc(100%+6px)] z-[1250] rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820)] p-1 shadow-[0_8px_18px_rgba(0,0,0,0.22)]">
+    <div class="absolute left-0 right-0 top-[calc(100%+6px)] z-[1250] rounded-lg border border-white/[0.12] bg-[var(--color-blue-820)] p-1 shadow-[0_8px_18px_rgba(0,0,0,0.22)]">
       @if (searchable()) {
         <div class="border-b border-white/[0.035] p-1 pb-2">
           <input #searchInput [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)" (keydown)="onSearchKeydown($event)" class="h-9 w-full rounded-[6px] border border-white/[0.07] bg-[var(--color-blue-820-light)] px-3 text-xs font-medium text-[var(--color-text1)] outline-none transition placeholder:text-[var(--color-text5)] focus:border-white/[0.14] focus:bg-[var(--color-blue-810)]" [placeholder]="searchPlaceholder()" type="text" autocomplete="off">
         </div>
       }
 
-      <div #listbox [id]="resolvedMenuId" class="overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" [ngClass]="size() === 'large' ? 'max-h-[230px]' : 'max-h-[190px]'" role="listbox">
+      <div #listbox [id]="resolvedMenuId" class="overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" [ngClass]="size() === 'large' ? 'max-h-[280px]' : 'max-h-[240px]'" role="listbox">
+        @if (loading()) {
+          <div class="flex h-9 items-center gap-2 px-3 text-xs font-medium text-[var(--color-text4)]">
+            <span class="h-3 w-3 animate-spin rounded-full border border-white/[0.16] border-t-[var(--color-text2)]"></span>
+            <span>Loading...</span>
+          </div>
+        } @else {
         @for (option of visibleOptions; track option.trackKey; let index = $index) {
           <button [id]="optionId(index)" [attr.data-dropdown-option-index]="index" [attr.data-testid]="optionTestIdPrefix() && option.testKey ? optionTestIdPrefix() + option.testKey : null" [attr.aria-selected]="isSelected(option.key)" class="mt-1 flex h-9 w-full items-center rounded-[6px] px-3 text-left text-xs transition first:mt-0" [ngClass]="optionClass(option, index)" role="option" type="button" (mouseenter)="setActiveIndex(index)" (keydown)="onOptionKeydown($event)" (click)="select(option.key, $event)">
             <span class="min-w-0 truncate">{{ option.label }}</span>
           </button>
         } @empty {
           <div class="px-3 py-3 text-xs font-medium text-[var(--color-text5)]">No results</div>
+        }
         }
       </div>
     </div>

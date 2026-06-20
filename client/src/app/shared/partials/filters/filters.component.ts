@@ -9,7 +9,8 @@ import { DatePickerComponent } from './date-picker/date-picker.component';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { ScrollService } from '../../services/scroll.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { UiDropdownComponent } from '../../components/ui-dropdown/ui-dropdown.component';
+import { UiDropdownComponent, UiDropdownOption } from '../../components/ui-dropdown/ui-dropdown.component';
+import { SuggestionService } from '../../../services/entity_filter_suggestions/suggestions.service';
 
 @Component({
   selector: 'app-filters',
@@ -19,11 +20,14 @@ import { UiDropdownComponent } from '../../components/ui-dropdown/ui-dropdown.co
   animations: [filterAnimation],
 })
 export class FiltersComponent implements OnInit {
+  private suggestionRequestIds: Record<string, number> = {};
+
   protected readonly Object = Object;
   protected readonly last = last;
 
   readonly filterModelInput = input<FilterModel | undefined>(undefined, { alias: 'filterModel' });
   selectedFilters: Record<string, string | null> = {};
+  dropdownLoading: Record<string, boolean> = {};
   initialModel!: FilterModel;
   filterModel!: FilterModel;
   readonly isFilterOpen = input.required<boolean | null>();
@@ -31,7 +35,7 @@ export class FiltersComponent implements OnInit {
   readonly filterReset = output<undefined>();
   readonly filterClose = output<undefined>();
 
-  constructor(protected dashboard: DashboardService, private scrollService: ScrollService) {
+  constructor(protected dashboard: DashboardService, private scrollService: ScrollService, private suggestionService: SuggestionService) {
     effect(() => {
       const currentFilters = this.dashboard.selectedFilters();
       this.selectedFilters = { ...currentFilters };
@@ -64,6 +68,37 @@ export class FiltersComponent implements OnInit {
     if (this.filterModel.filters[key]) {
       this.filterModel.filters[key].selected = value ?? '';
     }
+  }
+
+  onDropdownSearch(key: string, query: string) {
+    const filter = this.filterModel.filters[key];
+    if (!filter?.suggestionSource) {
+      return;
+    }
+
+    const trimmedQuery = query.trim();
+    const requestId = (this.suggestionRequestIds[key] || 0) + 1;
+    this.suggestionRequestIds[key] = requestId;
+    if (!trimmedQuery) {
+      this.dropdownLoading = { ...this.dropdownLoading, [key]: false };
+      return;
+    }
+
+    this.dropdownLoading = { ...this.dropdownLoading, [key]: true };
+    this.suggestionService.loadSuggestion(filter.suggestionSource, key, trimmedQuery).subscribe({
+      next: values => {
+        if (this.suggestionRequestIds[key] !== requestId) {
+          return;
+        }
+        this.setDropdownOptions(key, values.map(value => ({ key: value, label: value })));
+        this.dropdownLoading = { ...this.dropdownLoading, [key]: false };
+      },
+      error: () => {
+        if (this.suggestionRequestIds[key] === requestId) {
+          this.dropdownLoading = { ...this.dropdownLoading, [key]: false };
+        }
+      }
+    });
   }
 
   onNumberInputChange(key: string, rawValue: string | null) {
@@ -113,4 +148,11 @@ export class FiltersComponent implements OnInit {
     this.closeFilter();
   }
 
+  private setDropdownOptions(key: string, options: UiDropdownOption[]) {
+    const filter = this.filterModel.filters[key];
+    if (!filter) {
+      return;
+    }
+    filter.options = options;
+  }
 }

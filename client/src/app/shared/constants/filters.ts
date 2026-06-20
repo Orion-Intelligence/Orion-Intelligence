@@ -193,41 +193,46 @@ const EXPLOIT_TEXT_FILTERS = {
   m_cve: {
     title: "CVE",
     options: [],
-    type: 'text' as const,
+    type: 'dropdown' as const,
     tooltip: "CVE",
     selected: "",
+    suggestionSource: "exploit",
     placeholder: "CVE-2024-12345"
   },
   m_cwe: {
     title: "CWE",
     options: [],
-    type: 'text' as const,
+    type: 'dropdown' as const,
     tooltip: "CWE",
     selected: "",
+    suggestionSource: "exploit",
     placeholder: "CWE-79"
   },
   m_product: {
     title: "Product",
     options: [],
-    type: 'text' as const,
+    type: 'dropdown' as const,
     tooltip: "Product",
     selected: "",
+    suggestionSource: "exploit",
     placeholder: "Product name"
   },
   m_version: {
     title: "Version",
     options: [],
-    type: 'text' as const,
+    type: 'dropdown' as const,
     tooltip: "Version",
     selected: "",
+    suggestionSource: "exploit",
     placeholder: "Affected version"
   },
   m_tags: {
     title: "Tags",
     options: [],
-    type: 'text' as const,
+    type: 'dropdown' as const,
     tooltip: "Tags",
     selected: "",
+    suggestionSource: "exploit",
     placeholder: "rce, poc, exploit"
   }
 };
