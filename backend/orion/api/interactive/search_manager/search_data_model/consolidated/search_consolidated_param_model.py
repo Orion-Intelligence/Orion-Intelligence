@@ -30,6 +30,7 @@ class search_consolidated_param_model(BaseModel):
     m_cvss: Optional[Union[str, List[str]]] = ""
     m_severity: Optional[Union[str, List[str]]] = ""
     m_remote_type: Optional[Union[str, List[str]]] = ""
+    m_risk: Optional[Union[str, List[str]]] = ""
     m_tags: Optional[Union[str, List[str]]] = ""
     daterange: Annotated[str, StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")] = ""
     entity_filter: Optional[Dict[str, List[str]]] = Field(

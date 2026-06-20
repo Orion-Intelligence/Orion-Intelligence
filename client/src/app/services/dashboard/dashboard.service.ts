@@ -62,6 +62,10 @@ export class DashboardService {
       baseParams.category = paramModel.category || 'all';
       baseParams.content = baseParams.content || paramModel.content || 'all';
     }
+    if (apiEndpoint === 'search/exploit') {
+      const resultCount = Number(baseParams.platform_result_count || 0);
+      baseParams.platform_result_count = Math.max(Number.isFinite(resultCount) ? resultCount : 0, 100);
+    }
     this.syncQueryParamsToUrl(baseParams);
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
     if (semantic) {
@@ -222,10 +226,10 @@ export class DashboardService {
       "m_cwe",
       "m_product",
       "m_version",
-      "m_platform",
-      "m_cvss",
       "m_severity",
+      "m_risk",
       "m_remote_type",
+      "m_platform",
       "m_tags"
     ];
     const params = new URLSearchParams(window.location.search);
