@@ -208,6 +208,8 @@ html:has(body.dark-theme) {
 
 .threat-lens-tooltip {
   position: fixed;
+  top: var(--threat-lens-tooltip-top, 0);
+  left: var(--threat-lens-tooltip-left, 0);
   z-index: 9999;
   padding: 6px 10px;
   border: 1px solid var(--color-border);

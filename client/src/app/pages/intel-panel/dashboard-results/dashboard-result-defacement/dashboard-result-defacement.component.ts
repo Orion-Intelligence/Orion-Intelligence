@@ -19,6 +19,11 @@ const RECORD_SIDEBAR_CLOSE_MS = 300;
   animations: [fadeInDashboardItem],
 })
 export class DashboardResultDefacementComponent implements OnInit, AfterViewInit, OnDestroy {
+  private renderTimer: ReturnType<typeof setTimeout> | null = null;
+  private recordSidebarCloseTimer: ReturnType<typeof setTimeout> | null = null;
+  private renderKey = '';
+  private renderTargetCount = 0;
+
   readonly searchResultsInput = input<DefacementResultItem[]>([], { alias: 'searchResults' });
   readonly groupedResultsInput = input<DefacementGroupCallbackItem[]>([], { alias: 'groupedResults' });
   readonly searchQueryInput = input<string>('', { alias: 'searchQuery' });
@@ -27,10 +32,6 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
   expandedGroupKey: string | null = null;
   isRecordSidebarVisible = false;
   visibleGroupCount = 0;
-  private renderTimer: ReturnType<typeof setTimeout> | null = null;
-  private recordSidebarCloseTimer: ReturnType<typeof setTimeout> | null = null;
-  private renderKey = '';
-  private renderTargetCount = 0;
   searchResults: DefacementResultItem[] = [];
   groupedResults: DefacementGroupCallbackItem[] = [];
 

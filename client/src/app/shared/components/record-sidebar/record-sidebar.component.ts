@@ -19,10 +19,6 @@ export class RecordSidebarComponent {
   readonly testId = input('record-sidebar');
   readonly close = output<void>();
   readonly searchTerm = signal('');
-
-  constructor(private scrollService: ScrollService) {
-  }
-
   readonly filteredRecords = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
     const records = this.records();
@@ -31,7 +27,6 @@ export class RecordSidebarComponent {
     }
     return records.filter(record => String(record.searchText || `${record.title} ${record.subtitle || ''} ${record.sourceLabel || ''} ${(record.tags || []).join(' ')}`).toLowerCase().includes(term));
   });
-
   readonly latestDate = computed(() => {
     return this.records().reduce((latest, record) => {
       if (!latest) {
@@ -43,6 +38,9 @@ export class RecordSidebarComponent {
       return this.dateTime(record.date) > this.dateTime(latest) ? record.date : latest;
     }, null as string | null);
   });
+
+  constructor(private scrollService: ScrollService) {
+  }
 
   onClose(): void {
     this.searchTerm.set('');

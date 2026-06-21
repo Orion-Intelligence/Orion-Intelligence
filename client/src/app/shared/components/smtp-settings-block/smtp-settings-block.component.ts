@@ -24,6 +24,7 @@ export class SmtpSettingsBlockComponent implements OnChanges {
   @Input({ required: true }) form!: SmtpSettingsForm;
   @Input({ required: true }) isEditing!: boolean;
   @Input() errorState = false;
+
   @Output() edit = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
   @Output() save = new EventEmitter<void>();

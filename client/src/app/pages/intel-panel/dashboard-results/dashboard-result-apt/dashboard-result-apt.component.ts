@@ -19,6 +19,11 @@ const RECORD_SIDEBAR_CLOSE_MS = 300;
   animations: [fadeInDashboardItem],
 })
 export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDestroy {
+  private renderTimer: ReturnType<typeof setTimeout> | null = null;
+  private recordSidebarCloseTimer: ReturnType<typeof setTimeout> | null = null;
+  private renderKey = '';
+  private renderTargetCount = 0;
+
   currentUrl = '';
   queryParams: Record<string, string> = {};
   isCollapsed = true;
@@ -26,10 +31,6 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   expandedGroupKey: string | null = null;
   isRecordSidebarVisible = false;
   visibleGroupCount = 0;
-  private renderTimer: ReturnType<typeof setTimeout> | null = null;
-  private recordSidebarCloseTimer: ReturnType<typeof setTimeout> | null = null;
-  private renderKey = '';
-  private renderTargetCount = 0;
   readonly searchResults = input<AptIntelResultItem[]>([]);
   readonly isExpandAble = input<boolean>(false);
 
@@ -249,8 +250,8 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
     const values = this.isDefacement(item)
       ? [item.m_ioc_type, item.m_web_server, item.m_country, item.m_platform, item.m_ip]
       : this.isMalware(item)
-      ? [item.m_file_type, item.m_file_type_mime, item.m_platform, item.m_signature, ...this.toList(item.m_tags)]
-      : [item.m_family, item.m_country, item.m_origin_country, item.m_platform, ...this.toList(item.m_aliases)];
+        ? [item.m_file_type, item.m_file_type_mime, item.m_platform, item.m_signature, ...this.toList(item.m_tags)]
+        : [item.m_family, item.m_country, item.m_origin_country, item.m_platform, ...this.toList(item.m_aliases)];
     return values
       .flatMap(value => this.toList(value))
       .map(value => String(value || '').trim())
