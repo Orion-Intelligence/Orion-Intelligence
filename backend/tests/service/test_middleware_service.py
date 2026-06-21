@@ -169,6 +169,26 @@ async def test_content_security_policy_middleware_sets_admin_headers(monkeypatch
 
 
 @pytest.mark.anyio
+async def test_content_security_policy_middleware_sets_strict_app_csp(monkeypatch):
+    monkeypatch.setattr(
+        "orion.middleware.middlewares.content_security_policy_middleware.env_handler.get_instance",
+        staticmethod(lambda: SimpleNamespace(env=lambda *_args: "1")),
+    )
+
+    async with _client_with_middleware(content_security_policy_middleware, endpoint="/dashboard") as client:
+        response = await client.get("/dashboard")
+
+    csp = response.headers["Content-Security-Policy"]
+    assert "'unsafe-eval'" not in csp
+    assert "'wasm-unsafe-eval'" not in csp
+    assert "'unsafe-inline'" not in csp
+    assert "script-src 'self';" in csp
+    assert "style-src 'self' 'nonce-" in csp
+    assert "style-src-elem 'self' 'nonce-" in csp
+    assert "style-src-attr 'none';" in csp
+
+
+@pytest.mark.anyio
 async def test_security_headers_middleware_uses_debug_hsts_settings(monkeypatch):
     monkeypatch.setattr(
         "orion.middleware.middlewares.security_headers_middleware.env_handler.get_instance",

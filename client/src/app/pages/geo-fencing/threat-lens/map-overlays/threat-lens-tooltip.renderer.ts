@@ -91,7 +91,8 @@ export class ThreatLensTooltipRenderer {
     const preferredTop = this.tooltipPlacement === 'above' ? y - height - 10 : y + 10;
     const left = Math.max(8, Math.min(preferredLeft, window.innerWidth - width - 8));
     const top = Math.max(8, Math.min(preferredTop, window.innerHeight - height - 8));
-    this.tooltipEl.setAttribute('style', `left:${left}px;top:${top}px`);
+    this.tooltipEl.style.left = `${left}px`;
+    this.tooltipEl.style.top = `${top}px`;
   }
 
   hide(): void {

@@ -10,6 +10,9 @@ from orion.services.mongo_manager.shared_model.db_system_settings import Allowed
 class ResourceManager:
     __instance = None
     IMAGE_MAX_BYTES = 100 * 1024
+    IMMUTABLE_IMAGE_CACHE_HEADERS = {
+        "Cache-Control": "public, max-age=31536000, immutable"
+    }
 
     def __init__(self):
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
@@ -72,7 +75,9 @@ class ResourceManager:
     async def get_system_image(self, user_id: str):
         default_path = self.SYSTEM_DIR / "logo_url_default.png"
         image_path = next((path for path in self.SYSTEM_DIR.iterdir() if path.name == user_id and path.is_file()), None)
-        return FileResponse(image_path or default_path)
+        response_path = image_path or default_path
+        headers = self.IMMUTABLE_IMAGE_CACHE_HEADERS if response_path.name.endswith("_default.png") else None
+        return FileResponse(response_path, headers=headers)
 
     async def get_favicon(self):
         custom_path = self.SYSTEM_DIR / "logo_url_custom.png"
