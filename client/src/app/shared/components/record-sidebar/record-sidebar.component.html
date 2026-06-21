@@ -26,24 +26,24 @@
         </div>
         <div class="rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2">
           <div class="text-[10px] font-bold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Shown' | translate }}</div>
-          <div class="mt-1 font-mono text-[17px] font-semibold text-[var(--color-text1)]">{{ getFilteredRecords().length }}</div>
+          <div class="mt-1 font-mono text-[17px] font-semibold text-[var(--color-text1)]">{{ filteredRecords().length }}</div>
         </div>
         <div class="rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2">
           <div class="text-[10px] font-bold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Latest' | translate }}</div>
-          <div class="mt-1 truncate text-[13px] font-semibold text-[var(--color-text1)]">{{ getLatestDate() ? (getLatestDate() | date:'MMM d, y') : '-' }}</div>
+          <div class="mt-1 truncate text-[13px] font-semibold text-[var(--color-text1)]">{{ latestDate() ? (latestDate() | date:'MMM d, y') : '-' }}</div>
         </div>
       </div>
 
       <div class="relative mt-4">
         <img alt="search" src="assets/images/shared/theme/magnifyingglasswhite.svg" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-70">
-        <input data-testid="record-sidebar-local-search" type="search" [value]="searchTerm" (input)="searchTerm = $any($event.target).value" class="h-10 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] pl-10 pr-3 text-sm text-[var(--color-text1)] outline-none transition placeholder:text-[var(--color-text4)] focus:border-[var(--color-blue-640)]" [placeholder]="'Search records' | translate">
+        <input data-testid="record-sidebar-local-search" type="search" [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" class="h-10 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] pl-10 pr-3 text-sm text-[var(--color-text1)] outline-none transition placeholder:text-[var(--color-text4)] focus:border-[var(--color-blue-640)]" [placeholder]="'Search records' | translate">
       </div>
     </div>
 
     <div class="flex-1 overflow-y-auto overflow-x-hidden py-4">
       <div class="grid gap-2">
-        @for (record of getFilteredRecords(); track record.id; let i = $index) {
-          <button [id]="'item-' + record.id" type="button" (click)="onRecordClick(record)" [queryParams]="record.queryParams" [routerLink]="record.routerLink" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-3 text-left transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-790)]">
+        @for (record of filteredRecords(); track record.id; let i = $index) {
+          <a [id]="'item-' + record.id" (click)="onRecordClick(record)" [queryParams]="record.queryParams" [routerLink]="record.routerLink" target="_blank" rel="noopener noreferrer" class="block w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-3 text-left no-underline transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-790)]">
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2">
@@ -72,11 +72,11 @@
                 <img alt="open" src="assets/images/shared/theme/redirect.svg" class="h-4 w-4 ui-action-icon">
               </span>
             </div>
-          </button>
+          </a>
         }
       </div>
 
-      @if (getFilteredRecords().length === 0) {
+      @if (filteredRecords().length === 0) {
         <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-5 text-sm text-[var(--color-text4)]">
           {{ 'No records match this sidebar search.' | translate }}
         </div>

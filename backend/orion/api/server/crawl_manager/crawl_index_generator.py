@@ -107,7 +107,7 @@ class crawl_index_generator:
         cipher = None
         for log in p_index_data["logs"]:
             m_hash = log["m_hash"]
-            _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
+            _id = str(datetime.now(timezone.utc).year) + "_UTC_" + m_hash
 
             doc = {}
             for k in log:

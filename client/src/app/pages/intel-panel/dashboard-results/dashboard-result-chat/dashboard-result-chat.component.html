@@ -18,7 +18,7 @@
               <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" />
             </div>
           </div>
-          <a (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [appTooltip]="'Open Report' | translate" data-testid="open-report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" class="flex cursor-pointer justify-center">
+          <a (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [appTooltip]="'Open Report' | translate" data-testid="open-report" [queryParams]="queryParams" [routerLink]="[currentUrl, item.m_hash]" target="_blank" rel="noopener noreferrer" class="flex cursor-pointer justify-center">
             <div class="pb-[10px] pl-[10px]">
               <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" />
             </div>

@@ -48,6 +48,7 @@ filterwarnings = [
     "ignore:Support for class-based `config` is deprecated, use ConfigDict instead.*:DeprecationWarning:pydantic.*",
     "ignore:`json_encoders` is deprecated.*:DeprecationWarning:pydantic.*",
     "ignore:.*HTTP_422_UNPROCESSABLE_ENTITY.*HTTP_422_UNPROCESSABLE_CONTENT.*:DeprecationWarning:starlette_admin(\\..*)?",
+    "ignore:Core Pydantic V1 functionality isn't compatible with Python 3.14 or greater\\.:UserWarning:odmantic\\.typing",
 ]
 
 [tool.coverage.run]

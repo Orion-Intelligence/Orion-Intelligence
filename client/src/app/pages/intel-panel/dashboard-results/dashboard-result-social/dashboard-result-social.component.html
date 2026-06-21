@@ -20,7 +20,7 @@
                 <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
               </div>
             </div>
-            <a (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [queryParams]="queryParams" [appTooltip]="'Open Report' | translate" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-report">
+            <a (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [queryParams]="queryParams" [appTooltip]="'Open Report' | translate" [routerLink]="[currentUrl, item.m_hash]" target="_blank" rel="noopener noreferrer" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-report">
               <div class="p-[0_0_10px_10px]">
                 <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" class="ui-action-icon" />
               </div>

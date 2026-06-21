@@ -6,6 +6,7 @@ from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 class search_apt_controller:
     __instance = None
     GROUP_PAGE_SIZE = 100
+    GROUP_RECORD_LIMIT = 5
     RAW_GROUP_MULTIPLIER = 10
     RAW_FETCH_MAX = 5000
 
@@ -33,6 +34,48 @@ class search_apt_controller:
     def _normalize_group_key(value):
         return " ".join(str(value or "unknown").strip().lower().split())
 
+    @staticmethod
+    def _minimal_record(item):
+        allowed_fields = (
+            "_id",
+            "rank_index",
+            "m_hash",
+            "m_title",
+            "m_team",
+            "m_attacker",
+            "m_family",
+            "m_aliases",
+            "m_signature",
+            "m_file_name",
+            "m_file_type",
+            "m_file_type_mime",
+            "m_sha256_hash",
+            "m_sha1_hash",
+            "m_md5_hash",
+            "m_url",
+            "m_base_url",
+            "m_source_url",
+            "m_reporter",
+            "m_date",
+            "m_first_seen",
+            "m_last_seen",
+            "m_update_date",
+            "m_creation_date",
+            "m_ioc_type",
+            "m_ip",
+            "m_web_server",
+            "m_country",
+            "m_origin_country",
+            "m_platform",
+            "m_references",
+            "m_tags",
+        )
+        return {
+            field: item.get(field)
+            for field in allowed_fields
+            if item.get(field) not in (None, "", [])
+        }
+
     def _group_title(self, item):
         if item.get("rank_index") == ELASTIC_INDEX.S_DEFACEMENT_INDEX:
             attackers = self._to_list(item.get("m_attacker"))
@@ -59,7 +102,14 @@ class search_apt_controller:
         ordered_groups = sorted(groups.items(), key=lambda entry: (str(entry[1]["latest"]), entry[1]["count"]), reverse=True)
         start = max(0, (page - 1) * self.GROUP_PAGE_SIZE)
         selected_keys = {key for key, _ in ordered_groups[start:start + self.GROUP_PAGE_SIZE]}
-        page_results = [item for item in results if self._group_key(item) in selected_keys]
+        page_results = []
+        for key, group in ordered_groups[start:start + self.GROUP_PAGE_SIZE]:
+            if key not in selected_keys:
+                continue
+            page_results.extend(
+                self._minimal_record(item)
+                for item in sorted(group["records"], key=self._date_value, reverse=True)[:self.GROUP_RECORD_LIMIT]
+            )
         return sorted(page_results, key=self._date_value, reverse=True), len(ordered_groups), len(selected_keys)
 
     async def search_result(self, param: search_consolidated_param_model):

@@ -6,6 +6,7 @@ from orion.services.elastic_manager.elastic_controller import elastic_controller
 
 class search_defacement_controller:
     __instance = None
+    GROUP_RECORD_LIMIT = 5
 
     @staticmethod
     def getInstance():
@@ -23,6 +24,33 @@ class search_defacement_controller:
         if isinstance(source_url, list):
             source_url = source_url[0] if source_url else ""
         return item.get("m_base_url") or item.get("m_url") or source_url or ""
+
+    @staticmethod
+    def _minimal_record(item):
+        allowed_fields = (
+            "_id",
+            "rank_index",
+            "m_hash",
+            "m_title",
+            "m_team",
+            "m_attacker",
+            "m_url",
+            "m_base_url",
+            "m_source_url",
+            "m_date",
+            "m_update_date",
+            "m_creation_date",
+            "m_ioc_type",
+            "m_ip",
+            "m_web_server",
+            "m_country",
+            "m_platform",
+        )
+        return {
+            field: item.get(field)
+            for field in allowed_fields
+            if item.get(field) not in (None, "", [])
+        }
 
     @classmethod
     async def _add_crawl_status(cls, records):
@@ -124,8 +152,8 @@ class search_defacement_controller:
                     if server and server not in servers:
                         servers.append(server)
 
-            group["records"] = records_in_group
             group["record_count"] = len(records_in_group)
+            group["records"] = [cls._minimal_record(record) for record in records_in_group[:cls.GROUP_RECORD_LIMIT]]
             group["affected_sites"] = len(sites)
             group["ip_count"] = len(ips)
             group["servers"] = servers[:6]
@@ -169,8 +197,9 @@ class search_defacement_controller:
             indices, query, indices_boost)
         records, total = self._records(response)
         await self._add_crawl_status(records)
+        result_records = [self._minimal_record(record) for record in records]
         return {
-            "Result": records,
+            "Result": result_records,
             "Page_Count": 1,
             "Total_Hits": total,
             "Defacement_Groups": self._build_groups(records)

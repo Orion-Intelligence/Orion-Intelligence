@@ -24,11 +24,11 @@
                 </div>
               }
             }
-            <div id="open-report" (click)="scrollService.saveCurrentPosition(item.m_hash)" [queryParams]="queryParams" [appTooltip]="'Open Report' | translate" data-testid="open-report" [routerLink]="getReportLink(item)" class="ml-auto flex w-auto cursor-pointer justify-center">
+            <a id="open-report" (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_hash)" [queryParams]="queryParams" [appTooltip]="'Open Report' | translate" data-testid="open-report" [routerLink]="getReportLink(item)" target="_blank" rel="noopener noreferrer" class="ml-auto flex w-auto cursor-pointer justify-center">
               <div class="p-[0_0_10px_10px]">
                 <img height="20" src="assets/images/shared/theme/redirect.svg" width="20" alt="redirect" class="ui-action-icon" />
               </div>
-            </div>
+            </a>
           </div>
         }
       </div>

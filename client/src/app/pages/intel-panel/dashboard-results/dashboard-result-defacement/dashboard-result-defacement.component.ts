@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, effect, input } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, effect, input } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
@@ -9,13 +9,16 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { RecordSidebarComponent } from '../../../../shared/components/record-sidebar/record-sidebar.component';
 import { RecordSidebarItem } from '../../../../shared/model/record-sidebar/record-sidebar.model';
 
+const STAGGER_RENDER_DELAY_MS = 20;
+const RECORD_SIDEBAR_CLOSE_MS = 300;
+
 @Component({
   selector: 'app-dashboard-result-defacement',
   standalone: true, imports: [NgClass, DatePipe, TooltipDirective, TranslatePipe, RecordSidebarComponent],
   templateUrl: './dashboard-result-defacement.component.html',
   animations: [fadeInDashboardItem],
 })
-export class DashboardResultDefacementComponent implements OnInit, AfterViewInit {
+export class DashboardResultDefacementComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly searchResultsInput = input<DefacementResultItem[]>([], { alias: 'searchResults' });
   readonly groupedResultsInput = input<DefacementGroupCallbackItem[]>([], { alias: 'groupedResults' });
   readonly searchQueryInput = input<string>('', { alias: 'searchQuery' });
@@ -23,6 +26,11 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
   queryParams: { ci: string; } | undefined;
   expandedGroupKey: string | null = null;
   isRecordSidebarVisible = false;
+  visibleGroupCount = 0;
+  private renderTimer: ReturnType<typeof setTimeout> | null = null;
+  private recordSidebarCloseTimer: ReturnType<typeof setTimeout> | null = null;
+  private renderKey = '';
+  private renderTargetCount = 0;
   searchResults: DefacementResultItem[] = [];
   groupedResults: DefacementGroupCallbackItem[] = [];
 
@@ -30,6 +38,8 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
     effect(() => {
       this.searchResults = this.searchResultsInput();
       this.groupedResults = this.groupedResultsInput();
+      const groups = this.getDefacementGroups();
+      this.startStaggeredRender(groups.length, this.buildRenderKey(groups));
     });
   }
 
@@ -45,6 +55,11 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
 
   ngAfterViewInit() {
     this.scrollService.scrollToSavedPosition();
+  }
+
+  ngOnDestroy() {
+    this.clearRenderTimer();
+    this.clearRecordSidebarCloseTimer();
   }
 
   getVisibleResults(): DefacementResultItem[] {
@@ -115,6 +130,11 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
     });
   }
 
+  getRenderedDefacementGroups(): DefacementGroup[] {
+    const groups = this.getDefacementGroups();
+    return groups.slice(0, this.visibleGroupCount);
+  }
+
   toggleGroup(key: string): void {
     if (this.expandedGroupKey === key && this.isRecordSidebarOpen()) {
       this.closeRecordSidebar();
@@ -134,17 +154,19 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
   }
 
   openRecordSidebar(): void {
+    this.clearRecordSidebarCloseTimer();
     this.isRecordSidebarVisible = true;
   }
 
-  openAllRecordSidebar(): void {
-    this.expandedGroupKey = null;
-    this.openRecordSidebar();
-  }
-
   closeRecordSidebar(): void {
-    this.expandedGroupKey = null;
     this.isRecordSidebarVisible = false;
+    this.clearRecordSidebarCloseTimer();
+    this.recordSidebarCloseTimer = setTimeout(() => {
+      if (!this.isRecordSidebarVisible) {
+        this.expandedGroupKey = null;
+      }
+      this.recordSidebarCloseTimer = null;
+    }, RECORD_SIDEBAR_CLOSE_MS);
   }
 
   getSelectedGroup(): DefacementGroup | null {
@@ -240,6 +262,45 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
 
   private normalizeGroupKey(value: string): string {
     return String(value || 'unknown').trim().toLowerCase().replace(/\s+/g, ' ');
+  }
+
+  private buildRenderKey(groups: DefacementGroup[]): string {
+    return groups.map(group => `${group.key}:${group.records.length}:${group.latestSeen || ''}`).join('|');
+  }
+
+  private startStaggeredRender(targetCount: number, key: string): void {
+    if (this.renderKey === key && this.renderTargetCount === targetCount) {
+      return;
+    }
+    this.clearRenderTimer();
+    this.renderKey = key;
+    this.renderTargetCount = targetCount;
+    this.visibleGroupCount = targetCount ? 1 : 0;
+    this.revealNextGroup();
+  }
+
+  private revealNextGroup(): void {
+    if (this.visibleGroupCount >= this.renderTargetCount) {
+      return;
+    }
+    this.renderTimer = setTimeout(() => {
+      this.visibleGroupCount += 1;
+      this.revealNextGroup();
+    }, STAGGER_RENDER_DELAY_MS);
+  }
+
+  private clearRenderTimer(): void {
+    if (this.renderTimer) {
+      clearTimeout(this.renderTimer);
+      this.renderTimer = null;
+    }
+  }
+
+  private clearRecordSidebarCloseTimer(): void {
+    if (this.recordSidebarCloseTimer) {
+      clearTimeout(this.recordSidebarCloseTimer);
+      this.recordSidebarCloseTimer = null;
+    }
   }
 
   private uniqueValues(values: string[]): string[] {

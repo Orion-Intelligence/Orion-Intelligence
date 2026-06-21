@@ -101,11 +101,21 @@ def test_request_general_doc_fetches_document_and_translates_selected_fields(fak
         staticmethod(lambda text, target_lang: translations.append((text, target_lang)) or f"{target_lang}:{text}"),
     )
 
+    async def fake_get_value_crawl_status(record_name: str, url: str):
+        return {"status": "active", "last_checked_at": None}
+
+    monkeypatch.setattr(
+        "orion.api.interactive.search_manager.search_model.FeederManager.get_instance",
+        staticmethod(lambda: SimpleNamespace(get_value_crawl_status=fake_get_value_crawl_status)),
+    )
+
     result = _run(search_model().request_general_doc("doc-1", "ur"))
 
     assert fake_elastic.get_doc_calls == [(ELASTIC_INDEX.S_GENERIC_INDEX, "doc-1")]
     assert result["m_content"] == "ur:content"
     assert result["m_important_content"] == "ur:important"
+    assert result["m_crawl_status"] == "active"
+    assert result["m_last_crawled_at"] is None
     assert "m_embedding" not in result
     assert translations == [("content", "ur"), ("important", "ur")]
 

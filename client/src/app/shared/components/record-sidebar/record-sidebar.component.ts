@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, input, output } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ScrollService } from '../../services/scroll.service';
@@ -18,21 +18,21 @@ export class RecordSidebarComponent {
   readonly records = input<RecordSidebarItem[]>([]);
   readonly testId = input('record-sidebar');
   readonly close = output<void>();
-  searchTerm = '';
+  readonly searchTerm = signal('');
 
   constructor(private scrollService: ScrollService) {
   }
 
-  getFilteredRecords(): RecordSidebarItem[] {
-    const term = this.searchTerm.trim().toLowerCase();
+  readonly filteredRecords = computed(() => {
+    const term = this.searchTerm().trim().toLowerCase();
     const records = this.records();
     if (!term) {
       return records;
     }
     return records.filter(record => String(record.searchText || `${record.title} ${record.subtitle || ''} ${record.sourceLabel || ''} ${(record.tags || []).join(' ')}`).toLowerCase().includes(term));
-  }
+  });
 
-  getLatestDate(): string | null {
+  readonly latestDate = computed(() => {
     return this.records().reduce((latest, record) => {
       if (!latest) {
         return record.date || null;
@@ -42,10 +42,10 @@ export class RecordSidebarComponent {
       }
       return this.dateTime(record.date) > this.dateTime(latest) ? record.date : latest;
     }, null as string | null);
-  }
+  });
 
   onClose(): void {
-    this.searchTerm = '';
+    this.searchTerm.set('');
     this.close.emit();
   }
 

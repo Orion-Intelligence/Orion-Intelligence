@@ -1,7 +1,7 @@
-<div class="mt-4 w-full" [@fadeInDashboardItem]>
+<div class="mt-4 w-full" @fadeInDashboardItem>
     @if (getDefacementGroups(); as headerGroups) {
         @if (getDefacementSummary(headerGroups); as headerSummary) {
-          <div class="mb-3 flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3" [@fadeInDashboardItem]>
+          <div class="mb-3 flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3" @fadeInDashboardItem>
             <div class="flex min-w-0 items-center gap-2">
               <div class="max-w-[110px] truncate text-sm font-semibold text-[var(--color-text1)]">{{ headerSummary.latestSeen ? (headerSummary.latestSeen | date:'MMM d, y') : '-' }}</div>
               <div class="text-xs text-[var(--color-text4)]">{{ 'Latest Compromise' | translate }}</div>
@@ -31,27 +31,21 @@
               <div class="text-xs text-[var(--color-text4)]">{{ 'Actor Groups' | translate }}</div>
             </div>
 
-            <div class="ml-auto flex items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
-              <button data-testid="defacement-open-record-sidebar" type="button" class="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[12px] font-semibold text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" (click)="openAllRecordSidebar()" [appTooltip]="'Compromise Records' | translate">
-                <img alt="records" src="assets/images/shared/list.svg" class="h-4 w-4 ui-action-icon">
-                <span>{{ headerSummary.records }}</span>
-              </button>
-            </div>
           </div>
         }
       }
 
-    <div data-testid="defacement-card-view" [@fadeInDashboardItem]>
-        @if (getDefacementGroups(); as groups) {
-            @if (groups.length === 0) {
+    <div data-testid="defacement-card-view" @fadeInDashboardItem>
+        @if (getRenderedDefacementGroups(); as groups) {
+            @if (getDefacementGroups().length === 0) {
               <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-800)] px-4 py-5 text-sm text-[var(--color-text4)]">
                 {{ 'No compromise records found for this scope.' | translate }}
               </div>
             }
-            @if (groups.length > 0) {
+            @if (getDefacementGroups().length > 0) {
               <div class="grid grid-cols-3 gap-3 max-[1280px]:grid-cols-2 max-[760px]:grid-cols-1">
                 @for (group of groups; track group.key) {
-                  <div data-testid="defacement-group-card" class="ui-result-enter-card relative h-[252px] overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-[0_10px_24px_rgba(0,0,0,0.16)] transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-810)] max-[760px]:h-auto max-[760px]:min-h-[252px]" [@fadeInDashboardItem]>
+                  <div data-testid="defacement-group-card" class="ui-stagger-result-card relative h-[252px] overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-[0_10px_24px_rgba(0,0,0,0.16)] transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-810)] max-[760px]:h-auto max-[760px]:min-h-[252px]">
                     <div class="absolute inset-y-0 left-0 w-1" [ngClass]="{ 'bg-red-500': group.risk === 'High', 'bg-yellow-400': group.risk === 'Medium', 'bg-emerald-400': group.risk === 'Low' }"></div>
                     <button type="button" class="flex h-full w-full flex-col p-4 pl-5 text-left" (click)="toggleGroup(group.key)" [attr.aria-expanded]="isGroupExpanded(group.key)">
                       <div class="flex h-[88px] items-start justify-between gap-4">

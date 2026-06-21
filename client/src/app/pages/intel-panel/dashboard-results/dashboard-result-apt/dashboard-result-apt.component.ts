@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { AfterViewInit, Component, OnInit, input } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, effect, input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
@@ -8,6 +8,9 @@ import { AptIntelGroup, AptIntelRecord, AptIntelResultItem, AptIntelSummary } fr
 import { RecordSidebarItem } from '../../../../shared/model/record-sidebar/record-sidebar.model';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 
+const STAGGER_RENDER_DELAY_MS = 20;
+const RECORD_SIDEBAR_CLOSE_MS = 300;
+
 @Component({
   selector: 'app-dashboard-result-apt',
   standalone: true,
@@ -15,17 +18,26 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
   templateUrl: './dashboard-result-apt.component.html',
   animations: [fadeInDashboardItem],
 })
-export class DashboardResultAptComponent implements OnInit, AfterViewInit {
+export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDestroy {
   currentUrl = '';
   queryParams: Record<string, string> = {};
   isCollapsed = true;
   isConsolidatedView = false;
   expandedGroupKey: string | null = null;
   isRecordSidebarVisible = false;
+  visibleGroupCount = 0;
+  private renderTimer: ReturnType<typeof setTimeout> | null = null;
+  private recordSidebarCloseTimer: ReturnType<typeof setTimeout> | null = null;
+  private renderKey = '';
+  private renderTargetCount = 0;
   readonly searchResults = input<AptIntelResultItem[]>([]);
   readonly isExpandAble = input<boolean>(false);
 
   constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
+    effect(() => {
+      const groups = this.getAptIntelGroups().slice(0, this.getGroupDisplayLimit());
+      this.startStaggeredRender(groups.length, this.buildRenderKey(groups));
+    });
   }
 
   ngOnInit(): void {
@@ -40,14 +52,19 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit {
     this.scrollService.scrollToSavedPosition();
   }
 
+  ngOnDestroy(): void {
+    this.clearRenderTimer();
+    this.clearRecordSidebarCloseTimer();
+  }
+
   getVisibleResults(): AptIntelResultItem[] {
     const limit = this.isExpandAble() && this.isCollapsed ? 2 : 100;
     return this.searchResults().slice(0, limit);
   }
 
   getVisibleGroups(): AptIntelGroup[] {
-    const limit = this.isExpandAble() && this.isCollapsed ? 2 : 100;
-    return this.getAptIntelGroups().slice(0, limit);
+    const groups = this.getAptIntelGroups().slice(0, this.getGroupDisplayLimit());
+    return groups.slice(0, this.visibleGroupCount);
   }
 
   getGridPlaceholders(results: unknown[]): number[] {
@@ -119,17 +136,25 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit {
   }
 
   openRecordSidebar(): void {
+    this.clearRecordSidebarCloseTimer();
     this.isRecordSidebarVisible = true;
   }
 
-  openAllRecordSidebar(): void {
-    this.expandedGroupKey = null;
-    this.openRecordSidebar();
+  closeRecordSidebar(): void {
+    this.isRecordSidebarVisible = false;
+    this.clearRecordSidebarCloseTimer();
+    this.recordSidebarCloseTimer = setTimeout(() => {
+      if (!this.isRecordSidebarVisible) {
+        this.expandedGroupKey = null;
+      }
+      this.recordSidebarCloseTimer = null;
+    }, RECORD_SIDEBAR_CLOSE_MS);
   }
 
-  closeRecordSidebar(): void {
-    this.expandedGroupKey = null;
-    this.isRecordSidebarVisible = false;
+  toggleCollapsed(): void {
+    this.isCollapsed = !this.isCollapsed;
+    const groups = this.getAptIntelGroups().slice(0, this.getGroupDisplayLimit());
+    this.startStaggeredRender(groups.length, this.buildRenderKey(groups));
   }
 
   getSelectedGroup(): AptIntelGroup | null {
@@ -345,6 +370,49 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit {
 
   private normalizeGroupKey(value: string): string {
     return String(value || 'unknown').trim().toLowerCase().replace(/\s+/g, ' ');
+  }
+
+  private getGroupDisplayLimit(): number {
+    return this.isExpandAble() && this.isCollapsed ? 2 : 100;
+  }
+
+  private buildRenderKey(groups: AptIntelGroup[]): string {
+    return groups.map(group => `${group.key}:${group.records.length}:${group.latestSeen || ''}`).join('|');
+  }
+
+  private startStaggeredRender(targetCount: number, key: string): void {
+    if (this.renderKey === key && this.renderTargetCount === targetCount) {
+      return;
+    }
+    this.clearRenderTimer();
+    this.renderKey = key;
+    this.renderTargetCount = targetCount;
+    this.visibleGroupCount = targetCount ? 1 : 0;
+    this.revealNextGroup();
+  }
+
+  private revealNextGroup(): void {
+    if (this.visibleGroupCount >= this.renderTargetCount) {
+      return;
+    }
+    this.renderTimer = setTimeout(() => {
+      this.visibleGroupCount += 1;
+      this.revealNextGroup();
+    }, STAGGER_RENDER_DELAY_MS);
+  }
+
+  private clearRenderTimer(): void {
+    if (this.renderTimer) {
+      clearTimeout(this.renderTimer);
+      this.renderTimer = null;
+    }
+  }
+
+  private clearRecordSidebarCloseTimer(): void {
+    if (this.recordSidebarCloseTimer) {
+      clearTimeout(this.recordSidebarCloseTimer);
+      this.recordSidebarCloseTimer = null;
+    }
   }
 
   private uniqueValues(values: string[]): string[] {
