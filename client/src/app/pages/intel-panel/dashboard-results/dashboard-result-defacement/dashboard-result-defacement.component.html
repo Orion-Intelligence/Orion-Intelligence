@@ -1,8 +1,7 @@
-<div class="mt-4 w-full" @fadeInDashboardItem>
-    @if (!isLoading) {
-      @if (getDefacementGroups(); as headerGroups) {
+<div class="mt-4 w-full" [@fadeInDashboardItem]>
+    @if (getDefacementGroups(); as headerGroups) {
         @if (getDefacementSummary(headerGroups); as headerSummary) {
-          <div class="mb-3 flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
+          <div class="mb-3 flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3" [@fadeInDashboardItem]>
             <div class="flex min-w-0 items-center gap-2">
               <div class="max-w-[110px] truncate text-sm font-semibold text-[var(--color-text1)]">{{ headerSummary.latestSeen ? (headerSummary.latestSeen | date:'MMM d, y') : '-' }}</div>
               <div class="text-xs text-[var(--color-text4)]">{{ 'Latest Compromise' | translate }}</div>
@@ -41,30 +40,9 @@
           </div>
         }
       }
-    }
 
-    <div data-testid="defacement-card-view" @fadeInDashboardItem>
-        @if (isLoading) {
-          <div class="grid grid-cols-3 gap-3 max-[1280px]:grid-cols-2 max-[760px]:grid-cols-1">
-            @for (_ of [1,2,3]; track _) {
-              <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-800)] p-4">
-                <div class="flex items-center justify-between gap-3">
-                  <div class="ui-shimmer h-5 w-44 rounded bg-[var(--color-placeholder)]"></div>
-                  <div class="ui-shimmer h-7 w-20 rounded-full bg-[var(--color-placeholder)]"></div>
-                </div>
-                <div class="mt-3 ui-shimmer h-3 w-64 max-w-full rounded bg-[var(--color-placeholder)]"></div>
-                <div class="mt-4 grid grid-cols-3 gap-2 max-[720px]:grid-cols-1">
-                  <div class="ui-shimmer h-14 rounded-lg bg-[var(--color-placeholder)]"></div>
-                  <div class="ui-shimmer h-14 rounded-lg bg-[var(--color-placeholder)]"></div>
-                  <div class="ui-shimmer h-14 rounded-lg bg-[var(--color-placeholder)]"></div>
-                </div>
-              </div>
-            }
-          </div>
-        }
-
-        @if (!isLoading) {
-          @if (getDefacementGroups(); as groups) {
+    <div data-testid="defacement-card-view" [@fadeInDashboardItem]>
+        @if (getDefacementGroups(); as groups) {
             @if (groups.length === 0) {
               <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-800)] px-4 py-5 text-sm text-[var(--color-text4)]">
                 {{ 'No compromise records found for this scope.' | translate }}
@@ -73,7 +51,7 @@
             @if (groups.length > 0) {
               <div class="grid grid-cols-3 gap-3 max-[1280px]:grid-cols-2 max-[760px]:grid-cols-1">
                 @for (group of groups; track group.key) {
-                  <div data-testid="defacement-group-card" class="relative h-[252px] overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-[0_10px_24px_rgba(0,0,0,0.16)] transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-810)] max-[760px]:h-auto max-[760px]:min-h-[252px]">
+                  <div data-testid="defacement-group-card" class="ui-result-enter-card relative h-[252px] overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-[0_10px_24px_rgba(0,0,0,0.16)] transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-810)] max-[760px]:h-auto max-[760px]:min-h-[252px]" [@fadeInDashboardItem]>
                     <div class="absolute inset-y-0 left-0 w-1" [ngClass]="{ 'bg-red-500': group.risk === 'High', 'bg-yellow-400': group.risk === 'Medium', 'bg-emerald-400': group.risk === 'Low' }"></div>
                     <button type="button" class="flex h-full w-full flex-col p-4 pl-5 text-left" (click)="toggleGroup(group.key)" [attr.aria-expanded]="isGroupExpanded(group.key)">
                       <div class="flex h-[88px] items-start justify-between gap-4">
@@ -151,100 +129,16 @@
                 }
               </div>
 
-              @if (isRecordSidebarOpen()) {
-                <div class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="closeRecordSidebar()"></div>
-              }
-
-              <aside class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[520px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[620px]:w-full" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !isRecordSidebarOpen(), 'translate-x-0 pointer-events-auto': isRecordSidebarOpen() }" data-testid="defacement-record-sidebar">
-                <div class="border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-5 py-3">
-                  <div class="flex items-center justify-between gap-3">
-                    <div class="min-w-0">
-                      <h2 class="truncate text-base font-bold text-[var(--color-text1)]">{{ 'Compromise Records' | translate }}</h2>
-                      @if (getSelectedGroup(); as selectedGroup) {
-                        <p class="mt-1 truncate text-[12px] text-[var(--color-text4)]" [title]="selectedGroup.title">
-                          {{ selectedGroup.records.length }} {{ 'records' | translate }} / {{ selectedGroup.title }}
-                        </p>
-                      } @else {
-                        <p class="mt-1 truncate text-[12px] text-[var(--color-text4)]">
-                          {{ getSidebarRecords().length }} {{ 'records' | translate }}@if (searchQueryInput()) { <span> / {{ searchQueryInput() }}</span> }
-                        </p>
-                      }
-                    </div>
-                    <button data-testid="defacement-record-sidebar-close" type="button" (click)="closeRecordSidebar()" class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Close sidebar' | translate">
-                      <img alt="close" height="22" src="assets/images/shared/theme/nav-next.svg" width="22" class="ui-action-icon">
-                    </button>
-                  </div>
-                </div>
-
-                <div class="flex h-[calc(100vh-61px)] flex-col overflow-hidden bg-[var(--color-blue-830)] px-5 overflow-x-hidden">
-                  <div class="border-b border-[var(--color-border)] bg-[var(--color-blue-830)] pb-4 pt-5">
-                    <div class="grid grid-cols-3 gap-2">
-                      <div class="rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2">
-                        <div class="text-[10px] font-bold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Records' | translate }}</div>
-                        <div class="mt-1 font-mono text-[17px] font-semibold text-[var(--color-text1)]">{{ getSidebarRecords().length }}</div>
-                      </div>
-                      <div class="rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2">
-                        <div class="text-[10px] font-bold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Shown' | translate }}</div>
-                        <div class="mt-1 font-mono text-[17px] font-semibold text-[var(--color-text1)]">{{ getFilteredSidebarRecords().length }}</div>
-                      </div>
-                      <div class="rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2">
-                        <div class="text-[10px] font-bold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Latest' | translate }}</div>
-                        <div class="mt-1 truncate text-[13px] font-semibold text-[var(--color-text1)]">{{ getLatestSidebarDate() ? (getLatestSidebarDate() | date:'MMM d, y') : '-' }}</div>
-                      </div>
-                    </div>
-
-                    <div class="relative mt-4">
-                      <img alt="search" src="assets/images/shared/theme/magnifyingglasswhite.svg" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-70">
-                      <input #sidebarSearch data-testid="defacement-sidebar-local-search" type="search" [value]="sidebarSearchTerm" (input)="sidebarSearchTerm = sidebarSearch.value" class="h-10 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] pl-10 pr-3 text-sm text-[var(--color-text1)] outline-none transition placeholder:text-[var(--color-text4)] focus:border-[var(--color-blue-640)]" [placeholder]="'Search records' | translate">
-                    </div>
-                  </div>
-
-                  <div class="flex-1 overflow-y-auto overflow-x-hidden py-4">
-                    <div class="grid gap-2">
-                      @for (record of getFilteredSidebarRecords(); track record.item.m_hash || record.sourceUrl || $index; let i = $index) {
-                        <button [id]="'item-' + record.item.m_hash" type="button" (click)="scrollService.saveCurrentPosition(record.item.m_hash)" [queryParams]="queryParams" [routerLink]="[currentUrl, record.item.m_hash]" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-3 text-left transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-790)]">
-                          <div class="flex items-start justify-between gap-3">
-                            <div class="min-w-0 flex-1">
-                              <div class="flex flex-wrap items-center gap-2">
-                                <span class="font-mono text-[11px] text-[var(--color-text4)]">#{{ i + 1 }}</span>
-                                <span class="text-[11px] text-[var(--color-text4)]">{{ record.leakDate ? (record.leakDate | date:'MMM d, y') : '-' }}</span>
-                                @if (record.item.m_ioc_type?.length) {
-                                  <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-text3)]">{{ record.item.m_ioc_type[0] }}</span>
-                                }
-                              </div>
-                              <div class="mt-2 truncate text-[13px] font-semibold text-[var(--color-text1)]" [title]="record.title">{{ record.title }}</div>
-                              <div class="mt-1 truncate text-[12px] text-[var(--color-text4)]" [title]="getActorLabel(record.item)">{{ getActorLabel(record.item) || ('Unknown actor' | translate) }}</div>
-                              <div class="mt-2 flex min-w-0 flex-wrap gap-1.5">
-                                @if (record.ipSummary !== '-') {
-                                  <span class="max-w-full truncate rounded-full bg-[var(--color-tags)] px-2 py-1 text-[11px] text-[var(--color-text2)]">{{ record.ipSummary }}</span>
-                                }
-                                @if (record.webServerSummary !== '-') {
-                                  <span class="max-w-full truncate rounded-full bg-[var(--color-tags)] px-2 py-1 text-[11px] text-[var(--color-text2)]">{{ record.webServerSummary }}</span>
-                                }
-                              </div>
-                              @if (record.sourceUrl) {
-                                <div class="mt-2 truncate text-[12px] font-semibold text-[var(--color-blue-640)]" [title]="record.sourceUrl">{{ record.sourceUrl }}</div>
-                              }
-                            </div>
-                            <span class="mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)]">
-                              <img alt="open" src="assets/images/shared/theme/redirect.svg" class="h-4 w-4 ui-action-icon">
-                            </span>
-                          </div>
-                        </button>
-                      }
-                    </div>
-
-                    @if (getFilteredSidebarRecords().length === 0) {
-                      <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-5 text-sm text-[var(--color-text4)]">
-                        {{ 'No records match this sidebar search.' | translate }}
-                      </div>
-                    }
-                  </div>
-                </div>
-              </aside>
+              <app-record-sidebar
+                [isOpen]="isRecordSidebarOpen()"
+                [records]="getSidebarItems()"
+                [subtitle]="getSidebarSubtitle()"
+                [testId]="'defacement-record-sidebar'"
+                [title]="'Compromise Records'"
+                (close)="closeRecordSidebar()">
+              </app-record-sidebar>
             }
           }
-        }
     </div>
 
 </div>

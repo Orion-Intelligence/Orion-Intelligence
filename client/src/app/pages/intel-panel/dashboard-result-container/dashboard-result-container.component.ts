@@ -8,11 +8,12 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { Category } from '../../../shared/constants/pages';
 import { combineLatest, distinctUntilChanged } from 'rxjs';
 import { ResultComponent } from '../../../shared/partials/result/result.component';
-import { defacement_filters, exploit_filters, feed_filters, general_filters, leak_filters } from '../../../shared/constants/filters';
+import { defacement_filters, exploit_filters, feed_filters, general_filters, leak_filters, apt_intel_filters } from '../../../shared/constants/filters';
 import { AppService } from '../../../services/core/app/app.service';
 import { DashboardResultExploitComponent } from '../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
 import { DashboardResultSocialComponent } from '../dashboard-results/dashboard-result-social/dashboard-result-social.component';
 import { DashboardResultChatComponent } from '../dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
+import { DashboardResultAptComponent } from '../dashboard-results/dashboard-result-apt/dashboard-result-apt.component';
 import { ConsolidatedParamModel } from '../../../shared/model/results/consolidated/consolidated.param.model';
 import { SortType } from '../../../shared/constants/shared-enums';
 import { HelperService } from '../../../shared/services/helper.service';
@@ -30,6 +31,7 @@ import { FilterModel } from '../../../shared/model/filter/filter.model';
     ResultComponent,
     CrossSearchCardComponent,
     DashboardResultExploitComponent,
+    DashboardResultAptComponent,
     DashboardResultSocialComponent,
     DashboardResultChatComponent,
     DashboardResultDefacementComponent],
@@ -45,11 +47,13 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
   protected readonly feed_filters = feed_filters;
   protected readonly defacement_filters = defacement_filters;
   protected readonly exploit_filters = exploit_filters;
+  protected readonly apt_intel_filters = apt_intel_filters;
   protected readonly Category = Category;
   protected readonly alert = alert;
 
   public currentResultModel: any = null;
   public defacementGroups: DefacementGroupCallbackItem[] = [];
+  public totalGroups = 0;
   public maxPages = 1;
   public isResponseLoading = signal(false);
   type: Category = Category.STRATEGIC;
@@ -57,7 +61,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
 
   constructor(protected helperService: HelperService, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, private scrollService: ScrollService) {
     this.type = this.route.snapshot.data['type'] as Category;
-    this.apiEndpoint = this.type.toLowerCase() === Category.STRATEGIC.toLowerCase() ? 'search/strategic' : this.type.toLowerCase() === Category.SOCIAL.toLowerCase() ? 'search/social' : this.type.toLowerCase() === Category.EXPLOIT.toLowerCase() ? 'search/exploit' : this.type.toLowerCase() === Category.THREAT_INTEL.toLowerCase() ? 'search/threat-intel' : this.type.toLowerCase() === Category.DEFACEMENT.toLowerCase() ? 'search/defacement' : 'search/breach';
+    this.apiEndpoint = this.type.toLowerCase() === Category.STRATEGIC.toLowerCase() ? 'search/strategic' : this.type.toLowerCase() === Category.SOCIAL.toLowerCase() ? 'search/social' : this.type.toLowerCase() === Category.EXPLOIT.toLowerCase() ? 'search/exploit' : this.type.toLowerCase() === Category.APT_INTEL.toLowerCase() ? 'search/apt-intel' : this.type.toLowerCase() === Category.DEFACEMENT.toLowerCase() ? 'search/defacement' : 'search/breach';
   }
 
   get currentParamModel(): ConsolidatedParamModel {
@@ -75,6 +79,8 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
         return this.defacement_filters;
       case Category.EXPLOIT.toLowerCase():
         return this.exploit_filters;
+      case Category.APT_INTEL.toLowerCase():
+        return this.apt_intel_filters;
       case Category.FEED.toLowerCase():
         return this.feed_filters;
       case Category.BREACH.toLowerCase():
@@ -116,6 +122,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
         if (String(route) !== this.dashboardService.m_current_route) {
           this.currentResultModel = null;
           this.defacementGroups = [];
+          this.totalGroups = 0;
         }
 
         this.dashboardService.consolidatedParamModel.q = params['q'] || '';
@@ -132,6 +139,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
             const parsedCache = JSON.parse(cachedResult);
             this.currentResultModel = parsedCache?.result ?? parsedCache;
             this.defacementGroups = parsedCache?.defacementGroups ?? [];
+            this.totalGroups = Number(parsedCache?.totalGroups ?? 0) || 0;
             this.maxPages = Number(parsedCache?.maxPages ?? 1) || 1;
             this.restoreSavedScroll();
           }
@@ -159,6 +167,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
     this.isResponseLoading.set(true);
     this.currentResultModel = null;
     this.defacementGroups = [];
+    this.totalGroups = 0;
 
     this.dashboardService.fetchSearchResults<any>(this.apiEndpoint,
       this.dashboardService.consolidatedParamModel)
@@ -168,12 +177,16 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
           this.defacementGroups = this.apiEndpoint === 'search/defacement'
             ? (response.data["Defacement_Groups"] ?? [])
             : [];
+          this.totalGroups = this.apiEndpoint === 'search/apt-intel'
+            ? Number(response.data["Total_Groups"] ?? 0) || 0
+            : 0;
           this.maxPages = Number(response.data["Page_Count"] ?? 1) || 1;
-          sessionStorage.setItem(this.buildCacheKey(), JSON.stringify({
+          this.cacheResult({
             result: this.currentResultModel,
             defacementGroups: this.defacementGroups,
+            totalGroups: this.totalGroups,
             maxPages: this.maxPages,
-          }));
+          });
           this.restoreSavedScroll();
         }
         this.isResponseLoading.set(false);
@@ -197,7 +210,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
     let key: string;
     let order: 'asc' | 'desc' = 'asc';
 
-    if (this.type === Category.BREACH || this.type === Category.THREAT_INTEL) {
+    if (this.type === Category.BREACH || this.type === Category.APT_INTEL) {
       key = 'm_date';
     }
     else {
@@ -226,6 +239,13 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
     return Array.isArray(this.currentResultModel) && this.currentResultModel.length > 0;
   }
 
+  getResultCount(): number {
+    if (this.apiEndpoint !== 'search/apt-intel') {
+      return Math.ceil(this.currentResultModel?.length ?? 0);
+    }
+    return this.totalGroups;
+  }
+
   private buildCacheKey(): string {
     const filterKey = JSON.stringify(Object.entries(this.dashboardService.selectedFilters()).sort(([left], [right]) => left.localeCompare(right)));
     return [
@@ -235,8 +255,18 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
       filterKey,
       this.dashboardService.consolidatedParamModel.category || 'all',
       this.dashboardService.consolidatedParamModel.page || '1',
-      this.dashboardService.consolidatedParamModel.q || ''
+      this.dashboardService.consolidatedParamModel.q || '',
+      this.apiEndpoint === 'search/apt-intel' ? 'group-limit-100' : ''
     ].join('|');
+  }
+
+  private cacheResult(payload: unknown): void {
+    try {
+      sessionStorage.setItem(this.buildCacheKey(), JSON.stringify(payload));
+    }
+    catch {
+      this.dashboardService.clearResultCaches();
+    }
   }
 
   private getDefacementContent(category: string): string {
@@ -261,4 +291,5 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
     this.cdr.detectChanges();
     this.pendingScrollRestore = true;
   }
+
 }

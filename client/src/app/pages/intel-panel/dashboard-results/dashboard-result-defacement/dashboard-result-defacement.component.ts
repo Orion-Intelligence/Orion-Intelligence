@@ -1,15 +1,17 @@
 import { AfterViewInit, Component, OnInit, effect, input } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { DefacementGroup, DefacementGroupCallbackItem, DefacementRecord, DefacementResultItem, DefacementRisk, DefacementSummary } from '../../../../shared/model/results/defacement/defacement.callback.model';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { RecordSidebarComponent } from '../../../../shared/components/record-sidebar/record-sidebar.component';
+import { RecordSidebarItem } from '../../../../shared/model/record-sidebar/record-sidebar.model';
 
 @Component({
   selector: 'app-dashboard-result-defacement',
-  standalone: true, imports: [RouterLink, NgClass, DatePipe, TooltipDirective, TranslatePipe],
+  standalone: true, imports: [NgClass, DatePipe, TooltipDirective, TranslatePipe, RecordSidebarComponent],
   templateUrl: './dashboard-result-defacement.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -17,21 +19,17 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
   readonly searchResultsInput = input<DefacementResultItem[]>([], { alias: 'searchResults' });
   readonly groupedResultsInput = input<DefacementGroupCallbackItem[]>([], { alias: 'groupedResults' });
   readonly searchQueryInput = input<string>('', { alias: 'searchQuery' });
-  readonly isLoadingInput = input(true, { alias: 'isLoading' });
   currentUrl = '';
   queryParams: { ci: string; } | undefined;
   expandedGroupKey: string | null = null;
   isRecordSidebarVisible = false;
-  sidebarSearchTerm = '';
   searchResults: DefacementResultItem[] = [];
   groupedResults: DefacementGroupCallbackItem[] = [];
-  isLoading: boolean = true;
 
   constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
     effect(() => {
       this.searchResults = this.searchResultsInput();
       this.groupedResults = this.groupedResultsInput();
-      this.isLoading = this.isLoadingInput();
     });
   }
 
@@ -136,7 +134,6 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
   }
 
   openRecordSidebar(): void {
-    this.sidebarSearchTerm = '';
     this.isRecordSidebarVisible = true;
   }
 
@@ -147,7 +144,6 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
 
   closeRecordSidebar(): void {
     this.expandedGroupKey = null;
-    this.sidebarSearchTerm = '';
     this.isRecordSidebarVisible = false;
   }
 
@@ -165,18 +161,29 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
     return [...records].sort((a, b) => this.dateTime(b.leakDate) - this.dateTime(a.leakDate)).slice(0, 1000);
   }
 
-  getFilteredSidebarRecords(): DefacementRecord[] {
-    const term = this.sidebarSearchTerm.trim().toLowerCase();
-    const results = this.getSidebarRecords();
-    if (!term) {
-      return results;
-    }
-
-    return results.filter(record => this.getRecordSearchText(record.item).includes(term));
+  getSidebarItems(): RecordSidebarItem[] {
+    return this.getSidebarRecords().map((record, index) => ({
+      id: record.item.m_hash || record.sourceUrl || `${this.normalizeGroupKey(record.title)}-${index}`,
+      title: record.title,
+      subtitle: this.getActorLabel(record.item) || 'Unknown actor',
+      kindLabel: record.item.m_ioc_type?.[0],
+      date: record.leakDate,
+      tags: [record.ipSummary, record.webServerSummary].filter(value => value && value !== '-'),
+      sourceLabel: record.sourceUrl,
+      routerLink: [this.currentUrl, record.item.m_hash],
+      queryParams: this.queryParams,
+      searchText: this.getRecordSearchText(record.item),
+      savePositionId: record.item.m_hash,
+    }));
   }
 
-  getLatestSidebarDate(): string | null {
-    return this.getSidebarRecords().reduce((latest, record) => this.getLatestDate(latest, record.leakDate), null as string | null);
+  getSidebarSubtitle(): string {
+    const selectedGroup = this.getSelectedGroup();
+    if (selectedGroup) {
+      return `${selectedGroup.records.length} records / ${selectedGroup.title}`;
+    }
+    const suffix = this.searchQueryInput() ? ` / ${this.searchQueryInput()}` : '';
+    return `${this.getSidebarRecords().length} records${suffix}`;
   }
 
   getActorLabel(item: DefacementResultItem): string {

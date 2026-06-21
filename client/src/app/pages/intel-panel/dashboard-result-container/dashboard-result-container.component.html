@@ -13,7 +13,7 @@
 </app-result>
 
 @if (!isResponseLoading()) {
-  <div @fadeInDashboardItem>
+  <div class="ui-result-enter" @fadeInDashboardItem>
     <div [class]="apiEndpoint === 'search/defacement' || apiEndpoint === 'search/exploit' || apiEndpoint === 'search/apt-intel' ? 'mx-[32px] max-w-none pb-[16px] max-[1000px]:mx-[15px]' : 'mx-[32px] max-w-[1220px] pb-[16px] max-[1000px]:mx-[15px]'">
       @for (item of currentResultModel; track (item.m_hash || item.m_message_id || item.id || item.m_url || 'item') + '-' + $index) {
         <div class="space-y-6">
