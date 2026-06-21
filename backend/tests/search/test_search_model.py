@@ -6,6 +6,7 @@ from types import SimpleNamespace
 
 import httpx
 import pytest
+from cryptography.fernet import Fernet
 
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import (
     search_consolidated_param_model,
@@ -15,6 +16,7 @@ from orion.api.interactive.search_manager.search_data_model.dump.search_credenti
     search_credential_param_model,
 )
 from orion.api.interactive.search_manager.search_model import search_model
+from orion.constants.constant import CONSTANTS
 from orion.helper_manager.env_handler import env_handler
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from tests.fake_model.fakes import FakeElastic
@@ -226,6 +228,23 @@ def test_search_stealer_iocs_applies_password_schema_after_real_query_build(fake
     document, query = fake_elastic.search_query_calls[0]
     assert document == ELASTIC_INDEX.S_STEALERLOGS_INDEX
     assert "m_emails" in str(query) or "email" in str(query)
+
+
+def test_search_stealer_iocs_decrypts_password_before_return(fake_elastic, monkeypatch):
+    key = Fernet.generate_key().decode()
+    encrypted_password = Fernet(key.encode()).encrypt(b"Secret123!").decode()
+    monkeypatch.setattr(CONSTANTS, "S_ENCRYPTION_KEY", key)
+    fake_elastic.search_query_result = (
+        True,
+        _search_response(
+            _hit({"password": encrypted_password, "channel": "telegram"}, index=ELASTIC_INDEX.S_STEALERLOGS_INDEX),
+            total=1,
+        ),
+    )
+
+    result = _run(search_model().search_stealer_iocs(search_credential_param_model(ioc="m_email:test@example.com")))
+
+    assert result.Result[0].model_dump()["password"] == "Secret123!"
 
 
 def test_dynamic_search_returns_json_payload(monkeypatch):

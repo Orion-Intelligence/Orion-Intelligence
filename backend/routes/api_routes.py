@@ -2,7 +2,19 @@ import asyncio
 from typing import Optional
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, UploadFile, File
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
-from configs.app_dependency import license_required, role_required, status_required, get_current_role, get_current_user, get_is_free_token
+from configs.app_dependency import (
+    _enforce_demo_safe_search,
+    _read_scan_upload,
+    _scan_domain_with_type,
+    _validate_public_scan_target,
+    admin_or_enterprise_required,
+    license_required,
+    role_required,
+    status_required,
+    get_current_role,
+    get_current_user,
+    get_is_free_token,
+)
 from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.feedback_manager.feedback_manager import FeedbackManager
@@ -39,27 +51,6 @@ STIX_MEMBER_DEPS = [Depends(role_required([user_role.ADMIN, user_role.DEMO, user
 GENERAL_MODULE_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:general"))]
 SCANNING_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("scanning"))]
 STIX_KIND_VALUES = {"general", "leak", "defacement", "exploit", "chat", "social"}
-SCAN_UPLOAD_MAX_BYTES = 10 * 1024 * 1024
-
-
-async def _scan_domain_with_type(payload: DomainScanRequest, user_id: str, scan_type: Optional[str] = None):
-    if scan_type:
-        payload.scanType = scan_type
-    return await crawl_model.getInstance().scan_domain(payload, user_id=user_id)
-
-
-async def _read_scan_upload(file: UploadFile) -> bytes:
-    if getattr(file, "size", None) is not None and file.size > SCAN_UPLOAD_MAX_BYTES:
-        raise HTTPException(status_code=413, detail="File too large! Maximum allowed size is 10 MB.")
-    content = await file.read()
-    if len(content) > SCAN_UPLOAD_MAX_BYTES:
-        raise HTTPException(status_code=413, detail="File too large! Maximum allowed size is 10 MB.")
-    return content
-
-
-def _enforce_demo_safe_search(param: search_consolidated_param_model, current_user, is_free: bool = False) -> None:
-    if current_user and getattr(current_user, "role", None) == user_role.DEMO and is_free:
-        param.safe = True
 
 
 @api_routes.post(
@@ -148,7 +139,7 @@ async def search_leak(param: search_consolidated_param_model = Body(...), curren
     operation_id="searchSocialReports",
     response_description=SEARCH_DOCS["strategic"]["response_description"],
     status_code=200,
-    dependencies=GENERAL_MODULE_DEPS, )
+    dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:social", bypass_licenses=["maintainer"]))], )
 async def search_social(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
@@ -175,7 +166,7 @@ async def search_social(param: search_consolidated_param_model = Body(...), curr
     operation_id="searchExploitReports",
     response_description=SEARCH_DOCS["strategic"]["response_description"],
     status_code=200,
-    dependencies=GENERAL_MODULE_DEPS, )
+    dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:exploit", bypass_licenses=["maintainer"]))], )
 async def search_exploit(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
@@ -187,7 +178,7 @@ async def search_exploit(param: search_consolidated_param_model = Body(...), cur
     "/api/search/exploit/suggestions",
     status_code=200,
     include_in_schema=False,
-    dependencies=GENERAL_MODULE_DEPS, )
+    dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:exploit", bypass_licenses=["maintainer"]))], )
 async def get_exploit_filter_suggestions(field: str = Query(...), q: str = Query(""), limit: int = Query(25, ge=1, le=50)):
     values = await search_exploit_controller.getInstance().get_filter_suggestions(field, q, limit)
     return {"values": values}
@@ -240,7 +231,7 @@ async def search_threat_intel(param: search_consolidated_param_model = Body(...)
     operation_id="searchDefacementReports",
     response_description=SEARCH_DOCS["strategic"]["response_description"],
     status_code=200,
-    dependencies=GENERAL_MODULE_DEPS, )
+    dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:defacement", bypass_licenses=["maintainer"]))], )
 async def search_defacement(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
@@ -371,9 +362,7 @@ async def search_stealer_iocs(param: search_credential_param_model = Body(...), 
     operation_id="searchConsolidatedReports",
     response_description=SEARCH_DOCS["consolidated"]["response_description"],
     status_code=200,
-    dependencies=[Depends(
-        role_required(
-            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), ], )
+    dependencies=[Depends(admin_or_enterprise_required)], )
 async def search_consolidated(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
@@ -383,11 +372,7 @@ async def search_consolidated(param: search_consolidated_param_model = Body(...)
     "/api/search/consolidated/ioc",
     include_in_schema=False,
     status_code=200,
-    dependencies=[Depends(
-        role_required(
-            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
-        )
-    )],
+    dependencies=[Depends(admin_or_enterprise_required)],
 )
 async def search_consolidated_iocs(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
@@ -638,6 +623,7 @@ async def parse_wayback_scan(payload: DomainScanRequest, current_user=Depends(ge
     dependencies=SCAN_WITH_LIMITER_DEPS,
 )
 async def parse_ip(payload: IPScanRequest, current_user=Depends(get_current_user)):
+    await _validate_public_scan_target(payload.ip)
     await AuditLogManager.get_instance().search_audit(current_user, "ip_scan", payload.ip)
     return await crawl_model.getInstance().scan_ip(payload, user_id=str(current_user.id))
 
@@ -705,7 +691,8 @@ async def search_dynamic_national_identity(param: search_dynamic_crack_model = B
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])), ], )
+            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])),
+        Depends(license_required("module:breach", bypass_licenses=["maintainer"])), ], )
 async def get_breach_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_leak_stix(doc_id, lang)
 
@@ -720,7 +707,8 @@ async def get_breach_stix_document(doc_id: str, lang: Optional[str] = Query(None
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])), ], )
+            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])),
+        Depends(license_required("module:general", bypass_licenses=["maintainer"])), ], )
 async def get_strategic_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_general_stix(doc_id, lang)
 
@@ -735,7 +723,8 @@ async def get_strategic_stix_document(doc_id: str, lang: Optional[str] = Query(N
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])), ], )
+            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])),
+        Depends(license_required("module:defacement", bypass_licenses=["maintainer"])), ], )
 async def get_defacement_stix_document(doc_id: str):
     return await stix_manager.get_instance().get_defacement_stix(doc_id)
 
@@ -750,7 +739,8 @@ async def get_defacement_stix_document(doc_id: str):
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])), ], )
+            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])),
+        Depends(license_required("module:exploit", bypass_licenses=["maintainer"])), ], )
 async def get_exploit_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_exploit_stix(doc_id, lang)
 
@@ -763,7 +753,7 @@ async def get_exploit_stix_document(doc_id: str, lang: Optional[str] = Query(Non
     operation_id="getSocialStixReport",
     response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
-    dependencies=STIX_MEMBER_DEPS, )
+    dependencies=[*STIX_MEMBER_DEPS, Depends(license_required("module:social", bypass_licenses=["maintainer"]))], )
 async def get_social_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_social_stix(doc_id, lang)
 
@@ -776,7 +766,7 @@ async def get_social_stix_document(doc_id: str, lang: Optional[str] = Query(None
     operation_id="getSocialStixReport",
     response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
-    dependencies=STIX_MEMBER_DEPS, )
+    dependencies=[*STIX_MEMBER_DEPS, Depends(license_required("module:chat", bypass_licenses=["maintainer"]))], )
 async def get_chat_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_chat_stix(doc_id, lang)
 
@@ -801,7 +791,8 @@ async def get_entity_relations(query: EntityQueryModel = Depends()):
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])), ], )
+            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])),
+        Depends(license_required("module:news", bypass_licenses=["maintainer"])), ], )
 async def get_news_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_leak_stix(doc_id, lang)
 
@@ -888,6 +879,7 @@ async def cross_search(param: search_dynamic_onion_search = Body(...), current_u
     dependencies=SCANNING_DEPS,
 )
 async def resolve_ip(param: ResolveIPRequest = Body(...), current_user=Depends(get_current_user)):
+    await _validate_public_scan_target(param.domain)
     await AuditLogManager.get_instance().search_audit(current_user, "resolve_ip", param.domain)
     return await search_model.getInstance().network_intel(param, "resolve_ip", user_id=str(current_user.id))
 
@@ -902,6 +894,7 @@ async def resolve_ip(param: ResolveIPRequest = Body(...), current_user=Depends(g
     dependencies=SCANNING_DEPS,
 )
 async def ipscanner(param: NetIntelDeepScanRequest = Body(...), current_user=Depends(get_current_user)):
+    await _validate_public_scan_target(param.ip)
     await AuditLogManager.get_instance().search_audit(current_user, "ipscanner", param.ip)
     return await search_model.getInstance().network_intel(param, "netintel_scanner", user_id=str(current_user.id))
 
@@ -916,6 +909,7 @@ async def ipscanner(param: NetIntelDeepScanRequest = Body(...), current_user=Dep
     dependencies=SCAN_WITH_LIMITER_DEPS,
 )
 async def url_vulnerability_scan(param: UrlVulnerabilityScanRequest = Body(...), current_user=Depends(get_current_user)):
+    await _validate_public_scan_target(param.domain)
     await AuditLogManager.get_instance().search_audit(current_user, "url_vulnerability_scan", param.domain+", depth: "+param.depth)
     return await search_model.getInstance().network_intel(param, "url_vulnerability_scan", user_id=str(current_user.id))
 

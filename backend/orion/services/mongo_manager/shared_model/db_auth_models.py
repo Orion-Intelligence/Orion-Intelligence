@@ -53,6 +53,8 @@ class db_user_account(Model):
     tenant_uuid: str = Field(default="")
     verification_token: Optional[str] = Field(default=None)
     verification_expiry: Optional[datetime] = Field(default=None)
+    password_reset_token: Optional[str] = Field(default=None)
+    password_reset_expiry: Optional[datetime] = Field(default=None)
 
     twofa_enabled: bool = Field(default=False)
     twofa_secret: Optional[str] = Field(default=None)

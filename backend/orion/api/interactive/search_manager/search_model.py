@@ -1,5 +1,6 @@
 from typing import List, Optional
 import httpx
+from cryptography.fernet import Fernet
 from fastapi import HTTPException
 from starlette import status
 from starlette.responses import JSONResponse
@@ -10,6 +11,7 @@ from orion.api.interactive.search_manager.search_data_model.consolidated.search_
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_stealerlog_callback_model import search_stealerlog_callback_model
 from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
+from orion.constants.constant import CONSTANTS
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
@@ -194,6 +196,20 @@ class search_model:
         return {"Result": ranked_results, "Page_Count": page_count if ranked_results or current_page > 1 else total_pages, "Total_Hits": total}
 
     @staticmethod
+    def _decrypt_stealer_passwords(response):
+        cipher = None
+        for item in response.Result or []:
+            password = getattr(item, "password", None)
+            if not password:
+                continue
+            try:
+                if cipher is None:
+                    cipher = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode())
+                item.password = cipher.decrypt(str(password).encode()).decode()
+            except Exception:
+                pass
+
+    @staticmethod
     async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, blocked_categories, allowed_categories,search_type=""):
         filter_dict = param.entity_filter if param.entity_filter else {}
         indices, query, indices_boost = search_query_generator().on_search_consolidated_ranked_data(
@@ -313,6 +329,7 @@ class search_model:
         response = await self.__search_callback.search_handler( m_status, m_documents,search_stealerlog_callback_model, {}, data_limit=False)
         raw_result_count = len(response.Result or [])
 
+        self._decrypt_stealer_passwords(response)
 
         password_filter = getattr(param, "password_schema", None)
         if password_filter and response and hasattr(response, "Result"):

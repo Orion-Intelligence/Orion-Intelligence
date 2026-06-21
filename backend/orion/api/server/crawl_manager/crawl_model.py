@@ -1,4 +1,5 @@
 import base64
+import binascii
 import hashlib
 import os
 import asyncio
@@ -28,6 +29,9 @@ from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_d
 from orion.api.server.crawl_manager.class_model.CTITextRequest import CTITextRequest
 from orion.constants.constant import CONSTANTS
 from orion.constants import constant
+
+SCREENSHOT_UPLOAD_MAX_BYTES = 10 * 1024 * 1024
+SCREENSHOT_UPLOAD_MAX_BASE64_LENGTH = ((SCREENSHOT_UPLOAD_MAX_BYTES + 2) // 3) * 4
 
 
 class crawl_model:
@@ -445,9 +449,22 @@ class crawl_model:
             file_path = os.path.realpath(os.path.join(screenshot_root, filename))
             if not file_path.startswith(f"{screenshot_root}{os.sep}"):
                 return {"error": "Failed to save screenshot"}
+            encoded_data = (payload.data or "").strip()
+            if encoded_data.startswith("data:") and "," in encoded_data:
+                encoded_data = encoded_data.split(",", 1)[1]
+            if len(encoded_data) > SCREENSHOT_UPLOAD_MAX_BASE64_LENGTH:
+                raise HTTPException(status_code=413, detail="Screenshot too large! Maximum allowed size is 10 MB.")
+            try:
+                decoded_data = base64.b64decode(encoded_data, validate=True)
+            except (binascii.Error, ValueError) as exc:
+                raise HTTPException(status_code=400, detail="Invalid screenshot data") from exc
+            if len(decoded_data) > SCREENSHOT_UPLOAD_MAX_BYTES:
+                raise HTTPException(status_code=413, detail="Screenshot too large! Maximum allowed size is 10 MB.")
             with open(file_path, "wb") as f:
-                f.write(base64.b64decode(payload.data))
+                f.write(decoded_data)
             return {"message": f"Screenshot saved successfully at {file_path}", "filename": filename}
+        except HTTPException:
+            raise
         except Exception:
             return {"error": "Failed to save screenshot"}
 

@@ -90,9 +90,13 @@ class auth_manager:
         if user.status == UserStatus.DISABLE:
             raise HTTPException(status_code=401, detail="Account Blocked")
 
-        if getattr(user, "password_reset_required", False) and not user.verification_token:
-            user.verification_token = session_manager.get_instance().generate_verification_token()
-            await engine.save(user)
+        if getattr(user, "password_reset_required", False):
+            reset_expiry = getattr(user, "password_reset_expiry", None)
+            reset_expired = not reset_expiry or datetime.now(timezone.utc) > reset_expiry.replace(tzinfo=timezone.utc)
+            if not getattr(user, "password_reset_token", None) or reset_expired:
+                user.password_reset_token = session_manager.get_instance().generate_verification_token()
+                user.password_reset_expiry = datetime.now(timezone.utc) + timedelta(minutes=20)
+                await engine.save(user)
 
         if user.role == user_role.CRAWLER:
             access_token_expires = timedelta(weeks=92)
@@ -108,7 +112,7 @@ class auth_manager:
         onboarding_exists = await session_manager.get_instance().has_onboarding(str(user.tenant_uuid))
 
         session_data = {"role": role, "username": user.username, "status": user.status, "hasOnboarding": onboarding_exists, "subscription": user.subscription, "verificationDate": user.account_verify_at, "licenses": [
-            license.value for license in user.licenses], "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": user.verification_token if getattr(user, "password_reset_required", False) else None, }
+            license.value for license in user.licenses], "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": user.password_reset_token if getattr(user, "password_reset_required", False) else None, }
 
 
         return {"access_token": access_token, "token_type": "bearer", "session": session_data, }
@@ -138,10 +142,12 @@ class auth_manager:
     @staticmethod
     async def update_password(token: str, password: str):
         engine = mongo_controller.get_instance().get_engine()
-        user = await engine.find_one(db_user_account, db_user_account.verification_token == token)
+        user = await engine.find_one(db_user_account, db_user_account.password_reset_token == token)
         if not user:
             raise HTTPException(status_code=404, detail="Invalid Link")
-        if not user.verification_expiry or datetime.now(timezone.utc) > user.verification_expiry.replace(
+        if user.status != UserStatus.ACTIVE:
+            raise HTTPException(status_code=403, detail="Account is not active")
+        if not user.password_reset_expiry or datetime.now(timezone.utc) > user.password_reset_expiry.replace(
                 tzinfo=timezone.utc):
             raise HTTPException(status_code=400, detail="Password reset link expired")
         if CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password):
@@ -149,8 +155,8 @@ class auth_manager:
 
         user.password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
         user.password_reset_required = False
-        user.verification_token = None
-        user.verification_expiry = None
+        user.password_reset_token = None
+        user.password_reset_expiry = None
         await engine.save(user)
 
         await AuditLogManager.get_instance().register(
@@ -164,16 +170,18 @@ class auth_manager:
         user = await engine.find_one(db_user_account, db_user_account.email == mail)
         if not user:
             raise HTTPException(status_code=404, detail="Entered mail is not resgister")
+        if user.status != UserStatus.ACTIVE:
+            raise HTTPException(status_code=403, detail="Account is not active")
 
-        user.verification_token = session_manager.get_instance().generate_verification_token()
-        user.verification_expiry = datetime.now(timezone.utc) + timedelta(minutes=20)
+        user.password_reset_token = session_manager.get_instance().generate_verification_token()
+        user.password_reset_expiry = datetime.now(timezone.utc) + timedelta(minutes=20)
         await engine.save(user)
 
         await AuditLogManager.get_instance().register(
             str(user.tenant_uuid), str(user.id), "Password reset requested")
 
         APP_URL = env_handler.get_instance().env("APP_URL")
-        forgot_url = f"{APP_URL}/reset/{user.verification_token}"
+        forgot_url = f"{APP_URL}/reset/{user.password_reset_token}"
         html_content = constant.mail_template.render(
             username=user.username,
             email=user.email,

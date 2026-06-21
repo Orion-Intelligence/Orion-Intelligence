@@ -24,7 +24,6 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   isEditing = false;
   configurationError = '';
   mailErrorState = false;
-  systemData = { ai_endpoint_enabled: true, language_allowed: '', version: '', app_name: '0', s_onion: '' };
   form = { language: '', version: '', app_name: '0', ai_endpoint_enabled: true, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
   languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
   onionPattern = /^(https?:\/\/)?[a-z2-7]{56}\.onion\/?$/i;
@@ -51,10 +50,6 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     catch {
       metaInfo = {};
     }
-    this.systemData = {
-      ...(settings as typeof this.systemData),
-      app_name: settings.app_name?.trim() || DEFAULT_APP_NAME
-    };
     this.form.language = settings.language_allowed;
     this.form.version = settings.version;
     this.form.app_name = settings.app_name?.trim() || DEFAULT_APP_NAME;
@@ -215,13 +210,6 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           this.appService.configData.set(new ConfigSettings(response.settings, current.localSettings));
           const s = this.appService.configData()?.appSettings;
           if (s) {
-            this.systemData = {
-              ai_endpoint_enabled: s.ai_endpoint_enabled,
-              language_allowed: s.language_allowed,
-              version: s.version,
-              app_name: s.app_name?.trim() || DEFAULT_APP_NAME,
-              s_onion: s.s_onion
-            };
             document.title = s.app_name?.trim() || DEFAULT_APP_NAME;
             this.loadSettings();
           }
@@ -234,6 +222,6 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   }
 
   get displayVersion(): string {
-    return (this.systemData.version || '').replaceAll('_', '.');
+    return (this.form.version || '').replaceAll('_', '.');
   }
 }

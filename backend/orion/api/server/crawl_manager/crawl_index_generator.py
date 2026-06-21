@@ -1,6 +1,9 @@
 import hashlib
 from datetime import datetime, timezone
 
+from cryptography.fernet import Fernet
+
+from orion.constants.constant import CONSTANTS
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX, ELASTIC_KEYS
 
@@ -101,6 +104,7 @@ class crawl_index_generator:
     @staticmethod
     def index_query_stealerlog(p_index_data):
         bulk_entries = []
+        cipher = None
         for log in p_index_data["logs"]:
             m_hash = log["m_hash"]
             _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
@@ -108,7 +112,12 @@ class crawl_index_generator:
             doc = {}
             for k in log:
                 if log[k] is not None:
-                    doc[k] = log[k]
+                    if k == "password":
+                        if cipher is None:
+                            cipher = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode())
+                        doc[k] = cipher.encrypt(str(log[k]).encode()).decode()
+                    else:
+                        doc[k] = log[k]
 
             bulk_entries.append({"create": {"_index": ELASTIC_INDEX.S_STEALERLOGS_INDEX, "_id": _id}})
             bulk_entries.append(doc)

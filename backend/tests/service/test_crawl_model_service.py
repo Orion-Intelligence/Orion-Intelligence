@@ -31,6 +31,7 @@ from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_m
 from orion.api.server.crawl_manager.class_model.report_chat_data_model import ReportChatRequest
 from orion.api.server.crawl_manager.class_model.social_model import social_data_model, social_model
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import SocialScrapeRequest
+from orion.api.server.crawl_manager.crawl_index_generator import crawl_index_generator
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.constants.constant import CONSTANTS
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX, ELASTIC_KEYS
@@ -457,6 +458,30 @@ def test_build_parser_payload_decrypts_files_and_embeds_feeders(monkeypatch, tmp
     assert archive.read("plain.py") == b"print('plain')"
     assert archive.read("secret.py") == b"secret = 1"
     assert archive.read("feeder/crawl_data_alpha.txt") == b"alpha\n"
+
+
+def test_index_query_stealerlog_encrypts_password(monkeypatch):
+    key = Fernet.generate_key().decode()
+    monkeypatch.setattr(CONSTANTS, "S_ENCRYPTION_KEY", key)
+
+    result = crawl_index_generator.index_query_stealerlog(
+        {
+            "logs": [
+                {
+                    "m_hash": "hash-1",
+                    "username": "alice",
+                    "password": "secret-password",
+                    "file": None,
+                }
+            ]
+        }
+    )
+
+    doc = result[1]
+    assert doc["username"] == "alice"
+    assert "file" not in doc
+    assert doc["password"] != "secret-password"
+    assert Fernet(key.encode()).decrypt(doc["password"].encode()).decode() == "secret-password"
 
 
 def test_fetch_file_helpers_and_decrypt_error_paths(monkeypatch, tmp_path: Path):

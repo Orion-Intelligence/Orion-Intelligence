@@ -20,7 +20,7 @@ class search_consolidated_param_model(BaseModel):
     url: Optional[str] = ""
     user: Optional[str] = ""
     ioc: Optional[str] = ""
-    platform_result_count: Optional[int] = 15
+    platform_result_count: int = Field(default=15, ge=1, le=100)
     sort_latest: Optional[bool] = False
     m_cve: Optional[Union[str, List[str]]] = ""
     m_cwe: Optional[Union[str, List[str]]] = ""

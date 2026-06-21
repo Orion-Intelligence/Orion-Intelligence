@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from bson import ObjectId
 from cryptography.fernet import Fernet
 
+from configs.app_dependency import _validate_public_scan_target
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_crack_model, search_dynamic_param_model, search_dynamic_social_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
@@ -63,6 +64,7 @@ class alert_job:
             if not clean_domain.endswith("/"):
                 clean_domain += "/"
 
+            await _validate_public_scan_target(clean_domain)
             payload = DomainScanRequest(domain=clean_domain, scanType=scan_type)
 
             while True:

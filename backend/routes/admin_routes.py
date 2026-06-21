@@ -12,20 +12,29 @@ from orion.services.mail_manager.mail_manager import mail_manager
 admin_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 
 
-@admin_routes.get("/admin/api/db_system_model/row-action")
+@admin_routes.get(
+    "/admin/api/db_system_model/row-action",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
 async def block_row_action(name: str = Query(...)):
     if name == "delete":
         raise HTTPException(status_code=403, detail="Deletion of system settings is not allowed")
     return {"message": f"Action '{name}' is not restricted"}
 
 
-@admin_routes.post("/admin/api/db_user_account/edit/{id}")
+@admin_routes.post(
+    "/admin/api/db_user_account/edit/{id}",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
 async def custom_edit_api(id: str, request: Request):
     await auth_manager.edit_userStatus_and_sendMail_from_admin(id, request)
     return RedirectResponse(url="/admin/db_user_account/list", status_code=303)
 
 
-@admin_routes.post("/admin/api/db_user_account/edit/{id}/")
+@admin_routes.post(
+    "/admin/api/db_user_account/edit/{id}/",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
 async def custom_edit_api_trailing(id: str, request: Request):
     await auth_manager.edit_userStatus_and_sendMail_from_admin(id, request)
     return RedirectResponse(url="/admin/db_user_account/list", status_code=303)
@@ -37,7 +46,7 @@ async def custom_edit_api_trailing(id: str, request: Request):
         role_required(
             [user_role.ADMIN])), ], )
 async def update_public_config(param: config_data):
-    return await config_controller.getInstance().update_public_config(param)
+    return await config_controller.getInstance().update_public_config(param, include_email_config=True)
 
 @admin_routes.delete(
     "/api/system/image",

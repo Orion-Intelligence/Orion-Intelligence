@@ -6,8 +6,10 @@ from orion.api.interactive.resource_manager.resource_manager import ResourceMana
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.config_manager.config_controller import config_controller
-from configs.app_dependency import get_current_user
-from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, user_role
+from configs.app_dependency import _enum_value, admin_or_enterprise_required
+from configs.auth_cookie import token_from_request
+from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
+from orion.services.session_manager.session_manager import session_manager
 
 public_routes = APIRouter()
 
@@ -17,24 +19,28 @@ def cookie_required(request: Request):
         raise HTTPException(status_code=401, detail="Missing auth cookie")
 
 
-def _enum_value(value):
-    return value.value if hasattr(value, "value") else value
-
-
-async def admin_or_enterprise_required(current_user=Depends(get_current_user)):
-    role = _enum_value(getattr(current_user, "role", None))
-    licenses = {_enum_value(license_name) for license_name in (getattr(current_user, "licenses", []) or [])}
-    if role == user_role.ADMIN.value or LicenseName.ENTERPRISE.value in licenses:
-        return current_user
-    raise HTTPException(status_code=403, detail="Access forbidden")
+async def _request_has_admin_account(request: Request) -> bool:
+    token = token_from_request(request)
+    if not token:
+        return False
+    try:
+        user = await session_manager.get_instance().get_current_user(token)
+    except HTTPException:
+        return False
+    return (
+        _enum_value(getattr(user, "role", None)) == user_role.ADMIN.value
+        and _enum_value(getattr(user, "status", None)) == UserStatus.ACTIVE.value
+    )
 
 
 @public_routes.get(
     "/api/public",
     dependencies=[],
 )
-async def get_public_config():
-    return await config_controller.getInstance().get_system_info()
+async def get_public_config(request: Request):
+    return await config_controller.getInstance().get_system_info(
+        include_email_config=await _request_has_admin_account(request)
+    )
 
 
 @public_routes.get("/api/s/static/tenant/{id}", include_in_schema=False, dependencies=[Depends(cookie_required)])

@@ -204,6 +204,8 @@ class AccountManager:
                 enc = Fernet(dek)
                 tenant_allowed = set(enc.decrypt(l.encode()).decode() for l in (tenant.licenses or []))
                 requested = set(request.licenses or [])
+                if LicenseName.MAINTAINER in requested:
+                    raise HTTPException(status_code=403, detail="Only admin can assign maintainer license")
                 if requested and not requested.issubset(tenant_allowed):
                     raise HTTPException(status_code=400, detail="User assigned license not allowed for this tenant")
             user.licenses = request.licenses
@@ -386,7 +388,7 @@ class AccountManager:
             theme = "dark-theme"
 
         node = NodeCallbackModel.model_validate(
-            {"user": {"email": user.email, "theme": theme, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": user.verification_token if getattr(user, "password_reset_required", False) else None, "license": [
+            {"user": {"email": user.email, "theme": theme, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": user.password_reset_token if getattr(user, "password_reset_required", False) else None, "license": [
                 license.value for license in
                 user.licenses], "image": user_image_path, "preferences": user.preferences or {}, "demo_tour": getattr(user, "demo_tour", True) }, "tenant": {"hasOnboarding": tenant.status == TenantStatus.ONBOARDING, "id": str(
                 tenant.id), "isDefault": str(tenant.is_default), "name": self.safe_decrypt(

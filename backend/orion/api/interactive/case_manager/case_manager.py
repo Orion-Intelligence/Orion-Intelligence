@@ -459,6 +459,7 @@ class CaseManager:
 
         if not files:
             raise HTTPException(status_code=400, detail="No files selected")
+        self._artifact_file_helper.validate_file_count(files)
 
         enc = await CaseHelperMethods.get_case_cipher(current_user)
         CaseHelperMethods.apply_sensitive_case_values(
@@ -851,4 +852,3 @@ class CaseManager:
             "success": is_valid,
             "status": artifact_file.integrityStatus,
         }
-    

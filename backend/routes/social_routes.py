@@ -1,6 +1,7 @@
 import base64
+import binascii
 
-from fastapi import APIRouter, Body, Depends, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
 from configs.app_dependency import get_current_user, license_required, role_required, status_required
 from orion.api.interactive.graph_manager.graph_models.search_social_param_model import (
@@ -16,6 +17,8 @@ from orion.api.interactive.search_manager.search_model import search_model
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
 
 social_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
+SOCIAL_IMAGE_MAX_BYTES = 10 * 1024 * 1024
+SOCIAL_IMAGE_MAX_BASE64_LENGTH = ((SOCIAL_IMAGE_MAX_BYTES + 2) // 3) * 4
 
 
 @social_routes.post(
@@ -63,7 +66,20 @@ async def search_dynamic_image(payload: dict = Body(...)):
     if not image_base64:
         return {"status": "error", "message": "image_base64_required"}
 
-    file_bytes = base64.b64decode(image_base64)
+    if not isinstance(image_base64, str):
+        raise HTTPException(status_code=400, detail="Invalid image_base64")
+    image_base64 = image_base64.strip()
+    if image_base64.startswith("data:") and "," in image_base64:
+        image_base64 = image_base64.split(",", 1)[1]
+    if len(image_base64) > SOCIAL_IMAGE_MAX_BASE64_LENGTH:
+        raise HTTPException(status_code=413, detail="Image too large! Maximum allowed size is 10 MB")
+
+    try:
+        file_bytes = base64.b64decode(image_base64, validate=True)
+    except (binascii.Error, ValueError) as exc:
+        raise HTTPException(status_code=400, detail="Invalid image_base64") from exc
+    if len(file_bytes) > SOCIAL_IMAGE_MAX_BYTES:
+        raise HTTPException(status_code=413, detail="Image too large! Maximum allowed size is 10 MB")
 
     return await search_model.getInstance().social_search(
         {"file_bytes": file_bytes, "filename": "upload.png"},
