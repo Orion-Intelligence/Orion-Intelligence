@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PasswordToggleDirective } from '../../directives/password-toggle.directive';
 import { SmtpSettingsForm } from '../../model/smtp-settings/smtp-settings.model';
@@ -24,6 +24,9 @@ export class SmtpSettingsBlockComponent implements OnChanges {
   @Input({ required: true }) form!: SmtpSettingsForm;
   @Input({ required: true }) isEditing!: boolean;
   @Input() errorState = false;
+  @Output() edit = new EventEmitter<void>();
+  @Output() cancel = new EventEmitter<void>();
+  @Output() save = new EventEmitter<void>();
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['errorState']?.currentValue) {

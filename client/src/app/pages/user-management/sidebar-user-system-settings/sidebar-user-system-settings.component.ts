@@ -21,7 +21,8 @@ const DEFAULT_APP_NAME = 'Orion Intelligence';
   templateUrl: './sidebar-user-system-settings.component.html'
 })
 export class SidebarProfileSystemSettingsComponent implements OnInit {
-  isEditing = false;
+  configurationEditing = false;
+  mailEditing = false;
   configurationError = '';
   mailErrorState = false;
   form = { language: '', version: '', app_name: '0', ai_endpoint_enabled: true, admin_root_allowed: false, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
@@ -69,16 +70,36 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.mailErrorState = false;
   }
 
-  toggleEdit() {
-    if (this.isEditing) {
-      this.save();
+  toggleConfigurationEdit() {
+    if (this.configurationEditing) {
+      if (this.save('configuration')) {
+        this.configurationEditing = false;
+      }
+      return;
     }
-    this.isEditing = !this.isEditing;
+    this.mailEditing = false;
+    this.configurationEditing = true;
   }
 
-  cancelEdit() {
+  cancelConfigurationEdit() {
     this.loadSettings();
-    this.isEditing = false;
+    this.configurationEditing = false;
+  }
+
+  toggleMailEdit() {
+    if (this.mailEditing) {
+      if (this.save('mail')) {
+        this.mailEditing = false;
+      }
+      return;
+    }
+    this.configurationEditing = false;
+    this.mailEditing = true;
+  }
+
+  cancelMailEdit() {
+    this.loadSettings();
+    this.mailEditing = false;
   }
 
   updateUserResource(file: File,key: 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
@@ -127,20 +148,27 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     });
   }
 
-  save() {
-    this.configurationError = '';
-    this.mailErrorState = false;
-    const requiredFields = [
+  save(section: 'configuration' | 'mail'): boolean {
+    if (section === 'configuration') {
+      this.configurationError = '';
+    }
+    else {
+      this.mailErrorState = false;
+    }
+    const configurationFields = [
       { key: 'app_name', label: 'App Name' },
       { key: 'language', label: 'Language' },
       { key: 'data_sources_url', label: 'Data Sources URL' },
       { key: 'adversaries_url', label: 'Adversaries URL' },
-      { key: 'pricing_url', label: 'Pricing URL' },
+      { key: 'pricing_url', label: 'Pricing URL' }
+    ] as const;
+    const mailFields = [
       { key: 'accounts_mail_password', label: 'Account Mail Password' },
       { key: 'accounts_mail', label: 'Account Mail' },
       { key: 'accounts_smtp_server', label: 'Account SMTP Server' },
       { key: 'accounts_smtp_port', label: 'Account SMTP Port' }
     ] as const;
+    const requiredFields = section === 'configuration' ? configurationFields : mailFields;
     for (const field of requiredFields) {
       const value = this.form[field.key];
       if (typeof value !== 'string' || !value.trim()) {
@@ -150,7 +178,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
         else {
           this.configurationError = `${field.label} is required`;
         }
-        return;
+        return false;
       }
     }
     this.form.app_name = this.form.app_name.trim() || DEFAULT_APP_NAME;
@@ -163,48 +191,41 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.accounts_mail = this.form.accounts_mail.trim();
     this.form.accounts_smtp_server = this.form.accounts_smtp_server.trim();
     this.form.accounts_smtp_port = this.form.accounts_smtp_port.trim();
-    if (this.form.s_onion && !this.onionPattern.test(this.form.s_onion)) {
+    if (section === 'configuration' && this.form.s_onion && !this.onionPattern.test(this.form.s_onion)) {
       this.messageNotificationService.show('Invalid onion address');
-      return;
+      return false;
     }
-    if ((this.form.data_sources_url && !this.urlPattern.test(this.form.data_sources_url)) ||
+    if (section === 'configuration' && ((this.form.data_sources_url && !this.urlPattern.test(this.form.data_sources_url)) ||
       (this.form.adversaries_url && !this.urlPattern.test(this.form.adversaries_url)) ||
-      (this.form.pricing_url && !this.urlPattern.test(this.form.pricing_url))) {
+      (this.form.pricing_url && !this.urlPattern.test(this.form.pricing_url)))) {
       this.configurationError = 'Data Sources URL, Adversaries URL, and Pricing URL must start with http:// or https://';
-      return;
+      return false;
     }
-    if (!this.emailPattern.test(this.form.accounts_mail)) {
+    if (section === 'mail' && !this.emailPattern.test(this.form.accounts_mail)) {
       this.mailErrorState = true;
-      return;
+      return false;
     }
-    if (!this.smtpServerPattern.test(this.form.accounts_smtp_server)) {
+    if (section === 'mail' && !this.smtpServerPattern.test(this.form.accounts_smtp_server)) {
       this.mailErrorState = true;
-      return;
+      return false;
     }
     const smtpPort = Number(this.form.accounts_smtp_port);
-    if (!Number.isInteger(smtpPort) || smtpPort < 1 || smtpPort > 65535) {
+    if (section === 'mail' && (!Number.isInteger(smtpPort) || smtpPort < 1 || smtpPort > 65535)) {
       this.mailErrorState = true;
-      return;
+      return false;
     }
-    const settings = {
-      language: this.form.language,
-      version: this.form.version,
-      app_name: this.form.app_name,
-      ai_endpoint_enabled: this.form.ai_endpoint_enabled ? '1' : '0',
-      admin_root_allowed: this.form.admin_root_allowed ? '1' : '0',
-      s_onion: this.form.s_onion,
-      meta_info: JSON.stringify({
-        S_HOME_HEADER_DATA_SOURCES: this.form.data_sources_url,
-        S_HOME_HEADER_ADVERSARIES: this.form.adversaries_url,
-        S_HOME_HEADER_PRICING: this.form.pricing_url,
-        S_HOME_HEADER_PRICING_ALLOWED: this.form.documentation_allowed,
-        S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED: this.form.whistle_blowing_allowed,
-        ACCOUNTS_MAIL_PASSWORD: this.form.accounts_mail_password,
-        ACCOUNTS_MAIL: this.form.accounts_mail,
-        ACCOUNTS_SMTP_SERVER: this.form.accounts_smtp_server,
-        ACCOUNTS_SMTP_PORT: this.form.accounts_smtp_port
-      })
-    };
+    const settings: Record<string, string> = section === 'configuration'
+      ? {
+        language: this.form.language,
+        app_name: this.form.app_name,
+        ai_endpoint_enabled: this.form.ai_endpoint_enabled ? '1' : '0',
+        admin_root_allowed: this.form.admin_root_allowed ? '1' : '0',
+        s_onion: this.form.s_onion,
+        meta_info: JSON.stringify(this.buildMetaInfo('configuration'))
+      }
+      : {
+        meta_info: JSON.stringify(this.buildMetaInfo('mail'))
+      };
     this.apiService.post<any>('public/update', { settings }).subscribe({
       next: (response) => {
         if (response?.settings) {
@@ -218,9 +239,35 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
         }
       },
       error: () => {
-        this.mailErrorState = true;
+        if (section === 'mail') {
+          this.mailErrorState = true;
+          this.mailEditing = true;
+        }
+        else {
+          this.configurationError = 'Failed to save configuration';
+          this.configurationEditing = true;
+        }
       }
     });
+    return true;
+  }
+
+  private buildMetaInfo(section: 'configuration' | 'mail'): Record<string, string | boolean> {
+    const metaInfo: Record<string, string | boolean> = {};
+    if (section === 'configuration') {
+      metaInfo['S_HOME_HEADER_DATA_SOURCES'] = this.form.data_sources_url;
+      metaInfo['S_HOME_HEADER_ADVERSARIES'] = this.form.adversaries_url;
+      metaInfo['S_HOME_HEADER_PRICING'] = this.form.pricing_url;
+      metaInfo['S_HOME_HEADER_PRICING_ALLOWED'] = this.form.documentation_allowed;
+      metaInfo['S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED'] = this.form.whistle_blowing_allowed;
+    }
+    if (section === 'mail') {
+      metaInfo['ACCOUNTS_MAIL_PASSWORD'] = this.form.accounts_mail_password;
+      metaInfo['ACCOUNTS_MAIL'] = this.form.accounts_mail;
+      metaInfo['ACCOUNTS_SMTP_SERVER'] = this.form.accounts_smtp_server;
+      metaInfo['ACCOUNTS_SMTP_PORT'] = this.form.accounts_smtp_port;
+    }
+    return metaInfo;
   }
 
   get displayVersion(): string {
