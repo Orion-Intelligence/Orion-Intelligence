@@ -611,8 +611,8 @@ export const routes: Routes = [
         ]
       },
       {
-        path: 'threat-intel',
-        data: { animation: 'ThreatIntelPage' },
+        path: 'apt-intel',
+        data: { animation: 'AptIntelPage' },
         children: [
           {
             path: '',
@@ -622,23 +622,23 @@ export const routes: Routes = [
           {
             path: 'all',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'Threat Intelligence', animation: 'DataBreach' }
+            data: { type: 'APT Intel', animation: 'DataBreach' }
           },
           {
             path: 'apt',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'Threat Intelligence', animation: 'DataBreach' }
+            data: { type: 'APT Intel', animation: 'DataBreach' }
           },
           {
             path: 'malware-bazaar',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'Threat Intelligence', animation: 'DataBreach' }
+            data: { type: 'APT Intel', animation: 'DataBreach' }
           },
           {
             path: ':category/:m_hash',
             loadComponent: loadReportComponent,
             resolve: { reportdata: ReportResolver },
-            data: { type: 'Threat Intelligence', animation: 'HashPage' }
+            data: { type: 'APT Intel', animation: 'HashPage' }
           }
         ]
       },

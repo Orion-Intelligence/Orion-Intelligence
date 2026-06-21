@@ -230,9 +230,9 @@ export class HelperService {
       case 'exploit_model':
         return { path: ['/dashboard', 'exploit', 'all', docId], queryParams: { ci: 'exploit' } };
       case 'apt_model':
-        return { path: ['/dashboard', 'threat-intel', 'apt', docId], queryParams: { ci: 'apt' } };
+        return { path: ['/dashboard', 'apt-intel', 'apt', docId], queryParams: { ci: 'apt' } };
       case 'malware_model':
-        return { path: ['/dashboard', 'threat-intel', 'malware-bazaar', docId], queryParams: { ci: 'malware' } };
+        return { path: ['/dashboard', 'apt-intel', 'malware-bazaar', docId], queryParams: { ci: 'malware' } };
       case 'defacement_model':
         return { path: ['/dashboard', 'defacement', 'all', docId], queryParams: { ci: 'defacement' } };
       case 'social_model':

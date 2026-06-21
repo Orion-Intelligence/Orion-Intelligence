@@ -84,10 +84,10 @@
         <app-dashboard-sidebar-items
           (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)"
-          [category]="category.THREAT_INTEL"
+          [category]="category.APT_INTEL"
           [icon]="'assets/images/sidebar/graph.svg'"
-          [items]="threatIntelCategories"
-          [routePrefix]="'threat-intel'"
+          [items]="aptIntelCategories"
+          [routePrefix]="'apt-intel'"
         [title]="('Actors & Malware') | translate"></app-dashboard-sidebar-items>
       }
       @if (isAdmin() || licenseService.canUseModule('feed')) {
@@ -294,10 +294,10 @@
         <app-dashboard-sidebar-collapsed
           (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)"
-          [category]="category.THREAT_INTEL"
+          [category]="category.APT_INTEL"
           [icon]="'assets/images/sidebar/graph.svg'"
-          [items]="threatIntelCategories"
-          [routePrefix]="'threat-intel'"
+          [items]="aptIntelCategories"
+          [routePrefix]="'apt-intel'"
           [selectionStore]="selectionStore"
           [title]="('Actors & Malware') | translate">
         </app-dashboard-sidebar-collapsed>

@@ -7,7 +7,7 @@ export enum Category {
     SOCIAL = 'Social',
     API = 'Api',
     EXPLOIT = 'Exploit',
-    THREAT_INTEL = 'Threat Intelligence',
+    APT_INTEL = 'APT Intel',
     FEED = 'Feed',
     CONSOLIDATED = 'Consolidated',
     STEALERLOGS = 'Stealerlogs',
@@ -55,7 +55,7 @@ export enum ExploitSubCategory {
     TOOLS = 'Tools',
     ZERODAY = 'ZeroDay'
 }
-export enum ThreatIntelSubCategory {
+export enum AptIntelSubCategory {
     ALL = 'All',
     APT = 'APT',
     MALWARE_BAZAAR = 'Malware-Bazaar'

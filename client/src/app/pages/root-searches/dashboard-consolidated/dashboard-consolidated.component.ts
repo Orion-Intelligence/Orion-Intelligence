@@ -11,7 +11,7 @@ import { ConsolidatedCallbackModel } from '../../../shared/model/results/consoli
 import { DashboardResultExploitComponent } from '../../intel-panel/dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
 import { DashboardResultChatComponent } from '../../intel-panel/dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
 import { SortGroupedResultsPipe } from '../../../shared/pipes/sort-grouped-results.pipe';
-import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, FeedSubCategory, SocialSubCategory, ThreatIntelSubCategory } from '../../../shared/constants/pages';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, FeedSubCategory, SocialSubCategory, AptIntelSubCategory } from '../../../shared/constants/pages';
 import { SelectionStoreService } from '../../../services/dashboard/selection.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { DashboardResultSocialComponent } from '../../intel-panel/dashboard-results/dashboard-result-social/dashboard-result-social.component';
@@ -62,7 +62,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   firstTrigger = true;
   result_count = 0;
   apiCategories = Object.values(ApiSubCategory);
-  threatIntelCategories = Object.values(ThreatIntelSubCategory);
+  aptIntelCategories = Object.values(AptIntelSubCategory);
   newsCategories = Object.values(FeedSubCategory);
   socialCategories = Object.values(SocialSubCategory);
   leakCategories = Object.values(BreachSubCategory);
@@ -310,8 +310,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       case Category.DEFACEMENT:
         firstSubcategory = this.defacementCategories[0];
         break;
-      case Category.THREAT_INTEL:
-        firstSubcategory = this.threatIntelCategories[0];
+      case Category.APT_INTEL:
+        firstSubcategory = this.aptIntelCategories[0];
         break;
       case Category.FEED:
         firstSubcategory = this.newsCategories[0];
@@ -324,7 +324,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     if (firstSubcategory) {
       this.selectionStore.setSelectedOption(firstSubcategory);
     }
-    const sectionRoute = section === Category.THREAT_INTEL ? 'threat-intel' : section.toLowerCase();
+    const sectionRoute = section === Category.APT_INTEL ? 'apt-intel' : section.toLowerCase();
     const routePrefix = '/dashboard/' + sectionRoute + '/' + second_category;
     this.router.navigate([routePrefix], {
       queryParams: { page: 1 }, queryParamsHandling: 'merge'
@@ -339,7 +339,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         return Category.EXPLOIT;
       case 'apt_model':
       case 'malware_model':
-        return Category.THREAT_INTEL;
+        return Category.APT_INTEL;
       case 'defacement_model':
         return Category.DEFACEMENT;
       case 'chat_model':

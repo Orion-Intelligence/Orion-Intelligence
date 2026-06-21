@@ -1,4 +1,4 @@
-export interface ThreatIntelResultItem {
+export interface AptIntelResultItem {
   _id?: string;
   m_hash?: string;
   m_title?: string;
@@ -36,7 +36,7 @@ export interface ThreatIntelResultItem {
   rank_index?: string;
 }
 
-export interface ThreatIntelSummary {
+export interface AptIntelSummary {
   total: number;
   actorCount: number;
   malwareCount: number;
@@ -44,19 +44,19 @@ export interface ThreatIntelSummary {
   referenceCount: number;
 }
 
-export interface ThreatIntelRecord {
-  item: ThreatIntelResultItem;
+export interface AptIntelRecord {
+  item: AptIntelResultItem;
   title: string;
   sourceLabel: string;
   date: string | null;
 }
 
-export interface ThreatIntelGroup {
+export interface AptIntelGroup {
   key: string;
   title: string;
   subtitle: string;
   sourceTypes: string[];
-  records: ThreatIntelRecord[];
+  records: AptIntelRecord[];
   latestSeen: string | null;
   referenceCount: number;
   artifactCount: number;

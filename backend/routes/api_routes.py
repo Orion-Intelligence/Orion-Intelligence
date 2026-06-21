@@ -25,6 +25,7 @@ from orion.api.interactive.hompage_manager.homepage_model import homepage_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_crack_model, search_dynamic_crypto_model, search_dynamic_onion_search, search_dynamic_param_model, search_dynamic_social_model
+from orion.api.interactive.search_manager.internal.search_apt_controller import search_apt_controller
 from orion.api.interactive.search_manager.internal.search_defacement_controller import search_defacement_controller
 from orion.api.interactive.search_manager.internal.search_exploit_controller import search_exploit_controller
 from orion.api.interactive.search_manager.internal.search_generic_controller import search_generic_controller
@@ -185,42 +186,18 @@ async def get_exploit_filter_suggestions(field: str = Query(...), q: str = Query
 
 
 @api_routes.post(
-    "/api/search/malware",
-    summary="Search malware reports",
+    "/api/search/apt-intel",
+    summary="Search APT Intel reports",
     description=SEARCH_DOCS["strategic"]["description"],
     tags=["Search"],
-    operation_id="searchMalwareReports",
+    operation_id="searchAptIntelReports",
     response_description=SEARCH_DOCS["strategic"]["response_description"],
     status_code=200,
     dependencies=GENERAL_MODULE_DEPS, )
-async def search_malware(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
+async def search_apt_intel(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
-    base_index = [ELASTIC_INDEX.S_MALWARE_INDEX]
-    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
-
-
-@api_routes.post(
-    "/api/search/threat-intel",
-    summary="Search threat intelligence reports",
-    description=SEARCH_DOCS["strategic"]["description"],
-    tags=["Search"],
-    operation_id="searchThreatIntelReports",
-    response_description=SEARCH_DOCS["strategic"]["response_description"],
-    status_code=200,
-    dependencies=GENERAL_MODULE_DEPS, )
-async def search_threat_intel(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
-    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
-    _enforce_demo_safe_search(param, current_user)
-    category = (param.category or "all").lower()
-    if category == "apt":
-        base_index = [ELASTIC_INDEX.S_APT_INDEX]
-    elif category in {"malware", "malware-bazaar"}:
-        base_index = [ELASTIC_INDEX.S_MALWARE_INDEX]
-    else:
-        base_index = [ELASTIC_INDEX.S_APT_INDEX, ELASTIC_INDEX.S_MALWARE_INDEX]
-    param.category = "all"
-    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
+    return await search_apt_controller.getInstance().search_result(param)
 
 
 @api_routes.post(
