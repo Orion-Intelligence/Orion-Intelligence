@@ -167,7 +167,7 @@ def test_search_consolidated_iocs_builds_ioc_logic_and_returns_ranked_results(fa
     assert indices == [ELASTIC_INDEX.S_LEAK_INDEX]
     filters = query["query"]["function_score"]["query"]["bool"]["filter"]
     assert any("m_email" in str(clause) and "m_domain" in str(clause) for clause in filters)
-    assert any("m_message_date" in str(clause) or "m_leak_date" in str(clause) for clause in filters)
+    assert any("m_date" in str(clause) or "m_date" in str(clause) for clause in filters)
 
 
 # def test_search_stealerlogs_result_normalizes_mapping_and_preserves_page(fake_elastic):

@@ -6,6 +6,8 @@ from orion.api.interactive.resource_manager.resource_manager import ResourceMana
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.config_manager.config_controller import config_controller
+from configs.app_dependency import get_current_user
+from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, user_role
 
 public_routes = APIRouter()
 
@@ -13,6 +15,18 @@ public_routes = APIRouter()
 def cookie_required(request: Request):
     if not request.cookies.get("access_token"):
         raise HTTPException(status_code=401, detail="Missing auth cookie")
+
+
+def _enum_value(value):
+    return value.value if hasattr(value, "value") else value
+
+
+async def admin_or_enterprise_required(current_user=Depends(get_current_user)):
+    role = _enum_value(getattr(current_user, "role", None))
+    licenses = {_enum_value(license_name) for license_name in (getattr(current_user, "licenses", []) or [])}
+    if role == user_role.ADMIN.value or LicenseName.ENTERPRISE.value in licenses:
+        return current_user
+    raise HTTPException(status_code=403, detail="Access forbidden")
 
 
 @public_routes.get(
@@ -57,7 +71,8 @@ async def robots_txt():
 @public_routes.get(
     "/api/search/stealerlogs",
     include_in_schema=False,
-    status_code=200
+    status_code=200,
+    dependencies=[Depends(admin_or_enterprise_required)],
 )
 async def search_stealerlog(q: str = Query(...)):
     param = search_credential_param_model(q=q)

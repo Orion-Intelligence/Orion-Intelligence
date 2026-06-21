@@ -140,7 +140,7 @@ class TenantManager:
             id=str(current_user.tenant_uuid), name=enc.decrypt(tenant.name.encode()).decode(), iocs=ioc_models,
             profile_visibility_enabled=getattr(tenant, "profile_visibility_enabled", True),
             event_management_enabled=getattr(tenant, "event_management_enabled", False),
-            accounts_mail_password=enc.decrypt(getattr(tenant, "accounts_mail_password", "").encode()).decode() if getattr(tenant, "accounts_mail_password", "") else "",
+            accounts_mail_password="",
             accounts_mail=enc.decrypt(getattr(tenant, "accounts_mail", "").encode()).decode() if getattr(tenant, "accounts_mail", "") else "",
             accounts_smtp_server=enc.decrypt(getattr(tenant, "accounts_smtp_server", "").encode()).decode() if getattr(tenant, "accounts_smtp_server", "") else "",
             accounts_smtp_port=enc.decrypt(getattr(tenant, "accounts_smtp_port", "").encode()).decode() if getattr(tenant, "accounts_smtp_port", "") else "")
@@ -201,18 +201,20 @@ class TenantManager:
         if data.accounts_smtp_port is not None:
             tenant.accounts_smtp_port = enc.encrypt((data.accounts_smtp_port or "").encode()).decode()
 
-        if data.verified is not None:
+        is_admin = current_user.role in ["admin"]
+
+        if is_admin and data.verified is not None:
             tenant.verified = data.verified
 
-        if data.user_quota is not None:
+        if is_admin and data.user_quota is not None:
             if data.user_quota < 0:
                 data.user_quota = 0
             tenant.user_quota = data.user_quota
 
-        if data.status is not None:
+        if is_admin and data.status is not None:
             tenant.status = data.status
 
-        if data.licenses is not None and len(data.licenses) > 0:
+        if is_admin and data.licenses is not None and len(data.licenses) > 0:
             if LicenseName.FEEDER.value in data.licenses:
                 raise HTTPException(status_code=400, detail="Feeder license cannot be assigned to tenant")
             tenant.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
@@ -232,10 +234,10 @@ class TenantManager:
         await self._engine.save(tenant)
 
         allowed_licenses = set(data.licenses or [])
-        if "maintainer" in allowed_licenses and current_user.role not in ["admin"]:
+        if "maintainer" in allowed_licenses and not is_admin:
             raise HTTPException(status_code=401, detail="Only admin can assign maintainer license")
 
-        if current_user.role in ["admin"]:
+        if is_admin:
             users = await self._engine.find(db_user_account, db_user_account.tenant_uuid == tenant_id)
             for u in users:
                 if "maintainer" in (u.licenses or []):
@@ -279,7 +281,7 @@ class TenantManager:
         tenant_data["postal_code"] = enc.decrypt(
             (tenant_data.get("postal_code") or "").encode()).decode() if tenant_data.get("postal_code") else ""
         tenant_data["licenses"] = [enc.decrypt(x.encode()).decode() for x in (tenant_data.get("licenses") or [])]
-        tenant_data["accounts_mail_password"] = enc.decrypt((tenant_data.get("accounts_mail_password") or "").encode()).decode() if tenant_data.get("accounts_mail_password") else ""
+        tenant_data["accounts_mail_password"] = ""
         tenant_data["accounts_mail"] = enc.decrypt((tenant_data.get("accounts_mail") or "").encode()).decode() if tenant_data.get("accounts_mail") else ""
         tenant_data["accounts_smtp_server"] = enc.decrypt((tenant_data.get("accounts_smtp_server") or "").encode()).decode() if tenant_data.get("accounts_smtp_server") else ""
         tenant_data["accounts_smtp_port"] = enc.decrypt((tenant_data.get("accounts_smtp_port") or "").encode()).decode() if tenant_data.get("accounts_smtp_port") else ""
@@ -315,7 +317,7 @@ class TenantManager:
                 tenant.email = enc.decrypt(tenant.email.encode()).decode()
             else:
                 tenant.email = ""
-            tenant.accounts_mail_password = enc.decrypt(tenant.accounts_mail_password.encode()).decode() if getattr(tenant, "accounts_mail_password", "") else ""
+            tenant.accounts_mail_password = ""
             tenant.accounts_mail = enc.decrypt(tenant.accounts_mail.encode()).decode() if getattr(tenant, "accounts_mail", "") else ""
             tenant.accounts_smtp_server = enc.decrypt(tenant.accounts_smtp_server.encode()).decode() if getattr(tenant, "accounts_smtp_server", "") else ""
             tenant.accounts_smtp_port = enc.decrypt(tenant.accounts_smtp_port.encode()).decode() if getattr(tenant, "accounts_smtp_port", "") else ""

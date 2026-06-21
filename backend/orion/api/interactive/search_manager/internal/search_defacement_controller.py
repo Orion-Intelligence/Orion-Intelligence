@@ -95,7 +95,7 @@ class search_defacement_controller:
         for group in groups.values():
             records_in_group = sorted(
                 group["records"],
-                key=lambda record: str(record.get("m_leak_date") or record.get("m_update_date") or record.get("m_creation_date") or ""),
+                key=lambda record: str(record.get("m_date") or record.get("m_update_date") or record.get("m_creation_date") or ""),
                 reverse=True)
             sites = set()
             ips = set()
@@ -130,8 +130,8 @@ class search_defacement_controller:
             group["ip_count"] = len(ips)
             group["servers"] = servers[:6]
             group["latest_seen"] = next(
-                (record.get("m_leak_date") or record.get("m_update_date") or record.get("m_creation_date") for record in records_in_group
-                 if record.get("m_leak_date") or record.get("m_update_date") or record.get("m_creation_date")),
+                (record.get("m_date") or record.get("m_update_date") or record.get("m_creation_date") for record in records_in_group
+                 if record.get("m_date") or record.get("m_update_date") or record.get("m_creation_date")),
                 None)
 
         return sorted(
@@ -159,7 +159,7 @@ class search_defacement_controller:
         query["size"] = 1000
         query["from"] = 0
         query["sort"] = [
-            {"m_leak_date": {"order": "desc", "missing": "_last"}},
+            {"m_date": {"order": "desc", "missing": "_last"}},
             {"m_update_date": {"order": "desc", "missing": "_last"}},
             {"m_creation_date": {"order": "desc", "missing": "_last"}},
             {"_score": {"order": "desc"}},

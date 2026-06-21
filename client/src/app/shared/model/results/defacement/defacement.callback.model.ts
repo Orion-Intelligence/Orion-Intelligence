@@ -10,7 +10,7 @@ export class DefacementResultItem {
   m_ip!: string[];
   m_location!: string;
   m_content!: string;
-  m_leak_date?: string;
+  m_date?: string;
   m_source_url!: string[];
   m_hash!: string;
   m_screenshot?: string;

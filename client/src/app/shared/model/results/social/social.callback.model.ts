@@ -14,7 +14,7 @@ export class SocialResultItem {
   m_channel_url?: string;
   m_sender_name?: string;
   m_sender_username?: string;
-  m_message_date?: string;
+  m_date?: string;
   m_network?: string;
   m_post_likes?: string;
   m_post_shares?: string;

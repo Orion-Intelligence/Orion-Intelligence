@@ -62,10 +62,10 @@ def test_insight_consolidated_result_builds_and_caches_display_data(monkeypatch)
     fake_elastic = FakeElastic(
         responses=[
             {"hits": {"hits": [{"_source": {"m_hash": "leak-1", "m_title": "Leak title", "m_country_name": "US", "m_update_date": "2026-04-01"}}]}},
-            {"hits": {"hits": [{"_source": {"m_hash": "chat-1", "m_caption": "Chat hit", "m_channel_name": "alpha", "m_message_date": "2026-04-01"}}]}},
+            {"hits": {"hits": [{"_source": {"m_hash": "chat-1", "m_caption": "Chat hit", "m_channel_name": "alpha", "m_date": "2026-04-01"}}]}},
             {"hits": {"hits": [{"_source": {"m_hash": "exp-1", "m_title": "Exploit title", "m_network": "forum", "m_update_date": "2026-04-01"}}]}},
             {"hits": {"hits": [{"_source": {"m_hash": "gen-1", "m_title": "General title", "m_company_name": "Acme", "m_update_date": "2026-04-01", "m_url": "https://example.com"}}]}},
-            {"hits": {"hits": [{"_source": {"m_hash": "def-1", "m_url": "https://defaced.example", "m_attacker": ["team-x"], "m_location": "US, CA", "m_leak_date": "2026-04-01"}}]}},
+            {"hits": {"hits": [{"_source": {"m_hash": "def-1", "m_url": "https://defaced.example", "m_attacker": ["team-x"], "m_location": "US, CA", "m_date": "2026-04-01"}}]}},
         ]
     )
     monkeypatch.setattr(
@@ -169,7 +169,7 @@ def test_homepage_country_and_display_helpers_cover_edge_cases():
             "m_url": "https://defaced.example",
             "m_attacker": ["team-x"],
             "m_location": "US, CA",
-            "m_leak_date": "2026-04-01",
+            "m_date": "2026-04-01",
         },
     )
 

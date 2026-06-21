@@ -376,8 +376,7 @@ class search_query_generator:
     @staticmethod
     def build_date_priority_filter(from_date, to_date, priority_field_names):
         formatted_ranges = {
-            "m_leak_date": (from_date[:10], to_date[:10]),
-            "m_message_date": (from_date, to_date),
+            "m_date": (from_date, to_date),
             "m_update_date": (from_date, to_date),
             "m_creation_date": (from_date, to_date),
         }
@@ -433,11 +432,11 @@ class search_query_generator:
         index_set = set(base_index or [])
 
         if index_set and index_set.issubset({ELASTIC_INDEX.S_EXPLOIT_INDEX, ELASTIC_INDEX.S_APT_INDEX, ELASTIC_INDEX.S_MALWARE_INDEX, ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_INDEX.S_LEAK_INDEX}):
-            date_priority_fields = ["m_leak_date", "m_update_date", "m_creation_date"]
-            date_boost_fields = [("m_leak_date", 0), ("m_update_date", 0), ("m_creation_date", 0)]
+            date_priority_fields = ["m_date", "m_update_date", "m_creation_date"]
+            date_boost_fields = [("m_date", 0), ("m_update_date", 0), ("m_creation_date", 0)]
         elif index_set and index_set.issubset({ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX}):
-            date_priority_fields = ["m_message_date"]
-            date_boost_fields = [("m_message_date", 0)]
+            date_priority_fields = ["m_date"]
+            date_boost_fields = [("m_date", 0)]
         elif index_set and index_set.issubset({ELASTIC_INDEX.S_GENERIC_INDEX}):
             date_priority_fields = ["m_update_date", "m_creation_date"]
             date_boost_fields = [("m_update_date", 0), ("m_creation_date", 0)]
@@ -576,8 +575,7 @@ class search_query_generator:
                 must_clauses.append({
                     "bool": {
                         "should": [
-                            {"range": {"m_message_date": {"gte": from_date, "lte": to_date}}},
-                            {"range": {"m_leak_date": {"gte": from_date, "lte": to_date}}},
+                            {"range": {"m_date": {"gte": from_date, "lte": to_date}}},
                             {"range": {"m_creation_date": {"gte": from_date, "lte": to_date}}},
                         ],
                         "minimum_should_match": 1,

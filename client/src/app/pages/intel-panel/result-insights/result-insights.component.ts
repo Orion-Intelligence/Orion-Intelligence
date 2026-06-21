@@ -176,7 +176,7 @@ export class ResultInsightsComponent implements OnInit {
       ]
       : (Array.isArray(rankedData) ? rankedData : []);
     items.forEach(item => {
-      addToMap(item.m_url, item.m_title, item.m_creation_date || item.m_update_date || item.m_leak_date || item.m_message_date);
+      addToMap(item.m_url, item.m_title, item.m_creation_date || item.m_update_date || item.m_date);
       ['m_clearnet_links', 'm_weblink', 'm_dumplink', 'm_source_url'].forEach(field => {
         const links = item[field];
         if (Array.isArray(links)) {
@@ -260,7 +260,7 @@ export class ResultInsightsComponent implements OnInit {
       : (Array.isArray(rankedData) ? rankedData : []);
     total = allResults.length;
     allResults.forEach(item => {
-      const rawDate = item.m_update_date || item.m_leak_date || item.m_message_date || item.m_creation_date;
+      const rawDate = item.m_update_date || item.m_date || item.m_creation_date;
       const status = this.getStatusCategory(rawDate);
       if (status === 'Active') {
         active++;

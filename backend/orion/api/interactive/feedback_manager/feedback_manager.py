@@ -144,7 +144,7 @@ class FeedbackManager:
 
     @staticmethod
     def _pick_date(data: dict[str, Any]) -> str:
-        for key in ("m_message_date", "m_update_date", "m_creation_date", "m_leak_date"):
+        for key in ("m_date", "m_update_date", "m_creation_date"):
             value = data.get(key)
             if value:
                 return str(value)

@@ -16,7 +16,7 @@ export class GeneralResultItem {
   m_section!: string[];
   m_clearnet_links!: string[];
   m_weblink!: string[];
-  m_leak_date?: string | null;
+  m_date?: string | null;
   m_dumplink!: string[];
   m_update_date!: string;
   m_crawl_status?: string | null;

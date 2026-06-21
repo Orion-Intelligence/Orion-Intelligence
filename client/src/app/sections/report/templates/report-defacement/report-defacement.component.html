@@ -12,7 +12,7 @@
     <div class="mt-5 grid gap-x-6 border-t border-[var(--color-divider)] pt-2 text-sm md:grid-cols-2 xl:grid-cols-3">
       <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
         <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Saved on' | translate }}</p>
-        <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_leak_date ? (defacementData?.m_leak_date | date: 'MMM d, y') : '-' }}</span>
+        <span class="ml-auto min-w-0 w-0 flex-1 truncate whitespace-nowrap text-right text-[14px] font-medium text-[var(--color-text1)]">{{ defacementData?.m_date ? (defacementData?.m_date | date: 'MMM d, y') : '-' }}</span>
       </div>
 
       @if (!defacementData?.m_ioc_type?.length) {

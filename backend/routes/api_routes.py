@@ -39,12 +39,22 @@ STIX_MEMBER_DEPS = [Depends(role_required([user_role.ADMIN, user_role.DEMO, user
 GENERAL_MODULE_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:general"))]
 SCANNING_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("scanning"))]
 STIX_KIND_VALUES = {"general", "leak", "defacement", "exploit", "chat", "social"}
+SCAN_UPLOAD_MAX_BYTES = 10 * 1024 * 1024
 
 
 async def _scan_domain_with_type(payload: DomainScanRequest, user_id: str, scan_type: Optional[str] = None):
     if scan_type:
         payload.scanType = scan_type
     return await crawl_model.getInstance().scan_domain(payload, user_id=user_id)
+
+
+async def _read_scan_upload(file: UploadFile) -> bytes:
+    if getattr(file, "size", None) is not None and file.size > SCAN_UPLOAD_MAX_BYTES:
+        raise HTTPException(status_code=413, detail="File too large! Maximum allowed size is 10 MB.")
+    content = await file.read()
+    if len(content) > SCAN_UPLOAD_MAX_BYTES:
+        raise HTTPException(status_code=413, detail="File too large! Maximum allowed size is 10 MB.")
+    return content
 
 
 def _enforce_demo_safe_search(param: search_consolidated_param_model, current_user, is_free: bool = False) -> None:
@@ -805,11 +815,12 @@ async def get_news_stix_document(doc_id: str, lang: Optional[str] = Query(None, 
     response_description=DYNAMIC_DOCS["ioc_extract"]["response_description"],
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST, Depends(license_required("scanning"))])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(license_required("scanning")),
     ],
 )
 async def extract_ioc(file: UploadFile = File(...), current_user=Depends(get_current_user)):
-    file_content = await file.read()
+    file_content = await _read_scan_upload(file)
     result = await search_model.getInstance().extract_ioc_from_file(file_content, file.filename, user_id=str(current_user.id))
     return result
 
@@ -826,7 +837,7 @@ async def extract_ioc(file: UploadFile = File(...), current_user=Depends(get_cur
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning"))],
 )
 async def scan_apk(file: UploadFile = File(...), current_user=Depends(get_current_user)):
-    file_content = await file.read()
+    file_content = await _read_scan_upload(file)
     result = await search_model.getInstance().scan_apk(file_content, file.filename, user_id=str(current_user.id))
 
     return result

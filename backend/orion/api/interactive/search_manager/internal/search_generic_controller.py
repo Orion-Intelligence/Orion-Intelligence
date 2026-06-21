@@ -76,7 +76,7 @@ class search_generic_controller:
 
     @staticmethod
     def _date(item):
-        for field in ("m_update_date", "m_creation_date", "m_leak_date", "m_message_date"):
+        for field in ("m_update_date", "m_creation_date", "m_date"):
             value = item.get(field)
             if value:
                 return str(value)

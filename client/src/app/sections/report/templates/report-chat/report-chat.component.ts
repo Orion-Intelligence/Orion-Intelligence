@@ -234,7 +234,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
       });
     };
 
-    add('Message Date', item.m_message_date);
+    add('Message Date', item.m_date);
     add('Views', item.m_views);
     add('Sender Username', item.m_sender_username);
     add('Sender', item.m_sender_name);

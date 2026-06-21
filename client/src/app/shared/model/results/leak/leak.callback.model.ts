@@ -20,7 +20,7 @@ export class LeakResultItem {
   m_websites!: string[];
   m_company_name?: string | null;
   m_logo_or_images!: string[];
-  m_leak_date?: string | null;
+  m_date?: string | null;
   m_data_size?: string | null;
   m_country_name?: string | null;
   m_revenue?: string | null;

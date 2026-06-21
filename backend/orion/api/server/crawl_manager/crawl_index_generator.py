@@ -187,9 +187,9 @@ class crawl_index_generator:
                 continue
 
             card["m_hash"] = helper_controller.generate_data_hash(title)
-            leak_date = card.get("m_leak_date") or card.get("m_published_date") or card.get("m_last_updated")
+            leak_date = card.get("m_date") or card.get("m_published_date") or card.get("m_last_updated")
             if leak_date:
-                card["m_leak_date"] = str(leak_date)[:10]
+                card["m_date"] = str(leak_date)[:10]
             card["m_update_date"] = current_timestamp
             card["m_contact_link"] = contact_link
             card.setdefault("m_base_url", base_url)
@@ -215,9 +215,9 @@ class crawl_index_generator:
 
             unique_value = card.get("m_sha256_hash") or card.get("m_source_url") or title
             card["m_hash"] = helper_controller.generate_data_hash(str(unique_value))
-            leak_date = card.get("m_leak_date") or card.get("m_first_seen") or card.get("m_last_seen")
+            leak_date = card.get("m_date") or card.get("m_first_seen") or card.get("m_last_seen")
             if leak_date:
-                card["m_leak_date"] = str(leak_date)[:10]
+                card["m_date"] = str(leak_date)[:10]
             card["m_update_date"] = current_timestamp
             card["m_contact_link"] = contact_link
             card.setdefault("m_base_url", base_url)

@@ -198,7 +198,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
     let order: 'asc' | 'desc' = 'asc';
 
     if (this.type === Category.BREACH || this.type === Category.THREAT_INTEL) {
-      key = 'm_leak_date';
+      key = 'm_date';
     }
     else {
       key = 'm_update_date';

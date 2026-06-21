@@ -93,7 +93,7 @@ class insight_generator:
         size = CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE
 
         query_statement = {"query": {"match_all": {}}, "sort": [
-            {"m_leak_date": {"order": "desc"}}], "from": from_, "size": size, "track_total_hits": True}
+            {"m_date": {"order": "desc"}}], "from": from_, "size": size, "track_total_hits": True}
 
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
 
@@ -103,7 +103,7 @@ class insight_generator:
         size = CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE
 
         query_statement = {"query": {"match_all": {}}, "sort": [
-            {"m_message_date": {"order": "desc"}}], "from": from_, "size": size, "track_total_hits": True}
+            {"m_date": {"order": "desc"}}], "from": from_, "size": size, "track_total_hits": True}
 
         return ELASTIC_INDEX.S_CHATS_INDEX, query_statement
 

@@ -169,7 +169,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   }
 
   dateValue(item: any): string {
-    return this.rowHelper.valueOrDash(item?.m_leak_date);
+    return this.rowHelper.valueOrDash(item?.m_date);
   }
 
   usernameValue(item: any): string {

@@ -141,12 +141,16 @@ class auth_manager:
         user = await engine.find_one(db_user_account, db_user_account.verification_token == token)
         if not user:
             raise HTTPException(status_code=404, detail="Invalid Link")
+        if not user.verification_expiry or datetime.now(timezone.utc) > user.verification_expiry.replace(
+                tzinfo=timezone.utc):
+            raise HTTPException(status_code=400, detail="Password reset link expired")
         if CONSTANTS.S_AUTH_PWD_CONTEXT.verify(password, user.password):
             raise HTTPException(status_code=400, detail="New password must be different from the old one.")
 
         user.password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
         user.password_reset_required = False
         user.verification_token = None
+        user.verification_expiry = None
         await engine.save(user)
 
         await AuditLogManager.get_instance().register(
@@ -162,6 +166,7 @@ class auth_manager:
             raise HTTPException(status_code=404, detail="Entered mail is not resgister")
 
         user.verification_token = session_manager.get_instance().generate_verification_token()
+        user.verification_expiry = datetime.now(timezone.utc) + timedelta(minutes=20)
         await engine.save(user)
 
         await AuditLogManager.get_instance().register(

@@ -175,7 +175,7 @@ export class CredentialComponent implements OnInit {
   onToggleSort(sort: SortType) {
     let key;
     let order: 'asc' | 'desc' = 'asc';
-    key = 'm_message_date';
+    key = 'm_date';
     if (sort === SortType.NEWEST_FIRST) {
       order = 'desc';
     }
@@ -366,7 +366,7 @@ export class CredentialComponent implements OnInit {
       title: this.toExportValue(item?.['m_title'], 160),
       url: this.toExportValue(item?.['m_url'], 160),
       rank: this.toExportValue(item?.['rank_index']),
-      date: this.toExportValue(item?.['m_leak_date'] || item?.['m_update_date']),
+      date: this.toExportValue(item?.['m_date'] || item?.['m_update_date']),
       team: this.toExportValue(item?.['m_team']),
       summary: this.toExportValue(item?.['m_important_content'] || item?.['m_content'], 240)
     }));

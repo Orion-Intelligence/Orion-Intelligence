@@ -93,8 +93,8 @@
       <div class="mt-[20px] flex flex-wrap items-start justify-start gap-[15px] pt-[10px] pr-[10px] text-[12px]">
         <div class="flex flex-col gap-[2px]">
           <span class="font-[Roboto] text-[12px] font-[400] text-[var(--color-text4)]">{{ 'Message Date' | translate }}:</span>
-          <span class="font-[Roboto] text-[14px] font-[500] text-[var(--color-text1)]">{{ item.m_message_date ?
-          (item.m_message_date | date: 'MMM d, y') : ('Not available' | translate) }}</span>
+          <span class="font-[Roboto] text-[14px] font-[500] text-[var(--color-text1)]">{{ item.m_date ?
+          (item.m_date | date: 'MMM d, y') : ('Not available' | translate) }}</span>
         </div>
       </div>
     </div>

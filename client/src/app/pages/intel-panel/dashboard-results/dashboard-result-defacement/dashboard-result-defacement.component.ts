@@ -212,7 +212,7 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
       campaigns: groups.length,
       records: records.length,
       affectedSites: this.countUnique(records.map(item => this.getSiteLabel(item))),
-      latestSeen: records.reduce((latest, item) => this.getLatestDate(latest, item.m_leak_date || null), null as string | null)
+      latestSeen: records.reduce((latest, item) => this.getLatestDate(latest, item.m_date || null), null as string | null)
     };
   }
 
@@ -227,7 +227,7 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
       ipSummary: item.m_ip?.length ? item.m_ip.join(', ') : '-',
       webServerSummary: item.m_web_server?.length ? item.m_web_server.join(', ') : '-',
       sourceUrl: this.getFirstSourceUrl(item),
-      leakDate: item.m_leak_date || null
+      leakDate: item.m_date || null
     };
   }
 
