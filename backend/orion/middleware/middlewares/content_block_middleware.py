@@ -3,7 +3,9 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response, RedirectResponse
 
 from configs.auth_cookie import token_from_request
+from orion.api.server.config_manager.config_controller import config_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
+from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys
 from orion.services.session_manager.session_manager import session_manager
 
 
@@ -13,6 +15,11 @@ class content_block_middleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
+
+        if path == "/admin" or path.startswith("/admin/") or path == "/dashboard/admin" or path.startswith("/dashboard/admin/"):
+            admin_root_allowed = await config_controller.getInstance().get_cached(AllowedKeys.ADMIN_ROOT_ALLOWED.value, "0")
+            if str(admin_root_allowed).lower() not in ("1", "true"):
+                return RedirectResponse(url="/", status_code=302)
 
         if path.startswith("/api/"):
             return await call_next(request)

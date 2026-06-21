@@ -179,6 +179,8 @@ class config_controller:
                 key = AllowedKeys.META_INFO
             elif key_str == "ai_endpoint_enabled":
                 key = AllowedKeys.AI_ENDPOINT_ENABLED
+            elif key_str == "admin_root_allowed":
+                key = AllowedKeys.ADMIN_ROOT_ALLOWED
             elif key_str == "s_onion":
                 key = AllowedKeys.S_ONION
             else:

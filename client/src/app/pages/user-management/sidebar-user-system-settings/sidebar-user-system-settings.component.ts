@@ -24,7 +24,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   isEditing = false;
   configurationError = '';
   mailErrorState = false;
-  form = { language: '', version: '', app_name: '0', ai_endpoint_enabled: true, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
+  form = { language: '', version: '', app_name: '0', ai_endpoint_enabled: true, admin_root_allowed: false, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
   languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
   onionPattern = /^(https?:\/\/)?[a-z2-7]{56}\.onion\/?$/i;
   urlPattern = /^https?:\/\/.+/i;
@@ -54,6 +54,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.version = settings.version;
     this.form.app_name = settings.app_name?.trim() || DEFAULT_APP_NAME;
     this.form.ai_endpoint_enabled = settings.ai_endpoint_enabled;
+    this.form.admin_root_allowed = settings.admin_root_allowed;
     this.form.s_onion = settings.s_onion;
     this.form.data_sources_url = typeof metaInfo['S_HOME_HEADER_DATA_SOURCES'] === 'string' ? metaInfo['S_HOME_HEADER_DATA_SOURCES'] : '';
     this.form.adversaries_url = typeof metaInfo['S_HOME_HEADER_ADVERSARIES'] === 'string' ? metaInfo['S_HOME_HEADER_ADVERSARIES'] : '';
@@ -190,6 +191,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       version: this.form.version,
       app_name: this.form.app_name,
       ai_endpoint_enabled: this.form.ai_endpoint_enabled ? '1' : '0',
+      admin_root_allowed: this.form.admin_root_allowed ? '1' : '0',
       s_onion: this.form.s_onion,
       meta_info: JSON.stringify({
         S_HOME_HEADER_DATA_SOURCES: this.form.data_sources_url,
