@@ -161,13 +161,21 @@ class config_controller:
             self._engine = mongo_controller.get_instance().get_engine()
         meta_info_raw = data.settings.get("meta_info")
         if meta_info_raw:
-            meta_info = json.loads(meta_info_raw)
-            await mail_manager.get_instance().send_test_mail(config={
-                "ACCOUNTS_MAIL_PASSWORD": meta_info.get("ACCOUNTS_MAIL_PASSWORD"),
-                "ACCOUNTS_MAIL": meta_info.get("ACCOUNTS_MAIL"),
-                "ACCOUNTS_SMTP_SERVER": meta_info.get("ACCOUNTS_SMTP_SERVER"),
-                "ACCOUNTS_SMTP_PORT": meta_info.get("ACCOUNTS_SMTP_PORT"),
-            })
+            submitted_meta_info = json.loads(meta_info_raw)
+            existing_record = await self._engine.find_one(db_system_model, db_system_model.key == AllowedKeys.META_INFO)
+            existing_meta_info = {}
+            if existing_record and existing_record.value:
+                existing_meta_info = json.loads(existing_record.value)
+            meta_info = {**existing_meta_info, **submitted_meta_info}
+            mail_config_submitted = any(key in submitted_meta_info for key in self.EMAIL_META_KEYS)
+            if mail_config_submitted:
+                await mail_manager.get_instance().send_test_mail(config={
+                    "ACCOUNTS_MAIL_PASSWORD": meta_info.get("ACCOUNTS_MAIL_PASSWORD"),
+                    "ACCOUNTS_MAIL": meta_info.get("ACCOUNTS_MAIL"),
+                    "ACCOUNTS_SMTP_SERVER": meta_info.get("ACCOUNTS_SMTP_SERVER"),
+                    "ACCOUNTS_SMTP_PORT": meta_info.get("ACCOUNTS_SMTP_PORT"),
+                })
+            data.settings["meta_info"] = json.dumps(meta_info)
         for key_str, value in data.settings.items():
             if key_str == "language":
                 key = AllowedKeys.LANGUAGE_ALLOWED
