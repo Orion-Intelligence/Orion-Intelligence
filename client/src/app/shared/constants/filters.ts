@@ -42,7 +42,7 @@ const COMMON_THREAT_OPTIONS = [
   { key: "zero_day", label: "Zero Day" },
   { key: "rootkit", label: "Rootkit" },
   { key: "apt", label: "APT" },
-  { key: "threat_intel", label: "Threat Intel" },
+  { key: "threat_intel", label: "APT Intel" },
   { key: "darkweb", label: "Dark Web" },
   { key: "rce", label: "RCE" },
   { key: "lpe", label: "LPE" },
@@ -77,6 +77,12 @@ const DEFACEMENT_CONTENT_OPTIONS = [
   { key: "scam", label: "scam" },
   { key: "spam_url", label: "spam_url" },
   { key: "typosquatting", label: "typosquatting" }
+];
+const APT_INTEL_CONTENT_OPTIONS = [
+  { key: "all", label: "All" },
+  { key: "apt", label: "APT" },
+  { key: "malware", label: "Malware" },
+  { key: "defacement", label: "Defacement" }
 ];
 const BASE_DATERANGE = {
   options: [],
@@ -117,6 +123,13 @@ const DEFACEMENT_CONTENT_FILTER = {
   type: 'dropdown' as const,
   tooltip: "Type of Content",
   selected: ""
+};
+const APT_INTEL_CONTENT_FILTER = {
+  title: "Content Type",
+  options: APT_INTEL_CONTENT_OPTIONS,
+  type: 'dropdown' as const,
+  tooltip: "Content Filter",
+  selected: "all"
 };
 const EXPLOIT_TYPE_FILTER = {
   title: "Type",
@@ -364,6 +377,13 @@ export const exploit_filters: FilterModel = {
     content: EXPLOIT_TYPE_FILTER,
     ...EXPLOIT_STRICT_FILTERS,
     ...EXPLOIT_TEXT_FILTERS
+  }
+};
+export const apt_intel_filters: FilterModel = {
+  filters: {
+    network: COMMON_NETWORK,
+    daterange: DATERANGE_CREATION,
+    content: APT_INTEL_CONTENT_FILTER
   }
 };
 export const consolidated_filters: FilterModel = {
