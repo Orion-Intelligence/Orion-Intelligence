@@ -6,12 +6,14 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { RecordSidebarComponent } from '../../../../shared/components/record-sidebar/record-sidebar.component';
 import { AptIntelGroup, AptIntelRecord, AptIntelResultItem, AptIntelSummary } from '../../../../shared/model/results/apt-intel/apt-intel.callback.model';
 import { RecordSidebarItem } from '../../../../shared/model/record-sidebar/record-sidebar.model';
+import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 
 @Component({
   selector: 'app-dashboard-result-apt',
   standalone: true,
   imports: [CommonModule, DatePipe, TranslatePipe, RecordSidebarComponent],
   templateUrl: './dashboard-result-apt.component.html',
+  animations: [fadeInDashboardItem],
 })
 export class DashboardResultAptComponent implements OnInit, AfterViewInit {
   currentUrl = '';
@@ -22,7 +24,6 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit {
   isRecordSidebarVisible = false;
   readonly searchResults = input<AptIntelResultItem[]>([]);
   readonly isExpandAble = input<boolean>(false);
-  readonly isLoading = input<boolean>(false);
 
   constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
   }

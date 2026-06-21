@@ -149,9 +149,97 @@
   }
 
   @if (isLoading()) {
-    <div class="mx-[30px] w-full min-w-0 max-w-[910px] max-[1000px]:mx-[15px] max-[800px]:mx-0 max-[800px]:w-full max-[800px]:max-w-full max-[800px]:px-[10px] max-[800px]:box-border" @fadeInDashboardItem>
-      <app-loading-form></app-loading-form>
-    </div>
+    @if (showResultCardShimmer()) {
+      <div class="mx-[32px] w-[calc(100%-64px)] max-w-none pb-[16px] max-[1000px]:mx-[15px] max-[1000px]:w-[calc(100%-30px)]" @fadeInDashboardItem>
+        <div class="mb-3 flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
+          <div class="flex min-w-0 items-center gap-2">
+            <div class="ui-shimmer h-4 w-[86px] rounded bg-[var(--color-placeholder)]"></div>
+            <div class="ui-shimmer h-3 w-[118px] rounded bg-[var(--color-placeholder)]"></div>
+          </div>
+          <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
+          <div class="hidden items-center gap-2 md:flex">
+            <div class="ui-shimmer h-5 w-5 rounded bg-[var(--color-placeholder)]"></div>
+            <div class="ui-shimmer h-4 w-8 rounded bg-[var(--color-placeholder)]"></div>
+            <div class="ui-shimmer h-3 w-14 rounded bg-[var(--color-placeholder)]"></div>
+          </div>
+          <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
+          <div class="hidden items-center gap-2 lg:flex">
+            <div class="ui-shimmer h-5 w-5 rounded bg-[var(--color-placeholder)]"></div>
+            <div class="ui-shimmer h-4 w-8 rounded bg-[var(--color-placeholder)]"></div>
+            <div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-placeholder)]"></div>
+          </div>
+          <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
+          <div class="hidden items-center gap-2 xl:flex">
+            <div class="ui-shimmer h-5 w-5 rounded bg-[var(--color-placeholder)]"></div>
+            <div class="ui-shimmer h-4 w-8 rounded bg-[var(--color-placeholder)]"></div>
+            <div class="ui-shimmer h-3 w-16 rounded bg-[var(--color-placeholder)]"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3 max-[1280px]:grid-cols-2 max-[760px]:grid-cols-1">
+          @for (_ of [1, 2, 3]; track _) {
+            <article class="relative h-[252px] overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-[0_10px_24px_rgba(0,0,0,0.16)] max-[760px]:h-auto max-[760px]:min-h-[252px]">
+              <div class="absolute inset-y-0 left-0 w-1 bg-[var(--color-divider)]"></div>
+              <div class="flex h-full w-full flex-col p-4 pl-5">
+                <div class="flex h-[86px] items-start justify-between gap-4">
+                  <div class="min-w-0 flex-1">
+                    <div class="flex h-9 min-w-0 flex-col justify-start overflow-hidden">
+                      <div class="ui-shimmer h-[11px] w-24 rounded bg-[var(--color-placeholder)]"></div>
+                      <div class="ui-shimmer mt-2 h-[11px] w-20 rounded bg-[var(--color-placeholder)]"></div>
+                    </div>
+                    <div class="ui-shimmer mt-3 h-6 w-[72%] rounded bg-[var(--color-placeholder)]"></div>
+                    <div class="mt-2 flex h-5 min-w-0 items-center gap-x-2">
+                      <div class="ui-shimmer h-3 w-[38%] rounded bg-[var(--color-placeholder)]"></div>
+                      <div class="ui-shimmer h-3 w-2 rounded bg-[var(--color-placeholder)]"></div>
+                      <div class="ui-shimmer h-3 w-[36%] rounded bg-[var(--color-placeholder)]"></div>
+                    </div>
+                  </div>
+                  <div class="ui-shimmer h-8 w-8 shrink-0 rounded-md bg-[var(--color-placeholder)]"></div>
+                </div>
+
+                <div class="mt-3 flex h-[28px] min-w-0 gap-1.5 overflow-hidden">
+                  <div class="ui-shimmer h-6 w-24 rounded-full bg-[var(--color-placeholder)]"></div>
+                  <div class="ui-shimmer h-6 w-20 rounded-full bg-[var(--color-placeholder)]"></div>
+                  <div class="ui-shimmer h-6 w-16 rounded-full bg-[var(--color-placeholder)]"></div>
+                </div>
+
+                <div class="mt-3 h-[72px] overflow-hidden rounded-lg border border-[var(--color-border)] bg-[rgba(255,255,255,0.03)] px-3 py-2">
+                  <div class="flex items-stretch gap-3">
+                    <div class="flex min-w-[124px] items-center justify-between gap-3 rounded-md bg-[var(--color-blue-720)] px-3 py-2">
+                      <div class="min-w-0">
+                        <div class="ui-shimmer h-3 w-16 rounded bg-[var(--color-placeholder)]"></div>
+                        <div class="ui-shimmer mt-2 h-3 w-20 rounded bg-[var(--color-placeholder)]"></div>
+                      </div>
+                      <div class="ui-shimmer h-7 w-8 rounded bg-[var(--color-placeholder)]"></div>
+                    </div>
+                    <div [ngClass]="showDefacementResultShimmer() ? 'grid-cols-3' : 'grid-cols-2'" class="grid flex-1 gap-0">
+                      <div class="min-w-0 border-l border-[var(--color-divider)] px-3 py-1">
+                        <div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-placeholder)]"></div>
+                        <div class="ui-shimmer mt-2 h-5 w-8 rounded bg-[var(--color-placeholder)]"></div>
+                      </div>
+                      <div class="min-w-0 border-l border-[var(--color-divider)] px-3 py-1">
+                        <div class="ui-shimmer h-3 w-16 rounded bg-[var(--color-placeholder)]"></div>
+                        <div class="ui-shimmer mt-2 h-5 w-8 rounded bg-[var(--color-placeholder)]"></div>
+                      </div>
+                      @if (showDefacementResultShimmer()) {
+                        <div class="min-w-0 border-l border-[var(--color-divider)] px-3 py-1">
+                          <div class="ui-shimmer h-3 w-14 rounded bg-[var(--color-placeholder)]"></div>
+                          <div class="ui-shimmer mt-2 h-5 w-8 rounded bg-[var(--color-placeholder)]"></div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="mx-[30px] w-full min-w-0 max-w-[910px] max-[1000px]:mx-[15px] max-[800px]:mx-0 max-[800px]:w-full max-[800px]:max-w-full max-[800px]:px-[10px] max-[800px]:box-border" @fadeInDashboardItem>
+        <app-loading-form></app-loading-form>
+      </div>
+    }
   }
 
   @if (!entityFiltersCount() && !sidebarFilterCount() && showEmptyQuery() && !isLoading() && !result_count) {

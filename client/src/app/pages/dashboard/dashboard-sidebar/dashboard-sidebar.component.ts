@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, output } from '@angular/core';
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
-import { ApiSubCategory, AptIntelSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, TenantSubCategory, ProfileSubCategory } from '../../../shared/constants/pages';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, TenantSubCategory, ProfileSubCategory } from '../../../shared/constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
@@ -35,7 +35,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   mobile_menu_status = false;
   apiCategories = Object.values(ApiSubCategory);
   exploitCategories = Object.values(ExploitSubCategory);
-  aptIntelCategories = Object.values(AptIntelSubCategory);
+  aptIntelCategories: string[] = [];
   newsCategories = Object.values(FeedSubCategory);
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
