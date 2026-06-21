@@ -62,7 +62,7 @@ export class DashboardService {
       baseParams.category = paramModel.category || 'all';
       baseParams.content = baseParams.content || paramModel.content || 'all';
     }
-    if (apiEndpoint === 'search/exploit') {
+    if (apiEndpoint === 'search/exploit' || apiEndpoint === 'search/apt-intel') {
       const resultCount = Number(baseParams.platform_result_count || 0);
       baseParams.platform_result_count = Math.max(Number.isFinite(resultCount) ? resultCount : 0, 100);
     }
