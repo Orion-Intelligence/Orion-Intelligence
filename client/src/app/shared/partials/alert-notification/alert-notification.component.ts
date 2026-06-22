@@ -12,8 +12,8 @@ import { AlertExportService } from '../../services/export/alert-export.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ScanNotificationService } from '../../services/scan-notification.service';
 import { ScanJob } from '../../model/scan-jobs/scan-job.model';
-import { ScanExportService } from '../../services/export/scan-export.service';
 import { ConfirmationPopupComponent } from '../confirmation-popup/confirmation-popup.component';
+import { Router } from '@angular/router';
 
 type NotificationMode = 'alerts' | 'scans';
 type ScanDeleteMode = 'single' | 'all';
@@ -39,19 +39,17 @@ export class AlertNotificationComponent implements OnChanges {
   isLoadMoreTriggered: boolean = false;
   isFetchingDetail: boolean = false;
   alertToShowReport: AlertModel | null = null;
-  scanToExport: ScanJob | null = null;
   isExportChoiceOpen: boolean = false;
   isScanDeleteConfirmationOpen: boolean = false;
   isScanDeleting: boolean = false;
   scanDeleteTarget: ScanJob | null = null;
   scanDeleteMode: ScanDeleteMode | null = null;
   readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.', testId: 'notification-alert-export-option-report' }];
-  readonly scanExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate a PDF report from this scan result.', testId: 'notification-scan-export-option-report' }];
   readonly isNotificationOpen = input.required<boolean | null>();
   readonly notificationMode = input<NotificationMode>('alerts');
   readonly closeNotification = output<undefined>();
 
-  constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService, private alertExportService: AlertExportService, private scanExportService: ScanExportService, public scanNotificationService: ScanNotificationService) {
+  constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService, private alertExportService: AlertExportService, public scanNotificationService: ScanNotificationService, private router: Router) {
   }
 
   private decrementUnseenSummary(by: number = 1): void {
@@ -246,14 +244,9 @@ export class AlertNotificationComponent implements OnChanges {
 
   closeExportChoice(): void {
     this.isExportChoiceOpen = false;
-    this.scanToExport = null;
   }
 
   exportSelectedNotification(type: string): void {
-    if (this.isScanMode()) {
-      this.exportSelectedScan(type);
-      return;
-    }
     this.exportSelectedAlert(type);
   }
 
@@ -266,13 +259,17 @@ export class AlertNotificationComponent implements OnChanges {
     this.closeExportChoice();
   }
 
-  openScanExport(job: ScanJob): void {
+  openScanReport(job: ScanJob): void {
     if (!this.isScanCompleted(job)) {
       return;
     }
-    this.scanToExport = job;
     this.scanNotificationService.markSeen(job);
-    this.openExportChoice();
+    const reportUrl = this.router.serializeUrl(this.router.createUrlTree(['/dashboard/scan-report', job.scan_id]));
+    const absoluteUrl = `${window.location.origin}${reportUrl}`;
+    const openedWindow = window.open(absoluteUrl, '_blank', 'noopener,noreferrer');
+    if (openedWindow) {
+      openedWindow.opener = null;
+    }
   }
 
   markScanSeen(job: ScanJob, event?: Event): void {
@@ -352,15 +349,6 @@ export class AlertNotificationComponent implements OnChanges {
     this.scanDeleteMode = null;
   }
 
-  exportSelectedScan(_type: string): void {
-    if (!this.scanToExport) {
-      this.closeExportChoice();
-      return;
-    }
-    this.scanExportService.exportPdf(this.scanToExport, this.scanToExport.title || 'Scan Report');
-    this.closeExportChoice();
-  }
-
   statusLabel(job: ScanJob): string {
     const status = this.scanNotificationService.getStatus(job);
     if (status === 'done') {
@@ -405,15 +393,15 @@ export class AlertNotificationComponent implements OnChanges {
   }
 
   exportTitle(): string {
-    return this.isScanMode() ? 'Export Scan' : 'Export Alert';
+    return 'Export Alert';
   }
 
   exportSubtitle(): string {
-    return this.isScanMode() ? 'Choose the export format for this scan.' : 'Choose the export format.';
+    return 'Choose the export format.';
   }
 
   exportOptions(): ExportChoiceOption[] {
-    return this.isScanMode() ? this.scanExportOptions : this.alertExportOptions;
+    return this.alertExportOptions;
   }
 
   close() {

@@ -22,7 +22,7 @@ from orion.api.server.crawl_manager.class_model.domain_scan_request_model import
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import IPScanRequest, NetIntelDeepScanRequest, ResolveIPRequest
 from orion.api.server.crawl_manager.class_model.log_model import SiemSearchRequestModel, SiemSearchResponseModel
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import SocialScrapeRequest
-from orion.services.mongo_manager.shared_model.db_scan_job_model import ScanJobCreateRequest
+from orion.services.mongo_manager.shared_model.db_scan_job_model import ScanJobCreateRequest, ScanJobDetailResponse, ScanJobListResponse
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
@@ -959,6 +959,7 @@ async def create_scan_job(request: ScanJobCreateRequest = Body(...), current_use
 
 @api_routes.get(
     "/api/scan-jobs/notifications",
+    response_model=ScanJobListResponse,
     include_in_schema=False,
     dependencies=SCANNING_DEPS,
 )
@@ -982,6 +983,16 @@ async def list_incomplete_scan_jobs(limit: int = Query(1, ge=1, le=100), current
 )
 async def count_scan_jobs(current_user=Depends(get_current_user)):
     return await ScanJobManager.get_instance().count_jobs(current_user)
+
+
+@api_routes.get(
+    "/api/scan-jobs/{scan_id}",
+    response_model=ScanJobDetailResponse,
+    include_in_schema=False,
+    dependencies=SCANNING_DEPS,
+)
+async def get_scan_job(scan_id: str, current_user=Depends(get_current_user)):
+    return await ScanJobManager.get_instance().get_job(scan_id, current_user)
 
 
 @api_routes.post(

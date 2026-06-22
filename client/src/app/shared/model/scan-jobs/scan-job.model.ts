@@ -1,21 +1,35 @@
 export type ScanJobStatus = 'queued' | 'running' | 'done' | 'error' | 'cancelled' | 'expired';
 
-export interface ScanJob {
-  id: string;
+export interface ScanJobNotificationResponse {
+  scan_id: string;
   title?: string;
   target?: string;
-  payload?: Record<string, any>;
-  response?: any;
+  status: ScanJobStatus;
   seen?: boolean;
   created_at?: string | Date;
   updated_at?: string | Date;
   completed_at?: string | Date | null;
 }
 
+export interface ScanJobDetailResponse extends ScanJobNotificationResponse {
+  api_reference?: string;
+  payload: Record<string, any>;
+  response: any;
+}
+
+export interface ScanJob extends ScanJobNotificationResponse {
+  api_reference?: string;
+  payload?: Record<string, any>;
+  response?: any;
+}
+
+export type ScanJobNotification = ScanJobNotificationResponse;
+
 export interface ScanJobCreateResponse {
   scan_id: string;
   title: string;
   target: string;
+  api_reference?: string;
   payload: Record<string, any>;
   status: ScanJobStatus;
   response?: any;
@@ -29,20 +43,17 @@ export interface ScanJobCreateResponse {
 export interface ScanJobDuplicateChoiceResponse {
   requires_confirmation: true;
   message: string;
-  previous_scan: ScanJobCreateResponse;
+  source?: 'previous_completed';
+  previous_scan: ScanJobNotificationResponse;
 }
 
 export type ScanJobCreateApiResponse = ScanJobCreateResponse | ScanJobDuplicateChoiceResponse;
 
-export interface ScanJobNotificationResponse {
-  scan_id: string;
-  title?: string;
-  target?: string;
-  response?: any;
-  seen?: boolean;
-  created_at?: string | Date;
-  updated_at?: string | Date;
-  completed_at?: string | Date | null;
+export type DuplicateScanChoice = 'previous' | 'new' | 'cancel';
+
+export interface DuplicateScanPrompt {
+  message: string;
+  previousScan: ScanJobNotificationResponse;
 }
 
 export interface ScanJobIncompleteResponse {
@@ -50,12 +61,7 @@ export interface ScanJobIncompleteResponse {
   payload?: Record<string, any>;
 }
 
-export type ScanJobApiItem = Partial<ScanJob> & {
-  scan_id?: string;
-  status?: ScanJobStatus;
-};
-
-export interface ScanJobListResponse<T = ScanJobApiItem> {
+export interface ScanJobListResponse<T = ScanJobNotificationResponse> {
   items: T[];
   page: number;
   limit: number;

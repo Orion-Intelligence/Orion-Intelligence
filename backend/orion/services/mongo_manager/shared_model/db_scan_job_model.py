@@ -37,3 +37,28 @@ class ScanJobCreateRequest(BaseModel):
     payload: Dict[str, Any] = Field(default_factory=dict)
     metadata: Dict[str, Any] = Field(default_factory=dict)
     force_new: bool = False
+
+
+class ScanJobNotificationResponse(BaseModel):
+    scan_id: str
+    title: str = ""
+    target: str = ""
+    status: ScanJobStatus
+    seen: bool = False
+    created_at: datetime
+    updated_at: datetime
+    completed_at: Optional[datetime] = None
+
+
+class ScanJobDetailResponse(ScanJobNotificationResponse):
+    api_reference: str = ""
+    payload: Dict[str, Any] = Field(default_factory=dict)
+    response: Dict[str, Any] = Field(default_factory=dict)
+
+
+class ScanJobListResponse(BaseModel):
+    items: list[ScanJobNotificationResponse]
+    page: int
+    limit: int
+    total: int
+    has_more: bool

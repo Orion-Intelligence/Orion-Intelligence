@@ -2,14 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { EMPTY, Observable, Subject, Subscription, of, timer } from 'rxjs';
 import { catchError, filter, finalize, map, switchMap, takeWhile, tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
-import { ScanJob, ScanJobApiItem, ScanJobCountResponse, ScanJobCreateApiResponse, ScanJobCreateResponse, ScanJobDeleteResponse, ScanJobDuplicateChoiceResponse, ScanJobIncompleteResponse, ScanJobListResponse, ScanJobNotificationResponse, ScanJobPollResponse, ScanJobSeenResponse, ScanJobStartRequest, ScanJobStatus } from '../model/scan-jobs/scan-job.model';
-
-type DuplicateScanChoice = 'previous' | 'new' | 'cancel';
-
-interface DuplicateScanPrompt {
-  message: string;
-  previousScan: ScanJob;
-}
+import { DuplicateScanChoice, DuplicateScanPrompt, ScanJob, ScanJobCreateApiResponse, ScanJobDetailResponse, ScanJobDuplicateChoiceResponse, ScanJobIncompleteResponse, ScanJobListResponse, ScanJobNotificationResponse, ScanJobPollResponse, ScanJobStartRequest, ScanJobStatus } from '../model/scan-jobs/scan-job.model';
 
 @Injectable({ providedIn: 'root' })
 export class ScanNotificationService {
@@ -62,10 +55,10 @@ export class ScanNotificationService {
     this.api.get<ScanJobListResponse<ScanJobIncompleteResponse>>('scan-jobs/incomplete?limit=4').subscribe({
       next: response => {
         const job = (response?.items || [])[0];
-        if (job) {
-          const normalizedJob = this.normalizeScanJobView(job);
-          this.cacheJob(normalizedJob);
-          this.ensurePolling(normalizedJob);
+        if (job?.scan_id) {
+          const queuedJob = this.createQueuedJob(job);
+          this.cacheJob(queuedJob);
+          this.ensurePolling(queuedJob);
         }
         this.loadingNextActive = false;
       },
@@ -76,7 +69,7 @@ export class ScanNotificationService {
   }
 
   refreshCounts(): void {
-    this.api.get<ScanJobCountResponse>('scan-jobs/count').subscribe({
+    this.api.get<any>('scan-jobs/count').subscribe({
       next: response => {
         this.totalScanCount.set(Number(response?.total || 0));
       },
@@ -95,18 +88,17 @@ export class ScanNotificationService {
     this.isLoading.set(true);
     this.api.get<ScanJobListResponse<ScanJobNotificationResponse>>(`scan-jobs/notifications?page=${nextPage}&limit=${this.pageSize}`).subscribe({
       next: response => {
-        const items = response?.items || [];
+        const items = (response?.items || []) as ScanJob[];
         this.currentPage = response?.page || nextPage;
         this.hasMore.set(!!response?.has_more);
         if (reset) {
-          const normalizedItems = items.map(job => this.normalizeScanJobView(job));
-          normalizedItems.forEach(job => this.cacheJob(job, false));
-          this.jobs.set(normalizedItems);
+          items.forEach(job => this.cacheJob(job, false));
+          this.jobs.set(items);
         }
         else {
-          items.forEach(job => this.upsertVisibleJob(this.normalizeScanJobView(job)));
+          items.forEach(job => this.upsertVisibleJob(job));
         }
-        items.map(job => this.normalizeScanJobView(job)).filter(job => this.isIncomplete(job)).forEach(job => this.ensurePolling(job));
+        items.filter(job => this.isIncomplete(job)).forEach(job => this.ensurePolling(job));
         this.refreshCounts();
         this.isLoading.set(false);
       },
@@ -140,8 +132,8 @@ export class ScanNotificationService {
   }
 
   createJob(request: ScanJobStartRequest): Observable<ScanJob> {
-    return this.createJobRequest(request).pipe(switchMap(response => this.resolveCreateResponse(response, request)), map(job => this.normalizeScanJobView(job)), tap(job => {
-      const alreadyCached = this.jobCache.has(job.id);
+    return this.createJobRequest(request).pipe(switchMap(response => this.resolveCreateResponse(response, request)), tap(job => {
+      const alreadyCached = this.jobCache.has(job.scan_id);
       this.cacheJob(job);
       if (!alreadyCached) {
         this.upsertVisibleJob(job);
@@ -160,13 +152,13 @@ export class ScanNotificationService {
     });
   }
 
-  private resolveCreateResponse(response: ScanJobCreateApiResponse, request: ScanJobStartRequest): Observable<ScanJobCreateResponse> {
+  private resolveCreateResponse(response: ScanJobCreateApiResponse, request: ScanJobStartRequest): Observable<ScanJob> {
     if (!this.isDuplicateChoiceResponse(response)) {
       return of(response);
     }
     return this.askDuplicateScanChoice(response).pipe(switchMap(choice => {
       if (choice === 'previous') {
-        return of(response.previous_scan);
+        return this.getScanDetail(response.previous_scan.scan_id);
       }
       if (choice === 'new') {
         return this.createJobRequest({ ...request, forceNew: true }).pipe(switchMap(nextResponse => this.resolveCreateResponse(nextResponse, { ...request, forceNew: true })));
@@ -184,7 +176,7 @@ export class ScanNotificationService {
     this.duplicateScanChoice$ = new Subject<DuplicateScanChoice>();
     this.duplicateScanPrompt.set({
       message: response.message,
-      previousScan: this.normalizeScanJobView(response.previous_scan),
+      previousScan: response.previous_scan,
     });
     return this.duplicateScanChoice$.asObservable();
   }
@@ -198,12 +190,12 @@ export class ScanNotificationService {
 
   runScanAsResponse<T>(request: ScanJobStartRequest): Observable<T> {
     return this.createJob(request).pipe(switchMap(job =>
-      this.watchJob(job.id).pipe(map(updated => this.toScanResponse<T>(updated)),
+      this.watchJob(job.scan_id).pipe(map(updated => this.toScanResponse<T>(updated)),
         takeWhile(response => this.isPendingResponse(response), true),)));
   }
 
   markSeen(job: ScanJob): void {
-    this.api.post<ScanJobSeenResponse>(`scan-jobs/${job.id}/seen`, {}).subscribe({
+    this.api.post<any>(`scan-jobs/${job.scan_id}/seen`, {}).subscribe({
       next: () => {
         this.upsertVisibleJob({ ...job, seen: true });
         this.refreshCounts();
@@ -212,19 +204,23 @@ export class ScanNotificationService {
     });
   }
 
-  deleteScan(job: ScanJob): Observable<ScanJobDeleteResponse> {
-    return this.api.delete<ScanJobDeleteResponse>(`scan-jobs/delete/${job.id}`).pipe(tap(() => {
-      this.removeJob(job.id);
+  getScanDetail(scanId: string): Observable<ScanJobDetailResponse> {
+    return this.api.get<ScanJobDetailResponse>(`scan-jobs/${scanId}`).pipe(tap(job => this.cacheJob(job, false)));
+  }
+
+  deleteScan(job: ScanJob): Observable<any> {
+    return this.api.delete<any>(`scan-jobs/delete/${job.scan_id}`).pipe(tap(() => {
+      this.removeJob(job.scan_id);
       this.refreshCounts();
       this.resumeNextIncompleteJob();
     }));
   }
 
-  clearCompletedScans(): Observable<ScanJobDeleteResponse> {
-    return this.api.delete<ScanJobDeleteResponse>('scan-jobs/clear-all').pipe(tap(() => {
+  clearCompletedScans(): Observable<any> {
+    return this.api.delete<any>('scan-jobs/clear-all').pipe(tap(() => {
       const runningJobs = this.jobs().filter(job => this.isIncomplete(job));
       this.jobCache.clear();
-      runningJobs.forEach(job => this.jobCache.set(job.id, job));
+      runningJobs.forEach(job => this.jobCache.set(job.scan_id, job));
       this.jobs.set(runningJobs);
       this.refreshCounts();
       this.resumeNextIncompleteJob();
@@ -233,23 +229,23 @@ export class ScanNotificationService {
 
   private watchJob(scanId: string): Observable<ScanJob> {
     return new Observable<ScanJob>(observer => {
-      const current = this.jobCache.get(scanId) || this.jobs().find(job => job.id === scanId);
+      const current = this.jobCache.get(scanId) || this.jobs().find(job => job.scan_id === scanId);
       if (current) {
         observer.next(current);
       }
       const sub = this.jobUpdates$
-        .pipe(filter(job => job.id === scanId))
+        .pipe(filter(job => job.scan_id === scanId))
         .subscribe(job => observer.next(job));
       return () => sub.unsubscribe();
     });
   }
 
   private ensurePolling(job: ScanJob, pollDelayMs = this.defaultPollDelayMs): void {
-    if (!job?.id || this.pollers.has(job.id) || this.activePollerId === job.id || !this.isIncomplete(job)) {
+    if (!job?.scan_id || this.pollers.has(job.scan_id) || this.activePollerId === job.scan_id || !this.isIncomplete(job)) {
       return;
     }
-    this.pollDelayByJob.set(job.id, pollDelayMs);
-    this.queuedPollIds.add(job.id);
+    this.pollDelayByJob.set(job.scan_id, pollDelayMs);
+    this.queuedPollIds.add(job.scan_id);
     this.runNextQueuedJob();
   }
 
@@ -262,22 +258,22 @@ export class ScanNotificationService {
       this.resumeNextIncompleteJob();
       return;
     }
-    const job = this.jobCache.get(nextId) || this.jobs().find(item => item.id === nextId);
+    const job = this.jobCache.get(nextId) || this.jobs().find(item => item.scan_id === nextId);
     this.queuedPollIds.delete(nextId);
     if (!job || !this.isIncomplete(job)) {
       this.runNextQueuedJob();
       return;
     }
-    this.startPolling(job, this.pollDelayByJob.get(job.id) || this.defaultPollDelayMs);
+    this.startPolling(job, this.pollDelayByJob.get(job.scan_id) || this.defaultPollDelayMs);
   }
 
   private startPolling(job: ScanJob, pollDelayMs: number): void {
-    if (this.activePollerId || this.pollers.has(job.id)) {
+    if (this.activePollerId || this.pollers.has(job.scan_id)) {
       this.ensurePolling(job, pollDelayMs);
       return;
     }
-    this.activePollerId = job.id;
-    const sub = timer(0, pollDelayMs).pipe(switchMap(() => this.api.post<ScanJobPollResponse>(`scan-jobs/${job.id}/poll`, {}).pipe(map(response => this.mergePollResponse(job, response)),
+    this.activePollerId = job.scan_id;
+    const sub = timer(0, pollDelayMs).pipe(switchMap(() => this.api.post<ScanJobPollResponse>(`scan-jobs/${job.scan_id}/poll`, {}).pipe(map(response => this.mergePollResponse(job, response)),
       catchError(error => of(this.mergePollResponse(job, {
         response: {
           status: 'error',
@@ -290,49 +286,34 @@ export class ScanNotificationService {
     tap(updated => this.cacheJob(updated)),
     takeWhile(updated => this.isIncomplete(updated), true),
     finalize(() => {
-      this.pollers.delete(job.id);
-      this.pollDelayByJob.delete(job.id);
-      if (this.activePollerId === job.id) {
+      this.pollers.delete(job.scan_id);
+      this.pollDelayByJob.delete(job.scan_id);
+      if (this.activePollerId === job.scan_id) {
         this.activePollerId = null;
       }
       this.refreshCounts();
       this.runNextQueuedJob();
     }),).subscribe();
-    this.pollers.set(job.id, sub);
+    this.pollers.set(job.scan_id, sub);
   }
 
   private mergePollResponse(job: ScanJob, poll: ScanJobPollResponse): ScanJob {
-    const current = this.jobCache.get(job.id) || this.jobs().find(item => item.id === job.id) || job;
+    const current = this.jobCache.get(job.scan_id) || this.jobs().find(item => item.scan_id === job.scan_id) || job;
     const response = poll?.response ?? current.response ?? {};
 
     return {
       ...current,
       response,
+      status: this.statusFromResponse(response),
       seen: poll?.seen ?? current.seen,
       updated_at: poll?.updated_at ?? current.updated_at,
       completed_at: poll?.completed_at ?? current.completed_at,
     };
   }
 
-  private normalizeScanJobView(job: ScanJobApiItem): ScanJob {
-    const id = job.scan_id || '';
-    const response = job.response ?? (job.status ? { status: job.status } : {});
-
-    return {
-      id,
-      title: job.title,
-      target: job.target,
-      payload: job.payload ?? {},
-      response,
-      seen: job.seen ?? false,
-      created_at: job.created_at,
-      updated_at: job.updated_at,
-      completed_at: job.completed_at,
-    };
-  }
-
   getStatus(job: ScanJob): ScanJobStatus {
-    return this.statusFromResponse(job.response ?? {});
+    const response = job.response ?? {};
+    return response && Object.keys(response).length > 0 ? this.statusFromResponse(response) : (job.status || 'queued');
   }
 
   getProgress(job: ScanJob): number {
@@ -397,7 +378,7 @@ export class ScanNotificationService {
   }
 
   private cacheJob(job: ScanJob, emit = true): void {
-    this.jobCache.set(job.id, job);
+    this.jobCache.set(job.scan_id, job);
     this.updateVisibleJobIfPresent(job);
     if (emit) {
       this.jobUpdates$.next(job);
@@ -405,11 +386,11 @@ export class ScanNotificationService {
   }
 
   private upsertVisibleJob(job: ScanJob): void {
-    this.jobCache.set(job.id, job);
+    this.jobCache.set(job.scan_id, job);
     const current = this.jobs();
-    const index = current.findIndex(item => item.id === job.id);
+    const index = current.findIndex(item => item.scan_id === job.scan_id);
     const next = index >= 0
-      ? current.map(item => item.id === job.id ? job : item)
+      ? current.map(item => item.scan_id === job.scan_id ? job : item)
       : [job, ...current];
     next.sort((a, b) => new Date(b.created_at || b.updated_at || 0).getTime() - new Date(a.created_at || a.updated_at || 0).getTime());
     this.jobs.set(next);
@@ -418,11 +399,11 @@ export class ScanNotificationService {
 
   private updateVisibleJobIfPresent(job: ScanJob): void {
     const current = this.jobs();
-    const index = current.findIndex(item => item.id === job.id);
+    const index = current.findIndex(item => item.scan_id === job.scan_id);
     if (index < 0) {
       return;
     }
-    this.jobs.set(current.map(item => item.id === job.id ? job : item));
+    this.jobs.set(current.map(item => item.scan_id === job.scan_id ? job : item));
   }
 
   private removeJob(scanId: string): void {
@@ -434,7 +415,7 @@ export class ScanNotificationService {
       this.activePollerId = null;
     }
     this.jobCache.delete(scanId);
-    this.jobs.set(this.jobs().filter(job => job.id !== scanId));
+    this.jobs.set(this.jobs().filter(job => job.scan_id !== scanId));
   }
 
   private isIncomplete(job: ScanJob): boolean {
@@ -467,5 +448,17 @@ export class ScanNotificationService {
       return false;
     }
     return status === 'pending' || status === 'busy' || status === 'queued' || status === 'running';
+  }
+
+  private createQueuedJob(job: ScanJobIncompleteResponse): ScanJob {
+    return {
+      scan_id: job.scan_id,
+      title: 'Scan',
+      target: '',
+      status: 'queued',
+      payload: job.payload ?? {},
+      response: {},
+      seen: false,
+    };
   }
 }

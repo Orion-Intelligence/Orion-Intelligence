@@ -12,7 +12,7 @@ from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogMan
 from orion.api.interactive.scan_job_manager.scan_routes_enum import SCAN_ROUTES
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_scan_job_model import ScanJobStatus, db_scan_job_model
+from orion.services.mongo_manager.shared_model.db_scan_job_model import ScanJobDetailResponse, ScanJobListResponse, ScanJobNotificationResponse, ScanJobStatus, db_scan_job_model
 
 
 class ScanJobManager:
@@ -73,7 +73,7 @@ class ScanJobManager:
         return ScanJobStatus.DONE
 
     @staticmethod
-    def _serialize_poll_response(job: db_scan_job_model) -> Dict[str, Any]:
+    def _build_poll_response(job: db_scan_job_model) -> Dict[str, Any]:
         return {
             "response": job.response,
             "seen": job.seen,
@@ -81,30 +81,45 @@ class ScanJobManager:
             "completed_at": job.completed_at,
         }
 
-    def _serialize_scan_job(self, job: db_scan_job_model, status_value: Optional[str] = None, target: Optional[str] = None) -> Dict[str, Any]:
-        config = SCAN_ROUTES.get(self._normalize_api_reference(job.api_reference), {})
+    def _scan_status_value(self, job: db_scan_job_model, status_value: Optional[str] = None) -> ScanJobStatus:
+        if status_value:
+            return ScanJobStatus(status_value)
         response = job.response or {}
-        if status_value is None:
-            status_value = (self._job_status_from_response(response) if response else ScanJobStatus.QUEUED).value
-        return {
-            "scan_id": str(job.id),
-            "title": job.title,
-            "target": target if target is not None else self._get_target(job.payload, config.get("target_key", "")),
-            "payload": job.payload,
-            "response": job.response,
-            "seen": job.seen,
-            "status": status_value,
-            "created_at": job.created_at,
-            "updated_at": job.updated_at,
-            "completed_at": job.completed_at,
-        }
+        return self._job_status_from_response(response) if response else ScanJobStatus.QUEUED
+
+    def _scan_target(self, job: db_scan_job_model, target: Optional[str] = None) -> str:
+        if target is not None:
+            return target
+        config = SCAN_ROUTES.get(self._normalize_api_reference(job.api_reference), {})
+        return self._get_target(job.payload, config.get("target_key", ""))
+
+    def _build_scan_notification(self, job: db_scan_job_model, status_value: Optional[str] = None, target: Optional[str] = None) -> ScanJobNotificationResponse:
+        return ScanJobNotificationResponse(
+            scan_id=str(job.id),
+            title=job.title,
+            target=self._scan_target(job, target),
+            status=self._scan_status_value(job, status_value),
+            seen=job.seen,
+            created_at=job.created_at,
+            updated_at=job.updated_at,
+            completed_at=job.completed_at,
+        )
+
+    def _build_scan_detail(self, job: db_scan_job_model, status_value: Optional[str] = None, target: Optional[str] = None) -> ScanJobDetailResponse:
+        notification = self._build_scan_notification(job, status_value, target)
+        return ScanJobDetailResponse(
+            **notification.model_dump(),
+            api_reference=job.api_reference,
+            payload=job.payload,
+            response=job.response,
+        )
 
     async def create_job(self, current_user, api_reference: str, payload: Dict[str, Any], metadata: Optional[Dict[str, Any]] = None, force_new: bool = False) -> Dict[str, Any]:
         config = self._route_config(api_reference)
         metadata = metadata or {}
         now = datetime.utcnow()
         target = str(metadata.get("target") or self._get_target(payload, config.get("target_key", "")))
-        normalized_api_reference = f"/api/{self._normalize_api_reference(api_reference)}" #self._complete_api_reference(api_reference)
+        normalized_api_reference = f"/api/{self._normalize_api_reference(api_reference)}"
 
         existing_records = await self._engine.find(db_scan_job_model, (db_scan_job_model.user_uuid == str(current_user.id)) & (db_scan_job_model.api_reference == normalized_api_reference), sort=desc(db_scan_job_model.created_at))
         latest_done_scan = None
@@ -114,18 +129,20 @@ class ScanJobManager:
             response = record.response or {}
             scan_status = self._job_status_from_response(response) if response else ScanJobStatus.QUEUED
             if not self.is_terminal_status(scan_status.value):
-                return {**self._serialize_scan_job(record, scan_status.value), "source": "existing_running"}
+                return {**self._build_scan_detail(record, scan_status.value).model_dump(), "source": "existing_running"}
             if scan_status == ScanJobStatus.DONE and latest_done_scan is None:
                 latest_done_scan = record
 
         if latest_done_scan and not force_new:
-            completed_at = latest_done_scan.completed_at or latest_done_scan.updated_at or latest_done_scan.created_at
-            previous_scan = {**self._serialize_scan_job(latest_done_scan, ScanJobStatus.DONE.value), "source": "previous_completed"}
-            if completed_at >= now - timedelta(days=3):
-                return previous_scan
+            completed_at = (latest_done_scan.completed_at or latest_done_scan.updated_at or latest_done_scan.created_at)
+            if completed_at and completed_at >= now - timedelta(days=3):
+                return {**self._build_scan_detail(latest_done_scan, ScanJobStatus.DONE.value).model_dump(), "source": "previous_completed"}
+            
+            previous_scan = self._build_scan_notification(latest_done_scan, ScanJobStatus.DONE.value).model_dump()
             return {
                 "requires_confirmation": True,
                 "message": "You already scanned this before. Do you want to use the previous result or run a new scan?",
+                "source": "previous_completed",
                 "previous_scan": previous_scan,
             }
 
@@ -142,35 +159,17 @@ class ScanJobManager:
             await AuditLogManager.get_instance().search_audit(current_user, api_reference.replace("/", "_"), target)
         except Exception:
             pass
-        return {**self._serialize_scan_job(job, ScanJobStatus.QUEUED.value, target), "source": "new"}
+        return {**self._build_scan_detail(job, ScanJobStatus.QUEUED.value, target).model_dump(), "source": "new"}
 
-    async def list_scan_notifications(self, current_user, page: int = 1, limit: int = 8) -> Dict[str, Any]:
+    async def list_scan_notifications(self, current_user, page: int = 1, limit: int = 8) -> ScanJobListResponse:
         safe_limit = max(1, min(int(limit or 8), 100))
         safe_page = max(1, int(page or 1))
         skip = (safe_page - 1) * safe_limit
 
         records = await self._engine.find(db_scan_job_model, db_scan_job_model.user_uuid == str(current_user.id), sort=desc(db_scan_job_model.created_at), skip=skip, limit=safe_limit)
         total = await self._engine.count(db_scan_job_model, db_scan_job_model.user_uuid == str(current_user.id))
-        items = []
-        for record in records:
-            config = SCAN_ROUTES.get(self._normalize_api_reference(record.api_reference), {})
-            items.append({
-                "scan_id": str(record.id),
-                "title": record.title,
-                "target": self._get_target(record.payload, config.get("target_key", "")),
-                "response": record.response,
-                "seen": record.seen,
-                "created_at": record.created_at,
-                "updated_at": record.updated_at,
-                "completed_at": record.completed_at,
-            })
-        return {
-            "items": items,
-            "page": safe_page,
-            "limit": safe_limit,
-            "total": total,
-            "has_more": skip + len(items) < total
-        }
+        items = [self._build_scan_notification(record) for record in records]
+        return ScanJobListResponse(items=items, page=safe_page, limit=safe_limit, total=total, has_more=skip + len(items) < total)
 
     async def list_incomplete_scans(self, current_user, limit: int = 1) -> Dict[str, Any]:
         safe_limit = max(1, min(int(limit or 1), 100))
@@ -192,6 +191,12 @@ class ScanJobManager:
 
         return { "total": len(records) }
 
+    async def get_job(self, scan_id: str, current_user) -> ScanJobDetailResponse:
+        job = await self._engine.find_one(db_scan_job_model, (db_scan_job_model.id == ObjectId(scan_id)) & (db_scan_job_model.user_uuid == str(current_user.id)))
+        if not job:
+            raise HTTPException(status_code=404, detail="Scan job not found")
+        return self._build_scan_detail(job)
+
     async def poll_job(self, scan_id: str, current_user) -> Dict[str, Any]:
         job = await self._engine.find_one(db_scan_job_model, (db_scan_job_model.id == ObjectId(scan_id)) & (db_scan_job_model.user_uuid == str(current_user.id)))
         if not job:
@@ -200,7 +205,7 @@ class ScanJobManager:
         response = job.response or {}
         scan_status = self._job_status_from_response(response) if response else ScanJobStatus.QUEUED
         if self.is_terminal_status(scan_status.value):
-            return self._serialize_poll_response(job)
+            return self._build_poll_response(job)
 
         config = self._route_config(job.api_reference)
         base_url = env_handler.get_instance().env("NETWORK_API_BASE")
@@ -236,7 +241,7 @@ class ScanJobManager:
             job.completed_at = now
 
         await self._engine.save(job)
-        return self._serialize_poll_response(job)
+        return self._build_poll_response(job)
 
     async def mark_seen(self, scan_id: str, current_user) -> Dict[str, Any]:
         job = await self._engine.find_one(db_scan_job_model, (db_scan_job_model.id == ObjectId(scan_id)) & (db_scan_job_model.user_uuid == str(current_user.id)))

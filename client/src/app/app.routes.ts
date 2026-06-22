@@ -56,6 +56,7 @@ const loadCaseDetailsComponent = () => import('./pages/user-management/sidebar-u
 const loadCaseShareComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-share/case-share.component').then(m => m.CaseShareComponent);
 const loadSatelliteIntelComponent = () => import('./pages/geo-fencing/satellite-intel/satellite-intel').then(m => m.SatelliteIntel);
 const loadCaseTrackingBoardComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-tracking-board/case-tracking-board').then(m => m.CaseTrackingBoard);
+const loadScanReportComponent = () => import('./pages/scan-report/scan-report.component').then(m => m.ScanReportComponent);
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
   data: { type: 'consolidated', animation: 'HashPage' }
@@ -199,6 +200,11 @@ export const routes: Routes = [
         path: 'scan',
         loadComponent: loadSecurityScanComponent,
         data: { animation: 'HomePage' }
+      },
+      {
+        path: 'scan-report/:scanId',
+        loadComponent: loadScanReportComponent,
+        data: { animation: 'ScanReportPage' }
       },
       {
         path: 'home',
