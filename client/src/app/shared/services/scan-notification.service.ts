@@ -25,13 +25,13 @@ export class ScanNotificationService {
   private activePollerId: string | null = null;
   private loadingNextActive = false;
   private panelOpen = false;
+  private duplicateScanChoice$?: Subject<DuplicateScanChoice>;
 
   readonly jobs = signal<ScanJob[]>([]);
   readonly isLoading = signal(false);
   readonly hasMore = signal(false);
   readonly totalScanCount = signal(0);
   readonly duplicateScanPrompt = signal<DuplicateScanPrompt | null>(null);
-  private duplicateScanChoice$?: Subject<DuplicateScanChoice>;
 
   constructor(private api: ApiService) {}
 
@@ -315,7 +315,7 @@ export class ScanNotificationService {
   }
 
   private normalizeJobView(job: ScanJobApiItem): ScanJob {
-    const id = job.id || job.scan_id || '';
+    const id = job.scan_id || '';
     const response = job.response ?? (job.status ? { status: job.status } : {});
 
     return {

@@ -30,7 +30,7 @@ import { GenericChoicePopupAction, GenericChoicePopupComponent } from '../../sha
     DemoTourComponent,
     TranslatePipe,
     GenericChoicePopupComponent
-],
+  ],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]
 })
@@ -111,14 +111,14 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   }
 
   handleDuplicateScanChoice(action: GenericChoicePopupAction): void {
-      if (action === 'primary') {
-        this.scanNotificationService.resolveDuplicateScanChoice('previous');
-        return;
-      }
-      if (action === 'secondary') {
-        this.scanNotificationService.resolveDuplicateScanChoice('new');
-        return;
-      }
-      this.scanNotificationService.resolveDuplicateScanChoice('cancel');
+    if (action === 'primary') {
+      this.scanNotificationService.resolveDuplicateScanChoice('previous');
+      return;
     }
+    if (action === 'secondary') {
+      this.scanNotificationService.resolveDuplicateScanChoice('new');
+      return;
+    }
+    this.scanNotificationService.resolveDuplicateScanChoice('cancel');
+  }
 }
