@@ -7,6 +7,8 @@ export class FetchingStateService {
   platformImages = signal<Record<string, boolean>>({});
   followers = signal<Record<string, boolean>>({});
   following = signal<Record<string, boolean>>({});
+  onlinePresence = signal<Record<string, boolean>>({});
+  stealerLogs = signal<Record<string, boolean>>({});
   userImages = computed(() => {
     const platformState = this.platformImages();
     const userState: Record<string, boolean> = {};
@@ -30,6 +32,8 @@ export class FetchingStateService {
       this.platformImages(),
       this.followers(),
       this.following(),
+      this.onlinePresence(),
+      this.stealerLogs(),
     ];
     return states.some(state => Object.keys(state).some(key => key.startsWith(userNodeIdPrefix) && state[key]));
   }

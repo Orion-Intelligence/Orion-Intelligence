@@ -22,6 +22,32 @@ import { formatKeyLabel as formatKeyLabelUtil, getDisplayTitle as getDisplayTitl
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
+const METADATA_EXCLUDED_KEYS = new Set([
+  '_id',
+  'id',
+  'rank_index',
+  'm_embedding',
+  'm_title',
+  'm_content',
+  'm_important_content',
+  'm_url',
+  'm_source_url',
+  'm_base_url',
+  'm_hash',
+  'm_creation_date',
+  'm_update_date',
+  'm_updation_date',
+  'm_scrap_file',
+  'm_scrape_file',
+  'creation_date',
+  'update_date',
+  'updation_date',
+  'created_at',
+  'updated_at',
+  'scrap_file',
+  'scrape_file'
+]);
+
 @Component({
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
@@ -124,11 +150,42 @@ export class ReportComponent implements OnInit, AfterViewInit {
       }
       Object.keys(this.resultItem).forEach((key) => {
         const value = (this.resultItem)[key];
-        if (Array.isArray(value) && value.length > 0 && key !== 'm_section') {
+        if (key !== 'm_section' && this.shouldShowMetadataKey(key, value)) {
           this.arrayKeys.push(key);
         }
       });
     }
+  }
+
+  private shouldShowMetadataKey(key: string, value: unknown): boolean {
+    if (METADATA_EXCLUDED_KEYS.has(key)) {
+      return false;
+    }
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    if (value == null || typeof value === 'object') {
+      return false;
+    }
+    return String(value).trim().length > 0;
+  }
+
+  private getMetadataListItems(key: string): string[] {
+    const value = this.resultItem?.[key];
+    if (Array.isArray(value)) {
+      return value.map(item => String(item));
+    }
+    if (value == null) {
+      return [];
+    }
+    return [String(value)];
+  }
+
+  getMetadataCount(key: string): number {
+    if (key === 'm_content') {
+      return this.content ? 1 : 0;
+    }
+    return this.getMetadataListItems(key).length;
   }
 
   private syncActiveMetadataTab(): void {
@@ -145,27 +202,15 @@ export class ReportComponent implements OnInit, AfterViewInit {
       this.listItems = [];
       return;
     }
-    if (this.resultItem && Array.isArray(this.resultItem[this.activeTab])) {
-      this.listItems = [...this.resultItem[this.activeTab]];
-    }
-    else {
-      this.listItems = [];
-    }
+    this.listItems = this.getMetadataListItems(this.activeTab);
   }
 
   setActiveTab(tab: string) {
     if (this.activeTab === tab) {
-      this.activeTab = '';
-      this.listItems = [];
       return;
     }
     this.activeTab = tab;
-    if (this.resultItem && Array.isArray((this.resultItem)[tab])) {
-      this.listItems = (this.resultItem)[tab];
-    }
-    else {
-      this.listItems = [];
-    }
+    this.listItems = this.getMetadataListItems(tab);
     this.cdr.detectChanges();
   }
 

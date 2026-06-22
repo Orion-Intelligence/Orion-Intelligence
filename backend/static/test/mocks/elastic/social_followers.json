@@ -2,14 +2,14 @@
   "job_id": "mock-social-followers",
   "result": {
     "followers": [
-      "follower1",
-      "follower2",
-      "follower3",
-      "follower4",
-      "follower5"
+      "loislane",
+      "jimmyolsen",
+      "dailyplanet",
+      "metropoliswatch",
+      "smallvillebeat"
     ],
     "platform": "twitter",
-    "username": "msmannan00",
+    "username": "superman0011",
     "status": "active"
   }
 }

@@ -1,42 +1,60 @@
 import { NgZone } from '@angular/core';
-import { AnimatedArcDescriptor, ThreatLensCategoryMapData, ThreatLensCategoryModelKey } from '../../models/geo-fencing.models';
+import { AnimatedArcDescriptor, ArcDrawState, ThreatLensCategoryMapData, ThreatLensCategoryModelKey } from '../../models/geo-fencing.models';
 import { ThreatLensMapUtils } from '../map-utils/threat-lens-map.utils';
-import { ArcCategoryBatch, ThreatLensArcBatchStatus, ThreatLensArcRenderResult } from '../models/threat-lens-map.types';
+import { ArcCategoryBatch, LngLat, ThreatLensArcBatchStatus, ThreatLensArcRenderResult } from '../models/threat-lens-map.types';
 import { ThreatLensCountryLayerRenderer } from './threat-lens-country-layer.renderer';
 
 export class ThreatLensArcRenderer {
   private animatedArcs: AnimatedArcDescriptor[] = [];
   private arcBatches: ArcCategoryBatch[] = [];
+  private arcDrawStates: ArcDrawState[] = [];
   private animationFrame: number | null = null;
   private lastAnimationTick = 0;
-  private batchAnimationStartTime = 0;
+  private visibleBatchDrawStartTime = 0;
+  private animationPauseStartTime = 0;
   private visibleBatchIndex = -1;
+  private selectedBatchIndex = 0;
   private animationPaused = false;
   private activeCategoryKey: ThreatLensCategoryModelKey | null = null;
   private movingDotGraphics: any[] = [];
+  private receiverPulseGraphics: any[] = [];
+  private endpointHitTargetGraphics: any[] = [];
   private startMarkerGraphics: any[] = [];
   private endMarkerGraphics: any[] = [];
+  private hoveredEndpointGraphic: any | null = null;
+  private loggedCoordinateValidationKeys = new Set<string>();
+  private loggedSkippedArcKeys = new Set<string>();
   private readonly maxArcCount = 1000;
   private readonly minArcWeight = 1;
   private arcBatchSize = 10;
-  private readonly arcBatchDuration = 10000;
+  private readonly arcDrawDuration = 1900;
+  private readonly arcDrawStaggerMs = 90;
+  private readonly maxArcDrawStaggerMs = 900;
   private readonly movingDotBaseSize = 5;
+  private readonly endpointBaseSize = 18;
+  private readonly endpointHitTargetSize = 30;
+  private readonly endpointHoverColor = [250, 0, 0];
+  private readonly arcElevationMeters = 98000;
 
-  constructor( private ngZone: NgZone, private countryRenderer: ThreatLensCountryLayerRenderer, private arcGraphicsLayer: any, private arcSurfaceGraphicsLayer: any, private animatedArcGraphicsLayer: any, private geometryEngine: any, private webMercatorUtils: any, private toCountryKey: (value: string) => string, private onVisibleArcCountChange: (count: number) => void, private onBatchStatusChange: (status: ThreatLensArcBatchStatus | null) => void, ) {}
+  constructor( private ngZone: NgZone, private countryRenderer: ThreatLensCountryLayerRenderer, private arcGraphicsLayer: any, private animatedArcGraphicsLayer: any, private geometryEngine: any, private webMercatorUtils: any, private toCountryKey: (value: string) => string, private onVisibleArcCountChange: (count: number) => void, private onBatchStatusChange: (status: ThreatLensArcBatchStatus | null) => void, ) {}
 
   render(categoryData: ThreatLensCategoryMapData[], activeCountryFilterKey: string): ThreatLensArcRenderResult {
-    if (!this.arcGraphicsLayer || !this.arcSurfaceGraphicsLayer || !this.animatedArcGraphicsLayer) {
+    if (!this.arcGraphicsLayer || !this.animatedArcGraphicsLayer) {
       return { totalArcCount: 0, arcCountByCategory: new Map() };
     }
 
     this.stop();
     this.arcGraphicsLayer.removeAll();
-    this.arcSurfaceGraphicsLayer.removeAll();
     this.animatedArcGraphicsLayer.removeAll();
     this.animatedArcs = [];
     this.arcBatches = [];
+    this.arcDrawStates = [];
     this.visibleBatchIndex = -1;
-    this.batchAnimationStartTime = 0;
+    this.selectedBatchIndex = 0;
+    this.visibleBatchDrawStartTime = 0;
+    this.animationPauseStartTime = 0;
+    this.loggedCoordinateValidationKeys.clear();
+    this.loggedSkippedArcKeys.clear();
 
     const arcCountByCategory = new Map();
     let totalArcCount = 0;
@@ -59,14 +77,22 @@ export class ThreatLensArcRenderer {
         const start = ThreatLensMapUtils.getFeatureAnchor(featureA, this.geometryEngine, this.webMercatorUtils);
         const end = ThreatLensMapUtils.getFeatureAnchor(featureB, this.geometryEngine, this.webMercatorUtils);
 
-        if (!start || !end) {
+        if (!ThreatLensMapUtils.isValidLngLat(start)) {
+          this.logSkippedArc(category, pair, pair.countryAKey, featureA, start, 'missing or invalid start coordinates');
           continue;
         }
 
-        const arcPoints = ThreatLensMapUtils.buildArcPathPoints(start, end, pair.weight);
-        const arcPaths = [arcPoints];
+        if (!ThreatLensMapUtils.isValidLngLat(end)) {
+          this.logSkippedArc(category, pair, pair.countryBKey, featureB, end, 'missing or invalid end coordinates');
+          continue;
+        }
+
+        this.logCountryCoordinateValidation(pair.countryAKey, featureA, start);
+        this.logCountryCoordinateValidation(pair.countryBKey, featureB, end);
+
+        const arcPoints = ThreatLensMapUtils.buildSurfacePathPoints(start, end);
         const surfacePaths = ThreatLensMapUtils.buildSurfacePath(start, end);
-        if (!arcPaths.length || !surfacePaths.length || arcPoints.length < 2) {
+        if (!surfacePaths.length || arcPoints.length < 2) {
           continue;
         }
 
@@ -76,7 +102,6 @@ export class ThreatLensArcRenderer {
           color: category.color,
           weight: pair.weight,
           arcPoints,
-          arcPaths,
           surfacePaths,
           countryAKey: pair.countryAKey,
           countryBKey: pair.countryBKey,
@@ -94,7 +119,7 @@ export class ThreatLensArcRenderer {
     }
 
     this.rebuildBatches();
-    this.renderBatch(0);
+    this.renderSelectedBatch();
     this.start();
 
     const firstVisibleBatch = this.getVisibleBatchSequence()[0];
@@ -105,15 +130,16 @@ export class ThreatLensArcRenderer {
   }
 
   setBatchSize(size: number): void {
-    const nextSize = Math.max(1, Math.min(50, Math.round(Number(size) || this.arcBatchSize)));
+    const nextSize = Math.max(1, Math.min(this.maxArcCount, Math.round(Number(size) || this.arcBatchSize)));
     if (nextSize === this.arcBatchSize) {
       return;
     }
 
     this.arcBatchSize = nextSize;
+    this.selectedBatchIndex = 0;
     this.rebuildBatches();
-    this.resetBatchRotation();
-    this.renderBatch(0);
+    this.resetRangeAnimation();
+    this.renderSelectedBatch();
   }
 
   setActiveCategory(categoryKey: ThreatLensCategoryModelKey | null): void {
@@ -122,8 +148,20 @@ export class ThreatLensArcRenderer {
     }
 
     this.activeCategoryKey = categoryKey;
-    this.resetBatchRotation();
-    this.renderBatch(0);
+    this.selectedBatchIndex = 0;
+    this.resetRangeAnimation();
+    this.renderSelectedBatch();
+  }
+
+  setSelectedRangeIndex(index: number): void {
+    const nextIndex = Math.max(0, Math.round(Number(index) || 0));
+    if (nextIndex === this.selectedBatchIndex) {
+      return;
+    }
+
+    this.selectedBatchIndex = nextIndex;
+    this.resetRangeAnimation();
+    this.renderSelectedBatch();
   }
 
   stop(): void {
@@ -134,24 +172,62 @@ export class ThreatLensArcRenderer {
 
     this.animatedArcGraphicsLayer?.removeAll();
     this.lastAnimationTick = 0;
-    this.batchAnimationStartTime = 0;
+    this.visibleBatchDrawStartTime = 0;
+    this.animationPauseStartTime = 0;
     this.visibleBatchIndex = -1;
+    this.arcDrawStates = [];
+    this.hoveredEndpointGraphic = null;
+    this.movingDotGraphics = [];
+    this.receiverPulseGraphics = [];
+    this.endpointHitTargetGraphics = [];
+    this.startMarkerGraphics = [];
+    this.endMarkerGraphics = [];
+    this.countryRenderer.setConnectedCountryKeys([]);
     this.onBatchStatusChange(null);
   }
 
   destroy(): void {
     this.stop();
     this.arcGraphicsLayer?.removeAll();
-    this.arcSurfaceGraphicsLayer?.removeAll();
     this.animatedArcGraphicsLayer?.removeAll();
     this.animatedArcs = [];
     this.arcBatches = [];
+    this.arcDrawStates = [];
     this.movingDotGraphics = [];
+    this.receiverPulseGraphics = [];
+    this.endpointHitTargetGraphics = [];
+    this.hoveredEndpointGraphic = null;
   }
 
   isTooltipGraphic(graphic: any): boolean {
     const role = graphic?.attributes?.role;
-    return role === 'arc' || role === 'arc-surface' || role === 'arc-start' || role === 'arc-end' || role === 'arc-traveler';
+    return role === 'arc' || role === 'arc-surface' || role === 'arc-start' || role === 'arc-end' || role === 'arc-start-hit' || role === 'arc-end-hit' || role === 'arc-traveler';
+  }
+
+  isEndpointGraphic(graphic: any): boolean {
+    const role = graphic?.attributes?.role;
+    return role === 'arc-start' || role === 'arc-end' || role === 'arc-start-hit' || role === 'arc-end-hit';
+  }
+
+  setHoveredEndpointGraphic(graphic: any | null): void {
+    const nextGraphic = this.resolveEndpointIconGraphic(graphic);
+    if (this.hoveredEndpointGraphic === nextGraphic) {
+      return;
+    }
+
+    if (this.hoveredEndpointGraphic) {
+      this.setEndpointHoverState(this.hoveredEndpointGraphic, false);
+    }
+
+    this.hoveredEndpointGraphic = nextGraphic;
+
+    if (this.hoveredEndpointGraphic) {
+      this.setEndpointHoverState(this.hoveredEndpointGraphic, true);
+    }
+  }
+
+  clearEndpointHover(): void {
+    this.setHoveredEndpointGraphic(null);
   }
 
   setAnimationPaused(paused: boolean): void {
@@ -170,13 +246,22 @@ export class ThreatLensArcRenderer {
           return;
         }
 
-        if (!this.batchAnimationStartTime) {
-          this.batchAnimationStartTime = timestamp;
-        }
-
         if (this.animationPaused) {
+          if (!this.animationPauseStartTime) {
+            this.animationPauseStartTime = timestamp;
+          }
+
           this.animationFrame = requestAnimationFrame(animate);
           return;
+        }
+
+        if (this.animationPauseStartTime) {
+          const pausedDuration = timestamp - this.animationPauseStartTime;
+          if (this.visibleBatchDrawStartTime) {
+            this.visibleBatchDrawStartTime += pausedDuration;
+          }
+          this.animationPauseStartTime = 0;
+          this.lastAnimationTick = timestamp;
         }
 
         if (this.lastAnimationTick && (timestamp - this.lastAnimationTick) < 40) {
@@ -185,26 +270,29 @@ export class ThreatLensArcRenderer {
         }
 
         this.lastAnimationTick = timestamp;
-        const batch = this.getCurrentBatch(timestamp);
+        const batch = this.getSelectedBatch();
 
         if (batch.index !== this.visibleBatchIndex) {
-          this.renderBatch(batch.index, batch.batch);
+          this.renderBatch(batch.index, batch.batch, timestamp);
         }
+
+        this.updateArcDrawGraphics(timestamp);
 
         let index = 0;
         for (const arc of batch.batch?.items ?? []) {
           const progress = ((timestamp + (arc.animationOffset * arc.animationDuration)) % arc.animationDuration) / arc.animationDuration;
-          const point = ThreatLensMapUtils.getArcPointAtProgress(arc.arcPoints, progress);
+          const point = ThreatLensMapUtils.getSurfacePointAtProgress(arc.arcPoints, progress);
           const graphic = this.movingDotGraphics[index];
+          const receiverGraphic = this.receiverPulseGraphics[index];
 
           if (point && graphic) {
             const [lon, lat] = point;
-            graphic.geometry = {
-              type: 'point',
-              longitude: lon,
-              latitude: lat,
-              spatialReference: { wkid: 4326 },
-            };
+            graphic.geometry = this.buildPointGeometry([lon, lat]);
+            this.updateDataPacketSymbol(graphic, arc, progress);
+          }
+
+          if (receiverGraphic) {
+            this.updateReceiverPulseSymbol(receiverGraphic, arc, progress);
           }
 
           index += 1;
@@ -217,62 +305,85 @@ export class ThreatLensArcRenderer {
     });
   }
 
-  private getCurrentBatch(timestamp: number): { index: number; batch: ArcCategoryBatch | null } {
+  private getSelectedBatch(): { index: number; batch: ArcCategoryBatch | null } {
     const batches = this.getVisibleBatchSequence();
     if (!batches.length) {
       return { index: -1, batch: null };
     }
 
-    const elapsed = Math.max(0, timestamp - this.batchAnimationStartTime);
-    const index = Math.floor(elapsed / this.arcBatchDuration) % batches.length;
+    const index = this.getClampedBatchIndex(batches);
     return {
       index,
       batch: batches[index],
     };
   }
 
-  private renderBatch(index: number, batchOverride?: ArcCategoryBatch | null): void {
-    if (!this.arcGraphicsLayer || !this.arcSurfaceGraphicsLayer) {
+  private renderBatch(index: number, batchOverride?: ArcCategoryBatch | null, renderedAt = 0): void {
+    if (!this.arcGraphicsLayer) {
       return;
     }
 
     this.startMarkerGraphics = [];
     this.endMarkerGraphics = [];
+    this.arcDrawStates = [];
+    this.visibleBatchDrawStartTime = renderedAt;
+    this.hoveredEndpointGraphic = null;
     const batches = this.getVisibleBatchSequence();
     const batch = batchOverride ?? (index >= 0 ? batches[index] ?? null : null);
     const items = batch?.items ?? [];
     this.visibleBatchIndex = index;
     this.arcGraphicsLayer.removeAll();
-    this.arcSurfaceGraphicsLayer.removeAll();
+    this.animatedArcGraphicsLayer.removeAll();
 
     if (!items.length) {
+      this.countryRenderer.setConnectedCountryKeys([]);
       this.ngZone.run(() => this.onVisibleArcCountChange(0));
       this.emitBatchStatus(null);
       return;
     }
 
-    this.arcGraphicsLayer.addMany(items.map((arc) => this.buildArcGraphic(arc)));
-    this.arcSurfaceGraphicsLayer.addMany(items.map((arc) => this.buildSurfaceGraphic(arc)));
+    this.countryRenderer.setConnectedCountryKeys(this.getBatchCountryKeys(items));
+    this.arcGraphicsLayer.addMany(items.flatMap((arc) => [this.buildSurfaceGraphic(arc), this.buildArcGraphic(arc, 0)]));
+    const arcLayerGraphics = this.arcGraphicsLayer.graphics?.toArray?.() ?? [];
+    this.arcDrawStates = arcLayerGraphics
+      .filter((graphic: any) => graphic?.attributes?.role === 'arc')
+      .reduce((states: ArcDrawState[], graphic: any, drawIndex: number) => {
+        const arc = items[drawIndex];
+        if (arc) {
+          states.push({ arc, graphic, completed: false });
+        }
+        return states;
+      }, []);
     this.ngZone.run(() => this.onVisibleArcCountChange(items.length));
     this.emitBatchStatus(batch);
     this.movingDotGraphics = [];
+    this.receiverPulseGraphics = [];
+    this.endpointHitTargetGraphics = [];
 
     for (const arc of items) {
-      this.startMarkerGraphics.push(this.buildEndpointGraphic(arc, arc.arcPoints[0], 'arc-start', 98000, 1));
-      this.endMarkerGraphics.push(this.buildEndpointGraphic(arc, arc.arcPoints[arc.arcPoints.length - 1], 'arc-end', 98000, 0.88));
+      const startPoint = arc.arcPoints[0];
+      const endPoint = arc.arcPoints[arc.arcPoints.length - 1];
+      this.endpointHitTargetGraphics.push(this.buildEndpointHitTargetGraphic(arc, startPoint, 'arc-start-hit', 'arc-start'));
+      this.endpointHitTargetGraphics.push(this.buildEndpointHitTargetGraphic(arc, endPoint, 'arc-end-hit', 'arc-end'));
+      this.startMarkerGraphics.push(this.buildEndpointGraphic(arc, startPoint, 'arc-start', 98000, 1));
+      this.endMarkerGraphics.push(this.buildEndpointGraphic(arc, endPoint, 'arc-end', 98000, 0.88));
+      this.receiverPulseGraphics.push(this.buildReceiverPulseGraphic(arc, arc.arcPoints[arc.arcPoints.length - 1]));
       this.movingDotGraphics.push(this.buildMovingDotGraphic(arc, arc.arcPoints[0]));
     }
 
-    this.animatedArcGraphicsLayer.removeAll();
     this.animatedArcGraphicsLayer.addMany([
       ...this.startMarkerGraphics,
       ...this.endMarkerGraphics,
+      ...this.receiverPulseGraphics,
       ...this.movingDotGraphics,
+      ...this.endpointHitTargetGraphics,
     ]);
 
     const layerGraphics = this.animatedArcGraphicsLayer.graphics?.toArray?.() ?? [];
+    this.endpointHitTargetGraphics = layerGraphics.filter((graphic: any) => graphic?.attributes?.role === 'arc-start-hit' || graphic?.attributes?.role === 'arc-end-hit');
     this.startMarkerGraphics = layerGraphics.filter((graphic: any) => graphic?.attributes?.role === 'arc-start');
     this.endMarkerGraphics = layerGraphics.filter((graphic: any) => graphic?.attributes?.role === 'arc-end');
+    this.receiverPulseGraphics = layerGraphics.filter((graphic: any) => graphic?.attributes?.role === 'arc-receiver-pulse');
     this.movingDotGraphics = layerGraphics.filter((graphic: any) => graphic?.attributes?.role === 'arc-traveler');
   }
 
@@ -318,8 +429,23 @@ export class ThreatLensArcRenderer {
     return this.arcBatches.filter((batch) => batch.categoryKey === this.activeCategoryKey);
   }
 
-  private resetBatchRotation(): void {
-    this.batchAnimationStartTime = 0;
+  private renderSelectedBatch(renderedAt = 0): void {
+    const batches = this.getVisibleBatchSequence();
+    this.selectedBatchIndex = this.getClampedBatchIndex(batches);
+    this.renderBatch(this.selectedBatchIndex, batches[this.selectedBatchIndex] ?? null, renderedAt);
+  }
+
+  private getClampedBatchIndex(batches: ArcCategoryBatch[]): number {
+    if (!batches.length) {
+      return -1;
+    }
+
+    return Math.max(0, Math.min(this.selectedBatchIndex, batches.length - 1));
+  }
+
+  private resetRangeAnimation(): void {
+    this.visibleBatchDrawStartTime = 0;
+    this.animationPauseStartTime = 0;
     this.visibleBatchIndex = -1;
     this.lastAnimationTick = 0;
   }
@@ -342,55 +468,125 @@ export class ThreatLensArcRenderer {
     this.ngZone.run(() => this.onBatchStatusChange(status));
   }
 
-  private buildArcGraphic(arc: AnimatedArcDescriptor): any {
+  private logCountryCoordinateValidation(countryKey: string, feature: any, coordinates: LngLat): void {
+    const logKey = `${countryKey}:${coordinates[0].toFixed(6)}:${coordinates[1].toFixed(6)}`;
+    if (this.loggedCoordinateValidationKeys.has(logKey)) {
+      return;
+    }
+    this.loggedCoordinateValidationKeys.add(logKey);
+  }
+
+  private logSkippedArc(category: ThreatLensCategoryMapData, pair: { countryAKey: string; countryBKey: string; weight: number }, countryKey: string, feature: any, coordinates: LngLat | null, reason: string): void {
+    const logKey = `${category.categoryKey}:${pair.countryAKey}:${pair.countryBKey}:${countryKey}:${reason}`;
+    if (this.loggedSkippedArcKeys.has(logKey)) {
+      return;
+    }
+    this.loggedSkippedArcKeys.add(logKey);
+  }
+
+  private updateArcDrawGraphics(timestamp: number): void {
+    if (!this.arcDrawStates.length) {
+      return;
+    }
+
+    if (!this.visibleBatchDrawStartTime) {
+      this.visibleBatchDrawStartTime = timestamp;
+    }
+
+    for (let index = 0; index < this.arcDrawStates.length; index += 1) {
+      const state = this.arcDrawStates[index];
+      if (state.completed) {
+        continue;
+      }
+
+      const stagger = Math.min(this.maxArcDrawStaggerMs, index * this.arcDrawStaggerMs);
+      const elapsed = timestamp - this.visibleBatchDrawStartTime - stagger;
+      const linearProgress = Math.max(0, Math.min(1, elapsed / this.arcDrawDuration));
+      const progress = this.easeOutCubic(linearProgress);
+
+      state.graphic.geometry = this.buildPolylineGeometry(this.getArcDrawPaths(state.arc, progress));
+
+      if (linearProgress >= 1) {
+        state.graphic.geometry = this.buildPolylineGeometry(state.arc.surfacePaths);
+        state.completed = true;
+      }
+    }
+  }
+
+  private buildArcGraphic(arc: AnimatedArcDescriptor, drawProgress = 1): any {
     return {
-      geometry: {
-        type: 'polyline',
-        paths: arc.surfacePaths,
-        spatialReference: { wkid: 4326 },
-      },
+      geometry: this.buildPolylineGeometry(this.getArcDrawPaths(arc, drawProgress)),
       attributes: this.buildArcAttributes(arc, 'arc'),
       symbol: {
         type: 'simple-line',
-        color: [...arc.color, 0.92],
-        width: 1,
+        color: [...arc.color, 0.96],
+        width: Math.min(3.8, 1.25 + (arc.weight * 0.2)),
         cap: 'round',
         join: 'round',
       },
     };
   }
 
+  private getArcDrawPaths(arc: AnimatedArcDescriptor, progress: number): [number, number][][] {
+    if (progress >= 1) {
+      return arc.surfacePaths;
+    }
+
+    return ThreatLensMapUtils.extractSurfaceSegment(arc.arcPoints, 0, Math.max(0.001, progress));
+  }
+
+  private buildPolylineGeometry(paths: [number, number][][]): Record<string, unknown> {
+    return {
+      type: 'polyline',
+      hasZ: true,
+      paths: paths.map((path) => path.map(([lon, lat]) => [lon, lat, this.arcElevationMeters])),
+      spatialReference: { wkid: 4326 },
+    };
+  }
+
+  private buildPointGeometry(point: [number, number], elevation = this.arcElevationMeters): Record<string, unknown> {
+    return {
+      type: 'point',
+      longitude: point[0],
+      latitude: point[1],
+      z: elevation,
+      spatialReference: { wkid: 4326 },
+    };
+  }
+
+  private easeOutCubic(value: number): number {
+    const progress = Math.max(0, Math.min(1, value));
+    return 1 - Math.pow(1 - progress, 3);
+  }
+
   private buildSurfaceGraphic(arc: AnimatedArcDescriptor): any {
     return {
-      geometry: {
-        type: 'polyline',
-        paths: arc.surfacePaths,
-        spatialReference: { wkid: 4326 },
-      },
+      geometry: this.buildPolylineGeometry(arc.surfacePaths),
       attributes: this.buildArcAttributes(arc, 'arc-surface'),
       symbol: {
         type: 'simple-line',
-        color: [...arc.color, 0.58],
-        width: Math.min(3.2, 1.5 + (arc.weight * 0.18)),
+        color: [...arc.color, 0.22],
+        width: Math.min(4.8, 2.2 + (arc.weight * 0.22)),
+        cap: 'round',
+        join: 'round',
       },
     };
   }
 
-  private buildEndpointGraphic(arc: AnimatedArcDescriptor, point: [number, number, number], role: string, size: number, opacity: number): any {
+  private buildEndpointGraphic(arc: AnimatedArcDescriptor, point: [number, number], role: string, elevation: number, opacity: number): any {
     return {
-      geometry: {
-        type: 'point',
-        longitude: point[0],
-        latitude: point[1],
-        spatialReference: { wkid: 4326 },
+      geometry: this.buildPointGeometry(point, elevation),
+      attributes: {
+        ...this.buildArcAttributes(arc, role),
+        endpoint_color: arc.color,
+        endpoint_id: this.getEndpointId(arc, role),
+        endpoint_opacity: opacity,
       },
-      attributes: this.buildArcAttributes(arc, role),
       symbol: {
         type: 'picture-marker',
-        url:'/assets/images/shared/flag.svg',
-        width: '18px',
-        height: '18px',
-        color: [...arc.color, opacity],
+        url:'/assets/images/shared/location.svg',
+        width: `${this.endpointBaseSize}px`,
+        height: `${this.endpointBaseSize}px`,
         outline: {
           color: [255, 255, 255, 0.84],
           width: 1.2,
@@ -399,25 +595,58 @@ export class ThreatLensArcRenderer {
     };
   }
 
-  private buildMovingDotGraphic(arc: AnimatedArcDescriptor, point: [number, number, number]): any {
-    const movingDotSize = Math.min(16, this.movingDotBaseSize + (arc.weight * 0.32));
-
+  private buildEndpointHitTargetGraphic(arc: AnimatedArcDescriptor, point: [number, number], role: string, endpointRole: 'arc-start' | 'arc-end'): any {
     return {
-      geometry: {
-        type: 'point',
-        longitude: point[0],
-        latitude: point[1],
-        spatialReference: { wkid: 4326 },
+      geometry: this.buildPointGeometry(point),
+      attributes: {
+        ...this.buildArcAttributes(arc, role),
+        endpoint_color: arc.color,
+        endpoint_id: this.getEndpointId(arc, endpointRole),
+        endpoint_role: endpointRole,
+        hit_target: true,
       },
+      symbol: {
+        type: 'simple-marker',
+        style: 'circle',
+        size: this.endpointHitTargetSize,
+        color: [...arc.color, 0.012],
+        outline: {
+          color: [255, 255, 255, 0],
+          width: 0,
+        },
+      },
+    };
+  }
+
+  private buildMovingDotGraphic(arc: AnimatedArcDescriptor, point: [number, number]): any {
+    return {
+      geometry: this.buildPointGeometry(point),
       attributes: this.buildArcAttributes(arc, 'arc-traveler'),
       symbol: {
         type: 'simple-marker',
         style: 'circle',
-        size: movingDotSize,
-        color: [255, 255, 255, 0.96],
+        size: this.getDataPacketSize(0, arc.weight),
+        color: [255, 255, 255, 0.5],
         outline: {
-          color: [...arc.color, 1],
-          width: 0.75,
+          color: [...arc.color, 0.38],
+          width: 0.8,
+        },
+      },
+    };
+  }
+
+  private buildReceiverPulseGraphic(arc: AnimatedArcDescriptor, point: [number, number]): any {
+    return {
+      geometry: this.buildPointGeometry(point),
+      attributes: this.buildArcAttributes(arc, 'arc-receiver-pulse'),
+      symbol: {
+        type: 'simple-marker',
+        style: 'circle',
+        size: 1,
+        color: [...arc.color, 0],
+        outline: {
+          color: [...arc.color, 0],
+          width: 1,
         },
       },
     };
@@ -434,5 +663,116 @@ export class ThreatLensArcRenderer {
       end_country: arc.countryBName,
       weight: arc.weight,
     };
+  }
+
+  private setEndpointHoverState(graphic: any, hovered: boolean): void {
+    if (!this.isEndpointGraphic(graphic) || !graphic.symbol) {
+      return;
+    }
+
+    const symbol = graphic.symbol.clone?.() ?? { ...graphic.symbol, outline: graphic.symbol.outline ? { ...graphic.symbol.outline } : undefined };
+    const baseColor = Array.isArray(graphic.attributes?.endpoint_color) ? graphic.attributes.endpoint_color : [255, 255, 255];
+    const baseOpacity = Number(graphic.attributes?.endpoint_opacity);
+    const opacity = Number.isFinite(baseOpacity) ? baseOpacity : 1;
+    const endpointId = String(graphic.attributes?.endpoint_id || '');
+
+    delete symbol.color;
+    symbol.opacity = hovered ? 1 : opacity;
+    symbol.width = `${this.endpointBaseSize}px`;
+    symbol.height = `${this.endpointBaseSize}px`;
+    symbol.outline = { ...(symbol.outline ?? {}), color: [255, 255, 255, 0.84], width: 1.2, };
+
+    graphic.symbol = symbol;
+    this.setEndpointHitTargetHoverState(endpointId, baseColor, hovered);
+  }
+
+  private resolveEndpointIconGraphic(graphic: any | null): any | null {
+    if (!this.isEndpointGraphic(graphic)) {
+      return null;
+    }
+
+    const role = graphic?.attributes?.role;
+    if (role === 'arc-start' || role === 'arc-end') {
+      return graphic;
+    }
+
+    const endpointId = String(graphic?.attributes?.endpoint_id || '');
+    if (!endpointId) {
+      return null;
+    }
+
+    const endpointGraphics = [
+      ...this.startMarkerGraphics,
+      ...this.endMarkerGraphics,
+    ];
+    return endpointGraphics.find((endpointGraphic) => endpointGraphic?.attributes?.endpoint_id === endpointId) || null;
+  }
+
+  private getEndpointId(arc: AnimatedArcDescriptor, role: string): string {
+    return `${arc.categoryKey}:${arc.countryAKey}:${arc.countryBKey}:${role}`;
+  }
+
+  private setEndpointHitTargetHoverState(endpointId: string, color: number[], hovered: boolean): void {
+    if (!endpointId) {
+      return;
+    }
+
+    for (const hitTargetGraphic of this.endpointHitTargetGraphics) {
+      if (hitTargetGraphic?.attributes?.endpoint_id !== endpointId) {
+        continue;
+      }
+
+      hitTargetGraphic.symbol = {
+        type: 'simple-marker',
+        style: 'circle',
+        size: this.endpointHitTargetSize,
+        color: hovered ? [...color, 0.14] : [...color, 0.012],
+        outline: {
+          color: hovered ? [255, 255, 255, 0.92] : [255, 255, 255, 0],
+          width: hovered ? 1.8 : 0,
+        },
+      };
+    }
+  }
+
+  private updateDataPacketSymbol(graphic: any, arc: AnimatedArcDescriptor, progress: number): void {
+    const symbol = graphic.symbol.clone?.() ?? { ...graphic.symbol, outline: graphic.symbol?.outline ? { ...graphic.symbol.outline } : undefined };
+    const arrivalLift = progress > 0.88 ? (progress - 0.88) / 0.12 : 0;
+
+    symbol.size = this.getDataPacketSize(progress, arc.weight);
+    symbol.color = [255, 255, 255, 0.5 - (arrivalLift * 0.14)];
+    symbol.outline = {
+      ...(symbol.outline ?? {}),
+      color: [...arc.color, 0.38 + (arrivalLift * 0.18)],
+      width: 0.8 + (arrivalLift * 0.5),
+    };
+    graphic.symbol = symbol;
+  }
+
+  private updateReceiverPulseSymbol(graphic: any, arc: AnimatedArcDescriptor, progress: number): void {
+    const arrivalProgress = progress > 0.82 ? (progress - 0.82) / 0.18 : 0;
+    const pulse = this.easeOutCubic(arrivalProgress);
+    const opacity = arrivalProgress > 0 ? 0.78 * (1 - pulse) : 0;
+
+    graphic.symbol = {
+      type: 'simple-marker',
+      style: 'circle',
+      size: 4 + (pulse * Math.min(12, 7 + (arc.weight * 0.25))),
+      color: [...arc.color, opacity * 0.16],
+      outline: {
+        color: [...arc.color, opacity],
+        width: 1.3 + (pulse * 1.6),
+      },
+    };
+  }
+
+  private getDataPacketSize(progress: number, weight: number): number {
+    const baseSize = Math.min(8, this.movingDotBaseSize - 0.5 + (weight * 0.1));
+    const intakePulse = progress > 0.82 ? Math.sin(((progress - 0.82) / 0.18) * Math.PI) * 1.2 : 0;
+    return baseSize + intakePulse;
+  }
+
+  private getBatchCountryKeys(items: AnimatedArcDescriptor[]): string[] {
+    return Array.from(new Set(items.flatMap((arc) => [arc.countryAKey, arc.countryBKey]).filter(Boolean)));
   }
 }

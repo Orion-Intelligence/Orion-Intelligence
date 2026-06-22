@@ -95,6 +95,18 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     this.pageCounts = {};
   }
 
+  get defacementResultCount(): number {
+    return this.consolidatedCallbackModel.defacement_model?.Result?.length ?? 0;
+  }
+
+  get stealerlogResultCount(): number {
+    return this.stealerlogCallbackModel?.Result?.length ?? 0;
+  }
+
+  get hasDefacementOrStealerResults(): boolean {
+    return (this.defacementResultCount + this.stealerlogResultCount) > 0;
+  }
+
   ngAfterViewInit(): void {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page);
     if (isRouteChanged(this.router.url, this.dashboardService.m_current_route)) {
@@ -149,7 +161,12 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.isStealerLogLoading.set(false);
       this.dashboardService.consolidatedParamModel.q = '';
       this.dashboardService.consolidatedParamModel.ioc='';
-      this.router.navigate([], { queryParams: {}, queryParamsHandling: '' }).then();
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { tab: this.getActiveConsolidatedTab() },
+        queryParamsHandling: '',
+        replaceUrl: true,
+      }).then();
     }
     const cleanedParams: any = {};
     Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
@@ -157,6 +174,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         cleanedParams[key] = value;
       }
     });
+    cleanedParams.tab = this.getActiveConsolidatedTab();
     this.router.navigate([], {
       queryParams: cleanedParams, queryParamsHandling: 'merge', replaceUrl: true, relativeTo: this.route
     }).then(() => {
@@ -188,10 +206,13 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     });
     if (this.isEmailOrUrl(this.dashboardService.consolidatedParamModel.q)) {
       this.isStealerLogLoading.set(true);
-      this.dashboardService.consolidatedParamModel.url = this.dashboardService.consolidatedParamModel.q;
-      this.dashboardService.consolidatedParamModel.ioc = `m_search_all:${this.dashboardService.consolidatedParamModel.q}`;
-      this.dashboardService.consolidatedParamModel.category = "credential";
-      this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealer/ioc', this.dashboardService.consolidatedParamModel)
+      const stealerLogParams = {
+        ...this.dashboardService.consolidatedParamModel,
+        url: this.dashboardService.consolidatedParamModel.q,
+        ioc: `m_search_all:${this.dashboardService.consolidatedParamModel.q}`,
+        category: 'credential',
+      };
+      this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealer/ioc', stealerLogParams, '', false)
         .pipe(switchMap(response => timer(300).pipe(map(() => response))))
         .subscribe(response => {
           if (response.success && response.data) {
@@ -272,6 +293,10 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   onUpdateQuery(query: string) {
     this.dashboardService.consolidatedParamModel.q = query;
+    this.dashboardService.consolidatedParamModel.category = this.route.snapshot.routeConfig?.path || 'all';
+    this.dashboardService.consolidatedParamModel.url = '';
+    this.dashboardService.consolidatedParamModel.user = '';
+    this.dashboardService.consolidatedParamModel.ioc = '';
     this.query = query;
   }
 
@@ -403,6 +428,19 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.isGrouped = false;
       this.isGeoFencing = true;
     }
+  }
+
+  private getActiveConsolidatedTab(): string {
+    if (this.isNetworkIntel) {
+      return 'Network Intelligence';
+    }
+    if (this.isGeoFencing) {
+      return 'Geo Fencing';
+    }
+    if (this.isGrouped || !this.isIOC) {
+      return 'Deep Search';
+    }
+    return 'IOCs';
   }
 
   private restoreDeepSearchQuery(): void {

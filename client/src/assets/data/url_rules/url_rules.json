@@ -66,6 +66,11 @@
     "path": "social/platform",
     "value_regex": "^https?://(?:[^/]+\\.)?instagram\\.com(?:/.*)?$"
   },
+  "linkedin": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?(?:linkedin\\.com|lnkd\\.in)(?:/.*)?$"
+  },
   "tiktok": {
     "rule_type": "shared",
     "path": "social/platform",

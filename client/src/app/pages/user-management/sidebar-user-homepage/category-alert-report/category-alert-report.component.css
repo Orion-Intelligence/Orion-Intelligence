@@ -290,12 +290,12 @@
 
 @keyframes categoryReportDropdownIn {
     0% {
-        opacity: 0;
+        opacity: 0%;
         transform: translateY(-4px) scale(.98);
     }
 
     100% {
-        opacity: 1;
+        opacity: 100%;
         transform: translateY(0) scale(1);
     }
 }
@@ -327,7 +327,7 @@
 
 .category_report_alert-card .dropdown-divider {
     border-color: var(--color-border);
-    opacity: 1;
+    opacity: 100%;
     margin: 6px 12px;
 }
 
@@ -412,7 +412,7 @@
     font-size: 12px;
     line-height: 1;
     color: #60a5fa;
-    opacity: .95;
+    opacity: 95%;
 }
 
 .category_report_status-critical i {
@@ -710,7 +710,7 @@
 :host-context(.light-theme) .category_report_flex .report-menu-divider {
     background: #8ea6c1 !important;
     color: #8ea6c1 !important;
-    opacity: 1 !important;
+    opacity: 100% !important;
     border-left: 1px solid #8ea6c1 !important;
 }
 
@@ -736,13 +736,13 @@
 
 :host-context(.light-theme) .category_report_flex .report-menu-option img {
     filter: brightness(0) saturate(100%) invert(28%) sepia(15%) saturate(1038%) hue-rotate(176deg) brightness(93%) contrast(90%);
-    opacity: .92;
+    opacity: 92%;
 }
 
 :host-context(.light-theme) .category_report_search-icon,
 :host-context(.light-theme) .category_report_tool-icon {
     filter: brightness(0) saturate(100%) invert(28%) sepia(15%) saturate(1038%) hue-rotate(176deg) brightness(93%) contrast(90%);
-    opacity: .92;
+    opacity: 92%;
 }
 
 :host-context(.light-theme) .category_report_summary-card {
@@ -795,7 +795,7 @@
     border-radius: 0;
     padding: 0;
     box-shadow: none;
-    opacity: .95;
+    opacity: 95%;
 }
 
 :host-context(.light-theme) .category_report_alert-card {
@@ -867,7 +867,7 @@
 
 :host-context(.light-theme) .category_report_burger-icon img {
     filter: brightness(0) saturate(100%) invert(28%) sepia(15%) saturate(1038%) hue-rotate(176deg) brightness(93%) contrast(90%);
-    opacity: .92;
+    opacity: 92%;
 }
 
 :host-context(.light-theme) .category_report_alert-card .dropdown-menu {

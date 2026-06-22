@@ -24,10 +24,6 @@ export class ArcReportPopupComponent implements OnChanges {
     }
   }
 
-  get reportCount(): number {
-    return this.displayItems.length || this.arc?.weight || 0;
-  }
-
   onClose(): void {
     this.close.emit();
   }

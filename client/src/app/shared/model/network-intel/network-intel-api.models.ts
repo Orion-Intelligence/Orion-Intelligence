@@ -30,9 +30,11 @@ export interface GeoCameraResponse {
   ips_extracted?: number;
   ips_scanned?:   number;
   cameras_found?: number;
+  ip_locations?:  any[];
   result?: {
     status?:        string;
     cameras?:       any[];
+    ip_locations?:  any[];
     ips_extracted?: number;
     ips_scanned?:   number;
     cameras_found?: number;

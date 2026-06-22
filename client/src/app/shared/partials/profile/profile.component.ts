@@ -13,6 +13,8 @@ import { LANGUAGE_OPTIONS, LanguageOption } from '../../constants/shared-enums';
 import { ApiService } from '../../services/api.service';
 import { TranslationService } from '../../services/translation.service';
 
+type ThemeMode = 'dark-theme' | 'light-theme';
+
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -40,6 +42,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
   dropdownOpen = signal(false);
   languageDropdownOpen = signal(false);
   selectedLanguage = signal('');
+  selectedTheme = signal<ThemeMode>('dark-theme');
   languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
   readonly openPopup = output<undefined>();
 
@@ -54,6 +57,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
       this.username.set(data?.user?.username ?? '');
       this.role.set(data?.user?.role ?? '');
       this.selectedLanguage.set(this.getCurrentLanguage(data?.user?.preferences?.['language']));
+      this.selectedTheme.set(this.getCurrentTheme(data?.user?.theme ?? data?.user?.preferences?.['theme']));
     });
   }
 
@@ -131,6 +135,44 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
     this.languageDropdownOpen.set(false);
   }
 
+  canChangeTheme(): boolean {
+    return !!this.appService.userSessionData()?.user?.username;
+  }
+
+  toggleTheme(event: Event) {
+    event.stopPropagation();
+    const currentSession = this.appService.userSessionData();
+    if (!currentSession?.user) {
+      return;
+    }
+    const selectedTheme: ThemeMode = this.selectedTheme() === 'dark-theme' ? 'light-theme' : 'dark-theme';
+    const preferences = {
+      ...(currentSession.user.preferences || {}),
+      theme: selectedTheme
+    };
+    this.selectedTheme.set(selectedTheme);
+    this.appService.userSessionData.update(state => {
+      if (!state) {
+        return state;
+      }
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          theme: selectedTheme,
+          preferences
+        }
+      };
+    });
+    this.apiService.post('update/current/user', {
+      username: currentSession.user.username,
+      preferences
+    }).subscribe({
+      next: () => void 0,
+      error: () => void 0
+    });
+  }
+
   auditlog() {
     this.router.navigate(['/dashboard/profile/auditlog']).then();
   }
@@ -187,6 +229,10 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 
   private getCurrentLanguage(userLanguage: string): string {
     return this.translationService.getSupportedLanguage(userLanguage, this.translationService.getSystemLanguage());
+  }
+
+  private getCurrentTheme(userTheme?: string): ThemeMode {
+    return userTheme === 'light-theme' ? 'light-theme' : 'dark-theme';
   }
 
 }

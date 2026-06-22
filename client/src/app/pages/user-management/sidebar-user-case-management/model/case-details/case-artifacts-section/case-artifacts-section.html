@@ -85,7 +85,7 @@
                             {{ 'Report Source' | translate }}
                         </label>
 
-                        <select [(ngModel)]="artifact.linkedReportSource" (ngModelChange)="artifact.linkedReportId = ''; artifact.linkedReportTitle = ''; store.artifactReportSearchText = ''; store.isArtifactReportDropdownOpen = true; store.loadArtifactReports($event, '')" name="artifact-report-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                        <select [(ngModel)]="artifact.linkedReportSource" (ngModelChange)="artifact.linkedReportId = ''; artifact.linkedReportTitle = ''; store.artifactReportSearchText = ''; store.isArtifactReportDropdownOpen = true; store.loadArtifactReports($event, '')" name="artifact-report-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-artifact-report-source-select">
 
                             <option value="">{{ 'Select report source' | translate }}</option>
 
@@ -102,7 +102,7 @@
                         </label>
 
                         <div class="relative mt-1">
-                            <input type="text" [ngModel]="store.artifactReportSearchText || artifact.linkedReportTitle || ''" (ngModelChange)="store.searchArtifactReports(artifact.linkedReportSource || '', $event)" (focus)="store.isArtifactReportDropdownOpen = true; store.loadArtifactReports(artifact.linkedReportSource || '', store.artifactReportSearchText || '')" name="artifact-report-search" placeholder="Search reports..." autocomplete="off" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
+                            <input type="text" [ngModel]="store.artifactReportSearchText || artifact.linkedReportTitle || ''" (ngModelChange)="store.searchArtifactReports(artifact.linkedReportSource || '', $event)" (focus)="store.isArtifactReportDropdownOpen = true; store.loadArtifactReports(artifact.linkedReportSource || '', store.artifactReportSearchText || '')" name="artifact-report-search" placeholder="Search reports..." autocomplete="off" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-report-search-input" />
 
                             @if (artifact.linkedReportId) {
                             <div class="mt-2 flex items-center gap-2">
@@ -118,18 +118,18 @@
                             }
 
                             @if (store.isArtifactReportDropdownOpen) {
-                            <div class="absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-lg">
+                            <div class="absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-lg" data-testid="case-artifact-report-options">
                                 @if (isArtifactReportsLoading) {
                                 <div class="px-3 py-2 text-sm text-[var(--color-text4)]">
                                     {{"Loading reports..." | translate}}
                                 </div>
                                 } @else {
                                 @for (report of artifactReports; track report.id) {
-                                <button type="button" (click)="store.selectArtifactReport(artifact, report)" class="block w-full px-3 py-2 text-left text-sm text-[var(--color-text2)] hover:bg-sky-500/10 hover:text-sky-200">
+                                <button type="button" (click)="store.selectArtifactReport(artifact, report)" class="block w-full px-3 py-2 text-left text-sm text-[var(--color-text2)] hover:bg-sky-500/10 hover:text-sky-200" [attr.data-testid]="'case-artifact-report-option-' + $index">
                                     {{ report.title }}
                                 </button>
                                 } @empty {
-                                <div class="px-3 py-2 text-sm text-[var(--color-text4)]">
+                                <div class="px-3 py-2 text-sm text-[var(--color-text4)]" data-testid="case-artifact-report-empty">
                                     {{"No reports found" | translate}}
                                 </div>
                                 }
@@ -233,7 +233,7 @@
                             {{ artifactFile.fileName }}
                         </span>
 
-                        <span class="rounded-full border px-2 py-0.5 text-[10px]" [ngClass]="{ 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300': artifactFile.integrityStatus === 'verified', 'border-red-400/30 bg-red-500/10 text-red-300': artifactFile.integrityStatus === 'failed' }">
+                        <span class="rounded-full border px-2 py-0.5 text-[10px]" [attr.data-testid]="'case-artifact-file-integrity-' + fileIndex" [ngClass]="{ 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300': artifactFile.integrityStatus === 'verified', 'border-red-400/30 bg-red-500/10 text-red-300': artifactFile.integrityStatus === 'failed' }">
                             {{ artifactFile.integrityStatus === 'failed' ? 'Integrity Failed' : 'Verified' }}
                         </span>
                     </div>
@@ -338,7 +338,7 @@
                             {{ 'Report Source' | translate }}
                         </label>
 
-                        <select [(ngModel)]="newArtifact.linkedReportSource" (ngModelChange)="newArtifact.linkedReportId = ''; newArtifact.linkedReportTitle = ''; store.artifactReportSearchText = ''; store.isArtifactReportDropdownOpen = true; store.loadArtifactReports($event, '')" name="new-artifact-report-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]">
+                        <select [(ngModel)]="newArtifact.linkedReportSource" (ngModelChange)="newArtifact.linkedReportId = ''; newArtifact.linkedReportTitle = ''; store.artifactReportSearchText = ''; store.isArtifactReportDropdownOpen = true; store.loadArtifactReports($event, '')" name="new-artifact-report-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-artifact-report-source-select">
 
                             <option value="">{{ 'Select report source' | translate }}</option>
 
@@ -355,7 +355,7 @@
                         </label>
 
                         <div class="relative mt-1">
-                            <input type="text" [ngModel]="store.artifactReportSearchText || newArtifact.linkedReportTitle || ''" (ngModelChange)="store.searchArtifactReports(newArtifact.linkedReportSource || '', $event)" (focus)="store.isArtifactReportDropdownOpen = true; store.loadArtifactReports(newArtifact.linkedReportSource || '', store.artifactReportSearchText || '')" name="new-artifact-report-search" placeholder="Search reports..." autocomplete="off" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" />
+                            <input type="text" [ngModel]="store.artifactReportSearchText || newArtifact.linkedReportTitle || ''" (ngModelChange)="store.searchArtifactReports(newArtifact.linkedReportSource || '', $event)" (focus)="store.isArtifactReportDropdownOpen = true; store.loadArtifactReports(newArtifact.linkedReportSource || '', store.artifactReportSearchText || '')" name="new-artifact-report-search" placeholder="Search reports..." autocomplete="off" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-report-search-input" />
 
                             @if (newArtifact.linkedReportId) {
                             <div class="mt-2 flex items-center gap-2">
@@ -371,18 +371,18 @@
                             }
 
                             @if (store.isArtifactReportDropdownOpen) {
-                            <div class="absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-lg">
+                            <div class="absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-lg" data-testid="case-artifact-report-options">
                                 @if (isArtifactReportsLoading) {
                                 <div class="px-3 py-2 text-sm text-[var(--color-text4)]">
                                     {{ 'Loading reports...' | translate }}
                                 </div>
                                 } @else {
                                 @for (report of artifactReports; track report.id) {
-                                <button type="button" (click)="store.selectArtifactReport(newArtifact, report)" class="block w-full px-3 py-2 text-left text-sm text-[var(--color-text2)] hover:bg-sky-500/10 hover:text-sky-200">
+                                <button type="button" (click)="store.selectArtifactReport(newArtifact, report)" class="block w-full px-3 py-2 text-left text-sm text-[var(--color-text2)] hover:bg-sky-500/10 hover:text-sky-200" [attr.data-testid]="'case-artifact-report-option-' + $index">
                                     {{ report.title }}
                                 </button>
                                 } @empty {
-                                <div class="px-3 py-2 text-sm text-[var(--color-text4)]">
+                                <div class="px-3 py-2 text-sm text-[var(--color-text4)]" data-testid="case-artifact-report-empty">
                                     {{ 'No reports found' | translate }}
                                 </div>
                                 }

@@ -862,8 +862,25 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     };
   }
 
+  canCloseCase(): boolean {
+    return this.caseData?.status === 'resolved';
+  }
+
+  getCloseCaseTooltip(): string {
+    if (this.canCloseCase()) {
+      return 'Close case';
+    }
+
+    return 'Case cannot be closed until it reaches Resolved status';
+  }
+
   openCloseCase(): void {
     if (!this.caseData || this.isEditing || this.caseData.closure) {
+      return;
+    }
+
+    if (!this.canCloseCase()) {
+      this.messageNotificationService.show('Case cannot be closed until it reaches Resolved status');
       return;
     }
 

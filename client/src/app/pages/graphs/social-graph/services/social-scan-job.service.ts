@@ -53,6 +53,8 @@ export class SocialScanJobService {
         images: previous.images ?? next.images,
         followers_list: previous.followers_list ?? next.followers_list,
         following_list: previous.following_list ?? next.following_list,
+        onlinePresence: previous.onlinePresence ?? next.onlinePresence,
+        stealerLogs: previous.stealerLogs ?? next.stealerLogs,
         profileDetails: previous.profileDetails ?? next.profileDetails,
         allMetadata: next.allMetadata ?? previous.allMetadata,
       };
@@ -72,10 +74,10 @@ export class SocialScanJobService {
         ? { ...job, status: 'in_progress', progress: Math.max(job.progress, 5), step: 'Starting' }
         : job
     ))));
-    this.runScan(nextJob, opts.scanService.performScan(nextJob.username), opts, false);
+    this.runScan(nextJob, opts.scanService.performScan(nextJob.username), opts);
   }
 
-  private getScanObserver(job: Job, isImageScan: boolean, opts: ScanJobOptions) {
+  private getScanObserver(job: Job, opts: ScanJobOptions) {
     return {
       next: (event: ScanEvent) => {
         if (event.type === 'progress') {
@@ -91,9 +93,6 @@ export class SocialScanJobService {
             });
             tabState.jobs.update(jobs => jobs.map(j => j.id === job.id ? { ...j, status: 'completed', progress: 100, step: 'Completed' } : j));
           });
-          if (isImageScan) {
-            opts.state.openManageProfilesModal(job.username);
-          }
           this.startNextQueuedScan(opts);
         }
       },
@@ -106,12 +105,12 @@ export class SocialScanJobService {
     };
   }
 
-  private runScan(job: Job, scan$: ReturnType<SocialScanService['performScan']>, opts: ScanJobOptions, isImageScan: boolean): void {
+  private runScan(job: Job, scan$: ReturnType<SocialScanService['performScan']>, opts: ScanJobOptions): void {
     const cancel$ = new Subject<void>();
     opts.cancelScanSubjects.set(job.id, cancel$);
     scan$
       .pipe(takeUntil(cancel$), takeUntilDestroyed(opts.destroyRef))
-      .subscribe(this.getScanObserver(job, isImageScan, opts));
+      .subscribe(this.getScanObserver(job, opts));
   }
 
   initiateScan(username: string, opts: ScanJobOptions): void {
@@ -130,7 +129,7 @@ export class SocialScanJobService {
     };
     opts.updateState(state => state.jobs.update(currentJobs => [newJob, ...currentJobs.filter(job => job.username.toLowerCase() !== normalizedUsername)]));
     if (!shouldQueue) {
-      this.runScan(newJob, opts.scanService.performScan(newJob.username), opts, false);
+      this.runScan(newJob, opts.scanService.performScan(newJob.username), opts);
     }
   }
 
@@ -139,7 +138,7 @@ export class SocialScanJobService {
     const jobName = `${displayName} #${self.crypto.randomUUID().substring(0, 4)}`;
     const newJob: Job = { id: self.crypto.randomUUID(), username: jobName, displayName, status: 'in_progress', progress: 5, step: `Scanning ${fileName}` };
     opts.updateState(state => state.jobs.update(currentJobs => [newJob, ...currentJobs]));
-    this.runScan(newJob, opts.scanService.performImageScan(base64Image), opts, true);
+    this.runScan(newJob, opts.scanService.performImageScan(base64Image), opts);
   }
 
   cancelScan(jobId: string, opts: ScanJobOptions): void {
@@ -169,7 +168,7 @@ export class SocialScanJobService {
     const nextOpts = { jobs, ...opts };
     const activeJob = jobs().find(job => job.status === 'in_progress');
     if (activeJob && !opts.cancelScanSubjects.has(activeJob.id)) {
-      this.runScan(activeJob, opts.scanService.performScan(activeJob.username), nextOpts, false);
+      this.runScan(activeJob, opts.scanService.performScan(activeJob.username), nextOpts);
       return;
     }
     this.startNextQueuedScan(nextOpts);

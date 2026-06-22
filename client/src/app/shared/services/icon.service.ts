@@ -161,16 +161,15 @@ export class IconService {
 
   private buildIconSvg(pathData: string, options: IconOptions): string {
     const fillColor = '#e2e8f0';
-    const graphGroup = options.type === 'graph'
-      ? `<g transform="translate(4.2, 4.2) scale(0.65)"><path d="${pathData}"></path></g>`
-      : `<path d="${pathData}"></path>`;
-    return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="${fillColor}">${graphGroup}</svg>`;
+    const scale = options.type === 'graph' ? 0.65 : 0.72;
+    const offset = (24 - (24 * scale)) / 2;
+    return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="${fillColor}"><g transform="translate(${offset}, ${offset}) scale(${scale})"><path d="${pathData}"></path></g></svg>`;
   }
 
   private buildFallbackSvg(platformName: string, options: IconOptions): string {
     const firstLetter = platformName.charAt(0).toUpperCase() || '?';
     const fillColor = '#e2e8f0';
-    const fontSize = options.type === 'graph' ? 13 : 20;
+    const fontSize = options.type === 'graph' ? 13 : 16;
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text x="50%" y="50%" dy=".35em" text-anchor="middle" font-family="sans-serif" font-size="${fontSize}" font-weight="bold" fill="${fillColor}">${firstLetter}</text></svg>`;
   }
 

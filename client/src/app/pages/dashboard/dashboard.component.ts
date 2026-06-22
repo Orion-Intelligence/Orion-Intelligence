@@ -25,7 +25,8 @@ import { SidebarService } from '../../shared/services/sidebar.service';
     RouterOutlet,
     ScrollingModule,
     ProSubscriptionComponent,
-    DemoTourComponent, TranslatePipe],
+    DemoTourComponent,
+    TranslatePipe],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]
 })

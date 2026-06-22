@@ -1,5 +1,3 @@
-import { SelectedCountryCategoryCount } from '../../models/geo-fencing.models';
-
 export class ThreatLensTooltipRenderer {
   private tooltipEl: HTMLDivElement | null = null;
   private tooltipPlacement: 'above' | 'below' = 'below';
@@ -26,18 +24,67 @@ export class ThreatLensTooltipRenderer {
     }
 
     const ip = typeof attributes['ip'] === 'string' ? attributes['ip'] : 'Unknown IP';
+    const network = typeof attributes['network'] === 'string' ? attributes['network'] : '';
+    const accuracyRadius = this.toFiniteNumber(attributes['accuracyRadius']);
     const tooltipContent = document.createElement('div');
     tooltipContent.className = 'threat-lens-tooltip__content threat-lens-tooltip__content--ip';
 
     const title = document.createElement('div');
     title.className = 'threat-lens-tooltip__arc-title';
-    title.textContent = 'IP Scan';
+    title.textContent = 'Approximate location';
 
     tooltipContent.append(title, this.buildTooltipRow('IP address', ip));
+    if (network) {
+      tooltipContent.append(this.buildTooltipRow('Network', network));
+    }
+    if (accuracyRadius !== undefined) {
+      tooltipContent.append(this.buildTooltipRow('Approx. radius', this.formatKm(accuracyRadius)));
+    }
     this.show(event, tooltipContent);
   }
 
-  showCountry(event: any, countryName: string, threatCount: number, breakdown: SelectedCountryCategoryCount[]): void {
+  showIpCluster(event: any, attributes: Record<string, unknown>): void {
+    if (!this.tooltipEl) {
+      return;
+    }
+
+    const count = Number(attributes['count'] || 0);
+    const networkCount = Number(attributes['networkCount'] || 0);
+    const accuracyRadius = this.toFiniteNumber(attributes['accuracyRadius']);
+    const accuracyMin = this.toFiniteNumber(attributes['accuracyMin']);
+    const accuracyMax = this.toFiniteNumber(attributes['accuracyMax']);
+    const records = Array.isArray(attributes['records']) ? attributes['records'] : [];
+    const tooltipContent = document.createElement('div');
+    tooltipContent.className = 'threat-lens-tooltip__content threat-lens-tooltip__content--ip';
+
+    const title = document.createElement('div');
+    title.className = 'threat-lens-tooltip__arc-title';
+    title.textContent = 'Stacked approximate IPs';
+
+    tooltipContent.append(title);
+    tooltipContent.append(this.buildTooltipRow('Why stacked', String(attributes['stackReason'] || 'Same MaxMind coordinate')));
+    tooltipContent.append(this.buildTooltipRow('IP records', String(count || records.length)));
+    if (networkCount > 0) {
+      tooltipContent.append(this.buildTooltipRow('Prefixes', String(networkCount)));
+    }
+    if (accuracyMin !== undefined && accuracyMax !== undefined) {
+      tooltipContent.append(this.buildTooltipRow('Approx. radius', this.formatKmRange(accuracyMin, accuracyMax)));
+    }
+    else if (accuracyRadius !== undefined) {
+      tooltipContent.append(this.buildTooltipRow('Approx. radius', this.formatKm(accuracyRadius)));
+    }
+    const sampleIps = records
+      .map((record: any) => String(record?.ip || '').trim())
+      .filter(Boolean)
+      .slice(0, 3)
+      .join(', ');
+    if (sampleIps) {
+      tooltipContent.append(this.buildTooltipRow('Sample', sampleIps));
+    }
+    this.show(event, tooltipContent);
+  }
+
+  showCountry(event: any, countryName: string): void {
     if (!this.tooltipEl) {
       return;
     }
@@ -49,32 +96,7 @@ export class ThreatLensTooltipRenderer {
     countryTitle.className = 'threat-lens-tooltip__country-title';
     countryTitle.textContent = countryName;
 
-    const totalRow = document.createElement('div');
-    totalRow.className = 'threat-lens-tooltip__total-row';
-
-    const totalLabel = document.createElement('span');
-    totalLabel.className = 'threat-lens-tooltip__total-label';
-    totalLabel.textContent = 'Total Threats';
-
-    const totalValue = document.createElement('span');
-    totalValue.className = 'threat-lens-tooltip__total-value';
-    totalValue.textContent = String(threatCount);
-
-    totalRow.append(totalLabel, totalValue);
-    tooltipContent.append(countryTitle, totalRow);
-
-    if (breakdown.length) {
-      for (const item of breakdown) {
-        tooltipContent.append(this.buildBreakdownTooltipRow(item));
-      }
-    }
-    else {
-      const emptyMessage = document.createElement('div');
-      emptyMessage.className = 'threat-lens-tooltip__empty';
-      emptyMessage.textContent = 'No data found';
-      tooltipContent.append(emptyMessage);
-    }
-
+    tooltipContent.append(countryTitle);
     this.show(event, tooltipContent, 'above');
   }
 
@@ -127,29 +149,23 @@ export class ThreatLensTooltipRenderer {
     return row;
   }
 
-  private buildBreakdownTooltipRow(item: SelectedCountryCategoryCount): HTMLDivElement {
-    const row = document.createElement('div');
-    row.className = 'threat-lens-tooltip__breakdown-row';
-
-    const labelWrap = document.createElement('div');
-    labelWrap.className = 'threat-lens-tooltip__breakdown-label-wrap';
-
-    const dot = document.createElement('span');
-    dot.setAttribute('aria-hidden', 'true');
-    dot.className = 'threat-lens-tooltip__breakdown-dot';
-    dot.style.setProperty('--threat-lens-dot-color', item.colorHex);
-
-    const label = document.createElement('span');
-    label.className = 'threat-lens-tooltip__breakdown-label';
-    label.textContent = item.label;
-
-    const count = document.createElement('span');
-    count.className = 'threat-lens-tooltip__breakdown-count';
-    count.textContent = String(item.count);
-
-    labelWrap.append(dot, label);
-    row.append(labelWrap, count);
-
-    return row;
+  private toFiniteNumber(value: unknown): number | undefined {
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue) ? numericValue : undefined;
   }
+
+  private formatKm(value: number): string {
+    if (value >= 100) {
+      return `${Math.round(value)} km`;
+    }
+    return `${Math.round(value * 10) / 10} km`;
+  }
+
+  private formatKmRange(min: number, max: number): string {
+    if (Math.abs(max - min) < 0.1) {
+      return this.formatKm(max);
+    }
+    return `${this.formatKm(min)}-${this.formatKm(max)}`;
+  }
+
 }

@@ -20,6 +20,7 @@ from starlette.responses import JSONResponse
 from orion.api.server.crawl_manager.class_model import *
 from orion.helper_manager.helper_controller import helper_controller
 from orion.helper_manager.env_handler import env_handler
+from orion.services.log_manager.log_controller import log
 from orion.api.server.crawl_manager.crawl_index_generator import crawl_index_generator
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
@@ -597,8 +598,11 @@ class crawl_model:
 
     @staticmethod
     async def _post_swarm_payload(target_url: str, payload: dict):
-        async with httpx.AsyncClient(timeout=120) as client:
-            await client.post(target_url, json=payload)
+        try:
+            async with httpx.AsyncClient(timeout=120) as client:
+                await client.post(target_url, json=payload)
+        except httpx.HTTPError:
+            log.g().w(f"Crawl swarm not reachable: {target_url}")
 
     async def proxy_swarm_index(self, request: Request):
         payload = await request.json()

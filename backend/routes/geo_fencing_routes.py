@@ -1,4 +1,3 @@
-import calendar
 from datetime import date, timedelta
 
 from fastapi import APIRouter, Body, Depends, HTTPException

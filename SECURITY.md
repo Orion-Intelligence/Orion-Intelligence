@@ -8,3 +8,4 @@ To report a vulnerability, please use the private reporting form:
 
 We aim to acknowledge reports within 8 hours and address any critical issues with short-term fixes within 2 days,
 whenever possible.
+si

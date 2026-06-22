@@ -41,8 +41,8 @@ class AlertMailMessage(str, Enum):
     ALERT_UPDATED = "An alert in your workspace has been updated with the latest details."
     DEFAULT_CLOSING = "Please review these alerts when you have a moment. The alert view contains the full context, source details, and IOC history."
     ALERT_CHANGE_CLOSING = "You can open the alert view to review the latest IOC, source, and category details."
-    MODULE_COUNT = "Alert found in {category} : count {count} : {alert_word}"
-    SINGLE_ALERT_COUNT = "Alert found in {category}"
+    MODULE_COUNT = "In {category}, we found {count} new {alert_word}"
+    SINGLE_ALERT_COUNT = "In {category}, we found 1 alert"
 
 
 class AlertMailLabel(str, Enum):

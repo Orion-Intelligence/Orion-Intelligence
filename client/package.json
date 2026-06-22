@@ -8,7 +8,8 @@
     "build": "npm run prebuild && NO_COLOR=1 NG_BUILD_MAX_ERRORS=1000 ng build --configuration=production && node post-build.js",
     "production": "npm run prebuild && NO_COLOR=1 NG_BUILD_MAX_ERRORS=1000 ng build --configuration=production && node post-build.js",
     "test": "cypress",
-    "lint": "npx eslint src/app --ext .ts,.html --max-warnings=1000",
+    "lint": "npm run lint:styles && npx eslint src/app --ext .ts,.html --max-warnings=1000",
+    "lint:styles": "npx stylelint \"src/**/*.{css,scss}\"",
     "lint:fix": "npx eslint src/app --ext .ts,.html --fix",
     "lint:watch": "npx eslint src/app --ext .ts,.html --watch",
     "serve": "node scripts/serve-watch-strict.js",
@@ -48,6 +49,7 @@
     "simple-icons": "^16.20.0",
     "tldts": "^7.0.30",
     "topojson-client": "3.1.0",
+    "vis-data": "^8.0.4",
     "vis-network": "^10.1.0",
     "zone.js": "0.16.1"
   },
@@ -120,6 +122,7 @@
     "vite": "7.3.5",
     "js-yaml": "4.2.0",
     "undici": "7.28.0",
+    "@babel/core": "7.29.7",
     "yaml": "2.8.3",
     "brace-expansion": "5.0.6",
     "sockjs": {

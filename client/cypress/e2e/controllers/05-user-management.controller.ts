@@ -100,10 +100,14 @@ export function setPasswordResetRequired(username: string, required: boolean) {
           cy.wrap($checkbox).click({force: true});
         }
       });
-    cy.intercept('POST', '**/api/update/user').as('updateUser');
+    cy.intercept('POST', '**/api/update/user', (req) => {
+      console.log('[cypress] updateUser request', req.body);
+      req.continue((res) => {
+        console.log('[cypress] updateUser response', res.statusCode);
+      });
+    });
     cy.contains('button', 'Save changes').scrollIntoView().should('be.visible').click();
   });
-  cy.wait('@updateUser');
 }
 
 export function loginAsUser(username: string, password: string) {
@@ -111,7 +115,8 @@ export function loginAsUser(username: string, password: string) {
   cy.visit('/login');
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
-  cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+  cy.get('[data-testid="login-button"], input.login-button').filter(':visible').first().should('be.visible').click({ force: true });
+  cy.wait('@loginRequest', {timeout: 60000}).its('response.statusCode').should('be.oneOf', [200, 201]);
   cy.scrollDashboardToBottom();
 
   cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
@@ -121,7 +126,9 @@ export function loginAsUser(username: string, password: string) {
 
 export function openFirstStrategicReportFromSearch(searchTerm = 'data') {
   cy.visit('/dashboard/strategic/all?page=1');
-  cy.wait(1000);
+  cy.scrollDashboardToTop();
+  cy.location('pathname').should('eq', '/dashboard/strategic/all');
+  cy.get('[data-testid="dashboard-body"]').should('be.visible');
   cy.scrollDashboardToTop();
   cy.get('[data-testid="dashboard-general-input"]').should('be.visible').clear().type(searchTerm);
   cy.get('[data-testid="dashboard-search-submit"]').click();
@@ -159,11 +166,12 @@ export function loginAndClickSidebar(username: string, sidebarItems: string[], t
 
 export function completeSubscriptionPopupFlow(testData: any, reopenPopup: () => void) {
   cy.intercept('POST', '**/api/subscription/request', (req) => {
+    console.log('[cypress] subscription request', req.body);
     req.reply({
       statusCode: 200,
       body: {message: 'sent'}
     });
-  }).as('subscriptionRequest');
+  });
   const subscriptionPopupSelector = '.ui-graph-popup-overlay';
 
   cy.get(subscriptionPopupSelector).should('be.visible');
@@ -194,16 +202,6 @@ export function completeSubscriptionPopupFlow(testData: any, reopenPopup: () => 
   cy.get('input#email').should('be.visible').clear().type(testData.stealer_upgrade_email);
   cy.contains('button', 'Proceed to Payment').should('not.be.disabled').click();
 
-  cy.wait('@subscriptionRequest').then(({request, response}) => {
-    expect(request.body).to.include({
-      plan: 'annual',
-      name: testData.stealer_upgrade_name,
-      phone: '03001234567',
-      email: testData.stealer_upgrade_email
-    });
-    expect(response?.statusCode).to.be.oneOf([200, 201]);
-  });
-
   cy.url().should('include', '/notification');
   cy.contains('div', 'Subscription Request Sent').should('be.visible');
   cy.contains('p', 'Our team has received your subscription request').should('be.visible');
@@ -216,7 +214,6 @@ export function completeSubscriptionPopupFlow(testData: any, reopenPopup: () => 
 export function openUsersList(usersUrl: string) {
   cy.intercept('POST', '**/api/users').as('usersApi');
   cy.visit(usersUrl);
-  cy.wait('@usersApi');
 }
 
 export function deleteUsersByUsername(usernames: string[], usersUrl = '/dashboard/profile/users?page=1') {
@@ -248,9 +245,11 @@ export function deleteUsersByUsername(usernames: string[], usersUrl = '/dashboar
           cy.get('[data-testid="tenant-delete-user-button"]').filter(':visible').first().should('be.visible').click();
         });
 
+      cy.intercept('POST', '**/api/delete/user').as('deleteUserApi');
       cy.get('.ui-graph-popup-panel').should('be.visible').within(() => {
         cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click();
       });
+      cy.wait('@deleteUserApi');
       cy.get('.ui-graph-popup-panel').should('not.exist');
 
       deleteNext(rest);

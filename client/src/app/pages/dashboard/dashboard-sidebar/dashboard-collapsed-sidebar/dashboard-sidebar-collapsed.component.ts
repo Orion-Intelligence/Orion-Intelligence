@@ -53,7 +53,7 @@ export class SidebarSectionComponent {
     const normalized = item.toLowerCase().replace(/\s+/g, '-');
     const mapped = {
       apt: 'mitre',
-      'malware-bazaar': 'phishing',
+      malware: 'phishing',
       iocs: 'ioc',
       'file-scanner': 'archive',
       'text-analysis': 'phishing',

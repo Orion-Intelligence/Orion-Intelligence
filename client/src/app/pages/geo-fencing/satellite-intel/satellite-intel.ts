@@ -1,6 +1,6 @@
 import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { parseCoordinates } from '../../../shared/utils/geo-coordinates.utils';
@@ -56,6 +56,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private route: ActivatedRoute;
   private sidebarService: SidebarService;
   @ViewChild(MapRendererComponent) private mapRenderer?: MapRendererComponent;
+  @ViewChild(ThreatLensComponent) private threatLens?: ThreatLensComponent;
 
   satelliteService: SatelliteIntelService;
   readonly panel = SatelliteIntelPanelEnum;
@@ -73,7 +74,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   @Input() toolbarMode: 'hidden' | 'geo' = 'geo';
 
-  constructor( satelliteService: SatelliteIntelService, private geocodeService: GeoFencingGeocodeService, route: ActivatedRoute, sidebarService: SidebarService, aircraftTrackingService: SatelliteAircraftTrackingService, shipTrackingService: SatelliteShipTrackingService, facilitiesService: SatelliteFacilitiesService, monthCompareService: MonthCompareService, ) {
+  constructor( satelliteService: SatelliteIntelService, private geocodeService: GeoFencingGeocodeService, route: ActivatedRoute, private router: Router, sidebarService: SidebarService, aircraftTrackingService: SatelliteAircraftTrackingService, shipTrackingService: SatelliteShipTrackingService, facilitiesService: SatelliteFacilitiesService, monthCompareService: MonthCompareService, ) {
     this.satelliteService = satelliteService;
     this.route = route;
     this.sidebarService = sidebarService;
@@ -102,7 +103,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.setPanel(this.isPanelId(section) ? section : SatelliteIntelPanelEnum.Dashboard);
     this.isPanelPopupOpen = true;
     if (requestedView === 'threat') {
-      this.setActiveView('threat');
+      this.setActiveView('threat', false);
     }
     if (q) {
       this.locationState.setInitialQuery(q, parseCoordinates(q));
@@ -310,7 +311,11 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.scanState.resetRequestState();
   }
 
-  setActiveView(view: 'map' | 'threat'): void {
+  setActiveView(view: 'map' | 'threat', syncQuery = true): void {
+    if (view === 'threat' && this.isThreatToolbarDisabled) {
+      return;
+    }
+
     this.activeTab = view;
     if (view === 'map') {
       this.activePanel = SatelliteIntelPanelEnum.Dashboard;
@@ -322,6 +327,18 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     if (view === 'threat') {
       this.isPanelPopupOpen = false;
     }
+    if (syncQuery) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: view === 'map' ? { view, section: this.activePanel } : { view },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      }).then();
+    }
+  }
+
+  get isThreatToolbarDisabled(): boolean {
+    return this.isThreatView && this.isThreatLensLoading;
   }
 
   onThreatLensLoadingChange(isLoading: boolean): void {
@@ -352,10 +369,25 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.sidebarService.openSidebar();
   }
 
+  clearAllSelections(): void {
+    this.isPanelMenuOpen = false;
+    this.selectedFeature = null;
+    this.focusedFeature = null;
+    this.mapEntityDetailsState.close();
+    this.mapRenderer?.closeSidebar();
+    this.threatLens?.clearAllSelections();
+  }
+
   openPanelPopup(id: SatelliteIntelPanel): void {
     this.setPanel(id);
     this.isPanelPopupOpen = true;
     this.isPanelMenuOpen = false;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { section: id },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    }).then();
   }
 
   closePanelPopup(): void {

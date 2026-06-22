@@ -9,6 +9,17 @@ import { ScanHelperMethodsService } from '../../partials/scan-helper-methods/sca
 export class NetworkIntelScanService extends ScanHelperMethodsService {
   isRunning = signal(false);
 
+  protected override getPendingStatus<T extends { result?: { status?: string } | null; status?: string }>(res: T): string | undefined {
+    const status = super.getPendingStatus(res);
+    const payload = res as any;
+    const progress = Number(payload?.result?.progress ?? payload?.progress);
+    const step = String(payload?.result?.step ?? payload?.step ?? '').toLowerCase();
+    if ((status === 'pending' || status === 'busy') && progress >= 100 && step.includes('done')) {
+      return 'done';
+    }
+    return status;
+  }
+
   resetState(): void {
     this.currentCancel$ = undefined;
     this.progress.set(0);

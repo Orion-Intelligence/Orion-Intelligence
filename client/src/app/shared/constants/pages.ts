@@ -46,6 +46,7 @@ export enum SocialSubCategory {
     REDDIT = 'Reddit',
     FACEBOOK = 'Facebook',
     INSTAGRAM = 'Instagram',
+    LINKEDIN = 'LinkedIn',
     TIKTOK = 'TikTok',
     YOUTUBE = 'YouTube',
 }
@@ -58,7 +59,8 @@ export enum ExploitSubCategory {
 export enum AptIntelSubCategory {
     ALL = 'All',
     APT = 'APT',
-    MALWARE_BAZAAR = 'Malware-Bazaar'
+    MALWARE_BAZAAR = 'Malware',
+    COMPROMISED_ACTORS = 'Compromised-Actors'
 }
 export enum FeedSubCategory {
     NEWS = 'News',

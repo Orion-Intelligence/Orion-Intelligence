@@ -201,6 +201,16 @@ async def search_apt_intel(param: search_consolidated_param_model = Body(...), c
     return await search_apt_controller.getInstance().search_result(param)
 
 
+@api_routes.get("/api/search/apt/families", status_code=200, include_in_schema=False, dependencies=GENERAL_MODULE_DEPS)
+async def get_apt_families():
+    return await search_model.getInstance().get_apt_filter_options()
+
+
+@api_routes.get("/api/search/malware/filter-options", status_code=200, include_in_schema=False, dependencies=GENERAL_MODULE_DEPS)
+async def get_malware_filter_options():
+    return await search_model.getInstance().get_malware_filter_options()
+
+
 @api_routes.post(
     "/api/search/defacement",
     summary="Search defacement reports",

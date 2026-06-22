@@ -298,6 +298,10 @@ export class HomeSearchComponent implements OnInit {
     this.detachWindowPointerListeners();
   }
 
+  canViewSocialIntel(): boolean {
+    return this.licenseService.isAdmin() || (!this.licenseService.isDemo() && this.licenseService.canUseModule('social_mapper'));
+  }
+
   async selectTab(tab:string){
     this.selectedTab=tab;
     await this.router.navigate([], {
@@ -305,9 +309,6 @@ export class HomeSearchComponent implements OnInit {
       queryParams: { tab },
       queryParamsHandling: 'merge',
     });
-    if(tab === 'Geo Fencing'){
-      this.onSearchSubmit();
-    }
   }
 
   @HostListener('document:click', ['$event'])

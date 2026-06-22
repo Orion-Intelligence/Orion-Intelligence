@@ -33,7 +33,7 @@ class content_block_middleware(BaseHTTPMiddleware):
                     if user and user.role == user_role.ADMIN.value:
                         return await call_next(request)
                 except Exception:
-                    pass
+                    return RedirectResponse(url="/login", status_code=302)
             return RedirectResponse(url="/login", status_code=302)
 
         if path == "/dashboard/admin" or path.startswith("/dashboard/admin/"):

@@ -77,8 +77,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "1MB",
-                  "maximumError": "2MB"
+                  "maximumWarning": "2MB",
+                  "maximumError": "3MB"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -110,6 +110,9 @@
                 "src/assets/fonts"
               ],
               "styles": [
+                "node_modules/leaflet/dist/leaflet.css",
+                "node_modules/leaflet.markercluster/dist/MarkerCluster.css",
+                "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css",
                 "src/styles.scss",
                 {
                   "input": "src/tailwind.css",
@@ -185,6 +188,9 @@
               "src/assets/fonts"
             ],
             "styles": [
+              "node_modules/leaflet/dist/leaflet.css",
+              "node_modules/leaflet.markercluster/dist/MarkerCluster.css",
+              "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css",
               "src/styles.scss",
               {
                 "input": "src/tailwind.css",

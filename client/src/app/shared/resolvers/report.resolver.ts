@@ -30,9 +30,16 @@ export class ReportResolver implements Resolve<any> {
         apiUrl = hash ? `search/exploit/${hash}` : `search/exploit`;
         break;
       case 'apt-intel':
-        apiUrl = category_2 === 'apt'
-          ? (hash ? `search/apt/${hash}` : `search/apt`)
-          : (hash ? `search/malware/${hash}` : `search/malware`);
+      case 'threat-intel':
+      case 'apt-intel':
+        if (category_2 === 'compromised-actors') {
+          apiUrl = hash ? `search/defacement/${hash}` : `search/defacement`;
+        }
+        else {
+          apiUrl = category_2 === 'apt'
+            ? (hash ? `search/apt/${hash}` : `search/apt`)
+            : (hash ? `search/malware/${hash}` : `search/malware`);
+        }
         break;
       case 'social':
         if (category_2 == "all") {
@@ -43,7 +50,7 @@ export class ReportResolver implements Resolve<any> {
             apiUrl = hash ? `search/social/${hash}` : `search/social`;
           }
         }
-        else if (category_2 == "twitter" || category_2 == "reddit" || category_2 == "forum" || category_2 == "pastebin" || category_2 == "mastodon" || category_2 == "facebook" || category_2 == "instagram" || category_2 == "tiktok" || category_2 == "youtube") {
+        else if (category_2 == "twitter" || category_2 == "reddit" || category_2 == "forum" || category_2 == "pastebin" || category_2 == "mastodon" || category_2 == "facebook" || category_2 == "instagram" || category_2 == "linkedin" || category_2 == "tiktok" || category_2 == "youtube") {
           apiUrl = hash ? `search/social/${hash}` : `search/social`;
         }
         else {

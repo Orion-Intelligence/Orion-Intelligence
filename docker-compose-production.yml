@@ -136,7 +136,7 @@ services:
       - ENABLE_BROTLI=1
 
   mongo:
-    image: mongo:7.0
+    image: mongo:latest
     container_name: trusted-web-mongodb
     restart: always
     environment:

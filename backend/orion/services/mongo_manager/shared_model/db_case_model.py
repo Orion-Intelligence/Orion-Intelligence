@@ -34,12 +34,12 @@ class CaseType(str, Enum):
 
 class CaseStatus(str, Enum):
     NEW = "new"
-    TRIAGED = "triaged"
-    ASSIGNED = "assigned"
-    INVESTIGATING = "investigating"
-    WAITING_ON_RESPONSE = "waiting_on_response"
-    REMEDIATING = "remediating"
-    REVIEW = "review"
+    INTAKE_REVIEW = "intake_review"
+    UNDER_INVESTIGATION = "under_investigation"
+    EVIDENCE_COLLECTION = "evidence_collection"
+    VERIFICATION = "verification"
+    REGULATORY_ACTION = "regulatory_action"
+    LEGAL_REVIEW = "legal_review"
     RESOLVED = "resolved"
     CLOSED = "closed"
 
@@ -362,6 +362,11 @@ class CaseClosure(BaseModel):
     closedAt: datetime = PydanticField(default_factory=utc_now)
 
 
+class CaseStatusReason(EmbeddedModel):
+    status: CaseStatus
+    reason: str
+
+
 class CaseShare(EmbeddedModel):
     shareId: str
     tokenHash: str
@@ -380,6 +385,7 @@ class db_case_model(Model):
     caseType: CaseType = Field(default=CaseType.OTHER)
     caseTypeOtherValue: str = ""
     status: CaseStatus = Field(default=CaseStatus.NEW)
+    statusReasons: List[CaseStatusReason] = Field(default_factory=list)
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
     tags: List[CaseTag] = Field(default_factory=list)

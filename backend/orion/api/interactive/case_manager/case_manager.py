@@ -12,7 +12,7 @@ from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
-from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifactFile
+from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifactFile, CaseStatus, CaseStatusReason
 from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifact
 from orion.services.mongo_manager.shared_model.db_case_model import CaseClosure
 from orion.services.mongo_manager.shared_model.db_case_model import CaseComment
@@ -25,7 +25,7 @@ from orion.api.interactive.case_manager.case_artifact_helper import CaseArtifact
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
-
+from orion.api.interactive.case_manager.case_config import CASE_STATUS_FLOW
 
 class CaseManager:
     __instance = None
@@ -180,7 +180,7 @@ class CaseManager:
             title=data.title,
             description=data.description,
             caseType=data.caseType,
-            status=data.status,
+            status=CaseStatus.NEW,
             severity=data.severity,
             priority=data.priority,
             intakeSource=data.intakeSource,
@@ -314,6 +314,13 @@ class CaseManager:
         closure_provided = "closure" in data.model_fields_set
         if closure_provided and (data.closure is not None or record.closure is not None) and not CaseHelperMethods.can_close_case(record, current_user):
             raise HTTPException(status_code=403, detail="Only assigned analysts, admins, or maintainers can close cases")
+        
+        if closure_provided and data.closure is not None and record.status != CaseStatus.RESOLVED:
+            raise HTTPException(
+                status_code=400,
+                detail="Case cannot be closed until it reaches resolved status"
+            )
+        
         existing_entities = {
             entity.entityId: entity
             for entity in record.entities
@@ -328,6 +335,19 @@ class CaseManager:
             )
             for entity in data.entities
         ]
+
+        is_closing_from_details = (
+            data.status == CaseStatus.CLOSED
+            and record.status != CaseStatus.CLOSED
+            and data.closure is not None
+        )
+
+        if data.status != record.status and not is_closing_from_details:
+            raise HTTPException(
+                status_code=400,
+                detail="Case status can only be changed from the tracking board"
+            )
+
         record.title = data.title
         record.description = data.description
         record.caseType = data.caseType
@@ -397,6 +417,7 @@ class CaseManager:
             ]
         if closure_provided and data.closure is not None:
             record.closure = CaseClosure(**data.closure.model_dump(), closedBy=current_actor_id, closedAt=server_now)
+            record.status = CaseStatus.CLOSED
             record.closedAt = server_now
         elif closure_provided:
             record.closure = None
@@ -852,3 +873,65 @@ class CaseManager:
             "success": is_valid,
             "status": artifact_file.integrityStatus,
         }
+    
+    async def update_case_status(self, case_id: str, data, current_user) -> CaseResponse:
+        record = await self._engine.find_one(db_case_model, (db_case_model.caseId == case_id)
+            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)))
+
+        if not record:
+            raise HTTPException(status_code=404, detail="Case not found")
+
+        if not CaseHelperMethods.can_view_case(record, current_user):
+            raise HTTPException(status_code=403, detail="Access forbidden")
+
+        if record.isArchived:
+            raise HTTPException(status_code=403, detail="Archived cases cannot be updated")
+
+        reason = data.reason.strip()
+        if not reason:
+            raise HTTPException(status_code=400, detail="Status change reason is required")
+
+        current_status = record.status
+        next_status = data.status
+
+        if next_status == CaseStatus.NEW:
+            raise HTTPException(
+                status_code=400,
+                detail="Case cannot be moved back to new"
+            )
+
+        if next_status == CaseStatus.CLOSED:
+            raise HTTPException(
+                status_code=400,
+                detail="Case must be closed from the case details closure section"
+            )
+
+        current_index = CASE_STATUS_FLOW.index(current_status)
+        next_index = CASE_STATUS_FLOW.index(next_status)
+
+        if abs(next_index - current_index) != 1:
+            raise HTTPException(
+                status_code=400,
+                detail="Case can only move one step forward or backward"
+            )
+
+        record.status = next_status
+        record.updatedAt = utc_now()
+
+        record.statusReasons.append(
+            CaseStatusReason(
+                status=next_status,
+                reason=reason
+            )
+        )
+
+        await self._engine.save(record)
+
+        await AuditLogManager.get_instance().register(
+            str(current_user.tenant_uuid),
+            str(current_user.id),
+            f"Case status changed: caseId={case_id}, from={current_status}, to={next_status}, reason={reason}",
+        )
+
+        return await self._to_response(record, current_user)
+    
