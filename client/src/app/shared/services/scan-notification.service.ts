@@ -63,7 +63,7 @@ export class ScanNotificationService {
       next: response => {
         const job = (response?.items || [])[0];
         if (job) {
-          const normalizedJob = this.normalizeJobView(job);
+          const normalizedJob = this.normalizeScanJobView(job);
           this.cacheJob(normalizedJob);
           this.ensurePolling(normalizedJob);
         }
@@ -99,14 +99,14 @@ export class ScanNotificationService {
         this.currentPage = response?.page || nextPage;
         this.hasMore.set(!!response?.has_more);
         if (reset) {
-          const normalizedItems = items.map(job => this.normalizeJobView(job));
+          const normalizedItems = items.map(job => this.normalizeScanJobView(job));
           normalizedItems.forEach(job => this.cacheJob(job, false));
           this.jobs.set(normalizedItems);
         }
         else {
-          items.forEach(job => this.upsertVisibleJob(this.normalizeJobView(job)));
+          items.forEach(job => this.upsertVisibleJob(this.normalizeScanJobView(job)));
         }
-        items.map(job => this.normalizeJobView(job)).filter(job => this.isIncomplete(job)).forEach(job => this.ensurePolling(job));
+        items.map(job => this.normalizeScanJobView(job)).filter(job => this.isIncomplete(job)).forEach(job => this.ensurePolling(job));
         this.refreshCounts();
         this.isLoading.set(false);
       },
@@ -140,7 +140,7 @@ export class ScanNotificationService {
   }
 
   createJob(request: ScanJobStartRequest): Observable<ScanJob> {
-    return this.createJobRequest(request).pipe(switchMap(response => this.resolveCreateResponse(response, request)), map(job => this.normalizeJobView(job)), tap(job => {
+    return this.createJobRequest(request).pipe(switchMap(response => this.resolveCreateResponse(response, request)), map(job => this.normalizeScanJobView(job)), tap(job => {
       const alreadyCached = this.jobCache.has(job.id);
       this.cacheJob(job);
       if (!alreadyCached) {
@@ -184,7 +184,7 @@ export class ScanNotificationService {
     this.duplicateScanChoice$ = new Subject<DuplicateScanChoice>();
     this.duplicateScanPrompt.set({
       message: response.message,
-      previousScan: this.normalizeJobView(response.previous_scan),
+      previousScan: this.normalizeScanJobView(response.previous_scan),
     });
     return this.duplicateScanChoice$.asObservable();
   }
@@ -314,7 +314,7 @@ export class ScanNotificationService {
     };
   }
 
-  private normalizeJobView(job: ScanJobApiItem): ScanJob {
+  private normalizeScanJobView(job: ScanJobApiItem): ScanJob {
     const id = job.scan_id || '';
     const response = job.response ?? (job.status ? { status: job.status } : {});
 
