@@ -18,15 +18,13 @@ describe('Scans Management - Web Scans Flow', () => {
     cy.get('[data-testid="network-intel-tab-vulnerability-scan"]').should('be.visible').click();
     cy.get('[data-testid="network-intel-search-input"]').clear().type('ucp.edu.pk{enter}');
 
-    cy.visit('/dashboard/scanner/repository-scan');
-    fillPrimaryScanInput('https://github.com/juice-shop/juice-shop');
-    clickSearch();
-    cy.get('[data-testid="scan-download-report"]').filter(':visible').first().should('be.enabled').click();
-    cy.get('[data-testid="scan-print-report"]').filter(':visible').first().should('be.enabled').click();
+    cy.visit('/dashboard/scanner/network-scan');
+    cy.get('[data-testid="network-intel-tab-repository-scan"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('https://github.com/juice-shop/juice-shop{enter}');
 
-    cy.visit('/dashboard/scanner/seo-scan');
-    fillPrimaryScanInput('https://ucp.edu.pk/');
-    clickSearch();
+    cy.visit('/dashboard/scanner/network-scan');
+    cy.get('[data-testid="network-intel-tab-seo-scan"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('https://ucp.edu.pk/{enter}');
 
   });
 });

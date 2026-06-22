@@ -16,7 +16,6 @@ const SIDEBAR_GROUP_ROUTE_PREFIX: Record<string, string> = {
   'Stealer logs': 'stealerlogs',
   'Web Scans': 'scanner',
   'Entity Lookup': 'api',
-  Dump: 'dump',
 };
 
 function getSidebarGroupTestId(itemName: string): string {

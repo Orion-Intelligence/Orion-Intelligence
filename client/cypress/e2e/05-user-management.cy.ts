@@ -39,14 +39,14 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
 
     cy.get('[data-testid="sidebar-subitem-profile-system-settings"]').filter(':visible').first().scrollIntoView().click();
     cy.url().should('include', 'system-settings');
-    cy.get('[data-testid="system-settings-edit"]').should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-edit"]').should('be.visible').click();
     cy.get('[data-testid="system-settings-account-mail"]').scrollIntoView().should('be.visible').clear().type('cypress-mailer@example.test');
     cy.get('[data-testid="system-settings-account-mail-password"]').scrollIntoView().should('be.visible').clear().type('1#VSC&cuad)d', {log: false});
     cy.get('[data-testid="system-settings-account-smtp-server"]').scrollIntoView().should('be.visible').clear().type('mailpit');
     cy.get('[data-testid="system-settings-account-smtp-port"]').scrollIntoView().should('be.visible').clear().type('1025');
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="system-settings-save"]').should('be.visible').click();
-    cy.get('[data-testid="system-settings-edit"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="system-settings-mail-save"]').should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-edit"]', {timeout: 30000}).should('be.visible');
 
     cy.visit('/dashboard/profile/users');
     cy.get('[data-testid="tenant-add-user-button"]').should('not.be.disabled');
@@ -102,7 +102,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
   });
 
   it('logs in as testing2 and verifies assigned license sidebar groups', () => {
-    loginAndClickSidebar(testUsers.testing2.username, ['General Intelligence', 'Data Breach', 'Defacement', 'Social', 'Exploit', 'Feed', 'Dump'], testUsers, testData);
+    loginAndClickSidebar(testUsers.testing2.username, ['General Intelligence', 'Data Breach', 'Defacement', 'Social', 'Exploit', 'Feed'], testUsers, testData);
   });
 
   it('logs in as testing2 and updates account settings preferences', () => {
@@ -117,7 +117,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
   });
 
   it('logs in as testing3 and verifies assigned license sidebar groups', () => {
-    loginAndClickSidebar(testUsers.testing3.username, ['General Intelligence', 'Data Breach', 'Defacement', 'Social', 'Exploit', 'Feed', 'Stealer logs', 'Dump'], testUsers, testData);
+    loginAndClickSidebar(testUsers.testing3.username, ['General Intelligence', 'Data Breach', 'Defacement', 'Social', 'Exploit', 'Feed', 'Stealer logs'], testUsers, testData);
   });
 
   it('logs in as testing4 and verifies scanner and api sidebar groups', () => {

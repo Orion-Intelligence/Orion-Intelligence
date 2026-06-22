@@ -8,7 +8,7 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { Category } from '../../../shared/constants/pages';
 import { combineLatest, distinctUntilChanged } from 'rxjs';
 import { ResultComponent } from '../../../shared/partials/result/result.component';
-import { defacement_filters, exploit_filters, feed_filters, general_filters, leak_filters, apt_intel_filters } from '../../../shared/constants/filters';
+import { defacement_filters, exploit_filters, feed_filters, general_filters, leak_filters, apt_intel_filters, social_filters } from '../../../shared/constants/filters';
 import { AppService } from '../../../services/core/app/app.service';
 import { DashboardResultExploitComponent } from '../dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
 import { DashboardResultSocialComponent } from '../dashboard-results/dashboard-result-social/dashboard-result-social.component';
@@ -45,6 +45,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
   protected readonly general_filters = general_filters;
   protected readonly leak_filters = leak_filters;
   protected readonly feed_filters = feed_filters;
+  protected readonly social_filters = social_filters;
   protected readonly defacement_filters = defacement_filters;
   protected readonly exploit_filters = exploit_filters;
   protected readonly apt_intel_filters = apt_intel_filters;
@@ -83,6 +84,8 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
         return this.apt_intel_filters;
       case Category.FEED.toLowerCase():
         return this.feed_filters;
+      case Category.SOCIAL.toLowerCase():
+        return this.social_filters;
       case Category.BREACH.toLowerCase():
         return this.leak_filters;
       default:

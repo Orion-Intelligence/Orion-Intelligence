@@ -205,7 +205,8 @@ describe('Consolidated - IOC Basic Flow', () => {
     openFirstReportAndGoBack();
 
     cy.get('[data-testid="side-filter-open"]').scrollIntoView().click();
-    cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select('4: clearnet');
+    cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().click();
+    cy.contains('#side-filter-menu-network [role="option"]', /^Clearnet$/i).click({ force: true });
     cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
     cy.get('[data-testid="result-card"]').should('have.length.greaterThan', 0);
     cy.get('[data-testid="result-card"]').then(($cards) => {

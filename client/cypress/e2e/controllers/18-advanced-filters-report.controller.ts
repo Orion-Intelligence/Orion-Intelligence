@@ -69,6 +69,8 @@ let SIDEBAR_SUBITEM_PREFIX: Record<string, string> = {
   'Feed': 'feed',
 };
 
+const DIRECT_SECTION_BUTTONS = new Set(['General Intelligence', 'Data Breach', 'Defacement', 'Exploit']);
+
 
 export function visitDashboard18() {
   cy.visit('/dashboard/profile/homepage');
@@ -80,6 +82,9 @@ export function openSidebarGroup18(title: string) {
 }
 
 export function clickSidebarSubItem18(groupTitle: string, itemTitle: string) {
+  if (itemTitle === 'All' && DIRECT_SECTION_BUTTONS.has(groupTitle)) {
+    return;
+  }
   const prefix = SIDEBAR_SUBITEM_PREFIX[groupTitle];
   const testId = groupTitle === 'Feed' ? 'sidebar-subitem-feed-news' : `sidebar-subitem-${prefix}-${itemTitle.toLowerCase()}`;
   cy.get(`[data-testid="${testId}"]`).scrollIntoView().should('be.visible').click();
@@ -97,7 +102,7 @@ export function clearAdvancedFilters18() {
 export function selectAdvancedFilterCategory18(category: FilterCategoryKey) {
   openAdvancedFiltersPanel18();
   const formattedCategory = category.replace(/_/g, '-');
-  cy.get(`[data-testid="entity-filter-category-${formattedCategory}"]`).scrollIntoView().click();
+  cy.get(`[data-testid="entity-filter-category-${formattedCategory}"]`).scrollIntoView().click({ force: true });
 }
 
 export function addAdvancedFilterValue18(value: string) {
@@ -123,10 +128,15 @@ export function guardAgainstEmptyResults18() {
 export function openReportDetail18(sectionTitle: string) {
   guardAgainstEmptyResults18();
   if (sectionTitle === 'Defacement') {
-    cy.get('tbody tr.cursor-pointer').first().click();
-  } else {
-    cy.get('[data-testid="open-report"]').first().click();
+    cy.get('[data-testid="defacement-group-card"]').first().find('button').click({ force: true });
+    cy.get('[data-testid="defacement-record-sidebar"] a').first().invoke('removeAttr', 'target').click({ force: true });
+    return;
   }
+  if (sectionTitle === 'Exploit') {
+    cy.get('[data-testid="result-card"] a').first().invoke('removeAttr', 'target').click({ force: true });
+    return;
+  }
+  cy.get('[data-testid="open-report"]').first().invoke('removeAttr', 'target').click({ force: true });
 }
 
 export function assertValuesInMetadata18(category: FilterCategoryKey, values: string[]) {

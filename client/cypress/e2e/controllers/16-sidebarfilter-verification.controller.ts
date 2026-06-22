@@ -15,9 +15,34 @@ export function openSidebar() {
   waitForSidebar();
 }
 
-export function selectAndApply(selectTestId: string, option: string) {
+export function ensureDashboardSidebarExpanded() {
+  cy.get('body').then(($body) => {
+    if ($body.find('[data-testid="sidebar-expand-button"]:visible').length) {
+      cy.get('[data-testid="sidebar-expand-button"]').click();
+    }
+  });
+  cy.get('[data-testid="sidebar-collapse-button"]').should('be.visible');
+}
+
+export function selectSidebarFilterOption(selectTestId: string, option: string) {
   cy.get(`[data-testid="${selectTestId}"]`)
-    .select(option);
+    .filter(':visible')
+    .first()
+    .scrollIntoView()
+    .should('be.visible')
+    .then(($select) => {
+      if ($select.is('select')) {
+        cy.wrap($select).select(option);
+        return;
+      }
+      const menuId = $select.attr('aria-controls');
+      cy.wrap($select).click();
+      cy.get(`#${menuId} [role="option"]`).contains(option).click({ force: true });
+    });
+}
+
+export function selectAndApply(selectTestId: string, option: string) {
+  selectSidebarFilterOption(selectTestId, option);
 
   cy.get('[data-testid="side-filter-apply"]')
     .click();

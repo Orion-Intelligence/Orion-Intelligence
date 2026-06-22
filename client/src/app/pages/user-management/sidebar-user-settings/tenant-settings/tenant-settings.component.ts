@@ -24,6 +24,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 export class TenantSettingsComponent implements OnInit {
   isAccountSectionOpen = true;
   isEditing = false;
+  contactEditing = false;
   mailErrorState = false;
   userSessionData: userSessionData;
   userId: string = '';
@@ -55,6 +56,12 @@ export class TenantSettingsComponent implements OnInit {
 
   toggleEdit(event: Event) {
     this.isEditing = toggleEditState(event, this.isEditing, () => {
+      this.updateUser();
+    });
+  }
+
+  toggleContactEdit(event: Event) {
+    this.contactEditing = toggleEditState(event, this.contactEditing, () => {
       this.updateUser();
     });
   }
@@ -91,6 +98,11 @@ export class TenantSettingsComponent implements OnInit {
   cancelEdit(event: Event) {
     event.stopPropagation();
     this.isEditing = false;
+  }
+
+  cancelContactEdit(event: Event) {
+    event.stopPropagation();
+    this.contactEditing = false;
   }
 
   updateUserResource(file: File) {

@@ -213,6 +213,12 @@ class TenantManager:
 
         if is_admin and data.status is not None:
             tenant.status = data.status
+        elif (
+            data.status == TenantStatus.ACTIVE
+            and tenant.status == TenantStatus.ONBOARDING
+            and str(tenant.id) == str(current_user.tenant_uuid)
+        ):
+            tenant.status = TenantStatus.ACTIVE
 
         if is_admin and data.licenses is not None and len(data.licenses) > 0:
             if LicenseName.FEEDER.value in data.licenses:

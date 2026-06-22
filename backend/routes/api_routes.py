@@ -123,11 +123,12 @@ async def search_leak(param: search_consolidated_param_model = Body(...), curren
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
     if param.category in ["all"]:
+        param.category = "leak"
         base_index = [ELASTIC_INDEX.S_LEAK_INDEX]
-        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, ["news"], ["leaks", "tracking"])
+        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
     else:
         if param.category == "databases":
-            param.category = "leaks"
+            param.category = "leak"
         base_index = [ELASTIC_INDEX.S_LEAK_INDEX]
         return await search_model.getInstance().search_consolidated_ranked_result(param, base_index,[], [param.category])
 

@@ -28,9 +28,9 @@ export function fillSystemMailConfiguration(server: string, port: string) {
 
 export function ensureSystemSettingsEditing() {
   cy.get('body').then(($body) => {
-    if (!$body.find('[data-testid="system-settings-save"]:visible').length) {
+    if (!$body.find('[data-testid="system-settings-mail-save"]:visible').length) {
       cy.scrollDashboardToTop();
-      cy.get('[data-testid="system-settings-edit"]').first().click({force: true});
+      cy.get('[data-testid="system-settings-mail-edit"]').first().click({force: true});
     }
   });
 }

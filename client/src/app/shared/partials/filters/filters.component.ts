@@ -141,8 +141,9 @@ export class FiltersComponent implements OnInit {
 
   resetFilters() {
     this.scrollService.clearSavedPosition();
+    this.selectedFilters = {};
     this.dashboard.selectedFilters.set({});
-    this.filterChanged.emit({ ...this.selectedFilters });
+    this.filterChanged.emit({});
     // TODO: The 'emit' function requires a mandatory void argument
     this.filterReset.emit(undefined);
     this.closeFilter();

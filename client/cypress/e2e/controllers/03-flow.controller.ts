@@ -34,14 +34,17 @@ export function openSidebarGroup(title: string) {
     cy.wrap($group).scrollIntoView();
     let group = $group.parent('div');
     let sub = group.find('> ul');
+    if (!sub.length) {
+      cy.wrap($group).click({ force: true });
+      return;
+    }
     let isClosed = !sub.length || getComputedStyle(sub[0] as HTMLElement).pointerEvents === 'none';
     if (isClosed) {
       cy.wrap($group).find('img[alt="Drop Down"]').click();
     }
-  });
-
-  cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
-    expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
+    cy.wrap(sub).should(($ul) => {
+      expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
+    });
   });
 }
 
@@ -162,7 +165,15 @@ export function resetDirectoryFilters() {
 
 export function applyDirectoryDropdown(testId: string, option: { label: string; value: string; }, queryKey: string) {
   openDirectoryFilter();
-  cy.get(`[data-testid="side-filter-select-${testId}"]`).scrollIntoView().select(option.label);
+  cy.get(`[data-testid="side-filter-select-${testId}"]`).scrollIntoView().then(($el) => {
+    if ($el.is('select')) {
+      cy.wrap($el).select(option.label);
+      return;
+    }
+    const menuId = $el.attr('aria-controls');
+    cy.wrap($el).click();
+    cy.contains(`#${menuId} [role="option"]`, option.label).click();
+  });
   cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
   waitForDirectoryRequest();
   cy.location('search').should('include', `${queryKey}=${option.value}`);

@@ -352,11 +352,18 @@ export const general_filters: FilterModel = {
 export const leak_filters: FilterModel = {
   filters: {
     network: COMMON_NETWORK,
-    safe: SAFE_FILTER,
-    daterange: DATERANGE_CREATION
+    daterange: DATERANGE_CREATION,
+    content: createThreatContent()
   }
 };
 export const feed_filters: FilterModel = {
+  filters: {
+    network: COMMON_NETWORK,
+    daterange: DATERANGE_CREATION,
+    content: createThreatContent()
+  }
+};
+export const social_filters: FilterModel = {
   filters: {
     network: COMMON_NETWORK,
     daterange: DATERANGE_CREATION,

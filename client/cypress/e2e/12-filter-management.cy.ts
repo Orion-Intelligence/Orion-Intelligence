@@ -1,9 +1,80 @@
-import {CONTENT_TYPES, ENTITY_FILTERS, NETWORK_OPTIONS, SAFE_SEARCH_OPTIONS, SEARCH_BY_OPTIONS, SORT_OPTIONS} from '../support/constants';
-import {applyEntityFilter, selectDateRangeAndReopen, selectDateRangeResetAndReopen} from './controllers/12-filter-management.controller';
+import {CONTENT_TYPES, ENTITY_FILTERS, NETWORK_OPTIONS, SEARCH_BY_OPTIONS, SORT_OPTIONS} from '../support/constants';
+import {applyEntityFilter, ensureDashboardSidebarExpanded12, selectDateRangeAndReopen, selectDateRangeResetAndReopen, selectSidebarFilterOption12} from './controllers/12-filter-management.controller';
+
+const THREAT_CONTENT_TYPES = ['All', 'Leak', 'Credential', 'Ransomware'];
+
+interface ExploitFilterCase {
+  selectTestId: string;
+  label: string;
+  requestField: string;
+  requestValue: string;
+  resultFields: string[];
+  expectedValue: string;
+  search?: string;
+}
+
+const EXPLOIT_FILTER_CASES: ExploitFilterCase[] = [
+  { selectTestId: 'side-filter-select-content', label: 'CVE', requestField: 'content', requestValue: 'cve', resultFields: ['m_content_type'], expectedValue: 'cve' },
+  { selectTestId: 'side-filter-select-m_severity', label: 'Critical', requestField: 'm_severity', requestValue: 'critical', resultFields: ['m_severity'], expectedValue: 'critical' },
+  { selectTestId: 'side-filter-select-m_risk', label: 'Critical', requestField: 'm_risk', requestValue: 'critical', resultFields: ['m_risk'], expectedValue: 'critical' },
+  { selectTestId: 'side-filter-select-m_remote_type', label: 'Remote', requestField: 'm_remote_type', requestValue: 'remote', resultFields: ['m_remote_type'], expectedValue: 'remote' },
+  { selectTestId: 'side-filter-select-m_platform', label: 'Windows', requestField: 'm_platform', requestValue: 'windows', resultFields: ['m_platform'], expectedValue: 'windows' },
+  { selectTestId: 'side-filter-select-m_cve', label: 'CVE-2017-0120', requestField: 'm_cve', requestValue: 'cve-2017-0120', resultFields: ['m_cve'], expectedValue: 'cve-2017-0120' },
+  { selectTestId: 'side-filter-select-m_cwe', label: 'CWE-78', requestField: 'm_cwe', requestValue: 'cwe-78', resultFields: ['m_cwe'], expectedValue: 'cwe-78' },
+  { selectTestId: 'side-filter-select-m_product', label: 'Windows', requestField: 'm_product', requestValue: 'windows', resultFields: ['m_product'], expectedValue: 'windows' },
+  { selectTestId: 'side-filter-select-m_tags', label: 'pip', requestField: 'm_tags', requestValue: 'pip', resultFields: ['m_tags'], expectedValue: 'pip' },
+];
+const EXPLOIT_FILTER_URL = `/dashboard/exploit/all?q=${encodeURIComponent('*')}&page=1&platform_result_count=100&matchtype=or&must=true`;
+
+function fieldValues(item: any, fields: string[]): string[] {
+  return fields
+    .flatMap((field) => Array.isArray(item?.[field]) ? item[field] : [item?.[field]])
+    .map((value: any) => String(value || '').trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function selectExploitFilterOption(selectTestId: string, option: string, search = option) {
+  cy.get(`[data-testid="${selectTestId}"]`)
+    .filter(':visible')
+    .first()
+    .scrollIntoView()
+    .should('be.visible')
+    .then(($select) => {
+      const menuId = $select.attr('aria-controls');
+      cy.wrap($select).click();
+      cy.get(`#${menuId}`).parent().find('input').clear({ force: true }).type(search, { force: true });
+      cy.contains(`#${menuId} [role="option"]`, option, { timeout: 15000 }).click({ force: true });
+    });
+}
+
+function expectExploitResponseFields(interception: any, fields: string[], expected: string): void {
+  const results = interception.response?.body?.Result || [];
+  expect(results.length, `${expected} filtered results`).to.be.greaterThan(0);
+  results.forEach((item: any) => {
+    expect(fieldValues(item, fields), fields.join(',')).to.include(expected);
+  });
+}
+
+function applyExploitFilterCase(filterCase: ExploitFilterCase) {
+  cy.openSideFilter();
+  selectExploitFilterOption(filterCase.selectTestId, filterCase.label, filterCase.search || filterCase.label);
+  cy.get('[data-testid="side-filter-apply"]').click();
+  cy.wait('@exploitSearch').then((filterSearch) => {
+    expect(String(filterSearch.request.body?.[filterCase.requestField] || '').toLowerCase()).to.eq(filterCase.requestValue);
+    expectExploitResponseFields(filterSearch, filterCase.resultFields, filterCase.expectedValue);
+  });
+
+  cy.openSideFilter();
+  cy.get('[data-testid="side-filter-reset"]').click();
+  cy.wait('@exploitSearch').then((resetSearch) => {
+    expect(String(resetSearch.request.body?.[filterCase.requestField] || '').toLowerCase()).to.not.eq(filterCase.requestValue);
+  });
+}
 
 describe('Filter Management', () => {
   beforeEach(() => {
     cy.loginAsAdmin();
+    ensureDashboardSidebarExpanded12();
   });
 
   afterEach(() => {
@@ -45,12 +116,6 @@ describe('Filter Management', () => {
 
     cy.openSideFilter();
 
-    SAFE_SEARCH_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-safe"]').select(option);
-      cy.get('[data-testid="side-filter-apply"]').click();
-      cy.openSideFilter();
-    });
-
     cy.scrollDashboardToTop();
     cy.get('[data-testid="side-filter-date-toggle"]').should('be.visible').click();
     cy.get('[data-testid="side-filter-date-day-1"]').filter(':visible').first().click();
@@ -59,7 +124,7 @@ describe('Filter Management', () => {
     cy.openSideFilter();
 
     CONTENT_TYPES.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-content"]').select(option);
+      selectSidebarFilterOption12('side-filter-select-content', option);
       cy.get('[data-testid="side-filter-apply"]').click();
       cy.openSideFilter();
     });
@@ -71,7 +136,7 @@ describe('Filter Management', () => {
   it('applies all filter options in Data Breach', () => {
     cy.scrollDashboardToTop()
     cy.get('[data-testid="sidebar-group-breach"]').scrollIntoView().click();
-    cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
+    cy.get('[data-testid="dashboard-general-input"]').should('be.visible').clear().type('leak{enter}');
     cy.scrollDashboardToTop();
     cy.get('[data-testid="dashboard-advance-toggle"]').should('exist').then(($toggle) => {
       cy.wrap($toggle).closest('label').click();
@@ -80,13 +145,7 @@ describe('Filter Management', () => {
     cy.openSideFilter();
 
     NETWORK_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-network"]').select(option);
-      cy.get('[data-testid="side-filter-apply"]').click();
-      cy.openSideFilter();
-    });
-
-    SAFE_SEARCH_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-safe"]').select(option);
+      selectSidebarFilterOption12('side-filter-select-network', option);
       cy.get('[data-testid="side-filter-apply"]').click();
       cy.openSideFilter();
     });
@@ -95,12 +154,6 @@ describe('Filter Management', () => {
     cy.openSideFilter();
     cy.get('[data-testid="side-filter-reset"]').click();
     cy.openSideFilter();
-
-    CONTENT_TYPES.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-content"]').select(option);
-      cy.get('[data-testid="side-filter-apply"]').click();
-      cy.openSideFilter();
-    });
 
     cy.closeSideFilter();
     cy.scrollDashboardToTop();
@@ -115,7 +168,7 @@ describe('Filter Management', () => {
 
     cy.openSideFilter();
     NETWORK_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-network"]').select(option);
+      selectSidebarFilterOption12('side-filter-select-network', option);
       cy.applySideFilter();
       cy.openSideFilter();
     });
@@ -133,13 +186,13 @@ describe('Filter Management', () => {
 
     cy.openSideFilter();
     NETWORK_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-network"]').select(option);
+      selectSidebarFilterOption12('side-filter-select-network', option);
       cy.get('[data-testid="side-filter-apply"]').click();
       cy.openSideFilter();
     });
 
-    CONTENT_TYPES.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-content"]').select(option);
+    THREAT_CONTENT_TYPES.forEach((option) => {
+      selectSidebarFilterOption12('side-filter-select-content', option);
       cy.get('[data-testid="side-filter-apply"]').click();
       cy.openSideFilter();
     });
@@ -148,24 +201,15 @@ describe('Filter Management', () => {
     cy.get('[data-testid="dashboard-search-submit"]').first().scrollIntoView().click();
   });
   it('applies all filters in Exploit with auto-apply', () => {
+    cy.intercept('POST', '**/api/search/exploit').as('exploitSearch');
     cy.scrollDashboardToTop()
     cy.get('[data-testid="sidebar-group-exploit"]').scrollIntoView().click();
     cy.get('[data-testid="dashboard-general-input"]').should('be.visible');
-    cy.openSideFilter();
-    selectDateRangeResetAndReopen();
-    cy.openSideFilter();
+    cy.wait('@exploitSearch');
+    cy.visit(EXPLOIT_FILTER_URL);
+    cy.wait('@exploitSearch');
 
-    CONTENT_TYPES.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-content"]').select(option);
-      cy.get('[data-testid="side-filter-apply"]').click();
-      cy.openSideFilter();
-    });
-
-    NETWORK_OPTIONS.forEach((option) => {
-      cy.get('[data-testid="side-filter-select-network"]').select(option);
-      cy.get('[data-testid="side-filter-apply"]').click();
-      cy.openSideFilter();
-    });
+    EXPLOIT_FILTER_CASES.forEach((filterCase) => applyExploitFilterCase(filterCase));
 
     cy.closeSideFilter();
     cy.get('[data-testid="dashboard-search-submit"]').first().scrollIntoView().click();

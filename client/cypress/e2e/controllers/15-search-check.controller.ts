@@ -70,6 +70,8 @@ const SIDEBAR_SUBITEM_PREFIX: Record<string, string> = {
   Feed: 'feed',
 };
 
+const DIRECT_SECTION_BUTTONS = new Set(['General Intelligence', 'Data Breach', 'Defacement', 'Exploit']);
+
 export function openSidebarGroup15(title: string) {
   const testId = SIDEBAR_GROUP_TESTID[title];
   expect(testId, `sidebar testid mapping for "${title}"`).to.exist;
@@ -78,6 +80,10 @@ export function openSidebarGroup15(title: string) {
     .scrollIntoView()
     .should('be.visible')
     .click();
+
+  if (DIRECT_SECTION_BUTTONS.has(title)) {
+    return;
+  }
 
   cy.get(`[data-testid="${testId}"]`)
     .parent()
@@ -90,6 +96,9 @@ export function openSidebarGroup15(title: string) {
 }
 
 export function clickSidebarSubItem15(groupTitle: string, itemTitle: string) {
+  if (itemTitle === 'All' && DIRECT_SECTION_BUTTONS.has(groupTitle)) {
+    return;
+  }
   const prefix = SIDEBAR_SUBITEM_PREFIX[groupTitle];
   const testId = SIDEBAR_GROUP_TESTID[groupTitle];
   expect(prefix, `subitem prefix mapping for "${groupTitle}"`).to.exist;
@@ -164,49 +173,40 @@ export function assertFirstDefacementRow(data: {search_query: string; base_url: 
   const allowedWebUrls = Array.isArray(data.web_url) ? data.web_url : [data.web_url];
 
   cy.wait(1500)
-  cy.get('tbody tr.cursor-pointer', {timeout: 75000})
-    .then(($rows) => {
-      const matchingRow = Array.from($rows).find((row) => {
-        const cells = row.querySelectorAll('td');
-        const rowText = Array.from(cells).map((cell) => cell.textContent?.trim() || '').join(' ');
-        return allowedBaseUrls.some((baseUrl) => rowText.includes(baseUrl.trim())) && rowText.includes(data.team.trim());
+  cy.get('tbody tr.cursor-pointer, [data-testid="defacement-group-card"]', {timeout: 75000})
+    .then(($items) => {
+      const matchingItem = Array.from($items).find((item) => {
+        const itemText = item.textContent || '';
+        return allowedBaseUrls.some((baseUrl) => itemText.includes(baseUrl.trim())) && itemText.includes(data.team.trim());
       });
 
-      expect(matchingRow, `defacement row for ${allowedBaseUrls.join(' or ')}`).to.exist;
-      cy.wrap(matchingRow as HTMLTableRowElement).scrollIntoView().should('be.visible').as('firstRow');
+      expect(matchingItem, `defacement result for ${allowedBaseUrls.join(' or ')}`).to.exist;
+      cy.wrap(matchingItem as HTMLElement).scrollIntoView().should('be.visible').as('firstDefacementResult');
     });
 
-  cy.get('@firstRow')
-    .find('td[data-label="Base URL"]')
+  cy.get('@firstDefacementResult')
     .invoke('text')
-    .then((text) => {
+    .then((text: string) => {
       expect(
         allowedBaseUrls.some((baseUrl) => text.trim().includes(baseUrl.trim())),
         `expected base url to include one of: ${allowedBaseUrls.join(', ')}`
       ).to.equal(true);
-    });
-
-  cy.get('@firstRow')
-    .find('td[data-label="Team"]')
-    .invoke('text')
-    .then((text) => {
-      expect(text.trim()).to.equal(data.team.trim());
-    });
-
-  cy.get('@firstRow')
-    .find('td[data-label="Leak Date"]')
-    .invoke('text')
-    .then((text) => {
       expect(text.trim()).to.include(data.date.trim());
+      expect(text.trim()).to.include(data.team.trim());
     });
 
-  cy.get('@firstRow')
-    .find('td[data-label="Web URL"] a[href]')
-    .invoke('attr', 'href')
-    .then((href) => {
-      expect(
-        allowedWebUrls.includes(href || ''),
-        `expected web url to be one of: ${allowedWebUrls.join(', ')}`
-      ).to.equal(true);
+  cy.get('@firstDefacementResult')
+    .then(($item) => {
+      if ($item.is('tr')) {
+        cy.wrap($item)
+          .find('td[data-label="Web URL"] a[href]')
+          .invoke('attr', 'href')
+          .then((href) => {
+            expect(
+              allowedWebUrls.includes(href || ''),
+              `expected web url to be one of: ${allowedWebUrls.join(', ')}`
+            ).to.equal(true);
+          });
+      }
     });
 }

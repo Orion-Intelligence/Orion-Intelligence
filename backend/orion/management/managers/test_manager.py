@@ -246,6 +246,44 @@ class test_manager:
                 print("Mocks dir does not exist, exiting", flush=True)
                 return
 
+            async def _create_index_from_fixture(idx: str):
+                mapping_fp = mocks_dir / f"{idx}.mapping.json"
+                settings_fp = mocks_dir / f"{idx}.settings.json"
+                body = {}
+
+                if mapping_fp.exists():
+                    with mapping_fp.open("r", encoding="utf-8") as f:
+                        mapping_payload = json.load(f)
+                    mappings = mapping_payload.get(idx, mapping_payload).get("mappings")
+                    if mappings:
+                        body["mappings"] = mappings
+
+                if settings_fp.exists():
+                    with settings_fp.open("r", encoding="utf-8") as f:
+                        settings_payload = json.load(f)
+                    index_settings = (
+                        settings_payload
+                        .get(idx, settings_payload)
+                        .get("settings", {})
+                        .get("index", {})
+                    )
+                    allowed_settings = {}
+                    for key in ("analysis", "max_result_window", "number_of_shards", "number_of_replicas"):
+                        if key in index_settings:
+                            allowed_settings[key] = index_settings[key]
+                    if allowed_settings:
+                        body["settings"] = allowed_settings
+
+                if not body:
+                    return
+
+                print(f"Creating index from fixture mapping: {idx}", flush=True)
+                try:
+                    await es.indices.create(index=idx, body=body)
+                except ApiError as e:
+                    if getattr(e, "status_code", None) != 400:
+                        raise
+
             def _has_data(p: Path) -> bool:
                 with p.open("r", encoding="utf-8") as f:
                     for line in f:
@@ -265,6 +303,7 @@ class test_manager:
 
                 idx = data_fp.name.replace(".data.ndjson", "")
                 print(f"Target index: {idx}", flush=True)
+                await _create_index_from_fixture(idx)
 
                 async def gen(fp=data_fp, default_index=idx):
                     with fp.open("r", encoding="utf-8") as f:

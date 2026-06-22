@@ -40,11 +40,11 @@
       </div>
     </div>
 
-    <div class="flex-1 overflow-y-auto overflow-x-hidden py-4">
-      <div class="grid gap-2">
+    <div class="flex-1 overflow-y-auto overflow-x-hidden py-4 pr-2">
+      <div class="grid min-w-0 gap-2">
         @for (record of filteredRecords(); track record.id; let i = $index) {
-          <a [id]="'item-' + record.id" (click)="onRecordClick(record)" [queryParams]="record.queryParams" [routerLink]="record.routerLink" target="_blank" rel="noopener noreferrer" class="block w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-3 text-left no-underline transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-790)]">
-            <div class="flex items-start justify-between gap-3">
+          <a [id]="'item-' + record.id" (click)="onRecordClick(record)" [queryParams]="record.queryParams" [routerLink]="record.routerLink" target="_blank" rel="noopener noreferrer" class="block min-w-0 max-w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-3 text-left no-underline transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-790)]">
+            <div class="flex min-w-0 items-start justify-between gap-3">
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2">
                   <span class="font-mono text-[11px] text-[var(--color-text4)]">#{{ i + 1 }}</span>

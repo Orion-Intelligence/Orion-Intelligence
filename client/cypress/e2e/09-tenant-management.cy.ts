@@ -272,7 +272,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.contains('div', 'Privacy').should('be.visible');
     cy.contains('div', 'Address').should('be.visible');
 
-    cy.contains('button', 'Edit').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-contact-edit"]').scrollIntoView().should('be.visible').click();
     cy.get('input[name="tenant_phone"]').scrollIntoView().should('be.visible').clear().type(phoneValue);
     cy.get('input[name="tenant_country"]').scrollIntoView().should('be.visible').clear().type(countryValue);
     cy.get('input[name="tenant_city"]').scrollIntoView().should('be.visible').clear().type(cityValue);
@@ -288,7 +288,9 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
       });
 
     cy.scrollDashboardToBottom()
-    cy.contains('button', 'Save').scrollIntoView().should('be.visible').click();
+    cy.intercept('POST', '**/api/update/tenants').as('saveTenantSettings');
+    cy.get('[data-testid="tenant-contact-edit"]').scrollIntoView().should('be.visible').click();
+    cy.wait('@saveTenantSettings');
     cy.reload();
     cy.scrollDashboardToBottom()
 

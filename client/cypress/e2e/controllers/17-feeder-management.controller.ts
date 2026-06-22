@@ -47,24 +47,41 @@ function getWrongFileCategory(ruleKey: string) {
 }
 
 function selectFeederRule(ruleKey: string) {
-  return cy.get(`[data-testid="feeder-rule-option-${ruleKey}"]`).then(($option) => {
-    cy.get('[data-testid="feeder-rule-select"]').should('be.visible').and('not.be.disabled').select($option.attr('value')!);
-    cy.get('[data-testid="feeder-rule-select"]')
-      .find(':selected')
-      .should('have.attr', 'data-testid', `feeder-rule-option-${ruleKey}`);
+  return cy.get('[data-testid="feeder-rule-select"]').should('be.visible').and('not.be.disabled').then(($select) => {
+    if ($select.is('select')) {
+      cy.get(`[data-testid="feeder-rule-option-${ruleKey}"]`).then(($option) => {
+        cy.wrap($select).select($option.attr('value')!);
+        cy.wrap($select).find(':selected').should('have.attr', 'data-testid', `feeder-rule-option-${ruleKey}`);
+      });
+      cy.wait(250);
+      return;
+    }
+
+    cy.wrap($select).click();
+    cy.get(`[data-testid="feeder-rule-option-${ruleKey}"]`).click({ force: true });
     cy.wait(250);
   });
 }
 
 export function assertFeederRuleOptions() {
-  cy.get('[data-testid="feeder-rule-select"]').should('be.visible');
-  cy.get('[data-testid="feeder-rule-select"] option').then(($options) => {
-    const actualRuleKeys = [...$options]
-      .map((option) => option.getAttribute('data-testid') || '')
-      .filter(Boolean)
-      .map((testId) => testId.replace('feeder-rule-option-', ''));
+  cy.get('[data-testid="feeder-rule-select"]').should('be.visible').then(($select) => {
+    if ($select.is('select')) {
+      cy.get('[data-testid="feeder-rule-select"] option').then(($options) => {
+        const actualRuleKeys = [...$options]
+          .map((option) => option.getAttribute('data-testid') || '')
+          .filter(Boolean)
+          .map((testId) => testId.replace('feeder-rule-option-', ''));
 
-    expect(actualRuleKeys.length).to.be.greaterThan(11);
+        expect(actualRuleKeys.length).to.be.greaterThan(11);
+      });
+      return;
+    }
+
+    cy.wrap($select).click();
+    cy.get('[data-testid^="feeder-rule-option-"]').then(($options) => {
+      expect($options.length).to.be.greaterThan(11);
+    });
+    cy.get('body').click(0, 0);
   });
 }
 
