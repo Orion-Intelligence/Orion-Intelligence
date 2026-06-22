@@ -9,6 +9,7 @@ import { ResultComponent } from '../../../shared/partials/result/result.componen
 import { DashboardResultsGeneralComponent } from '../../intel-panel/dashboard-results/dashboard-results-general-grid/dashboard-results-general.component';
 import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
 import { DashboardResultExploitComponent } from '../../intel-panel/dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
+import { DashboardResultAptComponent } from '../../intel-panel/dashboard-results/dashboard-result-apt/dashboard-result-apt.component';
 import { DashboardResultChatComponent } from '../../intel-panel/dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
 import { SortGroupedResultsPipe } from '../../../shared/pipes/sort-grouped-results.pipe';
 import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, FeedSubCategory, SocialSubCategory, AptIntelSubCategory } from '../../../shared/constants/pages';
@@ -37,7 +38,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel, CrossSearchCardComponent, SatelliteIntel, TranslatePipe],
+  imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultAptComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel, CrossSearchCardComponent, SatelliteIntel, TranslatePipe],
   templateUrl: './dashboard-consolidated.component.html',
   animations: [scanAnimation, fadeInDashboardItem],
 })

@@ -255,11 +255,14 @@ export class ConsolidatedScanComponent {
 
   gradeBadgeClass(grade?: string): string {
     const g = (grade || '').toUpperCase();
-    const baseClass = 'inline-flex items-center justify-center rounded-[999px] border border-[var(--color-border)] px-[8px] py-[4px] font-[Inter] text-[12px] font-normal leading-[12px] text-[var(--color-text1)] whitespace-nowrap';
-    if (g === 'C' || g === 'D' || g === 'F') {
-      return `${baseClass} bg-[var(--color-banner)] text-[var(--color-text5)]`;
+    const baseClass = 'inline-flex items-center justify-center rounded-[999px] border px-[8px] py-[4px] font-[Inter] text-[12px] font-normal leading-[12px] whitespace-nowrap';
+    if (g === 'D') {
+      return `${baseClass} border-[rgba(248,113,113,0.45)] bg-[rgba(127,29,29,0.42)] text-red-100`;
     }
-    return baseClass;
+    if (g === 'C' || g === 'F') {
+      return `${baseClass} border-[var(--color-border)] bg-[var(--color-banner)] text-[var(--color-text5)]`;
+    }
+    return `${baseClass} border-[var(--color-border)] text-[var(--color-text1)]`;
   }
 
   gradeText(grade?: string): string {

@@ -16,6 +16,17 @@ stop_docker() {
     docker rm trusted-web-nginx 2>/dev/null || true
 }
 
+pull_image_if_missing() {
+    local image="$1"
+
+    if docker image inspect "$image" >/dev/null 2>&1; then
+        echo "Using local Docker image: $image"
+        return 0
+    fi
+
+    docker pull "$image"
+}
+
 ensure_local_ssl_cert() {
     mkdir -p "$LOCAL_SSL_DIR"
     if [ -f "$LOCAL_SSL_CERT" ] && [ -f "$LOCAL_SSL_KEY" ]; then
@@ -184,7 +195,7 @@ if [ "$COMMAND" = "build" ]; then
         enable_maintenance_mode
     fi
 
-    docker pull python:3.11-slim
+    pull_image_if_missing python:3.11-slim
     install_client_dependencies
 
     case "$FLAG" in
@@ -260,9 +271,9 @@ if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
 fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && [ "$EXTRA_FLAG" = "-full" ]; then
-    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --force-recreate "${compose_up_services[@]}"
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --pull never --force-recreate "${compose_up_services[@]}"
 else
-    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d "${compose_up_services[@]}"
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --pull never "${compose_up_services[@]}"
 fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then

@@ -138,6 +138,10 @@ class TenantManager:
 
         tenant_request = TenantRequest(
             id=str(current_user.tenant_uuid), name=enc.decrypt(tenant.name.encode()).decode(), iocs=ioc_models,
+            phone=enc.decrypt(tenant.phone.encode()).decode() if tenant.phone else "",
+            country=enc.decrypt(tenant.country.encode()).decode() if tenant.country else "",
+            city=enc.decrypt(tenant.city.encode()).decode() if tenant.city else "",
+            postal_code=enc.decrypt(tenant.postal_code.encode()).decode() if tenant.postal_code else "",
             profile_visibility_enabled=getattr(tenant, "profile_visibility_enabled", True),
             event_management_enabled=getattr(tenant, "event_management_enabled", False),
             accounts_mail_password="",

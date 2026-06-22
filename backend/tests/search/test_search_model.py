@@ -319,6 +319,20 @@ def test_search_consolidated_result_groups_platform_results(fake_elastic):
     assert all(indices == [ELASTIC_INDEX.S_LEAK_INDEX] for indices, _query, _boost in fake_elastic.search_consolidated_calls)
 
 
+def test_search_consolidated_result_does_not_filter_apt_malware_by_page_category(fake_elastic):
+    fake_elastic.search_consolidated_result = _search_response()
+    param = search_consolidated_param_model(q="malware", category="credential")
+
+    _run(search_model.search_consolidated_result(param))
+
+    apt_queries = [query for indices, query, _boost in fake_elastic.search_consolidated_calls if indices == [ELASTIC_INDEX.S_APT_INDEX]]
+    malware_queries = [query for indices, query, _boost in fake_elastic.search_consolidated_calls if indices == [ELASTIC_INDEX.S_MALWARE_INDEX]]
+    assert apt_queries
+    assert malware_queries
+    assert "credential" not in str(apt_queries[0])
+    assert "credential" not in str(malware_queries[0])
+
+
 def test_search_stealerlogs_persona_breach_summarizes_aggregations(fake_elastic):
     fake_elastic.search_query_result = (
         True,

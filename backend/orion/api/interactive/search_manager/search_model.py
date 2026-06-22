@@ -365,10 +365,14 @@ class search_model:
         for label in SEARCH_TYPES:
 
             config = SEARCH_CONFIG[label]
+            query_param = param
+            if label in ("apt_model", "malware_model"):
+                query_param = param.model_copy(deep=True)
+                query_param.category = "all"
 
             indices, query, indices_boost = \
                 search_query_generator().on_search_consolidated_ranked_data(
-                    param,
+                    query_param,
                     filter_dict,
                     config["base_index"],
                     config["blocked_categories"],
