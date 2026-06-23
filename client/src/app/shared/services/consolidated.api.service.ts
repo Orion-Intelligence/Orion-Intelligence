@@ -6,12 +6,12 @@ import { SearchDynamicEmailCallbackModel } from '../model/api/email/search_dynam
 import { ConsolidatedLiveApis } from '../model/results/consolidated/consolidated.callback.model';
 import { ConsolidatedLiveApiResults } from '../model/results/consolidated/consolidated.callback.model';
 import { ConsolidatedScanResults } from '../model/results/consolidated/consolidated.callback.model';
-import { ApiService } from './api.service';
+import { ScanNotificationService } from './scan-notification.service';
 @Injectable({
   providedIn: 'root'
 })
 export class ConsolidatedApiService {
-  constructor(private http: HttpClient, private apiService: ApiService) {
+  constructor(private http: HttpClient, private scanNotifications: ScanNotificationService) {
   }
 
   private getLiveApiDetails(input: ConsolidatedLiveApis): {
@@ -125,15 +125,18 @@ export class ConsolidatedApiService {
     const endpoint = 'urlscan/domain';
     const payloadKey = 'domain';
     const payload = { [payloadKey]: target, scanType };
-    return this.apiService
-      .post<any>(endpoint, payload)
-      .pipe(expand((res) => {
-        const isPending = res?.status === 'pending' || res?.step === 'queued' || res?.result?.status === 'pending';
-        if (isPending) {
-          return timer(5000).pipe(switchMap(() => this.apiService.post<any>(endpoint, payload)));
-        }
-        return EMPTY;
-      }), takeWhile((res) => res?.status === 'pending' || res?.step === 'queued' || res?.result?.status === 'pending', true), map((res) => {
+    return this.scanNotifications
+      .runScanAsResponse<any>({
+        apiReference: endpoint,
+        payload,
+        metadata: {
+          title: `${scanType.toUpperCase()} Scan`,
+          target,
+          section: scanType,
+        },
+        pollDelayMs: 5000,
+      })
+      .pipe(map((res) => {
         if (!res || res?.status === 'pending' || res?.step === 'queued') {
           return null;
         }

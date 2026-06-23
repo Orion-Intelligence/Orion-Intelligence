@@ -1,12 +1,16 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { lastValueFrom, Observable, Subscription } from 'rxjs';
-import { finalize, map } from 'rxjs/operators';
+import { finalize, map, takeUntil, tap } from 'rxjs/operators';
 import { GeoCameraResponse, NetworkIntelScanResponse, ResolveIpResponse } from '../../model/network-intel/network-intel-api.models';
 import { IpPortData, VulnerabilityScanDepth } from '../../model/network-intel/network-intel.model';
 import { ScanHelperMethodsService } from '../../partials/scan-helper-methods/scan-helper-methods-service.service';
+import { ScanNotificationService } from '../scan-notification.service';
+import { SubdomainResponse } from '../../model/scanners/scanner.models';
 
 @Injectable({ providedIn: 'root' })
 export class NetworkIntelScanService extends ScanHelperMethodsService {
+  private readonly scanNotifications = inject(ScanNotificationService);
+
   isRunning = signal(false);
 
   protected override getPendingStatus<T extends { result?: { status?: string } | null; status?: string }>(res: T): string | undefined {
@@ -47,15 +51,30 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
   }
 
   scanResolveIp(domain: string): Subscription {
-    return this.runPolledTask<ResolveIpResponse>(() => this.api.post<ResolveIpResponse>('netintel/resolve_ip', { domain }));
+    return this.runTrackedScan<ResolveIpResponse>('netintel/resolve_ip', { domain }, {
+      title: 'Host Recon',
+      target: domain,
+      page_reference: 'network-intel',
+      section: 'host-recon',
+    });
   }
 
   scanShodanIp(ip: string): Subscription {
-    return this.runPolledTask<NetworkIntelScanResponse>(() => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip }));
+    return this.runTrackedScan<NetworkIntelScanResponse>('netintel/ipscanner', { ip }, {
+      title: 'Deep IP Scan',
+      target: ip,
+      page_reference: 'network-intel',
+      section: 'deep-scan',
+    });
   }
 
   scanUrlVulnerability(domain: string, depth: VulnerabilityScanDepth): Subscription {
-    return this.runPolledTask<any>(() => this.api.post<any>('netintel/url_vulnerability_scan', { domain, depth }));
+    return this.runTrackedScan<any>('netintel/url_vulnerability_scan', { domain, depth }, {
+      title: 'URL Vulnerability Scan',
+      target: domain,
+      page_reference: 'network-intel',
+      section: 'vulnerability-scan',
+    });
   }
 
   async fetchShodanIpDetail(ip: string, onEach?: (response: NetworkIntelScanResponse) => void): Promise<any> {
@@ -66,12 +85,35 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
     return this.fetchPolledResult$<NetworkIntelScanResponse>(() => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip }), onEach);
   }
 
-  scanGeoCamera(coordinates: string, radius_km = 25, max_ips = 200): Subscription {
+  scanThreatLensGeoCamera(coordinates: string, radius_km = 25, max_ips = 200): Subscription {
     return this.runPolledTask<GeoCameraResponse>(() => this.api.post<GeoCameraResponse>('netintel/iot_detect', { coordinates, radius_km, max_ips }), 250);
   }
 
+  scanGeoCamera(coordinates: string, radius_km = 25, max_ips = 200): Subscription {
+    return this.runTrackedScan<GeoCameraResponse>('netintel/iot_detect', { coordinates, radius_km, max_ips }, {
+      title: 'Geo Camera Scan',
+      target: coordinates,
+      page_reference: 'network-intel',
+      section: 'geo-cameras',
+    }, 250);
+  }
+
   scanGeoCameraByRanges(ip_ranges: string[], max_ips = 200): Subscription {
-    return this.runPolledTask<GeoCameraResponse>(() => this.api.post<GeoCameraResponse>('netintel/camera_detect_ranges', { ip_ranges, max_ips }));
+    return this.runTrackedScan<GeoCameraResponse>('netintel/camera_detect_ranges', { ip_ranges, max_ips }, {
+      title: 'Geo Camera Range Scan',
+      target: ip_ranges.slice(0, 3).join(', '),
+      page_reference: 'network-intel',
+      section: 'geo-cameras',
+    });
+  }
+
+  override scanSubdomains(resolved: string, checkLive: boolean): Subscription {
+    return this.runTrackedScan<SubdomainResponse>('urlscan/subdomains', { domain: resolved, scanType: 'subdomains', checkLive }, {
+      title: 'Subdomain Scan',
+      target: resolved,
+      page_reference: 'network-intel',
+      section: 'vulnerability-scan',
+    });
   }
 
   hasRenderableValue(value: unknown): boolean {
@@ -251,6 +293,16 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
 
   private runPolledTask<T extends { result?: { status?: string; progress?: number } | null; status?: string; progress?: number | null }>(call: () => Observable<T>, pollDelayMs = this.pollDelayMs): Subscription {
     return this.runTask<T>((cancel$) => this.poll<T>(call, (response) => this.getPendingStatus(response), (response) => this.updateProgress(response?.result?.progress ?? response?.progress), cancel$, pollDelayMs));
+  }
+
+  private runTrackedScan<T extends { result?: { status?: string; progress?: number } | null; status?: string; progress?: number | null }>( apiReference: string, payload: Record<string, any>, metadata: Record<string, any>, pollDelayMs = this.pollDelayMs, ): Subscription {
+    return this.runTask<T>((cancel$) => this.scanNotifications.runScanAsResponse<T>({
+      apiReference,
+      payload,
+      metadata,
+      pollDelayMs,
+    }).pipe(tap((response: T) => this.updateProgress((response as any)?.result?.progress ?? (response as any)?.progress)),
+      takeUntil(cancel$),));
   }
 
   private async fetchPolledResult<T extends { result?: { status?: string } | null; status?: string }>(call: () => Observable<T>, onEach?: (response: T) => void): Promise<any> {

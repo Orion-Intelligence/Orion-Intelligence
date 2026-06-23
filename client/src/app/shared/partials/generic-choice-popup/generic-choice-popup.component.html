@@ -1,0 +1,15 @@
+<div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-4" @popupAnimation data-role="backdrop" (click)="onBackdrop($event)">
+  <div data-testid="generic-choice-popup" class="ui-graph-popup-panel ui-popup-shell w-full max-w-[460px] rounded-xl p-6">
+    <div class="ui-popup-title text-lg font-semibold">{{ title() | translate }}</div>
+
+    <div class="mt-3 text-sm leading-6 text-[var(--color-text3)]">
+      {{ message() | translate }}
+    </div>
+
+    <div class="mt-6 flex flex-wrap justify-end gap-2">
+      <button data-testid="generic-choice-primary" class="ui-popup-btn-primary px-4 py-2 text-sm font-semibold" type="button" (click)="choosePrimary()">{{ primaryLabel() | translate }}</button>
+      <button data-testid="generic-choice-secondary" class="ui-popup-btn-secondary px-4 py-2 text-sm font-semibold" type="button" (click)="chooseSecondary()">{{ secondaryLabel() | translate }}</button>
+      <button class="ui-popup-btn-secondary px-4 py-2 text-sm font-semibold" type="button" (click)="cancel()">{{ cancelLabel() | translate }}</button>
+    </div>
+  </div>
+</div>

@@ -14,6 +14,16 @@
         </a>
       }
     }
+    @if (router.url !== '/login' && canViewScanNotifications()) {
+      <button data-testid="profile-scan-notification-bell" type="button" (click)="openScanNotifications()" class="relative inline-flex cursor-pointer items-center justify-center px-[12px] pt-[18px] pb-[20px]" [attr.aria-label]="'Scan Notifications' | translate">
+        <span class="relative inline-flex h-6 w-6 items-center justify-center text-[var(--color-text2)]">
+           <img alt="Settings" src="/assets/images/sidebar/theme/scanner.svg" height="24" priority width="20" class="h-6 w-5">
+          <span class="absolute right-[-10px] top-[-8px] mt-[2px] inline-flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10px] font-bold leading-none text-white" [ngClass]="scanNotificationService.totalScanCount() === 0 ? 'bg-[#00C853]' : 'bg-[#F00]'">
+            {{ scanNotificationService.totalScanCount() }}
+          </span>
+        </span>
+      </button>
+    }
     @if (router.url !== '/login') {
       <div class="relative flex items-center">
         <button type="button" (click)="toggleLanguageDropdown($event)" data-testid="profile-language-menu" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center pl-[15px] pr-[8px] pt-[18px] pb-[20px]" [attr.aria-label]="'Language' | translate" [attr.aria-expanded]="languageDropdownOpen()">
@@ -103,6 +113,7 @@
     }
     <div class="relative">
       <app-alert-notification [isNotificationOpen]="isNotificationOpen()" (closeNotification)="closeNotifications()"></app-alert-notification>
+      <app-alert-notification notificationMode="scans" [isNotificationOpen]="isScanNotificationOpen()" (closeNotification)="closeScanNotifications()"></app-alert-notification>
     </div>
   </div>
 }

@@ -15,6 +15,7 @@ import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/c
 import { AppService } from '../../../services/core/app/app.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
+import { ScanNotificationService } from '../../../shared/services/scan-notification.service';
 
 const API_CHAT_TOOL_TYPES: Record<string, string> = {
   user: '/api/dynamic/user',
@@ -55,7 +56,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   cryptoSummaryExpanded = false;
   trackByIndex = (index: number) => index;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: ReportExportService, protected appService: AppService) {
+  constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: ReportExportService, protected appService: AppService, private scanNotifications: ScanNotificationService) {
     super();
   }
 
@@ -408,6 +409,27 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   }
 
   private fetchSearchResults(apiEndpoint: string, paramModel: any): Observable<any> {
+    const apiReference = apiEndpoint.replace(/^\/api\//, '');
+    const trackedReferences = new Set([
+      'dynamic/user',
+      'dynamic/social',
+      'dynamic/cracked',
+      'dynamic/software',
+      'dynamic/national-identity',
+      'crypto/scan',
+    ]);
+    if (trackedReferences.has(apiReference)) {
+      return this.scanNotifications.runScanAsResponse<any>({
+        apiReference,
+        payload: paramModel,
+        metadata: {
+          title: `${(this.apiType || apiReference).replace('-', ' ')} Scan`,
+          target: this.q1 || this.q2 || apiReference,
+          section: this.apiType || apiReference,
+        },
+        pollDelayMs: 2000,
+      }).pipe(catchError(_ => of(null)));
+    }
     return this.http.post<any>(apiEndpoint, paramModel).pipe(expand(res => this.shouldContinuePolling(res)
       ? timer(2000).pipe(switchMap(() => this.http.post<any>(apiEndpoint, paramModel)))
       : EMPTY), takeWhile(res => this.shouldContinuePolling(res), true), catchError(_ => of(null)));
