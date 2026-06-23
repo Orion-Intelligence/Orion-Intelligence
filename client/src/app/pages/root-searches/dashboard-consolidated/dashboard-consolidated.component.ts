@@ -34,6 +34,7 @@ import { NetworkIntel } from '../network-intel/network-intel';
 import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
 import { SatelliteIntel } from "../../geo-fencing/satellite-intel/satellite-intel";
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { ExternalConsolidatedFeedService } from '../../../services/dashboard/external-consolidated-feed.service';
 
 @Component({
   selector: 'app-dashboard-consolidated',
@@ -61,7 +62,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   isLoading = signal(false);
   isStealerLogLoading = signal(false);
   firstTrigger = true;
-  result_count = 0;
   apiCategories = Object.values(ApiSubCategory);
   aptIntelCategories = Object.values(AptIntelSubCategory);
   newsCategories = Object.values(FeedSubCategory);
@@ -92,7 +92,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     return false;
   });
 
-  constructor(public http: HttpClient, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected selectionStore: SelectionStoreService, protected licenseService: LicenseService, protected authService: AuthService) {
+  constructor(public http: HttpClient, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected selectionStore: SelectionStoreService, protected licenseService: LicenseService, protected authService: AuthService, protected externalConsolidatedFeedService: ExternalConsolidatedFeedService) {
     this.pageCounts = {};
   }
 
@@ -192,6 +192,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     this.isLoading.set(true);
     this.consolidatedCallbackModel.defacement_model = new DefacementCallbackModel();
     this.stealerlogCallbackModel = new StealerLogCallbackModel();
+    this.externalConsolidatedFeedService.resetActorMalware();
     this.dashboardService.fetchConsolidatedGroupedResults('search/consolidated', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(0).pipe(map(() => response)))).subscribe(response => {
       if (response.success && response.data) {
         this.response = response.data;
@@ -202,9 +203,11 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       else {
         this.consolidatedCallbackModel = new ConsolidatedCallbackModel();
         this.groupedResults = {};
+        this.externalConsolidatedFeedService.syncActorMalware(this.groupedResults, this.pageCounts);
       }
       this.isLoading.set(false);
     });
+    this.externalConsolidatedFeedService.fetchActorMalware(this.dashboardService.consolidatedParamModel, this.dashboardService.selectedFilters());
     if (this.isEmailOrUrl(this.dashboardService.consolidatedParamModel.q)) {
       this.isStealerLogLoading.set(true);
       const stealerLogParams = {
@@ -289,7 +292,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.groupedResults[model] = this.consolidatedCallbackModel[model]?.Result ?? [];
       this.pageCounts[model] = this.consolidatedCallbackModel[model]?.Page_Count ?? 0;
     });
-    this.result_count = Object.values(this.groupedResults).reduce((sum, list) => sum + list.length, 0);
+    this.externalConsolidatedFeedService.syncActorMalware(this.groupedResults, this.pageCounts);
   }
 
   onUpdateQuery(query: string) {
@@ -302,10 +305,9 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   getTotalResultCount(): number {
-    const groupedCount = Object.values(this.groupedResults).reduce((sum, list) => sum + list.length, 0);
     const rankedCount = this.rankedResult.pageCount;
     if (this.isGrouped) {
-      return groupedCount;
+      return this.externalConsolidatedFeedService.getMergedResultCount(this.groupedResults);
     }
     else {
       return rankedCount;
