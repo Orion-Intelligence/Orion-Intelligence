@@ -34,6 +34,14 @@ test_routes = APIRouter(
     ]
 )
 
+@test_routes.post(
+    "/api/scan-jobs/{scan_id}/poll",
+    include_in_schema=False,
+    dependencies=SCAN_DEPS,
+)
+async def test_poll_scan_job(scan_id: str, current_user=Depends(get_current_user)):
+    return await TestRouteHelper.test_poll_scan_job(scan_id, current_user)
+
 
 @test_routes.post(
     "/api/get/tenant/node",
