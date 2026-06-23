@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { AfterViewInit, Component, OnDestroy, OnInit, effect, input, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, effect, inject, input, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
@@ -20,6 +20,7 @@ const RECORD_SIDEBAR_CLOSE_MS = 300;
   animations: [fadeInDashboardItem],
 })
 export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDestroy {
+  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private renderTimer: ReturnType<typeof setTimeout> | null = null;
   private recordSidebarCloseTimer: ReturnType<typeof setTimeout> | null = null;
   private renderKey = '';
@@ -154,9 +155,12 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   }
 
   toggleCollapsed(): void {
+    const previousLimit = this.getGroupDisplayLimit();
+    const isExpanding = this.isCollapsed;
     this.isCollapsed = !this.isCollapsed;
     const groups = this.getAptIntelGroups().slice(0, this.getGroupDisplayLimit());
     this.startStaggeredRender(groups.length, this.buildRenderKey(groups));
+    this.scrollToResultIndex(isExpanding ? previousLimit : 0);
   }
 
   getSelectedGroup(): AptIntelGroup | null {
@@ -415,6 +419,17 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
       clearTimeout(this.recordSidebarCloseTimer);
       this.recordSidebarCloseTimer = null;
     }
+  }
+
+  private scrollToResultIndex(index: number): void {
+    if (index < 0) {
+      return;
+    }
+    setTimeout(() => {
+      this.elementRef.nativeElement
+        .querySelector<HTMLElement>(`[data-result-index="${index}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
   }
 
   private uniqueValues(values: string[]): string[] {

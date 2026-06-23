@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, inject, input } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, inject, input } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe, SlicePipe, CommonModule } from '@angular/common';
 import { ScrollService } from '../../../../shared/services/scroll.service';
@@ -25,6 +25,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   animations: [fadeInDashboardItem]
 })
 export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
+  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly proxied_resource = inject(ProxyController);
 
   currentUrl = '';
@@ -53,6 +54,17 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
     return Array.isArray(item.m_content_type)
       ? item.m_content_type.some((t: string) => t.includes('code'))
       : (typeof item.m_content_type === 'string' && item.m_content_type.includes('code'));
+  }
+
+  getResultDisplayLimit(): number {
+    return this.isExpandAble() && this.isCollapsed ? 2 : 30;
+  }
+
+  toggleCollapsed(): void {
+    const previousLimit = this.getResultDisplayLimit();
+    const isExpanding = this.isCollapsed;
+    this.isCollapsed = !this.isCollapsed;
+    this.scrollToResultIndex(isExpanding ? previousLimit : 0);
   }
 
   getContentWithoutEmptyLines(content: string | undefined): string {
@@ -88,5 +100,16 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
     }
 
     this.proxied_resource.open(url);
+  }
+
+  private scrollToResultIndex(index: number): void {
+    if (index < 0) {
+      return;
+    }
+    setTimeout(() => {
+      this.elementRef.nativeElement
+        .querySelector<HTMLElement>(`[data-result-index="${index}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
   }
 }
