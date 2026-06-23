@@ -10,7 +10,7 @@ import {
   openCreatedCaseDetails,
   openCreatedCaseFromList,
   selector
-} from './controllers/21-case-management.controller';
+} from './controllers/20-case-management.controller';
 
 describe('Case Management - Add View Edit Flow', () => {
   beforeEach(() => {
