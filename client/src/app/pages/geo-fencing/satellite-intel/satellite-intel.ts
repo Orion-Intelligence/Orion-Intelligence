@@ -72,7 +72,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   isFilterOpen$!: Observable<boolean>;
   fetchGeocodeResults = (query: string) => this.geocodeService.fetchGeocodeResults(query);
 
-  @Input() toolbarMode: 'hidden' | 'geo' = 'hidden';
+  @Input() toolbarMode: 'hidden' | 'geo' = 'geo';
 
   constructor( satelliteService: SatelliteIntelService, private geocodeService: GeoFencingGeocodeService, route: ActivatedRoute, private router: Router, sidebarService: SidebarService, aircraftTrackingService: SatelliteAircraftTrackingService, shipTrackingService: SatelliteShipTrackingService, facilitiesService: SatelliteFacilitiesService, monthCompareService: MonthCompareService, ) {
     this.satelliteService = satelliteService;
@@ -99,10 +99,10 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.initialMapLoadingId = this.loadingState.begin('Loading Satellite Map', 'Rendering satellite map...');
     const section = this.route.snapshot.queryParamMap.get('section');
     const q = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
-    const view = this.route.snapshot.queryParamMap.get('view');
+    const requestedView = this.route.snapshot.queryParamMap.get('view') || this.route.snapshot.data['view'];
     this.setPanel(this.isPanelId(section) ? section : SatelliteIntelPanelEnum.Dashboard);
     this.isPanelPopupOpen = true;
-    if (view === 'threat') {
+    if (requestedView === 'threat') {
       this.setActiveView('threat', false);
     }
     if (q) {

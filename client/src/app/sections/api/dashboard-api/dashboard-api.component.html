@@ -42,7 +42,7 @@
   <div class="ml-0 mt-3">
     <div class="w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-5 py-3 text-[13px] text-[var(--color-text1)]">
       <span>
-        <img alt="Info Icon" class="mr-[8px] inline-block" src="/client/src/assets/images/shared/hint.svg"/>
+        <img alt="Info Icon" class="mr-[8px] inline-block" src="assets/images/shared/hint.svg"/>
         <span>{{ (apiType === 'user' ? 'Determines whether the specified user has a presence on any (clearnet) platform.' : apiType === 'social' ? 'Determines whether the provided username exists on (clearnet) social platforms.' : apiType === 'wanted' ? 'Searches OpenSanctions wanted/watchlist records for the provided person query.' : apiType === 'national-identity' ? 'Searches national identity records using the provided CNIC or Mobile Number.' : apiType === 'cracked' ? 'Checks for cracked key signals for the provided Play Store URL.' : apiType === 'software' ? 'Checks for cracked mirrors of known softwares.' : apiType === 'crypto' ? 'Determines whether the provided wallet and transaction hash show any signals.' : '') | translate }}</span>
       </span>
     </div>

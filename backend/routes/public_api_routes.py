@@ -6,6 +6,10 @@ from orion.api.interactive.resource_manager.resource_manager import ResourceMana
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.config_manager.config_controller import config_controller
+from configs.app_dependency import _enum_value, admin_or_enterprise_required
+from configs.auth_cookie import token_from_request
+from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
+from orion.services.session_manager.session_manager import session_manager
 
 public_routes = APIRouter()
 
@@ -15,12 +19,28 @@ def cookie_required(request: Request):
         raise HTTPException(status_code=401, detail="Missing auth cookie")
 
 
+async def _request_has_admin_account(request: Request) -> bool:
+    token = token_from_request(request)
+    if not token:
+        return False
+    try:
+        user = await session_manager.get_instance().get_current_user(token)
+    except HTTPException:
+        return False
+    return (
+        _enum_value(getattr(user, "role", None)) == user_role.ADMIN.value
+        and _enum_value(getattr(user, "status", None)) == UserStatus.ACTIVE.value
+    )
+
+
 @public_routes.get(
     "/api/public",
     dependencies=[],
 )
-async def get_public_config():
-    return await config_controller.getInstance().get_system_info()
+async def get_public_config(request: Request):
+    return await config_controller.getInstance().get_system_info(
+        include_email_config=await _request_has_admin_account(request)
+    )
 
 
 @public_routes.get("/api/s/static/tenant/{id}", include_in_schema=False, dependencies=[Depends(cookie_required)])
@@ -57,7 +77,8 @@ async def robots_txt():
 @public_routes.get(
     "/api/search/stealerlogs",
     include_in_schema=False,
-    status_code=200
+    status_code=200,
+    dependencies=[Depends(admin_or_enterprise_required)],
 )
 async def search_stealerlog(q: str = Query(...)):
     param = search_credential_param_model(q=q)

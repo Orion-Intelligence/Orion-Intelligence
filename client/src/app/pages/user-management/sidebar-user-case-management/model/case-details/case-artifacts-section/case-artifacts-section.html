@@ -189,7 +189,7 @@
                 <div class="flex flex-wrap gap-2 sm:justify-end">
                     @if (artifact.capturedAt) {
                     <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
-                        getFormattedDateTime(artifact.capturedAt) }}</span>
+                        getFormattedDateOnly(artifact.capturedAt) }}</span>
                     }
                     @if (artifact.url) {
                     <a [href]="artifact.url" target="_blank" rel="noopener" class="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-xs text-sky-300 hover:text-sky-200">{{

@@ -2,6 +2,14 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
+SIEM_LOG_BATCH_MAX_ITEMS = 500
+SIEM_LOG_RAW_MAX_LENGTH = 20_000
+SIEM_LOG_FIELD_MAX_LENGTH = 512
+SIEM_LOG_TAG_MAX_ITEMS = 20
+SIEM_SEARCH_QUERY_MAX_LENGTH = 2_000
+SIEM_SEARCH_MAX_FROM = 10_000
+SIEM_SEARCH_MAX_SIZE = 500
+
 
 class LogModel(BaseModel):
     type: Optional[str] = None
@@ -16,16 +24,16 @@ class LogBatchModel(BaseModel):
 
 
 class InjectionLogModel(BaseModel):
-    raw: str = Field(..., description="Raw SIEM or security log line to ingest.")
-    source: Optional[str] = Field(default=None, description="Originating system or sensor, such as `waf`, `edr`, or `vpn`.")
-    event_type: Optional[str] = Field(default=None, description="Normalized event category, such as `auth_failure` or `waf_block`.")
-    severity: Optional[str] = Field(default=None, description="Severity label for the event, for example `low`, `medium`, `high`, or `critical`.")
-    host: Optional[str] = Field(default=None, description="Host, node, appliance, or gateway that produced the event.")
-    user: Optional[str] = Field(default=None, description="Username, account, or actor associated with the event when available.")
-    tags: List[str] = Field(default_factory=list, description="Optional labels used for quick grouping or filtering.")
-    timestamp: Optional[str] = Field(default=None, description="Original event timestamp in ISO 8601 format.")
-    ingested_at: Optional[str] = Field(default=None, description="Optional ingestion timestamp in ISO 8601 format. If omitted, the API sets it automatically.")
-    hash: Optional[str] = Field(default=None, description="Optional caller-provided hash. If omitted, the API generates one from the authenticated tenant and raw log content.")
+    raw: str = Field(..., max_length=SIEM_LOG_RAW_MAX_LENGTH, description="Raw SIEM or security log line to ingest.")
+    source: Optional[str] = Field(default=None, max_length=SIEM_LOG_FIELD_MAX_LENGTH, description="Originating system or sensor, such as `waf`, `edr`, or `vpn`.")
+    event_type: Optional[str] = Field(default=None, max_length=SIEM_LOG_FIELD_MAX_LENGTH, description="Normalized event category, such as `auth_failure` or `waf_block`.")
+    severity: Optional[str] = Field(default=None, max_length=SIEM_LOG_FIELD_MAX_LENGTH, description="Severity label for the event, for example `low`, `medium`, `high`, or `critical`.")
+    host: Optional[str] = Field(default=None, max_length=SIEM_LOG_FIELD_MAX_LENGTH, description="Host, node, appliance, or gateway that produced the event.")
+    user: Optional[str] = Field(default=None, max_length=SIEM_LOG_FIELD_MAX_LENGTH, description="Username, account, or actor associated with the event when available.")
+    tags: List[str] = Field(default_factory=list, max_length=SIEM_LOG_TAG_MAX_ITEMS, description="Optional labels used for quick grouping or filtering.")
+    timestamp: Optional[str] = Field(default=None, max_length=SIEM_LOG_FIELD_MAX_LENGTH, description="Original event timestamp in ISO 8601 format.")
+    ingested_at: Optional[str] = Field(default=None, max_length=SIEM_LOG_FIELD_MAX_LENGTH, description="Optional ingestion timestamp in ISO 8601 format. If omitted, the API sets it automatically.")
+    hash: Optional[str] = Field(default=None, max_length=SIEM_LOG_FIELD_MAX_LENGTH, description="Optional caller-provided hash. If omitted, the API generates one from the authenticated tenant and raw log content.")
 
     model_config = ConfigDict(
         extra="allow",
@@ -45,7 +53,7 @@ class InjectionLogModel(BaseModel):
 
 
 class InjectionBatchRequestModel(BaseModel):
-    logs: List[InjectionLogModel] = Field(..., description="Batch of log records to ingest into the SIEM index.")
+    logs: List[InjectionLogModel] = Field(..., min_length=1, max_length=SIEM_LOG_BATCH_MAX_ITEMS, description="Batch of log records to ingest into the SIEM index.")
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -87,9 +95,9 @@ class InjectionBatchResponseModel(BaseModel):
 
 
 class SiemSearchRequestModel(BaseModel):
-    q: str = Field(..., description="Free-text SIEM search query. Matches raw log content and indexed SIEM fields.")
-    from_: int = Field(default=0, alias="from", description="Starting offset for the result window.")
-    size: int = Field(default=500, description="Maximum number of SIEM log records to return in one batch.")
+    q: str = Field(..., max_length=SIEM_SEARCH_QUERY_MAX_LENGTH, description="Free-text SIEM search query. Matches raw log content and indexed SIEM fields.")
+    from_: int = Field(default=0, alias="from", ge=0, le=SIEM_SEARCH_MAX_FROM, description="Starting offset for the result window.")
+    size: int = Field(default=500, ge=1, le=SIEM_SEARCH_MAX_SIZE, description="Maximum number of SIEM log records to return in one batch.")
     date_range: Optional[str] = Field(default=None, description="Optional timestamp date range in `YYYY-MM-DD,YYYY-MM-DD` format.")
 
     model_config = ConfigDict(

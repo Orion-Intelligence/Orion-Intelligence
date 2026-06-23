@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "orion-intelligence"
-version = "1.0.3.2"
-migration_version = "1.0.3.3"
+version = "1.0.3.6"
+migration_version = "1.0.3.6"
 description = "Orion Platform: A web-based OSINT solution integrating search, crawling, and data aggregation."
 authors = ["Abdul Mannan <msmannan00@gmail.com>"]
 license = "MIT"
@@ -48,6 +48,7 @@ filterwarnings = [
     "ignore:Support for class-based `config` is deprecated, use ConfigDict instead.*:DeprecationWarning:pydantic.*",
     "ignore:`json_encoders` is deprecated.*:DeprecationWarning:pydantic.*",
     "ignore:.*HTTP_422_UNPROCESSABLE_ENTITY.*HTTP_422_UNPROCESSABLE_CONTENT.*:DeprecationWarning:starlette_admin(\\..*)?",
+    "ignore:Core Pydantic V1 functionality isn't compatible with Python 3.14 or greater\\.:UserWarning:odmantic\\.typing",
 ]
 
 [tool.coverage.run]

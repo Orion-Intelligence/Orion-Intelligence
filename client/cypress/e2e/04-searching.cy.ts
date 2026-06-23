@@ -1,4 +1,4 @@
-import {clickOpenReport, clickSidebarSubItem, exerciseJsonViewerOnce, openExploitSubmenu, openFirstReportAndValidateNavigationOrModal, openSidebarGroup, typeDashboardSearch, typeExploitSearch, waitForSearchReady} from './controllers/04-searching.controller';
+import {clickOpenDefacementReport, clickOpenExploitReport, clickOpenReport, clickSidebarSubItem, exerciseJsonViewerOnce, openFirstReportAndValidateNavigationOrModal, openSidebarGroup, typeDashboardSearchSlow, typeInputSlow, waitForSearchReady} from './controllers/04-searching.controller';
 
 describe('Orion Intelligence - Search Navigation and Report Access', () => {
   before(() => {
@@ -11,58 +11,56 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
 
   it('runs General Intelligence search flow for All, General, and Forums', () => {
     openSidebarGroup('General Intelligence');
-    clickSidebarSubItem('General Intelligence', 'All');
-    typeDashboardSearch('bitcoin');
+    typeDashboardSearchSlow('bitcoin');
     openFirstReportAndValidateNavigationOrModal();
 
     cy.go('back');
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    clickSidebarSubItem('General Intelligence', 'General');
-    typeDashboardSearch('bitcoin');
+    cy.visit('/dashboard/strategic/general');
+    typeDashboardSearchSlow('bitcoin');
     openFirstReportAndValidateNavigationOrModal();
 
     cy.go('back');
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    clickSidebarSubItem('General Intelligence', 'Forums');
-    typeDashboardSearch('bitcoin');
+    cy.visit('/dashboard/strategic/forums');
+    typeDashboardSearchSlow('bitcoin');
     openFirstReportAndValidateNavigationOrModal();
   });
 
   it('runs Defacement search flow for All, Hacked, Phishing, and Databases', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Defacement');
-    clickSidebarSubItem('Defacement', 'All');
-    typeDashboardSearch('mthcht');
-    cy.get('tbody tr.cursor-pointer[id^="item-"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
+    typeDashboardSearchSlow('mthcht');
+    clickOpenDefacementReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
 
     cy.go('back');
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    clickSidebarSubItem('Defacement', 'Hacked');
-    typeDashboardSearch('ASTAR');
-    cy.get('tbody tr.cursor-pointer[id^="item-"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
+    cy.visit('/dashboard/defacement/hacked');
+    typeDashboardSearchSlow('ASTAR');
+    clickOpenDefacementReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
 
     cy.go('back');
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    clickSidebarSubItem('Defacement', 'Phishing');
-    typeDashboardSearch('mthcht');
-    cy.get('tbody tr.cursor-pointer[id^="item-"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
+    cy.visit('/dashboard/defacement/phishing');
+    typeDashboardSearchSlow('mthcht');
+    clickOpenDefacementReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
 
     cy.go('back');
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    clickSidebarSubItem('Defacement', 'Databases');
-    typeDashboardSearch('urldna_bot');
-    cy.get('tbody tr.cursor-pointer[id^="item-"]').filter(':visible').first().should('be.visible').scrollIntoView().click();
+    cy.visit('/dashboard/defacement/databases');
+    typeDashboardSearchSlow('urldna_bot');
+    clickOpenDefacementReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
   });
@@ -71,7 +69,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Social');
     clickSidebarSubItem('Social', 'All');
-    typeDashboardSearch('a');
+    typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -83,7 +81,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.scrollDashboardToTop()
 
     clickSidebarSubItem('Social', 'Twitter');
-    typeDashboardSearch('a');
+    typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -92,7 +90,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Mastodon');
-    typeDashboardSearch('a');
+    typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -101,7 +99,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Pastebin');
-    typeDashboardSearch('a');
+    typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -110,7 +108,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Forum');
-    typeDashboardSearch('a');
+    typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -119,7 +117,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Reddit');
-    typeDashboardSearch('a');
+    typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -128,31 +126,30 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
   it('runs Exploit search flow for All, CVE, Tools, and ZeroDay', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Exploit');
-    openExploitSubmenu('All');
-    typeExploitSearch('exploit');
-    clickOpenReport();
+    typeDashboardSearchSlow('exploit');
+    clickOpenExploitReport();
 
     cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    openExploitSubmenu('CVE');
-    typeExploitSearch('cve');
-    cy.get('[data-testid="open-report"]').filter(':visible').filter(':has(img[src*="redirect.svg"])').first().scrollIntoView().should('be.visible').click();
+    cy.visit('/dashboard/exploit/cve');
+    typeDashboardSearchSlow('cve');
+    clickOpenExploitReport();
 
 
     cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    openExploitSubmenu('Tools');
-    typeExploitSearch('tool');
-    clickOpenReport();
+    cy.visit('/dashboard/exploit/tools');
+    typeDashboardSearchSlow('tool');
+    clickOpenExploitReport();
 
     cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    openExploitSubmenu('ZeroDay');
-    typeExploitSearch('exploit');
-    clickOpenReport();
+    cy.visit('/dashboard/exploit/zeroday');
+    typeDashboardSearchSlow('exploit');
+    clickOpenExploitReport();
 
     cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
@@ -170,7 +167,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('@q').clear();
 
     waitForSearchReady();
-    cy.get('@q').type('police{enter}');
+    typeInputSlow('@q', 'police');
     clickOpenReport();
     exerciseJsonViewerOnce();
   });
@@ -178,12 +175,11 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
   it('runs Stealer logs IOCS search flow and expands a row', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Stealer logs');
-    clickSidebarSubItem('Stealer logs', 'IOCS');
     cy.get('input[name="searchQuery"][placeholder="Search..."]').first().as('q');
     cy.get('@q').should('be.visible').and('not.be.disabled');
 
     waitForSearchReady();
-    cy.get('@q').type('uwe.dippold@web.de{enter}');
+    typeInputSlow('@q', 'uwe.dippold@web.de');
     cy.get('button[aria-label="Expand row"]').should('have.length.greaterThan', 0).first().scrollIntoView().click();
   });
 
@@ -199,7 +195,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('[data-testid="ioc-basic-tag-m_email"]').filter(':visible').first().scrollIntoView().click();
     cy.get('input[name="searchQuery"][placeholder="Search..."]').first().as('q');
     cy.get('@q').should('be.visible').and('not.be.disabled');
-    cy.get('@q').type('uwe.dippold@web.de{enter}');
+    typeInputSlow('@q', 'uwe.dippold@web.de');
 
     cy.get('app-loading-form', { timeout: 60000 }).should('not.exist');
     cy.get('[data-testid="ioc-stealer-table"]').scrollIntoView().should('be.visible');
@@ -213,7 +209,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('[data-testid="ioc-basic-tag-m_email"]').filter(':visible').first().scrollIntoView().click();
     cy.get('input[name="searchQuery"][placeholder="Search..."]').first().as('q');
     cy.get('@q').should('be.visible').and('not.be.disabled');
-    cy.get('@q').type('ydt.sja@gail.ccmm{enter}');
+    typeInputSlow('@q', 'ydt.sja@gail.ccmm');
 
     cy.get('app-loading-form', { timeout: 60000 }).should('not.exist');
     cy.get('[data-testid="ioc-stealer-table"]').scrollIntoView().should('be.visible');
@@ -225,7 +221,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     clickSidebarSubItem('Profile', 'Event Management');
     cy.get('app-loading-form', { timeout: 60000 }).should('not.exist');
 
-    cy.get('[data-testid="ioc-basic-search-input"]').filter(':visible').first().should('be.visible').clear().type('10.10.0.9{enter}');
+    typeInputSlow('[data-testid="ioc-basic-search-input"]', '10.10.0.9');
 
     cy.get('app-loading-form', { timeout: 60000 }).should('not.exist');
 
@@ -242,13 +238,12 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
   it('runs Web Scans flow for Basic, Port, Repository, and SEO', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Web Scans');
-    clickSidebarSubItem('Web Scans', 'Basic Scan');
     cy.get('[data-testid="network-intel-tab-host-recon"]').should('be.visible');
     cy.get('[data-testid="network-intel-search-input"][placeholder="Search domain..."]').first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    cy.get('@scanInput').type('bbc.com{enter}');
+    typeInputSlow('@scanInput', 'bbc.com');
 
     cy.get('button.ui-cred-toolbar-btn', { timeout: 60000 }).should('be.disabled');
     cy.get('[data-testid="network-intel-tab-ip-scan"]').should('be.visible').click();
@@ -256,39 +251,27 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    cy.get('@scanInput').type('8.8.8.8{enter}');
+    typeInputSlow('@scanInput', '8.8.8.8');
 
-    clickSidebarSubItem('Web Scans', 'Repository Scan');
-    cy.get('input[name="username"][placeholder="Repository"]').first().as('scanInput');
+    cy.get('[data-testid="network-intel-tab-repository-scan"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="network-intel-search-input"][placeholder="Search repository URL..."]').first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    cy.get('@scanInput').type('bbc.com');
-    cy.contains('button', /^Search$/).should('be.visible').and('not.be.disabled').click();
+    typeInputSlow('@scanInput', 'bbc.com');
 
-    clickSidebarSubItem('Web Scans', 'SEO Scan');
-    cy.get('input[name="username"][placeholder="Domain"]').first().as('scanInput');
+    cy.get('[data-testid="network-intel-tab-seo-scan"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="network-intel-search-input"][placeholder="Search domain..."]').first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    cy.get('@scanInput').type('bbc.com');
-    cy.contains('button', /^Search$/).should('be.visible').and('not.be.disabled').click();
+    typeInputSlow('@scanInput', 'bbc.com');
   });
 
-  it('opens Playstore Scanner under Entity API', () => {
+  it('opens Playstore Scanner under Entity Lookup', () => {
     cy.loginAsAdmin();
-    openSidebarGroup('Entity API');
-    clickSidebarSubItem('Entity API', 'Playstore Scanner');
+    openSidebarGroup('Entity Lookup');
+    clickSidebarSubItem('Entity Lookup', 'Playstore Scanner');
   });
 
-  it('runs Dump Listing search flow', () => {
-    cy.loginAsAdmin();
-    openSidebarGroup('Dump');
-    clickSidebarSubItem('Dump', 'Listing');
-    cy.get('input[name="username"][placeholder="Search leak URL"]').first().as('leak');
-    cy.get('@leak').should('be.visible');
-    waitForSearchReady();
-    cy.get('@leak').type('leak');
-    cy.contains('button', 'Search').should('be.visible').click();
-  });
 });

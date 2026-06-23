@@ -201,23 +201,23 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     openTenantSettings();
     cy.contains('app-smtp-settings-block', 'Network Configuration').should('be.visible');
 
-    cy.contains('button', 'Edit').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-edit"]').scrollIntoView().should('be.visible').click();
     fillTenantNetworkConfiguration('localhost', '1');
     cy.intercept('POST', '**/api/update/tenants').as('saveWrongTenantMail');
-    cy.contains('button', 'Save').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').click();
     cy.wait('@saveWrongTenantMail', {timeout: 60000})
       .its('response.statusCode')
       .should('eq', 424);
     cy.contains('app-smtp-settings-block', 'Mail configuration is not working').should('be.visible');
 
-    cy.contains('button', 'Edit').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-edit"]').scrollIntoView().should('be.visible').click();
     fillTenantNetworkConfiguration('mailpit', '1025');
     cy.intercept('POST', '**/api/update/tenants').as('saveRightTenantMail');
-    cy.contains('button', 'Save').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').click();
     cy.wait('@saveRightTenantMail', {timeout: 60000})
       .its('response.statusCode')
       .should('be.oneOf', [200, 201]);
-    cy.contains('button', 'Edit', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="system-settings-mail-edit"]', {timeout: 30000}).should('be.visible');
     cy.contains('app-smtp-settings-block', 'Mail configuration is not working').should('not.exist');
     cy.logout();
   });
@@ -272,23 +272,33 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.contains('div', 'Privacy').should('be.visible');
     cy.contains('div', 'Address').should('be.visible');
 
-    cy.contains('button', 'Edit').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-contact-edit"]').scrollIntoView().should('be.visible').click();
     cy.get('input[name="tenant_phone"]').scrollIntoView().should('be.visible').clear().type(phoneValue);
     cy.get('input[name="tenant_country"]').scrollIntoView().should('be.visible').clear().type(countryValue);
     cy.get('input[name="tenant_city"]').scrollIntoView().should('be.visible').clear().type(cityValue);
 
+    cy.intercept('POST', '**/api/update/tenants').as('saveTenantContact');
+    cy.get('[data-testid="tenant-contact-edit"]').scrollIntoView().should('be.visible').click();
+    cy.wait('@saveTenantContact', {timeout: 60000})
+      .its('response.statusCode')
+      .should('be.oneOf', [200, 201]);
+
+    cy.scrollDashboardToBottom();
+    cy.get('button[aria-label="Edit privacy settings"]').scrollIntoView().should('be.visible').click();
     cy.contains('label', 'Allow User Profile Visibility')
       .scrollIntoView()
-      .parents('div.cursor-pointer')
-      .first()
+      .closest('div.rounded-lg')
       .then(($toggle) => {
         if (($toggle.text() || '').includes('Users can manage their profile visibility')) {
           cy.wrap($toggle).click();
         }
       });
 
-    cy.scrollDashboardToBottom()
-    cy.contains('button', 'Save').scrollIntoView().should('be.visible').click();
+    cy.intercept('POST', '**/api/update/tenants').as('saveTenantPrivacy');
+    cy.get('button[aria-label="Save privacy settings"]').scrollIntoView().should('be.visible').click();
+    cy.wait('@saveTenantPrivacy', {timeout: 60000})
+      .its('response.statusCode')
+      .should('be.oneOf', [200, 201]);
     cy.reload();
     cy.scrollDashboardToBottom()
 
@@ -298,8 +308,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.get('input[name="tenant_city"]').should('have.value', cityValue);
     cy.contains('label', 'Allow User Profile Visibility')
       .scrollIntoView()
-      .parents('div.cursor-pointer')
-      .first()
+      .closest('div.rounded-lg')
       .should('contain.text', 'User profile visibility is disabled for this tenant');
     cy.logout();
   });

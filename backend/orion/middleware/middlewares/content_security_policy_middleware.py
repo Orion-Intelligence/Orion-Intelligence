@@ -1,3 +1,5 @@
+import secrets
+
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
@@ -11,7 +13,9 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
         self.DEBUG = env_handler.get_instance().env("PRODUCTION", "0") != "1"
 
     async def dispatch(self, request: Request, call_next):
+        request.state.csp_nonce = secrets.token_urlsafe(16)
         response: Response = await call_next(request)
+        nonce = request.state.csp_nonce
 
         if any(
                 path in request.url.path for path in

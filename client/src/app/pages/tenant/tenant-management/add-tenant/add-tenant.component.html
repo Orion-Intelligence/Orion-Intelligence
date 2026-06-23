@@ -53,23 +53,12 @@
       <div class="grid grid-cols-2 gap-5">
         <div>
           <label class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">{{ 'Role' | translate }}</label>
-          <select class="ui-popup-select w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none" [(ngModel)]="model.role" name="role">
-            @if (isAdmin) {
-              <option [ngValue]="'analyst'">{{ 'Analyst' | translate }}</option>
-              <option [ngValue]="'demo'">{{ 'Demo' | translate }}</option>
-            } @else {
-              <option [ngValue]="'analyst'">{{ 'Analyst' | translate }}</option>
-              <option [ngValue]="'member'">{{ 'Member' | translate }}</option>
-            }
-          </select>
+          <app-ui-dropdown testId="tenant-add-user-role" menuId="tenant-add-user-role-menu" surface="alert" [options]="roleOptions" [selected]="model.role" [searchable]="false" [placeholder]="'Select role' | translate" (valueChange)="setRole($event)"></app-ui-dropdown>
         </div>
 
         <div>
           <label class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">{{ 'Status' | translate }}</label>
-          <select class="ui-popup-select w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none" [(ngModel)]="model.status" name="status">
-            <option [ngValue]="'active'">{{ 'Active' | translate }}</option>
-            <option [ngValue]="'disable'">{{ 'Disable' | translate }}</option>
-          </select>
+          <app-ui-dropdown testId="tenant-add-user-status" menuId="tenant-add-user-status-menu" surface="alert" [options]="statusOptions" [selected]="model.status" [searchable]="false" [placeholder]="'Select status' | translate" (valueChange)="setStatus($event)"></app-ui-dropdown>
         </div>
       </div>
 
@@ -77,18 +66,40 @@
         <div class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">{{ 'Licenses' | translate }}</div>
       }
       @if (hasFullLicenseAccess || visibleTenantLicensesCount > 1) {
-        <div class="license-grid mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
-          @for (license of licenseList; track license) {
-            @if ((hasFullLicenseAccess || tenantLicenses.includes(license)) && license !== 'maintainer') {
-              <div class="license-card flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [ngClass]="(model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')) ? 'bg-[var(--color-blue-640)] border-[var(--color-blue-630)] text-white border' : 'bg-[var(--color-blue-820)] border-[var(--color-border)] border'" (click)="toggleTenantLicense(model, license)">
-                <input type="checkbox" class="hidden" [checked]="model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')" />
-                <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap" [ngClass]="(model.licenses?.includes(license) || (!model.licenses?.length && license === 'free')) ? 'text-white' : ''">
-                  {{ licenseService.getLicenseLabel(license) }}
-                </span>
-              </div>
-            }
-          }
-        </div>
+        <app-ui-dropdown
+          class="mt-[0.6rem]"
+          testId="tenant-add-user-license"
+          menuId="tenant-add-user-license-menu"
+          [options]="licenseDropdownOptions"
+          [selectedValues]="model.licenses || []"
+          [multiSelect]="true"
+          [showSelectedChips]="true"
+          menuPlacement="static"
+          surface="alert"
+          [placeholder]="'Select licenses' | translate"
+          [searchPlaceholder]="'Search licenses' | translate"
+          (valuesChange)="onLicenseDropdownChange($event)"></app-ui-dropdown>
+        @if (!model.licenses?.length) {
+          <div class="mt-2 text-xs text-[var(--color-text4)]">{{ 'No licenses assigned.' | translate }}</div>
+        }
+      }
+
+      <div class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">{{ 'Permissions' | translate }}</div>
+      <app-ui-dropdown
+        class="mt-[0.6rem]"
+        testId="tenant-add-user-permission"
+        menuId="tenant-add-user-permission-menu"
+        [options]="permissionOptions"
+        [selectedValues]="model.permissions || []"
+        [multiSelect]="true"
+        [showSelectedChips]="true"
+        menuPlacement="static"
+        surface="alert"
+        [placeholder]="'Select permissions' | translate"
+        [searchPlaceholder]="'Search permissions' | translate"
+        (valuesChange)="model.permissions = $event"></app-ui-dropdown>
+      @if (!model.permissions?.length) {
+        <div class="mt-2 text-xs text-[var(--color-text4)]">{{ 'No permissions assigned.' | translate }}</div>
       }
 
       @if (errorText) {

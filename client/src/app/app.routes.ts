@@ -10,7 +10,6 @@ import { IocResolver } from './shared/resolvers/ioc.resolver';
 import { ConfigResolver } from './shared/resolvers/config.resolver';
 import { OnboardingGuard } from './shared/guards/onboarding-guar';
 import { NotificationGuard } from './shared/guards/notification.guard';
-import { ThreatLensComponent } from './pages/geo-fencing/threat-lens/threat-lens';
 const loadLoginComponent = () => import('./pages/login/login.component').then(m => m.LoginComponent);
 const loadSignupComponent = () => import('./pages/signup/signup.component').then(m => m.SignupComponent);
 const loadDashboardComponent = () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent);
@@ -21,7 +20,6 @@ const loadDashboardResultContainer = () => import('./pages/intel-panel/dashboard
 const loadReportComponent = () => import('./sections/report/templates/report_general/report.component').then(m => m.ReportComponent);
 const loadReportDefacementComponent = () => import('./sections/report/templates/report-defacement/report-defacement.component').then(m => m.ReportDefacementComponent);
 const loadReportChatComponent = () => import('./sections/report/templates/report-chat/report-chat.component').then(m => m.ReportChatComponent);
-const loadDumpComponent = () => import('./pages/dump/dump.component').then(m => m.DumpComponent);
 const loadCredentialComponent = () => import('./pages/root-searches/credentials/credential.component').then(m => m.CredentialComponent);
 const loadErrorHandlerComponent = () => import('./shared/partials/error-handler/error-handler.component').then(m => m.ErrorHandlerComponent);
 const loadDashboardConsolidatedComponent = () => import('./pages/root-searches/dashboard-consolidated/dashboard-consolidated.component').then(m => m.DashboardConsolidatedComponent);
@@ -313,7 +311,7 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'all',
+            redirectTo: 'databases',
             pathMatch: 'full'
           },
           {
@@ -620,8 +618,8 @@ export const routes: Routes = [
         ]
       },
       {
-        path: 'threat-intel',
-        data: { animation: 'ThreatIntelPage' },
+        path: 'apt-intel',
+        data: { animation: 'AptIntelPage' },
         children: [
           {
             path: '',
@@ -631,17 +629,17 @@ export const routes: Routes = [
           {
             path: 'all',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'Threat Intelligence', animation: 'DataBreach' }
+            data: { type: 'APT Intel', animation: 'DataBreach' }
           },
           {
             path: 'apt',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'Threat Intelligence', animation: 'DataBreach' }
+            data: { type: 'APT Intel', animation: 'DataBreach' }
           },
           {
             path: 'malware',
             loadComponent: loadDashboardResultContainer,
-            data: { type: 'Threat Intelligence', animation: 'DataBreach' }
+            data: { type: 'APT Intel', animation: 'DataBreach' }
           },
           {
             path: 'compromised-actors',
@@ -658,7 +656,7 @@ export const routes: Routes = [
             path: ':category/:m_hash',
             loadComponent: loadReportComponent,
             resolve: { reportdata: ReportResolver },
-            data: { type: 'Threat Intelligence', animation: 'HashPage' }
+            data: { type: 'APT Intel', animation: 'HashPage' }
           }
         ]
       },
@@ -684,16 +682,6 @@ export const routes: Routes = [
             data: { animation: 'CategoryPage' }
           },
           {
-            path: 'repository-scan',
-            loadComponent: loadSecurityScanComponent,
-            data: { type: 'repo', animation: 'CategoryPage' }
-          },
-          {
-            path: 'seo-scan',
-            loadComponent: loadSecurityScanComponent,
-            data: { type: 'seo', animation: 'CategoryPage' }
-          },
-          {
             path: 'apk-scan',
             loadComponent: loadFileScannerComponent,
             data: {
@@ -706,41 +694,19 @@ export const routes: Routes = [
         ]
       },
       {
-        canActivate: [subscriptionGuard],
-        path: 'dump',
-        data: { animation: 'DumpPage' },
-        children: [
-          {
-            path: '',
-            redirectTo: 'listing',
-            pathMatch: 'full'
-          },
-          {
-            path: 'listing',
-            loadComponent: loadDumpComponent,
-            data: { type: 'listing', animation: 'CategoryPage' }
-          },
-          {
-            path: 'credential',
-            loadComponent: loadCredentialComponent,
-            data: { type: 'credential', animation: 'CategoryPage' }
-          }
-        ]
-      },
-      {
         path: 'stealerlogs',
         canActivate: [subscriptionGuard],
         data: { animation: 'StealerlogsPage' },
         children: [
           {
             path: '',
-            redirectTo: 'iocs',
-            pathMatch: 'full'
+            loadComponent: loadCredentialComponent,
+            data: { type: 'credential', animation: 'CategoryPage' }
           },
           {
             path: 'iocs',
-            loadComponent: loadCredentialComponent,
-            data: { type: 'credential', animation: 'CategoryPage' }
+            redirectTo: '',
+            pathMatch: 'full'
           }
         ]
       },
@@ -785,8 +751,8 @@ export const routes: Routes = [
       {
         path: 'threat-lens',
         canActivate: [subscriptionGuard],
-        component: ThreatLensComponent,
-        data: { animation: 'CategoryPage' }
+        loadComponent: loadSatelliteIntelComponent,
+        data: { animation: 'CategoryPage', view: 'threat' }
       },
       {
         path: 'profile',

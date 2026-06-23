@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, output } from '@angular/core';
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
-import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, ExploitSubCategory, GeneralSubCategory, FeedSubCategory, SocialSubCategory, StealerlogsSubCategory, ScannerSubCategory, TenantSubCategory, ProfileSubCategory, ThreatIntelSubCategory } from '../../../shared/constants/pages';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, TenantSubCategory, ProfileSubCategory } from '../../../shared/constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
@@ -35,15 +35,11 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   mobile_menu_status = false;
   apiCategories = Object.values(ApiSubCategory);
   exploitCategories = Object.values(ExploitSubCategory);
-  threatIntelCategories = Object.values(ThreatIntelSubCategory);
-  dumpCategories = Object.values(DumpSubCategory);
+  aptIntelCategories: string[] = [];
   newsCategories = Object.values(FeedSubCategory);
-  generalCategories = Object.values(GeneralSubCategory);
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
   socialCategories = Object.values(SocialSubCategory);
-  stealerlogsCategories = Object.values(StealerlogsSubCategory);
-  scannerCategories = Object.values(ScannerSubCategory);
   tenantCategories = Object.values(TenantSubCategory);
   category = Category;
   readonly menuToggle = output<undefined>();
@@ -111,7 +107,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       let firstSubcategory: string | undefined;
       switch (section) {
         case Category.STRATEGIC:
-          firstSubcategory = this.generalCategories[0];
+          firstSubcategory = 'All';
           break;
         case Category.BREACH:
           firstSubcategory = this.leakCategories[0];
@@ -122,23 +118,14 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         case Category.DEFACEMENT:
           firstSubcategory = this.defacementCategories[0];
           break;
-        case Category.THREAT_INTEL:
-          firstSubcategory = this.threatIntelCategories[0];
-          break;
-        case Category.DUMP:
-          firstSubcategory = this.dumpCategories[0];
+        case Category.APT_INTEL:
+          firstSubcategory = this.aptIntelCategories[0];
           break;
         case Category.FEED:
           firstSubcategory = this.newsCategories[0];
           break;
         case Category.TENANT:
           firstSubcategory = this.tenantCategories[0];
-          break;
-        case Category.SCANNER:
-          firstSubcategory = this.scannerCategories[0];
-          break;
-        case Category.STEALERLOGS:
-          firstSubcategory = this.stealerlogsCategories[0];
           break;
         case Category.PROFILE:
           firstSubcategory = this.getProfileCategories()[0];

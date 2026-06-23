@@ -14,7 +14,7 @@ class social_model(BaseModel):
     m_weblink: List[str] = Field(default_factory=list)
     m_content: str
     m_content_type: List[str] = Field(default_factory=list)
-    m_message_date: Optional[date] = None
+    m_date: Optional[date] = None
     m_channel_url: Optional[str] = None
     m_message_id: Optional[str] = None
     m_platform: str
@@ -22,7 +22,7 @@ class social_model(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    @field_serializer("m_message_date")
+    @field_serializer("m_date")
     def serialize_message_date(self, value: Optional[date]):
         return value.strftime(DATE_ONLY_FORMAT) if value else None
 

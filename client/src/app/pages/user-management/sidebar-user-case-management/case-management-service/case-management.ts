@@ -25,6 +25,10 @@ type ArtifactFileUploadResponse = {
   }[];
 };
 
+type AssignCaseAnalystRequest = {
+  analystId: string;
+};
+
 @Injectable({ providedIn: 'root' })
 export class CaseManagement {
   constructor(private api: ApiService) { }
@@ -99,5 +103,9 @@ export class CaseManagement {
 
   archiveCase(caseId: string): Observable<{ success: boolean; message?: string }> {
     return this.api.put<{ success: boolean; message?: string }>(`profile/cases/${caseId}/archive`, {});
+  }
+
+  assignCaseAnalyst(caseId: string, payload: AssignCaseAnalystRequest): Observable<Case> {
+    return this.api.put<Case>(`profile/cases/${caseId}/assign-analyst`, payload);
   }
 }

@@ -275,10 +275,9 @@ export class ThreatLensService {
 
   private extractDocumentDate(document: any): { isoDate: string; timestamp: number } {
     const candidates = [
-      document?.m_message_date,
+      document?.m_date,
       document?.m_creation_date,
       document?.m_update_date,
-      document?.m_leak_date,
     ];
 
     for (const candidate of candidates) {

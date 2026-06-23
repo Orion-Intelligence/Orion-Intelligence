@@ -36,7 +36,7 @@ export const INTAKE_SOURCE_OPTIONS: CaseOption<IntakeSource>[] = [
   { value: 'customer_report', label: 'Customer Report' },
   { value: 'breach_search', label: 'Breach Search' },
   { value: 'stealer_logs', label: 'Stealer Logs' },
-  { value: 'entity_api', label: 'Entity API' },
+  { value: 'entity_api', label: 'Entity Lookup' },
   { value: 'network_intel', label: 'Network Intel' },
   { value: 'social_intel', label: 'Social Intel' },
   { value: 'cti_graph', label: 'CTI Graph' },

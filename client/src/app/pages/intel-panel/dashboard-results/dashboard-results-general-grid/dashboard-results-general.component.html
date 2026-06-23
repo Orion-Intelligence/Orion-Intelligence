@@ -1,14 +1,14 @@
 <div id="search-result" [ngClass]="isConsolidatedView ? 'mb-6 w-full min-w-0' : 'mb-8 w-full max-w-[910px] min-w-0 px-2 sm:px-0 max-[640px]:px-0'">
-  @for (item of (isExpandAble() && isCollapsed ? searchResults().slice(0, 2) : searchResults().slice(0, 30)); track (item.m_hash || item.m_url || item.m_title || 'item') + '-' + $index) {
-    <div data-testid="result-card" [id]="'item-' + item.m_hash" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''" class="mb-[20px] w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card ui-result-card-hover bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] px-[20px] pt-[15px] pb-[20px] transition-all duration-300 hover:cursor-pointer hover:bg-[var(--color-blue-810)] max-[640px]:px-[12px] max-[640px]:pt-[12px] max-[640px]:pb-[14px]" (click)="openExternalUrl(getDisplayUrl(item))">
-      <div class="mb-[10px] flex flex-wrap justify-start gap-[10px]">
-        <div class="flex max-w-[80%] flex-wrap gap-[10px]">
+  @for (item of searchResults().slice(0, getResultDisplayLimit()); track (item.m_hash || item.m_url || item.m_title || 'item') + '-' + $index) {
+    <div data-testid="result-card" [attr.data-result-index]="$index" [id]="'item-' + item.m_hash" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''" class="mb-[20px] w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card ui-result-card-hover bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] px-[20px] pt-[15px] pb-[20px] transition-all duration-300 hover:cursor-pointer hover:bg-[var(--color-blue-810)] max-[640px]:px-[12px] max-[640px]:pt-[12px] max-[640px]:pb-[14px]" (click)="openExternalUrl(getDisplayUrl(item))">
+      <div class="mb-[10px] flex items-start gap-[10px]">
+        <div class="flex min-w-0 flex-1 flex-wrap gap-[10px]">
           @for (tag of getDisplayTags(item); track $index) {
             <span class="inline-flex h-[31px] items-center rounded-full bg-[var(--color-tags)] px-[13px] text-[12px] font-normal text-[var(--color-text3)]">{{ tag }}</span>
           }
         </div>
         @if (!isMobileMode()) {
-          <div class="ml-auto flex gap-[20px]">
+          <div class="ml-auto flex shrink-0 items-start gap-[20px] self-start">
             @if (!licenseService.isMaintainer() && (type() === 'strategic' || type() === 'general') && item && item.m_url && (item.m_url.endsWith('.onion') || item.m_url.endsWith('.onion/'))) {
               <div (click)="scrollService.openCTI($event, item.m_hash)" [appTooltip]="'Open CTI Graph' | translate" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-cti-graph">
                 <div class="p-[0_0_10px_10px]">
@@ -24,11 +24,11 @@
                 </div>
               }
             }
-            <div id="open-report" (click)="scrollService.saveCurrentPosition(item.m_hash)" [queryParams]="queryParams" [appTooltip]="'Open Report' | translate" data-testid="open-report" [routerLink]="getReportLink(item)" class="ml-auto flex w-auto cursor-pointer justify-center">
+            <a id="open-report" (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_hash)" [queryParams]="queryParams" [appTooltip]="'Open Report' | translate" data-testid="open-report" [routerLink]="getReportLink(item)" class="ml-auto flex w-auto cursor-pointer justify-center">
               <div class="p-[0_0_10px_10px]">
                 <img height="20" src="assets/images/shared/theme/redirect.svg" width="20" alt="redirect" class="ui-action-icon" />
               </div>
-            </div>
+            </a>
           </div>
         }
       </div>
@@ -66,7 +66,11 @@
       <div class="mt-[20px] flex flex-wrap items-center justify-between gap-[15px] rounded-[5px] pt-[10px] pr-[10px] text-[12px] max-[768px]:flex-col max-[768px]:items-start max-[768px]:text-start">
         <div class="flex flex-col gap-[2px] max-[768px]:mb-[10px] max-[768px]:w-full max-[768px]:items-start max-[768px]:justify-start">
           <span class="text-[var(--color-text4)]">{{ 'Published on' | translate }}:</span>
-          <span class="font-medium text-[var(--color-text1)]">{{ item?.m_leak_date ? (item.m_leak_date | date: 'MMM d, y') : '-' }}</span>
+          @if (type() === 'Strategic' || type() === 'strategic' || type() === 'general') {
+          <span class="font-medium text-[var(--color-text1)]">{{ item?.m_last_crawled_at ? (item.m_last_crawled_at | date: 'MMM d, y':'UTC') : '-' }}</span>
+          } @else {
+          <span class="font-medium text-[var(--color-text1)]">{{ item?.m_date ? (item.m_date | date: 'MMM d, y') : '-' }}</span>
+          }
         </div>
         <div class="flex flex-col gap-[2px] max-[768px]:mb-[10px] max-[768px]:w-full max-[768px]:items-start max-[768px]:justify-start">
           <span class="text-[var(--color-text4)]">{{ 'Network' | translate }}:</span>
@@ -74,13 +78,22 @@
         </div>
         <div class="flex flex-col gap-[2px] max-[768px]:mb-[10px] max-[768px]:w-full max-[768px]:items-start max-[768px]:justify-start">
           <span class="text-[var(--color-text4)]">{{ 'Last checked' | translate }}:</span>
+          @if (type() === 'Strategic' || type() === 'strategic' || type() === 'general') {
+          <span class="font-medium text-[var(--color-text1)]">{{ item?.m_last_crawled_at ? (item.m_last_crawled_at | date: 'mediumDate':'UTC') : '-' }}</span>
+          } @else {
           <span class="font-medium text-[var(--color-text1)]">{{ item?.m_update_date | date: 'mediumDate':'UTC' }}</span>
+          }
         </div>
         <div class="flex flex-col items-start gap-[5px] max-[768px]:mb-[10px] max-[768px]:w-full max-[768px]:items-start max-[768px]:justify-start">
           <span class="text-[var(--color-text4)]">{{ 'Status' | translate }}</span>
           <div class="flex items-center justify-start">
-            <span [ngClass]="{ 'bg-[#22c55e]': isWithinDays(item.m_update_date, 5), 'bg-[#f59e0b]': isWithinDays(item.m_update_date, 10) && !isWithinDays(item.m_update_date, 5), 'bg-[#ef4444]': !isWithinDays(item.m_update_date, 10) }" class="mr-2 inline-block h-[8px] w-[8px] shrink-0 rounded-full"></span>
-            <span class="font-medium text-[var(--color-text1)]">{{ isWithinDays(item.m_update_date, 5) ? 'active' : 'inactive' }}</span>
+            @if (type() === 'Strategic' || type() === 'strategic' || type() === 'general') {
+            <span [ngClass]="{ 'bg-[#22c55e]': item.m_crawl_status === 'active', 'bg-[#f59e0b]': item.m_crawl_status === 'stale', 'bg-[#ef4444]': item.m_crawl_status !== 'active' && item.m_crawl_status !== 'stale' }" class="mr-2 inline-block h-[8px] w-[8px] shrink-0 rounded-full"></span>
+            <span class="font-medium text-[var(--color-text1)]">{{ item.m_crawl_status || 'inactive' }}</span>
+            } @else {
+            <span [ngClass]="{ 'bg-[#22c55e]': isWithinDays(item.m_date || '', 183), 'bg-[#f59e0b]': isWithinDays(item.m_date || '', 365) && !isWithinDays(item.m_date || '', 183), 'bg-[#ef4444]': !isWithinDays(item.m_date || '', 365) }" class="mr-2 inline-block h-[8px] w-[8px] shrink-0 rounded-full"></span>
+            <span class="font-medium text-[var(--color-text1)]">{{ isWithinDays(item.m_date || '', 183) ? 'recent' : (isWithinDays(item.m_date || '', 365) ? 'tracked' : 'archive') }}</span>
+            }
           </div>
         </div>
       </div>
@@ -89,7 +102,7 @@
 
   @if (isExpandAble() && searchResults().length > 2) {
     <div class="flex justify-center pt-[4px]">
-      <span class="ui-see-more-btn cursor-pointer" (click)="isCollapsed = !isCollapsed" data-testid="consolidated-section-see-more">{{ (isCollapsed ? 'See More' : 'See Less') | translate }}</span>
+      <span class="ui-see-more-btn cursor-pointer" (click)="toggleCollapsed()" data-testid="consolidated-section-see-more">{{ (isCollapsed ? 'See More' : 'See Less') | translate }}</span>
     </div>
   }
 </div>

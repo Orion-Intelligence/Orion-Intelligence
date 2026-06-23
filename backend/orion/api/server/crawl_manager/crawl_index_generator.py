@@ -1,6 +1,9 @@
 import hashlib
 from datetime import datetime, timezone
 
+from cryptography.fernet import Fernet
+
+from orion.constants.constant import CONSTANTS
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX, ELASTIC_KEYS
 
@@ -101,14 +104,20 @@ class crawl_index_generator:
     @staticmethod
     def index_query_stealerlog(p_index_data):
         bulk_entries = []
+        cipher = None
         for log in p_index_data["logs"]:
             m_hash = log["m_hash"]
-            _id = str(datetime.utcnow().year) + "_UTC_" + m_hash
+            _id = str(datetime.now(timezone.utc).year) + "_UTC_" + m_hash
 
             doc = {}
             for k in log:
                 if log[k] is not None:
-                    doc[k] = log[k]
+                    if k == "password":
+                        if cipher is None:
+                            cipher = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode())
+                        doc[k] = cipher.encrypt(str(log[k]).encode()).decode()
+                    else:
+                        doc[k] = log[k]
 
             bulk_entries.append({"create": {"_index": ELASTIC_INDEX.S_STEALERLOGS_INDEX, "_id": _id}})
             bulk_entries.append(doc)
@@ -187,9 +196,9 @@ class crawl_index_generator:
                 continue
 
             card["m_hash"] = helper_controller.generate_data_hash(title)
-            leak_date = card.get("m_leak_date") or card.get("m_published_date") or card.get("m_last_updated")
+            leak_date = card.get("m_date") or card.get("m_published_date") or card.get("m_last_updated")
             if leak_date:
-                card["m_leak_date"] = str(leak_date)[:10]
+                card["m_date"] = str(leak_date)[:10]
             card["m_update_date"] = current_timestamp
             card["m_contact_link"] = contact_link
             card.setdefault("m_base_url", base_url)
@@ -215,9 +224,9 @@ class crawl_index_generator:
 
             unique_value = card.get("m_sha256_hash") or card.get("m_source_url") or title
             card["m_hash"] = helper_controller.generate_data_hash(str(unique_value))
-            leak_date = card.get("m_leak_date") or card.get("m_first_seen") or card.get("m_last_seen")
+            leak_date = card.get("m_date") or card.get("m_first_seen") or card.get("m_last_seen")
             if leak_date:
-                card["m_leak_date"] = str(leak_date)[:10]
+                card["m_date"] = str(leak_date)[:10]
             card["m_update_date"] = current_timestamp
             card["m_contact_link"] = contact_link
             card.setdefault("m_base_url", base_url)

@@ -488,7 +488,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
 
       const payload: GraphReportPayload = {
         graphKind: 'cti',
-        title: `Entity API Report - ${this.displayFieldLabel(apiLabel)}`,
+        title: `Entity Lookup Report - ${this.displayFieldLabel(apiLabel)}`,
         sessionName: `${this.apiType || 'api'}-${query || 'query'}`.slice(0, 80),
         generatedAtIso: now,
         nodes: Object.keys(values).map((k, i) => ({ id: `field-${i + 1}`, label: k, type: 'field' })),
@@ -530,7 +530,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
 
     const payload: GraphReportPayload = {
       graphKind: (this.apiType === 'social' || this.apiType === 'wanted' || this.apiType === 'national-identity') ? 'social' : 'cti',
-      title: `Entity API Report - ${this.displayFieldLabel(apiLabel)}`,
+      title: `Entity Lookup Report - ${this.displayFieldLabel(apiLabel)}`,
       sessionName: `${this.apiType || 'api'}-${query || 'query'}`.slice(0, 80),
       generatedAtIso: now,
       nodes: items.slice(0, 200).map((item, idx) => ({

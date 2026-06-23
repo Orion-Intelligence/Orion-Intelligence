@@ -14,6 +14,7 @@ class search_general_param_model(BaseModel, helper_controller):
     network: str = "all"
     matchtype: Optional[str] = "or"
     content: Optional[str] = "all"
+    m_content_type: Optional[str] = "all"
 
     daterange: Annotated[str, StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")] = ""
     entity_filter: Optional[Dict[str, List[str]]] = Field(

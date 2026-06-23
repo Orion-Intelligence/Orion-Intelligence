@@ -29,7 +29,9 @@ export class ReportResolver implements Resolve<any> {
       case 'exploit':
         apiUrl = hash ? `search/exploit/${hash}` : `search/exploit`;
         break;
+      case 'apt-intel':
       case 'threat-intel':
+      case 'apt-intel':
         if (category_2 === 'compromised-actors') {
           apiUrl = hash ? `search/defacement/${hash}` : `search/defacement`;
         }

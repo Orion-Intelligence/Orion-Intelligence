@@ -4,7 +4,7 @@ SYSTEM_INFO_DOCS = {"directory": {"description": (
     "- **page:** page number of the result\n"
     "- **network:** all, onion, i2p, clearnet\n"
     "- **index:** all, general, leak, defacement, chat, exploit, twitter, reddit\n"
-    "- **content_type:** all, general, forums, news, stolen, drugs, hacking, marketplaces, cryptocurrency, "
+    "- **content_type:** all, general, swarm, forums, news, stolen, drugs, hacking, marketplaces, cryptocurrency, "
     "leaks, adult, tracking, chat, social\n"
     "- **daterange:** optional date range (e.g., `2025-12-03,2025-12-18`)\n\n"
     "Results include URL, detected content type(s), index classification, network layer, and last-update metadata."), "response_description": (
@@ -34,44 +34,7 @@ SYSTEM_INFO_DOCS = {"directory": {"description": (
     "}\n"
     "```\n"), },
 
-    "dumps": {"description": (
-        "Retrieve the complete catalog of breach dumps collected from Telegram channels and monitored websites.\n\n"
-        "Supported filters:\n"
-        "- **page:** page number of the result set\n"
-        "- **source:** all, telegram, websites (origin of the leak, e.g., Telegram or monitored websites)\n"
-        "- **group:** leak group or channel name derived from the source (e.g., Telegram channel name)\n"
-        "- **status:** all, parsed, unparsed\n"
-        "- **daterange:** optional date range string (e.g., `2025-01-01,2025-01-15`)\n"
-        "- **q:** free-text search query applied to `leak_url`, `source`, `group`, and other indexed fields (default: `*`)\n\n"
-        "Common use-cases include identifying newly leaked dumps, retrieving unparsed dumps for analysis, "
-        "or filtering dumps from specific threat groups or Telegram channels."), "response_description": (
-        "Paginated dump catalog response containing:\n"
-        "- **total_count** — total number of dumps matching filters\n"
-        "- **page** — current page number\n"
-        "- **mDumpCallbackLinks** — list of dump entries, each containing:\n"
-        "  - **leak_url** — raw dump reference or asset URL\n"
-        "  - **source** — origin of the leak (e.g., telegram, websites)\n"
-        "  - **group** — associated leak group or channel name derived from the source (e.g., Telegram channel name)\n"
-        "  - **link** — direct reference link to the dump message or file\n"
-        "  - **parsed_status** — whether the dump has been parsed/processed\n"
-        "  - **created_at** — first-seen timestamp of the dump"
-        "\n\nExample response:\n"
-        "```json\n"
-        "{\n"
-        '  "total_count": 152,\n'
-        '  "page": 1,\n'
-        '  "mDumpCallbackLinks": [\n'
-        "    {\n"
-        '      "leak_url": "https://t.me/example_leaks/1234",\n'
-        '      "source": "telegram",\n'
-        '      "group": "example_leak_group",\n'
-        '      "link": "https://t.me/example_leaks/1234",\n'
-        '      "parsed_status": "parsed",\n'
-        '      "created_at": "2025-12-03T21:15:23Z"\n'
-        "    }\n"
-        "  ]\n"
-        "}\n"
-        "```\n"), }, "insight": {"description": (
+    "insight": {"description": (
         "Retrieve system-wide analytics and high-level intelligence metrics across all monitored data sources.\n\n"
         "This endpoint does not take any parameters and returns pre-aggregated insights computed by Orion.\n\n"
         "Returned analytics include (per data type such as general, leak, defacement):\n"
@@ -518,7 +481,7 @@ REPORT_DOCS = {"defacement": {"description": (
                                         "- **m_base_url** — base/source platform (for example `https://defacer.net`)\n"
                                         "- **m_url** — URL of the defaced or phishing page\n"
                                         "- **m_ip** — list of IP addresses associated with the defaced host\n"
-                                        "- **m_leak_date** — date the defacement was first recorded/observed\n"
+                                        "- **m_date** — date the defacement was first recorded/observed\n"
                                         "- **m_source_url** — list of source pages describing the defacement (for example the defacer.net view URL)\n"
                                         "- **m_screenshot** — screenshot reference when available, otherwise `null`\n"
                                         "- **m_mirror_links** — list of mirror/screenshot links for the defacement entry\n\n"
@@ -537,7 +500,7 @@ REPORT_DOCS = {"defacement": {"description": (
                                         "      \"m_base_url\": \"https://defacer.net\",\n"
                                         "      \"m_url\": \"http://phaoboi.vn/\",\n"
                                         "      \"m_ip\": [\"103.218.122.8\"],\n"
-                                        "      \"m_leak_date\": \"2025-12-03\",\n"
+                                        "      \"m_date\": \"2025-12-03\",\n"
                                         "      \"m_source_url\": [\"https://defacer.net/view/54543/\"],\n"
                                         "      \"m_screenshot\": null,\n"
                                         "      \"m_mirror_links\": [\"https://defacer.net/sc/54543\"]\n"
@@ -924,7 +887,7 @@ REPORT_DOCS = {"defacement": {"description": (
                                                                      "Core response fields typically include:\n"
                                                                      "- **m_content** — normalized text content of the message (main body text)\n"
                                                                      "- **m_caption** — original caption text, often mirroring **m_content** for media posts\n"
-                                                                     "- **m_message_date** — message date in `YYYY-MM-DD` format\n"
+                                                                     "- **m_date** — message date in `YYYY-MM-DD` format\n"
                                                                      "- **m_message_id** — platform-specific message identifier (e.g. Telegram message id)\n"
                                                                      "- **m_message_sharable_link** — deep link to the message (e.g. `https://t.me/...`)\n"
                                                                      "- **m_channel_id** — internal or platform channel identifier\n"
@@ -964,7 +927,7 @@ REPORT_DOCS = {"defacement": {"description": (
                                                                      "{\n"
                                                                      "  \"m_content\": \"Причина сигнала бедствия Boeing 777-200 — возгорание одного из двигателей. На данный момент пожар потушен. Сейчас самолёт вырабатывает топливо, готовясь к возвращению в Домодедово в 22:40. Экипаж работает штатно, паники на борту нет. UPD. На судне находятся 412 пассажиров и 13 членов бортовой команды. Подписывайся на Mash\",\n"
                                                                      "  \"m_caption\": \"Причина сигнала бедствия Boeing 777-200 — возгорание одного из двигателей. На данный момент пожар потушен. Сейчас самолёт вырабатывает топливо, готовясь к возвращению в Домодедово в 22:40. Экипаж работает штатно, паники на борту нет. UPD. На судне находятся 412 пассажиров и 13 членов бортовой команды. Подписывайся на Mash\",\n"
-                                                                     "  \"m_message_date\": \"2025-12-03\",\n"
+                                                                     "  \"m_date\": \"2025-12-03\",\n"
                                                                      "  \"m_message_id\": \"69893\",\n"
                                                                      "  \"m_message_sharable_link\": \"https://t.me/mash/69893\",\n"
                                                                      "  \"m_channel_id\": \"1117628569\",\n"
@@ -1013,7 +976,7 @@ REPORT_DOCS = {"defacement": {"description": (
                                                                      "- **m_content** — normalized text content of the post, including hashtags, mentions and links\n"
                                                                      "- **m_content_type** — internal labels describing the social collector/source type "
                                                                      "(e.g. `[\"social_collector\"]`)\n"
-                                                                     "- **m_message_date** — date the post was created, in `YYYY-MM-DD` format\n"
+                                                                     "- **m_date** — date the post was created, in `YYYY-MM-DD` format\n"
                                                                      "- **m_channel_url** — URL of the profile, channel or account page\n"
                                                                      "- **m_message_id** — platform-specific unique identifier for the post\n"
                                                                      "- **m_platform** — social platform name (e.g. `twitter`)\n"
@@ -1042,7 +1005,7 @@ REPORT_DOCS = {"defacement": {"description": (
                                                                      "  \"m_message_sharable_link\": \"https://x.com/lu3ky13/status/1852382887246541180\",\n"
                                                                      "  \"m_content\": \"Remote Code Execution (RCE) thank you \\n@nahamsec\\n \\n\\nYay, I was awarded a $7,800 bounty on \\n@Hacker0x01\\n! \\nhttps://\\nhackerone.com/lu3ky-13 #TogetherWeHitHarder #bugbounty\",\n"
                                                                      "  \"m_content_type\": [\"social_collector\"],\n"
-                                                                     "  \"m_message_date\": \"2024-11-01\",\n"
+                                                                     "  \"m_date\": \"2024-11-01\",\n"
                                                                      "  \"m_channel_url\": \"https://x.com/lu3ky13\",\n"
                                                                      "  \"m_message_id\": \"1852382887246541180\",\n"
                                                                      "  \"m_platform\": \"twitter\",\n"
@@ -1137,7 +1100,7 @@ DYNAMIC_DOCS = {"dynamic_user_email": {"description": (
     "      ],\n"
     "      \"m_websites\": [],\n"
     "      \"m_logo_or_images\": [],\n"
-    "      \"m_leak_date\": null,\n"
+    "      \"m_date\": null,\n"
     "      \"m_data_size\": null,\n"
     "      \"m_revenue\": null\n"
     "    }\n"
@@ -1158,7 +1121,7 @@ DYNAMIC_DOCS = {"dynamic_user_email": {"description": (
     "- **m_dumplink** — list of named breach collections or dump sources where the email was found\n"
     "- **m_websites** — list of affected websites or services when this information is available\n"
     "- **m_logo_or_images** — list of URLs pointing to logos or images associated with the victim or breach\n"
-    "- **m_leak_date** — date of the leak if known, otherwise null\n"
+    "- **m_date** — date of the leak if known, otherwise null\n"
     "- **m_data_size** — approximate size of the exposed dataset when provided, otherwise null\n"
     "- **m_revenue** — optional revenue or financial impact metadata, when tracked by the source\n\n"
     "Multiple entries can be returned in **result** if the same email or username was observed in more than "
@@ -1248,7 +1211,7 @@ DYNAMIC_DOCS = {"dynamic_user_email": {"description": (
     "      \"m_dumplink\": [\"https://twitter.com/bitcoin\"],\n"
     "      \"m_websites\": [],\n"
     "      \"m_logo_or_images\": [],\n"
-    "      \"m_leak_date\": null,\n"
+    "      \"m_date\": null,\n"
     "      \"m_data_size\": null,\n"
     "      \"m_revenue\": null\n"
     "    },\n"
@@ -1266,7 +1229,7 @@ DYNAMIC_DOCS = {"dynamic_user_email": {"description": (
     "      \"m_dumplink\": [\"https://clubhouse.com/@bitcoin\"],\n"
     "      \"m_websites\": [],\n"
     "      \"m_logo_or_images\": [],\n"
-    "      \"m_leak_date\": null,\n"
+    "      \"m_date\": null,\n"
     "      \"m_data_size\": null,\n"
     "      \"m_revenue\": null\n"
     "    }\n"
@@ -1289,7 +1252,7 @@ DYNAMIC_DOCS = {"dynamic_user_email": {"description": (
     "- **m_dumplink** — list of links or references within breach/collection data pointing to this account\n"
     "- **m_websites** — list of associated websites when available\n"
     "- **m_logo_or_images** — list of URLs for logos, avatars or images tied to the account\n"
-    "- **m_leak_date** — date of the leak or earliest observation if known, otherwise null\n"
+    "- **m_date** — date of the leak or earliest observation if known, otherwise null\n"
     "- **m_data_size** — size of associated dataset when this information is available, otherwise null\n"
     "- **m_revenue** — optional revenue/financial impact metadata when tracked by the backend\n\n"
     "Multiple entries can be returned in **result** when the same username is observed on different social "
@@ -1444,7 +1407,7 @@ SEARCH_DOCS = {"defacement": {"description": (
                                           "- **m_base_url** — base URL or service where the content originates (e.g. `https://github.com/`).\n"
                                           "- **m_url** — concrete URL of the defaced or phishing page.\n"
                                           "- **m_ioc_type** — high-level classification of the event (e.g. `phishing`, `defacement`).\n"
-                                          "- **m_leak_date** — first observed date for the event.\n"
+                                          "- **m_date** — first observed date for the event.\n"
                                           "- **m_network** — network type (`clearnet`, `onion`, `i2p`, etc.).\n"
                                           "- **m_domain** — list of domains involved in the event.\n"
                                           "- **m_content_type** — classification labels (e.g. [`defacement`, `phishing`]).\n"
@@ -1467,7 +1430,7 @@ SEARCH_DOCS = {"defacement": {"description": (
                                           "      \"m_base_url\": \"https://github.com/\",\n"
                                           "      \"m_url\": \"https://github.com/some-victim-repo\",\n"
                                           "      \"m_ioc_type\": \"phishing\",\n"
-                                          "      \"m_leak_date\": \"2025-12-01T18:22:41.032Z\",\n"
+                                          "      \"m_date\": \"2025-12-01T18:22:41.032Z\",\n"
                                           "      \"m_network\": \"clearnet\",\n"
                                           "      \"m_domain\": [\n"
                                           "        \"github.com\",\n"
@@ -1770,7 +1733,7 @@ SEARCH_DOCS = {"defacement": {"description": (
         "- **m_content** — normalized text content, including hashtags, mentions and links\n"
         "- **m_content_type** — internal labels describing the social collector/source type "
         "(e.g. `[\"social_collector\"]`)\n"
-        "- **m_message_date** — date the post was created in `YYYY-MM-DD` format\n"
+        "- **m_date** — date the post was created in `YYYY-MM-DD` format\n"
         "- **m_channel_url** — URL of the profile, channel or account page\n"
         "- **m_message_id** — platform-specific unique identifier\n"
         "- **m_platform** — social platform name (e.g. `twitter`, `mastodon`)\n"
@@ -1795,7 +1758,7 @@ SEARCH_DOCS = {"defacement": {"description": (
         "      \"m_message_sharable_link\": \"https://x.com/anyrun_app/status/1861024182210900357\",\n"
         "      \"m_content\": \"ALERT: Potential ZERO-DAY, Attackers Use Corrupted Files to Evade Detection (1/3)...\",\n"
         "      \"m_content_type\": [\"social_collector\"],\n"
-        "      \"m_message_date\": \"2024-11-25\",\n"
+        "      \"m_date\": \"2024-11-25\",\n"
         "      \"m_channel_url\": \"https://x.com/anyrun_app\",\n"
         "      \"m_message_id\": \"1861024182210900357\",\n"
         "      \"m_platform\": \"twitter\",\n"
@@ -1863,7 +1826,7 @@ SEARCH_DOCS = {"defacement": {"description": (
         "- **m_channel_name** — human-readable channel name.\n"
         "- **m_sender_name** — display name of the sender.\n"
         "- **m_sender_username** — sender username/handle.\n"
-        "- **m_message_date** — message date in `YYYY-MM-DD` format.\n"
+        "- **m_date** — message date in `YYYY-MM-DD` format.\n"
         "- **m_content** — normalized message text.\n"
         "- **m_caption** — media caption (if applicable).\n"
         "- **m_message_sharable_link** — deep link to the message (e.g. `https://t.me/...`).\n"
@@ -1886,7 +1849,7 @@ SEARCH_DOCS = {"defacement": {"description": (
         "      \"m_channel_name\": \"Example Ransomware Channel\",\n"
         "      \"m_sender_name\": \"Example Threat Actor\",\n"
         "      \"m_sender_username\": \"example_actor\",\n"
-        "      \"m_message_date\": \"2025-12-07\",\n"
+        "      \"m_date\": \"2025-12-07\",\n"
         "      \"m_message_sharable_link\": \"https://t.me/example_channel/123456\",\n"
         "      \"m_content\": \"New victim announced: ExampleCorp. Data will be leaked in 7 days.\",\n"
         "      \"m_caption\": \"\",\n"
@@ -1998,7 +1961,7 @@ SEARCH_DOCS = {"defacement": {"description": (
         "      {\n"
         '        "doc_id": "social-789",\n'
         '        "m_sender_name": "@threatintelfeed",\n'
-        '        "m_message_date": "2025-12-07",\n'
+        '        "m_date": "2025-12-07",\n'
         '        "m_content": "New Okta-related access sale spotted on darkweb.",\n'
         '        "m_platform": "mastodon",\n'
         '        "m_network": "clearnet",\n'
@@ -2051,8 +2014,8 @@ SEARCH_DOCS = {"defacement": {"description": (
         "- Common metadata fields depending on the index, such as:\n"
         "  - For leak/breach: **m_title**, **m_company_name**, **m_domain**, **m_network**, **m_content_type**\n"
         "  - For exploit: **m_title**, **m_platform**, **m_content_type**, **m_url**\n"
-        "  - For chat: **m_sender_name**, **m_message_date**, **m_content**, **m_channel_name**\n"
-        "  - For social: **m_sender_name**, **m_message_date**, **m_content**, **m_platform**\n\n"
+        "  - For chat: **m_sender_name**, **m_date**, **m_content**, **m_channel_name**\n"
+        "  - For social: **m_sender_name**, **m_date**, **m_content**, **m_platform**\n\n"
         "Example response:\n"
         "```json\n"
         "{\n"
@@ -2086,7 +2049,7 @@ SEARCH_DOCS = {"defacement": {"description": (
         '      "doc_id": "social-789",\n'
         '      "score": 9.42,\n'
         '      "m_sender_name": "@threatintelfeed",\n'
-        '      "m_message_date": "2025-12-07",\n'
+        '      "m_date": "2025-12-07",\n'
         '      "m_content": "New Okta-related access sale spotted on darkweb.",\n'
         '      "m_platform": "mastodon",\n'
         '      "m_network": "clearnet",\n'
@@ -2367,8 +2330,7 @@ def _doc(rel_path: str) -> dict:
     return {"description": text, "response_description": response_description}
 
 
-SYSTEM_INFO_DOCS = {"directory": _doc("system-info/directory.md"), "dumps": _doc(
-    "system-info/dumps.md"), "insight": _doc("system-info/insight.md"), }
+SYSTEM_INFO_DOCS = {"directory": _doc("system-info/directory.md"), "insight": _doc("system-info/insight.md"), }
 
 REPORT_DOCS = {"defacement": _doc("reports/defacement.md"), "breach": _doc("reports/breach.md"), "news": _doc(
     "reports/news.md"), "exploit": _doc("reports/exploit.md"), "strategic": _doc("reports/strategic.md"), "chat": _doc(

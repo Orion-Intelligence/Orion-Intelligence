@@ -24,6 +24,8 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 export class TenantSettingsComponent implements OnInit {
   isAccountSectionOpen = true;
   isEditing = false;
+  contactEditing = false;
+  privacyEditing = false;
   mailErrorState = false;
   userSessionData: userSessionData;
   userId: string = '';
@@ -55,17 +57,36 @@ export class TenantSettingsComponent implements OnInit {
 
   toggleEdit(event: Event) {
     this.isEditing = toggleEditState(event, this.isEditing, () => {
+      this.updateUser(true);
+    });
+  }
+
+  toggleContactEdit(event: Event) {
+    this.contactEditing = toggleEditState(event, this.contactEditing, () => {
       this.updateUser();
     });
+  }
+
+  togglePrivacyEdit(event: Event) {
+    this.privacyEditing = toggleEditState(event, this.privacyEditing, () => {
+      this.updateUser();
+    });
+  }
+
+  saveMailSettings() {
+    this.updateUser(true);
+    this.isEditing = false;
   }
 
   getLocationDisplay(): string {
     return getTenantLocationDisplay(this.userSessionData.tenant);
   }
 
-  updateUser() {
+  updateUser(includeMailSettings = false) {
     let route = "update/tenants";
-    this.mailErrorState = false;
+    if (includeMailSettings) {
+      this.mailErrorState = false;
+    }
     const tenantData: TenantModel = {
       id: '',
       name: this.userSessionData.tenant.name,
@@ -77,20 +98,34 @@ export class TenantSettingsComponent implements OnInit {
       profile_visibility_enabled: this.userSessionData.tenant.profileVisibilityEnabled,
       event_management_enabled: this.userSessionData.tenant.eventManagementEnabled === true,
     };
-    tenantData.accounts_mail_password = this.mailForm.accounts_mail_password;
-    tenantData.accounts_mail = this.mailForm.accounts_mail;
-    tenantData.accounts_smtp_server = this.mailForm.accounts_smtp_server;
-    tenantData.accounts_smtp_port = this.mailForm.accounts_smtp_port;
+    if (includeMailSettings) {
+      tenantData.accounts_mail_password = this.mailForm.accounts_mail_password;
+      tenantData.accounts_mail = this.mailForm.accounts_mail;
+      tenantData.accounts_smtp_server = this.mailForm.accounts_smtp_server;
+      tenantData.accounts_smtp_port = this.mailForm.accounts_smtp_port;
+    }
     this.apiService.post(route, tenantData).subscribe({
       error: () => {
-        this.mailErrorState = true;
+        if (includeMailSettings) {
+          this.mailErrorState = true;
+        }
       }
     });
   }
 
-  cancelEdit(event: Event) {
-    event.stopPropagation();
+  cancelEdit(event?: Event) {
+    event?.stopPropagation();
     this.isEditing = false;
+  }
+
+  cancelContactEdit(event: Event) {
+    event.stopPropagation();
+    this.contactEditing = false;
+  }
+
+  cancelPrivacyEdit(event: Event) {
+    event.stopPropagation();
+    this.privacyEditing = false;
   }
 
   updateUserResource(file: File) {

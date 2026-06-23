@@ -4,6 +4,7 @@ from enum import Enum
 from pydantic import BaseModel, ConfigDict
 
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName
+from orion.services.permission_manager.permission_models import UserPermission
 
 
 class UserStatus(str, Enum):
@@ -17,6 +18,7 @@ class tenant_param_model(BaseModel):
     status: Optional[UserStatus] = None
     subscription: Optional[bool] = None
     licenses: Optional[List[LicenseName]] = None
+    permissions: Optional[List[UserPermission]] = None
     password_reset_required: Optional[bool] = None
     preferences: Optional[Dict[str, Any]] = None
 

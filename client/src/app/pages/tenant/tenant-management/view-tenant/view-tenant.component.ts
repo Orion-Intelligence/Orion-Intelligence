@@ -9,11 +9,12 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
 import { TenantStatus, TenantStatusValues } from '../../../../shared/model/tenant/tenant.model';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/components/ui-dropdown/ui-dropdown.component';
 
 @Component({
   selector: 'app-view-tenant',
   standalone: true,
-  imports: [FormsModule, CommonModule, TranslatePipe],
+  imports: [FormsModule, CommonModule, TranslatePipe, UiDropdownComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './view-tenant.component.html',
 })
@@ -27,6 +28,12 @@ export class ViewTenantComponent implements OnInit {
   TenantStatus = TenantStatusValues;
 
   constructor(public apiService: ApiService, protected licenseService: LicenseService) {
+  }
+
+  get tenantLicenseOptions(): UiDropdownOption[] {
+    return this.licenseList
+      .filter(license => this.licenseService.getLicenseLabel(license) !== 'maintainer')
+      .map(license => ({ key: license, label: this.licenseService.getLicenseLabel(license) }));
   }
 
   ngOnInit(): void {
@@ -101,6 +108,10 @@ export class ViewTenantComponent implements OnInit {
     else {
       tenant.licenses.push(license);
     }
+  }
+
+  onTenantLicenseDropdownChange(tenant: any, licenses: string[]): void {
+    tenant.licenses = licenses;
   }
 
   getTenantLicensesLabel(tenant: any): string {

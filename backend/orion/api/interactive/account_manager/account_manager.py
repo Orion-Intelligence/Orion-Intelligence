@@ -116,6 +116,7 @@ class AccountManager:
                 status=data.status,
                 subscription=data.subscription,
                 licenses=data.licenses,
+                permissions=data.permissions,
                 password_reset_required=True, )
 
             await engine.save(user)
@@ -179,10 +180,13 @@ class AccountManager:
                 str(user.tenant_uuid), str(current_user.id), "User update denied")
             raise HTTPException(status_code=401, detail="This user type cannot be updated")
 
+        tenant = None
+        if request.licenses is not None or (user.status == UserStatus.DISABLE and request.status == UserStatus.ACTIVE):
+            tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+
         if request.status == UserStatus.DISABLE:
             user.status = UserStatus.DISABLE
         elif user.status == UserStatus.DISABLE:
-            tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
             active_count = await self._engine.count(
                 db_user_account,
                 (db_user_account.tenant_uuid == str(user.tenant_uuid)) & (
@@ -193,8 +197,21 @@ class AccountManager:
             if request.status == UserStatus.ACTIVE:
                 user.status = UserStatus.ACTIVE
 
-
-        user.licenses = request.licenses
+        if request.licenses is not None:
+            if current_user.role != user_role.ADMIN:
+                if tenant is None:
+                    raise HTTPException(status_code=400, detail="Tenant not found")
+                dek = await KeyManager.get_instance().get_profile_dek(str(tenant.id))
+                enc = Fernet(dek)
+                tenant_allowed = set(enc.decrypt(l.encode()).decode() for l in (tenant.licenses or []))
+                requested = set(request.licenses or [])
+                if LicenseName.MAINTAINER in requested:
+                    raise HTTPException(status_code=403, detail="Only admin can assign maintainer license")
+                if requested and not requested.issubset(tenant_allowed):
+                    raise HTTPException(status_code=400, detail="User assigned license not allowed for this tenant")
+            user.licenses = request.licenses
+        if request.permissions is not None:
+            user.permissions = request.permissions
         if request.password_reset_required is not None:
             user.password_reset_required = request.password_reset_required
         await self._engine.save(user)
@@ -374,7 +391,7 @@ class AccountManager:
             theme = "dark-theme"
 
         node = NodeCallbackModel.model_validate(
-            {"user": {"email": user.email, "theme": theme, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": user.verification_token if getattr(user, "password_reset_required", False) else None, "license": [
+            {"user": {"email": user.email, "theme": theme, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": user.password_reset_token if getattr(user, "password_reset_required", False) else None, "license": [
                 license.value for license in
                 user.licenses], "image": user_image_path, "preferences": user.preferences or {}, "demo_tour": getattr(user, "demo_tour", True) }, "tenant": {"hasOnboarding": tenant.status == TenantStatus.ONBOARDING, "id": str(
                 tenant.id), "isDefault": str(tenant.is_default), "name": self.safe_decrypt(
@@ -385,7 +402,7 @@ class AccountManager:
                 assigned_quota), "quotaExceeded": quota_exceeded, "image": tenant_image_path,
                 "profileVisibilityEnabled": getattr(tenant, "profile_visibility_enabled", True),
                 "eventManagementEnabled": getattr(tenant, "event_management_enabled", False),
-                "accountsMailPassword": self.safe_decrypt(enc, getattr(tenant, "accounts_mail_password", "")),
+                "accountsMailPassword": "",
                 "accountsMail": self.safe_decrypt(enc, getattr(tenant, "accounts_mail", "")),
                 "accountsSmtpServer": self.safe_decrypt(enc, getattr(tenant, "accounts_smtp_server", "")),
                 "accountsSmtpPort": self.safe_decrypt(enc, getattr(tenant, "accounts_smtp_port", "")), }, "alerts": [], "alert_summary": alert_summary, })

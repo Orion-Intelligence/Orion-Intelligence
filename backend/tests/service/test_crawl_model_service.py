@@ -20,7 +20,6 @@ from orion.api.server.crawl_manager.class_model.chat_model import chat_data_mode
 from orion.api.server.crawl_manager.class_model.defacement_model import CardExtractionModel as DefacementCardExtractionModel
 from orion.api.server.crawl_manager.class_model.defacement_model import DefacementDataModel
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest
-from orion.api.server.crawl_manager.class_model.dump_model import DumpModel
 from orion.api.server.crawl_manager.class_model.exploit_model import CardExtractionModel as ExploitCardExtractionModel
 from orion.api.server.crawl_manager.class_model.exploit_model import ExploitDataModel
 from orion.api.server.crawl_manager.class_model.file_model import ScreenshotPayload
@@ -32,6 +31,7 @@ from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_m
 from orion.api.server.crawl_manager.class_model.report_chat_data_model import ReportChatRequest
 from orion.api.server.crawl_manager.class_model.social_model import social_data_model, social_model
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import SocialScrapeRequest
+from orion.api.server.crawl_manager.crawl_index_generator import crawl_index_generator
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.constants.constant import CONSTANTS
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX, ELASTIC_KEYS
@@ -460,6 +460,30 @@ def test_build_parser_payload_decrypts_files_and_embeds_feeders(monkeypatch, tmp
     assert archive.read("feeder/crawl_data_alpha.txt") == b"alpha\n"
 
 
+def test_index_query_stealerlog_encrypts_password(monkeypatch):
+    key = Fernet.generate_key().decode()
+    monkeypatch.setattr(CONSTANTS, "S_ENCRYPTION_KEY", key)
+
+    result = crawl_index_generator.index_query_stealerlog(
+        {
+            "logs": [
+                {
+                    "m_hash": "hash-1",
+                    "username": "alice",
+                    "password": "secret-password",
+                    "file": None,
+                }
+            ]
+        }
+    )
+
+    doc = result[1]
+    assert doc["username"] == "alice"
+    assert "file" not in doc
+    assert doc["password"] != "secret-password"
+    assert Fernet(key.encode()).decrypt(doc["password"].encode()).decode() == "secret-password"
+
+
 def test_fetch_file_helpers_and_decrypt_error_paths(monkeypatch, tmp_path: Path):
     screenshot_dir = tmp_path / "shots"
     screenshot_dir.mkdir()
@@ -525,7 +549,7 @@ def test_fetch_parser_and_feeder_responses_cover_missing_and_success(monkeypatch
     assert missing_parser.status_code == 404
 
 
-def test_index_log_record_and_dump_index_cover_success_and_failure():
+def test_index_log_record_cover_success():
     engine = FakeMongoEngine()
     manager = object.__new__(crawl_model)
     manager._engine = engine
@@ -536,23 +560,6 @@ def test_index_log_record_and_dump_index_cover_success_and_failure():
     first = engine.saved[0][ELASTIC_KEYS.S_VALUE]
     assert engine.saved[0][ELASTIC_KEYS.S_DOCUMENT] == ELASTIC_INDEX.S_STEALERLOGS_INDEX
     assert first["log_hash"] == hashlib.sha256("alpha".encode("utf-8")).hexdigest()
-
-    dump_response = _run(
-        manager.invoke_dump_index(
-            DumpModel(id="batch-1", status=None, leak_url=["u1", "u2"], source="src", group="grp", link="lnk")
-        )
-    )
-    assert dump_response.status_code == 200
-    assert len(engine.saved) == 4
-
-    failing_manager = object.__new__(crawl_model)
-    failing_manager._engine = SimpleNamespace(save=lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("boom")))
-    failed = _run(
-        failing_manager.invoke_dump_index(
-            DumpModel(id="batch-2", status=True, leak_url=["u1"], source="src", group="grp", link="lnk")
-        )
-    )
-    assert failed.status_code == 500
 
 
 def test_fetch_cti_label_and_proxy_swarm_index_cover_forwarding_and_dedup(monkeypatch):

@@ -16,7 +16,7 @@ export class CardData {
   m_websites!: string[];
   m_company_name?: string;
   m_logo_or_images!: string[];
-  m_leak_date?: string;
+  m_date?: string;
   m_data_size?: string;
   m_country_name?: string;
   m_revenue?: string;

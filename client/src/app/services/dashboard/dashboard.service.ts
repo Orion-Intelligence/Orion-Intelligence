@@ -58,8 +58,13 @@ export class DashboardService {
     this.cancelOngoingRequest();
     paramModel.page = this.consolidatedParamModel.page;
     let baseParams: any = { ...paramModel, ...this.selectedFilters() };
-    if (syncUrl) {
-      this.syncQueryParamsToUrl(baseParams);
+    if (apiEndpoint === 'search/defacement') {
+      baseParams.category = paramModel.category || 'all';
+      baseParams.content = baseParams.content || paramModel.content || 'all';
+    }
+    if (apiEndpoint === 'search/exploit' || apiEndpoint === 'search/apt-intel') {
+      const resultCount = Number(baseParams.platform_result_count || 0);
+      baseParams.platform_result_count = Math.max(Number.isFinite(resultCount) ? resultCount : 0, 100);
     }
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
     if (semantic) {
@@ -217,10 +222,18 @@ export class DashboardService {
       "safe",
       "content",
       "mitre",
+      "platform_result_count",
+      "m_cve",
+      "m_cwe",
+      "m_product",
+      "m_severity",
+      "m_risk",
+      "m_remote_type",
+      "m_platform",
+      "m_tags",
       "family",
       "m_country",
-      "m_reporter",
-      "platform_result_count"
+      "m_reporter"
     ];
     const params = new URLSearchParams(window.location.search);
     const selected: Record<string, string | null> = {};

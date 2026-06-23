@@ -52,13 +52,13 @@ describe('System Settings - Admin Update Flow', () => {
 
     openSystemSettings();
 
-    cy.get('[data-testid="system-settings-edit"]').should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-edit"]').should('be.visible').click();
     cy.contains('div', 'Network Configuration').scrollIntoView().should('be.visible');
     fillSystemMailConfiguration('localhost', '1');
 
     cy.intercept('POST', '**/api/public/update').as('updateWrongSystemSettings');
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="system-settings-save"]').should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-save"]').should('be.visible').click();
     cy.wait('@updateWrongSystemSettings', {timeout: 60000})
       .its('response.statusCode')
       .should('eq', 424);
@@ -69,7 +69,7 @@ describe('System Settings - Admin Update Flow', () => {
 
     cy.intercept('POST', '**/api/public/update').as('updateSystemSettings');
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="system-settings-save"]').should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-save"]').should('be.visible').click();
 
     cy.wait('@updateSystemSettings', {timeout: 60000}).then(({ request, response }) => {
       expect(response?.statusCode).to.be.oneOf([200, 201]);

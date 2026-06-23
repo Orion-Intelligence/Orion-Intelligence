@@ -14,11 +14,18 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 })
 export class ResultInsightsComponent implements OnInit {
   sectionStates: Record<string, boolean> = {};
+  sectionSearchQueries: Record<string, string> = {};
+  copiedInsightItemKey = '';
+  uniqueUrlSearchQuery = '';
+  copiedUniqueUrlKey = '';
   searchQuery = '';
-  filterOptions = ['All', 'Email', 'Name'];
+  filterOptions = ['All', 'Email', 'Username', 'Actor', 'Team', 'Attacker'];
   selectedFilter: string = 'All';
   emails: string[] = [];
-  names: string[] = [];
+  usernames: string[] = [];
+  actors: string[] = [];
+  teams: string[] = [];
+  attackers: string[] = [];
   dataSections: { title: string; key: string; data: string[]; }[] = [];
   uniqueUrls: UniqueLinkItem[] = [];
   keywordData: { value: number; label: string; }[] = [];
@@ -31,12 +38,15 @@ export class ResultInsightsComponent implements OnInit {
 
   ngOnInit(): void {
     this.uniqueUrls = this.getUniqueLinks(this.consolidatedCallbackModel(), this.rankedResults(), this.isGrouped());
-    const { emails, names } = this.extractNamesAndEmails(this.consolidatedCallbackModel(), this.rankedResults(), this.isGrouped());
+    const { emails, usernames, actors, teams, attackers } = this.extractThreatEntities(this.consolidatedCallbackModel(), this.rankedResults(), this.isGrouped());
     this.emails = emails;
-    this.names = names;
+    this.usernames = usernames;
+    this.actors = actors;
+    this.teams = teams;
+    this.attackers = attackers;
     this.keywordData = [
       { value: this.getTotalResultCount(this.consolidatedCallbackModel(), this.rankedResults(), this.isGrouped()), label: 'Total Found' },
-      { value: this.emails.length + this.names.length, label: 'Documents' },
+      { value: this.getAllThreatEntities().length, label: 'Threat Entities' },
       { value: this.getSingleUrlPerResultCount(this.consolidatedCallbackModel(), this.rankedResults(), this.isGrouped()), label: 'Links' },
       { value: this.getActiveModelCount(this.consolidatedCallbackModel(), this.rankedResults(), this.isGrouped()), label: 'Pages' }
     ];
@@ -89,6 +99,59 @@ export class ResultInsightsComponent implements OnInit {
     return this.sectionStates[section];
   }
 
+  getFilteredSectionData(section: { key: string; data: string[] }): string[] {
+    const query = (this.sectionSearchQueries[section.key] || '').trim().toLowerCase();
+    if (!query) {
+      return section.data;
+    }
+    return section.data.filter(item => item.toLowerCase().includes(query));
+  }
+
+  copyInsightItem(item: string, sectionKey: string, index: number, event: MouseEvent): void {
+    event.stopPropagation();
+    if (!navigator.clipboard) {
+      return;
+    }
+    const copiedKey = `${sectionKey}-${index}`;
+    navigator.clipboard.writeText(item).then(() => {
+      this.copiedInsightItemKey = copiedKey;
+      setTimeout(() => {
+        if (this.copiedInsightItemKey === copiedKey) {
+          this.copiedInsightItemKey = '';
+        }
+      }, 1200);
+    }).catch(() => undefined);
+  }
+
+  getFilteredUniqueUrls(): UniqueLinkItem[] {
+    const query = this.uniqueUrlSearchQuery.trim().toLowerCase();
+    if (!query) {
+      return this.uniqueUrls;
+    }
+    return this.uniqueUrls.filter(item =>
+      item.title.toLowerCase().includes(query) || item.url.toLowerCase().includes(query));
+  }
+
+  getActiveUniqueUrlCount(): number {
+    return this.uniqueUrls.filter(item => item.status).length;
+  }
+
+  copyUniqueUrl(item: UniqueLinkItem, index: number, event: MouseEvent): void {
+    event.stopPropagation();
+    if (!navigator.clipboard) {
+      return;
+    }
+    const copiedKey = `${item.url}-${index}`;
+    navigator.clipboard.writeText(item.url).then(() => {
+      this.copiedUniqueUrlKey = copiedKey;
+      setTimeout(() => {
+        if (this.copiedUniqueUrlKey === copiedKey) {
+          this.copiedUniqueUrlKey = '';
+        }
+      }, 1200);
+    }).catch(() => undefined);
+  }
+
   coverageDotClass(item: { label: string; color: string }): string {
     if (item.label === 'Active' || item.color === '#1ec773') {
       return 'bg-[#1ec773]';
@@ -113,15 +176,34 @@ export class ResultInsightsComponent implements OnInit {
       case 'Email':
         source = this.emails;
         break;
-      case 'Name':
-        source = this.names;
+      case 'Username':
+        source = this.usernames;
+        break;
+      case 'Actor':
+        source = this.actors;
+        break;
+      case 'Team':
+        source = this.teams;
+        break;
+      case 'Attacker':
+        source = this.attackers;
         break;
       case 'All':
       default:
-        source = [...this.emails, ...this.names];
+        source = this.getAllThreatEntities();
         break;
     }
     return source.filter(item => item.toLowerCase().includes(query));
+  }
+
+  getAllThreatEntities(): string[] {
+    return Array.from(new Set([
+      ...this.emails,
+      ...this.usernames,
+      ...this.actors,
+      ...this.teams,
+      ...this.attackers
+    ]));
   }
 
   getTotalResultCount(consolidated: ConsolidatedCallbackModel, rankedData: any[], isGrouped: boolean): number {
@@ -176,7 +258,7 @@ export class ResultInsightsComponent implements OnInit {
       ]
       : (Array.isArray(rankedData) ? rankedData : []);
     items.forEach(item => {
-      addToMap(item.m_url, item.m_title, item.m_creation_date || item.m_update_date || item.m_leak_date || item.m_message_date);
+      addToMap(item.m_url, item.m_title, item.m_creation_date || item.m_update_date || item.m_date);
       ['m_clearnet_links', 'm_weblink', 'm_dumplink', 'm_source_url'].forEach(field => {
         const links = item[field];
         if (Array.isArray(links)) {
@@ -193,22 +275,38 @@ export class ResultInsightsComponent implements OnInit {
     return getStatusFlag(dateString);
   }
 
-  extractNamesAndEmails(consolidated: ConsolidatedCallbackModel, rankedData: any[], isGrouped: boolean): {
+  extractThreatEntities(consolidated: ConsolidatedCallbackModel, rankedData: any[], isGrouped: boolean): {
       emails: string[];
-      names: string[];
+      usernames: string[];
+      actors: string[];
+      teams: string[];
+      attackers: string[];
   } {
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/g;
-    const nameRegex = /\b[A-Z][a-z]+\s[A-Z][a-z]+\b/g;
     const emails = new Set<string>();
-    const names = new Set<string>();
-    const extractFromText = (text?: string | string[]) => {
-      if (!text) {
+    const usernames = new Set<string>();
+    const actors = new Set<string>();
+    const teams = new Set<string>();
+    const attackers = new Set<string>();
+    const toValues = (value?: unknown): string[] => {
+      if (!value) {
+        return [];
+      }
+      const values = Array.isArray(value) ? value : [value];
+      return values
+        .flatMap(item => typeof item === 'string' ? item.split(/\n+/) : [String(item)])
+        .map(item => item.trim())
+        .filter(item => item && item.toLowerCase() !== 'unknown');
+    };
+    const addValues = (target: Set<string>, value?: unknown) => {
+      toValues(value).forEach(item => target.add(item));
+    };
+    const extractEmails = (value?: unknown) => {
+      if (!value) {
         return;
       }
-      const texts = Array.isArray(text) ? text : [text];
-      texts.forEach(t => {
-        (t.match(emailRegex) || []).forEach(e => emails.add(e));
-        (t.match(nameRegex) || []).forEach(n => names.add(n));
+      toValues(value).forEach(item => {
+        (item.match(emailRegex) || []).forEach(email => emails.add(email));
       });
     };
     const items: any[] = isGrouped
@@ -224,20 +322,26 @@ export class ResultInsightsComponent implements OnInit {
       ]
       : (Array.isArray(rankedData) ? rankedData : []);
     items.forEach(item => {
-      extractFromText(item.m_content);
-      extractFromText(item.m_highlighted);
-      extractFromText(item.m_important_content);
-      extractFromText(item.m_meta_description);
-      extractFromText(item.m_attacker);
-      extractFromText(item.m_team);
-      extractFromText(item.m_sender_name);
-      extractFromText(item.m_channel_name);
-      extractFromText(item.m_title);
-      extractFromText(item.m_summary);
+      extractEmails(item.m_email);
+      extractEmails(item.m_content);
+      extractEmails(item.m_highlighted);
+      extractEmails(item.m_important_content);
+      extractEmails(item.m_meta_description);
+      addValues(usernames, item.m_username);
+      addValues(usernames, item.username);
+      addValues(usernames, item.m_sender_username);
+      addValues(actors, item.m_actor);
+      addValues(actors, item.m_threat_actor);
+      addValues(actors, item.m_family);
+      addValues(teams, item.m_team);
+      addValues(attackers, item.m_attacker);
     });
     return {
       emails: Array.from(emails),
-      names: Array.from(names)
+      usernames: Array.from(usernames),
+      actors: Array.from(actors),
+      teams: Array.from(teams),
+      attackers: Array.from(attackers)
     };
   }
 
@@ -260,7 +364,7 @@ export class ResultInsightsComponent implements OnInit {
       : (Array.isArray(rankedData) ? rankedData : []);
     total = allResults.length;
     allResults.forEach(item => {
-      const rawDate = item.m_update_date || item.m_leak_date || item.m_message_date || item.m_creation_date;
+      const rawDate = item.m_update_date || item.m_date || item.m_creation_date;
       const status = this.getStatusCategory(rawDate);
       if (status === 'Active') {
         active++;

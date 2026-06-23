@@ -8,7 +8,6 @@ from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, LicenseName
 from orion.services.mongo_manager.shared_model.db_document_feedback_model import db_document_feedback_model
-from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
 from orion.services.mongo_manager.shared_model.db_feeder_script_model import db_feeder_script_model
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_case_model import db_case_model
@@ -128,7 +127,6 @@ class mongo_controller:
         admin.add_view(ModelView(db_system_model, icon="fa fa-building"))
         admin.add_view(ModelView(db_url_data_model, icon="fa fa-link"))
         admin.add_view(ModelView(db_feeder_script_model, icon="fa fa-file"))
-        admin.add_view(ModelView(db_dump_record_model, icon="fa fa-link"))
         admin.add_view(ModelView(db_document_feedback_model, icon="fa fa-comments"))
         admin.add_view(ModelView(db_case_model, icon="fa fa-folder-open", label="Cases", name="cases"))
         admin.add_view(ModelView(db_scan_job_model, icon="fa fa-tasks", label="Scan Jobs", name="scan_jobs"))

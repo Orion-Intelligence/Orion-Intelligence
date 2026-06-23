@@ -376,8 +376,7 @@ class search_query_generator:
     @staticmethod
     def build_date_priority_filter(from_date, to_date, priority_field_names):
         formatted_ranges = {
-            "m_leak_date": (from_date[:10], to_date[:10]),
-            "m_message_date": (from_date, to_date),
+            "m_date": (from_date, to_date),
             "m_update_date": (from_date, to_date),
             "m_creation_date": (from_date, to_date),
         }
@@ -424,7 +423,7 @@ class search_query_generator:
         m_network = p_query_model.network
         m_platform = p_query_model.platform
         m_page_number = getattr(p_query_model, "page", 1)
-        m_content_type = p_query_model.content
+        m_content_type = str(getattr(p_query_model, "m_content_type", None) or p_query_model.content or "all").strip().lower()
         m_platform = (p_query_model.platform or "").strip().lower()
         m_family = (p_query_model.family or "").strip()
         m_country = (p_query_model.m_country or "").strip()
@@ -437,11 +436,11 @@ class search_query_generator:
         index_set = set(base_index or [])
 
         if index_set and index_set.issubset({ELASTIC_INDEX.S_EXPLOIT_INDEX, ELASTIC_INDEX.S_APT_INDEX, ELASTIC_INDEX.S_MALWARE_INDEX, ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_INDEX.S_LEAK_INDEX}):
-            date_priority_fields = ["m_leak_date", "m_update_date", "m_creation_date"]
-            date_boost_fields = [("m_leak_date", 0), ("m_update_date", 0), ("m_creation_date", 0)]
+            date_priority_fields = ["m_date", "m_update_date", "m_creation_date"]
+            date_boost_fields = [("m_date", 0), ("m_update_date", 0), ("m_creation_date", 0)]
         elif index_set and index_set.issubset({ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX}):
-            date_priority_fields = ["m_message_date"]
-            date_boost_fields = [("m_message_date", 0)]
+            date_priority_fields = ["m_date"]
+            date_boost_fields = [("m_date", 0)]
         elif index_set and index_set.issubset({ELASTIC_INDEX.S_GENERIC_INDEX}):
             date_priority_fields = ["m_update_date", "m_creation_date"]
             date_boost_fields = [("m_update_date", 0), ("m_creation_date", 0)]
@@ -520,7 +519,8 @@ class search_query_generator:
         elif m_content_type == "databases":
             must_not_clause.append({"terms": {"m_ioc_type": ["phishing", "hacked"]}})
 
-        if m_content_type and m_content_type.lower() not in ("", "all"):
+        is_defacement_ioc_filter = search_type == "defacement" and m_content_type in ("phishing", "hacked", "databases")
+        if m_content_type and m_content_type.lower() not in ("", "all") and not is_defacement_ioc_filter:
             if m_content_type.lower() == "swarm":
                 must_clauses.append(
                     {"bool": {"should": [
@@ -532,6 +532,7 @@ class search_query_generator:
                 must_clauses.append(
                     {"bool": {"should": [
                         {"bool": {"filter": [{"exists": {"field": "content_type"}}, {"term": {"content_type": m_content_type.lower()}}]}},
+                        {"bool": {"filter": [{"exists": {"field": "m_content_type"}}, {"term": {"m_content_type": m_content_type.lower()}}]}},
                         {"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": [m_content_type.lower()]}}]}}
                     ], "minimum_should_match": 1}})
 
@@ -596,8 +597,7 @@ class search_query_generator:
                 must_clauses.append({
                     "bool": {
                         "should": [
-                            {"range": {"m_message_date": {"gte": from_date, "lte": to_date}}},
-                            {"range": {"m_leak_date": {"gte": from_date, "lte": to_date}}},
+                            {"range": {"m_date": {"gte": from_date, "lte": to_date}}},
                             {"range": {"m_creation_date": {"gte": from_date, "lte": to_date}}},
                         ],
                         "minimum_should_match": 1,

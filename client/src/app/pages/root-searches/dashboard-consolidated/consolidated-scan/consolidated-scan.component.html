@@ -63,7 +63,7 @@
                       <span [class]="gradeBadgeClass(r.grade)">{{ gradeText(r.grade) }}</span>
                     </div>
                     <div class="w-[64px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-auto">
-                      <a data-testid="consolidated-scan-openweb-detail" class="font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] underline" [routerLink]="{ seo: '/dashboard/scanner/seo-scan', basic: '/dashboard/scanner/network-scan', advance: '/dashboard/scanner/network-scan', repo: '/dashboard/scanner/repository-scan' }[r.scanType] || '/dashboard/scanner/' + r.scanType" [queryParams]="{ q: '', page: 1, matchtype: 'or', domain: r.domain, scanType: r.scanType }" target="_blank" rel="noopener">
+                      <a data-testid="consolidated-scan-openweb-detail" class="font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] underline" [routerLink]="{ seo: '/dashboard/scanner/network-scan', basic: '/dashboard/scanner/network-scan', advance: '/dashboard/scanner/network-scan', repo: '/dashboard/scanner/network-scan' }[r.scanType] || '/dashboard/scanner/' + r.scanType" [queryParams]="{ q: r.domain, page: 1, matchtype: 'or', domain: null, scanType: r.scanType, section: r.scanType === 'seo' ? 'seo-scan' : (r.scanType === 'repo' ? 'repository-scan' : null) }" target="_blank" rel="noopener">
                         {{ 'Details' | translate }}
                       </a>
                     </div>

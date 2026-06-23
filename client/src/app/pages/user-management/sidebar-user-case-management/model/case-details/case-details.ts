@@ -23,6 +23,8 @@ import { caseInlineMotion, caseModeSwapMotion, caseSectionMotion } from './case-
 import { CaseEditDrawerComponent } from './case-edit-drawer/case-edit-drawer';
 import { CasePdfExportService } from '../../case-management-service/case-pdf-export.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { AppService } from '../../../../../services/core/app/app.service';
+import { ChatWidgetComponent } from '../../../../root-searches/ai-workspace/chat-widget/chat-widget.component';
 
 @Component({
   selector: 'app-case-details',
@@ -39,7 +41,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
     CaseEditDrawerComponent,
     CaseLinkedCasesSectionComponent,
     CaseRelatedEntitiesSectionComponent,
-    CaseTasksSectionComponent, TranslatePipe],
+    CaseTasksSectionComponent, TranslatePipe, ChatWidgetComponent],
   providers: [
     { provide: CaseDetailsStore, useExisting: forwardRef(() => CaseDetails) }
   ],
@@ -90,7 +92,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   isArchiveConfirmationOpen = false;
   isArchivingCase = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef) {
+  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef, public appService: AppService) {
     super();
   }
 
@@ -483,6 +485,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return;
     }
     this.revokeShareLinks();
+  }
+
+  getCaseDetailsJson(): string {
+    return JSON.stringify(this.caseData);
   }
 
   getShareConfirmationMessage(): string {

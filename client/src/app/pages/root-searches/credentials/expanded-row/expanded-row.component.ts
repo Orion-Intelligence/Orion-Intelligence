@@ -3,6 +3,7 @@ import { NgClass, TitleCasePipe } from '@angular/common';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { ResultRowHelperService } from '../../../../shared/services/result-row-helper.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 
 interface TelemetryGroup {
     key: string;
@@ -12,16 +13,21 @@ interface TelemetryGroup {
 @Component({
   selector: 'app-expanded-row',
   standalone: true,
-  imports: [NgClass, TitleCasePipe, TooltipDirective, TranslatePipe],
+  imports: [NgClass, TitleCasePipe, TooltipDirective, TranslatePipe, ConfirmationPopupComponent],
   templateUrl: './expanded-row.component.html',
 })
 export class ExpandedRowComponent implements OnChanges, OnDestroy {
   private copiedTimer: any = null;
   private telemetryGroupsCache: TelemetryGroup[] = [];
+  private visiblePasswordKeys = new Set<string>();
+  private readonly passwordRevealConfirmKey = 'orion.passwordRevealConfirmed';
+  private passwordRevealConfirmed = false;
+  private pendingPasswordRevealKey: string | null = null;
 
   activeTelemetryKey: string | null = null;
   matchedValues: string[] = [];
   copiedKey: string | null = null;
+  isPasswordRevealConfirmationOpen = false;
   readonly mode = input<'stealer' | 'threat'>('stealer');
   readonly item = input<any>(null);
   readonly result = input<any>(null);
@@ -29,6 +35,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   readonly searchQuery = input<string>('');
 
   constructor(private rowHelper: ResultRowHelperService) {
+    this.passwordRevealConfirmed = this.getPasswordRevealConfirmed();
   }
 
   ngOnDestroy(): void {
@@ -44,6 +51,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       if (this.copiedTimer) {
         clearTimeout(this.copiedTimer);
       }
+      this.visiblePasswordKeys.clear();
     }
     if (changes['mode'] || changes['item'] || changes['result']) {
       this.rebuildTelemetryGroups();
@@ -134,6 +142,103 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   get passwordValue(): string {
     const arr = this.rowHelper.normalizeToArray(this.item()?.['password']);
     return arr[0] || '-';
+  }
+
+  get identityPasswordKey(): string {
+    return `${this.mode()}-identity-password`;
+  }
+
+  isPasswordVisible(key: string): boolean {
+    return this.visiblePasswordKeys.has(key);
+  }
+
+  togglePassword(key: string, value: string, e?: MouseEvent) {
+    if (e) {
+      e.stopPropagation();
+    }
+    if (!value || value === '-') {
+      return;
+    }
+    if (this.visiblePasswordKeys.has(key)) {
+      this.visiblePasswordKeys.delete(key);
+      return;
+    }
+    if (!this.passwordRevealConfirmed) {
+      this.pendingPasswordRevealKey = key;
+      this.isPasswordRevealConfirmationOpen = true;
+      return;
+    }
+    this.visiblePasswordKeys.add(key);
+  }
+
+  isPasswordMasked(key: string, value: string): boolean {
+    return !!value && value !== '-' && !this.isPasswordVisible(key);
+  }
+
+  passwordTooltip(key: string, value: string): string {
+    if (!value || value === '-') {
+      return 'No password';
+    }
+    return this.isPasswordVisible(key) ? 'Hide password' : 'Show password';
+  }
+
+  isPasswordGroup(group: TelemetryGroup): boolean {
+    const key = (group?.key || '').toLowerCase();
+    const label = (group?.label || '').toLowerCase();
+    return key.includes('password') || label.includes('password');
+  }
+
+  passwordTelemetryKey(groupKey: string, index: number): string {
+    return `${this.mode()}-${groupKey}-${index}`;
+  }
+
+  isTelemetryPasswordMasked(group: TelemetryGroup, index: number, value: string): boolean {
+    return this.isPasswordGroup(group) && this.isPasswordMasked(this.passwordTelemetryKey(group.key, index), value);
+  }
+
+  telemetryValueTooltip(group: TelemetryGroup, value: string, index: number, copyKey: string): string {
+    if (!this.isPasswordGroup(group)) {
+      return this.isCopied(copyKey) ? 'Copied' : 'Copy';
+    }
+    return this.passwordTooltip(this.passwordTelemetryKey(group.key, index), value);
+  }
+
+  handleTelemetryValueClick(group: TelemetryGroup, value: string, index: number, copyKey: string, e?: MouseEvent) {
+    if (!this.isPasswordGroup(group)) {
+      this.copyText(value, copyKey, e);
+      return;
+    }
+    this.togglePassword(this.passwordTelemetryKey(group.key, index), value, e);
+  }
+
+  handlePasswordRevealConfirmation(confirmed: boolean) {
+    this.isPasswordRevealConfirmationOpen = false;
+    if (confirmed) {
+      this.passwordRevealConfirmed = true;
+      this.setPasswordRevealConfirmed();
+      if (this.pendingPasswordRevealKey) {
+        this.visiblePasswordKeys.add(this.pendingPasswordRevealKey);
+      }
+    }
+    this.pendingPasswordRevealKey = null;
+  }
+
+  private getPasswordRevealConfirmed(): boolean {
+    try {
+      return localStorage.getItem(this.passwordRevealConfirmKey) === 'true';
+    }
+    catch {
+      return false;
+    }
+  }
+
+  private setPasswordRevealConfirmed() {
+    try {
+      localStorage.setItem(this.passwordRevealConfirmKey, 'true');
+    }
+    catch {
+      return;
+    }
   }
 
   selectTelemetry(key: string, e?: MouseEvent) {

@@ -1,6 +1,6 @@
 <div [ngClass]="isConsolidatedView ? 'w-full min-w-0 space-y-4' : 'w-full max-w-[910px] px-2 sm:px-0 max-[640px]:px-0 space-y-4'">
-  @for (item of (isExpandAble() && isCollapsed ? searchResults().slice(0, 2) : searchResults().slice(0, 30)); track item.m_message_id || item.m_hash || item.m_message_sharable_link || $index) {
-    <div data-testid="result-card" [id]="'item-' + item.m_message_id" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''" class="mb-5 w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] ui-result-card px-[20px] pb-[20px] pt-[15px] transition-all duration-300 ease-in-out hover:bg-[var(--color-blue-810)] dark:bg-[var(--color-consolidated-secondary)]" (click)="openExternalUrl(item?.m_message_sharable_link)">
+  @for (item of searchResults().slice(0, getResultDisplayLimit()); track item.m_message_id || item.m_hash || item.m_message_sharable_link || $index) {
+    <div data-testid="result-card" [attr.data-result-index]="$index" [id]="'item-' + item.m_message_id" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''" class="mb-5 w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] ui-result-card px-[20px] pb-[20px] pt-[15px] transition-all duration-300 ease-in-out hover:bg-[var(--color-blue-810)] dark:bg-[var(--color-consolidated-secondary)]" (click)="openExternalUrl(item?.m_message_sharable_link)">
       <div class="flex items-start justify-between gap-3">
         <div class="flex min-w-0 flex-1 flex-wrap gap-[10px]">
           @if (item.m_content_type?.length) {
@@ -118,7 +118,7 @@
 <div class="flex flex-wrap items-center justify-between gap-[15px] pt-[10px] pr-[10px] text-[12px]">
   <div class="flex flex-col gap-[2px]">
     <span class="text-[var(--color-text4)]">{{ 'Message Date' | translate }}:</span>
-    <span class="font-medium text-[var(--color-text1)]">{{ item.m_message_date ? (item.m_message_date | date: 'MMM d, y') : ('Not available' | translate) }}</span>
+    <span class="font-medium text-[var(--color-text1)]">{{ item.m_date ? (item.m_date | date: 'MMM d, y') : ('Not available' | translate) }}</span>
   </div>
   @if (item.m_views) {
     <div class="flex flex-col gap-[2px]">
@@ -132,7 +132,7 @@
 
 @if (isExpandAble() && searchResults().length > 2) {
   <div class="flex justify-center">
-    <span class="ui-see-more-btn cursor-pointer" (click)="isCollapsed = !isCollapsed" data-testid="consolidated-section-see-more">{{ (isCollapsed ? 'See More' : 'See Less') | translate }}</span>
+    <span class="ui-see-more-btn cursor-pointer" (click)="toggleCollapsed()" data-testid="consolidated-section-see-more">{{ (isCollapsed ? 'See More' : 'See Less') | translate }}</span>
   </div>
 }
 </div>

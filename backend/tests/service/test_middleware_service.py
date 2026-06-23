@@ -138,6 +138,42 @@ async def test_content_block_middleware_allows_dashboard_with_cookie_session(mon
 
 
 @pytest.mark.anyio
+async def test_content_block_middleware_redirects_admin_to_home_when_system_flag_disabled(monkeypatch):
+    class _FakeConfigController:
+        async def get_cached(self, *_args):
+            return "0"
+
+    monkeypatch.setattr(
+        "orion.middleware.middlewares.content_block_middleware.config_controller.getInstance",
+        staticmethod(lambda: _FakeConfigController()),
+    )
+
+    async with _client_with_middleware(content_block_middleware, endpoint="/admin/panel") as client:
+        response = await client.get("/admin/panel", follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers["location"] == "/"
+
+
+@pytest.mark.anyio
+async def test_content_block_middleware_keeps_admin_available_when_system_flag_enabled(monkeypatch):
+    class _FakeConfigController:
+        async def get_cached(self, *_args):
+            return "1"
+
+    monkeypatch.setattr(
+        "orion.middleware.middlewares.content_block_middleware.config_controller.getInstance",
+        staticmethod(lambda: _FakeConfigController()),
+    )
+
+    async with _client_with_middleware(content_block_middleware, endpoint="/admin/panel") as client:
+        response = await client.get("/admin/panel", follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers["location"] == "/login"
+
+
+@pytest.mark.anyio
 async def test_content_security_policy_middleware_skips_docs_paths(monkeypatch):
     monkeypatch.setattr(
         "orion.middleware.middlewares.content_security_policy_middleware.env_handler.get_instance",

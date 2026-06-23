@@ -7,9 +7,18 @@ from orion.constants.constant import CONSTANTS
 
 
 class CaseArtifactHelper:
+    MAX_FILE_COUNT = 5
+    MAX_FILE_SIZE = 100 * 1024 * 1024
+    MAX_FILE_SIZE_MB = 100
+    READ_CHUNK_SIZE = 1024 * 1024
+
     def __init__(self):
         self.resource_dir = CONSTANTS.S_CASE_ARTIFACT_RESOURCE_DIR
         self.resource_dir.mkdir(parents=True, exist_ok=True)
+
+    def validate_file_count(self, files: list[UploadFile]) -> None:
+        if len(files) > self.MAX_FILE_COUNT:
+            raise HTTPException(status_code=413, detail=f"Maximum {self.MAX_FILE_COUNT} files are allowed")
 
     def validate_artifact_file(self, artifact_type: str, file: UploadFile) -> None:
         if artifact_type == "screenshot":
@@ -27,11 +36,27 @@ class CaseArtifactHelper:
     def generate_sha256_hash(self, raw: bytes) -> str:
         return hashlib.sha256(raw).hexdigest()
 
+    async def read_limited_file(self, file: UploadFile) -> bytes:
+        if getattr(file, "size", None) is not None and file.size > self.MAX_FILE_SIZE:
+            raise HTTPException(status_code=413, detail=f"File too large! Maximum allowed size is {self.MAX_FILE_SIZE_MB} MB")
+
+        chunks = []
+        total_size = 0
+        while True:
+            chunk = await file.read(self.READ_CHUNK_SIZE)
+            if not chunk:
+                break
+            total_size += len(chunk)
+            if total_size > self.MAX_FILE_SIZE:
+                raise HTTPException(status_code=413, detail=f"File too large! Maximum allowed size is {self.MAX_FILE_SIZE_MB} MB")
+            chunks.append(chunk)
+        return b"".join(chunks)
+
     async def save_encrypted_artifact_file(self, file: UploadFile, enc: Fernet) -> tuple[str, int, str]:
         resource_id = str(uuid4())
         target_path = self.resource_dir / f"{resource_id}.enc"
 
-        raw = await file.read()
+        raw = await self.read_limited_file(file)
         file_hash = hashlib.sha256(raw).hexdigest()
 
         target_path.write_bytes(enc.encrypt(raw))
@@ -61,4 +86,3 @@ class CaseArtifactHelper:
 
         if path.exists():
             path.unlink()
-    

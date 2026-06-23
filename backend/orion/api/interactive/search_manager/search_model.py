@@ -1,14 +1,17 @@
 from typing import List, Optional
 import httpx
+from cryptography.fernet import Fernet
 from fastapi import HTTPException
 from starlette import status
 from starlette.responses import JSONResponse
 from orion.api.interactive.search_manager.search_callback_model import search_callback
+from orion.api.interactive.feeder_manager.feeder_manager import FeederManager
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_callback_model import grouped_consolidated_search_callback_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_stealerlog_callback_model import search_stealerlog_callback_model
 from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
+from orion.constants.constant import CONSTANTS
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
@@ -153,7 +156,15 @@ class search_model:
         return await self._request_doc(ELASTIC_INDEX.S_SOCIAL_INDEX, doc_id, lang, ["m_content"])
 
     async def request_general_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
-        return await self._request_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id, lang, ["m_content", "m_important_content"])
+        result = await self._request_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id, lang, ["m_content", "m_important_content"])
+        if result:
+            crawl_status = await FeederManager.get_instance().get_value_crawl_status(
+                "_generic__values",
+                result.get("m_base_url") or result.get("m_url") or "",
+            )
+            result["m_crawl_status"] = crawl_status["status"]
+            result["m_last_crawled_at"] = crawl_status["last_checked_at"]
+        return result
 
     @staticmethod
     def _build_ranked_response(response, query, default_size: int, approximate_page_count: bool = False):
@@ -183,6 +194,20 @@ class search_model:
         has_next = len(ranked_results) >= size if size > 0 else False
         page_count = current_page + 1 if has_next else (current_page if ranked_results else max(1, current_page - 1))
         return {"Result": ranked_results, "Page_Count": page_count if ranked_results or current_page > 1 else total_pages, "Total_Hits": total}
+
+    @staticmethod
+    def _decrypt_stealer_passwords(response):
+        cipher = None
+        for item in response.Result or []:
+            password = getattr(item, "password", None)
+            if not password:
+                continue
+            try:
+                if cipher is None:
+                    cipher = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode())
+                item.password = cipher.decrypt(str(password).encode()).decode()
+            except Exception:
+                pass
 
     @staticmethod
     async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, blocked_categories, allowed_categories,search_type=""):
@@ -340,10 +365,14 @@ class search_model:
         for label in SEARCH_TYPES:
 
             config = SEARCH_CONFIG[label]
+            query_param = param
+            if label in ("apt_model", "malware_model"):
+                query_param = param.model_copy(deep=True)
+                query_param.category = "all"
 
             indices, query, indices_boost = \
                 search_query_generator().on_search_consolidated_ranked_data(
-                    param,
+                    query_param,
                     filter_dict,
                     config["base_index"],
                     config["blocked_categories"],
@@ -368,6 +397,7 @@ class search_model:
         response = await self.__search_callback.search_handler( m_status, m_documents,search_stealerlog_callback_model, {}, data_limit=False)
         raw_result_count = len(response.Result or [])
 
+        self._decrypt_stealer_passwords(response)
 
         password_filter = getattr(param, "password_schema", None)
         if password_filter and response and hasattr(response, "Result"):

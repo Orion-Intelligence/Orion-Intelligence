@@ -1,0 +1,121 @@
+<div [ngClass]="isEmbedded() ? 'py-4' : 'px-4 py-4 md:px-6'">
+  @if (errorMessage() && !isScanning()) {
+    <div class="mb-4 rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] shadow-[0_8px_22px_rgba(0,0,0,0.18)]">
+      <div class="text-[17px] font-semibold leading-tight text-[var(--color-text1)]">{{ 'Request Failed' | translate }}</div>
+      <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)]">{{ errorMessage() }}</div>
+    </div>
+  }
+
+  @if (showShell) {
+    <div class="ui-ioc-table-shell overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] shadow-[0_12px_30px_rgba(0,0,0,0.16)]">
+      <div class="ui-ioc-table-head flex items-center justify-between gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-760)] px-4 py-3">
+        <div class="min-w-0">
+          <div class="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text4)]">{{ normalizedScanType }} {{ 'Scan' | translate }}</div>
+          <div class="mt-1 truncate font-mono text-[13px] font-semibold text-[var(--color-text1)]">{{ meta()?.URL || displayHost }}</div>
+        </div>
+        @if (grade()) {
+          <div class="flex shrink-0 items-center gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+            <span class="text-[10px] font-bold uppercase tracking-[1px] text-[var(--color-text4)]">{{ 'Grade' | translate }}</span>
+            <span class="text-[13px] font-bold" [ngClass]="summaryEntries[0].tone">{{ grade() }}</span>
+          </div>
+        }
+      </div>
+
+      @if (isScanning() && !meta()) {
+        <div class="px-4 py-5" @fadeInDashboardItem>
+          <div class="mb-[6px] flex items-center justify-between gap-3">
+            <span class="truncate text-[12px] font-medium text-[var(--color-text1)]">{{ loadingStepLabel }}</span>
+            <span class="text-[12px] font-semibold text-sky-400">{{ progressValue }}%</span>
+          </div>
+          <div class="ui-progress-track h-[8px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+            <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + progressValue"></div>
+          </div>
+
+          <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+            @for (_ of [1,2,3]; track $index) {
+              <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-760)] p-4">
+                <div class="ui-shimmer h-3 w-24 rounded bg-[var(--color-blue-720)]"></div>
+                <div class="ui-shimmer mt-3 h-6 w-16 rounded bg-[var(--color-blue-720)]"></div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (meta()) {
+        <div class="px-4 py-4" @fadeInDashboardItem>
+          <div class="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+            @for (entry of summaryEntries; track entry.label) {
+              <div class="flex min-h-[74px] flex-col justify-between rounded-lg border border-[var(--color-border)] border-t-sky-400/30 bg-[var(--color-blue-700)] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                <div class="text-[11px] font-semibold uppercase tracking-[1.1px] text-[var(--color-text4)]">{{ entry.label | translate }}</div>
+                <div class="text-[23px] font-bold leading-none" [ngClass]="entry.tone">{{ entry.value }}</div>
+              </div>
+            }
+          </div>
+
+          @if (detailEntries.length) {
+            <div class="mb-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-760)] p-3">
+              <div class="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[1.5px] text-[var(--color-text4)]">
+                <span>{{ 'Scan Details' | translate }}</span>
+                <span class="h-px flex-1 bg-[var(--color-divider)]"></span>
+              </div>
+              <div class="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
+                @for (entry of detailEntries; track entry.label) {
+                  <div class="flex min-w-0 flex-col gap-1 rounded-md border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2">
+                    <span class="text-[11px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">{{ entry.label | translate }}</span>
+                    <span class="truncate text-[14px] font-medium text-[var(--color-text1)]" [title]="entry.value">{{ entry.value }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <div>
+            <div class="mb-2 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400">
+              <span>{{ 'Findings' | translate }}</span>
+              <span class="rounded border border-sky-400/20 bg-sky-400/10 px-2 py-0.5 text-[11px] font-semibold text-sky-300">{{ totalFindings }}</span>
+              <span class="h-px flex-1 bg-[var(--color-divider)]"></span>
+            </div>
+            @if (categories().length) {
+              <div class="flex flex-col gap-3">
+                @for (category of categories(); track category.name) {
+                  <div class="overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-760)] shadow-[0_6px_16px_rgba(0,0,0,0.14)]">
+                    <div class="flex items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-3">
+                      <span class="truncate text-[14px] font-bold text-[var(--color-text1)]">{{ category.name }}</span>
+                      <span class="rounded border border-sky-400/20 bg-sky-400/12 px-2.5 py-0.5 text-xs font-semibold text-sky-300">{{ category.total }} {{ 'Items' | translate }}</span>
+                    </div>
+                    <div class="flex flex-col gap-2.5 p-3">
+                      @for (item of category.items; track item.header + $index) {
+                        <div class="rounded-md border border-[var(--color-border)] border-l-sky-400/30 bg-[var(--color-blue-700)] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-colors hover:border-sky-400/30 hover:bg-[var(--color-blue-720)]">
+                          <div class="flex flex-wrap items-start justify-between gap-2">
+                            <div class="min-w-0 flex-1 truncate text-[14px] font-bold text-[var(--color-text1)]" [title]="item.header">{{ item.header }}</div>
+                            <div class="flex shrink-0 flex-wrap gap-1.5">
+                              @if (item.risk) {
+                                <span class="rounded border px-2.5 py-0.5 text-xs font-semibold" [ngClass]="riskBadgeClass(item.risk)">{{ item.risk }}</span>
+                              }
+                              @if (item.confidence) {
+                                <span class="rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-0.5 text-xs font-semibold text-[var(--color-text3)]">{{ item.confidence }}</span>
+                              }
+                            </div>
+                          </div>
+                          @if (item.description) {
+                            <div class="mt-2 border-t border-[var(--color-divider)] pt-2 text-[13px] leading-relaxed text-[var(--color-text2)]">{{ item.description }}</div>
+                          }
+                          @if (item.proof) {
+                            <pre class="mt-2 max-h-48 overflow-y-auto whitespace-pre-wrap break-all rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] p-2.5 text-[12px] leading-relaxed text-[var(--color-text3)]">{{ item.proof }}</pre>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-760)] px-4 py-5 text-[15px] font-medium text-[var(--color-text4)]">{{ 'No findings found' | translate }}</div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

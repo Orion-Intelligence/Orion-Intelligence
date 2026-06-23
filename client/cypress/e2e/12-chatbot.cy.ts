@@ -4,6 +4,11 @@ describe('Chatbot - General Intelligence Report Flow', () => {
   });
 
   after(() => {
+    cy.get('body').then(($body) => {
+      if ($body.find('[data-testid="chat-widget-overlay"]:visible').length) {
+        cy.get('[data-testid="chat-widget-overlay"]').click('topLeft', { force: true });
+      }
+    });
     cy.logout();
   });
 

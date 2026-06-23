@@ -20,6 +20,7 @@ from orion.constants import constant
 from orion.constants.constant import CONSTANTS, allowed_key_titles
 from orion.helper_manager.env_handler import env_handler
 from orion.services.elastic_manager.elastic_controller import elastic_controller
+from orion.services.elastic_manager.elastic_enums import ELASTIC_ENUMS
 from orion.services.log_manager.log_controller import log
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
@@ -198,6 +199,7 @@ class helper_controller:
         for item in data:
             if "key" in item:
                 allowed_key_titles[item["key"]] = item.get("title") or item["key"]
+        ELASTIC_ENUMS.ioc_field_mapping = helper_controller.build_ioc_field_mapping_from_entities(data)
 
         mail_templete_env = Environment(
             loader=FileSystemLoader(build_dir / "assets" / "data" / "mail_template_data"),
@@ -227,6 +229,22 @@ class helper_controller:
         version, data = helper_controller.parse_satellite_asset(satellite_asset)
         constant.map_entities_version = version
         constant.map_entities_data = data
+
+    @staticmethod
+    def build_ioc_field_mapping_from_entities(entities):
+        mapping = {}
+        for item in entities or []:
+            if not isinstance(item, dict):
+                continue
+            key = str(item.get("key") or "").strip()
+            if not key:
+                continue
+            raw_fields = item.get("fields") or [key]
+            if isinstance(raw_fields, str):
+                raw_fields = [raw_fields]
+            fields = [str(field).strip() for field in raw_fields if str(field or "").strip()]
+            mapping[key] = fields or [key]
+        return mapping
 
     @staticmethod
     def parse_satellite_asset(asset_data):
@@ -481,7 +499,7 @@ class helper_controller:
             return parsed_date.timestamp()
 
         def latest_document_timestamp(document):
-            date_fields = ("m_leak_date", "m_message_date","m_update_date", "m_creation_date")
+            date_fields = ("m_date", "m_update_date", "m_creation_date")
             return max(
                 coerce_date_timestamp(document.get(field))
                 for field in date_fields

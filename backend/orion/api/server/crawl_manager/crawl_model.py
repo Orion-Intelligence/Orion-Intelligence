@@ -1,4 +1,5 @@
 import base64
+import binascii
 import hashlib
 import os
 import asyncio
@@ -24,12 +25,14 @@ from orion.api.server.crawl_manager.crawl_index_generator import crawl_index_gen
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_dump_model import db_dump_record_model
 from orion.services.mongo_manager.shared_model.db_feeder_script_model import db_feeder_script_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
 from orion.api.server.crawl_manager.class_model.CTITextRequest import CTITextRequest
 from orion.constants.constant import CONSTANTS
 from orion.constants import constant
+
+SCREENSHOT_UPLOAD_MAX_BYTES = 10 * 1024 * 1024
+SCREENSHOT_UPLOAD_MAX_BASE64_LENGTH = ((SCREENSHOT_UPLOAD_MAX_BYTES + 2) // 3) * 4
 
 
 class crawl_model:
@@ -447,9 +450,22 @@ class crawl_model:
             file_path = os.path.realpath(os.path.join(screenshot_root, filename))
             if not file_path.startswith(f"{screenshot_root}{os.sep}"):
                 return {"error": "Failed to save screenshot"}
+            encoded_data = (payload.data or "").strip()
+            if encoded_data.startswith("data:") and "," in encoded_data:
+                encoded_data = encoded_data.split(",", 1)[1]
+            if len(encoded_data) > SCREENSHOT_UPLOAD_MAX_BASE64_LENGTH:
+                raise HTTPException(status_code=413, detail="Screenshot too large! Maximum allowed size is 10 MB.")
+            try:
+                decoded_data = base64.b64decode(encoded_data, validate=True)
+            except (binascii.Error, ValueError) as exc:
+                raise HTTPException(status_code=400, detail="Invalid screenshot data") from exc
+            if len(decoded_data) > SCREENSHOT_UPLOAD_MAX_BYTES:
+                raise HTTPException(status_code=413, detail="Screenshot too large! Maximum allowed size is 10 MB.")
             with open(file_path, "wb") as f:
-                f.write(base64.b64decode(payload.data))
+                f.write(decoded_data)
             return {"message": f"Screenshot saved successfully at {file_path}", "filename": filename}
+        except HTTPException:
+            raise
         except Exception:
             return {"error": "Failed to save screenshot"}
 
@@ -541,29 +557,6 @@ class crawl_model:
                 {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_STEALERLOGS_INDEX, ELASTIC_KEYS.S_VALUE: doc})
 
         return JSONResponse(content={"message": "Logs indexed successfully"}, status_code=200)
-
-    async def invoke_dump_index(self, dump_model: DumpModel):
-        try:
-            batch_id = dump_model.id
-            if not dump_model.status:
-                dump_model.status = False
-
-            for index, url in enumerate(dump_model.leak_url):
-                record_id = f"{batch_id}_{index}"
-
-                dump_record = db_dump_record_model(
-                    id=record_id,
-                    parsed_status=dump_model.status,
-                    leak_url=url,
-                    source=dump_model.source,
-                    group=dump_model.group,
-                    link=dump_model.link)
-                await self._engine.save(dump_record)
-
-            return JSONResponse(content={"message": "Dump records saved successfully"}, status_code=200)
-
-        except Exception:
-            return JSONResponse(content={"error": "Failed to save dump records"}, status_code=500)
 
     @staticmethod
     async def fetch_cti_label(payload: CTITextRequest):

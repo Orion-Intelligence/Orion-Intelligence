@@ -29,15 +29,15 @@ export function getDashboardFilterModel(type: Category, route: string, filters: 
   if (isMalwareBazaarRoute(type, route)) {
     return filters.malwareBazaar;
   }
-  return type === Category.THREAT_INTEL ? filters.threatIntel : filters.general;
+  return type === Category.APT_INTEL ? filters.threatIntel : filters.general;
 }
 
 export function isMalpediaRoute(type: Category, route: string): boolean {
-  return type === Category.THREAT_INTEL && route.endsWith('/threat-intel/apt');
+  return type === Category.APT_INTEL && (route.endsWith('/apt-intel/apt') || route.endsWith('/threat-intel/apt'));
 }
 
 export function isMalwareBazaarRoute(type: Category, route: string): boolean {
-  return type === Category.THREAT_INTEL && route.endsWith('/threat-intel/malware');
+  return type === Category.APT_INTEL && (route.endsWith('/apt-intel/malware') || route.endsWith('/threat-intel/malware'));
 }
 
 export function applyMalpediaFilterOptions(filterModel: FilterModel, response: MalpediaFilterOptionsResponse): void {

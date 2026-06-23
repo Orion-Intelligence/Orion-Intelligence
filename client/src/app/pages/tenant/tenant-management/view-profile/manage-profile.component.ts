@@ -15,10 +15,11 @@ import { finalize, switchMap, tap } from 'rxjs';
 import { NodeResolver } from '../../../../shared/resolvers/session-data-resolver.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/components/ui-dropdown/ui-dropdown.component';
 
 @Component({
   selector: 'app-view-profile',
-  imports: [FormsModule, CommonModule, AddTenantComponent, ConfirmationPopupComponent, TooltipDirective, TranslatePipe],
+  imports: [FormsModule, CommonModule, AddTenantComponent, ConfirmationPopupComponent, TooltipDirective, TranslatePipe, UiDropdownComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './manage-profile.component.html',
 })
@@ -27,6 +28,9 @@ export class ManageProfileComponent implements OnInit {
 
   users: User[] = [];
   licenseList = Object.values(LicenseName);
+  permissionOptions: UiDropdownOption[] = [{ key: 'case_management', label: 'Case Management' }];
+  statusOptions: UiDropdownOption[] = [{ key: 'active', label: 'Active' }, { key: 'disable', label: 'Disable' }];
+  passwordResetOptions: UiDropdownOption[] = [{ key: 'false', label: 'No password reset' }, { key: 'true', label: 'Require password reset' }];
   isLoading = true;
   selectedUserId: string | null = null;
   expandedUserIndex: number | null = null;
@@ -87,6 +91,36 @@ export class ManageProfileComponent implements OnInit {
     return (this.appService.userSessionData().tenant.licenses || []).includes(license);
   }
 
+  get licenseDropdownOptions(): UiDropdownOption[] {
+    return this.licenseList
+      .filter(license => this.canAssignLicense(license))
+      .map(license => ({ key: license, label: this.licenseService.getLicenseLabel(license) }));
+  }
+
+  setUserStatus(user: User, value: string | null): void {
+    if (value === 'active' || value === 'disable') {
+      user.status = value;
+    }
+  }
+
+  getPasswordResetValue(user: User): string {
+    return user.password_reset_required ? 'true' : 'false';
+  }
+
+  setPasswordResetRequired(user: User, value: string | null): void {
+    user.password_reset_required = value === 'true';
+  }
+
+  onUserLicenseDropdownChange(user: User, nextLicenses: string[]): void {
+    const currentLicenses = user.licenses || [];
+    const addedLicense = nextLicenses.find(license => !currentLicenses.includes(license));
+    if (addedLicense) {
+      this.toggleUserLicense(user, addedLicense as LicenseName);
+      return;
+    }
+    user.licenses = nextLicenses;
+  }
+
   toggleUserLicense(user: any, license: LicenseName) {
     if (!user.licenses) {
       user.licenses = [];
@@ -132,6 +166,17 @@ export class ManageProfileComponent implements OnInit {
       return 'None';
     }
     return user.licenses.map((l: LicenseName) => this.licenseService.getLicenseLabel(l)).join(', ');
+  }
+
+  getUserPermissionsLabel(user: User): string {
+    if (!user.permissions || user.permissions.length === 0) {
+      return 'None';
+    }
+    return user.permissions.map(permission => this.getPermissionLabel(permission)).join(', ');
+  }
+
+  getPermissionLabel(permission: string): string {
+    return this.permissionOptions.find(option => option.key === permission)?.label || permission;
   }
 
   canEditUser(user: User): boolean {

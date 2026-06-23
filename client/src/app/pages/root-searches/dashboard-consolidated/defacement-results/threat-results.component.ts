@@ -131,7 +131,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
     }
     else if (type === 'stealerlog') {
       let query = this.helperService.extractDomain(this.dashboardService.consolidatedParamModel.q);
-      const finalUrl = `/dashboard/stealerlogs/iocs?q=${encodeURIComponent(query)}&user=`;
+      const finalUrl = `/dashboard/stealerlogs?q=${encodeURIComponent(query)}&user=`;
       this.proxied_resource.open(finalUrl);
     }
   }
@@ -169,7 +169,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   }
 
   dateValue(item: any): string {
-    return this.rowHelper.valueOrDash(item?.m_leak_date);
+    return this.rowHelper.valueOrDash(item?.m_date);
   }
 
   usernameValue(item: any): string {

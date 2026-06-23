@@ -22,8 +22,8 @@
         [title]="this.appService.userSessionData().user.username">
       </app-dashboard-sidebar-items>
       </div>
-      @if (licenseService.canUseModule('free') || licenseService.canUseModule('osint_basic') || licenseService.canUseModule('osint_advanced') || licenseService.canUseModule('enterprise')) {
-        <div class="mt-[20px] text-[13px] font-bold text-white">{{ 'Darkweb Chatter' | translate }}</div>
+      @if (isAdmin() || licenseService.canUseModule('free') || licenseService.canUseModule('osint_basic') || licenseService.canUseModule('osint_advanced') || licenseService.canUseModule('enterprise') || licenseService.canUseScanning()) {
+        <div class="mt-[20px] text-[13px] font-bold text-white">{{ 'Search API\'s' | translate }}</div>
         <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
       }
       @if (isAdmin() || licenseService.canUseModule('general')) {
@@ -33,7 +33,7 @@
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.STRATEGIC"
           [icon]="'assets/images/sidebar/strategic.svg'"
-          [items]="generalCategories"
+          [items]="[]"
           [routePrefix]="'strategic'"
         [title]="('General Intelligence') | translate"></app-dashboard-sidebar-items>
         </div>
@@ -44,7 +44,7 @@
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.BREACH"
           [icon]="'assets/images/sidebar/data_breach.svg'"
-          [items]="leakCategories"
+          [items]="[]"
           [routePrefix]="'breach'"
         [title]="('Data Breach') | translate"></app-dashboard-sidebar-items>
       }
@@ -54,7 +54,7 @@
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.DEFACEMENT"
           [icon]="'assets/images/sidebar/defacement.svg'"
-          [items]="defacementCategories"
+          [items]="[]"
           [routePrefix]="'defacement'"
         [title]="('Compromise Monitoring') | translate"></app-dashboard-sidebar-items>
       }
@@ -76,7 +76,7 @@
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.EXPLOIT"
           [icon]="'assets/images/sidebar/exploits.svg'"
-          [items]="exploitCategories"
+          [items]="[]"
           [routePrefix]="'exploit'"
         [title]="('Exploit') | translate"></app-dashboard-sidebar-items>
       }
@@ -84,10 +84,10 @@
         <app-dashboard-sidebar-items
           (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)"
-          [category]="category.THREAT_INTEL"
+          [category]="category.APT_INTEL"
           [icon]="'assets/images/sidebar/graph.svg'"
-          [items]="threatIntelCategories"
-          [routePrefix]="'threat-intel'"
+          [items]="aptIntelCategories"
+          [routePrefix]="'apt-intel'"
         [title]="('Actors & Malware') | translate"></app-dashboard-sidebar-items>
       }
       @if (isAdmin() || licenseService.canUseModule('feed')) {
@@ -100,44 +100,6 @@
           [routePrefix]="'feed'"
         [title]="('News Feed') | translate"></app-dashboard-sidebar-items>
       }
-      @if (isAdmin() || licenseService.canUseModule('dumps')) {
-        <app-dashboard-sidebar-items
-          (optionSelected)="onOptionSelected($event)"
-          (sectionSelected)="onSectionSelected($event)"
-          [category]="category.DUMP"
-          [icon]="'assets/images/sidebar/dump.svg'"
-          [items]="dumpCategories"
-          [routePrefix]="'dump'"
-        [title]="('Breach Artifacts') | translate"></app-dashboard-sidebar-items>
-      }
-      @if (licenseService.canUseScanning() || licenseService.canUseModule('stealer_logs')) {
-        <div class="mt-[20px] text-[13px] font-bold text-white">{{ 'Webscans' | translate }}</div>
-        <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
-      }
-      @if (isAdmin() || licenseService.canUseModule('stealer_logs')) {
-        <div id="sidebar-stealer-logs">
-        <app-dashboard-sidebar-items
-          (optionSelected)="onOptionSelected($event)"
-          (sectionSelected)="onSectionSelected($event)"
-          [category]="category.STEALERLOGS"
-          [icon]="'assets/images/sidebar/stealerlog.svg'"
-          [items]="stealerlogsCategories"
-          [routePrefix]="'stealerlogs'"
-        [title]="('Stealer logs') | translate"></app-dashboard-sidebar-items>
-        </div>
-      }
-      @if (isAdmin() || licenseService.canUseScanning()) {
-        <div id="sidebar-web-scan">
-        <app-dashboard-sidebar-items
-          (optionSelected)="onOptionSelected($event)"
-          (sectionSelected)="onSectionSelected($event)"
-          [category]="category.SCANNER"
-          [icon]="'assets/images/sidebar/theme/scanner.svg'"
-          [items]="scannerCategories"
-          [routePrefix]="'scanner'"
-        [title]="('Web Scans') | translate"></app-dashboard-sidebar-items>
-        </div>
-      }
       @if (isAdmin() || licenseService.canUseScanning()) {
         <div id="sidebar-entity-api">
         <app-dashboard-sidebar-items
@@ -147,34 +109,38 @@
           [icon]="'assets/images/sidebar/live_api.svg'"
           [items]="apiCategories"
           [routePrefix]="'api'"
-        [title]="('Darkweb Chatter') | translate"></app-dashboard-sidebar-items>
+        [title]="('Entity Lookup') | translate"></app-dashboard-sidebar-items>
         </div>
       }
-      @if (licenseService.canUseScanning() || licenseService.canUseModule('stealer_logs') || isAdmin() || licenseService.canUseModule('osint_advanced') || licenseService.canUseCtiGraph() || (!isDemo() && licenseService.canUseModule('social_mapper')) || appService.getConfig().appSettings.home_header_whistle_blowing_allowed || isDemo()) {
-        <div class="mt-[20px] text-[13px] font-bold text-white">{{ 'Data Collection' | translate }}</div>
+      @if (licenseService.canUseModule('stealer_logs') || isAdmin() || licenseService.canUseModule('osint_advanced') || licenseService.canUseCtiGraph() || (!isDemo() && licenseService.canUseModule('social_mapper')) || appService.getConfig().appSettings.home_header_whistle_blowing_allowed || isDemo()) {
+        <div class="mt-[20px] text-[13px] font-bold text-white">{{ 'Data Collection API\'s' | translate }}</div>
         <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
       }
-      @if (isAdmin() || licenseService.canUseModule('osint_advanced') ||  isDemo()) {
+      @if (isAdmin() || licenseService.canUseModule('stealer_logs')) {
+        <div id="sidebar-stealer-logs">
+        <app-dashboard-sidebar-items
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.STEALERLOGS"
+          [icon]="'assets/images/sidebar/stealerlog.svg'"
+          [items]="[]"
+          [routePrefix]="'stealerlogs'"
+        [title]="('Stealer logs') | translate"></app-dashboard-sidebar-items>
+        </div>
+      }
+      @if (isAdmin() || licenseService.canUseModule('osint_advanced') || licenseService.canUseScanning() ||  isDemo()) {
         <div id="sidebar-network-intel" class="my-[6px] rounded-[8px] select-none">
-          <div (click)="requestStandaloneSubscription($event, (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode()); (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() && onSectionSelected(category.NETINT)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.NETINT, 'opacity-20': (isDemo() && !(isAdmin() || licenseService.canUseModule('osint_advanced'))) || appService.isMobileMode() }" [routerLink]="(isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() ? 'netint' : null" class="flex h-[46px] items-center gap-[8px] rounded-[8px] border border-transparent px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
+          <div data-testid="sidebar-group-scanner" (click)="requestStandaloneSubscription($event, (isAdmin() || licenseService.canUseModule('osint_advanced') || (!isDemo() && licenseService.canUseScanning())) && !appService.isMobileMode()); (isAdmin() || licenseService.canUseModule('osint_advanced') || (!isDemo() && licenseService.canUseScanning())) && !appService.isMobileMode() && onSectionSelected(category.NETINT)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.NETINT, 'opacity-20': (isDemo() && !(isAdmin() || licenseService.canUseModule('osint_advanced'))) || appService.isMobileMode() }" [routerLink]="(isAdmin() || licenseService.canUseModule('osint_advanced') || (!isDemo() && licenseService.canUseScanning())) && !appService.isMobileMode() ? 'netint' : null" class="flex h-[46px] items-center gap-[8px] rounded-[8px] border border-transparent px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
             <img alt="Network Intel" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/dump.svg" width="20">
             {{ 'Network Intel' | translate }}
           </div>
         </div>
       }
       @if (isAdmin() || licenseService.canUseModule('osint_advanced') || isDemo()) {
-        <div id="sidebar-satellite-intel" class="my-[6px] rounded-[8px] select-none">
+        <div id="sidebar-geo-fencing" class="my-[6px] rounded-[8px] select-none">
           <div (click)="requestStandaloneSubscription($event, (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode()); (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() && onSectionSelected(category.SATELLITE_INTEL)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.SATELLITE_INTEL, 'opacity-20': (isDemo() && !(isAdmin() || licenseService.canUseModule('osint_advanced'))) || appService.isMobileMode() }" [routerLink]="(isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() ? 'satellite-intel' : null" class="flex h-[46px] items-center gap-[8px] rounded-[8px] border border-transparent px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
-            <img alt="Satellite Intel" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/dump.svg" width="20">
-            {{ 'Satellite Intel' | translate }}
-          </div>
-        </div>
-      }
-      @if (isAdmin() || licenseService.canUseModule('osint_advanced')) {
-        <div class="my-[6px] rounded-[8px] select-none">
-          <div (click)="requestStandaloneSubscription($event, (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode()); (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() && onSectionSelected(category.THREAT_LENS)" [ngClass]="{ 'bg-[#31669b35] text-white': (selectionStore.selectedSection$ | async) === category.THREAT_LENS, 'opacity-20': !(isAdmin() || licenseService.canUseModule('osint_advanced')) || appService.isMobileMode() }" [routerLink]="(isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() ? 'threat-lens' : null" class="flex h-[46px] items-center gap-[8px] rounded-[8px] border border-transparent px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" queryParamsHandling="merge">
-            <img alt="Threat Lens" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="/assets/images/sidebar/theme/graph.svg" width="20">
-            {{ 'Threat Lens' | translate }}
+            <img alt="Geo Fencing" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/dump.svg" width="20">
+            {{ 'Geo Fencing' | translate }}
           </div>
         </div>
       }
@@ -269,7 +235,7 @@
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.STRATEGIC"
           [icon]="'assets/images/sidebar/strategic.svg'"
-          [items]="generalCategories"
+          [items]="[]"
           [routePrefix]="'strategic'"
           [selectionStore]="selectionStore"
           [title]="('General Intelligence') | translate">
@@ -281,7 +247,7 @@
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.BREACH"
           [icon]="'assets/images/sidebar/data_breach.svg'"
-          [items]="leakCategories"
+          [items]="[]"
           [routePrefix]="'breach'"
           [selectionStore]="selectionStore"
           [title]="('Data Breach') | translate">
@@ -293,10 +259,10 @@
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.DEFACEMENT"
           [icon]="'assets/images/sidebar/defacement.svg'"
-          [items]="defacementCategories"
+          [items]="[]"
           [routePrefix]="'defacement'"
           [selectionStore]="selectionStore"
-          [title]="('Defacement') | translate">
+          [title]="('Compromise Monitoring') | translate">
         </app-dashboard-sidebar-collapsed>
       }
       @if (isAdmin() || licenseService.canUseModule('social')) {
@@ -318,7 +284,7 @@
           (sectionSelected)="onSectionSelected($event)"
           [category]="category.EXPLOIT"
           [icon]="'assets/images/sidebar/exploits.svg'"
-          [items]="exploitCategories"
+          [items]="[]"
           [routePrefix]="'exploit'"
           [selectionStore]="selectionStore"
           [title]="('Exploit') | translate">
@@ -328,10 +294,10 @@
         <app-dashboard-sidebar-collapsed
           (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)"
-          [category]="category.THREAT_INTEL"
+          [category]="category.APT_INTEL"
           [icon]="'assets/images/sidebar/graph.svg'"
-          [items]="threatIntelCategories"
-          [routePrefix]="'threat-intel'"
+          [items]="aptIntelCategories"
+          [routePrefix]="'apt-intel'"
           [selectionStore]="selectionStore"
           [title]="('Actors & Malware') | translate">
         </app-dashboard-sidebar-collapsed>
@@ -348,41 +314,6 @@
           [title]="('News Feed') | translate">
         </app-dashboard-sidebar-collapsed>
       }
-      @if (isAdmin() || licenseService.canUseModule('dumps')) {
-        <app-dashboard-sidebar-collapsed
-          (optionSelected)="onOptionSelected($event)"
-          (sectionSelected)="onSectionSelected($event)"
-          [category]="category.DUMP"
-          [icon]="'assets/images/sidebar/dump.svg'"
-          [items]="dumpCategories"
-          [routePrefix]="'dump'"
-          [selectionStore]="selectionStore"
-        [title]="('Breach Artifacts') | translate"></app-dashboard-sidebar-collapsed>
-      }
-      @if (isAdmin() || licenseService.canUseModule('stealer_logs')) {
-        <app-dashboard-sidebar-collapsed
-          id="sidebar-stealer-logs"
-          (optionSelected)="onOptionSelected($event)"
-          (sectionSelected)="onSectionSelected($event)"
-          [category]="category.STEALERLOGS"
-          [icon]="'assets/images/sidebar/stealerlog.svg'"
-          [items]="stealerlogsCategories"
-          [routePrefix]="'stealerlogs'"
-          [selectionStore]="selectionStore"
-        [title]="('Stealer logs') | translate"></app-dashboard-sidebar-collapsed>
-      }
-      @if (isAdmin() || licenseService.canUseScanning()) {
-        <app-dashboard-sidebar-collapsed
-          id="sidebar-web-scan"
-          (optionSelected)="onOptionSelected($event)"
-          (sectionSelected)="onSectionSelected($event)"
-          [category]="category.SCANNER"
-          [icon]="'assets/images/sidebar/theme/scanner.svg'"
-          [items]="scannerCategories"
-          [routePrefix]="'scanner'"
-          [selectionStore]="selectionStore"
-        [title]="('Web Scans') | translate"></app-dashboard-sidebar-collapsed>
-      }
       @if (isAdmin() || licenseService.canUseScanning()) {
         <app-dashboard-sidebar-collapsed
           id="sidebar-entity-api"
@@ -393,26 +324,31 @@
           [items]="apiCategories"
           [routePrefix]="'api'"
           [selectionStore]="selectionStore"
-        [title]="('Darkweb Chatter') | translate"></app-dashboard-sidebar-collapsed>
+        [title]="('Entity Lookup') | translate"></app-dashboard-sidebar-collapsed>
       }
-      @if (isAdmin() || licenseService.canUseModule('osint_advanced') || isDemo()) {
+      @if (isAdmin() || licenseService.canUseModule('stealer_logs')) {
+        <app-dashboard-sidebar-collapsed
+          id="sidebar-stealer-logs"
+          (optionSelected)="onOptionSelected($event)"
+          (sectionSelected)="onSectionSelected($event)"
+          [category]="category.STEALERLOGS"
+          [icon]="'assets/images/sidebar/stealerlog.svg'"
+          [items]="[]"
+          [routePrefix]="'stealerlogs'"
+          [selectionStore]="selectionStore"
+        [title]="('Stealer logs') | translate"></app-dashboard-sidebar-collapsed>
+      }
+      @if (isAdmin() || licenseService.canUseModule('osint_advanced') || licenseService.canUseScanning() || isDemo()) {
         <li class="my-[6px] rounded-[8px] select-none">
-          <div (click)="requestStandaloneSubscription($event, (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode()); (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() && onSectionSelected(category.NETINT)" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.NETINT, 'opacity-20': (isDemo() && !(isAdmin() || licenseService.canUseModule('osint_advanced'))) || appService.isMobileMode() }" [routerLink]="(isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() ? 'netint' : null" [appTooltip]="'Network Intel' | translate" class="flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-white focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]" queryParamsHandling="merge">
+          <div data-testid="sidebar-group-scanner" (click)="requestStandaloneSubscription($event, (isAdmin() || licenseService.canUseModule('osint_advanced') || (!isDemo() && licenseService.canUseScanning())) && !appService.isMobileMode()); (isAdmin() || licenseService.canUseModule('osint_advanced') || (!isDemo() && licenseService.canUseScanning())) && !appService.isMobileMode() && onSectionSelected(category.NETINT)" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.NETINT, 'opacity-20': (isDemo() && !(isAdmin() || licenseService.canUseModule('osint_advanced'))) || appService.isMobileMode() }" [routerLink]="(isAdmin() || licenseService.canUseModule('osint_advanced') || (!isDemo() && licenseService.canUseScanning())) && !appService.isMobileMode() ? 'netint' : null" [appTooltip]="'Network Intel' | translate" class="flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-white focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]" queryParamsHandling="merge">
             <img alt="Network Intel" class="h-[20px] w-[20px] shrink-0 opacity-100" height="20" ngSrc="assets/images/sidebar/dump.svg" width="20">
           </div>
         </li>
       }
       @if (isAdmin() || licenseService.canUseModule('osint_advanced') || isDemo()) {
         <li class="my-[6px] rounded-[8px] select-none">
-          <div (click)="requestStandaloneSubscription($event, (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode()); (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() && onSectionSelected(category.SATELLITE_INTEL)" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.SATELLITE_INTEL, 'opacity-20': (isDemo() && !(isAdmin() || licenseService.canUseModule('osint_advanced'))) || appService.isMobileMode() }" [routerLink]="(isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() ? 'satelliteint' : null" [appTooltip]="'Satellite Intel' | translate" class="flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-white focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]" queryParamsHandling="merge">
-            <img alt="Satellite Intel" class="h-[20px] w-[20px] shrink-0 opacity-100" height="20" ngSrc="assets/images/sidebar/dump.svg" width="20">
-          </div>
-        </li>
-      }
-      @if (isAdmin() || licenseService.canUseModule('osint_advanced')) {
-        <li class="my-[6px] rounded-[8px] select-none">
-          <div (click)="requestStandaloneSubscription($event, (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode()); (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() && onSectionSelected(category.THREAT_LENS)" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.THREAT_LENS, 'opacity-20': !(isAdmin() || licenseService.canUseModule('osint_advanced')) || appService.isMobileMode() }" [routerLink]="(isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() ? 'threat-lens' : null" [appTooltip]="'Threat Lens' | translate" class="flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-white focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]" queryParamsHandling="merge">
-            <img alt="Threat Lens" class="h-[20px] w-[20px] shrink-0 opacity-100" height="20" ngSrc="/assets/images/sidebar/theme/graph.svg" width="20">
+          <div (click)="requestStandaloneSubscription($event, (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode()); (isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() && onSectionSelected(category.SATELLITE_INTEL)" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.SATELLITE_INTEL, 'opacity-20': (isDemo() && !(isAdmin() || licenseService.canUseModule('osint_advanced'))) || appService.isMobileMode() }" [routerLink]="(isAdmin() || licenseService.canUseModule('osint_advanced')) && !appService.isMobileMode() ? 'satellite-intel' : null" [appTooltip]="'Geo Fencing' | translate" class="flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-white focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]" queryParamsHandling="merge">
+            <img alt="Geo Fencing" class="h-[20px] w-[20px] shrink-0 opacity-100" height="20" ngSrc="assets/images/sidebar/dump.svg" width="20">
           </div>
         </li>
       }

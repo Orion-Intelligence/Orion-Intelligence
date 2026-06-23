@@ -90,6 +90,7 @@ export class ResultComponent implements OnInit, OnChanges {
   readonly shrinkmenu = input(false);
   readonly disableScroll = input(false);
   readonly type = input<Category | undefined>(undefined);
+  readonly apiEndpoint = input('');
   readonly discussion = input(false);
   consolidated = false;
   readonly domain = input(false);
@@ -109,10 +110,25 @@ export class ResultComponent implements OnInit, OnChanges {
   get shouldShowCrossSearchOnEmptyState(): boolean {
     return !this.consolidated
       && !this.app_service.isMobileMode()
-      && this.type() !== Category.DUMP
       && this.type() !== Category.DEFACEMENT
       && !this.router.url.toLowerCase().includes('/defacement')
       && !!this.searchQuery.trim();
+  }
+
+  showResultCardShimmer(): boolean {
+    const currentType = String(this.type() || '').toLowerCase();
+    const currentEndpoint = String(this.apiEndpoint() || '').toLowerCase();
+    return currentEndpoint === 'search/defacement'
+      || currentEndpoint === 'search/apt-intel'
+      || currentEndpoint === 'search/exploit'
+      || currentType === Category.DEFACEMENT.toLowerCase()
+      || currentType === Category.APT_INTEL.toLowerCase()
+      || currentType === Category.EXPLOIT.toLowerCase();
+  }
+
+  showDefacementResultShimmer(): boolean {
+    return String(this.apiEndpoint() || '').toLowerCase() === 'search/defacement'
+      || String(this.type() || '').toLowerCase() === Category.DEFACEMENT.toLowerCase();
   }
 
   constructor( protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService, protected aiToolRoutingService: AiToolRoutingService ) {

@@ -6,6 +6,7 @@ from types import SimpleNamespace
 
 import httpx
 import pytest
+from cryptography.fernet import Fernet
 
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import (
     search_consolidated_param_model,
@@ -15,6 +16,7 @@ from orion.api.interactive.search_manager.search_data_model.dump.search_credenti
     search_credential_param_model,
 )
 from orion.api.interactive.search_manager.search_model import search_model
+from orion.constants.constant import CONSTANTS
 from orion.helper_manager.env_handler import env_handler
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from tests.fake_model.fakes import FakeElastic
@@ -99,11 +101,21 @@ def test_request_general_doc_fetches_document_and_translates_selected_fields(fak
         staticmethod(lambda text, target_lang: translations.append((text, target_lang)) or f"{target_lang}:{text}"),
     )
 
+    async def fake_get_value_crawl_status(record_name: str, url: str):
+        return {"status": "active", "last_checked_at": None}
+
+    monkeypatch.setattr(
+        "orion.api.interactive.search_manager.search_model.FeederManager.get_instance",
+        staticmethod(lambda: SimpleNamespace(get_value_crawl_status=fake_get_value_crawl_status)),
+    )
+
     result = _run(search_model().request_general_doc("doc-1", "ur"))
 
     assert fake_elastic.get_doc_calls == [(ELASTIC_INDEX.S_GENERIC_INDEX, "doc-1")]
     assert result["m_content"] == "ur:content"
     assert result["m_important_content"] == "ur:important"
+    assert result["m_crawl_status"] == "active"
+    assert result["m_last_crawled_at"] is None
     assert "m_embedding" not in result
     assert translations == [("content", "ur"), ("important", "ur")]
 
@@ -167,7 +179,7 @@ def test_search_consolidated_iocs_builds_ioc_logic_and_returns_ranked_results(fa
     assert indices == [ELASTIC_INDEX.S_LEAK_INDEX]
     filters = query["query"]["function_score"]["query"]["bool"]["filter"]
     assert any("m_email" in str(clause) and "m_domain" in str(clause) for clause in filters)
-    assert any("m_message_date" in str(clause) or "m_leak_date" in str(clause) for clause in filters)
+    assert any("m_date" in str(clause) or "m_date" in str(clause) for clause in filters)
 
 
 # def test_search_stealerlogs_result_normalizes_mapping_and_preserves_page(fake_elastic):
@@ -226,6 +238,23 @@ def test_search_stealer_iocs_applies_password_schema_after_real_query_build(fake
     document, query = fake_elastic.search_query_calls[0]
     assert document == ELASTIC_INDEX.S_STEALERLOGS_INDEX
     assert "m_emails" in str(query) or "email" in str(query)
+
+
+def test_search_stealer_iocs_decrypts_password_before_return(fake_elastic, monkeypatch):
+    key = Fernet.generate_key().decode()
+    encrypted_password = Fernet(key.encode()).encrypt(b"Secret123!").decode()
+    monkeypatch.setattr(CONSTANTS, "S_ENCRYPTION_KEY", key)
+    fake_elastic.search_query_result = (
+        True,
+        _search_response(
+            _hit({"password": encrypted_password, "channel": "telegram"}, index=ELASTIC_INDEX.S_STEALERLOGS_INDEX),
+            total=1,
+        ),
+    )
+
+    result = _run(search_model().search_stealer_iocs(search_credential_param_model(ioc="m_email:test@example.com")))
+
+    assert result.Result[0].model_dump()["password"] == "Secret123!"
 
 
 def test_dynamic_search_returns_json_payload(monkeypatch):
@@ -288,6 +317,20 @@ def test_search_consolidated_result_groups_platform_results(fake_elastic):
     assert result.leak_model.Result[0].m_title == "Leak"
     assert len(fake_elastic.search_consolidated_calls) == 3
     assert all(indices == [ELASTIC_INDEX.S_LEAK_INDEX] for indices, _query, _boost in fake_elastic.search_consolidated_calls)
+
+
+def test_search_consolidated_result_does_not_filter_apt_malware_by_page_category(fake_elastic):
+    fake_elastic.search_consolidated_result = _search_response()
+    param = search_consolidated_param_model(q="malware", category="credential")
+
+    _run(search_model.search_consolidated_result(param))
+
+    apt_queries = [query for indices, query, _boost in fake_elastic.search_consolidated_calls if indices == [ELASTIC_INDEX.S_APT_INDEX]]
+    malware_queries = [query for indices, query, _boost in fake_elastic.search_consolidated_calls if indices == [ELASTIC_INDEX.S_MALWARE_INDEX]]
+    assert apt_queries
+    assert malware_queries
+    assert "credential" not in str(apt_queries[0])
+    assert "credential" not in str(malware_queries[0])
 
 
 def test_search_stealerlogs_persona_breach_summarizes_aggregations(fake_elastic):

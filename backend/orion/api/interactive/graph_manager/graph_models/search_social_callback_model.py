@@ -19,7 +19,7 @@ class result_item(BaseModel):
     m_network: str
     m_content: Optional[str] = None
     m_content_type: List[str] = Field(default_factory=list)
-    m_message_date: Optional[date] = None
+    m_date: Optional[date] = None
     m_channel_url: Optional[str] = None
     m_message_id: Optional[str] = None
     m_platform: str

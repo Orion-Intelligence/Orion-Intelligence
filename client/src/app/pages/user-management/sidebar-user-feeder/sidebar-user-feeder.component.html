@@ -17,11 +17,16 @@
     @if (isCatalogLoading) {
       <div class="ui-shimmer h-[40px] w-full rounded-[10px] bg-[var(--color-divider)]"></div>
     } @else {
-      <select data-testid="feeder-rule-select" [(ngModel)]="selectedRuleKey" (ngModelChange)="onRuleChange()" name="ruleKey" class="h-11 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 text-sm text-[var(--color-text1)] outline-none">
-        @for (rule of rules; track rule.key) {
-          <option [attr.data-testid]="'feeder-rule-option-' + rule.key" [ngValue]="rule.key">{{ getRuleLabel(rule.key) }}</option>
-        }
-      </select>
+      <app-ui-dropdown
+        id="feeder-rule-select-control"
+        menuId="feeder-rule-menu"
+        testId="feeder-rule-select"
+        optionTestIdPrefix="feeder-rule-option-"
+        size="large"
+        [options]="ruleDropdownOptions"
+        [selected]="selectedRuleKey"
+        [disabled]="!rules.length"
+        (valueChange)="onRuleSelect($event)"></app-ui-dropdown>
     }
   </div>
 

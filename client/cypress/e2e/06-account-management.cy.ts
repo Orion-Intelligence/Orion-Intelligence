@@ -33,7 +33,9 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
             });
 
             cy.get('[data-testid="account-settings-theme-toggle"]').click().wait(200).click();
+            cy.intercept('POST', '**/api/update/current/user').as('accountSettingsUpdate');
             cy.get('[data-testid="account-settings-twofa-toggle"]').click();
+            cy.wait('@accountSettingsUpdate', { timeout: 60000 }).its('response.statusCode').should('be.oneOf', [200, 204]);
             cy.logout();
 
             cy.visit('/login');

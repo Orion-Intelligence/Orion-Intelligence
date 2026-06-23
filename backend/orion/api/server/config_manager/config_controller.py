@@ -17,6 +17,7 @@ from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 class config_controller:
     __instance = None
     CONFIG_CACHE_KEY = "system_config"
+    EMAIL_META_KEYS = {"ACCOUNTS_MAIL_PASSWORD", "ACCOUNTS_MAIL", "ACCOUNTS_SMTP_SERVER", "ACCOUNTS_SMTP_PORT"}
 
     @staticmethod
     def getInstance():
@@ -99,7 +100,18 @@ class config_controller:
             return False
         return 1 <= smtp_port <= 65535
 
-    def _build_system_info_from_cache(self) -> config_data:
+    def _redact_email_config(self, meta_info_raw: str) -> str:
+        try:
+            meta_info = json.loads(meta_info_raw) if isinstance(meta_info_raw, str) else {}
+        except (TypeError, ValueError):
+            return meta_info_raw
+        if not isinstance(meta_info, dict):
+            return meta_info_raw
+        for key in self.EMAIL_META_KEYS:
+            meta_info.pop(key, None)
+        return json.dumps(meta_info)
+
+    def _build_system_info_from_cache(self, include_email_config: bool = False) -> config_data:
         fresh_config = dict(self._config)
 
         def asset(base: str) -> str:
@@ -112,20 +124,21 @@ class config_controller:
         fresh_config["logo_wide_light"] = asset("logo_wide_light")
         fresh_config["logo_wide_dark"] = asset("logo_wide_dark")
         fresh_config["auth_dashboard_icon"] = asset("auth_dashboard_icon")
-        fresh_config["meta_info"] = fresh_config.get("meta_info") or json.dumps({
+        meta_info = fresh_config.get("meta_info") or json.dumps({
             "S_HOME_HEADER_DATA_SOURCES": "https://www.orionintelligence.org/sources",
             "S_HOME_HEADER_ADVERSARIES": "https://www.orionintelligence.org/adversaries",
             "S_HOME_HEADER_PRICING": "https://www.orionintelligence.org/pricing",
             "S_HOME_HEADER_PRICING_ALLOWED": True
         })
-        fresh_config["smtp_configured"] = "1" if self._is_smtp_configured(fresh_config.get("meta_info")) else "0"
+        fresh_config["meta_info"] = meta_info if include_email_config else self._redact_email_config(meta_info)
+        fresh_config["smtp_configured"] = "1" if self._is_smtp_configured(meta_info) else "0"
         return config_data(settings=fresh_config)
 
-    async def get_system_info(self) -> config_data:
+    async def get_system_info(self, include_email_config: bool = False) -> config_data:
         try:
             self.SYSTEM_DIR = self.BASE_DIR / "static" / "resource" / "system"
             await self.load_config()
-            return self._build_system_info_from_cache()
+            return self._build_system_info_from_cache(include_email_config=include_email_config)
 
         except Exception as ex:
             log.g().e(f"Error fetching config: {ex}")
@@ -143,18 +156,26 @@ class config_controller:
                 "smtp_configured": "0",
             })
 
-    async def update_public_config(self, data: config_data):
+    async def update_public_config(self, data: config_data, include_email_config: bool = False):
         if self._engine is None:
             self._engine = mongo_controller.get_instance().get_engine()
         meta_info_raw = data.settings.get("meta_info")
         if meta_info_raw:
-            meta_info = json.loads(meta_info_raw)
-            await mail_manager.get_instance().send_test_mail(config={
-                "ACCOUNTS_MAIL_PASSWORD": meta_info.get("ACCOUNTS_MAIL_PASSWORD"),
-                "ACCOUNTS_MAIL": meta_info.get("ACCOUNTS_MAIL"),
-                "ACCOUNTS_SMTP_SERVER": meta_info.get("ACCOUNTS_SMTP_SERVER"),
-                "ACCOUNTS_SMTP_PORT": meta_info.get("ACCOUNTS_SMTP_PORT"),
-            })
+            submitted_meta_info = json.loads(meta_info_raw)
+            existing_record = await self._engine.find_one(db_system_model, db_system_model.key == AllowedKeys.META_INFO)
+            existing_meta_info = {}
+            if existing_record and existing_record.value:
+                existing_meta_info = json.loads(existing_record.value)
+            meta_info = {**existing_meta_info, **submitted_meta_info}
+            mail_config_submitted = any(key in submitted_meta_info for key in self.EMAIL_META_KEYS)
+            if mail_config_submitted:
+                await mail_manager.get_instance().send_test_mail(config={
+                    "ACCOUNTS_MAIL_PASSWORD": meta_info.get("ACCOUNTS_MAIL_PASSWORD"),
+                    "ACCOUNTS_MAIL": meta_info.get("ACCOUNTS_MAIL"),
+                    "ACCOUNTS_SMTP_SERVER": meta_info.get("ACCOUNTS_SMTP_SERVER"),
+                    "ACCOUNTS_SMTP_PORT": meta_info.get("ACCOUNTS_SMTP_PORT"),
+                })
+            data.settings["meta_info"] = json.dumps(meta_info)
         for key_str, value in data.settings.items():
             if key_str == "language":
                 key = AllowedKeys.LANGUAGE_ALLOWED
@@ -166,6 +187,8 @@ class config_controller:
                 key = AllowedKeys.META_INFO
             elif key_str == "ai_endpoint_enabled":
                 key = AllowedKeys.AI_ENDPOINT_ENABLED
+            elif key_str == "admin_root_allowed":
+                key = AllowedKeys.ADMIN_ROOT_ALLOWED
             elif key_str == "s_onion":
                 key = AllowedKeys.S_ONION
             else:
@@ -187,7 +210,7 @@ class config_controller:
                     db_system_model(key=key, value=value))
 
         await self.load_config(force_db=True)
-        return await self.get_system_info()
+        return await self.get_system_info(include_email_config=include_email_config)
 
     async def getSystemResource(self, name: str):
         file_path = self.SYSTEM_DIR / f"{name}.png"

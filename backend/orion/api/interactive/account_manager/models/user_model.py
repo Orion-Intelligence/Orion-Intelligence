@@ -1,8 +1,9 @@
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, user_role
+from orion.services.permission_manager.permission_models import UserPermission
 
 
 class user_model(BaseModel):
@@ -13,3 +14,4 @@ class user_model(BaseModel):
     status: UserStatus
     subscription: bool
     licenses: List[LicenseName]
+    permissions: List[UserPermission] = Field(default_factory=list)

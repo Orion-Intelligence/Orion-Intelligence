@@ -96,7 +96,7 @@ export class LicenseService {
     if (moduleName === 'Strategic') {
       moduleName = 'general';
     }
-    if (moduleName === 'Threat Intelligence') {
+    if (moduleName === 'APT Intel') {
       moduleName = 'general';
     }
     const key = moduleName.toLowerCase();

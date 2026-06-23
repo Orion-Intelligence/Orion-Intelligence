@@ -95,7 +95,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "summary": ["m_important_content", "m_content"],
         "url": ["m_url", "m_base_url"],
         "base_url": ["m_base_url"],
-        "created": ["m_creation_date", "m_update_date", "m_leak_date"],
+        "created": ["m_creation_date", "m_update_date", "m_date"],
         "tag": "orion:leak",
     },
     "defacement": {
@@ -103,7 +103,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "summary": ["m_content", "m_important_content"],
         "url": ["m_url", "m_base_url", "m_source_url"],
         "base_url": ["m_base_url"],
-        "created": ["m_leak_date", "m_creation_date", "m_update_date"],
+        "created": ["m_date", "m_creation_date", "m_update_date"],
         "tag": "orion:defacement",
     },
     "exploit": {
@@ -111,7 +111,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "summary": ["m_important_content", "m_content", "m_code_snippet"],
         "url": ["m_url", "m_weblink"],
         "base_url": ["m_base_url"],
-        "created": ["m_creation_date", "m_update_date", "m_leak_date"],
+        "created": ["m_creation_date", "m_update_date", "m_date"],
         "tag": "orion:exploit",
     },
     "chat": {
@@ -119,7 +119,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "summary": ["m_content", "m_media_caption"],
         "url": ["m_message_sharable_link", "m_media_url", "m_channel_url"],
         "base_url": ["m_channel_url"],
-        "created": ["m_creation_date", "m_update_date", "m_message_date"],
+        "created": ["m_creation_date", "m_update_date", "m_date"],
         "tag": "orion:chat",
     },
     "social": {
@@ -127,7 +127,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "summary": ["m_content", "m_important_content", "m_meta_description"],
         "url": ["m_message_sharable_link", "m_channel_url", "m_url"],
         "base_url": ["m_channel_url", "m_base_url"],
-        "created": ["m_creation_date", "m_update_date", "m_message_date"],
+        "created": ["m_creation_date", "m_update_date", "m_date"],
         "tag": "orion:social",
     },
 }

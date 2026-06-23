@@ -52,6 +52,7 @@
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
+              "src/llms.txt",
               "src/assets",
               "src/assets/images",
               "src/assets/fonts"
@@ -103,6 +104,7 @@
               "namedChunks": false,
               "assets": [
                 "src/favicon.ico",
+                "src/llms.txt",
                 "src/assets",
                 "src/assets/images",
                 "src/assets/fonts"
@@ -180,6 +182,7 @@
             "tsConfig": "tsconfig.spec.json",
             "assets": [
               "src/favicon.ico",
+              "src/llms.txt",
               "src/assets/images",
               "src/assets",
               "src/assets/fonts"

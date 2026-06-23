@@ -42,6 +42,15 @@ class FeederManager:
             FeederManager()
         return FeederManager.__instance
 
+    async def _read_limited_session_file(self, session_file: UploadFile) -> bytes:
+        max_size = self._helper.MAX_FILE_SIZE
+        if getattr(session_file, "size", None) is not None and session_file.size > max_size:
+            raise HTTPException(status_code=400, detail="Session file size must be 50 KB or less")
+        content = await session_file.read(max_size + 1)
+        if len(content) > max_size:
+            raise HTTPException(status_code=400, detail="Session file size must be 50 KB or less")
+        return content
+
     async def get_catalog(self, current_user) -> FeederCatalogResponse:
         records = await self._engine.find(self._helper.model, self._helper.script_query(current_user))
         return FeederCatalogResponse(
@@ -122,7 +131,7 @@ class FeederManager:
             scripts = self._helper.filter_records(records, "scripts")
             if not scripts:
                 raise HTTPException(status_code=400, detail="Upload the parser file before adding session")
-            content = await session_file.read()
+            content = await self._read_limited_session_file(session_file)
             if not content:
                 raise HTTPException(status_code=400, detail="Uploaded session file is empty")
             target_path = self._helper.resolve_record_file_path(scripts[0])
@@ -160,7 +169,7 @@ class FeederManager:
             current_user=current_user,
             url=seed_url if rule_type == "unique" else None,
             session_file_name=session_file.filename if session_file else None,
-            session_content=await session_file.read() if session_file else None,
+            session_content=await self._read_limited_session_file(session_file) if session_file else None,
         )
         return FeederUploadResponse(
             message="Feeder script uploaded successfully",
@@ -288,6 +297,28 @@ class FeederManager:
             )
             for user in users
         ]
+
+    async def get_value_crawl_status(self, record_name: str, url: str):
+        record = await self._engine.find_one(self._helper.model, self._helper.model.name == record_name)
+        lookup_url = str(url or "").strip().rstrip("/")
+        if not record or not lookup_url:
+            return {"status": "inactive", "last_checked_at": None}
+
+        for value in (record.values or []):
+            if str(value.get("url") or "").strip().rstrip("/") != lookup_url:
+                continue
+
+            last_checked_at = value.get("last_checked_at") or value.get("last_success_date") or value.get("last_failure_date")
+            if not last_checked_at:
+                return {"status": "inactive", "last_checked_at": None}
+            if last_checked_at.tzinfo is None:
+                last_checked_at = last_checked_at.replace(tzinfo=timezone.utc)
+
+            age_days = (datetime.now(timezone.utc) - last_checked_at).days
+            status = "active" if age_days <= 15 else "stale" if age_days <= 30 else "inactive"
+            return {"status": status, "last_checked_at": last_checked_at}
+
+        return {"status": "inactive", "last_checked_at": None}
 
     async def transfer_script_owner(self, script_id: str, data: FeederOwnerTransferRequest, current_user):
         record = await self._helper.get_script_record(script_id, current_user)

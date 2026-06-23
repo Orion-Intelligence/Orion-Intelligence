@@ -3,39 +3,21 @@ export enum Category {
     BREACH = 'Breach',
     HOMEPAGE = 'Home',
     DIRECTORY = 'Directory',
-    DUMP = 'Dump',
     DEFACEMENT = 'Defacement',
     SOCIAL = 'Social',
     API = 'Api',
     EXPLOIT = 'Exploit',
-    THREAT_INTEL = 'Threat Intelligence',
+    APT_INTEL = 'APT Intel',
     FEED = 'Feed',
     CONSOLIDATED = 'Consolidated',
     STEALERLOGS = 'Stealerlogs',
-    SCANNER = 'Scanner',
     TENANT = 'Tenant',
     PROFILE = 'Profile',
     NETINT = 'NETINT',
-    SATELLITE_INTEL = 'SATELLITE_INTEL',
-    THREAT_LENS = 'THREAT_LENS'
-}
-export enum GeneralSubCategory {
-    ALL = 'All',
-    GENERAL = 'General',
-    SWARM = 'Swarm',
-    FORUMS = 'Forums',
-    NEWS = 'News',
-    STOLEN = 'Stolen',
-    DRUGS = 'Drugs',
-    HACKING = 'Hacking',
-    MARKETPLACES = 'Marketplaces',
-    CRYPTOCURRENCY = 'Cryptocurrency',
-    LEAKS = 'Leaks'
+    SATELLITE_INTEL = 'SATELLITE_INTEL'
 }
 export enum BreachSubCategory {
-    ALL = 'All',
-    DATABASES = 'Databases',
-    TRACKING = 'Tracking'
+    DATABASES = 'Databases'
 }
 export enum DefacementSubCategory {
     ALL = 'All',
@@ -74,27 +56,15 @@ export enum ExploitSubCategory {
     TOOLS = 'Tools',
     ZERODAY = 'ZeroDay'
 }
-export enum ThreatIntelSubCategory {
+export enum AptIntelSubCategory {
     ALL = 'All',
     APT = 'APT',
     MALWARE_BAZAAR = 'Malware',
     COMPROMISED_ACTORS = 'Compromised-Actors'
 }
 export enum FeedSubCategory {
-    NEWS = 'News'
-}
-export enum ScannerSubCategory {
-    // BASIC = 'Basic-Scan',
-    // FULL = 'Port-Scan',
-    NETWORK = 'Network-Scan',
-    REPOSITORY = 'Repository-Scan',
-    SEO = 'SEO-Scan'
-}
-export enum DumpSubCategory {
-    LISTING = 'Listing'
-}
-export enum StealerlogsSubCategory {
-    IOC = 'IOCS'
+    NEWS = 'News',
+    TRACKING = 'Tracking'
 }
 export enum TenantSubCategory {
     VIEW_PROFILE = 'View-Profiles',

@@ -8,7 +8,9 @@
       "m_important_content": "Records were found in a data breach.",
       "m_network": "onion",
       "m_section": [],
-      "m_content_type": ["stolen"],
+      "m_content_type": [
+        "stolen"
+      ],
       "m_screenshot": "",
       "m_weblink": [],
       "m_dumplink": [
@@ -24,9 +26,9 @@
       ],
       "m_websites": [],
       "m_logo_or_images": [],
-      "m_leak_date": null,
       "m_data_size": null,
-      "m_revenue": null
+      "m_revenue": null,
+      "m_date": null
     }
   ]
 }

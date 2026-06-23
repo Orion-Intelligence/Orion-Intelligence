@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, inject, input } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, inject, input } from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HelperService } from '../../../../shared/services/helper.service';
@@ -20,6 +20,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 })
 export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   private highlightCache = new Map<string, string>();
+  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly proxied_resource = inject(ProxyController);
 
   protected readonly window = window;
@@ -80,6 +81,17 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
     return this.authService.getIsMobileDemo();
   }
 
+  getResultDisplayLimit(): number {
+    return this.isExpandAble() && this.isCollapsed ? 2 : 30;
+  }
+
+  toggleCollapsed(): void {
+    const previousLimit = this.getResultDisplayLimit();
+    const isExpanding = this.isCollapsed;
+    this.isCollapsed = !this.isCollapsed;
+    this.scrollToResultIndex(isExpanding ? previousLimit : 0);
+  }
+
   getDisplayTags(item: GeneralResultItem | LeakResultItem): string[] {
     if (item.m_content_type?.length) {
       return item.m_content_type;
@@ -103,6 +115,9 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
 
   getReportLink(item: GeneralResultItem | LeakResultItem): string[] {
     let url = this.currentUrl;
+    if (url.includes('/apt-intel/all')) {
+      url = url.replace('/all', item.rank_index === 'malware_model' ? '/malware' : '/apt');
+    }
     if (url.includes('/threat-intel/all')) {
       url = url.replace('/all', item.rank_index === 'malware_model' ? '/malware' : '/apt');
     }
@@ -115,5 +130,16 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
     }
 
     this.proxied_resource.open(url);
+  }
+
+  private scrollToResultIndex(index: number): void {
+    if (index < 0) {
+      return;
+    }
+    setTimeout(() => {
+      this.elementRef.nativeElement
+        .querySelector<HTMLElement>(`[data-result-index="${index}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
   }
 }
