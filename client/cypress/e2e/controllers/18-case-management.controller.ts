@@ -85,7 +85,7 @@ export function assignAnalystIfAvailable() {
         const menuId = $control.attr('aria-controls');
         expect(menuId, 'case analyst dropdown menu id').to.exist;
         cy.wrap($control).click({ force: true });
-        cy.get(`#${menuId} [role="option"]`, { timeout: 60000 }).first().click({ force: true });
+        cy.get(`#${menuId}`, { timeout: 60000 }).should('be.visible').find('[role="option"]').first().click({ force: true });
         cy.get(selector('case-analyst-submit')).click({ force: true });
         assertNotification('Case analyst assigned successfully');
       });
