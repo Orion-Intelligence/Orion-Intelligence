@@ -116,6 +116,7 @@ class AccountManager:
                 status=data.status,
                 subscription=data.subscription,
                 licenses=data.licenses,
+                permissions=data.permissions,
                 password_reset_required=True, )
 
             await engine.save(user)
@@ -209,6 +210,8 @@ class AccountManager:
                 if requested and not requested.issubset(tenant_allowed):
                     raise HTTPException(status_code=400, detail="User assigned license not allowed for this tenant")
             user.licenses = request.licenses
+        if request.permissions is not None:
+            user.permissions = request.permissions
         if request.password_reset_required is not None:
             user.password_reset_required = request.password_reset_required
         await self._engine.save(user)

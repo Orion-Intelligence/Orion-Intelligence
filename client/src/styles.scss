@@ -2061,6 +2061,72 @@ select:not(.ui-popup-select, .ui-select)::-ms-expand {
   color: #94a3b8 !important;
 }
 
+.light-theme app-ui-dropdown .ui-dropdown-selected-chip {
+  border-color: #cbd5e1 !important;
+  background-color: #f1f5f9 !important;
+  color: #334155 !important;
+}
+
+html.light-theme .cdk-overlay-container .ui-dropdown-menu,
+body.light-theme .cdk-overlay-container .ui-dropdown-menu,
+html.light-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']),
+body.light-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']),
+.light-theme .ui-dropdown-menu {
+  border-color: #d5dde8 !important;
+  background-color: #fff !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  box-shadow: 0 14px 34px rgb(15 23 42 / 14%) !important;
+}
+
+html.light-theme .cdk-overlay-container .ui-dropdown-menu input,
+body.light-theme .cdk-overlay-container .ui-dropdown-menu input,
+html.light-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']) input,
+body.light-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']) input,
+.light-theme .ui-dropdown-menu input {
+  border-width: 0 !important;
+  background-color: #fff !important;
+  color: #172235 !important;
+}
+
+html.dark-theme .cdk-overlay-container .ui-dropdown-menu,
+body.dark-theme .cdk-overlay-container .ui-dropdown-menu,
+html.dark-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']),
+body.dark-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']),
+.dark-theme .ui-dropdown-menu {
+  border-color: #2c3a4a !important;
+  background-color: #131e30 !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 100% !important;
+}
+
+html.dark-theme .cdk-overlay-container .ui-dropdown-menu-alert,
+body.dark-theme .cdk-overlay-container .ui-dropdown-menu-alert,
+.dark-theme .ui-dropdown-menu-alert {
+  background-color: #152230 !important;
+}
+
+html.dark-theme .cdk-overlay-container .ui-dropdown-menu input,
+body.dark-theme .cdk-overlay-container .ui-dropdown-menu input,
+html.dark-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']) input,
+body.dark-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']) input,
+.dark-theme .ui-dropdown-menu input {
+  border-width: 0 !important;
+  background-color: #131e30 !important;
+}
+
+html.dark-theme .cdk-overlay-container .ui-dropdown-menu-alert input,
+body.dark-theme .cdk-overlay-container .ui-dropdown-menu-alert input,
+.dark-theme .ui-dropdown-menu-alert input {
+  background-color: #152230 !important;
+}
+
+.dark-theme .ui-dropdown-menu input::placeholder {
+  color: #a0b8d1 !important;
+}
+
 .light-theme .ui-popup-btn-secondary {
   border-color: #c7d5e6 !important;
   background: transparent !important;

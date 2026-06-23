@@ -408,6 +408,7 @@ class TenantManager:
                 status=data.status,
                 subscription=data.subscription,
                 licenses=data.licenses,
+                permissions=data.permissions,
                 tenant_uuid=tenant_uuid,
                 password_reset_required=False, )
             

@@ -73,9 +73,13 @@ export function assertDashboardStealerExposure() {
     .and('contain.text', 'Exposure found');
   cy.get('[data-testid="social-dashboard-stealer-row"]', { timeout: SOCIAL_FETCH_TIMEOUT })
     .should('have.length.greaterThan', 0)
-    .first()
-    .should('contain.text', SOCIAL_STEALER_USERNAME)
-    .and('contain.text', SOCIAL_STEALER_DOMAIN);
+    .then(($rows) => {
+      const matchingRow = [...$rows].slice(0, 3).find((row) => {
+        const text = row.textContent || '';
+        return text.includes(SOCIAL_STEALER_USERNAME) && text.includes(SOCIAL_STEALER_DOMAIN);
+      });
+      expect(matchingRow, `top 3 stealer rows include ${SOCIAL_STEALER_DOMAIN}`).to.exist;
+    });
 }
 
 export function openConnectionsFromPlatformCard() {

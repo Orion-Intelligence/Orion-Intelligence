@@ -1,5 +1,6 @@
-import { NgClass } from '@angular/common';
-import { Component, ElementRef, HostListener, ViewChild, input, output } from '@angular/core';
+import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
+import { Component, ElementRef, HostListener, OnDestroy, ViewChild, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 export interface UiDropdownOption {
@@ -17,15 +18,18 @@ interface UiDropdownMenuOption {
 @Component({
   selector: 'app-ui-dropdown',
   standalone: true,
-  imports: [FormsModule, NgClass],
+  imports: [FormsModule, NgClass, NgTemplateOutlet, OverlayModule],
   host: {
     class: 'block',
   },
   templateUrl: './ui-dropdown.component.html',
 })
-export class UiDropdownComponent {
+export class UiDropdownComponent implements OnDestroy {
   private static nextId = 0;
+  private static activeDropdown: UiDropdownComponent | null = null;
   private readonly fallbackId = `ui-dropdown-${UiDropdownComponent.nextId++}`;
+  private removeScrollListener?: () => void;
+  @ViewChild('triggerButton') private triggerButton?: ElementRef<HTMLButtonElement>;
   @ViewChild('searchInput') private searchInput?: ElementRef<HTMLInputElement>;
   @ViewChild('listbox') private listbox?: ElementRef<HTMLElement>;
 
@@ -35,20 +39,42 @@ export class UiDropdownComponent {
   readonly optionTestIdPrefix = input<string | null>(null);
   readonly options = input<UiDropdownOption[]>([]);
   readonly selected = input<string | null | undefined>(null);
+  readonly selectedValues = input<string[] | null | undefined>(null);
   readonly placeholder = input('Select');
   readonly searchPlaceholder = input('Search options');
   readonly searchable = input(true);
   readonly allowEmpty = input(false);
+  readonly multiSelect = input(false);
+  readonly showSelectedChips = input(false);
+  readonly menuPlacement = input<'absolute' | 'static'>('absolute');
+  readonly surface = input<'default' | 'alert'>('default');
   readonly disabled = input(false);
   readonly size = input<'default' | 'large'>('default');
   readonly loading = input(false);
   readonly valueChange = output<string | null>();
+  readonly valuesChange = output<string[]>();
   readonly searchChange = output<string>();
   isOpen = false;
   searchTerm = '';
   activeIndex = -1;
+  overlayWidth = 0;
+  readonly overlayPositions: ConnectedPosition[] = [{ originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 0 }, { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom', offsetY: 0 }];
+
+  constructor(private readonly hostElement: ElementRef<HTMLElement>) {}
 
   get selectedLabel(): string {
+    if (this.multiSelect()) {
+      const selectedValues = this.selectedValues() || [];
+      if (!selectedValues.length) {
+        return this.placeholder();
+      }
+      const labels = selectedValues.map(value => this.options().find(option => option.key === value)?.label || value);
+      if (labels.length <= 2) {
+        return labels.join(', ');
+      }
+      return `${labels.slice(0, 2).join(', ')} +${labels.length - 2}`;
+    }
+
     const selected = this.selected();
     if (!selected) {
       return this.placeholder();
@@ -102,10 +128,31 @@ export class UiDropdownComponent {
 
   select(value: string | null, event?: Event): void {
     event?.stopPropagation();
-    this.isOpen = false;
-    this.searchTerm = '';
-    this.activeIndex = -1;
+    if (this.multiSelect()) {
+      if (value === null) {
+        this.valuesChange.emit([]);
+        return;
+      }
+      const selectedValues = this.selectedValues() || [];
+      const nextValues = selectedValues.includes(value)
+        ? selectedValues.filter(item => item !== value)
+        : [...selectedValues, value];
+      this.valuesChange.emit(nextValues);
+      return;
+    }
+
+    this.close();
     this.valueChange.emit(value);
+  }
+
+  removeSelectedValue(value: string, event: Event): void {
+    event.stopPropagation();
+    const selectedValues = this.selectedValues() || [];
+    this.valuesChange.emit(selectedValues.filter(item => item !== value));
+  }
+
+  selectedChipLabel(value: string): string {
+    return this.options().find(option => option.key === value)?.label || value;
   }
 
   onButtonKeydown(event: KeyboardEvent): void {
@@ -188,17 +235,91 @@ export class UiDropdownComponent {
   }
 
   isSelected(value: string | null): boolean {
+    if (this.multiSelect()) {
+      return value === null ? !(this.selectedValues() || []).length : (this.selectedValues() || []).includes(value);
+    }
     return value === null ? !this.selected() : this.selected() === value;
   }
 
+  isOptionVisuallySelected(value: string | null): boolean {
+    return value !== null && this.isSelected(value);
+  }
+
   optionClass(option: UiDropdownMenuOption, index: number): string {
+    if (this.isLightTheme()) {
+      if (option.key === null) {
+        return 'bg-transparent font-medium text-[#64748b] hover:bg-transparent hover:text-[#334155]';
+      }
+      if (this.isSelected(option.key)) {
+        return 'border border-[#d8dee8] bg-[#eef1f6] font-semibold text-[#172235]';
+      }
+      if (this.activeIndex === index) {
+        return 'bg-[#f1f4f8] font-medium text-[#172235]';
+      }
+      return 'font-medium text-[#40516a] hover:bg-[#f1f4f8] hover:text-[#172235]';
+    }
+
+    if (option.key === null) {
+      return 'bg-transparent font-medium text-[#d6dee8] hover:bg-transparent hover:text-[#f8fafc]';
+    }
+    const activeSurfaceClass = this.surface() === 'alert' ? '!bg-[#1a2835]' : '!bg-[#1D2A41]';
     if (this.isSelected(option.key)) {
-      return 'bg-[var(--color-blue-720)] font-semibold text-[var(--color-text1)]';
+      return `${activeSurfaceClass} font-semibold text-[var(--color-text1)]`;
     }
     if (this.activeIndex === index) {
-      return 'bg-white/[0.045] font-medium text-[var(--color-text1)]';
+      return `${activeSurfaceClass} font-medium text-[var(--color-text1)]`;
     }
-    return 'font-medium text-[var(--color-text3)] hover:bg-white/[0.035] hover:text-[var(--color-text1)]';
+    const hoverSurfaceClass = this.surface() === 'alert' ? 'hover:!bg-[#1a2835]' : 'hover:!bg-[#1D2A41]';
+    return `font-medium text-[var(--color-text3)] ${hoverSurfaceClass} hover:text-[var(--color-text1)]`;
+  }
+
+  triggerClass(): string {
+    const radiusClass = this.isOpen
+      ? (this.size() === 'large' ? 'rounded-t-[10px] rounded-b-none' : 'rounded-t-[7px] rounded-b-none')
+      : (this.size() === 'large' ? 'rounded-[10px]' : 'rounded-[7px]');
+    const sizeClass = this.size() === 'large' ? `h-11 ${radiusClass} px-3 text-sm` : `h-10 ${radiusClass} px-[15px] text-xs`;
+    const openBorderClass = this.isOpen ? '!border-b-transparent hover:!border-b-transparent focus:!border-b-transparent' : '';
+    const darkSurfaceClass = this.surface() === 'alert'
+      ? '!bg-[#152230] hover:!bg-[#152230] focus:!bg-[#152230]'
+      : '!bg-[#131E30] hover:!bg-[#131E30] focus:!bg-[#131E30]';
+    const themeClass = this.isLightTheme()
+      ? `border-[#c7d5e6] bg-white text-[#172235] hover:border-[#b8c8dc] hover:bg-[#f8fbff] focus:border-[#b8c8dc] focus:bg-white ${openBorderClass}`
+      : `border-[#2c3a4a] ${darkSurfaceClass} text-[var(--color-text1)] hover:border-[#2c3a4a] focus:border-[#2c3a4a] ${openBorderClass}`;
+    return `${sizeClass} ${themeClass}`;
+  }
+
+  selectedLabelClass(): string {
+    const hasSelection = this.multiSelect() ? !!(this.selectedValues() || []).length : !!this.selected();
+    const labelSizeClass = this.size() === 'large' ? 'text-sm' : 'text-[13px]';
+    if (hasSelection) {
+      return this.isLightTheme() ? `text-[#172235] ${labelSizeClass}` : `text-[#f8fafc] ${labelSizeClass}`;
+    }
+    return this.isLightTheme() ? `text-[#64748b]/85 ${labelSizeClass}` : `text-[#C7D5E6]/80 ${labelSizeClass}`;
+  }
+
+  searchInputClass(): string {
+    return this.isLightTheme()
+      ? 'bg-white text-[#172235] placeholder:text-[#94a3b8] focus:bg-white'
+      : (this.surface() === 'alert'
+        ? '!bg-[#152230] text-[var(--color-text1)] placeholder:text-[#A0B8D1] focus:!bg-[#152230]'
+        : '!bg-[#131E30] text-[var(--color-text1)] placeholder:text-[#A0B8D1] focus:!bg-[#131E30]');
+  }
+
+  checkboxClass(): string {
+    return this.isLightTheme() ? 'border-[#c7d5e6] bg-white' : 'border-[#4b5f78] !bg-[#131E30]';
+  }
+
+  menuClass(): string {
+    const surfaceClass = this.surface() === 'alert' ? 'ui-dropdown-menu-alert' : '';
+    const darkSurfaceClass = this.surface() === 'alert' ? '!bg-[#152230]' : '!bg-[#131E30]';
+    const themeSurface = this.isLightTheme()
+      ? 'border-[#d5dde8] bg-white shadow-[0_14px_34px_rgba(15,23,42,0.14)]'
+      : `border-[#2c3a4a] ${darkSurfaceClass} shadow-[0_8px_18px_rgba(0,0,0,0.22)]`;
+    const base = `ui-dropdown-menu ${surfaceClass} box-border w-full min-w-full left-0 right-0 z-[1250] rounded-b-lg rounded-t-none border border-t-0 p-1 ${themeSurface}`;
+    if (this.menuPlacement() === 'static') {
+      return `ui-dropdown-menu ${surfaceClass} box-border w-full min-w-full z-[1250] rounded-b-lg rounded-t-none border border-t-0 p-1 ${themeSurface}`;
+    }
+    return `${base} absolute top-full`;
   }
 
   @HostListener('document:click')
@@ -206,16 +327,72 @@ export class UiDropdownComponent {
     this.isOpen = false;
     this.searchTerm = '';
     this.activeIndex = -1;
+    this.removeDocumentScrollListener();
+    if (UiDropdownComponent.activeDropdown === this) {
+      UiDropdownComponent.activeDropdown = null;
+    }
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    if (this.isOpen) {
+      this.updateOverlayWidth();
+    }
+  }
+
+  @HostListener('document:wheel', ['$event'])
+  closeOnExternalWheel(event: WheelEvent): void {
+    const target = event.target as Node;
+    if (this.hostElement.nativeElement.contains(target) || this.listbox?.nativeElement.contains(target)) {
+      return;
+    }
+    this.close();
+  }
+
+  ngOnDestroy(): void {
+    this.removeDocumentScrollListener();
+    if (UiDropdownComponent.activeDropdown === this) {
+      UiDropdownComponent.activeDropdown = null;
+    }
   }
 
   private open(searchTerm = ''): void {
+    UiDropdownComponent.activeDropdown?.close();
+    UiDropdownComponent.activeDropdown = this;
     this.isOpen = true;
     this.searchTerm = searchTerm;
     this.searchChange.emit(searchTerm);
+    this.updateOverlayWidth();
     const selectedIndex = this.visibleOptions.findIndex(option => this.isSelected(option.key));
     this.activeIndex = selectedIndex >= 0 ? selectedIndex : (this.visibleOptions.length ? 0 : -1);
     this.focusSearch();
     this.scrollActiveIntoView();
+    window.setTimeout(() => {
+      if (this.isOpen) {
+        this.addDocumentScrollListener();
+      }
+    });
+  }
+
+  private addDocumentScrollListener(): void {
+    this.removeDocumentScrollListener();
+    const onScroll = (event: Event) => {
+      if (this.listbox?.nativeElement.contains(event.target as Node)) {
+        return;
+      }
+      this.close();
+    };
+    document.addEventListener('scroll', onScroll, true);
+    this.removeScrollListener = () => document.removeEventListener('scroll', onScroll, true);
+  }
+
+  private removeDocumentScrollListener(): void {
+    this.removeScrollListener?.();
+    this.removeScrollListener = undefined;
+  }
+
+  private updateOverlayWidth(): void {
+    this.overlayWidth = this.triggerButton?.nativeElement.getBoundingClientRect().width || this.hostElement.nativeElement.getBoundingClientRect().width || 0;
   }
 
   private canOpen(): boolean {
@@ -292,4 +469,9 @@ export class UiDropdownComponent {
   private isPrintableKey(event: KeyboardEvent): boolean {
     return event.key.length === 1 && !event.altKey && !event.ctrlKey && !event.metaKey;
   }
+
+  isLightTheme(): boolean {
+    return typeof document !== 'undefined' && document.body.classList.contains('light-theme');
+  }
+
 }

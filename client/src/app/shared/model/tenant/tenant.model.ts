@@ -40,6 +40,7 @@ export interface User {
     subscription?: boolean;
     verificationDate: string;
     licenses?: string[] | null;
+    permissions?: string[] | null;
     password_reset_required?: boolean;
 }
 export interface TenantTeamModel {
@@ -50,5 +51,6 @@ export interface TenantTeamModel {
     status: 'active' | 'disable';
     subscription: boolean;
     licenses?: string[] | null;
+    permissions?: string[] | null;
     quotaExceeded?: boolean;
 }

@@ -31,6 +31,7 @@ export class FiltersComponent implements OnInit {
   initialModel!: FilterModel;
   filterModel!: FilterModel;
   readonly isFilterOpen = input.required<boolean | null>();
+  readonly dropdownSurface = input<'default' | 'alert'>('default');
   readonly filterChanged = output<Record<string, string | null>>();
   readonly filterReset = output<undefined>();
   readonly filterClose = output<undefined>();

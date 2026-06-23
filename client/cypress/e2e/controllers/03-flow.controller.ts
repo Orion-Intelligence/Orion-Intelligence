@@ -183,9 +183,11 @@ export function applyDirectoryDropdown(testId: string, option: { label: string; 
       return;
     }
     const menuId = $el.attr('aria-controls');
-    cy.wrap($el).click();
-    cy.get(`#${menuId} input[type="text"]`).should('be.visible').clear().type(option.label, { force: true, delay: 75 });
-    cy.contains(`#${menuId} [role="option"]`, option.label).click();
+    expect(menuId, `side-filter-select-${testId} menu id`).to.exist;
+    cy.wrap($el).click({ force: true });
+    cy.wrap($el).should('have.attr', 'aria-expanded', 'true');
+    cy.get(`#${menuId}`).parent().find('input[type="text"]').should('be.visible').clear().type(option.label, { force: true, delay: 75 });
+    cy.contains(`#${menuId} [role="option"]`, option.label, { timeout: 15000 }).click({ force: true });
   });
   cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
   waitForDirectoryRequest();

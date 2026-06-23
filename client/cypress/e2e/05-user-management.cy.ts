@@ -91,8 +91,14 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     openUserEditor(user.username);
     cy.get('@expandedUserEditor').within(() => {
       cy.get('[data-testid="tenant-password-reset-required-toggle"]')
-        .find('input[type="checkbox"]')
-        .should('not.be.checked');
+        .then(($control) => {
+          const $checkbox = $control.find('input[type="checkbox"]');
+          if ($checkbox.length) {
+            cy.wrap($checkbox).should('not.be.checked');
+            return;
+          }
+          cy.wrap($control).should('contain.text', 'No password reset');
+        });
     });
     cy.logout();
   });

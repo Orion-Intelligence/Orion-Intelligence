@@ -19,6 +19,12 @@ const FEEDER_TEST_RULE_LIMIT = 4;
 const FEEDER_SCRIPT_ROW_TIMEOUT = 60000;
 const FEEDER_QUERY_TIMEOUT = 60000;
 
+function waitForFeederPanelReady(): Cypress.Chainable {
+  return cy.get('[data-testid="feeder-reload-button"]', { timeout: FEEDER_QUERY_TIMEOUT })
+    .should('be.visible')
+    .and('not.be.disabled');
+}
+
 export function openFeederAsAdmin() {
   cy.loginAsAdmin();
   cy.visit('/dashboard/profile/homepage');
@@ -204,21 +210,25 @@ function expectWrongValueUploadError(fixturePath: string): Cypress.Chainable {
 }
 
 function clearVisibleValueRows(): Cypress.Chainable {
-  return cy.get('body').then(($body): Cypress.Chainable => {
+  return waitForFeederPanelReady().then(() => cy.get('body')).then(($body): Cypress.Chainable => {
     const button = $body.find('[data-testid^="feeder-value-delete-button-"]:visible').first();
     if (!button.length) {
       return cy.wrap(null, { log: false });
     }
+    cy.intercept('POST', '**/api/profile/feeder/scripts/*/delete-value').as('feederValueDeleteRequest');
     cy.intercept('GET', '**/api/profile/feeder/scripts**').as('feederScriptsQueryAfterClear');
     cy.wrap(button).click();
     cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click();
-    return cy.wait('@feederScriptsQueryAfterClear', { timeout: FEEDER_QUERY_TIMEOUT }).then(() => clearVisibleValueRows());
+    return cy.wait('@feederValueDeleteRequest', { timeout: FEEDER_QUERY_TIMEOUT })
+      .then(() => cy.wait('@feederScriptsQueryAfterClear', { timeout: FEEDER_QUERY_TIMEOUT }))
+      .then(() => clearVisibleValueRows());
   });
 }
 
 function clearScripts(): Cypress.Chainable {
   return cy.contains('.ui-section-title', 'Your Scripts', { timeout: 4000 }).should('be.visible').then(() => {
-    return cy.get('[data-testid="feeder-empty-scripts"], [data-testid^="feeder-script-row-"], [data-testid="feeder-clear-all-button"]', { timeout: 4000 })
+    return waitForFeederPanelReady()
+      .then(() => cy.get('[data-testid="feeder-empty-scripts"], [data-testid^="feeder-script-row-"], [data-testid="feeder-clear-all-button"]', { timeout: 4000 }))
       .should('exist')
       .then(() =>
         cy.get('body', { timeout: 4000 }).should(($body) => {
@@ -231,11 +241,14 @@ function clearScripts(): Cypress.Chainable {
       .then(($body) => {
         const enabledClearButton = $body.find('[data-testid="feeder-clear-all-button"]:visible:not(:disabled)').first();
         if (enabledClearButton.length) {
+          cy.intercept('POST', '**/api/profile/feeder/scripts/clear-all**').as('feederClearAllRequest');
           cy.intercept('GET', '**/api/profile/feeder/scripts**').as('feederScriptsQueryAfterClear');
           cy.wrap(enabledClearButton).click({ force: true });
           cy.get('[data-testid="confirmation-popup"]').should('be.visible');
           cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click({ force: true });
-          return cy.wait('@feederScriptsQueryAfterClear', { timeout: FEEDER_QUERY_TIMEOUT }).then(() => {
+          return cy.wait('@feederClearAllRequest', { timeout: FEEDER_QUERY_TIMEOUT }).then(() => {
+            return cy.wait('@feederScriptsQueryAfterClear', { timeout: FEEDER_QUERY_TIMEOUT });
+          }).then(() => {
             return cy.get('[data-testid="feeder-empty-scripts"], [data-testid="feeder-clear-all-button"]:disabled', { timeout: 4000 })
               .should('exist');
           });

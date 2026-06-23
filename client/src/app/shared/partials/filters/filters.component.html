@@ -28,6 +28,7 @@
         [selected]="selectedFilters[key]"
         [placeholder]="'Select' | translate"
         [allowEmpty]="true"
+        [surface]="dropdownSurface()"
         [loading]="dropdownLoading[key] || false"
         (searchChange)="onDropdownSearch(key, $event)"
         (valueChange)="onSelectionChange(key, $event)"></app-ui-dropdown>
