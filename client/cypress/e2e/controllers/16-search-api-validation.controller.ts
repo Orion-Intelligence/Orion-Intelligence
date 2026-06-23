@@ -20,21 +20,39 @@ export interface DirectSearchCase16 {
   expected: ExpectedSearchResult16;
 }
 
+interface DateRangeSelection16 {
+  monthLabel: string;
+  startDay: number;
+  endDay: number;
+}
+
 export interface SidebarFilterCase16 extends DirectSearchCase16 {
-  selectTestId: string;
-  option: string;
+  selectTestId?: string;
+  option?: string;
   requestField: string;
   requestValue: string;
+  filterKind?: 'dropdown' | 'daterange';
+  dateRange?: DateRangeSelection16;
   responseFields?: string[];
   responseValue?: string;
 }
 
-export interface AdvancedEmailFilterCase16 {
+export interface SidebarFilterGroup16 {
+  section: string;
+  cases: SidebarFilterCase16[];
+}
+
+export interface AdvancedEntityFilterCase16 {
   section: string;
   route: string;
   endpoint: SearchEndpoint16;
-  email: string;
+  category: string;
+  requestField: string;
+  value: string;
+  searchQuery?: string;
   expected: ExpectedSearchResult16;
+  responseFields?: string[];
+  responseValue?: string;
 }
 
 const API_BASE_16 = '**/api/search';
@@ -127,86 +145,405 @@ export const DIRECT_SEARCH_CASES: DirectSearchCase16[] = [
   },
 ];
 
-export const SIDEBAR_FILTER_CASES: SidebarFilterCase16[] = [
+const GENERAL_DATE_EXPECTED: ExpectedSearchResult16 = {
+  ...DIRECT_SEARCH_CASES[0].expected,
+  responseDate: '2026-01-24',
+};
+
+const EXPLOIT_CVE_EXPECTED: ExpectedSearchResult16 = {
+  title: 'CVE-2017-0120',
+  linkAddress: 'https://raw.githubusercontent.com/trickest/cve/main/2017/CVE-2017-0120.md',
+  date: 'Jun 20, 2026',
+  responseDate: '2026-06-20',
+  description: 'Uniscribe Information Disclosure Vulnerability',
+  queryMatches: ['CVE-2017-0120', 'Uniscribe'],
+};
+
+const EXPLOIT_SENTRY_EXPECTED: ExpectedSearchResult16 = {
+  title: 'Ivanti Sentry OS Command Injection Vulnerability',
+  linkAddress: 'https://www.cve.org/CVERecord?id=CVE-2026-10520',
+  date: 'Jun 11, 2026',
+  responseDate: '2026-06-11',
+  description: 'Ivanti Sentry OS Command Injection Vulnerability',
+  queryMatches: ['CWE-78', 'Sentry'],
+};
+
+const EXPLOIT_LANGFLOW_EXPECTED: ExpectedSearchResult16 = {
+  title: 'Langflow: BaseFileComponent-based nodes arbitrary file read with RCE exploit',
+  linkAddress: 'https://github.com/advisories/GHSA-ccv6-r384-xp75',
+  date: 'Jun 19, 2026',
+  responseDate: '2026-06-19',
+  description: 'Langflow: BaseFileComponent-based nodes arbitrary file read with RCE exploit',
+  queryMatches: ['Langflow', 'pip'],
+};
+
+const EXPLOIT_VCR_EXPECTED: ExpectedSearchResult16 = {
+  title: 'VCR.py: Arbitrary code execution via unsafe YAML deserialization of cassette files',
+  linkAddress: 'https://github.com/advisories/GHSA-rpj2-4hq8-938g',
+  date: 'Jun 19, 2026',
+  responseDate: '2026-06-19',
+  description: 'VCR.py: Arbitrary code execution via unsafe YAML deserialization of cassette files',
+  queryMatches: ['VCR.py', 'example.com'],
+};
+
+const EXPLOIT_SMTP_EXPECTED: ExpectedSearchResult16 = {
+  title: 'Authenticated SMTP users may spoof other identities due to ambiguous \\u201cFrom\\u201d header interpretation',
+  linkAddress: 'https://www.kb.cert.org/vuls/id/517845',
+  date: 'Oct 28, 2025',
+  responseDate: '2025-10-28',
+  description: null,
+  queryMatches: ['attacker@example.com'],
+};
+
+export const SIDEBAR_FILTER_GROUPS: SidebarFilterGroup16[] = [
   {
-    ...DIRECT_SEARCH_CASES[0],
-    selectTestId: 'side-filter-select-network',
-    option: 'Onion',
-    requestField: 'network',
-    requestValue: 'onion',
-    responseFields: ['m_network'],
-    responseValue: 'onion',
+    section: 'General Intelligence',
+    cases: [
+      {
+        ...DIRECT_SEARCH_CASES[0],
+        selectTestId: 'side-filter-select-network',
+        option: 'Onion',
+        requestField: 'network',
+        requestValue: 'onion',
+        responseFields: ['m_network'],
+        responseValue: 'onion',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[0],
+        selectTestId: 'side-filter-select-safe',
+        option: 'No',
+        requestField: 'safe',
+        requestValue: 'no',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[0],
+        expected: GENERAL_DATE_EXPECTED,
+        requestField: 'daterange',
+        requestValue: '2026-01-23,2026-01-24',
+        filterKind: 'daterange',
+        dateRange: { monthLabel: 'January 2026', startDay: 23, endDay: 24 },
+        responseFields: ['m_creation_date'],
+        responseValue: '2026-01-24',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[0],
+        selectTestId: 'side-filter-select-m_content_type',
+        option: 'Marketplaces',
+        requestField: 'm_content_type',
+        requestValue: 'marketplaces',
+        responseFields: ['m_content_type'],
+        responseValue: 'marketplaces',
+      },
+    ],
   },
   {
-    ...DIRECT_SEARCH_CASES[1],
-    selectTestId: 'side-filter-select-network',
-    option: 'Onion',
-    requestField: 'network',
-    requestValue: 'onion',
-    responseFields: ['m_network'],
-    responseValue: 'onion',
+    section: 'Data Breach',
+    cases: [
+      {
+        ...DIRECT_SEARCH_CASES[1],
+        selectTestId: 'side-filter-select-network',
+        option: 'Onion',
+        requestField: 'network',
+        requestValue: 'onion',
+        responseFields: ['m_network'],
+        responseValue: 'onion',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[1],
+        requestField: 'daterange',
+        requestValue: '2026-01-23,2026-01-24',
+        filterKind: 'daterange',
+        dateRange: { monthLabel: 'January 2026', startDay: 23, endDay: 24 },
+        responseFields: ['m_date', 'm_creation_date'],
+        responseValue: '2026-01-24',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[1],
+        selectTestId: 'side-filter-select-content',
+        option: 'Leak',
+        requestField: 'content',
+        requestValue: 'leak',
+        responseFields: ['content_type'],
+        responseValue: 'leak',
+      },
+    ],
   },
   {
-    ...DIRECT_SEARCH_CASES[2],
-    selectTestId: 'side-filter-select-network',
-    option: 'Clearnet',
-    requestField: 'network',
-    requestValue: 'clearnet',
+    section: 'Defacement',
+    cases: [
+      {
+        ...DIRECT_SEARCH_CASES[2],
+        selectTestId: 'side-filter-select-network',
+        option: 'Clearnet',
+        requestField: 'network',
+        requestValue: 'clearnet',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[2],
+        requestField: 'daterange',
+        requestValue: '2026-01-23,2026-01-24',
+        filterKind: 'daterange',
+        dateRange: { monthLabel: 'January 2026', startDay: 23, endDay: 24 },
+        responseFields: ['m_date'],
+        responseValue: '2026-01-24',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[2],
+        selectTestId: 'side-filter-select-content',
+        option: 'scam',
+        requestField: 'content',
+        requestValue: 'scam',
+      },
+    ],
   },
   {
-    ...DIRECT_SEARCH_CASES[3],
-    selectTestId: 'side-filter-select-network',
-    option: 'Clearnet',
-    requestField: 'network',
-    requestValue: 'clearnet',
-    responseFields: ['m_network'],
-    responseValue: 'clearnet',
+    section: 'Social',
+    cases: [
+      {
+        ...DIRECT_SEARCH_CASES[3],
+        selectTestId: 'side-filter-select-network',
+        option: 'Clearnet',
+        requestField: 'network',
+        requestValue: 'clearnet',
+        responseFields: ['m_network'],
+        responseValue: 'clearnet',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[3],
+        requestField: 'daterange',
+        requestValue: '2025-06-11,2025-06-12',
+        filterKind: 'daterange',
+        dateRange: { monthLabel: 'June 2025', startDay: 11, endDay: 12 },
+        responseFields: ['m_date'],
+        responseValue: '2025-06-12',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[3],
+        selectTestId: 'side-filter-select-content',
+        option: 'Leak',
+        requestField: 'content',
+        requestValue: 'leak',
+        responseFields: ['content_type'],
+        responseValue: 'leak',
+      },
+    ],
+  },
+  {
+    section: 'Exploit',
+    cases: [
+      {
+        ...DIRECT_SEARCH_CASES[4],
+        selectTestId: 'side-filter-select-network',
+        option: 'Clearnet',
+        requestField: 'network',
+        requestValue: 'clearnet',
+        responseFields: ['m_network'],
+        responseValue: 'clearnet',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[4],
+        requestField: 'daterange',
+        requestValue: '2026-06-18,2026-06-19',
+        filterKind: 'daterange',
+        dateRange: { monthLabel: 'June 2026', startDay: 18, endDay: 19 },
+        responseFields: ['m_date', 'm_creation_date'],
+        responseValue: '2026-06-19',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[4],
+        selectTestId: 'side-filter-select-content',
+        option: 'CVE',
+        requestField: 'content',
+        requestValue: 'cve',
+        responseFields: ['m_content_type', 'content_type'],
+        responseValue: 'cve',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[4],
+        selectTestId: 'side-filter-select-m_severity',
+        option: 'Unknown',
+        requestField: 'm_severity',
+        requestValue: 'unknown',
+        responseFields: ['m_severity'],
+        responseValue: 'unknown',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[4],
+        selectTestId: 'side-filter-select-m_risk',
+        option: 'Critical',
+        requestField: 'm_risk',
+        requestValue: 'critical',
+        responseFields: ['m_risk'],
+        responseValue: 'critical',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[4],
+        selectTestId: 'side-filter-select-m_remote_type',
+        option: 'Unknown',
+        requestField: 'm_remote_type',
+        requestValue: 'unknown',
+        responseFields: ['m_remote_type'],
+        responseValue: 'unknown',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[4],
+        selectTestId: 'side-filter-select-m_platform',
+        option: 'Unknown',
+        requestField: 'm_platform',
+        requestValue: 'unknown',
+        responseFields: ['m_platform'],
+        responseValue: 'unknown',
+      },
+      {
+        section: 'Exploit',
+        route: '/dashboard/exploit/all',
+        endpoint: 'exploit',
+        searchQuery: 'CVE-2017-0120 Uniscribe',
+        expected: EXPLOIT_CVE_EXPECTED,
+        selectTestId: 'side-filter-select-m_cve',
+        option: 'CVE-2017-0120',
+        requestField: 'm_cve',
+        requestValue: 'cve-2017-0120',
+        responseFields: ['m_cve'],
+        responseValue: 'cve-2017-0120',
+      },
+      {
+        section: 'Exploit',
+        route: '/dashboard/exploit/all',
+        endpoint: 'exploit',
+        searchQuery: 'Ivanti Sentry CWE-78',
+        expected: EXPLOIT_SENTRY_EXPECTED,
+        selectTestId: 'side-filter-select-m_cwe',
+        option: 'CWE-78',
+        requestField: 'm_cwe',
+        requestValue: 'cwe-78',
+        responseFields: ['m_cwe'],
+        responseValue: 'cwe-78',
+      },
+      {
+        section: 'Exploit',
+        route: '/dashboard/exploit/all',
+        endpoint: 'exploit',
+        searchQuery: 'Ivanti Sentry CWE-78',
+        expected: EXPLOIT_SENTRY_EXPECTED,
+        selectTestId: 'side-filter-select-m_product',
+        option: 'Sentry',
+        requestField: 'm_product',
+        requestValue: 'sentry',
+        responseFields: ['m_product'],
+        responseValue: 'sentry',
+      },
+      {
+        section: 'Exploit',
+        route: '/dashboard/exploit/all',
+        endpoint: 'exploit',
+        searchQuery: 'Langflow pip RCE',
+        expected: EXPLOIT_LANGFLOW_EXPECTED,
+        selectTestId: 'side-filter-select-m_tags',
+        option: 'pip',
+        requestField: 'm_tags',
+        requestValue: 'pip',
+        responseFields: ['m_tags'],
+        responseValue: 'pip',
+      },
+    ],
+  },
+  {
+    section: 'Feed',
+    cases: [
+      {
+        ...DIRECT_SEARCH_CASES[5],
+        selectTestId: 'side-filter-select-network',
+        option: 'Clearnet',
+        requestField: 'network',
+        requestValue: 'clearnet',
+        responseFields: ['m_network'],
+        responseValue: 'clearnet',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[5],
+        requestField: 'daterange',
+        requestValue: '2026-01-11,2026-01-12',
+        filterKind: 'daterange',
+        dateRange: { monthLabel: 'January 2026', startDay: 11, endDay: 12 },
+        responseFields: ['m_date', 'm_creation_date'],
+        responseValue: '2026-01-12',
+      },
+      {
+        ...DIRECT_SEARCH_CASES[5],
+        selectTestId: 'side-filter-select-content',
+        option: 'News',
+        requestField: 'content',
+        requestValue: 'news',
+        responseFields: ['m_content_type', 'content_type'],
+        responseValue: 'news',
+      },
+    ],
+  },
+];
+
+export const ADVANCED_ENTITY_FILTER_CASES: AdvancedEntityFilterCase16[] = [
+  {
+    section: 'Exploit',
+    route: '/dashboard/exploit/all',
+    endpoint: 'exploit',
+    category: 'Emails',
+    requestField: 'm_email',
+    value: 'attacker@example.com',
+    searchQuery: 'attacker@example.com SMTP',
+    expected: EXPLOIT_SMTP_EXPECTED,
+    responseFields: ['m_email'],
+    responseValue: 'attacker@example.com',
   },
   {
     section: 'Exploit',
     route: '/dashboard/exploit/all',
     endpoint: 'exploit',
-    searchQuery: 'CVE-2017-0120 Uniscribe',
-    expected: {
-      title: 'CVE-2017-0128',
-      linkAddress: 'https://raw.githubusercontent.com/trickest/cve/main/2017/CVE-2017-0128.md',
-      date: 'Jun 20, 2026',
-      responseDate: '2026-06-20',
-      description: 'Uniscribe Information Disclosure Vulnerability',
-      queryMatches: ['CVE-2017-0120', 'Uniscribe'],
-    },
-    selectTestId: 'side-filter-select-m_cve',
-    option: 'CVE-2017-0120',
-    requestField: 'm_cve',
-    requestValue: 'cve-2017-0120',
-    responseFields: ['m_cve'],
-    responseValue: 'cve-2017-0120',
+    category: 'Domains',
+    requestField: 'm_domain',
+    value: 'example.com',
+    searchQuery: 'VCR.py example.com',
+    expected: EXPLOIT_VCR_EXPECTED,
+    responseFields: ['m_domain'],
+    responseValue: 'example.com',
   },
   {
-    ...DIRECT_SEARCH_CASES[5],
-    selectTestId: 'side-filter-select-network',
-    option: 'Clearnet',
-    requestField: 'network',
-    requestValue: 'clearnet',
-    responseFields: ['m_network'],
-    responseValue: 'clearnet',
+    section: 'Exploit',
+    route: '/dashboard/exploit/all',
+    endpoint: 'exploit',
+    category: 'URLs',
+    requestField: 'm_url',
+    value: 'https://www.kb.cert.org/vuls/id/517845',
+    searchQuery: 'attacker@example.com SMTP',
+    expected: EXPLOIT_SMTP_EXPECTED,
+    responseFields: ['m_url'],
+    responseValue: 'https://www.kb.cert.org/vuls/id/517845',
+  },
+  {
+    section: 'Exploit',
+    route: '/dashboard/exploit/all',
+    endpoint: 'exploit',
+    category: 'CVE & CWE',
+    requestField: 'm_cve',
+    value: 'CWE-502',
+    searchQuery: 'VCR.py CWE-502',
+    expected: EXPLOIT_VCR_EXPECTED,
+    responseFields: ['m_cwe'],
+    responseValue: 'CWE-502',
+  },
+  {
+    section: 'Exploit',
+    route: '/dashboard/exploit/all',
+    endpoint: 'exploit',
+    category: 'Country',
+    requestField: 'm_country',
+    value: 'united states',
+    searchQuery: 'Ivanti Sentry CWE-78',
+    expected: EXPLOIT_SENTRY_EXPECTED,
+    responseFields: ['m_country'],
+    responseValue: 'united states',
   },
 ];
-
-export const ADVANCED_EMAIL_FILTER_CASE: AdvancedEmailFilterCase16 = {
-  section: 'Exploit',
-  route: '/dashboard/exploit/all',
-  endpoint: 'exploit',
-  email: 'attacker@example.com',
-  expected: {
-    title: 'Authenticated SMTP users may spoof other identities due to ambiguous \\u201cFrom\\u201d header interpretation',
-    linkAddress: 'https://www.kb.cert.org/vuls/id/517845',
-    date: 'Oct 28, 2025',
-    responseDate: '2025-10-28',
-    description: null,
-    queryMatches: ['attacker@example.com'],
-  },
-};
 
 function resetSearchStorage16(win: Window) {
   win.localStorage.setItem('entityfilterCategories', '{}');
@@ -231,6 +568,10 @@ function visitSearchSection16(route: string) {
 
 function searchAlias16(endpoint: SearchEndpoint16, alias: string) {
   cy.intercept('POST', `${API_BASE_16}/${endpoint}`).as(alias);
+}
+
+function aliasKey16(value: string): string {
+  return value.replace(/[^a-zA-Z0-9]+/g, '');
 }
 
 function typeDashboardSearch16(value: string) {
@@ -364,15 +705,19 @@ function assertResponseResult16(interception: any, expected: ExpectedSearchResul
   return result;
 }
 
-function assertFilteredResponse16(interception: any, filterCase: SidebarFilterCase16) {
-  const result = assertResponseResult16(interception, filterCase.expected);
-
-  if (!filterCase.responseFields || !filterCase.responseValue) {
+function assertFilterFields16(result: any, fields?: string[], value?: string) {
+  if (!fields || !value) {
     return;
   }
 
-  const values = fieldValues16(result, filterCase.responseFields).map(value => normalize16(value));
-  expect(values, filterCase.responseFields.join(',')).to.include(normalize16(filterCase.responseValue));
+  const values = fieldValues16(result, fields).map(fieldValue => normalize16(fieldValue));
+  const expectedValue = normalize16(value);
+  expect(values.some(fieldValue => fieldValue === expectedValue || fieldValue.includes(expectedValue)), fields.join(',')).to.eq(true);
+}
+
+function assertFilteredResponse16(interception: any, filterCase: SidebarFilterCase16) {
+  const result = assertResponseResult16(interception, filterCase.expected);
+  assertFilterFields16(result, filterCase.responseFields, filterCase.responseValue);
 }
 
 function requestValue16(body: any, field: string): string {
@@ -413,8 +758,20 @@ function matchesSidebarRequest16(filterCase: SidebarFilterCase16) {
     && requestValue16(interception.request.body, filterCase.requestField) === filterCase.requestValue;
 }
 
-function matchesEmailFilterRequest16(filterCase: AdvancedEmailFilterCase16) {
-  return (interception: any) => (interception.request.body?.entity_filter?.m_email || []).includes(filterCase.email);
+function entityFilterValues16(interception: any, field: string): string[] {
+  return values16(interception.request.body?.entity_filter?.[field]);
+}
+
+function matchesEntityFilterRequest16(filterCase: AdvancedEntityFilterCase16) {
+  return (interception: any) => {
+    const queryMatches = filterCase.searchQuery
+      ? normalize16(interception.request.body?.q) === normalize16(filterCase.searchQuery)
+      : true;
+    const entityMatches = entityFilterValues16(interception, filterCase.requestField)
+      .map(value => normalize16(value))
+      .includes(normalize16(filterCase.value));
+    return queryMatches && entityMatches;
+  };
 }
 
 function assertRenderedSearchResult16(expected: ExpectedSearchResult16) {
@@ -475,6 +832,46 @@ function selectSidebarFilterOption16(selectTestId: string, option: string) {
     });
 }
 
+function moveDatePickerToMonth16(targetLabel: string, attempts = 0): void {
+  if (attempts > 24) {
+    throw new Error(`Could not navigate date picker to ${targetLabel}`);
+  }
+
+  cy.get('[data-testid="side-filter-date-month-label"]').filter(':visible').first().invoke('text').then((raw) => {
+    const currentLabel = raw.trim();
+    if (currentLabel === targetLabel) {
+      return;
+    }
+
+    const currentDate = new Date(`${currentLabel} 1`);
+    const targetDate = new Date(`${targetLabel} 1`);
+    const navSelector = currentDate.getTime() > targetDate.getTime()
+      ? '[data-testid="side-filter-date-prev-month"]'
+      : '[data-testid="side-filter-date-next-month"]';
+    cy.get(navSelector).filter(':visible').first().scrollIntoView().click({ force: true });
+    moveDatePickerToMonth16(targetLabel, attempts + 1);
+  });
+}
+
+function selectSidebarDateRange16(dateRange: DateRangeSelection16) {
+  cy.get('[data-testid="side-filter-date-toggle"]').filter(':visible').first().scrollIntoView().click({ force: true });
+  moveDatePickerToMonth16(dateRange.monthLabel);
+  cy.get(`[data-testid="side-filter-date-day-${dateRange.startDay}"]`).filter(':visible').first().scrollIntoView().click({ force: true });
+  cy.get(`[data-testid="side-filter-date-day-${dateRange.endDay}"]`).filter(':visible').first().scrollIntoView().click({ force: true });
+}
+
+function selectSidebarFilter16(filterCase: SidebarFilterCase16) {
+  if (filterCase.filterKind === 'daterange') {
+    expect(filterCase.dateRange, `${filterCase.section} date range`).to.exist;
+    selectSidebarDateRange16(filterCase.dateRange!);
+    return;
+  }
+
+  expect(filterCase.selectTestId, `${filterCase.section} select test id`).to.exist;
+  expect(filterCase.option, `${filterCase.section} option`).to.exist;
+  selectSidebarFilterOption16(filterCase.selectTestId!, filterCase.option!);
+}
+
 function ensureAdvancedFiltersOpen16() {
   cy.get(SEARCH_INPUT_16).first().click({ force: true });
   cy.get('[data-testid="dashboard-advance-toggle"]').should('exist')
@@ -489,7 +886,8 @@ function ensureAdvancedFiltersOpen16() {
 
 function applyEntityFilter16(category: string, value: string) {
   const categoryKey = category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-  cy.get(`[data-testid="entity-filter-category-${categoryKey}"]`).should('exist')
+  cy.get('app-search-filters input').first().clear({ force: true }).type(category, { force: true });
+  cy.get(`[data-testid="entity-filter-category-${categoryKey}"]`).should('be.visible')
     .scrollIntoView()
     .click({ force: true });
   cy.get('[data-testid="entity-filter-value-input"]').scrollIntoView()
@@ -523,8 +921,9 @@ export function assertDirectSearchResult16(searchCase: DirectSearchCase16) {
 }
 
 export function assertSidebarFilterResult16(filterCase: SidebarFilterCase16) {
-  const directAlias = `${filterCase.endpoint}BeforeSidebar16`;
-  const filterAlias = `${filterCase.endpoint}SidebarSearch16`;
+  const aliasKey = aliasKey16(`${filterCase.endpoint}-${filterCase.requestField}-${filterCase.requestValue}`);
+  const directAlias = `${aliasKey}BeforeSidebar16`;
+  const filterAlias = `${aliasKey}SidebarSearch16`;
 
   visitSearchSection16(filterCase.route);
   searchAlias16(filterCase.endpoint, directAlias);
@@ -535,7 +934,7 @@ export function assertSidebarFilterResult16(filterCase: SidebarFilterCase16) {
   });
 
   openSidebar16();
-  selectSidebarFilterOption16(filterCase.selectTestId, filterCase.option);
+  selectSidebarFilter16(filterCase);
   searchAlias16(filterCase.endpoint, filterAlias);
   cy.get('[data-testid="side-filter-apply"]').filter(':visible')
     .first()
@@ -549,19 +948,25 @@ export function assertSidebarFilterResult16(filterCase: SidebarFilterCase16) {
   assertRenderedSearchResult16(filterCase.expected);
 }
 
-export function assertAdvancedEmailFilterResult16(filterCase: AdvancedEmailFilterCase16) {
-  const alias = `${filterCase.endpoint}AdvancedEmailSearch16`;
+export function assertAdvancedEntityFilterResult16(filterCase: AdvancedEntityFilterCase16) {
+  const alias = `${aliasKey16(`${filterCase.endpoint}-${filterCase.requestField}-${filterCase.value}`)}AdvancedEntitySearch16`;
 
   visitSearchSection16(filterCase.route);
   clearEntityFilters16();
-  applyEntityFilter16('Emails', filterCase.email);
+  applyEntityFilter16(filterCase.category, filterCase.value);
   searchAlias16(filterCase.endpoint, alias);
-  submitDashboardSearch16();
+  if (filterCase.searchQuery) {
+    typeDashboardSearch16(filterCase.searchQuery);
+  }
+  else {
+    submitDashboardSearch16();
+  }
 
-  waitForMatchingSearch16(alias, matchesEmailFilterRequest16(filterCase), `${filterCase.section} email filter`).then((interception) => {
+  waitForMatchingSearch16(alias, matchesEntityFilterRequest16(filterCase), `${filterCase.section} ${filterCase.category} filter`).then((interception) => {
     expect(interception.response?.statusCode).to.eq(200);
-    expect(interception.request.body?.entity_filter?.m_email || []).to.include(filterCase.email);
-    assertResponseResult16(interception, filterCase.expected);
+    expect(entityFilterValues16(interception, filterCase.requestField).map(value => normalize16(value)), `${filterCase.requestField} entity request`).to.include(normalize16(filterCase.value));
+    const result = assertResponseResult16(interception, filterCase.expected);
+    assertFilterFields16(result, filterCase.responseFields, filterCase.responseValue);
   });
   assertRenderedSearchResult16(filterCase.expected);
 }

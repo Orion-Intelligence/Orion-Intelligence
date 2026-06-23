@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { AfterViewInit, Component, OnDestroy, OnInit, effect, input } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, effect, input, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
@@ -8,7 +8,8 @@ import { AptIntelGroup, AptIntelRecord, AptIntelResultItem, AptIntelSummary } fr
 import { RecordSidebarItem } from '../../../../shared/model/record-sidebar/record-sidebar.model';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 
-const STAGGER_RENDER_DELAY_MS = 20;
+const STAGGER_RENDER_BATCH_SIZE = 10;
+const STAGGER_RENDER_DELAY_MS = 16;
 const RECORD_SIDEBAR_CLOSE_MS = 300;
 
 @Component({
@@ -30,7 +31,7 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   isConsolidatedView = false;
   expandedGroupKey: string | null = null;
   isRecordSidebarVisible = false;
-  visibleGroupCount = 0;
+  visibleGroupCount = signal(0);
   readonly searchResults = input<AptIntelResultItem[]>([]);
   readonly isExpandAble = input<boolean>(false);
 
@@ -65,7 +66,7 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
 
   getVisibleGroups(): AptIntelGroup[] {
     const groups = this.getAptIntelGroups().slice(0, this.getGroupDisplayLimit());
-    return groups.slice(0, this.visibleGroupCount);
+    return groups.slice(0, this.visibleGroupCount());
   }
 
   getGridPlaceholders(results: unknown[]): number[] {
@@ -388,17 +389,17 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
     this.clearRenderTimer();
     this.renderKey = key;
     this.renderTargetCount = targetCount;
-    this.visibleGroupCount = targetCount ? 1 : 0;
-    this.revealNextGroup();
+    this.visibleGroupCount.set(Math.min(targetCount, STAGGER_RENDER_BATCH_SIZE));
+    this.revealNextGroupBatch();
   }
 
-  private revealNextGroup(): void {
-    if (this.visibleGroupCount >= this.renderTargetCount) {
+  private revealNextGroupBatch(): void {
+    if (this.visibleGroupCount() >= this.renderTargetCount) {
       return;
     }
     this.renderTimer = setTimeout(() => {
-      this.visibleGroupCount += 1;
-      this.revealNextGroup();
+      this.visibleGroupCount.update(count => Math.min(count + STAGGER_RENDER_BATCH_SIZE, this.renderTargetCount));
+      this.revealNextGroupBatch();
     }, STAGGER_RENDER_DELAY_MS);
   }
 

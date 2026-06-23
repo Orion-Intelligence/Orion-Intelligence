@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, effect, input } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, effect, input, signal } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
@@ -9,7 +9,8 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { RecordSidebarComponent } from '../../../../shared/components/record-sidebar/record-sidebar.component';
 import { RecordSidebarItem } from '../../../../shared/model/record-sidebar/record-sidebar.model';
 
-const STAGGER_RENDER_DELAY_MS = 20;
+const STAGGER_RENDER_BATCH_SIZE = 10;
+const STAGGER_RENDER_DELAY_MS = 16;
 const RECORD_SIDEBAR_CLOSE_MS = 300;
 
 @Component({
@@ -31,7 +32,7 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
   queryParams: { ci: string; } | undefined;
   expandedGroupKey: string | null = null;
   isRecordSidebarVisible = false;
-  visibleGroupCount = 0;
+  visibleGroupCount = signal(0);
   searchResults: DefacementResultItem[] = [];
   groupedResults: DefacementGroupCallbackItem[] = [];
 
@@ -133,7 +134,7 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
 
   getRenderedDefacementGroups(): DefacementGroup[] {
     const groups = this.getDefacementGroups();
-    return groups.slice(0, this.visibleGroupCount);
+    return groups.slice(0, this.visibleGroupCount());
   }
 
   toggleGroup(key: string): void {
@@ -276,17 +277,17 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
     this.clearRenderTimer();
     this.renderKey = key;
     this.renderTargetCount = targetCount;
-    this.visibleGroupCount = targetCount ? 1 : 0;
-    this.revealNextGroup();
+    this.visibleGroupCount.set(Math.min(targetCount, STAGGER_RENDER_BATCH_SIZE));
+    this.revealNextGroupBatch();
   }
 
-  private revealNextGroup(): void {
-    if (this.visibleGroupCount >= this.renderTargetCount) {
+  private revealNextGroupBatch(): void {
+    if (this.visibleGroupCount() >= this.renderTargetCount) {
       return;
     }
     this.renderTimer = setTimeout(() => {
-      this.visibleGroupCount += 1;
-      this.revealNextGroup();
+      this.visibleGroupCount.update(count => Math.min(count + STAGGER_RENDER_BATCH_SIZE, this.renderTargetCount));
+      this.revealNextGroupBatch();
     }, STAGGER_RENDER_DELAY_MS);
   }
 

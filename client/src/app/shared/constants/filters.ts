@@ -391,7 +391,7 @@ export const general_filters: FilterModel = {
     network: COMMON_NETWORK,
     safe: SAFE_FILTER,
     daterange: DATERANGE_CREATION,
-    content: createGeneralContent()
+    m_content_type: createGeneralContent()
   }
 };
 export const leak_filters: FilterModel = {
@@ -489,6 +489,7 @@ export const filter_mapping: Record<string, string> = {
   content_type: "Content Type",
   safe: "Safe Search",
   content: "Content Type",
+  m_content_type: "Content Type",
   mitre: "Mitre TTP",
   platform_result_count: "Platform Results Count",
   m_cve: "CVE",

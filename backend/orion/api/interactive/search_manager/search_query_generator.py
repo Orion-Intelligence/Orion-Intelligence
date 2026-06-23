@@ -423,7 +423,7 @@ class search_query_generator:
         m_network = p_query_model.network
         m_platform = p_query_model.platform
         m_page_number = getattr(p_query_model, "page", 1)
-        m_content_type = str(p_query_model.content or "all").strip().lower()
+        m_content_type = str(getattr(p_query_model, "m_content_type", None) or p_query_model.content or "all").strip().lower()
         m_platform = (p_query_model.platform or "").strip().lower()
         m_family = (p_query_model.family or "").strip()
         m_country = (p_query_model.m_country or "").strip()
@@ -532,6 +532,7 @@ class search_query_generator:
                 must_clauses.append(
                     {"bool": {"should": [
                         {"bool": {"filter": [{"exists": {"field": "content_type"}}, {"term": {"content_type": m_content_type.lower()}}]}},
+                        {"bool": {"filter": [{"exists": {"field": "m_content_type"}}, {"term": {"m_content_type": m_content_type.lower()}}]}},
                         {"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": [m_content_type.lower()]}}]}}
                     ], "minimum_should_match": 1}})
 

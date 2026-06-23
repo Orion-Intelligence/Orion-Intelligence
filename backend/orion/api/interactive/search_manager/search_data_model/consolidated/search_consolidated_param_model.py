@@ -14,6 +14,7 @@ class search_consolidated_param_model(BaseModel):
     network: str = "all"
     matchtype: Optional[str] = ""
     content: Optional[str] = "all"
+    m_content_type: Optional[str] = "all"
     family: Optional[str] = "all"
     m_country: Optional[str] = "all"
     content_type: Optional[str] = "all"
