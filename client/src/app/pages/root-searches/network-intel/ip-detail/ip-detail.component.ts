@@ -10,6 +10,71 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   standalone: true,
   imports: [CommonModule, TranslatePipe],
   templateUrl: './ip-detail.component.html',
+  styles: [`
+    :host(.threat-lens-ip-detail-content) > * {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+
+    :host(.threat-lens-ip-detail-content) > :first-child {
+      margin-top: 0 !important;
+    }
+
+    :host(.threat-lens-ip-detail-content) > :last-child {
+      margin-bottom: 0 !important;
+    }
+
+    :host(.threat-lens-ip-detail-content) > :first-child .grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 0 24px !important;
+      border-top: 1px solid rgba(143, 166, 190, 0.16);
+      border-bottom: 1px solid rgba(143, 166, 190, 0.16);
+      background: rgba(19, 30, 48, 0.28);
+    }
+
+    :host(.threat-lens-ip-detail-content) > :first-child .grid > div {
+      display: grid !important;
+      grid-template-columns: minmax(92px, 0.72fr) minmax(0, 1fr);
+      align-items: baseline;
+      gap: 10px;
+      min-height: 42px;
+      padding: 10px 2px;
+      border-bottom: 1px solid rgba(143, 166, 190, 0.14);
+    }
+
+    :host(.threat-lens-ip-detail-content) > :first-child .grid > div:nth-last-child(-n + 2) {
+      border-bottom: 0;
+    }
+
+    :host(.threat-lens-ip-detail-content) > :first-child .grid > div > span:first-child {
+      color: rgba(160, 184, 209, 0.82) !important;
+      font-size: 10px !important;
+      line-height: 1.2;
+      letter-spacing: 0.12em !important;
+    }
+
+    :host(.threat-lens-ip-detail-content) > :first-child .grid > div > span:last-child {
+      color: #E6EEF8 !important;
+      font-size: 14px !important;
+      line-height: 1.35;
+      font-weight: 600 !important;
+      text-align: right;
+    }
+
+    @media (max-width: 720px) {
+      :host(.threat-lens-ip-detail-content) > :first-child .grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      :host(.threat-lens-ip-detail-content) > :first-child .grid > div:nth-last-child(-n + 2) {
+        border-bottom: 1px solid rgba(143, 166, 190, 0.14);
+      }
+
+      :host(.threat-lens-ip-detail-content) > :first-child .grid > div:last-child {
+        border-bottom: 0;
+      }
+    }
+  `],
 })
 export class IpDetailComponent {
   private readonly renderedTopLevelKeys = new Set([ 'ip',  'status', 'ip_info', 'hostnames', 'country', 'city', 'organization', 'isp', 'asn', 'cloud_provider', 'cloud_region', 'cloud_service', 'hosting_type', 'web_technologies', 'vulnerabilities', 'misconfigurations', 'security', 'cdn', 'waf', 'paas', 'amazon_s3', 'load_balancer', 'hsts', 'web_server', 'favicon_hash', 'allowed_methods', 'cookies', 'title', 'http_headers', 'cache_headers', 'link_headers', 'camera_paths', 'cameras', 'is_camera', 'ports', 'open_ports', ]);
