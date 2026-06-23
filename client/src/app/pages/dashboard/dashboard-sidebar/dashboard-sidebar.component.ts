@@ -68,9 +68,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   private handleProfileRoute(url: string) {
     if (url.startsWith('/dashboard/profile/consolidated/') ||
-          url.startsWith('/dashboard/profile/homepage') ||
-          url.startsWith('/dashboard/profile/alerts/general') ||
-          url.startsWith('/dashboard/profile/alerts')) {
+      url.startsWith('/dashboard/profile/homepage') ||
+      url.startsWith('/dashboard/profile/alerts/general') ||
+      url.startsWith('/dashboard/profile/alerts')) {
       this.selectionStore.setSelectedSection('Profile');
       this.selectionStore.setSelectedOption('Homepage');
     }
@@ -194,33 +194,44 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
     if (this.isAdmin()) {
       return categories.filter(c => c !== ProfileSubCategory.IOC &&
-              c !== ProfileSubCategory.STATISTICS &&
-              c !== ProfileSubCategory.TENANT_SETTINGS &&
-              (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
-              (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
-              (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
-              (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
+        c !== ProfileSubCategory.STATISTICS &&
+        c !== ProfileSubCategory.TENANT_SETTINGS &&
+        (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
+        (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
+        (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
+        (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
     }
     if (this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
       return categories.filter(c => c !== ProfileSubCategory.TENANT &&
-              c !== ProfileSubCategory.SYSTEM_SETTINGS &&
-              (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
-              (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
-              (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
-              (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
+        c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+        (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
+        (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
+        (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
+        (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
+    }
+    if (this.isAnalyst()) {
+      return categories.filter(c => c !== ProfileSubCategory.TENANT &&
+        c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+        c !== ProfileSubCategory.EVENT_MANAGEMENT &&
+        c !== ProfileSubCategory.FEEDER &&
+        c !== ProfileSubCategory.USERS &&
+        c !== ProfileSubCategory.AUDITLOG &&
+        c !== ProfileSubCategory.IOC &&
+        c !== ProfileSubCategory.STATISTICS &&
+        c !== ProfileSubCategory.TENANT_SETTINGS);
     }
     return categories.filter(c => c !== ProfileSubCategory.TENANT &&
-          c !== ProfileSubCategory.SYSTEM_SETTINGS &&
-          c !== ProfileSubCategory.EVENT_MANAGEMENT &&
-          (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
-          (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
-          (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
-          c !== ProfileSubCategory.USERS &&
-          c !== ProfileSubCategory.AUDITLOG &&
-          c !== ProfileSubCategory.IOC &&
-          c !== ProfileSubCategory.CASE_MANAGEMENT &&
-          c !== ProfileSubCategory.STATISTICS &&
-          c !== ProfileSubCategory.TENANT_SETTINGS);
+      c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+      c !== ProfileSubCategory.EVENT_MANAGEMENT &&
+      (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
+      (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
+      (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
+      c !== ProfileSubCategory.USERS &&
+      c !== ProfileSubCategory.AUDITLOG &&
+      c !== ProfileSubCategory.IOC &&
+      c !== ProfileSubCategory.CASE_MANAGEMENT &&
+      c !== ProfileSubCategory.STATISTICS &&
+      c !== ProfileSubCategory.TENANT_SETTINGS);
   }
 
   isAdmin(): boolean {
@@ -233,5 +244,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   isMember(): boolean {
     return this.licenseService.isMember();
+  }
+
+  isAnalyst(): boolean {
+    return this.licenseService.isAnalyst();
   }
 }
