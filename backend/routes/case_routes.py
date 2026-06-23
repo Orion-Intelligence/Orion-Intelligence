@@ -3,7 +3,7 @@ from fastapi import File
 from fastapi import UploadFile
 from fastapi import Query
 from typing import List
-from configs.app_dependency import role_required, get_current_user, status_required
+from configs.app_dependency import role_required, get_current_user, status_required, case_management_required
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
 from orion.api.interactive.case_manager.case_manager import CaseManager
 from orion.api.interactive.case_manager.case_share_manager import CaseShareManager
@@ -11,7 +11,8 @@ from orion.api.interactive.case_manager.models.case_models import AssignCaseAnal
 from orion.api.interactive.case_manager.models.case_models import CreateCaseShareRequest
 from orion.api.interactive.case_manager.models.case_models import UpdateCaseRequest
 
-case_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
+
+case_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE])), Depends(case_management_required)])
 @case_routes.get(
     "/api/profile/cases",
     status_code=200,

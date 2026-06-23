@@ -191,6 +191,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     const eventManagementEnabled = this.appService.userSessionData().tenant.eventManagementEnabled === true;
     const canAccessFeeder = this.licenseService.canUseModule('feeder');
     const isMobileDemo = this.appService.isMobileMode();
+    const canUseCaseManagement = this.appService.userSessionData().user.permissions?.includes('case_management');
 
     if (this.isAdmin()) {
       return categories.filter(c => c !== ProfileSubCategory.IOC &&
@@ -218,7 +219,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
           c !== ProfileSubCategory.USERS &&
           c !== ProfileSubCategory.AUDITLOG &&
           c !== ProfileSubCategory.IOC &&
-          c !== ProfileSubCategory.CASE_MANAGEMENT &&
+          (canUseCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT) &&
           c !== ProfileSubCategory.STATISTICS &&
           c !== ProfileSubCategory.TENANT_SETTINGS);
   }

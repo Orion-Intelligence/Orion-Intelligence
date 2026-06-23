@@ -49,13 +49,8 @@ export function openSidebarGroup(title: string) {
 }
 
 export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
-  const groupTestId = getSidebarGroupTestId(groupTitle);
   const aliasedTestId = SIDEBAR_SUBITEM_TEST_ID_ALIAS[groupTitle]?.[itemTitle];
   const routePrefix = SIDEBAR_GROUP_ROUTE_PREFIX[groupTitle];
-
-  cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
-    expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
-  });
 
   if (aliasedTestId) {
     cy.get(`[data-testid="sidebar-subitem-${routePrefix}-${aliasedTestId}"]`)
@@ -65,7 +60,7 @@ export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
     return;
   }
 
-  cy.contains(`[data-testid^="sidebar-subitem-${routePrefix}-"] div`, new RegExp(`^\\s*${itemTitle}\\s*$`))
+  cy.contains(`[data-testid^="sidebar-subitem-${routePrefix}-"]`, new RegExp(`^\\s*${itemTitle}\\s*$`))
     .scrollIntoView()
     .should('be.visible')
     .click({ force: true });

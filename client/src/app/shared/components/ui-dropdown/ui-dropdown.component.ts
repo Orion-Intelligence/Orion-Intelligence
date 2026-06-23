@@ -58,7 +58,8 @@ export class UiDropdownComponent implements OnDestroy {
   searchTerm = '';
   activeIndex = -1;
   overlayWidth = 0;
-  readonly overlayPositions: ConnectedPosition[] = [{ originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 0 }, { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom', offsetY: 0 }];
+  listboxMaxHeight = 240;
+  readonly overlayPositions: ConnectedPosition[] = [{ originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 0 }];
 
   constructor(private readonly hostElement: ElementRef<HTMLElement>) {}
 
@@ -336,7 +337,7 @@ export class UiDropdownComponent implements OnDestroy {
   @HostListener('window:resize')
   onWindowResize(): void {
     if (this.isOpen) {
-      this.updateOverlayWidth();
+      this.updateOverlayMetrics();
     }
   }
 
@@ -362,7 +363,7 @@ export class UiDropdownComponent implements OnDestroy {
     this.isOpen = true;
     this.searchTerm = searchTerm;
     this.searchChange.emit(searchTerm);
-    this.updateOverlayWidth();
+    this.updateOverlayMetrics();
     const selectedIndex = this.visibleOptions.findIndex(option => this.isSelected(option.key));
     this.activeIndex = selectedIndex >= 0 ? selectedIndex : (this.visibleOptions.length ? 0 : -1);
     this.focusSearch();
@@ -391,8 +392,13 @@ export class UiDropdownComponent implements OnDestroy {
     this.removeScrollListener = undefined;
   }
 
-  private updateOverlayWidth(): void {
-    this.overlayWidth = this.triggerButton?.nativeElement.getBoundingClientRect().width || this.hostElement.nativeElement.getBoundingClientRect().width || 0;
+  private updateOverlayMetrics(): void {
+    const triggerRect = this.triggerButton?.nativeElement.getBoundingClientRect() || this.hostElement.nativeElement.getBoundingClientRect();
+    this.overlayWidth = triggerRect.width || 0;
+    const defaultMaxHeight = this.size() === 'large' ? 280 : 240;
+    const searchHeight = this.searchable() ? 44 : 0;
+    const availableBelow = window.innerHeight - triggerRect.bottom - searchHeight - 16;
+    this.listboxMaxHeight = Math.max(96, Math.min(defaultMaxHeight, Math.floor(availableBelow)));
   }
 
   private canOpen(): boolean {

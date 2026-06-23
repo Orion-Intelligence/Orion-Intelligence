@@ -76,19 +76,18 @@ export function assignAnalystIfAvailable() {
 
     cy.get(selector('case-analyst-select'), { timeout: 60000 })
       .should('be.visible')
-      .find('option')
-      .then(($options) => {
-        const value = [...$options]
-          .map(option => option.getAttribute('value') || '')
-          .find(value => value);
-
-        if (value) {
-          cy.get(selector('case-analyst-select')).select(value);
-          cy.get(selector('case-analyst-submit')).click({ force: true });
-          assertNotification('Case analyst assigned successfully');
-        } else {
+      .then(($control) => {
+        if (($control[0] as HTMLButtonElement).disabled) {
           cy.get(selector('case-analyst-cancel')).click({ force: true });
+          return;
         }
+
+        const menuId = $control.attr('aria-controls');
+        expect(menuId, 'case analyst dropdown menu id').to.exist;
+        cy.wrap($control).click({ force: true });
+        cy.get(`#${menuId} [role="option"]`, { timeout: 60000 }).first().click({ force: true });
+        cy.get(selector('case-analyst-submit')).click({ force: true });
+        assertNotification('Case analyst assigned successfully');
       });
   });
 }

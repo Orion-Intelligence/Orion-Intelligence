@@ -25,7 +25,7 @@
       </div>
     }
 
-    <div #listbox [id]="resolvedMenuId" class="overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" [ngClass]="size() === 'large' ? 'max-h-[280px]' : 'max-h-[240px]'" role="listbox" [attr.aria-multiselectable]="multiSelect() ? true : null">
+    <div #listbox [id]="resolvedMenuId" class="overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" [style.max-height.px]="listboxMaxHeight" role="listbox" [attr.aria-multiselectable]="multiSelect() ? true : null">
       @if (loading()) {
         <div class="flex h-9 items-center gap-2 px-3 text-xs font-medium text-[var(--color-text4)]">
           <span class="h-3 w-3 animate-spin rounded-full border border-white/[0.16] border-t-[var(--color-text2)]"></span>
@@ -55,7 +55,7 @@
 
   @if (isOpen) {
     @if (menuPlacement() === 'static') {
-      <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="dropdownTrigger" [cdkConnectedOverlayOpen]="isOpen" [cdkConnectedOverlayPositions]="overlayPositions" [cdkConnectedOverlayWidth]="overlayWidth">
+      <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="dropdownTrigger" [cdkConnectedOverlayOpen]="isOpen" [cdkConnectedOverlayPositions]="overlayPositions" [cdkConnectedOverlayWidth]="overlayWidth" [cdkConnectedOverlayPush]="false">
         <div [ngClass]="menuClass()" (click)="$event.stopPropagation()">
           <ng-container [ngTemplateOutlet]="dropdownMenuContent"></ng-container>
         </div>
