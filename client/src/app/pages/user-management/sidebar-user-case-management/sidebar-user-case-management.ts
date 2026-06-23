@@ -99,7 +99,12 @@ export class SidebarUserCaseManagement implements OnInit {
     if (!date) {
       return '-';
     }
-    return new Date(date).toLocaleDateString('en-US', {
+
+    const utcDate = typeof date === 'string' && !date.endsWith('Z') && !date.includes('+')
+      ? date + 'Z'
+      : date;
+
+    return new Date(utcDate).toLocaleDateString('en-US', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
@@ -110,7 +115,12 @@ export class SidebarUserCaseManagement implements OnInit {
     if (!date) {
       return '';
     }
-    return new Date(date).toLocaleTimeString('en-US', {
+
+    const utcDate = typeof date === 'string' && !date.endsWith('Z') && !date.includes('+')
+      ? date + 'Z'
+      : date;
+
+    return new Date(utcDate).toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit'
     });
