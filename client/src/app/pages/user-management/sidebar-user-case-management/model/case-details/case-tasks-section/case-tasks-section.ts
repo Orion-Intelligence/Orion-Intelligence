@@ -5,7 +5,7 @@ import { Case, CaseAnalyst, CaseTask } from '../../../../../../shared/model/case
 import { PRIORITY_OPTIONS, TASK_STATUS_OPTIONS } from '../../../../../../shared/model/case-management/case-management.defaults';
 import { TooltipDirective } from '../../../../../../shared/directive/tooltip-directive.directive';
 import { caseListItemMotion, caseModeSwapMotion, caseSectionMotion } from '../case-details.animations';
-import { CaseDateField, CaseDateTarget, formatCaseLabel, getAssignedCaseAnalysts, getCaseAnalystLabel, getCaseDateInputValue, getFormattedCaseDateTime, setCaseDateInputValue } from '../case-details-formatters';
+import { CaseDateField, CaseDateTarget, formatCaseLabel, getAssignedCaseAnalysts, getCaseAnalystLabel, getCaseDateInputValue, getFormattedCaseDateOnly, getFormattedCaseDateTime, setCaseDateInputValue } from '../case-details-formatters';
 import { CaseDetailsStore } from '../case-details.store';
 import { CaseEditDrawerComponent } from '../case-edit-drawer/case-edit-drawer';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
@@ -83,6 +83,10 @@ export class CaseTasksSectionComponent {
 
   getDateInputValue(date?: Date | string | null): string {
     return getCaseDateInputValue(date);
+  }
+
+  getFormattedDateOnly(date?: Date | string | null): string {
+    return getFormattedCaseDateOnly(date);
   }
 
   setDateInputValue(target: CaseDateTarget, field: CaseDateField, value: string): void {

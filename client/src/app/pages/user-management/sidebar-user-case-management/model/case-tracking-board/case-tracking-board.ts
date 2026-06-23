@@ -66,6 +66,10 @@ export class CaseTrackingBoard implements OnInit {
   }
 
   getAllowedStatuses(status: CaseStatus): CaseStatus[] {
+    if (status === 'closed') {
+      return [];
+    }
+
     const index = this.workflow.findIndex(item => item.value === status);
     const statuses: CaseStatus[] = [];
 

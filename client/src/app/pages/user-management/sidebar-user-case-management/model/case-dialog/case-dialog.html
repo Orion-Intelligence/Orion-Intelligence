@@ -1,0 +1,86 @@
+<div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" (click)="closed.emit()">
+    <div data-testid="case-analyst-dialog" class="ui-graph-popup-panel ui-popup-shell w-full max-w-[560px] overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-830)] shadow-2xl [body.light-theme_&]:bg-white" (click)="$event.stopPropagation()">
+
+        <div class="border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-6 py-5 [body.light-theme_&]:bg-[#f8fbff]">
+            <div class="flex items-start gap-4">
+                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-500/10 text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-700">
+                    <svg viewBox="0 0 16 16" class="h-5 w-5 fill-current" aria-hidden="true">
+                        <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
+                        <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"></path>
+                    </svg>
+                </div>
+
+                <div class="min-w-0">
+                    <div class="text-lg font-semibold text-[var(--color-text1)]">
+                        {{ 'Assign Case Analyst' | translate }}
+                    </div>
+                    <div class="mt-1 text-sm text-[var(--color-text4)]">
+                        {{ 'Select one analyst who will be responsible for this case.' | translate }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-6 py-5">
+            <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 [body.light-theme_&]:bg-[#f8fbff]">
+                <div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text4)]">
+                    {{ 'Case Details' | translate }}
+                </div>
+
+                <div class="mt-3 grid gap-3">
+                    <div>
+                        <div class="text-xs text-[var(--color-text4)]">{{ 'Case Number' | translate }}</div>
+                        <div class="mt-1 font-mono text-sm font-semibold text-[var(--color-text1)]">
+                            {{ caseItem?.caseId || '-' }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-xs text-[var(--color-text4)]">{{ 'Case Title' | translate }}</div>
+                        <div class="mt-1 line-clamp-2 text-sm font-semibold text-[var(--color-text1)]">
+                            {{ caseItem?.title || '-' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (isLoading) {
+            <div class="mt-5 space-y-3">
+                <div class="ui-shimmer h-[14px] w-[120px] rounded bg-[var(--color-divider)]"></div>
+                <div class="ui-shimmer h-[44px] w-full rounded-xl bg-[var(--color-divider)]"></div>
+            </div>
+            } @else {
+            <div class="mt-5">
+                <label class="mb-2 block text-sm font-semibold text-[var(--color-text1)]">
+                    {{ 'Analyst' | translate }}
+                </label>
+
+                <select data-testid="case-analyst-select" [(ngModel)]="selectedAnalystId" class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] px-4 py-3 text-sm text-[var(--color-text1)] outline-none transition focus:border-sky-400/70 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:bg-white">
+
+                    <option value="">{{ 'Select analyst' | translate }}</option>
+
+                    @for (analyst of analysts; track analyst.id) {
+                    <option [attr.data-testid]="'case-analyst-option-' + analyst.username" [value]="analyst.id">
+                        {{ analyst.username }}{{ analyst.email ? ' (' + analyst.email + ')' : '' }}
+                    </option>
+                    }
+                </select>
+
+                <div class="mt-2 text-xs text-[var(--color-text4)]">
+                    {{ 'Changing analyst will replace the current assigned analyst.' | translate }}
+                </div>
+            </div>
+            }
+        </div>
+
+        <div class="flex items-center justify-end gap-3 border-t border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-6 py-4 [body.light-theme_&]:bg-[#f8fbff]">
+            <button data-testid="case-analyst-cancel" type="button" class="rounded-xl border border-[var(--color-border)] px-4 py-2.5 text-sm font-semibold text-[var(--color-text1)] transition hover:bg-[var(--color-blue-720)] [body.light-theme_&]:hover:bg-[#edf4fb]" (click)="closed.emit()">
+                {{ 'common.actions.cancel' | translate }}
+            </button>
+
+            <button data-testid="case-analyst-submit" type="button" class="rounded-xl bg-sky-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-950/20 transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60" [disabled]="isLoading || isSaving || !selectedAnalystId" (click)="confirmAssignAnalyst()">
+                {{ (isSaving ? 'Assigning...' : 'Assign Analyst') | translate }}
+            </button>
+        </div>
+    </div>
+</div>

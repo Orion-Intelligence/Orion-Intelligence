@@ -3,6 +3,7 @@ import {
   addCase,
   addLinkTargetCase,
   assertNotification,
+  assignAnalystIfAvailable,
   caseId,
   clickHeaderAction,
   linkedCaseId,
@@ -24,6 +25,7 @@ describe('Case Management - Add View Edit Flow', () => {
   it('creates cases and opens created case details', () => {
     openCaseManagement();
     addCase();
+    assignAnalystIfAvailable();
     addLinkTargetCase();
     openCreatedCaseFromList();
 

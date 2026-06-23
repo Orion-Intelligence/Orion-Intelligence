@@ -60,6 +60,39 @@ export function addCase() {
   });
 }
 
+export function assignAnalystIfAvailable() {
+  cy.then(() => {
+    cy.get(selector(`case-row-${caseId}`), { timeout: 60000 })
+      .scrollIntoView()
+      .should('be.visible');
+
+    cy.get(selector(`case-assign-analyst-${caseId}`), { timeout: 60000 })
+      .scrollIntoView()
+      .should('be.visible')
+      .click({ force: true });
+
+    cy.get(selector('case-analyst-dialog'), { timeout: 60000 })
+      .should('be.visible');
+
+    cy.get(selector('case-analyst-select'), { timeout: 60000 })
+      .should('be.visible')
+      .find('option')
+      .then(($options) => {
+        const value = [...$options]
+          .map(option => option.getAttribute('value') || '')
+          .find(value => value);
+
+        if (value) {
+          cy.get(selector('case-analyst-select')).select(value);
+          cy.get(selector('case-analyst-submit')).click({ force: true });
+          assertNotification('Case analyst assigned successfully');
+        } else {
+          cy.get(selector('case-analyst-cancel')).click({ force: true });
+        }
+      });
+  });
+}
+
 export function addLinkTargetCase() {
   createCase('Cypress Link Target Case', 'Cypress linked case context', 'Cypress Link Target Entity', (createdCaseId) => {
     linkedCaseId = createdCaseId;

@@ -5,7 +5,7 @@ import { Case, CaseArtifact } from '../../../../../../shared/model/case-manageme
 import { ARTIFACT_REPORT_SOURCE_OPTIONS, ARTIFACT_TYPE_OPTIONS, SOURCE_TYPE_OPTIONS } from '../../../../../../shared/model/case-management/case-management.defaults';
 import { TooltipDirective } from '../../../../../../shared/directive/tooltip-directive.directive';
 import { caseInlineMotion, caseListItemMotion, caseModeSwapMotion, caseSectionMotion } from '../case-details.animations';
-import { CaseDateField, CaseDateTarget, formatCaseLabel, getCaseDateInputValue, getCaseDisplayLabel, getFormattedCaseDateTime, setCaseDateInputValue } from '../case-details-formatters';
+import { CaseDateField, CaseDateTarget, formatCaseLabel, getCaseDateInputValue, getCaseDisplayLabel, getFormattedCaseDateOnly, getFormattedCaseDateTime, setCaseDateInputValue } from '../case-details-formatters';
 import { CaseDetailsStore } from '../case-details.store';
 import { CaseEditDrawerComponent } from '../case-edit-drawer/case-edit-drawer';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
@@ -104,6 +104,10 @@ export class CaseArtifactsSectionComponent {
 
   setDateInputValue(target: CaseDateTarget, field: CaseDateField, value: string): void {
     setCaseDateInputValue(target, field, value);
+  }
+
+  getFormattedDateOnly(date?: Date | string | null): string {
+    return getFormattedCaseDateOnly(date);
   }
 
   formatLabel(value?: string | null): string {

@@ -97,7 +97,7 @@
                 <div><span class="text-[var(--color-text4)]">{{ 'Assigned' | translate }}:</span> {{
                     getAnalystLabel(task.assignedTo) }}</div>
                 <div><span class="text-[var(--color-text4)]">{{ 'Due' | translate }}:</span> {{
-                    getFormattedDateTime(task.dueAt) }}</div>
+                    getFormattedDateOnly(task.dueAt) }}</div>
                 @if (task.createdAt) { <div><span class="text-[var(--color-text4)]">{{ 'Created' | translate }}:</span> {{
                     getFormattedDateTime(task.createdAt) }}</div> }
                 @if (task.updatedAt) { <div><span class="text-[var(--color-text4)]">{{ 'Updated' | translate }}:</span> {{

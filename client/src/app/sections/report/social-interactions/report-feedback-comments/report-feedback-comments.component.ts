@@ -3,6 +3,7 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { FormsModule } from '@angular/forms';
 import { ReportFeedbackModel } from '../../templates/report_general/models/report-feedback.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { getFormattedCaseDateTime } from '../../../../pages/user-management/sidebar-user-case-management/model/case-details/case-details-formatters';
 
 @Component({
   selector: 'app-report-feedback-comments',
@@ -42,5 +43,9 @@ export class ReportFeedbackCommentsComponent implements OnChanges {
       return;
     }
     this.userSelected.emit(userId);
+  }
+
+  getFormattedDateTime(date?: Date | string | null): string {
+    return getFormattedCaseDateTime(date);
   }
 }

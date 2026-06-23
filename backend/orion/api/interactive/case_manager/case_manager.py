@@ -46,6 +46,36 @@ class CaseManager:
     async def _to_response(self, record: db_case_model, current_user) -> CaseResponse:
         enc = await CaseHelperMethods.get_case_cipher(current_user)
         CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.decrypt_value(enc, value))
+        
+        record.createdAt = CaseHelperMethods.as_aware_utc(record.createdAt)
+        record.updatedAt = CaseHelperMethods.as_aware_utc(record.updatedAt)
+        record.closedAt = CaseHelperMethods.as_aware_utc(record.closedAt) if record.closedAt else None
+        record.archivedAt = CaseHelperMethods.as_aware_utc(record.archivedAt) if record.archivedAt else None
+
+        for entity in record.entities or []:
+            entity.createdAt = CaseHelperMethods.as_aware_utc(entity.createdAt)
+            entity.updatedAt = CaseHelperMethods.as_aware_utc(entity.updatedAt)
+        
+        for artifact in record.artifacts or []:
+            artifact.createdAt = CaseHelperMethods.as_aware_utc(artifact.createdAt)
+
+            if artifact.capturedAt:
+                artifact.capturedAt = CaseHelperMethods.as_aware_utc(artifact.capturedAt)
+
+            for artifact_file in artifact.files or []:
+                artifact_file.uploadedAt = CaseHelperMethods.as_aware_utc(artifact_file.uploadedAt)
+        
+        for task in record.tasks or []:
+            task.createdAt = CaseHelperMethods.as_aware_utc(task.createdAt)
+            task.updatedAt = CaseHelperMethods.as_aware_utc(task.updatedAt)
+
+            if task.dueAt:
+                task.dueAt = CaseHelperMethods.as_aware_utc(task.dueAt)
+
+        for comment in record.comments or []:
+            comment.createdAt = CaseHelperMethods.as_aware_utc(comment.createdAt)
+            comment.updatedAt = CaseHelperMethods.as_aware_utc(comment.updatedAt)
+
         data = record.model_dump()
         data["id"] = str(record.id)
         return CaseResponse(**data)
@@ -274,6 +304,37 @@ class CaseManager:
         )
 
         return await self._to_response(record, current_user)
+    
+    def _has_entity_changed(self, old_entity: CaseEntity, new_entity) -> bool:
+        old_data = old_entity.model_dump(exclude={"createdBy", "updatedBy", "createdAt", "updatedAt"})
+        new_data = new_entity.model_dump()
+        return old_data != new_data
+
+    def _normalize_date_for_compare(self, value):
+        if value is None:
+            return None
+        if hasattr(value, "date"):
+            return value.date().isoformat()
+        return str(value)[:10]
+
+    def _has_task_changed(self, old_task: CaseTask, new_task) -> bool:
+        old_data = old_task.model_dump(
+            exclude={"taskId", "createdBy", "createdAt", "updatedAt", "completedAt"}
+        )
+        new_data = new_task.model_dump(exclude={"taskId"})
+
+        old_data["dueAt"] = self._normalize_date_for_compare(old_data.get("dueAt"))
+        new_data["dueAt"] = self._normalize_date_for_compare(new_data.get("dueAt"))
+
+        return old_data != new_data
+
+    def _has_comment_changed(self, old_comment: CaseComment, new_comment) -> bool:
+        old_data = old_comment.model_dump(
+            exclude={"commentId", "createdBy", "createdAt", "updatedAt"}
+        )
+        new_data = new_comment.model_dump(exclude={"commentId"})
+
+        return old_data != new_data
 
     async def update_case(self, case_id: str, data: UpdateCaseRequest, current_user) -> CaseResponse:
         record = await self._engine.find_one(
@@ -325,16 +386,21 @@ class CaseManager:
             entity.entityId: entity
             for entity in record.entities
         }
-        entities = [
-            CaseEntity(
-                **entity.model_dump(),
-                createdBy=existing_entities[entity.entityId].createdBy if entity.entityId in existing_entities else current_actor_id,
-                updatedBy=current_actor_id,
-                createdAt=existing_entities[entity.entityId].createdAt if entity.entityId in existing_entities else server_now,
-                updatedAt=server_now,
+        entities = []
+
+        for entity in data.entities:
+            existing_entity = existing_entities.get(entity.entityId)
+            has_changed = not existing_entity or self._has_entity_changed(existing_entity, entity)
+
+            entities.append(
+                CaseEntity(
+                    **entity.model_dump(),
+                    createdBy=existing_entity.createdBy if existing_entity else current_actor_id,
+                    updatedBy=current_actor_id if has_changed else existing_entity.updatedBy,
+                    createdAt=existing_entity.createdAt if existing_entity else server_now,
+                    updatedAt=server_now if has_changed else existing_entity.updatedAt,
+                )
             )
-            for entity in data.entities
-        ]
 
         is_closing_from_details = (
             data.status == CaseStatus.CLOSED
@@ -378,16 +444,21 @@ class CaseManager:
             task.taskId: task
             for task in record.tasks
         }
-        record.tasks = [
-            CaseTask(
-                **task.model_dump(exclude={"taskId"}),
-                taskId=task.taskId or str(uuid4()),
-                createdBy=existing_tasks[task.taskId].createdBy if task.taskId in existing_tasks else current_actor_id,
-                createdAt=existing_tasks[task.taskId].createdAt if task.taskId in existing_tasks else server_now,
-                updatedAt=server_now,
+        record.tasks = []
+
+        for task in data.tasks:
+            existing_task = existing_tasks.get(task.taskId)
+            has_changed = not existing_task or self._has_task_changed(existing_task, task)
+
+            record.tasks.append(
+                CaseTask(
+                    **task.model_dump(exclude={"taskId"}),
+                    taskId=task.taskId or str(uuid4()),
+                    createdBy=existing_task.createdBy if existing_task else current_actor_id,
+                    createdAt=existing_task.createdAt if existing_task else server_now,
+                    updatedAt=server_now if has_changed else existing_task.updatedAt,
+                )
             )
-            for task in data.tasks
-        ]
         existing_linked_cases = {
             linked_case.targetCaseId: linked_case
             for linked_case in record.linkedCases
@@ -405,16 +476,21 @@ class CaseManager:
                 comment.commentId: comment
                 for comment in record.comments
             }
-            record.comments = [
-                CaseComment(
-                    **comment.model_dump(exclude={"commentId"}),
-                    commentId=comment.commentId or str(uuid4()),
-                    createdBy=existing_comments[comment.commentId].createdBy if comment.commentId in existing_comments else current_actor_id,
-                    createdAt=existing_comments[comment.commentId].createdAt if comment.commentId in existing_comments else server_now,
-                    updatedAt=server_now,
+            record.comments = []
+
+            for comment in data.comments:
+                existing_comment = existing_comments.get(comment.commentId)
+                has_changed = not existing_comment or self._has_comment_changed(existing_comment, comment)
+
+                record.comments.append(
+                    CaseComment(
+                        **comment.model_dump(exclude={"commentId"}),
+                        commentId=comment.commentId or str(uuid4()),
+                        createdBy=existing_comment.createdBy if existing_comment else current_actor_id,
+                        createdAt=existing_comment.createdAt if existing_comment else server_now,
+                        updatedAt=server_now if has_changed else existing_comment.updatedAt,
+                    )
                 )
-                for comment in data.comments
-            ]
         if closure_provided and data.closure is not None:
             record.closure = CaseClosure(**data.closure.model_dump(), closedBy=current_actor_id, closedAt=server_now)
             record.status = CaseStatus.CLOSED
@@ -804,7 +880,6 @@ class CaseManager:
         record.archivedAt = utc_now()
         record.archivedBy = CaseHelperMethods.actor_id(current_user)
         record.updatedAt = utc_now()
-
         await self._engine.save(record)
 
         await AuditLogManager.get_instance().register(
@@ -886,6 +961,12 @@ class CaseManager:
 
         if record.isArchived:
             raise HTTPException(status_code=403, detail="Archived cases cannot be updated")
+        
+        if record.status == "closed":
+            raise HTTPException(
+                status_code=400,
+                detail="Closed cases cannot be moved to another status"
+            )
 
         reason = data.reason.strip()
         if not reason:
@@ -924,13 +1005,45 @@ class CaseManager:
                 reason=reason
             )
         )
-
         await self._engine.save(record)
 
         await AuditLogManager.get_instance().register(
             str(current_user.tenant_uuid),
             str(current_user.id),
             f"Case status changed: caseId={case_id}, from={current_status}, to={next_status}, reason={reason}",
+        )
+
+        return await self._to_response(record, current_user)
+    
+    async def assign_case_analyst(self, case_id: str, data, current_user) -> CaseResponse:
+        record = await self._engine.find_one(
+            db_case_model,
+            (db_case_model.caseId == case_id)
+            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
+        )
+
+        if not record:
+            raise HTTPException(status_code=404, detail="Case not found")
+
+        if record.isArchived:
+            raise HTTPException(status_code=403, detail="Archived cases cannot be updated")
+
+        if not CaseHelperMethods.can_manage_case_assignments(record, current_user):
+            raise HTTPException(
+                status_code=403,
+                detail="Only admins, maintainers, or the case creator can assign analysts"
+            )
+
+        await self._validate_case_analysts([data.analystId], current_user)
+
+        record.assignedAnalystIds = [data.analystId]
+        record.updatedAt = utc_now()
+        await self._engine.save(record)
+
+        await AuditLogManager.get_instance().register(
+            str(current_user.tenant_uuid),
+            str(current_user.id),
+            f"Case analyst assigned: caseId={case_id}, analystId={data.analystId}",
         )
 
         return await self._to_response(record, current_user)
