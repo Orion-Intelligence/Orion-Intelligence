@@ -1,4 +1,4 @@
-import {clickOpenDefacementReport, clickOpenExploitReport, clickOpenReport, clickSidebarSubItem, exerciseJsonViewerOnce, openFirstReportAndValidateNavigationOrModal, openSidebarGroup, typeDashboardSearch, typeDashboardSearchSlow, waitForSearchReady} from './controllers/04-searching.controller';
+import {clickOpenDefacementReport, clickOpenExploitReport, clickOpenReport, clickSidebarSubItem, exerciseJsonViewerOnce, openFirstReportAndValidateNavigationOrModal, openSidebarGroup, typeDashboardSearchSlow, typeInputSlow, waitForSearchReady} from './controllers/04-searching.controller';
 
 describe('Orion Intelligence - Search Navigation and Report Access', () => {
   before(() => {
@@ -11,21 +11,21 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
 
   it('runs General Intelligence search flow for All, General, and Forums', () => {
     openSidebarGroup('General Intelligence');
-    typeDashboardSearch('bitcoin');
+    typeDashboardSearchSlow('bitcoin');
     openFirstReportAndValidateNavigationOrModal();
 
     cy.go('back');
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     cy.visit('/dashboard/strategic/general');
-    typeDashboardSearch('bitcoin');
+    typeDashboardSearchSlow('bitcoin');
     openFirstReportAndValidateNavigationOrModal();
 
     cy.go('back');
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     cy.visit('/dashboard/strategic/forums');
-    typeDashboardSearch('bitcoin');
+    typeDashboardSearchSlow('bitcoin');
     openFirstReportAndValidateNavigationOrModal();
   });
 
@@ -69,7 +69,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Social');
     clickSidebarSubItem('Social', 'All');
-    typeDashboardSearch('a');
+    typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -81,7 +81,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.scrollDashboardToTop()
 
     clickSidebarSubItem('Social', 'Twitter');
-    typeDashboardSearch('a');
+    typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -90,7 +90,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Mastodon');
-    typeDashboardSearch('a');
+    typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -99,7 +99,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Pastebin');
-    typeDashboardSearch('a');
+    typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -108,7 +108,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Forum');
-    typeDashboardSearch('a');
+    typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -117,7 +117,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     clickSidebarSubItem('Social', 'Reddit');
-    typeDashboardSearch('a');
+    typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
     cy.get('body').type('{esc}');
@@ -126,14 +126,14 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
   it('runs Exploit search flow for All, CVE, Tools, and ZeroDay', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Exploit');
-    typeDashboardSearch('exploit');
+    typeDashboardSearchSlow('exploit');
     clickOpenExploitReport();
 
     cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     cy.visit('/dashboard/exploit/cve');
-    typeDashboardSearch('cve');
+    typeDashboardSearchSlow('cve');
     clickOpenExploitReport();
 
 
@@ -141,14 +141,14 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     cy.visit('/dashboard/exploit/tools');
-    typeDashboardSearch('tool');
+    typeDashboardSearchSlow('tool');
     clickOpenExploitReport();
 
     cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
     cy.visit('/dashboard/exploit/zeroday');
-    typeDashboardSearch('exploit');
+    typeDashboardSearchSlow('exploit');
     clickOpenExploitReport();
 
     cy.get('[data-testid="dashboard-header-back"]').click();
@@ -167,7 +167,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('@q').clear();
 
     waitForSearchReady();
-    cy.get('@q').type('police{enter}');
+    typeInputSlow('@q', 'police');
     clickOpenReport();
     exerciseJsonViewerOnce();
   });
@@ -179,7 +179,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('@q').should('be.visible').and('not.be.disabled');
 
     waitForSearchReady();
-    cy.get('@q').type('uwe.dippold@web.de{enter}');
+    typeInputSlow('@q', 'uwe.dippold@web.de');
     cy.get('button[aria-label="Expand row"]').should('have.length.greaterThan', 0).first().scrollIntoView().click();
   });
 
@@ -195,7 +195,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('[data-testid="ioc-basic-tag-m_email"]').filter(':visible').first().scrollIntoView().click();
     cy.get('input[name="searchQuery"][placeholder="Search..."]').first().as('q');
     cy.get('@q').should('be.visible').and('not.be.disabled');
-    cy.get('@q').type('uwe.dippold@web.de{enter}');
+    typeInputSlow('@q', 'uwe.dippold@web.de');
 
     cy.get('app-loading-form', { timeout: 60000 }).should('not.exist');
     cy.get('[data-testid="ioc-stealer-table"]').scrollIntoView().should('be.visible');
@@ -209,7 +209,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('[data-testid="ioc-basic-tag-m_email"]').filter(':visible').first().scrollIntoView().click();
     cy.get('input[name="searchQuery"][placeholder="Search..."]').first().as('q');
     cy.get('@q').should('be.visible').and('not.be.disabled');
-    cy.get('@q').type('ydt.sja@gail.ccmm{enter}');
+    typeInputSlow('@q', 'ydt.sja@gail.ccmm');
 
     cy.get('app-loading-form', { timeout: 60000 }).should('not.exist');
     cy.get('[data-testid="ioc-stealer-table"]').scrollIntoView().should('be.visible');
@@ -221,7 +221,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     clickSidebarSubItem('Profile', 'Event Management');
     cy.get('app-loading-form', { timeout: 60000 }).should('not.exist');
 
-    cy.get('[data-testid="ioc-basic-search-input"]').filter(':visible').first().should('be.visible').clear().type('10.10.0.9{enter}');
+    typeInputSlow('[data-testid="ioc-basic-search-input"]', '10.10.0.9');
 
     cy.get('app-loading-form', { timeout: 60000 }).should('not.exist');
 
@@ -243,7 +243,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    cy.get('@scanInput').type('bbc.com{enter}');
+    typeInputSlow('@scanInput', 'bbc.com');
 
     cy.get('button.ui-cred-toolbar-btn', { timeout: 60000 }).should('be.disabled');
     cy.get('[data-testid="network-intel-tab-ip-scan"]').should('be.visible').click();
@@ -251,21 +251,21 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    cy.get('@scanInput').type('8.8.8.8{enter}');
+    typeInputSlow('@scanInput', '8.8.8.8');
 
     cy.get('[data-testid="network-intel-tab-repository-scan"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="network-intel-search-input"][placeholder="Search repository URL..."]').first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    cy.get('@scanInput').type('bbc.com{enter}');
+    typeInputSlow('@scanInput', 'bbc.com');
 
     cy.get('[data-testid="network-intel-tab-seo-scan"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="network-intel-search-input"][placeholder="Search domain..."]').first().as('scanInput');
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    cy.get('@scanInput').type('bbc.com{enter}');
+    typeInputSlow('@scanInput', 'bbc.com');
   });
 
   it('opens Playstore Scanner under Entity Lookup', () => {

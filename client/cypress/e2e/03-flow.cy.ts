@@ -1,5 +1,5 @@
 import {FLOW_ADMIN_SECTIONS, FLOW_ENTITY_API_SECTIONS, FLOW_SOCIAL_SECTIONS} from '../support/constants';
-import {applyDateRange, applyDirectoryDropdown, assertDirectoryContentVisible, assertFreeModeDashboardChrome, clickSidebarSubItem, DIRECTORY_CONTENT_OPTION, DIRECTORY_INDEX_OPTION, DIRECTORY_NETWORK_OPTION, getHeatmapComponent, openCountryReportFromMap, openSidebarGroup, resetDirectoryFilters, waitForDirectoryRequest} from './controllers/03-flow.controller';
+import {applyDateRange, applyDirectoryDropdown, assertDirectoryContentVisible, assertFreeModeDashboardChrome, clickSidebarSubItem, DIRECTORY_CONTENT_OPTION, DIRECTORY_INDEX_OPTION, DIRECTORY_NETWORK_OPTION, getHeatmapComponent, openCountryReportFromMap, openSidebarGroup, resetDirectoryFilters, typeVisibleInputSlow, waitForDirectoryRequest} from './controllers/03-flow.controller';
 
 describe('Orion Intelligence - Free Mode Flow', () => {
   after(() => {
@@ -140,10 +140,10 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.get('app-world-heatmap').should('be.visible');
     cy.get('[data-testid="ioc-basic-tag-AI"]').filter(':visible').first().should('be.visible').click();
     cy.location('pathname').should('include', '/dashboard/profile/ai');
-    cy.get('[data-testid="chat-widget-input"]').filter(':visible').first().should('be.enabled').type('hello from basic flow{enter}');
+    typeVisibleInputSlow('[data-testid="chat-widget-input"]', 'hello from basic flow', true);
     cy.wait('@nexusChat');
     cy.get('[data-testid="chat-widget-messages"]').filter(':visible').first().should('contain.text', 'hello from basic flow');
-    cy.get('[data-testid="chat-widget-input"]').filter(':visible').first().should('be.enabled').type('send with button');
+    typeVisibleInputSlow('[data-testid="chat-widget-input"]', 'send with button');
     cy.get('[data-testid="chat-widget-send"]').filter(':visible').first().should('be.enabled').click();
     cy.wait('@nexusChat');
     cy.get('[data-testid="chat-widget-messages"]').filter(':visible').first().should('contain.text', 'send with button');
@@ -211,9 +211,9 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.get('[data-testid="support-overlay"]').should('be.visible').and('not.have.class', 'opacity-0');
     cy.get('[data-testid="support-modal"]').should('be.visible');
     cy.get('[data-testid="support-modal-title"]').should('be.visible');
-    cy.get('[data-testid="support-email-input"]').should('be.visible').clear().type(testData.support_email);
-    cy.get('[data-testid="support-subject-input"]').should('be.visible').clear().type('Support request from Cypress');
-    cy.get('[data-testid="support-message-input"]').should('be.visible').clear().type('Please review this test support message submission flow.');
+    typeVisibleInputSlow('[data-testid="support-email-input"]', testData.support_email);
+    typeVisibleInputSlow('[data-testid="support-subject-input"]', 'Support request from Cypress');
+    typeVisibleInputSlow('[data-testid="support-message-input"]', 'Please review this test support message submission flow.');
     cy.get('[data-testid="support-send"]').should('be.visible').and('not.be.disabled').click();
 
     cy.wait('@sendSupport');

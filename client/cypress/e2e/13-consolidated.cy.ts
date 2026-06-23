@@ -15,7 +15,7 @@ import {
   setAllInsightsExpanded,
   switchToDeepSearchTab,
   switchToIocsTab
-} from './controllers/14-consolidated.controller';
+} from './controllers/13-consolidated.controller';
 
 describe('Consolidated - IOC Basic Flow', () => {
   beforeEach(() => {

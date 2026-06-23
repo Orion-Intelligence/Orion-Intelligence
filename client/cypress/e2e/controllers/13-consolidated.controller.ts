@@ -1,3 +1,5 @@
+import { typeDashboardSearchSlow } from './04-searching.controller';
+
 const DOMAIN_SCANNER_MODAL_TIMEOUT = 90000;
 const DOMAIN_SCANNER_SELECTOR = '[data-testid="domain-scanner-modal"]';
 const DOMAIN_SCANNER_TEST_DOMAINS = ['example.com', 'bbc.com', 'cnn.com'];
@@ -197,7 +199,7 @@ export function searchDeepFromTop(query: string, waitForNetwork = true) {
   if (waitForNetwork) {
     cy.intercept('POST', '**/api/search/consolidated').as('consolidatedSearchAfterDeepSearch');
   }
-  cy.get('[data-testid="dashboard-general-input"]').filter(':visible').first().scrollIntoView().clear().type(`${query}{enter}`);
+  typeDashboardSearchSlow(query);
   if (waitForNetwork) {
     cy.wait('@consolidatedSearchAfterDeepSearch', {timeout: 60000});
   }

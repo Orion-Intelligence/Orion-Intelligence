@@ -133,6 +133,18 @@ export function waitForDirectoryRequest() {
   });
 }
 
+export function typeVisibleInputSlow(selector: string, value: string, submit = false) {
+  cy.get(selector).filter(':visible').first().should('be.enabled').click({ force: true });
+  cy.get(selector).filter(':visible').first().type('{selectall}{backspace}', { force: true });
+  cy.wait(250);
+  cy.get(selector).filter(':visible').first().type(value, { force: true, delay: 75 });
+  cy.get(selector).filter(':visible').first().should('have.value', value);
+  if (submit) {
+    cy.wait(250);
+    cy.get(selector).filter(':visible').first().type('{enter}', { force: true });
+  }
+}
+
 export function assertDirectoryContentVisible() {
   cy.scrollDashboardToTop();
   cy.get('app-directory').should('be.visible');
@@ -172,6 +184,7 @@ export function applyDirectoryDropdown(testId: string, option: { label: string; 
     }
     const menuId = $el.attr('aria-controls');
     cy.wrap($el).click();
+    cy.get(`#${menuId} input[type="text"]`).should('be.visible').clear().type(option.label, { force: true, delay: 75 });
     cy.contains(`#${menuId} [role="option"]`, option.label).click();
   });
   cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();

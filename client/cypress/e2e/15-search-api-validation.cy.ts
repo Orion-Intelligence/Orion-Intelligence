@@ -5,7 +5,7 @@ import {
   assertAdvancedEntityFilterResult16,
   assertDirectSearchResult16,
   assertSidebarFilterResult16,
-} from './controllers/16-search-api-validation.controller';
+} from './controllers/15-search-api-validation.controller';
 
 describe('Orion Intelligence - Search API Validation', () => {
   beforeEach(() => {
