@@ -58,7 +58,6 @@ export class UiDropdownComponent implements OnDestroy {
   searchTerm = '';
   activeIndex = -1;
   overlayWidth = 0;
-  listboxMaxHeight = 240;
   readonly overlayPositions: ConnectedPosition[] = [{ originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 0 }];
 
   constructor(private readonly hostElement: ElementRef<HTMLElement>) {}
@@ -310,6 +309,10 @@ export class UiDropdownComponent implements OnDestroy {
     return this.isLightTheme() ? 'border-[#c7d5e6] bg-white' : 'border-[#4b5f78] !bg-[#131E30]';
   }
 
+  listboxClass(): string {
+    return this.size() === 'large' ? 'max-h-[280px]' : 'max-h-[240px]';
+  }
+
   menuClass(): string {
     const surfaceClass = this.surface() === 'alert' ? 'ui-dropdown-menu-alert' : '';
     const darkSurfaceClass = this.surface() === 'alert' ? '!bg-[#152230]' : '!bg-[#131E30]';
@@ -395,10 +398,6 @@ export class UiDropdownComponent implements OnDestroy {
   private updateOverlayMetrics(): void {
     const triggerRect = this.triggerButton?.nativeElement.getBoundingClientRect() || this.hostElement.nativeElement.getBoundingClientRect();
     this.overlayWidth = triggerRect.width || 0;
-    const defaultMaxHeight = this.size() === 'large' ? 280 : 240;
-    const searchHeight = this.searchable() ? 44 : 0;
-    const availableBelow = window.innerHeight - triggerRect.bottom - searchHeight - 16;
-    this.listboxMaxHeight = Math.max(96, Math.min(defaultMaxHeight, Math.floor(availableBelow)));
   }
 
   private canOpen(): boolean {

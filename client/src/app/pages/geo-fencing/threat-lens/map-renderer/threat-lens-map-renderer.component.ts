@@ -57,6 +57,8 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private readonly hoverHitTestMinIntervalMs = 80;
   private readonly maxGlobeCanvasAspectRatio = 1.62;
 
+  isMapCursorPointer = false;
+
   @Output() mapReady = new EventEmitter<void>();
   @Output() mapError = new EventEmitter<string>();
   @Output() countrySelected = new EventEmitter<ThreatLensCountrySelection>();
@@ -1006,9 +1008,11 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   }
 
   private setMapCursor(cursor: string): void {
-    const element = this.mapContainer?.nativeElement;
-    if (element) {
-      element.style.cursor = cursor;
+    const isPointer = cursor === 'pointer';
+    if (this.isMapCursorPointer !== isPointer) {
+      this.ngZone.run(() => {
+        this.isMapCursorPointer = isPointer;
+      });
     }
   }
 

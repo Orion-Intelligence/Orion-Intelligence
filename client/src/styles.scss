@@ -271,6 +271,70 @@ app-satellite-map-renderer .leaflet-tooltip-pane {
   background-image: none;
 }
 
+.threat-lens-ip-detail-content > * {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
+
+.threat-lens-ip-detail-content > :first-child {
+  margin-top: 0 !important;
+}
+
+.threat-lens-ip-detail-content > :last-child {
+  margin-bottom: 0 !important;
+}
+
+.threat-lens-ip-detail-content > :first-child .grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 0 24px !important;
+  border-top: 1px solid rgb(143 166 190 / 16%);
+  border-bottom: 1px solid rgb(143 166 190 / 16%);
+  background: rgb(19 30 48 / 28%);
+}
+
+.threat-lens-ip-detail-content > :first-child .grid > div {
+  display: grid !important;
+  grid-template-columns: minmax(92px, 0.72fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+  min-height: 42px;
+  padding: 10px 2px;
+  border-bottom: 1px solid rgb(143 166 190 / 14%);
+}
+
+.threat-lens-ip-detail-content > :first-child .grid > div:nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+.threat-lens-ip-detail-content > :first-child .grid > div > span:first-child {
+  color: rgb(160 184 209 / 82%) !important;
+  font-size: 10px !important;
+  line-height: 1.2;
+  letter-spacing: 0.12em !important;
+}
+
+.threat-lens-ip-detail-content > :first-child .grid > div > span:last-child {
+  color: #e6eef8 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.35;
+  text-align: right;
+}
+
+@media (width <= 720px) {
+  .threat-lens-ip-detail-content > :first-child .grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .threat-lens-ip-detail-content > :first-child .grid > div:nth-last-child(-n + 2) {
+    border-bottom: 1px solid rgb(143 166 190 / 14%);
+  }
+
+  .threat-lens-ip-detail-content > :first-child .grid > div:last-child {
+    border-bottom: 0;
+  }
+}
+
 .threat-lens-tooltip__content--arc {
   min-width: 220px;
 }
