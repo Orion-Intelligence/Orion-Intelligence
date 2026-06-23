@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, effect, inject, input, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { RecordSidebarComponent } from '../../../../shared/components/record-sidebar/record-sidebar.component';
@@ -15,7 +15,7 @@ const RECORD_SIDEBAR_CLOSE_MS = 300;
 @Component({
   selector: 'app-dashboard-result-apt',
   standalone: true,
-  imports: [CommonModule, DatePipe, TranslatePipe, RecordSidebarComponent],
+  imports: [CommonModule, DatePipe, TranslatePipe, RouterLink, RecordSidebarComponent],
   templateUrl: './dashboard-result-apt.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -35,9 +35,15 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   visibleGroupCount = signal(0);
   readonly searchResults = input<AptIntelResultItem[]>([]);
   readonly isExpandAble = input<boolean>(false);
+  readonly directResults = input<boolean>(false);
 
   constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
     effect(() => {
+      if (this.directResults()) {
+        const results = this.getVisibleResults();
+        this.startStaggeredRender(results.length, this.buildDirectRenderKey(results));
+        return;
+      }
       const groups = this.getAptIntelGroups().slice(0, this.getGroupDisplayLimit());
       this.startStaggeredRender(groups.length, this.buildRenderKey(groups));
     });
@@ -63,6 +69,10 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   getVisibleResults(): AptIntelResultItem[] {
     const limit = this.isExpandAble() && this.isCollapsed ? 2 : 100;
     return this.searchResults().slice(0, limit);
+  }
+
+  getVisibleDirectResults(): AptIntelResultItem[] {
+    return this.getVisibleResults().slice(0, this.visibleGroupCount());
   }
 
   getVisibleGroups(): AptIntelGroup[] {
@@ -155,9 +165,15 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   }
 
   toggleCollapsed(): void {
-    const previousLimit = this.getGroupDisplayLimit();
+    const previousLimit = this.directResults() ? this.getDirectResultDisplayLimit() : this.getGroupDisplayLimit();
     const isExpanding = this.isCollapsed;
     this.isCollapsed = !this.isCollapsed;
+    if (this.directResults()) {
+      const results = this.getVisibleResults();
+      this.startStaggeredRender(results.length, this.buildDirectRenderKey(results));
+      this.scrollToResultIndex(isExpanding ? previousLimit : 0);
+      return;
+    }
     const groups = this.getAptIntelGroups().slice(0, this.getGroupDisplayLimit());
     this.startStaggeredRender(groups.length, this.buildRenderKey(groups));
     this.scrollToResultIndex(isExpanding ? previousLimit : 0);
@@ -201,14 +217,19 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   }
 
   getReportLink(item: AptIntelResultItem): string[] {
+    const reportId = this.getReportId(item);
     if (this.isDefacement(item)) {
-      return ['/dashboard', 'defacement', 'hacked', item.m_hash || item._id || ''];
+      return ['/dashboard', 'defacement', 'hacked', reportId];
+    }
+    if (this.currentUrl.includes('/consolidated/')) {
+      const category = this.isMalware(item) ? 'malware' : 'apt';
+      return [this.currentUrl.replace(/\/consolidated\/[^/]+$/, `/consolidated/${category}`), reportId];
     }
     const category = this.isMalware(item) ? 'malware-bazaar' : 'apt';
     if (this.currentUrl.includes('/apt-intel/')) {
-      return [this.currentUrl.replace(/\/apt-intel\/[^/]+$/, `/apt-intel/${category}`), item.m_hash || ''];
+      return [this.currentUrl.replace(/\/apt-intel\/[^/]+$/, `/apt-intel/${category}`), reportId];
     }
-    return [this.currentUrl, category, item.m_hash || ''];
+    return [this.currentUrl, category, reportId];
   }
 
   getQueryParams(item: AptIntelResultItem): Record<string, string> {
@@ -216,6 +237,18 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
       ...this.queryParams,
       ci: this.isDefacement(item) ? 'defacement' : this.isMalware(item) ? 'malware' : 'apt',
     };
+  }
+
+  getItemKey(item: AptIntelResultItem, index = 0): string {
+    return this.getReportId(item) || item.m_url || item.m_base_url || `${index}`;
+  }
+
+  getReportId(item: AptIntelResultItem): string {
+    return item.m_hash || item._id || item.m_sha256_hash || item.m_sha1_hash || item.m_md5_hash || '';
+  }
+
+  saveCurrentPosition(item: AptIntelResultItem): void {
+    this.scrollService.saveCurrentPosition(this.getReportId(item));
   }
 
   getKindLabel(item: AptIntelResultItem): string {
@@ -382,8 +415,16 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
     return this.isExpandAble() && this.isCollapsed ? 2 : 100;
   }
 
+  private getDirectResultDisplayLimit(): number {
+    return this.isExpandAble() && this.isCollapsed ? 2 : 100;
+  }
+
   private buildRenderKey(groups: AptIntelGroup[]): string {
     return groups.map(group => `${group.key}:${group.records.length}:${group.latestSeen || ''}`).join('|');
+  }
+
+  private buildDirectRenderKey(results: AptIntelResultItem[]): string {
+    return results.map((item, index) => this.getItemKey(item, index)).join('|');
   }
 
   private startStaggeredRender(targetCount: number, key: string): void {
