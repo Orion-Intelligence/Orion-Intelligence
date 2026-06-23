@@ -105,7 +105,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 
   toggleLanguageDropdown(event: Event) {
     event.stopPropagation();
-    this.dropdownOpen.set(false);
+    this.dropdownOpen.set(true);
     this.languageDropdownOpen.update(v => !v);
   }
 

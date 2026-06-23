@@ -7,6 +7,27 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
         cy.visit("/");
     });
 
+    it('changes account language away from English and back', () => {
+        cy.visit('/dashboard/profile/account');
+        cy.get('[data-testid="account-settings-form"]').should('be.visible');
+        cy.get('[data-testid="account-settings-language-select"] select').scrollIntoView().should('be.visible');
+
+        cy.intercept('POST', '**/api/update/current/user').as('accountLanguageUpdate');
+        cy.get('[data-testid="account-settings-language-select"] select').select('fr').should('have.value', 'fr');
+        cy.wait('@accountLanguageUpdate', { timeout: 60000 }).then(({request, response}) => {
+            const body = typeof request.body === 'string' ? JSON.parse(request.body) : request.body;
+            expect(body.preferences.language).to.eq('fr');
+            expect(response?.statusCode).to.be.oneOf([200, 204]);
+        });
+
+        cy.get('[data-testid="account-settings-language-select"] select').select('en').should('have.value', 'en');
+        cy.wait('@accountLanguageUpdate', { timeout: 60000 }).then(({request, response}) => {
+            const body = typeof request.body === 'string' ? JSON.parse(request.body) : request.body;
+            expect(body.preferences.language).to.eq('en');
+            expect(response?.statusCode).to.be.oneOf([200, 204]);
+        });
+    });
+
     it('updates avatar/theme/2FA and validates reset password journey', () => {
         cy.env(['TEST_USERS', 'NEW_PASSWORD']).then(({TEST_USERS, NEW_PASSWORD}) => {
             const resolvedNewPassword = NEW_PASSWORD ?? '';

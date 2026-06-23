@@ -110,10 +110,7 @@
               <div class="mt-2 flex items-center justify-between gap-2 text-[12px] text-[#a0b8d1]">
                 <span>{{ timeAgo(job.created_at) }}</span>
                 <div class="flex shrink-0 items-center gap-2">
-                  @if (isScanCompleted(job)) {
-                    <span data-testid="scan-notification-view-report" class="font-semibold text-[#57a5eb]">{{ 'View Report' | translate }}</span>
-                  }
-                  @else if (!job.seen && isScanFailed(job)) {
+                  @if (!job.seen && isScanFailed(job)) {
                     <button type="button" class="border-0 bg-transparent text-[12px] font-semibold text-[#57a5eb]" (click)="markScanSeen(job, $event)">{{ 'Mark seen' | translate }}</button>
                   }
                   <button data-testid="scan-notification-delete" type="button" [disabled]="isScanPending(job) || isScanDeleting" class="rounded-md border border-[rgba(255,77,79,0.35)] bg-[rgba(255,77,79,0.08)] px-2 py-1 text-[12px] font-semibold text-[#ff8a8c] transition hover:bg-[rgba(255,77,79,0.14)] disabled:cursor-not-allowed disabled:opacity-45" (click)="requestDeleteScan(job, $event)">{{ 'Delete' | translate }}</button>
