@@ -176,10 +176,6 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
     return this.formatDate(this.job?.completed_at || this.job?.updated_at || this.job?.created_at);
   }
 
-  get createdAtLabel(): string {
-    return this.formatDate(this.job?.created_at);
-  }
-
   getVisibleObjectEntries(item: any): { key: string; value: any }[] {
     return this.getFlattenedObjectEntries(item).filter(entry => !this.isEmptyDisplayValue(entry.value) && !this.isInternalField(entry.key));
   }

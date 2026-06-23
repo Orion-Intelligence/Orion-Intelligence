@@ -117,12 +117,10 @@ def test_test_scan_job_routes_save_model_and_poll_mock_response(monkeypatch):
 
     created = _run(
         ScanJobManager.get_instance().create_job(
-            {
-                "api_reference": "dynamic/social",
-                "payload": {"text": {"username": "alice"}},
-                "metadata": {"title": "Social Scan", "target": "alice"},
-            },
-            current_user,
+            current_user=current_user,
+            api_reference="dynamic/social",
+            payload={"text": {"username": "alice"}},
+            metadata={"title": "Social Scan", "target": "alice"},
         )
     )
     polled = _run(TestRouteHelper.test_poll_scan_job(created["scan_id"], current_user))
