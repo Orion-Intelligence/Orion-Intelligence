@@ -16,7 +16,7 @@ import { ConfirmationPopupComponent } from '../confirmation-popup/confirmation-p
 import { Router } from '@angular/router';
 
 type NotificationMode = 'alerts' | 'scans';
-type ScanDeleteMode = 'single' | 'all';
+type ScanActionMode = 'single-delete' | 'delete-all' | 'mark-seen-completed';
 
 @Component({
   selector: 'app-alert-notification',
@@ -43,7 +43,7 @@ export class AlertNotificationComponent implements OnChanges {
   isScanDeleteConfirmationOpen: boolean = false;
   isScanDeleting: boolean = false;
   scanDeleteTarget: ScanJob | null = null;
-  scanDeleteMode: ScanDeleteMode | null = null;
+  scanDeleteMode: ScanActionMode | null = null;
   readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.', testId: 'notification-alert-export-option-report' }];
   readonly isNotificationOpen = input.required<boolean | null>();
   readonly notificationMode = input<NotificationMode>('alerts');
@@ -283,7 +283,7 @@ export class AlertNotificationComponent implements OnChanges {
       return;
     }
     this.scanDeleteTarget = job;
-    this.scanDeleteMode = 'single';
+    this.scanDeleteMode = 'single-delete';
     this.isScanDeleteConfirmationOpen = true;
   }
 
@@ -292,13 +292,25 @@ export class AlertNotificationComponent implements OnChanges {
       return;
     }
     this.scanDeleteTarget = null;
-    this.scanDeleteMode = 'all';
+    this.scanDeleteMode = 'mark-seen-completed';
+    this.isScanDeleteConfirmationOpen = true;
+  }
+
+  requestDeleteAllScans(): void {
+    if (!this.scanNotificationService.jobs().length) {
+      return;
+    }
+    this.scanDeleteTarget = null;
+    this.scanDeleteMode = 'delete-all';
     this.isScanDeleteConfirmationOpen = true;
   }
 
   scanDeleteConfirmationMessage(): string {
-    if (this.scanDeleteMode === 'all') {
-      return 'Are you sure you want to delete all completed scan notifications? Running scans will not be deleted.';
+    if (this.scanDeleteMode === 'mark-seen-completed') {
+      return 'Are you sure you want to mark all notifications as seen?';
+    }
+    if (this.scanDeleteMode === 'delete-all') {
+      return 'Are you sure you want to delete all scan notifications?';
     }
     return 'Are you sure you want to delete this scan notification?';
   }
@@ -308,7 +320,7 @@ export class AlertNotificationComponent implements OnChanges {
       this.closeScanDeleteConfirmation();
       return;
     }
-    if (this.scanDeleteMode === 'single' && this.scanDeleteTarget) {
+    if (this.scanDeleteMode === 'single-delete' && this.scanDeleteTarget) {
       this.isScanDeleting = true;
       this.scanNotificationService.deleteScan(this.scanDeleteTarget).subscribe({
         next: () => {
@@ -324,14 +336,28 @@ export class AlertNotificationComponent implements OnChanges {
     }
 
     this.isScanDeleting = true;
-    this.scanNotificationService.clearCompletedScans().subscribe({
+    if (this.scanDeleteMode === 'mark-seen-completed') {
+      this.scanNotificationService.markCompletedScansSeen().subscribe({
+        next: () => {
+          this.messageNotificationService.show('Scans marked as seen!', 'success');
+          this.closeScanDeleteConfirmation();
+        },
+        error: err => {
+          this.messageNotificationService.show(err?.error?.detail || 'Failed to clear scans');
+          this.closeScanDeleteConfirmation();
+        },
+      });
+      return;
+    }
+
+    this.scanNotificationService.deleteAllScans().subscribe({
       next: response => {
         const deleted = Number(response?.deleted || 0);
         if (deleted > 0) {
           this.messageNotificationService.show('Scans deleted successfully!', 'success');
         }
         else {
-          this.messageNotificationService.show('No completed scans to delete');
+          this.messageNotificationService.show('No scans to delete');
         }
         this.closeScanDeleteConfirmation();
       },

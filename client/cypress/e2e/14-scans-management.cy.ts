@@ -145,6 +145,11 @@ describe('Scans Management - Entity Lookup Flow', () => {
     cy.get('[data-testid="scan-notification-clear-all"]').should('be.visible').and('not.be.disabled').click();
     cy.get('[data-testid="confirmation-popup"]').should('be.visible');
     cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click();
+    cy.get('[data-testid="scan-notification-card"]').should('exist');
+
+    cy.get('[data-testid="scan-notification-delete-all"]').should('be.visible').and('not.be.disabled').click();
+    cy.get('[data-testid="confirmation-popup"]').should('be.visible');
+    cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click();
     cy.get('[data-testid="scan-notification-card"]').should('not.exist');
   });
 });

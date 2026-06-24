@@ -41,6 +41,11 @@ class ScanJobCreateRequest(BaseModel):
     force_new: bool = False
 
 
+class ScanJobSeenRequest(BaseModel):
+    scan_id: Optional[str] = None
+    seen_all: bool = False
+
+
 class ScanJobNotificationResponse(BaseModel):
     scan_id: str
     title: str = ""

@@ -195,13 +195,22 @@ export class ScanNotificationService {
   }
 
   markSeen(job: ScanJob): void {
-    this.api.post<any>(`scan-jobs/${job.scan_id}/seen`, {}).subscribe({
+    this.api.post<any>('scan-jobs/seen', { scan_id: job.scan_id }).subscribe({
       next: () => {
         this.upsertVisibleJob({ ...job, seen: true });
         this.refreshCounts();
       },
       error: () => void 0,
     });
+  }
+
+  markCompletedScansSeen(): Observable<any> {
+    return this.api.post<any>('scan-jobs/seen', { seen_all: true }).pipe(tap(() => {
+      const nextJobs = this.jobs().map(job => this.isTerminal(job) ? { ...job, seen: true } : job);
+      this.jobs.set(this.sortJobs(nextJobs));
+      nextJobs.forEach(job => this.jobCache.set(job.scan_id, job));
+      this.refreshCounts();
+    }));
   }
 
   getScanDetail(scanId: string): Observable<ScanJobDetailResponse> {
@@ -216,12 +225,12 @@ export class ScanNotificationService {
     }));
   }
 
-  clearCompletedScans(): Observable<any> {
+  deleteAllScans(): Observable<any> {
     return this.api.delete<any>('scan-jobs/clear-all').pipe(tap(() => {
       const runningJobs = this.jobs().filter(job => this.isIncomplete(job));
       this.jobCache.clear();
       runningJobs.forEach(job => this.jobCache.set(job.scan_id, job));
-      this.jobs.set(runningJobs);
+      this.jobs.set(this.sortJobs(runningJobs));
       this.refreshCounts();
       this.resumeNextIncompleteJob();
     }));
@@ -392,8 +401,7 @@ export class ScanNotificationService {
     const next = index >= 0
       ? current.map(item => item.scan_id === job.scan_id ? job : item)
       : [job, ...current];
-    next.sort((a, b) => new Date(b.created_at || b.updated_at || 0).getTime() - new Date(a.created_at || a.updated_at || 0).getTime());
-    this.jobs.set(next);
+    this.jobs.set(this.sortJobs(next));
     this.jobUpdates$.next(job);
   }
 
@@ -403,7 +411,7 @@ export class ScanNotificationService {
     if (index < 0) {
       return;
     }
-    this.jobs.set(current.map(item => item.scan_id === job.scan_id ? job : item));
+    this.jobs.set(this.sortJobs(current.map(item => item.scan_id === job.scan_id ? job : item)));
   }
 
   private removeJob(scanId: string): void {
@@ -424,6 +432,17 @@ export class ScanNotificationService {
 
   private isTerminal(job: ScanJob): boolean {
     return ['done', 'error', 'cancelled', 'expired'].includes(this.getStatus(job));
+  }
+
+  private sortJobs(jobs: ScanJob[]): ScanJob[] {
+    return [...jobs].sort((a, b) => {
+      const priorityA = (!a.seen || this.isIncomplete(a)) ? 0 : 1;
+      const priorityB = (!b.seen || this.isIncomplete(b)) ? 0 : 1;
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+      return new Date(b.created_at || b.updated_at || 0).getTime() - new Date(a.created_at || a.updated_at || 0).getTime();
+    });
   }
 
   private toScanResponse<T>(job: ScanJob): T {
