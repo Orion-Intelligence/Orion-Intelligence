@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Awaitable, Callable, Dict, Optional
 
 import httpx
 from bson import ObjectId
@@ -81,6 +82,35 @@ class ScanJobManager:
             "completed_at": job.completed_at,
         }
 
+    @staticmethod
+    def _as_response_dict(response: Any) -> Dict[str, Any]:
+        if isinstance(response, dict):
+            return response
+        body = getattr(response, "body", None)
+        if body:
+            try:
+                return json.loads(body.decode("utf-8"))
+            except Exception:
+                return {"result": body.decode("utf-8", errors="replace")}
+        return {"result": response}
+
+    def _with_scan_metadata(self, response: Any, job: db_scan_job_model) -> Dict[str, Any]:
+        response_dict = self._as_response_dict(response)
+        notification = self._build_scan_notification(job)
+        return {**response_dict, "scan_id": str(job.id), "scan_title": notification.title, "scan_target": notification.target, "scan_status": notification.status.value,
+                "scan_seen": notification.seen, "scan_created_at": notification.created_at, "scan_updated_at": notification.updated_at, "scan_completed_at": notification.completed_at,
+        }
+
+    async def _save_job_response(self, job: db_scan_job_model, response: Any) -> None:
+        now = datetime.utcnow()
+        response_dict = self._as_response_dict(response)
+        job.response = response_dict
+        job.updated_at = now
+        computed_status = self._job_status_from_response(response_dict)
+        if computed_status in {ScanJobStatus.DONE, ScanJobStatus.ERROR}:
+            job.completed_at = now
+        await self._engine.save(job)
+
     def _scan_status_value(self, job: db_scan_job_model, status_value: Optional[str] = None) -> ScanJobStatus:
         if status_value:
             return ScanJobStatus(status_value)
@@ -120,7 +150,7 @@ class ScanJobManager:
         latest_date = job.created_at or job.updated_at or datetime.min
         return (0 if is_unseen_or_incomplete else 1, -latest_date.timestamp())
 
-    async def create_job(self, current_user, api_reference: str, payload: Dict[str, Any], metadata: Optional[Dict[str, Any]] = None, force_new: bool = False) -> Dict[str, Any]:
+    async def create_job(self, current_user, api_reference: str, payload: Dict[str, Any], metadata: Optional[Dict[str, Any]] = None, force_new: bool = False, confirm_duplicates: bool = True) -> Dict[str, Any]:
         config = self._route_config(api_reference)
         metadata = metadata or {}
         now = datetime.utcnow()
@@ -144,13 +174,14 @@ class ScanJobManager:
             if completed_at and completed_at >= now - timedelta(days=3):
                 return {**self._build_scan_detail(latest_done_scan, ScanJobStatus.DONE.value).model_dump(), "source": "previous_completed"}
             
-            previous_scan = self._build_scan_notification(latest_done_scan, ScanJobStatus.DONE.value).model_dump()
-            return {
-                "requires_confirmation": True,
-                "message": "You already scanned this before. Do you want to use the previous result or run a new scan?",
-                "source": "previous_completed",
-                "previous_scan": previous_scan,
-            }
+            if confirm_duplicates:
+                previous_scan = self._build_scan_notification(latest_done_scan, ScanJobStatus.DONE.value).model_dump()
+                return {
+                    "requires_confirmation": True,
+                    "message": "You already scanned this before. Do you want to use the previous result or run a new scan?",
+                    "source": "previous_completed",
+                    "previous_scan": previous_scan,
+                }
 
         job = db_scan_job_model(
             user_uuid=str(current_user.id),
@@ -166,6 +197,33 @@ class ScanJobManager:
         except Exception:
             pass
         return {**self._build_scan_detail(job, ScanJobStatus.QUEUED.value, target).model_dump(), "source": "new"}
+
+    async def run_tracked_scan(self, current_user, api_reference: str, payload: Dict[str, Any], metadata: Optional[Dict[str, Any]], runner: Callable[[], Awaitable[Any]], force_new: bool = False, confirm_duplicates: bool = True) -> Dict[str, Any]:
+        created = await self.create_job(current_user, api_reference, payload, metadata, force_new, confirm_duplicates,)
+        if created.get("requires_confirmation"):
+            return created
+
+        scan_id = created.get("scan_id")
+
+        job = await self._engine.find_one(db_scan_job_model,(db_scan_job_model.id == ObjectId(scan_id)) & (db_scan_job_model.user_uuid == str(current_user.id)))
+        if not job:
+            raise HTTPException(status_code=404, detail="Scan job not found")
+
+        if created.get("source") == "previous_completed":
+            response = job.response or {"status": "pending", "progress": 5, "step": "queued"}
+            return self._with_scan_metadata(response, job)
+
+        try:
+            response = await runner()
+        except HTTPException as exc:
+            await self._save_job_response(job, {"status": ScanJobStatus.ERROR.value, "detail": exc.detail, "step": "failed"})
+            raise
+        except Exception as exc:
+            await self._save_job_response(job, {"status": ScanJobStatus.ERROR.value, "detail": "Scan failed", "step": "failed"})
+            raise HTTPException(status_code=500, detail="Scan failed") from exc
+
+        await self._save_job_response(job, response)
+        return self._with_scan_metadata(job.response, job)
 
     async def list_scan_notifications(self, current_user, page: int = 1, limit: int = 8) -> ScanJobListResponse:
         safe_limit = max(1, min(int(limit or 8), 100))

@@ -138,12 +138,12 @@
     </div>
     <div class="w-full px-5">
       <div class="flex flex-col gap-2">
-        <button (click)="close()" class="w-full rounded-md border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--color-blue-810)] [body.light-theme_&]:text-[#172235]" type="button">{{ 'common.actions.close' | translate }}</button>
         @if (isAlertMode() && alertNotifications.length>0) {
+          <button (click)="close()" class="w-full rounded-md border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--color-blue-810)] [body.light-theme_&]:text-[#172235]" type="button">{{ 'common.actions.close' | translate }}</button>
           <button data-testid="tenant-notification-clear-all" (click)="clearAll()" class="w-full rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110" type="button">{{ 'Clear All' | translate }}</button>
         }
         @if (isScanMode() && scanNotificationService.jobs().length>0) {
-          <button data-testid="scan-notification-clear-all" [disabled]="isScanDeleting" (click)="requestClearAllScans()" class="w-full rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" type="button">{{ 'Clear All' | translate }}</button>
+          <button data-testid="scan-notification-clear-all" [disabled]="isScanDeleting" (click)="requestClearAllScans()" class="w-full rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" type="button">{{ 'Read All' | translate }}</button>
           <button data-testid="scan-notification-delete-all" [disabled]="isScanDeleting" (click)="requestDeleteAllScans()" class="w-full rounded-md border border-[rgba(255,77,79,0.35)] bg-[rgba(255,77,79,0.08)] px-4 py-2 text-sm font-semibold text-[#ff8a8c] transition hover:bg-[rgba(255,77,79,0.14)] disabled:cursor-not-allowed disabled:opacity-60" type="button">{{ 'Delete All' | translate }}</button>
         }
       </div>

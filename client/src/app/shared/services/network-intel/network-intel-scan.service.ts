@@ -315,7 +315,7 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
   }
 
   private runTrackedScan<T extends { result?: { status?: string; progress?: number } | null; status?: string; progress?: number | null }>( apiReference: string, payload: Record<string, any>, metadata: Record<string, any>, pollDelayMs = this.pollDelayMs, ): Subscription {
-    return this.runTask<T>((cancel$) => this.scanNotifications.runScanAsResponse<T>({
+    return this.runTask<T>((cancel$) => this.scanNotifications.runApiScanAsResponse<T>({
       apiReference,
       payload,
       metadata,
