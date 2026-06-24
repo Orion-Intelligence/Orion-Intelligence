@@ -271,9 +271,9 @@ if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
 fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && [ "$EXTRA_FLAG" = "-full" ]; then
-    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up --pull never --force-recreate "${compose_up_services[@]}"
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --pull never --force-recreate "${compose_up_services[@]}"
 else
-    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up --pull never "${compose_up_services[@]}"
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --pull never "${compose_up_services[@]}"
 fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
