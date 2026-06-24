@@ -950,7 +950,6 @@ async def list_scan_job_notifications(page: int = Query(1, ge=1), limit: int = Q
 @api_routes.get(
     "/api/scan-jobs/incomplete",
     include_in_schema=False,
-    dependencies=SCANNING_DEPS,
 )
 async def list_incomplete_scan_jobs(limit: int = Query(1, ge=1, le=100), current_user=Depends(get_current_user)):
     return await ScanJobManager.get_instance().list_incomplete_scans(current_user, limit=limit)
@@ -959,7 +958,6 @@ async def list_incomplete_scan_jobs(limit: int = Query(1, ge=1, le=100), current
 @api_routes.get(
     "/api/scan-jobs/count",
     include_in_schema=False,
-    dependencies=SCANNING_DEPS,
 )
 async def count_scan_jobs(current_user=Depends(get_current_user)):
     return await ScanJobManager.get_instance().count_jobs(current_user)
