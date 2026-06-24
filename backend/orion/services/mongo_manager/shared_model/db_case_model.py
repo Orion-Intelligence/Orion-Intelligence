@@ -209,6 +209,7 @@ class SourceType(str, Enum):
 class TaskStatus(str, Enum):
     OPEN = "open"
     IN_PROGRESS = "in_progress"
+    UNDER_REVIEW = "under_review"
     BLOCKED = "blocked"
     DONE = "done"
     CANCELLED = "cancelled"

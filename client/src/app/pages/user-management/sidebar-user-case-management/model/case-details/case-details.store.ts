@@ -63,4 +63,7 @@ export abstract class CaseDetailsStore {
   abstract viewArtifactReport(artifact: CaseArtifact): void;
   abstract verifyArtifactFile(artifact: CaseArtifact, fileId: string): void;
   abstract isArtifactFileIntegrityFailed(artifactFile: CaseArtifactFile): boolean;
+  abstract canAddTasks(): boolean;
+  abstract canEditTask(task?: CaseTask | null): boolean;
+  abstract canEditFullTask(): boolean;
 }

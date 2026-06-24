@@ -4,7 +4,7 @@
             <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Tasks' | translate }}</h2>
             <img src="/assets/images/shared/theme/info.svg" alt="" aria-hidden="true" [appTooltip]="'Investigation or follow-up work items that can be assigned to analysts on this case.' | translate" class="h-4 w-4 shrink-0 ui-action-icon">
         </div>
-        @if (canEditTasksAndComments() && !caseData.closure) {
+        @if (canAddTasks()) {
         <div class="flex items-center gap-2">
             <button type="button" (click)="store.openAddTask()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800 [body.light-theme_&]:hover:border-sky-700/40 [body.light-theme_&]:hover:bg-sky-200/70 [body.light-theme_&]:hover:text-sky-900" data-testid="case-task-add">
                 <i class="bi bi-plus-lg"></i> {{ 'common.actions.add' | translate }}
@@ -23,29 +23,33 @@
                     <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text2)]">{{
                         'Task' | translate }}
                         {{ (editingTaskIndex || 0) + 1 }}</span>
+                    @if (canEditFullTask()) {
                     <button type="button" (click)="store.removeTask(editingTaskIndex || 0)" [attr.aria-label]="'Remove task' | translate" class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-red-400/20 bg-red-500/10 px-2.5 text-sm font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/15 hover:text-red-200 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70 [body.light-theme_&]:hover:text-red-900" [attr.data-testid]="'case-task-remove-' + (editingTaskIndex || 0)">
                         <i class="bi bi-x-lg"></i> {{ 'Remove' | translate }}
                     </button>
+                    }
                 </div>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="sm:col-span-2">
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
                             'categoryAlerts.form.title' | translate }}</label>
-                        <input [(ngModel)]="task.title" name="task-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-title-input" />
+                        <input [(ngModel)]="task.title" [disabled]="!canEditFullTask()" name="task-title" type="text" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-title-input" />
                     </div>
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
                             'Status' | translate }}</label>
                         <select [(ngModel)]="task.status" name="task-status" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-status-select">
-                            @for (status of taskStatusOptions; track status.value) {
-                            <option [value]="status.value">{{ status.label }}</option>
+                            @for (status of getTaskStatusOptions(task); track status.value) {
+                            <option [value]="status.value" [disabled]="isReadonlyTaskStatusOption(status.value)">
+                                {{ status.label }}
+                            </option>
                             }
                         </select>
                     </div>
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
                             'Priority' | translate }}</label>
-                        <select [(ngModel)]="task.priority" name="task-priority" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-priority-select">
+                        <select [(ngModel)]="task.priority" [disabled]="!canEditFullTask()" name="task-priority" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-priority-select">
                             @for (priority of priorityOptions; track priority) {
                             <option [value]="priority" class="capitalize">{{ priority }}</option>
                             }
@@ -54,7 +58,7 @@
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
                             'Assign To' | translate }}</label>
-                        <select [(ngModel)]="task.assignedTo" name="task-assignee" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-assignee-select">
+                        <select [(ngModel)]="task.assignedTo" [disabled]="!canEditFullTask()" name="task-assignee" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-assignee-select">
                             <option value="">{{ 'Unassigned' | translate }}</option>
                             @for (analyst of getCaseAnalysts(editedCase); track analyst.id) {
                             <option [value]="analyst.id">{{ analyst.username || analyst.email || analyst.id
@@ -65,12 +69,12 @@
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
                             'Due Date' | translate }}</label>
-                        <input [ngModel]="getDateInputValue(task.dueAt)" (ngModelChange)="setDateInputValue(task, 'dueAt', $event)" name="task-due" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-due-input" />
+                        <input [ngModel]="getDateInputValue(task.dueAt)" (ngModelChange)="setDateInputValue(task, 'dueAt', $event)" [disabled]="!canEditFullTask()" name="task-due" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-due-input" />
                     </div>
                     <div class="sm:col-span-2">
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
                             'categoryAlerts.form.description' | translate }}</label>
-                        <textarea [(ngModel)]="task.description" name="task-description" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-description-input"></textarea>
+                        <textarea [(ngModel)]="task.description" [disabled]="!canEditFullTask()" name="task-description" rows="2" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-description-input"></textarea>
                     </div>
                 </div>
             </div>
@@ -96,7 +100,7 @@
                         formatLabel(task.status) }}</span>
                     <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--color-blue-700)] px-2.5 py-1 text-xs text-[var(--color-text2)]">{{
                         formatLabel(task.priority) }}</span>
-                    @if (canEditTasksAndComments() && !caseData.closure) {
+                    @if (canEditTask(task)) {
                     <button type="button" (click)="openEditTask($index)" class="inline-flex h-7 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-xs font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.data-testid]="'case-task-edit-' + $index">
                         <i class="bi bi-pencil-square"></i> {{ 'Edit' | translate }}
                     </button>

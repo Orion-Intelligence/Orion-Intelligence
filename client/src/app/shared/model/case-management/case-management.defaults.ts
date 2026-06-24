@@ -61,6 +61,7 @@ export const PRIORITY_OPTIONS: Priority[] = ['low', 'medium', 'high', 'critical'
 export const TASK_STATUS_OPTIONS: CaseOption<TaskStatus>[] = [
   { value: 'open', label: 'Open' },
   { value: 'in_progress', label: 'In Progress' },
+  { value: 'under_review', label: 'Under Review' },
   { value: 'blocked', label: 'Blocked' },
   { value: 'done', label: 'Done' },
   { value: 'cancelled', label: 'Cancelled' }

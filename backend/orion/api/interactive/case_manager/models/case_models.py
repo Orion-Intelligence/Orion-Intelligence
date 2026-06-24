@@ -281,6 +281,8 @@ class UpdateCaseRequest(CaseRequestModel):
 
 class CaseResponse(BaseModel):
     id: str
+    viewerId: str = ""
+    viewerRole: str = ""
     caseId: str
     tenant_uuid: str
     title: str

@@ -191,7 +191,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     const eventManagementEnabled = this.appService.userSessionData().tenant.eventManagementEnabled === true;
     const canAccessFeeder = this.licenseService.canUseModule('feeder');
     const isMobileDemo = this.appService.isMobileMode();
-    const canUseCaseManagement = this.appService.userSessionData().user.permissions?.includes('case_management');
 
     if (this.isAdmin()) {
       return categories.filter(c => c !== ProfileSubCategory.IOC &&

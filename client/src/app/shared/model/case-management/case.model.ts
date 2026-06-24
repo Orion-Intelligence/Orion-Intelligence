@@ -40,7 +40,7 @@ export type ArtifactReportSource =
 export type EntityConfidence = 'low' | 'medium' | 'high';
 export type Severity = 'info' | 'low' | 'medium' | 'high' | 'critical';
 export type Priority = 'low' | 'medium' | 'high' | 'critical';
-export type TaskStatus = 'open' | 'in_progress' | 'blocked' | 'done' | 'cancelled';
+export type TaskStatus = 'open' | 'in_progress' | 'under_review' | 'blocked' | 'done' | 'cancelled';
 export type ArtifactType = 'evidence' | 'screenshot' | 'file' | 'url_capture' | 'raw_alert' | 'chat_transcript' | 'email_header' | 'log_excerpt' | 'report' | 'other';
 export type ClosureReason = 'true_positive' | 'false_positive' | 'duplicate' | 'risk_accepted' | 'remediated' | 'no_action_required' | 'inconclusive' | 'other';
 
@@ -554,6 +554,8 @@ export interface SharedCaseComment {
 
 export interface Case {
     id?: string;
+    viewerId?: string;
+    viewerRole?: string;
     caseId: string;
     caseTypeOtherValue?: string;
     intakeSourceOtherValue?: string;

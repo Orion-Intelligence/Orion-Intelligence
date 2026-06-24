@@ -12,7 +12,7 @@ from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
-from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifactFile, CaseStatus, CaseStatusReason
+from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifactFile, CaseStatus, CaseStatusReason, TaskStatus
 from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifact
 from orion.services.mongo_manager.shared_model.db_case_model import CaseClosure
 from orion.services.mongo_manager.shared_model.db_case_model import CaseComment
@@ -79,6 +79,8 @@ class CaseManager:
 
         data = record.model_dump()
         data["id"] = str(record.id)
+        data["viewerId"] = CaseHelperMethods.actor_id(current_user)
+        data["viewerRole"] = getattr(current_user.role, "value", str(current_user.role))
         return CaseResponse(**data)
 
     @staticmethod
@@ -339,6 +341,70 @@ class CaseManager:
         new_data["dueAt"] = self._normalize_date_for_compare(new_data.get("dueAt"))
 
         return old_data != new_data
+    
+    def _task_non_status_changed_for_analyst(self, old_task: CaseTask, new_task) -> bool:
+        old_data = old_task.model_dump(
+            exclude={
+                "status",
+                "taskId",
+                "createdBy",
+                "createdAt",
+                "updatedAt",
+                "completedAt",
+            }
+        )
+        new_data = new_task.model_dump(exclude={"status", "taskId"})
+
+        old_data["dueAt"] = self._normalize_date_for_compare(old_data.get("dueAt"))
+        new_data["dueAt"] = self._normalize_date_for_compare(new_data.get("dueAt"))
+
+        return old_data != new_data
+
+    def _validate_analyst_task_update(self, record: db_case_model, tasks, current_actor_id: str) -> None:
+        allowed_statuses = {
+            TaskStatus.IN_PROGRESS,
+            TaskStatus.UNDER_REVIEW,
+        }
+
+        existing_tasks = {
+            task.taskId: task
+            for task in (record.tasks or [])
+        }
+
+        incoming_tasks = {
+            task.taskId: task
+            for task in (tasks or [])
+        }
+
+        if set(existing_tasks.keys()) != set(incoming_tasks.keys()):
+            raise HTTPException(
+                status_code=403,
+                detail="Analysts cannot add or remove tasks"
+            )
+
+        for task_id, incoming_task in incoming_tasks.items():
+            existing_task = existing_tasks[task_id]
+
+            if self._task_non_status_changed_for_analyst(existing_task, incoming_task):
+                raise HTTPException(
+                    status_code=403,
+                    detail="Analysts can only update task status"
+                )
+
+            if incoming_task.status == existing_task.status:
+                continue
+
+            if existing_task.assignedTo != current_actor_id:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Analysts can only update tasks assigned to them"
+                )
+
+            if incoming_task.status not in allowed_statuses:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Analysts can only change task status to in progress or under review"
+                )
 
     def _has_comment_changed(self, old_comment: CaseComment, new_comment) -> bool:
         old_data = old_comment.model_dump(
@@ -391,6 +457,9 @@ class CaseManager:
             data.artifacts = record.artifacts
             data.linkedCases = record.linkedCases
             data.closure = record.closure
+        
+        if analyst_limited_update:
+            self._validate_analyst_task_update(record, data.tasks, current_actor_id)
 
         if record.closure is not None:
             raise HTTPException(status_code=403, detail="Closed cases cannot be edited")

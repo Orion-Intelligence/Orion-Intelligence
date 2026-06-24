@@ -6,7 +6,7 @@ import { EntityDetailsComponent } from '../entity-details/entity-details';
 import { ReportFeedbackCommentsComponent } from '../../../../../sections/report/social-interactions/report-feedback-comments/report-feedback-comments.component';
 import { ReportUserSidebarComponent } from '../../../../../sections/report/social-interactions/report-user-sidebar/report-user-sidebar.component';
 import { ReportFeedbackModel } from '../../../../../sections/report/templates/report_general/models/report-feedback.model';
-import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseArtifactFile, CaseArtifactRequest, CaseClosure, CaseClosureRequest, CaseComment, CaseCommentRequest, CaseEntity, CaseEntityRequest, CaseLink, CaseTag, CaseTask, CaseTaskRequest, CaseUpdateRequest, SharedCaseReport } from '../../../../../shared/model/case-management/case.model';
+import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseArtifactFile, CaseArtifactRequest, CaseClosure, CaseClosureRequest, CaseComment, CaseCommentRequest, CaseEntity, CaseEntityRequest, CaseLink, CaseTag, CaseTask, CaseTaskRequest, CaseUpdateRequest, SharedCaseReport, TaskStatus } from '../../../../../shared/model/case-management/case.model';
 import { CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
@@ -112,6 +112,30 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
   canEditTasksAndComments(): boolean {
     return !!this.caseData && !this.caseData.closure && !this.caseData.isArchived;
+  }
+
+  canAddTasks(): boolean {
+    return this.canManageCases() && this.canEditTasksAndComments();
+  }
+
+  canEditFullTask(): boolean {
+    return this.canManageCases();
+  }
+
+  canEditTask(task?: CaseTask | null): boolean {
+    if (!task || !this.canEditTasksAndComments()) {
+      return false;
+    }
+
+    if (this.canManageCases()) {
+      return true;
+    }
+
+    return !!this.caseData?.viewerId && task.assignedTo === this.caseData.viewerId;
+  }
+
+  private isAnalystAllowedTaskStatus(status: TaskStatus): boolean {
+    return status === 'in_progress' || status === 'under_review';
   }
 
   loadAnalysts(): void {
@@ -890,6 +914,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   openAddTask(): void {
+    if (!this.canAddTasks()) {
+      return;
+    }
+
     if (!this.caseData || this.isEditing) {
       return;
     }
@@ -1218,6 +1246,31 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     if (invalidIndex >= 0) {
       this.messageNotificationService.show(`Task ${invalidIndex + 1} title is required`);
       return;
+    }
+
+    if (!this.canManageCases()) {
+      const originalTasks = new Map((this.caseData?.tasks || []).map(task => [task.taskId, task]));
+
+      const invalidTask = (this.editedCase.tasks || []).find(task => {
+        const originalTask = originalTasks.get(task.taskId);
+
+        if (!originalTask) {
+          return true;
+        }
+
+        const statusChanged = originalTask.status !== task.status;
+
+        if (!statusChanged) {
+          return false;
+        }
+
+        return !this.canEditTask(originalTask) || !this.isAnalystAllowedTaskStatus(task.status);
+      });
+
+      if (invalidTask) {
+        this.messageNotificationService.show('Analysts can only update their assigned task status to In Progress or Under Review');
+        return;
+      }
     }
 
     this.saveCasePayload(this.cleanCaseForSave(this.editedCase), 'Tasks updated successfully');
