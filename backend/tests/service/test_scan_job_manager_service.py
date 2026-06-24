@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import datetime, timedelta
 from types import SimpleNamespace
 
 from orion.api.interactive.scan_job_manager.scan_job_manager import ScanJobManager
@@ -149,3 +150,100 @@ def test_test_scan_job_routes_save_model_and_poll_mock_response(monkeypatch):
     }
     assert notifications.total == 1
     assert notifications.items[0].status == ScanJobStatus.DONE
+
+
+def test_count_jobs_returns_only_unseen_scans():
+    engine = FakeMongoEngine(records=[
+        db_scan_job_model(user_uuid="user-1", seen=False),
+        db_scan_job_model(user_uuid="user-1", seen=True),
+        db_scan_job_model(user_uuid="user-1", seen=False),
+    ])
+    manager = _make_manager(engine)
+
+    result = _run(manager.count_jobs(_make_user(id="user-1")))
+
+    assert result == {"total": 2}
+
+
+def test_list_scan_notifications_prioritizes_unseen_or_incomplete_scans():
+    now = datetime.utcnow()
+    seen_completed = db_scan_job_model(
+        user_uuid="user-1",
+        title="Seen completed",
+        response={"status": "done"},
+        seen=True,
+        created_at=now,
+        updated_at=now,
+        completed_at=now,
+    )
+    unseen_completed = db_scan_job_model(
+        user_uuid="user-1",
+        title="Unseen completed",
+        response={"status": "done"},
+        seen=False,
+        created_at=now - timedelta(minutes=10),
+        updated_at=now - timedelta(minutes=10),
+        completed_at=now - timedelta(minutes=10),
+    )
+    seen_running = db_scan_job_model(
+        user_uuid="user-1",
+        title="Seen running",
+        response={"status": "running"},
+        seen=True,
+        created_at=now - timedelta(minutes=20),
+        updated_at=now - timedelta(minutes=20),
+    )
+    engine = FakeMongoEngine(records=[seen_completed, unseen_completed, seen_running])
+    manager = _make_manager(engine)
+
+    result = _run(manager.list_scan_notifications(_make_user(id="user-1")))
+
+    assert [item.title for item in result.items] == [
+        "Unseen completed",
+        "Seen running",
+        "Seen completed",
+    ]
+    assert result.total == 3
+
+
+def test_mark_seen_can_mark_all_completed_scans_without_marking_running_scans():
+    completed = db_scan_job_model(
+        user_uuid="user-1",
+        response={"status": "done"},
+        seen=False,
+    )
+    failed = db_scan_job_model(
+        user_uuid="user-1",
+        response={"status": "error"},
+        seen=False,
+    )
+    running = db_scan_job_model(
+        user_uuid="user-1",
+        response={"status": "running"},
+        seen=False,
+    )
+    engine = FakeMongoEngine(records=[completed, failed, running])
+    manager = _make_manager(engine)
+
+    result = _run(manager.mark_seen(current_user=_make_user(id="user-1"), seen_all=True))
+
+    assert result == {"message": "Scans marked as seen"}
+    assert completed.seen is True
+    assert failed.seen is True
+    assert running.seen is False
+
+
+def test_mark_seen_can_mark_one_scan_by_id():
+    job = db_scan_job_model(
+        user_uuid="user-1",
+        response={"status": "done"},
+        seen=False,
+    )
+    engine = FakeMongoEngine(records=[job])
+    manager = _make_manager(engine)
+
+    result = _run(manager.mark_seen(current_user=_make_user(id="user-1"), scan_id=str(job.id)))
+
+    assert result == {"message": "Scan marked as seen"}
+    assert job.seen is True
+    assert engine.saved[-1] == job

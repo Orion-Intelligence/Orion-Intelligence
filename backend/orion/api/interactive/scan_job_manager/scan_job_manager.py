@@ -114,6 +114,12 @@ class ScanJobManager:
             response=job.response,
         )
 
+    def _scan_notification_priority(self, job: db_scan_job_model) -> tuple[int, float]:
+        scan_status = self._scan_status_value(job)
+        is_unseen_or_incomplete = not job.seen or not self.is_terminal_status(scan_status.value)
+        latest_date = job.created_at or job.updated_at or datetime.min
+        return (0 if is_unseen_or_incomplete else 1, -latest_date.timestamp())
+
     async def create_job(self, current_user, api_reference: str, payload: Dict[str, Any], metadata: Optional[Dict[str, Any]] = None, force_new: bool = False) -> Dict[str, Any]:
         config = self._route_config(api_reference)
         metadata = metadata or {}
@@ -166,9 +172,11 @@ class ScanJobManager:
         safe_page = max(1, int(page or 1))
         skip = (safe_page - 1) * safe_limit
 
-        records = await self._engine.find(db_scan_job_model, db_scan_job_model.user_uuid == str(current_user.id), sort=desc(db_scan_job_model.created_at), skip=skip, limit=safe_limit)
-        total = await self._engine.count(db_scan_job_model, db_scan_job_model.user_uuid == str(current_user.id))
-        items = [self._build_scan_notification(record) for record in records]
+        records = await self._engine.find(db_scan_job_model, db_scan_job_model.user_uuid == str(current_user.id), sort=desc(db_scan_job_model.created_at))
+        ordered_records = sorted(records, key=self._scan_notification_priority)
+        total = len(ordered_records)
+        page_records = ordered_records[skip:skip + safe_limit]
+        items = [self._build_scan_notification(record) for record in page_records]
         return ScanJobListResponse(items=items, page=safe_page, limit=safe_limit, total=total, has_more=skip + len(items) < total)
 
     async def list_incomplete_scans(self, current_user, limit: int = 1) -> Dict[str, Any]:
@@ -189,7 +197,7 @@ class ScanJobManager:
         query: Dict[str, Any] = {"user_uuid": str(current_user.id)}
         records = await self._engine.find(db_scan_job_model, query, sort=desc(db_scan_job_model.created_at))
 
-        return { "total": len(records) }
+        return { "total": len([record for record in records if not record.seen]) }
 
     async def get_job(self, scan_id: str, current_user) -> ScanJobDetailResponse:
         job = await self._engine.find_one(db_scan_job_model, (db_scan_job_model.id == ObjectId(scan_id)) & (db_scan_job_model.user_uuid == str(current_user.id)))
@@ -243,12 +251,28 @@ class ScanJobManager:
         await self._engine.save(job)
         return self._build_poll_response(job)
 
-    async def mark_seen(self, scan_id: str, current_user) -> Dict[str, Any]:
+    async def mark_seen(self, current_user, scan_id: Optional[str] = None, seen_all: bool = False) -> Dict[str, Any]:
+        if seen_all:
+            records = await self._engine.find(db_scan_job_model, db_scan_job_model.user_uuid == str(current_user.id))
+
+            for record in records:
+                scan_status = self._scan_status_value(record)
+                if not self.is_terminal_status(scan_status.value):
+                    continue
+                if record.seen:
+                    continue
+                record.seen = True
+                await self._engine.save(record)
+
+            return {"message": "Scans marked as seen"}
+
+        if not scan_id:
+            raise HTTPException(status_code=400, detail="Scan ID is required")
+
         job = await self._engine.find_one(db_scan_job_model, (db_scan_job_model.id == ObjectId(scan_id)) & (db_scan_job_model.user_uuid == str(current_user.id)))
         if not job:
             raise HTTPException(status_code=404, detail="Scan job not found")
         job.seen = True
-        job.updated_at = datetime.utcnow()
         await self._engine.save(job)
         return {"message": "Scan marked as seen"}
 
