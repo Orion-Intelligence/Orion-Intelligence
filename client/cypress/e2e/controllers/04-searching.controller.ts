@@ -82,25 +82,11 @@ export function typeDashboardSearchSlow(value: string) {
   cy.scrollDashboardToTop();
   waitForSearchReady();
   cy.scrollDashboardToTop();
-  cy.get(selector).first().should('be.visible').and('be.enabled').click();
-  cy.get(selector).first().type('{selectall}{backspace}', { force: true });
-  cy.wait(250);
-  cy.get(selector).first().type(value, { force: true, delay: 75 });
-  cy.get(selector).first().should('have.value', value);
-  cy.wait(250);
-  cy.get(selector).first().type('{enter}', { force: true });
+  cy.typeSlow(selector, value, { submit: true });
 }
 
 export function typeInputSlow(selector: string, value: string, submit = true) {
-  cy.get(selector).filter(':visible').first().should('be.visible').and('not.be.disabled').click({ force: true });
-  cy.get(selector).filter(':visible').first().type('{selectall}{backspace}', { force: true });
-  cy.wait(250);
-  cy.get(selector).filter(':visible').first().type(value, { force: true, delay: 75 });
-  cy.get(selector).filter(':visible').first().should('have.value', value);
-  if (submit) {
-    cy.wait(250);
-    cy.get(selector).filter(':visible').first().type('{enter}', { force: true });
-  }
+  cy.typeSlow(selector, value, { submit });
 }
 
 export function openExploitSubmenu(submenu: string) {

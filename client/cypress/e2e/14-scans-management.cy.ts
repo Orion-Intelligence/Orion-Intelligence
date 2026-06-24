@@ -24,7 +24,7 @@ describe('Scans Management - Web Scans Flow', () => {
 
     cy.visit('/dashboard/scanner/network-scan');
     cy.get('[data-testid="network-intel-tab-seo-scan"]').scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="network-intel-search-input"]').clear().type('https://ucp.edu.pk/{enter}');
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('ucp.edu.pk{enter}');
 
   });
 });
@@ -136,7 +136,7 @@ describe('Scans Management - Entity Lookup Flow', () => {
     cy.window().then(win => {
       cy.stub(win, 'open').as('scanReportOpen');
     });
-    cy.get('[data-testid="scan-notification-view-report"]').filter(':visible').first().click();
+    cy.get('[data-testid="scan-notification-card"][role="button"]').filter(':visible').first().click();
     cy.get('@scanReportOpen')
       .should('have.been.calledOnce')
       .its('firstCall.args.0')

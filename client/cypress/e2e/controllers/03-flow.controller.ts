@@ -155,7 +155,12 @@ export function assertDirectoryContentVisible() {
 export function openDirectoryFilter() {
   cy.scrollDashboardToTop();
   cy.get('app-directory #top').should('exist').scrollIntoView({duration: 300, offset: {top: -20, left: 0}});
-  cy.contains('button', 'Filter').should('be.visible').scrollIntoView().click();
+  cy.get('body').then(($body) => {
+    if ($body.find('[data-testid="side-filter-close"]:visible').length) {
+      return;
+    }
+    cy.contains('button', 'Filter').should('be.visible').scrollIntoView().click();
+  });
   cy.get('[data-testid="side-filter-close"]').filter(':visible').first().should('be.visible');
 }
 
@@ -181,8 +186,10 @@ export function applyDirectoryDropdown(testId: string, option: { label: string; 
     expect(menuId, `side-filter-select-${testId} menu id`).to.exist;
     cy.wrap($el).click({ force: true });
     cy.wrap($el).should('have.attr', 'aria-expanded', 'true');
-    cy.get(`#${menuId}`).parent().find('input[type="text"]').should('be.visible').clear().type(option.label, { force: true, delay: 75 });
+    cy.get(`#${menuId}`).parent().find('input[type="text"]').should('be.visible').clear();
+    cy.get(`#${menuId}`).parent().find('input[type="text"]').should('be.visible').type(option.label, { force: true }).should('have.value', option.label);
     cy.contains(`#${menuId} [role="option"]`, option.label, { timeout: 15000 }).click({ force: true });
+    cy.get(`[data-testid="side-filter-select-${testId}"]`).should('have.attr', 'aria-expanded', 'false');
   });
   cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
   waitForDirectoryRequest();

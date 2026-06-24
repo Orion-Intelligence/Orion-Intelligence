@@ -1,3 +1,5 @@
+export type NetworkIntelTab = 'dns' | 'shodan' | 'vuln' | 'geo' | 'seo' | 'repo';
+
 export interface IpPortTls {
   version?:              string;
   cipher?:               string;

@@ -14,6 +14,20 @@ import { ValuePresentationBase } from '../../shared/utils/value-presentation.bas
 
 type ScanReportField = { label: string; value: any };
 type ScanReportSection = { title: string; items: ScanReportField[] };
+const SCAN_REPORT_EXPORT_OPTIONS: ExportChoiceOption[] = [
+  {
+    value: 'json',
+    title: '1. JSON',
+    description: 'Download machine-readable scan report data.',
+    testId: 'scan-report-export-json'
+  },
+  {
+    value: 'report',
+    title: '2. Export Report (PDF)',
+    description: 'Generate consistent scan report PDF export.',
+    testId: 'scan-report-export-report'
+  }
+];
 
 @Component({
   selector: 'app-scan-report',
@@ -27,20 +41,7 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
   loading = true;
   errorMessage = '';
   isExportChoiceOpen = false;
-  readonly reportExportOptions: ExportChoiceOption[] = [
-    {
-      value: 'json',
-      title: '1. JSON',
-      description: 'Download machine-readable scan report data.',
-      testId: 'scan-report-export-json'
-    },
-    {
-      value: 'report',
-      title: '2. Export Report (PDF)',
-      description: 'Generate consistent scan report PDF export.',
-      testId: 'scan-report-export-report'
-    }
-  ];
+  readonly reportExportOptions = SCAN_REPORT_EXPORT_OPTIONS;
   readonly trackByIndex = (index: number) => index;
 
   constructor(private route: ActivatedRoute, private scanNotifications: ScanNotificationService, private reportExportService: ReportExportService) {

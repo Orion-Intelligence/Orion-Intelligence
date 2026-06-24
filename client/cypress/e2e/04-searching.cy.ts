@@ -258,7 +258,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    typeInputSlow('@scanInput', 'bbc.com');
+    typeInputSlow('@scanInput', 'https://github.com/juice-shop/juice-shop');
 
     cy.get('[data-testid="network-intel-tab-seo-scan"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="network-intel-search-input"][placeholder="Search domain..."]').first().as('scanInput');

@@ -184,7 +184,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.get('[data-testid="report-feedback-comment-save"]').filter(':visible').first().click();
     cy.contains('p', commentText).should('be.visible');
 
-    cy.contains('[data-testid="report-feedback-comment-user-name"]', currentUsername).first().click();
+    cy.contains('[data-testid="report-feedback-comment-user-name"]', currentUsername).first().click({ force: true });
     cy.contains('div', 'Profile').should('be.visible');
     cy.get('[data-testid="report-user-sidebar-open-profile"]').filter(':visible').first().click();
     cy.url().should('match', /\/dashboard\/profile\/user\/[^/]+$/);
@@ -230,7 +230,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     loginAsUser(testUsers.testing5.username, testUsers.testing5.password);
     openFirstStrategicReportFromSearch();
     cy.scrollDashboardToBottom()
-    cy.contains('[data-testid="report-feedback-comment-user-name"]', currentUsername).first().click();
+    cy.contains('[data-testid="report-feedback-comment-user-name"]', currentUsername).first().click({ force: true });
     cy.get('[data-testid="report-user-sidebar-hidden-profile"]').should('exist');
     cy.get('[data-testid="report-user-sidebar-open-profile"]').should('not.exist');
     cy.logout();

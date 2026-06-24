@@ -203,6 +203,25 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
     return 'Enter a valid domain e.g. bbc.com';
   }
 
+  validateGithubRepositoryInput(value: string): string | null {
+    const trimmed = this.getTrimmedInputOrNull(value);
+    if (!trimmed) {
+      return null;
+    }
+    try {
+      const url = new URL(trimmed.match(/^https?:\/\//i) ? trimmed : `https://${trimmed.replace(/^\/+/, '')}`);
+      const host = url.hostname.toLowerCase();
+      const pathParts = url.pathname.split('/').filter(Boolean);
+      if ((host === 'github.com' || host === 'www.github.com') && pathParts.length >= 2) {
+        return null;
+      }
+    }
+    catch {
+      return 'Enter a valid GitHub repository URL';
+    }
+    return 'Enter a valid GitHub repository URL';
+  }
+
   validateGeoCoordinatesInput(value: string): string | null {
     const trimmed = this.getTrimmedInputOrNull(value);
     if (!trimmed) {

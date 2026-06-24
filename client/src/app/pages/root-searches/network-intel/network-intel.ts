@@ -5,7 +5,7 @@ import { EMPTY, Subject, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, concatMap, finalize, tap } from 'rxjs/operators';
 import { NetworkIntelScanService } from '../../../shared/services/network-intel/network-intel-scan.service';
-import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats, VulnerabilityScanDepth } from '../../../shared/model/network-intel/network-intel.model';
+import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats, NetworkIntelTab, VulnerabilityScanDepth } from '../../../shared/model/network-intel/network-intel.model';
 import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
@@ -18,8 +18,6 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ScannerService } from './security-scan/scanner-service.service';
 import { UrlScanMeta, UrlScanThreatItem } from '../../../shared/model/security-scan/security.scan.results.model';
 import { NetworkIntelSeoRepoScanCategory, SeoRepoScanSectionComponent } from './seo-repo-scan-section/seo-repo-scan-section.component';
-
-type NetworkIntelTab = 'dns' | 'shodan' | 'vuln' | 'geo' | 'seo' | 'repo';
 
 @Component({
   selector:    'app-network-intel',
@@ -126,9 +124,13 @@ export class NetworkIntel implements OnInit, OnDestroy {
       this.vulnForm.ip = q;
       this.validateVulnerability();
     }
-    else if (this.activeTab === 'seo' || this.activeTab === 'repo') {
+    else if (this.activeTab === 'seo') {
       this.seoRepoScanForm.target = q;
-      this.validateSeoRepoScan();
+      this.validateSeoScan();
+    }
+    else if (this.activeTab === 'repo') {
+      this.seoRepoScanForm.target = q;
+      this.validateRepositoryScan();
     }
     else {
       this.geoForm.coordinates = q;
@@ -161,9 +163,13 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.formError = this.scanHelper.validateGeoCoordinatesInput(this.geoForm.coordinates);
   }
 
-  validateSeoRepoScan(): void {
+  validateSeoScan(): void {
+    this.formError = this.scanHelper.validateDnsInput(this.seoRepoScanForm.target);
+  }
+
+  validateRepositoryScan(): void {
     const target = this.seoRepoScanForm.target.trim();
-    this.formError = target ? null : 'Please enter a target';
+    this.formError = target ? this.scanHelper.validateGithubRepositoryInput(target) : 'Please enter a GitHub repository URL';
   }
 
   setTab(id: NetworkIntelTab): void {
@@ -266,9 +272,15 @@ export class NetworkIntel implements OnInit, OnDestroy {
       this.syncUrl();
       return;
     }
-    if (this.activeTab === 'seo' || this.activeTab === 'repo') {
+    if (this.activeTab === 'seo') {
       this.seoRepoScanForm.target = value;
-      this.validateSeoRepoScan();
+      this.validateSeoScan();
+      this.syncUrl();
+      return;
+    }
+    if (this.activeTab === 'repo') {
+      this.seoRepoScanForm.target = value;
+      this.validateRepositoryScan();
       this.syncUrl();
       return;
     }
@@ -529,7 +541,12 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (this.activeTab !== 'seo' && this.activeTab !== 'repo') {
       return;
     }
-    this.validateSeoRepoScan();
+    if (this.activeTab === 'repo') {
+      this.validateRepositoryScan();
+    }
+    else {
+      this.validateSeoScan();
+    }
     if (this.formError || !this.seoRepoScanForm.target.trim() || this.isScanning()) {
       return;
     }

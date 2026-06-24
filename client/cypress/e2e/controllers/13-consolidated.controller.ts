@@ -34,15 +34,15 @@ export function openHomepageAndSearch(query = '{enter}') {
 }
 
 export function switchToDeepSearchTab() {
-  cy.get('[data-testid="consolidated-tab-deep-search"]').scrollIntoView().should('be.visible').click();
+  cy.get('[data-testid="consolidated-tab-deep-search"]').scrollIntoView().should('be.visible').click({ force: true });
 }
 
 export function switchToIocsTab() {
-  cy.get('[data-testid="consolidated-tab-iocs"]').scrollIntoView().should('be.visible').click();
+  cy.get('[data-testid="consolidated-tab-iocs"]').scrollIntoView().should('be.visible').click({ force: true });
 }
 
 export function searchInIocs(query: string) {
-  cy.get('[data-testid="consolidated-tab-iocs"]').scrollIntoView().click();
+  cy.get('[data-testid="consolidated-tab-iocs"]').scrollIntoView().click({ force: true });
   cy.closeSideFilter()
   cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
   cy.get('[data-testid="ioc-basic-search-input"]')
@@ -101,12 +101,12 @@ export function openFirstReportAndGoBack() {
     cy.get('[data-testid="consolidated-tab-deep-search"]')
       .scrollIntoView()
       .should('be.visible')
-      .click();
+      .click({ force: true });
   });
 }
 
 export function runDomainScannerFlow() {
-  cy.get('[data-testid="consolidated-tab-iocs"]').scrollIntoView().should('be.visible').click();
+  cy.get('[data-testid="consolidated-tab-iocs"]').scrollIntoView().should('be.visible').click({ force: true });
   ensureDomainScannerModalOpen();
   cy.get('[data-testid="domain-scanner-tab-subdomains"]').scrollIntoView().should('be.visible').click();
   cy.get('[data-testid="domain-scanner-live-toggle"]').should('exist').parents('label').first().click();
