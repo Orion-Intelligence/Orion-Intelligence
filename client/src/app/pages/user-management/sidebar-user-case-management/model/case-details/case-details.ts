@@ -23,6 +23,7 @@ import { caseInlineMotion, caseModeSwapMotion, caseSectionMotion } from './case-
 import { CaseEditDrawerComponent } from './case-edit-drawer/case-edit-drawer';
 import { CasePdfExportService } from '../../case-management-service/case-pdf-export.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { LicenseService } from '../../../../../services/licenses/licenses.service';
 
 @Component({
   selector: 'app-case-details',
@@ -90,14 +91,22 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   isArchiveConfirmationOpen = false;
   isArchivingCase = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef) {
+  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef, private licenseService: LicenseService) {
     super();
   }
 
   ngOnInit(): void {
     this.loadCaseDetails();
-    this.loadAnalysts();
+
+    if (this.canManageCases()) {
+      this.loadAnalysts();
+    }
+
     this.loadAccessibleCases();
+  }
+
+  canManageCases(): boolean {
+    return this.licenseService.isMaintainer() || this.licenseService.isAdmin();
   }
 
   loadAnalysts(): void {

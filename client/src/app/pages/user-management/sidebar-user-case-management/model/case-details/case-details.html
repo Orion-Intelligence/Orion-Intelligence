@@ -124,7 +124,7 @@
 
             <div class="flex flex-wrap items-center gap-2 sm:justify-end">
                 @if (!isEditing) {
-                @if (caseData.closure && !caseData.isArchived) {
+                @if (canManageCases() && caseData.closure && !caseData.isArchived) {
                 <button @caseInlineMotion (click)="openArchiveConfirmation()" type="button" aria-label="Archive case | translate" appTooltip="Archive case | translate" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] hover:text-amber-300 disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-archive" [disabled]="isArchivingCase">
                     <img src="assets/images/shared/archive-icon.svg" alt="Archive" class="h-4 w-4" />
                 </button>
@@ -132,14 +132,16 @@
                 <button @caseInlineMotion (click)="exportPdf()" type="button" aria-label="Export PDF | translate" appTooltip="Export PDF | translate" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-export-pdf" [disabled]="isPdfExporting">
                     <i class="bi text-sm leading-none [body.light-theme_&]:text-emerald-700" [ngClass]="isPdfExporting ? 'bi-arrow-repeat animate-spin' : 'bi-download text-emerald-300'"></i>
                 </button>
-
+                @if (canManageCases()) {
                 <button @caseInlineMotion (click)="openShareConfirmation()" type="button" [attr.aria-label]="'Create share link' | translate" [appTooltip]="'Create share link' | translate" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-share" [disabled]="isShareCreating">
                     <i class="bi text-[15px] leading-none [body.light-theme_&]:text-slate-700 [&_.ui-bootstrap-icon]:overflow-visible" [ngClass]="isShareCreating ? 'bi-arrow-repeat animate-spin' : 'bi-share-fill'"></i>
                 </button>
-
+                }
+                @if (canManageCases()) {
                 <button @caseInlineMotion (click)="openRevokeShareConfirmation()" type="button" [attr.aria-label]="'Revoke all share links' | translate" [appTooltip]="'Revoke all share links' | translate" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-details-revoke-shares" [disabled]="isShareRevoking">
                     <i class="bi text-sm leading-none [body.light-theme_&]:text-red-700" [ngClass]="isShareRevoking ? 'bi-arrow-repeat animate-spin' : 'bi-trash3 text-red-300'"></i>
                 </button>
+                }
                 }
             </div>
         </div>
@@ -209,7 +211,7 @@
                             </div>
                         </div>
                         }
-                        @if (!caseData.closure) {
+                        @if (canManageCases() && !caseData.closure) {
                         <button @caseInlineMotion (click)="enableEditing('caseDetails')" type="button" class="inline-flex h-8 shrink-0 items-center gap-1.5 self-start rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-sm font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] sm:self-auto" data-testid="case-details-edit">
                             <i class="bi bi-pencil-square"></i> {{ 'Edit' | translate }}
                         </button>

@@ -151,6 +151,9 @@ class CaseManager:
                 raise HTTPException(status_code=400, detail="Linked cases must be cases you can access")
 
     async def get_cases(self, current_user, archived: bool = False) -> list[CaseResponse]:
+        if archived and getattr(current_user.role, "value", current_user.role) == user_role.ANALYST.value:
+            raise HTTPException(status_code=403, detail="Analysts cannot view archived cases")
+
         if CaseHelperMethods.is_maintainer(current_user):
             records = await self._engine.find(
                 db_case_model, (db_case_model.tenant_uuid == str(current_user.tenant_uuid)) 
@@ -866,6 +869,12 @@ class CaseManager:
 
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
+        
+        if not CaseHelperMethods.can_manage_case_assignments(record, current_user):
+            raise HTTPException(
+                status_code=403,
+                detail="Only admins, maintainers, or the case creator can archive cases"
+            )
 
         if not CaseHelperMethods.can_view_case(record, current_user):
             raise HTTPException(status_code=403, detail="Access forbidden")
@@ -958,6 +967,12 @@ class CaseManager:
 
         if not CaseHelperMethods.can_view_case(record, current_user):
             raise HTTPException(status_code=403, detail="Access forbidden")
+        
+        if not CaseHelperMethods.can_manage_case_assignments(record, current_user):
+            raise HTTPException(
+                status_code=403,
+                detail="Only admins, maintainers, or the case creator can update case status"
+            )
 
         if record.isArchived:
             raise HTTPException(status_code=403, detail="Archived cases cannot be updated")
