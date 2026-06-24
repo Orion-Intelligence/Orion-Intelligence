@@ -6,10 +6,11 @@ import { DnsResponse, SubdomainResponse, WaybackResponse } from '../../model/sca
 import { ScanNotificationService } from '../../services/scan-notification.service';
 @Injectable({ providedIn: 'root' })
 export class ScanHelperMethodsService {
+  private readonly baseScanNotifications = inject(ScanNotificationService);
+
   protected readonly pollDelayMs = 4000;
   protected currentCancel$?: Subject<boolean> = undefined;
   protected api = inject(ApiService);
-  private readonly baseScanNotifications = inject(ScanNotificationService);
 
   progress = signal(0);
   onDone = signal<any>(null);

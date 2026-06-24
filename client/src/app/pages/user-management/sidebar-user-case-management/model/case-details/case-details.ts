@@ -1490,11 +1490,13 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   goToLinkedCase(caseId: string): void {
-    this.router.navigate([], {
+    const tree = this.router.createUrlTree([], {
       relativeTo: this.route,
       queryParams: { caseId },
       queryParamsHandling: 'merge'
-    }).then(() => this.loadCaseDetails());
+    });
+
+    window.open(this.router.serializeUrl(tree), '_blank', 'noopener');
   }
 
   formatConfidence(value?: string | null): string {

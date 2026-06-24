@@ -189,10 +189,9 @@ export class ScanNotificationService {
   }
 
   runScanAsResponse<T>(request: ScanJobStartRequest): Observable<T> {
-    return this.createJob(request).pipe(switchMap(job =>
-      this.watchJob(job.scan_id).pipe(map(updated => this.toScanResponse<T>(updated)),
-        takeWhile(response => this.isPendingResponse(response), true),)));
-    }
+    return this.createJob(request).pipe(switchMap(job => this.watchJob(job.scan_id).pipe(map(updated => this.toScanResponse<T>(updated)), takeWhile(response => this.isPendingResponse(response), true))));
+  }
+
   runApiScanAsResponse<T>(request: ScanJobStartRequest): Observable<T> {
     return this.createApiScanRequest<T>(request).pipe(switchMap(response => this.resolveApiScanResponse<T>(response, request)));
   }
@@ -223,16 +222,13 @@ export class ScanNotificationService {
   }
 
   private watchTrackedJob<T>(job: ScanJob, pollDelayMs = this.defaultPollDelayMs): Observable<T> {
-    return this.watchJob(job.scan_id).pipe(
-      map(updated => this.toScanResponse<T>(updated)),
-      takeWhile(response => this.isPendingResponse(response), true),
-      tap(response => {
-        const scanId = (response as any)?.scan_id;
-        if (scanId) {
-          this.refreshCounts();
-        }
-      }),
-    );
+    this.ensurePolling(job, pollDelayMs);
+    return this.watchJob(job.scan_id).pipe(map(updated => this.toScanResponse<T>(updated)), takeWhile(response => this.isPendingResponse(response), true), tap(response => {
+      const scanId = (response as any)?.scan_id;
+      if (scanId) {
+        this.refreshCounts();
+      }
+    }));
   }
 
   private trackApiScanResponse<T>(response: T | any, request: ScanJobStartRequest): ScanJob | null {
