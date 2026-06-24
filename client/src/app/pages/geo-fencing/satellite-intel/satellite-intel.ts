@@ -379,6 +379,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   openPanelPopup(id: SatelliteIntelPanel): void {
+    this.mapRenderer?.closeSidebar();
     this.setPanel(id);
     this.isPanelPopupOpen = true;
     this.isPanelMenuOpen = false;
@@ -523,7 +524,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   onMapFeatureSelected(feature: OrionSatelliteFeature): void {
     this.selectedFeature = feature;
-    this.focusedFeature = feature;
   }
 
   onMapEntityFeatureIdsSelected(ids: string[]): void {

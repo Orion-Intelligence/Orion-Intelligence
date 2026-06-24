@@ -1,4 +1,4 @@
-import {clickSearch, fillPrimaryScanInput, fillSecondaryScanInput, makeFileInputInteractable} from './controllers/15-scans-management.controller';
+import {clickSearch, fillPrimaryScanInput, fillSecondaryScanInput, makeFileInputInteractable} from './controllers/14-scans-management.controller';
 
 describe('Scans Management - Web Scans Flow', () => {
   beforeEach(() => {
@@ -111,5 +111,40 @@ describe('Scans Management - Entity Lookup Flow', () => {
     fillPrimaryScanInput('bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh');
     clickSearch();
     cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
+  });
+
+  it('manages completed scan notifications from the top header panel', () => {
+    cy.visit('/dashboard');
+    cy.get('[data-testid="profile-scan-notification-bell"]').should('be.visible').click();
+    cy.get('[data-testid="tenant-notification-sidebar"]').should('be.visible').and('contain.text', 'Scan Notifications');
+
+    cy.get('[data-testid="scan-notification-card"]', { timeout: 30000 })
+      .should($cards => {
+        expect($cards.length).to.be.greaterThan(1);
+      })
+      .then($cards => {
+        cy.wrap($cards.length).as('initialScanCount');
+      });
+
+    cy.get('[data-testid="scan-notification-delete"]').filter(':enabled').first().click();
+    cy.get('[data-testid="confirmation-popup"]').should('be.visible');
+    cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click();
+    cy.get('@initialScanCount').then(initialScanCount => {
+      cy.get('[data-testid="scan-notification-card"]', { timeout: 15000 }).should('have.length', Number(initialScanCount) - 1);
+    });
+
+    cy.window().then(win => {
+      cy.stub(win, 'open').as('scanReportOpen');
+    });
+    cy.get('[data-testid="scan-notification-view-report"]').filter(':visible').first().click();
+    cy.get('@scanReportOpen')
+      .should('have.been.calledOnce')
+      .its('firstCall.args.0')
+      .should('include', '/dashboard/scan-report/');
+
+    cy.get('[data-testid="scan-notification-clear-all"]').should('be.visible').and('not.be.disabled').click();
+    cy.get('[data-testid="confirmation-popup"]').should('be.visible');
+    cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click();
+    cy.get('[data-testid="scan-notification-card"]').should('not.exist');
   });
 });

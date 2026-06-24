@@ -11,7 +11,7 @@ import {
   openCreatedCaseDetails,
   openCreatedCaseFromList,
   selector
-} from './controllers/20-case-management.controller';
+} from './controllers/18-case-management.controller';
 
 describe('Case Management - Add View Edit Flow', () => {
   beforeEach(() => {

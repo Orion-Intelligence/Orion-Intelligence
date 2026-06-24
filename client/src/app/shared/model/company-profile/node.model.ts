@@ -27,6 +27,7 @@ export interface UserDataModel {
     password_reset_required?: boolean;
     password_reset_token?: string | null;
     license: string[];
+    permissions?: string[];
     image?: string;
     preferences?: Record<string, any>;
     demo_tour: boolean;

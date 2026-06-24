@@ -40,3 +40,13 @@
 @if (demoTourMounted && shouldShowDemoTour()) {
   <app-demo-tour></app-demo-tour>
 }
+
+@if (scanNotificationService.duplicateScanPrompt(); as duplicatePrompt) {
+  <app-generic-choice-popup
+    [title]="'Previous Scan Found'"
+    [message]="duplicatePrompt.message"
+    [primaryLabel]="'Use Previous Result'"
+    [secondaryLabel]="'Run New Scan'"
+    (selected)="handleDuplicateScanChoice($event)">
+  </app-generic-choice-popup>
+}

@@ -101,7 +101,7 @@
         [isMapView]="isMapView"
         [isThreatView]="isThreatView"
         [isPanelMenuOpen]="isPanelMenuOpen"
-        [isPanelPopupOpen]="isPanelPopupOpen"
+        [isPanelPopupOpen]="isPanelPopupOpen && !mapRenderer.sidebarVisible"
         [activePanel]="activePanel"
         (threatFiltersOpened)="openThreatFilters()"
         (selectionsCleared)="clearAllSelections()"

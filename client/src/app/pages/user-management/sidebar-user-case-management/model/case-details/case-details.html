@@ -598,4 +598,7 @@
         <p class="text-[var(--color-text4)]">{{ 'Case not found' | translate }}</p>
     </div>
     }
+    @if (appService.getConfig().appSettings.ai_endpoint_enabled && caseData) {
+    <app-chat-widget [reportText]="getCaseDetailsJson()" tool="summarizer"></app-chat-widget>
+    }
 </div>

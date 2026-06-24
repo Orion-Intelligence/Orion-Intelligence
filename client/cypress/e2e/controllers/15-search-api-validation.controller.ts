@@ -821,6 +821,7 @@ function selectSidebarFilterOption16(selectTestId: string, option: string) {
       const menuId = $select.attr('aria-controls');
       expect(menuId, `${selectTestId} menu id`).to.exist;
       cy.wrap($select).click({ force: true });
+      cy.wrap($select).should('have.attr', 'aria-expanded', 'true');
       cy.get(`#${menuId}`).parent()
         .find('input')
         .then(($input) => {

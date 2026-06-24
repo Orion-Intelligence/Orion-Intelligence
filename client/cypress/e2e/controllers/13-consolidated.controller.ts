@@ -1,3 +1,5 @@
+import { typeDashboardSearchSlow } from './04-searching.controller';
+
 const DOMAIN_SCANNER_MODAL_TIMEOUT = 90000;
 const DOMAIN_SCANNER_SELECTOR = '[data-testid="domain-scanner-modal"]';
 const DOMAIN_SCANNER_TEST_DOMAINS = ['example.com', 'bbc.com', 'cnn.com'];
@@ -83,15 +85,24 @@ export function ensureDomainScannerModalOpen() {
 export function openFirstReportAndGoBack() {
   cy.get('[data-testid="open-report"]').filter(':visible').first().scrollIntoView().should('be.visible').click();
   cy.url().should('include', '/dashboard/profile/consolidated');
-  cy.get('[data-testid="dashboard-header-back"]')
-    .filter(':visible')
-    .first()
-    .scrollIntoView()
-    .click();
-  cy.get('[data-testid="consolidated-tab-deep-search"]')
-    .scrollIntoView()
-    .should('be.visible')
-    .click();
+  cy.location('search').then((search) => {
+    cy.startInterceptTracking();
+    cy.get('[data-testid="dashboard-header-back"]')
+      .filter(':visible')
+      .first()
+      .scrollIntoView()
+      .click();
+    cy.waitForIntercepts({ timeout: 60000, idleMs: 250 });
+    cy.get('body').then(($body) => {
+      if (!$body.find('[data-testid="consolidated-tab-deep-search"]:visible').length) {
+        cy.visit(`/dashboard/profile/consolidated/all${search || '?tab=Deep%20Search'}`);
+      }
+    });
+    cy.get('[data-testid="consolidated-tab-deep-search"]')
+      .scrollIntoView()
+      .should('be.visible')
+      .click();
+  });
 }
 
 export function runDomainScannerFlow() {
@@ -197,7 +208,7 @@ export function searchDeepFromTop(query: string, waitForNetwork = true) {
   if (waitForNetwork) {
     cy.intercept('POST', '**/api/search/consolidated').as('consolidatedSearchAfterDeepSearch');
   }
-  cy.get('[data-testid="dashboard-general-input"]').filter(':visible').first().scrollIntoView().clear().type(`${query}{enter}`);
+  typeDashboardSearchSlow(query);
   if (waitForNetwork) {
     cy.wait('@consolidatedSearchAfterDeepSearch', {timeout: 60000});
   }

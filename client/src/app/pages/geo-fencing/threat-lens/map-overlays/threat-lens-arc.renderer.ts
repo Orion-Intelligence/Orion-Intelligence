@@ -32,7 +32,7 @@ export class ThreatLensArcRenderer {
   private readonly maxArcDrawStaggerMs = 900;
   private readonly movingDotBaseSize = 5;
   private readonly endpointBaseSize = 18;
-  private readonly endpointHitTargetSize = 30;
+  private readonly endpointHitTargetSize = 46;
   private readonly endpointHoverColor = [250, 0, 0];
   private readonly arcElevationMeters = 98000;
 

@@ -11,6 +11,7 @@ import jwt
 from orion.constants.constant import CONSTANTS
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, user_role, UserStatus
+from orion.services.permission_manager.permission_models import UserPermission
 from orion.services.session_manager.session_manager import session_manager
 from configs.auth_cookie import token_from_request
 # from orion.api.interactive.auth_manager.rules.license_rules import LICENSE_RULES
@@ -112,6 +113,19 @@ async def admin_or_enterprise_required(current_user=Depends(get_current_user)):
     if role == user_role.ADMIN.value or LicenseName.ENTERPRISE.value in licenses:
         return current_user
     raise HTTPException(status_code=403, detail="Access forbidden")
+
+
+async def case_management_required(current_user=Depends(get_current_user)):
+    role = _enum_value(getattr(current_user, "role", None))
+    licenses = {_enum_value(license_name) for license_name in (current_user.licenses or [])}
+    if role == user_role.ADMIN.value or LicenseName.MAINTAINER.value in licenses:
+        return True
+
+    permissions = [_enum_value(permission) for permission in (current_user.permissions or [])]
+    if role == user_role.ANALYST.value and UserPermission.CASE_MANAGEMENT.value in permissions:
+        return True
+
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Case management permission required")
 
 
 def _extract_scan_host(target: str) -> str:

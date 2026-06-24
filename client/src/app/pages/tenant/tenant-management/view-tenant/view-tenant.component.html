@@ -40,23 +40,23 @@
                       </td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ tenant.email || '-' }}</td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                        <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getSubscriptionBadgeClass(tenant.subscription)">
+                        <span class="inline-flex rounded-[6px] px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getSubscriptionBadgeClass(tenant.subscription)">
                           {{ (tenant.subscription ? 'Paid' : 'Free') | translate }}
                         </span>
                       </td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                        <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">
+                        <span class="inline-flex rounded-[6px] px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">
                           {{ (tenant.verified ? 'Verified' : 'Not Verified') | translate }}
                         </span>
                       </td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ tenant.user_quota || 0 }}</td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                        <span class="inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getTenantStatusBadgeClass(tenant.status)">
+                        <span class="inline-flex rounded-[6px] px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getTenantStatusBadgeClass(tenant.status)">
                           {{ getStatusLabel(tenant.status) }}
                         </span>
                       </td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                        <span class="mr-0 block max-w-[290px] truncate rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text2)]" [attr.title]="getTenantLicensesLabel(tenant)">
+                        <span class="mr-0 block max-w-[290px] truncate rounded-[6px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text2)]" [attr.title]="getTenantLicensesLabel(tenant)">
                           {{ getTenantLicensesLabel(tenant) }}
                         </span>
                       </td>
@@ -100,7 +100,7 @@
                                 <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
                                   <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Subscription' | translate }}</div>
                                   <div>
-                                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getSubscriptionBadgeClass(tenant.subscription)">
+                                    <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getSubscriptionBadgeClass(tenant.subscription)">
                                       {{ (tenant.subscription ? 'Paid' : 'Free') | translate }}
                                     </span>
                                   </div>
@@ -108,7 +108,7 @@
                                 <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
                                   <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Verified' | translate }}</div>
                                   <div>
-                                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">
+                                    <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">
                                       {{ (tenant.verified ? 'Verified' : 'Not Verified') | translate }}
                                     </span>
                                   </div>
@@ -120,7 +120,7 @@
                                 <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
                                   <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Status' | translate }}</div>
                                   <div>
-                                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getTenantStatusBadgeClass(tenant.status)">
+                                    <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getTenantStatusBadgeClass(tenant.status)">
                                       {{ getStatusLabel(tenant.status) }}
                                     </span>
                                   </div>
@@ -131,7 +131,7 @@
                                     <div class="flex flex-wrap gap-1.5">
                                       @for (license of tenant.licenses; track license) {
                                         @if (licenseService.getLicenseLabel(license) !== 'Maintainer') {
-                                          <span class="rounded-md border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2 py-1 text-[11px] font-medium text-[var(--color-text2)]">
+                                          <span class="rounded-[6px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2 py-1 text-[11px] font-medium text-[var(--color-text2)]">
                                             {{ licenseService.getLicenseLabel(license) }}
                                           </span>
                                         }
@@ -146,6 +146,24 @@
                             <div data-testid="tenant-edit-form-panel" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-4">
                               <div class="text-[19px] font-bold text-[var(--color-text1)]">{{ 'Edit Tenant' | translate }}</div>
                               <div class="mt-2 space-y-3 pt-1">
+                                <div>
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Licenses' | translate }}</div>
+                                  <app-ui-dropdown
+                                    class="mt-[0.6rem]"
+                                    [menuId]="'tenant-license-menu-' + (tenant._id || tenant.id || tenant.name || tenant.companyName)"
+                                    optionTestIdPrefix="tenant-license-"
+                                    [options]="tenantLicenseOptions"
+                                    [selectedValues]="tenant.licenses || []"
+                                    [multiSelect]="true"
+                                    [showSelectedChips]="true"
+                                    menuPlacement="static"
+                                    [placeholder]="'Select licenses' | translate"
+                                    [searchPlaceholder]="'Search licenses' | translate"
+                                    (valuesChange)="onTenantLicenseDropdownChange(tenant, $event)"></app-ui-dropdown>
+                                  @if (!tenant.licenses?.length) {
+                                    <div class="mt-2 text-xs text-[var(--color-text4)]">{{ 'No licenses assigned.' | translate }}</div>
+                                  }
+                                </div>
                                 <label data-testid="tenant-verified-toggle" class="flex cursor-pointer items-center justify-between gap-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2.5 transition hover:border-sky-400/35">
                                   <span class="text-[12px] font-semibold text-[var(--color-text2)]">{{ 'Verified' | translate }}</span>
                                   <span class="pointer-events-none relative h-5 w-9 shrink-0">
@@ -174,21 +192,6 @@
                                       <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-200 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[2px] before:left-[2px] before:h-4 before:w-4 before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-200 peer-checked:before:translate-x-4"></span>
                                     </span>
                                   </label>
-                                <div>
-                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Licenses' | translate }}</div>
-                                  <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
-                                    @for (license of licenseList; track license) {
-                                      @if (licenseService.getLicenseLabel(license) !== 'maintainer') {
-                                        <div class="license-card flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [attr.data-testid]="'tenant-license-' + license" [ngClass]="tenant.licenses?.includes(license) ? 'border border-[var(--color-blue-630)] bg-[var(--color-blue-640)] text-white' : 'border border-[var(--color-border)] bg-[var(--color-blue-820)]'" (click)="toggleTenantLicense(tenant, license)">
-                                          <input type="checkbox" class="hidden" [checked]="tenant.licenses?.includes(license)" />
-                                          <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap" [ngClass]="tenant.licenses?.includes(license) ? 'text-white' : ''">
-                                            {{ licenseService.getLicenseLabel(license) }}
-                                          </span>
-                                        </div>
-                                      }
-                                    }
-                                  </div>
-                                </div>
                               </div>
                               <div class="mt-3 flex justify-end gap-2">
                                 <button data-testid="tenant-save-changes" type="button" class="ui-btn ui-btn-primary" (click)="updateTenant(tenant)">
@@ -228,15 +231,15 @@
                   <div class="space-y-2 px-3 py-2.5 text-sm text-[var(--color-text2)]">
                     <div class="flex items-center justify-between gap-3">
                       <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Subscription' | translate }}</span>
-                      <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getSubscriptionBadgeClass(tenant.subscription)">{{ (tenant.subscription ? 'Paid' : 'Free') | translate }}</span>
+                      <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getSubscriptionBadgeClass(tenant.subscription)">{{ (tenant.subscription ? 'Paid' : 'Free') | translate }}</span>
                     </div>
                     <div class="flex items-center justify-between gap-3">
                       <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Verified' | translate }}</span>
-                      <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">{{ (tenant.verified ? 'Verified' : 'Not Verified') | translate }}</span>
+                      <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">{{ (tenant.verified ? 'Verified' : 'Not Verified') | translate }}</span>
                     </div>
                     <div class="flex items-center justify-between gap-3">
                       <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Status' | translate }}</span>
-                      <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getTenantStatusBadgeClass(tenant.status)">{{ getStatusLabel(tenant.status) }}</span>
+                      <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getTenantStatusBadgeClass(tenant.status)">{{ getStatusLabel(tenant.status) }}</span>
                     </div>
                     <div class="flex items-center justify-between gap-3">
                       <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'User Quota' | translate }}</span>
@@ -244,7 +247,7 @@
                     </div>
                     <div class="pt-1">
                       <div class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Licenses' | translate }}</div>
-                      <div class="rounded-md border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1.5 text-xs">{{ getTenantLicensesLabel(tenant) }}</div>
+                      <div class="rounded-[6px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1.5 text-xs">{{ getTenantLicensesLabel(tenant) }}</div>
                     </div>
                   </div>
                   @if (tenant._expanded) {
@@ -269,6 +272,22 @@
                         </div>
                         <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-3">
                           <div class="text-base font-bold text-[var(--color-text1)]">{{ 'Edit Tenant' | translate }}</div>
+                          <div class="mt-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Licenses' | translate }}</div>
+                          <app-ui-dropdown
+                            class="mt-[0.6rem]"
+                            [menuId]="'tenant-license-mobile-menu-' + (tenant._id || tenant.id || tenant.name || tenant.companyName)"
+                            optionTestIdPrefix="tenant-license-"
+                            [options]="tenantLicenseOptions"
+                            [selectedValues]="tenant.licenses || []"
+                            [multiSelect]="true"
+                            [showSelectedChips]="true"
+                            menuPlacement="static"
+                            [placeholder]="'Select licenses' | translate"
+                            [searchPlaceholder]="'Search licenses' | translate"
+                            (valuesChange)="onTenantLicenseDropdownChange(tenant, $event)"></app-ui-dropdown>
+                          @if (!tenant.licenses?.length) {
+                            <div class="mt-2 text-xs text-[var(--color-text4)]">{{ 'No licenses assigned.' | translate }}</div>
+                          }
                           <label class="mt-2 block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'User Quota' | translate }}</label>
                           <input data-testid="tenant-user-quota-input" type="number" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
                           <label class="mt-3 block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Status' | translate }}</label>
@@ -286,19 +305,6 @@
                                       <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-200 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[2px] before:left-[2px] before:h-4 before:w-4 before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-200 peer-checked:before:translate-x-4"></span>
                                     </span>
                                   </label>
-                          <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Licenses' | translate }}</div>
-                          <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
-                            @for (license of licenseList; track license) {
-                              @if (licenseService.getLicenseLabel(license) !== 'maintainer') {
-                                <div class="license-card flex min-h-[34px] cursor-pointer select-none items-center justify-center rounded-[8px] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [ngClass]="tenant.licenses?.includes(license) ? 'border border-[var(--color-blue-630)] bg-[var(--color-blue-640)] text-white' : 'border border-[var(--color-border)] bg-[var(--color-blue-820)]'" (click)="toggleTenantLicense(tenant, license)">
-                                  <input type="checkbox" class="hidden" [checked]="tenant.licenses?.includes(license)" />
-                                  <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap" [ngClass]="tenant.licenses?.includes(license) ? 'text-white' : ''">
-                                    {{ licenseService.getLicenseLabel(license) }}
-                                  </span>
-                                </div>
-                              }
-                            }
-                          </div>
                           <div class="mt-3 flex justify-end">
                             <button type="button" class="ui-btn ui-btn-primary" (click)="updateTenant(tenant)">{{ 'Save changes' | translate }}</button>
                           </div>

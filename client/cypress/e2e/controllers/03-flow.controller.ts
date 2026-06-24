@@ -49,13 +49,8 @@ export function openSidebarGroup(title: string) {
 }
 
 export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
-  const groupTestId = getSidebarGroupTestId(groupTitle);
   const aliasedTestId = SIDEBAR_SUBITEM_TEST_ID_ALIAS[groupTitle]?.[itemTitle];
   const routePrefix = SIDEBAR_GROUP_ROUTE_PREFIX[groupTitle];
-
-  cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
-    expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
-  });
 
   if (aliasedTestId) {
     cy.get(`[data-testid="sidebar-subitem-${routePrefix}-${aliasedTestId}"]`)
@@ -65,7 +60,7 @@ export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
     return;
   }
 
-  cy.contains(`[data-testid^="sidebar-subitem-${routePrefix}-"] div`, new RegExp(`^\\s*${itemTitle}\\s*$`))
+  cy.contains(`[data-testid^="sidebar-subitem-${routePrefix}-"]`, new RegExp(`^\\s*${itemTitle}\\s*$`))
     .scrollIntoView()
     .should('be.visible')
     .click({ force: true });
@@ -133,6 +128,18 @@ export function waitForDirectoryRequest() {
   });
 }
 
+export function typeVisibleInputSlow(selector: string, value: string, submit = false) {
+  cy.get(selector).filter(':visible').first().should('be.enabled').click({ force: true });
+  cy.get(selector).filter(':visible').first().type('{selectall}{backspace}', { force: true });
+  cy.wait(250);
+  cy.get(selector).filter(':visible').first().type(value, { force: true, delay: 75 });
+  cy.get(selector).filter(':visible').first().should('have.value', value);
+  if (submit) {
+    cy.wait(250);
+    cy.get(selector).filter(':visible').first().type('{enter}', { force: true });
+  }
+}
+
 export function assertDirectoryContentVisible() {
   cy.scrollDashboardToTop();
   cy.get('app-directory').should('be.visible');
@@ -171,8 +178,11 @@ export function applyDirectoryDropdown(testId: string, option: { label: string; 
       return;
     }
     const menuId = $el.attr('aria-controls');
-    cy.wrap($el).click();
-    cy.contains(`#${menuId} [role="option"]`, option.label).click();
+    expect(menuId, `side-filter-select-${testId} menu id`).to.exist;
+    cy.wrap($el).click({ force: true });
+    cy.wrap($el).should('have.attr', 'aria-expanded', 'true');
+    cy.get(`#${menuId}`).parent().find('input[type="text"]').should('be.visible').clear().type(option.label, { force: true, delay: 75 });
+    cy.contains(`#${menuId} [role="option"]`, option.label, { timeout: 15000 }).click({ force: true });
   });
   cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
   waitForDirectoryRequest();

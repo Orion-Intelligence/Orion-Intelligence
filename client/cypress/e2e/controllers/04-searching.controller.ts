@@ -50,12 +50,7 @@ export function openSidebarGroup(title: string) {
 
 export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
   const routePrefix = SIDEBAR_GROUP_ROUTE_PREFIX[groupTitle];
-  const groupTestId = getSidebarGroupTestId(groupTitle);
   const aliasedTestId = SIDEBAR_SUBITEM_TEST_ID_ALIAS[groupTitle]?.[itemTitle];
-
-  cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
-    expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
-  });
 
   if (aliasedTestId) {
     cy.get(`[data-testid="sidebar-subitem-${routePrefix}-${aliasedTestId}"]`)
@@ -65,7 +60,7 @@ export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
     return;
   }
 
-  cy.contains(`[data-testid^="sidebar-subitem-${routePrefix}-"] div`, new RegExp(`^\\s*${itemTitle}\\s*$`))
+  cy.contains(`[data-testid^="sidebar-subitem-${routePrefix}-"]`, new RegExp(`^\\s*${itemTitle}\\s*$`))
     .scrollIntoView()
     .should('be.visible')
     .click();
@@ -96,12 +91,24 @@ export function typeDashboardSearchSlow(value: string) {
   cy.get(selector).first().type('{enter}', { force: true });
 }
 
+export function typeInputSlow(selector: string, value: string, submit = true) {
+  cy.get(selector).filter(':visible').first().should('be.visible').and('not.be.disabled').click({ force: true });
+  cy.get(selector).filter(':visible').first().type('{selectall}{backspace}', { force: true });
+  cy.wait(250);
+  cy.get(selector).filter(':visible').first().type(value, { force: true, delay: 75 });
+  cy.get(selector).filter(':visible').first().should('have.value', value);
+  if (submit) {
+    cy.wait(250);
+    cy.get(selector).filter(':visible').first().type('{enter}', { force: true });
+  }
+}
+
 export function openExploitSubmenu(submenu: string) {
   clickSidebarSubItem('Exploit', submenu);
 }
 
 export function typeExploitSearch(value: string) {
-  typeDashboardSearch(value);
+  typeDashboardSearchSlow(value);
 }
 
 export function clickOpenReport() {

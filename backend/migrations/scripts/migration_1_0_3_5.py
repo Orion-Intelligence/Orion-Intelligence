@@ -1,3 +1,6 @@
+from elastic_transport import ApiError
+
+from orion.services.log_manager.log_controller import log
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.mongo_controller import mongo_controller
@@ -85,71 +88,77 @@ class migration_1_0_3_5:
             request_timeout=220,
         )
 
-        await es.update_by_query(
-            index=index,
-            body={
-                "script": {
-                    "lang": "painless",
-                    "source": """
-                        def selectedDate = null;
+        try:
+            await es.update_by_query(
+                index=index,
+                body={
+                    "script": {
+                        "lang": "painless",
+                        "source": """
+                            def selectedDate = null;
 
-                        for (def field : params.fields) {
-                            if (!ctx._source.containsKey(field)) {
-                                continue;
-                            }
+                            for (def field : params.fields) {
+                                if (!ctx._source.containsKey(field)) {
+                                    continue;
+                                }
 
-                            def rawDate = ctx._source.get(field);
-                            if (rawDate instanceof List) {
-                                for (def item : rawDate) {
-                                    if (item == null) {
-                                        continue;
+                                def rawDate = ctx._source.get(field);
+                                if (rawDate instanceof List) {
+                                    for (def item : rawDate) {
+                                        if (item == null) {
+                                            continue;
+                                        }
+
+                                        def dateText = item.toString().trim();
+                                        if (dateText.length() < 10) {
+                                            continue;
+                                        }
+
+                                        dateText = dateText.substring(0, 10);
+                                        if (dateText.substring(4, 5).equals("-") && dateText.substring(7, 8).equals("-")) {
+                                            selectedDate = dateText;
+                                            break;
+                                        }
                                     }
-
-                                    def dateText = item.toString().trim();
-                                    if (dateText.length() < 10) {
-                                        continue;
-                                    }
-
-                                    dateText = dateText.substring(0, 10);
-                                    if (dateText.substring(4, 5).equals("-") && dateText.substring(7, 8).equals("-")) {
-                                        selectedDate = dateText;
-                                        break;
+                                } else if (rawDate != null) {
+                                    def dateText = rawDate.toString().trim();
+                                    if (dateText.length() >= 10) {
+                                        dateText = dateText.substring(0, 10);
+                                        if (dateText.substring(4, 5).equals("-") && dateText.substring(7, 8).equals("-")) {
+                                            selectedDate = dateText;
+                                        }
                                     }
                                 }
-                            } else if (rawDate != null) {
-                                def dateText = rawDate.toString().trim();
-                                if (dateText.length() >= 10) {
-                                    dateText = dateText.substring(0, 10);
-                                    if (dateText.substring(4, 5).equals("-") && dateText.substring(7, 8).equals("-")) {
-                                        selectedDate = dateText;
-                                    }
+
+                                if (selectedDate != null) {
+                                    break;
                                 }
                             }
 
                             if (selectedDate != null) {
-                                break;
+                                ctx._source.put('m_date', selectedDate);
                             }
+                        """,
+                        "params": {"fields": fields},
+                    },
+                    "query": {
+                        "bool": {
+                            "should": [{"exists": {"field": field}} for field in fields],
+                            "minimum_should_match": 1,
                         }
-
-                        if (selectedDate != null) {
-                            ctx._source.put('m_date', selectedDate);
-                        }
-                    """,
-                    "params": {"fields": fields},
+                    },
                 },
-                "query": {
-                    "bool": {
-                        "should": [{"exists": {"field": field}} for field in fields],
-                        "minimum_should_match": 1,
-                    }
-                },
-            },
-            allow_no_indices=True,
-            conflicts="proceed",
-            ignore_unavailable=True,
-            refresh=True,
-            request_timeout=220,
-        )
+                allow_no_indices=True,
+                conflicts="proceed",
+                ignore_unavailable=True,
+                refresh=True,
+                request_timeout=220,
+            )
+        except ApiError as ex:
+            status_code = getattr(ex, "status_code", None) or getattr(getattr(ex, "meta", None), "status", None)
+            if status_code != 503:
+                raise
+            log.g().w(f"Skipping migration backfill for unavailable Elasticsearch index {index}: {str(ex)}")
 
     @staticmethod
     async def update_version(engine, version):

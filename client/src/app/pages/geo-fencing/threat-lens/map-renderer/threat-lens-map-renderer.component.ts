@@ -57,6 +57,8 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private readonly hoverHitTestMinIntervalMs = 80;
   private readonly maxGlobeCanvasAspectRatio = 1.62;
 
+  isMapCursorPointer = false;
+
   @Output() mapReady = new EventEmitter<void>();
   @Output() mapError = new EventEmitter<string>();
   @Output() countrySelected = new EventEmitter<ThreatLensCountrySelection>();
@@ -380,6 +382,17 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         return;
       }
 
+      const endpointGraphic = hit.results.find((result: any) => this.arcRenderer?.isEndpointGraphic(result.graphic))?.graphic;
+      if (endpointGraphic) {
+        const selection = this.buildArcSelection(endpointGraphic.attributes || {});
+        if (selection) {
+          this.tooltipRenderer.hide();
+          this.clearHoverHighlight();
+          this.ngZone.run(() => this.arcSelected.emit(selection));
+        }
+        return;
+      }
+
       const countryGraphic = hit.results.find((result: any) => result.graphic?.layer === this.countryRenderer.layer)?.graphic;
 
       if (countryGraphic) {
@@ -442,6 +455,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       const clusterGraphic = hit.results.find((result: any) => this.ipMarkerRenderer?.isClusterGraphic(result.graphic))?.graphic;
       if (clusterGraphic) {
         this.clearHoverHighlight();
+        this.setMapCursor('');
         this.ipMarkerRenderer?.showAccuracyRadius(clusterGraphic);
         this.tooltipRenderer.showIpCluster(event, clusterGraphic.attributes || {});
         return;
@@ -450,6 +464,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       const ipGraphic = hit.results.find((result: any) => this.ipMarkerRenderer?.isMarkerGraphic(result.graphic))?.graphic;
       if (ipGraphic) {
         this.clearHoverHighlight();
+        this.setMapCursor('pointer');
         this.ipMarkerRenderer?.showAccuracyRadius(ipGraphic);
         this.tooltipRenderer.showIpScan(event, ipGraphic.attributes || {});
         return;
@@ -460,9 +475,11 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         this.clearCountryHoverHighlight();
         this.ipMarkerRenderer?.clearAccuracyRadius();
         if (this.arcRenderer?.isEndpointGraphic(arcGraphic)) {
+          this.setMapCursor('pointer');
           this.arcRenderer.setHoveredEndpointGraphic(arcGraphic);
         }
         else {
+          this.setMapCursor('');
           this.arcRenderer?.clearEndpointHover();
         }
         this.tooltipRenderer.hide();
@@ -483,6 +500,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       }
 
       this.clearHoverHighlight();
+      this.setMapCursor('pointer');
       this.hoveredCountryKey = selection.key;
       this.countryRenderer.applyHoverHighlight(countryGraphic);
       this.tooltipRenderer.showCountry(event, selection.name);
@@ -981,11 +999,21 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.clearCountryHoverHighlight();
     this.arcRenderer?.clearEndpointHover();
     this.ipMarkerRenderer?.clearAccuracyRadius();
+    this.setMapCursor('');
   }
 
   private clearCountryHoverHighlight(): void {
     this.countryRenderer.clearHoverHighlight();
     this.hoveredCountryKey = '';
+  }
+
+  private setMapCursor(cursor: string): void {
+    const isPointer = cursor === 'pointer';
+    if (this.isMapCursorPointer !== isPointer) {
+      this.ngZone.run(() => {
+        this.isMapCursorPointer = isPointer;
+      });
+    }
   }
 
   private toCountryKey(value: string): string {

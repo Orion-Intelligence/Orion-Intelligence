@@ -116,6 +116,7 @@ class AccountManager:
                 status=data.status,
                 subscription=data.subscription,
                 licenses=data.licenses,
+                permissions=data.permissions,
                 password_reset_required=True, )
 
             await engine.save(user)
@@ -209,6 +210,8 @@ class AccountManager:
                 if requested and not requested.issubset(tenant_allowed):
                     raise HTTPException(status_code=400, detail="User assigned license not allowed for this tenant")
             user.licenses = request.licenses
+        if request.permissions is not None:
+            user.permissions = request.permissions
         if request.password_reset_required is not None:
             user.password_reset_required = request.password_reset_required
         await self._engine.save(user)
@@ -390,7 +393,8 @@ class AccountManager:
         node = NodeCallbackModel.model_validate(
             {"user": {"email": user.email, "theme": theme, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": user.password_reset_token if getattr(user, "password_reset_required", False) else None, "license": [
                 license.value for license in
-                user.licenses], "image": user_image_path, "preferences": user.preferences or {}, "demo_tour": getattr(user, "demo_tour", True) }, "tenant": {"hasOnboarding": tenant.status == TenantStatus.ONBOARDING, "id": str(
+                user.licenses], "permissions": [
+                permission.value if hasattr(permission, "value") else permission for permission in (getattr(user, "permissions", None) or [])], "image": user_image_path, "preferences": user.preferences or {}, "demo_tour": getattr(user, "demo_tour", True) }, "tenant": {"hasOnboarding": tenant.status == TenantStatus.ONBOARDING, "id": str(
                 tenant.id), "isDefault": str(tenant.is_default), "name": self.safe_decrypt(
                 enc, tenant.name), "phone": self.safe_decrypt(enc, tenant.phone), "country": self.safe_decrypt(
                 enc, tenant.country), "city": self.safe_decrypt(enc, tenant.city), "postalCode": self.safe_decrypt(

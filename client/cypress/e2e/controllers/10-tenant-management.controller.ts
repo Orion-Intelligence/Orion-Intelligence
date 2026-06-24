@@ -81,17 +81,38 @@ export function setTenantEditorToggle(testId: string, checked: boolean) {
   });
 }
 
+function setTenantLicenseSelection(license: string, checked: boolean, changedAlias?: string) {
+  const triggerSelector = 'button[aria-controls^="tenant-license-menu-"]';
+  cy.get('@tenantEditFormPanel')
+    .find(triggerSelector)
+    .first()
+    .scrollIntoView()
+    .should('be.visible')
+    .then(($trigger) => {
+      const menuId = $trigger.attr('aria-controls');
+      expect(menuId, 'tenant license menu id').to.exist;
+      cy.wrap($trigger).click({force: true});
+      cy.wrap($trigger).should('have.attr', 'aria-expanded', 'true');
+
+      cy.get(`#${menuId} [data-testid="tenant-license-${license}"]`, {timeout: 10000})
+        .should('exist')
+        .then(($option) => {
+          const isSelected = $option.attr('aria-selected') === 'true';
+          if (isSelected !== checked) {
+            cy.wrap($option).click({force: true});
+            if (changedAlias) {
+              cy.wrap(true).as(changedAlias);
+            }
+          }
+        })
+        .then(() => {
+          cy.wrap($trigger).click({force: true});
+        });
+    });
+}
+
 export function setTenantLicense(license: string, checked: boolean) {
-  cy.get('@tenantEditFormPanel').within(() => {
-    cy.get(`[data-testid="tenant-license-${license}"]`)
-      .scrollIntoView()
-      .then(($card) => {
-        const isChecked = $card.find('input[type="checkbox"]').is(':checked');
-        if (isChecked !== checked) {
-          cy.wrap($card).click();
-        }
-      });
-  });
+  setTenantLicenseSelection(license, checked);
 }
 
 export function saveTenantEditor(alias: string) {
@@ -303,15 +324,11 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
       .first()
       .scrollTo('bottomRight', {ensureScrollable: false});
 
-    cy.get('[data-testid="tenant-license-enterprise"]').first().scrollIntoView().should('exist').then(($card) => {
-      const $cb = $card.find('input[type="checkbox"], input.license-checkbox').first();
-      if (!$cb.prop('checked')) {
-        const cardEl = $card.get(0) as HTMLElement;
-        cardEl.scrollIntoView();
-        cardEl.click();
-        cy.wrap(true).as('changed');
-      }
-    });
+    cy.get('[data-testid="tenant-edit-form-panel"]')
+      .filter(':visible')
+      .first()
+      .as('tenantEditFormPanel');
+    setTenantLicenseSelection('enterprise', true, 'changed');
 
     cy.get('@changed').then((changed: any) => {
       if (changed) {

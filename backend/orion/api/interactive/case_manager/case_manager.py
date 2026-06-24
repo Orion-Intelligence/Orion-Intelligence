@@ -26,6 +26,7 @@ from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.api.interactive.case_manager.case_config import CASE_STATUS_FLOW
+from orion.services.permission_manager.permission_models import UserPermission
 
 class CaseManager:
     __instance = None
@@ -80,6 +81,13 @@ class CaseManager:
         data["id"] = str(record.id)
         return CaseResponse(**data)
 
+    @staticmethod
+    def _has_case_management_permission(user) -> bool:
+        return UserPermission.CASE_MANAGEMENT.value in [
+            permission.value if hasattr(permission, "value") else permission
+            for permission in (user.permissions or [])
+        ]
+
     async def _get_tenant_analyst_ids(self, current_user) -> set[str]:
         users = await self._engine.find(
             db_user_account,
@@ -87,7 +95,7 @@ class CaseManager:
             & (db_user_account.role == user_role.ANALYST)
             & (db_user_account.status == UserStatus.ACTIVE),
         )
-        return {str(user.id) for user in users}
+        return {str(user.id) for user in users if self._has_case_management_permission(user)}
 
     async def _validate_case_analysts(self, analyst_ids: list[str], current_user) -> None:
         requested_ids = set(analyst_ids or [])
@@ -273,6 +281,7 @@ class CaseManager:
             & (db_user_account.role == user_role.ANALYST)
             & (db_user_account.status == UserStatus.ACTIVE),
         )
+        users = [user for user in users if self._has_case_management_permission(user)]
         return [
             {
                 "id": str(user.id),

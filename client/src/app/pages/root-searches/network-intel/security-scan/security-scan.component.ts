@@ -301,6 +301,9 @@ export class SecurityScanComponent implements OnInit {
   }
 
   onSearchSubmit(): void {
+    if (this.isLoading) {
+      return;
+    }
     const raw = (this.searchQuery ?? '').trim();
     if (!raw) {
       return;

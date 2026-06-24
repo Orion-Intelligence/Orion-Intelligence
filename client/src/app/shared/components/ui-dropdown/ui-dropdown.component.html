@@ -1,6 +1,6 @@
 <div class="relative" (click)="$event.stopPropagation()">
-  <button [id]="id()" [attr.data-testid]="testId()" [attr.aria-expanded]="isOpen" [attr.aria-controls]="resolvedMenuId" [attr.aria-activedescendant]="isOpen && activeIndex >= 0 ? optionId(activeIndex) : null" [disabled]="disabled() || (!options().length && !allowEmpty())" aria-haspopup="listbox" type="button" class="flex w-full items-center justify-between border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-left font-medium text-[var(--color-text1)] shadow-[0_1px_2px_0_#1018280d] outline-none transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-810)] focus:border-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="size() === 'large' ? 'h-11 rounded-[10px] px-3 text-sm' : 'h-10 rounded-[7px] px-[15px] text-xs'" (click)="toggle($event)" (keydown)="onButtonKeydown($event)">
-    <span class="min-w-0 truncate">{{ selectedLabel }}</span>
+  <button #triggerButton cdkOverlayOrigin #dropdownTrigger="cdkOverlayOrigin" [id]="id()" [attr.data-testid]="testId()" [attr.aria-expanded]="isOpen" [attr.aria-controls]="resolvedMenuId" [attr.aria-activedescendant]="isOpen && activeIndex >= 0 ? optionId(activeIndex) : null" [disabled]="disabled() || (!options().length && !allowEmpty())" aria-haspopup="listbox" type="button" class="flex w-full items-center justify-between border text-left font-medium shadow-[0_1px_2px_0_#1018280d] outline-none transition disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="triggerClass()" (click)="toggle($event)" (keydown)="onButtonKeydown($event)">
+    <span class="min-w-0 truncate" [ngClass]="selectedLabelClass()">{{ selectedLabel }}</span>
     @if (isOpen) {
       <span class="ml-3 h-2 w-2 shrink-0 rotate-[225deg] translate-y-1 border-b-2 border-r-2 border-[var(--color-text3)] transition-transform duration-150"></span>
     } @else {
@@ -8,30 +8,62 @@
     }
   </button>
 
-  @if (isOpen) {
-    <div class="absolute left-0 right-0 top-[calc(100%+6px)] z-[1250] rounded-lg border border-white/[0.12] bg-[var(--color-blue-820)] p-1 shadow-[0_8px_18px_rgba(0,0,0,0.22)]">
-      @if (searchable()) {
-        <div class="border-b border-white/[0.035] p-1 pb-2">
-          <input #searchInput [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)" (keydown)="onSearchKeydown($event)" class="h-9 w-full rounded-[6px] border border-white/[0.07] bg-[var(--color-blue-820-light)] px-3 text-xs font-medium text-[var(--color-text1)] outline-none transition placeholder:text-[var(--color-text5)] focus:border-white/[0.14] focus:bg-[var(--color-blue-810)]" [placeholder]="searchPlaceholder()" type="text" autocomplete="off">
-        </div>
+  @if (multiSelect() && showSelectedChips() && (selectedValues() || []).length) {
+    <div class="mt-2 flex flex-wrap gap-1.5">
+      @for (value of selectedValues() || []; track value) {
+        <span class="ui-dropdown-selected-chip inline-flex min-h-7 max-w-full items-center rounded-[6px] border border-transparent bg-slate-500/10 px-2.5 py-1 text-[11px] font-semibold text-slate-300 [body.dark-theme_&]:!border-[#334155] [body.light-theme_&]:border-[#cbd5e1] [body.light-theme_&]:bg-[#f1f5f9] [body.light-theme_&]:text-[#334155]">
+          <span class="min-w-0 truncate">{{ selectedChipLabel(value) }}</span>
+        </span>
       }
-
-      <div #listbox [id]="resolvedMenuId" class="overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" [ngClass]="size() === 'large' ? 'max-h-[280px]' : 'max-h-[240px]'" role="listbox">
-        @if (loading()) {
-          <div class="flex h-9 items-center gap-2 px-3 text-xs font-medium text-[var(--color-text4)]">
-            <span class="h-3 w-3 animate-spin rounded-full border border-white/[0.16] border-t-[var(--color-text2)]"></span>
-            <span>Loading...</span>
-          </div>
-        } @else {
-        @for (option of visibleOptions; track option.trackKey; let index = $index) {
-          <button [id]="optionId(index)" [attr.data-dropdown-option-index]="index" [attr.data-testid]="optionTestIdPrefix() && option.testKey ? optionTestIdPrefix() + option.testKey : null" [attr.aria-selected]="isSelected(option.key)" class="mt-1 flex h-9 w-full items-center rounded-[6px] px-3 text-left text-xs transition first:mt-0" [ngClass]="optionClass(option, index)" role="option" type="button" (mouseenter)="setActiveIndex(index)" (keydown)="onOptionKeydown($event)" (click)="select(option.key, $event)">
-            <span class="min-w-0 truncate">{{ option.label }}</span>
-          </button>
-        } @empty {
-          <div class="px-3 py-3 text-xs font-medium text-[var(--color-text5)]">No results</div>
-        }
-        }
-      </div>
     </div>
+  }
+
+  <ng-template #dropdownMenuContent>
+    @if (searchable()) {
+      <div class="-mx-1 -mt-1 pb-2">
+        <input #searchInput [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)" (keydown)="onSearchKeydown($event)" class="h-9 w-full border-0 px-3 text-xs font-medium outline-none transition" [ngClass]="searchInputClass()" [placeholder]="searchPlaceholder()" type="text" autocomplete="off">
+      </div>
+    }
+
+    <div #listbox [id]="resolvedMenuId" class="overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" [ngClass]="listboxClass()" role="listbox" [attr.aria-multiselectable]="multiSelect() ? true : null">
+      @if (loading()) {
+        <div class="flex h-9 items-center gap-2 px-3 text-xs font-medium text-[var(--color-text4)]">
+          <span class="h-3 w-3 animate-spin rounded-full border border-white/[0.16] border-t-[var(--color-text2)]"></span>
+          <span>Loading...</span>
+        </div>
+      } @else {
+      @for (option of visibleOptions; track option.trackKey; let index = $index) {
+        <button [id]="optionId(index)" [attr.data-dropdown-option-index]="index" [attr.data-testid]="optionTestIdPrefix() && option.testKey ? optionTestIdPrefix() + option.testKey : null" [attr.aria-selected]="isOptionVisuallySelected(option.key)" class="relative mt-1 flex h-9 w-full items-center rounded-[6px] px-3 text-left text-xs transition first:mt-0" [ngClass]="optionClass(option, index)" role="option" type="button" (mouseenter)="setActiveIndex(index)" (keydown)="onOptionKeydown($event)" (click)="select(option.key, $event)">
+          @if (index > 0) {
+            <span class="pointer-events-none absolute left-0 right-0 top-[-1px] h-px" [ngClass]="isLightTheme() ? 'bg-[#e2e8f0]' : 'bg-white/[0.06]'"></span>
+          }
+          @if (multiSelect()) {
+            <span class="mr-2 flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border" [ngClass]="checkboxClass()">
+              @if (isOptionVisuallySelected(option.key)) {
+                <span class="h-2 w-2 rounded-[2px]" [ngClass]="isLightTheme() ? 'bg-[#475569]' : 'bg-[#cbd5e1]'"></span>
+              }
+            </span>
+          }
+          <span class="min-w-0 flex-1 truncate">{{ option.label }}</span>
+        </button>
+      } @empty {
+        <div class="px-3 py-3 text-xs font-medium text-[var(--color-text5)]">No results</div>
+      }
+      }
+    </div>
+  </ng-template>
+
+  @if (isOpen) {
+    @if (menuPlacement() === 'static') {
+      <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="dropdownTrigger" [cdkConnectedOverlayOpen]="isOpen" [cdkConnectedOverlayPositions]="overlayPositions" [cdkConnectedOverlayWidth]="overlayWidth" [cdkConnectedOverlayPush]="false">
+        <div [ngClass]="menuClass()" (click)="$event.stopPropagation()">
+          <ng-container [ngTemplateOutlet]="dropdownMenuContent"></ng-container>
+        </div>
+      </ng-template>
+    } @else {
+      <div [ngClass]="menuClass()">
+        <ng-container [ngTemplateOutlet]="dropdownMenuContent"></ng-container>
+      </div>
+    }
   }
 </div>

@@ -10,8 +10,8 @@ import {
   visitSocialIntel
 } from '../../client/cypress/e2e/controllers/08-social-management.controller';
 import { openManageIOCs } from '../../client/cypress/e2e/controllers/10-tenant-management.controller';
-import { switchToDeepSearchTab, searchDeepFromTop, setAllInsightsExpanded } from '../../client/cypress/e2e/controllers/14-consolidated.controller';
-import { fillPrimaryScanInput, fillSecondaryScanInput, clickSearch, makeFileInputInteractable } from '../../client/cypress/e2e/controllers/15-scans-management.controller';
+import { switchToDeepSearchTab, searchDeepFromTop, setAllInsightsExpanded } from '../../client/cypress/e2e/controllers/13-consolidated.controller';
+import { fillPrimaryScanInput, fillSecondaryScanInput, clickSearch, makeFileInputInteractable } from '../../client/cypress/e2e/controllers/14-scans-management.controller';
 import { openSystemSettings } from '../../client/cypress/e2e/controllers/09-system-management.controller';
 
 describe('User Manual Screenshot Flow', () => {

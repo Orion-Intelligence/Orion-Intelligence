@@ -24,6 +24,8 @@ import { CaseEditDrawerComponent } from './case-edit-drawer/case-edit-drawer';
 import { CasePdfExportService } from '../../case-management-service/case-pdf-export.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
+import { AppService } from '../../../../../services/core/app/app.service';
+import { ChatWidgetComponent } from '../../../../root-searches/ai-workspace/chat-widget/chat-widget.component';
 
 @Component({
   selector: 'app-case-details',
@@ -40,7 +42,7 @@ import { LicenseService } from '../../../../../services/licenses/licenses.servic
     CaseEditDrawerComponent,
     CaseLinkedCasesSectionComponent,
     CaseRelatedEntitiesSectionComponent,
-    CaseTasksSectionComponent, TranslatePipe],
+    CaseTasksSectionComponent, TranslatePipe, ChatWidgetComponent],
   providers: [
     { provide: CaseDetailsStore, useExisting: forwardRef(() => CaseDetails) }
   ],
@@ -91,7 +93,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   isArchiveConfirmationOpen = false;
   isArchivingCase = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef, private licenseService: LicenseService) {
+  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef, public appService: AppService, private licenseService: LicenseService) {
     super();
   }
 
@@ -516,6 +518,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return;
     }
     this.revokeShareLinks();
+  }
+
+  getCaseDetailsJson(): string {
+    return JSON.stringify(this.caseData);
   }
 
   getShareConfirmationMessage(): string {

@@ -15,7 +15,7 @@ import {
   setAllInsightsExpanded,
   switchToDeepSearchTab,
   switchToIocsTab
-} from './controllers/14-consolidated.controller';
+} from './controllers/13-consolidated.controller';
 
 describe('Consolidated - IOC Basic Flow', () => {
   beforeEach(() => {
@@ -191,8 +191,13 @@ describe('Consolidated - IOC Basic Flow', () => {
     openFirstReportAndGoBack();
 
     cy.get('[data-testid="side-filter-open"]').scrollIntoView().click();
-    cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().click();
-    cy.contains('#side-filter-menu-network [role="option"]', /^Clearnet$/i).click({ force: true });
+    cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().then(($trigger) => {
+      const menuId = $trigger.attr('aria-controls');
+      expect(menuId, 'side-filter network menu id').to.exist;
+      cy.wrap($trigger).click({ force: true });
+      cy.wrap($trigger).should('have.attr', 'aria-expanded', 'true');
+      cy.contains(`#${menuId} [role="option"]`, /^Clearnet$/i, { timeout: 15000 }).click({ force: true });
+    });
     cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
     cy.get('[data-testid="result-card"]').should('have.length.greaterThan', 0);
 

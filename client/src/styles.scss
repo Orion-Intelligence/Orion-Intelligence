@@ -244,6 +244,97 @@ app-satellite-map-renderer .leaflet-tooltip-pane {
   z-index: 9999;
 }
 
+.orion-popup .leaflet-popup-content-wrapper {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.orion-popup .leaflet-popup-content {
+  margin: 0 !important;
+}
+
+.orion-popup .leaflet-popup-tip {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.threat-lens-detail-popup-body {
+  background-image:
+    linear-gradient(#1a2835 1px, transparent 1px),
+    linear-gradient(90deg, #1a2835 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.light-theme .threat-lens-detail-popup-body {
+  background-image: none;
+}
+
+.threat-lens-ip-detail-content > * {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
+
+.threat-lens-ip-detail-content > :first-child {
+  margin-top: 0 !important;
+}
+
+.threat-lens-ip-detail-content > :last-child {
+  margin-bottom: 0 !important;
+}
+
+.threat-lens-ip-detail-content > :first-child .grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 0 24px !important;
+  border-top: 1px solid rgb(143 166 190 / 16%);
+  border-bottom: 1px solid rgb(143 166 190 / 16%);
+  background: rgb(19 30 48 / 28%);
+}
+
+.threat-lens-ip-detail-content > :first-child .grid > div {
+  display: grid !important;
+  grid-template-columns: minmax(92px, 0.72fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+  min-height: 42px;
+  padding: 10px 2px;
+  border-bottom: 1px solid rgb(143 166 190 / 14%);
+}
+
+.threat-lens-ip-detail-content > :first-child .grid > div:nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+.threat-lens-ip-detail-content > :first-child .grid > div > span:first-child {
+  color: rgb(160 184 209 / 82%) !important;
+  font-size: 10px !important;
+  line-height: 1.2;
+  letter-spacing: 0.12em !important;
+}
+
+.threat-lens-ip-detail-content > :first-child .grid > div > span:last-child {
+  color: #e6eef8 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.35;
+  text-align: right;
+}
+
+@media (width <= 720px) {
+  .threat-lens-ip-detail-content > :first-child .grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .threat-lens-ip-detail-content > :first-child .grid > div:nth-last-child(-n + 2) {
+    border-bottom: 1px solid rgb(143 166 190 / 14%);
+  }
+
+  .threat-lens-ip-detail-content > :first-child .grid > div:last-child {
+    border-bottom: 0;
+  }
+}
+
 .threat-lens-tooltip__content--arc {
   min-width: 220px;
 }
@@ -2061,6 +2152,72 @@ select:not(.ui-popup-select, .ui-select)::-ms-expand {
   color: #94a3b8 !important;
 }
 
+.light-theme app-ui-dropdown .ui-dropdown-selected-chip {
+  border-color: #cbd5e1 !important;
+  background-color: #f1f5f9 !important;
+  color: #334155 !important;
+}
+
+html.light-theme .cdk-overlay-container .ui-dropdown-menu,
+body.light-theme .cdk-overlay-container .ui-dropdown-menu,
+html.light-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']),
+body.light-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']),
+.light-theme .ui-dropdown-menu {
+  border-color: #d5dde8 !important;
+  background-color: #fff !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  box-shadow: 0 14px 34px rgb(15 23 42 / 14%) !important;
+}
+
+html.light-theme .cdk-overlay-container .ui-dropdown-menu input,
+body.light-theme .cdk-overlay-container .ui-dropdown-menu input,
+html.light-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']) input,
+body.light-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']) input,
+.light-theme .ui-dropdown-menu input {
+  border-width: 0 !important;
+  background-color: #fff !important;
+  color: #172235 !important;
+}
+
+html.dark-theme .cdk-overlay-container .ui-dropdown-menu,
+body.dark-theme .cdk-overlay-container .ui-dropdown-menu,
+html.dark-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']),
+body.dark-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']),
+.dark-theme .ui-dropdown-menu {
+  border-color: #2c3a4a !important;
+  background-color: #131e30 !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 100% !important;
+}
+
+html.dark-theme .cdk-overlay-container .ui-dropdown-menu-alert,
+body.dark-theme .cdk-overlay-container .ui-dropdown-menu-alert,
+.dark-theme .ui-dropdown-menu-alert {
+  background-color: #152230 !important;
+}
+
+html.dark-theme .cdk-overlay-container .ui-dropdown-menu input,
+body.dark-theme .cdk-overlay-container .ui-dropdown-menu input,
+html.dark-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']) input,
+body.dark-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']) input,
+.dark-theme .ui-dropdown-menu input {
+  border-width: 0 !important;
+  background-color: #131e30 !important;
+}
+
+html.dark-theme .cdk-overlay-container .ui-dropdown-menu-alert input,
+body.dark-theme .cdk-overlay-container .ui-dropdown-menu-alert input,
+.dark-theme .ui-dropdown-menu-alert input {
+  background-color: #152230 !important;
+}
+
+.dark-theme .ui-dropdown-menu input::placeholder {
+  color: #a0b8d1 !important;
+}
+
 .light-theme .ui-popup-btn-secondary {
   border-color: #c7d5e6 !important;
   background: transparent !important;
@@ -3000,7 +3157,7 @@ select:not(.ui-popup-select, .ui-select)::-ms-expand {
   max-width: 340px;
   border: 1px solid rgb(74 222 128 / 32%);
   border-radius: 8px;
-  background: rgb(8 16 27 / 96%);
+  background: #172235;
   color: #eef7f1;
   box-shadow: 0 10px 28px rgb(0 0 0 / 34%);
   pointer-events: none;
