@@ -13,7 +13,7 @@ export class ScannerService {
   scanDomain(domain: string, scanType: string): Observable<any> {
     this.cancel$.next();
     const body = { domain, scanType };
-    return this.scanNotifications.runScanAsResponse<any>({
+    return this.scanNotifications.runApiScanAsResponse<any>({
       apiReference: 'urlscan/domain',
       payload: body,
       metadata: {

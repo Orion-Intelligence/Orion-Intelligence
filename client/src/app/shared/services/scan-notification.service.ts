@@ -192,6 +192,79 @@ export class ScanNotificationService {
     return this.createJob(request).pipe(switchMap(job =>
       this.watchJob(job.scan_id).pipe(map(updated => this.toScanResponse<T>(updated)),
         takeWhile(response => this.isPendingResponse(response), true),)));
+    }
+  runApiScanAsResponse<T>(request: ScanJobStartRequest): Observable<T> {
+    return this.createApiScanRequest<T>(request).pipe(switchMap(response => this.resolveApiScanResponse<T>(response, request)));
+  }
+
+  private createApiScanRequest<T>(request: ScanJobStartRequest): Observable<T | ScanJobDuplicateChoiceResponse> {
+    const endpoint = request.forceNew ? this.withForceNew(request.apiReference) : request.apiReference;
+    return this.api.post<T | ScanJobDuplicateChoiceResponse>(endpoint, request.payload);
+  }
+
+  private resolveApiScanResponse<T>(response: T | ScanJobDuplicateChoiceResponse, request: ScanJobStartRequest): Observable<T> {
+    if (this.isDuplicateChoiceResponse(response as ScanJobCreateApiResponse)) {
+      return this.askDuplicateScanChoice(response as ScanJobDuplicateChoiceResponse).pipe(switchMap(choice => {
+        if (choice === 'previous') {
+          return this.getScanDetail((response as ScanJobDuplicateChoiceResponse).previous_scan.scan_id).pipe(switchMap(job => this.watchTrackedJob<T>(job, request.pollDelayMs)));
+        }
+        if (choice === 'new') {
+          return this.createApiScanRequest<T>({ ...request, forceNew: true }).pipe(switchMap(nextResponse => this.resolveApiScanResponse<T>(nextResponse, { ...request, forceNew: true })));
+        }
+        return EMPTY;
+      }));
+    }
+
+    const job = this.trackApiScanResponse(response, request);
+    if (!job) {
+      return of(response as T);
+    }
+    return this.watchTrackedJob<T>(job, request.pollDelayMs);
+  }
+
+  private watchTrackedJob<T>(job: ScanJob, pollDelayMs = this.defaultPollDelayMs): Observable<T> {
+    return this.watchJob(job.scan_id).pipe(
+      map(updated => this.toScanResponse<T>(updated)),
+      takeWhile(response => this.isPendingResponse(response), true),
+      tap(response => {
+        const scanId = (response as any)?.scan_id;
+        if (scanId) {
+          this.refreshCounts();
+        }
+      }),
+    );
+  }
+
+  private trackApiScanResponse<T>(response: T | any, request: ScanJobStartRequest): ScanJob | null {
+    const scanId = response?.scan_id;
+    if (!scanId) {
+      return null;
+    }
+    const job: ScanJob = {
+      scan_id: String(scanId),
+      title: response?.scan_title || request.metadata?.title || 'Scan',
+      target: response?.scan_target || request.metadata?.target || '',
+      api_reference: request.apiReference,
+      payload: request.payload,
+      response,
+      status: response?.scan_status || this.statusFromResponse(response),
+      seen: response?.scan_seen ?? false,
+      created_at: response?.scan_created_at,
+      updated_at: response?.scan_updated_at,
+      completed_at: response?.scan_completed_at,
+    };
+    const alreadyCached = this.jobCache.has(job.scan_id);
+    this.cacheJob(job);
+    if (!alreadyCached) {
+      this.upsertVisibleJob(job);
+    }
+    this.refreshCounts();
+    this.ensurePolling(job, request.pollDelayMs);
+    return job;
+  }
+
+  private withForceNew(endpoint: string): string {
+    return `${endpoint}${endpoint.includes('?') ? '&' : '?'}force_new=true`;
   }
 
   markSeen(job: ScanJob): void {

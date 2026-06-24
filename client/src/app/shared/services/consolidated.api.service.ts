@@ -126,7 +126,7 @@ export class ConsolidatedApiService {
     const payloadKey = 'domain';
     const payload = { [payloadKey]: target, scanType };
     return this.scanNotifications
-      .runScanAsResponse<any>({
+      .runApiScanAsResponse<any>({
         apiReference: endpoint,
         payload,
         metadata: {
