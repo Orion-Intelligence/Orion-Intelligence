@@ -12,7 +12,7 @@ from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
-from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifactFile, CaseStatus, CaseStatusReason
+from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifactFile, CaseStatus, CaseStatusReason, TaskStatus
 from orion.services.mongo_manager.shared_model.db_case_model import CaseArtifact
 from orion.services.mongo_manager.shared_model.db_case_model import CaseClosure
 from orion.services.mongo_manager.shared_model.db_case_model import CaseComment
@@ -79,6 +79,9 @@ class CaseManager:
 
         data = record.model_dump()
         data["id"] = str(record.id)
+        data["viewerId"] = CaseHelperMethods.actor_id(current_user)
+        data["viewerRole"] = getattr(current_user.role, "value", str(current_user.role))
+        data["assignedAnalysts"] = await self._get_assigned_case_analysts(record)
         return CaseResponse(**data)
 
     @staticmethod
@@ -159,6 +162,9 @@ class CaseManager:
                 raise HTTPException(status_code=400, detail="Linked cases must be cases you can access")
 
     async def get_cases(self, current_user, archived: bool = False) -> list[CaseResponse]:
+        if archived and getattr(current_user.role, "value", current_user.role) == user_role.ANALYST.value:
+            raise HTTPException(status_code=403, detail="Analysts cannot view archived cases")
+
         if CaseHelperMethods.is_maintainer(current_user):
             records = await self._engine.find(
                 db_case_model, (db_case_model.tenant_uuid == str(current_user.tenant_uuid)) 
@@ -201,7 +207,7 @@ class CaseManager:
         self._validate_work_assignments(data.tasks, data.assignedAnalystIds)
         await self._validate_linked_cases(data.caseId, data.linkedCases, current_user)
         if data.closure and not (CaseHelperMethods.is_maintainer(current_user) or CaseHelperMethods.is_admin(current_user) or current_actor_id in data.assignedAnalystIds):
-            raise HTTPException(status_code=403, detail="Only assigned analysts, admins, or maintainers can close cases")
+            raise HTTPException(status_code=403, detail="Only admins, maintainers, or the case creator can close cases")
         entities = [
             CaseEntity(
                 **entity.model_dump(),
@@ -289,6 +295,35 @@ class CaseManager:
             }
             for user in users
         ]
+    
+    async def _get_assigned_case_analysts(self, record: db_case_model) -> list[dict]:
+        assigned_ids = set(record.assignedAnalystIds or [])
+
+        if not assigned_ids:
+            return []
+
+        users = await self._engine.find(
+            db_user_account,
+            (db_user_account.tenant_uuid == record.tenant_uuid)
+            & (db_user_account.role == user_role.ANALYST)
+            & (db_user_account.status == UserStatus.ACTIVE),
+        )
+
+        users = [
+            user for user in users
+            if str(user.id) in assigned_ids and self._has_case_management_permission(user)
+        ]
+
+        return [
+            {
+                "id": str(user.id),
+                "username": user.username,
+                "email": user.email,
+                "role": user.role.value if user.role else "",
+                "status": user.status.value if user.status else "",
+            }
+            for user in users
+        ]
 
     async def get_case_by_id(self, case_id: str, current_user) -> CaseResponse:
         record = await self._engine.find_one(
@@ -336,6 +371,70 @@ class CaseManager:
         new_data["dueAt"] = self._normalize_date_for_compare(new_data.get("dueAt"))
 
         return old_data != new_data
+    
+    def _task_non_status_changed_for_analyst(self, old_task: CaseTask, new_task) -> bool:
+        old_data = old_task.model_dump(
+            exclude={
+                "status",
+                "taskId",
+                "createdBy",
+                "createdAt",
+                "updatedAt",
+                "completedAt",
+            }
+        )
+        new_data = new_task.model_dump(exclude={"status", "taskId"})
+
+        old_data["dueAt"] = self._normalize_date_for_compare(old_data.get("dueAt"))
+        new_data["dueAt"] = self._normalize_date_for_compare(new_data.get("dueAt"))
+
+        return old_data != new_data
+
+    def _validate_analyst_task_update(self, record: db_case_model, tasks, current_actor_id: str) -> None:
+        allowed_statuses = {
+            TaskStatus.IN_PROGRESS,
+            TaskStatus.UNDER_REVIEW,
+        }
+
+        existing_tasks = {
+            task.taskId: task
+            for task in (record.tasks or [])
+        }
+
+        incoming_tasks = {
+            task.taskId: task
+            for task in (tasks or [])
+        }
+
+        if set(existing_tasks.keys()) != set(incoming_tasks.keys()):
+            raise HTTPException(
+                status_code=403,
+                detail="Analysts cannot add or remove tasks"
+            )
+
+        for task_id, incoming_task in incoming_tasks.items():
+            existing_task = existing_tasks[task_id]
+
+            if self._task_non_status_changed_for_analyst(existing_task, incoming_task):
+                raise HTTPException(
+                    status_code=403,
+                    detail="Analysts can only update task status"
+                )
+
+            if incoming_task.status == existing_task.status:
+                continue
+
+            if existing_task.assignedTo != current_actor_id:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Analysts can only update tasks assigned to them"
+                )
+
+            if incoming_task.status not in allowed_statuses:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Analysts can only change task status to in progress or under review"
+                )
 
     def _has_comment_changed(self, old_comment: CaseComment, new_comment) -> bool:
         old_data = old_comment.model_dump(
@@ -368,28 +467,63 @@ class CaseManager:
             raise HTTPException(status_code=403, detail="Access forbidden")
         enc = await CaseHelperMethods.get_case_cipher(current_user)
         CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.decrypt_value(enc, value))
+
+        analyst_limited_update = CaseHelperMethods.is_analyst(current_user)
+
+        if analyst_limited_update:
+            data.title = record.title
+            data.description = record.description
+            data.caseType = record.caseType
+            data.status = record.status
+            data.severity = record.severity
+            data.priority = record.priority
+            data.intakeSource = record.intakeSource
+            data.caseTypeOtherValue = record.caseTypeOtherValue
+            data.intakeSourceOtherValue = record.intakeSourceOtherValue
+            data.tags = record.tags
+            data.assignedAnalystIds = record.assignedAnalystIds
+            data.primaryEntityId = record.primaryEntityId
+            data.entities = record.entities
+            data.artifacts = record.artifacts
+            data.linkedCases = record.linkedCases
+            data.closure = record.closure
+        
+        if analyst_limited_update:
+            self._validate_analyst_task_update(record, data.tasks, current_actor_id)
+
         if record.closure is not None:
             raise HTTPException(status_code=403, detail="Closed cases cannot be edited")
-        if data.assignedAnalystIds != (record.assignedAnalystIds or []) and not CaseHelperMethods.can_manage_case_assignments(record, current_user):
+        
+        assigned_analysts_changed = data.assignedAnalystIds != (record.assignedAnalystIds or [])
+        task_assignments_changed = self._task_assignments_changed(record, data.tasks)
+        linked_cases_changed = self._linked_cases_changed(record, data.linkedCases)
+
+        if assigned_analysts_changed and not CaseHelperMethods.can_manage_case_assignments(record, current_user):
             raise HTTPException(status_code=403, detail="Only admins, maintainers, or the case creator can update case analysts")
-        if self._task_assignments_changed(record, data.tasks) and not CaseHelperMethods.can_manage_case_assignments(record, current_user):
+
+        if (task_assignments_changed and not CaseHelperMethods.is_analyst(current_user) and not CaseHelperMethods.can_manage_case_assignments(record, current_user)):
             raise HTTPException(status_code=403, detail="Only admins, maintainers, or the case creator can assign tasks")
-        if self._linked_cases_changed(record, data.linkedCases) and not CaseHelperMethods.can_manage_case_assignments(record, current_user):
+
+        if linked_cases_changed and not CaseHelperMethods.can_manage_case_assignments(record, current_user):
             raise HTTPException(status_code=403, detail="Only admins, maintainers, or the case creator can link cases")
-        await self._validate_case_analysts(data.assignedAnalystIds, current_user)
+
+        if assigned_analysts_changed:
+            await self._validate_case_analysts(data.assignedAnalystIds, current_user)
+
         self._validate_work_assignments(data.tasks, data.assignedAnalystIds)
-        await self._validate_linked_cases(case_id, data.linkedCases, current_user)
+
+        if linked_cases_changed:
+            await self._validate_linked_cases(case_id, data.linkedCases, current_user)
+
         if data.comments is not None and not CaseHelperMethods.can_comment(record, current_user):
             raise HTTPException(status_code=403, detail="Only assigned analysts, admins, maintainers, or the case creator can comment on cases")
+        
         closure_provided = "closure" in data.model_fields_set
-        if closure_provided and (data.closure is not None or record.closure is not None) and not CaseHelperMethods.can_close_case(record, current_user):
-            raise HTTPException(status_code=403, detail="Only assigned analysts, admins, or maintainers can close cases")
+        if closure_provided and not analyst_limited_update and (data.closure is not None or record.closure is not None) and not CaseHelperMethods.can_close_case(record, current_user):
+            raise HTTPException(status_code=403, detail="Only admins, maintainers, or the case creator can close cases")
         
         if closure_provided and data.closure is not None and record.status != CaseStatus.RESOLVED:
-            raise HTTPException(
-                status_code=400,
-                detail="Case cannot be closed until it reaches resolved status"
-            )
+            raise HTTPException(status_code=400, detail="Case cannot be closed until it reaches resolved status")
         
         existing_entities = {
             entity.entityId: entity
@@ -403,7 +537,7 @@ class CaseManager:
 
             entities.append(
                 CaseEntity(
-                    **entity.model_dump(),
+                    **entity.model_dump(exclude={"createdBy", "updatedBy", "createdAt", "updatedAt"}),
                     createdBy=existing_entity.createdBy if existing_entity else current_actor_id,
                     updatedBy=current_actor_id if has_changed else existing_entity.updatedBy,
                     createdAt=existing_entity.createdAt if existing_entity else server_now,
@@ -442,7 +576,7 @@ class CaseManager:
         }
         record.artifacts = [
             CaseArtifact(
-                **artifact.model_dump(exclude={"artifactId"}),
+                **artifact.model_dump(exclude={"artifactId", "createdBy", "createdAt"}),
                 artifactId=artifact.artifactId or str(uuid4()),
                 createdBy=existing_artifacts[artifact.artifactId].createdBy if artifact.artifactId in existing_artifacts else current_actor_id,
                 createdAt=existing_artifacts[artifact.artifactId].createdAt if artifact.artifactId in existing_artifacts else server_now,
@@ -474,7 +608,7 @@ class CaseManager:
         }
         record.linkedCases = [
             CaseLink(
-                **linked_case.model_dump(),
+                **linked_case.model_dump(exclude={"createdBy", "createdAt"}),
                 createdBy=existing_linked_cases[linked_case.targetCaseId].createdBy if linked_case.targetCaseId in existing_linked_cases else current_actor_id,
                 createdAt=existing_linked_cases[linked_case.targetCaseId].createdAt if linked_case.targetCaseId in existing_linked_cases else server_now,
             )
@@ -562,6 +696,9 @@ class CaseManager:
 
         if not CaseHelperMethods.can_view_case(record, current_user):
             raise HTTPException(status_code=403, detail="Access forbidden")
+        
+        if CaseHelperMethods.is_analyst(current_user):
+            raise HTTPException(status_code=403, detail="Analysts cannot upload artifact files")
 
         if not files:
             raise HTTPException(status_code=400, detail="No files selected")
@@ -701,6 +838,9 @@ class CaseManager:
 
         if not CaseHelperMethods.can_view_case(record, current_user):
             raise HTTPException(status_code=403, detail="Access forbidden")
+        
+        if CaseHelperMethods.is_analyst(current_user):
+            raise HTTPException(status_code=403, detail="Analysts cannot delete artifact files")
 
         enc = await CaseHelperMethods.get_case_cipher(current_user)
         CaseHelperMethods.apply_sensitive_case_values(
@@ -875,6 +1015,12 @@ class CaseManager:
 
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
+        
+        if not CaseHelperMethods.can_manage_case_assignments(record, current_user):
+            raise HTTPException(
+                status_code=403,
+                detail="Only admins, maintainers, or the case creator can archive cases"
+            )
 
         if not CaseHelperMethods.can_view_case(record, current_user):
             raise HTTPException(status_code=403, detail="Access forbidden")
@@ -967,6 +1113,12 @@ class CaseManager:
 
         if not CaseHelperMethods.can_view_case(record, current_user):
             raise HTTPException(status_code=403, detail="Access forbidden")
+        
+        if not CaseHelperMethods.can_manage_case_assignments(record, current_user):
+            raise HTTPException(
+                status_code=403,
+                detail="Only admins, maintainers, or the case creator can update case status"
+            )
 
         if record.isArchived:
             raise HTTPException(status_code=403, detail="Archived cases cannot be updated")

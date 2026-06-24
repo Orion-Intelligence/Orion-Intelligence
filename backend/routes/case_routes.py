@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from fastapi import Body, Depends, APIRouter
 from fastapi import File
 from fastapi import UploadFile
@@ -21,6 +22,9 @@ case_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE
     ],
 )
 async def get_cases(archived: bool = Query(False), current_user=Depends(get_current_user)):
+    if archived and getattr(current_user.role, "value", current_user.role) == user_role.ANALYST.value:
+        raise HTTPException(status_code=403, detail="Analysts cannot view archived cases")
+
     return await CaseManager.get_instance().get_cases(current_user, archived)
 
 
@@ -28,7 +32,7 @@ async def get_cases(archived: bool = Query(False), current_user=Depends(get_curr
     "/api/profile/cases",
     status_code=201,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def create_case(payload: CreateCaseRequest = Body(...), current_user=Depends(get_current_user)):
@@ -39,7 +43,7 @@ async def create_case(payload: CreateCaseRequest = Body(...), current_user=Depen
     "/api/profile/cases/next-id",
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def get_next_case_id(current_user=Depends(get_current_user)):
@@ -50,7 +54,7 @@ async def get_next_case_id(current_user=Depends(get_current_user)):
     "/api/profile/cases/analysts",
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def get_case_analysts(current_user=Depends(get_current_user)):
@@ -60,7 +64,7 @@ async def get_case_analysts(current_user=Depends(get_current_user)):
     "/api/profile/cases/{case_id}/assign-analyst",
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def assign_case_analyst(
@@ -75,7 +79,7 @@ async def assign_case_analyst(
     "/api/profile/cases/{case_id}/shares",
     status_code=201,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def create_case_share(case_id: str, payload: CreateCaseShareRequest = Body(...), current_user=Depends(get_current_user)):
@@ -87,7 +91,7 @@ async def create_case_share(case_id: str, payload: CreateCaseShareRequest = Body
     status_code=200,
     tags=["Case Management"],
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def verify_artifact_file(case_id: str, artifact_id: str, file_id: str, current_user=Depends(get_current_user)):
@@ -98,7 +102,7 @@ async def verify_artifact_file(case_id: str, artifact_id: str, file_id: str, cur
     "/api/profile/cases/{case_id}/shares",
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def revoke_case_shares(case_id: str, current_user=Depends(get_current_user)):
@@ -119,7 +123,7 @@ async def get_artifact_reports(source: str = Query(...), q: str = Query(""), lim
     "/api/profile/cases/{case_id}/archive",
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def archive_case(case_id: str, current_user=Depends(get_current_user)):
@@ -152,7 +156,7 @@ async def update_case(case_id: str, payload: UpdateCaseRequest = Body(...), curr
     status_code=200,
     tags=["Case Management"],
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def upload_artifact_files(
@@ -190,7 +194,7 @@ async def download_artifact_file(
     status_code=200,
     tags=["Case Management"],
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def delete_artifact_file(
@@ -208,7 +212,7 @@ async def delete_artifact_file(
     "/api/profile/cases/{case_id}",
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def delete_case(case_id: str, current_user=Depends(get_current_user)):
@@ -219,7 +223,7 @@ async def delete_case(case_id: str, current_user=Depends(get_current_user)):
     "/api/profile/cases/{case_id}/status",
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def update_case_status(

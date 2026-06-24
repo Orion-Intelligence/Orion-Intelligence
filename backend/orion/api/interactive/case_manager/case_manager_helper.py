@@ -58,11 +58,10 @@ class CaseHelperMethods:
 
     @staticmethod
     def can_close_case(record: db_case_model, current_user) -> bool:
-        current_actor_id = CaseHelperMethods.actor_id(current_user)
         return (
             CaseHelperMethods.is_maintainer(current_user)
             or CaseHelperMethods.is_admin(current_user)
-            or current_actor_id in (record.assignedAnalystIds or [])
+            or record.createdBy == CaseHelperMethods.actor_id(current_user)
         )
 
     @staticmethod
@@ -167,3 +166,47 @@ class CaseHelperMethods:
             profile.profileUrl = transform(profile.profileUrl)
             profile.displayName = transform(profile.displayName)
             profile.platformOtherValue = transform(profile.platformOtherValue)
+    
+    @staticmethod
+    def is_analyst(current_user) -> bool:
+        role = getattr(current_user.role, "value", str(current_user.role))
+        return role == user_role.ANALYST.value
+
+
+    @staticmethod
+    def normalize_case_for_analyst_compare(value):
+        if value is None:
+            return None
+
+        if hasattr(value, "model_dump"):
+            value = value.model_dump()
+
+        if isinstance(value, list):
+            return [CaseHelperMethods.normalize_case_for_analyst_compare(item) for item in value]
+
+        if isinstance(value, dict):
+            ignored_keys = {
+                "id",
+                "tenant_uuid",
+                "caseId",
+                "statusReasons",
+                "comments",
+                "tasks",
+                "createdAt",
+                "updatedAt",
+                "createdBy",
+                "updatedBy",
+                "closedAt",
+                "isArchived",
+                "archivedAt",
+                "archivedBy",
+                "uploadedAt",
+            }
+
+            return {
+                key: CaseHelperMethods.normalize_case_for_analyst_compare(val)
+                for key, val in value.items()
+                if key not in ignored_keys
+            }
+
+        return value

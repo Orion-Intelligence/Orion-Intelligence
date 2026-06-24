@@ -64,4 +64,8 @@ export class CaseClosureSectionComponent {
   getFormattedDateTime(date?: Date | string | null): string {
     return getFormattedCaseDateTime(date);
   }
+
+  canManageCases(): boolean {
+    return this.store.canManageCases();
+  }
 }

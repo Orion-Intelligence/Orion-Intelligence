@@ -89,6 +89,18 @@ export function typeInputSlow(selector: string, value: string, submit = true) {
   cy.typeSlow(selector, value, { submit });
 }
 
+export function typeInputSlow(selector: string, value: string, submit = true) {
+  cy.get(selector).filter(':visible').first().should('be.visible').and('not.be.disabled').click({ force: true });
+  cy.get(selector).filter(':visible').first().type('{selectall}{backspace}', { force: true });
+  cy.wait(250);
+  cy.get(selector).filter(':visible').first().type(value, { force: true, delay: 75 });
+  cy.get(selector).filter(':visible').first().should('have.value', value);
+  if (submit) {
+    cy.wait(250);
+    cy.get(selector).filter(':visible').first().type('{enter}', { force: true });
+  }
+}
+
 export function openExploitSubmenu(submenu: string) {
   clickSidebarSubItem('Exploit', submenu);
 }

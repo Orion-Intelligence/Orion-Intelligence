@@ -20,6 +20,9 @@ export abstract class CaseDetailsStore {
   abstract analysts: CaseAnalyst[];
   abstract accessibleCases: Case[];
 
+  abstract canManageCases(): boolean;
+  abstract canEditTasksAndComments(): boolean;
+
   abstract enableEditing(section: CaseDetailsEditSection): void;
   abstract cancelEditing(): void;
   abstract openAddRelatedEntity(): void;
@@ -60,4 +63,7 @@ export abstract class CaseDetailsStore {
   abstract viewArtifactReport(artifact: CaseArtifact): void;
   abstract verifyArtifactFile(artifact: CaseArtifact, fileId: string): void;
   abstract isArtifactFileIntegrityFailed(artifactFile: CaseArtifactFile): boolean;
+  abstract canAddTasks(): boolean;
+  abstract canEditTask(task?: CaseTask | null): boolean;
+  abstract canEditFullTask(): boolean;
 }

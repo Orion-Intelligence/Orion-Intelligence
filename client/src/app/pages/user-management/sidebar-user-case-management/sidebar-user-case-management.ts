@@ -50,6 +50,9 @@ export class SidebarUserCaseManagement implements OnInit {
   }
 
   addCase(): void {
+    if (!this.canManageCases()) {
+      return;
+    }
     this.showAddCasePopup = true;
   }
 
@@ -71,6 +74,10 @@ export class SidebarUserCaseManagement implements OnInit {
 
   canDeleteCases(): boolean {
     return this.licenseService.isMaintainer();
+  }
+
+  canManageCases(): boolean {
+    return this.licenseService.isMaintainer() || this.licenseService.isAdmin();
   }
 
   openDeleteConfirmation(caseId: string): void {
@@ -136,11 +143,19 @@ export class SidebarUserCaseManagement implements OnInit {
   }
 
   toggleArchivedCases(): void {
+    if (!this.canManageCases()) {
+      return;
+    }
+
     this.showArchivedCases = !this.showArchivedCases;
     this.loadCases();
   }
 
   openTrackingBoard(): void {
+    if (!this.canManageCases()) {
+      return;
+    }
+
     const url = this.router.createUrlTree([
       '/dashboard/profile/case-management/tracking-board'
     ]).toString();
@@ -165,6 +180,10 @@ export class SidebarUserCaseManagement implements OnInit {
   }
 
   openAssignAnalystDialog(caseItem: Case): void {
+    if (!this.canManageCases()) {
+      return;
+    }
+
     this.selectedAssignCase = caseItem;
     this.isAssignAnalystDialogOpen = true;
     this.loadAnalysts();

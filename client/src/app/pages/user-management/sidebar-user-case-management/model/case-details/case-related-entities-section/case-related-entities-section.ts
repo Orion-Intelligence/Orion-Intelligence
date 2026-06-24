@@ -101,4 +101,8 @@ export class CaseRelatedEntitiesSectionComponent {
   getFormattedDateTime(date?: Date | string | null): string {
     return getFormattedCaseDateTime(date);
   }
+
+  canManageCases(): boolean {
+    return this.store.canManageCases();
+  }
 }
