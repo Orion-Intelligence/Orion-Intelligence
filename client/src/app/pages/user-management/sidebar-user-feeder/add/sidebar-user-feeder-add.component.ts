@@ -25,6 +25,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
   uploadedSessionFileName = '';
   valuesText = '';
   isSubmitting = false;
+  isSelectingFiles = false;
   isSharedScriptStatusLoading = false;
   isValuesLoading = false;
   uploadProgressCurrent = 0;
@@ -93,6 +94,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
+    this.isSelectingFiles = false;
     this.selectedFiles = Array.from(input.files || []);
   }
 
