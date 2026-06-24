@@ -168,9 +168,16 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         caseData.linkedCases = caseData.linkedCases || [];
         caseData.closure = caseData.closure || null;
         caseData.assignedAnalystIds = caseData.assignedAnalystIds || [];
+        caseData.assignedAnalysts = caseData.assignedAnalysts || [];
+
+        if (!this.canManageCases()) {
+          this.analysts = caseData.assignedAnalysts;
+        }
+
         this.caseData = caseData;
         this.caseMotionDisabled = true;
         this.isLoading = false;
+
         setTimeout(() => {
           this.caseMotionDisabled = false;
         });
@@ -1405,10 +1412,16 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     if (!userId) {
       return 'Unassigned';
     }
-    const analyst = this.analysts.find(item => item.id === userId);
+
+    const analyst = [
+      ...(this.analysts || []),
+      ...(this.caseData?.assignedAnalysts || [])
+    ].find(item => item.id === userId);
+
     if (!analyst) {
       return userId;
     }
+
     return analyst.username || analyst.email || analyst.id;
   }
 
@@ -1445,6 +1458,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   getCaseAnalysts(caseItem: Case | null = this.caseData): CaseAnalyst[] {
+    if (caseItem?.assignedAnalysts?.length) {
+      return caseItem.assignedAnalysts;
+    }
+
     const assignedIds = new Set(caseItem?.assignedAnalystIds || []);
     return this.analysts.filter(analyst => assignedIds.has(analyst.id));
   }

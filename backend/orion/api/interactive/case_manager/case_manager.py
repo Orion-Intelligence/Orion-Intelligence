@@ -81,6 +81,7 @@ class CaseManager:
         data["id"] = str(record.id)
         data["viewerId"] = CaseHelperMethods.actor_id(current_user)
         data["viewerRole"] = getattr(current_user.role, "value", str(current_user.role))
+        data["assignedAnalysts"] = await self._get_assigned_case_analysts(record)
         return CaseResponse(**data)
 
     @staticmethod
@@ -284,6 +285,35 @@ class CaseManager:
             & (db_user_account.status == UserStatus.ACTIVE),
         )
         users = [user for user in users if self._has_case_management_permission(user)]
+        return [
+            {
+                "id": str(user.id),
+                "username": user.username,
+                "email": user.email,
+                "role": user.role.value if user.role else "",
+                "status": user.status.value if user.status else "",
+            }
+            for user in users
+        ]
+    
+    async def _get_assigned_case_analysts(self, record: db_case_model) -> list[dict]:
+        assigned_ids = set(record.assignedAnalystIds or [])
+
+        if not assigned_ids:
+            return []
+
+        users = await self._engine.find(
+            db_user_account,
+            (db_user_account.tenant_uuid == record.tenant_uuid)
+            & (db_user_account.role == user_role.ANALYST)
+            & (db_user_account.status == UserStatus.ACTIVE),
+        )
+
+        users = [
+            user for user in users
+            if str(user.id) in assigned_ids and self._has_case_management_permission(user)
+        ]
+
         return [
             {
                 "id": str(user.id),

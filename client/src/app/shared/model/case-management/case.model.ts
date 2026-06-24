@@ -556,6 +556,7 @@ export interface Case {
     id?: string;
     viewerId?: string;
     viewerRole?: string;
+    assignedAnalysts?: CaseAnalyst[];
     caseId: string;
     caseTypeOtherValue?: string;
     intakeSourceOtherValue?: string;
