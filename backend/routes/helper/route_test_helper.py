@@ -13,6 +13,8 @@ from orion.helper_manager.env_handler import env_handler
 
 
 class TestRouteHelper:
+    __test__ = False
+
     MOCKS_DIR = Path(__file__).resolve().parents[2] / "static" / "test" / "mocks" / "api"
     ELASTIC_MOCKS_DIR = Path(__file__).resolve().parents[2] / "static" / "test" / "mocks" / "elastic"
     STATIC_TEST_CHAT_RESPONSE = "how may i help you"

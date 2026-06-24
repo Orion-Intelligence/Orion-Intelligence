@@ -1,5 +1,5 @@
 describe('Orion Intelligence - Account Settings and Password Reset Flow', () => {
-    before(() => {
+    beforeEach(() => {
         cy.loginAsTest1();
     });
 
