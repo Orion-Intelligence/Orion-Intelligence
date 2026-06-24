@@ -1,8 +1,12 @@
 <div class="mx-auto w-full max-w-[2400px] px-5 pb-8 pt-5 lg:px-8">
   @if (loading) {
+    <div class="mb-4">
+      <h1 class="text-[20px] font-semibold text-[var(--color-text1)]">{{ 'Analysis Report' | translate }}</h1>
+      <p class="text-[13px] text-[var(--color-text4)]">{{ 'File Processing Results' | translate }}</p>
+    </div>
     <div class="mt-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-5">
-      <div class="mb-3 h-4 w-44 animate-pulse rounded bg-[var(--color-blue-720)]"></div>
-      <div class="h-3 w-72 animate-pulse rounded bg-[var(--color-blue-720)]"></div>
+      <div class="ui-shimmer mb-3 h-4 w-44 rounded bg-[var(--color-blue-720)]"></div>
+      <div class="ui-shimmer h-3 w-72 rounded bg-[var(--color-blue-720)]"></div>
     </div>
   } @else if (errorMessage) {
     <section class="rounded-[10px] border border-[rgba(255,77,79,0.35)] bg-[rgba(255,77,79,0.08)] p-[20px] text-center">
@@ -10,15 +14,10 @@
       <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">{{ errorMessage }}</div>
     </section>
   } @else if (job) {
-    <header class="mb-4">
-      <div class="flex flex-wrap items-start justify-between gap-3">
-        <div class="min-w-0">
-          <h1 class="m-0 text-[22px] font-semibold leading-tight text-[var(--color-text1)]">{{ reportTitle | translate }}</h1>
-          <div class="mt-1 max-w-[760px] truncate text-[13px] text-[var(--color-text4)]" [title]="targetText">{{ targetText }}</div>
-        </div>
-        <span class="shrink-0 rounded-full border border-[var(--color-border)] px-3 py-1.5 text-[12px] font-semibold" [ngClass]="statusBadgeClass()">{{ statusLabel | translate }}</span>
-      </div>
-    </header>
+    <div class="mb-4">
+      <h1 class="text-[20px] font-semibold text-[var(--color-text1)]">{{ 'Analysis Report' | translate }}</h1>
+      <p class="text-[13px] text-[var(--color-text4)]">{{ 'File Processing Results' | translate }}</p>
+    </div>
 
     <div data-testid="scan-report-summary" class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3" @fadeInDashboardItem>
       <div class="flex items-center gap-2">
@@ -58,105 +57,68 @@
         <div class="max-w-[240px] truncate text-sm font-semibold text-[var(--color-text1)]" [title]="completedAtLabel">{{ completedAtLabel }}</div>
         <div class="text-xs text-[var(--color-text4)]">{{ 'Completed' | translate }}</div>
       </div>
+
+      <div class="ml-auto flex items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
+        <button data-testid="scan-download-report" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:-translate-y-[1px] hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]" [appTooltip]="'Export Report' | translate" (click)="openExportChoice()" [attr.aria-label]="'Export Report' | translate">
+          <img src="assets/images/shared/theme/download.svg" width="16" height="16" alt="download" class="ui-action-icon" />
+        </button>
+      </div>
     </div>
 
-    @if (isVulnerabilityReport) {
-      <app-network-intel-vulnerability-section
-        [isScanning]="false"
-        [progress]="100"
-        [currentStep]="'done'"
-        [errorMessage]="null"
-        [hasSearched]="true"
-        [targets]="vulnerabilityTargets"
-        [activeTarget]="vulnerabilityActiveTarget"
-        [searchDomain]="vulnerabilityActiveTarget"
-        [vulnerabilityResult]="result">
-      </app-network-intel-vulnerability-section>
-    } @else if (genericItems.length > 0) {
-      <div data-testid="scan-report-results" class="ui-ioc-table-shell mt-4 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]" @fadeInDashboardItem>
-        <div class="ui-ioc-table-head grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[60px_1fr_120px_48px]">
-          <div>#</div>
-          <div>{{ 'Result' | translate }}</div>
-          <div>{{ 'Fields' | translate }}</div>
-          <div class="max-[640px]:hidden">{{ 'Scan Type' | translate }}</div>
-          <div></div>
-        </div>
-
-        @for (item of genericItems; track trackByIndex($index); let idx = $index) {
-          <div data-testid="scan-report-row" role="row" tabindex="0" class="ui-ioc-table-row grid min-w-[680px] cursor-pointer grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] px-4 py-3 text-sm text-[var(--color-text1)] transition-colors max-[900px]:grid-cols-[60px_1fr_120px_48px]" [class.ui-ioc-row-even]="idx % 2 === 0" [class.ui-ioc-row-odd]="idx % 2 !== 0" [class.credential_row_expand]="expandedResultIndex === idx" [attr.aria-expanded]="expandedResultIndex === idx" (click)="toggleResultItem(idx)" (keydown.enter)="toggleResultItem(idx)" (keydown.space)="$event.preventDefault(); toggleResultItem(idx)">
-            <div class="font-mono text-xs">{{ idx + 1 }}</div>
-            <div class="truncate" [title]="item?.m_title || item?.m_app_name || item?.title || item?.name || targetText">
-              {{ item?.m_title || item?.m_app_name || item?.title || item?.name || targetText }}
+    @if (resultSections.length > 0) {
+      <section data-testid="scan-report-results" class="mt-4 w-full space-y-4" @fadeInDashboardItem>
+        @for (section of resultSections; track trackByIndex($index); let sectionIdx = $index) {
+          <div>
+            <div class="my-[10px] flex items-center gap-[12px] text-[12px] font-semibold uppercase tracking-[1px] text-[#10b981]">
+              <span>{{ section.title }}</span>
+              <span class="h-px flex-1 bg-[linear-gradient(90deg,rgba(16,185,129,0.6),rgba(16,185,129,0))]"></span>
             </div>
-            <div class="truncate" [title]="getVisibleObjectEntries(item).length + ' Fields'">{{ getVisibleObjectEntries(item).length }} {{ 'Fields' | translate }}</div>
-            <div class="text-xs capitalize text-[var(--color-text4)] max-[640px]:hidden">{{ apiType }}</div>
-            <button data-testid="scan-report-row-toggle" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="$event.stopPropagation(); toggleResultItem(idx)" [attr.aria-label]="(expandedResultIndex === idx ? 'Collapse row' : 'Expand row') | translate" [attr.aria-pressed]="expandedResultIndex === idx">
-              <img class="h-3 w-3 ui-action-icon" [src]="expandedResultIndex === idx ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" [alt]="expandedResultIndex === idx ? 'Collapse row' : 'Expand row'">
-            </button>
-          </div>
-
-          @if (expandedResultIndex === idx) {
-            <div class="border-b border-[var(--color-divider)] bg-[var(--color-blue-790)] px-4 py-3" @fadeInDashboardItem>
-              <div data-testid="scan-report-card" class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border border-[var(--ui-consolidated-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] [--ui-consolidated-sub-bg:var(--color-blue-700)] [--ui-consolidated-sub-hover:var(--color-blue-700)] [--ui-consolidated-border:var(--color-border)] [--ui-consolidated-divider:var(--color-divider)]">
-                <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
-                  <div class="min-w-0">
-                    <b data-testid="scan-report-card-title" class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">
-                      {{ apiType | uppercase }} {{ 'RESULT' | translate }} | {{ idx + 1 }}
-                    </b>
-                    <div class="mt-[4px] overflow-hidden text-ellipsis whitespace-nowrap text-[11px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text6)]">
-                      {{ 'Target' | translate }}: <span class="font-[600] text-[var(--color-text2)]">{{ targetText }}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <span class="inline-flex h-[32px] items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-transparent px-[12px] text-[12px] font-[800] tracking-[0.2px] text-[var(--color-text1)]">
-                      {{ getVisibleObjectEntries(item).length }} {{ 'Fields' | translate }}
-                    </span>
-                  </div>
-                </div>
-                <div class="grid grid-cols-1 gap-0 px-[14px] py-[6px] md:grid-cols-2 md:gap-x-[18px] max-[640px]:px-[10px]">
-                  @for (entry of getVisibleObjectEntries(item); track entry.key || $index; let fieldIdx = $index; let last = $last) {
-                    <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [ngClass]="{ 'border-b-0': last || (fieldIdx === getVisibleObjectEntries(item).length - 2 && getVisibleObjectEntries(item).length % 2 === 0) }">
-                      <div class="w-[92px] shrink-0 font-[Inter] text-[10px] font-[700] uppercase tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[78px]">
-                        {{ displayFieldLabel(entry.key) }}
-                      </div>
-                      <div class="flex min-w-0 flex-1 items-center gap-[8px]">
-                        @if (!isArrayValue(entry.value)) {
-                          @if (isUrlValue(entry.value)) {
-                            <a class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-[600] text-[var(--color-text5)] hover:underline" [href]="entry.value" target="_blank" rel="noopener noreferrer">
-                              {{ entry.value }}
-                            </a>
-                          } @else {
-                            <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]">
-                              {{ stringifyNestedValue(entry.value) }}
-                            </div>
-                          }
-                        }
-                        @if (isArrayValue(entry.value)) {
-                          <div class="flex min-w-0 flex-1 flex-wrap gap-x-[10px] gap-y-[4px]">
-                            @for (valueItem of deduplicateWithCount(entry.value); track trackByIndex($index)) {
-                              <span class="inline-flex max-w-full items-center gap-[4px] text-[13px] font-[600] text-[var(--color-text1)]">
-                                <span class="truncate">{{ stringifyNestedValue(valueItem.value) }}</span>
-                                @if (valueItem.count > 1) {
-                                  <span class="ml-[2px] rounded-md border border-sky-500/20 bg-sky-500/10 px-[6px] py-[1px] text-[10px] font-semibold tracking-wide text-sky-400">x{{ valueItem.count }}</span>
-                                }
-                              </span>
-                            }
-                          </div>
-                        }
-                      </div>
-                    </div>
-                  }
+            <div data-testid="scan-report-card" class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border border-[var(--ui-consolidated-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] [--ui-consolidated-sub-bg:var(--color-blue-700)] [--ui-consolidated-sub-hover:var(--color-blue-700)] [--ui-consolidated-border:var(--color-border)] [--ui-consolidated-divider:var(--color-divider)]">
+              <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
+                <div class="min-w-0">
+                  <b data-testid="scan-report-card-title" class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">{{ section.title }}</b>
+                  <div class="mt-[4px] text-[11px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text6)]">{{ 'Fields' | translate }}: <span class="font-[600] text-[var(--color-text2)]">{{ section.items.length }}</span></div>
                 </div>
               </div>
+              <div class="grid grid-cols-1 gap-0 px-[14px] py-[8px] md:grid-cols-2 md:gap-x-[18px] max-[640px]:px-[10px]">
+                @for (item of section.items; track trackByIndex($index); let itemIdx = $index) {
+                  <div class="group flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [ngClass]="{ 'border-b-0': isLastSectionRow(section, itemIdx) }">
+                    <div class="w-[150px] shrink-0 break-words font-[Inter] text-[10px] font-[700] uppercase leading-[1.25] tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[110px]" [title]="item.label">{{ item.label }}</div>
+                    <div class="flex min-w-0 flex-1 items-center gap-[8px]">
+                      @if (isUrlValue(item.value)) {
+                        <a class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-[600] text-[var(--color-text5)] hover:underline" [href]="item.value" target="_blank" rel="noopener noreferrer">
+                          {{ item.value }}
+                        </a>
+                      } @else {
+                        <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [title]="stringifyNestedValue(item.value)">
+                          {{ stringifyNestedValue(item.value) }}
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
             </div>
-          }
+          </div>
         }
-      </div>
+      </section>
     } @else {
-      <section class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[20px] text-center">
+      <section class="mt-4 w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[20px] text-center">
         <div class="text-[16px] font-semibold text-[var(--color-text1)]">{{ 'No response was found' | translate }}</div>
         <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">{{ 'This scan does not have renderable report data yet.' | translate }}</div>
       </section>
     }
+
+    <app-export-choice-modal
+      [visible]="isExportChoiceOpen"
+      [title]="('Export Report') | translate"
+      [subtitle]="('Choose the export format.') | translate"
+      [options]="reportExportOptions"
+      overlayTestId="scan-report-export-overlay"
+      modalTestId="scan-report-export-modal"
+      closeTestId="scan-report-export-close"
+      (closed)="closeExportChoice()"
+      (optionSelected)="selectExport($event)">
+    </app-export-choice-modal>
   }
 </div>

@@ -1,18 +1,24 @@
-import { CommonModule, NgClass, UpperCasePipe } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { TooltipDirective } from '../../shared/directive/tooltip-directive.directive';
+import { ExportChoiceOption } from '../../shared/model/report/export-choice.model';
+import { GraphReportPayload } from '../../shared/model/report/report-export.model';
 import { ScanJob } from '../../shared/model/scan-jobs/scan-job.model';
+import { ExportChoiceModalComponent } from '../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
-import { VulnerabilitySectionComponent } from '../root-searches/network-intel/vulnerability-section/vulnerability-section.component';
+import { ReportExportService } from '../../shared/services/report-export.service';
 import { ScanNotificationService } from '../../shared/services/scan-notification.service';
 import { ValuePresentationBase } from '../../shared/utils/value-presentation.base';
+
+type ScanReportField = { label: string; value: any };
+type ScanReportSection = { title: string; items: ScanReportField[] };
 
 @Component({
   selector: 'app-scan-report',
   standalone: true,
-  imports: [CommonModule, NgClass, UpperCasePipe, TooltipDirective, TranslatePipe, VulnerabilitySectionComponent],
+  imports: [CommonModule, NgClass, TooltipDirective, ExportChoiceModalComponent, TranslatePipe],
   templateUrl: './scan-report.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -20,10 +26,24 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
   job: ScanJob | null = null;
   loading = true;
   errorMessage = '';
-  expandedResultIndex: number | null = 0;
+  isExportChoiceOpen = false;
+  readonly reportExportOptions: ExportChoiceOption[] = [
+    {
+      value: 'json',
+      title: '1. JSON',
+      description: 'Download machine-readable scan report data.',
+      testId: 'scan-report-export-json'
+    },
+    {
+      value: 'report',
+      title: '2. Export Report (PDF)',
+      description: 'Generate consistent scan report PDF export.',
+      testId: 'scan-report-export-report'
+    }
+  ];
   readonly trackByIndex = (index: number) => index;
 
-  constructor(private route: ActivatedRoute, private scanNotifications: ScanNotificationService) {
+  constructor(private route: ActivatedRoute, private scanNotifications: ScanNotificationService, private reportExportService: ReportExportService) {
     super();
   }
 
@@ -77,10 +97,6 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
     return raw || 'scan';
   }
 
-  get reportTitle(): string {
-    return this.job?.title || `${this.displayFieldLabel(this.apiType)} Report`;
-  }
-
   get targetText(): string {
     return this.job?.target || this.result?.domain || this.result?.host || this.result?.url || this.result?.ip || this.result?.query || 'Scan target';
   }
@@ -103,116 +119,111 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
   }
 
   get resultCount(): number {
-    if (this.isVulnerabilityReport) {
-      return Number(this.result?.summary?.total ?? this.vulnerabilityFindings.length ?? 0);
+    if (this.findingItems.length) {
+      return this.findingItems.length;
     }
     if (Array.isArray(this.result)) {
       return this.result.length;
     }
-    if (this.genericItems.length) {
-      return this.genericItems.length;
+    if (this.resultSections.length) {
+      return this.resultSections.length;
     }
     return this.result && typeof this.result === 'object' ? 1 : 0;
   }
 
   get fieldCount(): number {
-    if (this.isVulnerabilityReport) {
-      return this.getVisibleObjectEntries(this.result).length + this.vulnerabilityFindings.length;
-    }
-    return this.genericItems.reduce((total, item) => total + this.getVisibleObjectEntries(item).length, 0);
+    return this.resultSections.reduce((total, section) => total + section.items.length, 0);
   }
 
-  get genericItems(): any[] {
-    if (this.isVulnerabilityReport) {
-      return [];
-    }
-    const r = this.result;
-    if (!r) {
-      return [];
-    }
-    if (Array.isArray(r)) {
-      return r;
-    }
-    if (Array.isArray(r?.cards_data)) {
-      return r.cards_data;
-    }
-    if (Array.isArray(r?.result)) {
-      return r.result;
-    }
-    if (Array.isArray(r?.data?.cards_data)) {
-      return r.data.cards_data;
-    }
-    if (Array.isArray(r?.result?.cards_data)) {
-      return r.result.cards_data;
-    }
-    if (typeof r === 'object') {
-      return [r];
-    }
-    return [{ value: r }];
-  }
-
-  get isVulnerabilityReport(): boolean {
-    const ref = String(this.job?.api_reference || '').toLowerCase();
-    return ref.includes('url_vulnerability_scan') || Boolean(this.result?.summary && (Array.isArray(this.result?.findings) || Array.isArray(this.result?.top_findings)));
-  }
-
-  get vulnerabilityFindings(): any[] {
-    return Array.isArray(this.result?.findings)
-      ? this.result.findings
-      : Array.isArray(this.result?.top_findings)
-        ? this.result.top_findings
-        : [];
-  }
-
-  get vulnerabilityTargets(): string[] {
-    return [this.vulnerabilityActiveTarget].filter(Boolean);
-  }
-
-  get vulnerabilityActiveTarget(): string {
-    return this.result?.host || this.result?.extracted?.host || this.result?.url || this.targetText;
+  get resultSections(): ScanReportSection[] {
+    return this.buildResultSections(this.result);
   }
 
   get completedAtLabel(): string {
     return this.formatDate(this.job?.completed_at || this.job?.updated_at || this.job?.created_at);
   }
 
-  getVisibleObjectEntries(item: any): { key: string; value: any }[] {
-    return this.getFlattenedObjectEntries(item).filter(entry => !this.isEmptyDisplayValue(entry.value) && !this.isInternalField(entry.key));
+  isLastSectionRow(section: ScanReportSection, index: number): boolean {
+    const count = section.items.length;
+    return index === count - 1 || (index === count - 2 && count % 2 === 0);
   }
 
-  isArrayValue(value: any): boolean {
-    return Array.isArray(value);
+  openExportChoice(): void {
+    this.isExportChoiceOpen = true;
   }
 
-  deduplicateWithCount(arr: any[]): { value: any; count: number }[] {
-    if (!Array.isArray(arr)) {
-      return [];
+  closeExportChoice(): void {
+    this.isExportChoiceOpen = false;
+  }
+
+  selectExport(type: string): void {
+    if (type === 'json' || type === 'report') {
+      this.exportReport(type);
     }
-    const map = new Map<string, { value: any; count: number }>();
-    arr.forEach(item => {
-      const key = this.stringifyNestedValue(item);
-      const existing = map.get(key);
-      if (existing) {
-        existing.count += 1;
-        return;
-      }
-      map.set(key, { value: item, count: 1 });
-    });
-    return Array.from(map.values());
+    this.closeExportChoice();
   }
 
-  toggleResultItem(index: number): void {
-    this.expandedResultIndex = this.expandedResultIndex === index ? null : index;
+  private exportReport(type: string): void {
+    if (!this.job) {
+      return;
+    }
+    this.reportExportService.exportByType(this.buildReportPayload(), type === 'json' ? 'json' : 'doc_pdf');
   }
 
-  statusBadgeClass(): string {
-    if (this.statusLabel === 'Completed') {
-      return 'bg-[rgba(74,222,128,0.14)] text-[#4ade80]';
-    }
-    if (this.statusLabel === 'Failed') {
-      return 'bg-[rgba(255,77,79,0.14)] text-[#ff4d4f]';
-    }
-    return 'bg-[rgba(87,165,235,0.14)] text-[#57a5eb]';
+  private buildReportPayload(): GraphReportPayload {
+    const now = new Date().toISOString();
+    const sections = this.resultSections;
+    const target = this.targetText || 'Scan target';
+    const apiLabel = this.displayFieldLabel(this.apiType);
+    const sectionNodes = sections.slice(0, 120).map((section, index) => ({
+      id: `section-${index + 1}`,
+      label: section.title,
+      type: 'section',
+    }));
+
+    return {
+      graphKind: 'cti',
+      title: `Scan Report - ${apiLabel}`,
+      sessionName: `${this.apiType}-${target}`.slice(0, 80),
+      generatedAtIso: now,
+      nodes: [
+        { id: 'target', label: target, type: 'target' },
+        ...sectionNodes,
+      ],
+      edges: sectionNodes.map(node => ({
+        id: `edge-${node.id}`,
+        from: 'target',
+        to: node.id,
+        label: 'contains',
+      })),
+      summary: {
+        scan_type: apiLabel,
+        target,
+        status: this.statusLabel,
+        results: this.resultCount,
+        fields: this.fieldCount,
+        completed_at: this.completedAtLabel,
+        exported_at: new Date(now).toLocaleString(),
+      },
+      tables: [
+        {
+          title: 'Request Context',
+          values: {
+            'Scan Type': apiLabel,
+            Target: target,
+            Status: this.statusLabel,
+            Results: String(this.resultCount),
+            Fields: String(this.fieldCount),
+            Completed: this.completedAtLabel,
+            'Exported At': new Date(now).toLocaleString(),
+          },
+        },
+        ...sections.slice(0, 80).map(section => ({
+          title: section.title,
+          values: this.buildReportTableValues(section),
+        })),
+      ],
+    };
   }
 
   private unwrapResult(response: any): any {
@@ -229,6 +240,80 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
       return response.result;
     }
     return response;
+  }
+
+  private get findingItems(): any[] {
+    return Array.isArray(this.result?.findings)
+      ? this.result.findings
+      : Array.isArray(this.result?.top_findings)
+        ? this.result.top_findings
+        : [];
+  }
+
+  private buildResultSections(result: any): ScanReportSection[] {
+    if (!result) {
+      return [];
+    }
+
+    if (Array.isArray(result)) {
+      return result
+        .map((item, index) => ({
+          title: `${this.displayFieldLabel(this.apiType)} ${index + 1}`,
+          items: this.flattenReportValue(item),
+        }))
+        .filter(section => section.items.length > 0);
+    }
+
+    if (!this.isObjectValue(result)) {
+      return this.isEmptyDisplayValue(result)
+        ? []
+        : [{ title: 'Result', items: [{ label: 'Value', value: result }] }];
+    }
+
+    return Object.entries(result)
+      .filter(([key, value]) => !this.isInternalField(key) && !this.isEmptyDisplayValue(value))
+      .map(([key, value]) => ({
+        title: this.displayFieldLabel(key),
+        items: this.flattenReportValue(value),
+      }))
+      .filter(section => section.items.length > 0);
+  }
+
+  private flattenReportValue(value: any, path: string[] = []): ScanReportField[] {
+    if (this.isEmptyDisplayValue(value)) {
+      return [];
+    }
+
+    if (Array.isArray(value)) {
+      return value.flatMap((item, index) => this.flattenReportValue(item, path.length ? path : [`Item ${index + 1}`]));
+    }
+
+    if (!this.isObjectValue(value)) {
+      return [{
+        label: this.displayFieldLabel(path[path.length - 1] || 'Value'),
+        value,
+      }];
+    }
+
+    return Object.entries(value)
+      .filter(([key, child]) => !this.isInternalField(key) && !this.isEmptyDisplayValue(child))
+      .flatMap(([key, child]) => this.flattenReportValue(child, [...path, key]))
+      .filter((item, index, items) => index === items.findIndex(match => match.label === item.label && this.stringifyNestedValue(match.value) === this.stringifyNestedValue(item.value)));
+  }
+
+  private buildReportTableValues(section: ScanReportSection): Record<string, string> {
+    const values: Record<string, string> = {};
+    section.items.slice(0, 80).forEach((item, index) => {
+      const label = item.label || `Field ${index + 1}`;
+      const key = values[label] === undefined ? label : `${label} ${index + 1}`;
+      values[key] = this.toReportCellValue(item.value);
+    });
+    return Object.keys(values).length ? values : { Details: '-' };
+  }
+
+  private toReportCellValue(value: any): string {
+    const text = this.stringifyNestedValue(value) || '-';
+    return text.length > 1000 ? `${text.slice(0, 997)}...` : text;
   }
 
   private isInternalField(key: string): boolean {
