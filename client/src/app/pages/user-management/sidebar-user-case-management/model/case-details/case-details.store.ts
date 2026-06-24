@@ -20,6 +20,9 @@ export abstract class CaseDetailsStore {
   abstract analysts: CaseAnalyst[];
   abstract accessibleCases: Case[];
 
+  abstract canManageCases(): boolean;
+  abstract canEditTasksAndComments(): boolean;
+
   abstract enableEditing(section: CaseDetailsEditSection): void;
   abstract cancelEditing(): void;
   abstract openAddRelatedEntity(): void;

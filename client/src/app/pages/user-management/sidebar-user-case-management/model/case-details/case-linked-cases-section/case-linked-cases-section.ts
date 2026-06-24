@@ -87,4 +87,8 @@ export class CaseLinkedCasesSectionComponent {
   formatLabel(value?: string | null): string {
     return formatCaseLabel(value);
   }
+
+  canManageCases(): boolean {
+    return this.store.canManageCases();
+  }
 }

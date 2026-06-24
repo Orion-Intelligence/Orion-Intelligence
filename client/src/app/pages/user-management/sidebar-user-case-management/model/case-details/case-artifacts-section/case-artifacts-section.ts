@@ -113,4 +113,8 @@ export class CaseArtifactsSectionComponent {
   formatLabel(value?: string | null): string {
     return formatCaseLabel(value);
   }
+
+  canManageCases(): boolean {
+    return this.store.canManageCases();
+  }
 }

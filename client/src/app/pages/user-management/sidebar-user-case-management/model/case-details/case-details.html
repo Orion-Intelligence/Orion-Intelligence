@@ -421,7 +421,7 @@
                             <span class="w-fit rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text2)]">
                                 {{ formatLabel(primaryEntity.type) }}
                             </span>
-                            @if (!caseData.closure) {
+                            @if (canManageCases() && !caseData.closure) {
                             <button type="button" (click)="enableEditing('primaryEntity')" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-sm font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-primary-entity-edit">
                                 <i class="bi bi-pencil-square"></i> {{ 'Edit' | translate }}
                             </button>

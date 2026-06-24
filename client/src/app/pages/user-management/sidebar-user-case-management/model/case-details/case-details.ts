@@ -100,13 +100,16 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
     if (this.canManageCases()) {
       this.loadAnalysts();
+      this.loadAccessibleCases();
     }
-
-    this.loadAccessibleCases();
   }
 
   canManageCases(): boolean {
     return this.licenseService.isMaintainer() || this.licenseService.isAdmin();
+  }
+
+  canEditTasksAndComments(): boolean {
+    return !!this.caseData && !this.caseData.closure && !this.caseData.isArchived;
   }
 
   loadAnalysts(): void {
@@ -169,6 +172,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     if (!this.caseData) {
       return;
     }
+    if (!this.canManageCases() && section !== 'tasks') {
+      this.messageNotificationService.show('Analysts can only edit tasks and comments');
+      return;
+    }
     if (this.caseData.closure) {
       this.messageNotificationService.show('Closed cases cannot be edited');
       return;
@@ -220,6 +227,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   uploadArtifactFiles(artifact: CaseArtifact, fileInput: HTMLInputElement): void {
+    if (!this.canManageCases()) {
+      this.messageNotificationService.show('Analysts cannot upload artifact files');
+      return;
+    }
     if (!this.caseData || !artifact.artifactId) {
       return;
     }
@@ -394,6 +405,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   deleteArtifactFile(artifact: CaseArtifact, fileId: string): void {
+    if (!this.canManageCases()) {
+      this.messageNotificationService.show('Analysts cannot delete artifact files');
+      return;
+    }
     if (!this.caseData || !artifact.artifactId) {
       return;
     }
@@ -460,6 +475,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   openArchiveConfirmation(): void {
+    if (!this.canManageCases()) {
+      return;
+    }
     if (!this.caseData?.closure || this.caseData.isArchived || this.isArchivingCase) {
       return;
     }
@@ -468,6 +486,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   openShareConfirmation(): void {
+    if (!this.canManageCases()) {
+      return;
+    }
     if (!this.caseData || this.isShareCreating) {
       return;
     }
@@ -475,6 +496,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   openRevokeShareConfirmation(): void {
+    if (!this.canManageCases()) {
+      return;
+    }
     if (!this.caseData || this.isShareRevoking) {
       return;
     }
@@ -732,6 +756,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   removeRelatedEntity(index: number): void {
+    if (!this.requireManageCases()) {
+      return;
+    }
     if (!this.editedCase) {
       return;
     }
@@ -749,6 +776,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   removeArtifact(index: number): void {
+    if (!this.requireManageCases()) {
+      return;
+    }
     if (!this.editedCase?.artifacts) {
       return;
     }
@@ -771,6 +801,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   removeLinkedCase(index: number): void {
+    if (!this.requireManageCases()) {
+      return;
+    }
     if (!this.editedCase?.linkedCases) {
       return;
     }
@@ -819,6 +852,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   openAddRelatedEntity(): void {
+    if (!this.canManageCases()) {
+      return;
+    }
     if (!this.caseData || this.isEditing) {
       return;
     }
@@ -832,6 +868,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   openAddArtifact(): void {
+    if (!this.canManageCases()) {
+      return;
+    }
     if (!this.caseData || this.isEditing) {
       return;
     }
@@ -858,6 +897,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   openAddLinkedCase(): void {
+    if (!this.canManageCases()) {
+      return;
+    }
     if (!this.caseData || this.isEditing || !this.hasLinkableCases(this.caseData)) {
       return;
     }
@@ -884,6 +926,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   openCloseCase(): void {
+    if (!this.canManageCases()) {
+      return;
+    }
     if (!this.caseData || this.isEditing || this.caseData.closure) {
       return;
     }
@@ -903,6 +948,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   openEditClosure(): void {
+    if (!this.canManageCases()) {
+      return;
+    }
     if (!this.caseData || this.isEditing || !this.caseData.closure) {
       return;
     }
@@ -945,6 +993,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   saveCaseDetails(): void {
+    if (!this.requireManageCases()) {
+      return;
+    }
     if (!this.editedCase) {
       return;
     }
@@ -965,6 +1016,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   savePrimaryEntity(): void {
+    if (!this.requireManageCases()) {
+      return;
+    }
     if (!this.editedCase) {
       return;
     }
@@ -987,6 +1041,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   saveRelatedEntities(): void {
+    if (!this.requireManageCases()) {
+      return;
+    }
     if (!this.editedCase) {
       return;
     }
@@ -1005,6 +1062,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   saveNewRelatedEntity(): void {
+    if (!this.requireManageCases()) {
+      return;
+    }
     if (!this.caseData || !this.newRelatedEntity) {
       return;
     }
@@ -1029,6 +1089,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   saveArtifacts(): void {
+    if (!this.requireManageCases()) {
+      return;
+    }
     if (!this.editedCase) {
       return;
     }
@@ -1048,6 +1111,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   saveNewArtifact(): void {
+    if (!this.requireManageCases()) {
+      return;
+    }
     if (!this.caseData || !this.newArtifact) {
       return;
     }
@@ -1168,6 +1234,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   saveLinkedCases(): void {
+    if (!this.requireManageCases()) {
+      return;
+    }
     if (!this.editedCase) {
       return;
     }
@@ -1190,6 +1259,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   saveNewLinkedCase(): void {
+    if (!this.requireManageCases()) {
+      return;
+    }
     if (!this.caseData || !this.newLinkedCase) {
       return;
     }
@@ -1214,6 +1286,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   saveClosure(): void {
+    if (!this.requireManageCases()) {
+      return;
+    }
     if (!this.caseData || !this.newClosure) {
       return;
     }
@@ -1462,6 +1537,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   verifyArtifactFile(artifact: CaseArtifact, fileId: string): void {
+    if (!this.canManageCases()) {
+      this.messageNotificationService.show('Analysts cannot verify artifact files');
+      return;
+    }
     if (!this.caseData || !artifact.artifactId) {
       return;
     }
@@ -1616,5 +1695,14 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     return true;
+  }
+
+  private requireManageCases(): boolean {
+    if (this.canManageCases()) {
+      return true;
+    }
+
+    this.messageNotificationService.show('Analysts can only edit tasks and comments');
+    return false;
   }
 }

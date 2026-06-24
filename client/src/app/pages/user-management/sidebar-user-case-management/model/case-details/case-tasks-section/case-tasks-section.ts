@@ -96,4 +96,8 @@ export class CaseTasksSectionComponent {
   formatLabel(value?: string | null): string {
     return formatCaseLabel(value);
   }
+
+  canEditTasksAndComments(): boolean {
+    return this.store.canEditTasksAndComments();
+  }
 }

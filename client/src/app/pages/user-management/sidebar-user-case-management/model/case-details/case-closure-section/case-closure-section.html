@@ -6,11 +6,11 @@
             <img src="/assets/images/shared/theme/info.svg" alt="" aria-hidden="true" [appTooltip]="'Closure records the final case outcome, reason, summary, and resolution details.' | translate" class="h-4 w-4 shrink-0 ui-action-icon">
         </div>
         <div class="flex items-center gap-2">
-            @if (caseData.closure) {
+            @if (canManageCases() && caseData.closure) {
             <button type="button" (click)="store.openEditClosure()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-sm font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" data-testid="case-closure-edit">
                 <i class="bi bi-pencil-square"></i> {{ 'Edit' | translate }}
             </button>
-            } @else {
+            } @else if (canManageCases()) {
             <button type="button" (click)="store.openCloseCase()" [disabled]="!canCloseCase()" [appTooltip]="getCloseCaseTooltip() | translate" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/30 bg-emerald-500/15 px-2.5 text-sm font-semibold text-emerald-200 transition hover:border-emerald-400/50 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-emerald-600/40 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800 [body.light-theme_&]:hover:border-emerald-700/45 [body.light-theme_&]:hover:bg-emerald-200/70" data-testid="case-closure-add">
                 <i class="bi bi-lock-fill"></i> {{ 'Closure' | translate }}
             </button>

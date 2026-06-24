@@ -78,7 +78,7 @@ async def assign_case_analyst(
     "/api/profile/cases/{case_id}/shares",
     status_code=201,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def create_case_share(case_id: str, payload: CreateCaseShareRequest = Body(...), current_user=Depends(get_current_user)):
@@ -90,7 +90,7 @@ async def create_case_share(case_id: str, payload: CreateCaseShareRequest = Body
     status_code=200,
     tags=["Case Management"],
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def verify_artifact_file(case_id: str, artifact_id: str, file_id: str, current_user=Depends(get_current_user)):
@@ -101,7 +101,7 @@ async def verify_artifact_file(case_id: str, artifact_id: str, file_id: str, cur
     "/api/profile/cases/{case_id}/shares",
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def revoke_case_shares(case_id: str, current_user=Depends(get_current_user)):
@@ -155,7 +155,7 @@ async def update_case(case_id: str, payload: UpdateCaseRequest = Body(...), curr
     status_code=200,
     tags=["Case Management"],
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def upload_artifact_files(
@@ -193,7 +193,7 @@ async def download_artifact_file(
     status_code=200,
     tags=["Case Management"],
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def delete_artifact_file(
@@ -211,7 +211,7 @@ async def delete_artifact_file(
     "/api/profile/cases/{case_id}",
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def delete_case(case_id: str, current_user=Depends(get_current_user)):
@@ -222,7 +222,7 @@ async def delete_case(case_id: str, current_user=Depends(get_current_user)):
     "/api/profile/cases/{case_id}/status",
     status_code=200,
     dependencies=[
-        Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
     ],
 )
 async def update_case_status(
