@@ -1,0 +1,7 @@
+@if (!isEditing) {
+<app-report-feedback-comments [docId]="caseData.caseId" [feedback]="getCaseCommentsFeedback()"
+    [isSaving]="isCommentSaving" [errorMessage]="commentErrorMessage" [flushSpacing]="true"
+    (saveComment)="saveCaseComment($event)"
+    (userSelected)="openUserSidebar($event)"></app-report-feedback-comments>
+<app-report-user-sidebar></app-report-user-sidebar>
+}

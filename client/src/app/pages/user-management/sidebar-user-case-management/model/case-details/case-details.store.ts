@@ -1,3 +1,4 @@
+import { ReportFeedbackModel } from '../../../../../sections/report/templates/report_general/models/report-feedback.model';
 import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseArtifactFile, CaseClosure, CaseEntity, CaseLink, CaseTask } from '../../../../../shared/model/case-management/case.model';
 
 export type CaseDetailsEditSection = 'caseDetails' | 'primaryEntity' | 'relatedEntities' | 'artifacts' | 'tasks' | 'linkedCases';
@@ -19,12 +20,27 @@ export abstract class CaseDetailsStore {
   abstract newClosure: CaseClosure | null;
   abstract analysts: CaseAnalyst[];
   abstract accessibleCases: Case[];
+  abstract get editablePrimaryEntity(): CaseEntity | null;
+  abstract isCommentSaving: boolean;
+  abstract isShareCreating: boolean;
+  abstract isShareRevoking: boolean;
+  abstract isPdfExporting: boolean;
+  abstract isArchivingCase: boolean;
+  abstract commentErrorMessage: string;
 
   abstract canManageCases(): boolean;
   abstract canEditTasksAndComments(): boolean;
 
   abstract enableEditing(section: CaseDetailsEditSection): void;
   abstract cancelEditing(): void;
+  abstract saveCaseDetails(): void;
+  abstract savePrimaryEntity(): void;
+  abstract exportPdf(): void;
+  abstract openArchiveConfirmation(): void;
+  abstract openShareConfirmation(): void;
+  abstract openRevokeShareConfirmation(): void;
+  abstract getCaseCommentsFeedback(): ReportFeedbackModel;
+  abstract saveCaseComment(body: string): void;
   abstract openAddRelatedEntity(): void;
   abstract removeRelatedEntity(index: number): void;
   abstract saveRelatedEntities(): void;

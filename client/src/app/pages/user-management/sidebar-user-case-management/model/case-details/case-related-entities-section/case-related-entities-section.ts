@@ -21,6 +21,7 @@ export class CaseRelatedEntitiesSectionComponent {
 
   editingRelatedEntityId: string | null = null;
   readonly store = inject(CaseDetailsStore);
+  $index: any;
 
   get caseData(): Case {
     return this.store.caseData as Case;

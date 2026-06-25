@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "packageManager": "npm@11.12.0",
   "scripts": {
-    "ng": "ng",
+    "ng": "node --disable-warning=DEP0060 ./node_modules/@angular/cli/bin/ng",
     "prebuild": "node -e \"\"",
     "build": "npm run prebuild && NO_COLOR=1 NG_BUILD_MAX_ERRORS=1000 ng build --configuration=production && node post-build.js",
     "production": "npm run prebuild && NO_COLOR=1 NG_BUILD_MAX_ERRORS=1000 ng build --configuration=production && node post-build.js",
@@ -12,8 +12,8 @@
     "lint:styles": "npx stylelint \"src/**/*.{css,scss}\"",
     "lint:fix": "npx eslint src/app --ext .ts,.html --fix",
     "lint:watch": "npx eslint src/app --ext .ts,.html --watch",
-    "serve": "node scripts/serve-watch-strict.js",
-    "serve:watch": "node scripts/serve-watch.js"
+    "serve": "node --disable-warning=DEP0060 ./node_modules/@angular/cli/bin/ng serve",
+    "serve:watch": "node --disable-warning=DEP0060 ./node_modules/@angular/cli/bin/ng serve"
   },
   "private": true,
   "dependencies": {

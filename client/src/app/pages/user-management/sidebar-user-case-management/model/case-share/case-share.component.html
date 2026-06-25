@@ -438,8 +438,7 @@
             <div class="text-sm font-medium leading-6 text-[var(--color-text2)]">{{ formatLabel(report.closure?.reason)
               }}</div>
             <div class="mt-3 mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Closure Summary' | translate }}</div>
-            <div class="text-sm leading-6 text-[var(--color-text2)]">{{ (report.closure?.summary || 'No closure summary
-              provided.') | translate }}</div>
+            <div class="text-sm leading-6 text-[var(--color-text2)]">{{ (report.closure?.summary || 'No closure summary provided.') | translate }}</div>
             @if (report.closure?.resolution) {
             <div class="mt-3 mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
               {{ 'Resolution Notes' | translate }}</div>
@@ -483,8 +482,7 @@
             </button>
             @if (isArtifactExpanded(artifact.artifactId)) {
             <div class="border-t border-[var(--color-divider)] px-3 py-3">
-              <div class="text-sm leading-6 text-[var(--color-text3)]">{{ (artifact.description || 'No artifact
-                description provided.') | translate }}</div>
+              <div class="text-sm leading-6 text-[var(--color-text3)]">{{ (artifact.description || 'No artifact description provided.') | translate }}</div>
               @if (artifact.url) {
               <a [href]="artifact.url" target="_blank" rel="noopener" class="mt-2 block truncate text-sm font-medium text-sky-300 hover:text-sky-200">{{ artifact.url }}</a>
               }
