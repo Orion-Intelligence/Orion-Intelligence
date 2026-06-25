@@ -33,40 +33,20 @@ export const DEFAULT_CASE_LIST_FILTERS: CaseListFilters = {
   templateUrl: './case-filter-row.html'
 })
 export class CaseFilterRowComponent {
+  isMobileFiltersOpen = false;
+  readonly viewOptions: UiDropdownOption[] = [ { key: 'open', label: 'Open' }, { key: 'archived', label: 'Archived' } ];
+  readonly statusFilterOptions: UiDropdownOption[] = [ { key: 'all', label: 'All Statuses' }, ...CASE_STATUS_OPTIONS.map(option => ({ key: option.value, label: option.label })) ];
+  readonly severityFilterOptions: UiDropdownOption[] = [ { key: 'all', label: 'All Severities' }, ...SEVERITY_OPTIONS.map(severity => ({ key: severity, label: this.formatLabel(severity) })) ];
+  readonly priorityFilterOptions: UiDropdownOption[] = [ { key: 'all', label: 'All Priorities' }, ...PRIORITY_OPTIONS.map(priority => ({ key: priority, label: this.formatLabel(priority) })) ];
+  readonly caseTypeFilterOptions: UiDropdownOption[] = [ { key: 'all', label: 'All Types' }, ...CASE_TYPE_OPTIONS.map(option => ({ key: option.value, label: option.label })) ];
+  readonly sortOptions: UiDropdownOption[] = [ { key: 'updated_desc', label: 'Newest Updated' }, { key: 'updated_asc', label: 'Oldest Updated' }, { key: 'priority_desc', label: 'Highest Priority' }, { key: 'severity_desc', label: 'Highest Severity' } ];
+
   @Input() filters: CaseListFilters = { ...DEFAULT_CASE_LIST_FILTERS };
   @Input() showArchivedCases = false;
   @Input() canManage = false;
-  isMobileFiltersOpen = false;
 
   @Output() filtersChange = new EventEmitter<CaseListFilters>();
   @Output() archivedChange = new EventEmitter<boolean>();
-
-  readonly viewOptions: UiDropdownOption[] = [
-    { key: 'open', label: 'Open' },
-    { key: 'archived', label: 'Archived' }
-  ];
-  readonly statusFilterOptions: UiDropdownOption[] = [
-    { key: 'all', label: 'All Statuses' },
-    ...CASE_STATUS_OPTIONS.map(option => ({ key: option.value, label: option.label }))
-  ];
-  readonly severityFilterOptions: UiDropdownOption[] = [
-    { key: 'all', label: 'All Severities' },
-    ...SEVERITY_OPTIONS.map(severity => ({ key: severity, label: this.formatLabel(severity) }))
-  ];
-  readonly priorityFilterOptions: UiDropdownOption[] = [
-    { key: 'all', label: 'All Priorities' },
-    ...PRIORITY_OPTIONS.map(priority => ({ key: priority, label: this.formatLabel(priority) }))
-  ];
-  readonly caseTypeFilterOptions: UiDropdownOption[] = [
-    { key: 'all', label: 'All Types' },
-    ...CASE_TYPE_OPTIONS.map(option => ({ key: option.value, label: option.label }))
-  ];
-  readonly sortOptions: UiDropdownOption[] = [
-    { key: 'updated_desc', label: 'Newest Updated' },
-    { key: 'updated_asc', label: 'Oldest Updated' },
-    { key: 'priority_desc', label: 'Highest Priority' },
-    { key: 'severity_desc', label: 'Highest Severity' }
-  ];
 
   get selectedView(): string {
     return this.showArchivedCases ? 'archived' : 'open';

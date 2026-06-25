@@ -124,14 +124,6 @@ export class CaseAnalyticsPanel {
       .slice(0, 5);
   }
 
-  getChartPercent(count: number): number {
-    if (!this.filteredCases.length || !count) {
-      return 0;
-    }
-
-    return Math.max(6, Math.round((count / this.filteredCases.length) * 100));
-  }
-
   getToneClass(key: string): string {
     if (key === 'critical' || key === 'closed') {
       return 'bg-red-400';
@@ -152,24 +144,18 @@ export class CaseAnalyticsPanel {
     return 'bg-sky-400';
   }
 
-  getWorkloadPercent(count: number): number {
-    const max = this.analystWorkloadChart[0]?.count || 0;
-
-    if (!max || !count) {
-      return 0;
-    }
-
-    return Math.max(8, Math.round((count / max) * 100));
+  getChartWidthClass(count: number): string {
+    return this.getWidthClass(count, this.filteredCases.length);
   }
 
-  getTaskChartPercent(count: number): number {
+  getWorkloadWidthClass(count: number): string {
+    const max = this.analystWorkloadChart[0]?.count || 0;
+    return this.getWidthClass(count, max);
+  }
+
+  getTaskChartWidthClass(count: number): string {
     const totalTasks = this.taskStatusChart.reduce((total, item) => total + item.count, 0);
-
-    if (!totalTasks || !count) {
-      return 0;
-    }
-
-    return Math.max(8, Math.round((count / totalTasks) * 100));
+    return this.getWidthClass(count, totalTasks);
   }
 
   getUpdatedLabel(caseItem: Case): string {
@@ -183,16 +169,71 @@ export class CaseAnalyticsPanel {
   }
 
   private getChartItem(value: CaseStatus, label: string, field: 'status'): CaseChartItem;
+
   private getChartItem(value: Severity, label: string, field: 'severity'): CaseChartItem;
+
   private getChartItem(value: Priority, label: string, field: 'priority'): CaseChartItem;
+
   private getChartItem(value: CaseType, label: string, field: 'caseType'): CaseChartItem;
+
   private getChartItem(value: IntakeSource, label: string, field: 'intakeSource'): CaseChartItem;
+
   private getChartItem(value: CaseStatus | Severity | Priority | CaseType | IntakeSource, label: string, field: 'status' | 'severity' | 'priority' | 'caseType' | 'intakeSource'): CaseChartItem {
     return {
       key: value,
       label,
       count: this.filteredCases.filter(caseItem => caseItem[field] === value).length
     };
+  }
+
+  private getWidthClass(count: number, total: number): string {
+    if (!count || !total) {
+      return 'w-0';
+    }
+
+    const percent = Math.round((count / total) * 100);
+
+    if (percent >= 92) {
+      return 'w-full';
+    }
+
+    if (percent >= 84) {
+      return 'w-11/12';
+    }
+
+    if (percent >= 75) {
+      return 'w-3/4';
+    }
+
+    if (percent >= 67) {
+      return 'w-2/3';
+    }
+
+    if (percent >= 58) {
+      return 'w-7/12';
+    }
+
+    if (percent >= 50) {
+      return 'w-1/2';
+    }
+
+    if (percent >= 42) {
+      return 'w-5/12';
+    }
+
+    if (percent >= 34) {
+      return 'w-1/3';
+    }
+
+    if (percent >= 25) {
+      return 'w-1/4';
+    }
+
+    if (percent >= 17) {
+      return 'w-1/6';
+    }
+
+    return 'w-1/12';
   }
 
   private formatLabel(value?: string | null): string {

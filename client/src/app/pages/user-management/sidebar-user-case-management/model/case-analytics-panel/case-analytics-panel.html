@@ -45,7 +45,7 @@
                         <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
                     </div>
                     <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
-                        <div class="h-full rounded-full transition-all duration-300" [ngClass]="getToneClass(item.key)" [style.width.%]="getChartPercent(item.count)"></div>
+                        <div class="h-full rounded-full transition-all duration-300" [ngClass]="[getToneClass(item.key), getChartWidthClass(item.count)]"></div>
                     </div>
                 </div>
                 }
@@ -62,7 +62,7 @@
                         <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
                     </div>
                     <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
-                        <div class="h-full rounded-full transition-all duration-300" [ngClass]="getToneClass(item.key)" [style.width.%]="getChartPercent(item.count)"></div>
+                        <div class="h-full rounded-full transition-all duration-300" [ngClass]="[getToneClass(item.key), getChartWidthClass(item.count)]"></div>
                     </div>
                 </div>
                 }
@@ -79,7 +79,7 @@
                         <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
                     </div>
                     <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
-                        <div class="h-full rounded-full transition-all duration-300" [ngClass]="getToneClass(item.key)" [style.width.%]="getChartPercent(item.count)"></div>
+                        <div class="h-full rounded-full transition-all duration-300" [ngClass]="[getToneClass(item.key), getChartWidthClass(item.count)]"></div>
                     </div>
                 </div>
                 }
@@ -97,7 +97,7 @@
                         <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
                     </div>
                     <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
-                        <div class="h-full rounded-full bg-sky-400 transition-all duration-300" [style.width.%]="getChartPercent(item.count)"></div>
+                        <div class="h-full rounded-full bg-sky-400 transition-all duration-300" [ngClass]="getChartWidthClass(item.count)"></div>
                     </div>
                 </div>
                 }
@@ -120,7 +120,7 @@
                         <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
                     </div>
                     <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
-                        <div class="h-full rounded-full bg-sky-400 transition-all duration-300" [style.width.%]="getChartPercent(item.count)"></div>
+                        <div class="h-full rounded-full bg-sky-400 transition-all duration-300" [ngClass]="getChartWidthClass(item.count)"></div>
                     </div>
                 </div>
                 }
@@ -143,7 +143,7 @@
                         <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
                     </div>
                     <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
-                        <div class="h-full rounded-full transition-all duration-300" [ngClass]="getToneClass(item.key)" [style.width.%]="getTaskChartPercent(item.count)"></div>
+                        <div class="h-full rounded-full transition-all duration-300" [ngClass]="[getToneClass(item.key), getTaskChartWidthClass(item.count)]"></div>
                     </div>
                 </div>
                 }
@@ -166,7 +166,7 @@
                         <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
                     </div>
                     <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
-                        <div class="h-full rounded-full bg-emerald-400 transition-all duration-300" [style.width.%]="getWorkloadPercent(item.count)"></div>
+                        <div class="h-full rounded-full bg-emerald-400 transition-all duration-300" [ngClass]="getWorkloadWidthClass(item.count)"></div>
                     </div>
                 </div>
                 }
