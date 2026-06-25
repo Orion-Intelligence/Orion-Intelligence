@@ -27,9 +27,9 @@ class AptCardModel(BaseModel):
     m_authors: Optional[List[str]] = Field(default_factory=list)
     m_embedding: List[float] = Field(default_factory=list)
 
-    @field_validator("m_organization", mode="before")
+    @field_validator("m_country", "m_organization", mode="before")
     @classmethod
-    def normalize_organization(cls, value):
+    def normalize_scalar_text(cls, value):
         if isinstance(value, list):
             return ", ".join(str(item).strip() for item in value if str(item).strip())
         return value

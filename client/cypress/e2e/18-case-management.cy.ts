@@ -382,8 +382,7 @@ describe('Case Management - Add View Edit Flow', () => {
     assertNotification('Case archived successfully');
     cy.get(selector('case-details-archive')).should('not.exist');
 
-    cy.visit('/dashboard/profile/case-management');
-    cy.get(selector('case-management-page')).should('be.visible');
+    openCaseManagement();
     cy.get(selector('toggle-archived-cases-button')).should('be.visible').click();
     cy.get(selector('case-management-page')).should('contain.text', 'Viewing archived cases');
     cy.then(() => {

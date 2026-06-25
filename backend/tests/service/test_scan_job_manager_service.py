@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
 from orion.api.interactive.scan_job_manager.scan_job_manager import ScanJobManager
@@ -166,7 +166,7 @@ def test_count_jobs_returns_only_unseen_scans():
 
 
 def test_list_scan_notifications_prioritizes_unseen_or_incomplete_scans():
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     seen_completed = db_scan_job_model(
         user_uuid="user-1",
         title="Seen completed",

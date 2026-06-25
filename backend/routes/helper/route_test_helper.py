@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 from pathlib import Path
 from typing import Any
@@ -106,7 +106,7 @@ class TestRouteHelper:
         response = job.response or {}
         scan_status = manager._job_status_from_response(response) if response else None
         if not scan_status or not manager.is_terminal_status(scan_status.value):
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             mock_response = TestRouteHelper.scan_job_mock_response(job.api_reference, job.payload or {})
             job.response = mock_response if isinstance(mock_response, dict) else {"result": mock_response}
             job.updated_at = now

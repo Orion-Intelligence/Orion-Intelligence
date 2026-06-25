@@ -50,7 +50,9 @@ export function createCase(title: string, description: string, entityValue: stri
 }
 
 export function openCaseManagement() {
-  cy.visit('/dashboard/profile/case-management');
+  cy.visit('/dashboard/profile/homepage');
+  cy.get('[data-testid="sidebar-group-profile"]').filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
+  cy.get('[data-testid="sidebar-subitem-profile-case-management"]').filter(':visible').first().scrollIntoView().should('exist').click({ force: true });
   cy.get(selector('case-management-page')).should('be.visible');
 }
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Awaitable, Callable, Dict, Optional
 
 import httpx
@@ -102,7 +102,7 @@ class ScanJobManager:
         }
 
     async def _save_job_response(self, job: db_scan_job_model, response: Any) -> None:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         response_dict = self._as_response_dict(response)
         job.response = response_dict
         job.updated_at = now
@@ -153,7 +153,7 @@ class ScanJobManager:
     async def create_job(self, current_user, api_reference: str, payload: Dict[str, Any], metadata: Optional[Dict[str, Any]] = None, force_new: bool = False, confirm_duplicates: bool = True) -> Dict[str, Any]:
         config = self._route_config(api_reference)
         metadata = metadata or {}
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         target = str(metadata.get("target") or self._get_target(payload, config.get("target_key", "")))
         normalized_api_reference = f"/api/{self._normalize_api_reference(api_reference)}"
 
@@ -277,7 +277,7 @@ class ScanJobManager:
         base_url = env_handler.get_instance().env("NETWORK_API_BASE")
         upstream_url = f"{base_url}/{config['path'].strip('/')}/{job.user_uuid}"
 
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         try:
             async with httpx.AsyncClient(timeout=120) as client:
                 response = await client.post(upstream_url, json=job.payload)
