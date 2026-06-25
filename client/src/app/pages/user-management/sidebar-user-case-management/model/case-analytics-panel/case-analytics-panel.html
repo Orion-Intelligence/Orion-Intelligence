@@ -1,0 +1,207 @@
+<div data-testid="case-analytics-panel">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4" data-testid="case-analytics-summary">
+        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4">
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Visible Cases</p>
+            <div class="text-2xl font-bold tabular-nums text-[var(--color-text1)]">{{ filteredCases.length }} / {{ cases.length }}</div>
+        </div>
+        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4">
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Active</p>
+            <div class="text-2xl font-bold tabular-nums text-sky-300 [body.light-theme_&]:text-sky-700">{{ activeCaseCount }}</div>
+        </div>
+        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4">
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Critical Severity</p>
+            <div class="text-2xl font-bold tabular-nums text-red-300 [body.light-theme_&]:text-red-700">{{ criticalCaseCount }}</div>
+        </div>
+        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4">
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">High Priority</p>
+            <div class="text-2xl font-bold tabular-nums text-orange-300 [body.light-theme_&]:text-orange-700">{{ highPriorityCaseCount }}</div>
+        </div>
+        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4">
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Unassigned</p>
+            <div class="text-2xl font-bold tabular-nums text-amber-300 [body.light-theme_&]:text-amber-700">{{ unassignedCaseCount }}</div>
+        </div>
+        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4">
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Open Tasks</p>
+            <div class="text-2xl font-bold tabular-nums text-[var(--color-text1)]">{{ openTaskCount }}</div>
+        </div>
+        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4">
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Artifacts</p>
+            <div class="text-2xl font-bold tabular-nums text-[var(--color-text1)]">{{ artifactCount }}</div>
+        </div>
+        <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4">
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Avg Age / Stale</p>
+            <div class="text-2xl font-bold tabular-nums text-[var(--color-text1)]">{{ averageAgeDays }}d / {{ staleCaseCount }}</div>
+        </div>
+    </div>
+
+    <div class="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <section class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/45 p-4" data-testid="case-analytics-status-chart">
+            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">Status Distribution</h2>
+            <div class="space-y-3">
+                @for (item of statusChart; track item.key) {
+                <div>
+                    <div class="mb-1 flex items-center justify-between gap-3 text-xs">
+                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label }}</span>
+                        <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
+                    </div>
+                    <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
+                        <div class="h-full rounded-full transition-all duration-300" [ngClass]="getToneClass(item.key)" [style.width.%]="getChartPercent(item.count)"></div>
+                    </div>
+                </div>
+                }
+            </div>
+        </section>
+
+        <section class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/45 p-4" data-testid="case-analytics-severity-chart">
+            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">Severity Distribution</h2>
+            <div class="space-y-3">
+                @for (item of severityChart; track item.key) {
+                <div>
+                    <div class="mb-1 flex items-center justify-between gap-3 text-xs">
+                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label }}</span>
+                        <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
+                    </div>
+                    <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
+                        <div class="h-full rounded-full transition-all duration-300" [ngClass]="getToneClass(item.key)" [style.width.%]="getChartPercent(item.count)"></div>
+                    </div>
+                </div>
+                }
+            </div>
+        </section>
+
+        <section class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/45 p-4" data-testid="case-analytics-priority-chart">
+            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">Priority Distribution</h2>
+            <div class="space-y-3">
+                @for (item of priorityChart; track item.key) {
+                <div>
+                    <div class="mb-1 flex items-center justify-between gap-3 text-xs">
+                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label }}</span>
+                        <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
+                    </div>
+                    <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
+                        <div class="h-full rounded-full transition-all duration-300" [ngClass]="getToneClass(item.key)" [style.width.%]="getChartPercent(item.count)"></div>
+                    </div>
+                </div>
+                }
+            </div>
+        </section>
+
+        <section class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/45 p-4" data-testid="case-analytics-type-chart">
+            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">Case Type Distribution</h2>
+            @if (caseTypeChart.length) {
+            <div class="space-y-3">
+                @for (item of caseTypeChart; track item.key) {
+                <div>
+                    <div class="mb-1 flex items-center justify-between gap-3 text-xs">
+                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label }}</span>
+                        <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
+                    </div>
+                    <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
+                        <div class="h-full rounded-full bg-sky-400 transition-all duration-300" [style.width.%]="getChartPercent(item.count)"></div>
+                    </div>
+                </div>
+                }
+            </div>
+            } @else {
+            <div class="grid min-h-[160px] place-items-center rounded-[8px] border border-dashed border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]/45 px-4 text-center text-sm text-[var(--color-text4)]">
+                No matching case types
+            </div>
+            }
+        </section>
+
+        <section class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/45 p-4" data-testid="case-analytics-intake-chart">
+            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">Intake Source</h2>
+            @if (intakeSourceChart.length) {
+            <div class="space-y-3">
+                @for (item of intakeSourceChart; track item.key) {
+                <div>
+                    <div class="mb-1 flex items-center justify-between gap-3 text-xs">
+                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label }}</span>
+                        <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
+                    </div>
+                    <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
+                        <div class="h-full rounded-full bg-sky-400 transition-all duration-300" [style.width.%]="getChartPercent(item.count)"></div>
+                    </div>
+                </div>
+                }
+            </div>
+            } @else {
+            <div class="grid min-h-[160px] place-items-center rounded-[8px] border border-dashed border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]/45 px-4 text-center text-sm text-[var(--color-text4)]">
+                No intake data
+            </div>
+            }
+        </section>
+
+        <section class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/45 p-4" data-testid="case-analytics-task-chart">
+            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">Task Status</h2>
+            @if (taskStatusChart.length) {
+            <div class="space-y-3">
+                @for (item of taskStatusChart; track item.key) {
+                <div>
+                    <div class="mb-1 flex items-center justify-between gap-3 text-xs">
+                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label }}</span>
+                        <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
+                    </div>
+                    <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
+                        <div class="h-full rounded-full transition-all duration-300" [ngClass]="getToneClass(item.key)" [style.width.%]="getTaskChartPercent(item.count)"></div>
+                    </div>
+                </div>
+                }
+            </div>
+            } @else {
+            <div class="grid min-h-[160px] place-items-center rounded-[8px] border border-dashed border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]/45 px-4 text-center text-sm text-[var(--color-text4)]">
+                No tasks found
+            </div>
+            }
+        </section>
+
+        <section class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/45 p-4" data-testid="case-analytics-workload-chart">
+            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">Analyst Workload</h2>
+            @if (analystWorkloadChart.length) {
+            <div class="space-y-3">
+                @for (item of analystWorkloadChart; track item.key) {
+                <div>
+                    <div class="mb-1 flex items-center justify-between gap-3 text-xs">
+                        <span class="truncate font-semibold text-[var(--color-text3)]">{{ item.label }}</span>
+                        <span class="font-bold tabular-nums text-[var(--color-text1)]">{{ item.count }}</span>
+                    </div>
+                    <div class="h-2 overflow-hidden rounded-full bg-[var(--tenant-chip-bg)]">
+                        <div class="h-full rounded-full bg-emerald-400 transition-all duration-300" [style.width.%]="getWorkloadPercent(item.count)"></div>
+                    </div>
+                </div>
+                }
+            </div>
+            } @else {
+            <div class="grid min-h-[160px] place-items-center rounded-[8px] border border-dashed border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]/45 px-4 text-center text-sm text-[var(--color-text4)]">
+                No workload data
+            </div>
+            }
+        </section>
+
+        <section class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/45 p-4" data-testid="case-analytics-attention-list">
+            <h2 class="mb-4 text-sm font-bold text-[var(--color-text1)]">Needs Attention</h2>
+            @if (attentionCases.length) {
+            <div class="space-y-2">
+                @for (caseItem of attentionCases; track caseItem.caseId) {
+                <div class="rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] px-3 py-2.5">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="mb-0 truncate text-sm font-bold text-[var(--color-text1)]">{{ caseItem.title }}</p>
+                            <p class="mt-0.5 mb-0 text-xs font-medium text-[var(--color-text4)]">{{ caseItem.caseId }} · {{ getUpdatedLabel(caseItem) }}</p>
+                        </div>
+                        <div class="flex min-w-[150px] shrink-0 justify-end gap-1.5">
+                            <span class="rounded-full px-2.5 py-1 text-[10px] font-bold capitalize" [ngClass]="getToneClass(caseItem.severity)">Severity: {{ caseItem.severity }}</span>
+                            <span class="rounded-full bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-[10px] font-bold capitalize text-[var(--color-text3)]">Priority: {{ caseItem.priority }}</span>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+            } @else {
+            <div class="grid min-h-[160px] place-items-center rounded-[8px] border border-dashed border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]/45 px-4 text-center text-sm text-[var(--color-text4)]">
+                No active cases need attention
+            </div>
+            }
+        </section>
+    </div>
+</div>

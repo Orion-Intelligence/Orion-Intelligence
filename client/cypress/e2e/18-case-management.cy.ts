@@ -91,6 +91,12 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.then(() => assertCaseVisibleInList(caseId));
   });
 
+  it('toggles case list and analytics views', () => {
+    openCaseManagement();
+    cy.get(selector('case-mode-analytics-button')).click({ force: true }); cy.get(selector('case-analytics-panel')).should('be.visible');
+    cy.get(selector('case-mode-list-button')).click({ force: true }); cy.get(selector('case-management-table')).should('be.visible');
+  });
+
   it('edits case details and primary entity', () => {
     openCreatedCaseDetails();
 

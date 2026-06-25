@@ -12,10 +12,11 @@ import { CaseDialog } from './model/case-dialog/case-dialog';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { finalize } from 'rxjs';
 import { CaseFilterRowComponent, CaseListFilters, DEFAULT_CASE_LIST_FILTERS } from './model/case-filter-row/case-filter-row';
+import { CaseAnalyticsPanel } from './model/case-analytics-panel/case-analytics-panel';
 
 @Component({
   selector: 'app-sidebar-user-case-management',
-  imports: [CommonModule, FormsModule, AddNewCase, ConfirmationPopupComponent, TranslatePipe, CaseDialog, CaseFilterRowComponent],
+  imports: [CommonModule, FormsModule, AddNewCase, ConfirmationPopupComponent, TranslatePipe, CaseDialog, CaseFilterRowComponent, CaseAnalyticsPanel],
   templateUrl: './sidebar-user-case-management.html'
 })
 export class SidebarUserCaseManagement implements OnInit {
@@ -31,6 +32,7 @@ export class SidebarUserCaseManagement implements OnInit {
   isAnalystsLoading = false;
   isAssignAnalystSaving = false;
   caseFilters: CaseListFilters = { ...DEFAULT_CASE_LIST_FILTERS };
+  caseManagementMode: 'list' | 'analytics' = 'list';
 
   constructor(private router: Router, private caseService: CaseManagement, private licenseService: LicenseService, private messageNotificationService: MessageNotificationService) { }
 
@@ -100,6 +102,10 @@ export class SidebarUserCaseManagement implements OnInit {
 
   onCaseFiltersChange(filters: CaseListFilters): void {
     this.caseFilters = filters;
+  }
+
+  setCaseManagementMode(mode: 'list' | 'analytics'): void {
+    this.caseManagementMode = mode;
   }
 
   viewCase(caseId: string): void {

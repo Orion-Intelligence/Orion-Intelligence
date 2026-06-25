@@ -552,6 +552,12 @@ export interface SharedCaseComment {
     updatedAt?: string;
 }
 
+export interface CaseChartItem {
+    key: string;
+    label: string;
+    count: number;
+}
+
 export interface Case {
     id?: string;
     viewerId?: string;

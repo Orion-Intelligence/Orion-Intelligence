@@ -9,7 +9,16 @@
                         {{ (showArchivedCases ? 'Viewing archived cases' : 'Manage cybersecurity cases') | translate }}
                     </p>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="grid h-10 grid-cols-2 overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]" data-testid="case-management-mode-toggle">
+                        <button type="button" data-testid="case-mode-list-button" class="px-3 text-sm font-semibold transition" [ngClass]="caseManagementMode === 'list' ? 'bg-sky-500/15 text-sky-200 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'" (click)="setCaseManagementMode('list')">
+                            {{ 'Case List' | translate }}
+                        </button>
+                        <button type="button" data-testid="case-mode-analytics-button" class="border-l border-[var(--tenant-line)] px-3 text-sm font-semibold transition" [ngClass]="caseManagementMode === 'analytics' ? 'bg-sky-500/15 text-sky-200 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'" (click)="setCaseManagementMode('analytics')">
+                            {{ 'Analytics' | translate }}
+                        </button>
+                    </div>
+
                     @if (canManageCases()) {
                     <button type="button" data-testid="case-tracking-board-button" class="ui-btn ui-btn-secondary" (click)="openTrackingBoard()">
                         {{ 'Status Tracking Board' | translate }}
@@ -31,7 +40,22 @@
                 (filtersChange)="onCaseFiltersChange($event)"
                 (archivedChange)="setArchivedCases($event)"></app-case-filter-row>
 
-            <div class="case-table-shell m-0 overflow-hidden rounded-none border-0 shadow-none md:rounded-[8px] md:border md:!border-[var(--tenant-line)] md:shadow-none">
+            @if (caseManagementMode === 'analytics') {
+            @if (isLoading) {
+            <div class="grid min-h-[420px] animate-[slideUp_180ms_ease-out_both] place-items-center rounded-[10px] border border-dashed border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/60" data-testid="case-analytics-loading">
+                <div class="flex items-center gap-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-4 py-3">
+                    <span class="h-5 w-5 animate-spin rounded-full border-2 border-[var(--tenant-line)] border-t-sky-400"></span>
+                    <div>
+                        <p class="mb-0 text-sm font-semibold text-[var(--color-text2)]">Loading cases</p>
+                        <p class="mt-0.5 mb-0 text-xs text-[var(--color-text4)]">Preparing analytics</p>
+                    </div>
+                </div>
+            </div>
+            } @else {
+            <app-case-analytics-panel class="block animate-[slideUp_180ms_ease-out_both]" [cases]="cases" [filteredCases]="filteredCases"></app-case-analytics-panel>
+            }
+            } @else {
+            <div class="case-table-shell m-0 animate-[slideUp_180ms_ease-out_both] overflow-hidden rounded-none border-0 shadow-none md:rounded-[8px] md:border md:!border-[var(--tenant-line)] md:shadow-none">
                 @if (!isLoading) {
                 <div class="relative hidden overflow-x-auto overflow-y-visible md:block">
                     <table class="w-full min-w-[1120px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]" data-testid="case-management-table">
@@ -262,6 +286,7 @@
                 </div>
                 }
             </div>
+            }
             @if (showAddCasePopup) {
             <app-add-new-case (close)="closeAddCasePopup()" (caseAdded)="onCaseAdded($event)">
             </app-add-new-case>
