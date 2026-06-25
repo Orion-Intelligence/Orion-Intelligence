@@ -20,19 +20,25 @@
                         <span class="font-bold tabular-nums text-emerald-300 [body.light-theme_&]:text-emerald-700">{{ getCompletedCaseCount() }}</span>
                     </div>
                 </div>
-                <button type="button" class="ui-btn ui-btn-secondary inline-flex h-10 items-center gap-2 whitespace-nowrap" data-testid="case-tracking-board-refresh" (click)="loadCases()">
-                    <i class="bi bi-arrow-clockwise text-sm"></i>
-                    Refresh
+                <button type="button" class="ui-btn ui-btn-secondary inline-flex h-10 items-center gap-2 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-tracking-board-refresh" [disabled]="isLoading" (click)="loadCases()">
+                    <i class="bi bi-arrow-clockwise text-sm" [ngClass]="isLoading ? 'animate-spin' : ''"></i>
+                    {{ isLoading ? 'Refreshing' : 'Refresh' }}
                 </button>
             </div>
         </div>
 
         @if (isLoading) {
-        <div class="grid min-h-[520px] place-items-center rounded-[10px] border border-dashed border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/60 text-sm text-[var(--color-text4)]">
-            Loading cases...
+        <div class="box-border grid h-[calc(100vh-245px)] min-h-[560px] place-items-center overflow-hidden rounded-[10px] border border-dashed border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]/60 p-4" data-testid="case-tracking-board-loading">
+            <div class="flex items-center gap-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-4 py-3">
+                <span class="h-5 w-5 animate-spin rounded-full border-2 border-[var(--tenant-line)] border-t-sky-400"></span>
+                <div>
+                    <p class="mb-0 text-sm font-semibold text-[var(--color-text2)]">Loading cases</p>
+                    <p class="mt-0.5 mb-0 text-xs text-[var(--color-text4)]">Preparing workflow lanes</p>
+                </div>
+            </div>
         </div>
         } @else {
-        <div cdkDropListGroup class="flex min-h-[560px] gap-3 overflow-x-auto pb-4 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[8px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--tenant-chip-bg)] [&::-webkit-scrollbar-track]:bg-transparent">
+        <div cdkDropListGroup class="case-board-ready box-border flex h-[calc(100vh-245px)] min-h-[560px] gap-3 overflow-x-auto pb-4 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[8px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--tenant-chip-bg)] [&::-webkit-scrollbar-track]:bg-transparent">
             @for (column of workflow; track column.value) {
             <div class="relative flex h-[calc(100vh-245px)] min-h-[540px] w-[304px] min-w-[304px] flex-shrink-0 flex-col overflow-hidden rounded-[10px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)] shadow-[0_10px_22px_var(--color-shadow-light)] transition-all duration-200 ease-out hover:border-[var(--color-blue-640)]/25 hover:bg-[var(--color-blue-820-light)]/45 before:absolute before:left-0 before:top-0 before:h-1 before:w-full" [attr.data-testid]="'tracking-column-shell-' + column.value" [ngClass]="[getStatusAccentClass(column.value), getDragColumnClass(column.value)]">
                 <div class="border-b border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] px-3.5 pb-3 pt-4">

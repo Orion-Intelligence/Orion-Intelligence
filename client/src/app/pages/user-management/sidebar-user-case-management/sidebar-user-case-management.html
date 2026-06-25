@@ -11,10 +11,6 @@
                 </div>
                 <div class="flex items-center gap-2">
                     @if (canManageCases()) {
-                    <button type="button" data-testid="toggle-archived-cases-button" class="ui-btn" [ngClass]="showArchivedCases ? 'ui-btn-primary' : 'ui-btn-secondary'" (click)="toggleArchivedCases()">
-                        {{ (showArchivedCases ? 'Hide Archives' : 'Show Archived') | translate }}
-                    </button>
-
                     <button type="button" data-testid="case-tracking-board-button" class="ui-btn ui-btn-secondary" (click)="openTrackingBoard()">
                         {{ 'Status Tracking Board' | translate }}
                     </button>
@@ -27,6 +23,13 @@
             </div>
 
             <div class="my-5 hidden h-px w-full bg-[var(--color-divider)] md:block"></div>
+
+            <app-case-filter-row
+                [filters]="caseFilters"
+                [showArchivedCases]="showArchivedCases"
+                [canManage]="canManageCases()"
+                (filtersChange)="onCaseFiltersChange($event)"
+                (archivedChange)="setArchivedCases($event)"></app-case-filter-row>
 
             <div class="case-table-shell m-0 overflow-hidden rounded-none border-0 shadow-none md:rounded-[8px] md:border md:!border-[var(--tenant-line)] md:shadow-none">
                 @if (!isLoading) {
@@ -53,9 +56,9 @@
                             </tr>
                         </thead>
 
-                        @if ((cases?.length || 0) > 0) {
+                        @if ((filteredCases?.length || 0) > 0) {
                         <tbody class="text-[15px] font-normal text-[var(--color-text3)]">
-                            @for (case of cases; track case.caseId || $index; let i = $index) {
+                            @for (case of filteredCases; track case.caseId || $index; let i = $index) {
                             <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [attr.data-testid]="'case-row-' + case.caseId">
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">
                                     {{ case.caseId }}</td>
@@ -109,18 +112,20 @@
                             }
                         </tbody>
                         }
-                        @if ((cases?.length || 0) === 0) {
+                        @if ((filteredCases?.length || 0) === 0) {
                         <tbody>
                             <tr class="border-t !border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]" data-testid="case-management-empty">
-                                <td class="px-4 py-12 text-center text-sm text-[var(--color-text4)]" colspan="8">{{ 'No case available.' | translate }}</td>
+                                <td class="px-4 py-12 text-center text-sm text-[var(--color-text4)]" colspan="8">
+                                    {{ ((cases?.length || 0) > 0 ? 'No cases match the selected filters.' : 'No case available.') | translate }}
+                                </td>
                             </tr>
                         </tbody>
                         }
                     </table>
                 </div>
                 <div class="space-y-3 md:hidden">
-                    @if ((cases?.length || 0) > 0) {
-                    @for (case of cases; track case.caseId || $index; let i = $index) {
+                    @if ((filteredCases?.length || 0) > 0) {
+                    @for (case of filteredCases; track case.caseId || $index; let i = $index) {
                     <div class="overflow-hidden rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)]" [attr.data-testid]="'case-mobile-card-' + case.caseId">
                         <div class="flex items-start justify-between gap-3 border-b border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] px-3 py-2.5">
                             <div class="min-w-0">
@@ -181,9 +186,9 @@
                     </div>
                     }
                     }
-                    @if ((cases?.length || 0) === 0) {
+                    @if ((filteredCases?.length || 0) === 0) {
                     <div class="rounded-[10px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] px-3 py-8 text-center text-sm text-[var(--color-text4)]" data-testid="case-management-mobile-empty">
-                        {{ 'No case available.' | translate }}
+                        {{ ((cases?.length || 0) > 0 ? 'No cases match the selected filters.' : 'No case available.') | translate }}
                     </div>
                     }
                 </div>

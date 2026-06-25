@@ -23,6 +23,46 @@ export function assertNotification(message: string) {
   cy.contains(message, { timeout: 60000 }).should('exist');
 }
 
+function caseListSelector(id: string): string {
+  return `${selector(`case-row-${id}`)}, ${selector(`case-mobile-card-${id}`)}`;
+}
+
+export function openCaseFiltersIfCollapsed() {
+  cy.get('body').then(($body) => {
+    const toggle = $body.find(selector('case-filter-mobile-toggle')).filter(':visible').first();
+    if (toggle.length && toggle.attr('aria-expanded') !== 'true') {
+      cy.wrap(toggle).click({ force: true });
+    }
+  });
+}
+
+export function selectCaseFilterDropdown(testId: string, optionLabel: string) {
+  openCaseFiltersIfCollapsed();
+  cy.get(selector(testId)).filter(':visible').first().scrollIntoView().should('be.visible').then(($button) => {
+    const menuId = $button.attr('aria-controls');
+    expect(menuId, `${testId} dropdown menu id`).to.exist;
+
+    cy.wrap($button).click({ force: true });
+    cy.get(`#${menuId}`, { timeout: 60000 })
+      .should('be.visible')
+      .contains('[role="option"]', optionLabel)
+      .click({ force: true });
+  });
+}
+
+export function typeCaseFilterSearch(value: string) {
+  openCaseFiltersIfCollapsed();
+  cy.get(selector('case-filter-search')).filter(':visible').first().scrollIntoView().should('be.visible').clear().type(value);
+}
+
+export function assertCaseVisibleInList(id: string) {
+  cy.get(caseListSelector(id), { timeout: 60000 }).filter(':visible').first().scrollIntoView().should('be.visible');
+}
+
+export function assertCaseHiddenInList(id: string) {
+  cy.get(caseListSelector(id), { timeout: 60000 }).should('not.exist');
+}
+
 export function createCase(title: string, description: string, entityValue: string, assignId: (id: string) => void) {
   let createdCaseId = '';
   cy.get(selector('add-case-button')).filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });

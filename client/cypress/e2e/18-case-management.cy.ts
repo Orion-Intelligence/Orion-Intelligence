@@ -2,6 +2,8 @@ import {
   CASE_MOVE_STATUS_IDS,
   addCase,
   addLinkTargetCase,
+  assertCaseHiddenInList,
+  assertCaseVisibleInList,
   assertNotification,
   assignAnalystIfAvailable,
   caseId,
@@ -10,7 +12,9 @@ import {
   openCaseManagement,
   openCreatedCaseDetails,
   openCreatedCaseFromList,
-  selector
+  selectCaseFilterDropdown,
+  selector,
+  typeCaseFilterSearch
 } from './controllers/18-case-management.controller';
 
 describe('Case Management - Add View Edit Flow', () => {
@@ -45,6 +49,46 @@ describe('Case Management - Add View Edit Flow', () => {
       .scrollIntoView()
       .should('be.visible')
       .and('be.disabled');
+  });
+
+  it('filters case list by search and dropdown filters', () => {
+    openCaseManagement();
+
+    cy.then(() => {
+      expect(caseId, 'created case id').not.to.equal('');
+      expect(linkedCaseId, 'linked case id').not.to.equal('');
+
+      typeCaseFilterSearch(caseId);
+      assertCaseVisibleInList(caseId);
+      assertCaseHiddenInList(linkedCaseId);
+    });
+
+    selectCaseFilterDropdown('case-filter-status', 'New');
+    cy.then(() => assertCaseVisibleInList(caseId));
+    selectCaseFilterDropdown('case-filter-status', 'Resolved');
+    cy.then(() => assertCaseHiddenInList(caseId));
+    selectCaseFilterDropdown('case-filter-status', 'All Statuses');
+
+    selectCaseFilterDropdown('case-filter-severity', 'High');
+    cy.then(() => assertCaseVisibleInList(caseId));
+    selectCaseFilterDropdown('case-filter-severity', 'Critical');
+    cy.then(() => assertCaseHiddenInList(caseId));
+    selectCaseFilterDropdown('case-filter-severity', 'All Severities');
+
+    selectCaseFilterDropdown('case-filter-priority', 'High');
+    cy.then(() => assertCaseVisibleInList(caseId));
+    selectCaseFilterDropdown('case-filter-priority', 'Critical');
+    cy.then(() => assertCaseHiddenInList(caseId));
+    selectCaseFilterDropdown('case-filter-priority', 'All Priorities');
+
+    selectCaseFilterDropdown('case-filter-type', 'Fraud');
+    cy.then(() => assertCaseVisibleInList(caseId));
+    selectCaseFilterDropdown('case-filter-type', 'Malware');
+    cy.then(() => assertCaseHiddenInList(caseId));
+    selectCaseFilterDropdown('case-filter-type', 'All Types');
+
+    selectCaseFilterDropdown('case-filter-sort', 'Oldest Updated');
+    cy.then(() => assertCaseVisibleInList(caseId));
   });
 
   it('edits case details and primary entity', () => {
@@ -383,10 +427,10 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.get(selector('case-details-archive')).should('not.exist');
 
     openCaseManagement();
-    cy.get(selector('toggle-archived-cases-button')).should('be.visible').click();
+    selectCaseFilterDropdown('case-filter-view', 'Archived');
     cy.get(selector('case-management-page')).should('contain.text', 'Viewing archived cases');
     cy.then(() => {
-      cy.get(selector(`case-row-${caseId}`)).should('be.visible');
+      assertCaseVisibleInList(caseId);
     });
   });
 });
