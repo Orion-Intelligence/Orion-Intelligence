@@ -10,6 +10,19 @@ export const SOCIAL_STEALER_USERNAME = 'superman0011';
 export const SOCIAL_STEALER_PLATFORM = /twitter/i;
 const SOCIAL_STEALER_DOMAIN = 'twitter.com';
 
+function isStealerDomain(value: string) {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+  try {
+    const host = new URL(normalized.includes('://') ? normalized : `https://${normalized}`).hostname.replace(/^www\./, '');
+    return host === SOCIAL_STEALER_DOMAIN || host.endsWith(`.${SOCIAL_STEALER_DOMAIN}`);
+  } catch {
+    return false;
+  }
+}
+
 export function visitSocialIntel() {
   setViewportToCurrentScreen();
   cy.visit('/dashboard/social-intel');
@@ -76,7 +89,8 @@ export function assertDashboardStealerExposure() {
     .then(($rows) => {
       const matchingRow = [...$rows].slice(0, 3).find((row) => {
         const text = row.textContent || '';
-        return text.includes(SOCIAL_STEALER_USERNAME) && text.includes(SOCIAL_STEALER_DOMAIN);
+        const domain = row.querySelector('[title]')?.getAttribute('title') || '';
+        return text.includes(SOCIAL_STEALER_USERNAME) && isStealerDomain(domain);
       });
       expect(matchingRow, `top 3 stealer rows include ${SOCIAL_STEALER_DOMAIN}`).to.exist;
     });

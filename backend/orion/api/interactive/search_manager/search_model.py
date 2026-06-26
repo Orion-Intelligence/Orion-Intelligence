@@ -16,6 +16,7 @@ from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
+from orion.services.log_manager.log_controller import log
 from orion.api.interactive.search_manager.search_query_generator import search_query_generator
 from orion.api.interactive.search_manager.search_enums import SEARCH_CONFIG
 
@@ -206,8 +207,8 @@ class search_model:
                 if cipher is None:
                     cipher = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode())
                 item.password = cipher.decrypt(str(password).encode()).decode()
-            except Exception:
-                pass
+            except Exception as ex:
+                log.g().w(f"Stealer password decrypt skipped: {str(ex)}")
 
     @staticmethod
     async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, blocked_categories, allowed_categories,search_type=""):
