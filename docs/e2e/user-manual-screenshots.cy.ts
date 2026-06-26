@@ -1003,6 +1003,7 @@ describe('User Manual Screenshot Flow', () => {
 
     cy.get('[data-testid="network-intel-tab-vulnerability-scan"]').click();
     cy.get('[data-testid="network-intel-search-input"]').should('be.visible').click({ force: true }).type('{selectall}{backspace}bbc.com{enter}', { force: true });
+    cy.contains('[data-testid="network-intel-vulnerability-target"]', 'bbc.com', { timeout: 60000 }).click({ force: true });
     cy.contains('[data-testid="network-intel-vulnerability-result"]', 'Missing Content-Security-Policy', {
       timeout: 60000,
     }).should('be.visible');
