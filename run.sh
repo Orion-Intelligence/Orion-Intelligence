@@ -60,12 +60,11 @@ client_build() {
 
 install_client_dependencies() {
     cd client || exit
-    if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
-        npm ci
-    else
-        rm -rf node_modules
-        npm install
+    if [ ! -f package-lock.json ] && [ ! -f npm-shrinkwrap.json ]; then
+        echo "Missing client lockfile; refusing unpinned dependency install"
+        exit 1
     fi
+    npm ci
     npm run lint
     cd ..
 }

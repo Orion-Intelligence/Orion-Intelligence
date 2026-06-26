@@ -15,7 +15,6 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         request.state.csp_nonce = secrets.token_urlsafe(16)
         response: Response = await call_next(request)
-        nonce = request.state.csp_nonce
 
         if any(
                 path in request.url.path for path in

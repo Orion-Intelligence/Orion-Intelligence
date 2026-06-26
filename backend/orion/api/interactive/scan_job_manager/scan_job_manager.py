@@ -12,6 +12,7 @@ from odmantic.query import desc
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.interactive.scan_job_manager.scan_routes_enum import SCAN_ROUTES
 from orion.helper_manager.env_handler import env_handler
+from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_scan_job_model import ScanJobDetailResponse, ScanJobListResponse, ScanJobNotificationResponse, ScanJobStatus, db_scan_job_model
 
@@ -194,8 +195,8 @@ class ScanJobManager:
         await self._engine.save(job)
         try:
             await AuditLogManager.get_instance().search_audit(current_user, api_reference.replace("/", "_"), target)
-        except Exception:
-            pass
+        except Exception as ex:
+            log.g().w(f"Scan audit logging skipped: {str(ex)}")
         return {**self._build_scan_detail(job, ScanJobStatus.QUEUED.value, target).model_dump(), "source": "new"}
 
     async def run_tracked_scan(self, current_user, api_reference: str, payload: Dict[str, Any], metadata: Optional[Dict[str, Any]], runner: Callable[[], Awaitable[Any]], force_new: bool = False, confirm_duplicates: bool = True) -> Dict[str, Any]:

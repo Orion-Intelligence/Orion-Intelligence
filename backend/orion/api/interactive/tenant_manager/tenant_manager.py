@@ -144,7 +144,7 @@ class TenantManager:
             postal_code=enc.decrypt(tenant.postal_code.encode()).decode() if tenant.postal_code else "",
             profile_visibility_enabled=getattr(tenant, "profile_visibility_enabled", True),
             event_management_enabled=getattr(tenant, "event_management_enabled", False),
-            accounts_mail_password="",
+            accounts_mail_password=None,
             accounts_mail=enc.decrypt(getattr(tenant, "accounts_mail", "").encode()).decode() if getattr(tenant, "accounts_mail", "") else "",
             accounts_smtp_server=enc.decrypt(getattr(tenant, "accounts_smtp_server", "").encode()).decode() if getattr(tenant, "accounts_smtp_server", "") else "",
             accounts_smtp_port=enc.decrypt(getattr(tenant, "accounts_smtp_port", "").encode()).decode() if getattr(tenant, "accounts_smtp_port", "") else "")
@@ -291,7 +291,7 @@ class TenantManager:
         tenant_data["postal_code"] = enc.decrypt(
             (tenant_data.get("postal_code") or "").encode()).decode() if tenant_data.get("postal_code") else ""
         tenant_data["licenses"] = [enc.decrypt(x.encode()).decode() for x in (tenant_data.get("licenses") or [])]
-        tenant_data["accounts_mail_password"] = ""
+        tenant_data["accounts_mail_password"] = None
         tenant_data["accounts_mail"] = enc.decrypt((tenant_data.get("accounts_mail") or "").encode()).decode() if tenant_data.get("accounts_mail") else ""
         tenant_data["accounts_smtp_server"] = enc.decrypt((tenant_data.get("accounts_smtp_server") or "").encode()).decode() if tenant_data.get("accounts_smtp_server") else ""
         tenant_data["accounts_smtp_port"] = enc.decrypt((tenant_data.get("accounts_smtp_port") or "").encode()).decode() if tenant_data.get("accounts_smtp_port") else ""
@@ -327,7 +327,7 @@ class TenantManager:
                 tenant.email = enc.decrypt(tenant.email.encode()).decode()
             else:
                 tenant.email = ""
-            tenant.accounts_mail_password = ""
+            tenant.accounts_mail_password = None
             tenant.accounts_mail = enc.decrypt(tenant.accounts_mail.encode()).decode() if getattr(tenant, "accounts_mail", "") else ""
             tenant.accounts_smtp_server = enc.decrypt(tenant.accounts_smtp_server.encode()).decode() if getattr(tenant, "accounts_smtp_server", "") else ""
             tenant.accounts_smtp_port = enc.decrypt(tenant.accounts_smtp_port.encode()).decode() if getattr(tenant, "accounts_smtp_port", "") else ""
