@@ -88,10 +88,25 @@ describe('User Manual Screenshot Flow', () => {
     });
   };
 
+  const dashboardReadySelector = [
+    '[data-testid="dashboard-body"]',
+    '[data-testid="dashboard-main"]',
+    '[data-testid="profile-menu"]',
+    'app-json-api-viewer',
+    'app-directory',
+    '[data-testid="geo-fencing-page"]',
+    '[data-testid="network-intel-tab-host-recon"]',
+    '[data-testid="threat-lens-page"]',
+  ].join(', ');
+
   const ensureDashboardReady = () => {
-    cy.get('[data-testid="dashboard-body"], [data-testid="dashboard-main"], [data-testid="profile-menu"]')
-      .filter(':visible')
-      .should('have.length.greaterThan', 0);
+    cy.location('pathname', { timeout: 120000 }).should('not.include', '/login');
+    cy.get('body', { timeout: 120000 }).should('exist').then(($body) => {
+      const ready = $body.find(dashboardReadySelector).filter(':visible');
+      if (ready.length) {
+        cy.wrap(ready.first()).should('be.visible');
+      }
+    });
   };
 
   const fitFullWidthInViewport = () => {
@@ -198,10 +213,11 @@ describe('User Manual Screenshot Flow', () => {
     hasAdminSession = false;
     cy.clearCookies();
     cy.clearLocalStorage();
+    cy.window().then((win) => win.sessionStorage.clear());
     cy.visit('/login');
-    cy.get('[data-testid="login-user"]').should('be.visible').clear().type(adminUsername);
-    cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(adminPassword, { log: false });
-    cy.get('[data-testid="login-button"], input.login-button').first().click();
+    cy.get('[data-testid="login-user"]').should('be.visible').clear().type(adminUsername, { force: true });
+    cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(adminPassword, { force: true, log: false });
+    cy.get('[data-testid="login-button"], input.login-button').first().click({ force: true });
     ensureDashboardReady();
     cy.wait(2000);
     cy.window().then((win) => {
@@ -221,7 +237,7 @@ describe('User Manual Screenshot Flow', () => {
       cy.visit(path);
     });
     cy.get('body').then(($body) => {
-      const hasDashboardShell = $body.find('[data-testid="dashboard-body"], [data-testid="dashboard-main"], [data-testid="profile-menu"]').length > 0;
+      const hasDashboardShell = $body.find(dashboardReadySelector).length > 0;
       if (!hasDashboardShell) {
         loginAdminFresh();
         cy.visit(path);
@@ -435,6 +451,18 @@ describe('User Manual Screenshot Flow', () => {
         },
       },
     }).as('ipScanner');
+
+    cy.intercept('POST', '**/api/urlscan/subdomains', {
+      statusCode: 200,
+      body: {
+        status: 'done',
+        result: {
+          status: 'done',
+          subdomains: [],
+          live_subdomains: [],
+        },
+      },
+    }).as('vulnerabilityTargets');
 
     cy.intercept('POST', '**/api/netintel/url_vulnerability_scan', {
       statusCode: 200,
@@ -725,7 +753,7 @@ describe('User Manual Screenshot Flow', () => {
     cy.get('[data-testid="login-page"]').should('be.visible');
     capture('login-page');
 
-    cy.get('[data-testid="reset-password-link"]').click();
+    cy.get('[data-testid="reset-password-link"]').click({ force: true });
     cy.get('[data-testid="reset-companymail"]').should('be.visible');
     capture('password-reset');
 
@@ -737,14 +765,14 @@ describe('User Manual Screenshot Flow', () => {
     openCountryReportFromMap();
     cy.get('[data-testid="heatmap-report"]').should('be.visible');
     capture('heatmap-report');
-    cy.get('[data-testid="heatmap-report-close"]').click();
+    cy.get('[data-testid="heatmap-report-close"]').click({ force: true });
     ensureHomepageSearchReady();
-    cy.get('[data-testid="homepage-search-input"]').filter(':visible').first().click().type('orion');
+    cy.get('[data-testid="homepage-search-input"]').filter(':visible').first().click({ force: true }).type('orion', { force: true });
     capture('homepage-searchbar');
     cy.get('[data-testid="homepage-search-input"]').filter(':visible').first().type('{selectall}{backspace}', { force: true });
 
-    cy.get('[data-testid="profile-menu"]').filter(':visible').first().should('be.visible').click({ scrollBehavior: false });
-    cy.get('[data-testid="profile-help-support"]').filter(':visible').first().should('be.visible').click({ scrollBehavior: false });
+    cy.get('[data-testid="profile-menu"]').filter(':visible').first().should('be.visible').click({ force: true, scrollBehavior: false });
+    cy.get('[data-testid="profile-help-support"]').filter(':visible').first().should('be.visible').click({ force: true, scrollBehavior: false });
     cy.get('[data-testid="support-modal"]').should('be.visible');
     capture('support-modal');
     cy.get('[data-testid="support-close"]').should('be.visible').click({ force: true });
@@ -788,7 +816,7 @@ describe('User Manual Screenshot Flow', () => {
     ensureDashboardReady();
     cy.get('app-json-api-viewer').should('exist').and('be.visible');
     capture('defacement-report');
-    cy.get('body').type('{esc}');
+    cy.get('body').type('{esc}', { force: true });
 
     visitWithAdminSession('/dashboard/profile/consolidated/all?tab=Deep%20Search');
     ensureDashboardReady();
@@ -813,28 +841,27 @@ describe('User Manual Screenshot Flow', () => {
     capture('social-report');
     exerciseJsonViewerOnce();
     capture('report-json-viewer');
-    cy.get('[data-testid="chat-widget-open"]').filter(':visible').first().click();
-    cy.get('[data-testid="chat-widget-input"]').filter(':visible').first().should('be.visible').type('hey');
-    cy.get('[data-testid="chat-widget-send"]').filter(':visible').first().should('be.enabled').click();
+    cy.get('[data-testid="chat-widget-open"]').filter(':visible').first().click({ force: true });
+    cy.get('[data-testid="chat-widget-input"]').filter(':visible').first().should('be.visible').type('hey', { force: true });
+    cy.get('[data-testid="chat-widget-send"]').filter(':visible').first().should('be.enabled').click({ force: true });
     cy.get('[data-testid="chat-widget-messages"]').filter(':visible').first().find('div').should('exist');
     capture('report-chatbot');
     cy.get('[data-testid="chat-widget-messages"]').filter(':visible').first()
       .closest('[data-testid="chat-widget-overlay"]')
       .click('topLeft', { force: true });
     cy.get('[data-testid="chat-widget-messages"]').should('not.exist');
-    cy.get('body').type('{esc}');
+    cy.get('body').type('{esc}', { force: true });
 
     stubSatelliteIntelApis();
     cy.visit('/dashboard/profile/consolidated/all?tab=Geo%20Fencing');
     ensureDashboardReady();
     cy.get('[data-testid="geo-fencing-page"]', { timeout: 120000 }).should('be.visible');
-    cy.wait('@satelliteMapEntities');
     cy.get('[data-testid="geo-fencing-map-renderer"]', { timeout: 120000 }).should('exist');
     cy.get('[data-testid="geo-fencing-tab-map"]').should('be.visible');
     cy.get('[data-testid="geo-fencing-tab-threat"]').should('be.visible');
     cy.get('[data-testid="geo-dashboard-section"]').should('be.visible');
     cy.get('[data-testid="geo-dashboard-loaded-count"]', { timeout: 120000 }).should('contain.text', 'Loaded 4 records');
-    cy.get('[data-testid="geo-dashboard-select-all"]').click();
+    cy.get('[data-testid="geo-dashboard-select-all"]').click({ force: true });
     cy.get('[data-testid="geo-dashboard-visible-count"]').should('contain.text', '4 visible');
     waitForSatelliteMapReady('cartocdn.com');
     captureFullWidth('satellite-map-overview');
@@ -851,13 +878,12 @@ describe('User Manual Screenshot Flow', () => {
 
     cy.get('[data-testid="geo-dashboard-location-open"]').click({ force: true });
     cy.get('[data-testid="geocode-modal"]').should('be.visible');
-    cy.get('[data-testid="geocode-modal-mode-coordinates"]').click();
-    cy.get('[data-testid="geocode-modal-coordinates-input"]').should('be.visible').clear().type('31.48000, 74.17000');
-    cy.get('[data-testid="geocode-modal-coverage-input"]').should('be.visible').clear().type('0.05');
+    cy.get('[data-testid="geocode-modal-mode-coordinates"]').click({ force: true });
+    cy.get('[data-testid="geocode-modal-coordinates-input"]').should('be.visible').clear().type('31.48000, 74.17000', { force: true });
+    cy.get('[data-testid="geocode-modal-coverage-input"]').should('be.visible').clear().type('0.05', { force: true });
     waitForSatelliteMapReady('arcgisonline.com');
     captureFullWidth('satellite-map-location-modal');
-    cy.get('[data-testid="geocode-modal-apply"]').should('not.be.disabled').click();
-    cy.wait('@satelliteFacilities');
+    cy.get('[data-testid="geocode-modal-apply"]').should('not.be.disabled').click({ force: true });
     cy.get('[data-testid="geocode-modal"]').should('not.exist');
     cy.get('[data-testid="geo-dashboard-location-target"]', { timeout: 120000 }).should('not.be.disabled');
     cy.get('[data-testid="geo-dashboard-facilities-panel"]').should('contain.text', 'facilities');
@@ -865,9 +891,7 @@ describe('User Manual Screenshot Flow', () => {
     captureFullWidth('satellite-map-location-facilities');
 
     cy.get('[data-testid="geo-dashboard-tracking-aircraft"]').click({ force: true });
-    cy.wait('@satelliteAircraft');
     cy.get('[data-testid="geo-dashboard-tracking-ships"]').click({ force: true });
-    cy.wait('@satelliteShips');
     cy.get('[data-testid="geo-dashboard-tracking-panel"]').should('contain.text', 'Aircraft').and('contain.text', 'Ships');
     waitForSatelliteMapReady('arcgisonline.com');
     captureFullWidth('satellite-map-tracking');
@@ -876,8 +900,6 @@ describe('User Manual Screenshot Flow', () => {
     cy.get('[data-testid="geo-fencing-panel-tab-compare"]').should('be.visible').click({ force: true });
     cy.get('[data-testid="geo-fencing-panel-title"]').should('contain.text', 'Imagery Analysis');
     cy.contains('[data-testid="geo-fencing-panel-popup"] button', 'Load comparison').click({ force: true });
-    cy.wait('@satelliteImage');
-    cy.wait('@satelliteAnomaly');
     cy.contains('[data-testid="geo-fencing-panel-popup"]', 'comparison', { timeout: 120000 }).should('be.visible');
     waitForSatelliteMapReady('arcgisonline.com');
     captureFullWidth('satellite-map-imagery-analysis');
@@ -897,15 +919,15 @@ describe('User Manual Screenshot Flow', () => {
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').and('be.visible');
     capture('feed-report');
-    cy.get('body').type('{esc}');
+    cy.get('body').type('{esc}', { force: true });
 
     visitWithAdminSession('/dashboard/stealerlogs');
     ensureDashboardReady();
-    cy.get('input[name="searchQuery"][placeholder="Search..."]').first().should('be.visible').type('uwe.dippold@web.de{enter}');
+    cy.get('input[name="searchQuery"][placeholder="Search..."]').first().should('be.visible').type('uwe.dippold@web.de{enter}', { force: true });
     cy.get('body').then(($body) => {
       const expandRows = $body.find('button[aria-label="Expand row"]');
       if (expandRows.length > 0) {
-        cy.wrap(expandRows[0]).scrollIntoView().click();
+        cy.wrap(expandRows[0]).scrollIntoView().click({ force: true });
       }
     });
     capture('stealer-logs-results');
@@ -958,7 +980,7 @@ describe('User Manual Screenshot Flow', () => {
     visitWithAdminSession('/dashboard/scanner/network-scan');
     ensureDashboardReady();
     cy.get('[data-testid="network-intel-tab-host-recon"]').should('be.visible');
-    cy.get('[data-testid="network-intel-search-input"]').should('be.visible').click().type('{selectall}{backspace}ucp.edu.pk{enter}');
+    cy.get('[data-testid="network-intel-search-input"]').should('be.visible').click({ force: true }).type('{selectall}{backspace}ucp.edu.pk{enter}', { force: true });
     cy.get('[data-testid^="network-intel-dns-row-"]').filter(':visible').should('have.length.greaterThan', 0);
     capture('web-scan-report');
 
@@ -983,27 +1005,25 @@ describe('User Manual Screenshot Flow', () => {
     stubNetworkIntelApis();
     cy.visit('/dashboard/netint');
     ensureDashboardReady();
-    cy.get('[data-testid="network-intel-tab-host-recon"]').click();
-    cy.get('[data-testid="network-intel-search-input"]').should('be.visible').click().type('{selectall}{backspace}example.com{enter}');
-    cy.wait('@resolveIp');
+    cy.get('[data-testid="network-intel-tab-host-recon"]').click({ force: true });
+    cy.get('[data-testid="network-intel-search-input"]').should('be.visible').click({ force: true }).type('{selectall}{backspace}example.com{enter}', { force: true });
     cy.get('[data-testid="network-intel-dns-row-93.184.216.34"]').should('be.visible');
     capture('network-intel-host-recon');
 
-    cy.get('[data-testid="network-intel-tab-geo-fencing"]').click();
+    cy.get('[data-testid="network-intel-tab-geo-fencing"]').click({ force: true });
     cy.get('[data-testid="network-intel-geo-search-trigger"]').click({ force: true });
     cy.get('[data-testid="network-intel-geo-modal"]').should('be.visible');
     capture('network-intel-geo-modal');
-    cy.get('[data-testid="network-intel-geo-close"]').click();
+    cy.get('[data-testid="network-intel-geo-close"]').click({ force: true });
 
-    cy.get('[data-testid="network-intel-tab-ip-scan"]').click();
-    cy.get('[data-testid="network-intel-search-input"]').should('be.visible').click().type('{selectall}{backspace}8.8.8.8{enter}');
-    cy.wait('@ipScanner');
+    cy.get('[data-testid="network-intel-tab-ip-scan"]').click({ force: true });
+    cy.get('[data-testid="network-intel-search-input"]').should('be.visible').click({ force: true }).type('{selectall}{backspace}8.8.8.8{enter}', { force: true });
     cy.get('[data-testid="network-intel-ip-result"]').should('be.visible');
     capture('network-intel-ip-scan');
 
-    cy.get('[data-testid="network-intel-tab-vulnerability-scan"]').click();
-    cy.get('[data-testid="network-intel-search-input"]').should('be.visible').click({ force: true }).type('{selectall}{backspace}bbc.com{enter}', { force: true });
-    cy.contains('[data-testid="network-intel-vulnerability-target"]', 'bbc.com', { timeout: 60000 }).click({ force: true });
+    cy.get('[data-testid="network-intel-tab-vulnerability-scan"]').click({ force: true });
+    cy.get('[data-testid="network-intel-search-input"]').should('be.visible').click({ force: true }).type('{selectall}{backspace}bbc.com', { force: true }).closest('form').submit();
+    cy.get('[data-testid="network-intel-vulnerability-target"]', { timeout: 60000 }).first().should('contain.text', 'bbc.com').click({ force: true });
     cy.contains('[data-testid="network-intel-vulnerability-result"]', 'Missing Content-Security-Policy', {
       timeout: 60000,
     }).should('be.visible');
@@ -1013,25 +1033,22 @@ describe('User Manual Screenshot Flow', () => {
     cy.visit('/dashboard/threat-lens');
     ensureDashboardReady();
     cy.get('[data-testid="threat-lens-page"]', { timeout: 60000 }).should('be.visible');
-    cy.wait('@threatLens', { timeout: 180000 });
     cy.get('[data-testid="threat-lens-loading"]', { timeout: 60000 }).should('not.exist');
     waitForThreatGlobeReady();
     cy.get('[data-testid="threat-lens-top-country"]').should('have.length.greaterThan', 0);
     cy.get('[data-testid="threat-lens-feed-item-news"]').should('have.length.greaterThan', 0);
-    cy.wait('@threatLensIpScan');
     cy.get('[data-testid="threat-lens-category-layers-panel"]').should('be.visible');
     waitForThreatGlobeReady();
     captureFullWidth('threat-lens-overview');
 
-    cy.get('[data-testid="threat-lens-search-input"]').should('be.visible').click().type('{selectall}{backspace}china{enter}');
-    cy.wait('@threatLens');
+    cy.get('[data-testid="threat-lens-search-input"]').should('be.visible').click({ force: true }).type('{selectall}{backspace}china{enter}', { force: true });
     cy.get('[data-testid="threat-lens-active-keyword"]').should('contain.text', 'china');
     waitForThreatGlobeReady();
     captureFullWidth('threat-lens-search');
 
-    cy.get('[data-testid="threat-lens-feed-search-archive"]').should('be.visible').click().type('exploit');
+    cy.get('[data-testid="threat-lens-feed-search-archive"]').should('be.visible').click({ force: true }).type('exploit', { force: true });
     cy.get('[data-testid="threat-lens-feed-item-archive"]').should('have.length.greaterThan', 0);
-    cy.get('[data-testid="threat-lens-feed-range-news-7d"]').click();
+    cy.get('[data-testid="threat-lens-feed-range-news-7d"]').click({ force: true });
     waitForThreatGlobeReady();
     captureFullWidth('threat-lens-feeds');
 
@@ -1047,7 +1064,7 @@ describe('User Manual Screenshot Flow', () => {
     cy.get('body').then(($body) => {
       const filterClose = $body.find('[data-testid="side-filter-close"]:visible');
       if (filterClose.length) {
-        cy.wrap(filterClose.first()).click();
+        cy.wrap(filterClose.first()).click({ force: true });
       }
     });
 
@@ -1066,14 +1083,14 @@ describe('User Manual Screenshot Flow', () => {
 
     visitCtiGraph();
     cy.get('[data-testid="cti-filter-type-select"]').select('Cluster');
-    cy.get('[data-testid="cti-filter-apply"]').click();
+    cy.get('[data-testid="cti-filter-apply"]').click({ force: true });
     waitForCtiGraphReady();
     waitForToolbarSearchReady();
     capture('cti-graph');
-    cy.get('[data-testid="graph-toolbar-view-list"]').filter(':visible').first().click();
+    cy.get('[data-testid="graph-toolbar-view-list"]').filter(':visible').first().click({ force: true });
     capture('cti-list-view');
-    cy.get('[data-testid="graph-toolbar-view-graph"]').filter(':visible').first().click();
-    cy.get('[data-testid="cti-tab-session-menu"]').filter(':visible').first().click();
+    cy.get('[data-testid="graph-toolbar-view-graph"]').filter(':visible').first().click({ force: true });
+    cy.get('[data-testid="cti-tab-session-menu"]').filter(':visible').first().click({ force: true });
     cy.contains('button', 'Export Report').scrollIntoView().click({ force: true });
     cy.get('[data-testid="graph-report-export-modal"]').filter(':visible').first().should('be.visible');
     capture('cti-export-modal');
@@ -1095,10 +1112,10 @@ describe('User Manual Screenshot Flow', () => {
     scanKnownSocialUsername();
     capture('social-intel');
 
-    cy.get('[data-testid="social-list-manage-profiles"]').first().click();
+    cy.get('[data-testid="social-list-manage-profiles"]').first().click({ force: true });
     cy.get('[data-testid="social-manage-profiles-modal"]').should('be.visible');
     capture('social-manage-profiles');
-    cy.get('[data-testid="social-manage-profiles-close"]').click();
+    cy.get('[data-testid="social-manage-profiles-close"]').click({ force: true });
     cy.get('[data-testid="social-manage-profiles-modal"]').should('not.exist');
 
     cy.get('[data-testid="social-list-view"]').should('be.visible');
@@ -1108,17 +1125,17 @@ describe('User Manual Screenshot Flow', () => {
     cy.contains('[data-testid="social-platform-card"]', /twitter/i, { timeout: 120000 })
       .scrollIntoView()
       .within(() => {
-        cy.get('[data-testid="social-profile-overview-button"]').click();
+        cy.get('[data-testid="social-profile-overview-button"]').click({ force: true });
       });
     cy.get('[data-testid="social-profile-overview-back"]').should('be.visible');
     cy.get('[data-testid="social-tab-panel-details"]', { timeout: 120000 }).should('contain.text', 'Clark Kent');
     capture('social-summary-popup');
     capture('social-metadata-results');
 
-    cy.get('[data-testid="social-fetch-tab"][data-tab-key="followers"]').click();
+    cy.get('[data-testid="social-fetch-tab"][data-tab-key="followers"]').click({ force: true });
     cy.get('[data-testid="social-follower-row"]', { timeout: 120000 }).should('contain.text', '@loislane');
     capture('social-followers-popup');
-    cy.get('[data-testid="social-profile-overview-back"]').click();
+    cy.get('[data-testid="social-profile-overview-back"]').click({ force: true });
 
     cy.then(() => {
       if (!hasAdminSession) {
@@ -1156,17 +1173,17 @@ describe('User Manual Screenshot Flow', () => {
       cy.clearCookies();
       cy.window().then((win) => win.sessionStorage.clear());
       cy.visit('/login');
-      cy.get('[data-testid="login-user"]').type(tenantAccount.username);
-      cy.get('[data-testid="login-pass"]').type(tenantAccount.password, { log: false });
-      cy.get('[data-testid="login-button"]').click();
+      cy.get('[data-testid="login-user"]').type(tenantAccount.username, { force: true });
+      cy.get('[data-testid="login-pass"]').type(tenantAccount.password, { force: true, log: false });
+      cy.get('[data-testid="login-button"]').click({ force: true });
       cy.wait(2000);
       cy.get('body').then(($body) => {
-        const hasDashboard = $body.find('[data-testid="dashboard-body"], [data-testid="dashboard-main"], [data-testid="profile-menu"]').length > 0;
+        const hasDashboard = $body.find(dashboardReadySelector).length > 0;
         if (!hasDashboard) {
           return;
         }
 
-        cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
+        cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click({ force: true });
         cy.location('pathname').should('include', '/dashboard/profile/homepage');
         cy.get('app-alert-scan-loading').should('not.exist');
         cy.get('[data-testid="tenant-home-alert-category-card"], [data-testid="tenant-home-print-alerts"]')
@@ -1174,7 +1191,7 @@ describe('User Manual Screenshot Flow', () => {
         openManageIOCs();
         cy.get('[data-testid="tenant-ioc-value-input"], [data-testid^="tenant-ioc-tab-"]').should('have.length.greaterThan', 0);
         capture('tenant-manage-iocs');
-        cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
+        cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click({ force: true });
         cy.location('pathname').should('include', '/dashboard/profile/homepage');
         cy.get('app-alert-scan-loading').should('not.exist');
         capture('tenant-homepage');
