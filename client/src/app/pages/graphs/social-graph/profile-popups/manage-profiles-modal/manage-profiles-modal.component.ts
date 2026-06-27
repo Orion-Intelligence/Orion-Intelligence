@@ -1,12 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
-import { ManagedPlatform, ManageProfilesModalData, PlatformResult } from '../../../../../shared/model/social/social-scan.models';
+import { ManageProfilesModalData, PlatformResult } from '../../../../../shared/model/social/social-scan.models';
 import { SocialIconComponent } from '../../../../../shared/components/social-icon/social-icon.component';
 import { PlatformIconBgDirective } from '../../directives/platform-icon-bg.directive';
-
-type ManagedPlatformRow = ManagedPlatform & {
-  draftUsername: string;
-  initialUsername: string;
-};
+import type { ManagedPlatformRow } from '../../models/social-graph.models';
 
 @Component({
   selector: 'app-manage-profiles-modal',

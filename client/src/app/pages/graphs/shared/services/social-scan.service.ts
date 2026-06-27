@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Observable, throwError, timer, EMPTY } from 'rxjs';
-import { catchError, expand, filter, map, retry, switchMap, take, takeWhile, tap } from 'rxjs/operators';
+import { Observable, throwError, timer } from 'rxjs';
+import { catchError, filter, map, retry, switchMap, take, tap } from 'rxjs/operators';
 import { ApiService } from '../../../../shared/services/api.service';
-import { PlatformResult, ProfileDetails, ScanEvent, SocialImage, SocialPost } from '../../../../shared/model/social/social-scan.models';
+import { PlatformResult, ProfileDetails, ScanEvent, SocialImage, SocialPost, SocialStoredProfile } from '../../../../shared/model/social/social-scan.models';
+import { SocialNormalizationUtil } from '../../social-graph/utils/social-normalization.util';
 interface ApiEnvelope<T> {
     status?: string;
     message?: any;
@@ -177,6 +178,22 @@ export class SocialScanService {
     });
   }
 
+  saveSocialProfiles(profileUsername: string, profiles: PlatformResult[], replace = false): Observable<any> {
+    return this.api.post<any>('social/data', { profile_username: profileUsername, profiles, replace });
+  }
+
+  fetchStoredSocialProfiles(): Observable<SocialStoredProfile[]> {
+    return this.api.get<ApiEnvelope<SocialStoredProfile[]>>('social/data').pipe(map(res => Array.isArray(res?.result) ? res.result : []));
+  }
+
+  fetchStoredSocialProfile(profileUsername: string): Observable<SocialStoredProfile> {
+    return this.api.get<SocialStoredProfile>(`social/data/${encodeURIComponent(profileUsername)}`);
+  }
+
+  deleteStoredSocialProfiles(profileUsername: string): Observable<any> {
+    return this.api.delete<any>(`social/data/${encodeURIComponent(profileUsername)}`);
+  }
+
   fetchProfileInfo(platform: string, username: string): Observable<{
         profile: ProfileDetails;
     }> {
@@ -185,7 +202,11 @@ export class SocialScanService {
                 profile: ProfileDetails;
             }>>('social/profile', { platform, username }),
       isReady: (res) => !!res && 'result' in res,
-      mapResult: (res) => ({ profile: (res.result as any)?.profile ?? {} as ProfileDetails }),
+      mapResult: (res) => {
+        const result = res.result as any;
+        const profile = Array.isArray(result) ? result[0] : result?.profile ?? result ?? {};
+        return { profile: profile as ProfileDetails };
+      },
     }).pipe(retry(3));
   }
 
@@ -207,13 +228,33 @@ export class SocialScanService {
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<SocialPost[] | {
                 posts: SocialPost[];
-            }>>('social/posts', { platform, username }),
+            }>>('social/posts', { platform, username, max_posts: 5, social_data_type: 'posts' }),
       isReady: (res) => !!res && 'result' in res,
-      mapResult: (res) => {
-        const result = res.result;
-        const posts = Array.isArray(result) ? result : (result as any)?.posts;
-        return { posts: Array.isArray(posts) ? posts : [] };
-      },
+      mapResult: (res) => ({ posts: this.normalizeSocialPosts(res.result, 'posts') }),
+    }).pipe(retry(3));
+  }
+
+  fetchSocialVideos(platform: string, username: string): Observable<{
+        videos: SocialPost[];
+    }> {
+    return this.pollForResult({
+      request: () => this.api.post<ApiEnvelope<SocialPost[] | {
+                videos: SocialPost[];
+            }>>('social/videos', { platform, username, max_videos: 5, social_data_type: 'videos' }),
+      isReady: (res) => !!res && 'result' in res,
+      mapResult: (res) => ({ videos: this.normalizeSocialPosts(res.result, 'videos') }),
+    }).pipe(retry(3));
+  }
+
+  fetchSocialShorts(platform: string, username: string): Observable<{
+        shorts: SocialPost[];
+    }> {
+    return this.pollForResult({
+      request: () => this.api.post<ApiEnvelope<SocialPost[] | {
+                shorts: SocialPost[];
+            }>>('social/shorts', { platform, username, max_shorts: 5, social_data_type: 'shorts' }),
+      isReady: (res) => !!res && 'result' in res,
+      mapResult: (res) => ({ shorts: this.normalizeSocialPosts(res.result, 'shorts') }),
     }).pipe(retry(3));
   }
 
@@ -235,29 +276,6 @@ export class SocialScanService {
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ following: (res.result as any)?.following ?? [] }),
     }).pipe(retry(3));
-  }
-
-  fetchProfileBreachData(username?: string, email?: string): Observable<any> {
-    const payload = { text: { username: username || '', email: email || '' } };
-    return this.api.post<any>('dynamic/user', payload).pipe(expand((res) => this.shouldContinueDynamicPolling(res)
-      ? timer(2000).pipe(switchMap(() => this.api.post<any>('dynamic/user', payload)))
-      : EMPTY),
-    takeWhile((res) => this.shouldContinueDynamicPolling(res), true),
-    map((res) => {
-      if (!res || this.shouldContinueDynamicPolling(res)) {
-        return { cards_data: [] };
-      }
-      const normalized = (res && typeof res === 'object')
-        ? (res.data ?? res.result ?? res)
-        : res;
-      const cards = Array.isArray(normalized?.cards_data)
-        ? normalized.cards_data
-        : Array.isArray(normalized?.result)
-          ? normalized.result
-          : [];
-      return { cards_data: cards };
-    }),
-    catchError(() => throwError(() => new Error('Failed to fetch breach data'))));
   }
 
   fetchStealerLogsByIdentity(query: string): Observable<any[]> {
@@ -309,6 +327,17 @@ export class SocialScanService {
     return [];
   }
 
+  private normalizeSocialPosts(result: any, key: 'posts' | 'videos' | 'shorts'): SocialPost[] {
+    const items = Array.isArray(result)
+      ? result
+      : Array.isArray(result?.[key])
+        ? result[key]
+        : Array.isArray(result?.data)
+          ? result.data
+          : [];
+    return items.map((post: any) => SocialNormalizationUtil.normalizeSocialPost(post));
+  }
+
   fetchProfileMetadataTokens(tokens: string[], username: string, platform?: string): Observable<{
         query: string;
         total_found: number;
@@ -339,14 +368,4 @@ export class SocialScanService {
     }).pipe(retry(3));
   }
 
-  private shouldContinueDynamicPolling(res: any): boolean {
-    const topStatus = (res?.status || '').toLowerCase();
-    const nestedStatus = (res?.result?.status || '').toLowerCase();
-    const isPending = ['pending', 'processing', 'running', 'busy'].includes(topStatus) ||
-      ['pending', 'processing', 'running', 'busy'].includes(nestedStatus);
-    const isFailedPending = (topStatus === 'pending' || nestedStatus === 'pending') &&
-      ((res?.result?.progress ?? res?.progress) === 0) &&
-      ((res?.result?.step ?? res?.step) === 'failed');
-    return isPending && !isFailedPending;
-  }
 }

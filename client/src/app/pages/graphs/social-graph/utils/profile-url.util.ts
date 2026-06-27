@@ -1,5 +1,7 @@
+import { SocialNormalizationUtil } from './social-normalization.util';
+
 export function buildSocialProfileUrl(platformName: string, username: string, fallbackUrl: string = ''): string {
-  const normalizedUsername = normalizeUsername(username);
+  const normalizedUsername = SocialNormalizationUtil.normalizeProfilePathUsername(username);
   if (!normalizedUsername) {
     return fallbackUrl || '#';
   }
@@ -13,7 +15,7 @@ export function buildSocialProfileUrl(platformName: string, username: string, fa
       const parsed = new URL(fallbackUrl);
       const pathSegments = parsed.pathname.split('/').filter(Boolean);
       const hasUsernameInPath = pathSegments.some(segment => {
-        const normalizedSegment = normalizeUsername(segment);
+        const normalizedSegment = SocialNormalizationUtil.normalizeProfilePathUsername(segment);
         return normalizedSegment === normalizedUsername;
       });
       if (hasUsernameInPath) {
@@ -32,9 +34,7 @@ export function buildSocialProfileUrl(platformName: string, username: string, fa
   }
   return '#';
 }
-function normalizeUsername(value: string): string {
-  return (value || '').trim().replace(/^@+/, '').replace(/\/+$/, '');
-}
+
 function buildKnownPlatformUrl(platform: string, username: string): string {
   if (platform === 'twitter' || platform === 'x') {
     return `https://x.com/${username}`;

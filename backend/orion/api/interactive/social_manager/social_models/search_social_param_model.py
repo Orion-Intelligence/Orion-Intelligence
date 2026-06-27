@@ -1,4 +1,5 @@
-from typing import Optional, Dict, List, Annotated
+from typing import Annotated, Dict, List, Optional
+
 from pydantic import BaseModel, Field, StringConstraints, model_validator
 
 
@@ -24,10 +25,6 @@ class SocialReconRequest(BaseModel):
     query: str = Field(..., min_length=1)
 
 
-class SearchEngineMetaRequest(BaseModel):
-    username: str = Field(..., min_length=1)
-
-
 class PlatformUsernameRequest(BaseModel):
     platform: str = Field(..., min_length=1)
     username: str = Field(..., min_length=1)
@@ -43,11 +40,22 @@ class PlatformUsernameRequest(BaseModel):
 class SocialProfileRequest(PlatformUsernameRequest):
     platform: str = Field(..., min_length=1, examples=["tiktok"])
     username: str = Field(..., min_length=1, examples=["@msmannan00"])
+    social_data_type: Optional[str] = None
 
 
-class SocialPostRequest(PlatformUsernameRequest):
-    platform: str = Field(..., min_length=1, examples=["tiktok"])
-    username: str = Field(..., min_length=1, examples=["@msmannan00"])
+class SocialPostsRequest(PlatformUsernameRequest):
+    max_posts: int = Field(default=5, ge=1, le=100)
+    social_data_type: Optional[str] = None
+
+
+class SocialVideosRequest(PlatformUsernameRequest):
+    max_videos: int = Field(default=5, ge=1, le=100)
+    social_data_type: Optional[str] = None
+
+
+class SocialShortsRequest(PlatformUsernameRequest):
+    max_shorts: int = Field(default=5, ge=1, le=100)
+    social_data_type: Optional[str] = None
 
 
 class SocialFollowersRequest(PlatformUsernameRequest):

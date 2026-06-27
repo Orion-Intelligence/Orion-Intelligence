@@ -391,7 +391,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (!force && nextSignature === this.lastSavedSessionSignature) {
       return;
     }
-    this.api.post<any>(`social/session/upsert?graph_type=${this.graphType}`, payload).subscribe({
+    this.api.post<any>(`graph/session/upsert?graph_type=${this.graphType}`, payload).subscribe({
       next: () => {
         this.lastSavedSessionSignature = nextSignature;
       },
@@ -405,7 +405,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       this.addSession();
       return;
     }
-    this.api.get<any>(`social/session/tabs?graph_type=${this.graphType}`).subscribe({
+    this.api.get<any>(`graph/session/tabs?graph_type=${this.graphType}`).subscribe({
       next: (savedState) => {
         const savedTabs = Array.isArray(savedState?.tabs) ? savedState.tabs : [];
         if (savedTabs.length === 0) {

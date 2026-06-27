@@ -2,21 +2,14 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, output, si
 import { PlatformResult, SocialOnlinePresenceResult, SocialPost, SocialStealerLogRecord } from '../../../../shared/model/social/social-scan.models';
 import { formatFollowers, formatKey, isImageUrl, isUrl } from '../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
-import { SocialMapperStateService } from '../services/social-mapper-state.service';
-import { FetchingStateService } from '../services/fetching-state.service';
+import { SocialService } from '../services/social.service';
 import { getMetadataEntries, getProfileDetailEntries } from '../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
 import { StealerlogSectionComponent } from '../stealerlog-section/stealerlog-section.component';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
-
-interface FeedUser {
-  username: string;
-  platforms: PlatformResult[];
-}
-
-type FetchTabKey = 'details' | 'posts' | 'images' | 'connections' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs';
-type FetchTab = { key: FetchTabKey; label: string; icon: string; };
-type OnlinePresenceFetchRequest = { platformData: PlatformResult; token: string; };
+import type { FeedUser, FetchTab, FetchTabKey, OnlinePresenceFetchRequest, SocialPlatformCapabilityMap } from '../models/social-graph.models';
+import { SocialNormalizationUtil } from '../utils/social-normalization.util';
+import socialPlatformCapabilities from '../../../../../assets/data/social-graph/platform-capabilities.json';
 
 @Component({
   selector: 'app-list-view',
@@ -29,26 +22,28 @@ export class ListViewComponent {
   private readonly PRIORITY_PLATFORMS = ['instagram', 'youtube', 'facebook', 'behance', 'tiktok', 'twitter', 'vimeo', 'x'];
   private readonly stealerLogExportColumns = [ 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private readonly baseFetchTabs: FetchTab[] = [ { key: 'details', label: 'Details', icon: 'bi bi-person-badge' }, { key: 'posts', label: 'Posts', icon: 'bi bi-file-post' }, { key: 'images', label: 'Images', icon: 'bi bi-images' }, { key: 'connections', label: 'Connections', icon: 'bi bi-diagram-3' } ];
+  private readonly mappedFetchTabs: Partial<Record<FetchTabKey, FetchTab>> = { videos: { key: 'videos', label: 'Videos', icon: 'bi bi-play-btn' }, shorts: { key: 'shorts', label: 'Shorts', icon: 'bi bi-play-circle' } };
   private readonly followerFetchTabs: FetchTab[] = [ { key: 'followers', label: 'Followers', icon: 'bi bi-people' }, { key: 'following', label: 'Following', icon: 'bi bi-person-plus' } ];
   private readonly onlinePresenceTab: FetchTab = { key: 'onlinePresence', label: 'Online Presence', icon: 'bi bi-globe2' };
   private readonly stealerLogsTab: FetchTab = { key: 'stealerLogs', label: 'Stealer Logs', icon: 'bi bi-shield-exclamation' };
+  private readonly platformCapabilities = socialPlatformCapabilities as SocialPlatformCapabilityMap;
 
   scanResults = input.required<Map<string, PlatformResult[]>>();
   sidebarPlatformClicked = output<string>();
   fetchPostsInline = output<PlatformResult>();
+  fetchVideosInline = output<PlatformResult>();
+  fetchShortsInline = output<PlatformResult>();
   fetchImagesInline = output<PlatformResult>();
   fetchFollowersInline = output<PlatformResult>();
   fetchFollowingInline = output<PlatformResult>();
   fetchMetadataInline = output<PlatformResult>();
   fetchOnlinePresenceInline = output<OnlinePresenceFetchRequest>();
   fetchStealerLogsInline = output<PlatformResult>();
-  public state = inject(SocialMapperStateService);
-  public fetchingState = inject(FetchingStateService);
+  public state = inject(SocialService);
   activeTabs = signal<Record<string, FetchTabKey | null>>({});
   profileOverviewIds = signal<Set<string>>(new Set<string>());
   platformSearchTerm = signal('');
   onlinePresenceSearchTerms = signal<Record<string, string>>({});
-  public formatFollowers = formatFollowers;
   public formatKey = formatKey;
   public isUrl = isUrl;
   public isImageUrl = isImageUrl;
@@ -86,6 +81,9 @@ export class ListViewComponent {
   }
 
   openConnectionsOverview(platformId: string, platformData?: PlatformResult): void {
+    if (platformData && !this.isFetchTabAllowed(platformData, 'connections')) {
+      return;
+    }
     this.openProfileOverviewTab(platformId, 'connections', platformData);
   }
 
@@ -103,32 +101,26 @@ export class ListViewComponent {
 
   getFetchTabs(platformData: PlatformResult): FetchTab[] {
     const sharedTabs = [...this.baseFetchTabs, this.onlinePresenceTab, this.stealerLogsTab];
-    return this.isPriorityPlatform(platformData.platform)
+    const tabs = this.isPriorityPlatform(platformData.platform)
       ? [...this.baseFetchTabs, ...this.followerFetchTabs, this.onlinePresenceTab, this.stealerLogsTab]
       : sharedTabs;
+    const capability = this.platformCapabilities[platformData.platform.toLowerCase()];
+    for (const key of capability?.allow ?? []) {
+      const mappedTab = this.mappedFetchTabs[key as FetchTabKey];
+      if (mappedTab && !tabs.some(tab => tab.key === mappedTab.key)) {
+        tabs.splice(Math.max(tabs.findIndex(tab => tab.key === 'images'), 2), 0, mappedTab);
+      }
+    }
+    const disabledTabs = new Set(capability?.disallow ?? []);
+    return tabs.filter(tab => !disabledTabs.has(tab.key));
+  }
+
+  isFetchTabAllowed(platformData: PlatformResult, tabKey: FetchTabKey): boolean {
+    return this.getFetchTabs(platformData).some(tab => tab.key === tabKey);
   }
 
   isTabLoading(platformData: PlatformResult, tabKey: FetchTabKey): boolean {
-    const key = this.fetchingState.getPlatformUniqueKey(platformData);
-    switch (tabKey) {
-      case 'details':
-        return !!this.fetchingState.profile()[key];
-      case 'posts':
-      case 'connections':
-        return !!this.fetchingState.posts()[key];
-      case 'images':
-        return !!this.fetchingState.platformImages()[key];
-      case 'followers':
-        return !!this.fetchingState.followers()[key];
-      case 'following':
-        return !!this.fetchingState.following()[key];
-      case 'onlinePresence':
-        return !!this.fetchingState.onlinePresence()[key];
-      case 'stealerLogs':
-        return !!this.fetchingState.stealerLogs()[key];
-      default:
-        return false;
-    }
+    return this.state.isTabLoading(platformData, tabKey);
   }
 
   private fetchTabData(platformData: PlatformResult, tabKey: FetchTabKey): void {
@@ -144,6 +136,14 @@ export class ListViewComponent {
         this.fetchMetadataInline.emit(platformData);
         break;
       case 'posts':
+        this.fetchPostsInline.emit(platformData);
+        break;
+      case 'videos':
+        this.fetchVideosInline.emit(platformData);
+        break;
+      case 'shorts':
+        this.fetchShortsInline.emit(platformData);
+        break;
       case 'connections':
         this.fetchPostsInline.emit(platformData);
         break;
@@ -170,7 +170,11 @@ export class ListViewComponent {
       case 'details':
         return this.getProfileDetailEntries(platformData).length > 0;
       case 'posts':
-        return this.getUniquePosts(platformData).length > 0;
+        return this.getUniquePosts(platformData, 'posts').length > 0;
+      case 'videos':
+        return this.getUniquePosts(platformData, 'videos').length > 0;
+      case 'shorts':
+        return this.getUniquePosts(platformData, 'shorts').length > 0;
       case 'connections':
         return this.getPostConnections(platformData).length > 0;
       case 'images':
@@ -203,11 +207,6 @@ export class ListViewComponent {
     }
     const s = String(value).toLowerCase().trim();
     return s === 'true' || s === 'false';
-  }
-
-  formatNumericValue(value: any): string {
-    const n = typeof value === 'number' ? value : Number(String(value).replace(/,/g, ''));
-    return Number.isFinite(n) ? n.toLocaleString() : String(value);
   }
 
   formatMetadataValue(value: any): string {
@@ -262,7 +261,7 @@ export class ListViewComponent {
   }
 
   getPlatformStealerDomain(platformData: PlatformResult): string {
-    const fromUrl = this.normalizeDomain(platformData.url);
+    const fromUrl = SocialNormalizationUtil.normalizeDomain(platformData.url);
     if (fromUrl) {
       return fromUrl;
     }
@@ -282,15 +281,15 @@ export class ListViewComponent {
   }
 
   getStealerRecordHost(record: SocialStealerLogRecord): string {
-    return this.firstStealerValue(record?.['source_domain'], record?.['domain'], record?.['ip'], record?.['url'], record?.['host'], record?.['raw']) || '-';
+    return SocialNormalizationUtil.firstValue(record?.['source_domain'], record?.['domain'], record?.['ip'], record?.['url'], record?.['host'], record?.['raw']) || '-';
   }
 
   getStealerRecordIdentity(record: SocialStealerLogRecord): string {
-    return this.firstStealerValue(record?.['email'], record?.['username'], record?.['user'], record?.['login'], record?.['credential'], record?.['raw']) || '-';
+    return SocialNormalizationUtil.firstValue(record?.['email'], record?.['username'], record?.['user'], record?.['login'], record?.['credential'], record?.['raw']) || '-';
   }
 
   getStealerRecordDate(record: SocialStealerLogRecord): string {
-    return this.firstStealerValue(record?.['date'], record?.['timestamp'], record?.['created_at'], record?.['updated_at']) || '-';
+    return SocialNormalizationUtil.firstValue(record?.['date'], record?.['timestamp'], record?.['created_at'], record?.['updated_at']) || '-';
   }
 
   getStealerRecordTrackKey(index: number, record: SocialStealerLogRecord): string {
@@ -302,27 +301,27 @@ export class ListViewComponent {
       recordType: 'stealer',
       recordIndex: String(index + 1),
       searchQuery: `${platformData.username || platformData.keyUsername} ${this.getPlatformStealerDomain(platformData)}`.trim(),
-      email: this.toStealerExportValue(item?.['email']),
-      username: this.toStealerExportValue(item?.['username']),
-      domain: this.toStealerExportValue(item?.['domain']),
-      source: this.toStealerExportValue(item?.['channel'] || item?.['filename'] || item?.['file']),
-      hash: this.toStealerExportValue(item?.['m_hash']),
+      email: SocialNormalizationUtil.toExportValue(item?.['email']),
+      username: SocialNormalizationUtil.toExportValue(item?.['username']),
+      domain: SocialNormalizationUtil.toExportValue(item?.['domain']),
+      source: SocialNormalizationUtil.toExportValue(item?.['channel'] || item?.['filename'] || item?.['file']),
+      hash: SocialNormalizationUtil.toExportValue(item?.['m_hash']),
       title: '-',
       url: '-',
       rank: '-',
-      date: this.toStealerExportValue(item?.['date']),
+      date: SocialNormalizationUtil.toExportValue(item?.['date']),
       team: '-',
       summary: '-'
     }));
     const csvLines = [
       this.stealerLogExportColumns.join(','),
-      ...rows.map(row => this.stealerLogExportColumns.map(column => this.escapeCsvValue(row[column] ?? '-')).join(','))
+      ...rows.map(row => this.stealerLogExportColumns.map(column => SocialNormalizationUtil.escapeCsvValue(row[column] ?? '-')).join(','))
     ];
     const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `stealerlogs_${this.normalizeDownloadName(platformData.username || platformData.keyUsername)}_${this.normalizeDownloadName(this.getPlatformStealerDomain(platformData))}.csv`;
+    link.download = `stealerlogs_${SocialNormalizationUtil.normalizeDownloadName(platformData.username || platformData.keyUsername)}_${SocialNormalizationUtil.normalizeDownloadName(this.getPlatformStealerDomain(platformData))}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -358,7 +357,7 @@ export class ListViewComponent {
   }
 
   getPlatformCardId(platformData: PlatformResult): string {
-    return this.fetchingState.getPlatformUniqueKey(platformData);
+    return this.state.getPlatformUniqueKey(platformData);
   }
 
   getPlatformTrackKey(_index: number, platformData: PlatformResult): string {
@@ -381,16 +380,28 @@ export class ListViewComponent {
   }
 
   getProfileBio(platformData: PlatformResult): string {
+    const details = (platformData.profileDetails || {}) as any;
     return platformData.profileDetails?.bio
+      || details['m_content']
       || platformData.description
       || platformData.allMetadata?.['bio']
       || platformData.allMetadata?.['description']
+      || platformData.allMetadata?.['m_content']
       || '';
+  }
+
+  getProfileImageUrl(platformData: PlatformResult): string {
+    return this.getFirstMetadataValue(platformData, ['m_img_src', 'img_src', 'profile_image', 'profileImage', 'avatar', 'image']);
+  }
+
+  getCoverImageUrl(platformData: PlatformResult): string {
+    return this.getFirstMetadataValue(platformData, ['m_coverpage', 'coverpage', 'cover_image', 'coverImage', 'banner', 'banner_image']);
   }
 
   getPlatformTimestamp(platformData: PlatformResult): string {
     const metadata = platformData.allMetadata || {};
-    const timestamp = platformData.timestamp || metadata['timestamp'] || metadata['Timestamp'];
+    const details = (platformData.profileDetails || {}) as any;
+    const timestamp = platformData.timestamp || details['m_date'] || metadata['timestamp'] || metadata['Timestamp'] || metadata['m_date'];
     return timestamp ? String(timestamp) : '';
   }
 
@@ -412,8 +423,21 @@ export class ListViewComponent {
     return post?.media_type?.replace(/_/g, ' ') || 'Media';
   }
 
-  getUniquePosts(platformData: PlatformResult): SocialPost[] {
-    const posts = platformData.posts || [];
+  isPostContentTabActive(platformData: PlatformResult): boolean {
+    return this.isPostContentTab(this.getActiveTabForPlatform(platformData));
+  }
+
+  getActivePostContentTab(platformData: PlatformResult): 'posts' | 'videos' | 'shorts' {
+    const activeTab = this.getActiveTabForPlatform(platformData);
+    return this.isPostContentTab(activeTab) ? activeTab : 'posts';
+  }
+
+  getPostContentTabLabel(tabKey: 'posts' | 'videos' | 'shorts'): string {
+    return tabKey === 'videos' ? 'Videos' : tabKey === 'shorts' ? 'Shorts' : 'Posts';
+  }
+
+  getUniquePosts(platformData: PlatformResult, tabKey: 'posts' | 'videos' | 'shorts' = 'posts'): SocialPost[] {
+    const posts = this.getPostContentItems(platformData, tabKey);
     const seen = new Set<string>();
     return posts.filter(post => {
       if (!post) {
@@ -428,6 +452,20 @@ export class ListViewComponent {
     });
   }
 
+  private isPostContentTab(tabKey: FetchTabKey): tabKey is 'posts' | 'videos' | 'shorts' {
+    return tabKey === 'posts' || tabKey === 'videos' || tabKey === 'shorts';
+  }
+
+  private getPostContentItems(platformData: PlatformResult, tabKey: 'posts' | 'videos' | 'shorts'): SocialPost[] {
+    if (tabKey === 'videos') {
+      return platformData.videos || [];
+    }
+    if (tabKey === 'shorts') {
+      return platformData.shorts || [];
+    }
+    return platformData.posts || [];
+  }
+
   formatPostMetric(value: string | number | null | undefined): string {
     if (value === null || value === undefined || value === '') {
       return '0';
@@ -439,7 +477,7 @@ export class ListViewComponent {
   getStatValue(platformData: PlatformResult, key: keyof NonNullable<PlatformResult['profileDetails']>): string {
     const profileValue = platformData.profileDetails?.[key];
     const metadataValue = platformData.allMetadata?.[key as string];
-    const rawValue = profileValue ?? metadataValue;
+    const rawValue = profileValue ?? metadataValue ?? this.getFallbackStatValue(platformData, key);
     if (rawValue === null || rawValue === undefined || rawValue === '') {
       return '--';
     }
@@ -458,6 +496,36 @@ export class ListViewComponent {
   getFilteredMetadataEntries(platformData: PlatformResult): { key: string; value: any; }[] {
     return this.getPlatformMetadataEntries(platformData)
       .filter(entry => entry.key.toLowerCase().replace(/[\s_-]+/g, '') !== 'timestamp');
+  }
+
+  private getFallbackStatValue(platformData: PlatformResult, key: keyof NonNullable<PlatformResult['profileDetails']>): string | number | null {
+    const metadata = platformData.allMetadata || {};
+    switch (key) {
+      case 'total_posts':
+        return this.firstStatValue(metadata['totalPosts'], metadata['posts_count'], metadata['m_post_count'], this.getPostCollectionCount(platformData));
+      case 'total_followers':
+        return this.firstStatValue(platformData.followers, metadata['followers'], metadata['followers_count'], metadata['m_followers'], this.extractSocialCount(metadata['m_group_info']));
+      case 'total_following':
+        return this.firstStatValue(metadata['following'], metadata['following_count'], metadata['m_following'], platformData.following_list?.length);
+      case 'total_likes':
+        return this.firstStatValue(metadata['totalLikes'], metadata['likes'], metadata['m_likes'], metadata['m_post_likes']);
+      default:
+        return null;
+    }
+  }
+
+  private firstStatValue(...values: Array<string | number | null | undefined>): string | number | null {
+    return values.find(value => value !== null && value !== undefined && value !== '') ?? null;
+  }
+
+  private getPostCollectionCount(platformData: PlatformResult): number | null {
+    const items = [...(platformData.posts || []), ...(platformData.videos || []), ...(platformData.shorts || [])];
+    return items.length ? new Set(items.map(item => item.post_url || JSON.stringify(item))).size : null;
+  }
+
+  private extractSocialCount(value: unknown): string | null {
+    const text = typeof value === 'string' ? value : '';
+    return text.match(/([\d,.]+[kmb]?)(?=\s*(subscribers|followers))/i)?.[1] ?? null;
   }
 
   trackByKey(_index: number, item: { key: string }): string {
@@ -525,66 +593,40 @@ export class ListViewComponent {
     return selectedPlatforms.length > 0 ? selectedPlatforms : [...platforms];
   }
 
-  private getAllowedTabKey(platformData: PlatformResult, tabKey: FetchTabKey): FetchTabKey {
-    return this.getFetchTabs(platformData).some(tab => tab.key === tabKey) ? tabKey : 'details';
-  }
-
-  private firstStealerValue(...values: any[]): string {
-    for (const value of values) {
-      const normalized = this.normalizeStealerValue(value);
-      if (normalized) {
-        return normalized;
+  private getFirstMetadataValue(platformData: PlatformResult, keys: string[]): string {
+    const sources = [platformData.profileDetails, platformData.allMetadata];
+    for (const source of sources) {
+      const value = this.getFirstValueFromSource(source, keys);
+      if (value) {
+        return value;
       }
     }
     return '';
   }
 
-  private normalizeStealerValue(value: any): string {
-    if (Array.isArray(value)) {
-      return this.normalizeStealerValue(value[0]);
-    }
-    if (value === null || value === undefined || value === '') {
+  private getFirstValueFromSource(source: any, keys: string[]): string {
+    if (!source) {
       return '';
     }
-    return String(value);
-  }
-
-  private toStealerExportValue(value: unknown, maxLength = 120): string {
-    if (Array.isArray(value)) {
-      return this.toStealerExportValue(value.join(', '), maxLength);
-    }
-    if (value === null || value === undefined || value === '') {
-      return '-';
-    }
-    const text = String(value).replace(/\s+/g, ' ').trim();
-    if (!text) {
-      return '-';
-    }
-    return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
-  }
-
-  private escapeCsvValue(value: string | number): string {
-    const text = String(value ?? '');
-    return `"${text.replace(/"/g, '""')}"`;
-  }
-
-  private normalizeDownloadName(value: string): string {
-    return (value || 'profile').replace(/^@+/, '').replace(/[^a-z0-9.-]+/gi, '_') || 'profile';
-  }
-
-  private normalizeDomain(value: string): string {
-    const raw = (value || '').trim().toLowerCase();
-    if (!raw) {
+    if (Array.isArray(source)) {
+      for (const item of source) {
+        const value = this.getFirstValueFromSource(item, keys);
+        if (value) {
+          return value;
+        }
+      }
       return '';
     }
-    const candidate = raw.includes('://') ? raw : `https://${raw}`;
-    try {
-      const host = new URL(candidate).hostname.replace(/^(www|m)\./, '');
-      return host === 'x.com' ? 'twitter.com' : host;
+    for (const key of keys) {
+      const value = source[key];
+      if (typeof value === 'string' && value.trim()) {
+        return value.trim();
+      }
     }
-    catch {
-      const host = raw.replace(/^https?:\/\//, '').split(/[/?#]/)[0].replace(/^(www|m)\./, '');
-      return host === 'x.com' ? 'twitter.com' : host;
-    }
+    return this.getFirstValueFromSource(source.result || source.profile || source.data, keys);
+  }
+
+  private getAllowedTabKey(platformData: PlatformResult, tabKey: FetchTabKey): FetchTabKey {
+    return this.getFetchTabs(platformData).some(tab => tab.key === tabKey) ? tabKey : 'details';
   }
 }

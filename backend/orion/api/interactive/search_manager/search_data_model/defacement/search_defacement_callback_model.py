@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from orion.api.interactive.graph_manager.graph_models.search_social_callback_model import suggestion
+from orion.api.interactive.social_manager.social_models.search_social_callback_model import suggestion
 
 
 class result_item(BaseModel):

@@ -13,6 +13,7 @@ from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_case_model import db_case_model
 from orion.services.mongo_manager.shared_model.db_chat_session_model import db_chat_session_model
 from orion.services.mongo_manager.shared_model.db_scan_job_model import db_scan_job_model
+from orion.services.mongo_manager.shared_model.db_social_model import db_social_model
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
@@ -72,6 +73,7 @@ class mongo_controller:
         await self.__engine.get_collection(db_chat_session_model).create_index("user_id", unique=True)
         await self.__engine.get_collection(db_document_feedback_model).create_index("doc_id", unique=True)
         await self.__engine.get_collection(db_scan_job_model).create_index([("user_uuid", 1), ("created_at", -1)])
+        await self.__engine.get_collection(db_social_model).create_index([("user_id", 1), ("profile_username", 1), ("updated_at", -1)])
         feeder_collection = self.__engine.get_collection(db_feeder_script_model)
         try:
             await feeder_collection.drop_index("name_1")

@@ -1,7 +1,6 @@
 <div data-testid="social-graph-root" class="ui-social-root-bg flex h-[100dvh] min-h-0 w-screen flex-col overflow-hidden text-[var(--color-text2)]">
   @if (isTailwindReady()) {
-    @if (tabManager.activeTab()) {
-      <main class="relative min-h-0 flex-grow">
+    <main class="relative min-h-0 flex-grow">
         <input data-testid="social-image-file-input" type="file" #imageInput class="hidden" (change)="onImageSelected($event)" accept="image/png, image/jpeg, image/webp, image/gif">
         <div class="flex h-full min-h-0 w-full flex-col overflow-hidden">
           <div class="relative flex min-h-0 flex-grow flex-row">
@@ -17,9 +16,7 @@
               (searchChanged)="onHomeMenuSearchChanged($event)"
               (jobClicked)="handleCompletedJobClick($event)"
               (cancelScan)="cancelScan($event)"
-              (cancelAllFetches)="cancelAllFetchesForUser($event)"
-              (scanRequested)="triggerScan()"
-              (imageUploadRequested)="triggerImageUpload()">
+              (cancelAllFetches)="cancelAllFetchesForUser($event)">
             </app-home-menu>
 
             @if (!(isSmallScreen() && isMobileHomeMenuOpen())) {
@@ -63,6 +60,8 @@
                   [scanResults]="scanResults()"
                   (sidebarPlatformClicked)="onSidebarPlatformClicked($event)"
                   (fetchPostsInline)="handleFetchSocialPosts($event)"
+                  (fetchVideosInline)="handleFetchSocialVideos($event)"
+                  (fetchShortsInline)="handleFetchSocialShorts($event)"
                   (fetchImagesInline)="handleFetchImagesForPlatform($event)"
                   (fetchFollowersInline)="handleFetchFollowers($event)"
                   (fetchFollowingInline)="handleFetchFollowing($event)"
@@ -79,13 +78,7 @@
             <app-notification-bar [data]="state.notification()"></app-notification-bar>
           }
         </div>
-      </main>
-    } @else {
-      <app-graph-loading
-        [title]="'Restoring Social Session'"
-        [subtitle]="'Loading saved scan state.'">
-      </app-graph-loading>
-    }
+    </main>
 
     @if (state.deleteConfirmationData(); as data) {
       <app-confirmation-popup [message]="data.message" (confirmed)="onDeleteConfirmation($event)"></app-confirmation-popup>

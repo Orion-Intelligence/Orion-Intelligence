@@ -1,0 +1,360 @@
+import { Injectable, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable, Subject, of } from 'rxjs';
+import { map, takeUntil, tap } from 'rxjs/operators';
+import { Job, PlatformResult, ScanEvent } from '../../../../shared/model/social/social-scan.models';
+import { SocialScanService } from '../../shared/services/social-scan.service';
+import type { FetchStateKey, FetchTabKey, NotificationType, ScanJobOptions, UpdateStateFn } from '../models/social-graph.models';
+import { SocialNormalizationUtil } from '../utils/social-normalization.util';
+import { SocialStateService } from './social-state.service';
+
+@Injectable({ providedIn: 'root' })
+export class SocialService {
+  private readonly scanService = inject(SocialScanService);
+  private readonly stateStore = inject(SocialStateService);
+
+  readonly graphState = this.stateStore.graphState;
+  readonly notification = this.stateStore.notification;
+  readonly deleteConfirmationData = this.stateStore.deleteConfirmationData;
+  readonly deleteUsername = this.stateStore.deleteUsername;
+  readonly manageProfilesModalData = this.stateStore.manageProfilesModalData;
+  readonly activeUsername = this.stateStore.activeUsername;
+  readonly highlightedNodeId = this.stateStore.highlightedNodeId;
+
+  setActiveUserIndex(index: number): void {
+    this.stateStore.setActiveUserIndex(index);
+  }
+
+  isActiveUser(username: string): boolean {
+    return this.stateStore.isActiveUser(username);
+  }
+
+  isUserBusy(username: string): boolean {
+    return this.stateStore.isUserBusy(username);
+  }
+
+  isTabLoading(platformData: PlatformResult, tabKey: FetchTabKey): boolean {
+    return this.stateStore.isTabLoading(platformData, tabKey);
+  }
+
+  getPlatformUniqueKey(platformData: PlatformResult): string {
+    return this.stateStore.getPlatformUniqueKey(platformData);
+  }
+
+  openDeleteConfirmation(username: string): void {
+    this.stateStore.openDeleteConfirmation(username);
+  }
+
+  closeDeleteConfirmation(): void {
+    this.stateStore.closeDeleteConfirmation();
+  }
+
+  openManageProfilesModal(username: string): void {
+    this.stateStore.openManageProfilesModal(username);
+  }
+
+  closeManageProfilesModal(): void {
+    this.stateStore.closeManageProfilesModal();
+  }
+
+  showNotification(type: NotificationType): void {
+    this.stateStore.showNotification(type);
+  }
+
+  loadStoredSocialProfiles(): Observable<void> {
+    return this.scanService.fetchStoredSocialProfiles().pipe(tap(documents => this.stateStore.applyStoredSocialProfiles(documents)), map(() => undefined));
+  }
+
+  loadStoredSocialProfile(profileUsername: string): Observable<PlatformResult[]> {
+    const normalizedUsername = SocialNormalizationUtil.normalizeUsername(profileUsername);
+    const cachedProfiles = this.stateStore.getStoredProfiles(normalizedUsername);
+    if (cachedProfiles) {
+      this.stateStore.setProfilesForUsername(normalizedUsername, cachedProfiles);
+      return of(cachedProfiles);
+    }
+    return this.scanService.fetchStoredSocialProfile(normalizedUsername).pipe(map(document => {
+      const normalizedDocument = SocialNormalizationUtil.normalizeStoredDocument(document);
+      return SocialNormalizationUtil.normalizeStoredProfiles(normalizedDocument);
+    }), tap(profiles => {
+      this.stateStore.setStoredProfiles(normalizedUsername, profiles);
+      this.stateStore.setProfilesForUsername(normalizedUsername, profiles);
+    }));
+  }
+
+  saveSocialProfiles(profileUsername: string, profiles: PlatformResult[], replace = false): Observable<any> {
+    const normalizedUsername = SocialNormalizationUtil.normalizeUsername(profileUsername);
+    return this.scanService.saveSocialProfiles(normalizedUsername, profiles, replace).pipe(tap(() => {
+      this.stateStore.cacheCurrentProfiles(normalizedUsername, profiles);
+    }));
+  }
+
+  deleteStoredSocialProfiles(profileUsername: string): Observable<any> {
+    const normalizedUsername = SocialNormalizationUtil.normalizeUsername(profileUsername);
+    return this.scanService.deleteStoredSocialProfiles(normalizedUsername).pipe(tap(() => {
+      this.stateStore.deleteStoredProfiles(normalizedUsername);
+    }));
+  }
+
+  fetchProfileInfo(platform: string, username: string): ReturnType<SocialScanService['fetchProfileInfo']> {
+    return this.scanService.fetchProfileInfo(platform, username);
+  }
+
+  fetchPlatformImages(platform: string, username: string): ReturnType<SocialScanService['fetchPlatformImages']> {
+    return this.scanService.fetchPlatformImages(platform, username);
+  }
+
+  fetchSocialPosts(platform: string, username: string): ReturnType<SocialScanService['fetchSocialPosts']> {
+    return this.scanService.fetchSocialPosts(platform, username);
+  }
+
+  fetchSocialVideos(platform: string, username: string): ReturnType<SocialScanService['fetchSocialVideos']> {
+    return this.scanService.fetchSocialVideos(platform, username);
+  }
+
+  fetchSocialShorts(platform: string, username: string): ReturnType<SocialScanService['fetchSocialShorts']> {
+    return this.scanService.fetchSocialShorts(platform, username);
+  }
+
+  fetchFollowers(platform: string, username: string): ReturnType<SocialScanService['fetchFollowers']> {
+    return this.scanService.fetchFollowers(platform, username);
+  }
+
+  fetchFollowing(platform: string, username: string): ReturnType<SocialScanService['fetchFollowing']> {
+    return this.scanService.fetchFollowing(platform, username);
+  }
+
+  fetchPlatformStealerLogs(username: string, domain: string): ReturnType<SocialScanService['fetchPlatformStealerLogs']> {
+    return this.scanService.fetchPlatformStealerLogs(username, domain);
+  }
+
+  fetchStealerLogsByIdentity(query: string): ReturnType<SocialScanService['fetchStealerLogsByIdentity']> {
+    return this.scanService.fetchStealerLogsByIdentity(query);
+  }
+
+  fetchProfileMetadataTokens(tokens: string[], username: string, platform?: string): ReturnType<SocialScanService['fetchProfileMetadataTokens']> {
+    return this.scanService.fetchProfileMetadataTokens(tokens, username, platform);
+  }
+
+  initiateScan(username: string, opts: ScanJobOptions): void {
+    const normalizedUsername = SocialNormalizationUtil.normalizeUsername(username);
+    if (opts.jobs().some(job => SocialNormalizationUtil.normalizeUsername(job.username) === normalizedUsername && (job.status === 'in_progress' || job.status === 'queued'))) {
+      this.showNotification('scanning');
+      return;
+    }
+    const shouldQueue = this.hasRunningJob(opts.jobs());
+    const newJob: Job = {
+      id: self.crypto.randomUUID(),
+      username,
+      status: shouldQueue ? 'queued' : 'in_progress',
+      progress: shouldQueue ? 0 : 5,
+      step: shouldQueue ? 'Queued' : 'Starting'
+    };
+    opts.updateState(state => state.jobs.update(currentJobs => [newJob, ...currentJobs.filter(job => SocialNormalizationUtil.normalizeUsername(job.username) !== normalizedUsername)]));
+    if (!shouldQueue) {
+      this.runScan(newJob, this.scanService.performScan(newJob.username), opts);
+    }
+  }
+
+  initiateImageScan(base64Image: string, fileName: string, opts: ScanJobOptions): void {
+    const displayName = `Image Scan: ${fileName}`;
+    const jobName = `${displayName} #${self.crypto.randomUUID().substring(0, 4)}`;
+    const newJob: Job = { id: self.crypto.randomUUID(), username: jobName, displayName, status: 'in_progress', progress: 5, step: `Scanning ${fileName}` };
+    opts.updateState(state => state.jobs.update(currentJobs => [newJob, ...currentJobs]));
+    this.runScan(newJob, this.scanService.performImageScan(base64Image), opts);
+  }
+
+  cancelScan(jobId: string, opts: ScanJobOptions): void {
+    const cancelledJob = opts.jobs().find(job => job.id === jobId);
+    opts.cancelScanSubjects.get(jobId)?.next();
+    opts.cancelScanSubjects.delete(jobId);
+    opts.updateState(state => state.jobs.update(currentJobs => currentJobs.filter(job => job.id !== jobId)));
+    if (cancelledJob?.status === 'in_progress') {
+      this.startNextQueuedScan(opts);
+    }
+  }
+
+  resumeIncompleteScans(jobs: () => Job[], opts: Omit<ScanJobOptions, 'jobs'>): void {
+    const inProgressJobs = jobs().filter(job => job.status === 'in_progress');
+    if (inProgressJobs.length > 1) {
+      const [activeJob, ...queuedJobs] = inProgressJobs;
+      opts.updateState(tabState => tabState.jobs.update(currentJobs => currentJobs.map(job => {
+        if (job.id === activeJob.id) {
+          return job;
+        }
+        if (queuedJobs.some(queuedJob => queuedJob.id === job.id)) {
+          return { ...job, status: 'queued', progress: 0, step: 'Queued' };
+        }
+        return job;
+      })));
+    }
+    const nextOpts = { jobs, ...opts };
+    const activeJob = jobs().find(job => job.status === 'in_progress');
+    if (activeJob && !opts.cancelScanSubjects.has(activeJob.id)) {
+      this.runScan(activeJob, this.scanService.performScan(activeJob.username), nextOpts);
+      return;
+    }
+    this.startNextQueuedScan(nextOpts);
+  }
+
+  fetchPlatformData(opts: { platformResult: PlatformResult; stateKey: FetchStateKey; request$: Observable<any>; cancelMap: Map<string, Subject<void>>; destroyRef: ScanJobOptions['destroyRef']; updateState: UpdateStateFn; }): void {
+    const { platformResult, stateKey, request$, cancelMap, destroyRef, updateState } = opts;
+    const key = this.stateStore.getPlatformUniqueKey(platformResult);
+    if (this.stateStore.isUserBusy(platformResult.keyUsername)) {
+      this.showNotification('busy');
+      return;
+    }
+    if (cancelMap.has(key)) {
+      return;
+    }
+    this.stateStore.setFetching(stateKey, key, true);
+    const cancel$ = new Subject<void>();
+    cancelMap.set(key, cancel$);
+    request$.pipe(takeUntil(cancel$), takeUntilDestroyed(destroyRef))
+      .subscribe({
+        next: (response: any) => {
+          const propertyMap = { profile: 'profileDetails', posts: 'posts', videos: 'videos', shorts: 'shorts', platformImages: 'images', followers: 'followers_list', following: 'following_list', onlinePresence: 'onlinePresence', stealerLogs: 'stealerLogs' };
+          const dataKey = Object.keys(response)[0];
+          const data = response[dataKey];
+          const hasData = data && (Array.isArray(data) ? data.length > 0 : Object.keys(data).length > 0);
+          const newData: Partial<PlatformResult> = { [(propertyMap as any)[stateKey]]: hasData ? data : null } as Partial<PlatformResult>;
+          if (stateKey === 'posts') {
+            newData.post_connections = hasData ? this.extractConnections(data) : null;
+          }
+          let updatedProfiles: PlatformResult[] | null = null;
+          updateState(tabState => {
+            tabState.scanResults.update(currentMap => {
+              const newMap = new Map(currentMap);
+              const userResults = newMap.get(platformResult.keyUsername)?.map(platform => this.isSamePlatformIdentity(platform, platformResult) ? { ...platform, ...newData } : platform);
+              if (userResults) {
+                newMap.set(platformResult.keyUsername, userResults);
+                updatedProfiles = userResults;
+              }
+              return newMap;
+            });
+          });
+          if (updatedProfiles) {
+            this.saveSocialProfiles(platformResult.keyUsername, updatedProfiles, true).pipe(takeUntilDestroyed(destroyRef)).subscribe();
+          }
+        },
+        complete: () => {
+          this.stateStore.setFetching(stateKey, key, false);
+          cancelMap.delete(key);
+        }
+      });
+  }
+
+  cancelPlatformFetch(platformData: PlatformResult, stateKey: FetchStateKey, cancelMap: Map<string, Subject<void>>): void {
+    const key = this.stateStore.getPlatformUniqueKey(platformData);
+    cancelMap.get(key)?.next();
+    this.stateStore.setFetching(stateKey, key, false);
+  }
+
+  cancelAllPlatformFetchesForUser(username: string, scanResults: Map<string, PlatformResult[]>, cancelHandlers: { profile: (platformData: PlatformResult) => void; posts: (platformData: PlatformResult) => void; videos: (platformData: PlatformResult) => void; shorts: (platformData: PlatformResult) => void; images: (platformData: PlatformResult) => void; followers: (platformData: PlatformResult) => void; following: (platformData: PlatformResult) => void; onlinePresence: (platformData: PlatformResult) => void; stealerLogs: (platformData: PlatformResult) => void; }): void {
+    scanResults.get(username)?.forEach(platformData => {
+      cancelHandlers.profile(platformData);
+      cancelHandlers.posts(platformData);
+      cancelHandlers.videos(platformData);
+      cancelHandlers.shorts(platformData);
+      cancelHandlers.images(platformData);
+      cancelHandlers.followers(platformData);
+      cancelHandlers.following(platformData);
+      cancelHandlers.onlinePresence(platformData);
+      cancelHandlers.stealerLogs(platformData);
+    });
+  }
+
+  private hasRunningJob(jobs: Job[]): boolean {
+    return jobs.some(job => job.status === 'in_progress');
+  }
+
+  private getQueuedJob(jobs: Job[]): Job | undefined {
+    return jobs.find(job => job.status === 'queued');
+  }
+
+  private startNextQueuedScan(opts: ScanJobOptions): void {
+    if (this.hasRunningJob(opts.jobs())) {
+      return;
+    }
+    const nextJob = this.getQueuedJob(opts.jobs());
+    if (!nextJob) {
+      return;
+    }
+    opts.updateState(tabState => tabState.jobs.update(jobs => jobs.map(job => (
+      job.id === nextJob.id
+        ? { ...job, status: 'in_progress', progress: Math.max(job.progress, 5), step: 'Starting' }
+        : job
+    ))));
+    this.runScan(nextJob, this.scanService.performScan(nextJob.username), opts);
+  }
+
+  private getScanObserver(job: Job, opts: ScanJobOptions) {
+    return {
+      next: (event: ScanEvent) => {
+        if (event.type === 'progress') {
+          opts.updateState(tabState => tabState.jobs.update(jobs => jobs.map(currentJob => currentJob.id === job.id ? { ...currentJob, ...event.payload } : currentJob)));
+          return;
+        }
+        if (event.type === 'complete') {
+          const incomingPlatforms = event.payload.map(platform => ({ ...platform, keyUsername: job.username }));
+          opts.updateState(tabState => {
+            tabState.scanResults.update(currentMap => {
+              const existing = currentMap.get(job.username) ?? [];
+              return new Map(currentMap).set(job.username, [...existing, ...incomingPlatforms]);
+            });
+            tabState.activeUsername.set(job.username);
+            tabState.jobs.update(jobs => jobs.map(currentJob => currentJob.id === job.id ? { ...currentJob, status: 'completed', progress: 100, step: 'Completed' } : currentJob));
+          });
+          opts.persistProfiles?.(job.username, incomingPlatforms);
+          this.startNextQueuedScan(opts);
+        }
+      },
+      error: () => {
+        opts.updateState(tabState => tabState.jobs.update(jobs => jobs.map(currentJob => currentJob.id === job.id ? { ...currentJob, status: 'failed', step: 'Scan failed' } : currentJob)));
+        opts.cancelScanSubjects.delete(job.id);
+        this.startNextQueuedScan(opts);
+      },
+      complete: () => opts.cancelScanSubjects.delete(job.id)
+    };
+  }
+
+  private runScan(job: Job, scan$: ReturnType<SocialScanService['performScan']>, opts: ScanJobOptions): void {
+    const cancel$ = new Subject<void>();
+    opts.cancelScanSubjects.set(job.id, cancel$);
+    scan$
+      .pipe(takeUntil(cancel$), takeUntilDestroyed(opts.destroyRef))
+      .subscribe(this.getScanObserver(job, opts));
+  }
+
+  private getPlatformIdentityKey(platform: PlatformResult): string {
+    return `${platform.keyUsername}|${platform.platform.toLowerCase()}|${platform.username.toLowerCase()}`;
+  }
+
+  private isSamePlatformIdentity(left: PlatformResult, right: PlatformResult): boolean {
+    return this.getPlatformIdentityKey(left) === this.getPlatformIdentityKey(right);
+  }
+
+  private extractConnections(posts: any): string[] | null {
+    if (!Array.isArray(posts)) {
+      return null;
+    }
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const post of posts) {
+      const connections = Array.isArray(post?.connections) ? post.connections : [];
+      for (const connection of connections) {
+        const trimmed = String(connection || '').trim();
+        if (!trimmed) {
+          continue;
+        }
+        const normalized = SocialNormalizationUtil.normalizeIdentity(trimmed);
+        const key = normalized.toLowerCase();
+        if (seen.has(key)) {
+          continue;
+        }
+        seen.add(key);
+        result.push(normalized);
+      }
+    }
+    return result;
+  }
+}

@@ -1,8 +1,7 @@
 import { Component, ChangeDetectionStrategy, input, output, computed, signal, inject, effect, OnDestroy } from '@angular/core';
 
 import { Job } from '../../../../shared/model/social/social-scan.models';
-import { FetchingStateService } from '../services/fetching-state.service';
-import { SocialMapperStateService } from '../services/social-mapper-state.service';
+import { SocialService } from '../services/social.service';
 import { SidebarShellComponent } from '../../shared/sidebar-shell/sidebar-shell.component';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 @Component({
@@ -13,11 +12,9 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeMenuComponent implements OnDestroy {
-  private fetchingState = inject(FetchingStateService);
   private animationFrameId: number | null = null;
 
   isCollapsed = input.required<boolean>();
-  activeTab = signal<'history'>('history');
   searchTerm = input.required<string>();
   jobs = input.required<Job[]>();
   resultUsernames = input.required<Set<string>>();
@@ -25,12 +22,10 @@ export class HomeMenuComponent implements OnDestroy {
   toggle = output<undefined>();
   historyTabClicked = output<undefined>();
   searchChanged = output<string>();
-  scanRequested = output<undefined>();
-  imageUploadRequested = output<undefined>();
   jobClicked = output<Job>();
   cancelScan = output<string>();
   cancelAllFetches = output<string>();
-  public state = inject(SocialMapperStateService);
+  public state = inject(SocialService);
   visibleJobsCount = signal(10);
   animatedProgressByJobId = signal<Record<string, number>>({});
   jobsWithFilter = computed(() => {
@@ -62,11 +57,6 @@ export class HomeMenuComponent implements OnDestroy {
 
   loadMoreJobs() {
     this.visibleJobsCount.update(c => c + 10);
-  }
-
-  onSearchInput(event: Event) {
-    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
-    this.searchChanged.emit(nextValue);
   }
 
   getJobClasses(job: Job): string {
@@ -102,7 +92,7 @@ export class HomeMenuComponent implements OnDestroy {
   }
 
   isUserBusy(username: string): boolean {
-    return this.fetchingState.isUserBusy(username);
+    return this.state.isUserBusy(username);
   }
 
   hasResults(username: string): boolean {

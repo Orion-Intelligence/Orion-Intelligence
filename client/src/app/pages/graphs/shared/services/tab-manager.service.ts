@@ -1,14 +1,26 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { Job, PlatformResult, TabState, SerializableTabState, Tab } from '../../../../shared/model/social/social-scan.models';
+import { Job, PlatformResult, SocialGraphState } from '../../../../shared/model/social/social-scan.models';
 import { ApiService } from '../../../../shared/services/api.service';
 import { ReportExportService } from '../../../../shared/services/report-export.service';
 import { GraphReportExportType, GraphReportPayload, GraphReportTableRow } from '../../../../shared/model/report/report-export.model';
+
+type TabState = SocialGraphState;
+type SerializableTabState = {
+  [K in keyof TabState]: ReturnType<TabState[K]>;
+};
+
+interface Tab {
+  id: string;
+  name: string;
+  state: TabState;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class TabManagerService {
   private readonly maxTabsAllowed = 5;
-  private readonly sessionType = 'social';
+  private readonly sessionType = 'graph';
   private readonly saveDebounceMs = 300;
   private static tabCounter = 1;
   private hasLoadedState = false;
@@ -192,7 +204,7 @@ export class TabManagerService {
       return;
     }
     this.isSaveInFlight = true;
-    this.api.post<any>(`social/session/upsert?graph_type=${this.sessionType}`, serializableState).subscribe({
+    this.api.post<any>(`graph/session/upsert?graph_type=${this.sessionType}`, serializableState).subscribe({
       next: () => {
         this.lastSavedSignature = nextSignature;
         this.hasPendingSave = false;
@@ -224,7 +236,7 @@ export class TabManagerService {
       name: tab.name,
       state: this.serializeTabState(tab.state),
     };
-    this.api.post<any>(`social/session/tab/add?graph_type=${this.sessionType}`, tabPayload).subscribe();
+    this.api.post<any>(`graph/session/tab/add?graph_type=${this.sessionType}`, tabPayload).subscribe();
   }
 
   private loadState() {
@@ -242,7 +254,7 @@ export class TabManagerService {
       }
       return;
     }
-    this.api.get<any>(`social/session/tabs?graph_type=${this.sessionType}`).subscribe({
+    this.api.get<any>(`graph/session/tabs?graph_type=${this.sessionType}`).subscribe({
       next: (savedState) => {
         const savedTabs = Array.isArray(savedState?.tabs) ? savedState.tabs : [];
         if (savedTabs.length === 0) {

@@ -1,4 +1,3 @@
-import httpx
 from datetime import datetime, UTC
 from fastapi.responses import JSONResponse
 from orion.services.mongo_manager.mongo_controller import mongo_controller
@@ -16,39 +15,6 @@ class graphs_model:
 
     def __init__(self):
         self._engine = mongo_controller.get_instance().get_engine()
-
-    async def social_search(self, model, key: str):
-        try:
-            async with httpx.AsyncClient() as client:
-                if isinstance(model, dict) and "file_bytes" in model:
-                    response = await client.post(
-                        "http://trusted-social-api:8020/social/" + key,
-                        files={
-                            "file": (
-                                model.get("filename", "file"),
-                                model["file_bytes"],
-                                "application/octet-stream",
-                            )
-                        },
-                        timeout=120,
-                    )
-                else:
-                    response = await client.post(
-                        "http://trusted-social-api:8020/social/" + key,
-                        json=model.model_dump(),
-                        timeout=120,
-                    )
-
-                if response.status_code != 200:
-                    return JSONResponse(
-                        status_code=response.status_code,
-                        content={"detail": "Social service request failed"},
-                    )
-
-                return response.json()
-
-        except Exception:
-            return JSONResponse(status_code=500, content={"detail": "Failed to process social search"})
 
     async def get_tabs_summary(self, user_id: str, graph_type: str = "social"):
         try:

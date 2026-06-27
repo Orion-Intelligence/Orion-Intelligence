@@ -48,6 +48,13 @@ export interface SocialOnlinePresenceResult {
 export interface SocialStealerLogRecord {
     [key: string]: any;
 }
+export interface SocialStoredProfile {
+    user_id?: string;
+    profile_username: string;
+    profiles: PlatformResult[];
+    count?: number;
+    updated_at?: string;
+}
 export interface PlatformResult {
     keyUsername: string;
     platform: string;
@@ -63,6 +70,8 @@ export interface PlatformResult {
     allMetadata: Record<string, any>;
     profileDetails?: ProfileDetails | null;
     posts?: SocialPost[] | null;
+    videos?: SocialPost[] | null;
+    shorts?: SocialPost[] | null;
     post_connections?: string[] | null;
     images?: SocialImage[] | null;
     followers_list?: string[] | null;
@@ -85,18 +94,10 @@ export type ScanEvent = {
     type: 'complete';
     payload: PlatformResult[];
 };
-export interface TabState {
+export interface SocialGraphState {
     homeMenuSearchTerm: WritableSignal<string>;
     jobs: WritableSignal<Job[]>;
     scanResults: WritableSignal<Map<string, PlatformResult[]>>;
     isHomeMenuCollapsed: WritableSignal<boolean>;
     activeUsername: WritableSignal<string | null>;
-}
-export type SerializableTabState = {
-    [K in keyof TabState]: ReturnType<TabState[K]>;
-};
-export interface Tab {
-    id: string;
-    name: string;
-    state: TabState;
 }

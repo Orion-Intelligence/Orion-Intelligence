@@ -23,6 +23,7 @@ from routes.api_routes import api_routes
 from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
 from routes.geo_fencing_routes import geo_fencing_routes
+from routes.graph_routes import graph_routes
 from routes.public_api_routes import public_routes
 from routes.tenant_routes import tenant_routes
 from routes.test_routes import test_routes
@@ -91,6 +92,7 @@ app.include_router(ai_routes, include_in_schema=False)
 app.include_router(tenant_routes, include_in_schema=False)
 app.include_router(api_routes)
 app.include_router(geo_fencing_routes, include_in_schema=False)
+app.include_router(graph_routes, include_in_schema=False)
 app.include_router(social_routes, include_in_schema=False)
 app.include_router(case_routes, include_in_schema=False)
 

@@ -1,0 +1,6 @@
+{
+  "youtube": {
+    "allow": ["posts", "videos", "shorts"],
+    "disallow": ["connections", "followers", "following"]
+  }
+}
