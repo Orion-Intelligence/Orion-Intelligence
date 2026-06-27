@@ -32,8 +32,7 @@
           <img alt="Channel" height="20" src="/assets/images/shared/theme/channel.svg" width="20" class="shrink-0 ui-action-icon" />
           <h2 class="mb-0 ml-2 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[24px] font-[500] text-[var(--color-text1)] max-[640px]:text-[18px]">
             @if (item.m_sender_name; as senderName) {
-              {{ senderName.substring(1)
-              }}
+              {{ senderName.startsWith('@') ? senderName.substring(1) : senderName }}
             } @else {
               <span>{{ item.m_title | removeEmojis }}</span>
             }

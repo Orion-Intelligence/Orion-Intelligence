@@ -11,33 +11,33 @@
 }
 
 <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 [body.light-theme_&]:bg-white">
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <div>
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div class="min-w-0">
       <div class="ui-section-title">{{ getSectionTitle() }}</div>
       <div class="ui-section-description">{{ getSectionDescription() }}</div>
     </div>
-    <div class="flex flex-wrap items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
-      <input data-testid="feeder-search-input" type="text" [value]="searchText" [placeholder]="'Search current page...' | translate" class="h-[38px] w-[240px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 text-sm text-[var(--color-text1)] outline-none transition focus:border-[#57a5eb55] max-[640px]:basis-full max-[640px]:w-full [body.light-theme_&]:bg-[#f8fbff]" (input)="onSearchInput($any($event.target).value || '')" />
-      <button data-testid="feeder-reload-button" type="button" class="inline-flex h-[38px] w-[38px] items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="'Reload' | translate" [disabled]="isScriptsLoading" (click)="loadScripts()">
+    <div class="ml-auto inline-flex max-w-full shrink-0 flex-wrap items-stretch justify-end overflow-hidden rounded-[9px] border border-[rgba(125,211,252,0.20)] bg-[rgba(255,255,255,0.04)] max-[640px]:w-full [body.light-theme_&]:border-[#d6e3ee] [body.light-theme_&]:bg-[#f8fbff]">
+      <input data-testid="feeder-search-input" type="text" [value]="searchText" [placeholder]="'Search current page...' | translate" class="h-[38px] min-w-0 w-[260px] rounded-none border-0 bg-transparent px-3 text-sm text-[var(--color-text1)] outline-none transition focus:bg-[rgba(87,165,235,0.06)] max-[640px]:basis-full max-[640px]:w-full max-[640px]:border-b max-[640px]:border-[var(--color-border)] [body.light-theme_&]:bg-transparent" (input)="onSearchInput($any($event.target).value || '')" />
+      <button data-testid="feeder-reload-button" type="button" class="inline-flex h-[38px] w-[38px] items-center justify-center rounded-none border-0 border-l border-[rgba(125,211,252,0.18)] bg-transparent text-[var(--color-text1)] transition hover:bg-[rgba(125,211,252,0.10)] disabled:cursor-not-allowed disabled:opacity-60 max-[640px]:flex-1 max-[640px]:border-l-0 [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="'Reload' | translate" [disabled]="isScriptsLoading" (click)="loadScripts()">
         <svg viewBox="0 0 24 24" class="h-[16px] w-[16px] fill-none stroke-current" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
           <path d="M21 3v6h-6"></path>
         </svg>
       </button>
       @if (entryType !== 'values') {
-        <button data-testid="feeder-enable-all-button" type="button" class="inline-flex h-[38px] w-[38px] items-center justify-center rounded-[8px] border border-[rgba(34,197,94,0.28)] bg-[rgba(20,83,45,0.28)] text-[#8ee6ab] transition hover:border-[rgba(34,197,94,0.42)] hover:bg-[rgba(20,83,45,0.42)] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-[#86efac] [body.light-theme_&]:bg-[#ecfdf3] [body.light-theme_&]:text-[#166534] [body.light-theme_&]:hover:bg-[#dcfce7]" [title]="'Enable All' | translate" [disabled]="!selectedRuleKey || !scripts.length || !canBulkToggle()" (click)="openConfirmation('enableAll')">
+        <button data-testid="feeder-enable-all-button" data-feeder-selection-action="true" type="button" class="inline-flex h-[38px] w-[38px] items-center justify-center rounded-none border-0 border-l border-[rgba(125,211,252,0.18)] bg-transparent text-[#8ee6ab] transition hover:bg-[rgba(125,211,252,0.10)] disabled:cursor-not-allowed disabled:opacity-60 max-[640px]:flex-1 [body.light-theme_&]:text-[#166534] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="'Enable All' | translate" [disabled]="!selectedRuleKey || !scripts.length || !canBulkToggle()" (click)="openConfirmation('enableAll')">
           <svg viewBox="0 0 24 24" class="h-[16px] w-[16px] fill-none stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M5 12.5l4.2 4.2L19 7.8"></path>
           </svg>
         </button>
-        <button data-testid="feeder-disable-all-button" type="button" class="inline-flex h-[38px] w-[38px] items-center justify-center rounded-[8px] border border-[rgba(245,158,11,0.28)] bg-[rgba(120,53,15,0.28)] text-[#f9c56a] transition hover:border-[rgba(245,158,11,0.42)] hover:bg-[rgba(120,53,15,0.42)] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-[#fcd34d] [body.light-theme_&]:bg-[#fffbeb] [body.light-theme_&]:text-[#92400e] [body.light-theme_&]:hover:bg-[#fef3c7]" [title]="'Disable All' | translate" [disabled]="!selectedRuleKey || !scripts.length || !canBulkToggle()" (click)="openConfirmation('disableAll')">
+        <button data-testid="feeder-disable-all-button" data-feeder-selection-action="true" type="button" class="inline-flex h-[38px] w-[38px] items-center justify-center rounded-none border-0 border-l border-[rgba(125,211,252,0.18)] bg-transparent text-[#f9c56a] transition hover:bg-[rgba(125,211,252,0.10)] disabled:cursor-not-allowed disabled:opacity-60 max-[640px]:flex-1 [body.light-theme_&]:text-[#92400e] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="'Disable All' | translate" [disabled]="!selectedRuleKey || !scripts.length || !canBulkToggle()" (click)="openConfirmation('disableAll')">
           <svg viewBox="0 0 24 24" class="h-[16px] w-[16px] fill-none stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M6 12h12"></path>
           </svg>
         </button>
       }
       @if (entryType !== 'values') {
-        <button data-testid="feeder-clear-all-button" type="button" class="inline-flex h-[38px] w-[38px] items-center justify-center rounded-[8px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text1)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)] disabled:cursor-not-allowed disabled:opacity-60" [title]="'Clear All' | translate" [disabled]="!selectedRuleKey || !scripts.length" (click)="openConfirmation('clear')">
+        <button data-testid="feeder-clear-all-button" data-feeder-selection-action="true" type="button" class="inline-flex h-[38px] w-[38px] items-center justify-center rounded-none border-0 border-l border-[rgba(125,211,252,0.18)] bg-transparent text-[#fca5a5] transition hover:bg-[rgba(125,211,252,0.10)] disabled:cursor-not-allowed disabled:opacity-60 max-[640px]:flex-1 [body.light-theme_&]:text-[#b42318] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="'Clear All' | translate" [disabled]="!selectedRuleKey || !scripts.length" (click)="openConfirmation('clear')">
           <svg viewBox="0 0 24 24" class="h-[15px] w-[15px] fill-none stroke-current" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M3 6h18"></path>
             <path d="M8 6V4h8v2"></path>
@@ -230,9 +230,11 @@
           </thead>
           <tbody>
             @for (script of displayedScripts; track script.id; let rowIndex = $index) {
-              <tr [attr.data-testid]="'feeder-script-row-' + script.file_name" class="border-t border-[var(--color-border)] text-sm text-[var(--color-text1)]" [ngClass]="{ 'opacity-60': !script.enabled, 'bg-[rgba(87,165,235,0.08)]': selectedScript?.id === script.id }">
-                <td class="px-4 py-2.5" [ngClass]="{ 'border-l-4 border-l-emerald-400 pl-3': script.enabled }">
-                  <div class="font-mono text-[12px] text-[var(--color-text4)]">{{ ((currentPage - 1) * 1000) + rowIndex + 1 }}</div>
+              <tr [attr.data-testid]="'feeder-script-row-' + script.file_name" data-feeder-script-row="true" class="cursor-pointer select-none border-t border-[var(--color-border)] text-sm text-[var(--color-text1)] hover:bg-[rgba(125,211,252,0.14)]" [ngClass]="{ 'bg-[rgba(125,211,252,0.10)] border-t-[color:rgba(125,211,252,0.22)]': selectedScript?.id === script.id || isScriptSelected(script) }" (mousedown)="beginScriptSelection($event, script)" (mouseover)="extendScriptSelection(script)" (mouseleave)="leaveScriptSelection(script)" (dragstart)="$event.preventDefault()">
+                <td class="px-4 py-2.5" [ngClass]="script.enabled ? 'border-l-4 border-l-emerald-400' : 'border-l-4 border-l-slate-700'">
+                  <div class="flex items-center gap-2 font-mono text-[12px] text-[var(--color-text4)]">
+                    <span>{{ ((currentPage - 1) * 1000) + rowIndex + 1 }}</span>
+                  </div>
                 </td>
                 <td class="px-4 py-2.5">
                   <div class="max-w-[260px] truncate font-semibold" [title]="getScriptDisplayName(script)">{{ getScriptDisplayName(script) }}</div>
@@ -242,7 +244,7 @@
                 }
                 <td class="px-4 py-2.5">
                   <div class="max-w-[320px]">
-                    <span class="block truncate rounded-full bg-[var(--color-blue-720)] px-4 py-1 text-[12px] font-semibold text-[var(--color-text3)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#35526b]" [title]="getScriptPathLabel(script)">{{ getScriptPathLabel(script) }}</span>
+                    <span class="block truncate text-[12px] font-semibold text-[var(--color-text3)] [body.light-theme_&]:text-[#35526b]" [title]="getScriptPathLabel(script)">{{ getScriptPathLabel(script) }}</span>
                   </div>
                 </td>
                 <td class="px-4 py-2.5">
@@ -258,12 +260,12 @@
                 <td class="px-4 py-2.5 text-[var(--color-text4)]">{{ script.last_success_date ? (script.last_success_date | date:'medium') : '-' }}</td>
                 <td class="px-4 py-2.5 text-[var(--color-text4)]">{{ script.updated_at ? (script.updated_at | date:'medium') : '-' }}</td>
                 <td class="px-4 py-2.5">
-                  <div class="flex items-center justify-end gap-2">
-                      <button [attr.data-testid]="'feeder-script-view-button-' + script.file_name" type="button" class="inline-flex h-[36px] items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3.5 text-[12px] font-semibold text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="toggleScript(script)">
+                  <div class="inline-flex items-center justify-end overflow-hidden rounded-[8px] border border-[rgba(125,211,252,0.20)] bg-[rgba(255,255,255,0.04)]">
+                      <button [attr.data-testid]="'feeder-script-view-button-' + script.file_name" type="button" class="inline-flex h-[36px] items-center border-0 bg-transparent px-3.5 text-[12px] font-semibold text-[var(--color-text1)] transition hover:bg-[rgba(125,211,252,0.10)] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="toggleScript(script)">
                       {{ selectedScript?.id === script.id ? ('Hide' | translate) : ('View' | translate) }}
                     </button>
                     @if (canTransferScript(script)) {
-                      <button [attr.data-testid]="'feeder-script-owner-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text1)] opacity-100 transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="'Change Owner' | translate" (click)="openOwnerDialog(script)">
+                      <button [attr.data-testid]="'feeder-script-owner-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center border-0 border-l border-[rgba(125,211,252,0.18)] bg-transparent text-[var(--color-text1)] opacity-100 transition hover:bg-[rgba(125,211,252,0.10)] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="'Change Owner' | translate" (click)="openOwnerDialog(script)">
                         <svg viewBox="0 0 16 16" class="h-[16px] w-[16px] fill-current" aria-hidden="true">
                           <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
                           <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"></path>
@@ -271,14 +273,14 @@
                       </button>
                     }
                     @if (canToggleScript(script)) {
-                      <button [attr.data-testid]="'feeder-script-toggle-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="(script.enabled ? 'Disable' : 'Enable') | translate" (click)="openConfirmation('toggle', script)">
+                      <button [attr.data-testid]="'feeder-script-toggle-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center border-0 border-l border-[rgba(125,211,252,0.18)] bg-transparent text-[var(--color-text1)] transition hover:bg-[rgba(125,211,252,0.10)] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="(script.enabled ? 'Disable' : 'Enable') | translate" (click)="openConfirmation('toggle', script)">
                         <svg viewBox="0 0 24 24" class="h-[16px] w-[16px] fill-none stroke-current" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                           <path d="M12 2v10"></path>
                           <path d="M6.2 6.2a8 8 0 1 0 11.6 0"></path>
                         </svg>
                       </button>
                     }
-                    <button [attr.data-testid]="'feeder-script-delete-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center rounded-[8px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text1)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)] [body.light-theme_&]:text-[#b42318]" [title]="'common.actions.delete' | translate" (click)="openConfirmation('delete', script)">
+                    <button [attr.data-testid]="'feeder-script-delete-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center border-0 border-l border-[rgba(125,211,252,0.18)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text1)] transition hover:bg-[rgba(127,29,29,0.30)] [body.light-theme_&]:text-[#b42318]" [title]="'common.actions.delete' | translate" (click)="openConfirmation('delete', script)">
                       <svg viewBox="0 0 24 24" class="h-[15px] w-[15px] fill-none stroke-current" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M3 6h18"></path>
                         <path d="M8 6V4h8v2"></path>
@@ -336,9 +338,11 @@
     </div>
     <div class="mt-4 space-y-3 min-[1401px]:hidden">
       @for (script of displayedScripts; track script.id; let rowIndex = $index) {
-        <div class="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-830)]" [ngClass]="{ 'border-l-4 border-l-emerald-400': script.enabled }">
+        <div data-feeder-script-row="true" class="cursor-pointer select-none overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-830)] hover:bg-[rgba(125,211,252,0.14)]" [ngClass]="{ 'border-l-4 border-l-emerald-400': script.enabled, 'border-l-4 border-l-slate-700': !script.enabled, 'bg-[rgba(125,211,252,0.10)] border-[color:rgba(125,211,252,0.22)]': isScriptSelected(script) }" (mousedown)="beginScriptSelection($event, script)" (mouseover)="extendScriptSelection(script)" (mouseleave)="leaveScriptSelection(script)" (dragstart)="$event.preventDefault()">
           <div class="flex items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 py-2">
-            <div class="text-xs font-semibold tracking-wide text-[var(--color-text4)]">#{{ ((currentPage - 1) * 1000) + rowIndex + 1 }}</div>
+            <div class="flex items-center gap-2 text-xs font-semibold tracking-wide text-[var(--color-text4)]">
+              <span>#{{ ((currentPage - 1) * 1000) + rowIndex + 1 }}</span>
+            </div>
             <div class="flex items-center gap-2">
               <span [attr.data-testid]="'feeder-script-active-status-' + script.file_name" class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="script.enabled ? 'bg-emerald-500/10 text-emerald-300' : 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-700'">
                 {{ script.enabled ? 'enabled' : 'disabled' }}
@@ -362,7 +366,7 @@
             <div class="px-3 py-2">
               <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Alias Path' | translate }}</div>
               <div class="mt-1">
-                <span class="inline-flex max-w-full rounded-full bg-[var(--color-blue-720)] px-3 py-1 text-[12px] font-semibold text-[var(--color-text3)] break-all [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#35526b]">{{ getScriptPathLabel(script) }}</span>
+                <span class="inline-flex max-w-full break-all text-[12px] font-semibold text-[var(--color-text3)] [body.light-theme_&]:text-[#35526b]">{{ getScriptPathLabel(script) }}</span>
               </div>
             </div>
             <div class="grid gap-3 px-3 py-2 sm:grid-cols-2">
@@ -376,12 +380,12 @@
               </div>
             </div>
             <div class="px-3 py-2">
-              <div class="flex flex-wrap justify-end gap-2">
-                  <button [attr.data-testid]="'feeder-script-view-button-' + script.file_name" type="button" class="inline-flex h-[36px] items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3.5 text-[12px] font-semibold text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="toggleScript(script)">
+              <div class="inline-flex max-w-full flex-wrap justify-end overflow-hidden rounded-[8px] border border-[rgba(125,211,252,0.20)] bg-[rgba(255,255,255,0.04)]">
+                  <button [attr.data-testid]="'feeder-script-view-button-' + script.file_name" type="button" class="inline-flex h-[36px] items-center border-0 bg-transparent px-3.5 text-[12px] font-semibold text-[var(--color-text1)] transition hover:bg-[rgba(125,211,252,0.10)] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="toggleScript(script)">
                   {{ selectedScript?.id === script.id ? ('Hide' | translate) : ('View' | translate) }}
                 </button>
                 @if (canTransferScript(script)) {
-                  <button [attr.data-testid]="'feeder-script-owner-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text1)] opacity-100 transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="'Change Owner' | translate" (click)="openOwnerDialog(script)">
+                  <button [attr.data-testid]="'feeder-script-owner-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center border-0 border-l border-[rgba(125,211,252,0.18)] bg-transparent text-[var(--color-text1)] opacity-100 transition hover:bg-[rgba(125,211,252,0.10)] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="'Change Owner' | translate" (click)="openOwnerDialog(script)">
                     <svg viewBox="0 0 16 16" class="h-[16px] w-[16px] fill-current" aria-hidden="true">
                       <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
                       <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"></path>
@@ -389,14 +393,14 @@
                   </button>
                 }
                 @if (canToggleScript(script)) {
-                  <button [attr.data-testid]="'feeder-script-toggle-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="(script.enabled ? 'Disable' : 'Enable') | translate" (click)="openConfirmation('toggle', script)">
+                  <button [attr.data-testid]="'feeder-script-toggle-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center border-0 border-l border-[rgba(125,211,252,0.18)] bg-transparent text-[var(--color-text1)] transition hover:bg-[rgba(125,211,252,0.10)] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="(script.enabled ? 'Disable' : 'Enable') | translate" (click)="openConfirmation('toggle', script)">
                     <svg viewBox="0 0 24 24" class="h-[16px] w-[16px] fill-none stroke-current" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <path d="M12 2v10"></path>
                       <path d="M6.2 6.2a8 8 0 1 0 11.6 0"></path>
                     </svg>
                   </button>
                 }
-                <button [attr.data-testid]="'feeder-script-delete-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center rounded-[8px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text1)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)] [body.light-theme_&]:text-[#b42318]" [title]="'common.actions.delete' | translate" (click)="openConfirmation('delete', script)">
+                <button [attr.data-testid]="'feeder-script-delete-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center border-0 border-l border-[rgba(125,211,252,0.18)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text1)] transition hover:bg-[rgba(127,29,29,0.30)] [body.light-theme_&]:text-[#b42318]" [title]="'common.actions.delete' | translate" (click)="openConfirmation('delete', script)">
                   <svg viewBox="0 0 24 24" class="h-[15px] w-[15px] fill-none stroke-current" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M3 6h18"></path>
                     <path d="M8 6V4h8v2"></path>
