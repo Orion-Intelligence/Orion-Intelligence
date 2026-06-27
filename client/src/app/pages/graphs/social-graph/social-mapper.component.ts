@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, Inject, OnDestroy, PLATFORM_ID, ViewEncapsulation, computed, inject, signal, viewChild } from '@angular/core';
-import { isPlatformBrowser, NgOptimizedImage } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { RouterLink } from '@angular/router';
+import { finalize, map } from 'rxjs/operators';
+import { Router } from '@angular/router';
 import { Job, PlatformResult, SocialGraphState, SocialStealerLogRecord } from '../../../shared/model/social/social-scan.models';
 import { HomeMenuComponent } from './home-menu/home-menu.component';
-import { ListViewComponent } from './list-view/list-view.component';
+import { SocialProfileListingComponent } from './profile-listing/profile-listing.component';
 import { NotificationBarComponent } from './notification-bar/notification-bar.component';
 import { SocialService } from './services/social.service';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
@@ -14,8 +14,9 @@ import { GraphLoadingComponent } from '../shared/graph-loading/graph-loading.com
 import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/utils/file-input.util';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 import { ManageProfilesModalComponent } from './profile-popups/manage-profiles-modal/manage-profiles-modal.component';
-import type { FetchStateKey, OnlinePresenceFetchRequest, ScanJobOptions } from './models/social-graph.models';
+import type { FetchStateKey, OnlinePresenceFetchRequest, PostCursorFetchRequest, PostFetchMergeMode, ScanJobOptions } from './models/social-graph.models';
 import { SocialNormalizationUtil } from './utils/social-normalization.util';
+import { SocialBreadcrumbComponent } from './breadcrumb/social-breadcrumb.component';
 
 @Component({
   selector: 'app-social-graph',
@@ -25,18 +26,18 @@ import { SocialNormalizationUtil } from './utils/social-normalization.util';
   standalone: true,
   imports: [
     HomeMenuComponent,
-    ListViewComponent,
+    SocialProfileListingComponent,
     ConfirmationPopupComponent,
     NotificationBarComponent,
     GraphLoadingComponent,
     ProfileComponent,
     ManageProfilesModalComponent,
-    NgOptimizedImage,
-    RouterLink
+    SocialBreadcrumbComponent
   ]
 })
 export class SocialMapperComponent implements OnDestroy {
   private readonly stateService = inject(SocialService);
+  private readonly router = inject(Router);
   private readonly graphState = this.stateService.graphState;
   private cancelScanSubjects = new Map<string, Subject<void>>();
   private cancelProfileFetchSubjects = new Map<string, Subject<void>>();
@@ -68,9 +69,11 @@ export class SocialMapperComponent implements OnDestroy {
   isHomeMenuCollapsed = computed(() => this.graphState.isHomeMenuCollapsed());
   isSmallScreen = signal(false);
   isMobileHomeMenuOpen = signal(false);
+  isInitialLoading = signal(true);
+  profileBreadcrumbLabel = signal<string | null>(null);
   effectiveHomeMenuCollapsed = computed(() => this.isSmallScreen() ? !this.isMobileHomeMenuOpen() : this.isHomeMenuCollapsed());
   imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
-  listView = viewChild(ListViewComponent);
+  profileListing = viewChild(SocialProfileListingComponent);
 
   constructor( private destroyRef: DestroyRef, @Inject(PLATFORM_ID) private platformId: object ) {
     if (isPlatformBrowser(this.platformId)) {
@@ -78,7 +81,7 @@ export class SocialMapperComponent implements OnDestroy {
       this.isSmallScreen.set(this.mediaQueryList.matches);
       this.mediaQueryList.addEventListener('change', this.mediaQueryListener);
     }
-    this.state.loadStoredSocialProfiles().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+    this.state.loadStoredSocialProfiles().pipe(takeUntilDestroyed(this.destroyRef), finalize(() => this.isInitialLoading.set(false))).subscribe();
     queueMicrotask(() => this.resumeIncompleteScans());
   }
 
@@ -175,7 +178,7 @@ export class SocialMapperComponent implements OnDestroy {
     if (job.status !== 'completed') {
       return;
     }
-    this.listView()?.clearProfileOverview();
+    this.profileListing()?.clearProfileOverview();
     if (job.id.startsWith('stored-') || !this.scanResults().has(job.username)) {
       this.state.loadStoredSocialProfile(job.username).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         error: () => this.graphState.activeUsername.set(job.username)
@@ -255,6 +258,19 @@ export class SocialMapperComponent implements OnDestroy {
     this.fetchData(p, 'shorts', this.state.fetchSocialShorts(p.platform, p.username), this.cancelShortFetchSubjects);
   }
 
+  handleFetchSocialPostCursor(request: PostCursorFetchRequest): void {
+    const p = request.platformData;
+    if (request.tabKey === 'videos') {
+      this.fetchData(p, 'videos', this.state.fetchSocialVideos(p.platform, p.username, request.cursorId), this.cancelVideoFetchSubjects, request.mergeMode);
+      return;
+    }
+    if (request.tabKey === 'shorts') {
+      this.fetchData(p, 'shorts', this.state.fetchSocialShorts(p.platform, p.username, request.cursorId), this.cancelShortFetchSubjects, request.mergeMode);
+      return;
+    }
+    this.fetchData(p, 'posts', this.state.fetchSocialPosts(p.platform, p.username, request.cursorId), this.cancelPostFetchSubjects, request.mergeMode);
+  }
+
   handleFetchImagesForPlatform(p: PlatformResult): void {
     this.cancelAllFetchesForUser(p.keyUsername);
     this.fetchData(p, 'platformImages', this.state.fetchPlatformImages(p.platform, p.username), this.cancelPlatformImageFetchSubjects);
@@ -294,14 +310,15 @@ export class SocialMapperComponent implements OnDestroy {
       this.cancelStealerLogsFetchSubjects);
   }
 
-  private fetchData(platformResult: PlatformResult, stateKey: FetchStateKey, request$: any, cancelMap: Map<string, Subject<void>>): void {
+  private fetchData(platformResult: PlatformResult, stateKey: FetchStateKey, request$: any, cancelMap: Map<string, Subject<void>>, mergeMode?: PostFetchMergeMode): void {
     this.state.fetchPlatformData({
       platformResult,
       stateKey,
       request$,
       cancelMap,
       destroyRef: this.destroyRef,
-      updateState: this.updateState.bind(this)
+      updateState: this.updateState.bind(this),
+      mergeMode
     });
   }
 
@@ -427,6 +444,19 @@ export class SocialMapperComponent implements OnDestroy {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  }
+
+  onHeaderBack(): void {
+    const profileListing = this.profileListing();
+    if (profileListing?.hasOpenProfileOverview()) {
+      profileListing.clearProfileOverview();
+      return;
+    }
+    void this.router.navigate(['/dashboard/home']);
+  }
+
+  onProfileOverviewLabelChanged(label: string | null): void {
+    this.profileBreadcrumbLabel.set(label);
   }
 
   private getPlatformSelectionKey(platform: PlatformResult): string {

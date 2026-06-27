@@ -66,6 +66,7 @@ export class SocialNormalizationUtil {
       ? String(post.m_post_comments_list.length)
       : '';
     return {
+      hash_id: this.firstValue(post?.hash_id, post?.m_hash_id, post?.id, post?.m_message_id),
       post_url: this.firstValue(post?.post_url, post?.m_url, post?.url, post?.m_message_sharable_link, post?.m_weblink),
       datetime: this.firstValue(post?.datetime, post?.date, post?.m_date, post?.timestamp),
       caption: this.firstValue(post?.caption, post?.m_content, post?.m_title, post?.title),

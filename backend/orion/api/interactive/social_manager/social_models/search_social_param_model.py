@@ -46,16 +46,19 @@ class SocialProfileRequest(PlatformUsernameRequest):
 class SocialPostsRequest(PlatformUsernameRequest):
     max_posts: int = Field(default=5, ge=1, le=100)
     social_data_type: Optional[str] = None
+    hash_id: Optional[str] = None
 
 
 class SocialVideosRequest(PlatformUsernameRequest):
     max_videos: int = Field(default=5, ge=1, le=100)
     social_data_type: Optional[str] = None
+    hash_id: Optional[str] = None
 
 
 class SocialShortsRequest(PlatformUsernameRequest):
     max_shorts: int = Field(default=5, ge=1, le=100)
     social_data_type: Optional[str] = None
+    hash_id: Optional[str] = None
 
 
 class SocialFollowersRequest(PlatformUsernameRequest):

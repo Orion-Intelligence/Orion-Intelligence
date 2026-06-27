@@ -24,6 +24,7 @@ export interface SocialImage {
     source: string;
 }
 export interface SocialPost {
+    hash_id?: string;
     post_url: string;
     datetime: string;
     caption: string;

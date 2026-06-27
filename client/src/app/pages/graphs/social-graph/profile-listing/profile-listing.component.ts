@@ -1,52 +1,57 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
-import { PlatformResult, SocialOnlinePresenceResult, SocialPost, SocialStealerLogRecord } from '../../../../shared/model/social/social-scan.models';
-import { formatFollowers, formatKey, isImageUrl, isUrl } from '../../../../shared/utils/formatters';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { PlatformResult, SocialPost } from '../../../../shared/model/social/social-scan.models';
+import { formatFollowers } from '../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
 import { SocialService } from '../services/social.service';
-import { getMetadataEntries, getProfileDetailEntries } from '../utils/summary-view.util';
-import { buildSocialProfileUrl } from '../utils/profile-url.util';
+import { getProfileDetailEntries } from '../utils/summary-view.util';
 import { StealerlogSectionComponent } from '../stealerlog-section/stealerlog-section.component';
-import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
-import type { FeedUser, FetchTab, FetchTabKey, OnlinePresenceFetchRequest, SocialPlatformCapabilityMap } from '../models/social-graph.models';
+import type { FeedUser, FetchTab, FetchTabKey, OnlinePresenceFetchRequest, PostCursorFetchRequest, SocialPlatformCapabilityMap } from '../models/social-graph.models';
 import { SocialNormalizationUtil } from '../utils/social-normalization.util';
 import socialPlatformCapabilities from '../../../../../assets/data/social-graph/platform-capabilities.json';
+import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
+import { SocialDefaultListSectionComponent } from './default-list-section.component';
+import { SocialProfileTabsSectionComponent } from '../profile-detail/profile-tabs-section/profile-tabs-section.component';
 
 @Component({
-  selector: 'app-list-view',
-  templateUrl: './list-view.component.html',
+  selector: 'app-social-profile-listing',
+  templateUrl: './profile-listing.component.html',
   standalone: true,
-  imports: [SocialIconComponent, StealerlogSectionComponent, TooltipDirective],
+  imports: [SocialIconComponent, StealerlogSectionComponent, SocialDefaultListSectionComponent, SocialProfileTabsSectionComponent],
+  animations: [fadeInDashboardItem],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ListViewComponent {
+export class SocialProfileListingComponent {
   private readonly PRIORITY_PLATFORMS = ['instagram', 'youtube', 'facebook', 'behance', 'tiktok', 'twitter', 'vimeo', 'x'];
-  private readonly stealerLogExportColumns = [ 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private readonly baseFetchTabs: FetchTab[] = [ { key: 'details', label: 'Details', icon: 'bi bi-person-badge' }, { key: 'posts', label: 'Posts', icon: 'bi bi-file-post' }, { key: 'images', label: 'Images', icon: 'bi bi-images' }, { key: 'connections', label: 'Connections', icon: 'bi bi-diagram-3' } ];
   private readonly mappedFetchTabs: Partial<Record<FetchTabKey, FetchTab>> = { videos: { key: 'videos', label: 'Videos', icon: 'bi bi-play-btn' }, shorts: { key: 'shorts', label: 'Shorts', icon: 'bi bi-play-circle' } };
   private readonly followerFetchTabs: FetchTab[] = [ { key: 'followers', label: 'Followers', icon: 'bi bi-people' }, { key: 'following', label: 'Following', icon: 'bi bi-person-plus' } ];
   private readonly onlinePresenceTab: FetchTab = { key: 'onlinePresence', label: 'Online Presence', icon: 'bi bi-globe2' };
   private readonly stealerLogsTab: FetchTab = { key: 'stealerLogs', label: 'Stealer Logs', icon: 'bi bi-shield-exclamation' };
   private readonly platformCapabilities = socialPlatformCapabilities as SocialPlatformCapabilityMap;
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private appliedProfileQuery = signal(false);
 
   scanResults = input.required<Map<string, PlatformResult[]>>();
+  isInitialLoading = input(false);
   sidebarPlatformClicked = output<string>();
   fetchPostsInline = output<PlatformResult>();
   fetchVideosInline = output<PlatformResult>();
   fetchShortsInline = output<PlatformResult>();
+  fetchPostCursorInline = output<PostCursorFetchRequest>();
   fetchImagesInline = output<PlatformResult>();
   fetchFollowersInline = output<PlatformResult>();
   fetchFollowingInline = output<PlatformResult>();
   fetchMetadataInline = output<PlatformResult>();
   fetchOnlinePresenceInline = output<OnlinePresenceFetchRequest>();
   fetchStealerLogsInline = output<PlatformResult>();
+  profileOverviewLabelChanged = output<string | null>();
   public state = inject(SocialService);
   activeTabs = signal<Record<string, FetchTabKey | null>>({});
   profileOverviewIds = signal<Set<string>>(new Set<string>());
   platformSearchTerm = signal('');
   onlinePresenceSearchTerms = signal<Record<string, string>>({});
-  public formatKey = formatKey;
-  public isUrl = isUrl;
-  public isImageUrl = isImageUrl;
   activeUsers = computed<FeedUser[]>(() => {
     return Array.from(this.scanResults().entries())
       .map(([username, platforms]) => ({
@@ -67,6 +72,17 @@ export class ListViewComponent {
     }
     return users[0] ?? null;
   });
+  activeProfilePlatform = computed(() => {
+    const [platformId] = Array.from(this.profileOverviewIds());
+    return platformId ? this.getPlatformById(platformId) ?? null : null;
+  });
+
+  constructor() {
+    effect(() => {
+      this.activeUsers();
+      queueMicrotask(() => this.openProfileOverviewFromQuery());
+    });
+  }
 
   setActiveTab(platformId: string, tabKey: FetchTabKey, platformData?: PlatformResult): void {
     this.activeTabs.update(current => ({ ...current, [platformId]: tabKey }));
@@ -78,6 +94,10 @@ export class ListViewComponent {
   openProfileOverviewTab(platformId: string, tabKey: FetchTabKey, platformData?: PlatformResult): void {
     this.profileOverviewIds.set(new Set<string>([platformId]));
     this.setActiveTab(platformId, platformData ? this.getAllowedTabKey(platformData, tabKey) : tabKey, platformData);
+    if (platformData) {
+      this.setProfileQuery(platformData);
+      this.emitProfileOverviewLabel(platformData);
+    }
   }
 
   openConnectionsOverview(platformId: string, platformData?: PlatformResult): void {
@@ -165,6 +185,38 @@ export class ListViewComponent {
     }
   }
 
+  onProfileTabSelected(platformData: PlatformResult, tabKey: FetchTabKey): void {
+    this.setActiveTab(this.getPlatformCardId(platformData), tabKey, platformData);
+  }
+
+  onProfileTabRefetch(platformData: PlatformResult, tabKey: FetchTabKey): void {
+    this.refetchTabData(platformData, tabKey);
+  }
+
+  onProfileOnlinePresenceTermChanged(platformData: PlatformResult, term: string): void {
+    const key = this.getPlatformCardId(platformData);
+    this.onlinePresenceSearchTerms.update(current => ({ ...current, [key]: term }));
+  }
+
+  onDefaultProfileOverview(platformData: PlatformResult): void {
+    this.toggleProfileOverview(this.getPlatformCardId(platformData), platformData);
+  }
+
+  onDefaultConnectionsOverview(platformData: PlatformResult): void {
+    this.openConnectionsOverview(this.getPlatformCardId(platformData), platformData);
+  }
+
+  onDefaultProfileTab(event: { platformData: PlatformResult; tabKey: FetchTabKey }): void {
+    this.openProfileOverviewTab(this.getPlatformCardId(event.platformData), event.tabKey, event.platformData);
+  }
+
+  getLoadingStates(platformData: PlatformResult): Partial<Record<FetchTabKey, boolean>> {
+    return this.getFetchTabs(platformData).reduce<Partial<Record<FetchTabKey, boolean>>>((states, tab) => {
+      states[tab.key] = this.isTabLoading(platformData, tab.key);
+      return states;
+    }, {});
+  }
+
   private hasTabData(platformData: PlatformResult, tabKey: FetchTabKey): boolean {
     switch (tabKey) {
       case 'details':
@@ -188,25 +240,6 @@ export class ListViewComponent {
       case 'stealerLogs':
         return this.getStealerLogs(platformData).length > 0;
     }
-  }
-
-  isNumeric(value: any): boolean {
-    if (value === null || value === undefined || value === '') {
-      return false;
-    }
-    if (typeof value === 'number') {
-      return true;
-    }
-    const s = String(value);
-    return !isNaN(Number(s.replace(/,/g, ''))) && s.trim() !== '';
-  }
-
-  isBool(value: any): boolean {
-    if (typeof value === 'boolean') {
-      return true;
-    }
-    const s = String(value).toLowerCase().trim();
-    return s === 'true' || s === 'false';
   }
 
   formatMetadataValue(value: any): string {
@@ -248,84 +281,8 @@ export class ListViewComponent {
     return platformData.post_connections || [];
   }
 
-  getOnlinePresence(platformData: PlatformResult): SocialOnlinePresenceResult | null {
-    return platformData.onlinePresence || null;
-  }
-
-  getOnlinePresenceResults(platformData: PlatformResult): NonNullable<SocialOnlinePresenceResult['results']> {
-    return platformData.onlinePresence?.results || [];
-  }
-
-  getStealerLogs(platformData: PlatformResult): SocialStealerLogRecord[] {
+  getStealerLogs(platformData: PlatformResult): any[] {
     return platformData.stealerLogs || [];
-  }
-
-  getPlatformStealerDomain(platformData: PlatformResult): string {
-    const fromUrl = SocialNormalizationUtil.normalizeDomain(platformData.url);
-    if (fromUrl) {
-      return fromUrl;
-    }
-    const platform = (platformData.platform || '').toLowerCase();
-    const platformDomains: Record<string, string> = {
-      behance: 'behance.net',
-      facebook: 'facebook.com',
-      github: 'github.com',
-      instagram: 'instagram.com',
-      tiktok: 'tiktok.com',
-      twitter: 'twitter.com',
-      vimeo: 'vimeo.com',
-      x: 'x.com',
-      youtube: 'youtube.com'
-    };
-    return platformDomains[platform] || platform;
-  }
-
-  getStealerRecordHost(record: SocialStealerLogRecord): string {
-    return SocialNormalizationUtil.firstValue(record?.['source_domain'], record?.['domain'], record?.['ip'], record?.['url'], record?.['host'], record?.['raw']) || '-';
-  }
-
-  getStealerRecordIdentity(record: SocialStealerLogRecord): string {
-    return SocialNormalizationUtil.firstValue(record?.['email'], record?.['username'], record?.['user'], record?.['login'], record?.['credential'], record?.['raw']) || '-';
-  }
-
-  getStealerRecordDate(record: SocialStealerLogRecord): string {
-    return SocialNormalizationUtil.firstValue(record?.['date'], record?.['timestamp'], record?.['created_at'], record?.['updated_at']) || '-';
-  }
-
-  getStealerRecordTrackKey(index: number, record: SocialStealerLogRecord): string {
-    return `${this.getStealerRecordHost(record)}|${this.getStealerRecordIdentity(record)}|${this.getStealerRecordDate(record)}|${index}`;
-  }
-
-  downloadStealerLogs(platformData: PlatformResult): void {
-    const rows = this.getStealerLogs(platformData).map((item, index) => ({
-      recordType: 'stealer',
-      recordIndex: String(index + 1),
-      searchQuery: `${platformData.username || platformData.keyUsername} ${this.getPlatformStealerDomain(platformData)}`.trim(),
-      email: SocialNormalizationUtil.toExportValue(item?.['email']),
-      username: SocialNormalizationUtil.toExportValue(item?.['username']),
-      domain: SocialNormalizationUtil.toExportValue(item?.['domain']),
-      source: SocialNormalizationUtil.toExportValue(item?.['channel'] || item?.['filename'] || item?.['file']),
-      hash: SocialNormalizationUtil.toExportValue(item?.['m_hash']),
-      title: '-',
-      url: '-',
-      rank: '-',
-      date: SocialNormalizationUtil.toExportValue(item?.['date']),
-      team: '-',
-      summary: '-'
-    }));
-    const csvLines = [
-      this.stealerLogExportColumns.join(','),
-      ...rows.map(row => this.stealerLogExportColumns.map(column => SocialNormalizationUtil.escapeCsvValue(row[column] ?? '-')).join(','))
-    ];
-    const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `stealerlogs_${SocialNormalizationUtil.normalizeDownloadName(platformData.username || platformData.keyUsername)}_${SocialNormalizationUtil.normalizeDownloadName(this.getPlatformStealerDomain(platformData))}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   }
 
   getOnlinePresenceSearchTerm(platformData: PlatformResult): string {
@@ -333,27 +290,9 @@ export class ListViewComponent {
     return this.onlinePresenceSearchTerms()[key] ?? platformData.platform;
   }
 
-  onOnlinePresenceSearchInput(platformData: PlatformResult, event: Event): void {
-    const key = this.getPlatformCardId(platformData);
-    const value = (event.target as HTMLInputElement | null)?.value ?? '';
-    this.onlinePresenceSearchTerms.update(current => ({ ...current, [key]: value }));
-  }
-
   searchOnlinePresence(platformData: PlatformResult): void {
     const token = this.getOnlinePresenceSearchTerm(platformData).trim() || platformData.platform;
     this.fetchOnlinePresenceInline.emit({ platformData, token });
-  }
-
-  getFollowerPreview(platformData: PlatformResult): string[] {
-    return this.getFollowers(platformData).slice(0, 3);
-  }
-
-  getFollowingPreview(platformData: PlatformResult): string[] {
-    return this.getFollowing(platformData).slice(0, 3);
-  }
-
-  getProfileUrl(platformData: PlatformResult, username: string): string {
-    return buildSocialProfileUrl(platformData.platform, username, platformData.url);
   }
 
   getPlatformCardId(platformData: PlatformResult): string {
@@ -379,63 +318,6 @@ export class ListViewComponent {
     });
   }
 
-  getProfileBio(platformData: PlatformResult): string {
-    const details = (platformData.profileDetails || {}) as any;
-    return platformData.profileDetails?.bio
-      || details['m_content']
-      || platformData.description
-      || platformData.allMetadata?.['bio']
-      || platformData.allMetadata?.['description']
-      || platformData.allMetadata?.['m_content']
-      || '';
-  }
-
-  getProfileImageUrl(platformData: PlatformResult): string {
-    return this.getFirstMetadataValue(platformData, ['m_img_src', 'img_src', 'profile_image', 'profileImage', 'avatar', 'image']);
-  }
-
-  getCoverImageUrl(platformData: PlatformResult): string {
-    return this.getFirstMetadataValue(platformData, ['m_coverpage', 'coverpage', 'cover_image', 'coverImage', 'banner', 'banner_image']);
-  }
-
-  getPlatformTimestamp(platformData: PlatformResult): string {
-    const metadata = platformData.allMetadata || {};
-    const details = (platformData.profileDetails || {}) as any;
-    const timestamp = platformData.timestamp || details['m_date'] || metadata['timestamp'] || metadata['Timestamp'] || metadata['m_date'];
-    return timestamp ? String(timestamp) : '';
-  }
-
-  getPostCaption(post: SocialPost | null | undefined): string {
-    return post?.caption?.trim() || '';
-  }
-
-  hasPostMedia(post: SocialPost | null | undefined): boolean {
-    return !!post?.media_url;
-  }
-
-  isVideoPost(post: SocialPost | null | undefined): boolean {
-    const mediaType = (post?.media_type || '').toLowerCase();
-    const mediaUrl = (post?.media_url || '').toLowerCase();
-    return mediaType.includes('video') || mediaUrl.includes('.mp4') || mediaUrl.includes('.mov') || mediaUrl.includes('.webm');
-  }
-
-  getPostMediaTypeLabel(post: SocialPost | null | undefined): string {
-    return post?.media_type?.replace(/_/g, ' ') || 'Media';
-  }
-
-  isPostContentTabActive(platformData: PlatformResult): boolean {
-    return this.isPostContentTab(this.getActiveTabForPlatform(platformData));
-  }
-
-  getActivePostContentTab(platformData: PlatformResult): 'posts' | 'videos' | 'shorts' {
-    const activeTab = this.getActiveTabForPlatform(platformData);
-    return this.isPostContentTab(activeTab) ? activeTab : 'posts';
-  }
-
-  getPostContentTabLabel(tabKey: 'posts' | 'videos' | 'shorts'): string {
-    return tabKey === 'videos' ? 'Videos' : tabKey === 'shorts' ? 'Shorts' : 'Posts';
-  }
-
   getUniquePosts(platformData: PlatformResult, tabKey: 'posts' | 'videos' | 'shorts' = 'posts'): SocialPost[] {
     const posts = this.getPostContentItems(platformData, tabKey);
     const seen = new Set<string>();
@@ -452,10 +334,6 @@ export class ListViewComponent {
     });
   }
 
-  private isPostContentTab(tabKey: FetchTabKey): tabKey is 'posts' | 'videos' | 'shorts' {
-    return tabKey === 'posts' || tabKey === 'videos' || tabKey === 'shorts';
-  }
-
   private getPostContentItems(platformData: PlatformResult, tabKey: 'posts' | 'videos' | 'shorts'): SocialPost[] {
     if (tabKey === 'videos') {
       return platformData.videos || [];
@@ -464,14 +342,6 @@ export class ListViewComponent {
       return platformData.shorts || [];
     }
     return platformData.posts || [];
-  }
-
-  formatPostMetric(value: string | number | null | undefined): string {
-    if (value === null || value === undefined || value === '') {
-      return '0';
-    }
-    const numericValue = typeof value === 'number' ? value : Number(String(value).replace(/,/g, ''));
-    return Number.isFinite(numericValue) ? formatFollowers(numericValue) : String(value);
   }
 
   getStatValue(platformData: PlatformResult, key: keyof NonNullable<PlatformResult['profileDetails']>): string {
@@ -487,15 +357,6 @@ export class ListViewComponent {
 
   getProfileDetailEntries(platformData: PlatformResult): { key: string; value: any; }[] {
     return getProfileDetailEntries(platformData);
-  }
-
-  getPlatformMetadataEntries(platformData: PlatformResult): { key: string; value: any; }[] {
-    return getMetadataEntries(platformData.allMetadata);
-  }
-
-  getFilteredMetadataEntries(platformData: PlatformResult): { key: string; value: any; }[] {
-    return this.getPlatformMetadataEntries(platformData)
-      .filter(entry => entry.key.toLowerCase().replace(/[\s_-]+/g, '') !== 'timestamp');
   }
 
   private getFallbackStatValue(platformData: PlatformResult, key: keyof NonNullable<PlatformResult['profileDetails']>): string | number | null {
@@ -528,25 +389,25 @@ export class ListViewComponent {
     return text.match(/([\d,.]+[kmb]?)(?=\s*(subscribers|followers))/i)?.[1] ?? null;
   }
 
-  trackByKey(_index: number, item: { key: string }): string {
-    return item.key;
-  }
-
-  trackByUsername(_index: number, username: string): string {
-    return username;
-  }
-
   toggleProfileOverview(platformId: string, platformData?: PlatformResult): void {
     if (this.profileOverviewIds().has(platformId)) {
       this.profileOverviewIds.set(new Set<string>());
+      this.clearProfileQuery();
+      this.profileOverviewLabelChanged.emit(null);
       return;
     }
     this.profileOverviewIds.set(new Set<string>([platformId]));
     this.setActiveTab(platformId, 'details', platformData);
+    if (platformData) {
+      this.setProfileQuery(platformData);
+      this.emitProfileOverviewLabel(platformData);
+    }
   }
 
   clearProfileOverview(): void {
     this.profileOverviewIds.set(new Set<string>());
+    this.clearProfileQuery();
+    this.profileOverviewLabelChanged.emit(null);
   }
 
   isProfileOverviewActive(platformId: string): boolean {
@@ -557,13 +418,79 @@ export class ListViewComponent {
     return this.profileOverviewIds().size > 0;
   }
 
+  isProfileQueryLoading(): boolean {
+    return !!this.route.snapshot.queryParamMap.get('profile')
+      && !!this.route.snapshot.queryParamMap.get('platform')
+      && !this.appliedProfileQuery();
+  }
+
+  showLoadingSkeleton(): boolean {
+    return this.isInitialLoading() || this.isProfileQueryLoading();
+  }
+
   handleSidebarPlatformClick(platformId: string): void {
     if (this.profileOverviewIds().size > 0) {
-      this.setActiveTab(platformId, 'details', this.getPlatformById(platformId));
+      const platform = this.getPlatformById(platformId);
+      this.setActiveTab(platformId, 'details', platform);
       this.profileOverviewIds.set(new Set([platformId]));
+      if (platform) {
+        this.setProfileQuery(platform);
+        this.emitProfileOverviewLabel(platform);
+      }
       return;
     }
     this.sidebarPlatformClicked.emit(platformId);
+  }
+
+  private openProfileOverviewFromQuery(): void {
+    if (this.appliedProfileQuery()) {
+      return;
+    }
+    const profile = this.route.snapshot.queryParamMap.get('profile');
+    const platform = this.route.snapshot.queryParamMap.get('platform');
+    if (!profile || !platform) {
+      this.appliedProfileQuery.set(true);
+      return;
+    }
+    const normalizedProfile = SocialNormalizationUtil.normalizeUsername(profile);
+    const normalizedPlatform = platform.toLowerCase();
+    for (const user of this.activeUsers()) {
+      const match = user.platforms.find(item => item.platform.toLowerCase() === normalizedPlatform && SocialNormalizationUtil.normalizeUsername(item.username) === normalizedProfile);
+      if (match) {
+        const platformId = this.getPlatformCardId(match);
+        this.state.graphState.activeUsername.set(user.username);
+        this.profileOverviewIds.set(new Set([platformId]));
+        this.setActiveTab(platformId, 'details', match);
+        this.emitProfileOverviewLabel(match);
+        this.appliedProfileQuery.set(true);
+        return;
+      }
+    }
+    if (this.activeUsers().length > 0) {
+      this.appliedProfileQuery.set(true);
+    }
+  }
+
+  private setProfileQuery(platformData: PlatformResult): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { profile: SocialNormalizationUtil.normalizeProfilePathUsername(platformData.username || platformData.keyUsername), platform: platformData.platform.toLowerCase() },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  private clearProfileQuery(): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { profile: null, platform: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  private emitProfileOverviewLabel(platformData: PlatformResult): void {
+    this.profileOverviewLabelChanged.emit(`${platformData.platform} / ${platformData.username || platformData.keyUsername}`);
   }
 
   private getPlatformById(platformId: string): PlatformResult | undefined {
@@ -591,39 +518,6 @@ export class ListViewComponent {
   private getVisiblePlatforms(platforms: PlatformResult[]): PlatformResult[] {
     const selectedPlatforms = platforms.filter(platform => platform.isSelected);
     return selectedPlatforms.length > 0 ? selectedPlatforms : [...platforms];
-  }
-
-  private getFirstMetadataValue(platformData: PlatformResult, keys: string[]): string {
-    const sources = [platformData.profileDetails, platformData.allMetadata];
-    for (const source of sources) {
-      const value = this.getFirstValueFromSource(source, keys);
-      if (value) {
-        return value;
-      }
-    }
-    return '';
-  }
-
-  private getFirstValueFromSource(source: any, keys: string[]): string {
-    if (!source) {
-      return '';
-    }
-    if (Array.isArray(source)) {
-      for (const item of source) {
-        const value = this.getFirstValueFromSource(item, keys);
-        if (value) {
-          return value;
-        }
-      }
-      return '';
-    }
-    for (const key of keys) {
-      const value = source[key];
-      if (typeof value === 'string' && value.trim()) {
-        return value.trim();
-      }
-    }
-    return this.getFirstValueFromSource(source.result || source.profile || source.data, keys);
   }
 
   private getAllowedTabKey(platformData: PlatformResult, tabKey: FetchTabKey): FetchTabKey {

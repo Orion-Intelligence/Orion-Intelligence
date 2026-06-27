@@ -4,7 +4,7 @@ import { Observable, Subject, of } from 'rxjs';
 import { map, takeUntil, tap } from 'rxjs/operators';
 import { Job, PlatformResult, ScanEvent } from '../../../../shared/model/social/social-scan.models';
 import { SocialScanService } from '../../shared/services/social-scan.service';
-import type { FetchStateKey, FetchTabKey, NotificationType, ScanJobOptions, UpdateStateFn } from '../models/social-graph.models';
+import type { FetchStateKey, FetchTabKey, NotificationType, PostFetchMergeMode, ScanJobOptions, UpdateStateFn } from '../models/social-graph.models';
 import { SocialNormalizationUtil } from '../utils/social-normalization.util';
 import { SocialStateService } from './social-state.service';
 
@@ -103,16 +103,16 @@ export class SocialService {
     return this.scanService.fetchPlatformImages(platform, username);
   }
 
-  fetchSocialPosts(platform: string, username: string): ReturnType<SocialScanService['fetchSocialPosts']> {
-    return this.scanService.fetchSocialPosts(platform, username);
+  fetchSocialPosts(platform: string, username: string, hashId?: string): ReturnType<SocialScanService['fetchSocialPosts']> {
+    return this.scanService.fetchSocialPosts(platform, username, hashId);
   }
 
-  fetchSocialVideos(platform: string, username: string): ReturnType<SocialScanService['fetchSocialVideos']> {
-    return this.scanService.fetchSocialVideos(platform, username);
+  fetchSocialVideos(platform: string, username: string, hashId?: string): ReturnType<SocialScanService['fetchSocialVideos']> {
+    return this.scanService.fetchSocialVideos(platform, username, hashId);
   }
 
-  fetchSocialShorts(platform: string, username: string): ReturnType<SocialScanService['fetchSocialShorts']> {
-    return this.scanService.fetchSocialShorts(platform, username);
+  fetchSocialShorts(platform: string, username: string, hashId?: string): ReturnType<SocialScanService['fetchSocialShorts']> {
+    return this.scanService.fetchSocialShorts(platform, username, hashId);
   }
 
   fetchFollowers(platform: string, username: string): ReturnType<SocialScanService['fetchFollowers']> {
@@ -196,8 +196,8 @@ export class SocialService {
     this.startNextQueuedScan(nextOpts);
   }
 
-  fetchPlatformData(opts: { platformResult: PlatformResult; stateKey: FetchStateKey; request$: Observable<any>; cancelMap: Map<string, Subject<void>>; destroyRef: ScanJobOptions['destroyRef']; updateState: UpdateStateFn; }): void {
-    const { platformResult, stateKey, request$, cancelMap, destroyRef, updateState } = opts;
+  fetchPlatformData(opts: { platformResult: PlatformResult; stateKey: FetchStateKey; request$: Observable<any>; cancelMap: Map<string, Subject<void>>; destroyRef: ScanJobOptions['destroyRef']; updateState: UpdateStateFn; mergeMode?: PostFetchMergeMode; }): void {
+    const { platformResult, stateKey, request$, cancelMap, destroyRef, updateState, mergeMode } = opts;
     const key = this.stateStore.getPlatformUniqueKey(platformResult);
     if (this.stateStore.isUserBusy(platformResult.keyUsername)) {
       this.showNotification('busy');
@@ -212,19 +212,16 @@ export class SocialService {
     request$.pipe(takeUntil(cancel$), takeUntilDestroyed(destroyRef))
       .subscribe({
         next: (response: any) => {
-          const propertyMap = { profile: 'profileDetails', posts: 'posts', videos: 'videos', shorts: 'shorts', platformImages: 'images', followers: 'followers_list', following: 'following_list', onlinePresence: 'onlinePresence', stealerLogs: 'stealerLogs' };
           const dataKey = Object.keys(response)[0];
           const data = response[dataKey];
           const hasData = data && (Array.isArray(data) ? data.length > 0 : Object.keys(data).length > 0);
-          const newData: Partial<PlatformResult> = { [(propertyMap as any)[stateKey]]: hasData ? data : null } as Partial<PlatformResult>;
-          if (stateKey === 'posts') {
-            newData.post_connections = hasData ? this.extractConnections(data) : null;
-          }
           let updatedProfiles: PlatformResult[] | null = null;
           updateState(tabState => {
             tabState.scanResults.update(currentMap => {
               const newMap = new Map(currentMap);
-              const userResults = newMap.get(platformResult.keyUsername)?.map(platform => this.isSamePlatformIdentity(platform, platformResult) ? { ...platform, ...newData } : platform);
+              const userResults = newMap.get(platformResult.keyUsername)?.map(platform => this.isSamePlatformIdentity(platform, platformResult)
+                ? { ...platform, ...this.buildFetchedPlatformData(platform, stateKey, data, !!hasData, mergeMode) }
+                : platform);
               if (userResults) {
                 newMap.set(platformResult.keyUsername, userResults);
                 updatedProfiles = userResults;
@@ -331,6 +328,49 @@ export class SocialService {
 
   private isSamePlatformIdentity(left: PlatformResult, right: PlatformResult): boolean {
     return this.getPlatformIdentityKey(left) === this.getPlatformIdentityKey(right);
+  }
+
+  private buildFetchedPlatformData(platform: PlatformResult, stateKey: FetchStateKey, data: any, hasData: boolean, mergeMode?: PostFetchMergeMode): Partial<PlatformResult> {
+    const propertyMap = { profile: 'profileDetails', posts: 'posts', videos: 'videos', shorts: 'shorts', platformImages: 'images', followers: 'followers_list', following: 'following_list', onlinePresence: 'onlinePresence', stealerLogs: 'stealerLogs' };
+    const propertyName = (propertyMap as any)[stateKey];
+    if (mergeMode && this.isPostStateKey(stateKey)) {
+      if (!hasData || !Array.isArray(data)) {
+        return {};
+      }
+      const existing = Array.isArray((platform as any)[propertyName]) ? (platform as any)[propertyName] : [];
+      const merged = this.mergePostItems(existing, data, mergeMode);
+      const mergedData: Partial<PlatformResult> = { [propertyName]: merged } as Partial<PlatformResult>;
+      if (stateKey === 'posts') {
+        mergedData.post_connections = this.extractConnections(merged);
+      }
+      return mergedData;
+    }
+    const newData: Partial<PlatformResult> = { [propertyName]: hasData ? data : null } as Partial<PlatformResult>;
+    if (stateKey === 'posts') {
+      newData.post_connections = hasData ? this.extractConnections(data) : null;
+    }
+    return newData;
+  }
+
+  private isPostStateKey(stateKey: FetchStateKey): stateKey is 'posts' | 'videos' | 'shorts' {
+    return stateKey === 'posts' || stateKey === 'videos' || stateKey === 'shorts';
+  }
+
+  private mergePostItems(existing: any[], incoming: any[], mergeMode: PostFetchMergeMode): any[] {
+    const orderedItems = mergeMode === 'prepend' ? [...incoming, ...existing] : [...existing, ...incoming];
+    const seen = new Set<string>();
+    return orderedItems.filter(item => {
+      const key = this.getPostItemKey(item);
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+  }
+
+  private getPostItemKey(post: any): string {
+    return String(post?.hash_id || post?.m_hash_id || post?.post_url || post?.m_url || post?.url || post?.m_message_sharable_link || JSON.stringify(post)).trim();
   }
 
   private extractConnections(posts: any): string[] | null {
