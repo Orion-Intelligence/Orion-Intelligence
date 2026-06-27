@@ -66,6 +66,7 @@ class SocialFollowersRequest(PlatformUsernameRequest):
 
 
 class SocialOnlineImages(PlatformUsernameRequest):
+    max_images: int = Field(default=10, ge=1, le=100)
     max_followers: int = Field(default=50, ge=1, le=5000)
 
 

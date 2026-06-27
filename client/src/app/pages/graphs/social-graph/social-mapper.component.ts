@@ -14,7 +14,7 @@ import { GraphLoadingComponent } from '../shared/graph-loading/graph-loading.com
 import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/utils/file-input.util';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 import { ManageProfilesModalComponent } from './profile-popups/manage-profiles-modal/manage-profiles-modal.component';
-import type { FetchStateKey, OnlinePresenceFetchRequest, PostCursorFetchRequest, PostFetchMergeMode, ScanJobOptions } from './models/social-graph.models';
+import type { FetchMergeMode, FetchStateKey, ImageCursorFetchRequest, OnlinePresenceFetchRequest, PostCursorFetchRequest, ScanJobOptions } from './models/social-graph.models';
 import { SocialNormalizationUtil } from './utils/social-normalization.util';
 import { SocialBreadcrumbComponent } from './breadcrumb/social-breadcrumb.component';
 
@@ -260,20 +260,26 @@ export class SocialMapperComponent implements OnDestroy {
 
   handleFetchSocialPostCursor(request: PostCursorFetchRequest): void {
     const p = request.platformData;
+    const cursorId = request.mergeMode === 'prepend' ? request.cursorId : undefined;
     if (request.tabKey === 'videos') {
-      this.fetchData(p, 'videos', this.state.fetchSocialVideos(p.platform, p.username, request.cursorId), this.cancelVideoFetchSubjects, request.mergeMode);
+      this.fetchData(p, 'videos', this.state.fetchSocialVideos(p.platform, p.username, cursorId, request.limit), this.cancelVideoFetchSubjects, request.mergeMode);
       return;
     }
     if (request.tabKey === 'shorts') {
-      this.fetchData(p, 'shorts', this.state.fetchSocialShorts(p.platform, p.username, request.cursorId), this.cancelShortFetchSubjects, request.mergeMode);
+      this.fetchData(p, 'shorts', this.state.fetchSocialShorts(p.platform, p.username, cursorId, request.limit), this.cancelShortFetchSubjects, request.mergeMode);
       return;
     }
-    this.fetchData(p, 'posts', this.state.fetchSocialPosts(p.platform, p.username, request.cursorId), this.cancelPostFetchSubjects, request.mergeMode);
+    this.fetchData(p, 'posts', this.state.fetchSocialPosts(p.platform, p.username, cursorId, request.limit), this.cancelPostFetchSubjects, request.mergeMode);
   }
 
   handleFetchImagesForPlatform(p: PlatformResult): void {
     this.cancelAllFetchesForUser(p.keyUsername);
     this.fetchData(p, 'platformImages', this.state.fetchPlatformImages(p.platform, p.username), this.cancelPlatformImageFetchSubjects);
+  }
+
+  handleFetchImageCursor(request: ImageCursorFetchRequest): void {
+    const p = request.platformData;
+    this.fetchData(p, 'platformImages', this.state.fetchPlatformImages(p.platform, p.username, request.limit), this.cancelPlatformImageFetchSubjects, request.mergeMode);
   }
 
   handleFetchFollowers(p: PlatformResult): void {
@@ -310,7 +316,7 @@ export class SocialMapperComponent implements OnDestroy {
       this.cancelStealerLogsFetchSubjects);
   }
 
-  private fetchData(platformResult: PlatformResult, stateKey: FetchStateKey, request$: any, cancelMap: Map<string, Subject<void>>, mergeMode?: PostFetchMergeMode): void {
+  private fetchData(platformResult: PlatformResult, stateKey: FetchStateKey, request$: any, cancelMap: Map<string, Subject<void>>, mergeMode?: FetchMergeMode): void {
     this.state.fetchPlatformData({
       platformResult,
       stateKey,

@@ -1,5 +1,6 @@
 import base64
 import binascii
+import hashlib
 from datetime import UTC, datetime
 
 import httpx
@@ -45,6 +46,23 @@ class social_model:
             "updated_at": record.get("updated_at"),
         }
 
+    @staticmethod
+    def _social_hash_id(platform: str, stable_id: str) -> str:
+        return hashlib.sha256("|".join([platform or "", stable_id or "", "", "", ""]).encode("utf-8")).hexdigest()
+
+    @classmethod
+    def _normalize_social_cursor(cls, payload: dict, key: str) -> dict:
+        if key not in {"posts", "videos", "shorts"}:
+            return payload
+        hash_id = str(payload.get("hash_id") or "").strip()
+        if not hash_id or (len(hash_id) == 64 and all(char in "0123456789abcdefABCDEF" for char in hash_id)):
+            return payload
+        if "://" not in hash_id:
+            return payload
+        normalized_payload = dict(payload)
+        normalized_payload["hash_id"] = cls._social_hash_id(str(payload.get("platform") or "").lower(), hash_id)
+        return normalized_payload
+
     @classmethod
     def _merge_profile_documents(cls, rows: list[dict]) -> list[dict]:
         merged: dict[str, dict] = {}
@@ -78,6 +96,7 @@ class social_model:
                     )
                 else:
                     payload = model.model_dump() if hasattr(model, "model_dump") else model
+                    payload = self._normalize_social_cursor(payload, key) if isinstance(payload, dict) else payload
                     response = await client.post(
                         "http://trusted-social-api:8020/social/" + key,
                         json=payload,

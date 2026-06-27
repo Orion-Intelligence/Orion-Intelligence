@@ -10,13 +10,22 @@ export interface FeedUser {
 
 export type FetchTabKey = 'details' | 'posts' | 'videos' | 'shorts' | 'images' | 'connections' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs';
 export type PostContentTabKey = Extract<FetchTabKey, 'posts' | 'videos' | 'shorts'>;
-export type PostFetchMergeMode = 'prepend' | 'append';
+export type FetchMergeMode = 'prepend' | 'append';
+export type PostFetchMergeMode = FetchMergeMode;
+export type ImageFetchMergeMode = FetchMergeMode;
 
 export interface PostCursorFetchRequest {
   platformData: PlatformResult;
   tabKey: PostContentTabKey;
   cursorId?: string;
+  limit?: number;
   mergeMode: PostFetchMergeMode;
+}
+
+export interface ImageCursorFetchRequest {
+  platformData: PlatformResult;
+  limit?: number;
+  mergeMode: ImageFetchMergeMode;
 }
 
 export interface FetchTab {

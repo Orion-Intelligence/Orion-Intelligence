@@ -3,11 +3,11 @@
     <div [attr.data-testid]="'social-tab-panel-' + contentType" class="px-[13px] pt-[11px] pb-[13px]">
       <div class="mb-3 flex items-center justify-between gap-3">
         <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ getPostContentTabLabel(contentType) }}</p>
-        <div class="flex flex-shrink-0 items-center gap-2">
-          <button type="button" (click)="fetchNew(platformData, contentType)" [disabled]="isLoading()" class="inline-flex h-8 items-center rounded-[8px] border border-[#e2e8f0] bg-[#f1f5f9] px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+        <div class="inline-flex flex-shrink-0 items-center overflow-hidden rounded-[6px] border border-[#e2e8f0] bg-[#f1f5f9] [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc]">
+          <button type="button" (click)="fetchNew(platformData, contentType)" [disabled]="isLoading()" class="inline-flex h-8 items-center border-0 bg-transparent px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
             Fetch New
           </button>
-          <button type="button" (click)="loadMore(platformData, contentType)" [disabled]="isLoading()" class="inline-flex h-8 items-center rounded-[8px] border border-[#e2e8f0] bg-[#f1f5f9] px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+          <button type="button" (click)="loadMore(platformData, contentType)" [disabled]="isLoading()" class="inline-flex h-8 items-center border-0 border-l border-[#d6dee8] bg-transparent px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
             Load More
           </button>
         </div>

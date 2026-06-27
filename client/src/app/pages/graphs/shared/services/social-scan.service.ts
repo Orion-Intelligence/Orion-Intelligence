@@ -210,49 +210,49 @@ export class SocialScanService {
     }).pipe(retry(3));
   }
 
-  fetchPlatformImages(platform: string, username: string): Observable<{
+  fetchPlatformImages(platform: string, username: string, maxImages = 10): Observable<{
         images: SocialImage[];
     }> {
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<{
                 images: SocialImage[];
-            }>>('social/online/images', { platform, username }),
+            }>>('social/online/images', { platform, username, max_images: maxImages }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ images: (res.result as any)?.images ?? [] }),
     }).pipe(retry(3));
   }
 
-  fetchSocialPosts(platform: string, username: string, hashId?: string): Observable<{
+  fetchSocialPosts(platform: string, username: string, hashId?: string, maxPosts = 5): Observable<{
         posts: SocialPost[];
     }> {
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<SocialPost[] | {
                 posts: SocialPost[];
-            }>>('social/posts', { platform, username, max_posts: 5, social_data_type: 'posts', hash_id: hashId || undefined }),
+            }>>('social/posts', { platform, username, max_posts: maxPosts, social_data_type: 'posts', hash_id: hashId || undefined }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ posts: this.normalizeSocialPosts(res.result, 'posts') }),
     }).pipe(retry(3));
   }
 
-  fetchSocialVideos(platform: string, username: string, hashId?: string): Observable<{
+  fetchSocialVideos(platform: string, username: string, hashId?: string, maxVideos = 5): Observable<{
         videos: SocialPost[];
     }> {
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<SocialPost[] | {
                 videos: SocialPost[];
-            }>>('social/videos', { platform, username, max_videos: 5, social_data_type: 'videos', hash_id: hashId || undefined }),
+            }>>('social/videos', { platform, username, max_videos: maxVideos, social_data_type: 'videos', hash_id: hashId || undefined }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ videos: this.normalizeSocialPosts(res.result, 'videos') }),
     }).pipe(retry(3));
   }
 
-  fetchSocialShorts(platform: string, username: string, hashId?: string): Observable<{
+  fetchSocialShorts(platform: string, username: string, hashId?: string, maxShorts = 5): Observable<{
         shorts: SocialPost[];
     }> {
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<SocialPost[] | {
                 shorts: SocialPost[];
-            }>>('social/shorts', { platform, username, max_shorts: 5, social_data_type: 'shorts', hash_id: hashId || undefined }),
+            }>>('social/shorts', { platform, username, max_shorts: maxShorts, social_data_type: 'shorts', hash_id: hashId || undefined }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ shorts: this.normalizeSocialPosts(res.result, 'shorts') }),
     }).pipe(retry(3));

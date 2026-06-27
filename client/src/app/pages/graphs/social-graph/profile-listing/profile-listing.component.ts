@@ -6,7 +6,7 @@ import { SocialIconComponent } from '../../../../shared/components/social-icon/s
 import { SocialService } from '../services/social.service';
 import { getProfileDetailEntries } from '../utils/summary-view.util';
 import { StealerlogSectionComponent } from '../stealerlog-section/stealerlog-section.component';
-import type { FeedUser, FetchTab, FetchTabKey, OnlinePresenceFetchRequest, PostCursorFetchRequest, SocialPlatformCapabilityMap } from '../models/social-graph.models';
+import type { FeedUser, FetchTab, FetchTabKey, ImageCursorFetchRequest, OnlinePresenceFetchRequest, PostCursorFetchRequest, SocialPlatformCapabilityMap } from '../models/social-graph.models';
 import { SocialNormalizationUtil } from '../utils/social-normalization.util';
 import socialPlatformCapabilities from '../../../../../assets/data/social-graph/platform-capabilities.json';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
@@ -41,6 +41,7 @@ export class SocialProfileListingComponent {
   fetchShortsInline = output<PlatformResult>();
   fetchPostCursorInline = output<PostCursorFetchRequest>();
   fetchImagesInline = output<PlatformResult>();
+  fetchImageCursorInline = output<ImageCursorFetchRequest>();
   fetchFollowersInline = output<PlatformResult>();
   fetchFollowingInline = output<PlatformResult>();
   fetchMetadataInline = output<PlatformResult>();

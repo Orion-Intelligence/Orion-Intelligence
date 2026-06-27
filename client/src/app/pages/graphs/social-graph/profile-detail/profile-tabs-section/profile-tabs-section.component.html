@@ -130,6 +130,16 @@
             <div data-testid="social-tab-panel-images" class="px-[13px] pt-[11px] pb-[13px]">
               <div class="mb-3 flex items-center justify-between gap-3">
                 <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Images</p>
+                @if ((platformData.images || []).length > 0) {
+                  <div class="inline-flex flex-shrink-0 items-center overflow-hidden rounded-[6px] border border-[#e2e8f0] bg-[#f1f5f9] [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc]">
+                    <button type="button" (click)="fetchImagesNew(platformData)" [disabled]="isTabLoading('images')" class="inline-flex h-8 items-center border-0 bg-transparent px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+                      Fetch New
+                    </button>
+                    <button type="button" (click)="loadMoreImages(platformData)" [disabled]="isTabLoading('images')" class="inline-flex h-8 items-center border-0 border-l border-[#d6dee8] bg-transparent px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+                      Load More
+                    </button>
+                  </div>
+                }
               </div>
               @if (isTabLoading('images') && (platformData.images || []).length === 0) {
                 <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">

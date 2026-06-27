@@ -4,7 +4,7 @@ import { Observable, Subject, of } from 'rxjs';
 import { map, takeUntil, tap } from 'rxjs/operators';
 import { Job, PlatformResult, ScanEvent } from '../../../../shared/model/social/social-scan.models';
 import { SocialScanService } from '../../shared/services/social-scan.service';
-import type { FetchStateKey, FetchTabKey, NotificationType, PostFetchMergeMode, ScanJobOptions, UpdateStateFn } from '../models/social-graph.models';
+import type { FetchMergeMode, FetchStateKey, FetchTabKey, NotificationType, ScanJobOptions, UpdateStateFn } from '../models/social-graph.models';
 import { SocialNormalizationUtil } from '../utils/social-normalization.util';
 import { SocialStateService } from './social-state.service';
 
@@ -99,20 +99,20 @@ export class SocialService {
     return this.scanService.fetchProfileInfo(platform, username);
   }
 
-  fetchPlatformImages(platform: string, username: string): ReturnType<SocialScanService['fetchPlatformImages']> {
-    return this.scanService.fetchPlatformImages(platform, username);
+  fetchPlatformImages(platform: string, username: string, maxImages?: number): ReturnType<SocialScanService['fetchPlatformImages']> {
+    return this.scanService.fetchPlatformImages(platform, username, maxImages);
   }
 
-  fetchSocialPosts(platform: string, username: string, hashId?: string): ReturnType<SocialScanService['fetchSocialPosts']> {
-    return this.scanService.fetchSocialPosts(platform, username, hashId);
+  fetchSocialPosts(platform: string, username: string, hashId?: string, maxPosts?: number): ReturnType<SocialScanService['fetchSocialPosts']> {
+    return this.scanService.fetchSocialPosts(platform, username, hashId, maxPosts);
   }
 
-  fetchSocialVideos(platform: string, username: string, hashId?: string): ReturnType<SocialScanService['fetchSocialVideos']> {
-    return this.scanService.fetchSocialVideos(platform, username, hashId);
+  fetchSocialVideos(platform: string, username: string, hashId?: string, maxVideos?: number): ReturnType<SocialScanService['fetchSocialVideos']> {
+    return this.scanService.fetchSocialVideos(platform, username, hashId, maxVideos);
   }
 
-  fetchSocialShorts(platform: string, username: string, hashId?: string): ReturnType<SocialScanService['fetchSocialShorts']> {
-    return this.scanService.fetchSocialShorts(platform, username, hashId);
+  fetchSocialShorts(platform: string, username: string, hashId?: string, maxShorts?: number): ReturnType<SocialScanService['fetchSocialShorts']> {
+    return this.scanService.fetchSocialShorts(platform, username, hashId, maxShorts);
   }
 
   fetchFollowers(platform: string, username: string): ReturnType<SocialScanService['fetchFollowers']> {
@@ -196,7 +196,7 @@ export class SocialService {
     this.startNextQueuedScan(nextOpts);
   }
 
-  fetchPlatformData(opts: { platformResult: PlatformResult; stateKey: FetchStateKey; request$: Observable<any>; cancelMap: Map<string, Subject<void>>; destroyRef: ScanJobOptions['destroyRef']; updateState: UpdateStateFn; mergeMode?: PostFetchMergeMode; }): void {
+  fetchPlatformData(opts: { platformResult: PlatformResult; stateKey: FetchStateKey; request$: Observable<any>; cancelMap: Map<string, Subject<void>>; destroyRef: ScanJobOptions['destroyRef']; updateState: UpdateStateFn; mergeMode?: FetchMergeMode; }): void {
     const { platformResult, stateKey, request$, cancelMap, destroyRef, updateState, mergeMode } = opts;
     const key = this.stateStore.getPlatformUniqueKey(platformResult);
     if (this.stateStore.isUserBusy(platformResult.keyUsername)) {
@@ -330,7 +330,7 @@ export class SocialService {
     return this.getPlatformIdentityKey(left) === this.getPlatformIdentityKey(right);
   }
 
-  private buildFetchedPlatformData(platform: PlatformResult, stateKey: FetchStateKey, data: any, hasData: boolean, mergeMode?: PostFetchMergeMode): Partial<PlatformResult> {
+  private buildFetchedPlatformData(platform: PlatformResult, stateKey: FetchStateKey, data: any, hasData: boolean, mergeMode?: FetchMergeMode): Partial<PlatformResult> {
     const propertyMap = { profile: 'profileDetails', posts: 'posts', videos: 'videos', shorts: 'shorts', platformImages: 'images', followers: 'followers_list', following: 'following_list', onlinePresence: 'onlinePresence', stealerLogs: 'stealerLogs' };
     const propertyName = (propertyMap as any)[stateKey];
     if (mergeMode && this.isPostStateKey(stateKey)) {
@@ -345,6 +345,13 @@ export class SocialService {
       }
       return mergedData;
     }
+    if (mergeMode && stateKey === 'platformImages') {
+      if (!hasData || !Array.isArray(data)) {
+        return {};
+      }
+      const existing = Array.isArray(platform.images) ? platform.images : [];
+      return { images: this.mergeImageItems(existing, data, mergeMode) };
+    }
     const newData: Partial<PlatformResult> = { [propertyName]: hasData ? data : null } as Partial<PlatformResult>;
     if (stateKey === 'posts') {
       newData.post_connections = hasData ? this.extractConnections(data) : null;
@@ -356,7 +363,7 @@ export class SocialService {
     return stateKey === 'posts' || stateKey === 'videos' || stateKey === 'shorts';
   }
 
-  private mergePostItems(existing: any[], incoming: any[], mergeMode: PostFetchMergeMode): any[] {
+  private mergePostItems(existing: any[], incoming: any[], mergeMode: FetchMergeMode): any[] {
     const orderedItems = mergeMode === 'prepend' ? [...incoming, ...existing] : [...existing, ...incoming];
     const seen = new Set<string>();
     return orderedItems.filter(item => {
@@ -371,6 +378,24 @@ export class SocialService {
 
   private getPostItemKey(post: any): string {
     return String(post?.hash_id || post?.m_hash_id || post?.post_url || post?.m_url || post?.url || post?.m_message_sharable_link || JSON.stringify(post)).trim();
+  }
+
+  private mergeImageItems(existing: any[], incoming: any[], mergeMode: FetchMergeMode): any[] {
+    const orderedItems = mergeMode === 'prepend' ? [...incoming, ...existing] : [...existing, ...incoming];
+    const seen = new Set<string>();
+    return orderedItems.filter(item => {
+      const key = this.getImageItemKey(item);
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+  }
+
+  private getImageItemKey(image: any): string {
+    const sourceTitleKey = image?.source || image?.title ? `${image?.source || ''}|${image?.title || ''}` : '';
+    return String(image?.image_url || image?.thumbnail || image?.url || sourceTitleKey || JSON.stringify(image)).trim();
   }
 
   private extractConnections(posts: any): string[] | null {
