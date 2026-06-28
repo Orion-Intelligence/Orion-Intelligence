@@ -12,6 +12,9 @@ import { FeederService } from '../feeder.service';
 import { SidebarUserFeederOwnerDialogComponent } from '../owner-dialog/sidebar-user-feeder-owner-dialog.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
+type SortDirection = 'asc' | 'desc';
+type SortColumn = 'file' | 'owner' | 'path' | 'active' | 'status' | 'lastSuccess' | 'updated';
+
 @Component({
   selector: 'app-sidebar-user-feeder-view',
   standalone: true,
@@ -46,7 +49,8 @@ export class SidebarUserFeederViewComponent implements OnChanges {
   hasLoadedScripts = false;
   currentPage = 1;
   totalPages = 1;
-  sortStatusDirection: 'asc' | 'desc' | null = null;
+  sortColumn: SortColumn | null = null;
+  sortDirection: SortDirection | null = null;
   readonly shimmerRows = Array.from({ length: 4 }, (_, index) => index);
 
   @Input() active = false;
@@ -203,9 +207,17 @@ export class SidebarUserFeederViewComponent implements OnChanges {
     return value.last_checked_at || value.last_success_date || value.last_failure_date || null;
   }
 
-  toggleStatusSort(): void {
-    this.sortStatusDirection = this.sortStatusDirection === 'asc' ? 'desc' : 'asc';
+  toggleSort(column: SortColumn): void {
+    this.sortDirection = this.sortColumn === column && this.sortDirection === 'asc' ? 'desc' : 'asc';
+    this.sortColumn = column;
     this.applyLocalSearch();
+  }
+
+  getSortIcon(column: SortColumn): string {
+    if (this.sortColumn !== column) {
+      return '';
+    }
+    return this.sortDirection === 'asc' ? '↑' : '↓';
   }
 
   hasValuePreview(value: FeederValueItem): boolean {
@@ -395,7 +407,8 @@ export class SidebarUserFeederViewComponent implements OnChanges {
   }
 
   beginScriptSelection(event: MouseEvent, script: FeederScriptItem): void {
-    if (this.entryType === 'values' || this.isInteractiveTarget(event.target)) {
+    const usesSelectionModifier = event.shiftKey || event.ctrlKey || event.metaKey;
+    if (this.entryType === 'values' || this.isInteractiveTarget(event.target) || (this.isTextSelectionTarget(event.target) && !usesSelectionModifier)) {
       return;
     }
 
@@ -664,7 +677,23 @@ export class SidebarUserFeederViewComponent implements OnChanges {
   }
 
   private isInteractiveTarget(target: EventTarget | null): boolean {
-    return target instanceof HTMLElement && !!target.closest('button, input, textarea, select, a, [role="button"]');
+    const element = this.getEventElement(target);
+    return !!element?.closest('button, input, textarea, select, a, [role="button"]');
+  }
+
+  private isTextSelectionTarget(target: EventTarget | null): boolean {
+    const element = this.getEventElement(target);
+    return !!element?.closest('[data-feeder-text-selectable="true"]');
+  }
+
+  private getEventElement(target: EventTarget | null): HTMLElement | null {
+    if (target instanceof HTMLElement) {
+      return target;
+    }
+    if (target instanceof Node && target.parentElement instanceof HTMLElement) {
+      return target.parentElement;
+    }
+    return null;
   }
 
   hasStatusPreview(script: FeederScriptItem | null | undefined): boolean {
@@ -720,10 +749,10 @@ export class SidebarUserFeederViewComponent implements OnChanges {
           || (value.status || '').toLowerCase().includes(query)
           || (value.last_error || '').toLowerCase().includes(query));
       const totalValues = filteredValues.length;
-      const sortedValues = this.sortStatusDirection
+      const sortedValues = this.sortColumn === 'status' && this.sortDirection
         ? [...filteredValues].sort((left, right) => {
           const result = this.getValueStatus(left).localeCompare(this.getValueStatus(right));
-          return this.sortStatusDirection === 'asc' ? result : -result;
+          return this.sortDirection === 'asc' ? result : -result;
         })
         : filteredValues;
       this.totalPages = Math.max(1, Math.ceil(totalValues / this.pageSize));
@@ -740,12 +769,7 @@ export class SidebarUserFeederViewComponent implements OnChanges {
     this.valuesRecord = null;
     if (!query) {
       this.scripts = [...this.rawScripts];
-      this.displayedScripts = this.sortStatusDirection
-        ? [...this.scripts].sort((left, right) => {
-          const result = this.getRuntimeStatus(left).localeCompare(this.getRuntimeStatus(right));
-          return this.sortStatusDirection === 'asc' ? result : -result;
-        })
-        : [...this.scripts];
+      this.displayedScripts = this.sortScripts(this.scripts);
       this.totalPages = Math.max(1, Math.ceil(this.scriptTotal / this.pageSize));
       return;
     }
@@ -759,13 +783,46 @@ export class SidebarUserFeederViewComponent implements OnChanges {
       ];
       return haystacks.some(value => value.toLowerCase().includes(query));
     });
-    this.displayedScripts = this.sortStatusDirection
-      ? [...this.scripts].sort((left, right) => {
-        const result = this.getRuntimeStatus(left).localeCompare(this.getRuntimeStatus(right));
-        return this.sortStatusDirection === 'asc' ? result : -result;
-      })
-      : [...this.scripts];
+    this.displayedScripts = this.sortScripts(this.scripts);
     this.totalPages = 1;
+  }
+
+  private sortScripts(scripts: FeederScriptItem[]): FeederScriptItem[] {
+    if (!this.sortColumn || !this.sortDirection) {
+      return [...scripts];
+    }
+    return [...scripts].sort((left, right) => {
+      const leftValue = this.getScriptSortValue(left, this.sortColumn as SortColumn);
+      const rightValue = this.getScriptSortValue(right, this.sortColumn as SortColumn);
+      const result = typeof leftValue === 'number' && typeof rightValue === 'number'
+        ? leftValue - rightValue
+        : String(leftValue).localeCompare(String(rightValue));
+      return this.sortDirection === 'asc' ? result : -result;
+    });
+  }
+
+  private getScriptSortValue(script: FeederScriptItem, column: SortColumn): string | number {
+    switch (column) {
+      case 'file':
+        return this.getScriptDisplayName(script).toLowerCase();
+      case 'owner':
+        return this.getOwnerLabel(script).toLowerCase();
+      case 'path':
+        return this.getScriptPathLabel(script).toLowerCase();
+      case 'active':
+        return script.enabled ? 1 : 0;
+      case 'status':
+        return this.getRuntimeStatus(script);
+      case 'lastSuccess':
+        return this.getDateSortValue(script.last_success_date);
+      case 'updated':
+        return this.getDateSortValue(script.updated_at);
+    }
+  }
+
+  private getDateSortValue(value?: string | null): number {
+    const timestamp = value ? Date.parse(value) : NaN;
+    return Number.isNaN(timestamp) ? 0 : timestamp;
   }
 
   private deferStateUpdate(callback: () => void): void {

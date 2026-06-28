@@ -28,6 +28,20 @@
         [disabled]="!rules.length"
         (valueChange)="onRuleSelect($event)"></app-ui-dropdown>
     }
+    @if (!isCatalogLoading && isSocialRuleSelected) {
+      <div class="mt-3">
+        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Social Media' | translate }}</label>
+        <app-ui-dropdown
+          menuId="feeder-social-rule-menu"
+          testId="feeder-social-rule-select"
+          optionTestIdPrefix="feeder-social-rule-option-"
+          size="large"
+          [options]="socialRuleDropdownOptions"
+          [selected]="selectedSocialRuleKey"
+          [disabled]="!socialRuleDropdownOptions.length"
+          (valueChange)="onSocialRuleSelect($event)"></app-ui-dropdown>
+      </div>
+    }
   </div>
 
   <div class="mt-6 flex max-w-full flex-nowrap gap-2 overflow-x-auto whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]">
@@ -47,13 +61,13 @@
   </div>
 
   @if (activeTab === 'add') {
-    <app-sidebar-user-feeder-add [rules]="rules" [selectedRuleKey]="selectedRuleKey" [isCatalogLoading]="isCatalogLoading" (scriptUploaded)="onScriptUploaded($event)"></app-sidebar-user-feeder-add>
+    <app-sidebar-user-feeder-add [rules]="rules" [selectedRuleKey]="effectiveSelectedRuleKey" [isCatalogLoading]="isCatalogLoading" (scriptUploaded)="onScriptUploaded($event)"></app-sidebar-user-feeder-add>
   }
 
   @if (activeTab === 'view' || activeTab === 'values') {
     <app-sidebar-user-feeder-view
       [active]="activeTab === 'view' || activeTab === 'values'"
-      [selectedRuleKey]="selectedRuleKey"
+      [selectedRuleKey]="effectiveSelectedRuleKey"
       [entryType]="activeTab === 'values' ? 'values' : 'scripts'"
       [highlightedScript]="activeTab === 'view' ? highlightedScript : null"></app-sidebar-user-feeder-view>
   }

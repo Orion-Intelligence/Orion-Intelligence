@@ -19,10 +19,14 @@ import { UiDropdownComponent, UiDropdownOption } from '../../../shared/component
   animations: [fadeInDashboardItem],
 })
 export class SidebarUserFeederComponent implements OnInit {
+  private readonly socialRuleGroupKey = '__social_media__';
+  private readonly socialRuleKeys = new Set(['facebook', 'instagram', 'linkedin', 'mastodon', 'pastebin', 'reddit', 'tiktok', 'twitter', 'youtube']);
+
   activeTab: 'add' | 'view' | 'values' = 'add';
   highlightedScript: FeederScriptItem | null = null;
   rules: FeederRuleOption[] = [];
   selectedRuleKey = '';
+  selectedSocialRuleKey = '';
   isCatalogLoading = true;
   formError = '';
 
@@ -34,15 +38,38 @@ export class SidebarUserFeederComponent implements OnInit {
   }
 
   get selectedRule(): FeederRuleOption | undefined {
-    return this.rules.find((rule) => rule.key === this.selectedRuleKey);
+    return this.rules.find((rule) => rule.key === this.effectiveSelectedRuleKey);
   }
 
   get selectedRuleType(): string {
     return this.selectedRule?.rule_type || '';
   }
 
+  get isSocialRuleSelected(): boolean {
+    return this.selectedRuleKey === this.socialRuleGroupKey;
+  }
+
+  get effectiveSelectedRuleKey(): string {
+    return this.isSocialRuleSelected ? (this.selectedSocialRuleKey || this.socialRules[0]?.key || '') : this.selectedRuleKey;
+  }
+
+  get socialRules(): FeederRuleOption[] {
+    return this.rules.filter(rule => this.isSocialRule(rule));
+  }
+
   get ruleDropdownOptions(): UiDropdownOption[] {
-    return this.rules.map(rule => ({
+    const options = this.rules.filter(rule => !this.isSocialRule(rule)).map(rule => ({
+      key: rule.key,
+      label: this.getRuleLabel(rule.key),
+    }));
+    if (this.socialRules.length) {
+      options.push({ key: this.socialRuleGroupKey, label: 'Social Media' });
+    }
+    return options;
+  }
+
+  get socialRuleDropdownOptions(): UiDropdownOption[] {
+    return this.socialRules.map(rule => ({
       key: rule.key,
       label: this.getRuleLabel(rule.key),
     }));
@@ -77,8 +104,26 @@ export class SidebarUserFeederComponent implements OnInit {
     if (!ruleKey || this.selectedRuleKey === ruleKey) {
       return;
     }
+    if (ruleKey === this.socialRuleGroupKey) {
+      this.selectedRuleKey = ruleKey;
+      this.selectedSocialRuleKey = this.selectedSocialRuleKey || this.socialRules[0]?.key || '';
+      this.activeTab = this.hasScriptTab() ? 'view' : this.hasValuesTab() ? 'values' : 'add';
+      this.onRuleChange();
+      return;
+    }
     this.selectedRuleKey = ruleKey;
+    this.selectedSocialRuleKey = '';
     this.onRuleChange();
+  }
+
+  onSocialRuleSelect(ruleKey: string | null): void {
+    if (!ruleKey || this.selectedSocialRuleKey === ruleKey) {
+      return;
+    }
+    this.highlightedScript = null;
+    this.selectedSocialRuleKey = ruleKey;
+    this.ensureValidActiveTab();
+    this.syncRuleQueryParam();
   }
 
   getRuleLabel(ruleKey: string): string {
@@ -94,12 +139,14 @@ export class SidebarUserFeederComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.rules = response?.rules ?? [];
+          this.syncSocialRuleSelectionFromSelectedRule();
           if (!this.selectedRuleKey && this.rules.length > 0) {
-            this.selectedRuleKey = this.rules[0].key;
+            this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key || this.socialRuleGroupKey;
           }
-          if (this.selectedRuleKey && !this.rules.some((rule) => rule.key === this.selectedRuleKey)) {
-            this.selectedRuleKey = this.rules[0]?.key || '';
+          if (this.selectedRuleKey && this.selectedRuleKey !== this.socialRuleGroupKey && !this.rules.some((rule) => rule.key === this.selectedRuleKey)) {
+            this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key || '';
           }
+          this.ensureSocialRuleSelection();
           this.ensureValidActiveTab();
           this.syncRuleQueryParam();
           this.formError = '';
@@ -131,9 +178,36 @@ export class SidebarUserFeederComponent implements OnInit {
   private syncRuleQueryParam(): void {
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { rule: this.selectedRuleKey || null },
+      queryParams: { rule: this.effectiveSelectedRuleKey || null },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
+  }
+
+  private isSocialRule(rule: FeederRuleOption): boolean {
+    return this.socialRuleKeys.has((rule.key || '').toLowerCase()) || (rule.path || '').toLowerCase() === 'social/platform';
+  }
+
+  private syncSocialRuleSelectionFromSelectedRule(): void {
+    const selectedSocialRule = this.rules.find(rule => rule.key === this.selectedRuleKey && this.isSocialRule(rule));
+    if (!selectedSocialRule) {
+      return;
+    }
+    this.selectedSocialRuleKey = selectedSocialRule.key;
+    this.selectedRuleKey = this.socialRuleGroupKey;
+  }
+
+  private ensureSocialRuleSelection(): void {
+    if (!this.isSocialRuleSelected) {
+      return;
+    }
+    if (!this.socialRules.length) {
+      this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key || '';
+      this.selectedSocialRuleKey = '';
+      return;
+    }
+    if (!this.socialRules.some(rule => rule.key === this.selectedSocialRuleKey)) {
+      this.selectedSocialRuleKey = this.socialRules[0].key;
+    }
   }
 }

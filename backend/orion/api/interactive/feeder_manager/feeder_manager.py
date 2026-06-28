@@ -382,61 +382,87 @@ class FeederManager:
                 if str(rule.get("rule_type") or "") in {"shared", "generic"}:
                     record = candidate_record
                     break
-        if not record:
-            raise HTTPException(status_code=404, detail="Script not found")
-
-        if not record.feeder:
-            record.feeder = osint_feeder()
-
-        related_script_record = None
-        if record.entry_kind == "values" and record.rule_key:
-            related_script_record = await self._engine.find_one(
+        records = [record] if record else []
+        if lookup_url:
+            extra_records = await self._engine.find(
                 self._helper.model,
-                (self._helper.model.rule_key == record.rule_key) & (self._helper.model.entry_kind == "script"),
+                {
+                    "$or": [
+                        {"url": lookup_url},
+                        {"values.url": lookup_url},
+                    ],
+                },
             )
-            if related_script_record and not related_script_record.feeder:
-                related_script_record.feeder = osint_feeder()
+            seen_ids = {str(candidate.id) for candidate in records}
+            for candidate_record in extra_records:
+                if str(candidate_record.id) in seen_ids:
+                    continue
+                records.append(candidate_record)
+                seen_ids.add(str(candidate_record.id))
+
+        if not records:
+            raise HTTPException(status_code=404, detail="Script not found")
 
         now = datetime.now(timezone.utc)
         status = data.status.strip().lower()
         message = (data.message or "").strip() or None
 
-        if status == "failure":
-            if lookup_url and (record.values or []):
-                for value in (record.values or []):
-                    if str(value.get("url") or "") != lookup_url:
-                        continue
-                    value["status"] = "failure"
-                    value["last_checked_at"] = now
-                    value["last_failure_date"] = now
-                    value["last_error"] = message
-                    value["last_failure_message"] = message
-                    break
-            record.feeder.last_failure_date = now
-            record.feeder.last_failure_message = message
-            if related_script_record:
-                related_script_record.feeder.last_failure_date = now
-                related_script_record.feeder.last_failure_message = message
-        elif status == "success":
-            if lookup_url and (record.values or []):
-                for value in (record.values or []):
-                    if str(value.get("url") or "") != lookup_url:
-                        continue
-                    value["status"] = "success"
-                    value["last_checked_at"] = now
-                    value["last_success_date"] = now
-                    value["last_success_message"] = message
-                    value["last_error"] = None
-                    break
-            record.feeder.last_success_date = now
-            record.feeder.last_success_message = message
-            if related_script_record:
-                related_script_record.feeder.last_success_date = now
-                related_script_record.feeder.last_success_message = message
-        else:
+        if status not in {"success", "failure"}:
             raise HTTPException(status_code=400, detail="Status must be success or failure")
 
-        await self._engine.save(record)
-        if related_script_record:
-            await self._engine.save(related_script_record)
+        related_records = []
+        for record in records:
+            if not record.feeder:
+                record.feeder = osint_feeder()
+
+            if record.entry_kind == "values" and record.rule_key:
+                related_script_record = await self._engine.find_one(
+                    self._helper.model,
+                    (self._helper.model.rule_key == record.rule_key) & (self._helper.model.entry_kind == "script"),
+                )
+                if related_script_record and not related_script_record.feeder:
+                    related_script_record.feeder = osint_feeder()
+                if related_script_record:
+                    related_records.append(related_script_record)
+
+            if status == "failure":
+                if lookup_url and (record.values or []):
+                    for value in (record.values or []):
+                        if str(value.get("url") or "") != lookup_url:
+                            continue
+                        value["status"] = "failure"
+                        value["last_checked_at"] = now
+                        value["last_failure_date"] = now
+                        value["last_error"] = message
+                        value["last_failure_message"] = message
+                record.feeder.last_failure_date = now
+                record.feeder.last_failure_message = message
+            elif status == "success":
+                if lookup_url and (record.values or []):
+                    for value in (record.values or []):
+                        if str(value.get("url") or "") != lookup_url:
+                            continue
+                        value["status"] = "success"
+                        value["last_checked_at"] = now
+                        value["last_success_date"] = now
+                        value["last_success_message"] = message
+                        value["last_error"] = None
+                record.feeder.last_success_date = now
+                record.feeder.last_success_message = message
+
+        if status == "failure":
+            for related_record in related_records:
+                related_record.feeder.last_failure_date = now
+                related_record.feeder.last_failure_message = message
+        elif status == "success":
+            for related_record in related_records:
+                related_record.feeder.last_success_date = now
+                related_record.feeder.last_success_message = message
+
+        seen_ids = set()
+        for record in [*records, *related_records]:
+            if str(record.id) in seen_ids:
+                continue
+            await self._engine.save(record)
+            seen_ids.add(str(record.id))
         return {"message": f"Feeder script marked as {status} successfully"}
