@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, throwError, timer } from 'rxjs';
-import { catchError, filter, map, retry, switchMap, take, tap } from 'rxjs/operators';
+import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { ApiService } from '../../../../shared/services/api.service';
 import { PlatformResult, ProfileDetails, ScanEvent, SocialImage, SocialPost, SocialStoredProfile } from '../../../../shared/model/social/social-scan.models';
 import { SocialNormalizationUtil } from '../../social-graph/utils/social-normalization.util';
@@ -207,7 +207,7 @@ export class SocialScanService {
         const profile = Array.isArray(result) ? result[0] : result?.profile ?? result ?? {};
         return { profile: profile as ProfileDetails };
       },
-    }).pipe(retry(3));
+    });
   }
 
   fetchPlatformImages(platform: string, username: string, maxImages = 10): Observable<{
@@ -219,7 +219,7 @@ export class SocialScanService {
             }>>('social/online/images', { platform, username, max_images: maxImages }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ images: (res.result as any)?.images ?? [] }),
-    }).pipe(retry(3));
+    });
   }
 
   fetchSocialPosts(platform: string, username: string, hashId?: string, maxPosts = 5, socialDataType = 'posts', maxComments = 10, commentOffset = 0): Observable<{
@@ -231,7 +231,7 @@ export class SocialScanService {
             }>>('social/posts', { platform, username, max_posts: maxPosts, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ posts: this.normalizeSocialPosts(res.result, 'posts') }),
-    }).pipe(retry(3));
+    });
   }
 
   fetchSocialVideos(platform: string, username: string, hashId?: string, maxVideos = 5, socialDataType = 'videos', maxComments = 10, commentOffset = 0): Observable<{
@@ -243,7 +243,7 @@ export class SocialScanService {
             }>>('social/videos', { platform, username, max_videos: maxVideos, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ videos: this.normalizeSocialPosts(res.result, 'videos') }),
-    }).pipe(retry(3));
+    });
   }
 
   fetchSocialShorts(platform: string, username: string, hashId?: string, maxShorts = 5, socialDataType = 'shorts', maxComments = 10, commentOffset = 0): Observable<{
@@ -255,7 +255,7 @@ export class SocialScanService {
             }>>('social/shorts', { platform, username, max_shorts: maxShorts, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ shorts: this.normalizeSocialPosts(res.result, 'shorts') }),
-    }).pipe(retry(3));
+    });
   }
 
   fetchSocialPostComments(platform: string, username: string, tabKey: 'posts' | 'videos' | 'shorts', hashId?: string, commentOffset = 0, maxComments = 10): Observable<{
@@ -279,7 +279,7 @@ export class SocialScanService {
       request: () => this.api.post<any>('social/followers', { platform, username, max_followers: 1000 }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ followers: (res.result as any)?.followers ?? [] }),
-    }).pipe(retry(3));
+    });
   }
 
   fetchFollowing(platform: string, username: string): Observable<{
@@ -289,7 +289,7 @@ export class SocialScanService {
       request: () => this.api.post<any>('social/following', { platform, username, max_following: 1000 }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ following: (res.result as any)?.following ?? [] }),
-    }).pipe(retry(3));
+    });
   }
 
   fetchStealerLogsByIdentity(query: string): Observable<any[]> {
@@ -328,6 +328,13 @@ export class SocialScanService {
     catchError(() => throwError(() => new Error('Failed to fetch stealer logs'))));
   }
 
+  fetchWantedList(query: string): Observable<any[]> {
+    return this.api.post<any>('dynamic/wanted', { text: { query } }).pipe(map((res) => {
+      return this.extractWantedResults(res);
+    }),
+    catchError(() => throwError(() => new Error('Failed to fetch wanted list'))));
+  }
+
   private extractStealerLogResults(res: any): any[] {
     if (Array.isArray(res?.Result)) {
       return res.Result;
@@ -339,6 +346,26 @@ export class SocialScanService {
       return res.data.Result;
     }
     return [];
+  }
+
+  private extractWantedResults(res: any): any[] {
+    const sources = [res, res?.data, res?.result, res?.data?.result, res?.result?.data];
+    for (const source of sources) {
+      if (Array.isArray(source?.cards_data)) {
+        return source.cards_data;
+      }
+      if (Array.isArray(source?.result)) {
+        return source.result;
+      }
+      if (Array.isArray(source)) {
+        return source;
+      }
+      if (source && typeof source === 'object' && 'cards_data' in source) {
+        return [];
+      }
+    }
+    const single = res?.data?.result ?? res?.result ?? res?.data ?? res;
+    return single && typeof single === 'object' ? [single] : [];
   }
 
   private normalizeSocialPosts(result: any, key: 'posts' | 'videos' | 'shorts'): SocialPost[] {
@@ -379,7 +406,7 @@ export class SocialScanService {
           results: Array.isArray(r?.results) ? r.results : []
         };
       },
-    }).pipe(retry(3));
+    });
   }
 
 }

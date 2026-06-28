@@ -172,6 +172,8 @@ class ScanJobManager:
 
         if latest_done_scan and not force_new:
             completed_at = (latest_done_scan.completed_at or latest_done_scan.updated_at or latest_done_scan.created_at)
+            if completed_at and completed_at.tzinfo is None:
+                completed_at = completed_at.replace(tzinfo=timezone.utc)
             if completed_at and completed_at >= now - timedelta(days=3):
                 return {**self._build_scan_detail(latest_done_scan, ScanJobStatus.DONE.value).model_dump(), "source": "previous_completed"}
             

@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, input, output, signal } from '@angular/core';
 import { PlatformResult, SocialPost, SocialPostComment } from '../../../../../shared/model/social/social-scan.models';
 import { formatFollowers } from '../../../../../shared/utils/formatters';
-import type { PostContentTabKey, PostCursorFetchRequest } from '../../models/social-graph.models';
+import type { PostContentTabKey, PostCursorFetchRequest, SocialPlatformCapabilityMap } from '../../models/social-graph.models';
 import { SocialNormalizationUtil } from '../../utils/social-normalization.util';
+import socialPlatformCapabilities from '../../../../../../assets/data/social-graph/platform-capabilities.json';
 
 @Component({
   selector: 'app-social-profile-post-content-section',
@@ -12,6 +13,7 @@ import { SocialNormalizationUtil } from '../../utils/social-normalization.util';
 })
 export class SocialProfilePostContentSectionComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
+  private readonly platformCapabilities = socialPlatformCapabilities as SocialPlatformCapabilityMap;
   private postMediaLoading = signal<Record<string, boolean>>({});
   private pendingScrollToBottom = false;
   private sawLoadingForScroll = false;
@@ -124,6 +126,10 @@ export class SocialProfilePostContentSectionComponent {
       return post.comment_details;
     }
     return (post?.comment_items || []).map(text => ({ text }));
+  }
+
+  areCommentsAllowed(platformData: PlatformResult): boolean {
+    return !this.platformCapabilities[platformData.platform.toLowerCase()]?.disallow?.includes('comments');
   }
 
   getCommentTrackKey(index: number, comment: SocialPostComment): string {

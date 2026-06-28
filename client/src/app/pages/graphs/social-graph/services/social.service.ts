@@ -135,6 +135,10 @@ export class SocialService {
     return this.scanService.fetchStealerLogsByIdentity(query);
   }
 
+  fetchWantedList(query: string): ReturnType<SocialScanService['fetchWantedList']> {
+    return this.scanService.fetchWantedList(query);
+  }
+
   fetchProfileMetadataTokens(tokens: string[], username: string, platform?: string): ReturnType<SocialScanService['fetchProfileMetadataTokens']> {
     return this.scanService.fetchProfileMetadataTokens(tokens, username, platform);
   }

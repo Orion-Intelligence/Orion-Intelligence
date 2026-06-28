@@ -657,7 +657,7 @@ async def search_dynamic_social(param: search_dynamic_social_model = Body(...), 
 async def search_dynamic_wanted(param: search_dynamic_social_model = Body(...), force_new: bool = Query(False), current_user=Depends(get_current_user)):
     target = next((str(v) for v in (param.text or {}).values() if v), "")
     await AuditLogManager.get_instance().search_audit(current_user, "dynamic_wanted", target)
-    return await ScanJobManager.get_instance().run_tracked_scan(current_user=current_user, api_reference="dynamic/wanted", payload=param.model_dump(), metadata={"title": "Wanted People Scan", "target": target}, runner=lambda: search_model.getInstance().search_wanted_list(param), force_new=force_new)
+    return await ScanJobManager.get_instance().run_tracked_scan(current_user=current_user, api_reference="dynamic/wanted", payload=param.model_dump(), metadata={"title": "Wanted People Scan", "target": target}, runner=lambda: search_model.getInstance().search_wanted_list(param), force_new=True)
 
 @api_routes.post(
     "/api/dynamic/national-identity",

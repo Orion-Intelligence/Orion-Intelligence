@@ -42,9 +42,11 @@ export interface OnlinePresenceFetchRequest {
   token: string;
 }
 
+export type SocialPlatformCapabilityKey = FetchTabKey | 'comments';
+
 export interface SocialPlatformCapability {
   allow?: string[];
-  disallow?: FetchTabKey[];
+  disallow?: SocialPlatformCapabilityKey[];
 }
 
 export type SocialPlatformCapabilityMap = Record<string, SocialPlatformCapability>;

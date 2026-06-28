@@ -2,5 +2,15 @@
   "youtube": {
     "allow": ["posts", "videos", "shorts"],
     "disallow": ["connections", "followers", "following"]
+  },
+  "tiktok": {
+    "allow": ["shorts"],
+    "disallow": ["posts"]
+  },
+  "twitter": {
+    "disallow": ["followers", "following", "comments"]
+  },
+  "x": {
+    "disallow": ["followers", "following", "comments"]
   }
 }

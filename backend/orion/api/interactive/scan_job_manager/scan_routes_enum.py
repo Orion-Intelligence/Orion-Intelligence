@@ -46,6 +46,10 @@ SCAN_ROUTES: Dict[str, Dict[str, str]] = {
         "path": "runtime/parse/social",
         "target_key": "text",
     },
+    "dynamic/wanted": {
+        "path": "runtime/parse/wanted",
+        "target_key": "text",
+    },
     "dynamic/cracked": {
         "path": "runtime/parse/cracked",
         "target_key": "text",

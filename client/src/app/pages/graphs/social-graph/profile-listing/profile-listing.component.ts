@@ -6,6 +6,7 @@ import { SocialIconComponent } from '../../../../shared/components/social-icon/s
 import { SocialService } from '../services/social.service';
 import { getProfileDetailEntries } from '../utils/summary-view.util';
 import { StealerlogSectionComponent } from '../stealerlog-section/stealerlog-section.component';
+import { WantedListSectionComponent } from '../wanted-list-section/wanted-list-section.component';
 import type { FeedUser, FetchTab, FetchTabKey, ImageCursorFetchRequest, OnlinePresenceFetchRequest, PostCursorFetchRequest, SocialPlatformCapabilityMap } from '../models/social-graph.models';
 import { SocialNormalizationUtil } from '../utils/social-normalization.util';
 import socialPlatformCapabilities from '../../../../../assets/data/social-graph/platform-capabilities.json';
@@ -17,7 +18,7 @@ import { SocialProfileTabsSectionComponent } from '../profile-detail/profile-tab
   selector: 'app-social-profile-listing',
   templateUrl: './profile-listing.component.html',
   standalone: true,
-  imports: [SocialIconComponent, StealerlogSectionComponent, SocialDefaultListSectionComponent, SocialProfileTabsSectionComponent],
+  imports: [SocialIconComponent, StealerlogSectionComponent, WantedListSectionComponent, SocialDefaultListSectionComponent, SocialProfileTabsSectionComponent],
   animations: [fadeInDashboardItem],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
