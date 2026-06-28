@@ -38,6 +38,8 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   animations: [fadeInDashboardItem]
 })
 export class ReportChatComponent implements OnInit, AfterViewInit {
+  private readonly commentTabKeys = new Set(['m_comments', 'm_post_comments', 'm_post_comments_list', 'm_post_comment_list', 'm_comment_list', 'm_comments_list', 'comments', 'comment_items', 'comment_details', 'comments_list', 'post_comments_list', 'm_replies', 'replies', 'm_thread_comments', 'thread_comments']);
+
   protected readonly last = last;
 
   resultItem: ChatResultItem | SocialResultItem | null = null;
@@ -144,7 +146,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
       return;
     }
     if (this.resultItem && Array.isArray((this.resultItem as any)[this.activeTab])) {
-      this.listItems = (this.resultItem as any)[this.activeTab].slice(0, 100);
+      this.listItems = this.getMetadataListItems(this.activeTab);
     }
     else {
       this.listItems = [];
@@ -162,7 +164,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
       this.listItems = [];
     }
     else if (this.resultItem && Array.isArray((this.resultItem as any)[tab])) {
-      this.listItems = (this.resultItem as any)[tab].slice(0, 100);
+      this.listItems = this.getMetadataListItems(tab);
     }
     else {
       this.listItems = [];
@@ -205,6 +207,67 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
     }
     const value = (this.resultItem as any)?.[key];
     return Array.isArray(value) ? value.length : value ? 1 : 0;
+  }
+
+  private getMetadataListItems(tab: string): string[] {
+    if (!this.resultItem) {
+      return [];
+    }
+    const value = (this.resultItem as any)[tab];
+    if (this.commentTabKeys.has(tab)) {
+      return this.normalizeCommentValues(value).slice(0, 100);
+    }
+    return Array.isArray(value) ? value.map(item => this.toDisplayValue(item)).filter(Boolean).slice(0, 100) : [];
+  }
+
+  private normalizeCommentValues(value: unknown): string[] {
+    if (!value) {
+      return [];
+    }
+    if (Array.isArray(value)) {
+      return value.flatMap(item => this.normalizeCommentValues(item));
+    }
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return [];
+      }
+      if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+        try {
+          return this.normalizeCommentValues(JSON.parse(trimmed));
+        }
+        catch {
+          return [trimmed];
+        }
+      }
+      return [trimmed];
+    }
+    if (typeof value === 'object') {
+      const comment = value as any;
+      const text = comment.text || comment.comment || comment.comment_text || comment.m_comment_text || comment.m_comment || comment.m_text || comment.content || comment.comment_content || comment.m_content || comment.message || comment.body || comment.m_body || comment.comment_body || comment.reply || comment.reply_content || comment.description;
+      if (text) {
+        const meta = [
+          comment.sender_name || comment.m_sender_name || comment.author || comment.m_author || comment.comment_author || comment.username || comment.user || comment.name || comment.from,
+          comment.m_date || comment.date || comment.datetime || comment.created_at || comment.timestamp || comment.time || comment.m_time
+        ].filter(Boolean).join(' - ');
+        return [meta ? `${meta}: ${text}` : String(text)];
+      }
+      return Array.from(this.commentTabKeys).flatMap(key => this.normalizeCommentValues(comment[key]));
+    }
+    return [String(value)];
+  }
+
+  private toDisplayValue(value: unknown): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (typeof value === 'object') {
+      return JSON.stringify(value);
+    }
+    return String(value);
   }
 
   private isLikelyUrl(value: string): boolean {

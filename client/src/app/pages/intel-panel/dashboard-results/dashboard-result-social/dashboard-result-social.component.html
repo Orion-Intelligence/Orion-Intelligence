@@ -68,15 +68,17 @@
           }
         }
       } @else {
-        @if (getContentLines(item).length > 0) {
-          <div class="mb-[12px] mt-[10px] space-y-[10px]">
-            @for (section of getContentLines(item).slice(0, 5); track $index; let i = $index; let isLast = $last) {
+        @if (getDisplaySections(item); as sections) {
+          @if (sections.length > 0) {
+          <div class="mb-[10px] mt-[8px] space-y-[6px]">
+            @for (section of sections; track $index; let i = $index; let isLast = $last) {
               <div class="p-0">
-                <h3 class="m-0 text-[15px] font-semibold text-[var(--color-text1)]">{{ 'Section' | translate }} {{ i + 1 }}</h3>
-                <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)] select-text" [class.mb-0]="isLast">{{ section.length > 150 ? (section | slice:0:150) + '...' : section }}</p>
+                <h3 class="m-0 text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Section' | translate }} {{ i + 1 }}</h3>
+                <p class="mt-[4px] mb-[8px] break-all text-[14px] font-normal text-[var(--color-text8)] select-text" [class.mb-0]="isLast">{{ section.length > 150 ? (section | slice:0:150) + '...' : section }}</p>
               </div>
             }
           </div>
+          }
         }
       }
       @if (item.m_weblink?.length) {
@@ -92,9 +94,14 @@
       <div class="mt-[20px] flex flex-wrap items-start justify-start gap-[15px] pt-[10px] pr-[10px] text-[12px]">
         <div class="flex flex-col gap-[2px]">
           <span class="font-[Roboto] text-[12px] font-[400] text-[var(--color-text4)]">{{ 'Message Date' | translate }}:</span>
-          <span class="font-[Roboto] text-[14px] font-[500] text-[var(--color-text1)]">{{ item.m_date ?
-          (item.m_date | date: 'MMM d, y') : ('Not available' | translate) }}</span>
+          <span class="font-[Roboto] text-[14px] font-[500] text-[var(--color-text1)]">{{ getMessageDate(item) || ('Not available' | translate) }}</span>
         </div>
+        @if (getCommentCount(item)) {
+          <div class="flex flex-col gap-[2px]">
+            <span class="font-[Roboto] text-[12px] font-[400] text-[var(--color-text4)]">{{ 'Comments' | translate }}:</span>
+            <span class="font-[Roboto] text-[14px] font-[500] text-[var(--color-text1)]">{{ getCommentCount(item) }}</span>
+          </div>
+        }
       </div>
     </div>
   </div>

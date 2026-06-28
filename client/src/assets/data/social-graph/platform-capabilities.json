@@ -1,16 +1,18 @@
 {
-  "youtube": {
-    "allow": ["posts", "videos", "shorts"],
+  "__all__": {
     "disallow": ["connections", "followers", "following"]
+  },
+  "youtube": {
+    "allow": ["posts", "videos", "shorts"]
   },
   "tiktok": {
     "allow": ["shorts"],
     "disallow": ["posts"]
   },
   "twitter": {
-    "disallow": ["followers", "following", "comments"]
+    "disallow": ["comments"]
   },
   "x": {
-    "disallow": ["followers", "following", "comments"]
+    "disallow": ["comments"]
   }
 }

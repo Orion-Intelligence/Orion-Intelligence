@@ -143,7 +143,6 @@ class SocialPlatform(str, Enum):
     X = "x"
     LINKEDIN = "linkedin"
     TELEGRAM = "telegram"
-    WHATSAPP = "whatsapp"
     DISCORD = "discord"
     REDDIT = "reddit"
     GITHUB = "github"

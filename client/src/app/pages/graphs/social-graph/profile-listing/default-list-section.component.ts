@@ -40,15 +40,16 @@ export class SocialDefaultListSectionComponent {
   }
 
   isFetchTabAllowed(platformData: PlatformResult, tabKey: FetchTabKey): boolean {
+    const globalCapability = this.platformCapabilities['__all__'];
     const capability = this.platformCapabilities[platformData.platform.toLowerCase()];
-    if (capability?.disallow?.includes(tabKey)) {
+    if (globalCapability?.disallow?.includes(tabKey) || capability?.disallow?.includes(tabKey)) {
       return false;
     }
     if (tabKey === 'followers' || tabKey === 'following') {
-      return this.isPriorityPlatform(platformData.platform);
+      return this.isPriorityPlatform(platformData.platform) || !!globalCapability?.allow?.includes(tabKey) || !!capability?.allow?.includes(tabKey);
     }
     if (tabKey === 'videos' || tabKey === 'shorts') {
-      return !!capability?.allow?.includes(tabKey);
+      return !!globalCapability?.allow?.includes(tabKey) || !!capability?.allow?.includes(tabKey);
     }
     return true;
   }

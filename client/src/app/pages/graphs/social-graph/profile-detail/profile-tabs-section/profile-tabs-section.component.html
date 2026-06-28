@@ -10,6 +10,16 @@
             <div class="absolute inset-0 opacity-[0.16] [background-image:linear-gradient(rgba(148,163,184,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.22)_1px,transparent_1px)] [background-size:22px_22px]"></div>
           }
           <div class="absolute inset-0 bg-gradient-to-t from-[var(--color-blue-820-light)] via-[rgba(15,23,42,0.58)] to-[rgba(15,23,42,0.10)]"></div>
+          @if (getProfileUrl(platformData, platformData.username || user.username); as profileUrl) {
+            @if (profileUrl !== '#') {
+              <a [href]="profileUrl" target="_blank" rel="noopener noreferrer" aria-label="Open original profile" title="Open original profile" class="absolute right-3 top-3 z-[2] inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/35 text-[13px] text-white shadow-[0_8px_18px_rgba(0,0,0,0.28)] backdrop-blur transition-colors hover:bg-black/50 hover:text-white">
+                <svg viewBox="0 0 24 24" aria-hidden="true" class="h-4 w-4 text-white" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14"></path>
+                  <path d="m13 6 6 6-6 6"></path>
+                </svg>
+              </a>
+            }
+          }
           <div class="relative z-[1] flex min-h-[172px] items-end gap-4 px-4 pb-4 pt-5">
             <div class="flex h-[82px] w-[82px] flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-[4px] border-[var(--color-blue-820-light)] bg-[var(--color-blue-720)] text-lg shadow-[0_12px_28px_rgba(0,0,0,0.34)]">
               @if (getProfileImageUrl(platformData) && !isProfileImageFailed(platformData)) {

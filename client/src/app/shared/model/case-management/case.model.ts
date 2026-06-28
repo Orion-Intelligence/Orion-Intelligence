@@ -127,7 +127,6 @@ export type SocialPlatform =
     'x' |
     'linkedin' |
     'telegram' |
-    'whatsapp' |
     'discord' |
     'reddit' |
     'github' |

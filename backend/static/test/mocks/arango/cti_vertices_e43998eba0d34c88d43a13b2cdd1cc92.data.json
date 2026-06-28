@@ -5908,7 +5908,6 @@
 {"_key":"m_mention:@kafeine","_id":"cti_vertices/m_mention:@kafeine","_rev":"_k9EbvOO---","value":"@kafeine","type":"m_mention"}
 {"_key":"97f753448201105bbcfd3268ad50f54ac6145bcd5ad824a735e317f5a6b2c634","_id":"cti_vertices/97f753448201105bbcfd3268ad50f54ac6145bcd5ad824a735e317f5a6b2c634","_rev":"_k9EbvTW---","type":"document","m_location":["Sweden"],"m_ip":["185.213.25.130"],"m_team":"chinafans","m_scrap_file":"_zone_xsec","m_document_id":"97f753448201105bbcfd3268ad50f54ac6145bcd5ad824a735e317f5a6b2c634"}
 {"_key":"m_mention:@cti_marc","_id":"cti_vertices/m_mention:@cti_marc","_rev":"_k9EbvnS---","value":"@cti_marc","type":"m_mention"}
-{"_key":"5d823e12de557801e2407eb0ec30ba2b7d6e350ec20178c5edc2fed1ee632c39","_id":"cti_vertices/5d823e12de557801e2407eb0ec30ba2b7d6e350ec20178c5edc2fed1ee632c39","_rev":"_k9EbvvW---","type":"document","m_country":["united states"],"m_team":"america's_cyber_defence_agency","m_cve":["CVE-2025-55177"],"m_scrap_file":"_cisa","m_domain":["cve.org","whatsapp.com","nvd.nist.gov"],"m_language":["en"],"m_document_id":"5d823e12de557801e2407eb0ec30ba2b7d6e350ec20178c5edc2fed1ee632c39"}
 {"_key":"m_mention:@malwrhunterteam","_id":"cti_vertices/m_mention:@malwrhunterteam","_rev":"_k9Ebvxy---","value":"@malwrhunterteam","type":"m_mention"}
 {"_key":"m_mention:@robbiewhite98","_id":"cti_vertices/m_mention:@robbiewhite98","_rev":"_k9Ebv0i---","value":"@robbiewhite98","type":"m_mention"}
 {"_key":"m_mention:@stoerchl","_id":"cti_vertices/m_mention:@stoerchl","_rev":"_k9Ebv3W--_","value":"@stoerchl","type":"m_mention"}
@@ -5916,7 +5915,6 @@
 {"_key":"m_mention:@adamtheanalyst","_id":"cti_vertices/m_mention:@adamtheanalyst","_rev":"_k9Ebv7a---","value":"@adamtheanalyst","type":"m_mention"}
 {"_key":"m_mention:@ffforward","_id":"cti_vertices/m_mention:@ffforward","_rev":"_k9EbwAG---","value":"@ffforward","type":"m_mention"}
 {"_key":"dc89a6b7993a90b0994a374509c1afc73befd3f99bc57e38fafba90504a0204c","_id":"cti_vertices/dc89a6b7993a90b0994a374509c1afc73befd3f99bc57e38fafba90504a0204c","_rev":"_k9EbwEy---","type":"document","m_ip":["51.210.135.2"],"m_scrap_file":"_twitter","m_domain":["virustotal.com"],"m_language":["en"],"m_mention":["@vk_intel","@arkbird_solg","@james_inthe_box","@jameswt_mht"],"m_document_id":"dc89a6b7993a90b0994a374509c1afc73befd3f99bc57e38fafba90504a0204c"}
-{"_key":"m_domain:whatsapp.com","_id":"cti_vertices/m_domain:whatsapp.com","_rev":"_k9EbwF2---","value":"whatsapp.com","type":"m_domain"}
 {"_key":"m_ip:51.210.135.2","_id":"cti_vertices/m_ip:51.210.135.2","_rev":"_k9EbwJu---","value":"51.210.135.2","type":"m_ip"}
 {"_key":"m_mention:@vk_intel","_id":"cti_vertices/m_mention:@vk_intel","_rev":"_k9EbwWq---","value":"@vk_intel","type":"m_mention"}
 {"_key":"m_mention:@arkbird_solg","_id":"cti_vertices/m_mention:@arkbird_solg","_rev":"_k9EbwbO---","value":"@arkbird_solg","type":"m_mention"}

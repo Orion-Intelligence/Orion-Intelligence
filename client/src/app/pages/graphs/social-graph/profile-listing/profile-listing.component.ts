@@ -126,14 +126,15 @@ export class SocialProfileListingComponent {
     const tabs = this.isPriorityPlatform(platformData.platform)
       ? [...this.baseFetchTabs, ...this.followerFetchTabs, this.onlinePresenceTab, this.stealerLogsTab]
       : sharedTabs;
+    const globalCapability = this.platformCapabilities['__all__'];
     const capability = this.platformCapabilities[platformData.platform.toLowerCase()];
-    for (const key of capability?.allow ?? []) {
+    for (const key of [...(globalCapability?.allow ?? []), ...(capability?.allow ?? [])]) {
       const mappedTab = this.mappedFetchTabs[key as FetchTabKey];
       if (mappedTab && !tabs.some(tab => tab.key === mappedTab.key)) {
         tabs.splice(Math.max(tabs.findIndex(tab => tab.key === 'images'), 2), 0, mappedTab);
       }
     }
-    const disabledTabs = new Set(capability?.disallow ?? []);
+    const disabledTabs = new Set([...(globalCapability?.disallow ?? []), ...(capability?.disallow ?? [])]);
     return tabs.filter(tab => !disabledTabs.has(tab.key));
   }
 

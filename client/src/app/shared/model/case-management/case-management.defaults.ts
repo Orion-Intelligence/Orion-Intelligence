@@ -155,7 +155,6 @@ export const SOCIAL_PLATFORM_OPTIONS: CaseOption<SocialPlatform>[] = [
   { value: 'x', label: 'X' },
   { value: 'linkedin', label: 'LinkedIn' },
   { value: 'telegram', label: 'Telegram' },
-  { value: 'whatsapp', label: 'WhatsApp' },
   { value: 'discord', label: 'Discord' },
   { value: 'reddit', label: 'Reddit' },
   { value: 'github', label: 'GitHub' },

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { siAboutdotme, siArtstation, siBehance, siBitbucket, siCrowdin, siDeviantart, siDiscord, siDocker, siDribbble, siEnvato, siFacebook, siFlickr, siFoursquare, siGithub, siGitlab, siGravatar, siInstagram, siLastdotfm, siMedium, siNodedotjs, siPatreon, siPinterest, siReddit, siReplit, siSnapchat, siSoundcloud, siSpotify, siSteam, siTelegram, siTiktok, siTumblr, siTwitch, siVimeo, siVk, siWhatsapp, siWordpress, siX, siYoutube, siDevdotto } from 'simple-icons';
+import { siAboutdotme, siArtstation, siBehance, siBitbucket, siCrowdin, siDeviantart, siDiscord, siDocker, siDribbble, siEnvato, siFacebook, siFlickr, siFoursquare, siGithub, siGitlab, siGravatar, siInstagram, siLastdotfm, siMedium, siNodedotjs, siPatreon, siPinterest, siReddit, siReplit, siSnapchat, siSoundcloud, siSpotify, siSteam, siTelegram, siTiktok, siTumblr, siTwitch, siVimeo, siVk, siWordpress, siX, siYoutube, siDevdotto } from 'simple-icons';
 const iconMap: Record<string, string> = {
   'x': 'x',
   'twitter': 'x',
@@ -52,7 +52,6 @@ const iconMap: Record<string, string> = {
   'twitch': 'twitch',
   'vimeo': 'vimeo',
   'vk': 'vk',
-  'whatsapp': 'whatsapp',
   'wordpress': 'wordpress',
 };
 const simpleIconPathMap: Record<string, string> = {
@@ -93,7 +92,6 @@ const simpleIconPathMap: Record<string, string> = {
   twitch: siTwitch.path,
   vimeo: siVimeo.path,
   vk: siVk.path,
-  whatsapp: siWhatsapp.path,
   wordpress: siWordpress.path,
 };
 const simpleIconColorMap: Record<string, string> = {
@@ -134,7 +132,6 @@ const simpleIconColorMap: Record<string, string> = {
   twitch: `#${siTwitch.hex}`,
   vimeo: `#${siVimeo.hex}`,
   vk: `#${siVk.hex}`,
-  whatsapp: `#${siWhatsapp.hex}`,
   wordpress: `#${siWordpress.hex}`,
 };
 const fallbackPlatformColorMap: Record<string, string> = {

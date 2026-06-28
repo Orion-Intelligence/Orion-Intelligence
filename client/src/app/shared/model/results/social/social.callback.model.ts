@@ -23,6 +23,10 @@ export class SocialResultItem {
   m_post_views?: string;
   m_post_expiry?: string;
   m_comment_count?: string;
+  m_comments_count?: string;
+  m_comments?: unknown;
+  m_post_comments?: unknown;
+  m_post_comments_list?: unknown;
   m_likes?: string;
   m_retweets?: string;
   m_commenters!: string[];
