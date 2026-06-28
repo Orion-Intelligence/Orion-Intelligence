@@ -326,7 +326,7 @@ export class SocialProfileListingComponent {
       if (!post) {
         return false;
       }
-      const key = post.post_url || JSON.stringify(post);
+      const key = SocialNormalizationUtil.getPostItemKey(post);
       if (seen.has(key)) {
         return false;
       }
@@ -382,7 +382,7 @@ export class SocialProfileListingComponent {
 
   private getPostCollectionCount(platformData: PlatformResult): number | null {
     const items = [...(platformData.posts || []), ...(platformData.videos || []), ...(platformData.shorts || [])];
-    return items.length ? new Set(items.map(item => item.post_url || JSON.stringify(item))).size : null;
+    return items.length ? new Set(items.map(item => SocialNormalizationUtil.getPostItemKey(item))).size : null;
   }
 
   private extractSocialCount(value: unknown): string | null {

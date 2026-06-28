@@ -115,6 +115,10 @@ export class SocialService {
     return this.scanService.fetchSocialShorts(platform, username, hashId, maxShorts);
   }
 
+  fetchSocialPostComments(platform: string, username: string, tabKey: 'posts' | 'videos' | 'shorts', hashId?: string, commentOffset?: number, maxComments?: number): ReturnType<SocialScanService['fetchSocialPostComments']> {
+    return this.scanService.fetchSocialPostComments(platform, username, tabKey, hashId, commentOffset, maxComments);
+  }
+
   fetchFollowers(platform: string, username: string): ReturnType<SocialScanService['fetchFollowers']> {
     return this.scanService.fetchFollowers(platform, username);
   }
@@ -364,6 +368,13 @@ export class SocialService {
   }
 
   private mergePostItems(existing: any[], incoming: any[], mergeMode: FetchMergeMode): any[] {
+    if (mergeMode === 'update') {
+      const incomingByKey = new Map(incoming.map(item => [this.getPostItemKey(item), item]));
+      return existing.map(item => {
+        const incomingItem = incomingByKey.get(this.getPostItemKey(item));
+        return incomingItem ? this.mergePostUpdate(item, incomingItem) : item;
+      });
+    }
     const orderedItems = mergeMode === 'prepend' ? [...incoming, ...existing] : [...existing, ...incoming];
     const seen = new Set<string>();
     return orderedItems.filter(item => {
@@ -377,7 +388,22 @@ export class SocialService {
   }
 
   private getPostItemKey(post: any): string {
-    return String(post?.hash_id || post?.m_hash_id || post?.post_url || post?.m_url || post?.url || post?.m_message_sharable_link || JSON.stringify(post)).trim();
+    return SocialNormalizationUtil.getPostItemKey(post);
+  }
+
+  private mergePostUpdate(existing: any, incoming: any): any {
+    const existingCommentDetails = Array.isArray(existing?.comment_details) && existing.comment_details.length > 0 ? existing.comment_details : existing?.comment_items;
+    const incomingCommentDetails = Array.isArray(incoming?.comment_details) && incoming.comment_details.length > 0 ? incoming.comment_details : incoming?.comment_items;
+    const mergedCommentDetails = SocialNormalizationUtil.normalizeCommentDetails(existingCommentDetails, incomingCommentDetails);
+    const mergedCommentItems = SocialNormalizationUtil.normalizeCommentItems(existing?.comment_items, incoming?.comment_items);
+    const merged = { ...existing, ...incoming };
+    if (mergedCommentDetails.length > 0) {
+      merged.comment_details = mergedCommentDetails;
+    }
+    if (mergedCommentItems.length > 0) {
+      merged.comment_items = mergedCommentItems;
+    }
+    return merged;
   }
 
   private mergeImageItems(existing: any[], incoming: any[], mergeMode: FetchMergeMode): any[] {

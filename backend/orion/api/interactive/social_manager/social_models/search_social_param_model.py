@@ -45,18 +45,24 @@ class SocialProfileRequest(PlatformUsernameRequest):
 
 class SocialPostsRequest(PlatformUsernameRequest):
     max_posts: int = Field(default=5, ge=1, le=100)
+    max_comments: int = Field(default=10, ge=1, le=100)
+    comment_offset: int = Field(default=0, ge=0, le=1000)
     social_data_type: Optional[str] = None
     hash_id: Optional[str] = None
 
 
 class SocialVideosRequest(PlatformUsernameRequest):
     max_videos: int = Field(default=5, ge=1, le=100)
+    max_comments: int = Field(default=10, ge=1, le=100)
+    comment_offset: int = Field(default=0, ge=0, le=1000)
     social_data_type: Optional[str] = None
     hash_id: Optional[str] = None
 
 
 class SocialShortsRequest(PlatformUsernameRequest):
     max_shorts: int = Field(default=5, ge=1, le=100)
+    max_comments: int = Field(default=10, ge=1, le=100)
+    comment_offset: int = Field(default=0, ge=0, le=1000)
     social_data_type: Optional[str] = None
     hash_id: Optional[str] = None
 

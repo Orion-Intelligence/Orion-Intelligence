@@ -10,7 +10,7 @@ export interface FeedUser {
 
 export type FetchTabKey = 'details' | 'posts' | 'videos' | 'shorts' | 'images' | 'connections' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs';
 export type PostContentTabKey = Extract<FetchTabKey, 'posts' | 'videos' | 'shorts'>;
-export type FetchMergeMode = 'prepend' | 'append';
+export type FetchMergeMode = 'prepend' | 'append' | 'update';
 export type PostFetchMergeMode = FetchMergeMode;
 export type ImageFetchMergeMode = FetchMergeMode;
 
@@ -19,7 +19,10 @@ export interface PostCursorFetchRequest {
   tabKey: PostContentTabKey;
   cursorId?: string;
   limit?: number;
+  commentOffset?: number;
+  maxComments?: number;
   mergeMode: PostFetchMergeMode;
+  commentsOnly?: boolean;
 }
 
 export interface ImageCursorFetchRequest {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, input, output, signal } from '@angular/core';
 import { PlatformResult, SocialOnlinePresenceResult, SocialStealerLogRecord } from '../../../../../shared/model/social/social-scan.models';
 import { formatKey, isImageUrl, isUrl } from '../../../../../shared/utils/formatters';
 import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
@@ -10,8 +10,6 @@ import { SocialProfilePostsSectionComponent } from '../profile-posts-section/pro
 import { SocialProfileVideosSectionComponent } from '../profile-videos-section/profile-videos-section.component';
 import { SocialProfileShortsSectionComponent } from '../profile-shorts-section/profile-shorts-section.component';
 
-type PendingImageScroll = 'top' | 'bottom';
-
 @Component({
   selector: 'app-social-profile-tabs-section',
   templateUrl: './profile-tabs-section.component.html',
@@ -22,8 +20,9 @@ type PendingImageScroll = 'top' | 'bottom';
 export class SocialProfileTabsSectionComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly stealerLogExportColumns = [ 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
-  private pendingImageScroll: PendingImageScroll | null = null;
+  private pendingImageScrollToBottom = false;
   private sawImageLoadingForScroll = false;
+  private failedProfileImages = signal<Set<string>>(new Set<string>());
 
   user = input.required<FeedUser>();
   platformData = input.required<PlatformResult>();
@@ -45,7 +44,7 @@ export class SocialProfileTabsSectionComponent {
     effect(() => {
       const loading = this.isTabLoading('images');
       this.platformData();
-      if (!this.pendingImageScroll) {
+      if (!this.pendingImageScrollToBottom) {
         return;
       }
       if (loading) {
@@ -55,10 +54,9 @@ export class SocialProfileTabsSectionComponent {
       if (!this.sawImageLoadingForScroll) {
         return;
       }
-      const target = this.pendingImageScroll;
-      this.pendingImageScroll = null;
+      this.pendingImageScrollToBottom = false;
       this.sawImageLoadingForScroll = false;
-      setTimeout(() => this.scrollToImageEdge(target), 0);
+      setTimeout(() => this.scrollToImageBottom(), 0);
     });
   }
 
@@ -84,8 +82,25 @@ export class SocialProfileTabsSectionComponent {
     return this.getFirstMetadataValue(platformData, ['m_img_src', 'img_src', 'profile_image', 'profileImage', 'avatar', 'image']);
   }
 
+  isProfileImageFailed(platformData: PlatformResult): boolean {
+    const imageUrl = this.getProfileImageUrl(platformData);
+    return !!imageUrl && this.failedProfileImages().has(imageUrl);
+  }
+
+  markProfileImageFailed(platformData: PlatformResult): void {
+    const imageUrl = this.getProfileImageUrl(platformData);
+    if (!imageUrl) {
+      return;
+    }
+    this.failedProfileImages.update(current => {
+      const next = new Set(current);
+      next.add(imageUrl);
+      return next;
+    });
+  }
+
   getCoverImageUrl(platformData: PlatformResult): string {
-    return this.getFirstMetadataValue(platformData, ['m_coverpage', 'coverpage', 'cover_image', 'coverImage', 'banner', 'banner_image']);
+    return this.getFirstMetadataValue(platformData, ['m_coverpage', 'coverpage', 'image_bg', 'cover_image', 'coverImage', 'banner', 'banner_image']);
   }
 
   getProfileDetailEntries(platformData: PlatformResult): { key: string; value: any; }[] {
@@ -151,13 +166,12 @@ export class SocialProfileTabsSectionComponent {
   }
 
   fetchImagesNew(platformData: PlatformResult): void {
-    this.prepareImageScrollAfterFetch('top');
     this.imageCursorFetch.emit({ platformData, mergeMode: 'prepend' });
   }
 
   loadMoreImages(platformData: PlatformResult): void {
     const imageCount = (platformData.images || []).length;
-    this.prepareImageScrollAfterFetch('bottom');
+    this.prepareImageScrollAfterFetch();
     this.imageCursorFetch.emit({ platformData, limit: Math.min(imageCount + 10, 100), mergeMode: 'append' });
   }
 
@@ -278,16 +292,15 @@ export class SocialProfileTabsSectionComponent {
     return this.getFirstValueFromSource(source.result || source.profile || source.data, keys);
   }
 
-  private prepareImageScrollAfterFetch(target: PendingImageScroll): void {
-    this.pendingImageScroll = target;
+  private prepareImageScrollAfterFetch(): void {
+    this.pendingImageScrollToBottom = true;
     this.sawImageLoadingForScroll = false;
   }
 
-  private scrollToImageEdge(target: PendingImageScroll): void {
+  private scrollToImageBottom(): void {
     requestAnimationFrame(() => {
       const rows = this.elementRef.nativeElement.querySelectorAll('[data-testid="social-image-result"]') as NodeListOf<HTMLElement>;
-      const row = target === 'top' ? rows[0] : rows[rows.length - 1];
-      row?.scrollIntoView({ behavior: 'smooth', block: target === 'top' ? 'start' : 'end' });
+      rows[rows.length - 1]?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     });
   }
 }

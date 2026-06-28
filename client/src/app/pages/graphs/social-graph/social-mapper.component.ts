@@ -10,13 +10,19 @@ import { SocialProfileListingComponent } from './profile-listing/profile-listing
 import { NotificationBarComponent } from './notification-bar/notification-bar.component';
 import { SocialService } from './services/social.service';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
-import { GraphLoadingComponent } from '../shared/graph-loading/graph-loading.component';
 import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/utils/file-input.util';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 import { ManageProfilesModalComponent } from './profile-popups/manage-profiles-modal/manage-profiles-modal.component';
-import type { FetchMergeMode, FetchStateKey, ImageCursorFetchRequest, OnlinePresenceFetchRequest, PostCursorFetchRequest, ScanJobOptions } from './models/social-graph.models';
+import type { FetchMergeMode, FetchStateKey, ImageCursorFetchRequest, OnlinePresenceFetchRequest, PostContentTabKey, PostCursorFetchRequest, ScanJobOptions } from './models/social-graph.models';
 import { SocialNormalizationUtil } from './utils/social-normalization.util';
 import { SocialBreadcrumbComponent } from './breadcrumb/social-breadcrumb.component';
+
+type LatestFetchRequest = PostCursorFetchRequest | ImageCursorFetchRequest;
+
+interface LatestFetchConfirmationData {
+  message: string;
+  request: LatestFetchRequest;
+}
 
 @Component({
   selector: 'app-social-graph',
@@ -29,7 +35,6 @@ import { SocialBreadcrumbComponent } from './breadcrumb/social-breadcrumb.compon
     SocialProfileListingComponent,
     ConfirmationPopupComponent,
     NotificationBarComponent,
-    GraphLoadingComponent,
     ProfileComponent,
     ManageProfilesModalComponent,
     SocialBreadcrumbComponent
@@ -58,7 +63,6 @@ export class SocialMapperComponent implements OnDestroy {
   };
 
   public state = this.stateService;
-  isTailwindReady = signal(true);
   homeMenuSearchTerm = computed(() => this.graphState.homeMenuSearchTerm());
   jobs = computed(() => this.graphState.jobs());
   scanResults = computed(() => this.graphState.scanResults());
@@ -71,6 +75,7 @@ export class SocialMapperComponent implements OnDestroy {
   isMobileHomeMenuOpen = signal(false);
   isInitialLoading = signal(true);
   profileBreadcrumbLabel = signal<string | null>(null);
+  latestFetchConfirmationData = signal<LatestFetchConfirmationData | null>(null);
   effectiveHomeMenuCollapsed = computed(() => this.isSmallScreen() ? !this.isMobileHomeMenuOpen() : this.isHomeMenuCollapsed());
   imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
   profileListing = viewChild(SocialProfileListingComponent);
@@ -259,17 +264,25 @@ export class SocialMapperComponent implements OnDestroy {
   }
 
   handleFetchSocialPostCursor(request: PostCursorFetchRequest): void {
+    if (request.commentsOnly) {
+      const p = request.platformData;
+      this.fetchData(p, request.tabKey, this.state.fetchSocialPostComments(p.platform, p.username, request.tabKey, request.cursorId, request.commentOffset, request.maxComments), this.getPostCancelMap(request.tabKey), 'update');
+      return;
+    }
+    if (request.mergeMode === 'prepend') {
+      this.openLatestFetchConfirmation(request);
+      return;
+    }
     const p = request.platformData;
-    const cursorId = request.mergeMode === 'prepend' ? request.cursorId : undefined;
     if (request.tabKey === 'videos') {
-      this.fetchData(p, 'videos', this.state.fetchSocialVideos(p.platform, p.username, cursorId, request.limit), this.cancelVideoFetchSubjects, request.mergeMode);
+      this.fetchData(p, 'videos', this.state.fetchSocialVideos(p.platform, p.username, undefined, request.limit), this.cancelVideoFetchSubjects, request.mergeMode);
       return;
     }
     if (request.tabKey === 'shorts') {
-      this.fetchData(p, 'shorts', this.state.fetchSocialShorts(p.platform, p.username, cursorId, request.limit), this.cancelShortFetchSubjects, request.mergeMode);
+      this.fetchData(p, 'shorts', this.state.fetchSocialShorts(p.platform, p.username, undefined, request.limit), this.cancelShortFetchSubjects, request.mergeMode);
       return;
     }
-    this.fetchData(p, 'posts', this.state.fetchSocialPosts(p.platform, p.username, cursorId, request.limit), this.cancelPostFetchSubjects, request.mergeMode);
+    this.fetchData(p, 'posts', this.state.fetchSocialPosts(p.platform, p.username, undefined, request.limit), this.cancelPostFetchSubjects, request.mergeMode);
   }
 
   handleFetchImagesForPlatform(p: PlatformResult): void {
@@ -278,8 +291,67 @@ export class SocialMapperComponent implements OnDestroy {
   }
 
   handleFetchImageCursor(request: ImageCursorFetchRequest): void {
+    if (request.mergeMode === 'prepend') {
+      this.openLatestFetchConfirmation(request);
+      return;
+    }
     const p = request.platformData;
     this.fetchData(p, 'platformImages', this.state.fetchPlatformImages(p.platform, p.username, request.limit), this.cancelPlatformImageFetchSubjects, request.mergeMode);
+  }
+
+  onLatestFetchConfirmation(confirmed: boolean): void {
+    const confirmation = this.latestFetchConfirmationData();
+    this.latestFetchConfirmationData.set(null);
+    if (!confirmed || !confirmation) {
+      return;
+    }
+    this.runLatestFetch(confirmation.request);
+  }
+
+  private openLatestFetchConfirmation(request: LatestFetchRequest): void {
+    this.latestFetchConfirmationData.set({
+      request,
+      message: `Fetching latest ${this.getLatestFetchSectionLabel(request)} will delete all existing records in this section and replace them with newly fetched records.`,
+    });
+  }
+
+  private runLatestFetch(request: LatestFetchRequest): void {
+    if (this.isPostCursorFetchRequest(request)) {
+      const p = request.platformData;
+      if (request.tabKey === 'videos') {
+        this.fetchData(p, 'videos', this.state.fetchSocialVideos(p.platform, p.username), this.cancelVideoFetchSubjects);
+        return;
+      }
+      if (request.tabKey === 'shorts') {
+        this.fetchData(p, 'shorts', this.state.fetchSocialShorts(p.platform, p.username), this.cancelShortFetchSubjects);
+        return;
+      }
+      this.fetchData(p, 'posts', this.state.fetchSocialPosts(p.platform, p.username), this.cancelPostFetchSubjects);
+      return;
+    }
+    const p = request.platformData;
+    this.fetchData(p, 'platformImages', this.state.fetchPlatformImages(p.platform, p.username), this.cancelPlatformImageFetchSubjects);
+  }
+
+  private getLatestFetchSectionLabel(request: LatestFetchRequest): string {
+    if (!this.isPostCursorFetchRequest(request)) {
+      return 'images';
+    }
+    return request.tabKey === 'videos' ? 'videos' : request.tabKey === 'shorts' ? 'shorts' : 'posts';
+  }
+
+  private isPostCursorFetchRequest(request: LatestFetchRequest): request is PostCursorFetchRequest {
+    return 'tabKey' in request;
+  }
+
+  private getPostCancelMap(tabKey: PostContentTabKey): Map<string, Subject<void>> {
+    if (tabKey === 'videos') {
+      return this.cancelVideoFetchSubjects;
+    }
+    if (tabKey === 'shorts') {
+      return this.cancelShortFetchSubjects;
+    }
+    return this.cancelPostFetchSubjects;
   }
 
   handleFetchFollowers(p: PlatformResult): void {

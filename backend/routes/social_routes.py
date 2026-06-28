@@ -146,7 +146,7 @@ async def get_social_profiles(profile_username: str, current_user=Depends(get_cu
 
 
 @social_routes.delete(
-    "/api/social/data/{profile_username}",
+    "/api/social/data/{profile_username:path}",
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning", bypass_licenses=["osint_advanced"]))])
 async def delete_social_profiles(profile_username: str, current_user=Depends(get_current_user)):

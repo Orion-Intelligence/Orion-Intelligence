@@ -6,6 +6,7 @@ import { FeedUser, FetchTabKey, SocialPlatformCapabilityMap } from '../models/so
 import { SocialService } from '../services/social.service';
 import { getMetadataEntries } from '../utils/summary-view.util';
 import socialPlatformCapabilities from '../../../../../assets/data/social-graph/platform-capabilities.json';
+import { SocialNormalizationUtil } from '../utils/social-normalization.util';
 
 @Component({
   selector: 'app-social-default-list-section',
@@ -147,7 +148,7 @@ export class SocialDefaultListSectionComponent {
 
   private getPostCollectionCount(platformData: PlatformResult): number | null {
     const items = [...(platformData.posts || []), ...(platformData.videos || []), ...(platformData.shorts || [])];
-    return items.length ? new Set(items.map(item => item.post_url || JSON.stringify(item))).size : null;
+    return items.length ? new Set(items.map(item => SocialNormalizationUtil.getPostItemKey(item))).size : null;
   }
 
   private extractSocialCount(value: unknown): string | null {

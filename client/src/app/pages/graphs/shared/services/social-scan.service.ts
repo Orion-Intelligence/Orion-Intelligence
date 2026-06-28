@@ -15,7 +15,7 @@ interface ApiEnvelope<T> {
 export class SocialScanService {
   constructor(private api: ApiService) { }
 
-  private extractMetadata(platformName: string, data: any): Partial<PlatformResult> {
+  private extractMetadata(data: any): Partial<PlatformResult> {
     if (!data) {
       return { allMetadata: {} };
     }
@@ -98,7 +98,7 @@ export class SocialScanService {
 
   private buildPlatformResult(item: any, keyUsername: string, rawPlatform: string): PlatformResult {
     const capitalizedPlatform = this.capitalizePlatform(rawPlatform);
-    const extractedData = this.extractMetadata(capitalizedPlatform, item.data);
+    const extractedData = this.extractMetadata(item.data);
     const rawStatus = item?.metadata?.status ?? item?.data?.status;
     const normalizedStatus = typeof rawStatus === 'string' ? rawStatus.trim().toLowerCase() : rawStatus;
     const platformResult = {
@@ -222,40 +222,54 @@ export class SocialScanService {
     }).pipe(retry(3));
   }
 
-  fetchSocialPosts(platform: string, username: string, hashId?: string, maxPosts = 5): Observable<{
+  fetchSocialPosts(platform: string, username: string, hashId?: string, maxPosts = 5, socialDataType = 'posts', maxComments = 10, commentOffset = 0): Observable<{
         posts: SocialPost[];
     }> {
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<SocialPost[] | {
                 posts: SocialPost[];
-            }>>('social/posts', { platform, username, max_posts: maxPosts, social_data_type: 'posts', hash_id: hashId || undefined }),
+            }>>('social/posts', { platform, username, max_posts: maxPosts, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ posts: this.normalizeSocialPosts(res.result, 'posts') }),
     }).pipe(retry(3));
   }
 
-  fetchSocialVideos(platform: string, username: string, hashId?: string, maxVideos = 5): Observable<{
+  fetchSocialVideos(platform: string, username: string, hashId?: string, maxVideos = 5, socialDataType = 'videos', maxComments = 10, commentOffset = 0): Observable<{
         videos: SocialPost[];
     }> {
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<SocialPost[] | {
                 videos: SocialPost[];
-            }>>('social/videos', { platform, username, max_videos: maxVideos, social_data_type: 'videos', hash_id: hashId || undefined }),
+            }>>('social/videos', { platform, username, max_videos: maxVideos, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ videos: this.normalizeSocialPosts(res.result, 'videos') }),
     }).pipe(retry(3));
   }
 
-  fetchSocialShorts(platform: string, username: string, hashId?: string, maxShorts = 5): Observable<{
+  fetchSocialShorts(platform: string, username: string, hashId?: string, maxShorts = 5, socialDataType = 'shorts', maxComments = 10, commentOffset = 0): Observable<{
         shorts: SocialPost[];
     }> {
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<SocialPost[] | {
                 shorts: SocialPost[];
-            }>>('social/shorts', { platform, username, max_shorts: maxShorts, social_data_type: 'shorts', hash_id: hashId || undefined }),
+            }>>('social/shorts', { platform, username, max_shorts: maxShorts, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ shorts: this.normalizeSocialPosts(res.result, 'shorts') }),
     }).pipe(retry(3));
+  }
+
+  fetchSocialPostComments(platform: string, username: string, tabKey: 'posts' | 'videos' | 'shorts', hashId?: string, commentOffset = 0, maxComments = 10): Observable<{
+        posts?: SocialPost[];
+        videos?: SocialPost[];
+        shorts?: SocialPost[];
+    }> {
+    if (tabKey === 'videos') {
+      return this.fetchSocialVideos(platform, username, hashId, 1, 'comments', maxComments, commentOffset);
+    }
+    if (tabKey === 'shorts') {
+      return this.fetchSocialShorts(platform, username, hashId, 1, 'comments', maxComments, commentOffset);
+    }
+    return this.fetchSocialPosts(platform, username, hashId, 1, 'comments', maxComments, commentOffset);
   }
 
   fetchFollowers(platform: string, username: string): Observable<{

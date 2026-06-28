@@ -23,6 +23,12 @@ export interface SocialImage {
     title: string;
     source: string;
 }
+export interface SocialPostComment {
+    sender_name?: string;
+    date?: string;
+    likes?: string;
+    text: string;
+}
 export interface SocialPost {
     hash_id?: string;
     post_url: string;
@@ -30,6 +36,8 @@ export interface SocialPost {
     caption: string;
     likes: string;
     comments: string;
+    comment_items?: string[];
+    comment_details?: SocialPostComment[];
     shares: string;
     views: string;
     media_type: string;

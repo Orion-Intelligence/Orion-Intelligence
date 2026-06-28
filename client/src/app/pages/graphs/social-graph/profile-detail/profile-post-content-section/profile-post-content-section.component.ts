@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, input, output, signal } from '@angular/core';
-import { PlatformResult, SocialPost } from '../../../../../shared/model/social/social-scan.models';
+import { PlatformResult, SocialPost, SocialPostComment } from '../../../../../shared/model/social/social-scan.models';
 import { formatFollowers } from '../../../../../shared/utils/formatters';
 import type { PostContentTabKey, PostCursorFetchRequest } from '../../models/social-graph.models';
-
-type PendingPostScroll = 'top' | 'bottom';
+import { SocialNormalizationUtil } from '../../utils/social-normalization.util';
 
 @Component({
   selector: 'app-social-profile-post-content-section',
@@ -14,7 +13,7 @@ type PendingPostScroll = 'top' | 'bottom';
 export class SocialProfilePostContentSectionComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private postMediaLoading = signal<Record<string, boolean>>({});
-  private pendingScroll: PendingPostScroll | null = null;
+  private pendingScrollToBottom = false;
   private sawLoadingForScroll = false;
 
   platformData = input.required<PlatformResult>();
@@ -28,7 +27,7 @@ export class SocialProfilePostContentSectionComponent {
       const loading = this.isLoading();
       this.platformData();
       this.contentType();
-      if (!this.pendingScroll) {
+      if (!this.pendingScrollToBottom) {
         return;
       }
       if (loading) {
@@ -38,10 +37,9 @@ export class SocialProfilePostContentSectionComponent {
       if (!this.sawLoadingForScroll) {
         return;
       }
-      const target = this.pendingScroll;
-      this.pendingScroll = null;
+      this.pendingScrollToBottom = false;
       this.sawLoadingForScroll = false;
-      setTimeout(() => this.scrollToPostEdge(target), 0);
+      setTimeout(() => this.scrollToPostBottom(), 0);
     });
   }
 
@@ -94,7 +92,7 @@ export class SocialProfilePostContentSectionComponent {
       if (!post) {
         return false;
       }
-      const key = post.post_url || JSON.stringify(post);
+      const key = this.getPostItemKey(post);
       if (seen.has(key)) {
         return false;
       }
@@ -104,15 +102,13 @@ export class SocialProfilePostContentSectionComponent {
   }
 
   fetchNew(platformData: PlatformResult, tabKey: PostContentTabKey): void {
-    const [firstPost] = this.getUniquePosts(platformData, tabKey);
-    this.prepareScrollAfterFetch('top');
-    this.cursorFetch.emit({ platformData, tabKey, cursorId: this.getPostCursorId(firstPost), mergeMode: 'prepend' });
+    this.cursorFetch.emit({ platformData, tabKey, mergeMode: 'prepend' });
   }
 
   loadMore(platformData: PlatformResult, tabKey: PostContentTabKey): void {
     const posts = this.getUniquePosts(platformData, tabKey);
-    this.prepareScrollAfterFetch('bottom');
-    this.cursorFetch.emit({ platformData, tabKey, cursorId: this.getPostCursorId(posts[posts.length - 1]), limit: Math.min(posts.length + 5, 100), mergeMode: 'append' });
+    this.prepareScrollAfterFetch();
+    this.cursorFetch.emit({ platformData, tabKey, limit: Math.min(posts.length + 5, 100), mergeMode: 'append' });
   }
 
   formatPostMetric(value: string | number | null | undefined): string {
@@ -121,6 +117,33 @@ export class SocialProfilePostContentSectionComponent {
     }
     const numericValue = typeof value === 'number' ? value : Number(String(value).replace(/,/g, ''));
     return Number.isFinite(numericValue) ? formatFollowers(numericValue) : String(value);
+  }
+
+  getPostComments(post: SocialPost | null | undefined): SocialPostComment[] {
+    if (post?.comment_details?.length) {
+      return post.comment_details;
+    }
+    return (post?.comment_items || []).map(text => ({ text }));
+  }
+
+  getCommentTrackKey(index: number, comment: SocialPostComment): string {
+    return `${comment.sender_name || ''}|${comment.date || ''}|${comment.text}|${index}`;
+  }
+
+  canLoadComments(post: SocialPost | null | undefined): boolean {
+    return !!this.getPostCursorId(post);
+  }
+
+  getCommentFetchLabel(post: SocialPost | null | undefined): string {
+    return this.getPostComments(post).length > 0 ? 'Load more comments' : 'Load comments';
+  }
+
+  loadComments(platformData: PlatformResult, tabKey: PostContentTabKey, post: SocialPost): void {
+    const cursorId = this.getPostCursorId(post);
+    if (!cursorId) {
+      return;
+    }
+    this.cursorFetch.emit({ platformData, tabKey, cursorId, commentOffset: this.getPostComments(post).length, maxComments: 10, mergeMode: 'update', commentsOnly: true });
   }
 
   private getPostContentItems(platformData: PlatformResult, tabKey: PostContentTabKey): SocialPost[] {
@@ -142,16 +165,19 @@ export class SocialProfilePostContentSectionComponent {
     return cursorId ? String(cursorId) : undefined;
   }
 
-  private prepareScrollAfterFetch(target: PendingPostScroll): void {
-    this.pendingScroll = target;
+  private getPostItemKey(post: SocialPost): string {
+    return SocialNormalizationUtil.getPostItemKey(post);
+  }
+
+  private prepareScrollAfterFetch(): void {
+    this.pendingScrollToBottom = true;
     this.sawLoadingForScroll = false;
   }
 
-  private scrollToPostEdge(target: PendingPostScroll): void {
+  private scrollToPostBottom(): void {
     requestAnimationFrame(() => {
       const rows = this.elementRef.nativeElement.querySelectorAll('[data-testid="social-post-row"]') as NodeListOf<HTMLElement>;
-      const row = target === 'top' ? rows[0] : rows[rows.length - 1];
-      row?.scrollIntoView({ behavior: 'smooth', block: target === 'top' ? 'start' : 'end' });
+      rows[rows.length - 1]?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     });
   }
 }

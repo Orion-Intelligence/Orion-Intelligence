@@ -1,5 +1,4 @@
 <div data-testid="social-graph-root" class="ui-social-root-bg flex h-[100dvh] min-h-0 w-screen flex-col overflow-hidden text-[var(--color-text2)]">
-  @if (isTailwindReady()) {
     <main class="relative min-h-0 flex-grow">
         <input data-testid="social-image-file-input" type="file" #imageInput class="hidden" (change)="onImageSelected($event)" accept="image/png, image/jpeg, image/webp, image/gif">
         <div class="flex h-full min-h-0 w-full flex-col overflow-hidden">
@@ -80,6 +79,9 @@
     @if (state.deleteConfirmationData(); as data) {
       <app-confirmation-popup [message]="data.message" (confirmed)="onDeleteConfirmation($event)"></app-confirmation-popup>
     }
+    @if (latestFetchConfirmationData(); as data) {
+      <app-confirmation-popup [message]="data.message" (confirmed)="onLatestFetchConfirmation($event)"></app-confirmation-popup>
+    }
     @if (state.manageProfilesModalData(); as data) {
       <app-manage-profiles-modal
         [data]="data"
@@ -88,10 +90,4 @@
         (searchUsername)="handleImageFlowSearch($event)">
       </app-manage-profiles-modal>
     }
-  } @else {
-    <app-graph-loading
-      [title]="'Loading Social Intelligence'"
-      [subtitle]="'Loading styles.'">
-    </app-graph-loading>
-  }
 </div>
