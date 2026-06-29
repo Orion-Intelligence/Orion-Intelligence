@@ -50,25 +50,6 @@ export interface OrionSatelliteFeature {
   properties?: Record<string, unknown>;
 }
 
-export interface MapEntityByIdItem {
-  id: string;
-  name?: string;
-  country?: string;
-  type?: string;
-  capacity?: number;
-  source?: string;
-  location?: {
-    lat?: number;
-    lon?: number;
-  };
-  location_point?: string;
-}
-
-export interface MapEntitiesByIdsResponse {
-  Result: MapEntityByIdItem[];
-  Count: number;
-}
-
 export interface OrionSatelliteFilterOption {
   key: OrionSatelliteFeatureType;
   label: string;

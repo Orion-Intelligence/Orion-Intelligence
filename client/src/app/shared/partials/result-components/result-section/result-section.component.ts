@@ -7,6 +7,8 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   templateUrl: './result-section.component.html'
 })
 export class ResultSectionComponent {
+  private readonly expandedSectionIndexes = new Set<number>();
+
   filteredListItems: string[] = [];
   readonly listItems = input<string[]>([]);
 
@@ -16,6 +18,23 @@ export class ResultSectionComponent {
         const cleaned = item?.trim();
         return cleaned && cleaned.length > 1;
       });
+      this.expandedSectionIndexes.clear();
     });
+  }
+
+  isSectionExpanded(index: number): boolean {
+    return this.expandedSectionIndexes.has(index);
+  }
+
+  toggleSection(index: number): void {
+    if (this.expandedSectionIndexes.has(index)) {
+      this.expandedSectionIndexes.delete(index);
+      return;
+    }
+    this.expandedSectionIndexes.add(index);
+  }
+
+  shouldShowSectionToggle(section: string): boolean {
+    return (section || '').length > 220;
   }
 }

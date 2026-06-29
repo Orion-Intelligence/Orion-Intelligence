@@ -112,9 +112,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
     return !this.isResponseLoading()
       && !this.appService.isMobileMode()
       && !!this.currentQuery.trim()
-      && this.apiEndpoint !== 'search/defacement'
-      && this.apiEndpoint !== 'search/exploit'
-      && !this.router.url.toLowerCase().includes('/defacement');
+      && !this.isCrossSearchExcludedRoute();
   }
 
   ngAfterViewInit(): void {
@@ -356,5 +354,13 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
 
   private isCompromisedActorsRoute(route: string): boolean {
     return route.endsWith('/apt-intel/compromised-actors') || route.endsWith('/threat-intel/compromised-actors');
+  }
+
+  private isCrossSearchExcludedRoute(): boolean {
+    const route = this.router.url.toLowerCase();
+    return this.apiEndpoint === 'search/defacement'
+      || this.apiEndpoint === 'search/exploit'
+      || this.apiEndpoint === 'search/apt-intel'
+      || route.includes('/defacement');
   }
 }

@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { ApiService } from '../../../../../shared/services/api.service';
 import { SatelliteFacilitiesResponse } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
 import { AuthService } from '../../../../../services/authetication/auth.service';
-import { MapEntitiesByIdsResponse, OrionSatelliteFeature, OrionSatelliteFeatureType } from '../../../models/geo-fencing.models';
+import { OrionSatelliteFeature, OrionSatelliteFeatureType } from '../../../models/geo-fencing.models';
 import { SatelliteIntelService } from '../../satellite-intel-service';
 
 @Injectable({ providedIn: 'root' })
@@ -74,10 +74,6 @@ export class SatelliteFacilitiesService {
     catch (error) {
       onError?.(error);
     }
-  }
-
-  getMapEntitiesByIds(ids: string[]): Observable<MapEntitiesByIdsResponse> {
-    return this.api.post<MapEntitiesByIdsResponse>('search/map-entities/by-ids', ids);
   }
 
   private getPollStatus(res: SatelliteFacilitiesResponse): string | undefined {

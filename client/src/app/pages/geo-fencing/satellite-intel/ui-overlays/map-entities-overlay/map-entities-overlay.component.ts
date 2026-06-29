@@ -24,7 +24,6 @@ export class MapEntitiesOverlayComponent {
   @Input() isAircraftLoading = false;
   @Input() isShipsLoading = false;
   @Input() isMapEntityLoading = false;
-  @Input() isMapEntityDetailsLoading = false;
   @Input() errorMessage: string | null = null;
   @Input() isScanning = false;
   @Input() topControlsInset = false;
@@ -42,9 +41,6 @@ export class MapEntitiesOverlayComponent {
     }
     if (this.isMapEntityLoading) {
       badges.push('Facilities loading...');
-    }
-    if (this.isMapEntityDetailsLoading) {
-      badges.push('Loading Facility details...');
     }
 
     return badges;

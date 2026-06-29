@@ -1,8 +1,8 @@
 <div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" (click)="closed.emit()">
-    <div data-testid="case-analyst-dialog" class="ui-graph-popup-panel ui-popup-shell relative w-full max-w-[560px] overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-830)] shadow-2xl [body.light-theme_&]:bg-white" (click)="$event.stopPropagation()">
+    <div data-testid="case-analyst-dialog" class="ui-graph-popup-panel ui-popup-shell relative w-full max-w-[560px] overflow-visible rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-830)] shadow-2xl [body.light-theme_&]:bg-white" (click)="$event.stopPropagation()">
         <button data-testid="case-analyst-close" class="ui-popup-close absolute right-5 top-5 inline-flex items-center justify-center" type="button" [attr.aria-label]="'common.actions.close' | translate" [title]="'common.actions.close' | translate" (click)="closed.emit()">×</button>
 
-        <div class="border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-6 py-5 [body.light-theme_&]:bg-[#f8fbff]">
+        <div class="rounded-t-2xl border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-6 py-5 [body.light-theme_&]:bg-[#f8fbff]">
             <div class="flex items-start gap-4 pr-12">
                 <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-500/10 text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-700">
                     <svg viewBox="0 0 16 16" class="h-5 w-5 fill-current" aria-hidden="true">

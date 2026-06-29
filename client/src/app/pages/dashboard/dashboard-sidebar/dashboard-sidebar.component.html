@@ -80,7 +80,7 @@
           [routePrefix]="'exploit'"
         [title]="('Exploit') | translate"></app-dashboard-sidebar-items>
       }
-      @if (isAdmin() || licenseService.canUseModule('general')) {
+      @if (licenseService.canUseActorsAndMalware()) {
         <app-dashboard-sidebar-items
           (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)"
@@ -290,7 +290,7 @@
           [title]="('Exploit') | translate">
         </app-dashboard-sidebar-collapsed>
       }
-      @if (isAdmin() || licenseService.canUseModule('general')) {
+      @if (licenseService.canUseActorsAndMalware()) {
         <app-dashboard-sidebar-collapsed
           (optionSelected)="onOptionSelected($event)"
           (sectionSelected)="onSectionSelected($event)"

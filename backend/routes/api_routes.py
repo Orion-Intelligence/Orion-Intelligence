@@ -41,7 +41,7 @@ from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
-from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
+from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, user_role
 from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
 from orion.services.stix_manager.stix_manager import stix_manager
 from routes.docs.docs import CRYPTO_DOCS, CROSS_SEARCH_DOCS, DYNAMIC_DOCS, REPORT_DOCS, SEARCH_DOCS, SUPPORT_METHOD_DOCS, SYSTEM_INFO_DOCS
@@ -52,6 +52,17 @@ SCAN_WITH_LIMITER_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(limite
 STEALER_LOG_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:stealer_logs", bypass_roles=[], bypass_licenses=["maintainer"]))]
 STIX_MEMBER_DEPS = [Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))]
 GENERAL_MODULE_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:general"))]
+APT_INTEL_DEPS = [
+    Depends(role_required(SCAN_ROLE_DEPS)),
+    Depends(license_required(
+        "apt_intel",
+        bypass_licenses=[
+            LicenseName.OSINT_BASIC.value,
+            LicenseName.OSINT_ADVANCED.value,
+            LicenseName.ENTERPRISE.value,
+        ],
+    )),
+]
 SCANNING_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("scanning"))]
 STIX_KIND_VALUES = {"general", "leak", "defacement", "exploit", "chat", "social"}
 
@@ -196,19 +207,19 @@ async def get_exploit_filter_suggestions(field: str = Query(...), q: str = Query
     operation_id="searchAptIntelReports",
     response_description=SEARCH_DOCS["strategic"]["response_description"],
     status_code=200,
-    dependencies=GENERAL_MODULE_DEPS, )
+    dependencies=APT_INTEL_DEPS, )
 async def search_apt_intel(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
     return await search_apt_controller.getInstance().search_result(param)
 
 
-@api_routes.get("/api/search/apt/families", status_code=200, include_in_schema=False, dependencies=GENERAL_MODULE_DEPS)
+@api_routes.get("/api/search/apt/families", status_code=200, include_in_schema=False, dependencies=APT_INTEL_DEPS)
 async def get_apt_families():
     return await search_model.getInstance().get_apt_filter_options()
 
 
-@api_routes.get("/api/search/malware/filter-options", status_code=200, include_in_schema=False, dependencies=GENERAL_MODULE_DEPS)
+@api_routes.get("/api/search/malware/filter-options", status_code=200, include_in_schema=False, dependencies=APT_INTEL_DEPS)
 async def get_malware_filter_options():
     return await search_model.getInstance().get_malware_filter_options()
 
@@ -423,7 +434,7 @@ async def get_leak_document(doc_id: str, lang: Optional[str] = Query(None, alias
     operation_id="getNewsReport",
     response_description=REPORT_DOCS["news"]["response_description"],
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:news", bypass_licenses=["maintainer"]))], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:feed", bypass_licenses=["maintainer"]))], )
 async def get_news_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await search_model.getInstance().request_leak_doc(doc_id, lang)
 
@@ -449,7 +460,7 @@ async def get_exploit_document(doc_id: str, lang: Optional[str] = Query(None, al
     operation_id="getAptReport",
     response_description="APT report document",
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:general", bypass_licenses=["maintainer"]))], )
+    dependencies=APT_INTEL_DEPS, )
 async def get_apt_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await search_model.getInstance().request_apt_doc(doc_id, lang)
 
@@ -462,7 +473,7 @@ async def get_apt_document(doc_id: str, lang: Optional[str] = Query(None, alias=
     operation_id="getMalwareReport",
     response_description="Malware report document",
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:general", bypass_licenses=["maintainer"]))], )
+    dependencies=APT_INTEL_DEPS, )
 async def get_malware_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await search_model.getInstance().request_malware_doc(doc_id, lang)
 
@@ -794,7 +805,7 @@ async def get_entity_relations(query: EntityQueryModel = Depends()):
     dependencies=[Depends(
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
-        Depends(license_required("module:news", bypass_licenses=["maintainer"])), ], )
+        Depends(license_required("module:feed", bypass_licenses=["maintainer"])), ], )
 async def get_news_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_leak_stix(doc_id, lang)
 

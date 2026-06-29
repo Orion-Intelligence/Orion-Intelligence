@@ -36,14 +36,13 @@
             [shipsData]="shipsData"
             [topControlsInset]="showTopBar"
             (featureSelected)="onMapFeatureSelected($event)"
-            (featureIdsSelected)="onMapEntityFeatureIdsSelected($event)"
             (mapMoved)="onMapMoved($event)"
             (mapReady)="onSatelliteMapReady()"
             (mapError)="onSatelliteMapReady()">
           </app-satellite-map-renderer>
           <app-map-entities-overlay
             [facilitiesVisible]="facilitiesVisible"
-            [legendConstrained]="mapRenderer.sidebarVisible || isPanelPopupOpen || entityDescriptionPopupOpen"
+            [legendConstrained]="mapRenderer.sidebarVisible || isPanelPopupOpen"
             [legendFilters]="visibleDashboardTypeFilters"
             [sidebarVisible]="mapRenderer.sidebarVisible"
             [sidebarLoading]="mapRenderer.sidebarLoading"
@@ -52,7 +51,6 @@
             [isAircraftLoading]="isAircraftLoading"
             [isShipsLoading]="isShipsLoading"
             [isMapEntityLoading]="isMapEntityLoading"
-            [isMapEntityDetailsLoading]="isMapEntityDetailsLoading"
             [topControlsInset]="showTopBar"
             [errorMessage]="satelliteService.onError()?.message || null"
             [isScanning]="isScanning()"
@@ -89,13 +87,6 @@
           </div>
         }
       </div>
-      @if (isMapView) {
-        <app-entity-description-popup
-          [isOpen]="entityDescriptionPopupOpen"
-          [items]="entityDescriptionPopupData"
-          (close)="closeEntityDescriptionPopup()">
-        </app-entity-description-popup>
-      }
       <app-satellite-panel-shell
         class="block max-[1100px]:w-full"
         [isMapView]="isMapView"

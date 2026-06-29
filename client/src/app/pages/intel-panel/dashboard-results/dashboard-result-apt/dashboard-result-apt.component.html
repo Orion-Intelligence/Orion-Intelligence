@@ -39,7 +39,7 @@
     @if (getVisibleDirectResults(); as results) {
       <div [ngClass]="isConsolidatedView ? 'grid grid-cols-2 gap-3 max-[900px]:grid-cols-1' : 'grid grid-cols-3 gap-3 max-[1280px]:grid-cols-2 max-[760px]:grid-cols-1'">
         @for (item of results; track getItemKey(item, $index); let i = $index) {
-          <article data-testid="apt-intel-result-card" [attr.data-result-index]="i" [id]="'item-' + (getReportId(item) || i)" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub min-h-[252px]' : 'h-[252px] max-[760px]:h-auto max-[760px]:min-h-[252px]'" class="ui-stagger-result-card relative overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-[0_10px_24px_rgba(0,0,0,0.16)] transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-810)]">
+          <article data-testid="apt-intel-result-card" [attr.data-result-index]="i" [id]="'item-' + (getReportId(item) || i)" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub min-h-[252px]' : 'h-[252px] max-[760px]:h-auto max-[760px]:min-h-[252px]'" class="ui-stagger-result-card ui-result-card ui-result-card-hover relative overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-[0_10px_24px_rgba(0,0,0,0.16)] transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-810)]">
             <div class="absolute inset-y-0 left-0 w-1" [ngClass]="getAccentClass(item)"></div>
             <a class="flex h-full w-full flex-col p-4 pl-5 text-left no-underline" [routerLink]="getReportLink(item)" [queryParams]="getQueryParams(item)" (click)="saveCurrentPosition(item)">
               <div class="flex h-[86px] items-start justify-between gap-4">
@@ -103,9 +103,9 @@
   @if (getVisibleGroups(); as groups) {
     <div [ngClass]="isConsolidatedView ? 'grid gap-3' : 'grid grid-cols-3 gap-3 max-[1280px]:grid-cols-2 max-[760px]:grid-cols-1'">
       @for (group of groups; track group.key; let i = $index) {
-        <article data-testid="apt-intel-result-card" [attr.data-result-index]="i" [id]="'item-' + group.key" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub min-h-[252px]' : 'h-[252px] max-[760px]:h-auto max-[760px]:min-h-[252px]'" class="ui-stagger-result-card relative overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-[0_10px_24px_rgba(0,0,0,0.16)] transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-810)]">
+        <article data-testid="apt-intel-result-card" [attr.data-result-index]="i" [id]="'item-' + group.key" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub min-h-[252px]' : 'h-[252px] max-[760px]:h-auto max-[760px]:min-h-[252px]'" class="ui-stagger-result-card ui-result-card ui-result-card-hover relative overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-[0_10px_24px_rgba(0,0,0,0.16)] transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-810)]">
           <div class="absolute inset-y-0 left-0 w-1" [ngClass]="getGroupAccentClass(group)"></div>
-          <button type="button" class="group flex h-full w-full flex-col p-4 pl-5 text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue-800)]" (click)="toggleGroup(group.key)" [attr.aria-expanded]="isGroupExpanded(group.key)" [attr.aria-label]="((isGroupExpanded(group.key) ? 'Collapse group' : 'Expand group') | translate) + ': ' + group.title">
+          <button type="button" class="group flex h-full w-full flex-col p-4 pl-5 text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue-700)]" (click)="toggleGroup(group.key)" [attr.aria-expanded]="isGroupExpanded(group.key)" [attr.aria-label]="((isGroupExpanded(group.key) ? 'Collapse group' : 'Expand group') | translate) + ': ' + group.title">
             <div class="flex h-[86px] items-start justify-between gap-4">
               <div class="min-w-0 flex-1">
                 <div class="flex h-9 min-w-0 flex-col justify-start overflow-hidden">
@@ -163,7 +163,7 @@
         </article>
       }
       @for (_ of getGridPlaceholders(groups); track _) {
-        <div aria-hidden="true" class="h-[252px] rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-blue-800)] opacity-35 max-[1280px]:hidden"></div>
+        <div aria-hidden="true" class="h-[252px] rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-blue-700)] opacity-35 max-[1280px]:hidden"></div>
       }
     </div>
   }

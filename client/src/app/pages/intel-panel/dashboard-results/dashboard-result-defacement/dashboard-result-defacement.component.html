@@ -45,9 +45,9 @@
             @if (getDefacementGroups().length > 0) {
               <div class="grid grid-cols-3 gap-3 max-[1280px]:grid-cols-2 max-[760px]:grid-cols-1">
                 @for (group of groups; track group.key) {
-                  <div data-testid="defacement-group-card" class="ui-stagger-result-card relative h-[252px] overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] shadow-[0_10px_24px_rgba(0,0,0,0.16)] transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-810)] max-[760px]:h-auto max-[760px]:min-h-[252px]">
+                  <div data-testid="defacement-group-card" class="ui-stagger-result-card ui-result-card ui-result-card-hover relative h-[252px] overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-[0_10px_24px_rgba(0,0,0,0.16)] transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-810)] max-[760px]:h-auto max-[760px]:min-h-[252px]">
                     <div class="absolute inset-y-0 left-0 w-1" [ngClass]="{ 'bg-red-500': group.risk === 'High', 'bg-yellow-400': group.risk === 'Medium', 'bg-emerald-400': group.risk === 'Low' }"></div>
-                    <button type="button" class="group flex h-full w-full flex-col p-4 pl-5 text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue-800)]" (click)="toggleGroup(group.key)" [attr.aria-expanded]="isGroupExpanded(group.key)" [attr.aria-label]="((isGroupExpanded(group.key) ? 'Collapse group' : 'Expand group') | translate) + ': ' + group.title">
+                    <button type="button" class="group flex h-full w-full flex-col p-4 pl-5 text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue-700)]" (click)="toggleGroup(group.key)" [attr.aria-expanded]="isGroupExpanded(group.key)" [attr.aria-label]="((isGroupExpanded(group.key) ? 'Collapse group' : 'Expand group') | translate) + ': ' + group.title">
                       <div class="flex h-[88px] items-start justify-between gap-4">
                         <div class="min-w-0 flex-1">
                           <div class="flex h-9 min-w-0 flex-col justify-start overflow-hidden">

@@ -57,7 +57,6 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
 
   @Output() mapMoved  = new EventEmitter<{ lat: number; lon: number; zoom: number; trackingDelta: number }>();
   @Output() featureSelected = new EventEmitter<any>();
-  @Output() featureIdsSelected = new EventEmitter<string[]>();
   @Output() mapReady = new EventEmitter<void>();
   @Output() mapError = new EventEmitter<void>();
 
@@ -303,7 +302,6 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         getOrionData: () => this.orionData,
         getFocusedFeature: () => this.focusedFeature,
         onFeatureSelected: (feature: OrionSatelliteFeature) => this.ngZone.run(() => this.featureSelected.emit(feature)),
-        onFeatureIdsSelected: (ids: string[]) => this.ngZone.run(() => this.featureIdsSelected.emit(ids)),
       });
       this.entityRenderer.init(this.facilitiesVisible);
 

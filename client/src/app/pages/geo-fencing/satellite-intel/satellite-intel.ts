@@ -9,7 +9,6 @@ import { GeoFencingGeocodeService } from '../shared/services/geo-fencing-geocode
 import { MapRendererComponent } from './map-renderer/map-renderer.component';
 import { GeocodeModalComponent } from '../../../shared/partials/geocode-modal/geocode-modal.component';
 import { MonthCompareSectionComponent } from './ui-overlays/month-compare-section/month-compare-section.component';
-import { EntityDescriptionPopupComponent } from './ui-overlays/entity-description-popup/entity-description-popup.component';
 import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
 import { ThreatLensComponent } from '../threat-lens/threat-lens';
 import { OrionSatelliteDashboardFilter, OrionSatelliteFeature, OrionSatelliteFeatureType } from '../models/geo-fencing.models';
@@ -22,7 +21,6 @@ import { MapEntitiesOverlayComponent } from './ui-overlays/map-entities-overlay/
 import { MonthCompareService } from './ui-overlays/month-compare-section/month-compare.service';
 import { DashboardSectionComponent } from './ui-overlays/dashboard-section/dashboard-section.component';
 import { PanelShellComponent } from './ui-overlays/panel-shell/panel-shell.component';
-import { MapEntityDetailsState } from './state/map-entity-details.state';
 import { SatelliteLoadingState } from './state/satellite-loading.state';
 import { SatelliteLocationState } from './state/satellite-location.state';
 import { SatelliteScanState } from './state/satellite-scan.state';
@@ -38,7 +36,6 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
     GeocodeModalComponent,
     MapRendererComponent,
     MonthCompareSectionComponent,
-    EntityDescriptionPopupComponent,
     MapEntitiesOverlayComponent,
     DashboardSectionComponent,
     PanelShellComponent,
@@ -50,7 +47,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private loadingState = new SatelliteLoadingState();
   private locationState = new SatelliteLocationState();
   private scanState: SatelliteScanState;
-  private mapEntityDetailsState: MapEntityDetailsState;
   private initialMapEntityLoadTimer: ReturnType<typeof setTimeout> | null = null;
   private initialMapLoadingId: number | null = null;
   private route: ActivatedRoute;
@@ -90,7 +86,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       loading: loadingBridge,
     });
     this.mapEntityDashboard = new SatelliteMapEntityDashboardController(facilitiesService, () => this.facilitiesVisible, () => this.facilitiesMapData);
-    this.mapEntityDetailsState = new MapEntityDetailsState(facilitiesService);
     this.scanState = new SatelliteScanState(satelliteService, monthCompareService);
   }
 
@@ -121,7 +116,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     }
     this.entityLoader.destroy();
     this.mapEntityDashboard.destroy();
-    this.mapEntityDetailsState.destroy();
     this.scanState.destroy();
     this.loadingState.clear();
   }
@@ -150,14 +144,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     return this.loadingState.message;
   }
 
-  get entityDescriptionPopupOpen(): boolean {
-    return this.mapEntityDetailsState.isOpen;
-  }
-
-  get entityDescriptionPopupData(): MapEntityDetailsState['data'] {
-    return this.mapEntityDetailsState.data;
-  }
-
   get anomalyResult(): SatelliteScanState['anomalyResult'] {
     return this.scanState.anomalyResult;
   }
@@ -168,10 +154,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   get hasSearched(): boolean {
     return this.scanState.hasSearched;
-  }
-
-  get isMapEntityDetailsLoading(): boolean {
-    return this.mapEntityDetailsState.isLoading;
   }
 
   isScanning(): boolean {
@@ -373,7 +355,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.isPanelMenuOpen = false;
     this.selectedFeature = null;
     this.focusedFeature = null;
-    this.mapEntityDetailsState.close();
     this.mapRenderer?.closeSidebar();
     this.threatLens?.clearAllSelections();
   }
@@ -524,14 +505,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   onMapFeatureSelected(feature: OrionSatelliteFeature): void {
     this.selectedFeature = feature;
-  }
-
-  onMapEntityFeatureIdsSelected(ids: string[]): void {
-    this.mapEntityDetailsState.load(ids);
-  }
-
-  closeEntityDescriptionPopup(): void {
-    this.mapEntityDetailsState.close();
   }
 
   private isPanelId(value: string | null): value is SatelliteIntelPanel {

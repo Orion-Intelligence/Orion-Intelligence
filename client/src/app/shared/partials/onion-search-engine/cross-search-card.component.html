@@ -161,11 +161,6 @@
             </div>
           }
 
-          <div class="mt-[14px] flex flex-wrap items-center justify-between gap-[10px]">
-            <button type="button" class="inline-flex min-h-[36px] items-center justify-center rounded-full border border-[var(--color-border)] bg-transparent px-[14px] text-[12px] font-[800] tracking-[0.2px] text-[var(--color-text1)] transition-[background,transform,filter] duration-150 hover:bg-[var(--color-blue-820)] hover:translate-y-[-1px] hover:brightness-[1.02] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50" (click)="onSearch(); $event.stopPropagation()" [disabled]="!(query || '').trim()">
-              {{ 'Re-run Cross Search' | translate }}
-            </button>
-          </div>
         }
       }
     </div>

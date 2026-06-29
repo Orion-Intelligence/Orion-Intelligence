@@ -2,10 +2,6 @@
 
 <app-map-loading-badges [items]="loadingBadges" [topControlsInset]="topControlsInset"></app-map-loading-badges>
 
-@if (isMapEntityDetailsLoading) {
-  <div class="absolute inset-0 z-[918] cursor-wait bg-transparent"></div>
-}
-
 @if (errorMessage && !isScanning) {
   <div class="absolute left-3 right-3 z-[900] max-w-[min(520px,calc(100%-24px))] rounded-lg border border-red-500/30 bg-red-500/12 px-[14px] py-[10px] text-[12px] text-red-300 [body.light-theme_&]:border-red-300 [body.light-theme_&]:bg-red-50 [body.light-theme_&]:text-red-700 max-[943px]:left-2 max-[943px]:right-2 max-[943px]:top-[52px] max-[943px]:max-w-none max-[520px]:top-[96px]" [ngClass]="topControlsInset ? 'top-[76px]' : 'top-3'">
     <i class="bi bi-exclamation-triangle-fill"></i>
