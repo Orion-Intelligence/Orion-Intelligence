@@ -28,7 +28,6 @@ export class UiDropdownComponent implements OnDestroy {
   private static nextId = 0;
   private static activeDropdown: UiDropdownComponent | null = null;
   private readonly fallbackId = `ui-dropdown-${UiDropdownComponent.nextId++}`;
-  private removeScrollListener?: () => void;
   @ViewChild('triggerButton') private triggerButton?: ElementRef<HTMLButtonElement>;
   @ViewChild('searchInput') private searchInput?: ElementRef<HTMLInputElement>;
   @ViewChild('listbox') private listbox?: ElementRef<HTMLElement>;
@@ -331,7 +330,6 @@ export class UiDropdownComponent implements OnDestroy {
     this.isOpen = false;
     this.searchTerm = '';
     this.activeIndex = -1;
-    this.removeDocumentScrollListener();
     if (UiDropdownComponent.activeDropdown === this) {
       UiDropdownComponent.activeDropdown = null;
     }
@@ -344,17 +342,7 @@ export class UiDropdownComponent implements OnDestroy {
     }
   }
 
-  @HostListener('document:wheel', ['$event'])
-  closeOnExternalWheel(event: WheelEvent): void {
-    const target = event.target as Node;
-    if (this.hostElement.nativeElement.contains(target) || this.listbox?.nativeElement.contains(target)) {
-      return;
-    }
-    this.close();
-  }
-
   ngOnDestroy(): void {
-    this.removeDocumentScrollListener();
     if (UiDropdownComponent.activeDropdown === this) {
       UiDropdownComponent.activeDropdown = null;
     }
@@ -371,28 +359,6 @@ export class UiDropdownComponent implements OnDestroy {
     this.activeIndex = selectedIndex >= 0 ? selectedIndex : (this.visibleOptions.length ? 0 : -1);
     this.focusSearch();
     this.scrollActiveIntoView();
-    window.setTimeout(() => {
-      if (this.isOpen) {
-        this.addDocumentScrollListener();
-      }
-    });
-  }
-
-  private addDocumentScrollListener(): void {
-    this.removeDocumentScrollListener();
-    const onScroll = (event: Event) => {
-      if (this.listbox?.nativeElement.contains(event.target as Node)) {
-        return;
-      }
-      this.close();
-    };
-    document.addEventListener('scroll', onScroll, true);
-    this.removeScrollListener = () => document.removeEventListener('scroll', onScroll, true);
-  }
-
-  private removeDocumentScrollListener(): void {
-    this.removeScrollListener?.();
-    this.removeScrollListener = undefined;
   }
 
   private updateOverlayMetrics(): void {

@@ -211,6 +211,24 @@ export class DashboardService {
     });
   }
 
+  deleteDocumentFeedbackComment(docId: string, commentCreatedAt: string, feedbackModel: ReportFeedbackModel, handlers?: { setSaving?: (value: boolean) => void; setError?: (value: string) => void }): void {
+    if (!docId || !commentCreatedAt) {
+      return;
+    }
+    handlers?.setError?.('');
+    handlers?.setSaving?.(true);
+    this.apiService.delete<ReportFeedbackModel>(`feedback/comment/${docId}/${encodeURIComponent(commentCreatedAt)}`).subscribe({
+      next: (response) => {
+        this.patchReportFeedbackModel(feedbackModel, new ReportFeedbackModel(response));
+        handlers?.setSaving?.(false);
+      },
+      error: (error) => {
+        handlers?.setError?.(error?.error?.detail || error?.error?.message || 'Unable to delete comment.');
+        handlers?.setSaving?.(false);
+      },
+    });
+  }
+
   private initializeSideFilters() {
     const allowedKeys = [
       "source",

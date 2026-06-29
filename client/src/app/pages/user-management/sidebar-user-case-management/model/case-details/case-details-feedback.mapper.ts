@@ -6,6 +6,7 @@ export function buildCaseCommentsFeedback(caseData: Case | null, getAnalystLabel
     user_id: comment.createdBy || '',
     username: getAnalystLabel(comment.createdBy),
     comment: comment.body,
+    is_deleted: false,
     created_at: String(comment.createdAt || ''),
     updated_at: String(comment.updatedAt || comment.createdAt || '')
   }));

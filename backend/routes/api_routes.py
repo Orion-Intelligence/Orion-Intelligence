@@ -238,6 +238,16 @@ async def add_feedback_comment(doc_id: str, param: feedback_comment_param_model 
     return await FeedbackManager.get_instance().add_comment(doc_id, param.comment, current_user)
 
 
+@api_routes.delete(
+    "/api/feedback/comment/{doc_id}/{comment_created_at}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))],
+)
+async def delete_feedback_comment(doc_id: str, comment_created_at: str, current_user=Depends(get_current_user)):
+    return await FeedbackManager.get_instance().delete_comment(doc_id, comment_created_at, current_user)
+
+
 @api_routes.get(
     "/api/feedback/{doc_id}",
     status_code=200,
