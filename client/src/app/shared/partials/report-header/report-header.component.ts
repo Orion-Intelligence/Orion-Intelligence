@@ -166,7 +166,10 @@ export class ReportHeaderComponent {
     const currentUrl = new URL(window.location.href);
     currentUrl.searchParams.set('lang', selectedLanguage);
     const segments = currentUrl.pathname.split('/').filter(Boolean);
-    const type = segments[segments.length - 3];
+    let type = segments[segments.length - 2];
+    if(type=='leak'){
+      type = 'breach';
+    }
     const reportId = segments[segments.length - 1];
     const apiUrl = `search/${type}/${reportId}`;
     this.selectedLanguage.set(selectedLanguage);
