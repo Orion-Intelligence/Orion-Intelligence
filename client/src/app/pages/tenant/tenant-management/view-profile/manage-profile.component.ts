@@ -27,6 +27,7 @@ export class ManageProfileComponent implements OnInit {
   protected readonly JSON = JSON;
 
   users: User[] = [];
+  userSearch = '';
   licenseList = Object.values(LicenseName);
   permissionOptions: UiDropdownOption[] = [{ key: 'case_management', label: 'Case Management' }];
   statusOptions: UiDropdownOption[] = [{ key: 'active', label: 'Active' }, { key: 'disable', label: 'Disable' }];
@@ -95,6 +96,22 @@ export class ManageProfileComponent implements OnInit {
     return this.licenseList
       .filter(license => this.canAssignLicense(license))
       .map(license => ({ key: license, label: this.licenseService.getLicenseLabel(license) }));
+  }
+
+  get filteredUsers(): User[] {
+    const search = this.userSearch.trim().toLowerCase();
+    if (!search) {
+      return this.users;
+    }
+    return this.users.filter((user) => [
+      user.username,
+      user.email,
+      user.role,
+      user.status,
+      user.subscription ? 'paid' : 'free',
+      this.getUserLicensesLabel(user),
+      this.getUserPermissionsLabel(user)
+    ].some(value => String(value || '').toLowerCase().includes(search)));
   }
 
   setUserStatus(user: User, value: string | null): void {

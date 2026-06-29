@@ -777,7 +777,7 @@ async def get_chat_stix_document(doc_id: str, lang: Optional[str] = Query(None, 
     "/api/graph",
     status_code=200,
     include_in_schema=False,
-    dependencies=[Depends(license_required("cti_graph"))], )
+    dependencies=[Depends(license_required("cti_graph", bypass_roles=[user_role.ADMIN], bypass_licenses=["maintainer"]))], )
 async def get_entity_relations(query: EntityQueryModel = Depends()):
     manager = entity_manager.get_instance()
     return await manager.get_entity_relations(query)

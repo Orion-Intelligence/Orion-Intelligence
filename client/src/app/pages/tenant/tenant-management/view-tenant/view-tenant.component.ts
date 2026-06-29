@@ -22,6 +22,7 @@ export class ViewTenantComponent implements OnInit {
   protected readonly JSON = JSON;
 
   tenants: any[] = [];
+  tenantSearch = '';
   licenseList = Object.values(LicenseName).filter((license) => license !== LicenseName.FEEDER);
   isLoading = true;
   selectedTenantId: string | null = null;
@@ -34,6 +35,26 @@ export class ViewTenantComponent implements OnInit {
     return this.licenseList
       .filter(license => this.licenseService.getLicenseLabel(license) !== 'maintainer')
       .map(license => ({ key: license, label: this.licenseService.getLicenseLabel(license) }));
+  }
+
+  get filteredTenants(): any[] {
+    const search = this.tenantSearch.trim().toLowerCase();
+    if (!search) {
+      return this.tenants;
+    }
+    return this.tenants.filter((tenant) => [
+      tenant.companyName,
+      tenant.company,
+      tenant.name,
+      tenant.email,
+      tenant.phone,
+      tenant.country,
+      tenant.city,
+      tenant.status,
+      tenant.subscription ? 'paid' : 'free',
+      tenant.verified ? 'verified' : 'not verified',
+      this.getTenantLicensesLabel(tenant)
+    ].some(value => String(value || '').toLowerCase().includes(search)));
   }
 
   ngOnInit(): void {

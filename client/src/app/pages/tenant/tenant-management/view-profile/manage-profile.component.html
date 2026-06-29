@@ -15,12 +15,15 @@
       </div>
 
       <div class="my-5 hidden h-px w-full bg-[var(--color-divider)] md:block"></div>
+      <div class="mb-3 flex justify-end">
+        <input data-testid="tenant-user-search-input" type="text" [(ngModel)]="userSearch" [placeholder]="'Search' | translate" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 sm:max-w-[320px]">
+      </div>
 
       <div class="tenant-table-shell m-0 overflow-hidden rounded-none border-0 shadow-none md:rounded-[8px] md:border md:!border-[var(--tenant-line)] md:shadow-none">
         @if (!isLoading) {
           <div class="relative hidden overflow-x-auto overflow-y-visible md:block">
             <table class="w-full min-w-[1120px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]">
-              @if ((users?.length || 0) > 0) {
+              @if ((filteredUsers?.length || 0) > 0) {
                 <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
                   <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
                     <th class="w-[70px] overflow-clip align-middle px-4 py-3.5">{{ 'Sr #' | translate }}</th>
@@ -34,9 +37,9 @@
                   </tr>
                 </thead>
               }
-              @if ((users?.length || 0) > 0) {
+              @if ((filteredUsers?.length || 0) > 0) {
                 <tbody class="text-[15px] font-normal text-[var(--color-text3)]" @fadeInDashboardItem>
-                  @for (user of users; track user.email || user.username || $index; let i = $index) {
+                  @for (user of filteredUsers; track user.email || user.username || $index; let i = $index) {
                     <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [ngClass]="expandedUserIndex === (i - 1) ? '!border-t-0' : ''">
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">{{ i + 1 }}</td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
@@ -214,7 +217,7 @@
                   }
                 </tbody>
               }
-              @if ((users?.length || 0) === 0) {
+              @if ((filteredUsers?.length || 0) === 0) {
                 <tbody>
                   <tr class="border-t !border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]">
                     <td class="px-4 py-12 text-center text-sm text-[var(--color-text4)]" colspan="8">{{ 'No users available.' | translate }}</td>
@@ -224,8 +227,8 @@
             </table>
           </div>
           <div class="space-y-3 p-0 md:hidden" @fadeInDashboardItem>
-            @if ((users?.length || 0) > 0) {
-              @for (user of users; track user.email || user.username || $index; let i = $index) {
+            @if ((filteredUsers?.length || 0) > 0) {
+              @for (user of filteredUsers; track user.email || user.username || $index; let i = $index) {
                 <div class="overflow-hidden rounded-[10px] bg-[var(--tenant-row-bg)]">
                   <div class="flex items-center justify-between px-3 py-2.5">
                     <div class="min-w-0">
