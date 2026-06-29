@@ -158,16 +158,24 @@ async def search_leak(param: search_consolidated_param_model = Body(...), curren
 async def search_social(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
-    if param.category == "all":
+    category = (param.category or "all").strip().lower()
+    if category == "all":
         base_index = [ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX]
         return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
     else:
-        if param.category == "telegram":
+        if category == "telegram":
             param.category = "all"
             base_index = [ELASTIC_INDEX.S_CHATS_INDEX]
             return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
+        if category in ("forum", "forums"):
+            param.category = "all"
+            param.content = "all"
+            param.m_content_type = "all"
+            param.platform = "forum"
+            base_index = [ELASTIC_INDEX.S_SOCIAL_INDEX]
+            return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])
         else:
-            param.platform = param.category
+            param.platform = category
             param.category = "all"
             base_index = [ELASTIC_INDEX.S_SOCIAL_INDEX]
             return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [])

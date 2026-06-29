@@ -90,20 +90,14 @@ export class SocialDefaultListSectionComponent {
 
   getFilteredMetadataEntries(platformData: PlatformResult): { key: string; value: any; }[] {
     return getMetadataEntries(platformData.allMetadata)
-      .filter(entry => entry.key.toLowerCase().replace(/[\s_-]+/g, '') !== 'timestamp');
+      .filter(entry => entry.key.toLowerCase().replace(/[\s_-]+/g, '') !== 'timestamp')
+      .filter(entry => entry.value !== null && entry.value !== undefined && entry.value !== '')
+      .filter(entry => typeof entry.value !== 'object');
   }
 
   formatMetadataValue(value: any): string {
     if (value === null || value === undefined) {
       return '';
-    }
-    if (typeof value === 'object') {
-      try {
-        return JSON.stringify(value, null, 2);
-      }
-      catch {
-        return String(value);
-      }
     }
     return String(value);
   }

@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { Job, PlatformResult, SocialGraphState, SocialStealerLogRecord } from '../../../shared/model/social/social-scan.models';
+import { Job, PlatformResult, SocialGraphState, SocialResultSource, SocialStealerLogRecord } from '../../../shared/model/social/social-scan.models';
 import { HomeMenuComponent } from './home-menu/home-menu.component';
 import { SocialProfileListingComponent } from './profile-listing/profile-listing.component';
 import { NotificationBarComponent } from './notification-bar/notification-bar.component';
@@ -76,7 +76,28 @@ export class SocialMapperComponent implements OnDestroy {
   isInitialLoading = signal(true);
   profileBreadcrumbLabel = signal<string | null>(null);
   latestFetchConfirmationData = signal<LatestFetchConfirmationData | null>(null);
+  activeResultSources = signal<Record<string, SocialResultSource>>({});
   effectiveHomeMenuCollapsed = computed(() => this.isSmallScreen() ? !this.isMobileHomeMenuOpen() : this.isHomeMenuCollapsed());
+  activeSourceUsername = computed(() => this.state.activeUsername());
+  activeSourcePlatforms = computed(() => {
+    const username = this.activeSourceUsername();
+    if (!username) {
+      return [];
+    }
+    const results = this.scanResults();
+    const platforms = results.get(username) ?? Array.from(results.entries()).find(([key]) => key.toLowerCase() === username.toLowerCase())?.[1] ?? [];
+    return this.getVisiblePlatforms(platforms);
+  });
+  hasResultSourceTabs = computed(() => this.activeSourcePlatforms().length > 0);
+  activeResultSource = computed(() => {
+    const username = this.activeSourceUsername();
+    const platforms = this.activeSourcePlatforms();
+    const preferred = username ? this.activeResultSources()[username] ?? 'normal' : 'normal';
+    if (platforms.some(platform => this.getResultSource(platform) === preferred)) {
+      return preferred;
+    }
+    return platforms.some(platform => this.getResultSource(platform) === 'normal') ? 'normal' : 'darkweb';
+  });
   imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
   profileListing = viewChild(SocialProfileListingComponent);
 
@@ -126,6 +147,19 @@ export class SocialMapperComponent implements OnDestroy {
     if (this.isSmallScreen()) {
       this.closeMobileHomeMenu();
     }
+  }
+
+  setResultSource(source: SocialResultSource): void {
+    const username = this.activeSourceUsername();
+    if (!username || this.activeResultSource() === source || this.getResultSourceCount(source) === 0) {
+      return;
+    }
+    this.activeResultSources.update(current => ({ ...current, [username]: source }));
+    this.profileListing()?.clearProfileOverview();
+  }
+
+  getResultSourceCount(source: SocialResultSource): number {
+    return this.activeSourcePlatforms().filter(platform => this.getResultSource(platform) === source).length;
   }
 
   triggerScan(): void {
@@ -539,5 +573,14 @@ export class SocialMapperComponent implements OnDestroy {
 
   private getPlatformSelectionKey(platform: PlatformResult): string {
     return `${platform.keyUsername}|${platform.platform.toLowerCase()}|${platform.username.toLowerCase()}|${platform.url}`;
+  }
+
+  private getResultSource(platformData: PlatformResult): SocialResultSource {
+    return platformData.resultSource ?? 'normal';
+  }
+
+  private getVisiblePlatforms(platforms: PlatformResult[]): PlatformResult[] {
+    const selectedPlatforms = platforms.filter(platform => platform.isSelected);
+    return selectedPlatforms.length > 0 ? selectedPlatforms : [...platforms];
   }
 }

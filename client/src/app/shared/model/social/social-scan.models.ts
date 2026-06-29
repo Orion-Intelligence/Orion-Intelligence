@@ -34,6 +34,8 @@ export interface SocialPost {
     post_url: string;
     datetime: string;
     caption: string;
+    author?: string;
+    source?: string;
     likes: string;
     comments: string;
     comment_items?: string[];
@@ -43,6 +45,7 @@ export interface SocialPost {
     media_type: string;
     media_url: string;
 }
+export type SocialResultSource = 'normal' | 'darkweb';
 export interface SocialOnlinePresenceResult {
     query: string;
     total_found: number;
@@ -72,6 +75,7 @@ export interface PlatformResult {
     timestamp?: string;
     isSelected: boolean;
     status?: 'active' | 'suggested' | 'informational';
+    resultSource?: SocialResultSource;
     description?: string;
     followers?: number;
     joiningDate?: string;

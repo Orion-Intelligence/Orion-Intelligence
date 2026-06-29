@@ -272,11 +272,6 @@ export class AlertNotificationComponent implements OnChanges {
     }
   }
 
-  markScanSeen(job: ScanJob, event?: Event): void {
-    event?.stopPropagation();
-    this.scanNotificationService.markSeen(job);
-  }
-
   requestDeleteScan(job: ScanJob, event?: Event): void {
     event?.stopPropagation();
     if (this.isScanPending(job)) {

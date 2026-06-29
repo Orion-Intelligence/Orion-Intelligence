@@ -261,6 +261,9 @@ export class SocialProfileTabsSectionComponent {
   }
 
   getProfileUrl(platformData: PlatformResult, username: string): string {
+    if (platformData.resultSource === 'darkweb') {
+      return platformData.url || '#';
+    }
     return buildSocialProfileUrl(platformData.platform, username, platformData.url);
   }
 

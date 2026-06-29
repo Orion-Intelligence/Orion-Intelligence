@@ -304,7 +304,7 @@ export class SocialService {
           return;
         }
         if (event.type === 'complete') {
-          const incomingPlatforms = event.payload.map(platform => ({ ...platform, keyUsername: job.username }));
+          const incomingPlatforms = event.payload.map(platform => ({ ...platform, keyUsername: job.username, resultSource: platform.resultSource ?? ('normal' as const) }));
           opts.updateState(tabState => {
             tabState.scanResults.update(currentMap => {
               const existing = currentMap.get(job.username) ?? [];

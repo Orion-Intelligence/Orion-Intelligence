@@ -7,6 +7,8 @@ import httpx
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 
+from orion.services.elastic_manager.elastic_controller import elastic_controller
+from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_social_model import db_social_model
 
@@ -114,6 +116,62 @@ class social_model:
 
     async def search_recon(self, param):
         return await self.social_search(param, "recon")
+
+    async def search_forum_profiles(self, param):
+        query = self._normalize_username(getattr(param, "query", ""))
+        if not query:
+            return {"Result": [], "Total_Hits": 0}
+
+        max_results = int(getattr(param, "max_results", 50) or 50)
+        data_filter = {
+            "size": max(1, min(max_results, 100)),
+            "query": {
+                "bool": {
+                    "filter": [
+                        {"term": {"m_platform": {"value": "forum", "case_insensitive": True}}}
+                    ],
+                    "should": [
+                        {"term": {"m_sender_name": {"value": query, "case_insensitive": True, "boost": 6}}},
+                        {"term": {"m_author": {"value": query, "case_insensitive": True, "boost": 5}}},
+                        {"term": {"m_attacker": {"value": query, "case_insensitive": True, "boost": 4}}},
+                        {"term": {"m_username": {"value": query, "case_insensitive": True, "boost": 4}}},
+                        {"term": {"m_comments.m_username": {"value": query, "case_insensitive": True, "boost": 4}}},
+                        {"match": {"m_sender_name": {"query": query, "operator": "and", "boost": 4}}},
+                        {"match": {"m_author": {"query": query, "operator": "and", "boost": 3}}},
+                        {"match": {"m_attacker": {"query": query, "operator": "and", "boost": 3}}},
+                        {"match": {"m_username": {"query": query, "operator": "and", "boost": 3}}},
+                        {"match": {"m_title": {"query": query, "operator": "and", "boost": 2}}},
+                        {"match": {"m_content": {"query": query, "operator": "and"}}},
+                    ],
+                    "minimum_should_match": 1,
+                }
+            },
+            "sort": [
+                {"m_date": {"order": "desc", "unmapped_type": "date"}},
+                {"m_creation_date": {"order": "desc", "unmapped_type": "date"}},
+                {"_score": {"order": "desc"}},
+            ],
+        }
+
+        success, documents = await elastic_controller.get_instance().search_query(ELASTIC_INDEX.S_SOCIAL_INDEX, data_filter)
+        if not success:
+            return {"Result": [], "Total_Hits": 0}
+
+        body = documents.body if hasattr(documents, "body") else documents
+        hits = (body or {}).get("hits", {}).get("hits", [])
+        total = (body or {}).get("hits", {}).get("total", 0)
+        total_hits = total.get("value", 0) if isinstance(total, dict) else int(total or 0)
+        results = []
+        for rank, hit in enumerate(hits, start=1):
+            source = dict(hit.get("_source", {}) or {})
+            source.pop("m_embedding", None)
+            source["_id"] = hit.get("_id", "")
+            source["_score"] = hit.get("_score", 0)
+            source["_rank"] = rank
+            source["rank_index"] = ELASTIC_INDEX.S_SOCIAL_INDEX
+            results.append(source)
+
+        return {"Result": results, "Total_Hits": total_hits}
 
     async def search_phone_recon(self, param):
         return await self.social_search(param, "phone")

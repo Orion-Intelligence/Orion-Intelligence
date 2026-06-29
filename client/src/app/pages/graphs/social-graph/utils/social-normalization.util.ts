@@ -233,6 +233,8 @@ export class SocialNormalizationUtil {
       post_url: this.firstValue(post?.post_url, post?.m_url, post?.url, post?.m_message_sharable_link, post?.m_weblink),
       datetime: this.firstValue(post?.datetime, post?.date, post?.m_date, post?.timestamp),
       caption: this.firstValue(post?.caption, post?.m_content, post?.m_title, post?.title),
+      author: this.firstValue(post?.author, post?.m_author, post?.m_sender_name),
+      source: this.firstValue(post?.source, post?.m_domain, post?.m_platform, post?.m_scrap_file),
       likes: this.firstValue(post?.likes, post?.m_post_likes, post?.m_likes),
       comments: commentCount,
       comment_items: commentItems,
@@ -339,6 +341,7 @@ export class SocialNormalizationUtil {
       ...profile,
       keyUsername: document.profile_username,
       isSelected: profile.isSelected ?? false,
+      resultSource: profile.resultSource ?? 'normal',
       allMetadata: profile.allMetadata ?? {},
     }));
   }

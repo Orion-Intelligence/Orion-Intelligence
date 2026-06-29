@@ -4,6 +4,7 @@ from configs.app_dependency import get_current_user, license_required, role_requ
 from orion.api.interactive.social_manager.social_models.search_social_param_model import (
     SocialFollowersRequest,
     SocialFollowingRequest,
+    SocialForumRequest,
     SocialMetadataRequest,
     SocialPostsRequest,
     SocialOnlineImages,
@@ -24,6 +25,14 @@ social_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTI
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialReconRequest = Body(...)):
     return await social_model.getInstance().search_recon(param)
+
+
+@social_routes.post(
+    "/api/social/forum",
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def search_social_forum_profiles(param: SocialForumRequest = Body(...)):
+    return await social_model.getInstance().search_forum_profiles(param)
 
 
 @social_routes.post(

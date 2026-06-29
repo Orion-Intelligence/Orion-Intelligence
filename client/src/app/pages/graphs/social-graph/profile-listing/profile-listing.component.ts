@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PlatformResult, SocialPost } from '../../../../shared/model/social/social-scan.models';
+import { PlatformResult, SocialPost, SocialResultSource } from '../../../../shared/model/social/social-scan.models';
 import { formatFollowers } from '../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
 import { SocialService } from '../services/social.service';
@@ -52,15 +52,21 @@ export class SocialProfileListingComponent {
   public state = inject(SocialService);
   activeTabs = signal<Record<string, FetchTabKey | null>>({});
   profileOverviewIds = signal<Set<string>>(new Set<string>());
+  activeResultSources = input<Record<string, SocialResultSource>>({});
   platformSearchTerm = signal('');
   onlinePresenceSearchTerms = signal<Record<string, string>>({});
   activeUsers = computed<FeedUser[]>(() => {
     return Array.from(this.scanResults().entries())
-      .map(([username, platforms]) => ({
-        username,
-        platforms: this.getVisiblePlatforms(platforms).sort((a, b) => this.comparePlatforms(a, b))
-      }))
-      .filter(user => user.platforms.length > 0);
+      .map(([username, platforms]) => {
+        const allPlatforms = this.getVisiblePlatforms(platforms).sort((a, b) => this.comparePlatforms(a, b));
+        const activeResultSource = this.getActiveResultSource(username, allPlatforms);
+        return {
+          username,
+          allPlatforms,
+          platforms: allPlatforms.filter(platform => this.getResultSource(platform) === activeResultSource)
+        };
+      })
+      .filter(user => user.allPlatforms.length > 0);
   });
   hasResults = computed(() => this.activeUsers().length > 0);
   activeUser = computed(() => {
@@ -122,6 +128,13 @@ export class SocialProfileListingComponent {
   }
 
   getFetchTabs(platformData: PlatformResult): FetchTab[] {
+    if (this.getResultSource(platformData) === 'darkweb') {
+      return [
+        ...this.baseFetchTabs.filter(tab => tab.key === 'details' || tab.key === 'posts' || tab.key === 'images'),
+        this.onlinePresenceTab,
+        this.stealerLogsTab
+      ];
+    }
     const sharedTabs = [...this.baseFetchTabs, this.onlinePresenceTab, this.stealerLogsTab];
     const tabs = this.isPriorityPlatform(platformData.platform)
       ? [...this.baseFetchTabs, ...this.followerFetchTabs, this.onlinePresenceTab, this.stealerLogsTab]
@@ -154,6 +167,9 @@ export class SocialProfileListingComponent {
   }
 
   refetchTabData(platformData: PlatformResult, tabKey: FetchTabKey): void {
+    if (this.getResultSource(platformData) === 'darkweb' && (tabKey === 'details' || tabKey === 'posts')) {
+      return;
+    }
     switch (tabKey) {
       case 'details':
         this.fetchMetadataInline.emit(platformData);
@@ -319,6 +335,10 @@ export class SocialProfileListingComponent {
       return platform.platform.toLowerCase().includes(term)
         || platform.username.toLowerCase().includes(term);
     });
+  }
+
+  getResultSource(platformData: PlatformResult): SocialResultSource {
+    return platformData.resultSource ?? 'normal';
   }
 
   getUniquePosts(platformData: PlatformResult, tabKey: 'posts' | 'videos' | 'shorts' = 'posts'): SocialPost[] {
@@ -521,6 +541,14 @@ export class SocialProfileListingComponent {
   private getVisiblePlatforms(platforms: PlatformResult[]): PlatformResult[] {
     const selectedPlatforms = platforms.filter(platform => platform.isSelected);
     return selectedPlatforms.length > 0 ? selectedPlatforms : [...platforms];
+  }
+
+  private getActiveResultSource(username: string, platforms: PlatformResult[]): SocialResultSource {
+    const preferred = this.activeResultSources()[username] ?? 'normal';
+    if (platforms.some(platform => this.getResultSource(platform) === preferred)) {
+      return preferred;
+    }
+    return platforms.some(platform => this.getResultSource(platform) === 'normal') ? 'normal' : 'darkweb';
   }
 
   private getAllowedTabKey(platformData: PlatformResult, tabKey: FetchTabKey): FetchTabKey {

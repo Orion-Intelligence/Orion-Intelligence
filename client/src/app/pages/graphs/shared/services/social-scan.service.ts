@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, throwError, timer } from 'rxjs';
+import { Observable, of, throwError, timer } from 'rxjs';
 import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { ApiService } from '../../../../shared/services/api.service';
 import { PlatformResult, ProfileDetails, ScanEvent, SocialImage, SocialPost, SocialStoredProfile } from '../../../../shared/model/social/social-scan.models';
@@ -96,6 +96,11 @@ export class SocialScanService {
     return platform;
   }
 
+  private isForumLabel(value: any): boolean {
+    const normalized = String(value || '').trim().toLowerCase();
+    return normalized === 'forum' || normalized === 'forums';
+  }
+
   private buildPlatformResult(item: any, keyUsername: string, rawPlatform: string): PlatformResult {
     const capitalizedPlatform = this.capitalizePlatform(rawPlatform);
     const extractedData = this.extractMetadata(item.data);
@@ -107,6 +112,7 @@ export class SocialScanService {
       username: item.metadata.username,
       url: item.metadata.url,
       isSelected: false,
+      resultSource: 'normal',
       status: normalizedStatus,
       ...extractedData
     } as PlatformResult;
@@ -158,12 +164,41 @@ export class SocialScanService {
   }
 
   performScan(username: string): Observable<ScanEvent> {
-    return this.runScanFlow({
-      submitStep: 'Submitting job to API...',
-      request: () => this.api.post<any>('social/recon', { query: username }),
-      mapResult: (res) => this.mapScanItems(res.result || [], username, (item: any) => this.inferPlatformName(item, username)),
-      initialDelayMs: 1000,
-      intervalMs: 2000
+    return new Observable(subscriber => {
+      subscriber.next({ type: 'progress', payload: { progress: 10, step: 'Submitting job to API...' } });
+      const pollingSub = this.pollForResult<{
+                data?: any[];
+                result?: any;
+                step?: string;
+                progress?: number;
+            }, PlatformResult[]>({
+              request: () => this.api.post<any>('social/recon', { query: username }),
+              isReady: (res) => !!res && 'result' in (res as any),
+              mapResult: (res) => this.mapScanItems(Array.isArray((res as any).result) ? (res as any).result : [], username, (item: any) => this.inferPlatformName(item, username)),
+              onPending: (res: any) => {
+                this.emitPendingProgress(subscriber, res);
+              },
+              initialDelayMs: 1000,
+              intervalMs: 2000
+            }).pipe(switchMap((platforms) => {
+              subscriber.next({ type: 'progress', payload: { progress: 82, step: 'Searching forum records...' } });
+              return this.fetchForumProfiles(username).pipe(
+                catchError(() => of([])),
+                map(forumProfiles => [...platforms, ...forumProfiles])
+              );
+            })).subscribe({
+              next: (platforms) => {
+                subscriber.next({ type: 'progress', payload: { progress: 90, step: 'Processing results...' } });
+                subscriber.next({ type: 'complete', payload: platforms });
+                subscriber.complete();
+              },
+              error: (err) => {
+                subscriber.error(err);
+              }
+            });
+      return () => {
+        pollingSub.unsubscribe();
+      };
     });
   }
 
@@ -176,6 +211,157 @@ export class SocialScanService {
       initialDelayMs: 2000,
       intervalMs: 3000
     });
+  }
+
+  private fetchForumProfiles(username: string): Observable<PlatformResult[]> {
+    const queryUsername = username.replace(/"/g, '').trim();
+    const payload = {
+      query: queryUsername || username,
+      max_results: 50,
+    };
+    return this.api.post<any>('social/forum', payload).pipe(map(res => this.mapForumProfiles(this.extractSearchResults(res), username)));
+  }
+
+  private extractSearchResults(res: any): any[] {
+    const sources = [res, res?.message, res?.result, res?.data, res?.message?.data, res?.message?.result, res?.result?.data, res?.data?.result];
+    for (const source of sources) {
+      if (Array.isArray(source?.Result)) {
+        return source.Result;
+      }
+      if (Array.isArray(source?.result)) {
+        return source.result;
+      }
+      if (Array.isArray(source)) {
+        return source;
+      }
+    }
+    return [];
+  }
+
+  private mapForumProfiles(records: any[], keyUsername: string): PlatformResult[] {
+    const matchedRecords = records.filter(record => this.isForumRecord(record) && this.recordMatchesForumUsername(record, keyUsername));
+    const grouped = new Map<string, any[]>();
+    for (const record of matchedRecords) {
+      const domain = this.getForumDomain(record);
+      const key = domain || 'forum';
+      grouped.set(key, [...(grouped.get(key) || []), record]);
+    }
+    return Array.from(grouped.entries()).map(([domain, items]) => this.buildForumPlatformResult(keyUsername, domain, items));
+  }
+
+  private buildForumPlatformResult(keyUsername: string, domain: string, records: any[]): PlatformResult {
+    const first = records[0] || {};
+    const posts = records.map(record => this.normalizeForumPost(record));
+    const authors = Array.from(new Set(records.flatMap(record => this.expandField(record?.m_author || record?.m_sender_name)).filter(Boolean)));
+    const commenters = Array.from(new Set(records.flatMap(record => [
+      ...this.expandField(record?.m_username),
+      ...this.expandField(record?.m_commenters),
+      ...this.getForumCommentUsers(record)
+    ]).filter(Boolean)));
+    const displayUsername = this.getForumDisplayUsername(records, keyUsername);
+    const url = SocialNormalizationUtil.firstValue(first?.m_group_info, first?.m_channel_url, first?.m_url, first?.m_message_sharable_link);
+    const description = `${displayUsername} appears in ${posts.length} forum thread${posts.length !== 1 ? 's' : ''}${domain ? ` on ${domain}` : ''}.`;
+    return {
+      keyUsername,
+      platform: domain || 'Forum',
+      username: displayUsername,
+      url,
+      isSelected: false,
+      resultSource: 'darkweb',
+      status: 'active',
+      description,
+      timestamp: SocialNormalizationUtil.firstValue(first?.m_date, first?.m_creation_date),
+      allMetadata: {
+        source: 'Elastic forum',
+        forum: domain || 'forum',
+        network: SocialNormalizationUtil.firstValue(first?.m_network),
+        threads: posts.length,
+        authors,
+        commenters,
+      },
+      profileDetails: {
+        bio: description,
+        total_posts: String(posts.length),
+        profile_url: url,
+      },
+      posts,
+    };
+  }
+
+  private normalizeForumPost(record: any): SocialPost {
+    return {
+      hash_id: SocialNormalizationUtil.firstValue(record?.m_hash, record?._id, record?.m_message_id),
+      post_url: SocialNormalizationUtil.firstValue(record?.m_message_sharable_link, record?.m_url, record?.m_channel_url),
+      datetime: SocialNormalizationUtil.firstValue(record?.m_date, record?.m_creation_date),
+      caption: SocialNormalizationUtil.firstValue(record?.m_title, record?.m_content),
+      author: SocialNormalizationUtil.firstValue(record?.m_author, record?.m_sender_name),
+      source: this.getForumDomain(record),
+      likes: SocialNormalizationUtil.firstValue(record?.m_likes, record?.m_post_likes),
+      comments: SocialNormalizationUtil.firstValue(record?.m_post_comments_count, record?.m_comment_count, SocialNormalizationUtil.firstArrayCount(record?.m_comments)),
+      comment_items: SocialNormalizationUtil.normalizeCommentItems(record?.m_comments),
+      comment_details: SocialNormalizationUtil.normalizeCommentDetails(record?.m_comments),
+      shares: '',
+      views: '',
+      media_type: '',
+      media_url: '',
+    };
+  }
+
+  private isForumRecord(record: any): boolean {
+    const platform = String(record?.m_platform || '').toLowerCase();
+    return this.isForumLabel(platform);
+  }
+
+  private recordMatchesForumUsername(record: any, username: string): boolean {
+    const normalizedUsername = SocialNormalizationUtil.normalizeUsername(username);
+    if (!normalizedUsername) {
+      return false;
+    }
+    const candidates = [
+      ...this.expandField(record?.m_author),
+      ...this.expandField(record?.m_sender_name),
+      ...this.expandField(record?.m_attacker),
+      ...this.expandField(record?.m_username),
+      ...this.expandField(record?.m_commenters),
+      ...this.getForumCommentUsers(record),
+    ];
+    return candidates.some(candidate => SocialNormalizationUtil.normalizeUsername(candidate) === normalizedUsername);
+  }
+
+  private getForumDisplayUsername(records: any[], fallback: string): string {
+    const normalizedFallback = SocialNormalizationUtil.normalizeUsername(fallback);
+    for (const record of records) {
+      const candidates = [
+        ...this.expandField(record?.m_author),
+        ...this.expandField(record?.m_sender_name),
+        ...this.expandField(record?.m_username),
+        ...this.getForumCommentUsers(record),
+      ];
+      const match = candidates.find(candidate => SocialNormalizationUtil.normalizeUsername(candidate) === normalizedFallback);
+      if (match) {
+        return match;
+      }
+    }
+    return fallback;
+  }
+
+  private getForumDomain(record: any): string {
+    return SocialNormalizationUtil.firstValue(
+      SocialNormalizationUtil.normalizeDomain(record?.m_url),
+      SocialNormalizationUtil.normalizeDomain(record?.m_channel_url),
+      SocialNormalizationUtil.normalizeDomain(record?.m_message_sharable_link),
+      this.expandField(record?.m_domain)[0]
+    );
+  }
+
+  private getForumCommentUsers(record: any): string[] {
+    return Array.isArray(record?.m_comments)
+      ? record.m_comments.flatMap((comment: any) => this.expandField(comment?.m_username || comment?.username || comment?.user))
+      : [];
+  }
+
+  private expandField(value: any): string[] {
+    return SocialNormalizationUtil.expandRecordValue(value).map(item => item.trim()).filter(Boolean);
   }
 
   saveSocialProfiles(profileUsername: string, profiles: PlatformResult[], replace = false): Observable<any> {

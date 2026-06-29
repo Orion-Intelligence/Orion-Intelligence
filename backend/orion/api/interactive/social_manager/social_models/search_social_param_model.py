@@ -25,6 +25,11 @@ class SocialReconRequest(BaseModel):
     query: str = Field(..., min_length=1)
 
 
+class SocialForumRequest(BaseModel):
+    query: str = Field(..., min_length=1)
+    max_results: int = Field(default=50, ge=1, le=100)
+
+
 class PlatformUsernameRequest(BaseModel):
     platform: str = Field(..., min_length=1)
     username: str = Field(..., min_length=1)

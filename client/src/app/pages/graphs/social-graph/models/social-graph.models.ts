@@ -6,6 +6,7 @@ import type { SocialService } from '../services/social.service';
 export interface FeedUser {
   username: string;
   platforms: PlatformResult[];
+  allPlatforms: PlatformResult[];
 }
 
 export type FetchTabKey = 'details' | 'posts' | 'videos' | 'shorts' | 'images' | 'connections' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs';

@@ -146,7 +146,7 @@ export class SocialProfilePostContentSectionComponent {
   }
 
   canLoadComments(post: SocialPost | null | undefined): boolean {
-    return !!this.getPostCursorId(post);
+    return this.platformData().resultSource !== 'darkweb' && !!this.getPostCursorId(post);
   }
 
   getCommentFetchLabel(post: SocialPost | null | undefined): string {
@@ -159,6 +159,10 @@ export class SocialProfilePostContentSectionComponent {
       return;
     }
     this.cursorFetch.emit({ platformData, tabKey, cursorId, commentOffset: this.getPostComments(post).length, maxComments: 10, mergeMode: 'update', commentsOnly: true });
+  }
+
+  canFetchRemote(platformData: PlatformResult): boolean {
+    return platformData.resultSource !== 'darkweb';
   }
 
   private getPostContentItems(platformData: PlatformResult, tabKey: PostContentTabKey): SocialPost[] {

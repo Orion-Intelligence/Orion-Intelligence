@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { PlatformResult } from '../../../../shared/model/social/social-scan.models';
 import { SocialService } from '../services/social.service';
 import { SocialNormalizationUtil } from '../utils/social-normalization.util';
 
@@ -15,12 +16,25 @@ export class StealerlogSectionComponent {
   private requestId = 0;
 
   username = input.required<string>();
+  platforms = input<PlatformResult[]>([]);
   records = signal<any[]>([]);
   isLoading = signal(false);
   errorMessage = signal('');
   searchIdentity = computed(() => SocialNormalizationUtil.normalizeIdentity(this.username()));
   hasRecords = computed(() => this.records().length > 0);
   visibleRecords = computed(() => this.records().slice(0, 3));
+  darkwebPresence = computed(() => {
+    const identity = SocialNormalizationUtil.normalizeUsername(this.searchIdentity());
+    if (!identity) {
+      return [];
+    }
+    return this.platforms().filter(platform => {
+      const commenters = SocialNormalizationUtil.expandRecordValue(platform?.allMetadata?.['commenters']);
+      return platform?.resultSource === 'darkweb'
+        && commenters.some(commenter => SocialNormalizationUtil.normalizeUsername(commenter) === identity);
+    });
+  });
+  hasDarkwebPresence = computed(() => this.darkwebPresence().length > 0);
   displayIdentity = computed(() => {
     const identity = this.searchIdentity();
     return identity ? `@${identity}` : 'No username';
