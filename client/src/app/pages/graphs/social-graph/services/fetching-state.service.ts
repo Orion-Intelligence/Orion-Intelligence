@@ -9,6 +9,8 @@ export class FetchingStateService {
   following = signal<Record<string, boolean>>({});
   onlinePresence = signal<Record<string, boolean>>({});
   stealerLogs = signal<Record<string, boolean>>({});
+  youtubeVideos = signal<Record<string, boolean>>({});
+  youtubeShorts = signal<Record<string, boolean>>({});
   userImages = computed(() => {
     const platformState = this.platformImages();
     const userState: Record<string, boolean> = {};
@@ -34,6 +36,8 @@ export class FetchingStateService {
       this.following(),
       this.onlinePresence(),
       this.stealerLogs(),
+      this.youtubeVideos(),
+      this.youtubeShorts(),
     ];
     return states.some(state => Object.keys(state).some(key => key.startsWith(userNodeIdPrefix) && state[key]));
   }

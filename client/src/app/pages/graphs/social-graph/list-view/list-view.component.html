@@ -394,6 +394,17 @@
                     <div [class]="getActiveTabForPlatform(platformData) === 'stealerLogs' ? 'bg-[var(--color-blue-820-light)]' : 'min-h-[220px] bg-[var(--color-blue-820-light)]'">
                       @if (getActiveTabForPlatform(platformData) === 'details') {
                         <div data-testid="social-tab-panel-details" class="px-[13px] pt-[11px] pb-[13px]">
+                          <div data-testid="social-tab-panel-details" class="px-[13px] pt-[11px] pb-[13px]">
+  @if (platformData.profileDetails?.avatar_url || platformData.profileDetails?.cover_url) {
+    <div class="relative mb-3 overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)]/35">
+      @if (platformData.profileDetails?.cover_url) {
+        <img [src]="platformData.profileDetails?.cover_url" alt="Cover" class="h-28 w-full object-cover">
+      }
+      @if (platformData.profileDetails?.avatar_url) {
+        <img [src]="platformData.profileDetails?.avatar_url" alt="Avatar" class="h-16 w-16 rounded-[10px] border-[3px] border-[var(--color-blue-820-light)] object-cover" [class.absolute]="!!platformData.profileDetails?.cover_url" [class.-bottom-0]="!!platformData.profileDetails?.cover_url" [class.left-3]="!!platformData.profileDetails?.cover_url" [class.m-3]="!platformData.profileDetails?.cover_url">
+      }
+    </div>
+  } </div>
                           @if (isTabLoading(platformData, 'details') && getProfileDetailEntries(platformData).length === 0) {
                             <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
                               <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
@@ -826,6 +837,205 @@
                             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                               @for (following of getFollowing(platformData); track trackByUsername($index, following)) {
                                 <a data-testid="social-following-row" [href]="getProfileUrl(platformData, following)" target="_blank" rel="noopener noreferrer" class="rounded-[8px] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-mono text-[var(--color-text3)] hover:text-[var(--color-blue-640)]">&#64;{{ following }}</a>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+
+                      @if (getActiveTabForPlatform(platformData) === 'youtubeVideos') {
+                        <div data-testid="social-tab-panel-youtube-videos" class="px-[13px] pt-[11px] pb-[13px]">
+                          <div class="mb-3 flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                              <i class="bi bi-play-circle text-red-400"></i>
+                              <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">YouTube Videos</p>
+                            </div>
+                            @if (getUniqueVideos(platformData).length > 0) {
+                              <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text3)]">{{ getUniqueVideos(platformData).length }} videos</span>
+                            }
+                          </div>
+                          @if (isTabLoading(platformData, 'youtubeVideos') && getUniqueVideos(platformData).length === 0) {
+                            <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                              <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-red-400">
+                                <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                              </div>
+                              <div>
+                                <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">Loading videos</p>
+                                <p class="mb-0 text-xs text-[var(--color-text4)]">Fetching YouTube videos for this channel.</p>
+                              </div>
+                              <button (click)="refetchTabData(platformData, 'youtubeVideos')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-300 transition-colors hover:bg-red-500/15 hover:text-red-100">
+                                <i class="bi bi-arrow-clockwise text-[11px]"></i> Restart fetch
+                              </button>
+                            </div>
+                          } @else if (getUniqueVideos(platformData).length === 0) {
+                            <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                              <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-red-400">
+                                <i class="bi bi-play-circle text-base"></i>
+                              </div>
+                              <div>
+                                <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No videos found</p>
+                                <p class="mb-0 text-xs text-[var(--color-text4)]">Run the video fetch again for this channel.</p>
+                              </div>
+                              <button (click)="refetchTabData(platformData, 'youtubeVideos')" class="inline-flex items-center gap-1.5 rounded-[8px] bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-500">
+                                <i class="bi bi-arrow-clockwise text-[11px]"></i> Retry fetch
+                              </button>
+                            </div>
+                          } @else {
+                            <div class="flex flex-col gap-2.5">
+                              @for (video of getUniqueVideos(platformData); track video.video_url || $index) {
+                                <div data-testid="social-youtube-video-row" class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3 transition-colors hover:bg-[rgba(87,165,235,0.06)]">
+                                  <div class="flex items-start gap-3">
+                                    @if (video.thumbnail_url) {
+                                      <div class="relative w-[96px] h-[54px] flex-shrink-0 overflow-hidden rounded-[8px] border border-[var(--color-border)]">
+                                        <img [src]="video.thumbnail_url" [alt]="video.title || 'Video thumbnail'" class="h-full w-full object-cover">
+                                        <div class="absolute inset-0 flex items-center justify-center bg-black/30">
+                                          <i class="bi bi-play-circle-fill text-lg text-white/90"></i>
+                                        </div>
+                                      </div>
+                                    } @else {
+                                      <div class="flex h-[54px] w-[96px] flex-shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)]">
+                                        <i class="bi bi-play-circle text-red-400 text-xl"></i>
+                                      </div>
+                                    }
+                                    <div class="min-w-0 flex-1">
+                                      <div class="flex items-start justify-between gap-2">
+                                        <p class="mb-1 break-words text-sm font-medium leading-5 text-[var(--color-text2)]">{{ video.title || 'Untitled video' }}</p>
+                                        @if (video.video_url) {
+                                          <a [href]="video.video_url" target="_blank" rel="noopener noreferrer" class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[8px] border border-red-500/20 bg-red-500/10 text-red-300 transition-colors hover:bg-red-500/15 hover:text-red-100" title="Watch on YouTube">
+                                            <i class="bi bi-box-arrow-up-right text-xs"></i>
+                                          </a>
+                                        }
+                                      </div>
+                                      <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                                        @if (video.datetime) {
+                                          <span class="text-[11px] text-[var(--color-text4)]">{{ video.datetime }}</span>
+                                        }
+                                        @if (video.channel_url) {
+                                          <a [href]="video.channel_url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] text-red-400 hover:text-red-300">
+                                            <i class="bi bi-youtube text-[10px]"></i>{{ video.channel_url.replace('https://www.youtube.com/', '') }}
+                                          </a>
+                                        }
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[rgba(148,163,184,0.10)] pt-2 text-[11px] font-medium text-[var(--color-text4)]">
+                                    <span class="inline-flex items-center gap-1 tabular-nums"><i class="bi bi-eye text-[10px]"></i> {{ formatPostMetric(video.views) }} views</span>
+                                    <span class="inline-flex items-center gap-1 tabular-nums"><i class="bi bi-hand-thumbs-up text-[10px]"></i> {{ formatPostMetric(video.likes) }} likes</span>
+                                    <span class="inline-flex items-center gap-1 tabular-nums"><i class="bi bi-chat text-[10px]"></i> {{ formatPostMetric(video.comments) }} comments</span>
+                                    @if (video.subscribers) {
+                                      <span class="inline-flex items-center gap-1 tabular-nums"><i class="bi bi-people text-[10px]"></i> {{ formatPostMetric(video.subscribers) }} subs</span>
+                                    }
+                                    @if (video.duration) {
+                                      <span class="inline-flex items-center gap-1"><i class="bi bi-clock text-[10px]"></i> {{ video.duration }}</span>
+                                    }
+                                  </div>
+                                  @if (video.top_comments && video.top_comments.length > 0) {
+                                    <div class="mt-2.5 rounded-[8px] border border-[rgba(148,163,184,0.10)] bg-[rgba(0,0,0,0.12)] p-2.5">
+                                      <p class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]"><i class="bi bi-chat-quote mr-1"></i>Top Comments</p>
+                                      <div class="flex flex-col gap-1.5">
+                                        @for (comment of video.top_comments.slice(0, 5); track $index) {
+                                          <p class="mb-0 line-clamp-2 text-[11px] leading-5 text-[var(--color-text3)]">{{ comment }}</p>
+                                        }
+                                      </div>
+                                    </div>
+                                  }
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+
+                      @if (getActiveTabForPlatform(platformData) === 'youtubeShorts') {
+                        <div data-testid="social-tab-panel-youtube-shorts" class="px-[13px] pt-[11px] pb-[13px]">
+                          <div class="mb-3 flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                              <i class="bi bi-lightning-charge-fill text-red-400"></i>
+                              <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">YouTube Shorts</p>
+                            </div>
+                            @if (getUniqueShorts(platformData).length > 0) {
+                              <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text3)]">{{ getUniqueShorts(platformData).length }} shorts</span>
+                            }
+                          </div>
+                          @if (isTabLoading(platformData, 'youtubeShorts') && getUniqueShorts(platformData).length === 0) {
+                            <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                              <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-red-400">
+                                <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                              </div>
+                              <div>
+                                <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">Loading shorts</p>
+                                <p class="mb-0 text-xs text-[var(--color-text4)]">Fetching YouTube Shorts for this channel.</p>
+                              </div>
+                              <button (click)="refetchTabData(platformData, 'youtubeShorts')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-300 transition-colors hover:bg-red-500/15 hover:text-red-100">
+                                <i class="bi bi-arrow-clockwise text-[11px]"></i> Restart fetch
+                              </button>
+                            </div>
+                          } @else if (getUniqueShorts(platformData).length === 0) {
+                            <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                              <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-red-400">
+                                <i class="bi bi-lightning-charge-fill text-base"></i>
+                              </div>
+                              <div>
+                                <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No shorts found</p>
+                                <p class="mb-0 text-xs text-[var(--color-text4)]">Run the shorts fetch again for this channel.</p>
+                              </div>
+                              <button (click)="refetchTabData(platformData, 'youtubeShorts')" class="inline-flex items-center gap-1.5 rounded-[8px] bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-500">
+                                <i class="bi bi-arrow-clockwise text-[11px]"></i> Retry fetch
+                              </button>
+                            </div>
+                          } @else {
+                            <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                              @for (short of getUniqueShorts(platformData); track short.short_url || $index) {
+                                <div data-testid="social-youtube-short-row" class="rounded-[10px] border border-[rgba(239,68,68,0.15)] bg-[rgba(239,68,68,0.035)] p-3 transition-colors hover:bg-[rgba(239,68,68,0.06)]">
+                                  @if (short.thumbnail_url) {
+                                    <div class="relative mb-2.5 aspect-[9/16] max-h-[200px] overflow-hidden rounded-[8px] border border-[var(--color-border)]">
+                                      <img [src]="short.thumbnail_url" [alt]="short.title || 'Short thumbnail'" class="h-full w-full object-cover">
+                                      <div class="absolute inset-0 flex items-center justify-center bg-black/30">
+                                        <i class="bi bi-lightning-charge-fill text-2xl text-white/90"></i>
+                                      </div>
+                                    </div>
+                                  } @else {
+                                    <div class="mb-2.5 flex h-[56px] w-full items-center justify-center rounded-[8px] border border-[rgba(239,68,68,0.20)] bg-[rgba(239,68,68,0.07)]">
+                                      <i class="bi bi-lightning-charge-fill text-xl text-red-400/70"></i>
+                                    </div>
+                                  }
+                                  <div class="flex items-start justify-between gap-2">
+                                    <p class="mb-1 break-words text-sm font-medium leading-5 text-[var(--color-text2)]">{{ short.title || 'Untitled short' }}</p>
+                                    @if (short.short_url) {
+                                      <a [href]="short.short_url" target="_blank" rel="noopener noreferrer" class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[8px] border border-red-500/20 bg-red-500/10 text-red-300 transition-colors hover:bg-red-500/15 hover:text-red-100" title="Watch Short on YouTube">
+                                        <i class="bi bi-box-arrow-up-right text-xs"></i>
+                                      </a>
+                                    }
+                                  </div>
+                                  <div class="mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                                    @if (short.datetime) {
+                                      <span class="text-[11px] text-[var(--color-text4)]">{{ short.datetime }}</span>
+                                    }
+                                    @if (short.channel_url) {
+                                      <a [href]="short.channel_url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] text-red-400 hover:text-red-300">
+                                        <i class="bi bi-youtube text-[10px]"></i>{{ short.channel_url.replace('https://www.youtube.com/', '') }}
+                                      </a>
+                                    }
+                                  </div>
+                                  <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-[rgba(239,68,68,0.12)] pt-2 text-[11px] font-medium text-[var(--color-text4)]">
+                                    <span class="inline-flex items-center gap-1 tabular-nums"><i class="bi bi-eye text-[10px]"></i> {{ formatPostMetric(short.views) }}</span>
+                                    <span class="inline-flex items-center gap-1 tabular-nums"><i class="bi bi-hand-thumbs-up text-[10px]"></i> {{ formatPostMetric(short.likes) }}</span>
+                                    <span class="inline-flex items-center gap-1 tabular-nums"><i class="bi bi-chat text-[10px]"></i> {{ formatPostMetric(short.comments) }}</span>
+                                    @if (short.subscribers) {
+                                      <span class="inline-flex items-center gap-1 tabular-nums"><i class="bi bi-people text-[10px]"></i> {{ formatPostMetric(short.subscribers) }} subs</span>
+                                    }
+                                  </div>
+                                  @if (short.top_comments && short.top_comments.length > 0) {
+                                    <div class="mt-2.5 rounded-[8px] border border-[rgba(239,68,68,0.12)] bg-[rgba(0,0,0,0.12)] p-2.5">
+                                      <p class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]"><i class="bi bi-chat-quote mr-1"></i>Top Comments</p>
+                                      <div class="flex flex-col gap-1.5">
+                                        @for (comment of short.top_comments.slice(0, 5); track $index) {
+                                          <p class="mb-0 line-clamp-2 text-[11px] leading-5 text-[var(--color-text3)]">{{ comment }}</p>
+                                        }
+                                      </div>
+                                    </div>
+                                  }
+                                </div>
                               }
                             </div>
                           }

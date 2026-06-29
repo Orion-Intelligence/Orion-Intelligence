@@ -16,6 +16,8 @@ export interface ProfileDetails {
     profile_url?: string;
     location?: string;
     total_likes?: string;
+    avatar_url?: string;
+    cover_url?: string;
 }
 export interface SocialImage {
     image_url: string;
@@ -48,6 +50,31 @@ export interface SocialOnlinePresenceResult {
 export interface SocialStealerLogRecord {
     [key: string]: any;
 }
+export interface YoutubeVideo {
+    video_url: string;
+    title: string;
+    datetime: string;
+    views: string;
+    likes: string;
+    comments: string;
+    thumbnail_url: string;
+    duration?: string;
+    channel_url?: string;
+    subscribers?: string;
+    top_comments?: string[];
+}
+export interface YoutubeShort {
+    short_url: string;
+    title: string;
+    datetime: string;
+    views: string;
+    likes: string;
+    comments: string;
+    thumbnail_url: string;
+    channel_url?: string;
+    subscribers?: string;
+    top_comments?: string[];
+}
 export interface PlatformResult {
     keyUsername: string;
     platform: string;
@@ -69,6 +96,8 @@ export interface PlatformResult {
     following_list?: string[] | null;
     onlinePresence?: SocialOnlinePresenceResult | null;
     stealerLogs?: SocialStealerLogRecord[] | null;
+    youtube_videos?: YoutubeVideo[] | null;
+    youtube_shorts?: YoutubeShort[] | null;
 }
 export type ManagedPlatform = PlatformResult & {
     stableKey: string;

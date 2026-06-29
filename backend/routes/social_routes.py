@@ -96,6 +96,22 @@ async def search_dynamic_posts(param: SocialProfileRequest = Body(...)):
 
 
 @social_routes.post(
+    "/api/social/videos",
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def search_youtube_videos(param: SocialProfileRequest = Body(...)):
+    return await graphs_model.getInstance().social_search(param, "videos")
+
+
+@social_routes.post(
+    "/api/social/shorts",
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def search_youtube_shorts(param: SocialProfileRequest = Body(...)):
+    return await graphs_model.getInstance().social_search(param, "shorts")
+
+
+@social_routes.post(
     "/api/social/entity",
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )

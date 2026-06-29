@@ -48,6 +48,8 @@ export class SocialMapperComponent implements OnDestroy {
   private cancelFollowingFetchSubjects = new Map<string, Subject<void>>();
   private cancelOnlinePresenceFetchSubjects = new Map<string, Subject<void>>();
   private cancelStealerLogsFetchSubjects = new Map<string, Subject<void>>();
+  private cancelYouTubeVideoFetchSubjects = new Map<string, Subject<void>>();
+  private cancelYouTubeShortFetchSubjects = new Map<string, Subject<void>>();
   private mediaQueryList: MediaQueryList | null = null;
   private readonly mediaQueryListener = (event: MediaQueryListEvent) => {
     this.isSmallScreen.set(event.matches);
@@ -303,7 +305,17 @@ export class SocialMapperComponent implements OnDestroy {
       this.cancelStealerLogsFetchSubjects);
   }
 
-  private fetchData(platformResult: PlatformResult, stateKey: 'profile' | 'posts' | 'platformImages' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs', request$: any, cancelMap: Map<string, Subject<void>>): void {
+  handleFetchYouTubeVideos(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
+    this.fetchData(p, 'youtubeVideos', this.scanService.fetchYouTubeVideos(p.platform, p.username), this.cancelYouTubeVideoFetchSubjects);
+  }
+
+  handleFetchYouTubeShorts(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
+    this.fetchData(p, 'youtubeShorts', this.scanService.fetchYouTubeShorts(p.platform, p.username), this.cancelYouTubeShortFetchSubjects);
+  }
+
+  private fetchData(platformResult: PlatformResult, stateKey: 'profile' | 'posts' | 'platformImages' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs' | 'youtubeVideos' | 'youtubeShorts', request$: any, cancelMap: Map<string, Subject<void>>): void {
     this.platformFetchService.fetchData({
       platformResult,
       stateKey,
@@ -344,7 +356,15 @@ export class SocialMapperComponent implements OnDestroy {
     this.cancelFetch(p, 'stealerLogs', this.cancelStealerLogsFetchSubjects);
   }
 
-  private cancelFetch(p: PlatformResult, stateKey: 'profile' | 'posts' | 'platformImages' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs', cancelMap: Map<string, Subject<void>>): void {
+  handleCancelFetchYouTubeVideos(p: PlatformResult): void {
+    this.cancelFetch(p, 'youtubeVideos', this.cancelYouTubeVideoFetchSubjects);
+  }
+
+  handleCancelFetchYouTubeShorts(p: PlatformResult): void {
+    this.cancelFetch(p, 'youtubeShorts', this.cancelYouTubeShortFetchSubjects);
+  }
+
+  private cancelFetch(p: PlatformResult, stateKey: 'profile' | 'posts' | 'platformImages' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs' | 'youtubeVideos' | 'youtubeShorts', cancelMap: Map<string, Subject<void>>): void {
     this.platformFetchService.cancelFetch(p, stateKey, cancelMap, this.fetchingState);
   }
 
@@ -356,7 +376,9 @@ export class SocialMapperComponent implements OnDestroy {
       followers: (p: PlatformResult) => this.handleCancelFetchFollowers(p),
       following: (p: PlatformResult) => this.handleCancelFetchFollowing(p),
       onlinePresence: (p: PlatformResult) => this.handleCancelFetchOnlinePresence(p),
-      stealerLogs: (p: PlatformResult) => this.handleCancelFetchStealerLogs(p)
+      stealerLogs: (p: PlatformResult) => this.handleCancelFetchStealerLogs(p),
+      youtubeVideos: (p: PlatformResult) => this.handleCancelFetchYouTubeVideos(p),
+      youtubeShorts: (p: PlatformResult) => this.handleCancelFetchYouTubeShorts(p)
     });
   }
 

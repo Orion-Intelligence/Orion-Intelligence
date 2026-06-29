@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
-import { PlatformResult, SocialOnlinePresenceResult, SocialPost, SocialStealerLogRecord } from '../../../../shared/model/social/social-scan.models';
+import { PlatformResult, SocialOnlinePresenceResult, SocialPost, SocialStealerLogRecord, YoutubeVideo, YoutubeShort } from '../../../../shared/model/social/social-scan.models';
 import { formatFollowers, formatKey, isImageUrl, isUrl } from '../../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../../shared/components/social-icon/social-icon.component';
 import { SocialMapperStateService } from '../services/social-mapper-state.service';
@@ -14,7 +14,7 @@ interface FeedUser {
   platforms: PlatformResult[];
 }
 
-type FetchTabKey = 'details' | 'posts' | 'images' | 'connections' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs';
+type FetchTabKey = 'details' | 'posts' | 'images' | 'connections' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs' | 'youtubeVideos' | 'youtubeShorts';
 type FetchTab = { key: FetchTabKey; label: string; icon: string; };
 type OnlinePresenceFetchRequest = { platformData: PlatformResult; token: string; };
 
@@ -30,6 +30,7 @@ export class ListViewComponent {
   private readonly stealerLogExportColumns = [ 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private readonly baseFetchTabs: FetchTab[] = [ { key: 'details', label: 'Details', icon: 'bi bi-person-badge' }, { key: 'posts', label: 'Posts', icon: 'bi bi-file-post' }, { key: 'images', label: 'Images', icon: 'bi bi-images' }, { key: 'connections', label: 'Connections', icon: 'bi bi-diagram-3' } ];
   private readonly followerFetchTabs: FetchTab[] = [ { key: 'followers', label: 'Followers', icon: 'bi bi-people' }, { key: 'following', label: 'Following', icon: 'bi bi-person-plus' } ];
+  private readonly youtubeTabs: FetchTab[] = [ { key: 'youtubeVideos', label: 'Videos', icon: 'bi bi-play-circle' }, { key: 'youtubeShorts', label: 'Shorts', icon: 'bi bi-lightning-charge-fill' } ];
   private readonly onlinePresenceTab: FetchTab = { key: 'onlinePresence', label: 'Online Presence', icon: 'bi bi-globe2' };
   private readonly stealerLogsTab: FetchTab = { key: 'stealerLogs', label: 'Stealer Logs', icon: 'bi bi-shield-exclamation' };
 
@@ -42,6 +43,8 @@ export class ListViewComponent {
   fetchMetadataInline = output<PlatformResult>();
   fetchOnlinePresenceInline = output<OnlinePresenceFetchRequest>();
   fetchStealerLogsInline = output<PlatformResult>();
+  fetchYouTubeVideosInline = output<PlatformResult>();
+  fetchYouTubeShortsInline = output<PlatformResult>();
   public state = inject(SocialMapperStateService);
   public fetchingState = inject(FetchingStateService);
   activeTabs = signal<Record<string, FetchTabKey | null>>({});
@@ -102,7 +105,11 @@ export class ListViewComponent {
   }
 
   getFetchTabs(platformData: PlatformResult): FetchTab[] {
+    const isYoutube = platformData.platform.toLowerCase() === 'youtube';
     const sharedTabs = [...this.baseFetchTabs, this.onlinePresenceTab, this.stealerLogsTab];
+    if (isYoutube) {
+      return [...this.baseFetchTabs, ...this.followerFetchTabs, ...this.youtubeTabs, this.onlinePresenceTab, this.stealerLogsTab];
+    }
     return this.isPriorityPlatform(platformData.platform)
       ? [...this.baseFetchTabs, ...this.followerFetchTabs, this.onlinePresenceTab, this.stealerLogsTab]
       : sharedTabs;
@@ -126,6 +133,10 @@ export class ListViewComponent {
         return !!this.fetchingState.onlinePresence()[key];
       case 'stealerLogs':
         return !!this.fetchingState.stealerLogs()[key];
+      case 'youtubeVideos':
+        return !!this.fetchingState.youtubeVideos()[key];
+      case 'youtubeShorts':
+        return !!this.fetchingState.youtubeShorts()[key];
       default:
         return false;
     }
@@ -162,6 +173,12 @@ export class ListViewComponent {
       case 'stealerLogs':
         this.fetchStealerLogsInline.emit(platformData);
         break;
+      case 'youtubeVideos':
+        this.fetchYouTubeVideosInline.emit(platformData);
+        break;
+      case 'youtubeShorts':
+        this.fetchYouTubeShortsInline.emit(platformData);
+        break;
     }
   }
 
@@ -183,6 +200,10 @@ export class ListViewComponent {
         return !!platformData.onlinePresence;
       case 'stealerLogs':
         return this.getStealerLogs(platformData).length > 0;
+      case 'youtubeVideos':
+        return this.getUniqueVideos(platformData).length > 0;
+      case 'youtubeShorts':
+        return this.getUniqueShorts(platformData).length > 0;
     }
   }
 
@@ -259,6 +280,38 @@ export class ListViewComponent {
 
   getStealerLogs(platformData: PlatformResult): SocialStealerLogRecord[] {
     return platformData.stealerLogs || [];
+  }
+
+  getUniqueVideos(platformData: PlatformResult): YoutubeVideo[] {
+    const videos = platformData.youtube_videos || [];
+    const seen = new Set<string>();
+    return videos.filter(v => {
+      if (!v) {
+        return false; 
+      }
+      const key = v.video_url || JSON.stringify(v);
+      if (seen.has(key)) {
+        return false; 
+      }
+      seen.add(key);
+      return true;
+    });
+  }
+
+  getUniqueShorts(platformData: PlatformResult): YoutubeShort[] {
+    const shorts = platformData.youtube_shorts || [];
+    const seen = new Set<string>();
+    return shorts.filter(s => {
+      if (!s) {
+        return false; 
+      }
+      const key = s.short_url || JSON.stringify(s);
+      if (seen.has(key)) {
+        return false; 
+      }
+      seen.add(key);
+      return true;
+    });
   }
 
   getPlatformStealerDomain(platformData: PlatformResult): string {

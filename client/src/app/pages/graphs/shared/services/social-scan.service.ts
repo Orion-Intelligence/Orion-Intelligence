@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, throwError, timer, EMPTY } from 'rxjs';
 import { catchError, expand, filter, map, retry, switchMap, take, takeWhile, tap } from 'rxjs/operators';
 import { ApiService } from '../../../../shared/services/api.service';
-import { PlatformResult, ProfileDetails, ScanEvent, SocialImage, SocialPost } from '../../../../shared/model/social/social-scan.models';
+import { PlatformResult, ProfileDetails, ScanEvent, SocialImage, SocialPost, YoutubeVideo, YoutubeShort } from '../../../../shared/model/social/social-scan.models';
 interface ApiEnvelope<T> {
     status?: string;
     message?: any;
@@ -178,14 +178,27 @@ export class SocialScanService {
   }
 
   fetchProfileInfo(platform: string, username: string): Observable<{
-        profile: ProfileDetails;
-    }> {
+      profile: ProfileDetails;
+  }> {
     return this.pollForResult({
-      request: () => this.api.post<ApiEnvelope<{
-                profile: ProfileDetails;
-            }>>('social/profile', { platform, username }),
+      request: () => this.api.post<ApiEnvelope<any>>('social/profile', { platform, username }),
       isReady: (res) => !!res && 'result' in res,
-      mapResult: (res) => ({ profile: (res.result as any)?.profile ?? {} as ProfileDetails }),
+      mapResult: (res) => {
+        const card = (res.result as any)?.cards?.[0] ?? {};
+        const profile: ProfileDetails = {
+          real_name: card.m_title || card.m_sender_name || undefined,
+          bio: card.m_bio || undefined,
+          profile_url: card.m_message_sharable_link || card.m_channel_url || undefined,
+          avatar_url: card.m_profile_pic_url || undefined,
+          cover_url: card.m_profile_cover_pic_url || undefined,
+          total_likes: card.m_likes,
+          total_posts: undefined,
+          total_followers: undefined,
+          total_following: undefined,
+          location: undefined,
+        };
+        return { profile };
+      },
     }).pipe(retry(3));
   }
 
@@ -202,19 +215,36 @@ export class SocialScanService {
   }
 
   fetchSocialPosts(platform: string, username: string): Observable<{
-        posts: SocialPost[];
-    }> {
+      posts: SocialPost[];
+  }> {
     return this.pollForResult({
-      request: () => this.api.post<ApiEnvelope<SocialPost[] | {
-                posts: SocialPost[];
-            }>>('social/posts', { platform, username }),
+      request: () => this.api.post<ApiEnvelope<any>>('social/posts', { platform, username }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => {
         const result = res.result;
-        const posts = Array.isArray(result) ? result : (result as any)?.posts;
-        return { posts: Array.isArray(posts) ? posts : [] };
+        const rawPosts = Array.isArray(result) ? result : (result as any)?.posts;
+        const posts = Array.isArray(rawPosts) ? rawPosts.map(card => this.mapRawPostCard(card)) : [];
+        return { posts };
       },
     }).pipe(retry(3));
+  }
+
+  private mapRawPostCard(card: any): SocialPost {
+
+    const mediaUrl = Array.isArray(card.m_post_pic_url) && card.m_post_pic_url.length > 0
+      ? card.m_post_pic_url[0]
+      : '';
+    return {
+      post_url: card.m_post_url || card.m_message_sharable_link || card.m_channel_url || '',
+      datetime: card.m_post_time || card.m_message_date || '',
+      caption: card.m_title || '',
+      likes: card.m_likes ?? card.m_post_likes ?? '0',
+      comments: card.m_comment_count ?? card.m_post_comments_count ?? '0',
+      shares: card.m_retweets ?? card.m_post_shares ?? '0',
+      views: card.m_views ?? card.m_post_views ?? '0',
+      media_type: mediaUrl ? 'image' : '',
+      media_url: mediaUrl
+    };
   }
 
   fetchFollowers(platform: string, username: string): Observable<{
@@ -235,6 +265,133 @@ export class SocialScanService {
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ following: (res.result as any)?.following ?? [] }),
     }).pipe(retry(3));
+  }
+
+  fetchYouTubeVideos(platform: string, username: string): Observable<{
+      youtube_videos: YoutubeVideo[];
+  }> {
+    return this.pollForResult({
+      request: () => this.api.post<ApiEnvelope<any>>('social/videos', { platform, username }),
+      isReady: (res) => !!res && 'result' in res,
+      mapResult: (res) => {
+        const result = res.result;
+        const rawCards: any[] = Array.isArray(result) ? result : (result as any)?.posts ?? [];
+        const youtube_videos = rawCards
+          .filter((card: any) => this.isYouTubeVideoCard(card))
+          .map((card: any) => this.mapRawVideoCard(card));
+        return { youtube_videos };
+      },
+    }).pipe(retry(3));
+  }
+
+  fetchYouTubeShorts(platform: string, username: string): Observable<{
+      youtube_shorts: YoutubeShort[];
+  }> {
+    return this.pollForResult({
+      request: () => this.api.post<ApiEnvelope<any>>('social/shorts', { platform, username }),
+      isReady: (res) => !!res && 'result' in res,
+      mapResult: (res) => {
+        const result = res.result;
+        const rawCards: any[] = Array.isArray(result) ? result : (result as any)?.posts ?? [];
+        const youtube_shorts = rawCards
+          .filter((card: any) => this.isYouTubeShortCard(card))
+          .map((card: any) => this.mapRawShortCard(card));
+        return { youtube_shorts };
+      },
+    }).pipe(retry(3));
+  }
+
+  /** Returns true if the card represents a standard YouTube video (not a Short).
+   * Real response: videos have m_content_type = ["social_collector", "youtube_video", "video"]
+   * Shorts have m_content_type = ["social_collector", "youtube_video", "short"]
+   * Both share "youtube_video", so we use "short" / "video" as the tiebreaker.
+   */
+  private isYouTubeVideoCard(card: any): boolean {
+    const contentTypes: string[] = Array.isArray(card.m_content_type) ? card.m_content_type : [];
+    if (contentTypes.includes('short')) {
+      return false; 
+    }      // definitely a Short
+    if (contentTypes.includes('video')) {
+      return true; 
+    }       // has 'video' but not 'short'
+    // URL-based fallback when m_content_type is missing
+    const url = String(card.m_post_url || card.m_message_sharable_link || '');
+    return url.includes('/watch?') && !url.includes('/shorts/');
+  }
+
+  /** Returns true if the card represents a YouTube Short.
+   * Real response: shorts have m_content_type = ["social_collector", "youtube_video", "short"]
+   */
+  private isYouTubeShortCard(card: any): boolean {
+    const contentTypes: string[] = Array.isArray(card.m_content_type) ? card.m_content_type : [];
+    if (contentTypes.includes('short')) {
+      return true; 
+    }       // has 'short' = definitely a Short
+    if (contentTypes.includes('video')) {
+      return false; 
+    }      // has 'video' but not 'short'
+    // URL-based fallback when m_content_type is missing
+    const url = String(card.m_post_url || card.m_message_sharable_link || '');
+    return url.includes('/shorts/');
+  }
+
+  /** Extracts a named value from the structured m_content string (e.g. "VIEWS: 3,600,000"). */
+  private extractContentField(content: string | null | undefined, fieldName: string): string {
+    if (!content) {
+      return ''; 
+    }
+    const regex = new RegExp(`^${fieldName}:\\s*(.+)$`, 'im');
+    const match = content.match(regex);
+    return match ? match[1].trim() : '';
+  }
+
+  private mapRawVideoCard(card: any): YoutubeVideo {
+    // Thumbnail: m_post_pic_url may be an array or null
+    const picUrl = Array.isArray(card.m_post_pic_url) && card.m_post_pic_url.length > 0
+      ? card.m_post_pic_url[0]
+      : (card.m_thumbnail_url || '');
+    // Top comments: m_commenters is a string array
+    const topComments: string[] = Array.isArray(card.m_commenters) ? card.m_commenters.filter(Boolean) : [];
+    // m_subscriber can be an integer (e.g. 23300000) or null — != null handles both 0 and non-null
+    const subscribersRaw = card.m_subscriber != null
+      ? String(card.m_subscriber)
+      : this.extractContentField(card.m_content, 'SUBSCRIBERS');
+    return {
+      video_url: card.m_post_url || card.m_message_sharable_link || card.m_channel_url || '',
+      title: card.m_title || '',
+      datetime: card.m_post_time || card.m_message_date || '',
+      views: String(card.m_views ?? card.m_post_views ?? '0'),
+      likes: String(card.m_likes ?? card.m_post_likes ?? '0'),
+      comments: String(card.m_comment_count ?? card.m_post_comments_count ?? '0'),
+      thumbnail_url: picUrl,
+      duration: card.m_duration || undefined,
+      channel_url: card.m_channel_url || undefined,
+      subscribers: subscribersRaw || undefined,
+      top_comments: topComments.length > 0 ? topComments : undefined,
+    };
+  }
+
+  private mapRawShortCard(card: any): YoutubeShort {
+    const picUrl = Array.isArray(card.m_post_pic_url) && card.m_post_pic_url.length > 0
+      ? card.m_post_pic_url[0]
+      : (card.m_thumbnail_url || '');
+    const topComments: string[] = Array.isArray(card.m_commenters) ? card.m_commenters.filter(Boolean) : [];
+    // m_subscriber can be an integer (e.g. 23300000) or null
+    const subscribersRaw = card.m_subscriber != null
+      ? String(card.m_subscriber)
+      : this.extractContentField(card.m_content, 'SUBSCRIBERS');
+    return {
+      short_url: card.m_post_url || card.m_message_sharable_link || '',
+      title: card.m_title || '',
+      datetime: card.m_post_time || card.m_message_date || '',
+      views: String(card.m_views ?? card.m_post_views ?? '0'),
+      likes: String(card.m_likes ?? card.m_post_likes ?? '0'),
+      comments: String(card.m_comment_count ?? card.m_post_comments_count ?? '0'),
+      thumbnail_url: picUrl,
+      channel_url: card.m_channel_url || undefined,
+      subscribers: subscribersRaw || undefined,
+      top_comments: topComments.length > 0 ? topComments : undefined,
+    };
   }
 
   fetchProfileBreachData(username?: string, email?: string): Observable<any> {
