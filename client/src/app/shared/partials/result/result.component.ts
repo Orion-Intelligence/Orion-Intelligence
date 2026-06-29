@@ -333,6 +333,10 @@ export class ResultComponent implements OnInit, OnChanges {
     const inputElement = event.target as HTMLInputElement | null;
     if (inputElement) {
       this.local_query = inputElement.value;
+      if (!inputElement.value.trim()) {
+        this.updateQuery.emit('');
+        this.clearQueryParam();
+      }
     }
     this.homeSearchService.handleSearchInput(event);
   }
@@ -359,6 +363,19 @@ export class ResultComponent implements OnInit, OnChanges {
       }
     }
     this.updateQuery.emit('');
+    this.clearQueryParam();
     this.init_domains();
+  }
+
+  private clearQueryParam(): void {
+    if (!this.route.snapshot.queryParamMap.has('q')) {
+      return;
+    }
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { q: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 }
