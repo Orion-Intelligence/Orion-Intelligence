@@ -178,7 +178,7 @@ export class AlertNotificationComponent implements OnChanges {
     if (!date) {
       return '';
     }
-    const d = new Date(date);
+    const d = new Date(date + 'Z');
     const now = new Date();
     const seconds = Math.floor((now.getTime() - d.getTime()) / 1000);
     if (seconds < 60) {
