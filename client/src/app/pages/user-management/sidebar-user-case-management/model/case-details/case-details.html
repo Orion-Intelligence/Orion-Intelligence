@@ -19,6 +19,12 @@
         </app-confirmation-popup>
         }
 
+        @if (isUnarchiveConfirmationOpen) {
+        <app-confirmation-popup data-testid="case-details-unarchive-confirmation"
+            [message]="('Are you sure you want to unarchive this case?') | translate" (confirmed)="unarchiveCase($event)">
+        </app-confirmation-popup>
+        }
+
         <div class="space-y-5">
             <app-case-closure-section @caseSectionMotion></app-case-closure-section>
             <app-case-summary-section @caseSectionMotion></app-case-summary-section>

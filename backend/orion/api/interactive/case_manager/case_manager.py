@@ -1044,6 +1044,36 @@ class CaseManager:
         )
 
         return {"success": True}
+
+    async def unarchive_case(self, case_id: str, current_user) -> dict:
+        if getattr(current_user.role, "value", current_user.role) != user_role.ADMIN.value:
+            raise HTTPException(status_code=403, detail="Only admins can unarchive cases")
+
+        record = await self._engine.find_one(
+            db_case_model,
+            (db_case_model.caseId == case_id)
+            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
+        )
+
+        if not record:
+            raise HTTPException(status_code=404, detail="Case not found")
+
+        if not record.isArchived:
+            return {"success": True, "message": "Case is already unarchived"}
+
+        record.isArchived = False
+        record.archivedAt = None
+        record.archivedBy = ""
+        record.updatedAt = utc_now()
+        await self._engine.save(record)
+
+        await AuditLogManager.get_instance().register(
+            str(current_user.tenant_uuid),
+            str(current_user.id),
+            f"Case unarchived: caseId={case_id}",
+        )
+
+        return {"success": True}
     
     def _verify_file_integrity(self, artifact_file: CaseArtifactFile, enc) -> bool:
         is_valid = self._artifact_file_helper.verify_artifact_file_hash(

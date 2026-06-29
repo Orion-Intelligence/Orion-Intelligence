@@ -86,6 +86,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   artifactReportSearchText = '';
   isArtifactReportDropdownOpen = false;
   isArchiveConfirmationOpen = false;
+  isUnarchiveConfirmationOpen = false;
   isArchivingCase = false;
 
   constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef, public appService: AppService, private licenseService: LicenseService) {
@@ -103,6 +104,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
   canManageCases(): boolean {
     return this.licenseService.isMaintainer() || this.licenseService.isAdmin();
+  }
+
+  canUnarchiveCases(): boolean {
+    return this.licenseService.isAdmin();
   }
 
   canEditTasksAndComments(): boolean {
@@ -513,6 +518,17 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     this.isArchiveConfirmationOpen = true;
   }
 
+  openUnarchiveConfirmation(): void {
+    if (!this.canUnarchiveCases()) {
+      return;
+    }
+    if (!this.caseData?.isArchived || this.isArchivingCase) {
+      return;
+    }
+
+    this.isUnarchiveConfirmationOpen = true;
+  }
+
   openShareConfirmation(): void {
     if (!this.canManageCases()) {
       return;
@@ -580,6 +596,32 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       error: err => {
         this.isArchivingCase = false;
         this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to archive case');
+      }
+    });
+  }
+
+  unarchiveCase(confirmed: boolean): void {
+    this.isUnarchiveConfirmationOpen = false;
+
+    if (!confirmed || !this.caseData || this.isArchivingCase) {
+      return;
+    }
+
+    this.isArchivingCase = true;
+
+    this.caseService.unarchiveCase(this.caseData.caseId).subscribe({
+      next: () => {
+        this.isArchivingCase = false;
+        if (this.caseData) {
+          this.caseData.isArchived = false;
+          this.caseData.archivedAt = undefined;
+          this.caseData.archivedBy = '';
+        }
+        this.messageNotificationService.show('Case unarchived successfully', 'success');
+      },
+      error: err => {
+        this.isArchivingCase = false;
+        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to unarchive case');
       }
     });
   }

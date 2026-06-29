@@ -105,6 +105,10 @@ export class CaseManagement {
     return this.api.put<{ success: boolean; message?: string }>(`profile/cases/${caseId}/archive`, {});
   }
 
+  unarchiveCase(caseId: string): Observable<{ success: boolean; message?: string }> {
+    return this.api.put<{ success: boolean; message?: string }>(`profile/cases/${caseId}/unarchive`, {});
+  }
+
   assignCaseAnalyst(caseId: string, payload: AssignCaseAnalystRequest): Observable<Case> {
     return this.api.put<Case>(`profile/cases/${caseId}/assign-analyst`, payload);
   }

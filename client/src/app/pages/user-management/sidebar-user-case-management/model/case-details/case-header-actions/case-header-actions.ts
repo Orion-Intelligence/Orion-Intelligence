@@ -48,4 +48,8 @@ export class CaseHeaderActionsComponent {
   canManageCases(): boolean {
     return this.store.canManageCases();
   }
+
+  canUnarchiveCases(): boolean {
+    return this.store.canUnarchiveCases();
+  }
 }

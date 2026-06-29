@@ -29,6 +29,7 @@ export abstract class CaseDetailsStore {
   abstract commentErrorMessage: string;
 
   abstract canManageCases(): boolean;
+  abstract canUnarchiveCases(): boolean;
   abstract canEditTasksAndComments(): boolean;
 
   abstract enableEditing(section: CaseDetailsEditSection): void;
@@ -37,6 +38,7 @@ export abstract class CaseDetailsStore {
   abstract savePrimaryEntity(): void;
   abstract exportPdf(): void;
   abstract openArchiveConfirmation(): void;
+  abstract openUnarchiveConfirmation(): void;
   abstract openShareConfirmation(): void;
   abstract openRevokeShareConfirmation(): void;
   abstract getCaseCommentsFeedback(): ReportFeedbackModel;

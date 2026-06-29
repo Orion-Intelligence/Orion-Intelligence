@@ -129,6 +129,16 @@ async def get_artifact_reports(source: str = Query(...), q: str = Query(""), lim
 async def archive_case(case_id: str, current_user=Depends(get_current_user)):
     return await CaseManager.get_instance().archive_case(case_id, current_user)
 
+@case_routes.put(
+    "/api/profile/cases/{case_id}/unarchive",
+    status_code=200,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN])),
+    ],
+)
+async def unarchive_case(case_id: str, current_user=Depends(get_current_user)):
+    return await CaseManager.get_instance().unarchive_case(case_id, current_user)
+
 @case_routes.get(
     "/api/profile/cases/{case_id}",
     status_code=200,
