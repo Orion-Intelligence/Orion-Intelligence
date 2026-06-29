@@ -9,10 +9,11 @@ import { CaseDateField, CaseDateTarget, formatCaseLabel, getAssignedCaseAnalysts
 import { CaseDetailsStore } from '../case-details.store';
 import { CaseEditDrawerComponent } from '../case-edit-drawer/case-edit-drawer';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
+import { DatePickerComponent } from '../../../../../../shared/partials/filters/date-picker/date-picker.component';
 
 @Component({
   selector: 'app-case-tasks-section',
-  imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent, TranslatePipe, DatePickerComponent],
   animations: [caseListItemMotion, caseModeSwapMotion, caseSectionMotion],
   host: { class: 'block' },
   templateUrl: './case-tasks-section.html'

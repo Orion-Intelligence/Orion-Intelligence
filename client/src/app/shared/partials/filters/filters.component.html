@@ -15,7 +15,7 @@
         {{ filterModel.filters[key].title }}
       </label>
       @if (filterModel.filters[key].type === 'daterange') {
-      <app-date-picker (dateSelected)="updateFilter($event)" (selectedFiltersChange)="updateFilter($event)"
+      <app-date-picker (dateSelected)="updateFilter($event)"
         [filterModel]="filterModel" [key]="key" [mSelectedFilters]="selectedFilters"></app-date-picker>
       }
       @if (filterModel.filters[key].type === 'dropdown') {

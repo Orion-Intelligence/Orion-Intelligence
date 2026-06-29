@@ -62,7 +62,7 @@
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
                             'Captured' | translate }}</label>
-                        <input [ngModel]="getDateInputValue(artifact.capturedAt)" (ngModelChange)="setDateInputValue(artifact, 'capturedAt', $event)" name="artifact-captured" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-captured-input" />
+                        <app-date-picker class="mt-1 block" selectionMode="single" toggleTestId="case-artifact-captured-input" [value]="getDateInputValue(artifact.capturedAt)" (dateSelected)="setDateInputValue(artifact, 'capturedAt', $event.value)"></app-date-picker>
                     </div>
                     <div class="sm:col-span-2">
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
@@ -152,19 +152,29 @@
                                 <div class="min-w-0">
                                     <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
                                         {{ "Selected files" | translate }}</div>
-                                    <div class="mt-1 truncate rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm font-medium text-[var(--color-text2)]">
-                                        {{ (artifact.files || []).length ? (artifact.files.length + ' file(s) uploaded'
-                                        | translate)
-                                        : 'No files selected' | translate }}
+                                    @if ((artifact.files || []).length) {
+                                    <div class="mt-1 max-h-32 space-y-1 overflow-y-auto rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-2">
+                                        @for (artifactFile of artifact.files || []; track artifactFile.fileId || $index; let fileIndex = $index) {
+                                        <div class="flex min-w-0 items-center gap-2 rounded-[6px] bg-[var(--color-blue-820-light)] px-2 py-1.5 text-sm font-medium text-[var(--color-text2)]">
+                                            <span class="flex h-5 min-w-5 items-center justify-center rounded-full bg-sky-500/10 text-[10px] font-semibold text-sky-300">{{ fileIndex + 1 }}</span>
+                                            <span class="min-w-0 truncate" [title]="artifactFile.fileName">{{ artifactFile.fileName }}</span>
+                                        </div>
+                                        }
                                     </div>
+                                    } @else {
+                                    <div class="mt-1 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm font-medium text-[var(--color-text2)]">
+                                        {{ 'No files selected' | translate }}
+                                    </div>
+                                    }
                                 </div>
                                 <button type="button" (click)="artifactFileInput.click()" class="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-3 text-sm font-semibold text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800">
-                                    <i class="bi bi-upload"></i> {{ "Choose File" | translate }}
+                                    <i class="bi bi-upload"></i> {{ "Choose Files" | translate }}
                                 </button>
                             </div>
                             <div class="mt-3 text-xs font-medium text-[var(--color-text4)]">
                                 {{ (artifact.type === 'screenshot') ? ('PNG only.' | translate) : ('PDF, JPG, PNG, TXT,
                                 or DOCX.' | translate) }}
+                                {{ 'Max 5 files.' | translate }}
                             </div>
                         </div>
                     </div>
@@ -317,7 +327,7 @@
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
                             'Captured' | translate }}</label>
-                        <input [ngModel]="getDateInputValue(newArtifact.capturedAt)" (ngModelChange)="setDateInputValue(newArtifact, 'capturedAt', $event)" name="new-artifact-captured" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-artifact-captured-input" />
+                        <app-date-picker class="mt-1 block" selectionMode="single" toggleTestId="case-artifact-captured-input" [value]="getDateInputValue(newArtifact.capturedAt)" (dateSelected)="setDateInputValue(newArtifact, 'capturedAt', $event.value)"></app-date-picker>
                     </div>
 
                     <div class="sm:col-span-2">
@@ -409,17 +419,29 @@
                                     <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">
                                         {{ 'Selected files' | translate }}
                                     </div>
-                                    <div class="mt-1 truncate rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm font-medium text-[var(--color-text2)]">
-                                        {{ pendingNewArtifactFileNames || ('No files selected' | translate) }}
+                                    @if (pendingNewArtifactFileNameRows.length) {
+                                    <div class="mt-1 max-h-32 space-y-1 overflow-y-auto rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-2">
+                                        @for (fileName of pendingNewArtifactFileNameRows; track $index; let fileIndex = $index) {
+                                        <div class="flex min-w-0 items-center gap-2 rounded-[6px] bg-[var(--color-blue-820-light)] px-2 py-1.5 text-sm font-medium text-[var(--color-text2)]">
+                                            <span class="flex h-5 min-w-5 items-center justify-center rounded-full bg-sky-500/10 text-[10px] font-semibold text-sky-300">{{ fileIndex + 1 }}</span>
+                                            <span class="min-w-0 truncate" [title]="fileName">{{ fileName }}</span>
+                                        </div>
+                                        }
                                     </div>
+                                    } @else {
+                                    <div class="mt-1 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2 text-sm font-medium text-[var(--color-text2)]">
+                                        {{ 'No files selected' | translate }}
+                                    </div>
+                                    }
                                 </div>
                                 <button type="button" (click)="newArtifactFileInput.click()" class="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-3 text-sm font-semibold text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800">
-                                    <i class="bi bi-upload"></i> {{ 'Choose File' | translate }}
+                                    <i class="bi bi-upload"></i> {{ 'Choose Files' | translate }}
                                 </button>
                             </div>
                             <div class="mt-3 text-xs font-medium text-[var(--color-text4)]">
                                 {{ (newArtifact.type === 'screenshot') ? ('PNG only.' | translate) : ('PDF, JPG, PNG,
                                 TXT, or DOCX.' | translate) }}
+                                {{ 'Max 5 files.' | translate }}
                             </div>
                         </div>
                     </div>

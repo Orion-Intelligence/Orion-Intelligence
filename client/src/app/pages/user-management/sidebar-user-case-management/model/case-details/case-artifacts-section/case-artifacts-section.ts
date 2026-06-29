@@ -9,10 +9,11 @@ import { CaseDateField, CaseDateTarget, formatCaseLabel, getCaseDateInputValue, 
 import { CaseDetailsStore } from '../case-details.store';
 import { CaseEditDrawerComponent } from '../case-edit-drawer/case-edit-drawer';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
+import { DatePickerComponent } from '../../../../../../shared/partials/filters/date-picker/date-picker.component';
 
 @Component({
   selector: 'app-case-artifacts-section',
-  imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent, TranslatePipe, DatePickerComponent],
   animations: [caseInlineMotion, caseListItemMotion, caseModeSwapMotion, caseSectionMotion],
   host: { class: 'block' },
   templateUrl: './case-artifacts-section.html'
@@ -44,8 +45,8 @@ export class CaseArtifactsSectionComponent {
     return this.store.newArtifact;
   }
 
-  get pendingNewArtifactFileNames(): string {
-    return this.store.getPendingNewArtifactFileNames();
+  get pendingNewArtifactFileNameRows(): string[] {
+    return this.store.getPendingNewArtifactFileNameRows();
   }
 
   get selectedEditableArtifact(): CaseArtifact | null {

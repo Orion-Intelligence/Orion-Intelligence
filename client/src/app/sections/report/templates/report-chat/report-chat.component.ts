@@ -288,8 +288,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
 
   getDisplayMessageDate(item: ChatResultItem | SocialResultItem | null): string {
     const rawItem = item as any;
-    const value = this.getFirstRenderableValue(
-      rawItem?.m_date,
+    const value = this.getFirstRenderableValue(rawItem?.m_date,
       rawItem?.m_message_date,
       rawItem?.message_date,
       rawItem?.date,
@@ -297,8 +296,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
       rawItem?.m_created_at,
       rawItem?.m_creation_date,
       rawItem?.m_update_date,
-      rawItem?.m_time
-    );
+      rawItem?.m_time);
     return this.formatDateValue(value);
   }
 

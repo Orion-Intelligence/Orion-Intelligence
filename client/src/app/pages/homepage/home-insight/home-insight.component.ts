@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgClass, NgOptimizedImage } from '@angular/common';
-import { DefacementModel, GenericModel, LeakModel } from '../../../shared/model/homepage/stats_insight.model';
+import { DefacementModel, GenericModel, InsightMetric, LeakModel } from '../../../shared/model/homepage/stats_insight.model';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { LatestDocument, LatestDocumentCallbackModel } from '../../../shared/model/homepage/document_insight.model';
 import { AppService } from '../../../services/core/app/app.service';
@@ -16,6 +16,8 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   standalone: true,
 })
 export class HomeInsightComponent implements OnInit {
+  private readonly statIconAliases: Record<string, string> = { actor_coverage: 'top_team', countries_tagged: 'unique_base_urls', indexed_urls: 'url_document_count', known_domains: 'unique_base_urls', languages_tagged: 'common_types', organizations_tagged: 'top_team', top_actor: 'top_team', victim_records: 'document_count' };
+
   protected readonly String = String;
 
   insights: any = { general: {}, leak: {}, defacement: {} };
@@ -50,6 +52,11 @@ export class HomeInsightComponent implements OnInit {
 
   getKeys(obj: GenericModel | LeakModel | DefacementModel): string[] {
     return obj ? Object.keys(obj) : [];
+  }
+
+  getStatIcon(key: string, metric?: InsightMetric): string {
+    const labelKey = (metric?.key ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    return this.statIconAliases[labelKey] ?? key;
   }
 
   formatModelKey(key: string): string {

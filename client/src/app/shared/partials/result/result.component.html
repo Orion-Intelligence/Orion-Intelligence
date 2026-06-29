@@ -101,7 +101,7 @@
                 }
               </div>
               @if (!shrinkmenu() && filterModel) {
-                <div class="flex h-[40px] shrink-0 items-center max-[900px]:mt-[2px] max-[900px]:self-end" [ngClass]="homeSearchService.showFiltersOverlay ? 'z-[0]' : 'z-[3]'">
+                <div class="flex h-[40px] shrink-0 items-center self-start max-[900px]:mt-[2px] max-[900px]:self-end" [ngClass]="homeSearchService.showFiltersOverlay ? 'z-[0]' : 'z-[3]'">
                   <label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" [appTooltip]="'Customize Results' | translate" class="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-[12px] text-[13px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-810)] max-[550px]:w-full max-[550px]:justify-center">
                     <img alt="Filter Icon" height="20" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
                     <span>{{ 'Filter' | translate }}</span>

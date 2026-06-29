@@ -78,6 +78,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   pendingShareAction: 'create' | 'revoke' | null = null;
   commentErrorMessage = '';
   readonly artifactAllowedFileTypes = ['application/pdf', 'image/jpeg', 'image/png', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  readonly maxArtifactFiles = 5;
   pendingNewArtifactFiles: File[] = [];
   pendingNewArtifactFileInput: HTMLInputElement | null = null;
   artifactReports: ArtifactReportOption[] = [];
@@ -264,7 +265,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
     const files = Array.from(fileInput.files || []);
 
-    if (!this.validateArtifactFiles(artifact, files)) {
+    if (!this.validateArtifactFiles(artifact, files, artifact.files?.length || 0)) {
       fileInput.value = '';
       return;
     }
@@ -478,8 +479,8 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     this.pendingNewArtifactFileInput = fileInput;
   }
 
-  getPendingNewArtifactFileNames(): string {
-    return this.pendingNewArtifactFiles.map(file => file.name).join(', ');
+  getPendingNewArtifactFileNameRows(): string[] {
+    return this.pendingNewArtifactFiles.map(file => file.name);
   }
 
   exportPdf(): void {
@@ -1388,8 +1389,13 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     return new Set(selectedCaseIds).size !== selectedCaseIds.length;
   }
 
-  private validateArtifactFiles(artifact: CaseArtifact, files: File[]): boolean {
+  private validateArtifactFiles(artifact: CaseArtifact, files: File[], existingFileCount = 0): boolean {
     if (!files.length) {
+      return false;
+    }
+
+    if (existingFileCount + files.length > this.maxArtifactFiles) {
+      this.messageNotificationService.show(`Maximum ${this.maxArtifactFiles} files can be attached to an artifact`);
       return false;
     }
 

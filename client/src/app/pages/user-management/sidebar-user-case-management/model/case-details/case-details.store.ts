@@ -52,7 +52,7 @@ export abstract class CaseDetailsStore {
   abstract downloadArtifactFile(artifact: CaseArtifact, fileId: string): void;
   abstract deleteArtifactFile(artifact: CaseArtifact, fileId: string): void;
   abstract setPendingNewArtifactFiles(fileInput: HTMLInputElement): void;
-  abstract getPendingNewArtifactFileNames(): string;
+  abstract getPendingNewArtifactFileNameRows(): string[];
   abstract saveNewArtifact(): void;
   abstract openAddTask(): void;
   abstract saveTasks(): void;

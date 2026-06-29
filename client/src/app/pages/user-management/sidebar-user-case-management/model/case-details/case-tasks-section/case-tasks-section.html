@@ -69,7 +69,7 @@
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
                             'Due Date' | translate }}</label>
-                        <input [ngModel]="getDateInputValue(task.dueAt)" (ngModelChange)="setDateInputValue(task, 'dueAt', $event)" [disabled]="!canEditFullTask()" name="task-due" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-due-input" />
+                        <app-date-picker class="mt-1 block" selectionMode="single" toggleTestId="case-task-due-input" [value]="getDateInputValue(task.dueAt)" [allowFutureDates]="true" [disabled]="!canEditFullTask()" (dateSelected)="setDateInputValue(task, 'dueAt', $event.value)"></app-date-picker>
                     </div>
                     <div class="sm:col-span-2">
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
@@ -173,7 +173,7 @@
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
                             'Due Date' | translate }}</label>
-                        <input [ngModel]="getDateInputValue(newTask.dueAt)" (ngModelChange)="setDateInputValue(newTask, 'dueAt', $event)" name="new-task-due" type="date" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-task-due-input" />
+                        <app-date-picker class="mt-1 block" selectionMode="single" toggleTestId="case-task-due-input" [value]="getDateInputValue(newTask.dueAt)" [allowFutureDates]="true" (dateSelected)="setDateInputValue(newTask, 'dueAt', $event.value)"></app-date-picker>
                     </div>
 
                     <div class="sm:col-span-2">
