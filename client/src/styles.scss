@@ -1087,6 +1087,14 @@ body.demo-tour-scroll-locked {
   filter: var(--ui-icon-filter-light);
 }
 
+.light-theme .ui-breadcrumb-link:hover {
+  color: var(--color-blue-640) !important;
+}
+
+.dark-theme .ui-breadcrumb-link:hover {
+  color: var(--color-blue-640) !important;
+}
+
 .light-theme .ui-action-icon {
   filter: var(--ui-icon-filter-light);
 }
