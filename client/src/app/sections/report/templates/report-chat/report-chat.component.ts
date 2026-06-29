@@ -286,6 +286,31 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
     return normalizeDisplayUrlUtil(url, '-');
   }
 
+  getDisplayMessageDate(item: ChatResultItem | SocialResultItem | null): string {
+    const rawItem = item as any;
+    const value = this.getFirstRenderableValue(
+      rawItem?.m_date,
+      rawItem?.m_message_date,
+      rawItem?.message_date,
+      rawItem?.date,
+      rawItem?.created_at,
+      rawItem?.m_created_at,
+      rawItem?.m_creation_date,
+      rawItem?.m_update_date,
+      rawItem?.m_time
+    );
+    return this.formatDateValue(value);
+  }
+
+  getDisplayMessageId(item: ChatResultItem | SocialResultItem | null): string {
+    const rawItem = item as any;
+    const messageId = String(rawItem?.m_message_id || '').trim();
+    if (!messageId || this.isSlugLikeMessageId(messageId, rawItem?.m_platform)) {
+      return '';
+    }
+    return messageId;
+  }
+
   hasValue(value: unknown): boolean {
     return this.scanHelperMethodsService.hasRenderableValue(value);
   }
@@ -308,11 +333,11 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
       });
     };
 
-    add('Message Date', item.m_date);
+    add('Message Date', this.getDisplayMessageDate(item));
     add('Views', item.m_views);
     add('Sender Username', item.m_sender_username);
     add('Sender', item.m_sender_name);
-    add('Message ID', item.m_message_id, true);
+    add('Message ID', this.getDisplayMessageId(item), true);
     add('Platform', item.m_platform);
     add('Network', item.m_network);
     add('Post Likes', item.m_post_likes);
@@ -331,5 +356,43 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
 
   get reportDocId(): string {
     return (this.resultItem as any)?.m_hash || (this.resultItem as any)?._id || '';
+  }
+
+  private getFirstRenderableValue(...values: unknown[]): unknown {
+    return values.find(value => this.hasValue(value));
+  }
+
+  private formatDateValue(value: unknown): string {
+    if (!this.hasValue(value)) {
+      return '';
+    }
+    const rawValue = Array.isArray(value) ? value[0] : value;
+    const rawDate = String(rawValue ?? '').trim();
+    if (!rawDate) {
+      return '';
+    }
+    const parsedDate = new Date(rawDate);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return rawDate;
+    }
+    return parsedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+  }
+
+  private isSlugLikeMessageId(value: string, platform?: string): boolean {
+    const normalizedPlatform = String(platform || '').toLowerCase();
+    const hasPercentEncoding = /%[0-9a-f]{2}/i.test(value);
+    const decodedValue = this.decodeURIComponentSafe(value);
+    const hasSlugSeparator = /[-_/]/.test(decodedValue);
+    return (normalizedPlatform === 'forum' && (hasPercentEncoding || (decodedValue.length > 80 && hasSlugSeparator))) ||
+      (hasPercentEncoding && decodedValue.length > 80);
+  }
+
+  private decodeURIComponentSafe(value: string): string {
+    try {
+      return decodeURIComponent(value);
+    }
+    catch {
+      return value;
+    }
   }
 }

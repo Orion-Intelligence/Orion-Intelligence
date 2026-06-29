@@ -50,7 +50,7 @@ api_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]
 SCAN_ROLE_DEPS = [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
 SCAN_WITH_LIMITER_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(limiter_dependency), Depends(license_required("scanning"))]
 STEALER_LOG_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:stealer_logs", bypass_roles=[], bypass_licenses=["maintainer"]))]
-STIX_MEMBER_DEPS = [Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER]))]
+STIX_MEMBER_DEPS = [Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))]
 GENERAL_MODULE_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:general"))]
 SCANNING_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("scanning"))]
 STIX_KIND_VALUES = {"general", "leak", "defacement", "exploit", "chat", "social"}
@@ -683,7 +683,7 @@ async def search_dynamic_national_identity(param: search_dynamic_crack_model = B
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])),
+            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:breach", bypass_licenses=["maintainer"])), ], )
 async def get_breach_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_leak_stix(doc_id, lang)
@@ -699,7 +699,7 @@ async def get_breach_stix_document(doc_id: str, lang: Optional[str] = Query(None
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])),
+            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:general", bypass_licenses=["maintainer"])), ], )
 async def get_strategic_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_general_stix(doc_id, lang)
@@ -715,7 +715,7 @@ async def get_strategic_stix_document(doc_id: str, lang: Optional[str] = Query(N
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])),
+            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:defacement", bypass_licenses=["maintainer"])), ], )
 async def get_defacement_stix_document(doc_id: str):
     return await stix_manager.get_instance().get_defacement_stix(doc_id)
@@ -731,7 +731,7 @@ async def get_defacement_stix_document(doc_id: str):
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])),
+            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:exploit", bypass_licenses=["maintainer"])), ], )
 async def get_exploit_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_exploit_stix(doc_id, lang)
@@ -783,7 +783,7 @@ async def get_entity_relations(query: EntityQueryModel = Depends()):
     status_code=200,
     dependencies=[Depends(
         role_required(
-            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER])),
+            [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:news", bypass_licenses=["maintainer"])), ], )
 async def get_news_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
     return await stix_manager.get_instance().get_leak_stix(doc_id, lang)

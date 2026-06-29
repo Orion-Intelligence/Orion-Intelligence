@@ -222,6 +222,7 @@ export class DashboardService {
       "safe",
       "content",
       "mitre",
+      "platform",
       "platform_result_count",
       "m_cve",
       "m_cwe",

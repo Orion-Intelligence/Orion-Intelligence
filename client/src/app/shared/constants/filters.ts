@@ -304,6 +304,26 @@ const PLATFORM_FILTER = {
   tooltip: "Platform",
   selected: "all"
 };
+const SOCIAL_PLATFORM_FILTER = {
+  title: "Platform",
+  options: [
+    { key: "all", label: "All" },
+    { key: "telegram", label: "Telegram" },
+    { key: "twitter", label: "Twitter" },
+    { key: "mastodon", label: "Mastodon" },
+    { key: "pastebin", label: "Pastebin" },
+    { key: "forum", label: "Forum" },
+    { key: "reddit", label: "Reddit" },
+    { key: "facebook", label: "Facebook" },
+    { key: "instagram", label: "Instagram" },
+    { key: "linkedin", label: "LinkedIn" },
+    { key: "tiktok", label: "TikTok" },
+    { key: "youtube", label: "YouTube" },
+  ],
+  type: "dropdown" as const,
+  tooltip: "Platform",
+  selected: "all"
+};
 const PLATFORM_RESULT_COUNT_FILTER = {
   title: "Platform Result Count",
   options: [],
@@ -411,6 +431,7 @@ export const feed_filters: FilterModel = {
 export const social_filters: FilterModel = {
   filters: {
     network: COMMON_NETWORK,
+    platform: SOCIAL_PLATFORM_FILTER,
     daterange: DATERANGE_CREATION,
     content: createThreatContent()
   }
@@ -491,6 +512,7 @@ export const filter_mapping: Record<string, string> = {
   content: "Content Type",
   m_content_type: "Content Type",
   mitre: "Mitre TTP",
+  platform: "Platform",
   platform_result_count: "Platform Results Count",
   m_cve: "CVE",
   m_cwe: "CWE",

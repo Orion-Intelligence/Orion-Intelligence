@@ -13,7 +13,7 @@
         <li>
           <div (click)="selectOption($event, item)" [ngClass]="{ 'border-l-2 border-white text-white font-medium h-[43px]': (selectionStore.selectedOption$ | async | lower) === (item | lower), 'opacity-20': !licenseService.canAccess(category()) }" [queryParams]="{ page: 1 }" [routerLink]="licenseService.canAccess(category()) ? [routePrefix(), item.toLowerCase()] : null" [attr.data-testid]="'sidebar-subitem-' + routePrefix() + '-' + item.toLowerCase()" class="mt-[5px] text-[#C7D7E6] font-[Roboto] cursor-pointer" queryParamsHandling="merge">
             <div [ngClass]="{ 'bg-[var(--color-blue-880)] before:text-white': (selectionStore.selectedOption$ | async | lower) === (item | lower) }" class="py-[12px] pr-[12px] pl-0 text-[13px] font-medium ml-[20px] rounded-[6px] font-[Inter] hover:bg-[var(--color-blue-880)] before:content-['●'] before:text-[8px] before:mr-[10px] before:ml-[18px] before:inline-block before:align-middle before:leading-none before:text-[#C7D7E6]">
-              {{ replaceDashWithSpace(item) }}
+              {{ replaceDashWithSpace(item) | translate }}
             </div>
           </div>
         </li>

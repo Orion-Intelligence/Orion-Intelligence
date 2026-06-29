@@ -118,6 +118,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         case Category.DEFACEMENT:
           firstSubcategory = this.defacementCategories[0];
           break;
+        case Category.SOCIAL:
+          firstSubcategory = this.socialCategories[0];
+          break;
         case Category.APT_INTEL:
           firstSubcategory = this.aptIntelCategories[0];
           break;
@@ -190,6 +193,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     const categories = Object.values(ProfileSubCategory);
     const eventManagementEnabled = this.appService.userSessionData().tenant.eventManagementEnabled === true;
     const canAccessFeeder = this.licenseService.canUseModule('feeder');
+    const canAccessCaseManagement = this.isAdmin() || this.licenseService.isMaintainer() || (this.isAnalyst() && (this.appService.userSessionData().user.permissions || []).includes('case_management'));
     const isMobileDemo = this.appService.isMobileMode();
 
     if (this.isAdmin()) {
@@ -199,6 +203,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
         (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
         (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
+        (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT) &&
         (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
     }
     if (this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
@@ -207,6 +212,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
         (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
         (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
+        (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT) &&
         (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
     }
     if (this.isAnalyst()) {
@@ -216,6 +222,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         c !== ProfileSubCategory.USERS &&
         c !== ProfileSubCategory.AUDITLOG &&
         c !== ProfileSubCategory.IOC &&
+        (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT) &&
         c !== ProfileSubCategory.STATISTICS &&
         c !== ProfileSubCategory.TENANT_SETTINGS);
     }
@@ -228,7 +235,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       c !== ProfileSubCategory.USERS &&
       c !== ProfileSubCategory.AUDITLOG &&
       c !== ProfileSubCategory.IOC &&
-      c !== ProfileSubCategory.CASE_MANAGEMENT &&
+      (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT) &&
       c !== ProfileSubCategory.STATISTICS &&
       c !== ProfileSubCategory.TENANT_SETTINGS);
   }

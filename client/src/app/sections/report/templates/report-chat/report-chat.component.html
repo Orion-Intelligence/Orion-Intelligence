@@ -48,7 +48,7 @@
       <div class="mt-5 grid gap-x-6 border-t border-[var(--color-divider)] pt-2 text-sm md:grid-cols-2 xl:grid-cols-3">
         <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
           <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Message Date' | translate }}</p>
-          <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_date }}</span>
+          <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ getDisplayMessageDate(resultItem) || ('Not available' | translate) }}</span>
         </div>
         @if (hasValue(resultItem.m_views)) {
           <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
@@ -68,10 +68,10 @@
             <span class="max-w-[65%] truncate text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_sender_name }}</span>
           </div>
         }
-        @if (hasValue(resultItem.m_message_id)) {
+        @if (getDisplayMessageId(resultItem); as messageId) {
           <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
             <p class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Message ID' | translate }}</p>
-            <span class="max-w-[65%] break-all text-right text-[14px] font-medium text-[var(--color-text1)]">{{ resultItem.m_message_id }}</span>
+            <span class="max-w-[65%] break-all text-right text-[14px] font-medium text-[var(--color-text1)]">{{ messageId }}</span>
           </div>
         }
         @if (hasValue(resultItem.m_platform)) {
