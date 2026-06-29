@@ -132,6 +132,7 @@ export class ScanHelperMethodsService {
       payload: { domain: ip, scanType: 'dns' },
       metadata: { title: 'DNS Scan', target: ip },
       pollDelayMs: this.pollDelayMs,
+      forceNew: true,
     });
     const getStatus = (res: DnsResponse) => res?.status;
     const getProgress = (res: DnsResponse) => res?.progress;

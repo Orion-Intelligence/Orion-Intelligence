@@ -31,8 +31,8 @@ SCAN_ROUTES: Dict[str, Dict[str, str]] = {
         "target_key": "domain",
     },
     "urlscan/dns": {
-        "path": "urlscan/domain",
-        "target_key": "domain",
+        "path": "urlscan/ip",
+        "target_key": "ip",
     },
     "urlscan/wayback": {
         "path": "urlscan/domain",

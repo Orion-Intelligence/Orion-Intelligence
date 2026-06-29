@@ -17,6 +17,7 @@ export interface SubdomainResponse {
 export interface DnsRecord {
     ip: string;
     hostname: string;
+    domains?: string[];
     error?: string;
 }
 export interface DnsResponse {

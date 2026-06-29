@@ -614,8 +614,10 @@ async def parse_subdomain_scan(payload: DomainScanRequest, force_new: bool = Que
     status_code=200,
     dependencies=SCAN_WITH_LIMITER_DEPS, )
 async def parse_dns_scan(payload: DomainScanRequest, force_new: bool = Query(False), current_user=Depends(get_current_user)):
+    await _validate_public_scan_target(payload.domain)
+    ip_payload = IPScanRequest(ip=payload.domain)
     await AuditLogManager.get_instance().search_audit(current_user, "dns_scan", payload.domain)
-    return await ScanJobManager.get_instance().run_tracked_scan(current_user=current_user, api_reference="urlscan/dns", payload=payload.model_dump(), metadata={"title": "DNS Scan", "target": payload.domain}, runner=lambda: _scan_domain_with_type(payload, user_id=str(current_user.id), scan_type='dns'), force_new=force_new)
+    return await ScanJobManager.get_instance().run_tracked_scan(current_user=current_user, api_reference="urlscan/dns", payload=ip_payload.model_dump(), metadata={"title": "DNS Scan", "target": payload.domain}, runner=lambda: crawl_model.getInstance().scan_ip(ip_payload, user_id=str(current_user.id)), force_new=force_new)
 
 
 @api_routes.post(
