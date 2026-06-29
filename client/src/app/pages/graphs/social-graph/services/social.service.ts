@@ -244,6 +244,10 @@ export class SocialService {
         complete: () => {
           this.stateStore.setFetching(stateKey, key, false);
           cancelMap.delete(key);
+        },
+        error: () => {
+          this.stateStore.setFetching(stateKey, key, false);
+          cancelMap.delete(key);
         }
       });
   }

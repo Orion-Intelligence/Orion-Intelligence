@@ -90,11 +90,11 @@
                       <div class="min-w-0 flex-1 break-words text-[13px] font-medium leading-5 text-[var(--color-text2)]" [class.tabular-nums]="isNumeric(item.value)">
                         @if (isImageUrl(item.value)) {
                           <div class="flex items-center gap-2">
-                            <img [src]="item.value" [alt]="item.key" class="h-8 w-8 flex-shrink-0 rounded-[6px] object-cover">
-                            <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="text-[11px] text-[var(--color-blue-640)] hover:underline">view image</a>
+                            <img [src]="getDisplayUrl(item.value)" [alt]="item.key" class="h-8 w-8 flex-shrink-0 rounded-[6px] object-cover">
+                            <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="text-[11px] text-[var(--color-blue-640)] hover:underline">view image</a>
                           </div>
                         } @else if (isUrl(item.value)) {
-                          <a [href]="item.value" target="_blank" rel="noopener noreferrer" class="break-all text-[var(--color-blue-640)] hover:underline">{{ item.value }}</a>
+                          <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="break-all text-[var(--color-blue-640)] hover:underline">{{ getDisplayUrl(item.value) }}</a>
                         } @else {
                           {{ item.value }}
                         }
@@ -180,8 +180,8 @@
               } @else {
                 <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                   @for (image of platformData.images || []; track image.image_url || image.thumbnail || $index) {
-                    <a data-testid="social-image-result" [href]="image.image_url || image.thumbnail" target="_blank" rel="noopener noreferrer" class="group relative block overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] shadow-[0_8px_18px_var(--color-shadow-light)] transition-colors hover:border-sky-400/35 hover:bg-[rgba(87,165,235,0.06)]">
-                      <img [src]="image.thumbnail || image.image_url" [alt]="image.title || image.source || 'Social image'" class="aspect-[4/5] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
+                    <a data-testid="social-image-result" [href]="getSocialImageHref(image)" target="_blank" rel="noopener noreferrer" class="group relative block overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] shadow-[0_8px_18px_var(--color-shadow-light)] transition-colors hover:border-sky-400/35 hover:bg-[rgba(87,165,235,0.06)]">
+                      <img [src]="getSocialImageSrc(image)" [alt]="image.title || image.source || 'Social image'" class="aspect-[4/5] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
                       <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
                         <p class="mb-0 truncate text-[10px] font-semibold text-white">{{ image.title || image.source || 'Image result' }}</p>
                       </div>

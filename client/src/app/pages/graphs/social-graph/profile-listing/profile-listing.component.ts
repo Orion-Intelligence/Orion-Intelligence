@@ -325,7 +325,7 @@ export class SocialProfileListingComponent {
     const posts = this.getPostContentItems(platformData, tabKey);
     const seen = new Set<string>();
     return posts.filter(post => {
-      if (!post) {
+      if (!post || !SocialNormalizationUtil.isUsableSocialPost(post)) {
         return false;
       }
       const key = SocialNormalizationUtil.getPostItemKey(post);

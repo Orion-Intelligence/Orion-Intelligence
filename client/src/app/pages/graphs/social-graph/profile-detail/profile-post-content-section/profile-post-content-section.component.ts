@@ -3,6 +3,7 @@ import { PlatformResult, SocialPost, SocialPostComment } from '../../../../../sh
 import { formatFollowers } from '../../../../../shared/utils/formatters';
 import type { PostContentTabKey, PostCursorFetchRequest, SocialPlatformCapabilityMap } from '../../models/social-graph.models';
 import { SocialNormalizationUtil } from '../../utils/social-normalization.util';
+import { normalizeRedditClearnetUrl } from '../../utils/reddit-url.util';
 import socialPlatformCapabilities from '../../../../../../assets/data/social-graph/platform-capabilities.json';
 
 @Component({
@@ -50,13 +51,21 @@ export class SocialProfilePostContentSectionComponent {
   }
 
   hasPostMedia(post: SocialPost | null | undefined): boolean {
-    return !!post?.media_url;
+    return !!this.getPostMediaUrl(post);
   }
 
   isVideoPost(post: SocialPost | null | undefined): boolean {
     const mediaType = (post?.media_type || '').toLowerCase();
-    const mediaUrl = (post?.media_url || '').toLowerCase();
+    const mediaUrl = this.getPostMediaUrl(post).toLowerCase();
     return mediaType.includes('video') || mediaUrl.includes('.mp4') || mediaUrl.includes('.mov') || mediaUrl.includes('.webm');
+  }
+
+  getPostUrl(post: SocialPost | null | undefined): string {
+    return normalizeRedditClearnetUrl(post?.post_url || '');
+  }
+
+  getPostMediaUrl(post: SocialPost | null | undefined): string {
+    return normalizeRedditClearnetUrl(post?.media_url || '');
   }
 
   getPostMediaTypeLabel(post: SocialPost | null | undefined): string {
@@ -91,7 +100,7 @@ export class SocialProfilePostContentSectionComponent {
     const posts = this.getPostContentItems(platformData, tabKey);
     const seen = new Set<string>();
     return posts.filter(post => {
-      if (!post) {
+      if (!post || !SocialNormalizationUtil.isUsableSocialPost(post)) {
         return false;
       }
       const key = this.getPostItemKey(post);
@@ -163,7 +172,8 @@ export class SocialProfilePostContentSectionComponent {
   }
 
   private getPostMediaKey(post: SocialPost | null | undefined): string {
-    return post?.media_url ? `${post.post_url || ''}|${post.media_url}` : '';
+    const mediaUrl = this.getPostMediaUrl(post);
+    return mediaUrl ? `${this.getPostUrl(post)}|${mediaUrl}` : '';
   }
 
   private getPostCursorId(post: SocialPost | null | undefined): string | undefined {

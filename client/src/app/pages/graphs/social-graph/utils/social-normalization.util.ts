@@ -205,6 +205,21 @@ export class SocialNormalizationUtil {
     return String(youtubeId || url || post?.hash_id || post?.m_hash_id || JSON.stringify(post)).trim();
   }
 
+  static isUsableSocialPost(post: any): boolean {
+    const url = this.firstValue(post?.post_url, post?.m_url, post?.url, post?.m_message_sharable_link, post?.m_weblink);
+    if (url) {
+      return true;
+    }
+    const caption = this.firstValue(post?.caption, post?.m_content, post?.m_title, post?.title).trim();
+    const normalizedCaption = caption.toLowerCase();
+    if (!caption || normalizedCaption === 'no title') {
+      return false;
+    }
+    const hashId = this.firstValue(post?.hash_id, post?.m_hash_id, post?.id, post?.m_message_id);
+    const mediaUrl = this.firstValue(post?.media_url, post?.m_img_src, post?.m_coverpage);
+    return !!mediaUrl || (!!hashId && hashId !== 'menu');
+  }
+
   static normalizeSocialPost(post: any): SocialPost {
     const mediaUrl = this.firstValue(post?.media_url, post?.m_img_src, post?.m_coverpage);
     const directComments = Array.isArray(post?.comments) ? '' : post?.comments;

@@ -376,7 +376,9 @@ export class SocialScanService {
         : Array.isArray(result?.data)
           ? result.data
           : [];
-    return items.map((post: any) => SocialNormalizationUtil.normalizeSocialPost(post));
+    return items
+      .filter((post: any) => SocialNormalizationUtil.isUsableSocialPost(post))
+      .map((post: any) => SocialNormalizationUtil.normalizeSocialPost(post));
   }
 
   fetchProfileMetadataTokens(tokens: string[], username: string, platform?: string): Observable<{

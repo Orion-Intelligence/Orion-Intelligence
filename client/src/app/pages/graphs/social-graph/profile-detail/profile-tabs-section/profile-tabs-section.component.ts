@@ -6,6 +6,7 @@ import type { FeedUser, FetchTab, FetchTabKey, ImageCursorFetchRequest, PostCurs
 import { getProfileDetailEntries } from '../../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../../utils/profile-url.util';
 import { SocialNormalizationUtil } from '../../utils/social-normalization.util';
+import { normalizeRedditClearnetUrl } from '../../utils/reddit-url.util';
 import { SocialProfilePostsSectionComponent } from '../profile-posts-section/profile-posts-section.component';
 import { SocialProfileVideosSectionComponent } from '../profile-videos-section/profile-videos-section.component';
 import { SocialProfileShortsSectionComponent } from '../profile-shorts-section/profile-shorts-section.component';
@@ -79,7 +80,7 @@ export class SocialProfileTabsSectionComponent {
   }
 
   getProfileImageUrl(platformData: PlatformResult): string {
-    return this.getFirstMetadataValue(platformData, ['m_img_src', 'img_src', 'profile_image', 'profileImage', 'avatar', 'image']);
+    return normalizeRedditClearnetUrl(this.getFirstMetadataValue(platformData, ['m_img_src', 'img_src', 'profile_image', 'profileImage', 'avatar', 'image']));
   }
 
   isProfileImageFailed(platformData: PlatformResult): boolean {
@@ -100,7 +101,19 @@ export class SocialProfileTabsSectionComponent {
   }
 
   getCoverImageUrl(platformData: PlatformResult): string {
-    return this.getFirstMetadataValue(platformData, ['m_coverpage', 'coverpage', 'image_bg', 'cover_image', 'coverImage', 'banner', 'banner_image']);
+    return normalizeRedditClearnetUrl(this.getFirstMetadataValue(platformData, ['m_coverpage', 'coverpage', 'image_bg', 'cover_image', 'coverImage', 'banner', 'banner_image']));
+  }
+
+  getDisplayUrl(value: any): string {
+    return normalizeRedditClearnetUrl(this.formatMetadataValue(value));
+  }
+
+  getSocialImageHref(image: { image_url?: string; thumbnail?: string } | null | undefined): string {
+    return normalizeRedditClearnetUrl(image?.image_url || image?.thumbnail || '');
+  }
+
+  getSocialImageSrc(image: { image_url?: string; thumbnail?: string } | null | undefined): string {
+    return normalizeRedditClearnetUrl(image?.thumbnail || image?.image_url || '');
   }
 
   getProfileDetailEntries(platformData: PlatformResult): { key: string; value: any; }[] {

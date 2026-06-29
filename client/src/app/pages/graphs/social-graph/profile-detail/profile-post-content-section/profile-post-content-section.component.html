@@ -49,8 +49,8 @@
                     <p class="mb-0 text-[11px] text-[var(--color-text4)]">{{ post.datetime }}</p>
                   }
                 </div>
-                @if (post.post_url) {
-                  <a [href]="post.post_url" target="_blank" rel="noopener noreferrer" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[8px] border border-[rgba(226,232,240,0.18)] bg-white/[0.02] text-[var(--color-text2)] transition-colors hover:bg-white/[0.06] hover:text-[var(--color-text1)] [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]" title="Open post">
+                @if (getPostUrl(post); as postUrl) {
+                  <a [href]="postUrl" target="_blank" rel="noopener noreferrer" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[8px] border border-[rgba(226,232,240,0.18)] bg-white/[0.02] text-[var(--color-text2)] transition-colors hover:bg-white/[0.06] hover:text-[var(--color-text1)] [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]" title="Open post">
                     <svg viewBox="0 0 24 24" aria-hidden="true" class="h-4 w-4 stroke-current" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M5 12h14"></path>
                       <path d="m13 6 6 6-6 6"></path>
@@ -66,9 +66,9 @@
                     </div>
                   }
                   @if (isVideoPost(post)) {
-                    <video [src]="post.media_url" controls preload="metadata" (loadstart)="markPostMediaLoading(post)" (loadedmetadata)="markPostMediaLoaded(post)" (loadeddata)="markPostMediaLoaded(post)" (canplay)="markPostMediaLoaded(post)" (error)="markPostMediaLoaded(post)" class="max-h-[420px] w-full bg-black transition-opacity duration-150" [class.opacity-0]="isPostMediaLoading(post)"></video>
+                    <video [src]="getPostMediaUrl(post)" controls preload="metadata" (loadstart)="markPostMediaLoading(post)" (loadedmetadata)="markPostMediaLoaded(post)" (loadeddata)="markPostMediaLoaded(post)" (canplay)="markPostMediaLoaded(post)" (error)="markPostMediaLoaded(post)" class="max-h-[420px] w-full bg-black transition-opacity duration-150" [class.opacity-0]="isPostMediaLoading(post)"></video>
                   } @else {
-                    <img [src]="post.media_url" [alt]="getPostMediaTypeLabel(post)" (load)="markPostMediaLoaded(post)" (error)="markPostMediaLoaded(post)" class="max-h-[420px] w-full object-cover transition-opacity duration-150" [class.opacity-0]="isPostMediaLoading(post)">
+                    <img [src]="getPostMediaUrl(post)" [alt]="getPostMediaTypeLabel(post)" (load)="markPostMediaLoaded(post)" (error)="markPostMediaLoaded(post)" class="max-h-[420px] w-full object-cover transition-opacity duration-150" [class.opacity-0]="isPostMediaLoading(post)">
                   }
                 </div>
               }
