@@ -49,6 +49,7 @@ export interface TenantDataModel {
     image?: string;
     profileVisibilityEnabled?: boolean;
     eventManagementEnabled?: boolean;
+    alertsVisibleToAdmin?: boolean;
     accountsMailPassword?: string;
     accountsMail?: string;
     accountsSmtpServer?: string;

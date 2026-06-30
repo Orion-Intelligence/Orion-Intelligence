@@ -27,6 +27,7 @@ export interface TenantModel {
     password_reset_required?: boolean;
     profile_visibility_enabled?: boolean;
     event_management_enabled?: boolean;
+    alerts_visible_to_admin?: boolean;
     accounts_mail_password?: string;
     accounts_mail?: string;
     accounts_smtp_server?: string;

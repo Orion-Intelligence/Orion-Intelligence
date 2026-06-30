@@ -97,6 +97,7 @@ export class TenantSettingsComponent implements OnInit {
       iocs: [],
       profile_visibility_enabled: this.userSessionData.tenant.profileVisibilityEnabled,
       event_management_enabled: this.userSessionData.tenant.eventManagementEnabled === true,
+      alerts_visible_to_admin: this.userSessionData.tenant.alertsVisibleToAdmin !== false,
     };
     if (includeMailSettings) {
       tenantData.accounts_mail_password = this.mailForm.accounts_mail_password;

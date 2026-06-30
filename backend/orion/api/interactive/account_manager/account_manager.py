@@ -403,6 +403,7 @@ class AccountManager:
                 assigned_quota), "quotaExceeded": quota_exceeded, "image": tenant_image_path,
                 "profileVisibilityEnabled": getattr(tenant, "profile_visibility_enabled", True),
                 "eventManagementEnabled": getattr(tenant, "event_management_enabled", False),
+                "alertsVisibleToAdmin": getattr(tenant, "alerts_visible_to_admin", True),
                 "accountsMailPassword": "",
                 "accountsMail": self.safe_decrypt(enc, getattr(tenant, "accounts_mail", "")),
                 "accountsSmtpServer": self.safe_decrypt(enc, getattr(tenant, "accounts_smtp_server", "")),

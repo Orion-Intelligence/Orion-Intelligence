@@ -43,6 +43,7 @@ class TenantDataModel(BaseModel):
     image: Optional[str] = None
     profileVisibilityEnabled: bool = True
     eventManagementEnabled: bool = False
+    alertsVisibleToAdmin: bool = True
     accountsMailPassword: str = ""
     accountsMail: str = ""
     accountsSmtpServer: str = ""

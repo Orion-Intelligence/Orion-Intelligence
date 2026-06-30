@@ -367,6 +367,7 @@ def test_get_node_builds_response_with_decrypted_tenant_data(tmp_path, monkeypat
     assert node.tenant.phone == "+1-555"
     assert node.tenant.licenses == ["enterprise"]
     assert node.tenant.quotaExceeded is False
+    assert node.tenant.alertsVisibleToAdmin is True
     assert node.alert_summary["unseen_total"] == 3
 
 

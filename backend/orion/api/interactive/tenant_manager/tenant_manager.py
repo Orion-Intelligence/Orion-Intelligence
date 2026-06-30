@@ -144,6 +144,7 @@ class TenantManager:
             postal_code=enc.decrypt(tenant.postal_code.encode()).decode() if tenant.postal_code else "",
             profile_visibility_enabled=getattr(tenant, "profile_visibility_enabled", True),
             event_management_enabled=getattr(tenant, "event_management_enabled", False),
+            alerts_visible_to_admin=getattr(tenant, "alerts_visible_to_admin", True),
             accounts_mail_password=None,
             accounts_mail=enc.decrypt(getattr(tenant, "accounts_mail", "").encode()).decode() if getattr(tenant, "accounts_mail", "") else "",
             accounts_smtp_server=enc.decrypt(getattr(tenant, "accounts_smtp_server", "").encode()).decode() if getattr(tenant, "accounts_smtp_server", "") else "",
@@ -234,6 +235,9 @@ class TenantManager:
 
         if data.event_management_enabled is not None:
             tenant.event_management_enabled = data.event_management_enabled
+
+        if data.alerts_visible_to_admin is not None:
+            tenant.alerts_visible_to_admin = data.alerts_visible_to_admin
 
         if data.iocs is not None:
             tenant.iocs = [IocCategory(
