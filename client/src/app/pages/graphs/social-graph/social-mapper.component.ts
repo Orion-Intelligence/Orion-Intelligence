@@ -27,6 +27,7 @@ interface LatestFetchConfirmationData {
 @Component({
   selector: 'app-social-graph',
   templateUrl: './social-mapper.component.html',
+  styleUrls: ['./social-mapper.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   standalone: true,

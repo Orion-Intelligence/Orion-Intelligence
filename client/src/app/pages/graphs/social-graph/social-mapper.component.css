@@ -1,0 +1,12 @@
+.social-result-source-tab--active {
+  background: var(--color-blue-640);
+  color: #fff;
+}
+
+.social-result-source-count {
+  background: rgb(15 23 42 / 18%);
+}
+
+.social-result-source-count--active {
+  background: rgb(255 255 255 / 18%);
+}

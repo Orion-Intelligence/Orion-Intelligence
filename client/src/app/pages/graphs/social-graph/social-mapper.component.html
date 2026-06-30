@@ -48,13 +48,13 @@
                       </div>
                       @if (hasResultSourceTabs()) {
                         <div data-testid="social-result-source-tabs" class="inline-flex h-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-1 shadow-[0_8px_18px_var(--color-shadow-light)]">
-                          <button type="button" (click)="setResultSource('normal')" [disabled]="getResultSourceCount('normal') === 0" class="inline-flex h-8 min-w-[86px] items-center justify-center gap-2 rounded-full px-3 text-xs font-semibold text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-720)] disabled:cursor-not-allowed disabled:opacity-45" [style.background]="activeResultSource() === 'normal' ? 'var(--color-blue-640)' : null" [style.color]="activeResultSource() === 'normal' ? '#fff' : null">
+                          <button type="button" (click)="setResultSource('normal')" [disabled]="getResultSourceCount('normal') === 0" class="inline-flex h-8 min-w-[86px] items-center justify-center gap-2 rounded-full px-3 text-xs font-semibold text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-720)] disabled:cursor-not-allowed disabled:opacity-45" [class.social-result-source-tab--active]="activeResultSource() === 'normal'">
                             Normal
-                            <span class="rounded-full px-1.5 py-0.5 text-[10px]" [style.background]="activeResultSource() === 'normal' ? 'rgba(255,255,255,0.18)' : 'rgba(15,23,42,0.18)'">{{ getResultSourceCount('normal') }}</span>
+                            <span class="social-result-source-count rounded-full px-1.5 py-0.5 text-[10px]" [class.social-result-source-count--active]="activeResultSource() === 'normal'">{{ getResultSourceCount('normal') }}</span>
                           </button>
-                          <button type="button" (click)="setResultSource('darkweb')" [disabled]="getResultSourceCount('darkweb') === 0" class="inline-flex h-8 min-w-[86px] items-center justify-center gap-2 rounded-full px-3 text-xs font-semibold text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-720)] disabled:cursor-not-allowed disabled:opacity-45" [style.background]="activeResultSource() === 'darkweb' ? 'var(--color-blue-640)' : null" [style.color]="activeResultSource() === 'darkweb' ? '#fff' : null">
+                          <button type="button" (click)="setResultSource('darkweb')" [disabled]="getResultSourceCount('darkweb') === 0" class="inline-flex h-8 min-w-[86px] items-center justify-center gap-2 rounded-full px-3 text-xs font-semibold text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-720)] disabled:cursor-not-allowed disabled:opacity-45" [class.social-result-source-tab--active]="activeResultSource() === 'darkweb'">
                             Darkweb
-                            <span class="rounded-full px-1.5 py-0.5 text-[10px]" [style.background]="activeResultSource() === 'darkweb' ? 'rgba(255,255,255,0.18)' : 'rgba(15,23,42,0.18)'">{{ getResultSourceCount('darkweb') }}</span>
+                            <span class="social-result-source-count rounded-full px-1.5 py-0.5 text-[10px]" [class.social-result-source-count--active]="activeResultSource() === 'darkweb'">{{ getResultSourceCount('darkweb') }}</span>
                           </button>
                         </div>
                       }

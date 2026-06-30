@@ -182,10 +182,8 @@ export class SocialScanService {
               intervalMs: 2000
             }).pipe(switchMap((platforms) => {
               subscriber.next({ type: 'progress', payload: { progress: 82, step: 'Searching forum records...' } });
-              return this.fetchForumProfiles(username).pipe(
-                catchError(() => of([])),
-                map(forumProfiles => [...platforms, ...forumProfiles])
-              );
+              return this.fetchForumProfiles(username).pipe(catchError(() => of([])),
+                map(forumProfiles => [...platforms, ...forumProfiles]));
             })).subscribe({
               next: (platforms) => {
                 subscriber.next({ type: 'progress', payload: { progress: 90, step: 'Processing results...' } });
@@ -346,12 +344,10 @@ export class SocialScanService {
   }
 
   private getForumDomain(record: any): string {
-    return SocialNormalizationUtil.firstValue(
-      SocialNormalizationUtil.normalizeDomain(record?.m_url),
+    return SocialNormalizationUtil.firstValue(SocialNormalizationUtil.normalizeDomain(record?.m_url),
       SocialNormalizationUtil.normalizeDomain(record?.m_channel_url),
       SocialNormalizationUtil.normalizeDomain(record?.m_message_sharable_link),
-      this.expandField(record?.m_domain)[0]
-    );
+      this.expandField(record?.m_domain)[0]);
   }
 
   private getForumCommentUsers(record: any): string[] {
