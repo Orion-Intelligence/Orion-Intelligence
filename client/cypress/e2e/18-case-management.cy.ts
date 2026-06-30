@@ -12,6 +12,7 @@ import {
   openCaseManagement,
   openCreatedCaseDetails,
   openCreatedCaseFromList,
+  selectCaseDate,
   selectCaseFilterDropdown,
   selector,
   typeCaseFilterSearch
@@ -155,7 +156,7 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.get(selector('case-artifact-title-input')).should('be.visible').type('Cypress Evidence Artifact');
     cy.get(selector('case-artifact-type-select')).should('be.visible').select('file');
     cy.get(selector('case-artifact-source-select')).should('be.visible').select('manual');
-    cy.get(selector('case-artifact-captured-input')).should('be.visible').type('2026-05-25');
+    selectCaseDate('case-artifact-captured-input', '2026-05-25');
     cy.get(selector('case-artifact-description-input')).should('be.visible').type('Artifact added by Cypress');
     cy.get(selector('case-artifact-file-input')).selectFile('cypress/fixtures/resume-sample.pdf', { force: true });
     cy.get(selector('case-artifact-add-save')).filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
@@ -252,7 +253,7 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.get(selector('case-task-title-input')).should('be.visible').type('Cypress Review Task');
     cy.get(selector('case-task-status-select')).should('be.visible').select('in_progress');
     cy.get(selector('case-task-priority-select')).should('be.visible').select('high');
-    cy.get(selector('case-task-due-input')).should('be.visible').type('2026-05-26');
+    selectCaseDate('case-task-due-input', '2026-05-26');
     cy.get(selector('case-task-description-input')).should('be.visible').type('Task added by Cypress');
     cy.get(selector('case-task-add-save')).filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
 

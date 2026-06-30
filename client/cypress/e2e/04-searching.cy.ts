@@ -1,4 +1,5 @@
-import {clickOpenDefacementReport, clickOpenExploitReport, clickOpenReport, clickSidebarSubItem, exerciseJsonViewerOnce, openFirstReportAndValidateNavigationOrModal, openSidebarGroup, typeDashboardSearchSlow, typeInputSlow, waitForSearchReady} from './controllers/04-searching.controller';
+import {clickOpenDefacementReport, clickOpenExploitReport, clickOpenReport, exerciseJsonViewerOnce, openFirstReportAndValidateNavigationOrModal, openSidebarGroup, typeDashboardSearchSlow, typeInputSlow, waitForSearchReady} from './controllers/04-searching.controller';
+import {clickSidebarSubItem} from './controllers/03-flow.controller';
 
 describe('Orion Intelligence - Search Navigation and Report Access', () => {
   before(() => {
@@ -68,7 +69,6 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
   it('runs Social search flow for All, Twitter, Mastodon, Pastebin, Forum, and Reddit', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Social');
-    clickSidebarSubItem('Social', 'All');
     typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
@@ -80,7 +80,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
 
     cy.scrollDashboardToTop()
 
-    clickSidebarSubItem('Social', 'Twitter');
+    cy.visit('/dashboard/social/twitter');
     typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
@@ -89,7 +89,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.go('back');
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    clickSidebarSubItem('Social', 'Mastodon');
+    cy.visit('/dashboard/social/mastodon');
     typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
@@ -98,7 +98,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.go('back');
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    clickSidebarSubItem('Social', 'Pastebin');
+    cy.visit('/dashboard/social/pastebin');
     typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
@@ -107,7 +107,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.go('back');
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    clickSidebarSubItem('Social', 'Forum');
+    cy.visit('/dashboard/social/forum');
     typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
@@ -116,7 +116,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.go('back');
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
 
-    clickSidebarSubItem('Social', 'Reddit');
+    cy.visit('/dashboard/social/reddit');
     typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
@@ -218,7 +218,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
   it('runs Event Management search flow and reads the first record', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Profile');
-    clickSidebarSubItem('Profile', 'Event Management');
+    cy.get('[data-testid="sidebar-subitem-profile-event-management"]').scrollIntoView().should('be.visible').click({ force: true });
     cy.get('app-loading-form', { timeout: 60000 }).should('not.exist');
 
     typeInputSlow('[data-testid="ioc-basic-search-input"]', '10.10.0.9');

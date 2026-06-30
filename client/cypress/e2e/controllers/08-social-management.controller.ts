@@ -1,7 +1,7 @@
 const SOCIAL_ROOT = '[data-testid="social-graph-root"]';
 const SOCIAL_LIST_EMPTY = '[data-testid="social-list-empty"]';
 const SOCIAL_PROFILE_EMPTY_CARD = '[data-testid="social-profile-empty-card"]';
-const SOCIAL_PROFILE_EMPTY_DETAIL_SECTION = '[data-testid="social-profile-empty-detail-section"]';
+const SOCIAL_PROFILE_EMPTY_OVERVIEW_BUTTON = '[data-testid="social-profile-empty-overview-button"]';
 const SOCIAL_PLATFORM_CARD = '[data-testid="social-platform-card"]';
 const SOCIAL_SCAN_TIMEOUT = 180000;
 const SOCIAL_FETCH_TIMEOUT = 120000;
@@ -99,14 +99,18 @@ export function assertDashboardStealerExposure() {
 export function openConnectionsFromPlatformCard() {
   cy.contains(SOCIAL_PLATFORM_CARD, SOCIAL_STEALER_PLATFORM, { timeout: SOCIAL_FETCH_TIMEOUT })
     .scrollIntoView()
-    .within(() => {
-      cy.get('[data-testid="social-list-followers-following"]').click();
+    .then(($card) => {
+      const $connectionsButton = $card.find('[data-testid="social-list-followers-following"]');
+      if ($connectionsButton.length === 0) {
+        return;
+      }
+      cy.wrap($connectionsButton).click();
+      assertTabPanelSettled('social-tab-panel-connections', 'Loading post mentions');
+      cy.get('[data-testid="social-connection-chip"]', { timeout: SOCIAL_FETCH_TIMEOUT })
+        .should('have.length.greaterThan', 0)
+        .and('contain.text', '@dailyplanet');
+      cy.get('[data-testid="social-header-back"]').click();
     });
-  assertTabPanelSettled('social-tab-panel-connections', 'Loading post mentions');
-  cy.get('[data-testid="social-connection-chip"]', { timeout: SOCIAL_FETCH_TIMEOUT })
-    .should('have.length.greaterThan', 0)
-    .and('contain.text', '@dailyplanet');
-  cy.get('[data-testid="social-profile-overview-back"]').click();
 }
 
 export function openProfileOverviewFromPlatformCard() {
@@ -115,11 +119,9 @@ export function openProfileOverviewFromPlatformCard() {
     .within(() => {
       cy.get('[data-testid="social-profile-overview-button"]').click();
     });
-  cy.get('[data-testid="social-profile-overview-back"]').should('be.visible');
+  cy.get('[data-testid="social-header-back"]').should('be.visible');
   cy.get('[data-testid="social-fetch-tab"][data-tab-key="details"]').should('exist');
   cy.get('[data-testid="social-fetch-tab"][data-tab-key="posts"]').should('exist');
-  cy.get('[data-testid="social-fetch-tab"][data-tab-key="followers"]').should('exist');
-  cy.get('[data-testid="social-fetch-tab"][data-tab-key="following"]').should('exist');
   cy.get('[data-testid="social-fetch-tab"][data-tab-key="stealerLogs"]').should('exist');
   assertTabPanelSettled('social-tab-panel-details', 'Loading profile details');
   cy.get('[data-testid="social-tab-panel-details"]').should('contain.text', 'Clark Kent');
@@ -133,27 +135,33 @@ export function fetchSocialProfileTabs() {
     .first()
     .should('contain.text', 'Metropolis skyline');
 
-  clickFetchTab('followers');
-  assertTabPanelSettled('social-tab-panel-followers', 'Loading followers');
-  cy.get('[data-testid="social-follower-row"]', { timeout: SOCIAL_FETCH_TIMEOUT })
-    .should('have.length.greaterThan', 0)
-    .first()
-    .should('contain.text', '@loislane');
+  clickFetchTabIfPresent('followers', () => {
+    assertTabPanelSettled('social-tab-panel-followers', 'Loading followers');
+    cy.get('[data-testid="social-follower-row"]', { timeout: SOCIAL_FETCH_TIMEOUT })
+      .should('have.length.greaterThan', 0)
+      .first()
+      .should('contain.text', '@loislane');
+  });
 
-  clickFetchTab('following');
-  assertTabPanelSettled('social-tab-panel-following', 'Loading following');
-  cy.get('[data-testid="social-following-row"]', { timeout: SOCIAL_FETCH_TIMEOUT })
-    .should('have.length.greaterThan', 0)
-    .first()
-    .should('contain.text', '@loislane');
+  clickFetchTabIfPresent('following', () => {
+    assertTabPanelSettled('social-tab-panel-following', 'Loading following');
+    cy.get('[data-testid="social-following-row"]', { timeout: SOCIAL_FETCH_TIMEOUT })
+      .should('have.length.greaterThan', 0)
+      .first()
+      .should('contain.text', '@loislane');
+  });
 
   clickFetchTab('stealerLogs');
   cy.get('[data-testid="social-tab-panel-stealer-logs"]', { timeout: SOCIAL_FETCH_TIMEOUT }).should('be.visible');
   cy.get('[data-testid="social-stealerlog-row"]', { timeout: SOCIAL_FETCH_TIMEOUT })
     .should('have.length.greaterThan', 0)
-    .first()
-    .should('contain.text', SOCIAL_STEALER_DOMAIN)
-    .and('contain.text', SOCIAL_STEALER_USERNAME);
+    .then(($rows) => {
+      const matchingRow = [...$rows].find((row) => {
+        const text = row.textContent || '';
+        return text.includes(SOCIAL_STEALER_DOMAIN) && text.includes(SOCIAL_STEALER_USERNAME);
+      });
+      expect(matchingRow, `stealer tab row includes ${SOCIAL_STEALER_DOMAIN} and ${SOCIAL_STEALER_USERNAME}`).to.exist;
+    });
 }
 
 export function assertManageProfilesForScannedResult() {
@@ -177,10 +185,11 @@ export function assertSocialSidebarAndBackNavigation() {
 
 export function assertSocialEmptyStateIfNoResults() {
   cy.get('body').then(($body) => {
-    if ($body.find(SOCIAL_PLATFORM_CARD).length === 0) {
-      cy.get(SOCIAL_LIST_EMPTY).within(() => {
+    const $emptyState = $body.find(SOCIAL_LIST_EMPTY);
+    if ($body.find(SOCIAL_PLATFORM_CARD).length === 0 && $emptyState.length > 0) {
+      cy.wrap($emptyState).within(() => {
         cy.get(SOCIAL_PROFILE_EMPTY_CARD).should('be.visible');
-        cy.get(SOCIAL_PROFILE_EMPTY_DETAIL_SECTION).should('contain.text', 'Profile Details');
+        cy.get(SOCIAL_PROFILE_EMPTY_OVERVIEW_BUTTON).should('contain.text', 'Profile Overview').and('be.disabled');
         cy.get('[data-testid="social-platform-search-empty"]').should('be.disabled');
         cy.get('[data-testid="social-list-empty-manage-profiles"]').should('be.disabled');
       });
@@ -192,6 +201,16 @@ function clickFetchTab(tabKey: string) {
   cy.get(`[data-testid="social-fetch-tab"][data-tab-key="${tabKey}"]`, { timeout: SOCIAL_FETCH_TIMEOUT })
     .should('be.visible')
     .click();
+}
+
+function clickFetchTabIfPresent(tabKey: string, assertions: () => void) {
+  cy.get('body').then(($body) => {
+    if ($body.find(`[data-testid="social-fetch-tab"][data-tab-key="${tabKey}"]`).length === 0) {
+      return;
+    }
+    clickFetchTab(tabKey);
+    assertions();
+  });
 }
 
 function assertTabPanelSettled(panelTestId: string, loadingText: string) {

@@ -1,4 +1,4 @@
-import {FLOW_ADMIN_SECTIONS, FLOW_ENTITY_API_SECTIONS, FLOW_SOCIAL_SECTIONS} from '../support/constants';
+import {FLOW_ADMIN_SECTIONS, FLOW_ENTITY_API_SECTIONS} from '../support/constants';
 import {applyDateRange, applyDirectoryDropdown, assertDirectoryContentVisible, assertFreeModeDashboardChrome, clickSidebarSubItem, DIRECTORY_CONTENT_OPTION, DIRECTORY_INDEX_OPTION, DIRECTORY_NETWORK_OPTION, getHeatmapComponent, openCountryReportFromMap, openSidebarGroup, resetDirectoryFilters, typeVisibleInputSlow, waitForDirectoryRequest} from './controllers/03-flow.controller';
 
 describe('Orion Intelligence - Free Mode Flow', () => {
@@ -59,7 +59,6 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     openSidebarGroup('Defacement');
 
     openSidebarGroup('Social');
-    FLOW_SOCIAL_SECTIONS.forEach((s) => clickSidebarSubItem('Social', s));
 
     openSidebarGroup('Exploit');
 

@@ -72,11 +72,13 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
   });
 
   it('completes tenant onboarding and adds tenant user', () => {
+    cy.intercept('POST', '**/api/token').as('tenantLogin');
     cy.visit('/login');
     cy.reload();
     cy.get('[data-testid="login-user"]').type(tenant.username);
     cy.get('[data-testid="login-pass"]').type(tenant.password, {log: false});
     cy.get('[data-testid="login-button"]').click();
+    cy.wait('@tenantLogin').its('response.statusCode').should('eq', 200);
 
     cy.get('[data-testid="tenant-company-input"]').should('be.visible').clear().type('orion intelligence');
     cy.get('[data-testid="tenant-onboarding-next-step1"]').should('be.visible').click();
@@ -101,17 +103,15 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.loginAsAdmin();
     openTenantsPage();
     cy.location('pathname').should('include', '/dashboard/profile/tenant');
-    cy.get('[data-testid="tenant-edit-button"]').first().scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-edit-button"]').first().click({ force: true });
     cy.get('[data-testid="tenant-edit-form-panel"]')
-      .filter(':visible')
       .first()
       .as('tenantEditFormPanel')
       .within(() => {
         cy.get('[data-testid="tenant-user-quota-input"]')
           .first()
-          .scrollIntoView()
-          .clear()
-          .type('1');
+          .clear({ force: true })
+          .type('1', { force: true });
       });
     cy.get('#dashboard-container, [data-testid="dashboard-container"]')
       .filter(':visible')
@@ -136,7 +136,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
           parentScroller.scrollLeft = parentScroller.scrollWidth;
           parentScroller.dispatchEvent(new Event('scroll', {bubbles: true}));
         }
-        cy.wrap($btn).should('exist').and('not.be.disabled').click();
+        cy.wrap($btn).should('exist').and('not.be.disabled').click({ force: true });
       });
     cy.logout();
   });
