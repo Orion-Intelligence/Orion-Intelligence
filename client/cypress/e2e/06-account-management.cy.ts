@@ -53,16 +53,22 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
                 });
             });
 
-            cy.get('[data-testid="account-settings-theme-toggle"]').click().wait(200).click();
+            cy.intercept('POST', '**/api/update/current/user').as('accountThemeUpdate');
+            cy.get('[data-testid="account-settings-theme-toggle"]').click();
+            cy.wait('@accountThemeUpdate', { timeout: 60000 }).its('response.statusCode').should('be.oneOf', [200, 204]);
+            cy.get('[data-testid="account-settings-theme-toggle"]').wait(200).click();
+            cy.wait('@accountThemeUpdate', { timeout: 60000 }).its('response.statusCode').should('be.oneOf', [200, 204]);
             cy.intercept('POST', '**/api/update/current/user').as('accountSettingsUpdate');
             cy.get('[data-testid="account-settings-twofa-toggle"]').click();
             cy.wait('@accountSettingsUpdate', { timeout: 60000 }).its('response.statusCode').should('be.oneOf', [200, 204]);
             cy.logout();
 
+            cy.intercept('POST', '**/api/token').as('twoFaLogin');
             cy.visit('/login');
             cy.get('[data-testid="login-user"]').clear().type(TEST_USERS.testing4.username);
             cy.get('[data-testid="login-pass"]').clear().type(TEST_USERS.testing4.password, {log: false});
             cy.get('[data-testid="login-button"]').click();
+            cy.wait('@twoFaLogin', { timeout: 60000 }).its('response.body.twofa_required').should('eq', true);
             cy.get('[data-testid="twofa-center"], .twofa-center').should('be.visible');
             cy.get('img[alt="2FA QR"]').should('exist');
             cy.get('input[name="otpCode"]').should('exist');

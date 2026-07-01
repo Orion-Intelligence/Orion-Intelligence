@@ -26,6 +26,20 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
   let tenantSubUser: any;
   const tenantResetNewPassword = '2wsx@WSX2026';
 
+  const selectEnabledCurrentMonthDate = (day: number) => {
+    cy.get(`[data-testid="side-filter-date-day-${day}"]`)
+      .filter(':visible')
+      .filter((_index, element) => {
+        const className = element.getAttribute('class') || '';
+        return !element.hasAttribute('disabled') && !className.includes('text-slate-400');
+      })
+      .should('have.length.greaterThan', 0)
+      .first()
+      .scrollIntoView()
+      .should('be.enabled')
+      .click();
+  };
+
   before(() => {
     cy.env(['TENANT_ACCOUNT', 'TENANT_SUB_USER']).then(({TENANT_ACCOUNT, TENANT_SUB_USER}) => {
       tenant = TENANT_ACCOUNT;
@@ -352,19 +366,11 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     Cypress._.times(12, () => {
       cy.get('[data-testid="side-filter-date-prev-month"]').first().click();
     });
-    cy.get('[data-testid="side-filter-date-day-15"]')
-      .not('.text-slate-400')
-      .first()
-      .scrollIntoView()
-      .click();
+    selectEnabledCurrentMonthDate(15);
     Cypress._.times(12, () => {
       cy.get('[data-testid="side-filter-date-next-month"]').first().click();
     });
-    cy.get('[data-testid="side-filter-date-day-15"]')
-      .not('.text-slate-400')
-      .first()
-      .scrollIntoView()
-      .click();
+    selectEnabledCurrentMonthDate(Math.min(15, new Date().getDate()));
     cy.get('[data-testid="side-filter-apply"]').scrollIntoView().should('be.visible').click();
     closeFilterSidebar();
 
