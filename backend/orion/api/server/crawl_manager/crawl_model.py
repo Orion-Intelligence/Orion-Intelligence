@@ -351,7 +351,11 @@ class crawl_model:
             is_leak_update=True)
 
     async def invoke_leak_index(self, leak_index: LeakDataModel):
-        m_data = crawl_index_generator.index_query_leak(leak_index.model_dump())
+        m_data = crawl_index_generator.index_query_leak(
+            leak_index.model_dump(),
+            cluster_id="leak",
+            default_content_type=["leaks"],
+        )
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(
             base_url=leak_index.base_url,
@@ -361,7 +365,11 @@ class crawl_model:
             is_leak_update=True)
 
     async def invoke_news_index(self, leak_index: LeakDataModel):
-        m_data = crawl_index_generator.index_query_leak(leak_index.model_dump())
+        m_data = crawl_index_generator.index_query_leak(
+            leak_index.model_dump(),
+            cluster_id="news",
+            default_content_type=["news"],
+        )
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(
             base_url=leak_index.base_url,
@@ -371,11 +379,15 @@ class crawl_model:
             is_leak_update=True)
 
     async def invoke_tracking_index(self, leak_index: LeakDataModel):
-        m_data = crawl_index_generator.index_query_leak(leak_index.model_dump())
+        m_data = crawl_index_generator.index_query_leak(
+            leak_index.model_dump(),
+            cluster_id="tracking",
+            default_content_type=["tracking"],
+        )
         await elastic_controller.get_instance().index_data(m_data)
         return await self._update_or_create_model(
             base_url=leak_index.base_url,
-            new_content_type=['news', 'tracking'],
+            new_content_type=['tracking'],
             new_index_type=['leak'],
             network_type=leak_index.m_network,
             is_leak_update=True)

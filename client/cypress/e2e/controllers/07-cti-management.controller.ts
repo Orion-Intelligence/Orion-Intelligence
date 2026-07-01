@@ -7,12 +7,12 @@ export function openAndAssertReportModal(title: string) {
 }
 
 export function selectCtiFilterType(label: string) {
-  cy.get('[data-testid="cti-filter-type-select"]').filter(':visible').first().click();
-  cy.contains('[role="option"]', label).filter(':visible').first().click();
+  const key = label.toLowerCase() === 'cluster' ? 'all' : label.toLowerCase();
+  cy.get(`[data-testid="cti-graph-search-chip-${key}"]`).filter(':visible').first().click();
 }
 
 export function waitForToolbarSearchReady() {
-  cy.get('[data-testid="graph-toolbar-search-input"]').should('be.visible').and('not.be.disabled');
+  cy.get('[data-testid="cti-graph-search-input"]').should('be.visible').and('not.be.disabled');
 }
 
 export function waitForCtiGraphReady() {
@@ -24,5 +24,5 @@ export function visitCtiGraph() {
   cy.viewport(1440, 900);
   cy.visit('/dashboard/ctigraph');
   cy.location('pathname').should('include', '/dashboard/ctigraph');
-  cy.get('[data-testid="graph-toolbar-root"]').should('be.visible');
+  cy.get('[data-testid="cti-graph-root"]').should('be.visible');
 }

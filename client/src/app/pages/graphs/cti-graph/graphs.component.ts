@@ -1,6 +1,8 @@
-import { Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, inject } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { ActivatedRoute, Params } from '@angular/router';
+import { forkJoin } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 import { Edge, Network } from 'vis-network';
 import { DataSet } from 'vis-data';
 import { ApiService } from '../../../shared/services/api.service';
@@ -9,10 +11,9 @@ import { GraphContextMenuComponent } from './context-menu/context-menu.component
 import { isPlatformBrowser } from '@angular/common';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { GraphToolbarComponent } from '../shared/graph-toolbar/graph-toolbar.component';
 import { ExpandToggleButtonComponent } from './expand-toggle-button/expand-toggle-button.component';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
-import { CtiGraphFilters, ExtendedNode, GraphResultItem, NodeVisualState } from '../../../shared/model/graph/cti-graph.model';
+import { CtiGraphFilters, CtiGraphLegendItem, CtiGraphStats, ExtendedNode, GraphResultItem, NodeVisualState } from '../../../shared/model/graph/cti-graph.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportExportType, GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
@@ -20,17 +21,40 @@ import { ensureStylesheet } from '../../../shared/utils/ensure-stylesheet.util';
 import { ProxyController } from '../../../shared/services/proxy-controller';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
+import { UiDropdownComponent, UiDropdownOption } from '../../../shared/components/ui-dropdown/ui-dropdown.component';
 
 type GraphNodeColor = NonNullable<ExtendedNode['color']>;
+type GraphSearchMode = 'all' | 'cluster' | 'property';
+type GraphSearchOption = {
+  key: string;
+  label: string;
+  mode: GraphSearchMode;
+  propertyType?: string;
+  clusterValue?: string;
+  placeholder: string;
+};
+type GraphAdvancedFilter = {
+  id: string;
+  optionKey: string;
+  value: string;
+  operator: '&&' | '||';
+};
+type GraphSearchRequest = {
+  dataPointType: string;
+  modelType: string;
+  queryValue: string;
+  operator?: '&&' | '||';
+};
 @Component({
   selector: 'app-graphs',
   standalone: true,
   templateUrl: './graphs.component.html',
   animations: [fadeInDashboardItem],
-  imports: [CtiSidebarComponent, GraphContextMenuComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, ProfileComponent, TranslatePipe]
+  imports: [FormsModule, CtiSidebarComponent, GraphContextMenuComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, ProfileComponent, TranslatePipe, UiDropdownComponent]
 })
 export class GraphComponent implements OnInit, OnDestroy {
   private readonly proxied_resource = inject(ProxyController);
+  private readonly changeDetector = inject(ChangeDetectorRef);
   private readonly maxNodeLabelLength = 28;
   private readonly edgeBaseColor = 'rgba(75, 85, 99, 0.8)';
   private readonly edgeHighlightColor = '#a78bfa';
@@ -41,7 +65,9 @@ export class GraphComponent implements OnInit, OnDestroy {
   private readonly nodeDocumentBorder = '#f97316';
   private readonly nodePropertyBorder = '#38bdf8';
   private readonly nodeFocusColor = '#facc15';
-  private readonly iconMap: Record<string, string> = { cluster: 'diagram-3-fill', document: 'file-earmark-text-fill', property: 'tags-fill', encoded: 'code-slash', document_id: 'file-earmark-lock-fill', ip: 'hdd-network-fill', phone: 'telephone-fill', email: 'envelope-fill', domain: 'globe2', url: 'link-45deg', country: 'flag-fill', file: 'folder-fill', card: 'credit-card-2-front-fill', crypto: 'currency-bitcoin', bank: 'bank2', platform: 'cpu-fill', company: 'building-fill', person: 'person-fill', location: 'geo-alt-fill', language: 'translate', hashtag: 'hash', mention: 'at', xmpp: 'chat-dots-fill', tactic: 'bullseye', technique: 'tools', script: 'braces' };
+  private readonly clusterPalette: Record<string, { color: string; label: string; swatchClass: string; }> = { general: { color: '#38bdf8', label: 'General', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-sky-400' }, leak: { color: '#f97316', label: 'Leak', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-orange-500' }, tracking: { color: '#22c55e', label: 'Tracking', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-green-500' }, news: { color: '#eab308', label: 'News', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-yellow-500' }, defacement: { color: '#ef4444', label: 'Defacement', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-red-500' }, chat: { color: '#06b6d4', label: 'Chat', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-cyan-500' }, exploit: { color: '#fb7185', label: 'Exploit', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-rose-400' }, social: { color: '#a78bfa', label: 'Social', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-purple-400' }, apt: { color: '#f43f5e', label: 'APT', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-rose-500' }, malware: { color: '#14b8a6', label: 'Malware', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-teal-500' } };
+  private readonly propertyClassPalette: Record<string, string> = { geo: '#22c55e', identity: '#38bdf8', infrastructure: '#60a5fa', indicator: '#f59e0b', vulnerability: '#fb7185', host_indicator: '#eab308', financial: '#34d399', crypto: '#f97316', organization: '#a78bfa', source: '#94a3b8' };
+  private readonly iconMap: Record<string, string> = { cluster: 'diagram-3-fill', campaign: 'diagram-3-fill', document: 'file-earmark-text-fill', property: 'tags-fill', actor: 'tags-fill', encoded: 'code-slash', document_id: 'file-earmark-lock-fill', ip: 'hdd-network-fill', phone: 'telephone-fill', email: 'envelope-fill', domain: 'globe2', url: 'link-45deg', country: 'flag-fill', file: 'folder-fill', card: 'credit-card-2-front-fill', crypto: 'currency-bitcoin', bank: 'bank2', platform: 'cpu-fill', company: 'building-fill', person: 'person-fill', location: 'geo-alt-fill', language: 'translate', hashtag: 'hash', mention: 'at', xmpp: 'chat-dots-fill', tactic: 'bullseye', technique: 'tools', script: 'braces' };
   private groupInfo: Record<string, string[]> = {};
   private groupedSubNodesByParent: Record<string, Set<string>> = {};
   private groupParentByGroupId: Record<string, string> = {};
@@ -53,6 +79,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   private readonly originalNodeState = new Map<string, NodeVisualState>();
   private readonly clusterNodePrefix = 'cti_vertices/';
   private nodeTypeById: Record<string, string> = {};
+  private lastAppliedQuerySignature = '';
   private readonly globalKeyDownListener = (event: KeyboardEvent) => {
     if (!this.network) {
       return;
@@ -89,6 +116,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     });
   };
   private pendingFilters: CtiGraphFilters | null = null;
+  private graphAdvancedFilterCounter = 0;
 
   networkContainer?: ElementRef;
   public rawNodes: ExtendedNode[] = [];
@@ -116,11 +144,20 @@ export class GraphComponent implements OnInit, OnDestroy {
   copied = false;
   orignalColor: GraphNodeColor = '';
   isSidebarCollapsed = false;
-  nodeSearchText = '';
-  searchMatchedCount = 0;
   showMaxEdgeNotice = false;
   isReportExportModalOpen = false;
   readonly graphExportOptions = GRAPH_REPORT_EXPORT_OPTIONS;
+  readonly primaryGraphSearchKeys = ['all', 'leak', 'tracking', 'news', 'defacement', 'chat', 'exploit', 'social', 'apt', 'malware'];
+  readonly graphWhereOperatorOptions: UiDropdownOption[] = [ { key: '__where__', label: 'WHERE' } ];
+  readonly graphJoinOperatorOptions: UiDropdownOption[] = [ { key: '&&', label: 'AND' }, { key: '||', label: 'OR' } ];
+  readonly graphSearchOptions: GraphSearchOption[] = [ { key: 'all', label: 'All', mode: 'all', placeholder: 'Search...' }, { key: 'leak', label: 'Leak', mode: 'cluster', clusterValue: 'leak', placeholder: 'Search leak...' }, { key: 'tracking', label: 'Tracking', mode: 'cluster', clusterValue: 'tracking', placeholder: 'Search tracking...' }, { key: 'news', label: 'News', mode: 'cluster', clusterValue: 'news', placeholder: 'Search news...' }, { key: 'defacement', label: 'Defacement', mode: 'cluster', clusterValue: 'defacement', placeholder: 'Search defacement...' }, { key: 'chat', label: 'Chat', mode: 'cluster', clusterValue: 'chat', placeholder: 'Search chat...' }, { key: 'exploit', label: 'Exploit', mode: 'cluster', clusterValue: 'exploit', placeholder: 'Search exploit...' }, { key: 'social', label: 'Social', mode: 'cluster', clusterValue: 'social', placeholder: 'Search social...' }, { key: 'apt', label: 'APT', mode: 'cluster', clusterValue: 'apt', placeholder: 'Search APT...' }, { key: 'malware', label: 'Malware', mode: 'cluster', clusterValue: 'malware', placeholder: 'Search malware...' }, { key: 'm_ip', label: 'IP Address', mode: 'property', propertyType: 'm_ip', placeholder: '8.8.8.8' }, { key: 'm_asns', label: 'ASN', mode: 'property', propertyType: 'm_asns', placeholder: 'AS13335 or 13335' }, { key: 'm_domain', label: 'Domain', mode: 'property', propertyType: 'm_domain', placeholder: 'example.com' }, { key: 'm_url', label: 'URL', mode: 'property', propertyType: 'm_url', placeholder: 'https://example.com/path' }, { key: 'm_encoded_urls', label: 'Encoded URL', mode: 'property', propertyType: 'm_encoded_urls', placeholder: 'Encoded or defanged URL' }, { key: 'm_email', label: 'Email', mode: 'property', propertyType: 'm_email', placeholder: 'name@example.com' }, { key: 'm_username', label: 'Username', mode: 'property', propertyType: 'm_username', placeholder: 'Username or handle' }, { key: 'm_person', label: 'Person', mode: 'property', propertyType: 'm_person', placeholder: 'Person name' }, { key: 'm_phone_number', label: 'Phone Number', mode: 'property', propertyType: 'm_phone_number', placeholder: '+1 555 0100' }, { key: 'm_org', label: 'Organization', mode: 'property', propertyType: 'm_org', placeholder: 'Company or organization' }, { key: 'm_attacker', label: 'Threat Actor', mode: 'property', propertyType: 'm_attacker', placeholder: 'Threat actor or alias' }, { key: 'm_alias', label: 'Alias', mode: 'property', propertyType: 'm_alias', placeholder: 'Actor or entity alias' }, { key: 'm_country', label: 'Country', mode: 'property', propertyType: 'm_country', placeholder: 'Pakistan, Iran, United States...' }, { key: 'm_location', label: 'Location', mode: 'property', propertyType: 'm_location', placeholder: 'City, state, region...' }, { key: 'm_origin_country', label: 'Origin Country', mode: 'property', propertyType: 'm_origin_country', placeholder: 'Origin country' }, { key: 'm_industry', label: 'Industry', mode: 'property', propertyType: 'm_industry', placeholder: 'Finance, healthcare...' }, { key: 'm_cve', label: 'CVE', mode: 'property', propertyType: 'm_cve', placeholder: 'CVE-2026-0000' }, { key: 'm_cwe', label: 'CWE', mode: 'property', propertyType: 'm_cwe', placeholder: 'CWE-79' }, { key: 'm_vulnerability', label: 'Vulnerability', mode: 'property', propertyType: 'm_vulnerability', placeholder: 'Vulnerability name' }, { key: 'm_cvss', label: 'CVSS', mode: 'property', propertyType: 'm_cvss', placeholder: '9.8' }, { key: 'm_severity', label: 'Severity', mode: 'property', propertyType: 'm_severity', placeholder: 'critical, high...' }, { key: 'm_risk', label: 'Risk', mode: 'property', propertyType: 'm_risk', placeholder: 'Risk level' }, { key: 'm_product', label: 'Product', mode: 'property', propertyType: 'm_product', placeholder: 'Affected product' }, { key: 'm_vendor', label: 'Vendor', mode: 'property', propertyType: 'm_vendor', placeholder: 'Vendor name' }, { key: 'm_version', label: 'Version', mode: 'property', propertyType: 'm_version', placeholder: 'Version string' }, { key: 'm_platform', label: 'Platform', mode: 'property', propertyType: 'm_platform', placeholder: 'Windows, Linux, Android...' }, { key: 'm_web_server', label: 'Web Server', mode: 'property', propertyType: 'm_web_server', placeholder: 'nginx, Apache...' }, { key: 'm_remote_type', label: 'Remote Type', mode: 'property', propertyType: 'm_remote_type', placeholder: 'Remote exploit type' }, { key: 'm_md5', label: 'MD5', mode: 'property', propertyType: 'm_md5', placeholder: 'MD5 hash' }, { key: 'm_sha1', label: 'SHA1', mode: 'property', propertyType: 'm_sha1', placeholder: 'SHA1 hash' }, { key: 'm_sha256', label: 'SHA256', mode: 'property', propertyType: 'm_sha256', placeholder: 'SHA256 hash' }, { key: 'm_sha3_384', label: 'SHA3-384', mode: 'property', propertyType: 'm_sha3_384', placeholder: 'SHA3-384 hash' }, { key: 'm_imphash', label: 'Imphash', mode: 'property', propertyType: 'm_imphash', placeholder: 'Import hash' }, { key: 'm_telfhash', label: 'Telfhash', mode: 'property', propertyType: 'm_telfhash', placeholder: 'Telfhash' }, { key: 'm_tlsh', label: 'TLSH', mode: 'property', propertyType: 'm_tlsh', placeholder: 'TLSH hash' }, { key: 'm_file_name', label: 'File Name', mode: 'property', propertyType: 'm_file_name', placeholder: 'payload.exe' }, { key: 'm_file_paths', label: 'File Path', mode: 'property', propertyType: 'm_file_paths', placeholder: '/tmp/payload.exe' }, { key: 'm_file_type', label: 'File Type', mode: 'property', propertyType: 'm_file_type', placeholder: 'PE, APK, PDF...' }, { key: 'm_signature', label: 'Signature', mode: 'property', propertyType: 'm_signature', placeholder: 'Signature name' }, { key: 'm_yara_rule', label: 'YARA Rule', mode: 'property', propertyType: 'm_yara_rule', placeholder: 'YARA rule name' }, { key: 'm_family', label: 'Malware Family', mode: 'property', propertyType: 'm_family', placeholder: 'Malware family' }, { key: 'm_registry_key_path', label: 'Registry Key', mode: 'property', propertyType: 'm_registry_key_path', placeholder: 'HKCU\\Software\\...' }, { key: 'm_mac_address', label: 'MAC Address', mode: 'property', propertyType: 'm_mac_address', placeholder: '00:11:22:33:44:55' }, { key: 'm_user_agents', label: 'User Agent', mode: 'property', propertyType: 'm_user_agents', placeholder: 'Mozilla/5.0...' }, { key: 'm_crypto_address', label: 'Crypto Address', mode: 'property', propertyType: 'm_crypto_address', placeholder: 'Wallet address' }, { key: 'm_currencies', label: 'Currency', mode: 'property', propertyType: 'm_currencies', placeholder: 'BTC, USD...' }, { key: 'm_network', label: 'Network', mode: 'property', propertyType: 'm_network', placeholder: 'Network name' }, { key: 'm_social_media_profiles', label: 'Social Profile', mode: 'property', propertyType: 'm_social_media_profiles', placeholder: 'Profile URL or handle' }, { key: 'm_hashtag', label: 'Hashtag', mode: 'property', propertyType: 'm_hashtag', placeholder: '#tag' }, { key: 'm_mention', label: 'Mention', mode: 'property', propertyType: 'm_mention', placeholder: '@handle' }, { key: 'm_xmpp_addresses', label: 'XMPP Address', mode: 'property', propertyType: 'm_xmpp_addresses', placeholder: 'user@example.com' }, { key: 'm_enterprise_attack_tactics', label: 'MITRE Tactic', mode: 'property', propertyType: 'm_enterprise_attack_tactics', placeholder: 'TA0001' }, { key: 'm_enterprise_attack_techniques', label: 'MITRE Technique', mode: 'property', propertyType: 'm_enterprise_attack_techniques', placeholder: 'T1059' }, { key: 'm_author', label: 'Author', mode: 'property', propertyType: 'm_author', placeholder: 'Author/source' }, { key: 'm_reporter', label: 'Reporter', mode: 'property', propertyType: 'm_reporter', placeholder: 'Reporter/source' }, { key: 'm_team', label: 'Team', mode: 'property', propertyType: 'm_team', placeholder: 'Team or group' }, { key: 'm_tags', label: 'Tag', mode: 'property', propertyType: 'm_tags', placeholder: 'Tag value' }, { key: 'm_first_seen', label: 'First Seen', mode: 'property', propertyType: 'm_first_seen', placeholder: 'First seen date' }, { key: 'm_last_seen', label: 'Last Seen', mode: 'property', propertyType: 'm_last_seen', placeholder: 'Last seen date' }, { key: 'm_uk_nhs', label: 'UK NHS Number', mode: 'property', propertyType: 'm_uk_nhs', placeholder: 'NHS number' }, { key: 'm_us_driver_license', label: 'US Driver License', mode: 'property', propertyType: 'm_us_driver_license', placeholder: 'Driver license' } ];
+  activeGraphSearchKey = 'all';
+  graphSearchAdvancedMode = false;
+  graphAdvancedFilters: GraphAdvancedFilter[] = [this.createGraphAdvancedFilter()];
+  graphSearchText = '';
+  legendItems: CtiGraphLegendItem[] = [];
+  clusterLegendItems: CtiGraphLegendItem[] = [];
+  graphStats: CtiGraphStats = { visibleNodes: 0, totalNodes: 0, visibleEdges: 0, totalEdges: 0, hiddenNodes: 0 };
 
   private getNodeLabelColor(): string {
     if (isPlatformBrowser(this.platformId)) {
@@ -222,6 +259,192 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   get activeSidebarCollapsed(): boolean {
     return this.isSidebarCollapsed;
+  }
+
+  get activeGraphSearchOption(): GraphSearchOption {
+    return this.graphSearchOptions.find(option => option.key === this.activeGraphSearchKey) ?? this.graphSearchOptions[0];
+  }
+
+  get primaryGraphSearchOptions(): GraphSearchOption[] {
+    return this.graphSearchOptions.filter(option => this.primaryGraphSearchKeys.includes(option.key));
+  }
+
+  get graphBuilderSearchOptions(): GraphSearchOption[] {
+    return this.graphSearchOptions.filter(option => option.mode === 'property');
+  }
+
+  get graphSearchPlaceholder(): string {
+    return this.activeGraphSearchOption.placeholder;
+  }
+
+  setGraphSearchOption(optionKey: string): void {
+    const option = this.graphSearchOptions.find(item => item.key === optionKey);
+    if (!option) {
+      return;
+    }
+    this.activeGraphSearchKey = option.key;
+    this.graphSearchAdvancedMode = false;
+    if (option.mode === 'cluster') {
+      this.graphSearchText = '';
+      this.submitGraphSearch();
+    }
+  }
+
+  toggleGraphSearchBuilder(): void {
+    this.graphSearchAdvancedMode = !this.graphSearchAdvancedMode;
+    if (this.graphSearchAdvancedMode) {
+      this.activeGraphSearchKey = this.graphAdvancedFilters[0]?.optionKey || 'm_country';
+      return;
+    }
+    if (!this.primaryGraphSearchKeys.includes(this.activeGraphSearchKey)) {
+      this.activeGraphSearchKey = 'all';
+    }
+  }
+
+  addGraphAdvancedFilter(): void {
+    if (this.graphAdvancedFilters.length >= 8) {
+      return;
+    }
+    this.graphAdvancedFilters = [...this.graphAdvancedFilters, this.createGraphAdvancedFilter()];
+  }
+
+  removeGraphAdvancedFilter(id: string): void {
+    if (this.graphAdvancedFilters.length <= 1) {
+      return;
+    }
+    this.graphAdvancedFilters = this.graphAdvancedFilters.filter(filter => filter.id !== id);
+  }
+
+  getGraphAdvancedOption(optionKey: string): GraphSearchOption {
+    return this.graphBuilderSearchOptions.find(option => option.key === optionKey) ?? this.graphBuilderSearchOptions[0] ?? this.graphSearchOptions[0];
+  }
+
+  getGraphOperatorOptions(index: number): UiDropdownOption[] {
+    return index === 0 ? this.graphWhereOperatorOptions : this.graphJoinOperatorOptions;
+  }
+
+  getGraphOperatorValue(filter: GraphAdvancedFilter, index: number): string {
+    return index === 0 ? '__where__' : filter.operator;
+  }
+
+  setGraphFilterOperator(filter: GraphAdvancedFilter, value: string | null, index: number): void {
+    if (index === 0) {
+      return;
+    }
+    filter.operator = value === '||' ? '||' : '&&';
+  }
+
+  setGraphFilterOption(filter: GraphAdvancedFilter, value: string | null): void {
+    const option = this.graphBuilderSearchOptions.find(item => item.key === value);
+    if (!option) {
+      return;
+    }
+    filter.optionKey = option.key;
+  }
+
+  private createGraphAdvancedFilter(): GraphAdvancedFilter {
+    this.graphAdvancedFilterCounter += 1;
+    return {
+      id: `graph-filter-${Date.now()}-${this.graphAdvancedFilterCounter}`,
+      optionKey: 'm_ip',
+      value: '',
+      operator: '&&'
+    };
+  }
+
+  submitGraphSearch(): void {
+    if (this.graphSearchAdvancedMode) {
+      this.submitGraphSearchBuilder();
+      return;
+    }
+
+    const option = this.activeGraphSearchOption;
+    const queryValue = this.graphSearchText.trim();
+    const nextFilters = { ...this.activeSidebarFilters };
+
+    if (option.mode === 'cluster') {
+      if (queryValue) {
+        nextFilters.selectedType = 'property';
+        nextFilters.singleInput = option.clusterValue || 'all';
+        nextFilters.propertyType = 'all';
+        nextFilters.propertyValue = queryValue;
+        this.applyFilterValues(nextFilters);
+        this.lastAppliedQuerySignature = `cluster-property:${JSON.stringify({ cluster: option.clusterValue, queryValue, maxEdge: this.maxEdge, maxDepth: this.maxDepth })}`;
+        this.loadGraphByScopedPropertySearch(queryValue, option.clusterValue || 'all');
+        return;
+      }
+      nextFilters.selectedType = 'cluster';
+      nextFilters.singleInput = option.clusterValue || 'all';
+      nextFilters.propertyType = 'all';
+      nextFilters.propertyValue = '';
+    }
+    else if (option.mode === 'property') {
+      if (!queryValue) {
+        return;
+      }
+      nextFilters.selectedType = 'property';
+      nextFilters.singleInput = '';
+      nextFilters.propertyType = option.propertyType || 'all';
+      nextFilters.propertyValue = queryValue;
+    }
+    else if (queryValue) {
+      nextFilters.selectedType = 'property';
+      nextFilters.singleInput = '';
+      nextFilters.propertyType = 'all';
+      nextFilters.propertyValue = queryValue;
+    }
+    else {
+      nextFilters.selectedType = 'cluster';
+      nextFilters.singleInput = 'all';
+      nextFilters.propertyType = 'all';
+      nextFilters.propertyValue = '';
+    }
+
+    this.applyFilterValues(nextFilters);
+    this.onSidebarApply(nextFilters);
+  }
+
+  submitGraphSearchBuilder(): void {
+    const requests = this.graphAdvancedFilters
+      .map((filter, index) => this.buildGraphSearchRequest(this.getGraphAdvancedOption(filter.optionKey), filter.value.trim(), index === 0 ? undefined : filter.operator))
+      .filter((request): request is GraphSearchRequest => !!request);
+
+    if (requests.length === 0) {
+      return;
+    }
+
+    const nextFilters = {
+      ...this.activeSidebarFilters,
+      selectedType: 'property',
+      singleInput: '',
+      propertyType: 'advanced',
+      propertyValue: this.describeGraphSearchBuilder()
+    };
+    this.applyFilterValues(nextFilters);
+    this.lastAppliedQuerySignature = `advanced-builder:${JSON.stringify({ requests, maxEdge: this.maxEdge, maxDepth: this.maxDepth })}`;
+    this.loadGraphByRequests(requests);
+  }
+
+  private describeGraphSearchBuilder(): string {
+    const filled = this.graphAdvancedFilters
+      .map((filter, index) => {
+        const option = this.getGraphAdvancedOption(filter.optionKey);
+        const value = filter.value.trim() || option.clusterValue || '';
+        const operator = index === 0 ? 'WHERE' : filter.operator;
+        return `${operator} ${option.label}${value ? `:${value}` : ''}`;
+      })
+      .join(' ');
+    return filled || 'advanced builder';
+  }
+
+  private buildGraphSearchRequest(option: GraphSearchOption, queryValue: string, operator?: '&&' | '||'): GraphSearchRequest | null {
+    if (option.mode === 'cluster') {
+      return { dataPointType: 'cluster', modelType: 'cluster', queryValue: option.clusterValue || 'all', operator };
+    }
+    if (option.mode === 'property') {
+      return queryValue ? { dataPointType: 'property', modelType: option.propertyType || 'all', queryValue, operator } : null;
+    }
+    return null;
   }
 
   openReportExportModal(): void {
@@ -364,8 +587,15 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.maxDepth = Number(filters.maxDepth);
   }
 
-  onSidebarFiltersChanged(filters: CtiGraphFilters): void {
-    this.applyFilterValues(filters);
+  private buildQuerySignature(filters: CtiGraphFilters): string {
+    return JSON.stringify({
+      selectedType: filters.selectedType,
+      singleInput: filters.singleInput,
+      propertyType: filters.propertyType,
+      propertyValue: filters.propertyValue,
+      maxEdge: Number(filters.maxEdge),
+      maxDepth: Number(filters.maxDepth)
+    });
   }
 
   resetGraph(): void {
@@ -392,6 +622,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.contextMenuNodeId = '';
     this.result = [];
     this.originalNodeState.clear();
+    this.updateLegendState([], []);
     const container = this.networkContainer?.nativeElement;
     if (container) {
       while (container.firstChild) {
@@ -443,6 +674,188 @@ export class GraphComponent implements OnInit, OnDestroy {
   });
   }
 
+  private loadGraphByScopedPropertySearch(queryValue: string, clusterKey: string): void {
+    if (this.expandEnabled) {
+      queueMicrotask(() => {
+        this.expandEnabled = false;
+      });
+    }
+    else {
+      this.expandEnabled = false;
+    }
+
+    this.loading = false;
+    this.resetGraph();
+    this.api.get<{ results: GraphResultItem[]; }>('graph', {
+      params: this.buildGraphHttpParams('property', 'all', queryValue)
+    }).subscribe({
+      next: response => {
+        const results = response.results ?? [];
+        this.result = clusterKey === 'all' ? results : this.filterGraphResultsByCluster(results, clusterKey);
+        this.renderGraph(this.result);
+        this.loading = true;
+      },
+      error: _ => {
+        this.isEmpty = true;
+        this.loading = true;
+      }
+    });
+  }
+
+  private buildGraphHttpParams(dataPointType: string, modelType: string, queryValue: string): HttpParams {
+    let params = new HttpParams();
+    if (dataPointType) {
+      params = params.set('data_point_type', dataPointType);
+    }
+    if (modelType) {
+      params = params.set('model_type', modelType);
+    }
+    if (queryValue) {
+      params = params.set('query_value', queryValue);
+    }
+    params = params.set('edge', String(this.maxEdge));
+    params = params.set('depth', String(this.maxDepth));
+    return params;
+  }
+
+  private loadGraphByRequests(requests: GraphSearchRequest[]): void {
+    if (this.expandEnabled) {
+      queueMicrotask(() => {
+        this.expandEnabled = false;
+      });
+    }
+    else {
+      this.expandEnabled = false;
+    }
+    this.loading = false;
+    this.resetGraph();
+    const calls = requests.map(request => this.api.get<{ results: GraphResultItem[]; }>('graph', {
+      params: this.buildGraphHttpParams(request.dataPointType, request.modelType, request.queryValue)
+    }));
+    forkJoin(calls).subscribe({
+      next: responses => {
+        const responseResults = responses.map(response => response.results ?? []);
+        this.result = this.mergeGraphBuilderResults(responseResults, requests);
+        this.renderGraph(this.result);
+        this.loading = true;
+      },
+      error: _ => {
+        this.isEmpty = true;
+        this.loading = true;
+      }
+    });
+  }
+
+  private filterGraphResultsByCluster(results: GraphResultItem[], clusterKey: string): GraphResultItem[] {
+    const clusterId = `cti_vertices/${clusterKey}`;
+    const documentIds = new Set<string>();
+    results.forEach(item => {
+      const from = String(item.edge?._from ?? '');
+      const to = String(item.edge?._to ?? '');
+      if (from === clusterId && to) {
+        documentIds.add(to);
+      }
+      if (to === clusterId && from) {
+        documentIds.add(from);
+      }
+    });
+
+    if (documentIds.size === 0) {
+      return [];
+    }
+
+    return this.dedupeGraphResults(results.filter(item => {
+      const vertexId = String(item.vertex?._id ?? '');
+      const edgeFrom = String(item.edge?._from ?? '');
+      const edgeTo = String(item.edge?._to ?? '');
+      if (vertexId === clusterId || documentIds.has(vertexId)) {
+        return true;
+      }
+      if (edgeFrom === clusterId || edgeTo === clusterId || documentIds.has(edgeFrom) || documentIds.has(edgeTo)) {
+        return true;
+      }
+      return (item.path?.vertices ?? []).some(vertex => documentIds.has(String(vertex?._id ?? '')) || String(vertex?._id ?? '') === clusterId);
+    }));
+  }
+
+  private dedupeGraphResults(results: GraphResultItem[]): GraphResultItem[] {
+    const merged = new Map<string, GraphResultItem>();
+    results.forEach(item => {
+      const edgeId = item?.edge?._id ?? '';
+      const vertexId = item?.vertex?._id ?? '';
+      const key = `${edgeId}:${vertexId}:${item?.vertex?._key ?? ''}`;
+      if (!merged.has(key)) {
+        merged.set(key, item);
+      }
+    });
+    return Array.from(merged.values());
+  }
+
+  private mergeGraphBuilderResults(responseResults: GraphResultItem[][], requests: GraphSearchRequest[]): GraphResultItem[] {
+    if (responseResults.length === 0) {
+      return [];
+    }
+
+    let aggregate = responseResults[0] ?? [];
+    let aggregateDocumentIds = this.extractDocumentIdsFromGraphResults(aggregate);
+    for (let index = 1; index < responseResults.length; index++) {
+      const current = responseResults[index] ?? [];
+      const operator = requests[index]?.operator ?? '||';
+      if (operator !== '&&') {
+        aggregate = this.dedupeGraphResults([...aggregate, ...current]);
+        aggregateDocumentIds = this.unionSets(aggregateDocumentIds, this.extractDocumentIdsFromGraphResults(current));
+        continue;
+      }
+
+      const currentDocumentIds = this.extractDocumentIdsFromGraphResults(current);
+      if (aggregateDocumentIds.size === 0 || currentDocumentIds.size === 0) {
+        aggregate = [];
+        aggregateDocumentIds = new Set<string>();
+        break;
+      }
+
+      const sharedDocumentIds = this.intersectSets(aggregateDocumentIds, currentDocumentIds);
+      aggregate = this.dedupeGraphResults([...aggregate, ...current].filter(item => {
+        const itemDocumentIds = this.extractDocumentIdsFromGraphResult(item);
+        return itemDocumentIds.some(documentId => sharedDocumentIds.has(documentId));
+      }));
+      aggregateDocumentIds = sharedDocumentIds;
+    }
+
+    return this.dedupeGraphResults(aggregate);
+  }
+
+  private extractDocumentIdsFromGraphResults(results: GraphResultItem[]): Set<string> {
+    const ids = new Set<string>();
+    results.forEach(item => {
+      this.extractDocumentIdsFromGraphResult(item).forEach(id => ids.add(id));
+    });
+    return ids;
+  }
+
+  private extractDocumentIdsFromGraphResult(item: GraphResultItem): string[] {
+    const ids = new Set<string>();
+    const inspect = (vertex: any) => {
+      if (!vertex?._id) {
+        return;
+      }
+      if (String(vertex.type || '').toLowerCase() === 'document') {
+        ids.add(String(vertex._id));
+      }
+    };
+    inspect(item.vertex);
+    (item.path?.vertices ?? []).forEach(inspect);
+    return Array.from(ids);
+  }
+
+  private unionSets(first: Set<string>, second: Set<string>): Set<string> {
+    return new Set([...first, ...second]);
+  }
+
+  private intersectSets(first: Set<string>, second: Set<string>): Set<string> {
+    return new Set([...first].filter(item => second.has(item)));
+  }
+
   showContextMenu( node: ExtendedNode, pointerDom?: { x: number; y: number; } ) {
     const menu = document.getElementById('customContextMenu');
     if (!menu) {
@@ -469,6 +882,13 @@ export class GraphComponent implements OnInit, OnDestroy {
         left = containerRect ? (containerRect.left + bottomRightDom.x) : bottomRightDom.x;
         top = containerRect ? (containerRect.top + bottomRightDom.y) : bottomRightDom.y;
       }
+      this.contextMenuNodeId = node.id;
+      this.contextMenuNode = node;
+      this.contextCanExpand = this.canContextExpand();
+      this.contextCanCollapse = this.canContextCollapse();
+      this.contextShowOpenCti = this.showContextOpenCti();
+      this.contextShowOpenReport = this.showContextOpenReport();
+      this.changeDetector.detectChanges();
       const menuWidth = menu.offsetWidth || 256;
       const menuHeight = menu.offsetHeight || 260;
       const viewportPadding = 12;
@@ -487,12 +907,6 @@ export class GraphComponent implements OnInit, OnDestroy {
       menu.classList.remove('hidden');
       menu.setAttribute('data-left', String(this.normalizePositionValue(left)));
       menu.setAttribute('data-top', String(this.normalizePositionValue(top)));
-      this.contextMenuNodeId = node.id;
-      this.contextMenuNode = node;
-      this.contextCanExpand = this.canContextExpand();
-      this.contextCanCollapse = this.canContextCollapse();
-      this.contextShowOpenCti = this.showContextOpenCti();
-      this.contextShowOpenReport = this.showContextOpenReport();
       if (node.color) {
         this.orignalColor = node.color;
       }
@@ -524,6 +938,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.contextCanCollapse = false;
     this.contextShowOpenCti = false;
     this.contextShowOpenReport = false;
+    this.changeDetector.detectChanges();
   }
 
   private normalizePositionValue(rawValue: number): number {
@@ -571,20 +986,28 @@ export class GraphComponent implements OnInit, OnDestroy {
     return newNodes;
   }
 
-  private createGroupNodeSvg(count: number, isExpanded = false, clusterLabel = 'CTI Cluster'): string {
-    const borderColor = isExpanded ? '#facc15' : '#7dd3fc';
+  private createGroupNodeSvg(count: number, isExpanded = false, clusterLabel = 'CTI Cluster', clusterKey = ''): string {
+    const paletteColor = this.clusterPalette[clusterKey]?.color ?? '#7dd3fc';
+    const borderColor = isExpanded ? '#facc15' : paletteColor;
     const subtitle = clusterLabel.replace(/&/g, '&amp;').slice(0, 20);
+    const initials = subtitle
+      .split(/\s+/)
+      .map(part => part.charAt(0))
+      .join('')
+      .slice(0, 3)
+      .toUpperCase();
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
     <defs>
       <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#0c4a6e" stop-opacity="1" />
+        <stop offset="0%" stop-color="${paletteColor}" stop-opacity="0.95" />
         <stop offset="100%" stop-color="#1e293b" stop-opacity="1" />
       </linearGradient>
     </defs>
     <g>
       <circle cx="80" cy="80" r="74" fill="url(#grad1)" stroke="${borderColor}" stroke-width="6" />
-      <text x="80" y="72" dominant-baseline="middle" font-family="'Inter', sans-serif" text-anchor="middle" font-size="30" font-weight="700" fill="#f1f5f9">${count}</text>
-      <text x="80" y="98" dominant-baseline="middle" font-family="'Inter', sans-serif" text-anchor="middle" font-size="10" font-weight="600" fill="#cbd5e1">${subtitle}</text>
+      <text x="80" y="54" dominant-baseline="middle" font-family="'Inter', sans-serif" text-anchor="middle" font-size="18" font-weight="800" fill="#f8fafc">${initials}</text>
+      <text x="80" y="85" dominant-baseline="middle" font-family="'Inter', sans-serif" text-anchor="middle" font-size="32" font-weight="800" fill="#f1f5f9">${count}</text>
+      <text x="80" y="112" dominant-baseline="middle" font-family="'Inter', sans-serif" text-anchor="middle" font-size="10" font-weight="700" fill="#cbd5e1">${subtitle}</text>
     </g>
   </svg>`;
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
@@ -592,13 +1015,14 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   private updateGroupNodeVisual(nodeId: string, count: number, isExpanded: boolean): void {
     const groupNode = this.nodeSet.get(nodeId) as ExtendedNode | null;
+    const clusterKey = this.getClusterKeyFromNodeId(nodeId);
     const clusterLabel = groupNode?.title
       ? String(groupNode.title).split('(')[0].trim()
-      : `${this.toTitleCase(String(nodeId).split('/').pop() ?? 'CTI')} Cluster`;
+      : `${this.clusterPalette[clusterKey]?.label ?? this.toTitleCase(String(nodeId).split('/').pop() ?? 'CTI')} Cluster`;
     this.nodeSet.update({
       id: nodeId,
       shape: 'circularImage',
-      image: this.createGroupNodeSvg(count, isExpanded, clusterLabel),
+      image: this.createGroupNodeSvg(count, isExpanded, clusterLabel, clusterKey),
       size: 40,
       borderWidth: 0,
       label: ''
@@ -779,7 +1203,17 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (!node) {
       return false;
     }
-    return !this.isClusterRootNode(String(node.id));
+    return this.isReportNode(node);
+  }
+
+  private isReportNode(node: ExtendedNode | null): boolean {
+    if (!node?.id) {
+      return false;
+    }
+    const nodeId = String(node.id);
+    const nodeType = String(node.nodeType || this.nodeTypeById[nodeId] || '').toLowerCase();
+    const nodeClass = String(node.nodeClass || '').toLowerCase();
+    return nodeType === 'document' || nodeType === 'report' || nodeClass === 'report';
   }
 
   openCTI() {
@@ -809,47 +1243,83 @@ export class GraphComponent implements OnInit, OnDestroy {
   (edge.to === nodeId && edge.from === clusterId));
   }
 
+  private normalizeReportCategory(category: string): string {
+    const normalized = category.trim().toLowerCase();
+    const aliases: Record<string, string> = {
+      breach: 'leak',
+      leaks: 'leak',
+      strategic: 'general',
+      telegram: 'chat',
+      chats: 'chat'
+    };
+    return aliases[normalized] || normalized;
+  }
+
   private getReportCategory(nodeId: string): string {
+    const nodeClusterId = this.normalizeReportCategory(String(this.contextMenuNode?.clusterId || ''));
+    if (nodeClusterId && this.clusterPalette[nodeClusterId]) {
+      return nodeClusterId;
+    }
+
     const checks: [
       string,
       string
   ][] = [
     ['general', 'cti_vertices/general'],
     ['leak', 'cti_vertices/leak'],
+    ['tracking', 'cti_vertices/tracking'],
+    ['news', 'cti_vertices/news'],
     ['defacement', 'cti_vertices/defacement'],
     ['exploit', 'cti_vertices/exploit'],
-    ['chat', 'cti_vertices/chat']
+    ['chat', 'cti_vertices/chat'],
+    ['social', 'cti_vertices/social'],
+    ['apt', 'cti_vertices/apt'],
+    ['malware', 'cti_vertices/malware']
   ];
     for (const [cat, clusterId] of checks) {
       if (this.hasClusterEdge(nodeId, clusterId)) {
         return cat;
       }
     }
+    const connectedCluster = Array.from(this.getConnectedClusterKeys(nodeId))
+      .find(clusterKey => checks.some(([cat]) => cat === clusterKey));
+    if (connectedCluster) {
+      return this.normalizeReportCategory(connectedCluster);
+    }
+    if (this.selectedType === 'cluster' && this.singleInput && this.singleInput !== 'all') {
+      return this.normalizeReportCategory(this.singleInput);
+    }
     return '';
   }
 
+  private getReportPathForCategory(category: string): string | null {
+    const pathByCategory: Record<string, string> = {
+      apt: '/dashboard/apt-intel/apt',
+      chat: '/dashboard/social/chat/all',
+      defacement: '/dashboard/defacement/all',
+      exploit: '/dashboard/exploit/all',
+      general: '/dashboard/strategic/all',
+      leak: '/dashboard/breach/all',
+      malware: '/dashboard/apt-intel/malware',
+      news: '/dashboard/feed/news',
+      social: '/dashboard/social/all',
+      tracking: '/dashboard/breach/tracking'
+    };
+    return pathByCategory[this.normalizeReportCategory(category)] || null;
+  }
+
   viewReport() {
-    this.hideContextMenu();
     const nodeId = this.contextMenuNodeId;
     const parts = nodeId.split('/');
-    const singleInput = parts[parts.length - 1];
+    const singleInput = this.contextMenuNode?.docId || parts[parts.length - 1];
     const category = this.getReportCategory(nodeId);
-    const open = (path: string) => this.proxied_resource.open(`${window.location.origin}${path}/${singleInput}`);
-    if (category === 'leak') {
-      open('/dashboard/breach/all');
+    const reportPath = this.getReportPathForCategory(category);
+    if (!singleInput || !reportPath) {
+      this.hideContextMenu();
+      return;
     }
-    else if (category === 'defacement') {
-      open('/dashboard/defacement/archive');
-    }
-    else if (category === 'general') {
-      open('/dashboard/strategic/all');
-    }
-    else if (category === 'chat') {
-      open('/dashboard/social/telegram');
-    }
-    else if (category === 'exploit') {
-      open('/dashboard/exploit/cve');
-    }
+    const encodedInput = encodeURIComponent(singleInput);
+    this.proxied_resource.open(`${window.location.origin}${reportPath}/${encodedInput}`);
     this.hideContextMenu();
   }
 
@@ -871,15 +1341,6 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.onPhysicsToggled(!this.physicsEnabled);
   }
 
-  onNodeSearchChange(value: string): void {
-    this.nodeSearchText = value ?? '';
-    this.applyNodeSearchHighlight();
-  }
-
-  onNodeSearchSubmitted(): void {
-    this.applyNodeSearchHighlight();
-  }
-
   toggleExpandCollapseAll(): void {
     this.expandEnabled = !this.expandEnabled;
     this.nodeSet.get().forEach(node => {
@@ -896,7 +1357,6 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
     });
     this.captureOriginalNodeColors();
-    this.applyNodeSearchHighlight();
   }
 
   onSidebarApply(filters: CtiGraphFilters): void {
@@ -904,15 +1364,19 @@ export class GraphComponent implements OnInit, OnDestroy {
       this.pendingFilters = { ...filters };
       return;
     }
-    this.selectedType = filters.selectedType;
-    this.singleInput = filters.singleInput;
-    this.propertyType = filters.propertyType;
-    this.propertyValue = filters.propertyValue;
-    this.maxEdge = filters.maxEdge;
-    this.maxDepth = filters.maxDepth;
+    this.applyFilterValues(filters);
     queueMicrotask(() => {
       this.showMaxEdgeNotice = Number(this.maxEdge) > 50;
     });
+
+    const nextQuerySignature = this.buildQuerySignature(filters);
+    const shouldReload = this.lastAppliedQuerySignature !== nextQuerySignature || !this.network;
+    if (!shouldReload) {
+      this.applyGraphViewFilters();
+      return;
+    }
+
+    this.lastAppliedQuerySignature = nextQuerySignature;
     if (filters.selectedType === 'property' && filters.propertyType && filters.propertyValue) {
       this.loadGraphByNode(this.selectedType, filters.propertyType, filters.propertyValue, this.maxEdge.toString(), this.maxDepth.toString());
     }
@@ -943,7 +1407,29 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.applyPhysicsAutoDisableIfNeeded();
     this.attachNetworkHandlers();
     this.applyPropertyHighlights();
-    this.applyNodeSearchHighlight();
+  }
+
+  private applyGraphViewFilters(): void {
+    if (!this.nodeSet || !this.edgeSet) {
+      return;
+    }
+    this.hideContextMenu();
+    this.highlightedNodeId = null;
+    const { visibleNodes, visibleEdges } = this.buildVisibleSets();
+    this.nodeSet.clear();
+    this.edgeSet.clear();
+    if (visibleNodes.length > 0) {
+      this.nodeSet.add(visibleNodes);
+    }
+    if (visibleEdges.length > 0) {
+      this.edgeSet.add(visibleEdges);
+    }
+    this.originalNodeState.clear();
+    this.captureOriginalNodeColors();
+    this.applyPropertyHighlights();
+    if (this.network) {
+      this.network.redraw();
+    }
   }
 
   private buildEdgesAndEdgeMap(data: GraphResultItem[]): Record<string, number> {
@@ -953,17 +1439,26 @@ export class GraphComponent implements OnInit, OnDestroy {
       if (!e?._from || !e._to) {
         return;
       }
+      const edgeTitle = this.getEdgeTitle(e);
       this.rawEdges.push({
         id: e._id || `${e._from}->${e._to}`,
         from: e._from,
         to: e._to,
-        arrows: '',
+        arrows: 'to',
         color: { color: this.edgeBaseColor },
+        title: edgeTitle,
         width: 1.5
       });
       edgeMap[e._from] = (edgeMap[e._from] || 0) + 1;
+      edgeMap[e._to] = (edgeMap[e._to] || 0) + 1;
     });
     return edgeMap;
+  }
+
+  private getEdgeTitle(edge: GraphResultItem['edge']): string {
+    const label = edge?.label || edge?.edge_type || edge?.relationship_type || edge?.type || 'Connection';
+    const confidence = typeof edge?.confidence === 'number' ? ` (${Math.round(edge.confidence * 100)}%)` : '';
+    return `${String(label).replace(/_/g, ' ')}${confidence}`;
   }
 
   private toTitleCase(input: string): string {
@@ -975,7 +1470,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (text.length <= this.maxNodeLabelLength) {
       return text;
     }
-    return `${text.slice(0, this.maxNodeLabelLength - 1)}…`;
+    return `${text.slice(0, this.maxNodeLabelLength - 3)}...`;
   }
 
   private prettifyLabel(rawLabel: string): string {
@@ -990,9 +1485,22 @@ export class GraphComponent implements OnInit, OnDestroy {
     return this.truncateLabel(`${key}: ${value}`);
   }
 
-  private normalizeLabel(v: any): string {
+  private normalizeFullLabel(v: any): string {
+    const preferred = v?.display_value ?? v?.label ?? v?.title ?? v?.value;
+    if (preferred) {
+      return String(preferred).replace(/_/g, ' ').trim();
+    }
     const rawLabel = String(v?._key ?? v?._id ?? '');
-    return this.prettifyLabel(rawLabel);
+    const base = rawLabel.split('/').pop() ?? rawLabel;
+    return base.replace(/^m_/, '').replace(/_/g, ' ').trim();
+  }
+
+  private normalizeLabel(v: any): string {
+    const fullLabel = this.normalizeFullLabel(v);
+    if (fullLabel) {
+      return this.truncateLabel(fullLabel);
+    }
+    return this.prettifyLabel(String(v?._key ?? v?._id ?? ''));
   }
 
   private extractPropertyKey(vertex: any): string | null {
@@ -1013,17 +1521,103 @@ export class GraphComponent implements OnInit, OnDestroy {
     return normalized;
   }
 
-  private getBorderColorForType(type: string): string {
+  private getVisualNodeCategory(node: ExtendedNode): string {
+    const type = String(node.nodeType || '').toLowerCase();
+    if (type === 'cluster' || this.isClusterRootNode(String(node.id ?? ''))) {
+      return 'cluster';
+    }
+    if (type === 'document') {
+      return 'document';
+    }
+    return 'property';
+  }
+
+  private getClusterKeyFromNodeId(nodeId: string): string {
+    if (!nodeId.startsWith(this.clusterNodePrefix)) {
+      return '';
+    }
+    return nodeId.slice(this.clusterNodePrefix.length).toLowerCase();
+  }
+
+  private getConnectedClusterKeys(nodeId: string): Set<string> {
+    const clusters = new Set<string>();
+    const addCluster = (candidateId: string) => {
+      const clusterKey = this.getClusterKeyFromNodeId(candidateId);
+      if (clusterKey) {
+        clusters.add(clusterKey);
+      }
+    };
+    this.rawEdges.forEach(edge => {
+      const from = String(edge.from ?? '');
+      const to = String(edge.to ?? '');
+      if (from === nodeId) {
+        addCluster(to);
+      }
+      else if (to === nodeId) {
+        addCluster(from);
+      }
+    });
+    if (clusters.size > 0) {
+      return clusters;
+    }
+
+    const adjacent = new Set<string>();
+    this.rawEdges.forEach(edge => {
+      const from = String(edge.from ?? '');
+      const to = String(edge.to ?? '');
+      if (from === nodeId) {
+        adjacent.add(to);
+      }
+      else if (to === nodeId) {
+        adjacent.add(from);
+      }
+    });
+    adjacent.forEach(adjacentId => {
+      this.rawEdges.forEach(edge => {
+        const from = String(edge.from ?? '');
+        const to = String(edge.to ?? '');
+        if (from === adjacentId) {
+          addCluster(to);
+        }
+        else if (to === adjacentId) {
+          addCluster(from);
+        }
+      });
+    });
+    return clusters;
+  }
+
+  private getNodeAccentColor(node: ExtendedNode, type: string): string {
     if (type === 'cluster') {
-      return this.nodeClusterBorder;
+      const clusterKey = this.getClusterKeyFromNodeId(String(node.id ?? ''));
+      return this.clusterPalette[clusterKey]?.color ?? this.nodeClusterBorder;
     }
     if (type === 'document') {
       return this.nodeDocumentBorder;
     }
-    if (type === 'property') {
-      return this.nodePropertyBorder;
+    const classKey = String(node.nodeClass || '').toLowerCase();
+    return this.propertyClassPalette[classKey] ?? this.nodePropertyBorder;
+  }
+
+  private getNodeSize(type: string, degree: number): number {
+    const normalizedDegree = Math.min(Math.max(degree, 0), 14);
+    const degreeBonus = Math.round(normalizedDegree * 0.7);
+    if (type === 'cluster') {
+      return 44 + degreeBonus;
     }
-    return this.nodeSecondaryBorder;
+    if (type === 'document') {
+      return 34 + degreeBonus;
+    }
+    return 30 + degreeBonus;
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   private getIconNameForNode(node: ExtendedNode, type: string): string {
@@ -1036,13 +1630,13 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (type === 'document') {
       return this.iconMap['document'];
     }
-    if (type !== 'property') {
-      return this.iconMap['property'];
-    }
     const rawKey = (node.propertyKey ?? '').toLowerCase();
     const labelKey = this.extractPropertyKeyFromLabel(node.label?.toString()) ?? '';
-    const key = rawKey || labelKey;
-    const tokens = [key, key.replace(/^m_/, ''), key.replace(/_/g, ' ')];
+    const typeKey = (type ?? '').toLowerCase();
+    const classKey = (node.nodeClass ?? '').toLowerCase();
+    const key = rawKey || typeKey || classKey || labelKey;
+    const tokens = [key, rawKey, typeKey, classKey, labelKey, key.replace(/^m_/, ''), key.replace(/_/g, ' ')]
+      .filter(Boolean);
     for (const token of tokens) {
       for (const [needle, icon] of Object.entries(this.iconMap)) {
         if (needle === 'cluster' || needle === 'document' || needle === 'property') {
@@ -1056,13 +1650,39 @@ export class GraphComponent implements OnInit, OnDestroy {
     return this.iconMap['property'];
   }
 
-  private buildIconSvg(iconName: string, borderColor: string): string | null {
-    const def = BOOTSTRAP_ICON_PATHS[iconName];
-    if (!def) {
-      return null;
+  private getNodeAcronym(node: ExtendedNode): string {
+    const clusterKey = this.getClusterKeyFromNodeId(String(node.id ?? ''));
+    if (clusterKey) {
+      const label = this.clusterPalette[clusterKey]?.label ?? clusterKey;
+      return label
+        .split(/\s+/)
+        .map(part => part.charAt(0))
+        .join('')
+        .slice(0, 3)
+        .toUpperCase();
     }
-    const paths = def.paths.map(d => `<path d="${d}" fill="#e2e8f0"/>`).join('');
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${def.viewBox}"><circle cx="8" cy="8" r="7.5" fill="${this.nodeFillColor}" stroke="${borderColor}" stroke-width="0.5"/><g transform="translate(4 4) scale(0.5)">${paths}</g></svg>`;
+    const source = String(node.propertyKey || node.nodeClass || node.rawLabel || node.label || '');
+    const cleaned = source.replace(/^m_/, '').replace(/[_:./-]+/g, ' ').trim();
+    if (!cleaned) {
+      return '?';
+    }
+    const parts = cleaned.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    return parts.map(part => part.charAt(0)).join('').slice(0, 3).toUpperCase();
+  }
+
+  private buildIconSvg(iconName: string, borderColor: string, node?: ExtendedNode): string | null {
+    const def = BOOTSTRAP_ICON_PATHS[iconName];
+    const iconContent = def
+      ? `<g transform="translate(4 4) scale(0.5)">${def.paths.map(d => `<path d="${d}" fill="#f8fafc"/>`).join('')}</g>`
+      : `<text x="8" y="9" dominant-baseline="middle" font-family="'Inter', sans-serif" text-anchor="middle" font-size="5.3" font-weight="800" fill="#f8fafc">${this.escapeHtml(node ? this.getNodeAcronym(node) : '?')}</text>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="7.5" fill="${this.nodeFillColor}" stroke="${borderColor}" stroke-width="0.75"/>
+      <circle cx="8" cy="8" r="5.9" fill="${borderColor}" fill-opacity="0.18"/>
+      ${iconContent}
+    </svg>`;
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   }
 
@@ -1070,13 +1690,28 @@ export class GraphComponent implements OnInit, OnDestroy {
     const rawNodeMap = new Map<string, ExtendedNode>();
     const put = (vertex: any, color: string) => {
       const id = vertex?._id;
-      if (!id || rawNodeMap.has(id)) {
+      if (!id) {
+        return;
+      }
+      const rawLabel = this.normalizeFullLabel(vertex);
+      const existingNode = rawNodeMap.get(id);
+      if (existingNode) {
+        existingNode.nodeClass = existingNode.nodeClass || vertex?.node_class;
+        existingNode.clusterId = existingNode.clusterId || vertex?.cluster_id;
+        existingNode.docId = existingNode.docId || vertex?.doc_id || vertex?.m_document_id || vertex?._key;
+        existingNode.rawLabel = existingNode.rawLabel || rawLabel;
+        existingNode.hiddenByDefault = existingNode.hiddenByDefault || !!vertex?.hidden_by_default;
         return;
       }
       rawNodeMap.set(id, {
         id,
         label: this.normalizeLabel(vertex),
+        rawLabel,
+        nodeClass: vertex?.node_class,
+        clusterId: vertex?.cluster_id,
+        docId: vertex?.doc_id || vertex?.m_document_id || vertex?._key,
         propertyKey: this.extractPropertyKey(vertex),
+        hiddenByDefault: !!vertex?.hidden_by_default,
         color: {
           border: color,
           background: this.nodeFillColor,
@@ -1119,6 +1754,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       const nodeType = nodeTypeMap[nodeId] || '';
       const isClusterNode = nodeType === 'cluster';
       const isClusterRootNode = this.isClusterRootNode(nodeId);
+      const clusterKey = this.getClusterKeyFromNodeId(nodeId);
       const clusterDocumentIds = isClusterRootNode ? this.getClusterDocumentIds(nodeId) : [];
       node.nodeType = nodeType;
       if (!node.propertyKey) {
@@ -1131,20 +1767,23 @@ export class GraphComponent implements OnInit, OnDestroy {
       const isGroupable = degree > 2 && isClusterRootNode && clusterDocumentIds.length > 5;
       if (isGroupable) {
         const subNodes = this.getClusterCollapseTargets(nodeId);
+        const clusterLabel = `${this.clusterPalette[clusterKey]?.label ?? this.toTitleCase(String(nodeId).split('/').pop() ?? 'CTI')} Cluster`;
         this.groupInfo[nodeId] = subNodes;
         this.groupParentByGroupId[nodeId] = nodeId;
         nodes.push({
           id: node.id,
           label: '',
-          title: `${this.toTitleCase(String(nodeId).split('/').pop() ?? 'CTI')} Cluster (${clusterDocumentIds.length} nodes)`,
+          rawLabel: clusterLabel,
+          nodeType,
+          degree,
           color: { border: 'transparent', background: 'transparent' },
           shape: 'circularImage',
           isGroup: true,
           physics: false,
           subNodes,
           font: { size: 14, color: this.getNodeLabelColor(), strokeWidth: 1 },
-          size: 40,
-          image: this.createGroupNodeSvg(clusterDocumentIds.length, false, `${this.toTitleCase(String(nodeId).split('/').pop() ?? 'CTI')} Cluster`),
+          size: 44,
+          image: this.createGroupNodeSvg(clusterDocumentIds.length, false, clusterLabel, clusterKey),
           borderWidth: 0
         });
         this.groupedSubNodesByParent[nodeId] = new Set(subNodes);
@@ -1154,13 +1793,14 @@ export class GraphComponent implements OnInit, OnDestroy {
       if (isClusterNode) {
         node.physics = false;
       }
+      node.degree = degree;
       const iconName = this.getIconNameForNode(node, nodeType);
-      const borderColor = this.getBorderColorForType(nodeType);
-      const icon = this.buildIconSvg(iconName, borderColor);
+      const borderColor = this.getNodeAccentColor(node, nodeType);
+      const icon = this.buildIconSvg(iconName, borderColor, node);
       if (icon) {
         node.shape = 'circularImage';
         node.image = icon;
-        node.size = 40;
+        node.size = this.getNodeSize(nodeType, degree);
         node.borderWidth = 0;
       }
       nodes.push(node);
@@ -1169,12 +1809,14 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private applyNonGroupNodeColor(node: ExtendedNode, isClusterNode: boolean, edgeMap: Record<string, number>): void {
+    const visualType = this.getVisualNodeCategory(node);
+    const accentColor = this.getNodeAccentColor(node, visualType);
     if (isClusterNode) {
       node.color = {
-        border: this.nodeClusterBorder,
+        border: accentColor,
         background: this.nodeFillColor,
         highlight: { border: this.nodeFocusColor, background: this.nodeFillColor },
-        hover: { border: '#fde68a', background: this.nodeFillColor }
+        hover: { border: accentColor, background: this.nodeFillColor }
       };
       return;
     }
@@ -1184,10 +1826,10 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     if (this.selectedType == 'cluster') {
       node.color = {
-        border: this.nodeClusterBorder,
+        border: accentColor,
         background: this.nodeFillColor,
         highlight: { border: this.nodeFocusColor, background: this.nodeFillColor },
-        hover: { border: '#fde68a', background: this.nodeFillColor }
+        hover: { border: accentColor, background: this.nodeFillColor }
       };
     }
     else if (this.selectedType == 'document') {
@@ -1208,10 +1850,10 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     else {
       node.color = {
-        border: this.nodePropertyBorder,
+        border: accentColor,
         background: this.nodeFillColor,
         highlight: { border: this.nodeFocusColor, background: this.nodeFillColor },
-        hover: { border: '#7dd3fc', background: this.nodeFillColor }
+        hover: { border: accentColor, background: this.nodeFillColor }
       };
     }
   }
@@ -1222,46 +1864,90 @@ export class GraphComponent implements OnInit, OnDestroy {
   } {
     const groupedSubNodeIds = new Set(Object.values(this.groupInfo).flat());
     const visibleNodes = this.rawNodes.filter(node => node.isGroup || !groupedSubNodeIds.has(node.id as string));
+    const visibleNodeIds = new Set(visibleNodes.map(node => String(node.id)));
     const hiddenToParent = new Map<string, string>();
     Object.entries(this.groupedSubNodesByParent).forEach(([parentId, subSet]) => {
+      if (!visibleNodeIds.has(parentId)) {
+        return;
+      }
       subSet.forEach(subId => hiddenToParent.set(subId, parentId));
     });
-    const visibleEdges = this.rawEdges.filter(edge => {
-      const fromId = String(edge.from ?? '');
-      const toId = String(edge.to ?? '');
-      return !hiddenToParent.has(fromId) && !hiddenToParent.has(toId);
-    });
-    const aggregateEdges = new Map<string, Edge>();
+    const visibleEdgesById = new Map<string, Edge>();
     this.rawEdges.forEach(edge => {
-      const fromId = String(edge.from ?? '');
-      const toId = String(edge.to ?? '');
-      const parentFrom = hiddenToParent.get(fromId);
-      const parentTo = hiddenToParent.get(toId);
-      if (!parentFrom && !parentTo) {
+      const rawFrom = String(edge.from ?? '');
+      const rawTo = String(edge.to ?? '');
+      const from = hiddenToParent.get(rawFrom) ?? rawFrom;
+      const to = hiddenToParent.get(rawTo) ?? rawTo;
+      if (from === to || !visibleNodeIds.has(from) || !visibleNodeIds.has(to)) {
         return;
       }
-      const aggFrom = parentFrom ?? fromId;
-      const aggTo = parentTo ?? toId;
-      if (aggFrom === aggTo) {
-        return;
-      }
-      if (hiddenToParent.has(aggFrom) || hiddenToParent.has(aggTo)) {
-        return;
-      }
-      const id = `${aggFrom}->${aggTo}`;
-      if (!aggregateEdges.has(id)) {
-        aggregateEdges.set(id, {
+      const isAggregated = from !== rawFrom || to !== rawTo;
+      const id = isAggregated ? `${from}->${to}` : String(edge.id ?? `${from}->${to}`);
+      if (!visibleEdgesById.has(id)) {
+        visibleEdgesById.set(id, {
+          ...edge,
           id,
-          from: aggFrom,
-          to: aggTo,
-          arrows: '',
+          from,
+          to,
+          arrows: 'to',
           color: { color: this.edgeBaseColor },
-          width: 1.5
+          title: isAggregated ? 'Aggregated connection' : edge.title,
+          width: edge.width ?? 1.5
         });
       }
     });
-    aggregateEdges.forEach(edge => visibleEdges.push(edge));
+
+    const visibleEdges = Array.from(visibleEdgesById.values());
+    this.updateLegendState(visibleNodes, visibleEdges);
     return { visibleNodes, visibleEdges };
+  }
+
+  private updateLegendState(visibleNodes: ExtendedNode[], visibleEdges: Edge[]): void {
+    const counts: Record<string, number> = {
+      cluster: 0,
+      document: 0,
+      property: 0
+    };
+    const clusterCounts: Record<string, number> = {};
+
+    visibleNodes.forEach(node => {
+      const category = this.getVisualNodeCategory(node);
+      counts[category] = (counts[category] ?? 0) + 1;
+      if (category === 'cluster') {
+        const clusterKey = this.getClusterKeyFromNodeId(String(node.id ?? ''));
+        if (clusterKey) {
+          clusterCounts[clusterKey] = (clusterCounts[clusterKey] ?? 0) + 1;
+        }
+        return;
+      }
+      this.getConnectedClusterKeys(String(node.id ?? '')).forEach(clusterKey => {
+        clusterCounts[clusterKey] = (clusterCounts[clusterKey] ?? 0) + 1;
+      });
+    });
+
+    this.legendItems = [
+      { key: 'cluster', label: 'Clusters', color: this.nodeClusterBorder, swatchClass: 'h-3.5 w-3.5 shrink-0 rounded-full border-2 border-amber-500 bg-[var(--color-blue-720)]', count: counts['cluster'] ?? 0 },
+      { key: 'document', label: 'Documents', color: this.nodeDocumentBorder, swatchClass: 'h-3.5 w-3.5 shrink-0 rounded-full border-2 border-orange-500 bg-[var(--color-blue-720)]', count: counts['document'] ?? 0 },
+      { key: 'property', label: 'Entities', color: this.nodePropertyBorder, swatchClass: 'h-3.5 w-3.5 shrink-0 rounded-full border-2 border-sky-400 bg-[var(--color-blue-720)]', count: counts['property'] ?? 0 }
+    ];
+
+    this.clusterLegendItems = Object.entries(this.clusterPalette)
+      .map(([key, value]) => ({
+        key,
+        label: value.label,
+        color: value.color,
+        swatchClass: value.swatchClass,
+        count: clusterCounts[key] ?? 0
+      }))
+      .filter(item => item.count > 0);
+
+    this.graphStats = {
+      visibleNodes: visibleNodes.length,
+      totalNodes: this.rawNodes.length,
+      visibleEdges: visibleEdges.length,
+      totalEdges: this.rawEdges.length,
+      hiddenNodes: Math.max(0, this.rawNodes.length - visibleNodes.length)
+    };
   }
 
   private initNetwork(): void {
@@ -1287,7 +1973,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         minVelocity: 0.75
       },
       edges: {
-        arrows: { to: { enabled: false, scaleFactor: 1 } },
+        arrows: { to: { enabled: true, scaleFactor: 0.65 } },
         width: 1.5,
         smooth: { enabled: true, type: 'continuous', roundness: 0.5 },
         color: {
@@ -1393,12 +2079,13 @@ export class GraphComponent implements OnInit, OnDestroy {
     const nodeId = String(rawNodeId);
     const node = this.nodeSet.get(nodeId) as ExtendedNode;
     const isMainClusterNode = this.isClusterRootNode(nodeId);
+    const isReportNode = this.isReportNode(node);
     const hasClusterConnection = this.rawEdges.some(edge => (edge.from === node?.id && this.isClusterRootNode(String(edge.to))) ||
   (edge.to === node?.id && this.isClusterRootNode(String(edge.from))));
     if (!node) {
       return;
     }
-    if (!isMainClusterNode && !hasClusterConnection && !node.isGroup) {
+    if (!isMainClusterNode && !hasClusterConnection && !node.isGroup && !isReportNode) {
       return;
     }
     this.showContextMenu(node, pointer);
@@ -1634,69 +2321,6 @@ export class GraphComponent implements OnInit, OnDestroy {
         image: (node as any).image
       });
     });
-  }
-
-  private restoreNodeColors(): void {
-    const updates = this.nodeSet.get().map(node => ({
-      id: node.id!,
-      color: this.originalNodeState.get(String(node.id))?.color ?? node.color,
-      borderWidth: this.originalNodeState.get(String(node.id))?.borderWidth ?? (node).borderWidth,
-      image: this.originalNodeState.get(String(node.id))?.image ?? (node).image
-    }));
-    if (updates.length > 0) {
-      this.nodeSet.update(updates);
-    }
-  }
-
-  private applyNodeSearchHighlight(): void {
-    if (!this.nodeSet) {
-      return;
-    }
-    const needle = this.nodeSearchText.trim().toLowerCase();
-    this.searchMatchedCount = 0;
-    this.restoreNodeColors();
-    if (!needle) {
-      return;
-    }
-    const updates = this.nodeSet.get()
-      .filter(node => {
-        const label = String(node.label ?? '').toLowerCase();
-        const id = String(node.id ?? '').toLowerCase();
-        return label.includes(needle) || id.includes(needle);
-      })
-      .map(node => {
-        const nodeState = this.originalNodeState.get(String(node.id));
-        const originalColor = nodeState?.color ?? node.color;
-        const highlightedColor = typeof originalColor === 'object' && originalColor !== null
-          ? {
-            ...(originalColor as any),
-            border: '#facc15',
-            background: '#facc15',
-            highlight: { border: '#facc15', background: '#facc15' },
-            hover: { border: '#facc15', background: '#facc15' }
-          }
-          : {
-            border: '#facc15',
-            background: '#facc15',
-            highlight: { border: '#facc15', background: '#facc15' },
-            hover: { border: '#facc15', background: '#facc15' }
-          };
-        const baseBorderWidth = nodeState?.borderWidth ?? ((node).borderWidth ?? 2);
-        const selectedBorderWidth = nodeState?.borderWidthSelected ?? ((node).borderWidthSelected ?? (baseBorderWidth + 2));
-        const extNode = node as ExtendedNode;
-        const iconName = this.getIconNameForNode(extNode, extNode.nodeType || '');
-        const yellowIcon = this.buildIconSvg(iconName, '#facc15');
-        return {
-          id: node.id!,
-          color: highlightedColor,
-          borderWidth: selectedBorderWidth,
-          image: yellowIcon ?? (node).image
-        };
-      });
-    this.searchMatchedCount = updates.length;
-    if (updates.length > 0) {
-      this.nodeSet.update(updates);
-    }
   }
 }
 const BOOTSTRAP_ICON_PATHS: Record<string, {

@@ -5,9 +5,10 @@
         <app-cti-sidebar
           class="flex flex-shrink-0 flex-col overflow-hidden border-r border-[#ffffff12] bg-[#172235]"
           [filters]="activeSidebarFilters"
+          [stats]="graphStats"
+          [legendItems]="legendItems"
+          [clusterLegendItems]="clusterLegendItems"
           [collapsed]="activeSidebarCollapsed"
-          (filtersChanged)="onSidebarFiltersChanged($event)"
-          (filtersApplied)="onSidebarApply($event)"
           (collapsedChange)="onSidebarCollapsedChange($event)">
         </app-cti-sidebar>
 
@@ -30,45 +31,102 @@
           </div>
 
           <div class="ui-social-dashboard-body ui-dashboard-grid-bg flex min-h-0 flex-1 flex-col overflow-hidden">
-            <div class="flex-shrink-0 py-4">
-              <div class="w-full px-4">
-                <div class="flex w-full flex-wrap items-center gap-2">
-                  <app-graph-toolbar
-                    class="min-w-[280px] flex-1"
-                    [applyOuterPadding]="false"
-                    [searchTerm]="nodeSearchText"
-                    [isSearchDisabled]="nodeSearchText.trim().length === 0"
-                    [searchPlaceholder]="('Search nodes to highlight...') | translate"
-                    [searchActionLabel]="('Search') | translate"
-                    [showSearchActionButton]="true"
-                    [showClearButton]="true"
-                    [showViewModeToggle]="false"
-                    [actionGroupVariant]="'actions'"
-                    [isPhysicsEnabled]="physicsEnabled"
-                    (searchChanged)="onNodeSearchChange($event)"
-                    (searchSubmitted)="onNodeSearchSubmitted()"
-                    (clearSearchClicked)="onNodeSearchChange('')"
-                    (physicsToggled)="togglePhysics()">
-                    <app-expand-toggle-button toolbarExtraActions [isExpanded]="expandEnabled" (toggled)="toggleExpandCollapseAll()"></app-expand-toggle-button>
-                  </app-graph-toolbar>
+            <div class="flex-shrink-0 border-b border-[var(--color-border)] bg-[var(--color-blue-760)] px-4 py-3">
+              <div class="flex w-full flex-wrap items-center gap-3">
+                @if (!graphSearchAdvancedMode) {
+                  <div class="flex max-w-full flex-nowrap gap-2 overflow-x-auto whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [mask-image:linear-gradient(to_right,black_0%,black_92%,transparent_100%)] [&::-webkit-scrollbar]:hidden">
+                    @for (option of primaryGraphSearchOptions; track option.key) {
+                      <button type="button" (click)="setGraphSearchOption(option.key)" [attr.data-testid]="'cti-graph-search-chip-' + option.key" [class]="activeGraphSearchKey === option.key ? 'cursor-pointer rounded-full border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-1.5 text-[12px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-colors' : 'cursor-pointer rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-1.5 text-[12px] font-semibold text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]'">
+                        {{ option.label | translate }}
+                      </button>
+                    }
+                  </div>
+                }
 
-                  <button data-testid="cti-export-report" type="button" (click)="openReportExportModal()" class="ml-auto inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)] px-3 text-xs font-semibold text-[var(--color-text3)] transition-colors duration-300 hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-45" [attr.aria-label]="'Export Report' | translate" [title]="'Export Report' | translate">
-                    <i class="bi bi-file-earmark-arrow-down"></i>
-                    <span>{{ 'Export Report' | translate }}</span>
+                @if (graphSearchAdvancedMode) {
+                  <div class="flex min-w-0 flex-col">
+                    <span class="text-sm font-semibold text-[var(--color-text1)]">{{ 'Advanced Graph Builder' | translate }}</span>
+                    <span class="text-xs text-[var(--color-text4)]">{{ 'Combine multiple graph fields with AND/OR' | translate }}</span>
+                  </div>
+                }
+
+                <div class="ml-auto flex items-center gap-2 max-[780px]:ml-0 max-[780px]:w-full max-[780px]:justify-end">
+                  <button data-testid="cti-graph-advanced-toggle" type="button" (click)="toggleGraphSearchBuilder()" class="ui-cred-toolbar-btn inline-flex h-10 items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-xs font-semibold text-[var(--color-text2)] transition-[background-color,border-color,color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]">
+                    <i class="bi inline-flex h-4 w-4 items-center justify-center text-[15px]" [class.bi-search]="graphSearchAdvancedMode" [class.bi-sliders2-vertical]="!graphSearchAdvancedMode"></i>
+                    {{ (graphSearchAdvancedMode ? 'Basic' : 'Advanced') | translate }}
                   </button>
+                  <div class="h-6 w-px bg-[var(--color-divider)]"></div>
+                  <button data-testid="cti-export-report" type="button" (click)="openReportExportModal()" class="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-xs font-semibold text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]" [attr.aria-label]="'Export Report' | translate" [title]="'Export Report' | translate">
+                    <i class="bi bi-file-earmark-arrow-down"></i>
+                    <span>{{ 'Export' | translate }}</span>
+                  </button>
+                </div>
+              </div>
 
-                  @if (nodeSearchText.trim().length> 0) {
-                    <div data-testid="cti-highlighted-count" class="inline-flex h-10 items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 text-xs font-semibold text-[var(--color-text3)] shadow-[0_8px_18px_var(--color-shadow-light)]">
-                      {{ searchMatchedCount }} {{ 'node(s) highlighted' | translate }}
+              @if (!graphSearchAdvancedMode) {
+                <form class="relative mt-4 flex min-h-[42px] w-full items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-white px-3 py-2" (submit)="$event.preventDefault(); submitGraphSearch()">
+                  <input data-testid="cti-graph-search-input" name="graphSearchText" [(ngModel)]="graphSearchText" type="text" class="h-6 min-w-0 flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/45" [placeholder]="graphSearchPlaceholder | translate">
+                </form>
+              }
+
+              @if (graphSearchAdvancedMode) {
+                <div class="mt-4 space-y-2.5">
+                  @for (filter of graphAdvancedFilters; track filter.id; let i = $index) {
+                    <div data-testid="cti-graph-adv-row" class="grid items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] md:grid-cols-[110px_1fr_2fr_auto]">
+                      <app-ui-dropdown
+                        testId="cti-graph-adv-operator-select"
+                        [options]="getGraphOperatorOptions(i)"
+                        [selected]="getGraphOperatorValue(filter, i)"
+                        [searchable]="false"
+                        [disabled]="i === 0"
+                        [surface]="'default'"
+                        [size]="'large'"
+                        (valueChange)="setGraphFilterOperator(filter, $event, i)">
+                      </app-ui-dropdown>
+                      <app-ui-dropdown
+                        testId="cti-graph-adv-field-select"
+                        [options]="graphBuilderSearchOptions"
+                        [selected]="filter.optionKey"
+                        [searchable]="true"
+                        [searchPlaceholder]="'Search fields' | translate"
+                        [surface]="'default'"
+                        [size]="'large'"
+                        (valueChange)="setGraphFilterOption(filter, $event)">
+                      </app-ui-dropdown>
+                      <input data-testid="cti-graph-adv-value-input" [(ngModel)]="filter.value" [ngModelOptions]="{standalone: true}" type="text" [placeholder]="getGraphAdvancedOption(filter.optionKey).placeholder | translate" class="h-11 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[13px] font-medium text-[var(--color-text1)] placeholder:text-[var(--color-text4)] outline-none transition-colors focus:border-[var(--color-blue-640)]" />
+                      <div class="flex items-center gap-2">
+                        <button data-testid="cti-graph-adv-delete-filter" type="button" (click)="removeGraphAdvancedFilter(filter.id)" [disabled]="graphAdvancedFilters.length === 1" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-45">
+                          <i class="bi bi-trash3 text-[14px]"></i>
+                        </button>
+                        @if (i === graphAdvancedFilters.length - 1 && graphAdvancedFilters.length < 8) {
+                          <button data-testid="cti-graph-adv-add-filter" type="button" (click)="addGraphAdvancedFilter()" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:-translate-y-[1px]">
+                            <i class="bi bi-plus-lg text-[14px]"></i>
+                          </button>
+                        }
+                      </div>
                     </div>
                   }
                 </div>
-              </div>
+                <div class="mt-2 flex justify-end">
+                  <button data-testid="cti-graph-adv-execute" type="button" (click)="submitGraphSearchBuilder()" class="inline-flex items-center gap-2 rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+                    <i class="bi bi-search text-[13px]"></i>
+                    {{ 'Execute' | translate }}
+                  </button>
+                </div>
+              }
             </div>
 
             <div class="flex min-h-0 w-full flex-1">
               <section class="ui-dashboard-grid-bg relative flex min-h-0 flex-1 overflow-hidden">
                 <div data-testid="cti-network-container" #networkContainer class="cti-network-canvas h-full min-h-0 w-full flex-1 bg-transparent transition-all duration-300">
+                </div>
+
+                <div class="absolute bottom-4 left-4 z-30 flex items-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-2 shadow-[0_10px_24px_var(--color-shadow-light)] backdrop-blur-sm">
+                  <button type="button" (click)="togglePhysics()" class="inline-flex h-9 items-center justify-center gap-2 rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-xs font-semibold text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]" [title]="'Physics' | translate">
+                    <i class="bi" [class.bi-pause-fill]="physicsEnabled" [class.bi-play-fill]="!physicsEnabled"></i>
+                    <span>{{ physicsEnabled ? ('Pause' | translate) : ('Run' | translate) }}</span>
+                  </button>
+                  <app-expand-toggle-button [isExpanded]="expandEnabled" (toggled)="toggleExpandCollapseAll()"></app-expand-toggle-button>
                 </div>
 
                 @if (maxEdge> 50 && showMaxEdgeNotice) {
@@ -79,39 +137,6 @@
                       <button type="button" class="ml-1 text-[var(--color-text4)] hover:text-white" (click)="showMaxEdgeNotice=false" [title]="'Hide' | translate">
                         <i class="bi bi-x-lg text-xs"></i>
                       </button>
-                    </div>
-                  </div>
-                }
-
-                @if (rawNodes.length> 0) {
-                  <div class="ui-graph-legend-shell pointer-events-none absolute bottom-4 left-4 z-20 select-none rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3 shadow-[0_10px_24px_var(--color-shadow-light)] backdrop-blur-sm">
-                    <h3 class="mb-2 border-b border-[var(--color-border)] pb-1 text-sm font-semibold text-[var(--color-text2)]">{{ 'Legend' | translate }}</h3>
-                    <div class="flex flex-col gap-2">
-                      <div class="flex items-center gap-2">
-                        <div class="h-4 w-4 rounded-full border-2 border-[#f59e0b] bg-[var(--color-blue-720)]"></div>
-                        <span class="text-xs text-[var(--color-text4)]">{{ 'Cluster' | translate }}</span>
-                      </div>
-                      <div class="flex items-center gap-2">
-                        <div class="h-4 w-4 rounded-full border-2 border-[#f97316] bg-[var(--color-blue-720)]"></div>
-                        <span class="text-xs text-[var(--color-text4)]">{{ 'Document' | translate }}</span>
-                      </div>
-                      <div class="flex items-center gap-2">
-                        <div class="h-4 w-4 rounded-full border-2 border-[#38bdf8] bg-[var(--color-blue-720)]"></div>
-                        <span class="text-xs text-[var(--color-text4)]">{{ 'Property' | translate }}</span>
-                      </div>
-                      <div class="flex items-center gap-2">
-                        <div class="h-4 w-4 rounded-full border-2 border-[#7dd3fc] bg-transparent"></div>
-                        <span class="text-xs text-[var(--color-text4)]">{{ 'Group Node' | translate }}</span>
-                      </div>
-                      <div class="my-1 h-px bg-[var(--color-border)]"></div>
-                      <div class="flex items-center gap-2">
-                        <div class="h-px w-4 bg-[var(--color-text4)]"></div>
-                        <span class="text-xs text-[var(--color-text4)]">{{ 'Connection' | translate }}</span>
-                      </div>
-                      <div class="flex items-center gap-2">
-                        <div class="w-4 text-[var(--color-text4)]">&rarr;</div>
-                        <span class="text-xs text-[var(--color-text4)]">{{ 'Connection Direction' | translate }}</span>
-                      </div>
                     </div>
                   </div>
                 }

@@ -142,7 +142,7 @@ class crawl_index_generator:
         return index_entries
 
     @staticmethod
-    def index_query_leak(p_index_data):
+    def index_query_leak(p_index_data, cluster_id: str = "leak", default_content_type: list[str] | None = None):
         contact_link = p_index_data.get("contact_link", "")
         index_entries = []
         current_timestamp = datetime.now(timezone.utc).isoformat()
@@ -154,6 +154,12 @@ class crawl_index_generator:
             card["m_hash"] = helper_controller.generate_data_hash(card["m_base_url"] + "_" + card["m_title"])
             card["m_update_date"] = current_timestamp
             card["m_contact_link"] = contact_link
+            card["m_cluster_id"] = cluster_id
+            if default_content_type:
+                existing_content_type = card.get("m_content_type") or []
+                if not isinstance(existing_content_type, list):
+                    existing_content_type = [existing_content_type]
+                card["m_content_type"] = list(dict.fromkeys([*existing_content_type, *default_content_type]))
 
             cleaned_card = {k: v for k, v in card.items() if v is not None}
 

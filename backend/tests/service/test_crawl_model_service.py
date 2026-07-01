@@ -268,7 +268,7 @@ def test_index_wrappers_cover_generator_and_elastic_paths(monkeypatch):
             index_query_chat=lambda payload: [{"type": "chat", "payload": payload}],
             index_query_general=lambda payload: [{"type": "general", "payload": payload}],
             index_query_exploit=lambda payload: [{"type": "exploit", "payload": payload}],
-            index_query_leak=lambda payload: [{"type": "leak", "payload": payload}],
+                index_query_leak=lambda payload, **_: [{"type": "leak", "payload": payload}],
             index_query_defacement=lambda payload: [{"type": "defacement", "payload": payload}],
         ),
     )

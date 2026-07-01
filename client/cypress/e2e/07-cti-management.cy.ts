@@ -18,53 +18,61 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
   it('runs CTI graph flow with filters, search, and export report actions', () => {
     visitCtiGraph();
     selectCtiFilterType('Cluster');
-    cy.get('[data-testid="cti-filter-apply"]').click();
     waitForCtiGraphReady();
     waitForToolbarSearchReady();
     cy.docsScreenshot('cti-graph');
-    cy.get('[data-testid="graph-toolbar-search-input"]').clear().type('leak');
-    cy.get('[data-testid="graph-toolbar-search-button"]').click();
-    cy.get('[data-testid="cti-highlighted-count"]').should('contain.text', 'highlighted');
+    cy.get('[data-testid="cti-graph-search-input"]').clear().type('leak{enter}');
+    waitForCtiGraphReady();
     openAndAssertReportModal('Export CTI Report');
   });
 
   it('covers CTI toolbar toggles', () => {
     visitCtiGraph();
 
-    cy.get('[data-testid="graph-toolbar-root"]').filter(':visible').first().within(() => {
-      cy.get('[data-testid="graph-toolbar-physics-toggle"], button[title="Enable Physics Simulation"], button[title="Disable Physics Simulation"]').filter(':visible').first().click();
-      cy.get('[data-testid="graph-toolbar-physics-toggle"], button[title="Enable Physics Simulation"], button[title="Disable Physics Simulation"]').filter(':visible').first().click();
-    });
+    cy.get('button[title="Physics"]').filter(':visible').first().click();
+    cy.get('button[title="Physics"]').filter(':visible').first().click();
+    cy.get('[data-testid="cti-expand-groups-toggle"]').filter(':visible').first().click();
+    cy.get('[data-testid="cti-expand-groups-toggle"]').filter(':visible').first().click();
   });
 
-  it('covers CTI filter rail collapse, reset, and apply actions', () => {
+  it('covers CTI sidebar collapse and advanced builder actions', () => {
     visitCtiGraph();
 
-    selectCtiFilterType('Property');
-    cy.get('[data-testid="cti-filter-reset"]').filter(':visible').first().click();
-    cy.get('[data-testid="cti-filter-type-select"]').should('contain.text', 'Cluster');
+    cy.get('[data-testid="cti-graph-advanced-toggle"]').filter(':visible').first().click();
+    cy.get('[data-testid="cti-graph-adv-row"]').filter(':visible').first().should('exist');
+    cy.get('[data-testid="cti-graph-adv-field-select"]').filter(':visible').first().click();
+    cy.contains('[role="option"]', 'Country').filter(':visible').first().click();
+    cy.get('[data-testid="cti-graph-adv-value-input"]').filter(':visible').first().clear().type('Pakistan');
+    cy.get('[data-testid="cti-graph-adv-add-filter"]').filter(':visible').first().click();
+    cy.get('[data-testid="cti-graph-adv-row"]').should('have.length.at.least', 2);
+    cy.get('[data-testid="cti-graph-adv-operator-select"]').filter(':visible').eq(1).click();
+    cy.contains('[role="option"]', 'OR').filter(':visible').first().click();
+    cy.get('[data-testid="cti-graph-adv-value-input"]').filter(':visible').eq(1).clear().type('8.8.8.8');
+    cy.get('[data-testid="cti-graph-adv-execute"]').filter(':visible').first().click();
+    waitForCtiGraphReady();
     cy.get('[data-testid="graph-sidebar-collapse"]').filter(':visible').first().click();
     cy.get('[data-testid="graph-sidebar-expand"]').filter(':visible').first().click();
-    cy.get('[data-testid="cti-filter-apply"]').filter(':visible').first().click();
-    waitForCtiGraphReady();
   });
 
   it('covers CTI report export option selection', () => {
     visitCtiGraph();
+    const exportDate = new Date().toISOString().slice(0, 10);
+    const exportBase = `cypress/downloads/cti-cti-graph-${exportDate}-cti-graph-intelligence-report`;
 
     openAndAssertReportModal('Export CTI Report');
     cy.docsScreenshot('cti-export-modal');
     cy.get('[data-testid="graph-report-export-json"]').filter(':visible').first().click();
     cy.get('[data-testid="graph-report-export-modal"]').should('not.exist');
+    cy.readFile(`${exportBase}-graph.json`, { timeout: 15000 }).should('contain', 'CTI Graph Intelligence Report');
     openAndAssertReportModal('Export CTI Report');
     cy.get('[data-testid="graph-report-export-graph-pdf"]').filter(':visible').first().click();
     cy.get('[data-testid="graph-report-export-modal"]').should('not.exist');
+    cy.readFile(`${exportBase}-graph-report.pdf`, 'binary', { timeout: 30000 }).should('contain', '%PDF');
   });
 
   it('attempts CTI graph context menu actions (data-dependent)', () => {
     visitCtiGraph();
     selectCtiFilterType('Cluster');
-    cy.get('[data-testid="cti-filter-apply"]').click();
     waitForCtiGraphReady();
 
     const attemptContextMenuAtOffsets = (offsetX: number, offsetY: number) => {
@@ -96,6 +104,16 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
 
     cy.get('[data-testid="cti-context-menu"]').should('exist');
     cy.docsScreenshot('cti-context-menu');
+    cy.window().then((win) => {
+      cy.stub(win, 'open').as('ctiReportOpen');
+    });
+    cy.get('body').then(($body) => {
+      const openReport = $body.find('[data-testid="cti-context-open-report"]:visible');
+      if (openReport.length > 0) {
+        cy.wrap(openReport.first()).click();
+        cy.get('@ctiReportOpen').should('have.been.called');
+      }
+    });
   });
 
 });

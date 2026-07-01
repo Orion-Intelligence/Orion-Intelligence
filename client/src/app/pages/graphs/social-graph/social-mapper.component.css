@@ -20,18 +20,20 @@
 
 @keyframes social-result-source-indicator-fade-normal {
   0% {
-    opacity: 0.72;
+    opacity: 72%;
   }
+
   100% {
-    opacity: 0.95;
+    opacity: 95%;
   }
 }
 
 @keyframes social-result-source-indicator-fade-darkweb {
   0% {
-    opacity: 0.72;
+    opacity: 72%;
   }
+
   100% {
-    opacity: 0.95;
+    opacity: 95%;
   }
 }
