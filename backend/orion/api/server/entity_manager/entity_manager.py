@@ -484,7 +484,7 @@ class entity_manager:
         vertex_collection = self.__db.collection("cti_vertices")
         key = document["_key"]
         with self._upsert_lock(f"vertex:{key}"):
-            old = vertex_collection.get(key) if vertex_collection.has(key) else {}
+            old = (vertex_collection.get(key) if vertex_collection.has(key) else {}) or {}
             merged = {k: v for k, v in old.items() if k not in {"_id", "_rev"}}
             merged.update({k: v for k, v in document.items() if v not in (None, "", [], {})})
             for field, additions in (merge_arrays or {}).items():
@@ -523,7 +523,7 @@ class entity_manager:
         edge_collection = self.__db.collection("cti_edges")
         key = edge_document["_key"]
         with self._upsert_lock(f"edge:{key}"):
-            old = edge_collection.get(key) if edge_collection.has(key) else {}
+            old = (edge_collection.get(key) if edge_collection.has(key) else {}) or {}
             merged = {k: v for k, v in old.items() if k not in {"_id", "_rev"}}
             merged.update({k: v for k, v in edge_document.items() if v not in (None, "", [], {})})
             merged["base_confidence"] = float(max(

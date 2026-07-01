@@ -31,7 +31,7 @@ class service_manager:
         self.__url = url
         self._is_available = False
 
-    async def init_services(self, build_dir=None):
+    async def init_services(self, build_dir=None, run_migrations: bool = True):
         build_dir = build_dir or self.default_build_dir()
         while not self._is_available:
             try:
@@ -44,7 +44,8 @@ class service_manager:
 
                 await test_manager.get_instance().reset_test_mongo_and_import_mocks()
 
-                await migration_manager.get_instance().init_migration()
+                if run_migrations:
+                    await migration_manager.get_instance().init_migration()
                 await mongo_controller.get_instance().ensure_indexes()
                 await mongo_controller.get_instance().initialize()
 

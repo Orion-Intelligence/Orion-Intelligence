@@ -1,3 +1,5 @@
+import asyncio
+import fcntl
 import importlib
 import os
 import sys
@@ -8,6 +10,16 @@ from orion.services.mongo_manager.shared_model.db_system_settings import db_syst
 
 
 async def run_migration(version, app_version=None):
+    lock_file = open("/tmp/orion_migration.lock", "w")
+    try:
+        await asyncio.to_thread(fcntl.flock, lock_file.fileno(), fcntl.LOCK_EX)
+        return await _run_migration_locked(version, app_version)
+    finally:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+        lock_file.close()
+
+
+async def _run_migration_locked(version, app_version=None):
     await mongo_controller.get_instance().link_connection()
     engine = mongo_controller.get_instance().get_engine()
     if engine is None:
