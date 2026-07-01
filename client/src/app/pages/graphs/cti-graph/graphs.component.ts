@@ -6,22 +6,20 @@ import { DataSet } from 'vis-data';
 import { ApiService } from '../../../shared/services/api.service';
 import { CtiSidebarComponent } from './cti-sidebar/cti-sidebar.component';
 import { GraphContextMenuComponent } from './context-menu/context-menu.component';
-import { NgClass, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 import { GraphToolbarComponent } from '../shared/graph-toolbar/graph-toolbar.component';
 import { ExpandToggleButtonComponent } from './expand-toggle-button/expand-toggle-button.component';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
-import { TabBarComponent } from '../shared/tab-bar/tab-bar.component';
-import { GraphLoadingComponent } from '../shared/graph-loading/graph-loading.component';
-import { ExtendedNode, GraphResultItem, GraphSessionState, GraphSessionTab, NodeVisualState } from '../../../shared/model/graph/cti-graph.model';
+import { CtiGraphFilters, ExtendedNode, GraphResultItem, NodeVisualState } from '../../../shared/model/graph/cti-graph.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportExportType, GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 import { ensureStylesheet } from '../../../shared/utils/ensure-stylesheet.util';
 import { ProxyController } from '../../../shared/services/proxy-controller';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 
 type GraphNodeColor = NonNullable<ExtendedNode['color']>;
 @Component({
@@ -29,10 +27,9 @@ type GraphNodeColor = NonNullable<ExtendedNode['color']>;
   standalone: true,
   templateUrl: './graphs.component.html',
   animations: [fadeInDashboardItem],
-  imports: [CtiSidebarComponent, GraphContextMenuComponent, ProfileComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, NgClass, TabBarComponent, GraphLoadingComponent, TranslatePipe]
+  imports: [CtiSidebarComponent, GraphContextMenuComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, ProfileComponent, TranslatePipe]
 })
 export class GraphComponent implements OnInit, OnDestroy {
-  private readonly playgroundTabName = 'Playground';
   private readonly proxied_resource = inject(ProxyController);
   private readonly maxNodeLabelLength = 28;
   private readonly edgeBaseColor = 'rgba(75, 85, 99, 0.8)';
@@ -56,18 +53,8 @@ export class GraphComponent implements OnInit, OnDestroy {
   private readonly originalNodeState = new Map<string, NodeVisualState>();
   private readonly clusterNodePrefix = 'cti_vertices/';
   private nodeTypeById: Record<string, string> = {};
-  private readonly graphType = 'graph';
-  private lastSavedSessionSignature = '';
-  private readonly globalPointerDownListener = (event: Event) => {
-    const target = event.target as Node | null;
-    const insideAdd = !!(target && this.addMenuWrapper?.nativeElement.contains(target));
-    const insideHeader = !!(target && this.headerMenuWrapper?.nativeElement.contains(target));
-    if (!insideAdd && !insideHeader) {
-      this.closeMenus();
-    }
-  };
   private readonly globalKeyDownListener = (event: KeyboardEvent) => {
-    if (!this.network || !this.isGraphView) {
+    if (!this.network) {
       return;
     }
     const eventTargetElement = event.target as HTMLElement | null;
@@ -101,10 +88,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       animation: false
     });
   };
-  private static sessionCounter = 1;
-  private pendingFilters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null = null;
-  private pendingSessionState: GraphSessionState | null = null;
-  private routeFilterOverride: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null = null;
+  private pendingFilters: CtiGraphFilters | null = null;
 
   networkContainer?: ElementRef;
   public rawNodes: ExtendedNode[] = [];
@@ -121,39 +105,22 @@ export class GraphComponent implements OnInit, OnDestroy {
   singleInput = 'all';
   propertyType = 'all';
   propertyValue = '';
-  maxEdge: any = 1;
-  maxDepth: any = 25;
+  maxEdge = 25;
+  maxDepth = 1;
   loading = false;
   physicsEnabled = true;
   expandEnabled = false;
   isEmpty = false;
-  limitReached = false;
   result: any[] = [];
-  flattenedDocuments: any[] = [];
   contextMenuNode: ExtendedNode | null = null;
   copied = false;
-  copiedX = 0;
-  copiedY = 0;
   orignalColor: GraphNodeColor = '';
-  currentCategory = '';
   isSidebarCollapsed = false;
-  isTailwindReady = true;
   nodeSearchText = '';
-  isGraphView = true;
-  isListingsCollapsed = true;
   searchMatchedCount = 0;
-  listRows: { id: string; label: string; cluster: string; }[] = [];
   showMaxEdgeNotice = false;
-  tabs: GraphSessionTab[] = [];
-  activeTabId = '';
-  editingTabId: string | null = null;
-  isAddMenuVisible = false;
-  isHeaderMenuVisible = false;
   isReportExportModalOpen = false;
-  hasLoadedSessions = false;
   readonly graphExportOptions = GRAPH_REPORT_EXPORT_OPTIONS;
-  @ViewChild('addMenuWrapper', { static: false }) addMenuWrapper?: ElementRef<HTMLElement>;
-  @ViewChild('headerMenuWrapper', { static: false }) headerMenuWrapper?: ElementRef<HTMLElement>;
 
   private getNodeLabelColor(): string {
     if (isPlatformBrowser(this.platformId)) {
@@ -173,7 +140,6 @@ export class GraphComponent implements OnInit, OnDestroy {
   set networkContainerRef(ref: ElementRef) {
     if (ref) {
       this.networkContainer = ref;
-      this.tryRestorePendingSessionState();
       this.tryApplyPendingFilters();
     }
   }
@@ -183,33 +149,35 @@ export class GraphComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       ensureStylesheet('/assets/libs/vis-network.css', 'vis-network-styles');
-      document.addEventListener('pointerdown', this.globalPointerDownListener, true);
       document.addEventListener('keydown', this.globalKeyDownListener, true);
     }
     this.route.queryParams.subscribe(params => {
-      this.routeFilterOverride = this.buildRouteFilterOverride(params);
-      if (this.hasLoadedSessions) {
-        this.applyRouteFilterOverride();
+      const routeFilters = this.buildRouteFilterOverride(params);
+      if (routeFilters) {
+        this.applyFilterValues(routeFilters);
       }
+      this.applyCurrentFilters();
     });
-    this.tryApplyPendingFilters();
-    this.loadSessions();
   }
 
   ngOnDestroy(): void {
     if (isPlatformBrowser(this.platformId)) {
-      document.removeEventListener('pointerdown', this.globalPointerDownListener, true);
       document.removeEventListener('keydown', this.globalKeyDownListener, true);
+    }
+  }
+
+  goBack(): void {
+    if (isPlatformBrowser(this.platformId) && window.history.length > 1) {
+      window.history.back();
     }
   }
 
   onSidebarCollapsedChange(isCollapsed: boolean): void {
     this.isSidebarCollapsed = isCollapsed;
-    this.updateActiveSessionState({ isSidebarCollapsed: isCollapsed });
   }
 
   private tryApplyPendingFilters(): void {
-    if (!this.isTailwindReady || !this.networkContainer || !this.pendingFilters) {
+    if (!this.networkContainer || !this.pendingFilters) {
       return;
     }
     const queued = this.pendingFilters;
@@ -217,16 +185,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.onSidebarApply(queued);
   }
 
-  private tryRestorePendingSessionState(): void {
-    if (!this.isTailwindReady || !this.networkContainer || !this.pendingSessionState) {
-      return;
-    }
-    const pending = this.pendingSessionState;
-    this.pendingSessionState = null;
-    this.restoreGraphSessionState(pending);
-  }
-
-  private buildRouteFilterOverride(params: Params): { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null {
+  private buildRouteFilterOverride(params: Params): CtiGraphFilters | null {
     const selectedType = String(params['selectedType'] ?? '').trim();
     const singleInput = String(params['singleInput'] ?? '').trim();
     const propertyType = String(params['propertyType'] ?? '').trim();
@@ -250,281 +209,19 @@ export class GraphComponent implements OnInit, OnDestroy {
     };
   }
 
-  private applyRouteFilterOverride(): void {
-    if (!this.routeFilterOverride || this.tabs.length === 0) {
-      return;
-    }
-
-    const playgroundTab = this.tabs[0];
-    const nextState: GraphSessionState = {
-      ...this.createDefaultSessionState(),
-      isSidebarCollapsed: playgroundTab.state.isSidebarCollapsed,
-      ...this.routeFilterOverride
-    };
-
-    this.tabs = this.tabs.map((tab, index) => index === 0 ? { ...tab, state: nextState } : tab);
-    this.normalizePlaygroundTab();
-    this.activeTabId = playgroundTab.id;
-    this.applySession(playgroundTab.id);
-    this.applyActiveTabState();
-    this.saveSessions();
-  }
-
-  private createDefaultSessionState(): GraphSessionState {
+  get activeSidebarFilters(): CtiGraphFilters {
     return {
-      selectedType: 'cluster',
-      singleInput: 'all',
-      propertyType: 'all',
-      propertyValue: '',
-      maxEdge: 25,
-      maxDepth: 1,
-      isSidebarCollapsed: false,
-      graphData: null,
-      groupExpandedState: {},
-      limitReached: false,
-      nodeSearchText: '',
-      physicsEnabled: true,
-      isGraphView: true,
-      isListingsCollapsed: true,
-      expandEnabled: false
-    };
-  }
-
-  private normalizePlaygroundTab(): void {
-    if (this.tabs.length === 0) {
-      return;
-    }
-    this.tabs = this.tabs.map((tab, index) => index === 0 ? { ...tab, name: this.playgroundTabName } : tab);
-  }
-
-  private generateId(): string {
-    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-      return crypto.randomUUID();
-    }
-    return `graph-session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-  }
-
-  private getActiveTab(): GraphSessionTab | undefined {
-    return this.tabs.find(t => t.id === this.activeTabId);
-  }
-
-  get activeSidebarFilters(): { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } {
-    const active = this.getActiveTab();
-    const state = active?.state ?? this.createDefaultSessionState();
-    return {
-      selectedType: state.selectedType,
-      singleInput: state.singleInput,
-      propertyType: state.propertyType,
-      propertyValue: state.propertyValue,
-      maxEdge: state.maxEdge,
-      maxDepth: state.maxDepth
+      selectedType: this.selectedType,
+      singleInput: this.singleInput,
+      propertyType: this.propertyType,
+      propertyValue: this.propertyValue,
+      maxEdge: Number(this.maxEdge),
+      maxDepth: Number(this.maxDepth)
     };
   }
 
   get activeSidebarCollapsed(): boolean {
-    const active = this.getActiveTab();
-    return active?.state.isSidebarCollapsed ?? false;
-  }
-
-  private applyActiveTabState(): void {
-    const active = this.getActiveTab();
-    if (!active) {
-      return;
-    }
-    this.onSidebarApply({
-      selectedType: active.state.selectedType,
-      singleInput: active.state.singleInput,
-      propertyType: active.state.propertyType,
-      propertyValue: active.state.propertyValue,
-      maxEdge: active.state.maxEdge,
-      maxDepth: active.state.maxDepth
-    });
-  }
-
-  private restoreGraphSessionState(state: GraphSessionState): void {
-    if (!this.isTailwindReady || !this.networkContainer) {
-      this.pendingSessionState = state;
-      return;
-    }
-    this.showMaxEdgeNotice = Number(state.maxEdge) > 50;
-    if (!state.graphData) {
-      this.resetGraph();
-      this.listRows = [];
-      this.flattenedDocuments = [];
-      this.limitReached = !!state.limitReached;
-      this.isEmpty = false;
-      this.loading = false;
-      return;
-    }
-    this.renderGraph(state.graphData);
-    this.initListings(state.graphData);
-    this.limitReached = !!state.limitReached;
-    this.loading = true;
-    Object.entries(state.groupExpandedState ?? {})
-      .filter(([, expanded]) => !!expanded)
-      .forEach(([nodeId]) => {
-        const node = this.nodeSet.get(nodeId) as ExtendedNode | undefined;
-        if (!node) {
-          return;
-        }
-        const subNodes = this.getContextSubNodes(nodeId, node);
-        if (subNodes.length > 0) {
-          this.expandGroupFromNodeId(nodeId, subNodes, 200, false);
-        }
-      });
-    this.captureOriginalNodeColors();
-    this.applyPropertyHighlights();
-    this.applyNodeSearchHighlight();
-  }
-
-  private saveSessions(force: boolean = false): void {
-    if (!isPlatformBrowser(this.platformId) || !this.hasLoadedSessions) {
-      return;
-    }
-    this.normalizePlaygroundTab();
-    const payload = {
-      tab_counter: GraphComponent.sessionCounter,
-      active_tab_id: this.activeTabId,
-      tabs: this.tabs
-    };
-    const nextSignature = JSON.stringify(payload);
-    if (!force && nextSignature === this.lastSavedSessionSignature) {
-      return;
-    }
-    this.api.post<any>(`graph/session/upsert?graph_type=${this.graphType}`, payload).subscribe({
-      next: () => {
-        this.lastSavedSessionSignature = nextSignature;
-      },
-      error: () => void 0
-    });
-  }
-
-  private loadSessions(): void {
-    if (!isPlatformBrowser(this.platformId)) {
-      this.hasLoadedSessions = true;
-      this.addSession();
-      return;
-    }
-    this.api.get<any>(`graph/session/tabs?graph_type=${this.graphType}`).subscribe({
-      next: (savedState) => {
-        const savedTabs = Array.isArray(savedState?.tabs) ? savedState.tabs : [];
-        if (savedTabs.length === 0) {
-          this.hasLoadedSessions = true;
-          this.addSession();
-          return;
-        }
-        this.tabs = savedTabs.map((savedTab: any, index: number) => ({
-          id: typeof savedTab?.id === 'string' && savedTab.id.length > 0 ? savedTab.id : this.generateId(),
-          name: typeof savedTab?.name === 'string' && savedTab.name.trim().length > 0 ? savedTab.name : `Session ${index + 1}`,
-          state: { ...this.createDefaultSessionState(), ...(savedTab?.state || {}) }
-        } as GraphSessionTab));
-        this.normalizePlaygroundTab();
-        GraphComponent.sessionCounter = Number(savedState?.tab_counter ?? savedState?.counter) || (this.tabs.length + 1);
-        this.activeTabId = savedState?.active_tab_id ?? savedState?.activeTabId ?? this.tabs[0].id;
-        if (!this.tabs.some(t => t.id === this.activeTabId)) {
-          this.activeTabId = this.tabs[0].id;
-        }
-        this.hasLoadedSessions = true;
-        this.lastSavedSessionSignature = JSON.stringify({
-          tab_counter: GraphComponent.sessionCounter,
-          active_tab_id: this.activeTabId,
-          tabs: this.tabs
-        });
-        this.applySession(this.activeTabId);
-        this.applyActiveTabState();
-        this.applyRouteFilterOverride();
-      },
-      error: () => {
-        this.hasLoadedSessions = true;
-        this.addSession();
-        this.applyRouteFilterOverride();
-      }
-    });
-  }
-
-  addSession(): void {
-    const newTab: GraphSessionTab = {
-      id: this.generateId(),
-      name: this.tabs.length === 0 ? this.playgroundTabName : `Session ${GraphComponent.sessionCounter++}`,
-      state: this.createDefaultSessionState()
-    };
-    this.tabs = [...this.tabs, newTab];
-    this.normalizePlaygroundTab();
-    this.activeTabId = newTab.id;
-    this.applySession(newTab.id);
-    this.applyActiveTabState();
-    this.saveSessions();
-  }
-
-  selectSession(id: string): void {
-    if (this.activeTabId === id) {
-      return;
-    }
-    this.activeTabId = id;
-    this.applySession(id);
-    this.applyActiveTabState();
-    this.saveSessions();
-  }
-
-  closeSession(id: string): void {
-    if (this.tabs.length <= 1) {
-      return;
-    }
-    if (this.tabs[0]?.id === id) {
-      return;
-    }
-    const idx = this.tabs.findIndex(t => t.id === id);
-    this.tabs = this.tabs.filter(t => t.id !== id);
-    if (this.activeTabId === id) {
-      const next = this.tabs[idx - 1] || this.tabs[idx] || this.tabs[0];
-      this.activeTabId = next.id;
-      this.applySession(this.activeTabId);
-    }
-    this.saveSessions();
-  }
-
-  startEditing(id: string): void {
-    if (this.tabs[0]?.id === id) {
-      return;
-    }
-    this.editingTabId = id;
-  }
-
-  stopEditing(): void {
-    this.editingTabId = null;
-  }
-
-  renameSession(id: string, newName: string): void {
-    if (this.tabs[0]?.id === id) {
-      this.stopEditing();
-      return;
-    }
-    const trimmed = newName.trim();
-    if (!trimmed) {
-      this.stopEditing();
-      return;
-    }
-    this.tabs = this.tabs.map(tab => (tab.id === id ? { ...tab, name: trimmed } : tab));
-    this.stopEditing();
-    this.saveSessions();
-  }
-
-  exportActiveSession(): void {
-    const active = this.getActiveTab();
-    if (!active) {
-      return;
-    }
-    const jsonString = JSON.stringify({ name: active.name, state: active.state }, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const safeName = active.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    a.download = `cti-graph-session-${safeName}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    return this.isSidebarCollapsed;
   }
 
   openReportExportModal(): void {
@@ -546,7 +243,6 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private buildGraphReportPayload(): GraphReportPayload {
-    const active = this.getActiveTab();
     const nodes = this.rawNodes.map(node => ({
       id: String(node.id ?? ''),
       label: String(node.label ?? ''),
@@ -562,20 +258,10 @@ export class GraphComponent implements OnInit, OnDestroy {
     nodes.forEach(node => {
       byType[node.type] = (byType[node.type] ?? 0) + 1;
     });
-    const tables = this.listRows.slice(0, 1).map(() => ({
-      title: 'Listing Snapshot',
-      values: {
-        documents: String(this.listRows.length),
-        view: this.isGraphView ? 'graph' : 'list',
-        selectedType: this.selectedType,
-        filterSingleInput: this.singleInput,
-        filterProperty: this.propertyValue || '-'
-      }
-    }));
     return {
       graphKind: 'cti',
       title: 'CTI Graph Intelligence Report',
-      sessionName: active?.name ?? 'Session',
+      sessionName: 'CTI Graph',
       generatedAtIso: new Date().toISOString(),
       nodes,
       edges,
@@ -585,8 +271,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         clusters: byType['cluster'] ?? 0,
         documents: byType['document'] ?? 0,
         properties: byType['property'] ?? 0
-      },
-      tables
+      }
     };
   }
 
@@ -666,102 +351,21 @@ export class GraphComponent implements OnInit, OnDestroy {
     return snapshot;
   }
 
-  importSessionFile(event: Event): void {
-    const inputElement = event.target as HTMLInputElement;
-    if (!inputElement.files?.length) {
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = e => {
-      try {
-        const content = String(e.target?.result ?? '');
-        const parsed = JSON.parse(content);
-        if (!parsed?.state || typeof parsed.state !== 'object') {
-          return;
-        }
-        const imported: GraphSessionTab = {
-          id: this.generateId(),
-          name: String(parsed.name || `Session ${GraphComponent.sessionCounter++}`),
-          state: { ...this.createDefaultSessionState(), ...parsed.state }
-        };
-        this.tabs = [...this.tabs, imported];
-        this.normalizePlaygroundTab();
-        this.activeTabId = imported.id;
-        this.applySession(imported.id);
-        this.saveSessions();
-      }
-      catch {
-        // Ignore invalid imported session files.
-      }
-    };
-    reader.readAsText(inputElement.files[0]);
-    inputElement.value = '';
+  private applyCurrentFilters(): void {
+    this.onSidebarApply(this.activeSidebarFilters);
   }
 
-  toggleAddMenu(event: MouseEvent): void {
-    event.stopPropagation();
-    this.isAddMenuVisible = !this.isAddMenuVisible;
-    this.isHeaderMenuVisible = false;
-  }
-
-  toggleHeaderMenu(event: MouseEvent): void {
-    event.stopPropagation();
-    this.isHeaderMenuVisible = !this.isHeaderMenuVisible;
-    this.isAddMenuVisible = false;
-  }
-
-  closeMenus(): void {
-    this.isAddMenuVisible = false;
-    this.isHeaderMenuVisible = false;
-  }
-
-  private applySession(tabId: string): void {
-    const tab = this.tabs.find(t => t.id === tabId);
-    if (!tab) {
-      return;
-    }
-    const s = tab.state;
-    this.nodeSearchText = s.nodeSearchText;
-    this.physicsEnabled = s.physicsEnabled;
-    this.isGraphView = s.isGraphView;
-    this.isListingsCollapsed = s.isListingsCollapsed;
-    this.expandEnabled = s.expandEnabled;
-    this.isSidebarCollapsed = s.isSidebarCollapsed;
-    this.selectedType = s.selectedType;
-    this.singleInput = s.singleInput;
-    this.propertyType = s.propertyType;
-    this.propertyValue = s.propertyValue;
-    this.maxEdge = s.maxEdge;
-    this.maxDepth = s.maxDepth;
-    this.restoreGraphSessionState(s);
-  }
-
-  private updateActiveSessionState(partial: Partial<GraphSessionState>, persist: boolean = true): void {
-    const active = this.getActiveTab();
-    if (!active) {
-      return;
-    }
-    this.tabs = this.tabs.map(tab => tab.id === active.id ? { ...tab, state: { ...tab.state, ...partial } } : tab);
-    if (persist) {
-      this.saveSessions();
-    }
-  }
-
-  onSidebarFiltersChanged(filters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; }): void {
+  private applyFilterValues(filters: CtiGraphFilters): void {
     this.selectedType = filters.selectedType;
     this.singleInput = filters.singleInput;
     this.propertyType = filters.propertyType;
     this.propertyValue = filters.propertyValue;
-    this.maxEdge = filters.maxEdge;
-    this.maxDepth = filters.maxDepth;
-    this.updateActiveSessionState({
-      selectedType: this.selectedType,
-      singleInput: this.singleInput,
-      propertyType: this.propertyType,
-      propertyValue: this.propertyValue,
-      maxEdge: Number(this.maxEdge),
-      maxDepth: Number(this.maxDepth)
-    });
+    this.maxEdge = Number(filters.maxEdge);
+    this.maxDepth = Number(filters.maxDepth);
+  }
+
+  onSidebarFiltersChanged(filters: CtiGraphFilters): void {
+    this.applyFilterValues(filters);
   }
 
   resetGraph(): void {
@@ -786,7 +390,6 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.highlightedNodeId = null;
     this.contextMenuNode = null;
     this.contextMenuNodeId = '';
-    this.currentCategory = '';
     this.result = [];
     this.originalNodeState.clear();
     const container = this.networkContainer?.nativeElement;
@@ -826,81 +429,18 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.resetGraph();
     this.api.get<{
       results: any[];
-      limit_reached: boolean;
   }>('graph', { params }).subscribe({
     next: response => {
-      const { results, limit_reached } = response;
+      const { results } = response;
       this.result = results;
       this.renderGraph(this.result);
-      this.limitReached = limit_reached;
       this.loading = true;
-      this.initListings(results);
-      this.updateActiveSessionState({
-        graphData: this.result,
-        limitReached: this.limitReached,
-        groupExpandedState: { ...this.groupExpandedState }
-      });
     },
     error: _ => {
       this.isEmpty = true;
-      this.limitReached = false;
       this.loading = true;
-      this.updateActiveSessionState({
-        graphData: [],
-        limitReached: false,
-        groupExpandedState: {}
-      });
     }
   });
-  }
-
-  initListings(results: any[]): void {
-    this.flattenedDocuments = [];
-    this.listRows = [];
-    results.forEach(item => {
-      const doc = item.vertex;
-      const edge = item.edge;
-      let path = 'unknown';
-      const from = (edge?._from || '').toLowerCase().trim();
-      const to = (edge?._to || '').toLowerCase().trim();
-      if (from.includes('general') || to.includes('general')) {
-        path = 'strategic/all';
-      }
-      else if (from.includes('leak') || to.includes('leak')) {
-        path = 'breach/all';
-      }
-      else if (from.includes('defacement') || to.includes('defacement')) {
-        path = 'defacement/archive';
-      }
-      else if (from.includes('chat') || to.includes('chat')) {
-        path = 'social/telegram';
-      }
-      else if (from.includes('exploit') || to.includes('exploit')) {
-        path = 'exploit/cve';
-      }
-      if (doc?.type === 'document') {
-        const docId = doc.m_document_id || doc._key;
-        const docType = doc.type;
-        this.listRows.push({
-          id: doc?._id ?? '',
-          label: doc?._key ?? '',
-          cluster: (edge?._from ?? '').split('/').pop() ?? 'unknown'
-        });
-        Object.entries(doc).forEach(([key, value]) => {
-          if (key.startsWith('m_') && Array.isArray(value)) {
-            value.forEach(val => {
-              this.flattenedDocuments.push({
-                m_document_id: docId,
-                type: docType,
-                property: key,
-                value: val,
-                path: path
-              });
-            });
-          }
-        });
-      }
-    });
   }
 
   showContextMenu( node: ExtendedNode, pointerDom?: { x: number; y: number; } ) {
@@ -1110,7 +650,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     return Array.from(collapsedTargets);
   }
 
-  private expandGroupFromNodeId(nodeId: string, subNodes: string[], radius: number, persist: boolean = true): void {
+  private expandGroupFromNodeId(nodeId: string, subNodes: string[], radius: number): void {
     const isExpanded = this.groupExpandedState[nodeId] || false;
     if (isExpanded) {
       return;
@@ -1153,12 +693,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     this.groupExpandedState[nodeId] = true;
     this.updateGroupNodeVisual(nodeId, uniqueSubNodes.length, true);
-    if (persist) {
-      this.updateActiveSessionState({ groupExpandedState: { ...this.groupExpandedState } });
-    }
   }
 
-  private collapseGroupFromNodeId(nodeId: string, subNodes: string[], force = false, persist: boolean = true): void {
+  private collapseGroupFromNodeId(nodeId: string, subNodes: string[], force = false): void {
     const isExpanded = this.groupExpandedState[nodeId] || false;
     if (!isExpanded && !force) {
       return;
@@ -1166,9 +703,6 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.removeSubNodesAndEdges(nodeId, subNodes);
     this.groupExpandedState[nodeId] = false;
     this.updateGroupNodeVisual(nodeId, subNodes.length, false);
-    if (persist) {
-      this.updateActiveSessionState({ groupExpandedState: { ...this.groupExpandedState } });
-    }
   }
 
   expandGroupNode(): void {
@@ -1261,11 +795,11 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.hideContextMenu();
   }
 
-  copyNodeLabel(event: MouseEvent) {
+  copyNodeLabel() {
     const _label = this.contextMenuNode?.label;
     if (_label) {
       this.clipboard.copy(_label);
-      this.showCopiedMessage(event);
+      this.showCopiedMessage();
       this.hideContextMenu();
     }
   }
@@ -1319,10 +853,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.hideContextMenu();
   }
 
-  showCopiedMessage(event: MouseEvent) {
-    const buttonRect = (event.target as HTMLElement).getBoundingClientRect();
-    this.copiedX = buttonRect.right + 10;
-    this.copiedY = buttonRect.top + window.scrollY;
+  showCopiedMessage() {
     this.copied = true;
     setTimeout(() => {
       this.copied = false;
@@ -1331,7 +862,6 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   onPhysicsToggled(enabled: boolean): void {
     this.physicsEnabled = enabled;
-    this.updateActiveSessionState({ physicsEnabled: this.physicsEnabled });
     if (this.network) {
       this.network.setOptions({ physics: { enabled } });
     }
@@ -1343,7 +873,6 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   onNodeSearchChange(value: string): void {
     this.nodeSearchText = value ?? '';
-    this.updateActiveSessionState({ nodeSearchText: this.nodeSearchText });
     this.applyNodeSearchHighlight();
   }
 
@@ -1351,26 +880,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.applyNodeSearchHighlight();
   }
 
-  onToolbarViewModeChanged(mode: 'graph' | 'list'): void {
-    this.setViewMode(mode === 'graph');
-  }
-
-  setViewMode(isGraphView: boolean): void {
-    this.isGraphView = isGraphView;
-    this.updateActiveSessionState({ isGraphView: this.isGraphView });
-  }
-
-  toggleListingsCollapsed(): void {
-    this.isListingsCollapsed = !this.isListingsCollapsed;
-    this.updateActiveSessionState({ isListingsCollapsed: this.isListingsCollapsed });
-  }
-
   toggleExpandCollapseAll(): void {
     this.expandEnabled = !this.expandEnabled;
-    this.updateActiveSessionState({
-      expandEnabled: this.expandEnabled,
-      groupExpandedState: this.expandEnabled ? {} : { ...this.groupExpandedState }
-    });
     this.nodeSet.get().forEach(node => {
       const groupNode = node as ExtendedNode;
       if (!groupNode.isGroup || !groupNode.subNodes || !groupNode.id) {
@@ -1378,18 +889,18 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
       const nodeId = String(groupNode.id);
       if (this.expandEnabled) {
-        this.expandGroupFromNodeId(nodeId, groupNode.subNodes, 200, false);
+        this.expandGroupFromNodeId(nodeId, groupNode.subNodes, 200);
       }
       else {
-        this.collapseGroupFromNodeId(nodeId, groupNode.subNodes, false, false);
+        this.collapseGroupFromNodeId(nodeId, groupNode.subNodes);
       }
     });
     this.captureOriginalNodeColors();
     this.applyNodeSearchHighlight();
   }
 
-  onSidebarApply( filters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } ): void {
-    if (!this.isTailwindReady || !this.networkContainer) {
+  onSidebarApply(filters: CtiGraphFilters): void {
+    if (!this.networkContainer) {
       this.pendingFilters = { ...filters };
       return;
     }
@@ -1402,18 +913,6 @@ export class GraphComponent implements OnInit, OnDestroy {
     queueMicrotask(() => {
       this.showMaxEdgeNotice = Number(this.maxEdge) > 50;
     });
-    this.updateActiveSessionState({
-      selectedType: this.selectedType,
-      singleInput: this.singleInput,
-      propertyType: this.propertyType,
-      propertyValue: this.propertyValue,
-      maxEdge: Number(this.maxEdge),
-      maxDepth: Number(this.maxDepth),
-      graphData: null,
-      groupExpandedState: {},
-      limitReached: false
-    });
-    this.saveSessions(true);
     if (filters.selectedType === 'property' && filters.propertyType && filters.propertyValue) {
       this.loadGraphByNode(this.selectedType, filters.propertyType, filters.propertyValue, this.maxEdge.toString(), this.maxDepth.toString());
     }
@@ -1422,13 +921,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
   }
 
-  cleanString(input: string): string {
-    const parts = input.replace(/['"]/g, '').split(',');
-    const uniqueParts = Array.from(new Set(parts.map(part => part.trim())));
-    return uniqueParts[0];
-  }
-
-  private renderGraph(data: GraphResultItem[], _ = false): void {
+  private renderGraph(data: GraphResultItem[]): void {
     this.resetGraph();
     this.isEmpty = data.length === 0;
     this.rawNodes = [];
@@ -1677,9 +1170,6 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   private applyNonGroupNodeColor(node: ExtendedNode, isClusterNode: boolean, edgeMap: Record<string, number>): void {
     if (isClusterNode) {
-      if (this.currentCategory === '') {
-        this.currentCategory = this.cleanString(node.label || '');
-      }
       node.color = {
         border: this.nodeClusterBorder,
         background: this.nodeFillColor,
@@ -1984,7 +1474,6 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.edgeSet.remove(residualEdgesToRemove);
     this.groupExpandedState[clusterNodeId] = false;
     this.updateGroupNodeVisual(clusterNodeId, this.getClusterDocumentIds(clusterNodeId).length, false);
-    this.updateActiveSessionState({ groupExpandedState: { ...this.groupExpandedState } });
   }
 
   private getVisibleClusterAttachedNodeIds(clusterNodeId: string): string[] {
@@ -2056,45 +1545,6 @@ export class GraphComponent implements OnInit, OnDestroy {
     else {
       this.expandGroupFromNodeId(nodeId, subNodes, 200);
     }
-  }
-
-  private toggleGroupOnClick(nodeId: string, node: ExtendedNode): void {
-    const subNodes = node.subNodes ?? [];
-    const isExpanded = this.groupExpandedState[nodeId] || false;
-    if (!isExpanded) {
-      const centerPos = this.network.getPositions([nodeId])[nodeId];
-      const radius = 200;
-      const newEdges = this.rawEdges
-        .filter(e => e.from === nodeId && subNodes.includes(e.to as string))
-        .filter(e => e.id == null || !this.edgeSet.get(e.id));
-      const newNodes = this.buildCircularSubNodes(subNodes, centerPos, radius);
-      this.nodeSet.add(newNodes);
-      this.edgeSet.add(newEdges);
-      this.captureOriginalNodeColors(newNodes.map(n => String(n.id)));
-      this.applyNodeSearchHighlight();
-      this.groupExpandedState[nodeId] = true;
-      this.updateActiveSessionState({ groupExpandedState: { ...this.groupExpandedState } });
-      this.network.selectNodes([nodeId]);
-      this.network.unselectAll();
-      return;
-    }
-    const edgeIdsToRemove = this.getEdgeIdsToRemove(nodeId, subNodes);
-    this.edgeSet.remove(edgeIdsToRemove);
-    subNodes.forEach(subId => {
-      const remainingEdges = this.edgeSet.get({
-        filter: edge => edge.from === subId || edge.to === subId
-      });
-      if (remainingEdges.length === 0 && this.nodeSet.get(subId)) {
-        this.nodeSet.remove(subId);
-      }
-    });
-    this.groupExpandedState[nodeId] = false;
-    this.updateActiveSessionState({ groupExpandedState: { ...this.groupExpandedState } });
-    if (this.orignalColor) {
-      this.nodeSet.update({ id: nodeId, color: this.orignalColor });
-    }
-    this.captureOriginalNodeColors();
-    this.applyNodeSearchHighlight();
   }
 
   private toggleEdgeHighlightOnClick(nodeId: string): void {

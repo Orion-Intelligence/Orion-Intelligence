@@ -1,5 +1,6 @@
 import {
   openAndAssertReportModal,
+  selectCtiFilterType,
   visitCtiGraph,
   waitForToolbarSearchReady,
   waitForCtiGraphReady
@@ -16,7 +17,7 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
 
   it('runs CTI graph flow with filters, search, and export report actions', () => {
     visitCtiGraph();
-    cy.get('[data-testid="cti-filter-type-select"]').select('Cluster');
+    selectCtiFilterType('Cluster');
     cy.get('[data-testid="cti-filter-apply"]').click();
     waitForCtiGraphReady();
     waitForToolbarSearchReady();
@@ -27,83 +28,25 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
     openAndAssertReportModal('Export CTI Report');
   });
 
-  it('covers CTI toolbar toggles and listings panel behavior', () => {
+  it('covers CTI toolbar toggles', () => {
     visitCtiGraph();
 
-    cy.get('[data-testid="graph-toolbar-root"]').filter(':visible').first().within(() => {
-      cy.get('[data-testid="graph-toolbar-view-list"]').filter(':visible').first().click();
-    });
-    cy.docsScreenshot('cti-list-view');
-    cy.get('[data-testid="graph-toolbar-root"]').filter(':visible').first().within(() => {
-      cy.get('[data-testid="graph-toolbar-view-graph"]').filter(':visible').first().click();
-    });
-    cy.get('[data-testid="cti-listings-toggle"], [data-testid="graph-toolbar-view-list"]').filter(':visible').first().click();
-    cy.get('[data-testid="cti-listings-toggle"], [data-testid="graph-toolbar-view-graph"]').filter(':visible').first().click();
-    cy.get('body').then(($body) => {
-      const listActive = $body.find('[data-testid="graph-toolbar-root"]:visible [data-testid="graph-toolbar-view-list"].text-white:visible').first();
-      if (listActive.length) {
-        cy.wrap(listActive).click();
-      }
-    });
     cy.get('[data-testid="graph-toolbar-root"]').filter(':visible').first().within(() => {
       cy.get('[data-testid="graph-toolbar-physics-toggle"], button[title="Enable Physics Simulation"], button[title="Disable Physics Simulation"]').filter(':visible').first().click();
       cy.get('[data-testid="graph-toolbar-physics-toggle"], button[title="Enable Physics Simulation"], button[title="Disable Physics Simulation"]').filter(':visible').first().click();
     });
   });
 
-  it('covers CTI session add, rename, import, export, and close actions', () => {
+  it('covers CTI filter rail collapse, reset, and apply actions', () => {
     visitCtiGraph();
 
-    cy.window().then((win) => {
-      cy.stub(win.URL, 'createObjectURL').as('createObjectURL').returns('blob:cti-test');
-      cy.stub(win.URL, 'revokeObjectURL').as('revokeObjectURL');
-      cy.stub(win.HTMLAnchorElement.prototype, 'click').as('anchorClick');
-    });
-    cy.get('[data-testid="cti-tab-session-menu"]').filter(':visible').first().should('be.visible');
-    cy.get('[data-testid="cti-tab-add-menu"]').filter(':visible').first().click();
-    cy.startInterceptTracking();
-    cy.get('[data-testid="cti-tab-add-new-session"]').filter(':visible').first().click();
-    cy.waitForIntercepts({ timeout: 60000, idleMs: 250 });
-    const newName = `CTI Session ${Date.now()}`;
-    cy.get('[data-testid="cti-tab-name"]').filter(':visible').should(($tabs) => {
-      const editableTabs = $tabs.toArray().filter(tab => tab.textContent?.trim() !== 'Playground');
-      expect(editableTabs.length).to.be.greaterThan(0);
-    }).then(($tabs) => {
-      const editableTabs = $tabs.toArray().filter(tab => tab.textContent?.trim() !== 'Playground');
-      cy.wrap(editableTabs[editableTabs.length - 1]).scrollIntoView().dblclick({ force: true });
-    });
-    cy.get('[data-testid="cti-tab-rename-input"]').filter(':visible').last().clear().type(`${newName}{enter}`);
-    cy.contains(newName).should('exist');
-    cy.get('[data-testid="cti-tab-session-menu"]').filter(':visible').first().click();
-    cy.contains('button', 'Export Current Session').then(($button) => {
-      ($button[0] as HTMLButtonElement).click();
-    });
-    cy.get('@createObjectURL').should('have.been.called');
-    cy.get('@anchorClick').should('have.been.called');
-    cy.get('@revokeObjectURL').should('have.been.called');
-    const importPayload = {
-      name: `Imported Session ${Date.now()}`,
-      state: {
-        selectedType: 'cluster',
-        singleInput: 'all',
-        propertyType: 'all',
-        propertyValue: '',
-        maxEdge: 25,
-        maxDepth: 1,
-        nodeSearchText: '',
-        physicsEnabled: true,
-        isGraphView: true,
-        isListingsCollapsed: true,
-        expandEnabled: false
-      }
-    };
-    cy.get('[data-testid="cti-tab-file-input"]').first().invoke('removeClass', 'hidden').invoke('css', 'display', 'block').invoke('css', 'visibility', 'visible').selectFile({
-      contents: Cypress.Buffer.from(JSON.stringify(importPayload)),
-      fileName: 'cti-import-session.json',
-      mimeType: 'application/json'
-    });
-    cy.contains(importPayload.name).should('exist');
-    cy.get('[data-testid="cti-tab-close"]').filter(':visible').first().click();
+    selectCtiFilterType('Property');
+    cy.get('[data-testid="cti-filter-reset"]').filter(':visible').first().click();
+    cy.get('[data-testid="cti-filter-type-select"]').should('contain.text', 'Cluster');
+    cy.get('[data-testid="graph-sidebar-collapse"]').filter(':visible').first().click();
+    cy.get('[data-testid="graph-sidebar-expand"]').filter(':visible').first().click();
+    cy.get('[data-testid="cti-filter-apply"]').filter(':visible').first().click();
+    waitForCtiGraphReady();
   });
 
   it('covers CTI report export option selection', () => {
@@ -120,7 +63,7 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
 
   it('attempts CTI graph context menu actions (data-dependent)', () => {
     visitCtiGraph();
-    cy.get('[data-testid="cti-filter-type-select"]').select('Cluster');
+    selectCtiFilterType('Cluster');
     cy.get('[data-testid="cti-filter-apply"]').click();
     waitForCtiGraphReady();
 

@@ -36,7 +36,7 @@ import { Component, input, output } from '@angular/core';
         </button>
       }
       @if (showCopyLabel()) {
-        <button data-testid="cti-context-copy-label" (click)="copyLabel.emit($event)" class="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm text-slate-200 transition-colors hover:bg-slate-700/70 hover:text-white [body.light-theme_&]:text-[var(--color-text2)] [body.light-theme_&]:hover:bg-[var(--color-blue-720)] [body.light-theme_&]:hover:text-[var(--color-text1)]">
+        <button data-testid="cti-context-copy-label" (click)="copyLabel.emit(undefined)" class="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm text-slate-200 transition-colors hover:bg-slate-700/70 hover:text-white [body.light-theme_&]:text-[var(--color-text2)] [body.light-theme_&]:hover:bg-[var(--color-blue-720)] [body.light-theme_&]:hover:text-[var(--color-text1)]">
           <i class="bi bi-clipboard w-5 h-5 text-slate-400 transition-colors group-hover:text-slate-200 [body.light-theme_&]:text-[var(--color-text4)]"></i>
           <span class="flex-grow">Copy Label</span>
           <i class="bi bi-chevron-right text-xs text-slate-500 transition-colors group-hover:text-slate-300 [body.light-theme_&]:text-[var(--color-text4)]"></i>
@@ -63,6 +63,6 @@ export class GraphContextMenuComponent {
   readonly expand = output<undefined>();
   readonly collapse = output<undefined>();
   readonly openCti = output<undefined>();
-  readonly copyLabel = output<MouseEvent>();
+  readonly copyLabel = output<undefined>();
   readonly openReport = output<undefined>();
 }

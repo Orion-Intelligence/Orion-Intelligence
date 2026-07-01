@@ -1,15 +1,16 @@
 import { Component, HostListener, OnChanges, OnInit, SimpleChanges, input, output } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { TitleCasePipe } from '@angular/common';
 import { GraphClusterType, GraphType, search_filter_labels } from '../../../../shared/constants/shared-enums';
 import { SidebarShellComponent } from '../../shared/sidebar-shell/sidebar-shell.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { CtiGraphFilters } from '../../../../shared/model/graph/cti-graph.model';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/components/ui-dropdown/ui-dropdown.component';
 
 @Component({
   selector: 'graph-sidebar',
   standalone: true,
   templateUrl: './sidebar.component.html',
-  imports: [FormsModule, ReactiveFormsModule, TitleCasePipe, SidebarShellComponent, TranslatePipe],
+  imports: [FormsModule, ReactiveFormsModule, SidebarShellComponent, TranslatePipe, UiDropdownComponent],
 })
 export class SidebarComponent implements OnInit, OnChanges {
   isCollapsed = false;
@@ -22,35 +23,26 @@ export class SidebarComponent implements OnInit, OnChanges {
   maxDepth = 1;
   graphTypeOptions = Object.values(GraphType);
   graphClusterOptions = Object.values(GraphClusterType);
+  graphTypeDropdownOptions: UiDropdownOption[] = this.graphTypeOptions.map(value => ({
+    key: value,
+    label: this.formatOptionLabel(value)
+  }));
+  graphClusterDropdownOptions: UiDropdownOption[] = this.graphClusterOptions.map(value => ({
+    key: value,
+    label: this.formatOptionLabel(value)
+  }));
   graphAllowedProperties = Object.entries(search_filter_labels).map(([key, label]) => ({
     label,
     key
   }));
-  readonly filters = input<{
-      selectedType: string;
-      singleInput: string;
-      propertyType: string;
-      propertyValue: string;
-      maxEdge: number;
-      maxDepth: number;
-  } | null>(null);
+  propertyDropdownOptions: UiDropdownOption[] = [
+    { key: 'all', label: 'All' },
+    ...this.graphAllowedProperties
+  ];
+  readonly filters = input<CtiGraphFilters | null>(null);
   readonly collapsed = input(false);
-  readonly filtersApplied = output<{
-      selectedType: string;
-      singleInput: string;
-      propertyType: string;
-      propertyValue: string;
-      maxEdge: number;
-      maxDepth: number;
-  }>();
-  readonly filtersChanged = output<{
-      selectedType: string;
-      singleInput: string;
-      propertyType: string;
-      propertyValue: string;
-      maxEdge: number;
-      maxDepth: number;
-  }>();
+  readonly filtersApplied = output<CtiGraphFilters>();
+  readonly filtersChanged = output<CtiGraphFilters>();
   readonly collapsedChange = output<boolean>();
 
   private buildFilterPayload() {
@@ -72,7 +64,7 @@ export class SidebarComponent implements OnInit, OnChanges {
     this.filtersChanged.emit(this.buildFilterPayload());
   }
 
-  private applyIncomingFilters(filters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; }) {
+  private applyIncomingFilters(filters: CtiGraphFilters) {
     this.selectedType = filters.selectedType || 'cluster';
     this.singleInput = filters.singleInput || 'all';
     this.propertyType = filters.propertyType || 'all';
@@ -145,6 +137,29 @@ export class SidebarComponent implements OnInit, OnChanges {
     return type.toLowerCase().replace("m_", "").replace("_", " ");
   }
 
+  setTypeFromDropdown(type: string | null) {
+    if (!type) {
+      return;
+    }
+    this.onTypeChange(type);
+  }
+
+  setClusterFromDropdown(value: string | null) {
+    if (!value) {
+      return;
+    }
+    this.singleInput = value;
+    this.emitDraftFilters();
+  }
+
+  setPropertyTypeFromDropdown(value: string | null) {
+    if (!value) {
+      return;
+    }
+    this.propertyType = value;
+    this.emitDraftFilters();
+  }
+
   onTypeChange(type: string) {
     this.selectedType = type;
     if (type === 'cluster') {
@@ -172,5 +187,11 @@ export class SidebarComponent implements OnInit, OnChanges {
       this.maxDepth = 2;
     }
     this.emitDraftFilters();
+  }
+
+  private formatOptionLabel(value: string): string {
+    return value
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, character => character.toUpperCase());
   }
 }

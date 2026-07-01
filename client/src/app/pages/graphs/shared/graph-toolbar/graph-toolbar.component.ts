@@ -18,6 +18,7 @@ export class GraphToolbarComponent {
   showImageButton = input(false);
   showClearButton = input(false);
   applyOuterPadding = input(true);
+  actionGroupVariant = input<'default' | 'tabs' | 'actions'>('default');
   viewMode = input<'graph' | 'list'>('graph');
   showViewModeToggle = input(true);
   isPhysicsEnabled = input(false);

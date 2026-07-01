@@ -1,5 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { SidebarComponent } from '../sidebar/sidebar.component';
+import { CtiGraphFilters } from '../../../../shared/model/graph/cti-graph.model';
 @Component({
   selector: 'app-cti-sidebar',
   standalone: true,
@@ -7,30 +8,9 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
   template: `<graph-sidebar [filters]="filters()" [collapsed]="collapsed()" (filtersApplied)="filtersApplied.emit($event)" (filtersChanged)="filtersChanged.emit($event)" (collapsedChange)="collapsedChange.emit($event)"></graph-sidebar>`
 })
 export class CtiSidebarComponent {
-  readonly filters = input<{
-      selectedType: string;
-      singleInput: string;
-      propertyType: string;
-      propertyValue: string;
-      maxEdge: number;
-      maxDepth: number;
-  } | null>(null);
+  readonly filters = input<CtiGraphFilters | null>(null);
   readonly collapsed = input(false);
-  readonly filtersApplied = output<{
-      selectedType: string;
-      singleInput: string;
-      propertyType: string;
-      propertyValue: string;
-      maxEdge: number;
-      maxDepth: number;
-  }>();
-  readonly filtersChanged = output<{
-      selectedType: string;
-      singleInput: string;
-      propertyType: string;
-      propertyValue: string;
-      maxEdge: number;
-      maxDepth: number;
-  }>();
+  readonly filtersApplied = output<CtiGraphFilters>();
+  readonly filtersChanged = output<CtiGraphFilters>();
   readonly collapsedChange = output<boolean>();
 }

@@ -2,76 +2,89 @@
   <div class="absolute inset-0 z-30 bg-slate-950/60 backdrop-blur-sm [body.light-theme_&]:bg-[var(--color-blue-850)]/20 md:hidden" (click)="onMobileBackdropClick()"></div>
 }
 
-<aside class="relative z-40 h-full border-r border-slate-800 bg-slate-900/90 backdrop-blur-md transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-[var(--color-blue-820-light)]" [class.w-[300px]]="!isCollapsed" [class.min-w-[300px]]="!isCollapsed" [class.w-[70px]]="isCollapsed && !isMobile" [class.min-w-[70px]]="isCollapsed && !isMobile" [class.w-[68px]]="isCollapsed && isMobile" [class.min-w-[68px]]="isCollapsed && isMobile">
-  <app-graph-sidebar-shell [isCollapsed]="isCollapsed" (toggleClicked)="toggleCollapsed()">
-    <form sidebar-expanded class="h-full p-3 flex flex-col gap-3 overflow-y-auto">
-      <div class="rounded-lg border border-slate-700 bg-slate-800/50 p-3 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white/90 [body.light-theme_&]:shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
-        <label class="text-xs uppercase tracking-wider text-slate-500 [body.light-theme_&]:text-[var(--color-text2)]">{{ 'categoryAlerts.export.type' | translate }}</label>
-        <select data-testid="cti-filter-type-select" [(ngModel)]="selectedType" (ngModelChange)="onTypeChange($event)" name="selectedType" class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white [body.light-theme_&]:text-[var(--color-text1)]">
-          @for (type of graphTypeOptions; track type) {
-            <option [ngValue]="type">{{ type | titlecase }}</option>
-          }
-        </select>
+<aside class="dark-theme relative z-40 h-full border-r border-[#ffffff12] bg-[var(--color-blue-900)] transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]" [class.w-[300px]]="!isCollapsed" [class.min-w-[300px]]="!isCollapsed" [class.w-[70px]]="isCollapsed && !isMobile" [class.min-w-[70px]]="isCollapsed && !isMobile" [class.w-[68px]]="isCollapsed && isMobile" [class.min-w-[68px]]="isCollapsed && isMobile">
+  <app-graph-sidebar-shell [isCollapsed]="isCollapsed" [forceDarkLogo]="true" (toggleClicked)="toggleCollapsed()">
+    <form sidebar-expanded class="h-full bg-[var(--color-blue-820-light)] p-3 flex flex-col gap-3 overflow-y-auto [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
+      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3 shadow-[0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+        <label class="text-xs uppercase tracking-wider text-[var(--color-text4)]">{{ 'categoryAlerts.export.type' | translate }}</label>
+        <app-ui-dropdown
+          class="mt-2"
+          testId="cti-filter-type-select"
+          menuId="cti-filter-type-menu"
+          menuPlacement="static"
+          [options]="graphTypeDropdownOptions"
+          [selected]="selectedType"
+          [searchable]="false"
+          [placeholder]="'Select type' | translate"
+          (valueChange)="setTypeFromDropdown($event)"></app-ui-dropdown>
       </div>
 
       @if (selectedType === 'cluster') {
-        <div class="rounded-lg border border-slate-700 bg-slate-800/50 p-3 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white/90 [body.light-theme_&]:shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
-          <label class="text-xs uppercase tracking-wider text-slate-500 [body.light-theme_&]:text-[var(--color-text2)]">{{ 'Cluster Type' | translate }}</label>
-          <select [(ngModel)]="singleInput" (ngModelChange)="emitDraftFilters()" name="singleInputCluster" class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white [body.light-theme_&]:text-[var(--color-text1)]">
-            @for (option of graphClusterOptions; track option) {
-              <option [ngValue]="option">{{ option | titlecase }}</option>
-            }
-          </select>
+        <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3 shadow-[0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+          <label class="text-xs uppercase tracking-wider text-[var(--color-text4)]">{{ 'Cluster Type' | translate }}</label>
+          <app-ui-dropdown
+            class="mt-2"
+            menuId="cti-filter-cluster-type-menu"
+            menuPlacement="static"
+            [options]="graphClusterDropdownOptions"
+            [selected]="singleInput"
+            [searchable]="false"
+            [placeholder]="'Select cluster' | translate"
+            (valueChange)="setClusterFromDropdown($event)"></app-ui-dropdown>
         </div>
       }
 
       @if (selectedType === 'property') {
-        <div class="rounded-lg border border-slate-700 bg-slate-800/50 p-3 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white/90 [body.light-theme_&]:shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
-          <label class="text-xs uppercase tracking-wider text-slate-500 [body.light-theme_&]:text-[var(--color-text2)]">{{ 'Property Type' | translate }}</label>
-          <select [(ngModel)]="propertyType" (ngModelChange)="emitDraftFilters()" name="propertyType" class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white [body.light-theme_&]:text-[var(--color-text1)]">
-            <option value="all">{{ 'All' | translate }}</option>
-            @for (property of graphAllowedProperties; track property) {
-              <option [ngValue]="property.key">{{ property.label }}</option>
-            }
-          </select>
-          <label class="mt-3 block text-xs uppercase tracking-wider text-slate-500 [body.light-theme_&]:text-[var(--color-text2)]">{{ 'Property Value' | translate }}</label>
-          <input [(ngModel)]="propertyValue" (ngModelChange)="emitDraftFilters()" name="propertyValue" type="text" [placeholder]="'Enter value' | translate" class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white [body.light-theme_&]:text-[var(--color-text1)] [body.light-theme_&]:placeholder:text-[var(--color-text4)]">
+        <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3 shadow-[0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+          <label class="text-xs uppercase tracking-wider text-[var(--color-text4)]">{{ 'Property Type' | translate }}</label>
+          <app-ui-dropdown
+            class="mt-2"
+            menuId="cti-filter-property-type-menu"
+            menuPlacement="static"
+            [options]="propertyDropdownOptions"
+            [selected]="propertyType"
+            [searchable]="true"
+            [placeholder]="'Select property' | translate"
+            [searchPlaceholder]="'Search properties' | translate"
+            (valueChange)="setPropertyTypeFromDropdown($event)"></app-ui-dropdown>
+          <label class="mt-3 block text-xs uppercase tracking-wider text-[var(--color-text4)]">{{ 'Property Value' | translate }}</label>
+          <input [(ngModel)]="propertyValue" (ngModelChange)="emitDraftFilters()" name="propertyValue" type="text" [placeholder]="'Enter value' | translate" class="mt-2 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-sm text-[var(--color-text1)] placeholder:text-[var(--color-text4)] focus:border-[var(--color-blue-640)] focus:outline-none focus:ring-2 focus:ring-[var(--color-blue-640)]/25">
         </div>
       }
 
       @if (selectedType === 'document') {
-        <div class="rounded-lg border border-slate-700 bg-slate-800/50 p-3 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white/90 [body.light-theme_&]:shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
-          <label class="text-xs uppercase tracking-wider text-slate-500 [body.light-theme_&]:text-[var(--color-text2)]">{{ 'Document ID' | translate }}</label>
-          <input [(ngModel)]="singleInput" (ngModelChange)="emitDraftFilters()" name="singleInputDoc" type="text" [placeholder]="'Enter ID' | translate" class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white [body.light-theme_&]:text-[var(--color-text1)] [body.light-theme_&]:placeholder:text-[var(--color-text4)]">
+        <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3 shadow-[0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+          <label class="text-xs uppercase tracking-wider text-[var(--color-text4)]">{{ 'Document ID' | translate }}</label>
+          <input [(ngModel)]="singleInput" (ngModelChange)="emitDraftFilters()" name="singleInputDoc" type="text" [placeholder]="'Enter ID' | translate" class="mt-2 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-sm text-[var(--color-text1)] placeholder:text-[var(--color-text4)] focus:border-[var(--color-blue-640)] focus:outline-none focus:ring-2 focus:ring-[var(--color-blue-640)]/25">
         </div>
       }
 
-      <div class="rounded-lg border border-slate-700 bg-slate-800/50 p-3 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white/90 [body.light-theme_&]:shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
-        <label class="text-xs uppercase tracking-wider text-slate-500 [body.light-theme_&]:text-[var(--color-text2)]">{{ 'Maximum Nodes (20-800)' | translate }}</label>
-        <input (blur)="validateMaxNodes()" [(ngModel)]="maxNodes" (ngModelChange)="emitDraftFilters()" name="maxNodes" type="number" min="20" max="800" class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white [body.light-theme_&]:text-[var(--color-text1)]">
+      <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3 shadow-[0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+        <label class="text-xs uppercase tracking-wider text-[var(--color-text4)]">{{ 'Maximum Nodes (20-800)' | translate }}</label>
+        <input (blur)="validateMaxNodes()" [(ngModel)]="maxNodes" (ngModelChange)="emitDraftFilters()" name="maxNodes" type="number" min="20" max="800" class="mt-2 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-sm text-[var(--color-text1)] focus:border-[var(--color-blue-640)] focus:outline-none focus:ring-2 focus:ring-[var(--color-blue-640)]/25">
 
-        <label class="mt-3 block text-xs uppercase tracking-wider text-slate-500 [body.light-theme_&]:text-[var(--color-text2)]">{{ 'Maximum Depth (1-5)' | translate }}</label>
-        <input (blur)="validateMaxDepth()" [(ngModel)]="maxDepth" (ngModelChange)="emitDraftFilters()" name="maxDepth" type="number" min="1" max="5" class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white [body.light-theme_&]:text-[var(--color-text1)]">
+        <label class="mt-3 block text-xs uppercase tracking-wider text-[var(--color-text4)]">{{ 'Maximum Depth (1-5)' | translate }}</label>
+        <input (blur)="validateMaxDepth()" [(ngModel)]="maxDepth" (ngModelChange)="emitDraftFilters()" name="maxDepth" type="number" min="1" max="5" class="mt-2 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-sm text-[var(--color-text1)] focus:border-[var(--color-blue-640)] focus:outline-none focus:ring-2 focus:ring-[var(--color-blue-640)]/25">
       </div>
 
       <div class="mt-auto flex gap-2">
-        <button data-testid="cti-filter-apply" (click)="applyFilters()" type="button" class="flex-1 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-500">{{ 'common.actions.apply' | translate }}</button>
-        <button data-testid="cti-filter-reset" (click)="resetFilters()" type="button" class="flex-1 rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-[var(--color-blue-720)] [body.light-theme_&]:text-[var(--color-text2)] [body.light-theme_&]:hover:bg-[var(--color-blue-710)]">{{ 'common.actions.reset' | translate }}</button>
+        <button data-testid="cti-filter-apply" (click)="applyFilters()" type="button" class="flex-1 rounded-[8px] bg-[var(--color-blue-640)] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">{{ 'common.actions.apply' | translate }}</button>
+        <button data-testid="cti-filter-reset" (click)="resetFilters()" type="button" class="flex-1 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-sm font-semibold text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]">{{ 'common.actions.reset' | translate }}</button>
       </div>
     </form>
 
-    <div sidebar-collapsed class="h-full flex flex-col items-center">
+    <div sidebar-collapsed class="h-full flex flex-col items-center bg-[var(--color-blue-820-light)]">
       <div class="py-4 flex flex-col items-center gap-4">
-        <button (click)="onTypeChange('cluster')" [class]="selectedType === 'cluster' ? 'w-9 h-9 flex items-center justify-center rounded-xl bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-700 hover:text-white [body.light-theme_&]:text-[var(--color-text4)] [body.light-theme_&]:hover:bg-[var(--color-blue-720)] [body.light-theme_&]:hover:text-[var(--color-text1)]'" [title]="'Cluster' | translate">
+        <button (click)="onTypeChange('cluster')" [class]="selectedType === 'cluster' ? 'w-9 h-9 flex items-center justify-center rounded-[8px] bg-[var(--color-blue-640)] text-white shadow-[0_8px_18px_rgba(15,23,42,0.18)]' : 'w-9 h-9 flex items-center justify-center rounded-[8px] text-[var(--color-text4)] hover:bg-[var(--color-blue-870)] hover:text-[var(--color-text1)]'" [title]="'Cluster' | translate">
           <i class="bi bi-diagram-3 text-lg leading-none"></i>
         </button>
-        <button (click)="onTypeChange('document')" [class]="selectedType === 'document' ? 'w-9 h-9 flex items-center justify-center rounded-xl bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-700 hover:text-white [body.light-theme_&]:text-[var(--color-text4)] [body.light-theme_&]:hover:bg-[var(--color-blue-720)] [body.light-theme_&]:hover:text-[var(--color-text1)]'" [title]="'Document' | translate">
+        <button (click)="onTypeChange('document')" [class]="selectedType === 'document' ? 'w-9 h-9 flex items-center justify-center rounded-[8px] bg-[var(--color-blue-640)] text-white shadow-[0_8px_18px_rgba(15,23,42,0.18)]' : 'w-9 h-9 flex items-center justify-center rounded-[8px] text-[var(--color-text4)] hover:bg-[var(--color-blue-870)] hover:text-[var(--color-text1)]'" [title]="'Document' | translate">
           <i class="bi bi-file-earmark-text text-lg leading-none"></i>
         </button>
-        <button (click)="onTypeChange('property')" [class]="selectedType === 'property' ? 'w-9 h-9 flex items-center justify-center rounded-xl bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-700 hover:text-white [body.light-theme_&]:text-[var(--color-text4)] [body.light-theme_&]:hover:bg-[var(--color-blue-720)] [body.light-theme_&]:hover:text-[var(--color-text1)]'" [title]="'Property' | translate">
+        <button (click)="onTypeChange('property')" [class]="selectedType === 'property' ? 'w-9 h-9 flex items-center justify-center rounded-[8px] bg-[var(--color-blue-640)] text-white shadow-[0_8px_18px_rgba(15,23,42,0.18)]' : 'w-9 h-9 flex items-center justify-center rounded-[8px] text-[var(--color-text4)] hover:bg-[var(--color-blue-870)] hover:text-[var(--color-text1)]'" [title]="'Property' | translate">
           <i class="bi bi-tags text-lg leading-none"></i>
         </button>
-        <button (click)="applyFilters()" class="w-9 h-9 flex items-center justify-center rounded-xl text-indigo-300 bg-indigo-500/20 hover:bg-indigo-500/30" [title]="'common.actions.apply' | translate">
+        <button (click)="applyFilters()" class="w-9 h-9 flex items-center justify-center rounded-[8px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]" [title]="'common.actions.apply' | translate">
           <i class="bi bi-play-fill text-lg leading-none"></i>
         </button>
       </div>

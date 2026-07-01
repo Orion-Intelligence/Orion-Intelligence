@@ -152,10 +152,14 @@ export class SocialMapperComponent implements OnDestroy {
 
   setResultSource(source: SocialResultSource): void {
     const username = this.activeSourceUsername();
-    if (!username || this.activeResultSource() === source || this.getResultSourceCount(source) === 0) {
+    if (!username) {
       return;
     }
-    this.activeResultSources.update(current => ({ ...current, [username]: source }));
+    const nextSource: SocialResultSource = this.activeResultSource() === source ? (source === 'normal' ? 'darkweb' : 'normal') : source;
+    if (this.getResultSourceCount(nextSource) === 0) {
+      return;
+    }
+    this.activeResultSources.update(current => ({ ...current, [username]: nextSource }));
     this.profileListing()?.clearProfileOverview();
   }
 

@@ -2716,22 +2716,130 @@ body.dark-theme .cdk-overlay-container .ui-dropdown-menu-alert input,
   background: var(--color-blue-850) !important;
 }
 
+.light-theme [data-testid='cti-graph-root'].ui-social-root-bg,
 .light-theme [data-testid='social-graph-root'].ui-social-root-bg {
   background: #e7eff9 !important;
 }
 
+.light-theme [data-testid='cti-graph-root'] > main,
+.light-theme [data-testid='cti-graph-root'] main > .h-full.w-full.min-h-0.flex.flex-col.overflow-hidden,
+.light-theme [data-testid='cti-graph-root'] .ui-social-dashboard-shell,
 .light-theme [data-testid='social-graph-root'] > main,
 .light-theme [data-testid='social-graph-root'] main > .h-full.w-full.min-h-0.flex.flex-col.overflow-hidden,
 .light-theme [data-testid='social-graph-root'] .ui-social-dashboard-shell {
   background: #e7eff9 !important;
 }
 
+.light-theme [data-testid='cti-graph-root'] app-cti-sidebar,
+.light-theme [data-testid='cti-graph-root'] app-cti-sidebar graph-sidebar > aside,
+.light-theme [data-testid='cti-graph-root'] app-cti-sidebar app-graph-sidebar-shell > div,
+.light-theme [data-testid='cti-graph-root'] app-cti-sidebar app-graph-sidebar-shell > div > .flex.shrink-0.items-center,
+.light-theme [data-testid='cti-graph-root'] app-cti-sidebar app-graph-sidebar-shell > div > .relative.flex-grow.overflow-hidden,
 .light-theme [data-testid='social-graph-root'] app-home-menu,
 .light-theme [data-testid='social-graph-root'] app-home-menu app-graph-sidebar-shell > div,
 .light-theme [data-testid='social-graph-root'] app-home-menu app-graph-sidebar-shell > div > .flex.shrink-0.items-center,
 .light-theme [data-testid='social-graph-root'] app-home-menu app-graph-sidebar-shell > div > .relative.flex-grow.overflow-hidden {
   border-color: #ffffff12 !important;
   background: #172235 !important;
+}
+
+[data-testid='cti-graph-root'] app-graph-toolbar .ui-graph-toolbar-action-shell .ui-graph-toolbar-search-btn.has-value,
+[data-testid='cti-graph-root'] app-graph-toolbar .ui-graph-toolbar-action-shell .ui-graph-toolbar-search-btn.has-value:hover,
+[data-testid='cti-graph-root'] app-graph-toolbar .ui-graph-toolbar-action-shell .ui-graph-toolbar-search-btn.has-value:active,
+[data-testid='cti-graph-root'] app-graph-toolbar [data-testid='graph-toolbar-physics-toggle'][class*='bg-teal-600'] {
+  background-color: var(--color-blue-640) !important;
+  color: #fff !important;
+}
+
+[data-testid='cti-graph-root'] app-graph-toolbar [data-testid='graph-toolbar-physics-toggle'][class*='bg-teal-600']:hover {
+  background-color: var(--color-blue-630) !important;
+}
+
+[data-testid='cti-graph-root'] app-graph-toolbar .cti-toolbar-tab--active {
+  background: var(--color-blue-640) !important;
+  color: #fff !important;
+}
+
+[data-testid='cti-graph-root'] app-graph-toolbar .cti-toolbar-tab--active:hover {
+  background: var(--color-blue-640) !important;
+}
+
+[data-testid='cti-graph-root'] .cti-toolbar-action-group {
+  border-color: var(--color-border) !important;
+  background: var(--color-blue-750) !important;
+  border-radius: 9999px !important;
+  box-shadow: none !important;
+}
+
+[data-testid='cti-graph-root'] .cti-toolbar-action {
+  background: var(--color-blue-750) !important;
+  border-radius: 9999px !important;
+  color: var(--color-text3) !important;
+}
+
+[data-testid='cti-graph-root'] .cti-toolbar-action-group > * {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+}
+
+[data-testid='cti-graph-root'] .cti-toolbar-action-group > * + * {
+  margin-left: 6px;
+  padding-left: 6px;
+}
+
+[data-testid='cti-graph-root'] .cti-toolbar-action-group > * + *::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 0;
+  z-index: 1;
+  width: 1px;
+  background: var(--color-border);
+  pointer-events: none;
+}
+
+[data-testid='cti-graph-root'] .cti-toolbar-action:hover {
+  background: var(--color-blue-810) !important;
+  color: var(--color-text1) !important;
+}
+
+[data-testid='cti-graph-root'] app-graph-toolbar .cti-toolbar-action--active {
+  background: var(--color-blue-750) !important;
+  color: var(--color-text1) !important;
+}
+
+[data-testid='cti-graph-root'] app-graph-toolbar .cti-toolbar-action--active:hover {
+  background: var(--color-blue-810) !important;
+  color: var(--color-text1) !important;
+}
+
+[data-testid='cti-graph-root'] .cti-toolbar-action:focus-visible {
+  outline: 2px solid rgb(255 255 255 / 0.34);
+  outline-offset: 2px;
+}
+
+[data-testid='cti-graph-root'] .cti-toolbar-action > i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+[data-testid='cti-graph-root'] .cti-toolbar-action > i .ui-bootstrap-icon {
+  height: 1.1rem;
+  width: 1.1rem;
+}
+
+[data-testid='cti-graph-root'] .cti-network-canvas,
+[data-testid='cti-graph-root'] .cti-network-canvas .vis-network,
+[data-testid='cti-graph-root'] .cti-network-canvas canvas {
+  display: block;
+  height: 100% !important;
+  min-height: 0 !important;
+  width: 100% !important;
 }
 
 .light-theme [data-testid='social-summary-popup'] > .relative.flex.flex-col.gap-4.border-b {

@@ -1,24 +1,14 @@
 export function openAndAssertReportModal(title: string) {
-  cy.get('[data-testid="cti-tab-session-menu"]').filter(':visible').first().click();
-  cy.contains('button', 'Export Report').then(($button) => {
-    ($button[0] as HTMLButtonElement).click();
-  });
+  cy.get('[data-testid="cti-export-report"]').filter(':visible').first().click();
   cy.contains(title).should('be.visible');
   cy.get('[data-testid="graph-report-export-modal"]').filter(':visible').first().should('be.visible');
   cy.get('[data-testid="graph-report-export-json"]').filter(':visible').first().should('exist');
   cy.get('[data-testid="graph-report-export-graph-pdf"]').filter(':visible').first().should('exist');
 }
 
-export function invokeVisibleTabBarMethod(methodName: 'createNewTab' | 'exportCurrentSession') {
-  cy.get('app-tab-bar')
-    .filter(':visible')
-    .first()
-    .then(($host) => {
-      cy.window().then((win: any) => {
-        const component = win.ng?.getComponent?.($host[0]);
-        component?.[methodName]?.();
-      });
-    });
+export function selectCtiFilterType(label: string) {
+  cy.get('[data-testid="cti-filter-type-select"]').filter(':visible').first().click();
+  cy.contains('[role="option"]', label).filter(':visible').first().click();
 }
 
 export function waitForToolbarSearchReady() {

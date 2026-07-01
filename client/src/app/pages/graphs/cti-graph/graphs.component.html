@@ -1,216 +1,159 @@
-@if (isTailwindReady) {
-  @if (hasLoadedSessions) {
-  <div class="fixed inset-0">
-    <app-tab-bar
-      [mode]="'cti'"
-      [tabs]="tabs"
-      [activeTabId]="activeTabId"
-      [editingTabId]="editingTabId"
-      [manageReportExportInternally]="false"
-      (tabSelected)="selectSession($event)"
-      (tabClosed)="closeSession($event)"
-      (tabEditStarted)="startEditing($event)"
-      (tabRenameSubmitted)="renameSession($event.id, $event.name)"
-      (tabRenameCancelled)="stopEditing()"
-      (newSessionRequested)="addSession()"
-      (exportCurrentRequested)="exportActiveSession()"
-      (exportReportRequested)="openReportExportModal()"
-      (fileSelected)="importSessionFile($event)">
-    </app-tab-bar>
-    <div class="absolute inset-x-0 bottom-0 top-12 flex">
-	      <app-cti-sidebar
-	        class="hidden flex-shrink-0 flex-col overflow-hidden border-b border-[var(--color-border)] bg-[#172235] backdrop-blur-md [body.light-theme_&]:bg-[var(--color-blue-820-light)] lg:flex lg:border-r"
-	        [filters]="activeSidebarFilters"
-	        [collapsed]="activeSidebarCollapsed"
-	        (filtersChanged)="onSidebarFiltersChanged($event)"
-	        (filtersApplied)="onSidebarApply($event)"
-	        (collapsedChange)="onSidebarCollapsedChange($event)">
-	      </app-cti-sidebar>
-      <main class="flex-grow min-h-0 relative">
-        <div class="pointer-events-none absolute left-0 right-0 top-0 z-30 p-2 sm:p-4">
-          <div class="pointer-events-auto flex-shrink-0 z-10">
-            <app-graph-toolbar
-              [applyOuterPadding]="false"
-              [searchTerm]="nodeSearchText"
-              [isSearchDisabled]="nodeSearchText.trim().length === 0"
-              [searchPlaceholder]="('Search nodes to highlight...') | translate"
-              [searchActionLabel]="('Search') | translate"
-              [showSearchActionButton]="true"
-              [showClearButton]="true"
-              [viewMode]="isGraphView ? 'graph' : 'list'"
-              [isPhysicsEnabled]="physicsEnabled"
-              (searchChanged)="onNodeSearchChange($event)"
-              (searchSubmitted)="onNodeSearchSubmitted()"
-              (clearSearchClicked)="onNodeSearchChange('')"
-              (viewModeChanged)="onToolbarViewModeChanged($event)"
-              (physicsToggled)="togglePhysics()">
-            </app-graph-toolbar>
-          </div>
-          @if (nodeSearchText.trim().length> 0) {
-            <div data-testid="cti-highlighted-count" class="mt-2 text-xs text-[var(--color-text2)]">
-              {{ searchMatchedCount }} {{ 'node(s) highlighted' | translate }}
-            </div>
-          }
-        </div>
-        <div class="absolute top-[80px] left-2 z-40 pointer-events-auto animate-[social-mapper-fade-in_0.4s_ease-in-out] sm:top-[96px] sm:left-4" [class.hidden]="!isGraphView">
-          <div class="relative h-10 w-10">
-            <app-expand-toggle-button [isExpanded]="expandEnabled" (toggled)="toggleExpandCollapseAll()"></app-expand-toggle-button>
-          </div>
-        </div>
-        <div data-testid="cti-network-container" #networkContainer class="h-full w-full bg-[var(--color-blue-850)] [background-image:radial-gradient(circle,_rgb(100_116_139_/_15%)_1px,_transparent_1px)] [background-size:2rem_2rem] transition-all duration-300" [ngClass]="{ 'lg:pr-[20rem]': isGraphView && !isListingsCollapsed, 'lg:pr-16': isGraphView && isListingsCollapsed, 'lg:pr-0': !isGraphView }" [class.opacity-100]="isGraphView" [class.translate-y-0]="isGraphView" [class.pointer-events-auto]="isGraphView" [class.opacity-0]="!isGraphView" [class.-translate-y-2]="!isGraphView" [class.pointer-events-none]="!isGraphView">
-        </div>
-        @if (isGraphView) {
-          <aside class="absolute inset-y-0 right-0 z-40 hidden overflow-hidden border-l border-[var(--color-border)] bg-[var(--color-blue-820-light)] backdrop-blur-sm transition-all duration-300 lg:block" [class.w-[22rem]]="!isListingsCollapsed" [class.w-16]="isListingsCollapsed">
-            <div class="flex h-full flex-col">
-              <div class="flex shrink-0 items-center border-b border-[var(--color-border)] p-3" [class.gap-3]="!isListingsCollapsed" [class.justify-between]="!isListingsCollapsed" [class.justify-center]="isListingsCollapsed">
-                <div class="overflow-hidden transition-all duration-300" [class.flex-grow]="!isListingsCollapsed" [class.w-0]="isListingsCollapsed" [class.opacity-0]="isListingsCollapsed">
-                  <h2 class="whitespace-nowrap text-md font-semibold text-[var(--color-text2)]">{{ 'Listings' | translate }}</h2>
-                </div>
-                <button data-testid="cti-listings-toggle" type="button" (click)="toggleListingsCollapsed()" class="flex h-10 w-10 items-center justify-center rounded-xl text-[var(--color-text4)] transition-colors hover:text-[var(--color-text1)] active:bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset" [title]="(isListingsCollapsed ? 'Expand listings' : 'Collapse listings') | translate">
-                  <i class="bi bi-list text-xl leading-none"></i>
-                </button>
-              </div>
-              @if (!isListingsCollapsed) {
-                <div class="border-b border-[var(--color-border)] px-5 py-2 text-xs text-[var(--color-text4)]">{{ listRows.length }} {{ 'documents' | translate }}</div>
-              }
-              @if (isListingsCollapsed) {
-                <div class="flex flex-1 items-start justify-center pt-3">
-                  <div class="flex h-10 min-w-10 items-center justify-center rounded-full bg-[var(--color-blue-800)] text-xs font-semibold text-[var(--color-text2)] ring-1 ring-inset ring-[var(--color-border)]">
-                    {{ listRows.length }}
-                  </div>
-                </div>
-              }
-              @if (!isListingsCollapsed) {
-                <div class="flex-1 overflow-y-auto">
-                  <div class="grid grid-cols-[1.6fr_1fr] border-b border-[var(--color-border)] px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--color-text4)]">
-                    <span>{{ 'Document' | translate }}</span>
-                    <span>{{ 'categoryAlerts.export.type' | translate }}</span>
-                  </div>
-                  @for (row of listRows; track row.id || $index) {
-                    <div class="grid grid-cols-[1.6fr_1fr] border-b border-[var(--color-border)] px-5 py-3 text-sm text-[var(--color-text2)] last:border-b-0">
-                      <span class="truncate">{{ row.label || row.id }}</span>
-                      <span class="text-[var(--color-text4)]">{{ row.cluster }}</span>
-                    </div>
-                  }
-                  @if (listRows.length === 0) {
-                    <div class="px-5 py-6 text-sm text-[var(--color-text4)]">
-                      {{ 'No listings available for current filters.' | translate }}
-                    </div>
-                  }
-                </div>
-              }
-            </div>
-          </aside>
-        }
-        @if (!isGraphView) {
-          <div class="absolute inset-0 overflow-y-auto bg-[var(--color-blue-850)]/95">
-            <div class="mx-auto max-w-6xl px-4 pt-24 pb-10">
-              <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-800)]/90 shadow-lg backdrop-blur-sm">
-                <div class="grid grid-cols-[1.6fr_1fr] border-b border-[var(--color-border)] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--color-text4)]">
-                  <span>{{ 'Document' | translate }}</span>
-                  <span>{{ 'categoryAlerts.export.type' | translate }}</span>
-                </div>
-                @for (row of listRows; track row.id || $index) {
-                  <div class="grid grid-cols-[1.6fr_1fr] border-b border-[var(--color-border)] px-4 py-3 text-sm text-[var(--color-text2)] last:border-b-0">
-                    <span class="truncate">{{ row.label || row.id }}</span>
-                    <span class="text-[var(--color-text4)]">{{ row.cluster }}</span>
-                  </div>
-                }
-                @if (listRows.length === 0) {
-                  <div class="px-4 py-6 text-sm text-[var(--color-text4)]">
-                    {{ 'No listings available for current filters.' | translate }}
-                  </div>
-                }
-              </div>
-            </div>
-          </div>
-        }
-        @if (isGraphView && maxEdge> 50 && showMaxEdgeNotice) {
-          <div class="absolute bottom-4 left-4 z-30 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-850)]/90 px-3 py-2 text-sm text-[var(--color-text1)] shadow-2xl backdrop-blur-sm">
-            <div class="flex items-start gap-2">
-              <img alt="Info Icon" class="mt-0.5 h-4 w-4 opacity-90" src="assets/images/shared/hint.svg">
-              <span>{{ 'You can see' | translate }} {{ maxEdge }} {{ 'nodes at a time, avoid using extreme values for better performance' | translate }}</span>
-              <button type="button" class="ml-1 text-[var(--color-text4)] hover:text-white" (click)="showMaxEdgeNotice=false" [title]="'Hide' | translate">
-                <i class="bi bi-x-lg text-xs"></i>
+<div data-testid="cti-graph-root" class="ui-social-root-bg flex h-[100dvh] min-h-0 w-screen flex-col overflow-hidden text-[var(--color-text2)]">
+  <main class="relative min-h-0 flex-grow">
+    <div class="flex h-full min-h-0 w-full flex-col overflow-hidden">
+      <div class="relative flex min-h-0 flex-grow flex-row">
+        <app-cti-sidebar
+          class="flex flex-shrink-0 flex-col overflow-hidden border-r border-[#ffffff12] bg-[#172235]"
+          [filters]="activeSidebarFilters"
+          [collapsed]="activeSidebarCollapsed"
+          (filtersChanged)="onSidebarFiltersChanged($event)"
+          (filtersApplied)="onSidebarApply($event)"
+          (collapsedChange)="onSidebarCollapsedChange($event)">
+        </app-cti-sidebar>
+
+        <main class="ui-social-dashboard-shell relative flex min-h-0 flex-grow flex-col bg-transparent">
+          <div class="ui-social-topbar relative z-[1100] flex h-[60px] w-full flex-shrink-0 items-center justify-between overflow-visible border-b border-[var(--color-border)] bg-[var(--color-mono)] p-0">
+            <div data-testid="cti-header-breadcrumb" class="ml-[10px] flex min-w-0 flex-1 items-center overflow-hidden pr-[20px] pl-3 text-[15px] text-white max-[943px]:ml-0 max-[943px]:pl-3">
+              <button type="button" (click)="goBack()" aria-label="Back" title="Back" class="mr-[10px] flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-[8px] transition-colors hover:bg-[var(--color-blue-870)]">
+                <img alt="Back" class="ui-breadcrumb-chevron h-[30px] w-[30px] p-[5px]" height="30" src="assets/images/shared/theme/arrow.svg" width="30" />
               </button>
+              <span class="inline-flex min-w-0 items-center font-[Inter,sans-serif] text-[16px] font-medium text-[var(--color-text1)]">
+                <span class="max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap max-[943px]:max-w-[110px]">CTI</span>
+                <img alt="breadcrumb" class="ui-breadcrumb-chevron ml-[5px] mr-[5px] inline-block" height="20" src="assets/images/shared/theme/nav-next.svg" width="20" />
+                <span class="max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap max-[943px]:max-w-[130px]">{{ 'Graph' | translate }}</span>
+              </span>
+            </div>
+
+            <div class="mr-0 flex shrink-0 items-center">
+              <app-profile></app-profile>
             </div>
           </div>
-        }
-        @if (rawNodes.length> 0 && isGraphView) {
-          <div class="ui-graph-legend-shell pointer-events-none absolute bottom-4 left-4 z-20 select-none rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)]/90 p-3 shadow-lg backdrop-blur-sm">
-            <h3 class="mb-2 border-b border-[var(--color-border)] pb-1 text-sm font-semibold text-[var(--color-text2)]">{{ 'Legend' | translate }}</h3>
-            <div class="flex flex-col gap-2">
-              <div class="flex items-center gap-2">
-                <div class="h-4 w-4 rounded-full border-2 border-[#f59e0b] bg-[var(--color-blue-720)]"></div>
-                <span class="text-xs text-[var(--color-text4)]">{{ 'Cluster' | translate }}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <div class="h-4 w-4 rounded-full border-2 border-[#f97316] bg-[var(--color-blue-720)]"></div>
-                <span class="text-xs text-[var(--color-text4)]">{{ 'Document' | translate }}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <div class="h-4 w-4 rounded-full border-2 border-[#38bdf8] bg-[var(--color-blue-720)]"></div>
-                <span class="text-xs text-[var(--color-text4)]">{{ 'Property' | translate }}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <div class="h-4 w-4 rounded-full border-2 border-[#7dd3fc] bg-transparent"></div>
-                <span class="text-xs text-[var(--color-text4)]">{{ 'Group Node' | translate }}</span>
-              </div>
-              <div class="my-1 h-px bg-[var(--color-border)]"></div>
-              <div class="flex items-center gap-2">
-                <div class="h-px w-4 bg-[var(--color-text4)]"></div>
-                <span class="text-xs text-[var(--color-text4)]">{{ 'Connection' | translate }}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <div class="w-4 text-[var(--color-text4)]">&rarr;</div>
-                <span class="text-xs text-[var(--color-text4)]">{{ 'Connection Direction' | translate }}</span>
+
+          <div class="ui-social-dashboard-body ui-dashboard-grid-bg flex min-h-0 flex-1 flex-col overflow-hidden">
+            <div class="flex-shrink-0 py-4">
+              <div class="w-full px-4">
+                <div class="flex w-full flex-wrap items-center gap-2">
+                  <app-graph-toolbar
+                    class="min-w-[280px] flex-1"
+                    [applyOuterPadding]="false"
+                    [searchTerm]="nodeSearchText"
+                    [isSearchDisabled]="nodeSearchText.trim().length === 0"
+                    [searchPlaceholder]="('Search nodes to highlight...') | translate"
+                    [searchActionLabel]="('Search') | translate"
+                    [showSearchActionButton]="true"
+                    [showClearButton]="true"
+                    [showViewModeToggle]="false"
+                    [actionGroupVariant]="'actions'"
+                    [isPhysicsEnabled]="physicsEnabled"
+                    (searchChanged)="onNodeSearchChange($event)"
+                    (searchSubmitted)="onNodeSearchSubmitted()"
+                    (clearSearchClicked)="onNodeSearchChange('')"
+                    (physicsToggled)="togglePhysics()">
+                    <app-expand-toggle-button toolbarExtraActions [isExpanded]="expandEnabled" (toggled)="toggleExpandCollapseAll()"></app-expand-toggle-button>
+                  </app-graph-toolbar>
+
+                  <button data-testid="cti-export-report" type="button" (click)="openReportExportModal()" class="ml-auto inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)] px-3 text-xs font-semibold text-[var(--color-text3)] transition-colors duration-300 hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-45" [attr.aria-label]="'Export Report' | translate" [title]="'Export Report' | translate">
+                    <i class="bi bi-file-earmark-arrow-down"></i>
+                    <span>{{ 'Export Report' | translate }}</span>
+                  </button>
+
+                  @if (nodeSearchText.trim().length> 0) {
+                    <div data-testid="cti-highlighted-count" class="inline-flex h-10 items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 text-xs font-semibold text-[var(--color-text3)] shadow-[0_8px_18px_var(--color-shadow-light)]">
+                      {{ searchMatchedCount }} {{ 'node(s) highlighted' | translate }}
+                    </div>
+                  }
+                </div>
               </div>
             </div>
+
+            <div class="flex min-h-0 w-full flex-1">
+              <section class="ui-dashboard-grid-bg relative flex min-h-0 flex-1 overflow-hidden">
+                <div data-testid="cti-network-container" #networkContainer class="cti-network-canvas h-full min-h-0 w-full flex-1 bg-transparent transition-all duration-300">
+                </div>
+
+                @if (maxEdge> 50 && showMaxEdgeNotice) {
+                  <div class="absolute bottom-4 right-4 z-30 max-w-md rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 px-3 py-2 text-sm text-[var(--color-text1)] shadow-[0_10px_24px_var(--color-shadow-light)] backdrop-blur-sm">
+                    <div class="flex items-start gap-2">
+                      <img alt="Info Icon" class="mt-0.5 h-4 w-4 opacity-90" src="assets/images/shared/hint.svg">
+                      <span>{{ 'You can see' | translate }} {{ maxEdge }} {{ 'nodes at a time, avoid using extreme values for better performance' | translate }}</span>
+                      <button type="button" class="ml-1 text-[var(--color-text4)] hover:text-white" (click)="showMaxEdgeNotice=false" [title]="'Hide' | translate">
+                        <i class="bi bi-x-lg text-xs"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+
+                @if (rawNodes.length> 0) {
+                  <div class="ui-graph-legend-shell pointer-events-none absolute bottom-4 left-4 z-20 select-none rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3 shadow-[0_10px_24px_var(--color-shadow-light)] backdrop-blur-sm">
+                    <h3 class="mb-2 border-b border-[var(--color-border)] pb-1 text-sm font-semibold text-[var(--color-text2)]">{{ 'Legend' | translate }}</h3>
+                    <div class="flex flex-col gap-2">
+                      <div class="flex items-center gap-2">
+                        <div class="h-4 w-4 rounded-full border-2 border-[#f59e0b] bg-[var(--color-blue-720)]"></div>
+                        <span class="text-xs text-[var(--color-text4)]">{{ 'Cluster' | translate }}</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <div class="h-4 w-4 rounded-full border-2 border-[#f97316] bg-[var(--color-blue-720)]"></div>
+                        <span class="text-xs text-[var(--color-text4)]">{{ 'Document' | translate }}</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <div class="h-4 w-4 rounded-full border-2 border-[#38bdf8] bg-[var(--color-blue-720)]"></div>
+                        <span class="text-xs text-[var(--color-text4)]">{{ 'Property' | translate }}</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <div class="h-4 w-4 rounded-full border-2 border-[#7dd3fc] bg-transparent"></div>
+                        <span class="text-xs text-[var(--color-text4)]">{{ 'Group Node' | translate }}</span>
+                      </div>
+                      <div class="my-1 h-px bg-[var(--color-border)]"></div>
+                      <div class="flex items-center gap-2">
+                        <div class="h-px w-4 bg-[var(--color-text4)]"></div>
+                        <span class="text-xs text-[var(--color-text4)]">{{ 'Connection' | translate }}</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <div class="w-4 text-[var(--color-text4)]">&rarr;</div>
+                        <span class="text-xs text-[var(--color-text4)]">{{ 'Connection Direction' | translate }}</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+
+                @if (this.isEmpty) {
+                  <div @fadeInDashboardItem class="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block">
+                    @if (loading) {
+                      <img alt="No Data" class="h-40 w-auto" src="assets/images/shared/cti-empty.svg"/>
+                    }
+                    @if (!loading) {
+                      <img alt="No Data" class="h-40 w-auto animate-pulse" src="assets/images/shared/magnifying_search.svg"/>
+                    }
+                  </div>
+                }
+              </section>
+            </div>
           </div>
-        }
-      </main>
-    </div>
-    <app-graph-context-menu
-      [nodeId]="contextMenuNodeId"
-      [canExpand]="contextCanExpand"
-      [canCollapse]="contextCanCollapse"
-      [showOpenCti]="contextShowOpenCti"
-      [showCopyLabel]="true"
-      [showOpenReport]="contextShowOpenReport"
-      (expand)="expandGroupNode()"
-      (collapse)="collapseGroupNode()"
-      (openCti)="openCTI()"
-      (copyLabel)="copyNodeLabel($event)"
-      (openReport)="viewReport()">
-    </app-graph-context-menu>
-    @if (copied) {
-      <span class="fixed right-4 top-4 z-[1001] rounded-full bg-emerald-500/90 px-3 py-1 text-xs font-semibold text-white shadow-lg">
-        {{ 'Copied!' | translate }}
-      </span>
-    }
-    @if (this.isEmpty) {
-      <div @fadeInDashboardItem class="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block">
-        @if (loading) {
-          <img alt="No Data" class="h-40 w-auto" src="assets/images/shared/cti-empty.svg"/>
-        }
-        @if (!loading) {
-          <img alt="No Data" class="h-40 w-auto animate-pulse" src="assets/images/shared/magnifying_search.svg"/>
-        }
+        </main>
       </div>
-    }
-  </div>
-  } @else {
-  <app-graph-loading
-    [title]="('Restoring CTI Session') | translate"
-    [subtitle]="('Loading tabs, filters, graph state, and expanded groups.') | translate">
-  </app-graph-loading>
+    </div>
+  </main>
+
+  <app-graph-context-menu
+    [nodeId]="contextMenuNodeId"
+    [canExpand]="contextCanExpand"
+    [canCollapse]="contextCanCollapse"
+    [showOpenCti]="contextShowOpenCti"
+    [showCopyLabel]="true"
+    [showOpenReport]="contextShowOpenReport"
+    (expand)="expandGroupNode()"
+    (collapse)="collapseGroupNode()"
+    (openCti)="openCTI()"
+    (copyLabel)="copyNodeLabel()"
+    (openReport)="viewReport()">
+  </app-graph-context-menu>
+
+  @if (copied) {
+    <span class="fixed right-4 top-4 z-[1001] rounded-full bg-emerald-500/90 px-3 py-1 text-xs font-semibold text-white shadow-lg">
+      {{ 'Copied!' | translate }}
+    </span>
   }
-} @else {
-  <app-graph-loading
-    [title]="('Loading CTI Graph') | translate"
-    [subtitle]="('Loading graph styles.') | translate">
-  </app-graph-loading>
-}
+</div>
 
 <app-export-choice-modal
   [visible]="isReportExportModalOpen"
