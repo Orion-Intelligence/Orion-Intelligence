@@ -53,6 +53,7 @@ describe('Scans Management - Entity Lookup Flow', () => {
     fillSecondaryScanInput(testData.scans_email_breach);
     clickSearch();
     cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
+    cy.docsScreenshot('entity-api-email-breach');
 
     cy.visit('/dashboard/api/social-scanner');
     fillPrimaryScanInput(testData.scans_social_username);
@@ -74,6 +75,12 @@ describe('Scans Management - Entity Lookup Flow', () => {
     clickSearch();
     cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
 
+    cy.visit('/dashboard/scanner/apk-scan');
+    makeFileInputInteractable();
+    cy.get('[data-testid="scan-file-input"]').first().selectFile('cypress/fixtures/1MB_1.0_APKPure.apk');
+    cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
+    cy.docsScreenshot('apk-scan-report');
+
     cy.visit('/dashboard/api/software-scanner');
     fillPrimaryScanInput('gta');
     clickSearch();
@@ -87,6 +94,7 @@ describe('Scans Management - Entity Lookup Flow', () => {
       mimeType: 'application/pdf'
     });
     cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
+    cy.docsScreenshot('file-scanner-report');
     cy.get('[data-testid="scan-download-report"]').filter(':visible').first().should('be.visible').and('be.enabled').scrollIntoView().click();
     cy.get('[data-testid="scan-another-file"]').filter(':visible').first().should('be.visible').and('be.enabled').scrollIntoView().click();
     makeFileInputInteractable();

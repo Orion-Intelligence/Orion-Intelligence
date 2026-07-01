@@ -27,6 +27,8 @@ describe('Orion Intelligence - Social Intel Management Flow', () => {
     assertSocialResultNavigation();
     assertDashboardStealerExposure();
     assertManageProfilesForScannedResult();
+    cy.get('[data-testid="social-list-view"]').should('be.visible');
+    cy.docsScreenshot('social-intel-list-view');
     openConnectionsFromPlatformCard();
     openProfileOverviewFromPlatformCard();
     fetchSocialProfileTabs();

@@ -13,7 +13,14 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
   it('runs General Intelligence search flow for All, General, and Forums', () => {
     openSidebarGroup('General Intelligence');
     typeDashboardSearchSlow('bitcoin');
+    cy.get('[data-testid="result-card"], tbody tr.cursor-pointer[id^="item-"]').should('have.length.greaterThan', 0);
+    cy.docsScreenshot('general-intelligence-results');
+    cy.openSideFilter();
+    cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().should('be.visible');
+    cy.docsScreenshot('search-filters');
+    cy.closeSideFilter();
     openFirstReportAndValidateNavigationOrModal();
+    cy.docsScreenshot('report-json-viewer');
 
     cy.go('back');
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
@@ -36,6 +43,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     typeDashboardSearchSlow('mthcht');
     clickOpenDefacementReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
+    cy.docsScreenshot('defacement-report');
     cy.get('body').type('{esc}');
 
     cy.go('back');
@@ -66,12 +74,23 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('body').type('{esc}');
   });
 
+  it('runs Data Breach tracking search flow', () => {
+    cy.loginAsAdmin();
+    cy.visit('/dashboard/breach/tracking?page=1');
+    waitForSearchReady();
+    typeDashboardSearchSlow('elena.pierce@samplemail.test');
+    cy.get('[data-testid="result-card"], tbody tr.cursor-pointer[id^="item-"], app-json-api-viewer')
+      .should('have.length.greaterThan', 0);
+    cy.docsScreenshot('data-breach-tracking');
+  });
+
   it('runs Social search flow for All, Twitter, Mastodon, Pastebin, Forum, and Reddit', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Social');
     typeDashboardSearchSlow('a');
     clickOpenReport();
     cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
+    cy.docsScreenshot('social-report');
     cy.get('body').type('{esc}');
 
     cy.go('back');
@@ -128,6 +147,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     openSidebarGroup('Exploit');
     typeDashboardSearchSlow('exploit');
     clickOpenExploitReport();
+    cy.docsScreenshot('exploit-results');
 
     cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
@@ -170,6 +190,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     typeInputSlow('@q', 'police');
     clickOpenReport();
     exerciseJsonViewerOnce();
+    cy.docsScreenshot('feed-report');
   });
 
   it('runs Stealer logs IOCS search flow and expands a row', () => {
@@ -181,6 +202,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     waitForSearchReady();
     typeInputSlow('@q', 'uwe.dippold@web.de');
     cy.get('button[aria-label="Expand row"]').should('have.length.greaterThan', 0).first().scrollIntoView().click();
+    cy.docsScreenshot('stealer-logs-results');
   });
 
   it('runs Stealer logs IOCS search with date filters', () => {
@@ -244,6 +266,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('@scanInput').clear();
     waitForSearchReady();
     typeInputSlow('@scanInput', 'bbc.com');
+    cy.docsScreenshot('web-scan-report');
 
     cy.get('button.ui-cred-toolbar-btn', { timeout: 60000 }).should('be.disabled');
     cy.get('[data-testid="network-intel-tab-ip-scan"]').should('be.visible').click();

@@ -37,6 +37,7 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
             cy.location('pathname').should('include', '/dashboard/profile/account');
             cy.get('[data-testid="account-settings-form"]').should('be.visible');
             cy.get('[data-testid="account-settings-title"]').should('be.visible');
+            cy.docsScreenshot('account-settings');
 
             cy.get('[data-testid="account-settings-title"]').invoke('text').then((t) => {
                 expect(t.trim()).to.match(/Admin Profile|User Profile Form/);
@@ -98,9 +99,11 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
                 cy.get('[data-testid="reset-confirm-password"]').clear().type(resolvedNewPassword, {log: false}).blur();
                 cy.get('[data-testid="reset-submit"]').click();
                 cy.url().should('include', '/login');
+                cy.intercept('POST', '**/api/token').as('loginRequest');
                 cy.get('[data-testid="login-user"]').clear().type(TEST_USERS.testing3.username);
                 cy.get('[data-testid="login-pass"]').clear().type(resolvedNewPassword, {log: false});
                 cy.get('[data-testid="login-button"]').click();
+                cy.waitForLoginRequest();
                 cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
                     .filter(':visible')
                     .should('have.length.greaterThan', 0);

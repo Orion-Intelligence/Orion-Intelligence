@@ -41,10 +41,12 @@ export function clickWhenVisible(selector: string, timeout: number = 30000) {
 }
 
 export function submitLogin(username: string, password: string) {
+  cy.intercept('POST', '**/api/token').as('loginRequest');
   cy.visit('/login');
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
   cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+  cy.waitForLoginRequest();
 }
 
 export function loginTenant(tenant: any) {

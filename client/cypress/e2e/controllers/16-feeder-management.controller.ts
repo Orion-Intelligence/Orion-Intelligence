@@ -39,6 +39,7 @@ export function openFeederAsUser(username: string, password: string) {
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, { log: false });
   cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+  cy.waitForLoginRequest();
   cy.get('[data-testid="dashboard-main"]').should('be.visible');
   cy.get('[data-testid="sidebar-group-profile"]').should('be.visible').scrollIntoView().click();
   cy.get('[data-testid="sidebar-subitem-profile-feeder"]').should('be.visible').scrollIntoView().click();

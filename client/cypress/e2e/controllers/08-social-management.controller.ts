@@ -58,6 +58,7 @@ export function scanKnownSocialUsername(username = SOCIAL_STEALER_USERNAME) {
   cy.contains(SOCIAL_PLATFORM_CARD, SOCIAL_STEALER_PLATFORM, { timeout: SOCIAL_FETCH_TIMEOUT })
     .scrollIntoView()
     .should('be.visible');
+  cy.docsScreenshot('social-intel');
 }
 
 export function assertSocialResultNavigation() {
@@ -125,6 +126,8 @@ export function openProfileOverviewFromPlatformCard() {
   cy.get('[data-testid="social-fetch-tab"][data-tab-key="stealerLogs"]').should('exist');
   assertTabPanelSettled('social-tab-panel-details', 'Loading profile details');
   cy.get('[data-testid="social-tab-panel-details"]').should('contain.text', 'Clark Kent');
+  cy.docsScreenshot('social-summary-popup');
+  cy.docsScreenshot('social-metadata-results');
 }
 
 export function fetchSocialProfileTabs() {
@@ -141,6 +144,7 @@ export function fetchSocialProfileTabs() {
       .should('have.length.greaterThan', 0)
       .first()
       .should('contain.text', '@loislane');
+    cy.docsScreenshot('social-followers-popup');
   });
 
   clickFetchTabIfPresent('following', () => {
@@ -167,6 +171,7 @@ export function fetchSocialProfileTabs() {
 export function assertManageProfilesForScannedResult() {
   cy.get('[data-testid="social-list-manage-profiles"]').first().click();
   cy.get('[data-testid="social-manage-profiles-modal"]').should('be.visible');
+  cy.docsScreenshot('social-manage-profiles');
   cy.get('[data-testid="social-manage-profiles-filter"]').clear().type('twitter');
   cy.get('[data-testid="social-manage-profile-card"]').should('have.length.greaterThan', 0);
   cy.get('[data-testid="social-manage-profile-switch"]').first().should('have.attr', 'role', 'switch');

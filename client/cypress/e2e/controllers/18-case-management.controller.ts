@@ -120,6 +120,9 @@ export function createCase(title: string, description: string, entityValue: stri
   cy.get(selector('case-add-severity-select')).should('be.visible').select('high');
   cy.get(selector('case-add-priority-select')).should('be.visible').select('high');
   cy.get(selector('case-primary-entity-value-input')).scrollIntoView().should('be.visible').type(entityValue);
+  if (title === 'Cypress Case Title') {
+    cy.docsScreenshot('case-management-add');
+  }
   cy.get(selector('case-add-save')).filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
 
   assertNotification('Case added successfully');

@@ -45,6 +45,7 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.get(selector('case-details-severity-value')).should('contain.text', 'high');
     cy.get(selector('case-details-priority-value')).should('contain.text', 'high');
     cy.get(selector('case-primary-entity-value')).should('contain.text', 'Cypress Entity');
+    cy.docsScreenshot('case-management-view');
 
     cy.get(selector('case-closure-add'))
       .scrollIntoView()

@@ -20,6 +20,7 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
     cy.get('[data-testid="cti-filter-apply"]').click();
     waitForCtiGraphReady();
     waitForToolbarSearchReady();
+    cy.docsScreenshot('cti-graph');
     cy.get('[data-testid="graph-toolbar-search-input"]').clear().type('leak');
     cy.get('[data-testid="graph-toolbar-search-button"]').click();
     cy.get('[data-testid="cti-highlighted-count"]').should('contain.text', 'highlighted');
@@ -31,6 +32,9 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
 
     cy.get('[data-testid="graph-toolbar-root"]').filter(':visible').first().within(() => {
       cy.get('[data-testid="graph-toolbar-view-list"]').filter(':visible').first().click();
+    });
+    cy.docsScreenshot('cti-list-view');
+    cy.get('[data-testid="graph-toolbar-root"]').filter(':visible').first().within(() => {
       cy.get('[data-testid="graph-toolbar-view-graph"]').filter(':visible').first().click();
     });
     cy.get('[data-testid="cti-listings-toggle"], [data-testid="graph-toolbar-view-list"]').filter(':visible').first().click();
@@ -106,6 +110,7 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
     visitCtiGraph();
 
     openAndAssertReportModal('Export CTI Report');
+    cy.docsScreenshot('cti-export-modal');
     cy.get('[data-testid="graph-report-export-json"]').filter(':visible').first().click();
     cy.get('[data-testid="graph-report-export-modal"]').should('not.exist');
     openAndAssertReportModal('Export CTI Report');
@@ -147,6 +152,7 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
     });
 
     cy.get('[data-testid="cti-context-menu"]').should('exist');
+    cy.docsScreenshot('cti-context-menu');
   });
 
 });
