@@ -11,6 +11,7 @@ import { CtiGraphFilters, CtiGraphLegendItem, CtiGraphStats } from '../../../../
     [legendItems]="legendItems()"
     [clusterLegendItems]="clusterLegendItems()"
     [collapsed]="collapsed()"
+    (filtersApply)="filtersApply.emit($event)"
     (collapsedChange)="collapsedChange.emit($event)">
   </graph-sidebar>`
 })
@@ -21,4 +22,5 @@ export class CtiSidebarComponent {
   readonly clusterLegendItems = input<CtiGraphLegendItem[]>([]);
   readonly collapsed = input(false);
   readonly collapsedChange = output<boolean>();
+  readonly filtersApply = output<CtiGraphFilters>();
 }

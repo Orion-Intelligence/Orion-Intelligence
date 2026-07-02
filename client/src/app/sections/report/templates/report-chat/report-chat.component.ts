@@ -15,7 +15,7 @@ import { DashboardService } from '../../../../services/dashboard/dashboard.servi
 import { ChatWidgetComponent } from '../../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { AppService } from '../../../../services/core/app/app.service';
 import { ScrollService } from '../../../../shared/services/scroll.service';
-import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, isLikelyUrl as isLikelyUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
+import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, isHiddenReportMetadataKey, isLikelyUrl as isLikelyUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
 import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
 import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
@@ -101,6 +101,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
         const value = (this.resultItem as any)[key];
         if (Array.isArray(value) &&
                     value.length > 0 &&
+                    !isHiddenReportMetadataKey(key) &&
                     !addedKeys.has(key)) {
           this.arrayKeys.push(key);
           addedKeys.add(key);

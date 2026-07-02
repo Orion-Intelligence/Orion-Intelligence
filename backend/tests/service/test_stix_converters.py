@@ -131,7 +131,7 @@ def test_convert_to_stix_builds_full_relationship_graph_for_general_content():
         "m_team": "APT Demo",
         "m_sender_username": "analyst1",
         "m_network": "onion",
-        "m_platform": "forum",
+        "m_platform": ["forum"],
         "m_language": ["en"],
         "m_content_type": ["leaks"],
     }
@@ -162,7 +162,7 @@ def test_convert_to_stix_builds_full_relationship_graph_for_general_content():
     assert report["lang"] == "en"
     assert report["x_orion_doc_id"] == "abc123"
     assert report["x_orion_network"] == "onion"
-    assert report["x_orion_platform"] == "forum"
+    assert report["x_orion_platform"] == ["forum"]
     assert report["external_references"][0]["url"] == "https://example.com/report"
 
     assert grouped["infrastructure"][0]["infrastructure_types"] == ["anonymization"]

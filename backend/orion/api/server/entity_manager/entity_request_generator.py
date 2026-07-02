@@ -5,6 +5,51 @@ from orion.constants.cti_graph_schema import DEFAULT_CLUSTER_IDS, DEFAULT_CLUSTE
 
 class EntityRequestGenerator:
     GRAPH_EXTRA_KEY_TITLES = graph_enums.GRAPH_EXTRA_KEY_TITLES
+    STRONG_RELATED_PROPERTY_KEYS = {
+        "m_alias",
+        "m_asns",
+        "m_attacker",
+        "m_author",
+        "m_company_name",
+        "m_crypto_address",
+        "m_cve",
+        "m_cwe",
+        "m_domain",
+        "m_email",
+        "m_enterprise_attack_tactics",
+        "m_enterprise_attack_techniques",
+        "m_family",
+        "m_file_name",
+        "m_file_paths",
+        "m_hash",
+        "m_hashes",
+        "m_hashtag",
+        "m_imphash",
+        "m_ip",
+        "m_mac_address",
+        "m_md5",
+        "m_mention",
+        "m_org",
+        "m_person",
+        "m_phone_number",
+        "m_product",
+        "m_reporter",
+        "m_registry_key_path",
+        "m_sha1",
+        "m_sha256",
+        "m_sha3_384",
+        "m_signature",
+        "m_social_media_profiles",
+        "m_telfhash",
+        "m_tlsh",
+        "m_uk_nhs",
+        "m_username",
+        "m_us_driver_license",
+        "m_vendor",
+        "m_vulnerability",
+        "m_xmpp_addresses",
+        "m_yara_rule",
+    }
 
     @staticmethod
     def get_cluster_documents_query(normalized_value: str, depth_level: int, document_limit: int):
@@ -199,6 +244,8 @@ class EntityRequestGenerator:
         LET property_ids = UNIQUE(
           FOR item IN raw_depth1
             FILTER item.vertex.type NOT IN ['document', 'cluster']
+            LET property_key = SPLIT(PARSE_IDENTIFIER(item.vertex._id).key, ":")[0]
+            FILTER property_key IN @strong_related_property_types
             RETURN item.vertex._id
         )
 
@@ -217,10 +264,11 @@ class EntityRequestGenerator:
           FOR doc_id IN doc_counts
             FOR e IN cti_edges
               FILTER e._from == doc_id AND STARTS_WITH(e.type, "has_")
+              FILTER e._to IN property_ids
               FOR doc IN cti_vertices
                 FILTER doc._id == doc_id AND doc.type == "document"
                 RETURN {{
-                  vertex: KEEP(doc, "_id", "_key", "_rev", "type", "doc_id"),
+                  vertex: KEEP(doc, "_id", "_key", "_rev", "type", "node_class", "doc_id", "m_document_id", "cluster_id", "module", "label", "display_value", "title", "summary", "published", "source", "source_reliability"),
                   edge: e,
                   path: null
                 }}
@@ -280,6 +328,7 @@ class EntityRequestGenerator:
 
         bind_vars = {
             "default_clusters": list(DEFAULT_CLUSTER_KEYS),
+            "strong_related_property_types": list(EntityRequestGenerator.STRONG_RELATED_PROPERTY_KEYS),
             "start_vertex": start_vertex,
         }
         return queried_id, query_str, bind_vars

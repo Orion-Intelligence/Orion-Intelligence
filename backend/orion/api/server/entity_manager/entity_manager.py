@@ -51,12 +51,16 @@ class entity_manager:
     def get_instance():
         if entity_manager.__instance is None:
             entity_manager()
+        entity_manager.__instance._refresh_arango_handles()
         return entity_manager.__instance
 
     def __init__(self):
         if entity_manager.__instance is not None:
             raise Exception("This class is a singleton!")
         entity_manager.__instance = self
+        self._refresh_arango_handles()
+
+    def _refresh_arango_handles(self):
         arango = arango_controller.get_instance()
         self.__db = arango.get_db()
         self.__graph = arango.get_graph()

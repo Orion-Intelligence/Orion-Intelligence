@@ -3,16 +3,20 @@
     <div class="flex h-full min-h-0 w-full flex-col overflow-hidden">
       <div class="relative flex min-h-0 flex-grow flex-row">
         <app-cti-sidebar
-          class="flex flex-shrink-0 flex-col overflow-hidden border-r border-[#ffffff12] bg-[#172235]"
+          class="z-[1200] flex flex-shrink-0 flex-col overflow-hidden border-r border-[#ffffff12] bg-[#172235]"
+          [class.max-md:absolute]="!activeSidebarCollapsed"
+          [class.max-md:inset-y-0]="!activeSidebarCollapsed"
+          [class.max-md:left-0]="!activeSidebarCollapsed"
           [filters]="activeSidebarFilters"
           [stats]="graphStats"
           [legendItems]="legendItems"
           [clusterLegendItems]="clusterLegendItems"
           [collapsed]="activeSidebarCollapsed"
+          (filtersApply)="onGraphSizeApply($event)"
           (collapsedChange)="onSidebarCollapsedChange($event)">
         </app-cti-sidebar>
 
-        <main class="ui-social-dashboard-shell relative flex min-h-0 flex-grow flex-col bg-transparent">
+        <main class="ui-social-dashboard-shell relative flex min-h-0 min-w-0 flex-grow flex-col bg-transparent">
           <div class="ui-social-topbar relative z-[1100] flex h-[60px] w-full flex-shrink-0 items-center justify-between overflow-visible border-b border-[var(--color-border)] bg-[var(--color-mono)] p-0">
             <div data-testid="cti-header-breadcrumb" class="ml-[10px] flex min-w-0 flex-1 items-center overflow-hidden pr-[20px] pl-3 text-[15px] text-white max-[943px]:ml-0 max-[943px]:pl-3">
               <button type="button" (click)="goBack()" aria-label="Back" title="Back" class="mr-[10px] flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-[8px] transition-colors hover:bg-[var(--color-blue-870)]">
@@ -66,6 +70,17 @@
               @if (!graphSearchAdvancedMode) {
                 <form class="relative mt-4 flex min-h-[42px] w-full items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-white px-3 py-2" (submit)="$event.preventDefault(); submitGraphSearch()">
                   <input data-testid="cti-graph-search-input" name="graphSearchText" [(ngModel)]="graphSearchText" type="text" class="h-6 min-w-0 flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/45" [placeholder]="graphSearchPlaceholder | translate">
+                  @if (nodeInfoPanelVisible) {
+                    <div data-testid="cti-node-info-panel" class="absolute left-0 top-full z-[1300] mt-2 max-h-[260px] w-[292px] overflow-y-auto rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/[0.93] p-3 text-xs text-[var(--color-text3)] shadow-[0_16px_36px_rgba(0,0,0,0.32)] backdrop-blur-[8px] [body.light-theme_&]:bg-[#f8fafc]/[0.93]">
+                      <div class="mb-2 flex items-center justify-between gap-2 border-b border-[var(--color-divider)] pb-2">
+                        <span class="font-semibold text-[var(--color-text1)]">{{ 'Node Details' | translate }}</span>
+                        <button type="button" class="inline-flex h-6 w-6 items-center justify-center rounded-[6px] text-[var(--color-text4)] transition hover:bg-white/[0.06] hover:text-[var(--color-text1)] [body.light-theme_&]:hover:bg-[#edf4fb]" (click)="hideNodeInfoPanel()" [attr.aria-label]="'common.actions.close' | translate">
+                          <i class="bi bi-x-lg text-[11px]"></i>
+                        </button>
+                      </div>
+                      <div class="leading-5 [&_strong]:font-semibold [&_strong]:text-[var(--color-text1)]" [innerHTML]="nodeInfoPanelHtml"></div>
+                    </div>
+                  }
                 </form>
               }
 

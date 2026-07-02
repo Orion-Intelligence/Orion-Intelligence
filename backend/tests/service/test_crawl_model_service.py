@@ -304,7 +304,7 @@ def test_index_wrappers_cover_generator_and_elastic_paths(monkeypatch):
                     social_model(
                         m_message_sharable_link="https://pastebin.com/raw/abc",
                         m_content="post",
-                        m_platform="pastebin",
+                        m_platform=["pastebin"],
                         m_network="surface",
                     )
                 ],

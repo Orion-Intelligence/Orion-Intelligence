@@ -18,35 +18,9 @@ import { ReportHeaderComponent } from '../../../../shared/partials/report-header
 import { ChatWidgetComponent } from '../../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { CodeBlockComponent } from '../../../../shared/partials/code-block/code-block.component';
 import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
-import { formatKeyLabel as formatKeyLabelUtil, getDisplayTitle as getDisplayTitleUtil, getStatusText as getStatusTextUtil, isWithinDays as isWithinDaysUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
+import { formatKeyLabel as formatKeyLabelUtil, getDisplayTitle as getDisplayTitleUtil, getStatusText as getStatusTextUtil, isHiddenReportMetadataKey, isWithinDays as isWithinDaysUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-
-const METADATA_EXCLUDED_KEYS = new Set([
-  '_id',
-  'id',
-  'rank_index',
-  'm_embedding',
-  'm_title',
-  'm_content',
-  'm_important_content',
-  'm_url',
-  'm_source_url',
-  'm_base_url',
-  'm_hash',
-  'm_creation_date',
-  'm_update_date',
-  'm_updation_date',
-  'm_scrap_file',
-  'm_scrape_file',
-  'creation_date',
-  'update_date',
-  'updation_date',
-  'created_at',
-  'updated_at',
-  'scrap_file',
-  'scrape_file'
-]);
 
 @Component({
   selector: 'app-result-panel',
@@ -158,7 +132,7 @@ export class ReportComponent implements OnInit, AfterViewInit {
   }
 
   private shouldShowMetadataKey(key: string, value: unknown): boolean {
-    if (METADATA_EXCLUDED_KEYS.has(key)) {
+    if (isHiddenReportMetadataKey(key)) {
       return false;
     }
     if (Array.isArray(value)) {

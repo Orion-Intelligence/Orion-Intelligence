@@ -9,6 +9,7 @@ export interface ExtendedNode extends Node {
     docId?: string;
     propertyKey?: string | null;
     rawLabel?: string;
+    nodeInfoHtml?: string;
     hiddenByDefault?: boolean;
     degree?: number;
 }

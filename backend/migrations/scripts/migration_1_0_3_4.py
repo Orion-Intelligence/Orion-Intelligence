@@ -6,6 +6,11 @@ from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys, db_system_model
 
+try:
+    from ._elastic_migration_guard import short_elastic_error, should_skip_elastic_index_error
+except ImportError:
+    from _elastic_migration_guard import short_elastic_error, should_skip_elastic_index_error
+
 
 class migration_1_0_3_4:
     INDEX_DATE_FIELDS = {
@@ -37,21 +42,28 @@ class migration_1_0_3_4:
 
     @staticmethod
     async def migrate_index(es, index, fields):
-        await es.indices.put_mapping(
-            index=index,
-            body={"properties": {"m_date": {"type": "date"}}},
-            allow_no_indices=True,
-            ignore_unavailable=True,
-            request_timeout=220,
-        )
-
         try:
-            await es.update_by_query(
+            await es.indices.put_mapping(
                 index=index,
-                body={
-                    "script": {
-                        "lang": "painless",
-                        "source": """
+                body={"properties": {"m_date": {"type": "date"}}},
+                allow_no_indices=True,
+                ignore_unavailable=True,
+                request_timeout=220,
+            )
+        except ApiError as ex:
+            if not should_skip_elastic_index_error(ex):
+                raise
+            log.g().w(f"Skipping migration mapping for unavailable Elasticsearch index {index}: {short_elastic_error(ex)}")
+            return
+
+        for attempt in range(2):
+            try:
+                await es.update_by_query(
+                    index=index,
+                    body={
+                        "script": {
+                            "lang": "painless",
+                            "source": """
                             def currentDate = ctx._source.get('m_date');
                             boolean hasMDate = currentDate != null && currentDate != '';
 
@@ -64,26 +76,33 @@ class migration_1_0_3_4:
                                 ctx._source.remove(field);
                             }
                         """,
-                        "params": {"fields": fields},
+                            "params": {"fields": fields},
+                        },
+                        "query": {
+                            "bool": {
+                                "should": [{"exists": {"field": field}} for field in fields],
+                                "minimum_should_match": 1,
+                            }
+                        },
                     },
-                    "query": {
-                        "bool": {
-                            "should": [{"exists": {"field": field}} for field in fields],
-                            "minimum_should_match": 1,
-                        }
-                    },
-                },
-                allow_no_indices=True,
-                conflicts="proceed",
-                ignore_unavailable=True,
-                refresh=True,
-                request_timeout=220,
-            )
-        except ApiError as ex:
-            status_code = getattr(ex, "status_code", None) or getattr(getattr(ex, "meta", None), "status", None)
-            if status_code != 503:
-                raise
-            log.g().w(f"Skipping migration backfill for unavailable Elasticsearch index {index}: {str(ex)}")
+                    allow_no_indices=True,
+                    conflicts="proceed",
+                    ignore_unavailable=True,
+                    refresh=True,
+                    request_timeout=220,
+                )
+                break
+            except ApiError as ex:
+                if not should_skip_elastic_index_error(ex):
+                    raise
+
+                short_message = short_elastic_error(ex)
+                if attempt == 0:
+                    log.g().w(f"Retrying migration backfill for Elasticsearch index {index}: {short_message}")
+                    continue
+
+                log.g().w(f"Skipping migration backfill for unavailable Elasticsearch index {index}: {short_message}")
+                break
 
     @staticmethod
     async def update_version(engine, version):

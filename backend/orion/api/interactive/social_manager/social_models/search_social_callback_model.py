@@ -22,7 +22,7 @@ class result_item(BaseModel):
     m_date: Optional[date] = None
     m_channel_url: Optional[str] = None
     m_message_id: Optional[str] = None
-    m_platform: str
+    m_platform: List[str] = Field(default_factory=list)
 
     model_config = ConfigDict(extra="allow")
 

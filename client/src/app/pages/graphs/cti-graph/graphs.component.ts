@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, inject } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { Edge, Network } from 'vis-network';
@@ -117,6 +117,8 @@ export class GraphComponent implements OnInit, OnDestroy {
   };
   private pendingFilters: CtiGraphFilters | null = null;
   private graphAdvancedFilterCounter = 0;
+  private skipNextBasicSearchRouteApply = false;
+  private hoveredNodeId: string | null = null;
 
   networkContainer?: ElementRef;
   public rawNodes: ExtendedNode[] = [];
@@ -158,6 +160,8 @@ export class GraphComponent implements OnInit, OnDestroy {
   legendItems: CtiGraphLegendItem[] = [];
   clusterLegendItems: CtiGraphLegendItem[] = [];
   graphStats: CtiGraphStats = { visibleNodes: 0, totalNodes: 0, visibleEdges: 0, totalEdges: 0, hiddenNodes: 0 };
+  nodeInfoPanelVisible = false;
+  nodeInfoPanelHtml = '';
 
   private getNodeLabelColor(): string {
     if (isPlatformBrowser(this.platformId)) {
@@ -181,7 +185,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor( private api: ApiService, private clipboard: Clipboard, private route: ActivatedRoute, private graphReportExport: ReportExportService, @Inject(PLATFORM_ID) private platformId: object ) { }
+  constructor( private api: ApiService, private clipboard: Clipboard, private route: ActivatedRoute, private router: Router, private graphReportExport: ReportExportService, @Inject(PLATFORM_ID) private platformId: object ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -190,8 +194,14 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     this.route.queryParams.subscribe(params => {
       const routeFilters = this.buildRouteFilterOverride(params);
+      const shouldSkipRouteApply = this.skipNextBasicSearchRouteApply;
+      this.skipNextBasicSearchRouteApply = false;
       if (routeFilters) {
         this.applyFilterValues(routeFilters);
+        this.syncBasicSearchControlsFromRoute(params, routeFilters);
+        if (shouldSkipRouteApply) {
+          return;
+        }
       }
       this.applyCurrentFilters();
     });
@@ -241,8 +251,8 @@ export class GraphComponent implements OnInit, OnDestroy {
       singleInput: singleInput || 'all',
       propertyType: propertyType || 'all',
       propertyValue: propertyValue || '',
-      maxEdge: Number.isFinite(parsedMaxEdge) && parsedMaxEdge >= 0 && parsedMaxEdge <= 800 ? parsedMaxEdge : 25,
-      maxDepth: Number.isFinite(parsedMaxDepth) && parsedMaxDepth >= 0 && parsedMaxDepth <= 5 ? parsedMaxDepth : 1
+      maxEdge: Number.isFinite(parsedMaxEdge) && parsedMaxEdge >= 20 && parsedMaxEdge <= 800 ? parsedMaxEdge : 25,
+      maxDepth: Number.isFinite(parsedMaxDepth) && parsedMaxDepth >= 1 && parsedMaxDepth <= 5 ? parsedMaxDepth : 1
     };
   }
 
@@ -369,8 +379,8 @@ export class GraphComponent implements OnInit, OnDestroy {
         nextFilters.propertyType = 'all';
         nextFilters.propertyValue = queryValue;
         this.applyFilterValues(nextFilters);
-        this.lastAppliedQuerySignature = `cluster-property:${JSON.stringify({ cluster: option.clusterValue, queryValue, maxEdge: this.maxEdge, maxDepth: this.maxDepth })}`;
-        this.loadGraphByScopedPropertySearch(queryValue, option.clusterValue || 'all');
+        this.onSidebarApply(nextFilters);
+        this.persistBasicSearchParams(nextFilters, option.key);
         return;
       }
       nextFilters.selectedType = 'cluster';
@@ -402,6 +412,50 @@ export class GraphComponent implements OnInit, OnDestroy {
 
     this.applyFilterValues(nextFilters);
     this.onSidebarApply(nextFilters);
+    this.persistBasicSearchParams(nextFilters, option.key);
+  }
+
+  private persistBasicSearchParams(filters: CtiGraphFilters, graphSearchKey: string): void {
+    this.skipNextBasicSearchRouteApply = true;
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        selectedType: filters.selectedType || null,
+        singleInput: filters.singleInput || null,
+        propertyType: filters.propertyType || null,
+        propertyValue: filters.propertyValue || null,
+        maxEdge: Number(filters.maxEdge),
+        maxDepth: Number(filters.maxDepth),
+        graphSearchKey: graphSearchKey || null
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    }).finally(() => {
+      this.skipNextBasicSearchRouteApply = false;
+    });
+  }
+
+  private syncBasicSearchControlsFromRoute(params: Params, filters: CtiGraphFilters): void {
+    this.graphSearchAdvancedMode = false;
+    const requestedKey = String(params['graphSearchKey'] ?? '').trim();
+    const requestedOption = requestedKey ? this.graphSearchOptions.find(option => option.key === requestedKey) : null;
+    if (requestedOption) {
+      this.activeGraphSearchKey = requestedOption.key;
+      this.graphSearchText = filters.propertyValue || '';
+      return;
+    }
+
+    if (filters.selectedType === 'property') {
+      const propertyOption = this.graphSearchOptions.find(option => option.mode === 'property' && option.propertyType === filters.propertyType);
+      const scopedClusterOption = this.graphSearchOptions.find(option => option.mode === 'cluster' && option.clusterValue === filters.singleInput);
+      this.activeGraphSearchKey = propertyOption?.key || scopedClusterOption?.key || 'all';
+      this.graphSearchText = filters.propertyValue || '';
+      return;
+    }
+
+    const clusterOption = this.graphSearchOptions.find(option => option.mode === 'cluster' && option.clusterValue === filters.singleInput);
+    this.activeGraphSearchKey = clusterOption?.key || 'all';
+    this.graphSearchText = '';
   }
 
   submitGraphSearchBuilder(): void {
@@ -620,6 +674,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.highlightedNodeId = null;
     this.contextMenuNode = null;
     this.contextMenuNodeId = '';
+    this.hideNodeInfoPanel();
+    this.hoveredNodeId = null;
     this.result = [];
     this.originalNodeState.clear();
     this.updateLegendState([], []);
@@ -1081,7 +1137,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     const uniqueSubNodes = Array.from(new Set(subNodes));
     const sourceId = this.groupParentByGroupId[nodeId] ?? nodeId;
-    const centerPos = this.network.getPositions([nodeId])[nodeId];
+    const centerPos = this.network.getPositions([nodeId])[nodeId] ?? { x: 0, y: 0 };
     const existingEdgeIds = new Set(this.edgeSet.getIds().map(id => String(id)));
     const uniqueEdgesById = new Map<string, Edge>();
     this.rawEdges.forEach(e => {
@@ -1117,6 +1173,29 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     this.groupExpandedState[nodeId] = true;
     this.updateGroupNodeVisual(nodeId, uniqueSubNodes.length, true);
+  }
+
+  private autoExpandSingleVisibleGroupNode(visibleNodes: ExtendedNode[]): void {
+    if (visibleNodes.length !== 1) {
+      return;
+    }
+    const node = visibleNodes[0];
+    const nodeId = String(node?.id ?? '');
+    const subNodes = node?.subNodes ?? [];
+    if (!node?.isGroup || !nodeId || subNodes.length === 0) {
+      return;
+    }
+    queueMicrotask(() => {
+      if (!this.network || !this.nodeSet?.get(nodeId)) {
+        return;
+      }
+      const hasVisibleSubNode = subNodes.some(subNodeId => !!this.nodeSet.get(subNodeId));
+      if (!hasVisibleSubNode) {
+        this.groupExpandedState[nodeId] = false;
+      }
+      this.expandGroupFromNodeId(nodeId, subNodes, 200);
+      this.captureOriginalNodeColors([nodeId, ...subNodes]);
+    });
   }
 
   private collapseGroupFromNodeId(nodeId: string, subNodes: string[], force = false): void {
@@ -1378,11 +1457,24 @@ export class GraphComponent implements OnInit, OnDestroy {
 
     this.lastAppliedQuerySignature = nextQuerySignature;
     if (filters.selectedType === 'property' && filters.propertyType && filters.propertyValue) {
-      this.loadGraphByNode(this.selectedType, filters.propertyType, filters.propertyValue, this.maxEdge.toString(), this.maxDepth.toString());
+      if (filters.propertyType === 'all' && filters.singleInput && filters.singleInput !== 'all') {
+        this.loadGraphByScopedPropertySearch(filters.propertyValue, filters.singleInput);
+      }
+      else {
+        this.loadGraphByNode(this.selectedType, filters.propertyType, filters.propertyValue, this.maxEdge.toString(), this.maxDepth.toString());
+      }
     }
     else if ((filters.selectedType === 'cluster' || filters.selectedType === 'document') && filters.singleInput) {
       this.loadGraphByNode(this.selectedType, filters.selectedType, filters.singleInput, this.maxEdge.toString(), this.maxDepth.toString());
     }
+  }
+
+  onGraphSizeApply(filters: CtiGraphFilters): void {
+    this.onSidebarApply(filters);
+    if (this.graphSearchAdvancedMode || filters.propertyType === 'advanced') {
+      return;
+    }
+    this.persistBasicSearchParams(filters, this.activeGraphSearchKey);
   }
 
   private renderGraph(data: GraphResultItem[]): void {
@@ -1406,6 +1498,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.initNetwork();
     this.applyPhysicsAutoDisableIfNeeded();
     this.attachNetworkHandlers();
+    this.autoExpandSingleVisibleGroupNode(visibleNodes);
     this.applyPropertyHighlights();
   }
 
@@ -1426,6 +1519,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     this.originalNodeState.clear();
     this.captureOriginalNodeColors();
+    this.autoExpandSingleVisibleGroupNode(visibleNodes);
     this.applyPropertyHighlights();
     if (this.network) {
       this.network.redraw();
@@ -1459,6 +1553,89 @@ export class GraphComponent implements OnInit, OnDestroy {
     const label = edge?.label || edge?.edge_type || edge?.relationship_type || edge?.type || 'Connection';
     const confidence = typeof edge?.confidence === 'number' ? ` (${Math.round(edge.confidence * 100)}%)` : '';
     return `${String(label).replace(/_/g, ' ')}${confidence}`;
+  }
+
+  private getNodeTitle(vertex: any): string {
+    const lines: string[] = [];
+    const type = String(vertex?.type || '').toLowerCase();
+    const add = (label: string, value: unknown) => {
+      const text = this.formatTooltipValue(value);
+      if (text) {
+        lines.push(`<strong>${this.escapeHtml(label)}:</strong> ${this.escapeHtml(text)}`);
+      }
+    };
+    const title = this.formatTooltipValue(vertex?.display_value || vertex?.label || vertex?.title || vertex?.value);
+    if (title) {
+      lines.push(`<strong>${this.escapeHtml(this.truncateTooltipText(title, 90))}</strong>`);
+    }
+
+    if (type === 'document') {
+      add('Type', 'Report');
+      add('Cluster', this.formatTooltipLabel(vertex?.cluster_id || vertex?.module));
+      add('Published', vertex?.published);
+      add('Summary', this.truncateTooltipText(vertex?.summary, 180));
+      add('Reliability', this.formatTooltipPercent(vertex?.source_reliability));
+      add('ID', this.shortenTooltipId(vertex?.doc_id || vertex?.m_document_id || vertex?._key));
+    }
+    else if (type === 'cluster') {
+      add('Type', 'Cluster');
+    }
+    else {
+      add('Type', this.formatTooltipLabel(vertex?.type || vertex?.node_class));
+      add('Role', this.formatTooltipLabel(vertex?.entity_role));
+      add('Confidence', this.formatTooltipPercent(vertex?.confidence));
+      add('Evidence', vertex?.evidence_count);
+      add('First Seen', vertex?.first_seen);
+      add('Last Seen', vertex?.last_seen);
+      if (Array.isArray(vertex?.aliases) && vertex.aliases.length > 0) {
+        add('Aliases', vertex.aliases.slice(0, 3).join(', '));
+      }
+    }
+
+    return lines.join('<br>');
+  }
+
+  private formatTooltipValue(value: unknown): string {
+    if (value === null || value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) {
+      return '';
+    }
+    return String(value).replace(/\s+/g, ' ').trim();
+  }
+
+  private truncateTooltipText(value: unknown, limit: number): string {
+    const text = this.formatTooltipValue(value);
+    if (text.length <= limit) {
+      return text;
+    }
+    return `${text.slice(0, limit - 3)}...`;
+  }
+
+  private formatTooltipLabel(value: unknown): string {
+    const text = this.formatTooltipValue(value).replace(/^m_/, '').replace(/_/g, ' ');
+    if (!text) {
+      return '';
+    }
+    return text.toLowerCase() === 'apt' ? 'APT' : this.toTitleCase(text);
+  }
+
+  private formatTooltipPercent(value: unknown): string {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+      return '';
+    }
+    const percent = numeric <= 1 ? numeric * 100 : numeric;
+    return `${Math.round(percent)}%`;
+  }
+
+  private shortenTooltipId(value: unknown): string {
+    const text = this.formatTooltipValue(value);
+    if (/^[a-f0-9]{32,}$/i.test(text)) {
+      return '';
+    }
+    if (text.length <= 22) {
+      return text;
+    }
+    return `${text.slice(0, 12)}...${text.slice(-6)}`;
   }
 
   private toTitleCase(input: string): string {
@@ -1498,6 +1675,14 @@ export class GraphComponent implements OnInit, OnDestroy {
   private normalizeLabel(v: any): string {
     const fullLabel = this.normalizeFullLabel(v);
     if (fullLabel) {
+      const propertyLabel = this.formatTooltipLabel(this.extractPropertyKey(v));
+      if (propertyLabel) {
+        const existingKeyPattern = new RegExp(`^${propertyLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*:`, 'i');
+        const displayLabel = existingKeyPattern.test(fullLabel)
+          ? fullLabel.replace(existingKeyPattern, `${propertyLabel}:`)
+          : `${propertyLabel}: ${fullLabel}`;
+        return this.truncateLabel(displayLabel);
+      }
       return this.truncateLabel(fullLabel);
     }
     return this.prettifyLabel(String(v?._key ?? v?._id ?? ''));
@@ -1701,11 +1886,13 @@ export class GraphComponent implements OnInit, OnDestroy {
         existingNode.docId = existingNode.docId || vertex?.doc_id || vertex?.m_document_id || vertex?._key;
         existingNode.rawLabel = existingNode.rawLabel || rawLabel;
         existingNode.hiddenByDefault = existingNode.hiddenByDefault || !!vertex?.hidden_by_default;
+        existingNode.nodeInfoHtml = existingNode.nodeInfoHtml || this.getNodeTitle(vertex);
         return;
       }
       rawNodeMap.set(id, {
         id,
         label: this.normalizeLabel(vertex),
+        nodeInfoHtml: this.getNodeTitle(vertex),
         rawLabel,
         nodeClass: vertex?.node_class,
         clusterId: vertex?.cluster_id,
@@ -1781,6 +1968,7 @@ export class GraphComponent implements OnInit, OnDestroy {
           isGroup: true,
           physics: false,
           subNodes,
+          nodeInfoHtml: `<strong>${this.escapeHtml(clusterLabel)}</strong><br><strong>Type:</strong> Cluster Group<br><strong>Reports:</strong> ${clusterDocumentIds.length}`,
           font: { size: 14, color: this.getNodeLabelColor(), strokeWidth: 1 },
           size: 44,
           image: this.createGroupNodeSvg(clusterDocumentIds.length, false, clusterLabel, clusterKey),
@@ -2046,6 +2234,12 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.network.on('click', params => {
       this.handleClick(params);
     });
+    this.network.on('hoverNode', params => {
+      this.handleNodeHover(String(params.node));
+    });
+    this.network.on('blurNode', params => {
+      this.handleNodeBlur(String(params.node));
+    });
     this.network.on('doubleClick', params => {
       this.handleDoubleClick(params);
     });
@@ -2203,10 +2397,82 @@ export class GraphComponent implements OnInit, OnDestroy {
     const pointer = params.pointer.DOM;
     const nodeIdRaw = this.network.getNodeAt(pointer);
     if (!nodeIdRaw) {
+      this.hideNodeInfoPanel();
       return;
     }
     const nodeId = String(nodeIdRaw);
+    const node = this.nodeSet.get(nodeId) as ExtendedNode | null;
     this.toggleEdgeHighlightOnClick(nodeId);
+    if (node) {
+      this.showNodeInfoPanel(node);
+    }
+  }
+
+  private handleNodeHover(nodeId: string): void {
+    if (!this.nodeSet?.get(nodeId) || this.hoveredNodeId === nodeId) {
+      return;
+    }
+    if (this.hoveredNodeId) {
+      this.handleNodeBlur(this.hoveredNodeId);
+    }
+    this.hoveredNodeId = nodeId;
+    const node = this.nodeSet.get(nodeId) as ExtendedNode;
+    const visualType = this.getVisualNodeCategory(node);
+    const accentColor = this.getNodeAccentColor(node, visualType);
+    this.nodeSet.update({
+      id: nodeId,
+      color: {
+        border: this.nodeFocusColor,
+        background: this.nodeFillColor,
+        highlight: { border: this.nodeFocusColor, background: this.nodeFillColor },
+        hover: { border: accentColor, background: this.nodeFillColor }
+      },
+      borderWidth: 2,
+      borderWidthSelected: 3
+    } as any);
+  }
+
+  private handleNodeBlur(nodeId: string): void {
+    const original = this.originalNodeState.get(nodeId);
+    if (original && this.nodeSet?.get(nodeId)) {
+      this.nodeSet.update({
+        id: nodeId,
+        color: original.color,
+        borderWidth: original.borderWidth,
+        borderWidthSelected: original.borderWidthSelected,
+        image: original.image
+      } as any);
+    }
+    if (this.hoveredNodeId === nodeId) {
+      this.hoveredNodeId = null;
+    }
+  }
+
+  private showNodeInfoPanel(node: ExtendedNode): void {
+    const html = node.nodeInfoHtml || this.getFallbackNodeInfoHtml(node);
+    if (!html) {
+      this.hideNodeInfoPanel();
+      return;
+    }
+    this.nodeInfoPanelHtml = html;
+    this.nodeInfoPanelVisible = true;
+    this.changeDetector.detectChanges();
+  }
+
+  hideNodeInfoPanel(): void {
+    this.nodeInfoPanelVisible = false;
+    this.nodeInfoPanelHtml = '';
+  }
+
+  private getFallbackNodeInfoHtml(node: ExtendedNode): string {
+    const label = this.formatTooltipValue(node.rawLabel || node.label || node.id);
+    const type = this.formatTooltipLabel(node.nodeType || node.nodeClass || 'Node');
+    const lines = [
+      label ? `<strong>${this.escapeHtml(this.truncateTooltipText(label, 90))}</strong>` : '',
+      type ? `<strong>Type:</strong> ${this.escapeHtml(type)}` : '',
+      node.degree !== undefined ? `<strong>Connections:</strong> ${node.degree}` : ''
+    ].filter(Boolean);
+    return lines.join('<br>');
   }
 
   private handleDoubleClick(params: any): void {

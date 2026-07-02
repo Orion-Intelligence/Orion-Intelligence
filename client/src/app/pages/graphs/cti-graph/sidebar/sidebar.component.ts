@@ -1,4 +1,5 @@
 import { Component, HostListener, OnChanges, OnInit, SimpleChanges, input, output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { SidebarShellComponent } from '../../shared/sidebar-shell/sidebar-shell.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { CtiGraphFilters, CtiGraphLegendItem, CtiGraphStats } from '../../../../shared/model/graph/cti-graph.model';
@@ -7,17 +8,20 @@ import { CtiGraphFilters, CtiGraphLegendItem, CtiGraphStats } from '../../../../
   selector: 'graph-sidebar',
   standalone: true,
   templateUrl: './sidebar.component.html',
-  imports: [SidebarShellComponent, TranslatePipe],
+  imports: [SidebarShellComponent, TranslatePipe, FormsModule],
 })
 export class SidebarComponent implements OnInit, OnChanges {
   isCollapsed = false;
   isMobile = false;
+  localMaxEdge = 25;
+  localMaxDepth = 1;
   readonly filters = input<CtiGraphFilters | null>(null);
   readonly stats = input<CtiGraphStats | null>(null);
   readonly legendItems = input<CtiGraphLegendItem[]>([]);
   readonly clusterLegendItems = input<CtiGraphLegendItem[]>([]);
   readonly collapsed = input(false);
   readonly collapsedChange = output<boolean>();
+  readonly filtersApply = output<CtiGraphFilters>();
 
   ngOnInit(): void {
     this.updateViewportState();
@@ -26,6 +30,10 @@ export class SidebarComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['collapsed']) {
       this.isCollapsed = !!changes['collapsed'].currentValue;
+    }
+    if (changes['filters']) {
+      this.localMaxEdge = this.clampNumber(this.filters()?.maxEdge, 20, 800, 25);
+      this.localMaxDepth = this.clampNumber(this.filters()?.maxDepth, 1, 5, 1);
     }
   }
 
@@ -76,6 +84,29 @@ export class SidebarComponent implements OnInit, OnChanges {
 
   get depthLabel(): string {
     return String(this.filters()?.maxDepth ?? 1);
+  }
+
+  applyGraphSize(): void {
+    const filters = this.filters();
+    if (!filters) {
+      return;
+    }
+    const nextFilters = {
+      ...filters,
+      maxEdge: this.clampNumber(this.localMaxEdge, 20, 800, 25),
+      maxDepth: this.clampNumber(this.localMaxDepth, 1, 5, 1)
+    };
+    this.localMaxEdge = nextFilters.maxEdge;
+    this.localMaxDepth = nextFilters.maxDepth;
+    this.filtersApply.emit(nextFilters);
+  }
+
+  private clampNumber(value: unknown, min: number, max: number, fallback: number): number {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+      return fallback;
+    }
+    return Math.min(max, Math.max(min, Math.round(numeric)));
   }
 
   private updateViewportState(): void {

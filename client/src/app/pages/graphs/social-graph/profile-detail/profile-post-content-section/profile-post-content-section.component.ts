@@ -16,6 +16,7 @@ export class SocialProfilePostContentSectionComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly platformCapabilities = socialPlatformCapabilities as SocialPlatformCapabilityMap;
   private postMediaLoading = signal<Record<string, boolean>>({});
+  private expandedPostCaptions = signal<Record<string, boolean>>({});
   private pendingScrollToBottom = false;
   private sawLoadingForScroll = false;
 
@@ -48,6 +49,24 @@ export class SocialProfilePostContentSectionComponent {
 
   getPostCaption(post: SocialPost | null | undefined): string {
     return post?.caption?.trim() || '';
+  }
+
+  isPostCaptionExpanded(post: SocialPost | null | undefined): boolean {
+    const key = this.getPostItemKey(post);
+    return !!(key && this.expandedPostCaptions()[key]);
+  }
+
+  togglePostCaption(post: SocialPost | null | undefined): void {
+    const key = this.getPostItemKey(post);
+    if (!key) {
+      return;
+    }
+    this.expandedPostCaptions.update(current => ({ ...current, [key]: !current[key] }));
+  }
+
+  shouldShowPostCaptionToggle(post: SocialPost | null | undefined): boolean {
+    const caption = this.getPostCaption(post);
+    return caption.length > 280 || caption.split(/\r?\n/).length > 4;
   }
 
   hasPostMedia(post: SocialPost | null | undefined): boolean {
@@ -185,8 +204,8 @@ export class SocialProfilePostContentSectionComponent {
     return cursorId ? String(cursorId) : undefined;
   }
 
-  private getPostItemKey(post: SocialPost): string {
-    return SocialNormalizationUtil.getPostItemKey(post);
+  private getPostItemKey(post: SocialPost | null | undefined): string {
+    return post ? SocialNormalizationUtil.getPostItemKey(post) : '';
   }
 
   private prepareScrollAfterFetch(): void {

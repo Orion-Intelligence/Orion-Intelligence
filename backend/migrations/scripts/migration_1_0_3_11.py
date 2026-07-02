@@ -6,13 +6,15 @@ from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys, db_system_model
 
-try:
-    from ._elastic_migration_guard import short_elastic_error, should_skip_elastic_index_error
-except ImportError:
-    from _elastic_migration_guard import short_elastic_error, should_skip_elastic_index_error
 
+class migration_1_0_3_11:
+    PLATFORM_LIST_INDICES = [
+        ELASTIC_INDEX.S_EXPLOIT_INDEX,
+        ELASTIC_INDEX.S_APT_INDEX,
+        ELASTIC_INDEX.S_MALWARE_INDEX,
+        ELASTIC_INDEX.S_SOCIAL_INDEX,
+    ]
 
-class migration_1_0_3_9:
     @staticmethod
     async def migrate(version):
         engine = mongo_controller.get_instance().get_engine()
@@ -25,49 +27,51 @@ class migration_1_0_3_9:
             await elastic_controller.get_instance().initialize()
             es = elastic_controller.get_instance().get_connection()
 
-        await migration_1_0_3_9.remove_invalid_cvss_values(es)
-        await migration_1_0_3_9.update_version(engine, version)
+        for index in migration_1_0_3_11.PLATFORM_LIST_INDICES:
+            await migration_1_0_3_11.migrate_index(es, index)
+
+        await migration_1_0_3_11.update_version(engine, version)
 
     @staticmethod
-    async def remove_invalid_cvss_values(es):
+    async def migrate_index(es, index):
         for attempt in range(2):
             try:
                 await es.update_by_query(
-                    index=ELASTIC_INDEX.S_EXPLOIT_INDEX,
+                    index=index,
                     body={
                         "script": {
                             "lang": "painless",
                             "source": """
-                            if (!ctx._source.containsKey('m_cvss')) {
+                            if (!ctx._source.containsKey('m_platform')) {
                                 return;
                             }
 
-                            def cvss = ctx._source.get('m_cvss');
-                            def values = cvss instanceof List ? cvss : [cvss];
-                            def cleaned = new ArrayList();
+                            def platform = ctx._source.get('m_platform');
+                            if (platform == null) {
+                                ctx._source.remove('m_platform');
+                                return;
+                            }
 
+                            def values = platform instanceof List ? platform : [platform];
+                            def cleaned = new ArrayList();
                             for (def value : values) {
                                 if (value == null) {
                                     continue;
                                 }
-                                if (value instanceof Number) {
-                                    cleaned.add(value);
-                                    continue;
-                                }
-                                try {
-                                    cleaned.add(Double.parseDouble(value.toString()));
-                                } catch (Exception ignored) {
+                                def text = value.toString().trim();
+                                if (text.length() > 0) {
+                                    cleaned.add(text);
                                 }
                             }
 
                             if (cleaned.isEmpty()) {
-                                ctx._source.remove('m_cvss');
+                                ctx._source.remove('m_platform');
                             } else {
-                                ctx._source.put('m_cvss', cleaned);
+                                ctx._source.put('m_platform', cleaned);
                             }
                         """,
                         },
-                        "query": {"exists": {"field": "m_cvss"}},
+                        "query": {"exists": {"field": "m_platform"}},
                     },
                     allow_no_indices=True,
                     conflicts="proceed",
@@ -77,20 +81,32 @@ class migration_1_0_3_9:
                 )
                 break
             except ApiError as ex:
-                if not should_skip_elastic_index_error(ex):
+                if not migration_1_0_3_11.should_skip_index_error(ex):
                     raise
 
-                short_message = short_elastic_error(ex)
+                short_message = str(ex)[:500]
                 if attempt == 0:
-                    log.g().w(
-                        f"Retrying invalid CVSS cleanup for Elasticsearch index {ELASTIC_INDEX.S_EXPLOIT_INDEX}: {short_message}"
-                    )
+                    log.g().w(f"Retrying m_platform list migration for Elasticsearch index {index}: {short_message}")
                     continue
 
-                log.g().w(
-                    f"Skipping invalid CVSS cleanup for unavailable Elasticsearch index {ELASTIC_INDEX.S_EXPLOIT_INDEX}: {short_message}"
-                )
+                log.g().w(f"Skipping m_platform list migration for unavailable Elasticsearch index {index}: {short_message}")
                 break
+
+    @staticmethod
+    def should_skip_index_error(ex):
+        status_code = getattr(ex, "status_code", None) or getattr(getattr(ex, "meta", None), "status", None)
+        if status_code == 503:
+            return True
+        if status_code != 404:
+            return False
+
+        message = str(ex).lower()
+        return any(marker in message for marker in (
+            "index_not_found_exception",
+            "no search context found",
+            "no such index",
+            "search_context_missing_exception",
+        ))
 
     @staticmethod
     async def update_version(engine, version):
