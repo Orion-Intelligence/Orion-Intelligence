@@ -1,5 +1,6 @@
 import re
 import threading
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import List
 
@@ -348,6 +349,77 @@ class TenantManager:
             result.append(tenant_data)
 
         return result
+
+    async def get_admin_visible_tenant_alerts_summary(self) -> List[dict]:
+        from orion.api.interactive.alert_manager.alert_manager import AlertManager
+
+        tenants = await self._engine.find(db_tenant_model,(db_tenant_model.is_default == False) & (db_tenant_model.alerts_visible_to_admin == True))
+        result = []
+
+        for tenant in tenants:
+            if (tenant.alerts_visible_to_admin == False):
+                continue
+
+            tenant_id = str(tenant.id)
+            dek = await KeyManager.get_instance().get_profile_dek(tenant_id)
+            enc = Fernet(dek)
+            # tenant_raw_data = tenant.model_dump()
+            tenant_name=tenant.name or""
+            tenant_email=tenant.email or""
+            tenant_data = {
+                "id": tenant_id,
+                "name": enc.decrypt(tenant_name.encode()).decode(),
+                "email": enc.decrypt(tenant_email.encode()).decode(),
+                "is_active": tenant.status == TenantStatus.ACTIVE
+            }
+
+            result.append({
+                "tenant": tenant_data,
+                "alert_summary": await AlertManager.getInstance().get_alert_summary(tenant_id)
+            })
+
+        return result
+
+    async def get_admin_tenant_alerts(self, tenant_id: str, page: int = 1, limit: int = 20, alert_type: str | None = None, paginate: bool = False):
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
+        if not tenant or getattr(tenant, "is_default", False) or getattr(tenant, "alerts_visible_to_admin", True) is False:
+            raise HTTPException(status_code=404, detail="Tenant alerts not available")
+
+        alerts_data = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenant_id)
+        if not alerts_data:
+            if paginate:
+                return {
+                    "items": [],
+                    "total": 0,
+                    "page": page,
+                    "limit": limit,
+                    "has_more": False
+                }
+            return []
+
+        alerts = alerts_data.alerts or []
+        if alert_type:
+            normalized_type = alert_type.strip().lower()
+            alerts = [alert for alert in alerts if (alert.type or "").strip().lower() == normalized_type]
+
+        if not paginate:
+            return alerts
+
+        sorted_alerts = sorted(
+            alerts,
+            key=lambda alert: alert.last_seen or alert.first_seen or datetime.min.replace(tzinfo=timezone.utc),
+            reverse=True)
+        total = len(sorted_alerts)
+        start = (page - 1) * limit
+        end = start + limit
+
+        return {
+            "items": sorted_alerts[start:end],
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "has_more": end < total,
+        }
 
     async def create_tenant_user(self, data: user_model, current_user):
         from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager

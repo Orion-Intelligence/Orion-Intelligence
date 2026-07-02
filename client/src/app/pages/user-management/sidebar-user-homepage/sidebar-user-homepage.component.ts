@@ -5,7 +5,7 @@ import { AppService } from '../../../services/core/app/app.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { Router } from '@angular/router';
 import { HomeSearchComponent } from "../../homepage/home-search/home-search.component";
-import { AlertCategorySummary } from '../../../shared/model/alert-notification/alert.notification.model';
+import { ALERT_CATEGORY_NAMES, AlertCategorySummary, createAlertCategorySummary } from '../../../shared/model/alert-notification/alert.notification.model';
 import { AlertModel } from '../../../shared/model/company-profile/node.model';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ApiService } from '../../../shared/services/api.service';
@@ -114,40 +114,11 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
 
   convertCountsToCategories(countsByType: Record<string, number>): AlertCategorySummary[] {
     const summaries: AlertCategorySummary[] = Object.entries(countsByType).map(([category, count]) => {
-      return {
-        categoryName: category,
-        risk: this.getRiskLevel(category),
-        iocCount: Number(count || 0),
-        detectedDate: null,
-        tags: []
-      };
+      return createAlertCategorySummary(category, count, this.getRiskLevel.bind(this));
     });
-    const ALL_CATEGORIES = [
-      "general",
-      "defacement",
-      "breach",
-      "exploit",
-      "social",
-      "discussion",
-      "stealerlogs",
-      "feed",
-      "advanced scanning",
-      "playstore-scanning",
-      "social-scanner",
-      "email-breach",
-      "software-scanning",
-      "repo scanning",
-      "seo scanning"
-    ];
-    for (const cat of ALL_CATEGORIES) {
+    for (const cat of ALERT_CATEGORY_NAMES) {
       if (!summaries.find(s => s.categoryName === cat)) {
-        summaries.push({
-          categoryName: cat,
-          risk: this.getRiskLevel(cat),
-          iocCount: 0,
-          detectedDate: null,
-          tags: []
-        });
+        summaries.push(createAlertCategorySummary(cat, 0, this.getRiskLevel.bind(this)));
       }
     }
     return summaries;

@@ -869,6 +869,11 @@ export const routes: Routes = [
                 path: 'tracking-board',
                 loadComponent: loadCaseTrackingBoardComponent,
                 data: { type: 'case-tracking-board', animation: 'CaseTrackingBoardPage' }
+              },
+              {
+                path: 'admin-alerts/:tenantId/:type',
+                loadComponent: loadCategoryAlertReportComponent,
+                data: { type: 'case-admin-alerts', animation: 'CategoryPage', adminTenantAlerts: true }
               }
             ]
           },

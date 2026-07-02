@@ -1,0 +1,157 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { finalize } from 'rxjs';
+import { LicenseService } from '../../../../../services/licenses/licenses.service';
+import { SidebarHomepageService } from '../../../../../services/dashboard/sidebar.service';
+import { ApiService } from '../../../../../shared/services/api.service';
+import { ALERT_CATEGORY_NAMES, AlertCategorySummary, createAlertCategorySummary } from '../../../../../shared/model/alert-notification/alert.notification.model';
+import { AlertModel, AlertSummary } from '../../../../../shared/model/company-profile/node.model';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { ExportChoiceModalComponent } from '../../../../../shared/partials/export-choice-modal/export-choice-modal.component';
+import { ExportChoiceOption } from '../../../../../shared/model/report/export-choice.model';
+import { AlertExportService } from '../../../../../shared/services/export/alert-export.service';
+import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
+import { AdminTenantAlertGroup, AdminTenantAlertsPage, AdminTenantAlertsResponse, AdminTenantSummary } from './admin-tenant-alerts.model';
+
+@Component({
+  selector: 'app-admin-tenant-alerts',
+  imports: [CommonModule, ExportChoiceModalComponent, TranslatePipe],
+  templateUrl: './admin-tenant-alerts.html'
+})
+export class AdminTenantAlerts implements OnInit {
+  tenantAlertGroups: AdminTenantAlertGroup[] = [];
+  isLoading = false;
+  isExportChoiceOpen = false;
+  isExportingTenantAlerts = false;
+  selectedExportGroup: AdminTenantAlertGroup | null = null;
+  readonly tenantAlertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Download all alerts for this tenant.', testId: 'case-admin-alert-tenant-export-option-report' }];
+
+  constructor(private apiService: ApiService, private sidebarHomepageService: SidebarHomepageService, private licenseService: LicenseService, private router: Router, private alertExportService: AlertExportService, private messageNotificationService: MessageNotificationService) { }
+
+  ngOnInit(): void {
+    if (this.licenseService.isAdmin()) {
+      this.loadTenantAlerts();
+    }
+  }
+
+  loadTenantAlerts(): void {
+    if (!this.licenseService.isAdmin()) {
+      this.tenantAlertGroups = [];
+      return;
+    }
+
+    this.isLoading = true;
+    this.apiService.post<AdminTenantAlertsResponse[]>('tenants/admin/alerts/summary', {})
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: (response) => {
+          this.tenantAlertGroups = (response || []).map(item => ({
+            tenant: item.tenant,
+            alertSummary: item.alert_summary,
+            totalAlerts: this.countTotalAlerts(item.alert_summary),
+            categories: this.convertSummaryToCategories(item.alert_summary),
+            riskCounts: this.countRiskFromSummary(item.alert_summary)
+          }));
+        },
+        error: () => {
+          this.tenantAlertGroups = [];
+        }
+      });
+  }
+
+  openTenantCategoryAlerts(group: AdminTenantAlertGroup, categoryName: string): void {
+    const category = group.categories.find(item => item.categoryName === categoryName);
+    if (!category || category.iocCount === 0 || !group.tenant.id) {
+      return;
+    }
+    this.router.navigate(['/dashboard/profile/case-management/admin-alerts', group.tenant.id, categoryName]).then();
+  }
+
+  getCategoryLabel(categoryName: string): string {
+    if (!categoryName) {
+      return '-';
+    }
+    return categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
+  }
+
+  getRiskLevel(type: string): string {
+    return this.sidebarHomepageService.getRiskLevel(type);
+  }
+
+  isCategoryClickable(category: AlertCategorySummary): boolean {
+    return category.iocCount > 0;
+  }
+
+  openTenantAlertsDownload(group: AdminTenantAlertGroup): void {
+    if (group.totalAlerts === 0 || !group.tenant.id || this.isExportingTenantAlerts) {
+      return;
+    }
+    this.selectedExportGroup = group;
+    this.isExportChoiceOpen = true;
+  }
+
+  closeExportChoice(): void {
+    if (this.isExportingTenantAlerts) {
+      return;
+    }
+    this.isExportChoiceOpen = false;
+    this.selectedExportGroup = null;
+  }
+
+  exportSelectedTenantAlerts(_type: string): void {
+    const group = this.selectedExportGroup;
+    if (!group?.tenant.id || this.isExportingTenantAlerts) {
+      return;
+    }
+
+    this.isExportingTenantAlerts = true;
+    this.fetchTenantAlertsPage(group.tenant.id, 1, [], (alerts) => {
+      this.alertExportService.exportPdf(alerts, `${group.tenant.name || 'Tenant'} Alerts`);
+      this.isExportingTenantAlerts = false;
+      this.isExportChoiceOpen = false;
+      this.selectedExportGroup = null;
+    });
+  }
+
+  isExportingGroup(group: AdminTenantAlertGroup): boolean {
+    return this.isExportingTenantAlerts && this.selectedExportGroup?.tenant.id === group.tenant.id;
+  }
+
+  private convertSummaryToCategories(summary?: AlertSummary): AlertCategorySummary[] {
+    const countsByType = summary?.counts_by_type || {};
+    return ALERT_CATEGORY_NAMES.map(category => createAlertCategorySummary(category, countsByType[category] || 0, this.getRiskLevel.bind(this)));
+  }
+
+  private countRiskFromSummary(summary?: AlertSummary): { critical: number; high: number; medium: number; low: number } {
+    return {
+      critical: Number(summary?.counts_by_risk?.critical || 0),
+      high: Number(summary?.counts_by_risk?.high || 0),
+      medium: Number(summary?.counts_by_risk?.medium || 0),
+      low: Number(summary?.counts_by_risk?.low || 0)
+    };
+  }
+
+  private countTotalAlerts(summary?: AlertSummary): number {
+    return Object.values(summary?.counts_by_type || {}).reduce((total, count) => total + Number(count || 0), 0);
+  }
+
+  private fetchTenantAlertsPage(tenantId: string, page: number, accumulated: AlertModel[], done: (alerts: AlertModel[]) => void): void {
+    const endpoint = `tenants/admin/${encodeURIComponent(tenantId)}/alerts?paginate=true&page=${page}&limit=20`;
+    this.apiService.get<AdminTenantAlertsPage>(endpoint).subscribe({
+      next: (response) => {
+        const nextAlerts = [...accumulated, ...(response?.items || [])];
+        if (response?.has_more) {
+          this.fetchTenantAlertsPage(tenantId, page + 1, nextAlerts, done);
+          return;
+        }
+        done(nextAlerts);
+      },
+      error: (err) => {
+        this.isExportingTenantAlerts = false;
+        this.messageNotificationService.show(err?.error?.detail || 'Failed to download tenant alerts');
+      }
+    });
+  }
+
+}

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Case, CaseAnalyst, Priority, Severity } from '../../../shared/model/case-management/case.model';
@@ -13,10 +13,11 @@ import { MessageNotificationService } from '../../../services/message_notificati
 import { finalize } from 'rxjs';
 import { CaseFilterRowComponent, CaseListFilters, DEFAULT_CASE_LIST_FILTERS } from './model/case-filter-row/case-filter-row';
 import { CaseAnalyticsPanel } from './model/case-analytics-panel/case-analytics-panel';
+import { AdminTenantAlerts } from './model/admin-tenant-alerts/admin-tenant-alerts';
 
 @Component({
   selector: 'app-sidebar-user-case-management',
-  imports: [CommonModule, FormsModule, AddNewCase, ConfirmationPopupComponent, TranslatePipe, CaseDialog, CaseFilterRowComponent, CaseAnalyticsPanel],
+  imports: [CommonModule, FormsModule, AddNewCase, ConfirmationPopupComponent, TranslatePipe, CaseDialog, CaseFilterRowComponent, CaseAnalyticsPanel, AdminTenantAlerts],
   templateUrl: './sidebar-user-case-management.html'
 })
 export class SidebarUserCaseManagement implements OnInit {
@@ -32,11 +33,12 @@ export class SidebarUserCaseManagement implements OnInit {
   isAnalystsLoading = false;
   isAssignAnalystSaving = false;
   caseFilters: CaseListFilters = { ...DEFAULT_CASE_LIST_FILTERS };
-  caseManagementMode: 'list' | 'analytics' = 'list';
+  caseManagementMode: 'list' | 'analytics' | 'alerts' = 'list';
 
-  constructor(private router: Router, private caseService: CaseManagement, private licenseService: LicenseService, private messageNotificationService: MessageNotificationService) { }
+  constructor(private router: Router, private route: ActivatedRoute, private caseService: CaseManagement, private licenseService: LicenseService, private messageNotificationService: MessageNotificationService) { }
 
   ngOnInit(): void {
+    this.restoreModeFromRoute();
     this.loadCases();
   }
 
@@ -104,8 +106,17 @@ export class SidebarUserCaseManagement implements OnInit {
     this.caseFilters = filters;
   }
 
-  setCaseManagementMode(mode: 'list' | 'analytics'): void {
+  setCaseManagementMode(mode: 'list' | 'analytics' | 'alerts'): void {
+    if (mode === 'alerts' && !this.canViewAdminAlerts()) {
+      return;
+    }
     this.caseManagementMode = mode;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { mode: mode === 'list' ? null : mode },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    }).then();
   }
 
   viewCase(caseId: string): void {
@@ -121,6 +132,10 @@ export class SidebarUserCaseManagement implements OnInit {
 
   canManageCases(): boolean {
     return this.licenseService.isMaintainer() || this.licenseService.isAdmin();
+  }
+
+  canViewAdminAlerts(): boolean {
+    return this.licenseService.isAdmin();
   }
 
   openDeleteConfirmation(caseId: string): void {
@@ -199,6 +214,17 @@ export class SidebarUserCaseManagement implements OnInit {
     ]).toString();
 
     window.open(url, '_blank');
+  }
+
+  private restoreModeFromRoute(): void {
+    const mode = this.route.snapshot.queryParamMap.get('mode');
+    if (mode === 'alerts' && this.canViewAdminAlerts()) {
+      this.caseManagementMode = 'alerts';
+      return;
+    }
+    if (mode === 'analytics') {
+      this.caseManagementMode = 'analytics';
+    }
   }
 
   loadAnalysts(): void {

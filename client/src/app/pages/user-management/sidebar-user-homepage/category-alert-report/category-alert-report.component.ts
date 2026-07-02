@@ -58,9 +58,12 @@ export class CategoryAlertReportComponent implements OnInit {
   importedAlert: AlertModel | null = null;
   alertToShowReport: AlertModel | null = null;
   isExportChoiceOpen: boolean = false;
+  exportAllAlertsRequested: boolean = false;
+  isAdminTenantAlertReport: boolean = false;
+  adminTenantId: string | null = null;
   readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.', testId: 'category-alert-export-option-report' }];
   expandedAlertIds = new Set<string>();
-  hoveredReportTool: 'add' | 'import' | 'flush' | 'sidebar' | null = null;
+  hoveredReportTool: 'add' | 'download' | 'import' | 'flush' | 'sidebar' | null = null;
 
   constructor( private router: Router, private route: ActivatedRoute, public appService: AppService, public sidebarService: SidebarService, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService, private alertExportService: AlertExportService, private sidebarHomepageService: SidebarHomepageService ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
@@ -81,7 +84,7 @@ export class CategoryAlertReportComponent implements OnInit {
     return document.body.classList.contains('light-theme');
   }
 
-  setReportToolHover(tool: 'add' | 'import' | 'flush' | 'sidebar' | null): void {
+  setReportToolHover(tool: 'add' | 'download' | 'import' | 'flush' | 'sidebar' | null): void {
     this.hoveredReportTool = tool;
   }
 
@@ -91,13 +94,15 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.isAdminTenantAlertReport = this.route.snapshot.data['adminTenantAlerts'] === true;
     this.route.url.pipe(map(segments => {
       if (segments && segments.length > 0) {
         return segments[segments.length - 1].path;
       }
       return '';
     })).subscribe(lastSegment => {
-      this.category = lastSegment;
+      this.adminTenantId = this.route.snapshot.paramMap.get('tenantId') || this.route.snapshot.queryParamMap.get('tenantId');
+      this.category = this.route.snapshot.paramMap.get('type') || lastSegment;
       this.getLatestAlerts();
     });
   }
@@ -144,7 +149,12 @@ export class CategoryAlertReportComponent implements OnInit {
     if (reset) {
       this.isInitialLoading = true;
     }
-    const endpoint = `profile/alerts?paginate=true&page=${nextPage}&limit=${this.serverPageSize}&alert_type=${encodeURIComponent(this.category)}`;
+    const endpoint = this.getAlertsEndpoint(nextPage);
+    if (!endpoint) {
+      this.isLoadingMoreAlerts = false;
+      this.isInitialLoading = false;
+      return;
+    }
 
     this.apiService.get<any>(endpoint).subscribe({
       next: response => {
@@ -186,6 +196,17 @@ export class CategoryAlertReportComponent implements OnInit {
       return;
     }
     this.loadAlertsPage(false);
+  }
+
+  private getAlertsEndpoint(page: number): string | null {
+    if (this.isAdminTenantAlertReport) {
+      if (!this.adminTenantId) {
+        return null;
+      }
+      return `tenants/admin/${encodeURIComponent(this.adminTenantId)}/alerts?paginate=true&page=${page}&limit=${this.serverPageSize}&alert_type=${encodeURIComponent(this.category)}`;
+    }
+
+    return `profile/alerts?paginate=true&page=${page}&limit=${this.serverPageSize}&alert_type=${encodeURIComponent(this.category)}`;
   }
 
   flushAll() {
@@ -339,6 +360,10 @@ export class CategoryAlertReportComponent implements OnInit {
       return;
     }
     if (this.alertToShowReport) {
+      if (this.isAdminTenantAlertReport) {
+        this.openExportChoice();
+        return;
+      }
       this.alertToShowReport.report_seen = true;
       this.apiService.post('alert/seen', [this.alertToShowReport]).subscribe({
         next: () => {
@@ -355,15 +380,66 @@ export class CategoryAlertReportComponent implements OnInit {
 
   closeExportChoice(): void {
     this.isExportChoiceOpen = false;
+    this.exportAllAlertsRequested = false;
   }
 
   exportSelectedAlert(_type: string): void {
+    if (this.exportAllAlertsRequested) {
+      this.alertExportService.exportPdf(this.getLoadedAlertsForExport(), this.getCategoryExportTitle());
+      this.closeExportChoice();
+      return;
+    }
+
     if (!this.alertToShowReport) {
       this.closeExportChoice();
       return;
     }
     this.alertExportService.exportPdf([this.alertToShowReport], 'Brand Alerts');
     this.closeExportChoice();
+  }
+
+  downloadAllAlerts(): void {
+    if (!this.category || this.alerts.length === 0) {
+      return;
+    }
+    this.alertToShowReport = null;
+    this.exportAllAlertsRequested = true;
+    this.openExportChoice();
+  }
+
+  getExportModalTitle(): string {
+    return this.exportAllAlertsRequested ? 'Download Alerts' : 'categoryAlerts.export.title';
+  }
+
+  getExportModalSubtitle(): string {
+    return this.exportAllAlertsRequested ? 'Choose export format for loaded alerts:' : 'categoryAlerts.export.subtitle';
+  }
+
+  private getCategoryExportTitle(): string {
+    const title = this.category
+      .replace(/[_-]/g, ' ')
+      .replace(/\b\w/g, char => char.toUpperCase());
+    return title ? `${title} Alerts` : 'Brand Alerts';
+  }
+
+  private getLoadedAlertsForExport(): AlertModel[] {
+    return this.alerts.map(alert => this.alertLookupById.get(alert.id) || this.convertCategoryAlertToAlertModel(alert));
+  }
+
+  private convertCategoryAlertToAlertModel(alert: CategoryAlerts): AlertModel {
+    return {
+      alert_id: alert.id,
+      type: alert.category,
+      title: alert.title,
+      description: alert.description,
+      ioc_value: alert.entity,
+      data_hash: alert.hash,
+      source: alert.source,
+      url: alert.url,
+      all_ioc: alert.allIOC,
+      first_seen: alert.detectedOn,
+      last_seen: alert.detectedOn
+    };
   }
 
   seeDetails(id: string, hash: string) {
@@ -450,7 +526,7 @@ export class CategoryAlertReportComponent implements OnInit {
 
 
         }
-        if (_alert) {
+        if (_alert && !this.isAdminTenantAlertReport) {
           _alert.report_seen = true;
           this.apiService.post('alert/seen', [_alert]).subscribe({
             next: () => {

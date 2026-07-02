@@ -63,6 +63,30 @@ async def get_all_tenants():
 
 
 @tenant_routes.post(
+    "/api/tenants/admin/alerts/summary",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def get_admin_tenant_alerts():
+    return await TenantManager.get_instance().get_admin_visible_tenant_alerts_summary()
+
+
+@tenant_routes.get(
+    "/api/tenants/admin/{tenant_id}/alerts",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def get_admin_tenant_category_alerts(tenant_id: str, page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=20), alert_type: str | None = Query(None), paginate: bool = Query(False)):
+    return await TenantManager.get_instance().get_admin_tenant_alerts(
+        tenant_id,
+        page=page,
+        limit=limit,
+        alert_type=alert_type,
+        paginate=paginate,
+    )
+
+
+@tenant_routes.post(
     "/api/update/user",
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))], )
