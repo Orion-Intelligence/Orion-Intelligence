@@ -12,15 +12,19 @@ import { ExportChoiceModalComponent } from '../../../../../shared/partials/expor
 import { ExportChoiceOption } from '../../../../../shared/model/report/export-choice.model';
 import { AlertExportService } from '../../../../../shared/services/export/alert-export.service';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
-import { AdminTenantAlertGroup, AdminTenantAlertsPage, AdminTenantAlertsResponse, AdminTenantSummary } from './admin-tenant-alerts.model';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { AdminTenantAlertGroup, AdminTenantAlertsPage, AdminTenantAlertsResponse } from './admin-tenant-alerts.model';
+
+const ALL_TENANTS_OPTION = 'all';
 
 @Component({
   selector: 'app-admin-tenant-alerts',
-  imports: [CommonModule, ExportChoiceModalComponent, TranslatePipe],
+  imports: [CommonModule, ExportChoiceModalComponent, TranslatePipe, UiDropdownComponent],
   templateUrl: './admin-tenant-alerts.html'
 })
 export class AdminTenantAlerts implements OnInit {
   tenantAlertGroups: AdminTenantAlertGroup[] = [];
+  selectedTenantIds: string[] = [ALL_TENANTS_OPTION];
   isLoading = false;
   isExportChoiceOpen = false;
   isExportingTenantAlerts = false;
@@ -53,11 +57,38 @@ export class AdminTenantAlerts implements OnInit {
             categories: this.convertSummaryToCategories(item.alert_summary),
             riskCounts: this.countRiskFromSummary(item.alert_summary)
           }));
+          this.selectedTenantIds = this.normalizeSelectedTenantIds(this.selectedTenantIds);
         },
         error: () => {
           this.tenantAlertGroups = [];
+          this.selectedTenantIds = [ALL_TENANTS_OPTION];
         }
       });
+  }
+
+  get tenantDropdownOptions(): UiDropdownOption[] {
+    return [
+      { key: ALL_TENANTS_OPTION, label: 'All' },
+      ...this.tenantAlertGroups
+        .filter(group => !!group.tenant.id)
+        .map(group => ({
+          key: group.tenant.id as string,
+          label: group.tenant.name || group.tenant.email || group.tenant.id as string
+        }))
+    ];
+  }
+
+  get visibleTenantAlertGroups(): AdminTenantAlertGroup[] {
+    if (!this.selectedTenantIds.length || this.selectedTenantIds.includes(ALL_TENANTS_OPTION)) {
+      return this.tenantAlertGroups;
+    }
+
+    const selectedIds = new Set(this.selectedTenantIds);
+    return this.tenantAlertGroups.filter(group => !!group.tenant.id && selectedIds.has(group.tenant.id));
+  }
+
+  onTenantSelectionChange(values: string[]): void {
+    this.selectedTenantIds = this.normalizeSelectedTenantIds(values, this.selectedTenantIds);
   }
 
   openTenantCategoryAlerts(group: AdminTenantAlertGroup, categoryName: string): void {
@@ -134,6 +165,21 @@ export class AdminTenantAlerts implements OnInit {
 
   private countTotalAlerts(summary?: AlertSummary): number {
     return Object.values(summary?.counts_by_type || {}).reduce((total, count) => total + Number(count || 0), 0);
+  }
+
+  private normalizeSelectedTenantIds(values: string[], previousValues: string[] = this.selectedTenantIds): string[] {
+    const availableTenantIds = new Set(this.tenantAlertGroups.map(group => group.tenant.id).filter((id): id is string => !!id));
+    const selectedIds = values.filter(value => value !== ALL_TENANTS_OPTION && availableTenantIds.has(value));
+
+    if (!values.length || !selectedIds.length) {
+      return [ALL_TENANTS_OPTION];
+    }
+
+    if (values.includes(ALL_TENANTS_OPTION)) {
+      return previousValues.includes(ALL_TENANTS_OPTION) ? selectedIds : [ALL_TENANTS_OPTION];
+    }
+
+    return selectedIds;
   }
 
   private fetchTenantAlertsPage(tenantId: string, page: number, accumulated: AlertModel[], done: (alerts: AlertModel[]) => void): void {
