@@ -15,7 +15,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   templateUrl: './sidebar-user-feeder-add.component.html',
 })
 export class SidebarUserFeederAddComponent implements OnChanges {
-  private readonly maxFileSize = 50 * 1024;
+  private readonly maxFileSize = 1024 * 1024;
   private pendingUploadInput: HTMLInputElement | null = null;
 
   sharedRuleScripts: FeederScriptItem[] = [];
@@ -178,7 +178,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
         return;
       }
       if (file.size > this.maxFileSize) {
-        this.formError = 'File size must be 50 KB or less';
+        this.formError = 'File size must be 1 MB or less';
         return;
       }
     }
