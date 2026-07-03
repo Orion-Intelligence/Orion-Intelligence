@@ -63,11 +63,28 @@
       </div>
 
       @if (loading) {
-        <div class="px-4 py-8 text-center text-[13px] text-[var(--color-text4)]">{{ 'Loading logs...' | translate }}</div>
+        <div class="overflow-x-auto" @fadeInDashboardItem>
+          <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[11px] font-semibold uppercase text-[var(--color-text4)]">
+            <div>{{ 'Type' | translate }}</div>
+            <div>{{ 'Time' | translate }}</div>
+            <div>{{ 'File' | translate }}</div>
+            <div>{{ 'Message' | translate }}</div>
+            <div>{{ 'Source' | translate }}</div>
+          </div>
+          @for (row of [1,2,3,4,5,6]; track row) {
+            <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] px-4 py-[15px]">
+              <div class="ui-shimmer h-[18px] w-[58px] rounded-full bg-[var(--color-blue-720)]"></div>
+              <div class="ui-shimmer h-3 w-[92px] rounded bg-[var(--color-blue-720)]"></div>
+              <div class="ui-shimmer h-3 w-[112px] rounded bg-[var(--color-blue-720)]"></div>
+              <div class="ui-shimmer h-3 w-full rounded bg-[var(--color-blue-720)]"></div>
+              <div class="ui-shimmer h-[24px] w-[82%] rounded-[6px] bg-[var(--color-blue-720)]"></div>
+            </div>
+          }
+        </div>
       } @else if (!response.entries.length) {
         <div class="px-4 py-8 text-center text-[13px] text-[var(--color-text4)]">{{ 'No logs found' | translate }}</div>
       } @else {
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto" @fadeInDashboardItem>
           <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[11px] font-semibold uppercase text-[var(--color-text4)]">
             <div>{{ 'Type' | translate }}</div>
             <div>{{ 'Time' | translate }}</div>
