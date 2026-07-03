@@ -8,6 +8,7 @@ class SystemLogManager:
     __instance = None
     __lock = threading.Lock()
 
+    READ_CHUNK_SIZE = 64 * 1024
     LOG_ROOT = Path(__file__).resolve().parents[3] / "logs"
     LOG_DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
     LOG_FILE_PATTERN = re.compile(r"^log_\d+\.log$")
@@ -42,28 +43,57 @@ class SystemLogManager:
         start = (safe_page - 1) * safe_limit
         end = start + safe_limit
         total = 0
+        has_more = False
         for path in files:
-            try:
-                lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-            except OSError:
-                continue
-            for index, line in reversed(list(enumerate(lines, start=1))):
+            for index, line in self._iter_log_lines_reverse(path):
                 item = self._parse_log_line(path, line, index)
                 if not item or (safe_type and item["type"] != safe_type):
                     continue
+                if total >= end:
+                    has_more = True
+                    break
                 if start <= total < end:
                     entries.append(item)
                 total += 1
+            if has_more:
+                break
+
+        visible_total = total + 1 if has_more else total
 
         return {
             "entries": entries,
-            "total": total,
+            "total": visible_total,
             "page": safe_page,
             "limit": safe_limit,
-            "page_count": (total + safe_limit - 1) // safe_limit if total else 0,
+            "page_count": safe_page + 1 if has_more else ((visible_total + safe_limit - 1) // safe_limit if visible_total else 0),
             "available_dates": sorted({self._log_date(path) for path in self._log_files()}, reverse=True),
             "files": [self._log_file_item(path) for path in files],
         }
+
+    def _iter_log_lines_reverse(self, path: Path):
+        try:
+            with path.open("rb") as file:
+                file.seek(0, 2)
+                position = file.tell()
+                buffer = b""
+                line_number = 0
+                while position > 0:
+                    read_size = min(self.READ_CHUNK_SIZE, position)
+                    position -= read_size
+                    file.seek(position)
+                    buffer = file.read(read_size) + buffer
+                    lines = buffer.split(b"\n")
+                    buffer = lines[0]
+                    for raw_line in reversed(lines[1:]):
+                        if not raw_line:
+                            continue
+                        line_number += 1
+                        yield line_number, raw_line.rstrip(b"\r").decode("utf-8", errors="replace")
+                if buffer:
+                    line_number += 1
+                    yield line_number, buffer.rstrip(b"\r").decode("utf-8", errors="replace")
+        except OSError:
+            return
 
     def delete(self, log_date: str, file_name: str) -> bool:
         path = self._safe_log_file(log_date, file_name)
