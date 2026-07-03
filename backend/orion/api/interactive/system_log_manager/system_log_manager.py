@@ -39,6 +39,9 @@ class SystemLogManager:
         safe_limit = max(1, min(int(limit or 200), 500))
         files = self._log_files(safe_date or None)
         entries = []
+        start = (safe_page - 1) * safe_limit
+        end = start + safe_limit
+        total = 0
         for path in files:
             try:
                 lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
@@ -48,12 +51,12 @@ class SystemLogManager:
                 item = self._parse_log_line(path, line, index)
                 if not item or (safe_type and item["type"] != safe_type):
                     continue
-                entries.append(item)
+                if start <= total < end:
+                    entries.append(item)
+                total += 1
 
-        total = len(entries)
-        start = (safe_page - 1) * safe_limit
         return {
-            "entries": entries[start:start + safe_limit],
+            "entries": entries,
             "total": total,
             "page": safe_page,
             "limit": safe_limit,
@@ -91,15 +94,45 @@ class SystemLogManager:
             return False
 
     def _log_files(self, log_date: str | None = None) -> list[Path]:
-        if not self.LOG_ROOT.exists():
-            return []
-        date_dirs = [self.LOG_ROOT / log_date] if log_date else [path for path in self.LOG_ROOT.iterdir() if path.is_dir()]
         files: list[Path] = []
-        for date_dir in sorted(date_dirs, reverse=True):
-            if not self._valid_log_date(date_dir.name) or not date_dir.is_dir():
+        seen: set[Path] = set()
+        for root in self._log_roots():
+            date_dirs = [root / log_date] if log_date else [path for path in root.iterdir() if path.is_dir()]
+            for date_dir in date_dirs:
+                if not self._valid_log_date(date_dir.name) or not date_dir.is_dir():
+                    continue
+                for path in date_dir.iterdir():
+                    if not path.is_file() or not self.LOG_FILE_PATTERN.fullmatch(path.name):
+                        continue
+                    resolved = path.resolve()
+                    if resolved in seen:
+                        continue
+                    seen.add(resolved)
+                    files.append(path)
+        return sorted(files, key=self._log_file_sort_key, reverse=True)
+
+    def _log_roots(self) -> list[Path]:
+        candidates = [
+            self.LOG_ROOT,
+            Path.cwd() / "orion" / "logs",
+            Path.cwd() / "logs",
+            Path.cwd() / "backend" / "orion" / "logs",
+        ]
+        roots = []
+        seen: set[Path] = set()
+        for root in candidates:
+            if not root.exists():
                 continue
-            files.extend(sorted((path for path in date_dir.iterdir() if path.is_file() and self.LOG_FILE_PATTERN.fullmatch(path.name)), reverse=True))
-        return files
+            resolved = root.resolve()
+            if resolved in seen:
+                continue
+            seen.add(resolved)
+            roots.append(root)
+        return roots
+
+    def _log_file_sort_key(self, path: Path) -> tuple[str, int]:
+        match = re.search(r"\d+", path.stem)
+        return path.parent.name, int(match.group(0)) if match else 0
 
     def _log_file_item(self, path: Path) -> dict:
         stat = path.stat()
@@ -137,10 +170,11 @@ class SystemLogManager:
     def _safe_log_file(self, log_date: str, file_name: str) -> Path | None:
         if not self._valid_log_date(log_date) or not self.LOG_FILE_PATTERN.fullmatch(file_name or ""):
             return None
-        path = self.LOG_ROOT / log_date / file_name
-        if not path.is_file() or self.LOG_ROOT.resolve() not in path.resolve().parents:
-            return None
-        return path
+        for root in self._log_roots():
+            path = root / log_date / file_name
+            if path.is_file() and root.resolve() in path.resolve().parents:
+                return path
+        return None
 
     @staticmethod
     def _remove_empty_dir(path: Path) -> None:
