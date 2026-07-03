@@ -11,7 +11,7 @@ from orion.services.arango_manager.arango_controller import arango_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.redis_manager.redis_controller import redis_controller
-from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
+from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 
 
 class service_manager:
@@ -52,6 +52,7 @@ class service_manager:
                 await test_manager.get_instance().reset_test_elastic_and_import_mocks()
 
                 await redis_controller.getInstance().initialize()
+                await self.clear_test_insight_cache()
                 await self.build_map_assets(build_dir)
                 await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [config_controller.CONFIG_CACHE_KEY])
                 await config_controller.getInstance().load_config()
@@ -76,6 +77,19 @@ class service_manager:
 
     def check_status(self):
         return self._is_available
+
+    @staticmethod
+    async def clear_test_insight_cache():
+        if env_handler.get_instance().env("TESTING_ENABLED", "0") != "1":
+            return
+
+        for key in (
+            REDIS_KEYS.APP_INSIGHT_KEY,
+            f"{REDIS_KEYS.APP_INSIGHT_KEY}:country_v1",
+            REDIS_KEYS.INSIGHT_STAT,
+            REDIS_KEYS.GRAPH_INSIGHT_STAT,
+        ):
+            await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [key])
 
     @staticmethod
     async def build_assets(build_dir):

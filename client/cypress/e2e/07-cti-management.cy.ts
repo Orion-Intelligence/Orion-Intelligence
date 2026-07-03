@@ -41,6 +41,7 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
     cy.get('[data-testid="cti-graph-advanced-toggle"]').filter(':visible').first().click();
     cy.get('[data-testid="cti-graph-adv-row"]').filter(':visible').first().should('exist');
     cy.get('[data-testid="cti-graph-adv-field-select"]').filter(':visible').first().click();
+    cy.get('.ui-dropdown-menu input').filter(':visible').first().clear().type('Country');
     cy.contains('[role="option"]', 'Country').filter(':visible').first().click();
     cy.get('[data-testid="cti-graph-adv-value-input"]').filter(':visible').first().clear().type('Pakistan');
     cy.get('[data-testid="cti-graph-adv-add-filter"]').filter(':visible').first().click();
@@ -63,7 +64,7 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
     cy.docsScreenshot('cti-export-modal');
     cy.get('[data-testid="graph-report-export-json"]').filter(':visible').first().click();
     cy.get('[data-testid="graph-report-export-modal"]').should('not.exist');
-    cy.readFile(`${exportBase}-graph.json`, { timeout: 15000 }).should('contain', 'CTI Graph Intelligence Report');
+    cy.readFile(`${exportBase}-graph.json`, { timeout: 15000 }).its('title').should('eq', 'CTI Graph Intelligence Report');
     openAndAssertReportModal('Export CTI Report');
     cy.get('[data-testid="graph-report-export-graph-pdf"]').filter(':visible').first().click();
     cy.get('[data-testid="graph-report-export-modal"]').should('not.exist');
