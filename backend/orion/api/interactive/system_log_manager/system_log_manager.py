@@ -1,4 +1,5 @@
 import re
+import shutil
 import threading
 from datetime import datetime
 from pathlib import Path
@@ -105,13 +106,18 @@ class SystemLogManager:
 
     def flush(self) -> dict:
         deleted = 0
-        for path in self._log_files():
+        for root in self._log_roots():
             try:
-                path.unlink()
-                deleted += 1
-                self._remove_empty_dir(path.parent)
+                date_dirs = [item for item in root.iterdir() if item.is_dir() and self._valid_log_date(item.name)]
             except OSError:
                 continue
+            for path in date_dirs:
+                try:
+                    deleted += sum(1 for item in path.rglob("*") if item.is_file())
+                    shutil.rmtree(path)
+                except OSError:
+                    continue
+            self._remove_empty_dir(root)
         return {"success": True, "deleted": deleted}
 
     def _valid_log_date(self, log_date: str) -> bool:

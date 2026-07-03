@@ -53,6 +53,28 @@ class elastic_controller:
             return self.__m_dump_connection
         return self.__m_core_connection
 
+    @classmethod
+    def _clip_oversized_keyword_values(cls, value, field_path: tuple[str, ...] = ()):
+        if any(part.lower() in {"m_screenshot", "screenshot"} for part in field_path):
+            return value
+
+        if isinstance(value, str):
+            encoded = value.encode("utf-8")
+            if len(encoded) > 32766:
+                return encoded[:32766].decode("utf-8", errors="ignore")
+            return value
+
+        if isinstance(value, list):
+            return [cls._clip_oversized_keyword_values(item, field_path) for item in value]
+
+        if isinstance(value, dict):
+            for key, item in list(value.items()):
+                next_path = (*field_path, str(key))
+                value[key] = cls._clip_oversized_keyword_values(item, next_path)
+            return value
+
+        return value
+
     async def __initialize_mappings(self):
         try:
             mapping_leakdatamodel = ELASTIC_ENUMS.mapping_leakdatamodel
@@ -401,6 +423,8 @@ class elastic_controller:
 
                 for key in keys_to_remove:
                     del data[key]
+
+                self._clip_oversized_keyword_values(data)
 
                 return p_entry
 
