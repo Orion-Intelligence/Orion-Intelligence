@@ -47,8 +47,8 @@
     </div>
   }
 
-  <div class="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-    <section class="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)]">
+  <div class="mt-4">
+    <section class="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] font-[Inter]">
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-divider)] px-4 py-3">
         <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ 'Entries' | translate }}</div>
         <div class="flex items-center gap-2 text-[12px] text-[var(--color-text4)]">
@@ -68,7 +68,7 @@
         <div class="px-4 py-8 text-center text-[13px] text-[var(--color-text4)]">{{ 'No logs found' | translate }}</div>
       } @else {
         <div class="overflow-x-auto">
-          <div class="grid min-w-[920px] grid-cols-[96px_150px_130px_minmax(0,1fr)_180px] gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[11px] font-semibold uppercase text-[var(--color-text4)]">
+          <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[11px] font-semibold uppercase text-[var(--color-text4)]">
             <div>{{ 'Type' | translate }}</div>
             <div>{{ 'Time' | translate }}</div>
             <div>{{ 'File' | translate }}</div>
@@ -76,38 +76,17 @@
             <div>{{ 'Source' | translate }}</div>
           </div>
           @for (entry of response.entries; track entry.id) {
-            <div class="grid min-w-[920px] grid-cols-[96px_150px_130px_minmax(0,1fr)_180px] gap-3 border-b border-[var(--color-divider)] px-4 py-3 text-[13px] text-[var(--color-text1)]">
-              <div><span class="inline-flex rounded-full border px-2 py-[2px] text-[10px] font-semibold" [ngClass]="getTypeClass(entry.type)">{{ entry.type }}</span></div>
-              <div class="font-mono text-[12px] text-[var(--color-text3)]">{{ entry.timestamp }}</div>
-              <div class="font-mono text-[12px] text-[var(--color-text3)]">{{ entry.date }}/{{ entry.file }}:{{ entry.line }}</div>
-              <div class="min-w-0 break-words leading-5">{{ entry.message }}</div>
-              <div class="min-w-0 truncate text-[12px] text-[var(--color-text4)]" [title]="entry.caller">{{ entry.caller || '-' }}</div>
+            <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] px-4 py-[11px] text-[13px] leading-5 text-[var(--color-text1)] transition-colors hover:bg-[rgba(87,165,235,0.06)]">
+              <div class="flex min-h-[28px] items-center"><span class="inline-flex items-center rounded-full border px-2 py-[3px] text-[10px] font-semibold uppercase leading-none" [ngClass]="getTypeClass(entry.type)">{{ entry.type }}</span></div>
+              <div class="flex min-h-[28px] items-center text-[12.5px] font-medium text-[var(--color-text3)]">{{ entry.timestamp }}</div>
+              <div class="flex min-h-[28px] min-w-0 items-center truncate text-[12.5px] font-medium text-[var(--color-text3)]" [title]="entry.date + '/' + entry.file + ':' + entry.line">{{ entry.date }}/{{ entry.file }}:{{ entry.line }}</div>
+              <div class="min-w-0 break-words text-[13px] font-medium leading-[1.45] text-[var(--color-text2)]">{{ entry.message }}</div>
+              <div class="flex min-h-[28px] min-w-0 items-center truncate rounded-[6px] bg-[var(--color-blue-720)] px-2 py-1 text-[12px] font-medium text-[var(--color-text3)]" [title]="entry.caller">{{ entry.caller || '-' }}</div>
             </div>
           }
         </div>
       }
     </section>
 
-    <aside class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)]">
-      <div class="border-b border-[var(--color-divider)] px-4 py-3 text-[14px] font-semibold text-[var(--color-text1)]">{{ 'Log Files' | translate }}</div>
-      <div class="max-h-[560px] overflow-y-auto p-3">
-        @if (!response.files.length) {
-          <div class="py-6 text-center text-[13px] text-[var(--color-text4)]">{{ 'No files found' | translate }}</div>
-        }
-        @for (file of response.files; track file.date + file.file) {
-          <div class="mb-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-3 last:mb-0">
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <div class="truncate font-mono text-[12px] text-[var(--color-text1)]" [title]="file.date + '/' + file.file">{{ file.date }}/{{ file.file }}</div>
-                <div class="mt-1 text-[11px] text-[var(--color-text4)]">{{ formatBytes(file.size) }}</div>
-              </div>
-              <button type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] text-red-300 transition-colors hover:bg-red-500/10" (click)="deleteFile(file)" aria-label="Delete log file">
-                <i class="bi bi-trash text-[13px]"></i>
-              </button>
-            </div>
-          </div>
-        }
-      </div>
-    </aside>
   </div>
 </div>
