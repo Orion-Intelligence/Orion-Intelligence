@@ -49,7 +49,7 @@
   "bluesky": {
     "rule_type": "shared",
     "path": "social/platform",
-    "value_regex": "^https?://(?:bsky\\.app/profile/[^/?#]+(?:/.*)?|(?:[^/]+\\.)?bsky\\.social(?:/.*)?)$"
+    "value_regex": "^https?://(?:bsky\\.app/(?:profile/[^/?#]+(?:/.*)?|search\\?q=[^&#]+(?:&.*)?)|(?:[^/]+\\.)?bsky\\.social(?:/.*)?)$"
   },
   "devto": {
     "rule_type": "shared",

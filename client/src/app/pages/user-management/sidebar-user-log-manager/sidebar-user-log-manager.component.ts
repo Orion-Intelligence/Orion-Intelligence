@@ -112,8 +112,10 @@ export class SidebarUserLogManagerComponent implements OnInit {
     }
     this.apiService.delete<{ success: boolean; deleted: number }>('profile/system-logs').subscribe({
       next: () => {
+        this.logType = '';
+        this.logDate = '';
         this.page = 1;
-        this.loadLogs();
+        this.response = this.emptyResponse();
       },
       error: (error) => {
         this.errorMessage = error?.error?.detail || 'Failed to flush logs';

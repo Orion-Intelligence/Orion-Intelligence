@@ -1,6 +1,7 @@
 import hashlib
 import re
 import threading
+from datetime import date, datetime
 from typing import Any
 
 from fastapi import HTTPException
@@ -80,6 +81,18 @@ class entity_manager:
         if value is None:
             return ""
         return str(value).strip()
+
+    @classmethod
+    def _json_safe(cls, value: Any) -> Any:
+        if isinstance(value, datetime):
+            return value.isoformat()
+        if isinstance(value, date):
+            return value.isoformat()
+        if isinstance(value, dict):
+            return {str(k): cls._json_safe(v) for k, v in value.items()}
+        if isinstance(value, (list, tuple, set)):
+            return [cls._json_safe(item) for item in value]
+        return value
 
     @staticmethod
     def _as_values(value: Any) -> list[Any]:
@@ -479,9 +492,9 @@ class entity_manager:
             if value in (None, "", [], {}):
                 continue
             if key in cls.REPORT_SUMMARY_KEYS:
-                metadata[key] = cls._truncate(value, 700)
+                metadata[key] = cls._json_safe(cls._truncate(value, 700))
             else:
-                metadata[key] = value
+                metadata[key] = cls._json_safe(value)
         return metadata
 
     def _upsert_vertex_sync(self, document: dict[str, Any], merge_arrays: dict[str, list[Any]] | None = None):
@@ -508,7 +521,7 @@ class entity_manager:
                     float(merged.get("max_source_reliability") or self.DEFAULT_SOURCE_RELIABILITY),
                     len(merged.get("sources") or []),
                 )
-            vertex_collection.insert(merged, overwrite=True)
+            vertex_collection.insert(self._json_safe(merged), overwrite=True)
 
     async def _upsert_observation_vertex(self, document: dict[str, Any], aliases: list[str], source_module: str, source_fields: list[str], doc_id: str):
         await run_in_threadpool(
@@ -547,7 +560,7 @@ class entity_manager:
                 merged["max_source_reliability"],
                 len(merged["sources"]),
             )
-            edge_collection.insert(merged, overwrite=True)
+            edge_collection.insert(self._json_safe(merged), overwrite=True)
 
     async def _upsert_derived_edge(self, from_vertex: str, to_vertex: str, edge_type: str, relationship_type: str, label: str, doc_id: str, source: str, source_module: str, published: str | None, source_reliability: float, base_confidence: float, extra: dict[str, Any] | None = None):
         edge_key = self._safe_key("derived", edge_type, from_vertex, to_vertex)
