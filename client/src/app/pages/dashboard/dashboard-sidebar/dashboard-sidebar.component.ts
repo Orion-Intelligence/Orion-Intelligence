@@ -16,6 +16,7 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ChatWidgetComponent } from '../../root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { AiChatSession } from '../../../shared/model/nexus/ai-chat-session.model';
 
 @Component({
   selector: 'app-dashboard-sidebar',
@@ -29,6 +30,8 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       this.onToggleSidebar(this.mobile_menu_status);
     }
   };
+  private readonly aiChatStorageKey = 'nexus-ai-chat-sessions';
+  private readonly aiHistoryUpdatedHandler = () => this.loadAiChatSessions();
 
   sidebar_default = true;
   min_detected = false;
@@ -42,7 +45,10 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   socialCategories = Object.values(SocialSubCategory);
   tenantCategories = Object.values(TenantSubCategory);
   category = Category;
+  isAiWorkspaceRoute = false;
   readonly menuToggle = output<undefined>();
+  aiChatSessions: AiChatSession[] = [];
+  activeAiChatId: string | null = null;
 
   constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService) {
   }
@@ -63,14 +69,22 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       });
     window.addEventListener('resize', this.checkScreenWidth.bind(this));
     window.addEventListener('close-dashboard-sidebar', this.closeForSubscriptionHandler);
+    window.addEventListener('nexus-ai-chat-history-updated', this.aiHistoryUpdatedHandler);
     this.checkScreenWidth();
   }
 
   private handleProfileRoute(url: string) {
+    this.isAiWorkspaceRoute = url.startsWith('/dashboard/profile/ai');
+
+    if (this.isAiWorkspaceRoute) {
+      this.loadAiChatSessions();
+    }
+
     if (url.startsWith('/dashboard/profile/consolidated/') ||
       url.startsWith('/dashboard/profile/homepage') ||
       url.startsWith('/dashboard/profile/alerts/general') ||
-      url.startsWith('/dashboard/profile/alerts')) {
+      url.startsWith('/dashboard/profile/alerts') ||
+      url.startsWith('/dashboard/profile/ai')) {
       this.selectionStore.setSelectedSection('Profile');
       this.selectionStore.setSelectedOption('Homepage');
     }
@@ -79,6 +93,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     window.removeEventListener('resize', this.checkScreenWidth.bind(this));
     window.removeEventListener('close-dashboard-sidebar', this.closeForSubscriptionHandler);
+    window.removeEventListener('nexus-ai-chat-history-updated', this.aiHistoryUpdatedHandler);
   }
 
   checkScreenWidth() {
@@ -238,6 +253,75 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT) &&
       c !== ProfileSubCategory.STATISTICS &&
       c !== ProfileSubCategory.TENANT_SETTINGS);
+  }
+
+  startNewAiChat(): void {
+    window.dispatchEvent(new CustomEvent('nexus-ai-new-chat'));
+    setTimeout(() => this.loadAiChatSessions());
+  }
+
+  selectAiChat(chat: AiChatSession): void {
+    this.activeAiChatId = chat.id;
+
+    window.dispatchEvent(new CustomEvent('nexus-ai-select-chat', {
+      detail: chat.id,
+    }));
+
+    if (window.innerWidth <= 900 && this.sidebar_default) {
+      this.onToggleSidebar();
+    }
+  }
+
+  renameAiChat(chat: AiChatSession, event: MouseEvent): void {
+    event.stopPropagation();
+
+    const title = window.prompt('Rename chat', chat.title)?.trim();
+
+    if (!title) {
+      return;
+    }
+
+    window.dispatchEvent(new CustomEvent('nexus-ai-rename-chat', {
+      detail: {
+        id: chat.id,
+        title,
+      },
+    }));
+
+    setTimeout(() => this.loadAiChatSessions());
+  }
+
+  deleteAiChat(chat: AiChatSession, event: MouseEvent): void {
+    event.stopPropagation();
+
+    window.dispatchEvent(new CustomEvent('nexus-ai-delete-chat', {
+      detail: chat.id,
+    }));
+
+    setTimeout(() => this.loadAiChatSessions());
+  }
+
+  private loadAiChatSessions(): void {
+    const raw = localStorage.getItem(this.aiChatStorageKey);
+
+    if (!raw) {
+      this.aiChatSessions = [];
+      this.activeAiChatId = null;
+      return;
+    }
+
+    try {
+      this.aiChatSessions = JSON.parse(raw) as AiChatSession[];
+    }
+    catch {
+      this.aiChatSessions = [];
+    }
+
+    const activeStillExists = this.aiChatSessions.some(chat => chat.id === this.activeAiChatId);
+
+    if (!activeStillExists) {
+      this.activeAiChatId = this.aiChatSessions[0]?.id ?? null;
+    }
   }
 
   isAdmin(): boolean {
