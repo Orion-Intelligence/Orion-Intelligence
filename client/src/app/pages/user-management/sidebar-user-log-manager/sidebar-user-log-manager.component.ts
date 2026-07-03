@@ -22,10 +22,10 @@ export class SidebarUserLogManagerComponent implements OnInit {
   logType = '';
   logDate = '';
   page = 1;
-  limit = 500;
+  limit = 100;
   loading = false;
   errorMessage = '';
-  response: SystemLogResponse = { entries: [], total: 0, page: 1, limit: 500, page_count: 0, available_dates: [], files: [] };
+  response: SystemLogResponse = { entries: [], total: 0, page: 1, limit: 100, page_count: 0, available_dates: [], files: [] };
 
   constructor(private apiService: ApiService, private licenseService: LicenseService, private router: Router) {
   }

@@ -21,6 +21,7 @@ services:
       - ./backend/migrations:/app/migrations:cached
       - ./client/build:/client_build:delegated
       - ./bloom_data:/app/bloom_data
+      - ../Orion-Crawler/app/logs:/app/crawler_logs:ro
     expose:
       - "8070"
     ports:

@@ -198,7 +198,7 @@ async def flush_system_logs():
 
 
 @tenant_routes.delete(
-    "/api/profile/system-logs/{log_date}/{file_name}",
+    "/api/profile/system-logs/{log_date}/{file_name:path}",
     status_code=200,
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN]))], )

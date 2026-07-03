@@ -11,7 +11,7 @@ class SystemLogManager:
     LOG_ROOT = Path(__file__).resolve().parents[3] / "logs"
     LOG_DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
     LOG_FILE_PATTERN = re.compile(r"^log_\d+\.log$")
-    LOG_LINE_PATTERN = re.compile(r"^(?P<type>[A-Z]+) - (?P<timestamp>\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2}) : (?P<message>.*)$")
+    LOG_LINE_PATTERN = re.compile(r"^(?:\[APP-LOG\]\s*)?(?P<type>[A-Z]+) - (?P<timestamp>\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2}) : (?P<message>.*)$")
     VISIBLE_LOG_TYPES = {"INFO", "WARNING", "ERROR"}
 
     @staticmethod
@@ -36,7 +36,7 @@ class SystemLogManager:
             raise ValueError("Invalid log date")
 
         safe_page = max(1, int(page or 1))
-        safe_limit = max(1, min(int(limit or 200), 500))
+        safe_limit = max(1, min(int(limit or 100), 100))
         files = self._log_files(safe_date or None)
         entries = []
         start = (safe_page - 1) * safe_limit
@@ -61,7 +61,7 @@ class SystemLogManager:
             "page": safe_page,
             "limit": safe_limit,
             "page_count": (total + safe_limit - 1) // safe_limit if total else 0,
-            "available_dates": sorted({path.parent.name for path in self._log_files()}, reverse=True),
+            "available_dates": sorted({self._log_date(path) for path in self._log_files()}, reverse=True),
             "files": [self._log_file_item(path) for path in files],
         }
 
@@ -101,7 +101,7 @@ class SystemLogManager:
             for date_dir in date_dirs:
                 if not self._valid_log_date(date_dir.name) or not date_dir.is_dir():
                     continue
-                for path in date_dir.iterdir():
+                for path in date_dir.rglob("*.log"):
                     if not path.is_file() or not self.LOG_FILE_PATTERN.fullmatch(path.name):
                         continue
                     resolved = path.resolve()
@@ -114,9 +114,11 @@ class SystemLogManager:
     def _log_roots(self) -> list[Path]:
         candidates = [
             self.LOG_ROOT,
+            Path("/app/crawler_logs"),
             Path.cwd() / "orion" / "logs",
             Path.cwd() / "logs",
             Path.cwd() / "backend" / "orion" / "logs",
+            Path.cwd().parent / "Orion-Crawler" / "app" / "logs",
         ]
         roots = []
         seen: set[Path] = set()
@@ -130,18 +132,31 @@ class SystemLogManager:
             roots.append(root)
         return roots
 
-    def _log_file_sort_key(self, path: Path) -> tuple[str, int]:
+    def _log_file_sort_key(self, path: Path) -> tuple[str, float, int]:
         match = re.search(r"\d+", path.stem)
-        return path.parent.name, int(match.group(0)) if match else 0
+        return self._log_date(path), path.stat().st_mtime, int(match.group(0)) if match else 0
 
     def _log_file_item(self, path: Path) -> dict:
         stat = path.stat()
         return {
-            "date": path.parent.name,
-            "file": path.name,
+            "date": self._log_date(path),
+            "file": self._log_file_name(path),
             "size": stat.st_size,
             "modified_at": datetime.fromtimestamp(stat.st_mtime).isoformat(),
         }
+
+    def _log_date(self, path: Path) -> str:
+        for parent in [path.parent, *path.parents]:
+            if self._valid_log_date(parent.name):
+                return parent.name
+        return path.parent.name
+
+    def _log_file_name(self, path: Path) -> str:
+        log_date = self._log_date(path)
+        for parent in path.parents:
+            if parent.name == log_date:
+                return path.relative_to(parent).as_posix()
+        return path.name
 
     def _parse_log_line(self, path: Path, line: str, line_number: int) -> dict | None:
         match = self.LOG_LINE_PATTERN.match(line)
@@ -156,9 +171,9 @@ class SystemLogManager:
         if separator in message:
             message, caller = message.rsplit(" - ", 1)
         return {
-            "id": f"{path.parent.name}:{path.name}:{line_number}",
-            "date": path.parent.name,
-            "file": path.name,
+            "id": f"{self._log_date(path)}:{self._log_file_name(path)}:{line_number}",
+            "date": self._log_date(path),
+            "file": self._log_file_name(path),
             "line": line_number,
             "type": log_type,
             "timestamp": match.group("timestamp"),
@@ -168,7 +183,7 @@ class SystemLogManager:
         }
 
     def _safe_log_file(self, log_date: str, file_name: str) -> Path | None:
-        if not self._valid_log_date(log_date) or not self.LOG_FILE_PATTERN.fullmatch(file_name or ""):
+        if not self._valid_log_date(log_date) or not file_name or ".." in Path(file_name).parts or not self.LOG_FILE_PATTERN.fullmatch(Path(file_name).name):
             return None
         for root in self._log_roots():
             path = root / log_date / file_name
