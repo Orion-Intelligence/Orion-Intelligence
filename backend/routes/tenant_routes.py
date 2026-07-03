@@ -13,6 +13,7 @@ from orion.api.interactive.account_manager.models.user_param_model import user_p
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.interactive.auditlog_manager.models.audit_log_param_model import audit_log_param_model
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
+from orion.api.interactive.system_log_manager.system_log_manager import SystemLogManager
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantRequest
@@ -173,6 +174,38 @@ async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=
     dependencies=[Depends(role_required([user_role.ADMIN]))], )
 async def delete_audit_log(log_id: str, current_user=Depends(get_current_user)):
     return {"success": await AuditLogManager.get_instance().delete(log_id)}
+
+
+@tenant_routes.get(
+    "/api/profile/system-logs",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def get_system_logs(log_type: str | None = Query(None), date: str | None = Query(None), page: int = Query(1), limit: int = Query(200)):
+    try:
+        return SystemLogManager.get_instance().get(log_type=log_type, date=date, page=page, limit=limit)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@tenant_routes.delete(
+    "/api/profile/system-logs",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def flush_system_logs():
+    return SystemLogManager.get_instance().flush()
+
+
+@tenant_routes.delete(
+    "/api/profile/system-logs/{log_date}/{file_name}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def delete_system_log(log_date: str, file_name: str):
+    if not SystemLogManager.get_instance().delete(log_date, file_name):
+        raise HTTPException(status_code=404, detail="Log file not found")
+    return {"success": True}
 
 
 @tenant_routes.get(

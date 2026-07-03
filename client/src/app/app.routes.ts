@@ -32,6 +32,7 @@ const loadResetPasswordComponent = () => import('./shared/partials/forgot-passwo
 const loadSidebarUserStatisticsComponent = () => import('./pages/user-management/sidebar-user-statistics/sidebar-user-statistics.component').then(m => m.SidebarUserStatisticsComponent);
 const loadSidebarUserIocComponent = () => import('./pages/user-management/sidebar-user-ioc/sidebar-user-ioc.component').then(m => m.SidebarUserIocComponent);
 const loadSidebarUserEventManagementComponent = () => import('./pages/user-management/sidebar-user-event-management/sidebar-user-event-management.component').then(m => m.SidebarUserEventManagementComponent);
+const loadSidebarUserLogManagerComponent = () => import('./pages/user-management/sidebar-user-log-manager/sidebar-user-log-manager.component').then(m => m.SidebarUserLogManagerComponent);
 const loadAuditlogComponent = () => import('./pages/user-management/auditlog/auditlog.component').then(m => m.AuditlogComponent);
 const loadNotificationComponent = () => import('./shared/partials/notification/notification.component').then(m => m.NotificationComponent);
 const loadTrailNotificationComponent = () => import('./shared/partials/trail-notification/trail-notification.component').then(m => m.TrailNotificationComponent);
@@ -826,6 +827,11 @@ export const routes: Routes = [
             path: 'event-management',
             loadComponent: loadSidebarUserEventManagementComponent,
             data: { type: 'event-management', animation: 'CategoryPage' }
+          },
+          {
+            path: 'log-manager',
+            loadComponent: loadSidebarUserLogManagerComponent,
+            data: { type: 'log-manager', animation: 'CategoryPage' }
           },
           {
             path: 'feeder',
