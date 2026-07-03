@@ -85,7 +85,7 @@
                       <div class="flex w-[128px] flex-shrink-0 items-center gap-2 pt-0.5">
                         <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full" [class.bg-sky-500]="isUrl(item.value) && !isImageUrl(item.value)" [class.bg-emerald-500]="isImageUrl(item.value)" [class.bg-amber-500]="isNumeric(item.value) && !isImageUrl(item.value) && !isUrl(item.value)" [class.bg-rose-400]="isBool(item.value)" [class.bg-slate-300]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)">
                         </span>
-                        <span class="min-w-0 truncate text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ formatKey(item.key) }}</span>
+                        <span class="min-w-0 truncate text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ formatProfileDetailKey(item.key) }}</span>
                       </div>
                       <div class="min-w-0 flex-1 break-words text-[13px] font-medium leading-5 text-[var(--color-text2)]" [class.tabular-nums]="isNumeric(item.value)">
                         @if (isImageUrl(item.value)) {

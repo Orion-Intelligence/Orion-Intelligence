@@ -35,6 +35,13 @@ import { Component, input, output } from '@angular/core';
           <i class="bi bi-chevron-right text-xs text-sky-300/70 transition-colors group-hover:text-sky-200 [body.light-theme_&]:text-[var(--color-text4)]"></i>
         </button>
       }
+      @if (showOpenDocument()) {
+        <button data-testid="cti-context-open-document" (click)="openDocument.emit(undefined)" class="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm text-orange-200 transition-colors hover:bg-orange-500/20 hover:text-orange-100 [body.light-theme_&]:text-[var(--color-text2)] [body.light-theme_&]:hover:bg-[var(--color-blue-720)] [body.light-theme_&]:hover:text-[var(--color-text1)]">
+          <i class="bi bi-file-earmark-text w-5 h-5 text-orange-300 transition-colors group-hover:text-orange-200 [body.light-theme_&]:text-[var(--color-text4)]"></i>
+          <span class="flex-grow">Open Document</span>
+          <i class="bi bi-chevron-right text-xs text-orange-300/70 transition-colors group-hover:text-orange-200 [body.light-theme_&]:text-[var(--color-text4)]"></i>
+        </button>
+      }
       @if (showCopyLabel()) {
         <button data-testid="cti-context-copy-label" (click)="copyLabel.emit(undefined)" class="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm text-slate-200 transition-colors hover:bg-slate-700/70 hover:text-white [body.light-theme_&]:text-[var(--color-text2)] [body.light-theme_&]:hover:bg-[var(--color-blue-720)] [body.light-theme_&]:hover:text-[var(--color-text1)]">
           <i class="bi bi-clipboard w-5 h-5 text-slate-400 transition-colors group-hover:text-slate-200 [body.light-theme_&]:text-[var(--color-text4)]"></i>
@@ -58,11 +65,13 @@ export class GraphContextMenuComponent {
   readonly canExpand = input(false);
   readonly canCollapse = input(false);
   readonly showOpenCti = input(true);
+  readonly showOpenDocument = input(false);
   readonly showCopyLabel = input(true);
   readonly showOpenReport = input(true);
   readonly expand = output<undefined>();
   readonly collapse = output<undefined>();
   readonly openCti = output<undefined>();
+  readonly openDocument = output<undefined>();
   readonly copyLabel = output<undefined>();
   readonly openReport = output<undefined>();
 }

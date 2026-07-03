@@ -89,7 +89,7 @@ export class SocialMapperComponent implements OnDestroy {
     const platforms = results.get(username) ?? Array.from(results.entries()).find(([key]) => key.toLowerCase() === username.toLowerCase())?.[1] ?? [];
     return this.getVisiblePlatforms(platforms);
   });
-  hasResultSourceTabs = computed(() => this.activeSourcePlatforms().length > 0);
+  hasResultSourceTabs = computed(() => this.activeSourcePlatforms().some(platform => this.getResultSource(platform) === 'darkweb'));
   activeResultSource = computed(() => {
     const username = this.activeSourceUsername();
     const platforms = this.activeSourcePlatforms();

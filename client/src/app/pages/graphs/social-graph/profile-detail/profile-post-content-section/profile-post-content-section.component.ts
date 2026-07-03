@@ -157,7 +157,7 @@ export class SocialProfilePostContentSectionComponent {
   }
 
   areCommentsAllowed(platformData: PlatformResult): boolean {
-    return !this.platformCapabilities[platformData.platform.toLowerCase()]?.disallow?.includes('comments');
+    return !this.platformCapabilities[SocialNormalizationUtil.canonicalPlatformKey(platformData.platformKey || platformData.platform)]?.disallow?.includes('comments');
   }
 
   getCommentTrackKey(index: number, comment: SocialPostComment): string {

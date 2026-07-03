@@ -19,7 +19,7 @@
         <main class="ui-social-dashboard-shell relative flex min-h-0 min-w-0 flex-grow flex-col bg-transparent">
           <div class="ui-social-topbar relative z-[1100] flex h-[60px] w-full flex-shrink-0 items-center justify-between overflow-visible border-b border-[var(--color-border)] bg-[var(--color-mono)] p-0">
             <div data-testid="cti-header-breadcrumb" class="ml-[10px] flex min-w-0 flex-1 items-center overflow-hidden pr-[20px] pl-3 text-[15px] text-white max-[943px]:ml-0 max-[943px]:pl-3">
-              <button type="button" (click)="goBack()" aria-label="Back" title="Back" class="mr-[10px] flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-[8px] transition-colors hover:bg-[var(--color-blue-870)]">
+              <button type="button" (click)="goBack()" aria-label="Back" title="Back" class="mr-[10px] flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-[8px]">
                 <img alt="Back" class="ui-breadcrumb-chevron h-[30px] w-[30px] p-[5px]" height="30" src="assets/images/shared/theme/arrow.svg" width="30" />
               </button>
               <span class="inline-flex min-w-0 items-center font-[Inter,sans-serif] text-[16px] font-medium text-[var(--color-text1)]">
@@ -70,17 +70,6 @@
               @if (!graphSearchAdvancedMode) {
                 <form class="relative mt-4 flex min-h-[42px] w-full items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-white px-3 py-2" (submit)="$event.preventDefault(); submitGraphSearch()">
                   <input data-testid="cti-graph-search-input" name="graphSearchText" [(ngModel)]="graphSearchText" type="text" class="h-6 min-w-0 flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/45" [placeholder]="graphSearchPlaceholder | translate">
-                  @if (nodeInfoPanelVisible) {
-                    <div data-testid="cti-node-info-panel" class="absolute left-0 top-full z-[1300] mt-2 max-h-[260px] w-[292px] overflow-y-auto rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/[0.93] p-3 text-xs text-[var(--color-text3)] shadow-[0_16px_36px_rgba(0,0,0,0.32)] backdrop-blur-[8px] [body.light-theme_&]:bg-[#f8fafc]/[0.93]">
-                      <div class="mb-2 flex items-center justify-between gap-2 border-b border-[var(--color-divider)] pb-2">
-                        <span class="font-semibold text-[var(--color-text1)]">{{ 'Node Details' | translate }}</span>
-                        <button type="button" class="inline-flex h-6 w-6 items-center justify-center rounded-[6px] text-[var(--color-text4)] transition hover:bg-white/[0.06] hover:text-[var(--color-text1)] [body.light-theme_&]:hover:bg-[#edf4fb]" (click)="hideNodeInfoPanel()" [attr.aria-label]="'common.actions.close' | translate">
-                          <i class="bi bi-x-lg text-[11px]"></i>
-                        </button>
-                      </div>
-                      <div class="leading-5 [&_strong]:font-semibold [&_strong]:text-[var(--color-text1)]" [innerHTML]="nodeInfoPanelHtml"></div>
-                    </div>
-                  }
                 </form>
               }
 
@@ -135,6 +124,17 @@
               <section class="ui-dashboard-grid-bg relative flex min-h-0 flex-1 overflow-hidden">
                 <div data-testid="cti-network-container" #networkContainer class="cti-network-canvas h-full min-h-0 w-full flex-1 bg-transparent transition-all duration-300">
                 </div>
+                @if (nodeInfoPanelVisible) {
+                  <div id="ctiNodeInfoPanel" data-left="0" data-top="0" data-testid="cti-node-info-panel" class="absolute z-[1300] max-h-[260px] w-[292px] overflow-y-auto rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/[0.93] p-3 text-xs text-[var(--color-text3)] shadow-[0_16px_36px_rgba(0,0,0,0.32)] backdrop-blur-[8px] [body.light-theme_&]:bg-[#f8fafc]/[0.93]">
+                    <div class="mb-2 flex items-center justify-between gap-2 border-b border-[var(--color-divider)] pb-2">
+                      <span class="font-semibold text-[var(--color-text1)]">{{ 'Node Details' | translate }}</span>
+                      <button type="button" class="inline-flex h-6 w-6 items-center justify-center rounded-[6px] text-[var(--color-text4)] transition hover:bg-white/[0.06] hover:text-[var(--color-text1)] [body.light-theme_&]:hover:bg-[#edf4fb]" (click)="hideNodeInfoPanel()" [attr.aria-label]="'common.actions.close' | translate">
+                        <i class="bi bi-x-lg text-[11px]"></i>
+                      </button>
+                    </div>
+                    <div class="leading-5 [&_strong]:font-semibold [&_strong]:text-[var(--color-text1)]" [innerHTML]="nodeInfoPanelHtml"></div>
+                  </div>
+                }
 
                 <div class="absolute bottom-4 left-4 z-30 flex items-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-2 shadow-[0_10px_24px_var(--color-shadow-light)] backdrop-blur-sm">
                   <button type="button" (click)="togglePhysics()" class="inline-flex h-9 items-center justify-center gap-2 rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-xs font-semibold text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]" [title]="'Physics' | translate">
@@ -179,11 +179,13 @@
     [canExpand]="contextCanExpand"
     [canCollapse]="contextCanCollapse"
     [showOpenCti]="contextShowOpenCti"
+    [showOpenDocument]="contextShowOpenDocument"
     [showCopyLabel]="true"
     [showOpenReport]="contextShowOpenReport"
     (expand)="expandGroupNode()"
     (collapse)="collapseGroupNode()"
     (openCti)="openCTI()"
+    (openDocument)="openDocumentGraph()"
     (copyLabel)="copyNodeLabel()"
     (openReport)="viewReport()">
   </app-graph-context-menu>

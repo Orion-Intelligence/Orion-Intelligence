@@ -119,6 +119,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   private graphAdvancedFilterCounter = 0;
   private skipNextBasicSearchRouteApply = false;
   private hoveredNodeId: string | null = null;
+  private pendingFocusNodeId: string | null = null;
 
   networkContainer?: ElementRef;
   public rawNodes: ExtendedNode[] = [];
@@ -129,6 +130,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   contextCanExpand = false;
   contextCanCollapse = false;
   contextShowOpenCti = false;
+  contextShowOpenDocument = false;
   contextShowOpenReport = false;
   network!: Network;
   selectedType = 'cluster';
@@ -162,6 +164,8 @@ export class GraphComponent implements OnInit, OnDestroy {
   graphStats: CtiGraphStats = { visibleNodes: 0, totalNodes: 0, visibleEdges: 0, totalEdges: 0, hiddenNodes: 0 };
   nodeInfoPanelVisible = false;
   nodeInfoPanelHtml = '';
+  nodeInfoPanelLeft = 12;
+  nodeInfoPanelTop = 12;
 
   private getNodeLabelColor(): string {
     if (isPlatformBrowser(this.platformId)) {
@@ -721,9 +725,14 @@ export class GraphComponent implements OnInit, OnDestroy {
       const { results } = response;
       this.result = results;
       this.renderGraph(this.result);
+      if (data_point_type === 'document') {
+        this.focusGraphNode(this.pendingFocusNodeId || `cti_vertices/${value}`);
+        this.pendingFocusNodeId = null;
+      }
       this.loading = true;
     },
     error: _ => {
+      this.pendingFocusNodeId = null;
       this.isEmpty = true;
       this.loading = true;
     }
@@ -943,6 +952,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       this.contextCanExpand = this.canContextExpand();
       this.contextCanCollapse = this.canContextCollapse();
       this.contextShowOpenCti = this.showContextOpenCti();
+      this.contextShowOpenDocument = this.showContextOpenDocument();
       this.contextShowOpenReport = this.showContextOpenReport();
       this.changeDetector.detectChanges();
       const menuWidth = menu.offsetWidth || 256;
@@ -993,6 +1003,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.contextCanExpand = false;
     this.contextCanCollapse = false;
     this.contextShowOpenCti = false;
+    this.contextShowOpenDocument = false;
     this.contextShowOpenReport = false;
     this.changeDetector.detectChanges();
   }
@@ -1285,6 +1296,10 @@ export class GraphComponent implements OnInit, OnDestroy {
     return this.isReportNode(node);
   }
 
+  showContextOpenDocument(): boolean {
+    return this.showContextOpenReport();
+  }
+
   private isReportNode(node: ExtendedNode | null): boolean {
     if (!node?.id) {
       return false;
@@ -1306,6 +1321,29 @@ export class GraphComponent implements OnInit, OnDestroy {
     const fullUrl = `${baseUrl}?${params.toString()}`;
     this.proxied_resource.open(fullUrl);
     this.hideContextMenu();
+  }
+
+  openDocumentGraph(): void {
+    const nodeId = this.contextMenuNodeId;
+    const parts = nodeId.split('/');
+    const documentKey = parts[parts.length - 1] || '';
+    if (!documentKey) {
+      this.hideContextMenu();
+      return;
+    }
+    const nextFilters: CtiGraphFilters = {
+      ...this.activeSidebarFilters,
+      selectedType: 'document',
+      singleInput: documentKey,
+      propertyType: 'all',
+      propertyValue: ''
+    };
+    this.pendingFocusNodeId = nodeId;
+    this.hideContextMenu();
+    this.applyFilterValues(nextFilters);
+    this.lastAppliedQuerySignature = '';
+    this.onSidebarApply(nextFilters);
+    this.persistBasicSearchParams(nextFilters, 'all');
   }
 
   copyNodeLabel() {
@@ -1526,6 +1564,21 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
   }
 
+  private focusGraphNode(nodeId: string): void {
+    queueMicrotask(() => {
+      if (!this.network || !this.nodeSet?.get(nodeId)) {
+        return;
+      }
+      this.network.focus(nodeId, {
+        scale: Math.max(this.network.getScale(), 0.9),
+        animation: {
+          duration: 250,
+          easingFunction: 'easeInOutQuad'
+        }
+      } as any);
+    });
+  }
+
   private buildEdgesAndEdgeMap(data: GraphResultItem[]): Record<string, number> {
     const edgeMap: Record<string, number> = {};
     data.forEach(item => {
@@ -1663,6 +1716,12 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private normalizeFullLabel(v: any): string {
+    if (this.selectedType === 'document' && String(v?.type || '').toLowerCase() === 'document') {
+      const docLabel = v?.doc_id || v?.m_document_id || v?._key || v?._id;
+      if (docLabel) {
+        return String(docLabel).trim();
+      }
+    }
     const preferred = v?.display_value ?? v?.label ?? v?.title ?? v?.value;
     if (preferred) {
       return String(preferred).replace(/_/g, ' ').trim();
@@ -1778,6 +1837,9 @@ export class GraphComponent implements OnInit, OnDestroy {
       return this.clusterPalette[clusterKey]?.color ?? this.nodeClusterBorder;
     }
     if (type === 'document') {
+      if (this.isFocusedDocumentNode(node)) {
+        return this.nodeFocusColor;
+      }
       return this.nodeDocumentBorder;
     }
     const classKey = String(node.nodeClass || '').toLowerCase();
@@ -1999,6 +2061,15 @@ export class GraphComponent implements OnInit, OnDestroy {
   private applyNonGroupNodeColor(node: ExtendedNode, isClusterNode: boolean, edgeMap: Record<string, number>): void {
     const visualType = this.getVisualNodeCategory(node);
     const accentColor = this.getNodeAccentColor(node, visualType);
+    if (this.isFocusedDocumentNode(node)) {
+      node.color = {
+        border: this.nodeFocusColor,
+        background: this.nodeFillColor,
+        highlight: { border: this.nodeFocusColor, background: this.nodeFillColor },
+        hover: { border: this.nodeFocusColor, background: this.nodeFillColor }
+      };
+      return;
+    }
     if (isClusterNode) {
       node.color = {
         border: accentColor,
@@ -2044,6 +2115,15 @@ export class GraphComponent implements OnInit, OnDestroy {
         hover: { border: accentColor, background: this.nodeFillColor }
       };
     }
+  }
+
+  private isFocusedDocumentNode(node: ExtendedNode): boolean {
+    if (this.selectedType !== 'document') {
+      return false;
+    }
+    const nodeId = String(node.id ?? '');
+    const documentKey = String(this.singleInput || '').trim();
+    return !!documentKey && nodeId === `${this.clusterNodePrefix}${documentKey}`;
   }
 
   private buildVisibleSets(): {
@@ -2243,7 +2323,11 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.network.on('doubleClick', params => {
       this.handleDoubleClick(params);
     });
+    this.network.on('dragStart', () => {
+      this.hideNodeInfoPanel();
+    });
     this.network.on('zoom', (properties: any) => {
+      this.hideNodeInfoPanel();
       const currentScale = this.network.getScale();
       const currentPosition = this.network.getViewPosition();
       if (currentScale <= this.minZoomScale) {
@@ -2404,7 +2488,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     const node = this.nodeSet.get(nodeId) as ExtendedNode | null;
     this.toggleEdgeHighlightOnClick(nodeId);
     if (node) {
-      this.showNodeInfoPanel(node);
+      this.showNodeInfoPanel(node, pointer);
     }
   }
 
@@ -2448,20 +2532,52 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
   }
 
-  private showNodeInfoPanel(node: ExtendedNode): void {
+  private showNodeInfoPanel(node: ExtendedNode, pointerDom?: { x: number; y: number; }): void {
     const html = node.nodeInfoHtml || this.getFallbackNodeInfoHtml(node);
     if (!html) {
       this.hideNodeInfoPanel();
       return;
     }
+    this.positionNodeInfoPanel(pointerDom);
     this.nodeInfoPanelHtml = html;
     this.nodeInfoPanelVisible = true;
     this.changeDetector.detectChanges();
+    this.applyNodeInfoPanelPosition();
   }
 
   hideNodeInfoPanel(): void {
     this.nodeInfoPanelVisible = false;
     this.nodeInfoPanelHtml = '';
+  }
+
+  private positionNodeInfoPanel(pointerDom?: { x: number; y: number; }): void {
+    const container = this.networkContainer?.nativeElement as HTMLElement | undefined;
+    const width = 292;
+    const height = 260;
+    const padding = 12;
+    const offset = 14;
+    const containerWidth = container?.clientWidth || window.innerWidth;
+    const containerHeight = container?.clientHeight || window.innerHeight;
+    const maxLeft = Math.max(padding, containerWidth - width - padding);
+    const maxTop = Math.max(padding, containerHeight - height - padding);
+    const x = pointerDom?.x ?? padding;
+    const y = pointerDom?.y ?? padding;
+    const preferredLeft = x + offset + width <= containerWidth - padding ? x + offset : x - width - offset;
+    const preferredTop = y + offset + height <= containerHeight - padding ? y + offset : y - height - offset;
+    this.nodeInfoPanelLeft = Math.min(Math.max(preferredLeft, padding), maxLeft);
+    this.nodeInfoPanelTop = Math.min(Math.max(preferredTop, padding), maxTop);
+  }
+
+  private applyNodeInfoPanelPosition(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    const panel = document.getElementById('ctiNodeInfoPanel');
+    if (!panel) {
+      return;
+    }
+    panel.setAttribute('data-left', String(this.normalizePositionValue(this.nodeInfoPanelLeft)));
+    panel.setAttribute('data-top', String(this.normalizePositionValue(this.nodeInfoPanelTop)));
   }
 
   private getFallbackNodeInfoHtml(node: ExtendedNode): string {

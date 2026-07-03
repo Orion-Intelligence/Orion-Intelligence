@@ -60,6 +60,32 @@ export interface SocialOnlinePresenceResult {
 export interface SocialStealerLogRecord {
     [key: string]: any;
 }
+export const VERIFIED_SOCIAL_PLATFORM_KEYS = [
+  'blogger',
+  'bluesky',
+  'devto',
+  'facebook',
+  'habr',
+  'hackernoon',
+  'hashnode',
+  'instagram',
+  'mastodon',
+  'medium',
+  'microblog',
+  'misskey',
+  'nostr',
+  'pleroma',
+  'primal',
+  'quora',
+  'reddit',
+  'stackoverflow',
+  'substack',
+  'threads',
+  'tiktok',
+  'twitter',
+  'youtube',
+] as const;
+
 export interface SocialStoredProfile {
     user_id?: string;
     profile_username: string;
@@ -70,6 +96,7 @@ export interface SocialStoredProfile {
 export interface PlatformResult {
     keyUsername: string;
     platform: string;
+    platformKey?: string;
     username: string;
     url: string;
     timestamp?: string;
