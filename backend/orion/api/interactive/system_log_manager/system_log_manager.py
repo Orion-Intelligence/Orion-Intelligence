@@ -67,7 +67,7 @@ class SystemLogManager:
             "limit": safe_limit,
             "page_count": safe_page + 1 if has_more else ((visible_total + safe_limit - 1) // safe_limit if visible_total else 0),
             "available_dates": sorted({self._log_date(path) for path in self._log_files()}, reverse=True),
-            "files": [self._log_file_item(path) for path in files],
+            "files": [self._log_file_item(path) for path in files[:safe_limit]],
         }
 
     def _iter_log_lines_reverse(self, path: Path):
