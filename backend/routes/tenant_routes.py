@@ -200,7 +200,7 @@ async def get_system_logs(log_type: str | None = Query(None), date: str | None =
     dependencies=[Depends(role_required([user_role.ADMIN]))], )
 async def flush_system_logs():
     result = SystemLogManager.get_instance().flush()
-    await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [SYSTEM_LOG_FLUSHED_AT_KEY, datetime.now().isoformat(), None])
+    await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [SYSTEM_LOG_FLUSHED_AT_KEY, datetime.now().replace(microsecond=0).isoformat(), None])
     return result
 
 

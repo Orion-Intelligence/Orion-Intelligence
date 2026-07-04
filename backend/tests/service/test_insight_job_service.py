@@ -64,7 +64,7 @@ def test_generate_insight_queries_count_optional_metric_fields_by_document_prese
         }
     }
     assert aggs_by_label[(ELASTIC_INDEX.S_GENERIC_INDEX, "Common Type")] == {
-        "terms": {"field": "m_content_type.keyword", "size": 1}
+        "terms": {"field": "m_content_type", "size": 1}
     }
     assert aggs_by_label[(ELASTIC_INDEX.S_LEAK_INDEX, "Actor Coverage")] == {
         "filter": {
@@ -91,10 +91,10 @@ def test_generate_insight_queries_count_optional_metric_fields_by_document_prese
         }
     }
     assert aggs_by_label[(ELASTIC_INDEX.S_DEFACEMENT_INDEX, "Top Team")] == {
-        "terms": {"field": "m_team.keyword", "size": 1}
+        "terms": {"field": "m_team", "size": 1}
     }
     assert aggs_by_label[(ELASTIC_INDEX.S_DEFACEMENT_INDEX, "Top Actor")] == {
-        "terms": {"field": "m_attacker.keyword", "size": 1}
+        "terms": {"field": "m_attacker", "size": 1}
     }
 
 
