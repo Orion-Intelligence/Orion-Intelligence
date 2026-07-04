@@ -110,19 +110,22 @@ class SystemLogManager:
 
     def flush(self) -> dict:
         deleted = 0
+        failed = []
         for root in self._log_roots():
             try:
                 date_dirs = [item for item in root.iterdir() if item.is_dir() and self._valid_log_date(item.name)]
-            except OSError:
+            except OSError as exc:
+                failed.append(f"{root}: {exc}")
                 continue
             for path in date_dirs:
                 try:
                     deleted += sum(1 for item in path.rglob("*") if item.is_file())
                     shutil.rmtree(path, onerror=self._make_writable_and_retry)
-                except OSError:
+                except OSError as exc:
+                    failed.append(f"{path}: {exc}")
                     continue
             self._remove_empty_dir(root)
-        return {"success": True, "deleted": deleted}
+        return {"success": not failed, "deleted": deleted, "failed": failed}
 
     def _valid_log_date(self, log_date: str) -> bool:
         if not self.LOG_DATE_PATTERN.fullmatch(log_date or ""):

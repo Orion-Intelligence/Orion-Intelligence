@@ -197,7 +197,10 @@ async def get_system_logs(response: Response, log_type: str | None = Query(None)
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN]))], )
 async def flush_system_logs():
-    return SystemLogManager.get_instance().flush()
+    result = SystemLogManager.get_instance().flush()
+    if not result.get("success"):
+        raise HTTPException(status_code=500, detail="Failed to flush system logs: " + "; ".join(result.get("failed", [])))
+    return result
 
 
 @tenant_routes.delete(
