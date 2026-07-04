@@ -41,7 +41,7 @@ export class SidebarUserLogManagerComponent implements OnInit {
   }
 
   loadLogs(): void {
-    let params = new HttpParams().set('page', this.page).set('limit', this.limit);
+    let params = new HttpParams().set('page', this.page).set('limit', this.limit).set('_ts', String(Date.now()));
     if (this.logType) {
       params = params.set('log_type', this.logType);
     }

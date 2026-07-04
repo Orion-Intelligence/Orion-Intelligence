@@ -1,6 +1,6 @@
 import asyncio
 
-from fastapi import APIRouter, Body, HTTPException, Query
+from fastapi import APIRouter, Body, HTTPException, Query, Response
 from fastapi import Depends, UploadFile
 
 from configs.app_dependency import license_required, role_required, status_required, get_current_user
@@ -181,7 +181,10 @@ async def delete_audit_log(log_id: str, current_user=Depends(get_current_user)):
     status_code=200,
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN]))], )
-async def get_system_logs(log_type: str | None = Query(None), date: str | None = Query(None), page: int = Query(1), limit: int = Query(200)):
+async def get_system_logs(response: Response, log_type: str | None = Query(None), date: str | None = Query(None), page: int = Query(1), limit: int = Query(200)):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
     try:
         return SystemLogManager.get_instance().get(log_type=log_type, date=date, page=page, limit=limit)
     except ValueError as exc:
