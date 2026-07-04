@@ -8,12 +8,13 @@ import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.a
 import { ApiService } from '../../../shared/services/api.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { SystemLogFile, SystemLogResponse } from './model/system-log.models';
 
 @Component({
   selector: 'app-sidebar-user-log-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, ConfirmationPopupComponent],
   templateUrl: './sidebar-user-log-manager.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -25,6 +26,7 @@ export class SidebarUserLogManagerComponent implements OnInit {
   limit = 100;
   loading = false;
   errorMessage = '';
+  isFlushAllConfirmationOpen = false;
   response: SystemLogResponse = { entries: [], total: 0, page: 1, limit: 100, page_count: 0, available_dates: [], files: [] };
 
   constructor(private apiService: ApiService, private licenseService: LicenseService, private router: Router) {
@@ -107,7 +109,12 @@ export class SidebarUserLogManagerComponent implements OnInit {
   }
 
   flushLogs(): void {
-    if (!confirm('Delete all log files?')) {
+    this.isFlushAllConfirmationOpen = true;
+  }
+
+  confirmFlushLogs(confirmed: boolean): void {
+    this.isFlushAllConfirmationOpen = false;
+    if (!confirmed) {
       return;
     }
     this.apiService.delete<{ success: boolean; deleted: number }>('profile/system-logs').subscribe({

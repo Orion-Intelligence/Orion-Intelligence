@@ -1,4 +1,8 @@
 <div class="mb-[200px] w-full px-[32px] max-[1200px]:px-[15px] max-[943px]:px-[10px]" @fadeInDashboardItem>
+  @if (isFlushAllConfirmationOpen) {
+    <app-confirmation-popup [message]="'Delete all log files?' | translate" (confirmed)="confirmFlushLogs($event)"></app-confirmation-popup>
+  }
+
   <section class="rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-[15px]">
     <div class="flex flex-wrap items-center justify-between gap-4">
       <div>

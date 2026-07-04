@@ -1,5 +1,7 @@
+import os
 import re
 import shutil
+import stat
 import threading
 from datetime import datetime
 from pathlib import Path
@@ -114,7 +116,7 @@ class SystemLogManager:
             for path in date_dirs:
                 try:
                     deleted += sum(1 for item in path.rglob("*") if item.is_file())
-                    shutil.rmtree(path)
+                    shutil.rmtree(path, onexc=self._make_writable_and_retry)
                 except OSError:
                     continue
             self._remove_empty_dir(root)
@@ -233,3 +235,8 @@ class SystemLogManager:
             path.rmdir()
         except OSError:
             pass
+
+    @staticmethod
+    def _make_writable_and_retry(function, path, _exc_info) -> None:
+        os.chmod(path, stat.S_IRWXU)
+        function(path)
