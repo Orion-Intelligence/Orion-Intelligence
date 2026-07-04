@@ -238,5 +238,7 @@ class SystemLogManager:
 
     @staticmethod
     def _make_writable_and_retry(function, path, _exc_info) -> None:
-        os.chmod(path, stat.S_IRWXU)
+        target = Path(path)
+        os.chmod(target.parent, stat.S_IRWXU)
+        os.chmod(target, stat.S_IRWXU)
         function(path)
