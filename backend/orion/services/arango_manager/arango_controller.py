@@ -116,8 +116,8 @@ class arango_controller:
             ]:
                 try:
                     vertex_collection.add_persistent_index(fields=fields)
-                except Exception:
-                    pass
+                except Exception as ex:
+                    log.g().w(f"ARANGO VERTEX INDEX INIT SKIPPED for {fields}: {ex}")
 
             for fields in [
                 ["type"],
@@ -129,8 +129,8 @@ class arango_controller:
             ]:
                 try:
                     edge_collection.add_persistent_index(fields=fields)
-                except Exception:
-                    pass
+                except Exception as ex:
+                    log.g().w(f"ARANGO EDGE INDEX INIT SKIPPED for {fields}: {ex}")
 
         except Exception as ex:
             log.g().e(f"ARANGO GRAPH INIT ERROR: {ex}")

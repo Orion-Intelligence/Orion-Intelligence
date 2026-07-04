@@ -162,7 +162,8 @@ export function fetchSocialProfileTabs() {
     .then(($rows) => {
       const matchingRow = [...$rows].find((row) => {
         const text = row.textContent || '';
-        return text.includes(SOCIAL_STEALER_DOMAIN) && text.includes(SOCIAL_STEALER_USERNAME);
+        const domain = row.querySelector('[title]')?.getAttribute('title') || '';
+        return isStealerDomain(domain) && text.includes(SOCIAL_STEALER_USERNAME);
       });
       expect(matchingRow, `stealer tab row includes ${SOCIAL_STEALER_DOMAIN} and ${SOCIAL_STEALER_USERNAME}`).to.exist;
     });
