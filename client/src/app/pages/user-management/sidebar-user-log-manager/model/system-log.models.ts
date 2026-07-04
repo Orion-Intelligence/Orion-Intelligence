@@ -8,11 +8,13 @@ export interface SystemLogEntry {
   message: string;
   caller: string;
   raw: string;
+  source_path?: string;
 }
 
 export interface SystemLogFile {
   date: string;
   file: string;
+  source_path?: string;
   size: number;
   modified_at: string;
 }
@@ -25,4 +27,6 @@ export interface SystemLogResponse {
   page_count: number;
   available_dates: string[];
   files: SystemLogFile[];
+  generated_at?: string;
+  log_roots?: string[];
 }

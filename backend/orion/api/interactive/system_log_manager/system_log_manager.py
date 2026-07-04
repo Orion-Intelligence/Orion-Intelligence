@@ -71,6 +71,8 @@ class SystemLogManager:
             "page_count": safe_page + 1 if has_more else ((visible_total + safe_limit - 1) // safe_limit if visible_total else 0),
             "available_dates": sorted({self._log_date(path) for path in self._log_files()}, reverse=True),
             "files": [self._log_file_item(path) for path in files[:safe_limit]],
+            "generated_at": datetime.now().isoformat(),
+            "log_roots": [str(root.resolve()) for root in self._log_roots()],
         }
 
     def _iter_log_lines_reverse(self, path: Path):
@@ -179,6 +181,7 @@ class SystemLogManager:
         return {
             "date": self._log_date(path),
             "file": self._log_file_name(path),
+            "source_path": str(path.resolve()),
             "size": stat.st_size,
             "modified_at": datetime.fromtimestamp(stat.st_mtime).isoformat(),
         }
@@ -218,6 +221,7 @@ class SystemLogManager:
             "message": message,
             "caller": caller,
             "raw": line,
+            "source_path": str(path.resolve()),
         }
 
     def _safe_log_file(self, log_date: str, file_name: str) -> Path | None:
