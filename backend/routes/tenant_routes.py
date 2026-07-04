@@ -1,6 +1,7 @@
 import asyncio
+from datetime import datetime
 
-from fastapi import APIRouter, Body, HTTPException, Query, Response
+from fastapi import APIRouter, Body, HTTPException, Query
 from fastapi import Depends, UploadFile
 
 from configs.app_dependency import license_required, role_required, status_required, get_current_user
@@ -19,11 +20,14 @@ from orion.services.mongo_manager.shared_model.db_auth_models import user_role, 
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantRequest
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel
+from orion.services.redis_manager.redis_controller import redis_controller
+from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.management.jobs.alert.alert_job import alert_job
 from orion.api.interactive.account_manager.models.user_model import user_model
 
 tenant_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
+SYSTEM_LOG_FLUSHED_AT_KEY = "SYSTEM_LOG_FLUSHED_AT"
 
 
 @tenant_routes.post(
@@ -181,12 +185,10 @@ async def delete_audit_log(log_id: str, current_user=Depends(get_current_user)):
     status_code=200,
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN]))], )
-async def get_system_logs(response: Response, log_type: str | None = Query(None), date: str | None = Query(None), page: int = Query(1), limit: int = Query(200)):
-    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
+async def get_system_logs(log_type: str | None = Query(None), date: str | None = Query(None), page: int = Query(1), limit: int = Query(200)):
     try:
-        return SystemLogManager.get_instance().get(log_type=log_type, date=date, page=page, limit=limit)
+        flushed_at = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [SYSTEM_LOG_FLUSHED_AT_KEY, None, None])
+        return SystemLogManager.get_instance().get(log_type=log_type, date=date, page=page, limit=limit, flushed_at=flushed_at)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -198,8 +200,7 @@ async def get_system_logs(response: Response, log_type: str | None = Query(None)
     dependencies=[Depends(role_required([user_role.ADMIN]))], )
 async def flush_system_logs():
     result = SystemLogManager.get_instance().flush()
-    if not result.get("success"):
-        raise HTTPException(status_code=500, detail="Failed to flush system logs: " + "; ".join(result.get("failed", [])))
+    await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [SYSTEM_LOG_FLUSHED_AT_KEY, datetime.now().isoformat(), None])
     return result
 
 

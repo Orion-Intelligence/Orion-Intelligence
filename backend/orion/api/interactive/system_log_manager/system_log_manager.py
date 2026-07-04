@@ -31,7 +31,7 @@ class SystemLogManager:
             raise Exception("This class is a singleton!")
         SystemLogManager.__instance = self
 
-    def get(self, log_type: str | None = None, date: str | None = None, page: int = 1, limit: int = 200) -> dict:
+    def get(self, log_type: str | None = None, date: str | None = None, page: int = 1, limit: int = 200, flushed_at: str | None = None) -> dict:
         safe_type = (log_type or "").strip().upper()
         if safe_type and safe_type not in self.VISIBLE_LOG_TYPES:
             raise ValueError("Invalid log type")
@@ -41,7 +41,10 @@ class SystemLogManager:
 
         safe_page = max(1, int(page or 1))
         safe_limit = max(1, min(int(limit or 100), 100))
+        flushed_at_dt = self._parse_flushed_at(flushed_at)
         files = self._log_files(safe_date or None)
+        if flushed_at_dt:
+            files = [path for path in files if self._log_file_may_have_entries_after(path, flushed_at_dt)]
         entries = []
         start = (safe_page - 1) * safe_limit
         end = start + safe_limit
@@ -51,6 +54,8 @@ class SystemLogManager:
             for index, line in self._iter_log_lines_reverse(path):
                 item = self._parse_log_line(path, line, index)
                 if not item or (safe_type and item["type"] != safe_type):
+                    continue
+                if flushed_at_dt and not self._entry_after_flush(item["timestamp"], flushed_at_dt):
                     continue
                 if total >= end:
                     has_more = True
@@ -62,6 +67,9 @@ class SystemLogManager:
                 break
 
         visible_total = total + 1 if has_more else total
+        all_files = self._log_files()
+        if flushed_at_dt:
+            all_files = [path for path in all_files if self._log_file_may_have_entries_after(path, flushed_at_dt)]
 
         return {
             "entries": entries,
@@ -69,10 +77,8 @@ class SystemLogManager:
             "page": safe_page,
             "limit": safe_limit,
             "page_count": safe_page + 1 if has_more else ((visible_total + safe_limit - 1) // safe_limit if visible_total else 0),
-            "available_dates": sorted({self._log_date(path) for path in self._log_files()}, reverse=True),
+            "available_dates": sorted({self._log_date(path) for path in all_files}, reverse=True),
             "files": [self._log_file_item(path) for path in files[:safe_limit]],
-            "generated_at": datetime.now().isoformat(),
-            "log_roots": [str(root.resolve()) for root in self._log_roots()],
         }
 
     def _iter_log_lines_reverse(self, path: Path):
@@ -110,22 +116,19 @@ class SystemLogManager:
 
     def flush(self) -> dict:
         deleted = 0
-        failed = []
         for root in self._log_roots():
             try:
                 date_dirs = [item for item in root.iterdir() if item.is_dir() and self._valid_log_date(item.name)]
-            except OSError as exc:
-                failed.append(f"{root}: {exc}")
+            except OSError:
                 continue
             for path in date_dirs:
                 try:
                     deleted += sum(1 for item in path.rglob("*") if item.is_file())
                     shutil.rmtree(path, onerror=self._make_writable_and_retry)
-                except OSError as exc:
-                    failed.append(f"{path}: {exc}")
+                except OSError:
                     continue
             self._remove_empty_dir(root)
-        return {"success": not failed, "deleted": deleted, "failed": failed}
+        return {"success": True, "deleted": deleted}
 
     def _valid_log_date(self, log_date: str) -> bool:
         if not self.LOG_DATE_PATTERN.fullmatch(log_date or ""):
@@ -184,7 +187,6 @@ class SystemLogManager:
         return {
             "date": self._log_date(path),
             "file": self._log_file_name(path),
-            "source_path": str(path.resolve()),
             "size": stat.st_size,
             "modified_at": datetime.fromtimestamp(stat.st_mtime).isoformat(),
         }
@@ -224,8 +226,29 @@ class SystemLogManager:
             "message": message,
             "caller": caller,
             "raw": line,
-            "source_path": str(path.resolve()),
         }
+
+    def _parse_flushed_at(self, flushed_at: str | None) -> datetime | None:
+        if not flushed_at:
+            return None
+        try:
+            return datetime.fromisoformat(flushed_at)
+        except ValueError:
+            return None
+
+    def _log_file_may_have_entries_after(self, path: Path, flushed_at: datetime) -> bool:
+        try:
+            log_date = datetime.strptime(self._log_date(path), "%Y-%m-%d").date()
+        except ValueError:
+            return True
+        return log_date >= flushed_at.date()
+
+    @staticmethod
+    def _entry_after_flush(timestamp: str, flushed_at: datetime) -> bool:
+        try:
+            return datetime.strptime(timestamp, "%d/%m/%Y %H:%M:%S") > flushed_at
+        except ValueError:
+            return True
 
     def _safe_log_file(self, log_date: str, file_name: str) -> Path | None:
         if not self._valid_log_date(log_date) or not file_name or ".." in Path(file_name).parts or not self.LOG_FILE_PATTERN.fullmatch(Path(file_name).name):
