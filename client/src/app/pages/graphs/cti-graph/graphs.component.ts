@@ -75,6 +75,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   private highlightedNodeId: string | null = null;
   private physicsTimeoutId: any = null;
   private readonly minZoomScale = 0.35;
+  private readonly graphBuilderCandidateLimit = 800;
   private minZoomLockPosition: { x: number; y: number; } | null = null;
   private readonly originalNodeState = new Map<string, NodeVisualState>();
   private readonly clusterNodePrefix = 'cti_vertices/';
@@ -767,7 +768,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     });
   }
 
-  private buildGraphHttpParams(dataPointType: string, modelType: string, queryValue: string, scopeCluster = ''): HttpParams {
+  private buildGraphHttpParams(dataPointType: string, modelType: string, queryValue: string, scopeCluster = '', edgeOverride?: number): HttpParams {
     let params = new HttpParams();
     if (dataPointType) {
       params = params.set('data_point_type', dataPointType);
@@ -781,7 +782,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (scopeCluster && scopeCluster !== 'all') {
       params = params.set('scope_cluster', scopeCluster);
     }
-    params = params.set('edge', String(this.maxEdge));
+    params = params.set('edge', String(edgeOverride ?? this.maxEdge));
     params = params.set('depth', String(this.maxDepth));
     return params;
   }
@@ -797,13 +798,15 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     this.loading = false;
     this.resetGraph();
+    const candidateLimit = requests.length > 1 ? this.graphBuilderCandidateLimit : Number(this.maxEdge);
     const calls = requests.map(request => this.api.get<{ results: GraphResultItem[]; }>('graph', {
-      params: this.buildGraphHttpParams(request.dataPointType, request.modelType, request.queryValue)
+      params: this.buildGraphHttpParams(request.dataPointType, request.modelType, request.queryValue, '', candidateLimit)
     }));
     forkJoin(calls).subscribe({
       next: responses => {
         const responseResults = responses.map(response => response.results ?? []);
-        this.result = this.mergeGraphBuilderResults(responseResults, requests);
+        const mergedResults = this.mergeGraphBuilderResults(responseResults, requests);
+        this.result = this.limitGraphBuilderResultsByDocuments(mergedResults, Number(this.maxEdge));
         this.renderGraph(this.result);
         this.loading = true;
       },
@@ -893,6 +896,31 @@ export class GraphComponent implements OnInit, OnDestroy {
     return this.dedupeGraphResults(aggregate);
   }
 
+  private limitGraphBuilderResultsByDocuments(results: GraphResultItem[], documentLimit: number): GraphResultItem[] {
+    if (!Number.isFinite(documentLimit) || documentLimit < 1) {
+      return this.dedupeGraphResults(results);
+    }
+
+    const orderedDocumentIds: string[] = [];
+    const seenDocumentIds = new Set<string>();
+    results.forEach(item => {
+      this.extractDocumentIdsFromGraphResult(item).forEach(documentId => {
+        if (!seenDocumentIds.has(documentId)) {
+          seenDocumentIds.add(documentId);
+          orderedDocumentIds.push(documentId);
+        }
+      });
+    });
+
+    if (orderedDocumentIds.length <= documentLimit) {
+      return this.dedupeGraphResults(results);
+    }
+
+    const allowedDocumentIds = new Set(orderedDocumentIds.slice(0, documentLimit));
+    const limitedResults = results.filter(item => this.extractDocumentIdsFromGraphResult(item).some(documentId => allowedDocumentIds.has(documentId)));
+    return this.dedupeGraphResults(limitedResults);
+  }
+
   private extractDocumentIdsFromGraphResults(results: GraphResultItem[]): Set<string> {
     const ids = new Set<string>();
     results.forEach(item => {
@@ -903,6 +931,25 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   private extractDocumentIdsFromGraphResult(item: GraphResultItem): string[] {
     const ids = new Set<string>();
+    const addDocumentId = (id: unknown) => {
+      const value = String(id ?? '');
+      if (!value || this.isClusterRootNode(value)) {
+        return;
+      }
+      ids.add(value);
+    };
+    const inspectEdge = (edge: any) => {
+      if (!edge?._from || !edge?._to) {
+        return;
+      }
+      const type = String(edge.type || '');
+      if (type === 'cluster_to_doc') {
+        addDocumentId(edge._to);
+      }
+      else if (type.startsWith('has_')) {
+        addDocumentId(edge._from);
+      }
+    };
     const inspect = (vertex: any) => {
       if (!vertex?._id) {
         return;
@@ -912,7 +959,9 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
     };
     inspect(item.vertex);
+    inspectEdge(item.edge);
     (item.path?.vertices ?? []).forEach(inspect);
+    (item.path?.edges ?? []).forEach(inspectEdge);
     return Array.from(ids);
   }
 
