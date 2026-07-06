@@ -14,6 +14,7 @@ export const ALERT_CATEGORY_NAMES = [
   "social-scanner",
   "email-breach",
   "software-scanning",
+  "vulnerability-scanning",
   "repo scanning",
   "seo scanning"
 ] as const;

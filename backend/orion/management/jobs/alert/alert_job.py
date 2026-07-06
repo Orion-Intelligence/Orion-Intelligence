@@ -40,7 +40,8 @@ class alert_job:
         self._cancel_scan_flags = self._cancellation_service._cancel_scan_flags
         self._tenant_ioc_service = TenantIocService()
         self._category_processor = CategoryAlertProcessor(self._alert_manager, self._search_model)
-        self._scanning_processor = ScanningAlertProcessor(self._alert_manager, self._crawl_model, self._cancellation_service)
+        self._scanning_processor = ScanningAlertProcessor(self._alert_manager,self._crawl_model, self._cancellation_service,self._search_model,
+    )
         self._dynamic_scanning_processor = DynamicScanningProcessor(self._alert_manager, self._search_model, self._cancellation_service)
 
     @staticmethod

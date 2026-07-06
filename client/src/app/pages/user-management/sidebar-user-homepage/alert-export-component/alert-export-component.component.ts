@@ -58,6 +58,7 @@ export class AlertExportComponentComponent {
       case 'email-breach':
       case 'stealerlogs':
       case 'software-scanning':
+      case 'vulnerability-scanning':
         return 'Critical';
       case 'defacement':
       case 'advanced scanning':

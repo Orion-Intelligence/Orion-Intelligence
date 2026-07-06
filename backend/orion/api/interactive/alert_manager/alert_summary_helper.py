@@ -41,6 +41,7 @@ class AlertSummaryHelper:
             "email-breach",
             "stealerlogs",
             "software-scanning",
+            "vulnerability-scanning",
         ):
             return "critical"
         if normalized in ("defacement", "advanced scanning", "repo scanning"):

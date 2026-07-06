@@ -2,17 +2,27 @@ import asyncio
 from typing import Any
 
 from orion.api.interactive.alert_manager.alert_summary_helper import AlertSummaryHelper
-from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest
+from orion.api.server.crawl_manager.class_model.domain_scan_request_model import (
+    DomainScanRequest,
+    UrlVulnerabilityScanRequest,
+)
 from orion.management.jobs.alert.cancellation_service import CancellationService
 from orion.management.jobs.alert.response_parser import ResponseParser
-from orion.management.jobs.alert.result_mappers import ScanResultMapper
+from orion.management.jobs.alert.result_mappers import ScanResultMapper, VulnerabilityScanResultMapper
 
 
 class ScanningAlertProcessor:
-    def __init__(self, alert_manager: Any, crawl_model: Any, cancellation_service: CancellationService):
+    def __init__(
+        self,
+        alert_manager: Any,
+        crawl_model: Any,
+        cancellation_service: CancellationService,
+        search_model: Any | None = None,
+    ):
         self._alert_manager = alert_manager
         self._crawl_model = crawl_model
         self._cancellation_service = cancellation_service
+        self._search_model = search_model
 
     @staticmethod
     def scan_types_for_ioc(ioc_type: str, ioc_value: str) -> list[str]:
@@ -36,15 +46,23 @@ class ScanningAlertProcessor:
                 scan_summary = await self.handle_scanning_alert(tenant_id, ioc_value, ioc_type, scan_type)
                 AlertSummaryHelper.merge_scan_summary(summary, scan_summary)
 
+            vulnerability_summary = await self.handle_vulnerability_scanning_alert(tenant_id, ioc_value, ioc_type)
+            AlertSummaryHelper.merge_scan_summary(summary, vulnerability_summary)
+
         return summary
+
+    @staticmethod
+    def _normalize_domain(value: str, *, include_scheme: bool = False, trailing_slash: bool = False) -> str:
+        clean_domain = value.strip()
+        if include_scheme and not clean_domain.startswith(("http://", "https://")):
+            clean_domain = "https://" + clean_domain
+        if trailing_slash and not clean_domain.endswith("/"):
+            clean_domain += "/"
+        return clean_domain
 
     async def handle_scanning_alert(self, tenant_id: str, ioc_value: str, ioc_type: str, scan_type: str):
         try:
-            clean_domain = ioc_value.strip()
-            if not clean_domain.startswith(("http://", "https://")):
-                clean_domain = "https://" + clean_domain
-            if not clean_domain.endswith("/"):
-                clean_domain += "/"
+            clean_domain = self._normalize_domain(ioc_value, include_scheme=True, trailing_slash=True)
 
             payload = DomainScanRequest(domain=clean_domain, scanType=scan_type)
 
@@ -87,6 +105,70 @@ class ScanningAlertProcessor:
             return AlertSummaryHelper.scan_result_summary(
                 alert_fields["category"], ioc_type, ioc_value, upsert_result
             )
+
+        except Exception:
+            return AlertSummaryHelper.new_scan_summary()
+
+    async def handle_vulnerability_scanning_alert(self, tenant_id: str, ioc_value: str, ioc_type: str):
+        summary = AlertSummaryHelper.new_scan_summary()
+        if ioc_type != "m_domain" or self._search_model is None:
+            return summary
+
+        try:
+            payload = UrlVulnerabilityScanRequest(
+                domain=self._normalize_domain(ioc_value),
+                depth="high",
+            )
+
+            while True:
+                if self._cancellation_service.is_cancelled(tenant_id):
+                    return summary
+
+                response = await self._search_model.network_intel(payload, "url_vulnerability_scan")
+                scan_result = ResponseParser.to_dict(response, allow_dict_method=False)
+                if scan_result is None:
+                    return summary
+
+                status = scan_result.get("status")
+                if status == "pending":
+                    await asyncio.sleep(5)
+                    continue
+
+                result = scan_result.get("result")
+                if not isinstance(result, dict):
+                    return summary
+                break
+
+            for finding in VulnerabilityScanResultMapper.findings_from_result(result):
+                if self._cancellation_service.is_cancelled(tenant_id):
+                    return summary
+
+                alert_fields = VulnerabilityScanResultMapper.to_alert_fields(ioc_type, ioc_value, result, finding)
+                if not alert_fields:
+                    continue
+
+                upsert_result = await self._alert_manager.upsert_alert(
+                    tenantId=tenant_id,
+                    category=alert_fields["category"],
+                    ioc_type=alert_fields["ioc_type"],
+                    ioc_value=alert_fields["ioc_value"],
+                    title=alert_fields["title"],
+                    description=alert_fields["description"],
+                    url=alert_fields["url"],
+                    source=alert_fields["source"],
+                    content_types=alert_fields["content_types"],
+                    all_ioc=alert_fields["all_ioc"],
+                    data_hash=alert_fields["data_hash"],
+                )
+
+                AlertSummaryHelper.merge_scan_summary(
+                    summary,
+                    AlertSummaryHelper.scan_result_summary(
+                        alert_fields["category"], ioc_type, ioc_value, upsert_result
+                    ),
+                )
+
+            return summary
 
         except Exception:
             return AlertSummaryHelper.new_scan_summary()

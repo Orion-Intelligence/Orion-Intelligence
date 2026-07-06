@@ -445,7 +445,7 @@ class AlertManager:
         if normalized in {"general", "seo scanning"}:
             risk = "Low"
         elif normalized in {"breach", "exploit", "malware", "feed", "playstore-scanning", "social-scanner",
-            "email-breach", "stealerlogs", "software-scanning"}:
+            "email-breach", "stealerlogs", "software-scanning", "vulnerability-scanning"}:
             risk = "Critical"
         elif normalized in {"defacement", "advanced scanning", "repo scanning"}:
             risk = "High"
