@@ -300,68 +300,36 @@ class EntityRequestGenerator:
     def build_scoped_property_search_query(normalized_value: str, document_limit: int, scope_cluster: str):
         queried_id = f"cti_vertices/{scope_cluster}"
         query_str = f"""
-        LET exact_normalized_props = (
+        LET props = (
           FOR property IN cti_vertices
             FILTER property.normalized_value == @search_value
             FILTER property.type NOT IN ['document', 'cluster']
             RETURN property._id
         )
 
-        LET exact_text_props = (
-          FOR _guard IN LENGTH(exact_normalized_props) > 0 ? [] : [1]
-            FOR property IN cti_vertices
-              FILTER property.type NOT IN ['document', 'cluster']
-              FILTER LOWER(TO_STRING(property.value)) == @search_value
-                || LOWER(TO_STRING(property.display_value)) == @search_value
-                || LOWER(TO_STRING(property.label)) == @search_value
-                || LOWER(TO_STRING(property._key)) == CONCAT(LOWER(TO_STRING(property.type)), ":", @search_value)
-              RETURN property._id
-        )
-
-        LET exact_props = UNIQUE(APPEND(exact_normalized_props, exact_text_props))
-
-        LET fuzzy_props = (
-          FOR _guard IN LENGTH(exact_props) > 0 ? [] : [1]
-            FOR property IN cti_vertices
-              FILTER property.type NOT IN ['document', 'cluster']
-              FILTER CONTAINS(LOWER(TO_STRING(property.label)), @search_value)
-                || CONTAINS(LOWER(TO_STRING(property.value)), @search_value)
-                || CONTAINS(LOWER(TO_STRING(property.display_value)), @search_value)
-                || CONTAINS(LOWER(TO_STRING(property.normalized_value)), @search_value)
-                || CONTAINS(LOWER(TO_STRING(property._key)), @search_value)
-              LIMIT @property_search_limit
-              RETURN property._id
-        )
-
-        LET props = UNIQUE(APPEND(exact_props, fuzzy_props))
-
         LET scoped_doc_matches = (
           FOR property_id IN props
             FOR property_edge IN cti_edges
               FILTER property_edge._to == property_id AND STARTS_WITH(property_edge.type, "has_")
               LET doc_id = property_edge._from
-              LET cluster_edge = FIRST(
+              FILTER LENGTH(
                 FOR candidate_edge IN cti_edges
                   FILTER candidate_edge._from == @scope_cluster_id
                     AND candidate_edge._to == doc_id
                     AND candidate_edge.type == "cluster_to_doc"
                   LIMIT 1
-                  RETURN candidate_edge
-              )
-              FILTER cluster_edge != null
+                  RETURN 1
+              ) > 0
               COLLECT matched_doc_id = doc_id INTO grouped = {{
                 property_id: property_id,
-                property_edge: property_edge,
-                cluster_edge: cluster_edge
+                property_edge: property_edge
               }}
               LET score = LENGTH(grouped)
               SORT score DESC
               LIMIT {document_limit}
-              LET first_group = FIRST(grouped)
               RETURN {{
                 doc_id: matched_doc_id,
-                property_edges: SLICE(grouped, 0, 4),
-                cluster_edge: first_group.cluster_edge
+                property_edges: SLICE(grouped, 0, 4)
               }}
         )
 
@@ -385,10 +353,19 @@ class EntityRequestGenerator:
         LET cluster_edges = (
           FOR match IN scoped_doc_matches
             LET cluster = DOCUMENT(@scope_cluster_id)
-            FILTER cluster != null AND match.cluster_edge != null
+            FILTER cluster != null
+            LET cluster_edge = FIRST(
+              FOR candidate_edge IN cti_edges
+                FILTER candidate_edge._from == @scope_cluster_id
+                  AND candidate_edge._to == match.doc_id
+                  AND candidate_edge.type == "cluster_to_doc"
+                LIMIT 1
+                RETURN candidate_edge
+            )
+            FILTER cluster_edge != null
             RETURN {{
               vertex: cluster,
-              edge: match.cluster_edge,
+              edge: cluster_edge,
               path: null
             }}
         )
@@ -404,7 +381,6 @@ class EntityRequestGenerator:
         """
 
         bind_vars = {
-            "property_search_limit": max(document_limit * 10, 100),
             "scope_cluster_id": queried_id,
             "search_value": normalized_value.lower(),
         }
