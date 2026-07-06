@@ -9,6 +9,9 @@ import { AppService } from '../../../services/core/app/app.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ConfirmationPopupComponent } from "../../../shared/partials/confirmation-popup/confirmation-popup.component";
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { getFirstFileFromInputEvent, readFileAsText } from '../../../shared/utils/file-input.util';
+import { downloadIocCsvTemplate, IOC_CSV_MAX_FILE_SIZE_BYTES, isCsvFile, mergeIocCsvValues, parseIocCsv } from '../../../shared/utils/ioc-csv.util';
+import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 
 @Component({
   selector: 'app-sidebar-user-ioc',
@@ -23,9 +26,10 @@ export class SidebarUserIocComponent implements OnInit {
   iocSearchText: string = '';
   categories: Record<string, string[]> = {};
   isConfirmationOpen: boolean = false;
+  isIocCsvUploading = false;
   @ViewChild('categoryScroll', { static: false }) categoryScroll!: ElementRef;
 
-  constructor(protected apiService: ApiService, public authService: AuthService, public appService: AppService) { }
+  constructor(protected apiService: ApiService, public authService: AuthService, public appService: AppService, private messageNotificationService: MessageNotificationService) { }
 
   ngOnInit(): void {
     const search_filter_keys = Object.keys(search_filter_labels);
@@ -69,6 +73,58 @@ export class SidebarUserIocComponent implements OnInit {
       category.values.push(value.trim());
     }
     this.update()
+  }
+
+  onIocCsvSelected(event: Event): void {
+    const selectedFile = getFirstFileFromInputEvent(event);
+    if (!selectedFile) {
+      return;
+    }
+
+    selectedFile.input.value = '';
+
+    if (!isCsvFile(selectedFile.file)) {
+      this.messageNotificationService.show('Only CSV files are allowed.');
+      return;
+    }
+
+    if (selectedFile.file.size > IOC_CSV_MAX_FILE_SIZE_BYTES) {
+      this.messageNotificationService.show('IOC CSV file size must be 1 MB or less.');
+      return;
+    }
+
+    this.isIocCsvUploading = true;
+    void readFileAsText(selectedFile.file)
+      .then((content) => {
+        try {
+          const parsedCsv = parseIocCsv(content);
+      const addedCount = mergeIocCsvValues(this.onboardingData?.iocs ?? [], parsedCsv);
+
+      if (addedCount === 0) {
+        this.isIocCsvUploading = false;
+        this.messageNotificationService.show('No new IOC values found in the uploaded file.');
+        return;
+      }
+
+      if (!this.selectedCategoryId && this.onboardingData?.iocs?.length) {
+        this.selectedCategoryId = this.onboardingData.iocs[0].ioc_id;
+      }
+
+      this.messageNotificationService.show(`${addedCount} IOC value${addedCount === 1 ? '' : 's'} imported.`, 'success');
+      this.update();
+        }
+        catch(error) {
+          this.isIocCsvUploading = false;
+          this.messageNotificationService.show(error instanceof Error ? error.message : 'Failed to import IOC CSV file.');
+        }
+      })
+      .finally(() => {
+        this.isIocCsvUploading = false;
+      });
+  }
+
+  downloadIocTemplate(): void {
+    downloadIocCsvTemplate();
   }
 
   removeIoc(iocId: string, value: string): void {

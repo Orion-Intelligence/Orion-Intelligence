@@ -10,6 +10,9 @@ import { TooltipDirective } from '../../shared/directive/tooltip-directive.direc
 import { ConfirmationPopupComponent } from '../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { HeaderComponent } from '../../shared/partials/header/login-header/header.component';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { getFirstFileFromInputEvent, readFileAsText } from '../../shared/utils/file-input.util';
+import { downloadIocCsvTemplate, IOC_CSV_MAX_FILE_SIZE_BYTES, isCsvFile, mergeIocCsvValues, parseIocCsv } from '../../shared/utils/ioc-csv.util';
+import { MessageNotificationService } from '../../services/message_notification/message-notification.service';
 
 @Component({
   selector: 'app-tenant',
@@ -26,8 +29,9 @@ export class TenantComponent implements OnInit {
   isConfirmationOpen: boolean = false;
   iocSearchText: string = '';
   categories: Record<string, string[]> = {};
+  isIocCsvUploading = false;
 
-  constructor(private router: Router, public apiService: ApiService, public appService: AppService) {
+  constructor(private router: Router, public apiService: ApiService, public appService: AppService, private messageNotificationService: MessageNotificationService) {
   }
 
   ngOnInit(): void {
@@ -56,6 +60,56 @@ export class TenantComponent implements OnInit {
     if (category && !category.values.includes(value.trim())) {
       category.values.push(value.trim());
     }
+  }
+
+  async onIocCsvSelected(event: Event): Promise<void> {
+    const selectedFile = getFirstFileFromInputEvent(event);
+    if (!selectedFile) {
+      return;
+    }
+
+    selectedFile.input.value = '';
+
+    if (!isCsvFile(selectedFile.file)) {
+      this.messageNotificationService.show('Only CSV files are allowed.');
+      return;
+    }
+
+    if (selectedFile.file.size > IOC_CSV_MAX_FILE_SIZE_BYTES) {
+      this.messageNotificationService.show('IOC CSV file size must be 1 MB or less.');
+      return;
+    }
+
+    this.isIocCsvUploading = true;
+     void readFileAsText(selectedFile.file)
+      .then((content) => {
+        try {
+          const parsedCsv = parseIocCsv(content);
+      const addedCount = mergeIocCsvValues(this.onboardingData.iocs, parsedCsv);
+       if (addedCount === 0) {
+        this.messageNotificationService.show('No new IOC values found in the uploaded file.');
+        this.isIocCsvUploading = false;
+        return;
+      }
+
+      if (!this.selectedCategoryId && this.onboardingData.iocs.length) {
+        this.selectedCategoryId = this.onboardingData.iocs[0].ioc_id;
+      }
+
+      this.messageNotificationService.show(`${addedCount} IOC value${addedCount === 1 ? '' : 's'} imported.`, 'success');
+        }
+        catch(error) {
+          this.messageNotificationService.show(error instanceof Error ? error.message : 'Failed to import IOC CSV file.');
+          this.isIocCsvUploading = false;
+        }
+      })
+      .finally(() => {
+        this.isIocCsvUploading = false;
+      });
+  }
+
+  downloadIocTemplate(): void {
+    downloadIocCsvTemplate();
   }
 
   removeIoc(iocId: string, value: string): void {
