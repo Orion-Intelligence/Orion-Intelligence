@@ -109,6 +109,7 @@ class arango_controller:
                 ["node_class"],
                 ["entity_role"],
                 ["normalized_value"],
+                ["type", "normalized_value"],
                 ["doc_id"],
                 ["cluster_id"],
                 ["evidence_count"],
@@ -121,6 +122,8 @@ class arango_controller:
 
             for fields in [
                 ["type"],
+                ["_from", "type"],
+                ["_to", "type"],
                 ["edge_type"],
                 ["entity_role"],
                 ["derived"],

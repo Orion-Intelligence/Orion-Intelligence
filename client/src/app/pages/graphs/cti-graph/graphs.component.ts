@@ -752,7 +752,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.loading = false;
     this.resetGraph();
     this.api.get<{ results: GraphResultItem[]; }>('graph', {
-      params: this.buildGraphHttpParams('property', 'all', queryValue)
+      params: this.buildGraphHttpParams('property', 'all', queryValue, clusterKey)
     }).subscribe({
       next: response => {
         const results = response.results ?? [];
@@ -767,7 +767,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     });
   }
 
-  private buildGraphHttpParams(dataPointType: string, modelType: string, queryValue: string): HttpParams {
+  private buildGraphHttpParams(dataPointType: string, modelType: string, queryValue: string, scopeCluster = ''): HttpParams {
     let params = new HttpParams();
     if (dataPointType) {
       params = params.set('data_point_type', dataPointType);
@@ -777,6 +777,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     if (queryValue) {
       params = params.set('query_value', queryValue);
+    }
+    if (scopeCluster && scopeCluster !== 'all') {
+      params = params.set('scope_cluster', scopeCluster);
     }
     params = params.set('edge', String(this.maxEdge));
     params = params.set('depth', String(this.maxDepth));

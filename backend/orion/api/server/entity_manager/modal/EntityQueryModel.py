@@ -7,3 +7,4 @@ class EntityQueryModel(BaseModel):
     query_value: str = "all"
     edge: str
     depth: str
+    scope_cluster: str = ""

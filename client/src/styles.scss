@@ -4662,3 +4662,46 @@ app-demo-tour .demo-tour-active {
   border-color: color-mix(in srgb, var(--color-blue-640) 18%, var(--color-border)) !important;
   background: color-mix(in srgb, var(--color-blue-640) 8%, var(--color-blue-720)) !important;
 }
+
+.orion-comment-input-surface,
+#TipCommentsInputBox.orion-comment-input-surface {
+  background: #172235 !important;
+  border-color: color-mix(in srgb, var(--color-border) 82%, var(--color-blue-640) 18%) !important;
+}
+
+.orion-comment-input-surface .form-control,
+.orion-comment-input-surface .orion-comment-input-field,
+#TipCommentsInputBox textarea {
+  background: #172235 !important;
+  color: var(--color-text1) !important;
+  border-color: color-mix(in srgb, var(--color-border) 88%, var(--color-blue-640) 12%) !important;
+}
+
+.orion-comment-input-surface .orion-comment-input-footer,
+#TipCommentsInputBox .orion-comment-input-footer {
+  background: #172235 !important;
+}
+
+.orion-comment-input-surface .write-message-label,
+.orion-comment-input-surface .orion-comment-footer-copy,
+#TipCommentsInputBox .write-message-label,
+#TipCommentsInputBox .orion-comment-footer-copy {
+  color: var(--color-text4) !important;
+}
+
+html.orion-rendered
+  body.orion-sidebar-ready.orion-recipient-shell:not(.orion-split-shell)
+  #Content
+  .reveal[class*="report-status-"]
+  #TipCommentsBox.orion-report-comments-card
+  #TipCommentsInputBox {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 10px !important;
+  visibility: visible !important;
+  opacity: 100% !important;
+  padding: 12px !important;
+  border: 1px solid rgb(160 184 209 / 14%) !important;
+  border-radius: 8px !important;
+  background: #172235 !important;
+}

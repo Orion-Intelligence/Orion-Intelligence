@@ -812,13 +812,19 @@ class entity_manager:
 
             query_str = ""
             bind_vars = {}
+            scope_cluster = ""
+            raw_scope_cluster = self._clean_text(getattr(query, "scope_cluster", ""))
+            if raw_scope_cluster:
+                candidate_scope_cluster = self._canonical_cluster_id(raw_scope_cluster)
+                if candidate_scope_cluster in self.CLUSTER_LABELS:
+                    scope_cluster = candidate_scope_cluster
 
             if query.data_point_type == "cluster" and normalized_type == "cluster":
                 queried_id, query_str, bind_vars = EntityRequestGenerator.get_cluster_documents_query(
                     normalized_value=normalized_value, depth_level=1, document_limit=document_limit)
             elif query.data_point_type == "property" and normalized_type == "all":
                 queried_id, query_str, bind_vars = EntityRequestGenerator.build_property_search_query(
-                    normalized_value, depth_level, document_limit)
+                    normalized_value, depth_level, document_limit, scope_cluster)
             else:
                 queried_id, query_str, bind_vars = EntityRequestGenerator.get_document_or_property_query(
                     normalized_value=normalized_value,

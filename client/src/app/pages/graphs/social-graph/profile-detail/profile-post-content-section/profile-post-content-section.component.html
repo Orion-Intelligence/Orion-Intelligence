@@ -81,7 +81,7 @@
                   @if (isVideoPost(post)) {
                     <video [src]="getPostMediaUrl(post)" controls preload="metadata" (loadstart)="markPostMediaLoading(post)" (loadedmetadata)="markPostMediaLoaded(post)" (loadeddata)="markPostMediaLoaded(post)" (canplay)="markPostMediaLoaded(post)" (error)="markPostMediaLoaded(post)" class="max-h-[420px] w-full bg-black transition-opacity duration-150" [class.opacity-0]="isPostMediaLoading(post)"></video>
                   } @else {
-                    <img [src]="getPostMediaUrl(post)" [alt]="getPostMediaTypeLabel(post)" (load)="markPostMediaLoaded(post)" (error)="markPostMediaLoaded(post)" class="max-h-[420px] w-full object-cover transition-opacity duration-150" [class.opacity-0]="isPostMediaLoading(post)">
+                    <img [src]="getPostMediaUrl(post)" [alt]="getPostMediaTypeLabel(post)" referrerpolicy="no-referrer" (load)="markPostMediaLoaded(post)" (error)="markPostMediaLoaded(post)" class="max-h-[420px] w-full object-cover transition-opacity duration-150" [class.opacity-0]="isPostMediaLoading(post)">
                   }
                 </div>
               }
