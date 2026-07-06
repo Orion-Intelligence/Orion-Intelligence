@@ -232,25 +232,27 @@ class EntityRequestGenerator:
             FILTER property.type NOT IN ['document', 'cluster']
             RETURN property._id
         )
-        LET exact_text_props = LENGTH(exact_normalized_props) > 0 ? [] : (
-          FOR property IN cti_vertices
-            FILTER property.type NOT IN ['document', 'cluster']
-            FILTER LOWER(TO_STRING(property.value)) == @search_value
-              || LOWER(TO_STRING(property.display_value)) == @search_value
-              || LOWER(TO_STRING(property.label)) == @search_value
-              || LOWER(TO_STRING(property._key)) == CONCAT(LOWER(TO_STRING(property.type)), ":", @search_value)
-            RETURN property._id
+        LET exact_text_props = (
+          FOR _guard IN LENGTH(exact_normalized_props) > 0 ? [] : [1]
+            FOR property IN cti_vertices
+              FILTER property.type NOT IN ['document', 'cluster']
+              FILTER LOWER(TO_STRING(property.value)) == @search_value
+                || LOWER(TO_STRING(property.display_value)) == @search_value
+                || LOWER(TO_STRING(property.label)) == @search_value
+                || LOWER(TO_STRING(property._key)) == CONCAT(LOWER(TO_STRING(property.type)), ":", @search_value)
+              RETURN property._id
         )
         LET exact_props = UNIQUE(APPEND(exact_normalized_props, exact_text_props))
-        LET fuzzy_props = LENGTH(exact_props) > 0 ? [] : (
-          FOR property IN cti_vertices
-            FILTER property.type NOT IN ['document', 'cluster']
-            FILTER CONTAINS(LOWER(TO_STRING(property.label)), @search_value)
-              || CONTAINS(LOWER(TO_STRING(property.value)), @search_value)
-              || CONTAINS(LOWER(TO_STRING(property.display_value)), @search_value)
-              || CONTAINS(LOWER(TO_STRING(property.normalized_value)), @search_value)
-              || CONTAINS(LOWER(TO_STRING(property._key)), @search_value)
-            RETURN property._id
+        LET fuzzy_props = (
+          FOR _guard IN LENGTH(exact_props) > 0 ? [] : [1]
+            FOR property IN cti_vertices
+              FILTER property.type NOT IN ['document', 'cluster']
+              FILTER CONTAINS(LOWER(TO_STRING(property.label)), @search_value)
+                || CONTAINS(LOWER(TO_STRING(property.value)), @search_value)
+                || CONTAINS(LOWER(TO_STRING(property.display_value)), @search_value)
+                || CONTAINS(LOWER(TO_STRING(property.normalized_value)), @search_value)
+                || CONTAINS(LOWER(TO_STRING(property._key)), @search_value)
+              RETURN property._id
         )
         LET props = UNIQUE(APPEND(exact_props, fuzzy_props))
         LET raw_depth1 = (
@@ -305,28 +307,30 @@ class EntityRequestGenerator:
             RETURN property._id
         )
 
-        LET exact_text_props = LENGTH(exact_normalized_props) > 0 ? [] : (
-          FOR property IN cti_vertices
-            FILTER property.type NOT IN ['document', 'cluster']
-            FILTER LOWER(TO_STRING(property.value)) == @search_value
-              || LOWER(TO_STRING(property.display_value)) == @search_value
-              || LOWER(TO_STRING(property.label)) == @search_value
-              || LOWER(TO_STRING(property._key)) == CONCAT(LOWER(TO_STRING(property.type)), ":", @search_value)
-            RETURN property._id
+        LET exact_text_props = (
+          FOR _guard IN LENGTH(exact_normalized_props) > 0 ? [] : [1]
+            FOR property IN cti_vertices
+              FILTER property.type NOT IN ['document', 'cluster']
+              FILTER LOWER(TO_STRING(property.value)) == @search_value
+                || LOWER(TO_STRING(property.display_value)) == @search_value
+                || LOWER(TO_STRING(property.label)) == @search_value
+                || LOWER(TO_STRING(property._key)) == CONCAT(LOWER(TO_STRING(property.type)), ":", @search_value)
+              RETURN property._id
         )
 
         LET exact_props = UNIQUE(APPEND(exact_normalized_props, exact_text_props))
 
-        LET fuzzy_props = LENGTH(exact_props) > 0 ? [] : (
-          FOR property IN cti_vertices
-            FILTER property.type NOT IN ['document', 'cluster']
-            FILTER CONTAINS(LOWER(TO_STRING(property.label)), @search_value)
-              || CONTAINS(LOWER(TO_STRING(property.value)), @search_value)
-              || CONTAINS(LOWER(TO_STRING(property.display_value)), @search_value)
-              || CONTAINS(LOWER(TO_STRING(property.normalized_value)), @search_value)
-              || CONTAINS(LOWER(TO_STRING(property._key)), @search_value)
-            LIMIT @property_search_limit
-            RETURN property._id
+        LET fuzzy_props = (
+          FOR _guard IN LENGTH(exact_props) > 0 ? [] : [1]
+            FOR property IN cti_vertices
+              FILTER property.type NOT IN ['document', 'cluster']
+              FILTER CONTAINS(LOWER(TO_STRING(property.label)), @search_value)
+                || CONTAINS(LOWER(TO_STRING(property.value)), @search_value)
+                || CONTAINS(LOWER(TO_STRING(property.display_value)), @search_value)
+                || CONTAINS(LOWER(TO_STRING(property.normalized_value)), @search_value)
+                || CONTAINS(LOWER(TO_STRING(property._key)), @search_value)
+              LIMIT @property_search_limit
+              RETURN property._id
         )
 
         LET props = UNIQUE(APPEND(exact_props, fuzzy_props))
