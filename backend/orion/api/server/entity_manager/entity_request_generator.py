@@ -226,53 +226,52 @@ class EntityRequestGenerator:
 
         queried_id = "all_properties"
         query_str = f"""
-        LET exact_normalized_props = (
+        LET props = (
           FOR property IN cti_vertices
             FILTER property.normalized_value == @search_value
             FILTER property.type NOT IN ['document', 'cluster']
             RETURN property._id
         )
-        LET exact_text_props = (
-          FOR _guard IN LENGTH(exact_normalized_props) > 0 ? [] : [1]
-            FOR property IN cti_vertices
-              FILTER property.type NOT IN ['document', 'cluster']
-              FILTER LOWER(TO_STRING(property.value)) == @search_value
-                || LOWER(TO_STRING(property.display_value)) == @search_value
-                || LOWER(TO_STRING(property.label)) == @search_value
-                || LOWER(TO_STRING(property._key)) == CONCAT(LOWER(TO_STRING(property.type)), ":", @search_value)
-              RETURN property._id
-        )
-        LET exact_props = UNIQUE(APPEND(exact_normalized_props, exact_text_props))
-        LET fuzzy_props = (
-          FOR _guard IN LENGTH(exact_props) > 0 ? [] : [1]
-            FOR property IN cti_vertices
-              FILTER property.type NOT IN ['document', 'cluster']
-              FILTER CONTAINS(LOWER(TO_STRING(property.label)), @search_value)
-                || CONTAINS(LOWER(TO_STRING(property.value)), @search_value)
-                || CONTAINS(LOWER(TO_STRING(property.display_value)), @search_value)
-                || CONTAINS(LOWER(TO_STRING(property.normalized_value)), @search_value)
-                || CONTAINS(LOWER(TO_STRING(property._key)), @search_value)
-              RETURN property._id
-        )
-        LET props = UNIQUE(APPEND(exact_props, fuzzy_props))
-        LET raw_depth1 = (
-          FOR id IN props
-            FOR v, e, p IN {depth_level}..{depth_level} ANY id GRAPH 'cti_graph'
-              FILTER v.type == 'document'
+
+        LET doc_matches = (
+          FOR property_id IN props
+            FOR property_edge IN cti_edges
+              FILTER property_edge._to == property_id AND STARTS_WITH(property_edge.type, "has_")
+              COLLECT matched_doc_id = property_edge._from INTO grouped = {{
+                property_id: property_id,
+                property_edge: property_edge
+              }}
+              LET score = LENGTH(grouped)
+              SORT score DESC
               LIMIT {document_limit}
-              RETURN {{vertex: v, edge: e, path: p}}
+              RETURN {{
+                doc_id: matched_doc_id,
+                property_edges: SLICE(grouped, 0, 4)
+              }}
         )
-        LET document_ids = UNIQUE(
-          FOR item IN raw_depth1
-            FILTER item.vertex.type == 'document'
-            RETURN item.vertex._id
+
+        LET raw_depth1 = (
+          FOR match IN doc_matches
+            LET doc = DOCUMENT(match.doc_id)
+            FILTER doc != null AND doc.type == "document"
+            FOR relation IN match.property_edges
+              LET property = DOCUMENT(relation.property_id)
+              FILTER property != null
+              RETURN {{
+                vertex: KEEP(doc, "_id", "_key", "_rev", "type", "node_class", "doc_id", "m_document_id", "cluster_id", "module", "label", "display_value", "title", "summary", "published", "source", "source_reliability"),
+                edge: relation.property_edge,
+                path: {{
+                  vertices: [property, doc],
+                  edges: [relation.property_edge]
+                }}
+              }}
         )
 
         LET default_clusters = @default_clusters
         LET filtered_cluster_edges = (
-          FOR doc_id IN document_ids
+          FOR match IN doc_matches
             FOR e IN cti_edges
-              FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
+              FILTER e._to == match.doc_id AND e.type == 'cluster_to_doc'
               LET cluster_key = PARSE_IDENTIFIER(e._from).key
               FILTER cluster_key IN default_clusters
               LET cluster = DOCUMENT(e._from)
@@ -280,7 +279,7 @@ class EntityRequestGenerator:
         )
 
         LET depth1 = APPEND(raw_depth1, filtered_cluster_edges)
-        LET limit_hit_depth1 = false
+        LET limit_hit_depth1 = LENGTH(doc_matches) >= {document_limit}
 
         RETURN {{
           depth1,
