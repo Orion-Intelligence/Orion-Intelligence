@@ -25,6 +25,38 @@ function executeIocAdvancedSearch() {
     .click();
 }
 
+function getVisibleIocAdvancedRow(index: number) {
+  return cy.get('[data-testid="ioc-adv-row"]').filter(':visible').eq(index);
+}
+
+function selectIocAdvancedControl(rowIndex: number, testId: string, nativeValue: string, dropdownLabel: RegExp) {
+  getVisibleIocAdvancedRow(rowIndex).find(`[data-testid="${testId}"]`).scrollIntoView().then(($control) => {
+    const tagName = ($control[0] as HTMLElement).tagName.toLowerCase();
+    if (tagName === 'select') {
+      cy.wrap($control).select(nativeValue);
+      return;
+    }
+
+    cy.wrap($control).click({ force: true });
+    cy.contains('[role="option"]', dropdownLabel).filter(':visible').first().click({ force: true });
+  });
+}
+
+function typeIocAdvancedValue(rowIndex: number, value: string) {
+  getVisibleIocAdvancedRow(rowIndex)
+    .find('[data-testid="ioc-adv-value-input"]')
+    .scrollIntoView()
+    .clear()
+    .type(value);
+}
+
+function clickIocAdvancedRowButton(rowIndex: number, testId: string) {
+  getVisibleIocAdvancedRow(rowIndex)
+    .find(`[data-testid="${testId}"]`)
+    .scrollIntoView()
+    .click({ force: true });
+}
+
 export function openHomepageAndSearch(query = '{enter}') {
   cy.get('[data-testid="sidebar-group-profile"]').should('be.visible').click();
   cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().should('be.visible').click();
@@ -246,25 +278,17 @@ export function runAdvancedFilterFlow() {
   });
   cy.get('[data-testid="ioc-adv-row"]').filter(':visible').should('have.length.at.least', 1);
 
-  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').first().within(() => {
-    cy.get('[data-testid="ioc-adv-tag-select"]').scrollIntoView().select('m_email');
-    cy.get('[data-testid="ioc-adv-value-input"]').scrollIntoView().clear().type('ydt.sja@gail.ccmm');
-  });
+  selectIocAdvancedControl(0, 'ioc-adv-tag-select', 'm_email', /email/i);
+  typeIocAdvancedValue(0, 'ydt.sja@gail.ccmm');
   executeIocAdvancedSearch();
   cy.get('[data-testid="ioc-stealer-table"]').find('[data-testid="ioc-stealer-row"]').should('have.length.greaterThan', 0);
 
-  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').first().within(() => {
-    cy.get('[data-testid="ioc-adv-add-filter"]').scrollIntoView().click();
-  });
+  clickIocAdvancedRowButton(0, 'ioc-adv-add-filter');
   cy.get('[data-testid="ioc-adv-row"]').filter(':visible').should('have.length.at.least', 2);
 
-  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').eq(1).within(() => {
-    cy.get('[data-testid="ioc-adv-operator-select"]').scrollIntoView().select('&&');
-    cy.scrollDashboardToTop()
-    cy.get('[data-testid="ioc-adv-tag-select"]').scrollIntoView().select('m_email');
-    cy.scrollDashboardToTop()
-    cy.get('[data-testid="ioc-adv-value-input"]').scrollIntoView().clear().type('fake-no-result-value-xyz@gmail.com');
-  });
+  selectIocAdvancedControl(1, 'ioc-adv-operator-select', '&&', /^(AND|&&)$/i);
+  selectIocAdvancedControl(1, 'ioc-adv-tag-select', 'm_email', /email/i);
+  typeIocAdvancedValue(1, 'fake-no-result-value-xyz@gmail.com');
   executeIocAdvancedSearch();
 
   cy.get('[data-testid="ioc-stealer-table"]').should(($shell) => {
@@ -273,9 +297,7 @@ export function runAdvancedFilterFlow() {
     expect(rowCount === 0 || emptyCount > 0).to.eq(true);
   });
 
-  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').eq(1).within(() => {
-    cy.get('[data-testid="ioc-adv-delete-filter"]').scrollIntoView().click();
-  });
+  clickIocAdvancedRowButton(1, 'ioc-adv-delete-filter');
   executeIocAdvancedSearch();
   cy.get('[data-testid="ioc-adv-row"]').filter(':visible').should('have.length.at.least', 1);
   cy.get('[data-testid="ioc-stealer-table"]').should(($shell) => {

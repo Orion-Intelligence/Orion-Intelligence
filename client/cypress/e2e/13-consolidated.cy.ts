@@ -17,6 +17,25 @@ import {
   switchToIocsTab
 } from './controllers/13-consolidated.controller';
 
+function expandIocRows(tableTestId: string, rowTestId: string, toggleTestId: string, maxRows = 3) {
+  const tableSelector = `[data-testid="${tableTestId}"]`;
+  const rowSelector = `[data-testid="${rowTestId}"]`;
+  const toggleSelector = `[data-testid="${toggleTestId}"]`;
+
+  cy.get(tableSelector).find(rowSelector).should('have.length.greaterThan', 0).then(($rows) => {
+    const count = Math.min(maxRows, $rows.length);
+    for (let i = 0; i < count; i += 1) {
+      cy.get(tableSelector)
+        .find(rowSelector)
+        .eq(i)
+        .scrollIntoView()
+        .find(toggleSelector)
+        .first()
+        .click({ force: true });
+    }
+  });
+}
+
 describe('Consolidated - IOC Basic Flow', () => {
   beforeEach(() => {
     cy.loginAsAdmin();
@@ -220,36 +239,10 @@ describe('Consolidated - IOC Basic Flow', () => {
     cy.get('[data-testid="ioc-stealer-table"]').should('be.visible');
     cy.get('[data-testid="ioc-threat-table"]').should('be.visible');
 
-    cy.get('[data-testid="ioc-stealer-table"]')
-      .within(() => {
-        cy.get('[data-testid="ioc-stealer-row"]').should('have.length.greaterThan', 0);
-        cy.get('[data-testid="ioc-stealer-row"]').then(($rows) => {
-          const count = Math.min(3, $rows.length);
-          for (let i = 0; i < count; i += 1) {
-            cy.wrap($rows.eq(i))
-              .scrollIntoView()
-              .find('[data-testid="ioc-stealer-row-toggle"]')
-              .first()
-              .click();
-          }
-        });
-      });
+    expandIocRows('ioc-stealer-table', 'ioc-stealer-row', 'ioc-stealer-row-toggle');
 
     cy.get('[data-testid="ioc-threat-table"]').scrollIntoView();
-    cy.get('[data-testid="ioc-threat-table"]')
-      .within(() => {
-        cy.get('[data-testid="ioc-threat-row"]').should('have.length.greaterThan', 0);
-        cy.get('[data-testid="ioc-threat-row"]').then(($rows) => {
-          const count = Math.min(3, $rows.length);
-          for (let i = 0; i < count; i += 1) {
-            cy.wrap($rows.eq(i))
-              .scrollIntoView()
-              .find('[data-testid="ioc-threat-row-toggle"]')
-              .first()
-              .click();
-          }
-        });
-      });
+    expandIocRows('ioc-threat-table', 'ioc-threat-row', 'ioc-threat-row-toggle');
 
     cy.scrollDashboardToTop()
     searchInIocs('ydt.sja@gail.ccmm');

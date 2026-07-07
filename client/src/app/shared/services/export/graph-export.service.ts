@@ -12,6 +12,9 @@ interface PlainTableThemeOptions {
   overflow?: 'linebreak';
   valign?: 'middle' | 'top';
   textColor?: [number, number, number];
+  rowFillColor?: [number, number, number];
+  alternateRowFillColor?: [number, number, number];
+  lineColor?: [number, number, number];
 }
 
 interface PlainTableThemeConfig {
@@ -431,7 +434,7 @@ export class GraphExportService {
       cellPadding: options.cellPadding,
       textColor: options.textColor ?? [30, 41, 59],
       lineWidth: this.TABLE_BORDER_WIDTH,
-      lineColor: this.TABLE_BORDER_RGB
+      lineColor: options.lineColor ?? this.TABLE_BORDER_RGB
     };
     if (options.font) {
       styles.font = options.font;
@@ -444,9 +447,9 @@ export class GraphExportService {
     }
 
     const bodyStyles: PlainTableThemeConfig['bodyStyles'] = {
-      fillColor: this.TABLE_ROW_BG_RGB,
+      fillColor: options.rowFillColor ?? this.TABLE_ROW_BG_RGB,
       lineWidth: this.TABLE_BORDER_WIDTH,
-      lineColor: this.TABLE_BORDER_RGB
+      lineColor: options.lineColor ?? this.TABLE_BORDER_RGB
     };
     if (options.textColor) {
       bodyStyles.textColor = options.textColor;
@@ -456,9 +459,9 @@ export class GraphExportService {
       styles,
       bodyStyles,
       alternateRowStyles: {
-        fillColor: this.TABLE_ROW_ALT_BG_RGB,
+        fillColor: options.alternateRowFillColor ?? this.TABLE_ROW_ALT_BG_RGB,
         lineWidth: this.TABLE_BORDER_WIDTH,
-        lineColor: this.TABLE_BORDER_RGB
+        lineColor: options.lineColor ?? this.TABLE_BORDER_RGB
       },
       theme: 'plain'
     };
@@ -482,16 +485,16 @@ export class GraphExportService {
     };
   }
 
-  protected makeHeaderAndFirstColumnDidParse(): (data: any) => void {
+  protected makeHeaderAndFirstColumnDidParse(headerFillColor: [number, number, number] = [207, 220, 236], firstColumnFillColor: [number, number, number] = [214, 226, 240]): (data: any) => void {
     return (data: any) => {
       if (data.row.index === 0) {
         data.cell.styles.fontStyle = 'bold';
-        data.cell.styles.fillColor = [207, 220, 236];
+        data.cell.styles.fillColor = headerFillColor;
         return;
       }
       if (data.column.index === 0) {
         data.cell.styles.fontStyle = 'bold';
-        data.cell.styles.fillColor = [214, 226, 240];
+        data.cell.styles.fillColor = firstColumnFillColor;
       }
     };
   }
@@ -633,11 +636,11 @@ export class GraphExportService {
     return { x, y, w: maxW, h: maxH };
   }
 
-  protected drawStandardPageHeader(doc: jsPDF, title: string, section: string, barBottom: number): void {
+  protected drawStandardPageHeader(doc: jsPDF, title: string, section: string, barBottom: number, accentRgb: [number, number, number] = [59, 130, 246]): void {
     const W = this.getPageW(doc);
     doc.setFillColor(248, 250, 252);
     doc.rect(0, 0, W, barBottom, 'F');
-    doc.setFillColor(59, 130, 246);
+    doc.setFillColor(...accentRgb);
     doc.rect(0, 0, W, 5, 'F');
     doc.setDrawColor(226, 232, 240);
     doc.line(40, barBottom, W - 40, barBottom);
@@ -700,7 +703,7 @@ export class GraphExportService {
     void endY;
   }
 
-  protected drawInfoSectionMarker(doc: jsPDF, y: number, width: number, label: string): void {
+  protected drawInfoSectionMarker(doc: jsPDF, y: number, width: number, label: string, fillRgb: [number, number, number] = this.INTERNAL_HEADER_RGB): void {
     const x = 40;
     const normalizedLabel = String(label || '').trim();
     const text = this.fitSingleLine(doc, normalizedLabel || 'Info', Math.max(110, width - 24));
@@ -708,9 +711,9 @@ export class GraphExportService {
     const badgeX = x;
     // Keep the section badge close to table content with no separator rule below.
     const badgeTopY = y - 4;
-    doc.setFillColor(...this.INTERNAL_HEADER_RGB);
+    doc.setFillColor(...fillRgb);
     doc.roundedRect(badgeX, badgeTopY, badgeWidth, 16, 4, 4, 'F');
-    doc.setFillColor(...this.INTERNAL_HEADER_RGB);
+    doc.setFillColor(...fillRgb);
     doc.rect(badgeX, badgeTopY + 8, badgeWidth, 8, 'F');
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8);

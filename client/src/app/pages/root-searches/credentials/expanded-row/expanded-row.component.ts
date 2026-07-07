@@ -167,6 +167,83 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return this.domainValues.length ? this.domainValues.join(', ') : '-';
   }
 
+  confidenceScore(): number {
+    const record = this.mode() === 'stealer' ? this.item() : this.result();
+    if (!record) {
+      return 0;
+    }
+
+    const values = (value: any): string[] => this.rowHelper.normalizeToArray(value);
+    const clean = (value: any): string => String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const term = (value: string): string => {
+      let text = String(value || '').trim().replace(/^['"]|['"]$/g, '');
+      if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(text)) {
+        const fieldMatch = text.match(/^[a-z_][a-z0-9_]*:(.+)$/i);
+        if (fieldMatch) {
+          text = fieldMatch[1].trim();
+        }
+      }
+      return clean(text);
+    };
+    const domain = (value: string): string => {
+      let text = clean(value);
+      if (!text || text === '-') {
+        return '';
+      }
+      text = text.replace(/^[a-z][a-z0-9+.-]*:\/\//i, '');
+      text = text.replace(/^[^@/\s]+@/, '');
+      text = text.split(/[/?#]/)[0] ?? '';
+      text = text.split(':')[0] ?? '';
+      text = text.replace(/^\.+|\.+$/g, '').replace(/^www\./, '');
+      return text && text.includes('.') && !/\s/.test(text) && !/^\d{1,3}(\.\d{1,3}){3}$/.test(text) ? text : '';
+    };
+
+    const searchTerms = Array.from(new Set((this.searchQuery() || '')
+      .split(/\s*(?:\|\||&&|\||&)\s*|[\s,;]+/)
+      .map(term)
+      .filter(value => value.length >= 3)));
+    const domains = Array.from(new Set((this.mode() === 'stealer'
+      ? [...values(record?.['domain']), ...values(record?.['source_domain'])]
+      : [...values(record?.m_domain), ...values(record?.m_root_domain), ...values(record?.m_url), ...values(record?.m_base_url), ...values(record?.m_weblink)])
+      .map(domain)
+      .filter(Boolean)));
+    const keys = this.mode() === 'stealer'
+      ? ['email', 'username', 'user', 'domain', 'source_domain', 'raw', 'url', 'ip', 'bin', 'card_type', 'channel', 'file', 'timestamp', 'date']
+      : ['m_email', 'm_username', 'm_user', 'm_domain', 'm_root_domain', 'm_url', 'm_base_url', 'm_weblink', 'm_title', 'm_content', 'm_important_content', 'm_channel', 'm_date', 'm_update_date', 'rank_index', 'm_rank_index'];
+    const searchable = Array.from(new Set([...domains, ...keys.flatMap(key => values(record?.[key]))])).map(clean).filter(value => value.length >= 3);
+    const baseKeys = ['confidence', 'confidence_score', 'score', 'rank_score', 'relevance_score', 'm_score'];
+    let score = baseKeys.reduce((found, key) => {
+      if (found > 0) {
+        return found;
+      }
+      const raw = Number(values(record?.[key])[0]);
+      return Number.isFinite(raw) && raw > 0 ? (raw <= 1 ? raw * 100 : raw) : 0;
+    }, 0) || 50;
+
+    if (searchTerms.some(search => searchable.some(value => value.includes(search) || search.includes(value)))) {
+      score += 18;
+    }
+    const dateValue = ['date', 'm_date', 'm_update_date', 'timestamp', 'created_at', 'updated_at', 'time', 'year']
+      .map(key => values(record?.[key])[0])
+      .find(Boolean);
+    const parsedDate = dateValue ? new Date(dateValue) : null;
+    if (parsedDate && !Number.isNaN(parsedDate.getTime())) {
+      const days = (Date.now() - parsedDate.getTime()) / 86400000;
+      score += days <= 30 ? 12 : days <= 180 ? 8 : days <= 365 ? 5 : 0;
+    }
+    if (domains.length > 1) {
+      score += 8;
+    }
+    if (searchTerms.some(search => {
+      const queryDomain = domain(search) || search;
+      return queryDomain.length >= 3 && domains.some(value => value.includes(queryDomain) || queryDomain.includes(value));
+    })) {
+      score += 15;
+    }
+
+    return Math.max(0, Math.min(100, Math.round(score)));
+  }
+
   get identityPasswordKey(): string {
     return `${this.mode()}-identity-password`;
   }
