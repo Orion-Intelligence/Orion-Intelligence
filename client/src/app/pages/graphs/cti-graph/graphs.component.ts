@@ -120,6 +120,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   private skipNextBasicSearchRouteApply = false;
   private hoveredNodeId: string | null = null;
   private pendingFocusNodeId: string | null = null;
+  private graphRequestSequence = 0;
 
   networkContainer?: ElementRef;
   public rawNodes: ExtendedNode[] = [];
@@ -656,6 +657,15 @@ export class GraphComponent implements OnInit, OnDestroy {
     });
   }
 
+  private nextGraphRequestId(): number {
+    this.graphRequestSequence += 1;
+    return this.graphRequestSequence;
+  }
+
+  private isCurrentGraphRequest(requestId: number): boolean {
+    return requestId === this.graphRequestSequence;
+  }
+
   resetGraph(): void {
     if (this.network) {
       this.network.destroy();
@@ -702,6 +712,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     let params = new HttpParams();
     this.loading = false;
+    const requestId = this.nextGraphRequestId();
     if (data_point_type) {
       params = params.set('data_point_type', data_point_type);
     }
@@ -722,6 +733,9 @@ export class GraphComponent implements OnInit, OnDestroy {
       results: any[];
   }>('graph', { params }).subscribe({
     next: response => {
+      if (!this.isCurrentGraphRequest(requestId)) {
+        return;
+      }
       const { results } = response;
       this.result = results;
       this.renderGraph(this.result);
@@ -732,6 +746,9 @@ export class GraphComponent implements OnInit, OnDestroy {
       this.loading = true;
     },
     error: _ => {
+      if (!this.isCurrentGraphRequest(requestId)) {
+        return;
+      }
       this.pendingFocusNodeId = null;
       this.isEmpty = true;
       this.loading = true;
@@ -750,17 +767,24 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
 
     this.loading = false;
+    const requestId = this.nextGraphRequestId();
     this.resetGraph();
     this.api.get<{ results: GraphResultItem[]; }>('graph', {
       params: this.buildGraphHttpParams('property', 'all', queryValue, clusterKey)
     }).subscribe({
       next: response => {
+        if (!this.isCurrentGraphRequest(requestId)) {
+          return;
+        }
         const results = response.results ?? [];
         this.result = clusterKey === 'all' ? results : this.filterGraphResultsByCluster(results, clusterKey);
         this.renderGraph(this.result);
         this.loading = true;
       },
       error: _ => {
+        if (!this.isCurrentGraphRequest(requestId)) {
+          return;
+        }
         this.isEmpty = true;
         this.loading = true;
       }
@@ -796,12 +820,16 @@ export class GraphComponent implements OnInit, OnDestroy {
       this.expandEnabled = false;
     }
     this.loading = false;
+    const requestId = this.nextGraphRequestId();
     this.resetGraph();
     const calls = requests.map(request => this.api.get<{ results: GraphResultItem[]; }>('graph', {
       params: this.buildGraphHttpParams(request.dataPointType, request.modelType, request.queryValue)
     }));
     forkJoin(calls).subscribe({
       next: responses => {
+        if (!this.isCurrentGraphRequest(requestId)) {
+          return;
+        }
         const responseResults = responses.map(response => response.results ?? []);
         const mergedResults = this.mergeGraphBuilderResults(responseResults, requests);
         this.result = this.limitGraphBuilderResultsByDocuments(mergedResults, Number(this.maxEdge));
@@ -809,6 +837,9 @@ export class GraphComponent implements OnInit, OnDestroy {
         this.loading = true;
       },
       error: _ => {
+        if (!this.isCurrentGraphRequest(requestId)) {
+          return;
+        }
         this.isEmpty = true;
         this.loading = true;
       }
