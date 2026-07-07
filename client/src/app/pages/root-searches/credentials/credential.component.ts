@@ -20,7 +20,7 @@ import { PasswordSchemaComponent } from './password-schema/password-schema.compo
 import { PasswordSchemaFilter } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
 import { ScanHelperMethods } from '../../../shared/partials/scan-helper-methods/scan-helper-methods.component';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
-import { REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
+import { CREDENTIAL_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportPayload, GraphReportRecordBlock, GraphReportTableRow } from '../../../shared/model/report/report-export.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
@@ -55,7 +55,7 @@ export class CredentialComponent implements OnInit {
   protected readonly filters = stealer_filters;
   protected readonly length = length;
 
-  readonly reportExportOptions = REPORT_EXPORT_OPTIONS;
+  readonly reportExportOptions = CREDENTIAL_REPORT_EXPORT_OPTIONS;
   searchQuery: string = '';
   isLoading: boolean = false;
   firstTrigger: boolean = true;

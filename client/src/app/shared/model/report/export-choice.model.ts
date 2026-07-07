@@ -22,6 +22,21 @@ export const GRAPH_REPORT_EXPORT_OPTIONS: ExportChoiceOption[] = [
 
 export const REPORT_EXPORT_OPTIONS: ExportChoiceOption[] = [
   {
+    value: 'json',
+    title: '1. Download JSON',
+    description: 'Download STIX JSON export for this report.',
+    testId: 'graph-report-export-json'
+  },
+  {
+    value: 'report',
+    title: '2. Export Report (PDF)',
+    description: 'Generate document PDF export for this report.',
+    testId: 'graph-report-export-report'
+  }
+];
+
+export const CREDENTIAL_REPORT_EXPORT_OPTIONS: ExportChoiceOption[] = [
+  {
     value: 'csv',
     title: '1. Export CSV',
     description: 'Download this report as a CSV file.',
@@ -34,3 +49,5 @@ export const REPORT_EXPORT_OPTIONS: ExportChoiceOption[] = [
     testId: 'graph-report-export-report'
   }
 ];
+
+export const RESULT_REPORT_EXPORT_OPTIONS = REPORT_EXPORT_OPTIONS;

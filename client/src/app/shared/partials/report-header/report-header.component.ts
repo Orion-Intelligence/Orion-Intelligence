@@ -9,7 +9,7 @@ import { AppService } from '../../../services/core/app/app.service';
 import { Router } from '@angular/router';
 import { ReportExportService } from '../../services/report-export.service';
 import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice-modal.component';
-import { REPORT_EXPORT_OPTIONS } from '../../model/report/export-choice.model';
+import { RESULT_REPORT_EXPORT_OPTIONS } from '../../model/report/export-choice.model';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { ProxyController } from '../../services/proxy-controller';
 import { AiSummaryComponent } from '../../../pages/root-searches/ai-workspace/ai-summary/ai-summary.component';
@@ -31,7 +31,7 @@ export class ReportHeaderComponent {
   isLanguageDropdownOpen = signal(false);
   selectedLanguage = signal('');
   readonly languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
-  readonly reportExportOptions = REPORT_EXPORT_OPTIONS;
+  readonly reportExportOptions = RESULT_REPORT_EXPORT_OPTIONS;
   readonly csv_object = input<string | object | null | undefined>(null);
   readonly url = input<string | null | undefined>(null);
   readonly lang = input<string>("");
@@ -42,9 +42,15 @@ export class ReportHeaderComponent {
   constructor(private helperService: HelperService, private api: ApiService, protected appService: AppService, private dashboardService: DashboardService, protected route: Router, protected licenseServise: LicenseService, private reportExportService: ReportExportService, private translationService: TranslationService) {
   }
 
-  downloadCSV() {
-    const row = this.buildCsvExportRow();
-    this.helperService.downloadAsCSV(row, 'report_export.csv');
+  downloadJSON() {
+    const endpoint = this.getStixExportEndpoint();
+    if (!endpoint) {
+      this.helperService.downloadstixJson(this.buildJsonExportPayload(), 'report_export.json');
+      return;
+    }
+    this.api.get<any>(endpoint).subscribe((res) => {
+      this.helperService.downloadstixJson(res, 'stix_report.json');
+    });
   }
 
   openExportChoice() {
@@ -56,8 +62,8 @@ export class ReportHeaderComponent {
   }
 
   selectExport(type: string) {
-    if (type === 'csv') {
-      this.downloadCSV();
+    if (type === 'json' || type === 'csv') {
+      this.downloadJSON();
     }
     else {
       this.printPage();
@@ -65,7 +71,23 @@ export class ReportHeaderComponent {
     this.closeExportChoice();
   }
 
-  private buildCsvExportRow(): Record<string, unknown> {
+  private getStixExportEndpoint(): string | null {
+    const tree = this.route.parseUrl(this.route.url);
+    const id = tree.root.children['primary']?.segments.slice(-1)[0]?.path || '';
+    let ci = String(tree.queryParams['ci'] || '').trim().toLowerCase();
+    if (!id || !ci) {
+      return null;
+    }
+    if (ci === 'general') {
+      ci = 'strategic';
+    }
+    if (ci === 'leak' || ci === 'feed') {
+      ci = 'breach';
+    }
+    return `search/${ci}/stix/${id}`;
+  }
+
+  private buildJsonExportPayload(): Record<string, unknown> {
     const source = this.csv_object();
     const row: Record<string, unknown> = {};
     if (source && typeof source === 'object' && !Array.isArray(source)) {
@@ -96,7 +118,7 @@ export class ReportHeaderComponent {
         lang: this.lang(),
         langDetected: this.lang_detected()
       });
-      this.reportExportService.exportByType(payload, 'graph_pdf');
+      this.reportExportService.exportByType(payload, 'doc_pdf');
     }
     catch {
       this.helperService.printPage();
