@@ -2166,6 +2166,10 @@ select:not(.ui-popup-select, .ui-select)::-ms-expand {
   color: #334155 !important;
 }
 
+.cdk-overlay-container {
+  z-index: 10010 !important;
+}
+
 html.light-theme .cdk-overlay-container .ui-dropdown-menu,
 body.light-theme .cdk-overlay-container .ui-dropdown-menu,
 html.light-theme .cdk-overlay-container .cdk-overlay-pane > div:has(> [role='listbox']),

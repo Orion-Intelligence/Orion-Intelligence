@@ -80,7 +80,7 @@ def test_graph_batch_expands_country_values_and_applies_builder_and():
     ]
 
 
-def test_graph_batch_groups_repeated_country_rows_as_country_list():
+def test_graph_batch_preserves_repeated_country_row_and_operator():
     manager = object.__new__(entity_manager)
     calls = []
 
@@ -125,7 +125,4 @@ def test_graph_batch_groups_repeated_country_rows_as_country_list():
         ("m_country", "pakistan"),
         ("m_country", "india"),
     ]
-    assert entity_manager._extract_document_ids_from_graph_results(result["results"]) == {
-        "cti_vertices/doc-pakistan",
-        "cti_vertices/doc-india",
-    }
+    assert entity_manager._extract_document_ids_from_graph_results(result["results"]) == set()

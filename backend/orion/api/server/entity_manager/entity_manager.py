@@ -1455,9 +1455,10 @@ class entity_manager:
             request_items = self._graph_batch_items(query.requests or [query], query)
             document_limit = self._graph_document_limit(query.edge)
 
-            conjunctive_response = await self._get_conjunctive_graph_relations(request_items, document_limit)
-            if conjunctive_response is not None:
-                return conjunctive_response
+            if getattr(self, "_entity_manager__db", None) is not None:
+                conjunctive_response = await self._get_conjunctive_graph_relations(request_items, document_limit)
+                if conjunctive_response is not None:
+                    return conjunctive_response
 
             for item in request_items:
                 group_result_sets: list[list[dict[str, Any]]] = []
