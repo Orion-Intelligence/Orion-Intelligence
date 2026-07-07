@@ -942,6 +942,54 @@ class entity_manager:
             document_limit = 800
         return document_limit
 
+    @staticmethod
+    def _graph_and_candidate_scan_limit(document_limit: int) -> int:
+        return min(max(document_limit * 200, 5000), 50000)
+
+    @classmethod
+    def _conjunctive_property_groups(cls, request_items: list[dict[str, Any]], query: EntityGraphBatchQueryModel) -> dict[str, Any] | None:
+        if len(request_items) < 2:
+            return None
+
+        try:
+            requested_depth = int(query.depth)
+        except (TypeError, ValueError):
+            requested_depth = 1
+        if requested_depth != 1:
+            return None
+
+        scope_cluster = request_items[0]["scope_cluster"]
+        property_groups: list[list[str]] = []
+        for index, item in enumerate(request_items):
+            if index > 0 and item["operator"] != "&&":
+                return None
+            if item["data_point_type"] != "property" or item["model_type"] in {"", "all"}:
+                return None
+            if item["scope_cluster"] != scope_cluster:
+                return None
+
+            normalized_type = cls._sanitize(cls._normalize_key(item["model_type"]))
+            group: list[str] = []
+            seen_group_ids: set[str] = set()
+            for value in item["query_values"]:
+                normalized_value = cls._sanitize(cls._normalize_key(value))
+                if not normalized_type or not normalized_value:
+                    continue
+                property_id = f"cti_vertices/{normalized_type}:{normalized_value}"
+                if property_id in seen_group_ids:
+                    continue
+                seen_group_ids.add(property_id)
+                group.append(property_id)
+            if not group:
+                return None
+            property_groups.append(group)
+
+        return {
+            "property_groups": property_groups,
+            "queried_ids": [property_id for group in property_groups for property_id in group],
+            "scope_cluster": scope_cluster,
+        }
+
     @classmethod
     def _dedupe_graph_results(cls, results: list[dict[str, Any]]) -> list[dict[str, Any]]:
         merged: dict[str, dict[str, Any]] = {}
@@ -1100,6 +1148,139 @@ class entity_manager:
         ]
         return cls._dedupe_graph_results(limited_results)
 
+    async def _get_conjunctive_property_relations(self, request_items: list[dict[str, Any]], query: EntityGraphBatchQueryModel, document_limit: int):
+        conjunctive_groups = self._conjunctive_property_groups(request_items, query)
+        if conjunctive_groups is None:
+            return None
+
+        scope_cluster = ""
+        raw_scope_cluster = self._clean_text(conjunctive_groups["scope_cluster"])
+        if raw_scope_cluster:
+            candidate_scope_cluster = self._canonical_cluster_id(raw_scope_cluster)
+            if candidate_scope_cluster in self.CLUSTER_LABELS:
+                scope_cluster = f"cti_vertices/{candidate_scope_cluster}"
+
+        query_str = """
+        LET ordered_property_groups = (
+          FOR group IN @property_groups
+            LET capped_count = SUM(
+              FOR property_id IN group
+                RETURN LENGTH(
+                  FOR seed_edge IN cti_edges
+                    FILTER seed_edge._to == property_id AND STARTS_WITH(seed_edge.type, "has_")
+                    LIMIT @seed_probe_limit
+                    RETURN 1
+                )
+            )
+            SORT capped_count ASC
+            RETURN group
+        )
+
+        LET seed_property_ids = FIRST(ordered_property_groups)
+
+        LET seed_doc_ids = (
+          FOR property_id IN seed_property_ids
+            FOR seed_edge IN cti_edges
+              FILTER seed_edge._to == property_id AND STARTS_WITH(seed_edge.type, "has_")
+              LIMIT @candidate_scan_limit
+              RETURN DISTINCT seed_edge._from
+        )
+
+        LET matched_doc_ids = (
+          FOR doc_id IN seed_doc_ids
+            LET matched_group_count = LENGTH(
+              FOR group IN ordered_property_groups
+                LET group_matches = (
+                  FOR property_id IN group
+                    FOR candidate_edge IN cti_edges
+                      FILTER candidate_edge._from == doc_id
+                        AND candidate_edge._to == property_id
+                        AND STARTS_WITH(candidate_edge.type, "has_")
+                      LIMIT 1
+                      RETURN 1
+                )
+                FILTER LENGTH(group_matches) > 0
+                RETURN 1
+            )
+            FILTER matched_group_count == LENGTH(ordered_property_groups)
+            LET in_scope = @scope_cluster_id == "" ? true : LENGTH(
+              FOR scope_edge IN cti_edges
+                FILTER scope_edge._from == @scope_cluster_id
+                  AND scope_edge._to == doc_id
+                  AND scope_edge.type == "cluster_to_doc"
+                LIMIT 1
+                RETURN 1
+            ) > 0
+            FILTER in_scope
+            LIMIT @document_limit
+            RETURN doc_id
+        )
+
+        LET property_edges = (
+          FOR doc_id IN matched_doc_ids
+            LET doc = DOCUMENT(doc_id)
+            FILTER doc != null AND doc.type == "document"
+            FOR group IN ordered_property_groups
+              FOR property_id IN group
+                FOR edge IN cti_edges
+                  FILTER edge._from == doc_id
+                    AND edge._to == property_id
+                    AND STARTS_WITH(edge.type, "has_")
+                  LET property = DOCUMENT(edge._to)
+                  FILTER property != null
+                  RETURN {
+                    vertex: KEEP(doc, "_id", "_key", "_rev", "type", "node_class", "doc_id", "m_document_id", "cluster_id", "module", "label", "display_value", "title", "summary", "published", "source", "source_reliability"),
+                    edge: edge,
+                    path: {
+                      vertices: [property, doc],
+                      edges: [edge]
+                    }
+                  }
+        )
+
+        LET cluster_edges = (
+          FOR doc_id IN matched_doc_ids
+            FOR edge IN cti_edges
+              FILTER edge._to == doc_id AND edge.type == "cluster_to_doc"
+              LET cluster_key = PARSE_IDENTIFIER(edge._from).key
+              FILTER cluster_key IN @default_clusters
+              LET cluster = DOCUMENT(edge._from)
+              FILTER cluster != null
+              RETURN {
+                vertex: cluster,
+                edge: edge,
+                path: null
+              }
+        )
+
+        RETURN {
+          depth1: APPEND(property_edges, cluster_edges),
+          limit_hit_depth1: LENGTH(matched_doc_ids) >= @document_limit OR LENGTH(seed_doc_ids) >= @candidate_scan_limit,
+          matched_ids: @queried_ids
+        }
+        """
+
+        bind_vars = {
+            "candidate_scan_limit": self._graph_and_candidate_scan_limit(document_limit),
+            "default_clusters": list(self.CLUSTER_LABELS.keys()),
+            "document_limit": document_limit,
+            "property_groups": conjunctive_groups["property_groups"],
+            "queried_ids": conjunctive_groups["queried_ids"],
+            "scope_cluster_id": scope_cluster,
+            "seed_probe_limit": min(document_limit * 20, 1000),
+        }
+        result_obj = await run_in_threadpool(lambda: list(self.__db.aql.execute(query_str, bind_vars=bind_vars)))
+        result_obj = result_obj[0] if result_obj else {}
+        results = self._dedupe_graph_results(result_obj.get("depth1", []) or [])
+        queried_ids = conjunctive_groups["queried_ids"]
+        return {
+            "results": results,
+            "limit_reached": bool(result_obj.get("limit_hit_depth1")),
+            "queried_id": queried_ids[0] if queried_ids else None,
+            "queried_ids": queried_ids,
+            "matched_vertex_ids": result_obj.get("matched_ids", []) or [],
+        }
+
     async def get_entity_relations_batch(self, query: EntityGraphBatchQueryModel):
         try:
             response_groups: list[dict[str, Any]] = []
@@ -1107,6 +1288,11 @@ class entity_manager:
             matched_vertex_ids: list[str] = []
             limit_reached = False
             request_items = self._graph_batch_items(query.requests or [query], query)
+            document_limit = self._graph_document_limit(query.edge)
+
+            conjunctive_response = await self._get_conjunctive_property_relations(request_items, query, document_limit)
+            if conjunctive_response is not None:
+                return conjunctive_response
 
             for item in request_items:
                 group_result_sets: list[list[dict[str, Any]]] = []
@@ -1137,7 +1323,7 @@ class entity_manager:
             merged_results = self._merge_graph_result_groups(response_groups)
             limited_results = self._limit_graph_results_by_documents(
                 merged_results,
-                self._graph_document_limit(query.edge),
+                document_limit,
             )
             return {
                 "results": limited_results,
