@@ -75,7 +75,6 @@ export class GraphComponent implements OnInit, OnDestroy {
   private highlightedNodeId: string | null = null;
   private physicsTimeoutId: any = null;
   private readonly minZoomScale = 0.35;
-  private readonly graphBuilderCandidateLimit = 800;
   private minZoomLockPosition: { x: number; y: number; } | null = null;
   private readonly originalNodeState = new Map<string, NodeVisualState>();
   private readonly clusterNodePrefix = 'cti_vertices/';
@@ -798,9 +797,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     this.loading = false;
     this.resetGraph();
-    const candidateLimit = requests.length > 1 ? this.graphBuilderCandidateLimit : Number(this.maxEdge);
     const calls = requests.map(request => this.api.get<{ results: GraphResultItem[]; }>('graph', {
-      params: this.buildGraphHttpParams(request.dataPointType, request.modelType, request.queryValue, '', candidateLimit)
+      params: this.buildGraphHttpParams(request.dataPointType, request.modelType, request.queryValue)
     }));
     forkJoin(calls).subscribe({
       next: responses => {

@@ -465,81 +465,27 @@ class EntityRequestGenerator:
             }
 
         query_str = f"""
-        LET depth1_nodes = (
-          FOR v, e, p IN {depth_level}..{depth_level} ANY @start_vertex GRAPH 'cti_graph'
-            OPTIONS {{ bfs: true, uniqueVertices: "global" }}
+        LET start_property = DOCUMENT(@start_vertex)
+
+        LET doc_nodes = (
+          FOR e IN cti_edges
+            FILTER e._to == @start_vertex AND STARTS_WITH(e.type, "has_")
+            LIMIT {document_limit}
+            LET doc = DOCUMENT(e._from)
+            FILTER doc != null AND doc.type == "document"
             RETURN {{
-              vertex: v,
+              vertex: KEEP(doc, "_id", "_key", "_rev", "type", "node_class", "doc_id", "m_document_id", "cluster_id", "module", "label", "display_value", "title", "summary", "published", "source", "source_reliability"),
               edge: e,
-              path: p
+              path: {{
+                vertices: [start_property, doc],
+                edges: [e]
+              }}
             }}
         )
 
-        LET depth2_nodes = (
-          FOR v, e, p IN {secondary_depth_level}..{secondary_depth_level} ANY @start_vertex GRAPH 'cti_graph'
-            OPTIONS {{ bfs: true, uniqueVertices: "global" }}
-            FILTER v.type == "cluster"
-            RETURN {{
-              vertex: v,
-              edge: e,
-              path: p
-            }}
-        )
-
-        LET raw_depth1 = APPEND(depth1_nodes, depth2_nodes)
-
-        LET property_ids = UNIQUE(
-          FOR item IN raw_depth1
-            FILTER item.vertex.type NOT IN ['document', 'cluster']
-            LET property_key = SPLIT(PARSE_IDENTIFIER(item.vertex._id).key, ":")[0]
-            FILTER property_key IN @strong_related_property_types
+        LET document_ids = UNIQUE(
+          FOR item IN doc_nodes
             RETURN item.vertex._id
-        )
-
-        LET raw_per_property_document_limit = LENGTH(property_ids) == 0 ? 0 : FLOOR({document_limit} / LENGTH(property_ids))
-        LET per_property_document_limit = raw_per_property_document_limit < 1 ? 1 : raw_per_property_document_limit
-
-        LET related_doc_candidates = (
-          FOR pid IN property_ids
-            LET docs_for_property = (
-              FOR e IN cti_edges
-                FILTER e._to == pid AND STARTS_WITH(e.type, "has_")
-                FILTER e._from != @start_vertex
-                COLLECT doc_id = e._from WITH COUNT INTO score
-                SORT score DESC
-                RETURN doc_id
-            )
-            RETURN SLICE(docs_for_property, 0, per_property_document_limit)
-        )
-
-        LET doc_counts = UNIQUE(FLATTEN(related_doc_candidates))
-
-        LET related_docs = (
-          FOR doc_id IN doc_counts
-            FOR e IN cti_edges
-              FILTER e._from == doc_id AND STARTS_WITH(e.type, "has_")
-              FILTER e._to IN property_ids
-              FOR doc IN cti_vertices
-                FILTER doc._id == doc_id AND doc.type == "document"
-                RETURN {{
-                  vertex: KEEP(doc, "_id", "_key", "_rev", "type", "node_class", "doc_id", "m_document_id", "cluster_id", "module", "label", "display_value", "title", "summary", "published", "source", "source_reliability"),
-                  edge: e,
-                  path: null
-                }}
-        )
-
-        LET related_doc_ids = (
-          FOR doc_id IN doc_counts
-            RETURN doc_id
-        )
-
-        LET document_ids = UNION(
-          UNIQUE(
-            FOR item IN raw_depth1
-              FILTER item.vertex.type == 'document'
-              RETURN item.vertex._id
-          ),
-          related_doc_ids
         )
 
         LET default_clusters = @default_clusters
@@ -558,20 +504,8 @@ class EntityRequestGenerator:
               }}
         )
 
-        LET start_doc_properties = (
-            FOR e IN cti_edges
-              FILTER e._from == @start_vertex AND STARTS_WITH(e.type, "has_")
-            FOR prop IN cti_vertices
-              FILTER prop._id == e._to
-              RETURN {{
-                vertex: prop,
-                edge: e,
-                path: null
-              }}
-        )
-
-        LET depth1 = APPEND(APPEND(APPEND(raw_depth1, cluster_edges), related_docs), start_doc_properties)
-        LET limit_hit_depth1 = LENGTH(related_docs) >= {document_limit}
+        LET depth1 = APPEND(doc_nodes, cluster_edges)
+        LET limit_hit_depth1 = LENGTH(doc_nodes) >= {document_limit}
 
         RETURN {{
           depth1,
@@ -582,7 +516,6 @@ class EntityRequestGenerator:
 
         bind_vars = {
             "default_clusters": list(DEFAULT_CLUSTER_KEYS),
-            "strong_related_property_types": list(EntityRequestGenerator.STRONG_RELATED_PROPERTY_KEYS),
             "start_vertex": start_vertex,
         }
         return queried_id, query_str, bind_vars

@@ -75,6 +75,17 @@ class elastic_controller:
 
         return value
 
+    @staticmethod
+    async def __put_mapping_safe(conn, index: str, properties: dict):
+        try:
+            await conn.indices.put_mapping(
+                index=index,
+                body={"properties": properties},
+                request_timeout=220,
+            )
+        except ApiError as ex:
+            log.g().w(f"Skipping mapping update for Elasticsearch index {index}: {str(ex)}")
+
     async def __initialize_mappings(self):
         try:
             mapping_leakdatamodel = ELASTIC_ENUMS.mapping_leakdatamodel
@@ -97,6 +108,12 @@ class elastic_controller:
                     index=ELASTIC_INDEX.S_LEAK_INDEX,
                     body={"index.blocks.read_only_allow_delete": False},
                     request_timeout=220)
+
+            await self.__put_mapping_safe(
+                self.__m_core_connection,
+                ELASTIC_INDEX.S_LEAK_INDEX,
+                {"m_domain": {"type": "keyword"}},
+            )
 
             if not await self.__m_core_connection.indices.exists(index=ELASTIC_INDEX.S_OPENSANCTIONS_INDEX, request_timeout=220):
                 await self.__m_core_connection.indices.create(
