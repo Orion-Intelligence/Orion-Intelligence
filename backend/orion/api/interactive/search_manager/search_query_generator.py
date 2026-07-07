@@ -25,16 +25,31 @@ class search_query_generator:
         domain = domain.split("/", 1)[0].split("?", 1)[0].split("#", 1)[0].split(":", 1)[0].strip(".")
 
         if "." not in domain or "@" in domain:
-            return {"term": {"domain.keyword": domain}}
+            return {
+                "term": {
+                    "domain.keyword": {
+                        "value": domain,
+                        "case_insensitive": True
+                    }
+                }
+            }
 
         return {
             "bool": {
                 "should": [
-                    {"term": {"domain.keyword": domain}},
+                    {
+                        "term": {
+                            "domain.keyword": {
+                                "value": domain,
+                                "case_insensitive": True
+                            }
+                        }
+                    },
                     {
                         "wildcard": {
                             "domain.keyword": {
                                 "value": f"*.{domain}",
+                                "case_insensitive": True,
                                 "rewrite": "constant_score"
                             }
                         }
@@ -80,6 +95,9 @@ class search_query_generator:
 
         fields = mapping.get(tag, [])
 
+        if is_stealer and tag == "m_search_all":
+            fields = list(dict.fromkeys(fields + ["raw"]))
+
         if tag in ("m_domain", "domain", "m_search_all", "all") and not is_stealer:
             merged = fields.copy()
             merged += mapping.get("source_domain", [])
@@ -96,6 +114,27 @@ class search_query_generator:
         def make_clause(field):
             if is_stealer and field == "domain.keyword" and tag in ("m_domain", "m_search_all"):
                 return search_query_generator._stealer_domain_clause(value)
+
+            if is_stealer and tag == "m_search_all" and field == "raw":
+                return {
+                    "bool": {
+                        "should": [
+                            {"match_phrase": {"raw": value}},
+                            {"match": {"raw": {"query": value, "operator": "AND"}}}
+                        ],
+                        "minimum_should_match": 1
+                    }
+                }
+
+            if is_stealer:
+                return {
+                    "term": {
+                        field: {
+                            "value": value,
+                            "case_insensitive": True
+                        }
+                    }
+                }
 
             return {"term": {field: value}}
 
@@ -483,7 +522,13 @@ class search_query_generator:
         must_not_clause = []
         index_set = set(base_index or [])
 
-        if index_set and index_set.issubset({ELASTIC_INDEX.S_EXPLOIT_INDEX, ELASTIC_INDEX.S_APT_INDEX, ELASTIC_INDEX.S_MALWARE_INDEX, ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_INDEX.S_LEAK_INDEX}):
+        if index_set and index_set.issubset({
+            ELASTIC_INDEX.S_EXPLOIT_INDEX,
+            ELASTIC_INDEX.S_APT_INDEX,
+            ELASTIC_INDEX.S_MALWARE_INDEX,
+            ELASTIC_INDEX.S_DEFACEMENT_INDEX,
+            ELASTIC_INDEX.S_LEAK_INDEX
+        }):
             date_priority_fields = ["m_date", "m_update_date", "m_creation_date"]
             date_boost_fields = [("m_date", 0), ("m_update_date", 0), ("m_creation_date", 0)]
         elif index_set and index_set.issubset({ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX}):
