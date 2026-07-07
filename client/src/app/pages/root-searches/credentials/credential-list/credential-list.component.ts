@@ -108,10 +108,6 @@ export class CredentialListComponent {
 
   private normalizeValues(value: any): string[] {
     const values = Array.isArray(value) ? value : [value];
-    return Array.from(new Set(
-      values
-        .map(v => v == null ? '' : String(v).trim())
-        .filter(Boolean)
-    ));
+    return Array.from(new Set(values.map(v => v == null ? '' : String(v).trim()).filter(Boolean)));
   }
 }
