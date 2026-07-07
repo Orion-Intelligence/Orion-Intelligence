@@ -98,19 +98,38 @@ class alert_job:
     async def run_all_categories(self):
         all_tenants = await self._tenant_manager.get_all_tenant()
         if not all_tenants:
-            return
+            return {
+                "status": "success",
+                "mail_status": "sent",
+                "message": "No tenants found for alert scan.",
+                "tenant_count": 0,
+                "processed_tenant_count": 0,
+                "skipped_tenant_count": 0,
+                "error_count": 0,
+                "mail_sent_count": 0,
+                "mail_failed_count": 0,
+            }
+
+        processed_tenant_count = 0
+        skipped_tenant_count = 0
+        error_count = 0
+        mail_sent_count = 0
+        mail_failed_count = 0
 
         for tenant in all_tenants:
             tenant_id = self._tenant_key(self._value(tenant, "id", ""))
             if self._value(tenant, "is_default", False):
+                skipped_tenant_count += 1
                 continue
 
             status = await self._alert_manager.getInstance().get_scan_status_by_tenant_id(tenant_id)
             if status.get("scan_running"):
+                skipped_tenant_count += 1
                 continue
 
             scan_summary = AlertSummaryHelper.new_scan_summary()
             scan_status = "success"
+            processed_tenant_count += 1
             await self._alert_manager.getInstance().set_scan_running(tenant_id, True)
             try:
                 for category in ALERT_CATEGORIES:
@@ -118,16 +137,41 @@ class alert_job:
                     AlertSummaryHelper.merge_scan_summary(scan_summary, category_summary)
             except Exception:
                 scan_status = "completed_with_errors"
+                error_count += 1
                 log.g().e(f"Alert category run failed for tenant={tenant_id}")
             finally:
                 self._cancellation_service.clear(tenant_id)
                 await self._alert_manager.getInstance().set_scan_running(tenant_id, False)
-                await self._alert_manager.send_scan_completed_mail(
+                mail_sent = await self._alert_manager.send_scan_completed_mail(
                     tenant_id=tenant_id,
                     scan_status=scan_status,
                     summary=scan_summary,
                     tenant=tenant,
                 )
+                if mail_sent:
+                    mail_sent_count += 1
+                else:
+                    mail_failed_count += 1
+
+        if mail_failed_count and mail_sent_count:
+            mail_status = "partial"
+        elif mail_failed_count:
+            mail_status = "failed"
+        else:
+            mail_status = "sent"
+
+        overall_status = "success" if error_count == 0 and mail_status == "sent" else "completed_with_errors"
+        return {
+            "status": overall_status,
+            "mail_status": mail_status,
+            "message": "Alert generation job finished.",
+            "tenant_count": len(all_tenants),
+            "processed_tenant_count": processed_tenant_count,
+            "skipped_tenant_count": skipped_tenant_count,
+            "error_count": error_count,
+            "mail_sent_count": mail_sent_count,
+            "mail_failed_count": mail_failed_count,
+        }
 
     def get_additional_result_keys(self, result: Any) -> list[tuple[str, Any]]:
         return ResultMetadataMapper.get_additional_result_keys(result)

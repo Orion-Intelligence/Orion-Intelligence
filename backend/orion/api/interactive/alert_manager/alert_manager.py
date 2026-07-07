@@ -139,7 +139,7 @@ class AlertManager:
         ioc_values = summary.get("ioc_values", []) if summary else []
         total_alerts = int(summary.get("total", 0) if summary else 0)
         if total_alerts <= 0:
-            return
+            return True
 
         module_rows = []
         for category, count in sorted(counts_by_category.items(), key=lambda item: item[0]):
@@ -161,7 +161,7 @@ class AlertManager:
         friendly_message = AlertMailMessage.SCAN_COMPLETED.value.format(count=total_alerts,alert_word=alert_word)
         subject = AlertMailSubject.SCAN_COMPLETED.value.format(count=total_alerts,alert_word=alert_word)
 
-        await self._send_alert_mail(tenant_id=tenant_id, current_user=current_user, subject=subject, email_title=AlertMailTitle.SCAN_COMPLETED.value, preheader=friendly_message,
+        return await self._send_alert_mail(tenant_id=tenant_id, current_user=current_user, subject=subject, email_title=AlertMailTitle.SCAN_COMPLETED.value, preheader=friendly_message,
             friendly_message=friendly_message, scan_status=self._display_alert_label(scan_status), total_alerts=total_alerts, module_rows=module_rows, ioc_rows=ioc_rows,
             action_url=self._alert_action_url())
 
