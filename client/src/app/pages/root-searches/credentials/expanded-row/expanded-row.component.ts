@@ -15,6 +15,7 @@ interface TelemetryGroup {
   standalone: true,
   imports: [NgClass, TitleCasePipe, TooltipDirective, TranslatePipe, ConfirmationPopupComponent],
   templateUrl: './expanded-row.component.html',
+  styleUrls: ['./expanded-row.component.scss'],
 })
 export class ExpandedRowComponent implements OnChanges, OnDestroy {
   private copiedTimer: any = null;
