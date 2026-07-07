@@ -47,6 +47,7 @@ class entity_manager:
     ENTITY_CLASS_BY_KEY = graph_enums.ENTITY_CLASS_BY_KEY
     EDGE_TYPE_BY_KEY = graph_enums.EDGE_TYPE_BY_KEY
     DEFAULT_HIDDEN_KEYS = graph_enums.DEFAULT_HIDDEN_KEYS
+    GRAPH_BATCH_LIST_KEYS = {"m_country", "m_origin_country"}
 
     @staticmethod
     def get_instance():
@@ -873,6 +874,57 @@ class entity_manager:
             values.append(cleaned)
         return values
 
+    @classmethod
+    def _merge_graph_query_values(cls, first: list[str], second: list[str]) -> list[str]:
+        values: list[str] = []
+        seen: set[str] = set()
+        for value in [*first, *second]:
+            cleaned = cls._clean_text(value)
+            normalized = cls._sanitize(cls._normalize_key(cleaned))
+            if not cleaned or normalized in seen:
+                continue
+            seen.add(normalized)
+            values.append(cleaned)
+        return values
+
+    @classmethod
+    def _graph_batch_items(cls, request_items: list[Any], query: EntityGraphBatchQueryModel) -> list[dict[str, Any]]:
+        normalized_items: list[dict[str, Any]] = []
+        list_item_indexes: dict[tuple[str, str, str], int] = {}
+
+        for item in request_items:
+            data_point_type = getattr(item, "data_point_type", query.data_point_type)
+            model_type = getattr(item, "model_type", query.model_type)
+            scope_cluster = getattr(item, "scope_cluster", "") or query.scope_cluster
+            values = cls._graph_query_values(
+                getattr(item, "query_values", []),
+                getattr(item, "query_value", ""),
+            )
+            if not values:
+                continue
+
+            operator = getattr(item, "operator", "||")
+            normalized_item = {
+                "data_point_type": data_point_type,
+                "model_type": model_type,
+                "query_values": values,
+                "operator": operator if operator in {"&&", "||"} else "||",
+                "scope_cluster": scope_cluster,
+            }
+
+            if data_point_type == "property" and model_type in cls.GRAPH_BATCH_LIST_KEYS:
+                list_key = (data_point_type, model_type, scope_cluster)
+                existing_index = list_item_indexes.get(list_key)
+                if existing_index is not None:
+                    existing = normalized_items[existing_index]
+                    existing["query_values"] = cls._merge_graph_query_values(existing["query_values"], values)
+                    continue
+                list_item_indexes[list_key] = len(normalized_items)
+
+            normalized_items.append(normalized_item)
+
+        return normalized_items
+
     @staticmethod
     def _graph_document_limit(edge: Any) -> int:
         try:
@@ -1016,25 +1068,18 @@ class entity_manager:
             queried_ids: list[str] = []
             matched_vertex_ids: list[str] = []
             limit_reached = False
-            request_items = query.requests or [query]
+            request_items = self._graph_batch_items(query.requests or [query], query)
 
             for item in request_items:
-                values = self._graph_query_values(
-                    getattr(item, "query_values", []),
-                    getattr(item, "query_value", ""),
-                )
-                if not values:
-                    continue
-
                 group_results: list[dict[str, Any]] = []
-                for value in values:
+                for value in item["query_values"]:
                     relation_query = EntityQueryModel(
-                        data_point_type=getattr(item, "data_point_type", query.data_point_type),
-                        model_type=getattr(item, "model_type", query.model_type),
+                        data_point_type=item["data_point_type"],
+                        model_type=item["model_type"],
                         query_value=value,
                         edge=query.edge,
                         depth=query.depth,
-                        scope_cluster=getattr(item, "scope_cluster", "") or query.scope_cluster,
+                        scope_cluster=item["scope_cluster"],
                     )
                     response = await self.get_entity_relations(relation_query)
                     group_results.extend(response.get("results") or [])
@@ -1047,7 +1092,7 @@ class entity_manager:
                             matched_vertex_ids.append(matched_id)
 
                 response_groups.append({
-                    "operator": getattr(item, "operator", "||") if getattr(item, "operator", "||") in {"&&", "||"} else "||",
+                    "operator": item["operator"],
                     "results": self._dedupe_graph_results(group_results),
                 })
 

@@ -463,9 +463,9 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   submitGraphSearchBuilder(): void {
-    const requests = this.graphAdvancedFilters
+    const requests = this.groupGraphBuilderListRequests(this.graphAdvancedFilters
       .map((filter, index) => this.buildGraphSearchRequest(this.getGraphAdvancedOption(filter.optionKey), filter.value.trim(), index === 0 ? undefined : filter.operator))
-      .filter((request): request is GraphSearchRequest => !!request);
+      .filter((request): request is GraphSearchRequest => !!request));
 
     if (requests.length === 0) {
       return;
@@ -515,6 +515,48 @@ export class GraphComponent implements OnInit, OnDestroy {
       return splitCountryValues(trimmedValue);
     }
     return [trimmedValue];
+  }
+
+  private groupGraphBuilderListRequests(requests: GraphSearchRequest[]): GraphSearchRequest[] {
+    const groupedRequests: GraphSearchRequest[] = [];
+    const listRequestIndexes = new Map<string, number>();
+
+    requests.forEach(request => {
+      if (request.dataPointType !== 'property' || !this.isGraphBuilderListKey(request.modelType)) {
+        groupedRequests.push(request);
+        return;
+      }
+
+      const existingIndex = listRequestIndexes.get(request.modelType);
+      if (existingIndex === undefined) {
+        listRequestIndexes.set(request.modelType, groupedRequests.length);
+        groupedRequests.push({ ...request, queryValues: [...request.queryValues] });
+        return;
+      }
+
+      groupedRequests[existingIndex].queryValues = this.mergeGraphBuilderQueryValues(groupedRequests[existingIndex].queryValues, request.queryValues);
+    });
+
+    return groupedRequests;
+  }
+
+  private isGraphBuilderListKey(modelType: string): boolean {
+    return modelType === 'm_country' || modelType === 'm_origin_country';
+  }
+
+  private mergeGraphBuilderQueryValues(first: string[], second: string[]): string[] {
+    const values: string[] = [];
+    const seen = new Set<string>();
+    [...first, ...second].forEach(value => {
+      const trimmedValue = value.trim();
+      const normalizedValue = trimmedValue.toLowerCase();
+      if (!trimmedValue || seen.has(normalizedValue)) {
+        return;
+      }
+      seen.add(normalizedValue);
+      values.push(trimmedValue);
+    });
+    return values;
   }
 
   openReportExportModal(): void {
