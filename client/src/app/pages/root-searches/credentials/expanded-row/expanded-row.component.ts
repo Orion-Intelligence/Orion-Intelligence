@@ -45,8 +45,10 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['mode'] || changes['item'] || changes['result'] || changes['index']) {
+    if (changes['mode'] || changes['item'] || changes['result']) {
       this.activeTelemetryKey = null;
+    }
+    if (changes['mode'] || changes['item'] || changes['result'] || changes['index']) {
       this.copiedKey = null;
       if (this.copiedTimer) {
         clearTimeout(this.copiedTimer);
@@ -96,10 +98,6 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     const index = this.index();
     const n = Number.isFinite(index) ? index + 1 : 1;
     return String(n);
-  }
-
-  get rowTypeLabel(): string {
-    return this.mode() === 'stealer' ? 'Stealer Log' : 'Threats';
   }
 
   get channelValue(): string {
@@ -185,7 +183,6 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       return;
     }
     if (this.visiblePasswordKeys.has(key)) {
-      this.visiblePasswordKeys.delete(key);
       return;
     }
     if (!this.passwordRevealConfirmed) {
@@ -204,7 +201,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     if (!value || value === '-') {
       return 'No password';
     }
-    return this.isPasswordVisible(key) ? 'Hide password' : 'Show password';
+    return this.isPasswordVisible(key) ? 'Password revealed' : 'Show password';
   }
 
   isPasswordGroup(group: TelemetryGroup): boolean {
@@ -266,19 +263,8 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     }
   }
 
-  selectTelemetry(key: string, e?: MouseEvent) {
-    if (e) {
-      e.stopPropagation();
-    }
-    this.activeTelemetryKey = this.activeTelemetryKey === key ? null : key;
-  }
-
   get telemetryGroups(): TelemetryGroup[] {
     return this.telemetryGroupsCache;
-  }
-
-  get telemetryCount(): number {
-    return this.telemetryGroups.reduce((acc, g) => acc + (g.values?.length || 0), 0);
   }
 
   get activeTelemetryGroup(): TelemetryGroup | null {
@@ -286,6 +272,13 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       return null;
     }
     return this.telemetryGroups.find(g => g.key === this.activeTelemetryKey) || null;
+  }
+
+  selectTelemetry(key: string, e?: MouseEvent) {
+    if (e) {
+      e.stopPropagation();
+    }
+    this.activeTelemetryKey = key;
   }
 
   telemetryIcon(key: string): string {
@@ -358,44 +351,6 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     }, e);
   }
 
-  copyAll(e?: MouseEvent) {
-    const payload = this.getReportPayload(e);
-    if (!payload) {
-      return;
-    }
-    this.rowHelper.copyToClipboard(payload).subscribe((ok) => {
-      if (!ok) {
-        return;
-      }
-      this.copiedTimer = this.rowHelper.setCopiedState('copy-all', this.copiedTimer, (value) => {
-        this.copiedKey = value;
-      });
-    });
-  }
-
-  downloadReport(e?: MouseEvent) {
-    const payload = this.getReportPayload(e);
-    if (!payload) {
-      return;
-    }
-    const blob = new Blob([payload], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const year = this.yearValue && this.yearValue !== '-' ? this.yearValue : 'report';
-    const idx = this.indexValue || '1';
-    a.href = url;
-    a.download = `${year}_${idx}_${this.rowTypeLabel.replace(/\s+/g, '_').toLowerCase()}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-    }, 1500);
-    this.copiedTimer = this.rowHelper.setCopiedState('download', this.copiedTimer, (value) => {
-      this.copiedKey = value;
-    });
-  }
-
   isCopied(key: string): boolean {
     return this.rowHelper.isCopied(this.copiedKey, key);
   }
@@ -405,65 +360,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       ? this.buildStealerGroups(this.item())
       : this.buildThreatGroups(this.result());
     const domainKey = this.mode() === 'stealer' ? 'domain' : 'm_domain';
-    this.activeTelemetryKey = this.telemetryGroupsCache.find(g => g.key === domainKey)?.key || null;
-  }
-
-  private getReportPayload(e?: MouseEvent): string | null {
-    if (e) {
-      e.stopPropagation();
-    }
-    const payload = this.buildReportText();
-    return payload.trim() ? payload : null;
-  }
-
-  private buildReportText(): string {
-    const lines: string[] = [];
-    lines.push(`Type: ${this.rowTypeLabel}`);
-    lines.push(`Index: ${this.indexValue}`);
-    lines.push(`Channel: ${this.channelValue}`);
-    lines.push(`Year: ${this.yearValue}`);
-    lines.push(`File Type: ${this.fileTypeValue}`);
-    lines.push('');
-    const mode = this.mode();
-    const result = this.result();
-    if (mode === 'stealer') {
-      const email = this.item()?.['email']?.[0] || '-';
-      const domain = this.domainValueText;
-      const ip = this.item()?.['ip']?.[0] || '-';
-      const password = this.passwordValue;
-      lines.push('Identity Intelligence');
-      lines.push(`Email: ${email}`);
-      lines.push(`Domain: ${domain}`);
-      lines.push(`IP: ${ip}`);
-      lines.push(`Password: ${password}`);
-      lines.push('');
-    }
-    else {
-      lines.push('Indicator Details');
-      lines.push(`ID: RANK-${this.indexValue}`);
-      lines.push(`Credential: ${result?.rank_index || '-'}`);
-      lines.push(`IOC: ${result?.m_url || '-'}`);
-      lines.push(`Description: ${result?.m_important_content || '-'}`);
-      lines.push('');
-    }
-    lines.push(`Metadata Telemetry Array (${this.telemetryCount})`);
-    for (const g of this.telemetryGroups) {
-      if (!g?.values?.length) {
-        continue;
-      }
-      lines.push(`- ${g.label} (${g.values.length})`);
-      for (const v of g.values) {
-        lines.push(`  • ${v}`);
-      }
-    }
-    lines.push('');
-    const raw = mode === 'stealer' ? this.item()?.['raw'] : result?.['raw'];
-    if (raw != null) {
-      lines.push('Raw Trace Buffer');
-      lines.push(String(raw));
-      lines.push('');
-    }
-    return lines.join('\n');
+    this.activeTelemetryKey = this.telemetryGroupsCache.find(g => g.key === domainKey)?.key || this.telemetryGroupsCache[0]?.key || null;
   }
 
   private buildStealerGroups(item: any): TelemetryGroup[] {
