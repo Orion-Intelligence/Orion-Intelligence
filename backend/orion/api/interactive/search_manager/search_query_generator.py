@@ -27,53 +27,46 @@ class search_query_generator:
                 if len(must_clauses) == 1:
                     return must_clauses[0]
                 return {"bool": {"must": must_clauses}}
-
             if "OR" in parsed:
                 should_clauses = [search_query_generator.build_es_from_tagged(x, mapping)
                                   for x in parsed["OR"]]
                 if len(should_clauses) == 1:
                     return should_clauses[0]
                 return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
-
         if isinstance(parsed, list):
             should_clauses = [search_query_generator.build_es_from_tagged(x, mapping)
                               for x in parsed]
             if len(should_clauses) == 1:
                 return should_clauses[0]
             return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
-
         tag = str(parsed.get("tag") or "").strip().lower()
         value = parsed.get("value")
         fields = mapping.get(tag, [])
-
         if tag in ("m_domain", "domain", "m_search_all", "all"):
             merged = fields.copy()
             merged += mapping.get("source_domain", [])
             merged += mapping.get("m_source_domain", [])
-            merged += ["source_domain", "source_domain"]
+            merged += ["source_domain", "m_source_domain", "source_domain.keyword", "m_source_domain.keyword"]
             fields = list(dict.fromkeys([f for f in merged if f]))
-
             if tag in ("m_search_all", "all") and allowed_key_titles:
                 fields = list(dict.fromkeys(fields + list(allowed_key_titles.keys())))
-
         if not fields:
             return {"match_none": {}}
-
-        should = [{"term": {f: {"value": value, "case_insensitive": True}}} for f in fields]
-
-        if tag in ("m_domain", "domain", "m_search_all", "all") and isinstance(value, str) and "." in value and "/" not in value and "@" not in value:
-            wildcard_value = value.strip().lower().lstrip("*.").strip(".")
-            domain_wildcard_fields = {"domain", "domain.keyword", "source_domain", "source_domain.keyword"}
-            should.extend(
-                {"wildcard": {f: {"value": f"*.{wildcard_value}", "case_insensitive": True, "rewrite": "constant_score"}}}
-                for f in fields
-                if f in domain_wildcard_fields
-            )
-
-        if len(should) == 1:
-            return should[0]
-        return {"bool": {"should": should, "minimum_should_match": 1}}
-
+        if tag in ("m_domain", "domain") and isinstance(value, str):
+            val = str(value).strip().lower()
+            should_clauses = []
+            for field in fields:
+                should_clauses.append({"term": {field: {"value": val, "case_insensitive": True}}})
+                if "." in val:
+                    should_clauses.append({"wildcard": {field: {"value": f"*.{val}", "case_insensitive": True}}})
+            if len(should_clauses) > 1:
+                return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
+            return should_clauses[0] if should_clauses else {"match_none": {}}
+        if len(fields) == 1:
+            return {"term": {fields[0]: {"value": value, "case_insensitive": True}}}
+        return {"bool": {"should": [{"term": {f: {"value": value, "case_insensitive": True}}} for f in fields],
+                         "minimum_should_match": 1}}
+    
     @staticmethod
     def build_ioc_filter_clauses(pfilter):
         must_filters = []
