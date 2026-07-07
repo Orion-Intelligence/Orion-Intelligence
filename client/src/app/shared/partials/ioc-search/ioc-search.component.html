@@ -66,46 +66,81 @@
   }
 
   @if (isAdvanced) {
-    <div class="space-y-2.5" @fadeInDashboardItem>
-      @for (filter of advancedFilters; track filter.id; let i = $index) {
-        <div data-testid="ioc-adv-row" @advancedRowMotion class="ui-ioc-adv-row grid items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] md:grid-cols-[110px_1fr_2fr_auto]">
-          <div class="text-xs font-semibold text-[var(--color-text4)]">
-            <div class="relative">
-              <select data-testid="ioc-adv-operator-select" class="ui-ioc-adv-control h-11 w-full appearance-none rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 pr-11 text-xs font-semibold text-[var(--color-text1)] outline-none transition-colors focus:border-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-75" [disabled]="i === 0" [ngModel]="i === 0 ? '__where__' : advancedFilters[i-1].operator" (ngModelChange)="i > 0 ? (advancedFilters[i-1].operator = $event) : null">
-                <option value="__where__">WHERE</option>
-                <option value="&&">{{ 'AND' | translate }}</option>
-                <option value="||">{{ 'OR' | translate }}</option>
-              </select>
-              <i class="bi bi-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-text4)]"></i>
+    <div class="flex min-h-[74px] w-full flex-col gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 md:flex-row md:items-end" @fadeInDashboardItem>
+      <div class="min-w-0 flex-1 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div class="flex min-w-max items-center gap-2 whitespace-nowrap">
+          @for (chip of getAdvancedFilterChips(); track chip.id) {
+            <span data-testid="ioc-adv-filter-chip" class="inline-flex h-8 max-w-[280px] shrink-0 items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 text-xs font-semibold text-[var(--color-text2)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+              <span class="truncate">{{ chip.label }}</span>
+            </span>
+          } @empty {
+            <div data-testid="ioc-adv-empty-state" class="min-w-[260px] whitespace-normal py-1">
+              <div class="text-xs font-semibold text-[var(--color-text2)]">{{ 'No builder values selected' | translate }}</div>
             </div>
-          </div>
-          <div class="relative">
-            <select data-testid="ioc-adv-tag-select" [(ngModel)]="filter.tag" class="ui-ioc-adv-control h-11 w-full appearance-none rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 pr-11 text-xs font-semibold text-[var(--color-text1)] outline-none transition-colors focus:border-[var(--color-blue-640)]">
-              @for (tag of filterLabels() | keyvalue; track tag.key) {
-                <option [value]="tag.key">{{ tag.value }}</option>
-              }
-            </select>
-            <i class="bi bi-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-text4)]"></i>
-          </div>
-          <input data-testid="ioc-adv-value-input" [(ngModel)]="filter.value" (ngModelChange)="filter.value = stripUrlPrefixes($event)" type="text" [placeholder]="'Enter value...' | translate" class="ui-ioc-adv-control h-11 w-full rounded-lg border bg-[var(--color-blue-720)] px-3 text-[13px] font-medium text-[var(--color-text1)] placeholder:text-[var(--color-text4)] outline-none transition-colors focus:border-[var(--color-blue-640)]" [ngClass]="isAdvancedInvalid(filter) ? 'border-[var(--color-border-red)]' : 'border-[var(--color-border)]'" />
-          <div class="flex items-center gap-2">
-            <button data-testid="ioc-adv-delete-filter" (click)="removeFilter(filter.id)" [disabled]="advancedFilters.length === 1" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-45">
-              <img alt="delete filter" src="assets/images/shared/theme/bin.svg" class="h-4 w-4 ui-action-icon">
-            </button>
-            @if (i === advancedFilters.length - 1 && advancedFilters.length < maxAdvancedFilters()) {
-              <button data-testid="ioc-adv-add-filter" (click)="addFilter()" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:-translate-y-[1px]">
-                <img alt="add filter" src="assets/images/shared/theme/plus.svg" class="h-4 w-4 ui-action-icon">
-              </button>
-            }
-          </div>
+          }
         </div>
-      }
-      <div class="flex justify-end">
-        <button data-testid="ioc-adv-execute" (click)="triggerSearch()" class="inline-flex items-center gap-2 rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-xs font-semibold text-white">
-          <img alt="Search" src="assets/images/shared/theme/magnifyingglasswhite.svg" class="h-4 w-4">
-          {{ 'Execute' | translate }}
+      </div>
+      <div class="flex shrink-0 items-center justify-end gap-2">
+        <button data-testid="ioc-adv-clear-all" type="button" (click)="clearAdvancedBuilder()" [disabled]="!hasAdvancedBuilderState()" class="inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 text-xs font-semibold text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-45">
+          <i class="bi bi-x-circle text-[13px]"></i>
+          {{ 'Clear all' | translate }}
+        </button>
+        <button data-testid="ioc-adv-expand" type="button" (click)="openAdvancedBuilder()" class="inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 text-xs font-semibold text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
+          <i class="bi bi-arrows-angle-expand text-[13px]"></i>
+          {{ 'Show filters' | translate }}
         </button>
       </div>
     </div>
   }
 </div>
+
+@if (isAdvancedBuilderExpanded) {
+  <div data-testid="ioc-adv-expanded-overlay" class="ui-graph-popup-overlay fixed inset-0 flex items-start justify-center p-4 pt-[10vh]" @popupAnimation data-role="backdrop" (click)="onAdvancedBuilderBackdrop($event)">
+    <section data-testid="ioc-adv-expanded-modal" role="dialog" aria-modal="true" class="ui-graph-popup-panel ui-popup-shell flex max-h-[calc(90dvh-32px)] w-[min(1180px,calc(100vw-32px))] flex-col overflow-hidden rounded-xl" (click)="$event.stopPropagation()">
+      <div class="ui-popup-header flex items-center justify-between gap-3 px-4 py-3">
+        <div class="min-w-0">
+          <h3 class="ui-popup-title truncate text-sm font-semibold">{{ advancedTitle() | translate }}</h3>
+          <p class="ui-popup-subtitle truncate text-xs">{{ advancedSubtitle() | translate }}</p>
+        </div>
+        <button data-testid="ioc-adv-expanded-close" type="button" (click)="closeAdvancedBuilder()" class="ui-popup-close inline-flex shrink-0 items-center justify-center text-[20px]" [attr.aria-label]="'common.actions.close' | translate">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-1 overflow-y-auto px-4 py-3 [scrollbar-gutter:stable]">
+        @for (filter of advancedFilters; track filter.id; let i = $index) {
+          <div data-testid="ioc-adv-row" @advancedRowMotion class="grid items-center gap-0 py-1 md:grid-cols-[110px_1fr_2fr_auto]">
+            <select data-testid="ioc-adv-operator-select" class="h-10 w-full rounded-r-none border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 pr-11 text-xs font-semibold text-[var(--color-text1)] outline-none transition-colors focus:border-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-75" [disabled]="i === 0" [ngModel]="i === 0 ? '__where__' : advancedFilters[i-1].operator" (ngModelChange)="i > 0 ? (advancedFilters[i-1].operator = $event) : null">
+              <option value="__where__">WHERE</option>
+              <option value="&&">{{ 'AND' | translate }}</option>
+              <option value="||">{{ 'OR' | translate }}</option>
+            </select>
+            <select data-testid="ioc-adv-tag-select" [(ngModel)]="filter.tag" class="-ml-px h-10 w-full rounded-none border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 pr-11 text-xs font-semibold text-[var(--color-text1)] outline-none transition-colors focus:border-[var(--color-blue-640)]">
+              @for (tag of filterLabels() | keyvalue; track tag.key) {
+                <option [value]="tag.key">{{ tag.value }}</option>
+              }
+            </select>
+            <input data-testid="ioc-adv-value-input" [(ngModel)]="filter.value" (ngModelChange)="filter.value = stripUrlPrefixes($event)" type="text" [placeholder]="'Enter value...' | translate" class="-ml-px h-10 w-full rounded-none border bg-[var(--color-blue-720)] px-3 text-xs font-medium text-[var(--color-text1)] placeholder:text-[var(--color-text4)] outline-none transition-colors focus:border-[var(--color-blue-640)]" [ngClass]="isAdvancedInvalid(filter) ? 'border-[var(--color-border-red)]' : 'border-[var(--color-border)]'" />
+            <div class="-ml-px flex items-center gap-0">
+              <button data-testid="ioc-adv-delete-filter" type="button" (click)="removeFilter(filter.id)" [disabled]="advancedFilters.length === 1" class="inline-flex h-10 w-10 items-center justify-center rounded-none border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] disabled:cursor-not-allowed disabled:opacity-45">
+                <i class="bi bi-trash3 text-[14px]"></i>
+              </button>
+              @if (i === advancedFilters.length - 1 && advancedFilters.length < maxAdvancedFilters()) {
+                <button data-testid="ioc-adv-add-filter" type="button" (click)="addFilter()" class="-ml-px inline-flex h-10 w-10 items-center justify-center rounded-r-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]">
+                  <i class="bi bi-plus-lg text-[14px]"></i>
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="ui-popup-footer flex justify-end px-4 py-3">
+        <button data-testid="ioc-adv-execute" type="button" (click)="executeAdvancedBuilder()" class="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--color-blue-640)] px-3 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+          <i class="bi bi-search text-[13px]"></i>
+          {{ 'Search' | translate }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

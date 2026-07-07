@@ -19,6 +19,32 @@ DATE_END_UTC_FORMAT = "%Y-%m-%dT23:59:59+00:00"
 
 class search_query_generator:
     @staticmethod
+    def _stealer_domain_clause(value):
+        domain = str(value or "").strip().lower()
+        domain = re.sub(r"^[a-z][a-z0-9+.-]*://", "", domain)
+        domain = domain.split("/", 1)[0].split("?", 1)[0].split("#", 1)[0].split(":", 1)[0].strip(".")
+
+        if "." not in domain or "@" in domain:
+            return {"term": {"domain.keyword": domain}}
+
+        return {
+            "bool": {
+                "should": [
+                    {"term": {"domain.keyword": domain}},
+                    {
+                        "wildcard": {
+                            "domain.keyword": {
+                                "value": f"*.{domain}",
+                                "rewrite": "constant_score"
+                            }
+                        }
+                    }
+                ],
+                "minimum_should_match": 1
+            }
+        }
+
+    @staticmethod
     def build_es_from_tagged(parsed, mapping):
         if isinstance(parsed, dict):
             if "AND" in parsed:
@@ -44,9 +70,17 @@ class search_query_generator:
 
         tag = parsed.get("tag")
         value = parsed.get("value")
+
+        is_stealer = mapping == ELASTIC_ENUMS.mapping_stealer_log_field
+
+        if is_stealer and tag == "domain":
+            tag = "m_domain"
+        elif is_stealer and tag == "all":
+            tag = "m_search_all"
+
         fields = mapping.get(tag, [])
 
-        if tag in ("m_domain", "domain", "m_search_all", "all"):
+        if tag in ("m_domain", "domain", "m_search_all", "all") and not is_stealer:
             merged = fields.copy()
             merged += mapping.get("source_domain", [])
             merged += mapping.get("m_source_domain", [])
@@ -59,9 +93,15 @@ class search_query_generator:
         if not fields:
             return {"match_none": {}}
 
+        def make_clause(field):
+            if is_stealer and field == "domain.keyword" and tag in ("m_domain", "m_search_all"):
+                return search_query_generator._stealer_domain_clause(value)
+
+            return {"term": {field: value}}
+
         if len(fields) == 1:
-            return {"term": {fields[0]: value}}
-        return {"bool": {"should": [{"term": {f: value}} for f in fields], "minimum_should_match": 1}}
+            return make_clause(fields[0])
+        return {"bool": {"should": [make_clause(f) for f in fields], "minimum_should_match": 1}}
 
     @staticmethod
     def build_ioc_filter_clauses(pfilter):
@@ -373,6 +413,7 @@ class search_query_generator:
         }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
+
     @staticmethod
     def build_date_priority_filter(from_date, to_date, priority_field_names):
         formatted_ranges = {
@@ -409,7 +450,7 @@ class search_query_generator:
             }
         }
 
-    def on_search_consolidated_ranked_data(self, p_query_model: search_consolidated_param_model, pfilter, base_index, blocked_categories, allowed_categories,search_type=""):
+    def on_search_consolidated_ranked_data(self, p_query_model: search_consolidated_param_model, pfilter, base_index, blocked_categories, allowed_categories, search_type=""):
         if p_query_model.matchtype and p_query_model.q:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 
@@ -499,7 +540,8 @@ class search_query_generator:
                 {"bool": {"should": [
                     *([] if m_ctype == "swarm" else [{"bool": {"must_not": {"exists": {"field": "m_content_type"}}}}]),
                     {"bool": {"filter": [{"exists": {"field": "m_content_type"}},
-                        {"terms": {"m_content_type": [m_ctype]}}]}}], "minimum_should_match": 1}})
+                                          {"terms": {"m_content_type": [m_ctype]}}]}}
+                ], "minimum_should_match": 1}})
 
         if blocked_categories:
             must_not_clause.append({"terms": {"m_content_type": blocked_categories}})
@@ -557,8 +599,8 @@ class search_query_generator:
         quoted_value = bool(phrases) and (p_query_model.q or "").strip().startswith('"') and (
                 p_query_model.q or "").strip().endswith('"')
         exact_phrases = phrases
-        if search_type=="defacement":
-            loose_terms=[]
+        if search_type == "defacement":
+            loose_terms = []
         else:
             loose_terms = [] if raw_query in ("*", "") else [t for t in re.findall(r'\w+', raw_query) if t and t.strip('"')]
         phrase_fields = [("m_title", 5), ("m_content", 3), ("m_url", 2), ("m_source_url", 2), ("m_sender_name", 2), ("m_author", 2), ("m_username", 2), ("m_base_url", 1),
@@ -580,7 +622,6 @@ class search_query_generator:
 
         unified_query["size"] = result_size
         unified_query["from"] = max(0, (m_page_number - 1) * result_size)
-
 
         if channel_q:
             qb = unified_query["query"]["function_score"]["query"].setdefault("bool", {"must": []})
@@ -665,8 +706,7 @@ class search_query_generator:
 
         es_query = {
             "bool": {
-                "must": [inner_query],
-                "filter": []
+                "filter": [] if is_match_all else [inner_query]
             }
         }
 
