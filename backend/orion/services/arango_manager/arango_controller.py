@@ -2,6 +2,7 @@ import asyncio
 
 from arango import ArangoClient
 
+from orion.constants.cti_graph_schema import CLUSTER_LABELS, GRAPH_SCHEMA_VERSION
 from orion.services.arango_manager.arango_enums import ARANGO_CONNECTIONS
 from orion.services.log_manager.log_controller import log
 
@@ -83,19 +84,56 @@ class arango_controller:
             else:
                 self.__graph = self.__db.graph("cti_graph")
 
-            vertex_collection = self.__graph.vertex_collection("cti_vertices")
+            vertex_collection = self.__db.collection("cti_vertices")
+            edge_collection = self.__db.collection("cti_edges")
             default_nodes = [
-                {"_key": "general", "type": "cluster", "label": "General"},
-                {"_key": "defacement", "type": "cluster", "label": "Defacement"},
-                {"_key": "exploit", "type": "cluster", "label": "exploit"},
-                {"_key": "leak", "type": "cluster", "label": "Leak"},
-                {"_key": "telegram", "type": "cluster", "label": "Telegram"},
-                {"_key": "social", "type": "cluster", "label": "Social"},
+                {
+                    "_key": key,
+                    "type": "cluster",
+                    "node_class": "cluster",
+                    "label": label,
+                    "display_value": label,
+                    "schema_version": GRAPH_SCHEMA_VERSION,
+                }
+                for key, label in CLUSTER_LABELS.items()
             ]
 
             for node in default_nodes:
                 if not vertex_collection.has(node["_key"]):
                     vertex_collection.insert(node)
+                else:
+                    vertex_collection.insert(node, overwrite=True)
+
+            for fields in [
+                ["type"],
+                ["node_class"],
+                ["entity_role"],
+                ["normalized_value"],
+                ["type", "normalized_value"],
+                ["doc_id"],
+                ["cluster_id"],
+                ["evidence_count"],
+                ["schema_version"],
+            ]:
+                try:
+                    vertex_collection.add_persistent_index(fields=fields)
+                except Exception as ex:
+                    log.g().w(f"ARANGO VERTEX INDEX INIT SKIPPED for {fields}: {ex}")
+
+            for fields in [
+                ["type"],
+                ["_from", "type"],
+                ["_to", "type"],
+                ["edge_type"],
+                ["entity_role"],
+                ["derived"],
+                ["evidence_count"],
+                ["schema_version"],
+            ]:
+                try:
+                    edge_collection.add_persistent_index(fields=fields)
+                except Exception as ex:
+                    log.g().w(f"ARANGO EDGE INDEX INIT SKIPPED for {fields}: {ex}")
 
         except Exception as ex:
             log.g().e(f"ARANGO GRAPH INIT ERROR: {ex}")

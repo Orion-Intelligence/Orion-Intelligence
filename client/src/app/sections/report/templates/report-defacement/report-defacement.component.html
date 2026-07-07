@@ -65,8 +65,8 @@
           </div>
           <p class="mt-1 text-[12px] text-[var(--color-text4)]">{{ 'Detected entities, extracted sections, and structured attributes.' | translate }}</p>
         </div>
-        <div [attr.aria-label]="(isExpandedMetadata ? 'Collapse' : 'Expand') | translate" class="mt-[2px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
-          <img [ngClass]="{ 'rotate-180': !isExpandedMetadata }" alt="toggle icon" class="h-[18px] w-[18px] transition ui-action-icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+        <div [attr.aria-label]="(isExpandedMetadata ? 'Collapse' : 'Expand') | translate" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-transparent transition-[border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:-translate-y-[1px]">
+          <img [ngClass]="{ 'rotate-180': !isExpandedMetadata }" alt="" aria-hidden="true" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="h-5 w-5 brightness-0 invert transition-transform duration-150">
         </div>
       </div>
       @if (isExpandedMetadata) {

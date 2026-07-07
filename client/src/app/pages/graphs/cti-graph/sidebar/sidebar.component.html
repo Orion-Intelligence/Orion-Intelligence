@@ -2,78 +2,103 @@
   <div class="absolute inset-0 z-30 bg-slate-950/60 backdrop-blur-sm [body.light-theme_&]:bg-[var(--color-blue-850)]/20 md:hidden" (click)="onMobileBackdropClick()"></div>
 }
 
-<aside class="relative z-40 h-full border-r border-slate-800 bg-slate-900/90 backdrop-blur-md transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-[var(--color-blue-820-light)]" [class.w-[300px]]="!isCollapsed" [class.min-w-[300px]]="!isCollapsed" [class.w-[70px]]="isCollapsed && !isMobile" [class.min-w-[70px]]="isCollapsed && !isMobile" [class.w-[68px]]="isCollapsed && isMobile" [class.min-w-[68px]]="isCollapsed && isMobile">
-  <app-graph-sidebar-shell [isCollapsed]="isCollapsed" (toggleClicked)="toggleCollapsed()">
-    <form sidebar-expanded class="h-full p-3 flex flex-col gap-3 overflow-y-auto">
-      <div class="rounded-lg border border-slate-700 bg-slate-800/50 p-3 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white/90 [body.light-theme_&]:shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
-        <label class="text-xs uppercase tracking-wider text-slate-500 [body.light-theme_&]:text-[var(--color-text2)]">{{ 'categoryAlerts.export.type' | translate }}</label>
-        <select data-testid="cti-filter-type-select" [(ngModel)]="selectedType" (ngModelChange)="onTypeChange($event)" name="selectedType" class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white [body.light-theme_&]:text-[var(--color-text1)]">
-          @for (type of graphTypeOptions; track type) {
-            <option [ngValue]="type">{{ type | titlecase }}</option>
+<aside class="dark-theme relative z-40 h-full border-r border-[#ffffff12] bg-[var(--color-blue-900)] transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]" [class.w-[280px]]="!isCollapsed" [class.min-w-[280px]]="!isCollapsed" [class.w-[70px]]="isCollapsed && !isMobile" [class.min-w-[70px]]="isCollapsed && !isMobile" [class.w-[68px]]="isCollapsed && isMobile" [class.min-w-[68px]]="isCollapsed && isMobile">
+  <app-graph-sidebar-shell [isCollapsed]="isCollapsed" [forceDarkLogo]="true" (toggleClicked)="toggleCollapsed()">
+    <div sidebar-expanded class="flex h-full flex-col gap-3 overflow-y-auto bg-[var(--color-blue-820-light)] p-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
+      <section class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3 shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
+        <div class="mb-2 flex items-center justify-between gap-2">
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text4)]">{{ 'Graph Size' | translate }}</h3>
+          <i class="bi bi-sliders2 text-sm text-[var(--color-blue-640)]"></i>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="block rounded-[7px] bg-[var(--color-blue-720)] px-2 py-1.5">
+            <span class="block text-[11px] text-[var(--color-text4)]">{{ 'Limit' | translate }}</span>
+            <input type="number" min="20" max="800" step="5" [ngModel]="localMaxEdge" (ngModelChange)="onMaxEdgeChange($event)" class="mt-1 h-8 w-full rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 text-sm font-semibold text-[var(--color-text1)] outline-none focus:border-[var(--color-blue-640)]" />
+          </label>
+          <label class="block rounded-[7px] bg-[var(--color-blue-720)] px-2 py-1.5">
+            <span class="block text-[11px] text-[var(--color-text4)]">{{ 'Depth' | translate }}</span>
+            <input type="number" min="1" max="5" step="1" [ngModel]="localMaxDepth" (ngModelChange)="onMaxDepthChange($event)" class="mt-1 h-8 w-full rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 text-sm font-semibold text-[var(--color-text1)] outline-none focus:border-[var(--color-blue-640)]" />
+          </label>
+        </div>
+        <button type="button" class="mt-2 inline-flex h-8 w-full items-center justify-center gap-2 rounded-[7px] bg-[var(--color-blue-640)] px-3 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]" (click)="applyGraphSize()">
+          <i class="bi bi-arrow-clockwise text-[13px]"></i>
+          {{ 'Apply' | translate }}
+        </button>
+      </section>
+
+      <div class="h-px bg-[var(--color-divider)]"></div>
+
+      <section class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3">
+        <div class="flex items-center justify-between gap-2 border-b border-[var(--color-border)] pb-2">
+          <div>
+            <p class="mb-0 text-xs uppercase tracking-wider text-[var(--color-text4)]">{{ 'Current View' | translate }}</p>
+            <h2 class="mt-1 text-sm font-semibold text-[var(--color-text1)]">{{ queryModeLabel | translate }}</h2>
+          </div>
+          <i class="bi bi-diagram-3 text-lg text-[var(--color-blue-640)]"></i>
+        </div>
+
+        <dl class="mt-3 space-y-2">
+          <div>
+            <dt class="text-[11px] uppercase tracking-wider text-[var(--color-text4)]">{{ 'Query' | translate }}</dt>
+            <dd class="mt-1 break-words text-sm font-semibold text-[var(--color-text2)]">{{ queryValueLabel }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="grid grid-cols-2 gap-2">
+        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3">
+          <p class="mb-1 text-[11px] uppercase tracking-wider text-[var(--color-text4)]">{{ 'Nodes' | translate }}</p>
+          <p class="mb-0 text-lg font-semibold text-[var(--color-text1)]">{{ stats()?.visibleNodes ?? 0 }}</p>
+          <p class="mb-0 text-[11px] text-[var(--color-text4)]">/ {{ stats()?.totalNodes ?? 0 }} {{ 'total' | translate }}</p>
+        </div>
+        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3">
+          <p class="mb-1 text-[11px] uppercase tracking-wider text-[var(--color-text4)]">{{ 'Edges' | translate }}</p>
+          <p class="mb-0 text-lg font-semibold text-[var(--color-text1)]">{{ stats()?.visibleEdges ?? 0 }}</p>
+          <p class="mb-0 text-[11px] text-[var(--color-text4)]">/ {{ stats()?.totalEdges ?? 0 }} {{ 'total' | translate }}</p>
+        </div>
+      </section>
+
+      <section class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3">
+        <div class="mb-2 flex items-center justify-between gap-2">
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text4)]">{{ 'Node Types' | translate }}</h3>
+          <span class="rounded-[6px] bg-[var(--color-blue-720)] px-2 py-1 text-[11px] font-semibold text-[var(--color-text3)]">{{ stats()?.hiddenNodes ?? 0 }} {{ 'hidden' | translate }}</span>
+        </div>
+        <div class="space-y-2">
+          @for (item of legendItems(); track item.key) {
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex min-w-0 items-center gap-2">
+                <span [class]="item.swatchClass"></span>
+                <span class="min-w-0 truncate text-xs font-semibold text-[var(--color-text3)]">{{ item.label | translate }}</span>
+              </div>
+              <span class="text-xs font-semibold text-[var(--color-text1)]">{{ item.count }}</span>
+            </div>
           }
-        </select>
-      </div>
+        </div>
+      </section>
 
-      @if (selectedType === 'cluster') {
-        <div class="rounded-lg border border-slate-700 bg-slate-800/50 p-3 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white/90 [body.light-theme_&]:shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
-          <label class="text-xs uppercase tracking-wider text-slate-500 [body.light-theme_&]:text-[var(--color-text2)]">{{ 'Cluster Type' | translate }}</label>
-          <select [(ngModel)]="singleInput" (ngModelChange)="emitDraftFilters()" name="singleInputCluster" class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white [body.light-theme_&]:text-[var(--color-text1)]">
-            @for (option of graphClusterOptions; track option) {
-              <option [ngValue]="option">{{ option | titlecase }}</option>
+      <section class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3">
+        <h3 class="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--color-text4)]">{{ 'Cluster Mix' | translate }}</h3>
+        @if (clusterLegendItems().length > 0) {
+          <div class="space-y-1.5">
+            @for (item of clusterLegendItems(); track item.key) {
+              <div class="flex min-w-0 items-center gap-2 rounded-[7px] bg-[var(--color-blue-720)] px-2 py-1.5">
+                <span [class]="item.swatchClass"></span>
+                <span class="min-w-0 flex-1 truncate text-xs font-semibold text-[var(--color-text3)]">{{ item.label | translate }}</span>
+                <span class="text-xs text-[var(--color-text4)]">{{ item.count }}</span>
+              </div>
             }
-          </select>
-        </div>
-      }
+          </div>
+        }
+        @else {
+          <p class="mb-0 text-xs text-[var(--color-text4)]">{{ 'No graph loaded' | translate }}</p>
+        }
+      </section>
+    </div>
 
-      @if (selectedType === 'property') {
-        <div class="rounded-lg border border-slate-700 bg-slate-800/50 p-3 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white/90 [body.light-theme_&]:shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
-          <label class="text-xs uppercase tracking-wider text-slate-500 [body.light-theme_&]:text-[var(--color-text2)]">{{ 'Property Type' | translate }}</label>
-          <select [(ngModel)]="propertyType" (ngModelChange)="emitDraftFilters()" name="propertyType" class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white [body.light-theme_&]:text-[var(--color-text1)]">
-            <option value="all">{{ 'All' | translate }}</option>
-            @for (property of graphAllowedProperties; track property) {
-              <option [ngValue]="property.key">{{ property.label }}</option>
-            }
-          </select>
-          <label class="mt-3 block text-xs uppercase tracking-wider text-slate-500 [body.light-theme_&]:text-[var(--color-text2)]">{{ 'Property Value' | translate }}</label>
-          <input [(ngModel)]="propertyValue" (ngModelChange)="emitDraftFilters()" name="propertyValue" type="text" [placeholder]="'Enter value' | translate" class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white [body.light-theme_&]:text-[var(--color-text1)] [body.light-theme_&]:placeholder:text-[var(--color-text4)]">
-        </div>
-      }
-
-      @if (selectedType === 'document') {
-        <div class="rounded-lg border border-slate-700 bg-slate-800/50 p-3 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white/90 [body.light-theme_&]:shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
-          <label class="text-xs uppercase tracking-wider text-slate-500 [body.light-theme_&]:text-[var(--color-text2)]">{{ 'Document ID' | translate }}</label>
-          <input [(ngModel)]="singleInput" (ngModelChange)="emitDraftFilters()" name="singleInputDoc" type="text" [placeholder]="'Enter ID' | translate" class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white [body.light-theme_&]:text-[var(--color-text1)] [body.light-theme_&]:placeholder:text-[var(--color-text4)]">
-        </div>
-      }
-
-      <div class="rounded-lg border border-slate-700 bg-slate-800/50 p-3 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white/90 [body.light-theme_&]:shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
-        <label class="text-xs uppercase tracking-wider text-slate-500 [body.light-theme_&]:text-[var(--color-text2)]">{{ 'Maximum Nodes (20-800)' | translate }}</label>
-        <input (blur)="validateMaxNodes()" [(ngModel)]="maxNodes" (ngModelChange)="emitDraftFilters()" name="maxNodes" type="number" min="20" max="800" class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white [body.light-theme_&]:text-[var(--color-text1)]">
-
-        <label class="mt-3 block text-xs uppercase tracking-wider text-slate-500 [body.light-theme_&]:text-[var(--color-text2)]">{{ 'Maximum Depth (1-5)' | translate }}</label>
-        <input (blur)="validateMaxDepth()" [(ngModel)]="maxDepth" (ngModelChange)="emitDraftFilters()" name="maxDepth" type="number" min="1" max="5" class="mt-2 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white [body.light-theme_&]:text-[var(--color-text1)]">
-      </div>
-
-      <div class="mt-auto flex gap-2">
-        <button data-testid="cti-filter-apply" (click)="applyFilters()" type="button" class="flex-1 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-500">{{ 'common.actions.apply' | translate }}</button>
-        <button data-testid="cti-filter-reset" (click)="resetFilters()" type="button" class="flex-1 rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-[var(--color-blue-720)] [body.light-theme_&]:text-[var(--color-text2)] [body.light-theme_&]:hover:bg-[var(--color-blue-710)]">{{ 'common.actions.reset' | translate }}</button>
-      </div>
-    </form>
-
-    <div sidebar-collapsed class="h-full flex flex-col items-center">
-      <div class="py-4 flex flex-col items-center gap-4">
-        <button (click)="onTypeChange('cluster')" [class]="selectedType === 'cluster' ? 'w-9 h-9 flex items-center justify-center rounded-xl bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-700 hover:text-white [body.light-theme_&]:text-[var(--color-text4)] [body.light-theme_&]:hover:bg-[var(--color-blue-720)] [body.light-theme_&]:hover:text-[var(--color-text1)]'" [title]="'Cluster' | translate">
-          <i class="bi bi-diagram-3 text-lg leading-none"></i>
-        </button>
-        <button (click)="onTypeChange('document')" [class]="selectedType === 'document' ? 'w-9 h-9 flex items-center justify-center rounded-xl bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-700 hover:text-white [body.light-theme_&]:text-[var(--color-text4)] [body.light-theme_&]:hover:bg-[var(--color-blue-720)] [body.light-theme_&]:hover:text-[var(--color-text1)]'" [title]="'Document' | translate">
-          <i class="bi bi-file-earmark-text text-lg leading-none"></i>
-        </button>
-        <button (click)="onTypeChange('property')" [class]="selectedType === 'property' ? 'w-9 h-9 flex items-center justify-center rounded-xl bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/30' : 'w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-700 hover:text-white [body.light-theme_&]:text-[var(--color-text4)] [body.light-theme_&]:hover:bg-[var(--color-blue-720)] [body.light-theme_&]:hover:text-[var(--color-text1)]'" [title]="'Property' | translate">
-          <i class="bi bi-tags text-lg leading-none"></i>
-        </button>
-        <button (click)="applyFilters()" class="w-9 h-9 flex items-center justify-center rounded-xl text-indigo-300 bg-indigo-500/20 hover:bg-indigo-500/30" [title]="'common.actions.apply' | translate">
-          <i class="bi bi-play-fill text-lg leading-none"></i>
-        </button>
+    <div sidebar-collapsed class="flex h-full flex-col items-center bg-[var(--color-blue-820-light)]">
+      <div class="flex flex-col items-center gap-4 py-4">
+        <i class="bi bi-diagram-3 text-xl text-[var(--color-blue-640)]"></i>
+        <span class="[writing-mode:vertical-rl] rotate-180 text-xs font-semibold uppercase tracking-wider text-[var(--color-text4)]">{{ 'Graph' | translate }}</span>
       </div>
     </div>
   </app-graph-sidebar-shell>

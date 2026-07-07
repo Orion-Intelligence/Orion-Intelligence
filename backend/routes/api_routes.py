@@ -39,7 +39,7 @@ from orion.api.server.crawl_manager.class_model.social_scrape_request_model impo
 from orion.services.mongo_manager.shared_model.db_scan_job_model import ScanJobCreateRequest, ScanJobDetailResponse, ScanJobListResponse, ScanJobSeenRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
-from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
+from orion.api.server.entity_manager.modal.EntityQueryModel import EntityGraphBatchQueryModel, EntityQueryModel
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, user_role
 from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
@@ -135,15 +135,14 @@ async def search_general(param: search_consolidated_param_model = Body(...), cur
 async def search_leak(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
-    if param.category in ["all"]:
+    category = (param.category or "all").strip().lower()
+    base_index = [ELASTIC_INDEX.S_LEAK_INDEX]
+    if category in {"all", "databases", "leak", "leaks"}:
         param.category = "leaks"
-        base_index = [ELASTIC_INDEX.S_LEAK_INDEX]
-        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [param.category])
-    else:
-        if param.category == "databases":
-            param.category = "leaks"
-        base_index = [ELASTIC_INDEX.S_LEAK_INDEX]
-        return await search_model.getInstance().search_consolidated_ranked_result(param, base_index,[], [param.category])
+        return await search_model.getInstance().search_consolidated_ranked_result(
+            param, base_index, ["news", "tracking"], ["leaks"])
+
+    return await search_model.getInstance().search_consolidated_ranked_result(param, base_index, [], [category])
 
 
 @api_routes.post(
@@ -802,6 +801,16 @@ async def get_chat_stix_document(doc_id: str, lang: Optional[str] = Query(None, 
 async def get_entity_relations(query: EntityQueryModel = Depends()):
     manager = entity_manager.get_instance()
     return await manager.get_entity_relations(query)
+
+
+@api_routes.post(
+    "/api/graph",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(license_required("cti_graph", bypass_roles=[user_role.ADMIN], bypass_licenses=["maintainer"]))], )
+async def post_entity_relations(query: EntityGraphBatchQueryModel = Body(...)):
+    manager = entity_manager.get_instance()
+    return await manager.get_entity_relations_batch(query)
 
 
 @api_routes.get(

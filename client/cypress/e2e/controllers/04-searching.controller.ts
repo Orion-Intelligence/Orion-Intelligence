@@ -102,7 +102,7 @@ export function clickOpenReport() {
 }
 
 export function clickOpenExploitReport() {
-  cy.get('[data-testid="result-card"] a').filter(':visible').first().scrollIntoView().should('be.visible').invoke('removeAttr', 'target').click({ force: true });
+  cy.get('[data-testid="open-report"]').filter(':visible').first().scrollIntoView().should('be.visible').invoke('removeAttr', 'target').click({ force: true });
 }
 
 export function clickOpenDefacementReport() {

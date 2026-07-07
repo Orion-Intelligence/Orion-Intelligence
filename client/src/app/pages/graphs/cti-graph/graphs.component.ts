@@ -1,39 +1,59 @@
-import { Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, inject } from '@angular/core';
-import { HttpParams } from '@angular/common/http';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, inject } from '@angular/core';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { Edge, Network } from 'vis-network';
 import { DataSet } from 'vis-data';
 import { ApiService } from '../../../shared/services/api.service';
 import { CtiSidebarComponent } from './cti-sidebar/cti-sidebar.component';
 import { GraphContextMenuComponent } from './context-menu/context-menu.component';
-import { NgClass, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
-import { GraphToolbarComponent } from '../shared/graph-toolbar/graph-toolbar.component';
 import { ExpandToggleButtonComponent } from './expand-toggle-button/expand-toggle-button.component';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
-import { TabBarComponent } from '../shared/tab-bar/tab-bar.component';
-import { GraphLoadingComponent } from '../shared/graph-loading/graph-loading.component';
-import { ExtendedNode, GraphResultItem, GraphSessionState, GraphSessionTab, NodeVisualState } from '../../../shared/model/graph/cti-graph.model';
+import { CtiGraphFilters, CtiGraphLegendItem, CtiGraphStats, ExtendedNode, GraphResultItem, NodeVisualState } from '../../../shared/model/graph/cti-graph.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportExportType, GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 import { ensureStylesheet } from '../../../shared/utils/ensure-stylesheet.util';
 import { ProxyController } from '../../../shared/services/proxy-controller';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
+import { UiDropdownComponent, UiDropdownOption } from '../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { splitCountryValues } from '../../../shared/utils/country-normalization.util';
 
 type GraphNodeColor = NonNullable<ExtendedNode['color']>;
+type GraphSearchMode = 'all' | 'cluster' | 'property';
+type GraphSearchOption = {
+  key: string;
+  label: string;
+  mode: GraphSearchMode;
+  propertyType?: string;
+  clusterValue?: string;
+  placeholder: string;
+};
+type GraphAdvancedFilter = {
+  id: string;
+  optionKey: string;
+  value: string;
+  operator: '&&' | '||';
+};
+type GraphSearchRequest = {
+  dataPointType: string;
+  modelType: string;
+  queryValues: string[];
+  operator?: '&&' | '||';
+};
 @Component({
   selector: 'app-graphs',
   standalone: true,
   templateUrl: './graphs.component.html',
   animations: [fadeInDashboardItem],
-  imports: [CtiSidebarComponent, GraphContextMenuComponent, ProfileComponent, GraphToolbarComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, NgClass, TabBarComponent, GraphLoadingComponent, TranslatePipe]
+  imports: [FormsModule, CtiSidebarComponent, GraphContextMenuComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, ProfileComponent, TranslatePipe, UiDropdownComponent]
 })
 export class GraphComponent implements OnInit, OnDestroy {
-  private readonly playgroundTabName = 'Playground';
   private readonly proxied_resource = inject(ProxyController);
+  private readonly changeDetector = inject(ChangeDetectorRef);
   private readonly maxNodeLabelLength = 28;
   private readonly edgeBaseColor = 'rgba(75, 85, 99, 0.8)';
   private readonly edgeHighlightColor = '#a78bfa';
@@ -44,7 +64,9 @@ export class GraphComponent implements OnInit, OnDestroy {
   private readonly nodeDocumentBorder = '#f97316';
   private readonly nodePropertyBorder = '#38bdf8';
   private readonly nodeFocusColor = '#facc15';
-  private readonly iconMap: Record<string, string> = { cluster: 'diagram-3-fill', document: 'file-earmark-text-fill', property: 'tags-fill', encoded: 'code-slash', document_id: 'file-earmark-lock-fill', ip: 'hdd-network-fill', phone: 'telephone-fill', email: 'envelope-fill', domain: 'globe2', url: 'link-45deg', country: 'flag-fill', file: 'folder-fill', card: 'credit-card-2-front-fill', crypto: 'currency-bitcoin', bank: 'bank2', platform: 'cpu-fill', company: 'building-fill', person: 'person-fill', location: 'geo-alt-fill', language: 'translate', hashtag: 'hash', mention: 'at', xmpp: 'chat-dots-fill', tactic: 'bullseye', technique: 'tools', script: 'braces' };
+  private readonly clusterPalette: Record<string, { color: string; label: string; swatchClass: string; }> = { general: { color: '#38bdf8', label: 'General', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-sky-400' }, leak: { color: '#f97316', label: 'Leak', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-orange-500' }, tracking: { color: '#22c55e', label: 'Tracking', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-green-500' }, news: { color: '#eab308', label: 'News', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-yellow-500' }, defacement: { color: '#ef4444', label: 'Defacement', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-red-500' }, chat: { color: '#06b6d4', label: 'Chat', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-cyan-500' }, exploit: { color: '#fb7185', label: 'Exploit', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-rose-400' }, social: { color: '#a78bfa', label: 'Social', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-purple-400' }, apt: { color: '#f43f5e', label: 'APT', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-rose-500' }, malware: { color: '#14b8a6', label: 'Malware', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-teal-500' } };
+  private readonly propertyClassPalette: Record<string, string> = { geo: '#22c55e', identity: '#38bdf8', infrastructure: '#60a5fa', indicator: '#f59e0b', vulnerability: '#fb7185', host_indicator: '#eab308', financial: '#34d399', crypto: '#f97316', organization: '#a78bfa', source: '#94a3b8' };
+  private readonly iconMap: Record<string, string> = { cluster: 'diagram-3-fill', campaign: 'diagram-3-fill', document: 'file-earmark-text-fill', property: 'tags-fill', actor: 'tags-fill', encoded: 'code-slash', document_id: 'file-earmark-lock-fill', ip: 'hdd-network-fill', phone: 'telephone-fill', email: 'envelope-fill', domain: 'globe2', url: 'link-45deg', country: 'flag-fill', file: 'folder-fill', card: 'credit-card-2-front-fill', crypto: 'currency-bitcoin', bank: 'bank2', platform: 'cpu-fill', company: 'building-fill', person: 'person-fill', location: 'geo-alt-fill', language: 'translate', hashtag: 'hash', mention: 'at', xmpp: 'chat-dots-fill', tactic: 'bullseye', technique: 'tools', script: 'braces' };
   private groupInfo: Record<string, string[]> = {};
   private groupedSubNodesByParent: Record<string, Set<string>> = {};
   private groupParentByGroupId: Record<string, string> = {};
@@ -56,18 +78,9 @@ export class GraphComponent implements OnInit, OnDestroy {
   private readonly originalNodeState = new Map<string, NodeVisualState>();
   private readonly clusterNodePrefix = 'cti_vertices/';
   private nodeTypeById: Record<string, string> = {};
-  private readonly graphType = 'graph';
-  private lastSavedSessionSignature = '';
-  private readonly globalPointerDownListener = (event: Event) => {
-    const target = event.target as Node | null;
-    const insideAdd = !!(target && this.addMenuWrapper?.nativeElement.contains(target));
-    const insideHeader = !!(target && this.headerMenuWrapper?.nativeElement.contains(target));
-    if (!insideAdd && !insideHeader) {
-      this.closeMenus();
-    }
-  };
+  private lastAppliedQuerySignature = '';
   private readonly globalKeyDownListener = (event: KeyboardEvent) => {
-    if (!this.network || !this.isGraphView) {
+    if (!this.network) {
       return;
     }
     const eventTargetElement = event.target as HTMLElement | null;
@@ -101,10 +114,12 @@ export class GraphComponent implements OnInit, OnDestroy {
       animation: false
     });
   };
-  private static sessionCounter = 1;
-  private pendingFilters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null = null;
-  private pendingSessionState: GraphSessionState | null = null;
-  private routeFilterOverride: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null = null;
+  private pendingFilters: CtiGraphFilters | null = null;
+  private graphAdvancedFilterCounter = 0;
+  private skipNextBasicSearchRouteApply = false;
+  private hoveredNodeId: string | null = null;
+  private pendingFocusNodeId: string | null = null;
+  private graphRequestSequence = 0;
 
   networkContainer?: ElementRef;
   public rawNodes: ExtendedNode[] = [];
@@ -115,45 +130,42 @@ export class GraphComponent implements OnInit, OnDestroy {
   contextCanExpand = false;
   contextCanCollapse = false;
   contextShowOpenCti = false;
+  contextShowOpenDocument = false;
   contextShowOpenReport = false;
   network!: Network;
   selectedType = 'cluster';
   singleInput = 'all';
   propertyType = 'all';
   propertyValue = '';
-  maxEdge: any = 1;
-  maxDepth: any = 25;
+  maxEdge = 25;
+  maxDepth = 1;
   loading = false;
   physicsEnabled = true;
   expandEnabled = false;
   isEmpty = false;
-  limitReached = false;
   result: any[] = [];
-  flattenedDocuments: any[] = [];
   contextMenuNode: ExtendedNode | null = null;
   copied = false;
-  copiedX = 0;
-  copiedY = 0;
   orignalColor: GraphNodeColor = '';
-  currentCategory = '';
   isSidebarCollapsed = false;
-  isTailwindReady = true;
-  nodeSearchText = '';
-  isGraphView = true;
-  isListingsCollapsed = true;
-  searchMatchedCount = 0;
-  listRows: { id: string; label: string; cluster: string; }[] = [];
   showMaxEdgeNotice = false;
-  tabs: GraphSessionTab[] = [];
-  activeTabId = '';
-  editingTabId: string | null = null;
-  isAddMenuVisible = false;
-  isHeaderMenuVisible = false;
   isReportExportModalOpen = false;
-  hasLoadedSessions = false;
   readonly graphExportOptions = GRAPH_REPORT_EXPORT_OPTIONS;
-  @ViewChild('addMenuWrapper', { static: false }) addMenuWrapper?: ElementRef<HTMLElement>;
-  @ViewChild('headerMenuWrapper', { static: false }) headerMenuWrapper?: ElementRef<HTMLElement>;
+  readonly primaryGraphSearchKeys = ['all', 'leak', 'tracking', 'news', 'defacement', 'chat', 'exploit', 'social', 'apt', 'malware'];
+  readonly graphWhereOperatorOptions: UiDropdownOption[] = [ { key: '__where__', label: 'WHERE' } ];
+  readonly graphJoinOperatorOptions: UiDropdownOption[] = [ { key: '&&', label: 'AND' }, { key: '||', label: 'OR' } ];
+  readonly graphSearchOptions: GraphSearchOption[] = [ { key: 'all', label: 'All', mode: 'all', placeholder: 'Search...' }, { key: 'leak', label: 'Leak', mode: 'cluster', clusterValue: 'leak', placeholder: 'Search leak...' }, { key: 'tracking', label: 'Tracking', mode: 'cluster', clusterValue: 'tracking', placeholder: 'Search tracking...' }, { key: 'news', label: 'News', mode: 'cluster', clusterValue: 'news', placeholder: 'Search news...' }, { key: 'defacement', label: 'Defacement', mode: 'cluster', clusterValue: 'defacement', placeholder: 'Search defacement...' }, { key: 'chat', label: 'Chat', mode: 'cluster', clusterValue: 'chat', placeholder: 'Search chat...' }, { key: 'exploit', label: 'Exploit', mode: 'cluster', clusterValue: 'exploit', placeholder: 'Search exploit...' }, { key: 'social', label: 'Social', mode: 'cluster', clusterValue: 'social', placeholder: 'Search social...' }, { key: 'apt', label: 'APT', mode: 'cluster', clusterValue: 'apt', placeholder: 'Search APT...' }, { key: 'malware', label: 'Malware', mode: 'cluster', clusterValue: 'malware', placeholder: 'Search malware...' }, { key: 'm_ip', label: 'IP Address', mode: 'property', propertyType: 'm_ip', placeholder: '8.8.8.8' }, { key: 'm_asns', label: 'ASN', mode: 'property', propertyType: 'm_asns', placeholder: 'AS13335 or 13335' }, { key: 'm_domain', label: 'Domain', mode: 'property', propertyType: 'm_domain', placeholder: 'example.com' }, { key: 'm_url', label: 'URL', mode: 'property', propertyType: 'm_url', placeholder: 'https://example.com/path' }, { key: 'm_encoded_urls', label: 'Encoded URL', mode: 'property', propertyType: 'm_encoded_urls', placeholder: 'Encoded or defanged URL' }, { key: 'm_email', label: 'Email', mode: 'property', propertyType: 'm_email', placeholder: 'name@example.com' }, { key: 'm_username', label: 'Username', mode: 'property', propertyType: 'm_username', placeholder: 'Username or handle' }, { key: 'm_person', label: 'Person', mode: 'property', propertyType: 'm_person', placeholder: 'Person name' }, { key: 'm_phone_number', label: 'Phone Number', mode: 'property', propertyType: 'm_phone_number', placeholder: '+1 555 0100' }, { key: 'm_org', label: 'Organization', mode: 'property', propertyType: 'm_org', placeholder: 'Company or organization' }, { key: 'm_attacker', label: 'Threat Actor', mode: 'property', propertyType: 'm_attacker', placeholder: 'Threat actor or alias' }, { key: 'm_alias', label: 'Alias', mode: 'property', propertyType: 'm_alias', placeholder: 'Actor or entity alias' }, { key: 'm_country', label: 'Country', mode: 'property', propertyType: 'm_country', placeholder: 'Pakistan, Iran, United States...' }, { key: 'm_location', label: 'Location', mode: 'property', propertyType: 'm_location', placeholder: 'City, state, region...' }, { key: 'm_origin_country', label: 'Origin Country', mode: 'property', propertyType: 'm_origin_country', placeholder: 'Origin country' }, { key: 'm_industry', label: 'Industry', mode: 'property', propertyType: 'm_industry', placeholder: 'Finance, healthcare...' }, { key: 'm_cve', label: 'CVE', mode: 'property', propertyType: 'm_cve', placeholder: 'CVE-2026-0000' }, { key: 'm_cwe', label: 'CWE', mode: 'property', propertyType: 'm_cwe', placeholder: 'CWE-79' }, { key: 'm_vulnerability', label: 'Vulnerability', mode: 'property', propertyType: 'm_vulnerability', placeholder: 'Vulnerability name' }, { key: 'm_cvss', label: 'CVSS', mode: 'property', propertyType: 'm_cvss', placeholder: '9.8' }, { key: 'm_severity', label: 'Severity', mode: 'property', propertyType: 'm_severity', placeholder: 'critical, high...' }, { key: 'm_risk', label: 'Risk', mode: 'property', propertyType: 'm_risk', placeholder: 'Risk level' }, { key: 'm_product', label: 'Product', mode: 'property', propertyType: 'm_product', placeholder: 'Affected product' }, { key: 'm_vendor', label: 'Vendor', mode: 'property', propertyType: 'm_vendor', placeholder: 'Vendor name' }, { key: 'm_version', label: 'Version', mode: 'property', propertyType: 'm_version', placeholder: 'Version string' }, { key: 'm_platform', label: 'Platform', mode: 'property', propertyType: 'm_platform', placeholder: 'Windows, Linux, Android...' }, { key: 'm_web_server', label: 'Web Server', mode: 'property', propertyType: 'm_web_server', placeholder: 'nginx, Apache...' }, { key: 'm_remote_type', label: 'Remote Type', mode: 'property', propertyType: 'm_remote_type', placeholder: 'Remote exploit type' }, { key: 'm_md5', label: 'MD5', mode: 'property', propertyType: 'm_md5', placeholder: 'MD5 hash' }, { key: 'm_sha1', label: 'SHA1', mode: 'property', propertyType: 'm_sha1', placeholder: 'SHA1 hash' }, { key: 'm_sha256', label: 'SHA256', mode: 'property', propertyType: 'm_sha256', placeholder: 'SHA256 hash' }, { key: 'm_sha3_384', label: 'SHA3-384', mode: 'property', propertyType: 'm_sha3_384', placeholder: 'SHA3-384 hash' }, { key: 'm_imphash', label: 'Imphash', mode: 'property', propertyType: 'm_imphash', placeholder: 'Import hash' }, { key: 'm_telfhash', label: 'Telfhash', mode: 'property', propertyType: 'm_telfhash', placeholder: 'Telfhash' }, { key: 'm_tlsh', label: 'TLSH', mode: 'property', propertyType: 'm_tlsh', placeholder: 'TLSH hash' }, { key: 'm_file_name', label: 'File Name', mode: 'property', propertyType: 'm_file_name', placeholder: 'payload.exe' }, { key: 'm_file_paths', label: 'File Path', mode: 'property', propertyType: 'm_file_paths', placeholder: '/tmp/payload.exe' }, { key: 'm_file_type', label: 'File Type', mode: 'property', propertyType: 'm_file_type', placeholder: 'PE, APK, PDF...' }, { key: 'm_signature', label: 'Signature', mode: 'property', propertyType: 'm_signature', placeholder: 'Signature name' }, { key: 'm_yara_rule', label: 'YARA Rule', mode: 'property', propertyType: 'm_yara_rule', placeholder: 'YARA rule name' }, { key: 'm_family', label: 'Malware Family', mode: 'property', propertyType: 'm_family', placeholder: 'Malware family' }, { key: 'm_registry_key_path', label: 'Registry Key', mode: 'property', propertyType: 'm_registry_key_path', placeholder: 'HKCU\\Software\\...' }, { key: 'm_mac_address', label: 'MAC Address', mode: 'property', propertyType: 'm_mac_address', placeholder: '00:11:22:33:44:55' }, { key: 'm_user_agents', label: 'User Agent', mode: 'property', propertyType: 'm_user_agents', placeholder: 'Mozilla/5.0...' }, { key: 'm_crypto_address', label: 'Crypto Address', mode: 'property', propertyType: 'm_crypto_address', placeholder: 'Wallet address' }, { key: 'm_currencies', label: 'Currency', mode: 'property', propertyType: 'm_currencies', placeholder: 'BTC, USD...' }, { key: 'm_network', label: 'Network', mode: 'property', propertyType: 'm_network', placeholder: 'Network name' }, { key: 'm_social_media_profiles', label: 'Social Profile', mode: 'property', propertyType: 'm_social_media_profiles', placeholder: 'Profile URL or handle' }, { key: 'm_hashtag', label: 'Hashtag', mode: 'property', propertyType: 'm_hashtag', placeholder: '#tag' }, { key: 'm_mention', label: 'Mention', mode: 'property', propertyType: 'm_mention', placeholder: '@handle' }, { key: 'm_xmpp_addresses', label: 'XMPP Address', mode: 'property', propertyType: 'm_xmpp_addresses', placeholder: 'user@example.com' }, { key: 'm_enterprise_attack_tactics', label: 'MITRE Tactic', mode: 'property', propertyType: 'm_enterprise_attack_tactics', placeholder: 'TA0001' }, { key: 'm_enterprise_attack_techniques', label: 'MITRE Technique', mode: 'property', propertyType: 'm_enterprise_attack_techniques', placeholder: 'T1059' }, { key: 'm_author', label: 'Author', mode: 'property', propertyType: 'm_author', placeholder: 'Author/source' }, { key: 'm_reporter', label: 'Reporter', mode: 'property', propertyType: 'm_reporter', placeholder: 'Reporter/source' }, { key: 'm_team', label: 'Team', mode: 'property', propertyType: 'm_team', placeholder: 'Team or group' }, { key: 'm_tags', label: 'Tag', mode: 'property', propertyType: 'm_tags', placeholder: 'Tag value' }, { key: 'm_first_seen', label: 'First Seen', mode: 'property', propertyType: 'm_first_seen', placeholder: 'First seen date' }, { key: 'm_last_seen', label: 'Last Seen', mode: 'property', propertyType: 'm_last_seen', placeholder: 'Last seen date' }, { key: 'm_uk_nhs', label: 'UK NHS Number', mode: 'property', propertyType: 'm_uk_nhs', placeholder: 'NHS number' }, { key: 'm_us_driver_license', label: 'US Driver License', mode: 'property', propertyType: 'm_us_driver_license', placeholder: 'Driver license' } ];
+  activeGraphSearchKey = 'all';
+  graphSearchAdvancedMode = false;
+  graphAdvancedFilters: GraphAdvancedFilter[] = [this.createGraphAdvancedFilter()];
+  graphSearchText = '';
+  legendItems: CtiGraphLegendItem[] = [];
+  clusterLegendItems: CtiGraphLegendItem[] = [];
+  graphStats: CtiGraphStats = { visibleNodes: 0, totalNodes: 0, visibleEdges: 0, totalEdges: 0, hiddenNodes: 0 };
+  nodeInfoPanelVisible = false;
+  nodeInfoPanelHtml = '';
+  nodeInfoPanelLeft = 12;
+  nodeInfoPanelTop = 12;
 
   private getNodeLabelColor(): string {
     if (isPlatformBrowser(this.platformId)) {
@@ -173,43 +185,50 @@ export class GraphComponent implements OnInit, OnDestroy {
   set networkContainerRef(ref: ElementRef) {
     if (ref) {
       this.networkContainer = ref;
-      this.tryRestorePendingSessionState();
       this.tryApplyPendingFilters();
     }
   }
 
-  constructor( private api: ApiService, private clipboard: Clipboard, private route: ActivatedRoute, private graphReportExport: ReportExportService, @Inject(PLATFORM_ID) private platformId: object ) { }
+  constructor( private api: ApiService, private clipboard: Clipboard, private route: ActivatedRoute, private router: Router, private graphReportExport: ReportExportService, @Inject(PLATFORM_ID) private platformId: object ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       ensureStylesheet('/assets/libs/vis-network.css', 'vis-network-styles');
-      document.addEventListener('pointerdown', this.globalPointerDownListener, true);
       document.addEventListener('keydown', this.globalKeyDownListener, true);
     }
     this.route.queryParams.subscribe(params => {
-      this.routeFilterOverride = this.buildRouteFilterOverride(params);
-      if (this.hasLoadedSessions) {
-        this.applyRouteFilterOverride();
+      const routeFilters = this.buildRouteFilterOverride(params);
+      const shouldSkipRouteApply = this.skipNextBasicSearchRouteApply;
+      this.skipNextBasicSearchRouteApply = false;
+      if (routeFilters) {
+        this.applyFilterValues(routeFilters);
+        this.syncBasicSearchControlsFromRoute(params, routeFilters);
+        if (shouldSkipRouteApply) {
+          return;
+        }
       }
+      this.applyCurrentFilters();
     });
-    this.tryApplyPendingFilters();
-    this.loadSessions();
   }
 
   ngOnDestroy(): void {
     if (isPlatformBrowser(this.platformId)) {
-      document.removeEventListener('pointerdown', this.globalPointerDownListener, true);
       document.removeEventListener('keydown', this.globalKeyDownListener, true);
+    }
+  }
+
+  goBack(): void {
+    if (isPlatformBrowser(this.platformId) && window.history.length > 1) {
+      window.history.back();
     }
   }
 
   onSidebarCollapsedChange(isCollapsed: boolean): void {
     this.isSidebarCollapsed = isCollapsed;
-    this.updateActiveSessionState({ isSidebarCollapsed: isCollapsed });
   }
 
   private tryApplyPendingFilters(): void {
-    if (!this.isTailwindReady || !this.networkContainer || !this.pendingFilters) {
+    if (!this.networkContainer || !this.pendingFilters) {
       return;
     }
     const queued = this.pendingFilters;
@@ -217,16 +236,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.onSidebarApply(queued);
   }
 
-  private tryRestorePendingSessionState(): void {
-    if (!this.isTailwindReady || !this.networkContainer || !this.pendingSessionState) {
-      return;
-    }
-    const pending = this.pendingSessionState;
-    this.pendingSessionState = null;
-    this.restoreGraphSessionState(pending);
-  }
-
-  private buildRouteFilterOverride(params: Params): { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } | null {
+  private buildRouteFilterOverride(params: Params): CtiGraphFilters | null {
     const selectedType = String(params['selectedType'] ?? '').trim();
     const singleInput = String(params['singleInput'] ?? '').trim();
     const propertyType = String(params['propertyType'] ?? '').trim();
@@ -245,286 +255,310 @@ export class GraphComponent implements OnInit, OnDestroy {
       singleInput: singleInput || 'all',
       propertyType: propertyType || 'all',
       propertyValue: propertyValue || '',
-      maxEdge: Number.isFinite(parsedMaxEdge) && parsedMaxEdge >= 0 && parsedMaxEdge <= 800 ? parsedMaxEdge : 25,
-      maxDepth: Number.isFinite(parsedMaxDepth) && parsedMaxDepth >= 0 && parsedMaxDepth <= 5 ? parsedMaxDepth : 1
+      maxEdge: Number.isFinite(parsedMaxEdge) && parsedMaxEdge >= 20 && parsedMaxEdge <= 800 ? parsedMaxEdge : 25,
+      maxDepth: Number.isFinite(parsedMaxDepth) && parsedMaxDepth >= 1 && parsedMaxDepth <= 5 ? parsedMaxDepth : 1
     };
   }
 
-  private applyRouteFilterOverride(): void {
-    if (!this.routeFilterOverride || this.tabs.length === 0) {
-      return;
-    }
-
-    const playgroundTab = this.tabs[0];
-    const nextState: GraphSessionState = {
-      ...this.createDefaultSessionState(),
-      isSidebarCollapsed: playgroundTab.state.isSidebarCollapsed,
-      ...this.routeFilterOverride
-    };
-
-    this.tabs = this.tabs.map((tab, index) => index === 0 ? { ...tab, state: nextState } : tab);
-    this.normalizePlaygroundTab();
-    this.activeTabId = playgroundTab.id;
-    this.applySession(playgroundTab.id);
-    this.applyActiveTabState();
-    this.saveSessions();
-  }
-
-  private createDefaultSessionState(): GraphSessionState {
+  get activeSidebarFilters(): CtiGraphFilters {
     return {
-      selectedType: 'cluster',
-      singleInput: 'all',
-      propertyType: 'all',
-      propertyValue: '',
-      maxEdge: 25,
-      maxDepth: 1,
-      isSidebarCollapsed: false,
-      graphData: null,
-      groupExpandedState: {},
-      limitReached: false,
-      nodeSearchText: '',
-      physicsEnabled: true,
-      isGraphView: true,
-      isListingsCollapsed: true,
-      expandEnabled: false
-    };
-  }
-
-  private normalizePlaygroundTab(): void {
-    if (this.tabs.length === 0) {
-      return;
-    }
-    this.tabs = this.tabs.map((tab, index) => index === 0 ? { ...tab, name: this.playgroundTabName } : tab);
-  }
-
-  private generateId(): string {
-    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-      return crypto.randomUUID();
-    }
-    return `graph-session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-  }
-
-  private getActiveTab(): GraphSessionTab | undefined {
-    return this.tabs.find(t => t.id === this.activeTabId);
-  }
-
-  get activeSidebarFilters(): { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } {
-    const active = this.getActiveTab();
-    const state = active?.state ?? this.createDefaultSessionState();
-    return {
-      selectedType: state.selectedType,
-      singleInput: state.singleInput,
-      propertyType: state.propertyType,
-      propertyValue: state.propertyValue,
-      maxEdge: state.maxEdge,
-      maxDepth: state.maxDepth
+      selectedType: this.selectedType,
+      singleInput: this.singleInput,
+      propertyType: this.propertyType,
+      propertyValue: this.propertyValue,
+      maxEdge: Number(this.maxEdge),
+      maxDepth: Number(this.maxDepth)
     };
   }
 
   get activeSidebarCollapsed(): boolean {
-    const active = this.getActiveTab();
-    return active?.state.isSidebarCollapsed ?? false;
+    return this.isSidebarCollapsed;
   }
 
-  private applyActiveTabState(): void {
-    const active = this.getActiveTab();
-    if (!active) {
-      return;
-    }
-    this.onSidebarApply({
-      selectedType: active.state.selectedType,
-      singleInput: active.state.singleInput,
-      propertyType: active.state.propertyType,
-      propertyValue: active.state.propertyValue,
-      maxEdge: active.state.maxEdge,
-      maxDepth: active.state.maxDepth
-    });
+  get activeGraphSearchOption(): GraphSearchOption {
+    return this.graphSearchOptions.find(option => option.key === this.activeGraphSearchKey) ?? this.graphSearchOptions[0];
   }
 
-  private restoreGraphSessionState(state: GraphSessionState): void {
-    if (!this.isTailwindReady || !this.networkContainer) {
-      this.pendingSessionState = state;
-      return;
-    }
-    this.showMaxEdgeNotice = Number(state.maxEdge) > 50;
-    if (!state.graphData) {
-      this.resetGraph();
-      this.listRows = [];
-      this.flattenedDocuments = [];
-      this.limitReached = !!state.limitReached;
-      this.isEmpty = false;
-      this.loading = false;
-      return;
-    }
-    this.renderGraph(state.graphData);
-    this.initListings(state.graphData);
-    this.limitReached = !!state.limitReached;
-    this.loading = true;
-    Object.entries(state.groupExpandedState ?? {})
-      .filter(([, expanded]) => !!expanded)
-      .forEach(([nodeId]) => {
-        const node = this.nodeSet.get(nodeId) as ExtendedNode | undefined;
-        if (!node) {
-          return;
-        }
-        const subNodes = this.getContextSubNodes(nodeId, node);
-        if (subNodes.length > 0) {
-          this.expandGroupFromNodeId(nodeId, subNodes, 200, false);
-        }
-      });
-    this.captureOriginalNodeColors();
-    this.applyPropertyHighlights();
-    this.applyNodeSearchHighlight();
+  get primaryGraphSearchOptions(): GraphSearchOption[] {
+    return this.graphSearchOptions.filter(option => this.primaryGraphSearchKeys.includes(option.key));
   }
 
-  private saveSessions(force: boolean = false): void {
-    if (!isPlatformBrowser(this.platformId) || !this.hasLoadedSessions) {
+  get graphBuilderSearchOptions(): GraphSearchOption[] {
+    return this.graphSearchOptions.filter(option => option.mode === 'property');
+  }
+
+  get graphSearchPlaceholder(): string {
+    return this.activeGraphSearchOption.placeholder;
+  }
+
+  setGraphSearchOption(optionKey: string): void {
+    const option = this.graphSearchOptions.find(item => item.key === optionKey);
+    if (!option) {
       return;
     }
-    this.normalizePlaygroundTab();
-    const payload = {
-      tab_counter: GraphComponent.sessionCounter,
-      active_tab_id: this.activeTabId,
-      tabs: this.tabs
+    this.activeGraphSearchKey = option.key;
+    this.graphSearchAdvancedMode = false;
+    if (option.mode === 'cluster') {
+      this.graphSearchText = '';
+      this.submitGraphSearch();
+    }
+  }
+
+  toggleGraphSearchBuilder(): void {
+    this.graphSearchAdvancedMode = !this.graphSearchAdvancedMode;
+    if (this.graphSearchAdvancedMode) {
+      this.activeGraphSearchKey = this.graphAdvancedFilters[0]?.optionKey || 'm_country';
+      return;
+    }
+    if (!this.primaryGraphSearchKeys.includes(this.activeGraphSearchKey)) {
+      this.activeGraphSearchKey = 'all';
+    }
+  }
+
+  addGraphAdvancedFilter(): void {
+    if (this.graphAdvancedFilters.length >= 8) {
+      return;
+    }
+    this.graphAdvancedFilters = [...this.graphAdvancedFilters, this.createGraphAdvancedFilter()];
+  }
+
+  removeGraphAdvancedFilter(id: string): void {
+    if (this.graphAdvancedFilters.length <= 1) {
+      return;
+    }
+    this.graphAdvancedFilters = this.graphAdvancedFilters.filter(filter => filter.id !== id);
+  }
+
+  getGraphAdvancedOption(optionKey: string): GraphSearchOption {
+    return this.graphBuilderSearchOptions.find(option => option.key === optionKey) ?? this.graphBuilderSearchOptions[0] ?? this.graphSearchOptions[0];
+  }
+
+  getGraphOperatorOptions(index: number): UiDropdownOption[] {
+    return index === 0 ? this.graphWhereOperatorOptions : this.graphJoinOperatorOptions;
+  }
+
+  getGraphOperatorValue(filter: GraphAdvancedFilter, index: number): string {
+    return index === 0 ? '__where__' : filter.operator;
+  }
+
+  setGraphFilterOperator(filter: GraphAdvancedFilter, value: string | null, index: number): void {
+    if (index === 0) {
+      return;
+    }
+    filter.operator = value === '||' ? '||' : '&&';
+  }
+
+  setGraphFilterOption(filter: GraphAdvancedFilter, value: string | null): void {
+    const option = this.graphBuilderSearchOptions.find(item => item.key === value);
+    if (!option) {
+      return;
+    }
+    filter.optionKey = option.key;
+  }
+
+  private createGraphAdvancedFilter(): GraphAdvancedFilter {
+    this.graphAdvancedFilterCounter += 1;
+    return {
+      id: `graph-filter-${Date.now()}-${this.graphAdvancedFilterCounter}`,
+      optionKey: 'm_ip',
+      value: '',
+      operator: '&&'
     };
-    const nextSignature = JSON.stringify(payload);
-    if (!force && nextSignature === this.lastSavedSessionSignature) {
-      return;
-    }
-    this.api.post<any>(`graph/session/upsert?graph_type=${this.graphType}`, payload).subscribe({
-      next: () => {
-        this.lastSavedSessionSignature = nextSignature;
-      },
-      error: () => void 0
-    });
   }
 
-  private loadSessions(): void {
-    if (!isPlatformBrowser(this.platformId)) {
-      this.hasLoadedSessions = true;
-      this.addSession();
+  submitGraphSearch(): void {
+    if (this.graphSearchAdvancedMode) {
+      this.submitGraphSearchBuilder();
       return;
     }
-    this.api.get<any>(`graph/session/tabs?graph_type=${this.graphType}`).subscribe({
-      next: (savedState) => {
-        const savedTabs = Array.isArray(savedState?.tabs) ? savedState.tabs : [];
-        if (savedTabs.length === 0) {
-          this.hasLoadedSessions = true;
-          this.addSession();
-          return;
-        }
-        this.tabs = savedTabs.map((savedTab: any, index: number) => ({
-          id: typeof savedTab?.id === 'string' && savedTab.id.length > 0 ? savedTab.id : this.generateId(),
-          name: typeof savedTab?.name === 'string' && savedTab.name.trim().length > 0 ? savedTab.name : `Session ${index + 1}`,
-          state: { ...this.createDefaultSessionState(), ...(savedTab?.state || {}) }
-        } as GraphSessionTab));
-        this.normalizePlaygroundTab();
-        GraphComponent.sessionCounter = Number(savedState?.tab_counter ?? savedState?.counter) || (this.tabs.length + 1);
-        this.activeTabId = savedState?.active_tab_id ?? savedState?.activeTabId ?? this.tabs[0].id;
-        if (!this.tabs.some(t => t.id === this.activeTabId)) {
-          this.activeTabId = this.tabs[0].id;
-        }
-        this.hasLoadedSessions = true;
-        this.lastSavedSessionSignature = JSON.stringify({
-          tab_counter: GraphComponent.sessionCounter,
-          active_tab_id: this.activeTabId,
-          tabs: this.tabs
-        });
-        this.applySession(this.activeTabId);
-        this.applyActiveTabState();
-        this.applyRouteFilterOverride();
-      },
-      error: () => {
-        this.hasLoadedSessions = true;
-        this.addSession();
-        this.applyRouteFilterOverride();
+
+    const option = this.activeGraphSearchOption;
+    const queryValue = this.graphSearchText.trim();
+    const nextFilters = { ...this.activeSidebarFilters };
+
+    if (option.mode === 'cluster') {
+      if (queryValue) {
+        nextFilters.selectedType = 'property';
+        nextFilters.singleInput = option.clusterValue || 'all';
+        nextFilters.propertyType = 'all';
+        nextFilters.propertyValue = queryValue;
+        this.applyFilterValues(nextFilters);
+        this.onSidebarApply(nextFilters);
+        this.persistBasicSearchParams(nextFilters, option.key);
+        return;
       }
+      nextFilters.selectedType = 'cluster';
+      nextFilters.singleInput = option.clusterValue || 'all';
+      nextFilters.propertyType = 'all';
+      nextFilters.propertyValue = '';
+    }
+    else if (option.mode === 'property') {
+      if (!queryValue) {
+        return;
+      }
+      nextFilters.selectedType = 'property';
+      nextFilters.singleInput = '';
+      nextFilters.propertyType = option.propertyType || 'all';
+      nextFilters.propertyValue = queryValue;
+    }
+    else if (queryValue) {
+      nextFilters.selectedType = 'property';
+      nextFilters.singleInput = '';
+      nextFilters.propertyType = 'all';
+      nextFilters.propertyValue = queryValue;
+    }
+    else {
+      nextFilters.selectedType = 'cluster';
+      nextFilters.singleInput = 'all';
+      nextFilters.propertyType = 'all';
+      nextFilters.propertyValue = '';
+    }
+
+    this.applyFilterValues(nextFilters);
+    this.onSidebarApply(nextFilters);
+    this.persistBasicSearchParams(nextFilters, option.key);
+  }
+
+  private persistBasicSearchParams(filters: CtiGraphFilters, graphSearchKey: string): void {
+    this.skipNextBasicSearchRouteApply = true;
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        selectedType: filters.selectedType || null,
+        singleInput: filters.singleInput || null,
+        propertyType: filters.propertyType || null,
+        propertyValue: filters.propertyValue || null,
+        maxEdge: Number(filters.maxEdge),
+        maxDepth: Number(filters.maxDepth),
+        graphSearchKey: graphSearchKey || null
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    }).finally(() => {
+      this.skipNextBasicSearchRouteApply = false;
     });
   }
 
-  addSession(): void {
-    const newTab: GraphSessionTab = {
-      id: this.generateId(),
-      name: this.tabs.length === 0 ? this.playgroundTabName : `Session ${GraphComponent.sessionCounter++}`,
-      state: this.createDefaultSessionState()
+  private syncBasicSearchControlsFromRoute(params: Params, filters: CtiGraphFilters): void {
+    this.graphSearchAdvancedMode = false;
+    const requestedKey = String(params['graphSearchKey'] ?? '').trim();
+    const requestedOption = requestedKey ? this.graphSearchOptions.find(option => option.key === requestedKey) : null;
+    if (requestedOption) {
+      this.activeGraphSearchKey = requestedOption.key;
+      this.graphSearchText = filters.propertyValue || '';
+      return;
+    }
+
+    if (filters.selectedType === 'property') {
+      const propertyOption = this.graphSearchOptions.find(option => option.mode === 'property' && option.propertyType === filters.propertyType);
+      const scopedClusterOption = this.graphSearchOptions.find(option => option.mode === 'cluster' && option.clusterValue === filters.singleInput);
+      this.activeGraphSearchKey = propertyOption?.key || scopedClusterOption?.key || 'all';
+      this.graphSearchText = filters.propertyValue || '';
+      return;
+    }
+
+    const clusterOption = this.graphSearchOptions.find(option => option.mode === 'cluster' && option.clusterValue === filters.singleInput);
+    this.activeGraphSearchKey = clusterOption?.key || 'all';
+    this.graphSearchText = '';
+  }
+
+  submitGraphSearchBuilder(): void {
+    const requests = this.groupGraphBuilderListRequests(this.graphAdvancedFilters
+      .map((filter, index) => this.buildGraphSearchRequest(this.getGraphAdvancedOption(filter.optionKey), filter.value.trim(), index === 0 ? undefined : filter.operator))
+      .filter((request): request is GraphSearchRequest => !!request));
+
+    if (requests.length === 0) {
+      return;
+    }
+
+    const nextFilters = {
+      ...this.activeSidebarFilters,
+      selectedType: 'property',
+      singleInput: '',
+      propertyType: 'advanced',
+      propertyValue: this.describeGraphSearchBuilder()
     };
-    this.tabs = [...this.tabs, newTab];
-    this.normalizePlaygroundTab();
-    this.activeTabId = newTab.id;
-    this.applySession(newTab.id);
-    this.applyActiveTabState();
-    this.saveSessions();
+    this.applyFilterValues(nextFilters);
+    this.lastAppliedQuerySignature = `advanced-builder:${JSON.stringify({ requests, maxEdge: this.maxEdge, maxDepth: this.maxDepth })}`;
+    this.loadGraphByRequests(requests);
   }
 
-  selectSession(id: string): void {
-    if (this.activeTabId === id) {
-      return;
-    }
-    this.activeTabId = id;
-    this.applySession(id);
-    this.applyActiveTabState();
-    this.saveSessions();
+  private describeGraphSearchBuilder(): string {
+    const filled = this.graphAdvancedFilters
+      .map((filter, index) => {
+        const option = this.getGraphAdvancedOption(filter.optionKey);
+        const value = filter.value.trim() || option.clusterValue || '';
+        const operator = index === 0 ? 'WHERE' : filter.operator;
+        return `${operator} ${option.label}${value ? `:${value}` : ''}`;
+      })
+      .join(' ');
+    return filled || 'advanced builder';
   }
 
-  closeSession(id: string): void {
-    if (this.tabs.length <= 1) {
-      return;
+  private buildGraphSearchRequest(option: GraphSearchOption, queryValue: string, operator?: '&&' | '||'): GraphSearchRequest | null {
+    if (option.mode === 'cluster') {
+      return { dataPointType: 'cluster', modelType: 'cluster', queryValues: [option.clusterValue || 'all'], operator };
     }
-    if (this.tabs[0]?.id === id) {
-      return;
+    if (option.mode === 'property') {
+      const queryValues = this.parseGraphBuilderValues(option, queryValue);
+      return queryValues.length ? { dataPointType: 'property', modelType: option.propertyType || 'all', queryValues, operator } : null;
     }
-    const idx = this.tabs.findIndex(t => t.id === id);
-    this.tabs = this.tabs.filter(t => t.id !== id);
-    if (this.activeTabId === id) {
-      const next = this.tabs[idx - 1] || this.tabs[idx] || this.tabs[0];
-      this.activeTabId = next.id;
-      this.applySession(this.activeTabId);
-    }
-    this.saveSessions();
+    return null;
   }
 
-  startEditing(id: string): void {
-    if (this.tabs[0]?.id === id) {
-      return;
+  private parseGraphBuilderValues(option: GraphSearchOption, queryValue: string): string[] {
+    const trimmedValue = queryValue.trim();
+    if (!trimmedValue) {
+      return [];
     }
-    this.editingTabId = id;
+    if (option.propertyType === 'm_country' || option.propertyType === 'm_origin_country') {
+      return splitCountryValues(trimmedValue);
+    }
+    return [trimmedValue];
   }
 
-  stopEditing(): void {
-    this.editingTabId = null;
+  private groupGraphBuilderListRequests(requests: GraphSearchRequest[]): GraphSearchRequest[] {
+    const groupedRequests: GraphSearchRequest[] = [];
+
+    requests.forEach(request => {
+      if (request.dataPointType !== 'property' || !this.isGraphBuilderListKey(request.modelType)) {
+        groupedRequests.push(request);
+        return;
+      }
+
+      const previousRequest = groupedRequests[groupedRequests.length - 1];
+      const canMergeWithPrevious = request.operator !== '&&' &&
+        previousRequest?.dataPointType === request.dataPointType &&
+        previousRequest.modelType === request.modelType &&
+        previousRequest.operator !== '&&';
+      if (!canMergeWithPrevious) {
+        groupedRequests.push({ ...request, queryValues: [...request.queryValues] });
+        return;
+      }
+
+      previousRequest.queryValues = this.mergeGraphBuilderQueryValues(previousRequest.queryValues, request.queryValues);
+    });
+
+    return groupedRequests;
   }
 
-  renameSession(id: string, newName: string): void {
-    if (this.tabs[0]?.id === id) {
-      this.stopEditing();
-      return;
-    }
-    const trimmed = newName.trim();
-    if (!trimmed) {
-      this.stopEditing();
-      return;
-    }
-    this.tabs = this.tabs.map(tab => (tab.id === id ? { ...tab, name: trimmed } : tab));
-    this.stopEditing();
-    this.saveSessions();
+  private isGraphBuilderListKey(modelType: string): boolean {
+    return modelType === 'm_country' || modelType === 'm_origin_country';
   }
 
-  exportActiveSession(): void {
-    const active = this.getActiveTab();
-    if (!active) {
-      return;
-    }
-    const jsonString = JSON.stringify({ name: active.name, state: active.state }, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const safeName = active.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    a.download = `cti-graph-session-${safeName}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  private mergeGraphBuilderQueryValues(first: string[], second: string[]): string[] {
+    const values: string[] = [];
+    const seen = new Set<string>();
+    [...first, ...second].forEach(value => {
+      const trimmedValue = value.trim();
+      const normalizedValue = trimmedValue.toLowerCase();
+      if (!trimmedValue || seen.has(normalizedValue)) {
+        return;
+      }
+      seen.add(normalizedValue);
+      values.push(trimmedValue);
+    });
+    return values;
   }
 
   openReportExportModal(): void {
@@ -546,7 +580,6 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private buildGraphReportPayload(): GraphReportPayload {
-    const active = this.getActiveTab();
     const nodes = this.rawNodes.map(node => ({
       id: String(node.id ?? ''),
       label: String(node.label ?? ''),
@@ -562,20 +595,10 @@ export class GraphComponent implements OnInit, OnDestroy {
     nodes.forEach(node => {
       byType[node.type] = (byType[node.type] ?? 0) + 1;
     });
-    const tables = this.listRows.slice(0, 1).map(() => ({
-      title: 'Listing Snapshot',
-      values: {
-        documents: String(this.listRows.length),
-        view: this.isGraphView ? 'graph' : 'list',
-        selectedType: this.selectedType,
-        filterSingleInput: this.singleInput,
-        filterProperty: this.propertyValue || '-'
-      }
-    }));
     return {
       graphKind: 'cti',
       title: 'CTI Graph Intelligence Report',
-      sessionName: active?.name ?? 'Session',
+      sessionName: 'CTI Graph',
       generatedAtIso: new Date().toISOString(),
       nodes,
       edges,
@@ -585,8 +608,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         clusters: byType['cluster'] ?? 0,
         documents: byType['document'] ?? 0,
         properties: byType['property'] ?? 0
-      },
-      tables
+      }
     };
   }
 
@@ -666,102 +688,37 @@ export class GraphComponent implements OnInit, OnDestroy {
     return snapshot;
   }
 
-  importSessionFile(event: Event): void {
-    const inputElement = event.target as HTMLInputElement;
-    if (!inputElement.files?.length) {
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = e => {
-      try {
-        const content = String(e.target?.result ?? '');
-        const parsed = JSON.parse(content);
-        if (!parsed?.state || typeof parsed.state !== 'object') {
-          return;
-        }
-        const imported: GraphSessionTab = {
-          id: this.generateId(),
-          name: String(parsed.name || `Session ${GraphComponent.sessionCounter++}`),
-          state: { ...this.createDefaultSessionState(), ...parsed.state }
-        };
-        this.tabs = [...this.tabs, imported];
-        this.normalizePlaygroundTab();
-        this.activeTabId = imported.id;
-        this.applySession(imported.id);
-        this.saveSessions();
-      }
-      catch {
-        // Ignore invalid imported session files.
-      }
-    };
-    reader.readAsText(inputElement.files[0]);
-    inputElement.value = '';
+  private applyCurrentFilters(): void {
+    this.onSidebarApply(this.activeSidebarFilters);
   }
 
-  toggleAddMenu(event: MouseEvent): void {
-    event.stopPropagation();
-    this.isAddMenuVisible = !this.isAddMenuVisible;
-    this.isHeaderMenuVisible = false;
-  }
-
-  toggleHeaderMenu(event: MouseEvent): void {
-    event.stopPropagation();
-    this.isHeaderMenuVisible = !this.isHeaderMenuVisible;
-    this.isAddMenuVisible = false;
-  }
-
-  closeMenus(): void {
-    this.isAddMenuVisible = false;
-    this.isHeaderMenuVisible = false;
-  }
-
-  private applySession(tabId: string): void {
-    const tab = this.tabs.find(t => t.id === tabId);
-    if (!tab) {
-      return;
-    }
-    const s = tab.state;
-    this.nodeSearchText = s.nodeSearchText;
-    this.physicsEnabled = s.physicsEnabled;
-    this.isGraphView = s.isGraphView;
-    this.isListingsCollapsed = s.isListingsCollapsed;
-    this.expandEnabled = s.expandEnabled;
-    this.isSidebarCollapsed = s.isSidebarCollapsed;
-    this.selectedType = s.selectedType;
-    this.singleInput = s.singleInput;
-    this.propertyType = s.propertyType;
-    this.propertyValue = s.propertyValue;
-    this.maxEdge = s.maxEdge;
-    this.maxDepth = s.maxDepth;
-    this.restoreGraphSessionState(s);
-  }
-
-  private updateActiveSessionState(partial: Partial<GraphSessionState>, persist: boolean = true): void {
-    const active = this.getActiveTab();
-    if (!active) {
-      return;
-    }
-    this.tabs = this.tabs.map(tab => tab.id === active.id ? { ...tab, state: { ...tab.state, ...partial } } : tab);
-    if (persist) {
-      this.saveSessions();
-    }
-  }
-
-  onSidebarFiltersChanged(filters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; }): void {
+  private applyFilterValues(filters: CtiGraphFilters): void {
     this.selectedType = filters.selectedType;
     this.singleInput = filters.singleInput;
     this.propertyType = filters.propertyType;
     this.propertyValue = filters.propertyValue;
-    this.maxEdge = filters.maxEdge;
-    this.maxDepth = filters.maxDepth;
-    this.updateActiveSessionState({
-      selectedType: this.selectedType,
-      singleInput: this.singleInput,
-      propertyType: this.propertyType,
-      propertyValue: this.propertyValue,
-      maxEdge: Number(this.maxEdge),
-      maxDepth: Number(this.maxDepth)
+    this.maxEdge = Number(filters.maxEdge);
+    this.maxDepth = Number(filters.maxDepth);
+  }
+
+  private buildQuerySignature(filters: CtiGraphFilters): string {
+    return JSON.stringify({
+      selectedType: filters.selectedType,
+      singleInput: filters.singleInput,
+      propertyType: filters.propertyType,
+      propertyValue: filters.propertyValue,
+      maxEdge: Number(filters.maxEdge),
+      maxDepth: Number(filters.maxDepth)
     });
+  }
+
+  private nextGraphRequestId(): number {
+    this.graphRequestSequence += 1;
+    return this.graphRequestSequence;
+  }
+
+  private isCurrentGraphRequest(requestId: number): boolean {
+    return requestId === this.graphRequestSequence;
   }
 
   resetGraph(): void {
@@ -786,9 +743,11 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.highlightedNodeId = null;
     this.contextMenuNode = null;
     this.contextMenuNodeId = '';
-    this.currentCategory = '';
+    this.hideNodeInfoPanel();
+    this.hoveredNodeId = null;
     this.result = [];
     this.originalNodeState.clear();
+    this.updateLegendState([], []);
     const container = this.networkContainer?.nativeElement;
     if (container) {
       while (container.firstChild) {
@@ -806,101 +765,280 @@ export class GraphComponent implements OnInit, OnDestroy {
     else {
       this.expandEnabled = false;
     }
-    let params = new HttpParams();
     this.loading = false;
-    if (data_point_type) {
-      params = params.set('data_point_type', data_point_type);
-    }
-    if (type) {
-      params = params.set('model_type', type);
-    }
-    if (value) {
-      params = params.set('query_value', value);
-    }
-    if (maxEdge) {
-      params = params.set('edge', maxEdge);
-    }
-    if (maxDepth) {
-      params = params.set('depth', maxDepth);
-    }
+    const requestId = this.nextGraphRequestId();
+    const payload = this.buildGraphPayload(data_point_type, type, value, '', maxEdge, maxDepth);
     this.resetGraph();
-    this.api.get<{
+    this.api.post<{
       results: any[];
-      limit_reached: boolean;
-  }>('graph', { params }).subscribe({
+  }>('graph', payload).subscribe({
     next: response => {
-      const { results, limit_reached } = response;
+      if (!this.isCurrentGraphRequest(requestId)) {
+        return;
+      }
+      const { results } = response;
       this.result = results;
       this.renderGraph(this.result);
-      this.limitReached = limit_reached;
+      if (data_point_type === 'document') {
+        this.focusGraphNode(this.pendingFocusNodeId || `cti_vertices/${value}`);
+        this.pendingFocusNodeId = null;
+      }
       this.loading = true;
-      this.initListings(results);
-      this.updateActiveSessionState({
-        graphData: this.result,
-        limitReached: this.limitReached,
-        groupExpandedState: { ...this.groupExpandedState }
-      });
     },
     error: _ => {
+      if (!this.isCurrentGraphRequest(requestId)) {
+        return;
+      }
+      this.pendingFocusNodeId = null;
       this.isEmpty = true;
-      this.limitReached = false;
       this.loading = true;
-      this.updateActiveSessionState({
-        graphData: [],
-        limitReached: false,
-        groupExpandedState: {}
-      });
     }
   });
   }
 
-  initListings(results: any[]): void {
-    this.flattenedDocuments = [];
-    this.listRows = [];
-    results.forEach(item => {
-      const doc = item.vertex;
-      const edge = item.edge;
-      let path = 'unknown';
-      const from = (edge?._from || '').toLowerCase().trim();
-      const to = (edge?._to || '').toLowerCase().trim();
-      if (from.includes('general') || to.includes('general')) {
-        path = 'strategic/all';
-      }
-      else if (from.includes('leak') || to.includes('leak')) {
-        path = 'breach/all';
-      }
-      else if (from.includes('defacement') || to.includes('defacement')) {
-        path = 'defacement/archive';
-      }
-      else if (from.includes('chat') || to.includes('chat')) {
-        path = 'social/telegram';
-      }
-      else if (from.includes('exploit') || to.includes('exploit')) {
-        path = 'exploit/cve';
-      }
-      if (doc?.type === 'document') {
-        const docId = doc.m_document_id || doc._key;
-        const docType = doc.type;
-        this.listRows.push({
-          id: doc?._id ?? '',
-          label: doc?._key ?? '',
-          cluster: (edge?._from ?? '').split('/').pop() ?? 'unknown'
-        });
-        Object.entries(doc).forEach(([key, value]) => {
-          if (key.startsWith('m_') && Array.isArray(value)) {
-            value.forEach(val => {
-              this.flattenedDocuments.push({
-                m_document_id: docId,
-                type: docType,
-                property: key,
-                value: val,
-                path: path
-              });
-            });
-          }
-        });
+  private loadGraphByScopedPropertySearch(queryValue: string, clusterKey: string): void {
+    if (this.expandEnabled) {
+      queueMicrotask(() => {
+        this.expandEnabled = false;
+      });
+    }
+    else {
+      this.expandEnabled = false;
+    }
+
+    this.loading = false;
+    const requestId = this.nextGraphRequestId();
+    this.resetGraph();
+    this.api.post<{ results: GraphResultItem[]; }>('graph', this.buildGraphPayload('property', 'all', queryValue, clusterKey)).subscribe({
+      next: response => {
+        if (!this.isCurrentGraphRequest(requestId)) {
+          return;
+        }
+        const results = response.results ?? [];
+        this.result = clusterKey === 'all' ? results : this.filterGraphResultsByCluster(results, clusterKey);
+        this.renderGraph(this.result);
+        this.loading = true;
+      },
+      error: _ => {
+        if (!this.isCurrentGraphRequest(requestId)) {
+          return;
+        }
+        this.isEmpty = true;
+        this.loading = true;
       }
     });
+  }
+
+  private buildGraphPayload(dataPointType: string, modelType: string, queryValue: string, scopeCluster = '', edgeOverride?: string | number, depthOverride?: string | number): Record<string, string> {
+    const payload: Record<string, string> = {
+      data_point_type: dataPointType,
+      model_type: modelType,
+      query_value: queryValue,
+      edge: String(edgeOverride ?? this.maxEdge),
+      depth: String(depthOverride ?? this.maxDepth)
+    };
+    if (scopeCluster && scopeCluster !== 'all') {
+      payload['scope_cluster'] = scopeCluster;
+    }
+    return payload;
+  }
+
+  private loadGraphByRequests(requests: GraphSearchRequest[]): void {
+    if (this.expandEnabled) {
+      queueMicrotask(() => {
+        this.expandEnabled = false;
+      });
+    }
+    else {
+      this.expandEnabled = false;
+    }
+    this.loading = false;
+    const requestId = this.nextGraphRequestId();
+    this.resetGraph();
+    const payload = {
+      requests: requests.map(request => ({
+        data_point_type: request.dataPointType,
+        model_type: request.modelType,
+        query_value: request.queryValues[0] || '',
+        query_values: request.queryValues,
+        operator: request.operator
+      })),
+      edge: String(this.maxEdge),
+      depth: String(this.maxDepth)
+    };
+    this.api.post<{ results: GraphResultItem[]; }>('graph', payload).subscribe({
+      next: response => {
+        if (!this.isCurrentGraphRequest(requestId)) {
+          return;
+        }
+        this.result = response.results ?? [];
+        this.renderGraph(this.result);
+        this.loading = true;
+      },
+      error: _ => {
+        if (!this.isCurrentGraphRequest(requestId)) {
+          return;
+        }
+        this.isEmpty = true;
+        this.loading = true;
+      }
+    });
+  }
+
+  private filterGraphResultsByCluster(results: GraphResultItem[], clusterKey: string): GraphResultItem[] {
+    const clusterId = `cti_vertices/${clusterKey}`;
+    const documentIds = new Set<string>();
+    results.forEach(item => {
+      const from = String(item.edge?._from ?? '');
+      const to = String(item.edge?._to ?? '');
+      if (from === clusterId && to) {
+        documentIds.add(to);
+      }
+      if (to === clusterId && from) {
+        documentIds.add(from);
+      }
+    });
+
+    if (documentIds.size === 0) {
+      return [];
+    }
+
+    return this.dedupeGraphResults(results.filter(item => {
+      const vertexId = String(item.vertex?._id ?? '');
+      const edgeFrom = String(item.edge?._from ?? '');
+      const edgeTo = String(item.edge?._to ?? '');
+      if (vertexId === clusterId || documentIds.has(vertexId)) {
+        return true;
+      }
+      if (edgeFrom === clusterId || edgeTo === clusterId || documentIds.has(edgeFrom) || documentIds.has(edgeTo)) {
+        return true;
+      }
+      return (item.path?.vertices ?? []).some(vertex => documentIds.has(String(vertex?._id ?? '')) || String(vertex?._id ?? '') === clusterId);
+    }));
+  }
+
+  private dedupeGraphResults(results: GraphResultItem[]): GraphResultItem[] {
+    const merged = new Map<string, GraphResultItem>();
+    results.forEach(item => {
+      const edgeId = item?.edge?._id ?? '';
+      const vertexId = item?.vertex?._id ?? '';
+      const key = `${edgeId}:${vertexId}:${item?.vertex?._key ?? ''}`;
+      if (!merged.has(key)) {
+        merged.set(key, item);
+      }
+    });
+    return Array.from(merged.values());
+  }
+
+  private mergeGraphBuilderResults(responseResults: GraphResultItem[][], requests: GraphSearchRequest[]): GraphResultItem[] {
+    if (responseResults.length === 0) {
+      return [];
+    }
+
+    let aggregate = responseResults[0] ?? [];
+    let aggregateDocumentIds = this.extractDocumentIdsFromGraphResults(aggregate);
+    for (let index = 1; index < responseResults.length; index++) {
+      const current = responseResults[index] ?? [];
+      const operator = requests[index]?.operator ?? '||';
+      if (operator !== '&&') {
+        aggregate = this.dedupeGraphResults([...aggregate, ...current]);
+        aggregateDocumentIds = this.unionSets(aggregateDocumentIds, this.extractDocumentIdsFromGraphResults(current));
+        continue;
+      }
+
+      const currentDocumentIds = this.extractDocumentIdsFromGraphResults(current);
+      if (aggregateDocumentIds.size === 0 || currentDocumentIds.size === 0) {
+        aggregate = [];
+        aggregateDocumentIds = new Set<string>();
+        break;
+      }
+
+      const sharedDocumentIds = this.intersectSets(aggregateDocumentIds, currentDocumentIds);
+      aggregate = this.dedupeGraphResults([...aggregate, ...current].filter(item => {
+        const itemDocumentIds = this.extractDocumentIdsFromGraphResult(item);
+        return itemDocumentIds.some(documentId => sharedDocumentIds.has(documentId));
+      }));
+      aggregateDocumentIds = sharedDocumentIds;
+    }
+
+    return this.dedupeGraphResults(aggregate);
+  }
+
+  private limitGraphBuilderResultsByDocuments(results: GraphResultItem[], documentLimit: number): GraphResultItem[] {
+    if (!Number.isFinite(documentLimit) || documentLimit < 1) {
+      return this.dedupeGraphResults(results);
+    }
+
+    const orderedDocumentIds: string[] = [];
+    const seenDocumentIds = new Set<string>();
+    results.forEach(item => {
+      this.extractDocumentIdsFromGraphResult(item).forEach(documentId => {
+        if (!seenDocumentIds.has(documentId)) {
+          seenDocumentIds.add(documentId);
+          orderedDocumentIds.push(documentId);
+        }
+      });
+    });
+
+    if (orderedDocumentIds.length <= documentLimit) {
+      return this.dedupeGraphResults(results);
+    }
+
+    const allowedDocumentIds = new Set(orderedDocumentIds.slice(0, documentLimit));
+    const limitedResults = results.filter(item => this.extractDocumentIdsFromGraphResult(item).some(documentId => allowedDocumentIds.has(documentId)));
+    return this.dedupeGraphResults(limitedResults);
+  }
+
+  private extractDocumentIdsFromGraphResults(results: GraphResultItem[]): Set<string> {
+    const ids = new Set<string>();
+    results.forEach(item => {
+      this.extractDocumentIdsFromGraphResult(item).forEach(id => ids.add(id));
+    });
+    return ids;
+  }
+
+  private extractDocumentIdsFromGraphResult(item: GraphResultItem): string[] {
+    const ids = new Set<string>();
+    const addDocumentId = (id: unknown) => {
+      const value = String(id ?? '');
+      if (!value || this.isClusterRootNode(value)) {
+        return;
+      }
+      ids.add(value);
+    };
+    const inspectEdge = (edge: any) => {
+      if (!edge?._from || !edge?._to) {
+        return;
+      }
+      const type = String(edge.type || '');
+      if (type === 'cluster_to_doc') {
+        addDocumentId(edge._to);
+      }
+      else if (type.startsWith('has_')) {
+        addDocumentId(edge._from);
+      }
+    };
+    const inspect = (vertex: any) => {
+      if (!vertex?._id) {
+        return;
+      }
+      if (String(vertex.type || '').toLowerCase() === 'document') {
+        ids.add(String(vertex._id));
+      }
+    };
+    inspect(item.vertex);
+    inspectEdge(item.edge);
+    (item.path?.vertices ?? []).forEach(inspect);
+    (item.path?.edges ?? []).forEach(inspectEdge);
+    return Array.from(ids);
+  }
+
+  private unionSets(first: Set<string>, second: Set<string>): Set<string> {
+    return new Set([...first, ...second]);
+  }
+
+  private intersectSets(first: Set<string>, second: Set<string>): Set<string> {
+    return new Set([...first].filter(item => second.has(item)));
   }
 
   showContextMenu( node: ExtendedNode, pointerDom?: { x: number; y: number; } ) {
@@ -929,6 +1067,14 @@ export class GraphComponent implements OnInit, OnDestroy {
         left = containerRect ? (containerRect.left + bottomRightDom.x) : bottomRightDom.x;
         top = containerRect ? (containerRect.top + bottomRightDom.y) : bottomRightDom.y;
       }
+      this.contextMenuNodeId = node.id;
+      this.contextMenuNode = node;
+      this.contextCanExpand = this.canContextExpand();
+      this.contextCanCollapse = this.canContextCollapse();
+      this.contextShowOpenCti = this.showContextOpenCti();
+      this.contextShowOpenDocument = this.showContextOpenDocument();
+      this.contextShowOpenReport = this.showContextOpenReport();
+      this.changeDetector.detectChanges();
       const menuWidth = menu.offsetWidth || 256;
       const menuHeight = menu.offsetHeight || 260;
       const viewportPadding = 12;
@@ -947,12 +1093,6 @@ export class GraphComponent implements OnInit, OnDestroy {
       menu.classList.remove('hidden');
       menu.setAttribute('data-left', String(this.normalizePositionValue(left)));
       menu.setAttribute('data-top', String(this.normalizePositionValue(top)));
-      this.contextMenuNodeId = node.id;
-      this.contextMenuNode = node;
-      this.contextCanExpand = this.canContextExpand();
-      this.contextCanCollapse = this.canContextCollapse();
-      this.contextShowOpenCti = this.showContextOpenCti();
-      this.contextShowOpenReport = this.showContextOpenReport();
       if (node.color) {
         this.orignalColor = node.color;
       }
@@ -983,7 +1123,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.contextCanExpand = false;
     this.contextCanCollapse = false;
     this.contextShowOpenCti = false;
+    this.contextShowOpenDocument = false;
     this.contextShowOpenReport = false;
+    this.changeDetector.detectChanges();
   }
 
   private normalizePositionValue(rawValue: number): number {
@@ -1031,20 +1173,28 @@ export class GraphComponent implements OnInit, OnDestroy {
     return newNodes;
   }
 
-  private createGroupNodeSvg(count: number, isExpanded = false, clusterLabel = 'CTI Cluster'): string {
-    const borderColor = isExpanded ? '#facc15' : '#7dd3fc';
+  private createGroupNodeSvg(count: number, isExpanded = false, clusterLabel = 'CTI Cluster', clusterKey = ''): string {
+    const paletteColor = this.clusterPalette[clusterKey]?.color ?? '#7dd3fc';
+    const borderColor = isExpanded ? '#facc15' : paletteColor;
     const subtitle = clusterLabel.replace(/&/g, '&amp;').slice(0, 20);
+    const initials = subtitle
+      .split(/\s+/)
+      .map(part => part.charAt(0))
+      .join('')
+      .slice(0, 3)
+      .toUpperCase();
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
     <defs>
       <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#0c4a6e" stop-opacity="1" />
+        <stop offset="0%" stop-color="${paletteColor}" stop-opacity="0.95" />
         <stop offset="100%" stop-color="#1e293b" stop-opacity="1" />
       </linearGradient>
     </defs>
     <g>
       <circle cx="80" cy="80" r="74" fill="url(#grad1)" stroke="${borderColor}" stroke-width="6" />
-      <text x="80" y="72" dominant-baseline="middle" font-family="'Inter', sans-serif" text-anchor="middle" font-size="30" font-weight="700" fill="#f1f5f9">${count}</text>
-      <text x="80" y="98" dominant-baseline="middle" font-family="'Inter', sans-serif" text-anchor="middle" font-size="10" font-weight="600" fill="#cbd5e1">${subtitle}</text>
+      <text x="80" y="54" dominant-baseline="middle" font-family="'Inter', sans-serif" text-anchor="middle" font-size="18" font-weight="800" fill="#f8fafc">${initials}</text>
+      <text x="80" y="85" dominant-baseline="middle" font-family="'Inter', sans-serif" text-anchor="middle" font-size="32" font-weight="800" fill="#f1f5f9">${count}</text>
+      <text x="80" y="112" dominant-baseline="middle" font-family="'Inter', sans-serif" text-anchor="middle" font-size="10" font-weight="700" fill="#cbd5e1">${subtitle}</text>
     </g>
   </svg>`;
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
@@ -1052,13 +1202,14 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   private updateGroupNodeVisual(nodeId: string, count: number, isExpanded: boolean): void {
     const groupNode = this.nodeSet.get(nodeId) as ExtendedNode | null;
+    const clusterKey = this.getClusterKeyFromNodeId(nodeId);
     const clusterLabel = groupNode?.title
       ? String(groupNode.title).split('(')[0].trim()
-      : `${this.toTitleCase(String(nodeId).split('/').pop() ?? 'CTI')} Cluster`;
+      : `${this.clusterPalette[clusterKey]?.label ?? this.toTitleCase(String(nodeId).split('/').pop() ?? 'CTI')} Cluster`;
     this.nodeSet.update({
       id: nodeId,
       shape: 'circularImage',
-      image: this.createGroupNodeSvg(count, isExpanded, clusterLabel),
+      image: this.createGroupNodeSvg(count, isExpanded, clusterLabel, clusterKey),
       size: 40,
       borderWidth: 0,
       label: ''
@@ -1110,14 +1261,14 @@ export class GraphComponent implements OnInit, OnDestroy {
     return Array.from(collapsedTargets);
   }
 
-  private expandGroupFromNodeId(nodeId: string, subNodes: string[], radius: number, persist: boolean = true): void {
+  private expandGroupFromNodeId(nodeId: string, subNodes: string[], radius: number): void {
     const isExpanded = this.groupExpandedState[nodeId] || false;
     if (isExpanded) {
       return;
     }
     const uniqueSubNodes = Array.from(new Set(subNodes));
     const sourceId = this.groupParentByGroupId[nodeId] ?? nodeId;
-    const centerPos = this.network.getPositions([nodeId])[nodeId];
+    const centerPos = this.network.getPositions([nodeId])[nodeId] ?? { x: 0, y: 0 };
     const existingEdgeIds = new Set(this.edgeSet.getIds().map(id => String(id)));
     const uniqueEdgesById = new Map<string, Edge>();
     this.rawEdges.forEach(e => {
@@ -1153,12 +1304,32 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     this.groupExpandedState[nodeId] = true;
     this.updateGroupNodeVisual(nodeId, uniqueSubNodes.length, true);
-    if (persist) {
-      this.updateActiveSessionState({ groupExpandedState: { ...this.groupExpandedState } });
-    }
   }
 
-  private collapseGroupFromNodeId(nodeId: string, subNodes: string[], force = false, persist: boolean = true): void {
+  private autoExpandSingleVisibleGroupNode(visibleNodes: ExtendedNode[]): void {
+    if (visibleNodes.length !== 1) {
+      return;
+    }
+    const node = visibleNodes[0];
+    const nodeId = String(node?.id ?? '');
+    const subNodes = node?.subNodes ?? [];
+    if (!node?.isGroup || !nodeId || subNodes.length === 0) {
+      return;
+    }
+    queueMicrotask(() => {
+      if (!this.network || !this.nodeSet?.get(nodeId)) {
+        return;
+      }
+      const hasVisibleSubNode = subNodes.some(subNodeId => !!this.nodeSet.get(subNodeId));
+      if (!hasVisibleSubNode) {
+        this.groupExpandedState[nodeId] = false;
+      }
+      this.expandGroupFromNodeId(nodeId, subNodes, 200);
+      this.captureOriginalNodeColors([nodeId, ...subNodes]);
+    });
+  }
+
+  private collapseGroupFromNodeId(nodeId: string, subNodes: string[], force = false): void {
     const isExpanded = this.groupExpandedState[nodeId] || false;
     if (!isExpanded && !force) {
       return;
@@ -1166,9 +1337,6 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.removeSubNodesAndEdges(nodeId, subNodes);
     this.groupExpandedState[nodeId] = false;
     this.updateGroupNodeVisual(nodeId, subNodes.length, false);
-    if (persist) {
-      this.updateActiveSessionState({ groupExpandedState: { ...this.groupExpandedState } });
-    }
   }
 
   expandGroupNode(): void {
@@ -1245,7 +1413,21 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (!node) {
       return false;
     }
-    return !this.isClusterRootNode(String(node.id));
+    return this.isReportNode(node);
+  }
+
+  showContextOpenDocument(): boolean {
+    return this.showContextOpenReport();
+  }
+
+  private isReportNode(node: ExtendedNode | null): boolean {
+    if (!node?.id) {
+      return false;
+    }
+    const nodeId = String(node.id);
+    const nodeType = String(node.nodeType || this.nodeTypeById[nodeId] || '').toLowerCase();
+    const nodeClass = String(node.nodeClass || '').toLowerCase();
+    return nodeType === 'document' || nodeType === 'report' || nodeClass === 'report';
   }
 
   openCTI() {
@@ -1261,11 +1443,34 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.hideContextMenu();
   }
 
-  copyNodeLabel(event: MouseEvent) {
+  openDocumentGraph(): void {
+    const nodeId = this.contextMenuNodeId;
+    const parts = nodeId.split('/');
+    const documentKey = parts[parts.length - 1] || '';
+    if (!documentKey) {
+      this.hideContextMenu();
+      return;
+    }
+    const nextFilters: CtiGraphFilters = {
+      ...this.activeSidebarFilters,
+      selectedType: 'document',
+      singleInput: documentKey,
+      propertyType: 'all',
+      propertyValue: ''
+    };
+    this.pendingFocusNodeId = nodeId;
+    this.hideContextMenu();
+    this.applyFilterValues(nextFilters);
+    this.lastAppliedQuerySignature = '';
+    this.onSidebarApply(nextFilters);
+    this.persistBasicSearchParams(nextFilters, 'all');
+  }
+
+  copyNodeLabel() {
     const _label = this.contextMenuNode?.label;
     if (_label) {
       this.clipboard.copy(_label);
-      this.showCopiedMessage(event);
+      this.showCopiedMessage();
       this.hideContextMenu();
     }
   }
@@ -1275,54 +1480,87 @@ export class GraphComponent implements OnInit, OnDestroy {
   (edge.to === nodeId && edge.from === clusterId));
   }
 
+  private normalizeReportCategory(category: string): string {
+    const normalized = category.trim().toLowerCase();
+    const aliases: Record<string, string> = {
+      breach: 'leak',
+      leaks: 'leak',
+      strategic: 'general',
+      telegram: 'chat',
+      chats: 'chat'
+    };
+    return aliases[normalized] || normalized;
+  }
+
   private getReportCategory(nodeId: string): string {
+    const nodeClusterId = this.normalizeReportCategory(String(this.contextMenuNode?.clusterId || ''));
+    if (nodeClusterId && this.clusterPalette[nodeClusterId]) {
+      return nodeClusterId;
+    }
+
     const checks: [
       string,
       string
   ][] = [
     ['general', 'cti_vertices/general'],
     ['leak', 'cti_vertices/leak'],
+    ['tracking', 'cti_vertices/tracking'],
+    ['news', 'cti_vertices/news'],
     ['defacement', 'cti_vertices/defacement'],
     ['exploit', 'cti_vertices/exploit'],
-    ['chat', 'cti_vertices/chat']
+    ['chat', 'cti_vertices/chat'],
+    ['social', 'cti_vertices/social'],
+    ['apt', 'cti_vertices/apt'],
+    ['malware', 'cti_vertices/malware']
   ];
     for (const [cat, clusterId] of checks) {
       if (this.hasClusterEdge(nodeId, clusterId)) {
         return cat;
       }
     }
+    const connectedCluster = Array.from(this.getConnectedClusterKeys(nodeId))
+      .find(clusterKey => checks.some(([cat]) => cat === clusterKey));
+    if (connectedCluster) {
+      return this.normalizeReportCategory(connectedCluster);
+    }
+    if (this.selectedType === 'cluster' && this.singleInput && this.singleInput !== 'all') {
+      return this.normalizeReportCategory(this.singleInput);
+    }
     return '';
   }
 
+  private getReportPathForCategory(category: string): string | null {
+    const pathByCategory: Record<string, string> = {
+      apt: '/dashboard/apt-intel/apt',
+      chat: '/dashboard/social/chat/all',
+      defacement: '/dashboard/defacement/all',
+      exploit: '/dashboard/exploit/all',
+      general: '/dashboard/strategic/all',
+      leak: '/dashboard/breach/all',
+      malware: '/dashboard/apt-intel/malware',
+      news: '/dashboard/feed/news',
+      social: '/dashboard/social/all',
+      tracking: '/dashboard/breach/tracking'
+    };
+    return pathByCategory[this.normalizeReportCategory(category)] || null;
+  }
+
   viewReport() {
-    this.hideContextMenu();
     const nodeId = this.contextMenuNodeId;
     const parts = nodeId.split('/');
-    const singleInput = parts[parts.length - 1];
+    const singleInput = this.contextMenuNode?.docId || parts[parts.length - 1];
     const category = this.getReportCategory(nodeId);
-    const open = (path: string) => this.proxied_resource.open(`${window.location.origin}${path}/${singleInput}`);
-    if (category === 'leak') {
-      open('/dashboard/breach/all');
+    const reportPath = this.getReportPathForCategory(category);
+    if (!singleInput || !reportPath) {
+      this.hideContextMenu();
+      return;
     }
-    else if (category === 'defacement') {
-      open('/dashboard/defacement/archive');
-    }
-    else if (category === 'general') {
-      open('/dashboard/strategic/all');
-    }
-    else if (category === 'chat') {
-      open('/dashboard/social/telegram');
-    }
-    else if (category === 'exploit') {
-      open('/dashboard/exploit/cve');
-    }
+    const encodedInput = encodeURIComponent(singleInput);
+    this.proxied_resource.open(`${window.location.origin}${reportPath}/${encodedInput}`);
     this.hideContextMenu();
   }
 
-  showCopiedMessage(event: MouseEvent) {
-    const buttonRect = (event.target as HTMLElement).getBoundingClientRect();
-    this.copiedX = buttonRect.right + 10;
-    this.copiedY = buttonRect.top + window.scrollY;
+  showCopiedMessage() {
     this.copied = true;
     setTimeout(() => {
       this.copied = false;
@@ -1331,7 +1569,6 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   onPhysicsToggled(enabled: boolean): void {
     this.physicsEnabled = enabled;
-    this.updateActiveSessionState({ physicsEnabled: this.physicsEnabled });
     if (this.network) {
       this.network.setOptions({ physics: { enabled } });
     }
@@ -1341,36 +1578,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.onPhysicsToggled(!this.physicsEnabled);
   }
 
-  onNodeSearchChange(value: string): void {
-    this.nodeSearchText = value ?? '';
-    this.updateActiveSessionState({ nodeSearchText: this.nodeSearchText });
-    this.applyNodeSearchHighlight();
-  }
-
-  onNodeSearchSubmitted(): void {
-    this.applyNodeSearchHighlight();
-  }
-
-  onToolbarViewModeChanged(mode: 'graph' | 'list'): void {
-    this.setViewMode(mode === 'graph');
-  }
-
-  setViewMode(isGraphView: boolean): void {
-    this.isGraphView = isGraphView;
-    this.updateActiveSessionState({ isGraphView: this.isGraphView });
-  }
-
-  toggleListingsCollapsed(): void {
-    this.isListingsCollapsed = !this.isListingsCollapsed;
-    this.updateActiveSessionState({ isListingsCollapsed: this.isListingsCollapsed });
-  }
-
   toggleExpandCollapseAll(): void {
     this.expandEnabled = !this.expandEnabled;
-    this.updateActiveSessionState({
-      expandEnabled: this.expandEnabled,
-      groupExpandedState: this.expandEnabled ? {} : { ...this.groupExpandedState }
-    });
     this.nodeSet.get().forEach(node => {
       const groupNode = node as ExtendedNode;
       if (!groupNode.isGroup || !groupNode.subNodes || !groupNode.id) {
@@ -1378,57 +1587,55 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
       const nodeId = String(groupNode.id);
       if (this.expandEnabled) {
-        this.expandGroupFromNodeId(nodeId, groupNode.subNodes, 200, false);
+        this.expandGroupFromNodeId(nodeId, groupNode.subNodes, 200);
       }
       else {
-        this.collapseGroupFromNodeId(nodeId, groupNode.subNodes, false, false);
+        this.collapseGroupFromNodeId(nodeId, groupNode.subNodes);
       }
     });
     this.captureOriginalNodeColors();
-    this.applyNodeSearchHighlight();
   }
 
-  onSidebarApply( filters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; } ): void {
-    if (!this.isTailwindReady || !this.networkContainer) {
+  onSidebarApply(filters: CtiGraphFilters): void {
+    if (!this.networkContainer) {
       this.pendingFilters = { ...filters };
       return;
     }
-    this.selectedType = filters.selectedType;
-    this.singleInput = filters.singleInput;
-    this.propertyType = filters.propertyType;
-    this.propertyValue = filters.propertyValue;
-    this.maxEdge = filters.maxEdge;
-    this.maxDepth = filters.maxDepth;
+    this.applyFilterValues(filters);
     queueMicrotask(() => {
       this.showMaxEdgeNotice = Number(this.maxEdge) > 50;
     });
-    this.updateActiveSessionState({
-      selectedType: this.selectedType,
-      singleInput: this.singleInput,
-      propertyType: this.propertyType,
-      propertyValue: this.propertyValue,
-      maxEdge: Number(this.maxEdge),
-      maxDepth: Number(this.maxDepth),
-      graphData: null,
-      groupExpandedState: {},
-      limitReached: false
-    });
-    this.saveSessions(true);
+
+    const nextQuerySignature = this.buildQuerySignature(filters);
+    const shouldReload = this.lastAppliedQuerySignature !== nextQuerySignature || !this.network;
+    if (!shouldReload) {
+      this.applyGraphViewFilters();
+      return;
+    }
+
+    this.lastAppliedQuerySignature = nextQuerySignature;
     if (filters.selectedType === 'property' && filters.propertyType && filters.propertyValue) {
-      this.loadGraphByNode(this.selectedType, filters.propertyType, filters.propertyValue, this.maxEdge.toString(), this.maxDepth.toString());
+      if (filters.propertyType === 'all' && filters.singleInput && filters.singleInput !== 'all') {
+        this.loadGraphByScopedPropertySearch(filters.propertyValue, filters.singleInput);
+      }
+      else {
+        this.loadGraphByNode(this.selectedType, filters.propertyType, filters.propertyValue, this.maxEdge.toString(), this.maxDepth.toString());
+      }
     }
     else if ((filters.selectedType === 'cluster' || filters.selectedType === 'document') && filters.singleInput) {
       this.loadGraphByNode(this.selectedType, filters.selectedType, filters.singleInput, this.maxEdge.toString(), this.maxDepth.toString());
     }
   }
 
-  cleanString(input: string): string {
-    const parts = input.replace(/['"]/g, '').split(',');
-    const uniqueParts = Array.from(new Set(parts.map(part => part.trim())));
-    return uniqueParts[0];
+  onGraphSizeApply(filters: CtiGraphFilters): void {
+    this.onSidebarApply(filters);
+    if (this.graphSearchAdvancedMode || filters.propertyType === 'advanced') {
+      return;
+    }
+    this.persistBasicSearchParams(filters, this.activeGraphSearchKey);
   }
 
-  private renderGraph(data: GraphResultItem[], _ = false): void {
+  private renderGraph(data: GraphResultItem[]): void {
     this.resetGraph();
     this.isEmpty = data.length === 0;
     this.rawNodes = [];
@@ -1449,8 +1656,47 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.initNetwork();
     this.applyPhysicsAutoDisableIfNeeded();
     this.attachNetworkHandlers();
+    this.autoExpandSingleVisibleGroupNode(visibleNodes);
     this.applyPropertyHighlights();
-    this.applyNodeSearchHighlight();
+  }
+
+  private applyGraphViewFilters(): void {
+    if (!this.nodeSet || !this.edgeSet) {
+      return;
+    }
+    this.hideContextMenu();
+    this.highlightedNodeId = null;
+    const { visibleNodes, visibleEdges } = this.buildVisibleSets();
+    this.nodeSet.clear();
+    this.edgeSet.clear();
+    if (visibleNodes.length > 0) {
+      this.nodeSet.add(visibleNodes);
+    }
+    if (visibleEdges.length > 0) {
+      this.edgeSet.add(visibleEdges);
+    }
+    this.originalNodeState.clear();
+    this.captureOriginalNodeColors();
+    this.autoExpandSingleVisibleGroupNode(visibleNodes);
+    this.applyPropertyHighlights();
+    if (this.network) {
+      this.network.redraw();
+    }
+  }
+
+  private focusGraphNode(nodeId: string): void {
+    queueMicrotask(() => {
+      if (!this.network || !this.nodeSet?.get(nodeId)) {
+        return;
+      }
+      this.network.focus(nodeId, {
+        scale: Math.max(this.network.getScale(), 0.9),
+        animation: {
+          duration: 250,
+          easingFunction: 'easeInOutQuad'
+        }
+      } as any);
+    });
   }
 
   private buildEdgesAndEdgeMap(data: GraphResultItem[]): Record<string, number> {
@@ -1460,17 +1706,109 @@ export class GraphComponent implements OnInit, OnDestroy {
       if (!e?._from || !e._to) {
         return;
       }
+      const edgeTitle = this.getEdgeTitle(e);
       this.rawEdges.push({
         id: e._id || `${e._from}->${e._to}`,
         from: e._from,
         to: e._to,
-        arrows: '',
+        arrows: 'to',
         color: { color: this.edgeBaseColor },
+        title: edgeTitle,
         width: 1.5
       });
       edgeMap[e._from] = (edgeMap[e._from] || 0) + 1;
+      edgeMap[e._to] = (edgeMap[e._to] || 0) + 1;
     });
     return edgeMap;
+  }
+
+  private getEdgeTitle(edge: GraphResultItem['edge']): string {
+    const label = edge?.label || edge?.edge_type || edge?.relationship_type || edge?.type || 'Connection';
+    const confidence = typeof edge?.confidence === 'number' ? ` (${Math.round(edge.confidence * 100)}%)` : '';
+    return `${String(label).replace(/_/g, ' ')}${confidence}`;
+  }
+
+  private getNodeTitle(vertex: any): string {
+    const lines: string[] = [];
+    const type = String(vertex?.type || '').toLowerCase();
+    const add = (label: string, value: unknown) => {
+      const text = this.formatTooltipValue(value);
+      if (text) {
+        lines.push(`<strong>${this.escapeHtml(label)}:</strong> ${this.escapeHtml(text)}`);
+      }
+    };
+    const title = this.formatTooltipValue(vertex?.display_value || vertex?.label || vertex?.title || vertex?.value);
+    if (title) {
+      lines.push(`<strong>${this.escapeHtml(this.truncateTooltipText(title, 90))}</strong>`);
+    }
+
+    if (type === 'document') {
+      add('Type', 'Report');
+      add('Cluster', this.formatTooltipLabel(vertex?.cluster_id || vertex?.module));
+      add('Published', vertex?.published);
+      add('Summary', this.truncateTooltipText(vertex?.summary, 180));
+      add('Reliability', this.formatTooltipPercent(vertex?.source_reliability));
+      add('ID', this.shortenTooltipId(vertex?.doc_id || vertex?.m_document_id || vertex?._key));
+    }
+    else if (type === 'cluster') {
+      add('Type', 'Cluster');
+    }
+    else {
+      add('Type', this.formatTooltipLabel(vertex?.type || vertex?.node_class));
+      add('Role', this.formatTooltipLabel(vertex?.entity_role));
+      add('Confidence', this.formatTooltipPercent(vertex?.confidence));
+      add('Evidence', vertex?.evidence_count);
+      add('First Seen', vertex?.first_seen);
+      add('Last Seen', vertex?.last_seen);
+      if (Array.isArray(vertex?.aliases) && vertex.aliases.length > 0) {
+        add('Aliases', vertex.aliases.slice(0, 3).join(', '));
+      }
+    }
+
+    return lines.join('<br>');
+  }
+
+  private formatTooltipValue(value: unknown): string {
+    if (value === null || value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) {
+      return '';
+    }
+    return String(value).replace(/\s+/g, ' ').trim();
+  }
+
+  private truncateTooltipText(value: unknown, limit: number): string {
+    const text = this.formatTooltipValue(value);
+    if (text.length <= limit) {
+      return text;
+    }
+    return `${text.slice(0, limit - 3)}...`;
+  }
+
+  private formatTooltipLabel(value: unknown): string {
+    const text = this.formatTooltipValue(value).replace(/^m_/, '').replace(/_/g, ' ');
+    if (!text) {
+      return '';
+    }
+    return text.toLowerCase() === 'apt' ? 'APT' : this.toTitleCase(text);
+  }
+
+  private formatTooltipPercent(value: unknown): string {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+      return '';
+    }
+    const percent = numeric <= 1 ? numeric * 100 : numeric;
+    return `${Math.round(percent)}%`;
+  }
+
+  private shortenTooltipId(value: unknown): string {
+    const text = this.formatTooltipValue(value);
+    if (/^[a-f0-9]{32,}$/i.test(text)) {
+      return '';
+    }
+    if (text.length <= 22) {
+      return text;
+    }
+    return `${text.slice(0, 12)}...${text.slice(-6)}`;
   }
 
   private toTitleCase(input: string): string {
@@ -1482,7 +1820,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (text.length <= this.maxNodeLabelLength) {
       return text;
     }
-    return `${text.slice(0, this.maxNodeLabelLength - 1)}…`;
+    return `${text.slice(0, this.maxNodeLabelLength - 3)}...`;
   }
 
   private prettifyLabel(rawLabel: string): string {
@@ -1497,9 +1835,36 @@ export class GraphComponent implements OnInit, OnDestroy {
     return this.truncateLabel(`${key}: ${value}`);
   }
 
-  private normalizeLabel(v: any): string {
+  private normalizeFullLabel(v: any): string {
+    if (this.selectedType === 'document' && String(v?.type || '').toLowerCase() === 'document') {
+      const docLabel = v?.doc_id || v?.m_document_id || v?._key || v?._id;
+      if (docLabel) {
+        return String(docLabel).trim();
+      }
+    }
+    const preferred = v?.display_value ?? v?.label ?? v?.title ?? v?.value;
+    if (preferred) {
+      return String(preferred).replace(/_/g, ' ').trim();
+    }
     const rawLabel = String(v?._key ?? v?._id ?? '');
-    return this.prettifyLabel(rawLabel);
+    const base = rawLabel.split('/').pop() ?? rawLabel;
+    return base.replace(/^m_/, '').replace(/_/g, ' ').trim();
+  }
+
+  private normalizeLabel(v: any): string {
+    const fullLabel = this.normalizeFullLabel(v);
+    if (fullLabel) {
+      const propertyLabel = this.formatTooltipLabel(this.extractPropertyKey(v));
+      if (propertyLabel) {
+        const existingKeyPattern = new RegExp(`^${propertyLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*:`, 'i');
+        const displayLabel = existingKeyPattern.test(fullLabel)
+          ? fullLabel.replace(existingKeyPattern, `${propertyLabel}:`)
+          : `${propertyLabel}: ${fullLabel}`;
+        return this.truncateLabel(displayLabel);
+      }
+      return this.truncateLabel(fullLabel);
+    }
+    return this.prettifyLabel(String(v?._key ?? v?._id ?? ''));
   }
 
   private extractPropertyKey(vertex: any): string | null {
@@ -1520,17 +1885,106 @@ export class GraphComponent implements OnInit, OnDestroy {
     return normalized;
   }
 
-  private getBorderColorForType(type: string): string {
-    if (type === 'cluster') {
-      return this.nodeClusterBorder;
+  private getVisualNodeCategory(node: ExtendedNode): string {
+    const type = String(node.nodeType || '').toLowerCase();
+    if (type === 'cluster' || this.isClusterRootNode(String(node.id ?? ''))) {
+      return 'cluster';
     }
     if (type === 'document') {
+      return 'document';
+    }
+    return 'property';
+  }
+
+  private getClusterKeyFromNodeId(nodeId: string): string {
+    if (!nodeId.startsWith(this.clusterNodePrefix)) {
+      return '';
+    }
+    return nodeId.slice(this.clusterNodePrefix.length).toLowerCase();
+  }
+
+  private getConnectedClusterKeys(nodeId: string): Set<string> {
+    const clusters = new Set<string>();
+    const addCluster = (candidateId: string) => {
+      const clusterKey = this.getClusterKeyFromNodeId(candidateId);
+      if (clusterKey) {
+        clusters.add(clusterKey);
+      }
+    };
+    this.rawEdges.forEach(edge => {
+      const from = String(edge.from ?? '');
+      const to = String(edge.to ?? '');
+      if (from === nodeId) {
+        addCluster(to);
+      }
+      else if (to === nodeId) {
+        addCluster(from);
+      }
+    });
+    if (clusters.size > 0) {
+      return clusters;
+    }
+
+    const adjacent = new Set<string>();
+    this.rawEdges.forEach(edge => {
+      const from = String(edge.from ?? '');
+      const to = String(edge.to ?? '');
+      if (from === nodeId) {
+        adjacent.add(to);
+      }
+      else if (to === nodeId) {
+        adjacent.add(from);
+      }
+    });
+    adjacent.forEach(adjacentId => {
+      this.rawEdges.forEach(edge => {
+        const from = String(edge.from ?? '');
+        const to = String(edge.to ?? '');
+        if (from === adjacentId) {
+          addCluster(to);
+        }
+        else if (to === adjacentId) {
+          addCluster(from);
+        }
+      });
+    });
+    return clusters;
+  }
+
+  private getNodeAccentColor(node: ExtendedNode, type: string): string {
+    if (type === 'cluster') {
+      const clusterKey = this.getClusterKeyFromNodeId(String(node.id ?? ''));
+      return this.clusterPalette[clusterKey]?.color ?? this.nodeClusterBorder;
+    }
+    if (type === 'document') {
+      if (this.isFocusedDocumentNode(node)) {
+        return this.nodeFocusColor;
+      }
       return this.nodeDocumentBorder;
     }
-    if (type === 'property') {
-      return this.nodePropertyBorder;
+    const classKey = String(node.nodeClass || '').toLowerCase();
+    return this.propertyClassPalette[classKey] ?? this.nodePropertyBorder;
+  }
+
+  private getNodeSize(type: string, degree: number): number {
+    const normalizedDegree = Math.min(Math.max(degree, 0), 14);
+    const degreeBonus = Math.round(normalizedDegree * 0.7);
+    if (type === 'cluster') {
+      return 44 + degreeBonus;
     }
-    return this.nodeSecondaryBorder;
+    if (type === 'document') {
+      return 34 + degreeBonus;
+    }
+    return 30 + degreeBonus;
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   private getIconNameForNode(node: ExtendedNode, type: string): string {
@@ -1543,13 +1997,13 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (type === 'document') {
       return this.iconMap['document'];
     }
-    if (type !== 'property') {
-      return this.iconMap['property'];
-    }
     const rawKey = (node.propertyKey ?? '').toLowerCase();
     const labelKey = this.extractPropertyKeyFromLabel(node.label?.toString()) ?? '';
-    const key = rawKey || labelKey;
-    const tokens = [key, key.replace(/^m_/, ''), key.replace(/_/g, ' ')];
+    const typeKey = (type ?? '').toLowerCase();
+    const classKey = (node.nodeClass ?? '').toLowerCase();
+    const key = rawKey || typeKey || classKey || labelKey;
+    const tokens = [key, rawKey, typeKey, classKey, labelKey, key.replace(/^m_/, ''), key.replace(/_/g, ' ')]
+      .filter(Boolean);
     for (const token of tokens) {
       for (const [needle, icon] of Object.entries(this.iconMap)) {
         if (needle === 'cluster' || needle === 'document' || needle === 'property') {
@@ -1563,13 +2017,39 @@ export class GraphComponent implements OnInit, OnDestroy {
     return this.iconMap['property'];
   }
 
-  private buildIconSvg(iconName: string, borderColor: string): string | null {
-    const def = BOOTSTRAP_ICON_PATHS[iconName];
-    if (!def) {
-      return null;
+  private getNodeAcronym(node: ExtendedNode): string {
+    const clusterKey = this.getClusterKeyFromNodeId(String(node.id ?? ''));
+    if (clusterKey) {
+      const label = this.clusterPalette[clusterKey]?.label ?? clusterKey;
+      return label
+        .split(/\s+/)
+        .map(part => part.charAt(0))
+        .join('')
+        .slice(0, 3)
+        .toUpperCase();
     }
-    const paths = def.paths.map(d => `<path d="${d}" fill="#e2e8f0"/>`).join('');
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${def.viewBox}"><circle cx="8" cy="8" r="7.5" fill="${this.nodeFillColor}" stroke="${borderColor}" stroke-width="0.5"/><g transform="translate(4 4) scale(0.5)">${paths}</g></svg>`;
+    const source = String(node.propertyKey || node.nodeClass || node.rawLabel || node.label || '');
+    const cleaned = source.replace(/^m_/, '').replace(/[_:./-]+/g, ' ').trim();
+    if (!cleaned) {
+      return '?';
+    }
+    const parts = cleaned.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    return parts.map(part => part.charAt(0)).join('').slice(0, 3).toUpperCase();
+  }
+
+  private buildIconSvg(iconName: string, borderColor: string, node?: ExtendedNode): string | null {
+    const def = BOOTSTRAP_ICON_PATHS[iconName];
+    const iconContent = def
+      ? `<g transform="translate(4 4) scale(0.5)">${def.paths.map(d => `<path d="${d}" fill="#f8fafc"/>`).join('')}</g>`
+      : `<text x="8" y="9" dominant-baseline="middle" font-family="'Inter', sans-serif" text-anchor="middle" font-size="5.3" font-weight="800" fill="#f8fafc">${this.escapeHtml(node ? this.getNodeAcronym(node) : '?')}</text>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="7.5" fill="${this.nodeFillColor}" stroke="${borderColor}" stroke-width="0.75"/>
+      <circle cx="8" cy="8" r="5.9" fill="${borderColor}" fill-opacity="0.18"/>
+      ${iconContent}
+    </svg>`;
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   }
 
@@ -1577,13 +2057,30 @@ export class GraphComponent implements OnInit, OnDestroy {
     const rawNodeMap = new Map<string, ExtendedNode>();
     const put = (vertex: any, color: string) => {
       const id = vertex?._id;
-      if (!id || rawNodeMap.has(id)) {
+      if (!id) {
+        return;
+      }
+      const rawLabel = this.normalizeFullLabel(vertex);
+      const existingNode = rawNodeMap.get(id);
+      if (existingNode) {
+        existingNode.nodeClass = existingNode.nodeClass || vertex?.node_class;
+        existingNode.clusterId = existingNode.clusterId || vertex?.cluster_id;
+        existingNode.docId = existingNode.docId || vertex?.doc_id || vertex?.m_document_id || vertex?._key;
+        existingNode.rawLabel = existingNode.rawLabel || rawLabel;
+        existingNode.hiddenByDefault = existingNode.hiddenByDefault || !!vertex?.hidden_by_default;
+        existingNode.nodeInfoHtml = existingNode.nodeInfoHtml || this.getNodeTitle(vertex);
         return;
       }
       rawNodeMap.set(id, {
         id,
         label: this.normalizeLabel(vertex),
+        nodeInfoHtml: this.getNodeTitle(vertex),
+        rawLabel,
+        nodeClass: vertex?.node_class,
+        clusterId: vertex?.cluster_id,
+        docId: vertex?.doc_id || vertex?.m_document_id || vertex?._key,
         propertyKey: this.extractPropertyKey(vertex),
+        hiddenByDefault: !!vertex?.hidden_by_default,
         color: {
           border: color,
           background: this.nodeFillColor,
@@ -1626,6 +2123,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       const nodeType = nodeTypeMap[nodeId] || '';
       const isClusterNode = nodeType === 'cluster';
       const isClusterRootNode = this.isClusterRootNode(nodeId);
+      const clusterKey = this.getClusterKeyFromNodeId(nodeId);
       const clusterDocumentIds = isClusterRootNode ? this.getClusterDocumentIds(nodeId) : [];
       node.nodeType = nodeType;
       if (!node.propertyKey) {
@@ -1638,20 +2136,24 @@ export class GraphComponent implements OnInit, OnDestroy {
       const isGroupable = degree > 2 && isClusterRootNode && clusterDocumentIds.length > 5;
       if (isGroupable) {
         const subNodes = this.getClusterCollapseTargets(nodeId);
+        const clusterLabel = `${this.clusterPalette[clusterKey]?.label ?? this.toTitleCase(String(nodeId).split('/').pop() ?? 'CTI')} Cluster`;
         this.groupInfo[nodeId] = subNodes;
         this.groupParentByGroupId[nodeId] = nodeId;
         nodes.push({
           id: node.id,
           label: '',
-          title: `${this.toTitleCase(String(nodeId).split('/').pop() ?? 'CTI')} Cluster (${clusterDocumentIds.length} nodes)`,
+          rawLabel: clusterLabel,
+          nodeType,
+          degree,
           color: { border: 'transparent', background: 'transparent' },
           shape: 'circularImage',
           isGroup: true,
           physics: false,
           subNodes,
+          nodeInfoHtml: `<strong>${this.escapeHtml(clusterLabel)}</strong><br><strong>Type:</strong> Cluster Group<br><strong>Reports:</strong> ${clusterDocumentIds.length}`,
           font: { size: 14, color: this.getNodeLabelColor(), strokeWidth: 1 },
-          size: 40,
-          image: this.createGroupNodeSvg(clusterDocumentIds.length, false, `${this.toTitleCase(String(nodeId).split('/').pop() ?? 'CTI')} Cluster`),
+          size: 44,
+          image: this.createGroupNodeSvg(clusterDocumentIds.length, false, clusterLabel, clusterKey),
           borderWidth: 0
         });
         this.groupedSubNodesByParent[nodeId] = new Set(subNodes);
@@ -1661,13 +2163,14 @@ export class GraphComponent implements OnInit, OnDestroy {
       if (isClusterNode) {
         node.physics = false;
       }
+      node.degree = degree;
       const iconName = this.getIconNameForNode(node, nodeType);
-      const borderColor = this.getBorderColorForType(nodeType);
-      const icon = this.buildIconSvg(iconName, borderColor);
+      const borderColor = this.getNodeAccentColor(node, nodeType);
+      const icon = this.buildIconSvg(iconName, borderColor, node);
       if (icon) {
         node.shape = 'circularImage';
         node.image = icon;
-        node.size = 40;
+        node.size = this.getNodeSize(nodeType, degree);
         node.borderWidth = 0;
       }
       nodes.push(node);
@@ -1676,15 +2179,23 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private applyNonGroupNodeColor(node: ExtendedNode, isClusterNode: boolean, edgeMap: Record<string, number>): void {
-    if (isClusterNode) {
-      if (this.currentCategory === '') {
-        this.currentCategory = this.cleanString(node.label || '');
-      }
+    const visualType = this.getVisualNodeCategory(node);
+    const accentColor = this.getNodeAccentColor(node, visualType);
+    if (this.isFocusedDocumentNode(node)) {
       node.color = {
-        border: this.nodeClusterBorder,
+        border: this.nodeFocusColor,
         background: this.nodeFillColor,
         highlight: { border: this.nodeFocusColor, background: this.nodeFillColor },
-        hover: { border: '#fde68a', background: this.nodeFillColor }
+        hover: { border: this.nodeFocusColor, background: this.nodeFillColor }
+      };
+      return;
+    }
+    if (isClusterNode) {
+      node.color = {
+        border: accentColor,
+        background: this.nodeFillColor,
+        highlight: { border: this.nodeFocusColor, background: this.nodeFillColor },
+        hover: { border: accentColor, background: this.nodeFillColor }
       };
       return;
     }
@@ -1694,10 +2205,10 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     if (this.selectedType == 'cluster') {
       node.color = {
-        border: this.nodeClusterBorder,
+        border: accentColor,
         background: this.nodeFillColor,
         highlight: { border: this.nodeFocusColor, background: this.nodeFillColor },
-        hover: { border: '#fde68a', background: this.nodeFillColor }
+        hover: { border: accentColor, background: this.nodeFillColor }
       };
     }
     else if (this.selectedType == 'document') {
@@ -1718,12 +2229,21 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     else {
       node.color = {
-        border: this.nodePropertyBorder,
+        border: accentColor,
         background: this.nodeFillColor,
         highlight: { border: this.nodeFocusColor, background: this.nodeFillColor },
-        hover: { border: '#7dd3fc', background: this.nodeFillColor }
+        hover: { border: accentColor, background: this.nodeFillColor }
       };
     }
+  }
+
+  private isFocusedDocumentNode(node: ExtendedNode): boolean {
+    if (this.selectedType !== 'document') {
+      return false;
+    }
+    const nodeId = String(node.id ?? '');
+    const documentKey = String(this.singleInput || '').trim();
+    return !!documentKey && nodeId === `${this.clusterNodePrefix}${documentKey}`;
   }
 
   private buildVisibleSets(): {
@@ -1732,46 +2252,90 @@ export class GraphComponent implements OnInit, OnDestroy {
   } {
     const groupedSubNodeIds = new Set(Object.values(this.groupInfo).flat());
     const visibleNodes = this.rawNodes.filter(node => node.isGroup || !groupedSubNodeIds.has(node.id as string));
+    const visibleNodeIds = new Set(visibleNodes.map(node => String(node.id)));
     const hiddenToParent = new Map<string, string>();
     Object.entries(this.groupedSubNodesByParent).forEach(([parentId, subSet]) => {
+      if (!visibleNodeIds.has(parentId)) {
+        return;
+      }
       subSet.forEach(subId => hiddenToParent.set(subId, parentId));
     });
-    const visibleEdges = this.rawEdges.filter(edge => {
-      const fromId = String(edge.from ?? '');
-      const toId = String(edge.to ?? '');
-      return !hiddenToParent.has(fromId) && !hiddenToParent.has(toId);
-    });
-    const aggregateEdges = new Map<string, Edge>();
+    const visibleEdgesById = new Map<string, Edge>();
     this.rawEdges.forEach(edge => {
-      const fromId = String(edge.from ?? '');
-      const toId = String(edge.to ?? '');
-      const parentFrom = hiddenToParent.get(fromId);
-      const parentTo = hiddenToParent.get(toId);
-      if (!parentFrom && !parentTo) {
+      const rawFrom = String(edge.from ?? '');
+      const rawTo = String(edge.to ?? '');
+      const from = hiddenToParent.get(rawFrom) ?? rawFrom;
+      const to = hiddenToParent.get(rawTo) ?? rawTo;
+      if (from === to || !visibleNodeIds.has(from) || !visibleNodeIds.has(to)) {
         return;
       }
-      const aggFrom = parentFrom ?? fromId;
-      const aggTo = parentTo ?? toId;
-      if (aggFrom === aggTo) {
-        return;
-      }
-      if (hiddenToParent.has(aggFrom) || hiddenToParent.has(aggTo)) {
-        return;
-      }
-      const id = `${aggFrom}->${aggTo}`;
-      if (!aggregateEdges.has(id)) {
-        aggregateEdges.set(id, {
+      const isAggregated = from !== rawFrom || to !== rawTo;
+      const id = isAggregated ? `${from}->${to}` : String(edge.id ?? `${from}->${to}`);
+      if (!visibleEdgesById.has(id)) {
+        visibleEdgesById.set(id, {
+          ...edge,
           id,
-          from: aggFrom,
-          to: aggTo,
-          arrows: '',
+          from,
+          to,
+          arrows: 'to',
           color: { color: this.edgeBaseColor },
-          width: 1.5
+          title: isAggregated ? 'Aggregated connection' : edge.title,
+          width: edge.width ?? 1.5
         });
       }
     });
-    aggregateEdges.forEach(edge => visibleEdges.push(edge));
+
+    const visibleEdges = Array.from(visibleEdgesById.values());
+    this.updateLegendState(visibleNodes, visibleEdges);
     return { visibleNodes, visibleEdges };
+  }
+
+  private updateLegendState(visibleNodes: ExtendedNode[], visibleEdges: Edge[]): void {
+    const counts: Record<string, number> = {
+      cluster: 0,
+      document: 0,
+      property: 0
+    };
+    const clusterCounts: Record<string, number> = {};
+
+    visibleNodes.forEach(node => {
+      const category = this.getVisualNodeCategory(node);
+      counts[category] = (counts[category] ?? 0) + 1;
+      if (category === 'cluster') {
+        const clusterKey = this.getClusterKeyFromNodeId(String(node.id ?? ''));
+        if (clusterKey) {
+          clusterCounts[clusterKey] = (clusterCounts[clusterKey] ?? 0) + 1;
+        }
+        return;
+      }
+      this.getConnectedClusterKeys(String(node.id ?? '')).forEach(clusterKey => {
+        clusterCounts[clusterKey] = (clusterCounts[clusterKey] ?? 0) + 1;
+      });
+    });
+
+    this.legendItems = [
+      { key: 'cluster', label: 'Clusters', color: this.nodeClusterBorder, swatchClass: 'h-3.5 w-3.5 shrink-0 rounded-full border-2 border-amber-500 bg-[var(--color-blue-720)]', count: counts['cluster'] ?? 0 },
+      { key: 'document', label: 'Documents', color: this.nodeDocumentBorder, swatchClass: 'h-3.5 w-3.5 shrink-0 rounded-full border-2 border-orange-500 bg-[var(--color-blue-720)]', count: counts['document'] ?? 0 },
+      { key: 'property', label: 'Entities', color: this.nodePropertyBorder, swatchClass: 'h-3.5 w-3.5 shrink-0 rounded-full border-2 border-sky-400 bg-[var(--color-blue-720)]', count: counts['property'] ?? 0 }
+    ];
+
+    this.clusterLegendItems = Object.entries(this.clusterPalette)
+      .map(([key, value]) => ({
+        key,
+        label: value.label,
+        color: value.color,
+        swatchClass: value.swatchClass,
+        count: clusterCounts[key] ?? 0
+      }))
+      .filter(item => item.count > 0);
+
+    this.graphStats = {
+      visibleNodes: visibleNodes.length,
+      totalNodes: this.rawNodes.length,
+      visibleEdges: visibleEdges.length,
+      totalEdges: this.rawEdges.length,
+      hiddenNodes: Math.max(0, this.rawNodes.length - visibleNodes.length)
+    };
   }
 
   private initNetwork(): void {
@@ -1797,7 +2361,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         minVelocity: 0.75
       },
       edges: {
-        arrows: { to: { enabled: false, scaleFactor: 1 } },
+        arrows: { to: { enabled: true, scaleFactor: 0.65 } },
         width: 1.5,
         smooth: { enabled: true, type: 'continuous', roundness: 0.5 },
         color: {
@@ -1870,10 +2434,20 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.network.on('click', params => {
       this.handleClick(params);
     });
+    this.network.on('hoverNode', params => {
+      this.handleNodeHover(String(params.node));
+    });
+    this.network.on('blurNode', params => {
+      this.handleNodeBlur(String(params.node));
+    });
     this.network.on('doubleClick', params => {
       this.handleDoubleClick(params);
     });
+    this.network.on('dragStart', () => {
+      this.hideNodeInfoPanel();
+    });
     this.network.on('zoom', (properties: any) => {
+      this.hideNodeInfoPanel();
       const currentScale = this.network.getScale();
       const currentPosition = this.network.getViewPosition();
       if (currentScale <= this.minZoomScale) {
@@ -1903,12 +2477,13 @@ export class GraphComponent implements OnInit, OnDestroy {
     const nodeId = String(rawNodeId);
     const node = this.nodeSet.get(nodeId) as ExtendedNode;
     const isMainClusterNode = this.isClusterRootNode(nodeId);
+    const isReportNode = this.isReportNode(node);
     const hasClusterConnection = this.rawEdges.some(edge => (edge.from === node?.id && this.isClusterRootNode(String(edge.to))) ||
   (edge.to === node?.id && this.isClusterRootNode(String(edge.from))));
     if (!node) {
       return;
     }
-    if (!isMainClusterNode && !hasClusterConnection && !node.isGroup) {
+    if (!isMainClusterNode && !hasClusterConnection && !node.isGroup && !isReportNode) {
       return;
     }
     this.showContextMenu(node, pointer);
@@ -1984,7 +2559,6 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.edgeSet.remove(residualEdgesToRemove);
     this.groupExpandedState[clusterNodeId] = false;
     this.updateGroupNodeVisual(clusterNodeId, this.getClusterDocumentIds(clusterNodeId).length, false);
-    this.updateActiveSessionState({ groupExpandedState: { ...this.groupExpandedState } });
   }
 
   private getVisibleClusterAttachedNodeIds(clusterNodeId: string): string[] {
@@ -2027,10 +2601,114 @@ export class GraphComponent implements OnInit, OnDestroy {
     const pointer = params.pointer.DOM;
     const nodeIdRaw = this.network.getNodeAt(pointer);
     if (!nodeIdRaw) {
+      this.hideNodeInfoPanel();
       return;
     }
     const nodeId = String(nodeIdRaw);
+    const node = this.nodeSet.get(nodeId) as ExtendedNode | null;
     this.toggleEdgeHighlightOnClick(nodeId);
+    if (node) {
+      this.showNodeInfoPanel(node, pointer);
+    }
+  }
+
+  private handleNodeHover(nodeId: string): void {
+    if (!this.nodeSet?.get(nodeId) || this.hoveredNodeId === nodeId) {
+      return;
+    }
+    if (this.hoveredNodeId) {
+      this.handleNodeBlur(this.hoveredNodeId);
+    }
+    this.hoveredNodeId = nodeId;
+    const node = this.nodeSet.get(nodeId) as ExtendedNode;
+    const visualType = this.getVisualNodeCategory(node);
+    const accentColor = this.getNodeAccentColor(node, visualType);
+    this.nodeSet.update({
+      id: nodeId,
+      color: {
+        border: this.nodeFocusColor,
+        background: this.nodeFillColor,
+        highlight: { border: this.nodeFocusColor, background: this.nodeFillColor },
+        hover: { border: accentColor, background: this.nodeFillColor }
+      },
+      borderWidth: 2,
+      borderWidthSelected: 3
+    } as any);
+  }
+
+  private handleNodeBlur(nodeId: string): void {
+    const original = this.originalNodeState.get(nodeId);
+    if (original && this.nodeSet?.get(nodeId)) {
+      this.nodeSet.update({
+        id: nodeId,
+        color: original.color,
+        borderWidth: original.borderWidth,
+        borderWidthSelected: original.borderWidthSelected,
+        image: original.image
+      } as any);
+    }
+    if (this.hoveredNodeId === nodeId) {
+      this.hoveredNodeId = null;
+    }
+  }
+
+  private showNodeInfoPanel(node: ExtendedNode, pointerDom?: { x: number; y: number; }): void {
+    const html = node.nodeInfoHtml || this.getFallbackNodeInfoHtml(node);
+    if (!html) {
+      this.hideNodeInfoPanel();
+      return;
+    }
+    this.positionNodeInfoPanel(pointerDom);
+    this.nodeInfoPanelHtml = html;
+    this.nodeInfoPanelVisible = true;
+    this.changeDetector.detectChanges();
+    this.applyNodeInfoPanelPosition();
+  }
+
+  hideNodeInfoPanel(): void {
+    this.nodeInfoPanelVisible = false;
+    this.nodeInfoPanelHtml = '';
+  }
+
+  private positionNodeInfoPanel(pointerDom?: { x: number; y: number; }): void {
+    const container = this.networkContainer?.nativeElement as HTMLElement | undefined;
+    const width = 292;
+    const height = 260;
+    const padding = 12;
+    const offset = 14;
+    const containerWidth = container?.clientWidth || window.innerWidth;
+    const containerHeight = container?.clientHeight || window.innerHeight;
+    const maxLeft = Math.max(padding, containerWidth - width - padding);
+    const maxTop = Math.max(padding, containerHeight - height - padding);
+    const x = pointerDom?.x ?? padding;
+    const y = pointerDom?.y ?? padding;
+    const preferredLeft = x + offset + width <= containerWidth - padding ? x + offset : x - width - offset;
+    const preferredTop = y + offset + height <= containerHeight - padding ? y + offset : y - height - offset;
+    this.nodeInfoPanelLeft = Math.min(Math.max(preferredLeft, padding), maxLeft);
+    this.nodeInfoPanelTop = Math.min(Math.max(preferredTop, padding), maxTop);
+  }
+
+  private applyNodeInfoPanelPosition(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    const panel = document.getElementById('ctiNodeInfoPanel');
+    if (!panel) {
+      return;
+    }
+    panel.setAttribute('data-left', String(this.normalizePositionValue(this.nodeInfoPanelLeft)));
+    panel.setAttribute('data-top', String(this.normalizePositionValue(this.nodeInfoPanelTop)));
+  }
+
+  private getFallbackNodeInfoHtml(node: ExtendedNode): string {
+    const label = this.formatTooltipValue(node.rawLabel || node.label || node.id);
+    const type = this.formatTooltipLabel(node.nodeType || node.nodeClass || 'Node');
+    const lines = [
+      label ? `<strong>${this.escapeHtml(this.truncateTooltipText(label, 90))}</strong>` : '',
+      type ? `<strong>Type:</strong> ${this.escapeHtml(type)}` : '',
+      node.degree !== undefined ? `<strong>Connections:</strong> ${node.degree}` : ''
+    ].filter(Boolean);
+    return lines.join('<br>');
   }
 
   private handleDoubleClick(params: any): void {
@@ -2056,45 +2734,6 @@ export class GraphComponent implements OnInit, OnDestroy {
     else {
       this.expandGroupFromNodeId(nodeId, subNodes, 200);
     }
-  }
-
-  private toggleGroupOnClick(nodeId: string, node: ExtendedNode): void {
-    const subNodes = node.subNodes ?? [];
-    const isExpanded = this.groupExpandedState[nodeId] || false;
-    if (!isExpanded) {
-      const centerPos = this.network.getPositions([nodeId])[nodeId];
-      const radius = 200;
-      const newEdges = this.rawEdges
-        .filter(e => e.from === nodeId && subNodes.includes(e.to as string))
-        .filter(e => e.id == null || !this.edgeSet.get(e.id));
-      const newNodes = this.buildCircularSubNodes(subNodes, centerPos, radius);
-      this.nodeSet.add(newNodes);
-      this.edgeSet.add(newEdges);
-      this.captureOriginalNodeColors(newNodes.map(n => String(n.id)));
-      this.applyNodeSearchHighlight();
-      this.groupExpandedState[nodeId] = true;
-      this.updateActiveSessionState({ groupExpandedState: { ...this.groupExpandedState } });
-      this.network.selectNodes([nodeId]);
-      this.network.unselectAll();
-      return;
-    }
-    const edgeIdsToRemove = this.getEdgeIdsToRemove(nodeId, subNodes);
-    this.edgeSet.remove(edgeIdsToRemove);
-    subNodes.forEach(subId => {
-      const remainingEdges = this.edgeSet.get({
-        filter: edge => edge.from === subId || edge.to === subId
-      });
-      if (remainingEdges.length === 0 && this.nodeSet.get(subId)) {
-        this.nodeSet.remove(subId);
-      }
-    });
-    this.groupExpandedState[nodeId] = false;
-    this.updateActiveSessionState({ groupExpandedState: { ...this.groupExpandedState } });
-    if (this.orignalColor) {
-      this.nodeSet.update({ id: nodeId, color: this.orignalColor });
-    }
-    this.captureOriginalNodeColors();
-    this.applyNodeSearchHighlight();
   }
 
   private toggleEdgeHighlightOnClick(nodeId: string): void {
@@ -2184,69 +2823,6 @@ export class GraphComponent implements OnInit, OnDestroy {
         image: (node as any).image
       });
     });
-  }
-
-  private restoreNodeColors(): void {
-    const updates = this.nodeSet.get().map(node => ({
-      id: node.id!,
-      color: this.originalNodeState.get(String(node.id))?.color ?? node.color,
-      borderWidth: this.originalNodeState.get(String(node.id))?.borderWidth ?? (node).borderWidth,
-      image: this.originalNodeState.get(String(node.id))?.image ?? (node).image
-    }));
-    if (updates.length > 0) {
-      this.nodeSet.update(updates);
-    }
-  }
-
-  private applyNodeSearchHighlight(): void {
-    if (!this.nodeSet) {
-      return;
-    }
-    const needle = this.nodeSearchText.trim().toLowerCase();
-    this.searchMatchedCount = 0;
-    this.restoreNodeColors();
-    if (!needle) {
-      return;
-    }
-    const updates = this.nodeSet.get()
-      .filter(node => {
-        const label = String(node.label ?? '').toLowerCase();
-        const id = String(node.id ?? '').toLowerCase();
-        return label.includes(needle) || id.includes(needle);
-      })
-      .map(node => {
-        const nodeState = this.originalNodeState.get(String(node.id));
-        const originalColor = nodeState?.color ?? node.color;
-        const highlightedColor = typeof originalColor === 'object' && originalColor !== null
-          ? {
-            ...(originalColor as any),
-            border: '#facc15',
-            background: '#facc15',
-            highlight: { border: '#facc15', background: '#facc15' },
-            hover: { border: '#facc15', background: '#facc15' }
-          }
-          : {
-            border: '#facc15',
-            background: '#facc15',
-            highlight: { border: '#facc15', background: '#facc15' },
-            hover: { border: '#facc15', background: '#facc15' }
-          };
-        const baseBorderWidth = nodeState?.borderWidth ?? ((node).borderWidth ?? 2);
-        const selectedBorderWidth = nodeState?.borderWidthSelected ?? ((node).borderWidthSelected ?? (baseBorderWidth + 2));
-        const extNode = node as ExtendedNode;
-        const iconName = this.getIconNameForNode(extNode, extNode.nodeType || '');
-        const yellowIcon = this.buildIconSvg(iconName, '#facc15');
-        return {
-          id: node.id!,
-          color: highlightedColor,
-          borderWidth: selectedBorderWidth,
-          image: yellowIcon ?? (node).image
-        };
-      });
-    this.searchMatchedCount = updates.length;
-    if (updates.length > 0) {
-      this.nodeSet.update(updates);
-    }
   }
 }
 const BOOTSTRAP_ICON_PATHS: Record<string, {

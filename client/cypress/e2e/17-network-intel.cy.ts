@@ -128,6 +128,7 @@ describe('Network Intel - End-to-End Flow', () => {
     cy.get('[data-testid="network-intel-search-input"]').clear().type('example.com{enter}');
     cy.get('[data-testid="network-intel-dns-row-93.184.216.34"]').should('be.visible').click();
     cy.get('[data-testid="network-intel-dns-detail-93.184.216.34"]').should('be.visible');
+    cy.docsScreenshot('network-intel-host-recon');
     cy.get('[data-testid="network-intel-dns-row-93.184.216.34"]').should('be.visible').click();
     cy.get('[data-testid="network-intel-dns-detail-93.184.216.34"]').should('not.exist');
 
@@ -139,6 +140,7 @@ describe('Network Intel - End-to-End Flow', () => {
     cy.get('[data-testid="network-intel-tab-ip-scan"]').click();
     cy.get('[data-testid="network-intel-search-input"]').clear().type('8.8.8.8{enter}');
     cy.get('[data-testid="network-intel-ip-result"]').should('be.visible');
+    cy.docsScreenshot('network-intel-ip-scan');
 
     cy.get('[data-testid="network-intel-download-report"]')
       .should('be.visible')
@@ -149,6 +151,7 @@ describe('Network Intel - End-to-End Flow', () => {
     cy.get('[data-testid="network-intel-search-input"]').clear().type('bbc.com{enter}');
     cy.contains('[data-testid="network-intel-vulnerability-target"]', /^bbc\.com$/, { timeout: 60000 }).click();
     cy.get('[data-testid="network-intel-vulnerability-result"]', { timeout: 120000 }).should('be.visible');
+    cy.docsScreenshot('network-intel-vulnerability-scan');
 
     cy.get('[data-testid="network-intel-download-report"]')
       .scrollIntoView()
@@ -185,6 +188,7 @@ describe('Network Intel - End-to-End Flow', () => {
 
     cy.get('[data-testid="network-intel-geo-search-trigger"]').click({ force: true });
     cy.get('[data-testid="network-intel-geo-modal"]').should('be.visible');
+    cy.docsScreenshot('network-intel-geo-modal');
     cy.get('[data-testid="network-intel-geo-close"]').click();
     cy.get('[data-testid="network-intel-geo-modal"]').should('not.exist');
 

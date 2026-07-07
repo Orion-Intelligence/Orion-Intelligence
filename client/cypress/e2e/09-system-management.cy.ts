@@ -36,6 +36,8 @@ describe('System Settings - Admin Update Flow', () => {
 
     openSystemSettings();
 
+    cy.get('[data-testid="system-settings-edit"], [data-testid="system-settings-app-name"]').should('be.visible');
+    cy.docsScreenshot('system-settings');
     cy.get('[data-testid="system-settings-edit"]').should('be.visible').click();
     cy.get('[data-testid="system-settings-app-name"]').should('be.visible').clear().type('Dark Intelligence');
     cy.get('input[placeholder="Data Sources"]').should('be.visible').clear().type('https://example.com/data-sources');

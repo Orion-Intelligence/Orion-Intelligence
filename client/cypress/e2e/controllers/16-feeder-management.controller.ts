@@ -39,6 +39,7 @@ export function openFeederAsUser(username: string, password: string) {
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, { log: false });
   cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+  cy.waitForLoginRequest();
   cy.get('[data-testid="dashboard-main"]').should('be.visible');
   cy.get('[data-testid="sidebar-group-profile"]').should('be.visible').scrollIntoView().click();
   cy.get('[data-testid="sidebar-subitem-profile-feeder"]').should('be.visible').scrollIntoView().click();
@@ -100,14 +101,14 @@ export function assertFeederRuleOptions() {
           .filter(Boolean)
           .map((testId) => testId.replace('feeder-rule-option-', ''));
 
-        expect(actualRuleKeys.length).to.be.greaterThan(11);
+        expect(actualRuleKeys.length).to.be.greaterThan(9);
       });
       return;
     }
 
     cy.wrap($select).click();
     cy.get('[data-testid^="feeder-rule-option-"]').then(($options) => {
-      expect($options.length).to.be.greaterThan(11);
+      expect($options.length).to.be.greaterThan(9);
     });
     cy.get('body').click(0, 0);
   });

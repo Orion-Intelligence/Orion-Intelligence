@@ -1,97 +1,122 @@
 import { Component, HostListener, OnChanges, OnInit, SimpleChanges, input, output } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { TitleCasePipe } from '@angular/common';
-import { GraphClusterType, GraphType, search_filter_labels } from '../../../../shared/constants/shared-enums';
+import { FormsModule } from '@angular/forms';
 import { SidebarShellComponent } from '../../shared/sidebar-shell/sidebar-shell.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { CtiGraphFilters, CtiGraphLegendItem, CtiGraphStats } from '../../../../shared/model/graph/cti-graph.model';
 
 @Component({
   selector: 'graph-sidebar',
   standalone: true,
   templateUrl: './sidebar.component.html',
-  imports: [FormsModule, ReactiveFormsModule, TitleCasePipe, SidebarShellComponent, TranslatePipe],
+  imports: [SidebarShellComponent, TranslatePipe, FormsModule],
 })
 export class SidebarComponent implements OnInit, OnChanges {
   isCollapsed = false;
   isMobile = false;
-  selectedType = 'cluster';
-  singleInput = 'all';
-  propertyType = 'all';
-  propertyValue = '';
-  maxNodes = 25;
-  maxDepth = 1;
-  graphTypeOptions = Object.values(GraphType);
-  graphClusterOptions = Object.values(GraphClusterType);
-  graphAllowedProperties = Object.entries(search_filter_labels).map(([key, label]) => ({
-    label,
-    key
-  }));
-  readonly filters = input<{
-      selectedType: string;
-      singleInput: string;
-      propertyType: string;
-      propertyValue: string;
-      maxEdge: number;
-      maxDepth: number;
-  } | null>(null);
+  localMaxEdge = 25;
+  localMaxDepth = 1;
+  readonly filters = input<CtiGraphFilters | null>(null);
+  readonly stats = input<CtiGraphStats | null>(null);
+  readonly legendItems = input<CtiGraphLegendItem[]>([]);
+  readonly clusterLegendItems = input<CtiGraphLegendItem[]>([]);
   readonly collapsed = input(false);
-  readonly filtersApplied = output<{
-      selectedType: string;
-      singleInput: string;
-      propertyType: string;
-      propertyValue: string;
-      maxEdge: number;
-      maxDepth: number;
-  }>();
-  readonly filtersChanged = output<{
-      selectedType: string;
-      singleInput: string;
-      propertyType: string;
-      propertyValue: string;
-      maxEdge: number;
-      maxDepth: number;
-  }>();
   readonly collapsedChange = output<boolean>();
-
-  private buildFilterPayload() {
-    return {
-      selectedType: this.selectedType,
-      singleInput: this.singleInput,
-      propertyType: this.propertyType,
-      propertyValue: this.propertyValue,
-      maxEdge: this.maxNodes,
-      maxDepth: this.maxDepth
-    };
-  }
-
-  private emitFilters() {
-    this.filtersApplied.emit(this.buildFilterPayload());
-  }
-
-  emitDraftFilters() {
-    this.filtersChanged.emit(this.buildFilterPayload());
-  }
-
-  private applyIncomingFilters(filters: { selectedType: string; singleInput: string; propertyType: string; propertyValue: string; maxEdge: number; maxDepth: number; }) {
-    this.selectedType = filters.selectedType || 'cluster';
-    this.singleInput = filters.singleInput || 'all';
-    this.propertyType = filters.propertyType || 'all';
-    this.propertyValue = filters.propertyValue || '';
-    this.maxNodes = Number(filters.maxEdge) || 25;
-    this.maxDepth = Number(filters.maxDepth) || 1;
-  }
+  readonly filtersApply = output<CtiGraphFilters>();
 
   ngOnInit(): void {
     this.updateViewportState();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['filters']?.currentValue) {
-      this.applyIncomingFilters(changes['filters'].currentValue);
-    }
     if (changes['collapsed']) {
       this.isCollapsed = !!changes['collapsed'].currentValue;
     }
+    if (changes['filters']) {
+      this.localMaxEdge = this.clampNumber(this.filters()?.maxEdge, 20, 800, 25);
+      this.localMaxDepth = this.clampNumber(this.filters()?.maxDepth, 1, 5, 1);
+    }
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.updateViewportState();
+  }
+
+  toggleCollapsed() {
+    this.isCollapsed = !this.isCollapsed;
+    this.collapsedChange.emit(this.isCollapsed);
+  }
+
+  onMobileBackdropClick(): void {
+    if (!this.isMobile) {
+      return;
+    }
+    this.isCollapsed = true;
+    this.collapsedChange.emit(this.isCollapsed);
+  }
+
+  get queryModeLabel(): string {
+    const type = this.filters()?.selectedType || 'cluster';
+    if (type === 'property') {
+      return 'Entity';
+    }
+    return this.formatLabel(type);
+  }
+
+  get queryValueLabel(): string {
+    const filters = this.filters();
+    if (!filters) {
+      return 'All';
+    }
+    if (filters.selectedType === 'property') {
+      const value = filters.propertyValue || 'All';
+      const type = filters.propertyType && filters.propertyType !== 'all'
+        ? this.formatLabel(filters.propertyType)
+        : 'Any entity';
+      return `${type}: ${value}`;
+    }
+    return this.formatLabel(filters.singleInput || 'all');
+  }
+
+  get nodeLimitLabel(): string {
+    return String(this.filters()?.maxEdge ?? 25);
+  }
+
+  get depthLabel(): string {
+    return String(this.filters()?.maxDepth ?? 1);
+  }
+
+  onMaxEdgeChange(value: unknown): void {
+    this.localMaxEdge = this.clampNumber(value, 20, 800, 25);
+    this.applyGraphSize();
+  }
+
+  onMaxDepthChange(value: unknown): void {
+    this.localMaxDepth = this.clampNumber(value, 1, 5, 1);
+    this.applyGraphSize();
+  }
+
+  applyGraphSize(): void {
+    const filters = this.filters();
+    if (!filters) {
+      return;
+    }
+    const nextFilters = {
+      ...filters,
+      maxEdge: this.clampNumber(this.localMaxEdge, 20, 800, 25),
+      maxDepth: this.clampNumber(this.localMaxDepth, 1, 5, 1)
+    };
+    this.localMaxEdge = nextFilters.maxEdge;
+    this.localMaxDepth = nextFilters.maxDepth;
+    this.filtersApply.emit(nextFilters);
+  }
+
+  private clampNumber(value: unknown, min: number, max: number, fallback: number): number {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+      return fallback;
+    }
+    return Math.min(max, Math.max(min, Math.round(numeric)));
   }
 
   private updateViewportState(): void {
@@ -108,69 +133,11 @@ export class SidebarComponent implements OnInit, OnChanges {
     }
   }
 
-  @HostListener('window:resize')
-  onWindowResize(): void {
-    this.updateViewportState();
-  }
-
-  applyFilters() {
-    this.emitFilters();
-  }
-
-  toggleCollapsed() {
-    this.isCollapsed = !this.isCollapsed;
-    this.collapsedChange.emit(this.isCollapsed);
-  }
-
-  onMobileBackdropClick(): void {
-    if (!this.isMobile) {
-      return;
+  private formatLabel(value: string): string {
+    const clean = String(value || 'all').replace(/^m_/, '').replace(/_/g, ' ');
+    if (clean.toLowerCase() === 'apt') {
+      return 'APT';
     }
-    this.isCollapsed = true;
-    this.collapsedChange.emit(this.isCollapsed);
-  }
-
-  resetFilters() {
-    this.selectedType = 'cluster';
-    this.singleInput = 'all';
-    this.propertyType = 'all';
-    this.propertyValue = '';
-    this.maxNodes = 25;
-    this.maxDepth = 1;
-    this.emitDraftFilters();
-    this.emitFilters();
-  }
-
-  onFormatPropertyType(type: string) {
-    return type.toLowerCase().replace("m_", "").replace("_", " ");
-  }
-
-  onTypeChange(type: string) {
-    this.selectedType = type;
-    if (type === 'cluster') {
-      this.singleInput = 'all';
-    }
-    else if (type === 'document') {
-      this.singleInput = '';
-    }
-    else if (type === 'property') {
-      this.propertyType = 'all';
-      this.propertyValue = '';
-    }
-    this.emitDraftFilters();
-  }
-
-  validateMaxNodes() {
-    if (!this.maxNodes || this.maxNodes < 20 || this.maxNodes > 800) {
-      this.maxNodes = 25;
-    }
-    this.emitDraftFilters();
-  }
-
-  validateMaxDepth() {
-    if (!this.maxDepth || this.maxDepth < 1 || this.maxDepth > 5) {
-      this.maxDepth = 2;
-    }
-    this.emitDraftFilters();
+    return clean.replace(/\b\w/g, character => character.toUpperCase());
   }
 }

@@ -26,6 +26,20 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
   let tenantSubUser: any;
   const tenantResetNewPassword = '2wsx@WSX2026';
 
+  const selectEnabledCurrentMonthDate = (day: number) => {
+    cy.get(`[data-testid="side-filter-date-day-${day}"]`)
+      .filter(':visible')
+      .filter((_index, element) => {
+        const className = element.getAttribute('class') || '';
+        return !element.hasAttribute('disabled') && !className.includes('text-slate-400');
+      })
+      .should('have.length.greaterThan', 0)
+      .first()
+      .scrollIntoView()
+      .should('be.enabled')
+      .click();
+  };
+
   before(() => {
     cy.env(['TENANT_ACCOUNT', 'TENANT_SUB_USER']).then(({TENANT_ACCOUNT, TENANT_SUB_USER}) => {
       tenant = TENANT_ACCOUNT;
@@ -60,6 +74,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.loginAsAdmin();
     openTenantsPage();
     cy.get('[data-testid="tenant-page-header"]').should('be.visible');
+    cy.docsScreenshot('tenant-administration');
     openTenantEditor(tenant);
     setTenantEditorToggle('tenant-verified-toggle', true);
     setTenantEditorToggle('tenant-status-toggle', true);
@@ -72,11 +87,13 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
   });
 
   it('completes tenant onboarding and adds tenant user', () => {
+    cy.intercept('POST', '**/api/token').as('tenantLogin');
     cy.visit('/login');
     cy.reload();
     cy.get('[data-testid="login-user"]').type(tenant.username);
     cy.get('[data-testid="login-pass"]').type(tenant.password, {log: false});
     cy.get('[data-testid="login-button"]').click();
+    cy.waitForLoginRequest('tenantLogin');
 
     cy.get('[data-testid="tenant-company-input"]').should('be.visible').clear().type('orion intelligence');
     cy.get('[data-testid="tenant-onboarding-next-step1"]').should('be.visible').click();
@@ -84,10 +101,14 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.get('[data-testid="tenant-onboarding-confirm"]').should('be.visible').click();
 
     openManageIOCs();
+    cy.get('[data-testid="tenant-ioc-value-input"], [data-testid^="tenant-ioc-tab-"]').should('have.length.greaterThan', 0);
+    cy.docsScreenshot('tenant-manage-iocs');
     addIOCForAllTabs();
 
     cy.get('[data-testid="sidebar-subitem-profile-users"]').filter(':visible').first().scrollIntoView().click();
     waitForBlockingOverlayToClose();
+    cy.get('tbody tr, [data-testid="tenant-add-user-button"]').should('exist');
+    cy.docsScreenshot('tenant-users');
     cy.get('[data-testid="tenant-add-user-button"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="tenant-add-user-username"]').type(tenantSubUser.username);
     cy.get('[data-testid="tenant-add-user-email"]').type(tenantSubUser.email);
@@ -101,17 +122,15 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.loginAsAdmin();
     openTenantsPage();
     cy.location('pathname').should('include', '/dashboard/profile/tenant');
-    cy.get('[data-testid="tenant-edit-button"]').first().scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-edit-button"]').first().click({ force: true });
     cy.get('[data-testid="tenant-edit-form-panel"]')
-      .filter(':visible')
       .first()
       .as('tenantEditFormPanel')
       .within(() => {
         cy.get('[data-testid="tenant-user-quota-input"]')
           .first()
-          .scrollIntoView()
-          .clear()
-          .type('1');
+          .clear({ force: true })
+          .type('1', { force: true });
       });
     cy.get('#dashboard-container, [data-testid="dashboard-container"]')
       .filter(':visible')
@@ -136,7 +155,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
           parentScroller.scrollLeft = parentScroller.scrollWidth;
           parentScroller.dispatchEvent(new Event('scroll', {bubbles: true}));
         }
-        cy.wrap($btn).should('exist').and('not.be.disabled').click();
+        cy.wrap($btn).should('exist').and('not.be.disabled').click({ force: true });
       });
     cy.logout();
   });
@@ -146,6 +165,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     openAuditLogPage();
 
     cy.get('[data-testid="auditlog-row"]').should('have.length.greaterThan', 0);
+    cy.docsScreenshot('audit-logs');
     cy.get('[data-testid="auditlog-actor"]').first().invoke('text').then((actorText) => {
       const actor = actorText.trim();
       cy.get('[data-testid="auditlog-user-search"]')
@@ -187,13 +207,11 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
   });
 
   it('logs in tenant and validates homepage navigation', () => {
-    cy.visit('/login');
-    cy.get('[data-testid="login-user"]').type(tenant.username);
-    cy.get('[data-testid="login-pass"]').type(tenant.password, {log: false});
-    cy.get('[data-testid="login-button"]').click();
-    cy.get('[data-testid="dashboard-main"]').should('be.visible');
+    loginTenant(tenant);
     cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
     cy.location('pathname').should('include', '/dashboard/profile/homepage');
+    cy.get('app-alert-scan-loading').should('not.exist');
+    cy.docsScreenshot('tenant-homepage');
   });
 
   it('saves tenant network configuration after failed SMTP validation', () => {
@@ -256,11 +274,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     const countryValue = 'Pakistan';
     const cityValue = 'Karachi';
 
-    cy.visit('/login');
-    cy.get('[data-testid="login-user"]').type(tenant.username);
-    cy.get('[data-testid="login-pass"]').type(tenant.password, {log: false});
-    cy.get('[data-testid="login-button"]').click();
-    cy.get('[data-testid="dashboard-main"]').should('be.visible');
+    loginTenant(tenant);
 
     cy.visit('/dashboard/profile/tenant-settings');
     cy.scrollDashboardToTop();
@@ -268,6 +282,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.contains('div', 'Profile').should('be.visible');
     cy.contains('div', 'Contacts').should('be.visible');
     cy.contains('div', 'Users').should('be.visible');
+    cy.docsScreenshot('tenant-settings');
     cy.scrollDashboardToBottom()
     cy.contains('div', 'Privacy').should('be.visible');
     cy.contains('div', 'Address').should('be.visible');
@@ -314,12 +329,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
   });
 
   it('handles tenant alerts and notifications end-to-end', () => {
-    cy.visit('/login');
-    cy.get('[data-testid="login-user"]').type(tenant.username);
-    cy.get('[data-testid="login-pass"]').type(tenant.password, {log: false});
-    cy.get('[data-testid="login-button"]').click();
-
-    cy.get('[data-testid="dashboard-main"]').should('be.visible');
+    loginTenant(tenant);
     cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
 
     cy.get('app-alert-scan-loading', { timeout: 80000 }).should('not.exist');
@@ -352,19 +362,11 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     Cypress._.times(12, () => {
       cy.get('[data-testid="side-filter-date-prev-month"]').first().click();
     });
-    cy.get('[data-testid="side-filter-date-day-15"]')
-      .not('.text-slate-400')
-      .first()
-      .scrollIntoView()
-      .click();
+    selectEnabledCurrentMonthDate(15);
     Cypress._.times(12, () => {
       cy.get('[data-testid="side-filter-date-next-month"]').first().click();
     });
-    cy.get('[data-testid="side-filter-date-day-15"]')
-      .not('.text-slate-400')
-      .first()
-      .scrollIntoView()
-      .click();
+    selectEnabledCurrentMonthDate(Math.min(15, new Date().getDate()));
     cy.get('[data-testid="side-filter-apply"]').scrollIntoView().should('be.visible').click();
     closeFilterSidebar();
 

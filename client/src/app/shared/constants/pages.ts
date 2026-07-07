@@ -84,6 +84,7 @@ export enum SatelliteIntelSubCategory {
 export enum ProfileSubCategory {
     HOMEPAGE = 'Homepage',
     EVENT_MANAGEMENT = 'Event-Management',
+    LOG_MANAGER = 'Log-Manager',
     FEEDER = 'Feeder',
     IOC = 'IOC',
     TENANT_SETTINGS = 'Tenant-Settings',

@@ -14,7 +14,7 @@ class AptCardModel(BaseModel):
     m_family_ids: Optional[List[str]] = Field(default_factory=list)
     m_aliases: Optional[List[str]] = Field(default_factory=list)
     m_references: Optional[List[str]] = Field(default_factory=list)
-    m_platform: str
+    m_platform: List[str] = Field(default_factory=list)
     m_country: Optional[str] = None
     m_date: Optional[date] = None
     m_name: Optional[str] = None

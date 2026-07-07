@@ -26,10 +26,12 @@
                 <i class="bi bi-check-circle-fill text-[10px]"></i> Verified
               </span>
             }
-            @if (platformData.url) {
-              <a data-testid="social-list-platform-open-link" [href]="platformData.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="flex h-8 w-8 items-center justify-center overflow-visible text-[var(--color-text4)] transition-colors hover:text-[var(--color-blue-640)]" title="Open actual profile" aria-label="Open actual profile">
-                <i class="bi bi-person-circle text-[20px] leading-none"></i>
-              </a>
+            @if (getProfileUrl(platformData, platformData.username || user.username); as profileUrl) {
+              @if (profileUrl !== '#') {
+                <a data-testid="social-list-platform-open-link" [href]="profileUrl" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="flex h-8 w-8 items-center justify-center overflow-visible text-[var(--color-text4)] transition-colors hover:text-[var(--color-blue-640)]" title="Open actual profile" aria-label="Open actual profile">
+                  <i class="bi bi-person-circle text-[20px] leading-none"></i>
+                </a>
+              }
             }
           </div>
         </div>
@@ -113,28 +115,24 @@
                 <p class="mb-0 truncate text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Posts</p>
               </div>
             </div>
-            @if (isFetchTabAllowed(platformData, 'followers')) {
-              <div class="flex min-w-0 items-center gap-2 rounded-[8px] border border-emerald-500/10 bg-[linear-gradient(145deg,rgba(16,185,129,0.07)_0%,rgba(34,197,94,0.035)_42%,rgba(16,185,129,0.018)_68%,var(--color-blue-820-light)_100%)] px-2.5 py-2">
-                <span class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[8px] bg-sky-500/10 text-[var(--color-blue-640)]">
-                  <i class="bi bi-people-fill text-xs"></i>
-                </span>
-                <div class="min-w-0">
-                  <p class="mb-0 text-[13px] font-bold tabular-nums text-[var(--color-text1)]">{{ getStatValue(platformData, 'total_followers') }}</p>
-                  <p class="mb-0 truncate text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Followers</p>
-                </div>
+            <div class="flex min-w-0 items-center gap-2 rounded-[8px] border border-emerald-500/10 bg-[linear-gradient(145deg,rgba(16,185,129,0.07)_0%,rgba(34,197,94,0.035)_42%,rgba(16,185,129,0.018)_68%,var(--color-blue-820-light)_100%)] px-2.5 py-2">
+              <span class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[8px] bg-sky-500/10 text-[var(--color-blue-640)]">
+                <i class="bi bi-people-fill text-xs"></i>
+              </span>
+              <div class="min-w-0">
+                <p class="mb-0 text-[13px] font-bold tabular-nums text-[var(--color-text1)]">{{ getStatValue(platformData, 'total_followers') }}</p>
+                <p class="mb-0 truncate text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Followers</p>
               </div>
-            }
-            @if (isFetchTabAllowed(platformData, 'following')) {
-              <div class="flex min-w-0 items-center gap-2 rounded-[8px] border border-emerald-500/10 bg-[linear-gradient(145deg,rgba(16,185,129,0.07)_0%,rgba(34,197,94,0.035)_42%,rgba(16,185,129,0.018)_68%,var(--color-blue-820-light)_100%)] px-2.5 py-2">
-                <span class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[8px] bg-cyan-500/10 text-cyan-400">
-                  <i class="bi bi-person-plus text-xs"></i>
-                </span>
-                <div class="min-w-0">
-                  <p class="mb-0 text-[13px] font-bold tabular-nums text-[var(--color-text1)]">{{ getStatValue(platformData, 'total_following') }}</p>
-                  <p class="mb-0 truncate text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Following</p>
-                </div>
+            </div>
+            <div class="flex min-w-0 items-center gap-2 rounded-[8px] border border-emerald-500/10 bg-[linear-gradient(145deg,rgba(16,185,129,0.07)_0%,rgba(34,197,94,0.035)_42%,rgba(16,185,129,0.018)_68%,var(--color-blue-820-light)_100%)] px-2.5 py-2">
+              <span class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[8px] bg-cyan-500/10 text-cyan-400">
+                <i class="bi bi-person-plus text-xs"></i>
+              </span>
+              <div class="min-w-0">
+                <p class="mb-0 text-[13px] font-bold tabular-nums text-[var(--color-text1)]">{{ getStatValue(platformData, 'total_following') }}</p>
+                <p class="mb-0 truncate text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Following</p>
               </div>
-            }
+            </div>
             <div class="flex min-w-0 items-center gap-2 rounded-[8px] border border-emerald-500/10 bg-[linear-gradient(145deg,rgba(16,185,129,0.07)_0%,rgba(34,197,94,0.035)_42%,rgba(16,185,129,0.018)_68%,var(--color-blue-820-light)_100%)] px-2.5 py-2">
               <span class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[8px] bg-rose-500/10 text-rose-400">
                 <i class="bi bi-heart-fill text-xs"></i>

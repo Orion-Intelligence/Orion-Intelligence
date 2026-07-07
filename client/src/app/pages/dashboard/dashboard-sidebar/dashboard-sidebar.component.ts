@@ -209,6 +209,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     if (this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
       return categories.filter(c => c !== ProfileSubCategory.TENANT &&
         c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+        c !== ProfileSubCategory.LOG_MANAGER &&
         (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
         (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
         (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
@@ -219,6 +220,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       return categories.filter(c => c !== ProfileSubCategory.TENANT &&
         c !== ProfileSubCategory.SYSTEM_SETTINGS &&
         c !== ProfileSubCategory.EVENT_MANAGEMENT &&
+        c !== ProfileSubCategory.LOG_MANAGER &&
         c !== ProfileSubCategory.USERS &&
         c !== ProfileSubCategory.AUDITLOG &&
         c !== ProfileSubCategory.IOC &&
@@ -229,6 +231,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     return categories.filter(c => c !== ProfileSubCategory.TENANT &&
       c !== ProfileSubCategory.SYSTEM_SETTINGS &&
       c !== ProfileSubCategory.EVENT_MANAGEMENT &&
+      c !== ProfileSubCategory.LOG_MANAGER &&
       (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
       (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
       (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&

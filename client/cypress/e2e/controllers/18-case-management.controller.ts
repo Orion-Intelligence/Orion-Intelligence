@@ -14,6 +14,45 @@ export let linkedCaseId = '';
 
 export const selector = (testId: string) => `[data-testid="${testId}"]`;
 
+function parseCaseDate(value: string): Date {
+  const [year, month, day] = value.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function caseDateMonthStart(label: string): number {
+  return new Date(`${label.trim()} 1`).getTime();
+}
+
+function moveCaseDatePickerToMonth(targetLabel: string, attempts = 24) {
+  cy.get('[data-testid="side-filter-date-month-label"]').filter(':visible').first().invoke('text').then((raw) => {
+    const currentLabel = raw.trim();
+    if (currentLabel === targetLabel) {
+      return;
+    }
+
+    expect(attempts, `navigate case date picker to ${targetLabel}`).to.be.greaterThan(0);
+    const goPrev = caseDateMonthStart(currentLabel) > caseDateMonthStart(targetLabel);
+    const navSelector = goPrev ? '[data-testid="side-filter-date-prev-month"]' : '[data-testid="side-filter-date-next-month"]';
+    cy.get(navSelector).filter(':visible').first().click({ force: true });
+    moveCaseDatePickerToMonth(targetLabel, attempts - 1);
+  });
+}
+
+export function selectCaseDate(testId: string, value: string) {
+  const date = parseCaseDate(value);
+  const monthLabel = date.toLocaleString(undefined, { month: 'long', year: 'numeric' });
+
+  cy.get(selector(testId)).filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
+  moveCaseDatePickerToMonth(monthLabel);
+  cy.get(`[data-testid="side-filter-date-day-${date.getDate()}"]`)
+    .filter(':visible')
+    .filter((_index, element) => !String(element.getAttribute('class') || '').includes('text-slate-400'))
+    .first()
+    .scrollIntoView()
+    .click({ force: true });
+  cy.get(selector(testId)).filter(':visible').first().should('contain.text', value);
+}
+
 export function clickHeaderAction(testId: string) {
   cy.scrollTo('top', { ensureScrollable: false });
   cy.get(selector(testId)).last().scrollIntoView().should('exist').click({ force: true });
@@ -81,6 +120,9 @@ export function createCase(title: string, description: string, entityValue: stri
   cy.get(selector('case-add-severity-select')).should('be.visible').select('high');
   cy.get(selector('case-add-priority-select')).should('be.visible').select('high');
   cy.get(selector('case-primary-entity-value-input')).scrollIntoView().should('be.visible').type(entityValue);
+  if (title === 'Cypress Case Title') {
+    cy.docsScreenshot('case-management-add');
+  }
   cy.get(selector('case-add-save')).filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
 
   assertNotification('Case added successfully');

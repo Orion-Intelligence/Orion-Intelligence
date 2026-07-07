@@ -18,10 +18,13 @@ from fastapi import Request, HTTPException
 from fastapi.responses import FileResponse, Response
 from starlette.responses import JSONResponse
 from orion.api.server.crawl_manager.class_model import *
+from orion.api.server.crawl_manager.class_model.entity_model import entity_model
+from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.helper_manager.helper_controller import helper_controller
 from orion.helper_manager.env_handler import env_handler
 from orion.services.log_manager.log_controller import log
 from orion.api.server.crawl_manager.crawl_index_generator import crawl_index_generator
+from orion.services.arango_manager.arango_controller import arango_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_KEYS, ELASTIC_INDEX
 from orion.services.mongo_manager.mongo_controller import mongo_controller
@@ -38,6 +41,17 @@ SCREENSHOT_UPLOAD_MAX_BASE64_LENGTH = ((SCREENSHOT_UPLOAD_MAX_BYTES + 2) // 3) *
 class crawl_model:
     __instance = None
     __swarm_bloom = None
+    CTI_GRAPH_INDEX_CLUSTER_MAP = {
+        ELASTIC_INDEX.S_GENERIC_INDEX: "general",
+        ELASTIC_INDEX.S_LEAK_INDEX: "leak",
+        ELASTIC_INDEX.S_DEFACEMENT_INDEX: "defacement",
+        ELASTIC_INDEX.S_CHATS_INDEX: "chat",
+        ELASTIC_INDEX.S_EXPLOIT_INDEX: "exploit",
+        ELASTIC_INDEX.S_SOCIAL_INDEX: "social",
+        ELASTIC_INDEX.S_APT_INDEX: "apt",
+        ELASTIC_INDEX.S_MALWARE_INDEX: "malware",
+    }
+    LEAK_CONTENT_TYPE_CLUSTERS = ("tracking", "news", "leaks", "leak")
 
     @staticmethod
     def getInstance():
@@ -51,6 +65,81 @@ class crawl_model:
             pass
         else:
             crawl_model.__instance = self
+
+    async def _index_cti_data(self, m_data, bypass_empty_embedding=False):
+        result = await elastic_controller.get_instance().index_data(m_data, bypass_empty_embedding)
+        await self._pass_cti_graph_documents(m_data)
+        return result
+
+    async def _pass_cti_graph_documents(self, m_data):
+        entries = m_data if isinstance(m_data, list) else [m_data]
+        graph_entries = [
+            entry for entry in entries
+            if isinstance(entry, dict)
+            and entry.get(ELASTIC_KEYS.S_DOCUMENT) in self.CTI_GRAPH_INDEX_CLUSTER_MAP
+            and isinstance(entry.get(ELASTIC_KEYS.S_VALUE), dict)
+        ]
+        if not graph_entries:
+            return
+
+        try:
+            arango = arango_controller.get_instance()
+            if arango.get_db() is None:
+                await arango.link_connection()
+            if arango.get_graph() is None:
+                await arango.initialize()
+            if arango.get_db() is None or arango.get_graph() is None:
+                log.g().w("Skipping CTI graph document pass because Arango graph is unavailable.")
+                return
+        except Exception as ex:
+            log.g().w(f"Skipping CTI graph document pass because Arango is unavailable: {ex}")
+            return
+
+        manager = entity_manager.get_instance()
+        for entry in graph_entries:
+            index = entry[ELASTIC_KEYS.S_DOCUMENT]
+            document = self._graph_document_from_index_entry(index, entry[ELASTIC_KEYS.S_VALUE])
+            try:
+                result = await manager.create_or_update_entity_nodes(entity_model(**document))
+                if result.get("status") != "success":
+                    log.g().w(f"Skipping CTI graph document pass for {index}/{document.get('m_document_id')}: {result.get('message')}")
+            except Exception as ex:
+                log.g().e(f"Skipping CTI graph document pass for {index}/{document.get('m_document_id')}: {ex}")
+
+    def _graph_document_from_index_entry(self, index: str, document: dict):
+        graph_document = dict(document)
+        graph_document.pop("m_embedding", None)
+        graph_document["m_cluster_id"] = self._cluster_for_graph_document(
+            index,
+            graph_document,
+            self.CTI_GRAPH_INDEX_CLUSTER_MAP[index],
+        )
+        if not graph_document.get("m_document_id"):
+            graph_document["m_document_id"] = (
+                graph_document.get("m_hash")
+                or graph_document.get("m_message_id")
+                or graph_document.get("m_url")
+                or graph_document.get("m_title")
+            )
+        return graph_document
+
+    def _cluster_for_graph_document(self, index: str, document: dict, default_cluster_id: str) -> str:
+        explicit_cluster = str(document.get("m_cluster_id") or "").strip().lower()
+        if explicit_cluster in {"leak", "tracking", "news"}:
+            return explicit_cluster
+
+        if index != ELASTIC_INDEX.S_LEAK_INDEX:
+            return default_cluster_id
+
+        raw_content_type = document.get("m_content_type") or document.get("content_type") or []
+        content_types = raw_content_type if isinstance(raw_content_type, list) else [raw_content_type]
+        normalized_types = {str(item).strip().lower() for item in content_types if item not in (None, "", [], {})}
+
+        for content_type in self.LEAK_CONTENT_TYPE_CLUSTERS:
+            if content_type in normalized_types:
+                return "leak" if content_type == "leaks" else content_type
+
+        return default_cluster_id
 
     @staticmethod
     def _normalize_swarm_route_url(raw_url: str | None) -> str | None:
@@ -264,9 +353,10 @@ class crawl_model:
 
     async def invoke_social_index(self, social_index: social_data_model):
 
-        m_bybass_embedding = social_index.cards_data[0].m_platform == "pastebin"
+        platforms = social_index.cards_data[0].m_platform if social_index.cards_data else []
+        m_bybass_embedding = any(str(platform).strip().lower() == "pastebin" for platform in platforms)
         m_data = crawl_index_generator.index_query_social(social_index.model_dump())
-        await elastic_controller.get_instance().index_data(m_data, m_bybass_embedding)
+        await self._index_cti_data(m_data, m_bybass_embedding)
 
         return await self._update_or_create_model(
             base_url=social_index.seed_url,
@@ -293,7 +383,7 @@ class crawl_model:
 
     async def invoke_chat_index(self, chat_index: chat_data_model):
         m_data = crawl_index_generator.index_query_chat(chat_index.model_dump())
-        await elastic_controller.get_instance().index_data(m_data)
+        await self._index_cti_data(m_data)
 
         return await self._update_or_create_model(
             base_url=chat_index.m_source_channel_url,
@@ -305,7 +395,7 @@ class crawl_model:
 
     async def invoke_generic_index(self, general_index: GeneralDataModel):
         m_data = crawl_index_generator.index_query_general(general_index.model_dump())
-        await elastic_controller.get_instance().index_data(m_data)
+        await self._index_cti_data(m_data)
         return await self._update_or_create_model(
             base_url=general_index.m_base_url,
             new_content_type=general_index.m_content_type,
@@ -315,7 +405,7 @@ class crawl_model:
 
     async def invoke_exploit_index(self, exploit_index: ExploitDataModel):
         m_data = crawl_index_generator.index_query_exploit(exploit_index.model_dump())
-        await elastic_controller.get_instance().index_data(m_data)
+        await self._index_cti_data(m_data)
         return await self._update_or_create_model(
             base_url=exploit_index.base_url,
             new_content_type=['exploit'],
@@ -325,7 +415,7 @@ class crawl_model:
 
     async def invoke_apt_index(self, apt_index: AptDataModel):
         m_data = crawl_index_generator.index_query_apt(apt_index.model_dump())
-        await elastic_controller.get_instance().index_data(m_data)
+        await self._index_cti_data(m_data)
         return await self._update_or_create_model(
             base_url=apt_index.base_url,
             new_content_type=['apt'],
@@ -337,7 +427,7 @@ class crawl_model:
         m_data = crawl_index_generator.index_query_malware(malware_index.model_dump())
         if not m_data:
             return {"message": "no valid malware records to index"}
-        await elastic_controller.get_instance().index_data(m_data, bypass_empty_embedding=True)
+        await self._index_cti_data(m_data, bypass_empty_embedding=True)
         return {"message": "malware indexed successfully", "indexed": len(m_data)}
 
     async def init_stealerlogs(self, leak_index: LeakDataModel):
@@ -351,8 +441,12 @@ class crawl_model:
             is_leak_update=True)
 
     async def invoke_leak_index(self, leak_index: LeakDataModel):
-        m_data = crawl_index_generator.index_query_leak(leak_index.model_dump())
-        await elastic_controller.get_instance().index_data(m_data)
+        m_data = crawl_index_generator.index_query_leak(
+            leak_index.model_dump(),
+            cluster_id="leak",
+            default_content_type=["leaks"],
+        )
+        await self._index_cti_data(m_data)
         return await self._update_or_create_model(
             base_url=leak_index.base_url,
             new_content_type=['leaks'],
@@ -361,8 +455,12 @@ class crawl_model:
             is_leak_update=True)
 
     async def invoke_news_index(self, leak_index: LeakDataModel):
-        m_data = crawl_index_generator.index_query_leak(leak_index.model_dump())
-        await elastic_controller.get_instance().index_data(m_data)
+        m_data = crawl_index_generator.index_query_leak(
+            leak_index.model_dump(),
+            cluster_id="news",
+            default_content_type=["news"],
+        )
+        await self._index_cti_data(m_data)
         return await self._update_or_create_model(
             base_url=leak_index.base_url,
             new_content_type=['news'],
@@ -371,18 +469,22 @@ class crawl_model:
             is_leak_update=True)
 
     async def invoke_tracking_index(self, leak_index: LeakDataModel):
-        m_data = crawl_index_generator.index_query_leak(leak_index.model_dump())
-        await elastic_controller.get_instance().index_data(m_data)
+        m_data = crawl_index_generator.index_query_leak(
+            leak_index.model_dump(),
+            cluster_id="tracking",
+            default_content_type=["tracking"],
+        )
+        await self._index_cti_data(m_data)
         return await self._update_or_create_model(
             base_url=leak_index.base_url,
-            new_content_type=['news', 'tracking'],
+            new_content_type=['tracking'],
             new_index_type=['leak'],
             network_type=leak_index.m_network,
             is_leak_update=True)
 
     async def invoke_defacement_index(self, defacement_index: DefacementDataModel):
         m_data = crawl_index_generator.index_query_defacement(defacement_index.model_dump())
-        await elastic_controller.get_instance().index_data(m_data, True)
+        await self._index_cti_data(m_data, True)
         return await self._update_or_create_model(
             base_url=defacement_index.base_url,
             new_content_type=['defacement'],

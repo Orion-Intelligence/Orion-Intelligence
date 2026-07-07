@@ -10,6 +10,7 @@ declare global {
         interface Chainable {
             loginAsAdmin(): Chainable<void>;
             loginAsTest1(): Chainable<void>;
+            waitForLoginRequest(alias?: string): Chainable<void>;
             logout(): Chainable<void>;
             typeSlow(selector: string, value: string, options?: SlowTypeOptions): Chainable<void>;
             startInterceptTracking(): Chainable<void>;
@@ -21,6 +22,7 @@ declare global {
             scrollDashboardToBottom(): Chainable<void>;
             openLastMailAndGetUrl(): Chainable<string>;
             clearAllEmails(): Chainable<void>;
+            docsScreenshot(name: string, options?: Partial<Cypress.ScreenshotOptions>): Chainable<void>;
         }
     }
 }
@@ -31,6 +33,35 @@ Cypress.Commands.add("startInterceptTracking", () => {
 
 Cypress.Commands.add("waitForIntercepts", () => {
     return cy.wrap<void>(undefined, { log: false });
+});
+
+const loginRequestAlias = (alias = "loginRequest"): `@${string}` => (
+    alias.startsWith("@") ? alias : `@${alias}`
+) as `@${string}`;
+
+Cypress.Commands.add("waitForLoginRequest", (alias = "loginRequest") => {
+    return cy.wait(loginRequestAlias(alias), { timeout: 60000 })
+        .its("response.statusCode")
+        .should("be.oneOf", [200, 201])
+        .then(() => cy.wrap<void>(undefined, { log: false }));
+});
+
+Cypress.Commands.add("docsScreenshot", (name: string, options: Partial<Cypress.ScreenshotOptions> = {}) => {
+    return cy.env<{ takeScreenshots?: boolean | string }>(["takeScreenshots"]).then(({ takeScreenshots }) => {
+        if (takeScreenshots !== true && takeScreenshots !== "true") {
+            return cy.wrap<void>(undefined, { log: false });
+        }
+
+        cy.viewport(1920, 1080);
+        cy.wait(300, { log: false });
+        cy.screenshot(`user-manual/${name}`, {
+            capture: "viewport",
+            overwrite: true,
+            disableTimersAndAnimations: false,
+            ...options,
+        });
+        return cy.wrap<void>(undefined, { log: false });
+    });
 });
 
 const getSlowTypeInput = (selector: string) => cy.get(selector).first().scrollIntoView().should('be.visible').and('not.be.disabled');
@@ -65,10 +96,12 @@ Cypress.Commands.add("typeSlow", (selector: string, value: string, options: Slow
 
 Cypress.Commands.add("loginAsAdmin", () => {
     cy.env(["ADMIN_USERNAME", "ADMIN_PASSWORD"]).then(({ ADMIN_USERNAME, ADMIN_PASSWORD }) => {
+        cy.intercept("POST", "**/api/token").as("loginRequest");
         cy.visit("/login");
         cy.get('[data-testid="login-user"]').type(ADMIN_USERNAME);
         cy.get('[data-testid="login-pass"]').type(ADMIN_PASSWORD, { log: false });
         cy.get('[data-testid="login-button"], input.login-button').first().click();
+        cy.waitForLoginRequest();
         cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
             .filter(':visible')
             .should('have.length.greaterThan', 0);
@@ -82,10 +115,12 @@ Cypress.Commands.add("loginAsTest1", () => {
         if (!user?.username || !user?.password) {
             throw new Error(`Missing test user credentials for key: ${key}`);
         }
+        cy.intercept("POST", "**/api/token").as("loginRequest");
         cy.visit("/login");
         cy.get('[data-testid="login-user"]').type(user.username);
         cy.get('[data-testid="login-pass"]').type(user.password, { log: false });
         cy.get('[data-testid="login-button"], input.login-button').first().click();
+        cy.waitForLoginRequest();
         cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
             .filter(':visible')
             .should('have.length.greaterThan', 0);
@@ -103,9 +138,13 @@ Cypress.Commands.add("logout", () => {
             if (!profileMenu.length) {
                 return;
             }
+            cy.intercept("POST", "**/api/logout").as("logoutRequest");
             cy.scrollTo("top", { ensureScrollable: false });
             cy.wrap(profileMenu).scrollIntoView().should('be.visible').click();
             cy.get('[data-testid="signout-btn"]').filter(':visible').first().scrollIntoView().should('be.visible').click();
+            cy.wait("@logoutRequest", { timeout: 60000 })
+                .its("response.statusCode")
+                .should("be.oneOf", [200, 204]);
             cy.get('[data-testid="login-user"]').should('exist');
         });
     });

@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 
 from fastapi import APIRouter, Body, HTTPException, Query
 from fastapi import Depends, UploadFile
@@ -13,16 +14,20 @@ from orion.api.interactive.account_manager.models.user_param_model import user_p
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.interactive.auditlog_manager.models.audit_log_param_model import audit_log_param_model
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
+from orion.api.interactive.system_log_manager.system_log_manager import SystemLogManager
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantRequest
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel
+from orion.services.redis_manager.redis_controller import redis_controller
+from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.management.jobs.alert.alert_job import alert_job
 from orion.api.interactive.account_manager.models.user_model import user_model
 
 tenant_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
+SYSTEM_LOG_FLUSHED_AT_KEY = "SYSTEM_LOG_FLUSHED_AT"
 
 
 @tenant_routes.post(
@@ -197,6 +202,41 @@ async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=
     dependencies=[Depends(role_required([user_role.ADMIN]))], )
 async def delete_audit_log(log_id: str, current_user=Depends(get_current_user)):
     return {"success": await AuditLogManager.get_instance().delete(log_id)}
+
+
+@tenant_routes.get(
+    "/api/profile/system-logs",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def get_system_logs(log_type: str | None = Query(None), date: str | None = Query(None), page: int = Query(1), limit: int = Query(200)):
+    try:
+        flushed_at = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [SYSTEM_LOG_FLUSHED_AT_KEY, None, None])
+        return SystemLogManager.get_instance().get(log_type=log_type, date=date, page=page, limit=limit, flushed_at=flushed_at)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@tenant_routes.delete(
+    "/api/profile/system-logs",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def flush_system_logs():
+    result = SystemLogManager.get_instance().flush()
+    await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [SYSTEM_LOG_FLUSHED_AT_KEY, datetime.now().replace(microsecond=0).isoformat(), None])
+    return result
+
+
+@tenant_routes.delete(
+    "/api/profile/system-logs/{log_date}/{file_name:path}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def delete_system_log(log_date: str, file_name: str):
+    if not SystemLogManager.get_instance().delete(log_date, file_name):
+        raise HTTPException(status_code=404, detail="Log file not found")
+    return {"success": True}
 
 
 @tenant_routes.get(

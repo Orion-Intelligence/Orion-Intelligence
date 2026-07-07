@@ -36,6 +36,8 @@ describe('Consolidated - IOC Basic Flow', () => {
       .should('be.visible')
       .and('have.attr', 'data-tab', 'Deep Search');
     searchDeepFromTop('data');
+    cy.get('[data-testid="result-card"]').should('exist');
+    cy.docsScreenshot('consolidated-results');
 
     cy.get('body').then(($body) => {
       const hasDefacementReport = $body.find('[data-testid="defacement-report"]').length > 0;
@@ -95,6 +97,7 @@ describe('Consolidated - IOC Basic Flow', () => {
     cy.get('[data-testid^="insights-coverage-item-"]').should('have.length.greaterThan', 0);
     setAllInsightsExpanded(true);
     cy.get('[data-testid="insights-section-threat-actor"]').scrollIntoView().should('be.visible');
+    cy.docsScreenshot('consolidated-insights');
 
     cy.get('[data-testid="insights-section-threat-actor"]').should('be.visible');
     ensureInsightSectionExpanded('insights-toggle-threat-actor');

@@ -14,8 +14,8 @@
           <span class="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-[var(--color-blue-640)] px-2 py-[2px] text-[10px] font-semibold text-white">{{ 'Copied' | translate }}</span>
         }
       </button>
-      <div [attr.aria-label]="(isExpanded ? 'Collapse' : 'Expand') | translate" class="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
-        <img [ngClass]="{ 'rotate-180': !isExpanded }" alt="toggle icon" class="h-[18px] w-[18px] transition ui-action-icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+      <div [attr.aria-label]="(isExpanded ? 'Collapse' : 'Expand') | translate" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-transparent transition-[border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:-translate-y-[1px]">
+        <img [ngClass]="{ 'rotate-180': !isExpanded }" alt="" aria-hidden="true" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="h-5 w-5 brightness-0 invert transition-transform duration-150">
       </div>
     </div>
   </div>

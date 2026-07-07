@@ -10,6 +10,7 @@ import { SidebarUserFeederViewComponent } from './view/sidebar-user-feeder-view.
 import { supportsFileUploadForRuleType, supportsValueUploadForRuleType } from './feeder-rule.utils';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { UiDropdownComponent, UiDropdownOption } from '../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { VERIFIED_SOCIAL_PLATFORM_KEYS } from '../../../shared/model/social/social-scan.models';
 
 @Component({
   selector: 'app-sidebar-user-feeder',
@@ -20,7 +21,7 @@ import { UiDropdownComponent, UiDropdownOption } from '../../../shared/component
 })
 export class SidebarUserFeederComponent implements OnInit {
   private readonly socialRuleGroupKey = '__social_media__';
-  private readonly socialRuleKeys = new Set(['facebook', 'instagram', 'linkedin', 'mastodon', 'pastebin', 'reddit', 'tiktok', 'twitter', 'youtube']);
+  private readonly supportedSocialRuleKeys = new Set<string>(VERIFIED_SOCIAL_PLATFORM_KEYS);
 
   activeTab: 'add' | 'view' | 'values' = 'add';
   highlightedScript: FeederScriptItem | null = null;
@@ -54,7 +55,7 @@ export class SidebarUserFeederComponent implements OnInit {
   }
 
   get socialRules(): FeederRuleOption[] {
-    return this.rules.filter(rule => this.isSocialRule(rule));
+    return this.rules.filter(rule => this.isSupportedSocialRule(rule));
   }
 
   get ruleDropdownOptions(): UiDropdownOption[] {
@@ -185,7 +186,11 @@ export class SidebarUserFeederComponent implements OnInit {
   }
 
   private isSocialRule(rule: FeederRuleOption): boolean {
-    return this.socialRuleKeys.has((rule.key || '').toLowerCase()) || (rule.path || '').toLowerCase() === 'social/platform';
+    return (rule.path || '').toLowerCase() === 'social/platform';
+  }
+
+  private isSupportedSocialRule(rule: FeederRuleOption): boolean {
+    return this.isSocialRule(rule) && this.supportedSocialRuleKeys.has((rule.key || '').toLowerCase());
   }
 
   private syncSocialRuleSelectionFromSelectedRule(): void {
@@ -193,7 +198,7 @@ export class SidebarUserFeederComponent implements OnInit {
     if (!selectedSocialRule) {
       return;
     }
-    this.selectedSocialRuleKey = selectedSocialRule.key;
+    this.selectedSocialRuleKey = this.isSupportedSocialRule(selectedSocialRule) ? selectedSocialRule.key : (this.socialRules[0]?.key || '');
     this.selectedRuleKey = this.socialRuleGroupKey;
   }
 

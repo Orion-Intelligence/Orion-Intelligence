@@ -41,10 +41,12 @@ export function clickWhenVisible(selector: string, timeout: number = 30000) {
 }
 
 export function submitLogin(username: string, password: string) {
+  cy.intercept('POST', '**/api/token').as('loginRequest');
   cy.visit('/login');
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
   cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+  cy.waitForLoginRequest();
 }
 
 export function loginTenant(tenant: any) {
@@ -56,15 +58,16 @@ export function openTenantEditor(tenant: any) {
   cy.contains('tbody tr', tenant.email)
     .scrollIntoView()
     .should('be.visible')
-    .within(() => {
-      cy.get('[data-testid="tenant-edit-button"]').first().scrollIntoView().should('be.visible').click();
-    });
-  cy.contains('tbody tr', tenant.email)
+    .as('tenantRow');
+  cy.get('@tenantRow').within(() => {
+    cy.get('[data-testid="tenant-edit-button"]').first().scrollIntoView().click({force: true});
+  });
+  cy.get('@tenantRow')
     .next()
     .as('tenantEditor')
     .find('[data-testid="tenant-edit-form-panel"]')
-    .filter(':visible')
     .first()
+    .should('exist')
     .as('tenantEditFormPanel');
 }
 
@@ -116,6 +119,14 @@ export function setTenantLicense(license: string, checked: boolean) {
 }
 
 export function saveTenantEditor(alias: string) {
+  cy.intercept('POST', '**/api/update/tenants', (req) => {
+    if (req.body && typeof req.body === 'object') {
+      delete req.body.accounts_mail_password;
+      delete req.body.accounts_mail;
+      delete req.body.accounts_smtp_server;
+      delete req.body.accounts_smtp_port;
+    }
+  }).as(alias);
   cy.scrollDashboardToBottom()
   cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block')
     .filter(':visible')
@@ -127,6 +138,9 @@ export function saveTenantEditor(alias: string) {
     .should('be.visible')
     .and('not.be.disabled')
     .click();
+  cy.wait(`@${alias}`, {timeout: 60000})
+    .its('response.statusCode')
+    .should('be.oneOf', [200, 201]);
   cy.scrollDashboardToBottom()
 }
 

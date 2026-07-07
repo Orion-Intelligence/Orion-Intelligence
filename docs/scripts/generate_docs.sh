@@ -7,14 +7,27 @@ DOCS_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$DOCS_DIR/.." && pwd)"
 CLIENT_DIR="$REPO_ROOT/client"
 TARGET_DIR="$DOCS_DIR/screenshots"
-TEMP_SPEC_REL="cypress/doc/tmp-user-manual-screenshots-docs-runner.cy.ts"
-TEMP_SPEC_DIR="$CLIENT_DIR/cypress/doc"
-TEMP_SPEC="$CLIENT_DIR/$TEMP_SPEC_REL"
-NESTED_DIR="$TARGET_DIR/tmp-user-manual-screenshots-docs-runner.cy.ts"
-LEGACY_NESTED_DIR="$TARGET_DIR/tmp-user-manual-screenshots-runner.cy.ts"
 FRONTEND_URL="${DOC_FRONTEND_URL:-http://127.0.0.1:8080}"
+DOC_SCREENSHOT_SPECS=(
+    "cypress/e2e/02-login.cy.ts"
+    "cypress/e2e/03-flow.cy.ts"
+    "cypress/e2e/04-searching.cy.ts"
+    "cypress/e2e/05-user-management.cy.ts"
+    "cypress/e2e/06-account-management.cy.ts"
+    "cypress/e2e/07-cti-management.cy.ts"
+    "cypress/e2e/08-social-management.cy.ts"
+    "cypress/e2e/09-system-management.cy.ts"
+    "cypress/e2e/10-tenant-management.cy.ts"
+    "cypress/e2e/12-chatbot.cy.ts"
+    "cypress/e2e/13-consolidated.cy.ts"
+    "cypress/e2e/14-scans-management.cy.ts"
+    "cypress/e2e/17-network-intel.cy.ts"
+    "cypress/e2e/18-case-management.cy.ts"
+    "cypress/e2e/19-geo-fencing.cy.ts"
+)
 
 clear_docs_screenshots() {
+    mkdir -p "$TARGET_DIR"
     rm -f "$TARGET_DIR"/*.png
     rm -f "$TARGET_DIR"/*.jpg
     rm -f "$TARGET_DIR"/*.jpeg
@@ -22,10 +35,11 @@ clear_docs_screenshots() {
     rm -rf "$TARGET_DIR"/20-user-manual-screenshots-docs-runner.cy.ts
     rm -rf "$TARGET_DIR"/tmp-user-manual-screenshots-docs-runner.cy.ts
     rm -rf "$TARGET_DIR"/tmp-user-manual-screenshots-runner.cy.ts
+    find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -type d -name "*.cy.ts" -exec rm -rf {} +
 }
 
 cleanup() {
-    rm -f "$TEMP_SPEC"
+    true
 }
 
 if [ "${1:-}" = "--clear" ]; then
@@ -85,23 +99,27 @@ fi
 trap cleanup EXIT
 
 cd "$CLIENT_DIR" || exit 1
-npm test -- run --browser electron --config "baseUrl=$FRONTEND_URL" --spec cypress/e2e/05-user-management.cy.ts
-npm test -- run --browser electron --config "baseUrl=$FRONTEND_URL" --spec cypress/e2e/09-system-management.cy.ts
-npm test -- run --browser electron --config "baseUrl=$FRONTEND_URL" --spec cypress/e2e/10-tenant-management.cy.ts
 mkdir -p "$TARGET_DIR"
-rm -rf "$NESTED_DIR"
-rm -rf "$LEGACY_NESTED_DIR"
-mkdir -p "$TEMP_SPEC_DIR"
-cat > "$TEMP_SPEC" <<'EOF'
-import '../../../docs/e2e/user-manual-screenshots.cy';
-EOF
+find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -type d -name "*.cy.ts" -exec rm -rf {} +
+rm -f "$TARGET_DIR"/*-20260326.png
 
+npm_test_specs="$(IFS=,; echo "${DOC_SCREENSHOT_SPECS[*]}")"
 npm test -- run --browser "$browser" \
-    --config "baseUrl=$FRONTEND_URL,specPattern=[\"cypress/e2e/**/*.cy.ts\",\"cypress/doc/**/*.cy.ts\"]" \
-    --spec "$TEMP_SPEC_REL"
-rm -f "$TEMP_SPEC"
+    --config "baseUrl=$FRONTEND_URL" \
+    --env takeScreenshots=true \
+    --spec "$npm_test_specs"
 
-find "$TARGET_DIR" -path "*/user-manual/*" -type f \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.webp' \) -exec cp {} "$TARGET_DIR"/ \;
+copied=0
+while IFS= read -r -d '' screenshot_path; do
+    cp "$screenshot_path" "$TARGET_DIR"/
+    copied=$((copied + 1))
+done < <(find "$TARGET_DIR" -path "*/user-manual/*" -type f \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.webp' \) -print0)
+
+if [ "$copied" -eq 0 ]; then
+    echo "No docs screenshots were produced."
+    exit 1
+fi
+
 (
     cd "$TARGET_DIR" || exit 1
     rm -f *-20260326.png
@@ -112,7 +130,7 @@ find "$TARGET_DIR" -path "*/user-manual/*" -type f \( -name '*.png' -o -name '*.
     "$postprocess_python" "$SCRIPT_DIR/postprocess_screenshots.py" *-20260326.png
     find . -maxdepth 1 -type f -name '*.png' ! -name '*-20260326.png' -delete
 )
-rm -rf "$NESTED_DIR"
-rm -rf "$LEGACY_NESTED_DIR"
+
+find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -type d -name "*.cy.ts" -exec rm -rf {} +
 trap - EXIT
 cleanup

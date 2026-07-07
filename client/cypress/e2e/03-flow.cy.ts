@@ -1,4 +1,4 @@
-import {FLOW_ADMIN_SECTIONS, FLOW_ENTITY_API_SECTIONS, FLOW_SOCIAL_SECTIONS} from '../support/constants';
+import {FLOW_ADMIN_SECTIONS, FLOW_ENTITY_API_SECTIONS} from '../support/constants';
 import {applyDateRange, applyDirectoryDropdown, assertDirectoryContentVisible, assertFreeModeDashboardChrome, clickSidebarSubItem, DIRECTORY_CONTENT_OPTION, DIRECTORY_INDEX_OPTION, DIRECTORY_NETWORK_OPTION, getHeatmapComponent, openCountryReportFromMap, openSidebarGroup, resetDirectoryFilters, typeVisibleInputSlow, waitForDirectoryRequest} from './controllers/03-flow.controller';
 
 describe('Orion Intelligence - Free Mode Flow', () => {
@@ -59,7 +59,6 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     openSidebarGroup('Defacement');
 
     openSidebarGroup('Social');
-    FLOW_SOCIAL_SECTIONS.forEach((s) => clickSidebarSubItem('Social', s));
 
     openSidebarGroup('Exploit');
 
@@ -83,6 +82,10 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.loginAsAdmin();
     cy.get('[data-testid="world-heatmap-map"] svg').should('exist');
     cy.get('[data-testid="world-heatmap-map"] svg').should('exist');
+    cy.docsScreenshot('homepage-overview');
+    cy.get('[data-testid="homepage-search-input"]').filter(':visible').first().click({ force: true }).type('orion', { force: true });
+    cy.docsScreenshot('homepage-searchbar');
+    cy.get('[data-testid="homepage-search-input"]').filter(':visible').first().type('{selectall}{backspace}', { force: true });
 
     cy.get('[data-testid="world-heatmap-map"] path.country.has-data, [data-testid="world-heatmap-map"] path.country')
       .then(($paths) => {
@@ -120,6 +123,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     openCountryReportFromMap();
     cy.contains('[data-testid="heatmap-report"] h3', 'Reports').should('be.visible');
     cy.get('[data-testid="heatmap-report"] .overflow-y-auto').should('exist');
+    cy.docsScreenshot('heatmap-report');
     cy.get('[data-testid="heatmap-report-close"]').should('be.visible').click();
     cy.get('[data-testid="heatmap-report"]').should('not.exist');
 
@@ -211,6 +215,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.get('[data-testid="support-overlay"]').should('be.visible').and('not.have.class', 'opacity-0');
     cy.get('[data-testid="support-modal"]').should('be.visible');
     cy.get('[data-testid="support-modal-title"]').should('be.visible');
+    cy.docsScreenshot('support-modal');
     typeVisibleInputSlow('[data-testid="support-email-input"]', testData.support_email);
     typeVisibleInputSlow('[data-testid="support-subject-input"]', 'Support request from Cypress');
     typeVisibleInputSlow('[data-testid="support-message-input"]', 'Please review this test support message submission flow.');
@@ -227,6 +232,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.scrollDashboardToTop()
     cy.get('app-directory .ui-page-title').should('contain.text', 'Directory');
     assertDirectoryContentVisible();
+    cy.docsScreenshot('directory-monitoring');
 
     cy.scrollDashboardToTop()
     cy.get('app-directory-list tbody tr').then(($rows) => {
@@ -257,6 +263,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     resetDirectoryFilters();
 
     applyDirectoryDropdown('content_type', DIRECTORY_CONTENT_OPTION, 'content_type');
+    cy.docsScreenshot('dump-listing');
     resetDirectoryFilters();
 
     applyDateRange(14);

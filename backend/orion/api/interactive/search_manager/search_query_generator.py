@@ -462,30 +462,47 @@ class search_query_generator:
             from_date = (datetime.now(timezone.utc) - timedelta(days=150)).strftime(DATE_START_UTC_FORMAT)
             must_clauses.append(search_query_generator.build_date_priority_filter(from_date, to_date, date_priority_fields))
 
-        if p_query_model.category:
-            m_ctype = p_query_model.category
-        else:
-            m_ctype = "all"
+        m_ctype = str(p_query_model.category or "all").strip().lower()
+        allowed_categories = [
+            str(category).strip().lower()
+            for category in (allowed_categories or [])
+            if category not in (None, "", [], {})
+        ]
+        allowed_categories = list(dict.fromkeys(allowed_categories))
+        blocked_categories = [
+            str(category).strip().lower()
+            for category in (blocked_categories or [])
+            if category not in (None, "", [], {})
+        ]
+        blocked_categories = list(dict.fromkeys(blocked_categories))
 
         if allowed_categories:
-            if p_query_model.category not in allowed_categories:
-                allowed_categories.append(p_query_model.category)
+            selected_categories = allowed_categories
+            if m_ctype != "all":
+                selected_categories = [category for category in allowed_categories if category == m_ctype]
 
-        if m_ctype != "all":
-            allowed_categories = [m_ctype]
+            if selected_categories:
+                category_filters = [
+                    {"bool": {"filter": [
+                        {"exists": {"field": "m_content_type"}},
+                        {"terms": {"m_content_type": selected_categories}}
+                    ]}}
+                ]
+                if "leaks" in selected_categories or "leak" in selected_categories:
+                    category_filters.append({"bool": {"must_not": {"exists": {"field": "m_content_type"}}}})
+                must_clauses.append(
+                    {"bool": {"should": category_filters, "minimum_should_match": 1}})
+            else:
+                must_clauses.append({"match_none": {}})
+        elif m_ctype != "all":
             must_clauses.append(
                 {"bool": {"should": [
                     *([] if m_ctype == "swarm" else [{"bool": {"must_not": {"exists": {"field": "m_content_type"}}}}]),
                     {"bool": {"filter": [{"exists": {"field": "m_content_type"}},
-                        {"terms": {"m_content_type": allowed_categories}}]}}], "minimum_should_match": 1}})
+                        {"terms": {"m_content_type": [m_ctype]}}]}}], "minimum_should_match": 1}})
 
         if blocked_categories:
-            if allowed_categories:
-                must_clauses.append(
-                    {"bool": {"should": [{"terms": {"m_content_type": allowed_categories}},
-                        {"bool": {"must_not": {"terms": {"m_content_type": blocked_categories}}}}], "minimum_should_match": 1}})
-            else:
-                must_not_clause.append({"terms": {"m_content_type": blocked_categories}})
+            must_not_clause.append({"terms": {"m_content_type": blocked_categories}})
 
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})

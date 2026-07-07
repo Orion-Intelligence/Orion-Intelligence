@@ -14,8 +14,10 @@ describe('Geo Fencing - Satellite Intel and Threat Lens', () => {
     cy.get('[data-testid="geo-fencing-map-renderer"]', { timeout: 120000 }).should('exist');
     cy.get('[data-testid="geo-fencing-tab-map"]').should('be.visible');
     cy.get('[data-testid="geo-fencing-tab-threat"]').should('be.visible');
+    cy.docsScreenshot('satellite-map-overview');
 
     cy.get('[data-testid="geo-fencing-layer-satellite"]').should('be.visible').click({ force: true });
+    cy.docsScreenshot('satellite-map-satellite-layer');
     cy.get('[data-testid="geo-fencing-layer-street"]').should('be.visible').click({ force: true });
 
     cy.get('[data-testid="geo-fencing-panel-menu-button"]').should('be.visible').click({ force: true });
@@ -41,6 +43,7 @@ describe('Geo Fencing - Satellite Intel and Threat Lens', () => {
       if (searchResult.length) {
         cy.wrap(searchResult).click();
         cy.get('[data-testid="geo-dashboard-selection-panel"]').should('not.contain.text', 'Click a map point');
+        cy.docsScreenshot('satellite-map-search-selection');
       }
     });
 
@@ -70,11 +73,13 @@ describe('Geo Fencing - Satellite Intel and Threat Lens', () => {
     });
 
     cy.get('[data-testid="geo-dashboard-facilities-panel"]').should('be.visible');
+    cy.docsScreenshot('satellite-map-location-facilities');
     cy.get('[data-testid="geo-dashboard-location-open"]').should('be.visible').click();
     cy.get('[data-testid="geocode-modal"]').should('be.visible');
     cy.get('[data-testid="geocode-modal-mode-coordinates"]').should('be.visible').click();
     cy.get('[data-testid="geocode-modal-coordinates-input"]').should('be.visible').clear().type('31.48000, 74.17000');
     cy.get('[data-testid="geocode-modal-coverage-input"]').should('be.visible').clear().type('0.05');
+    cy.docsScreenshot('satellite-map-location-modal');
     cy.get('[data-testid="geocode-modal-apply"]').should('be.visible').and('not.be.disabled').click();
     cy.get('[data-testid="geocode-modal"]').should('not.exist');
     cy.get('[data-testid="geo-dashboard-location-target"]', { timeout: 120000 }).should('not.be.disabled');
@@ -83,6 +88,12 @@ describe('Geo Fencing - Satellite Intel and Threat Lens', () => {
 
     cy.get('[data-testid="geo-dashboard-tracking-aircraft"]').should('be.visible');
     cy.get('[data-testid="geo-dashboard-tracking-ships"]').should('be.visible');
+    cy.docsScreenshot('satellite-map-tracking');
+
+    cy.get('[data-testid="geo-fencing-panel-menu-button"]').click({ force: true });
+    cy.get('[data-testid="geo-fencing-panel-tab-compare"]').should('be.visible').click({ force: true });
+    cy.get('[data-testid="geo-fencing-panel-title"]').should('contain.text', 'Imagery Analysis');
+    cy.docsScreenshot('satellite-map-imagery-analysis');
   });
 
   it('switches to Threat Lens and verifies visible UI by test id', () => {
@@ -96,6 +107,7 @@ describe('Geo Fencing - Satellite Intel and Threat Lens', () => {
     cy.get('[data-testid="threat-lens-loading"]', { timeout: 180000 }).should('not.exist');
     cy.get('[data-testid="threat-lens-map-renderer"]', { timeout: 180000 }).should('exist');
     cy.get('[data-testid="threat-lens-search-panel"]', { timeout: 180000 }).should('be.visible');
+    cy.docsScreenshot('threat-lens-overview');
 
     cy.get('body').then(($body) => {
       const categoryLayers = $body.find('[data-testid="threat-lens-category-layers"]:visible').first();
@@ -106,6 +118,7 @@ describe('Geo Fencing - Satellite Intel and Threat Lens', () => {
     });
 
     cy.get('[data-testid="threat-lens-feed-panel-news"]').should('be.visible');
+    cy.docsScreenshot('threat-lens-feeds');
     cy.get('[data-testid="threat-lens-feed-range-news-7d"]').click();
     cy.get('[data-testid="threat-lens-feed-range-news-all"]').click();
     cy.get('body').then(($body) => {
@@ -148,9 +161,11 @@ describe('Geo Fencing - Satellite Intel and Threat Lens', () => {
     cy.get('[data-testid="threat-lens-active-keyword"]', { timeout: 60000 }).should('contain.text', 'china');
     cy.get('[data-testid="threat-lens-loading"]', { timeout: 180000 }).should('not.exist');
     cy.get('[data-testid="threat-lens-search-panel"]', { timeout: 180000 }).should('be.visible');
+    cy.docsScreenshot('threat-lens-search');
 
     cy.get('[data-testid="geo-fencing-panel-menu-button"]').click({ force: true });
     cy.get('[data-testid="geo-fencing-panel-menu-filter"]').should('be.visible').click({ force: true });
     cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().should('be.visible');
+    cy.docsScreenshot('threat-lens-filters');
   });
 });

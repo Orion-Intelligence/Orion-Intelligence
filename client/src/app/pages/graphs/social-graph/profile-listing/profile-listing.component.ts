@@ -23,7 +23,6 @@ import { SocialProfileTabsSectionComponent } from '../profile-detail/profile-tab
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialProfileListingComponent {
-  private readonly PRIORITY_PLATFORMS = ['instagram', 'youtube', 'facebook', 'behance', 'tiktok', 'twitter', 'vimeo', 'x'];
   private readonly baseFetchTabs: FetchTab[] = [ { key: 'details', label: 'Details', icon: 'bi bi-person-badge' }, { key: 'posts', label: 'Posts', icon: 'bi bi-file-post' }, { key: 'images', label: 'Images', icon: 'bi bi-images' }, { key: 'connections', label: 'Connections', icon: 'bi bi-diagram-3' } ];
   private readonly mappedFetchTabs: Partial<Record<FetchTabKey, FetchTab>> = { videos: { key: 'videos', label: 'Videos', icon: 'bi bi-play-btn' }, shorts: { key: 'shorts', label: 'Shorts', icon: 'bi bi-play-circle' } };
   private readonly followerFetchTabs: FetchTab[] = [ { key: 'followers', label: 'Followers', icon: 'bi bi-people' }, { key: 'following', label: 'Following', icon: 'bi bi-person-plus' } ];
@@ -140,7 +139,8 @@ export class SocialProfileListingComponent {
       ? [...this.baseFetchTabs, ...this.followerFetchTabs, this.onlinePresenceTab, this.stealerLogsTab]
       : sharedTabs;
     const globalCapability = this.platformCapabilities['__all__'];
-    const capability = this.platformCapabilities[platformData.platform.toLowerCase()];
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platformData.platformKey || platformData.platform);
+    const capability = this.platformCapabilities[platformKey];
     for (const key of [...(globalCapability?.allow ?? []), ...(capability?.allow ?? [])]) {
       const mappedTab = this.mappedFetchTabs[key as FetchTabKey];
       if (mappedTab && !tabs.some(tab => tab.key === mappedTab.key)) {
@@ -282,10 +282,8 @@ export class SocialProfileListingComponent {
   }
 
   isPriorityPlatform(platformName?: string): boolean {
-    if (!platformName) {
-      return false;
-    }
-    return this.PRIORITY_PLATFORMS.includes(platformName.toLowerCase());
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platformName);
+    return !!platformKey && !!this.platformCapabilities[platformKey];
   }
 
   getFollowers(platformData: PlatformResult): string[] {
@@ -476,9 +474,9 @@ export class SocialProfileListingComponent {
       return;
     }
     const normalizedProfile = SocialNormalizationUtil.normalizeUsername(profile);
-    const normalizedPlatform = platform.toLowerCase();
+    const normalizedPlatform = SocialNormalizationUtil.canonicalPlatformKey(platform);
     for (const user of this.activeUsers()) {
-      const match = user.platforms.find(item => item.platform.toLowerCase() === normalizedPlatform && SocialNormalizationUtil.normalizeUsername(item.username) === normalizedProfile);
+      const match = user.platforms.find(item => SocialNormalizationUtil.canonicalPlatformKey(item.platformKey || item.platform) === normalizedPlatform && SocialNormalizationUtil.normalizeUsername(item.username) === normalizedProfile);
       if (match) {
         const platformId = this.getPlatformCardId(match);
         this.state.graphState.activeUsername.set(user.username);
@@ -497,7 +495,7 @@ export class SocialProfileListingComponent {
   private setProfileQuery(platformData: PlatformResult): void {
     void this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { profile: SocialNormalizationUtil.normalizeProfilePathUsername(platformData.username || platformData.keyUsername), platform: platformData.platform.toLowerCase() },
+      queryParams: { profile: SocialNormalizationUtil.normalizeProfilePathUsername(platformData.username || platformData.keyUsername), platform: SocialNormalizationUtil.canonicalPlatformKey(platformData.platformKey || platformData.platform) },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });

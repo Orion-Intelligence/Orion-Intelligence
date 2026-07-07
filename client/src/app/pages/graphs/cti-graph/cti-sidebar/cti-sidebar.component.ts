@@ -1,36 +1,26 @@
 import { Component, input, output } from '@angular/core';
 import { SidebarComponent } from '../sidebar/sidebar.component';
+import { CtiGraphFilters, CtiGraphLegendItem, CtiGraphStats } from '../../../../shared/model/graph/cti-graph.model';
 @Component({
   selector: 'app-cti-sidebar',
   standalone: true,
   imports: [SidebarComponent],
-  template: `<graph-sidebar [filters]="filters()" [collapsed]="collapsed()" (filtersApplied)="filtersApplied.emit($event)" (filtersChanged)="filtersChanged.emit($event)" (collapsedChange)="collapsedChange.emit($event)"></graph-sidebar>`
+  template: `<graph-sidebar
+    [filters]="filters()"
+    [stats]="stats()"
+    [legendItems]="legendItems()"
+    [clusterLegendItems]="clusterLegendItems()"
+    [collapsed]="collapsed()"
+    (filtersApply)="filtersApply.emit($event)"
+    (collapsedChange)="collapsedChange.emit($event)">
+  </graph-sidebar>`
 })
 export class CtiSidebarComponent {
-  readonly filters = input<{
-      selectedType: string;
-      singleInput: string;
-      propertyType: string;
-      propertyValue: string;
-      maxEdge: number;
-      maxDepth: number;
-  } | null>(null);
+  readonly filters = input<CtiGraphFilters | null>(null);
+  readonly stats = input<CtiGraphStats | null>(null);
+  readonly legendItems = input<CtiGraphLegendItem[]>([]);
+  readonly clusterLegendItems = input<CtiGraphLegendItem[]>([]);
   readonly collapsed = input(false);
-  readonly filtersApplied = output<{
-      selectedType: string;
-      singleInput: string;
-      propertyType: string;
-      propertyValue: string;
-      maxEdge: number;
-      maxDepth: number;
-  }>();
-  readonly filtersChanged = output<{
-      selectedType: string;
-      singleInput: string;
-      propertyType: string;
-      propertyValue: string;
-      maxEdge: number;
-      maxDepth: number;
-  }>();
   readonly collapsedChange = output<boolean>();
+  readonly filtersApply = output<CtiGraphFilters>();
 }

@@ -27,5 +27,6 @@ describe('Chatbot - General Intelligence Report Flow', () => {
     cy.get('[data-testid="chat-widget-input"]').filter(':visible').first().should('be.enabled').type('hey');
     cy.get('[data-testid="chat-widget-send"]').filter(':visible').first().should('be.enabled').click();
     cy.get('[data-testid="chat-widget-messages"]').filter(':visible').first().find('div').should('exist');
+    cy.docsScreenshot('report-chatbot');
   });
 });

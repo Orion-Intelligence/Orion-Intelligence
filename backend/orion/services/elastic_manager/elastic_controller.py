@@ -53,6 +53,39 @@ class elastic_controller:
             return self.__m_dump_connection
         return self.__m_core_connection
 
+    @classmethod
+    def _clip_oversized_keyword_values(cls, value, field_path: tuple[str, ...] = ()):
+        if any(part.lower() in {"m_screenshot", "screenshot"} for part in field_path):
+            return value
+
+        if isinstance(value, str):
+            encoded = value.encode("utf-8")
+            if len(encoded) > 32766:
+                return encoded[:32766].decode("utf-8", errors="ignore")
+            return value
+
+        if isinstance(value, list):
+            return [cls._clip_oversized_keyword_values(item, field_path) for item in value]
+
+        if isinstance(value, dict):
+            for key, item in list(value.items()):
+                next_path = (*field_path, str(key))
+                value[key] = cls._clip_oversized_keyword_values(item, next_path)
+            return value
+
+        return value
+
+    @staticmethod
+    async def __put_mapping_safe(conn, index: str, properties: dict):
+        try:
+            await conn.indices.put_mapping(
+                index=index,
+                body={"properties": properties},
+                request_timeout=220,
+            )
+        except ApiError as ex:
+            log.g().w(f"Skipping mapping update for Elasticsearch index {index}: {str(ex)}")
+
     async def __initialize_mappings(self):
         try:
             mapping_leakdatamodel = ELASTIC_ENUMS.mapping_leakdatamodel
@@ -75,6 +108,12 @@ class elastic_controller:
                     index=ELASTIC_INDEX.S_LEAK_INDEX,
                     body={"index.blocks.read_only_allow_delete": False},
                     request_timeout=220)
+
+            await self.__put_mapping_safe(
+                self.__m_core_connection,
+                ELASTIC_INDEX.S_LEAK_INDEX,
+                {"m_domain": {"type": "keyword"}},
+            )
 
             if not await self.__m_core_connection.indices.exists(index=ELASTIC_INDEX.S_OPENSANCTIONS_INDEX, request_timeout=220):
                 await self.__m_core_connection.indices.create(
@@ -401,6 +440,8 @@ class elastic_controller:
 
                 for key in keys_to_remove:
                     del data[key]
+
+                self._clip_oversized_keyword_values(data)
 
                 return p_entry
 

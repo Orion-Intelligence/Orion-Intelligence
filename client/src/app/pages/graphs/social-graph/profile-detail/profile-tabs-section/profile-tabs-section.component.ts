@@ -37,7 +37,6 @@ export class SocialProfileTabsSectionComponent {
   imageCursorFetch = output<ImageCursorFetchRequest>();
   onlinePresenceSearchTermChanged = output<string>();
   onlinePresenceSearch = output<void>();
-  readonly formatKey = formatKey;
   readonly isUrl = isUrl;
   readonly isImageUrl = isImageUrl;
 
@@ -118,6 +117,10 @@ export class SocialProfileTabsSectionComponent {
 
   getProfileDetailEntries(platformData: PlatformResult): { key: string; value: any; }[] {
     return getProfileDetailEntries(platformData);
+  }
+
+  formatProfileDetailKey(key: string): string {
+    return formatKey(key.replace(/^m_/, ''));
   }
 
   formatMetadataValue(value: any): string {

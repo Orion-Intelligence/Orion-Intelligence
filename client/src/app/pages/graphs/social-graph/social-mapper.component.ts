@@ -89,7 +89,7 @@ export class SocialMapperComponent implements OnDestroy {
     const platforms = results.get(username) ?? Array.from(results.entries()).find(([key]) => key.toLowerCase() === username.toLowerCase())?.[1] ?? [];
     return this.getVisiblePlatforms(platforms);
   });
-  hasResultSourceTabs = computed(() => this.activeSourcePlatforms().length > 0);
+  hasResultSourceTabs = computed(() => this.activeSourcePlatforms().some(platform => this.getResultSource(platform) === 'darkweb'));
   activeResultSource = computed(() => {
     const username = this.activeSourceUsername();
     const platforms = this.activeSourcePlatforms();
@@ -152,10 +152,14 @@ export class SocialMapperComponent implements OnDestroy {
 
   setResultSource(source: SocialResultSource): void {
     const username = this.activeSourceUsername();
-    if (!username || this.activeResultSource() === source || this.getResultSourceCount(source) === 0) {
+    if (!username) {
       return;
     }
-    this.activeResultSources.update(current => ({ ...current, [username]: source }));
+    const nextSource: SocialResultSource = this.activeResultSource() === source ? (source === 'normal' ? 'darkweb' : 'normal') : source;
+    if (this.getResultSourceCount(nextSource) === 0) {
+      return;
+    }
+    this.activeResultSources.update(current => ({ ...current, [username]: nextSource }));
     this.profileListing()?.clearProfileOverview();
   }
 

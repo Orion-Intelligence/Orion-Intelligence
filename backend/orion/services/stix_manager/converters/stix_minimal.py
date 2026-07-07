@@ -210,13 +210,13 @@ def convert_to_stix(kind: str, raw: Any) -> Dict[str, Any]:
     url = _first(raw, profile["url"])
     base_url = _first(raw, profile["base_url"])
     network = _get(raw, "m_network")
-    platform = _get(raw, "m_platform")
+    platforms = _clean(_as_list(_get(raw, "m_platform")))
     doc_id = str(_first(raw, ["m_document_id", "m_hash"], url or base_url or title))
     lang_value = _as_list(_get(raw, "m_language"))
     lang = str(lang_value[0]).strip() if len(lang_value) == 1 and str(lang_value[0]).strip() else None
 
     content_types = _clean(_as_list(_get(raw, "m_content_type")) + _as_list(_get(raw, "content_type")))
-    labels = _clean(content_types + ([str(network).strip().lower()] if network else []) + ([f"platform:{str(platform).strip().lower()}"] if platform else []) + [profile["tag"]])
+    labels = _clean(content_types + ([str(network).strip().lower()] if network else []) + [f"platform:{platform.lower()}" for platform in platforms] + [profile["tag"]])
 
     iocs = _extract_iocs(raw, str(url) if url else None)
 
@@ -424,7 +424,7 @@ def convert_to_stix(kind: str, raw: Any) -> Dict[str, Any]:
         "object_marking_refs": [tlp_amber_id],
         "x_orion_doc_id": doc_id,
         "x_orion_network": str(network) if network else None,
-        "x_orion_platform": str(platform) if platform else None,
+        "x_orion_platform": platforms or None,
     }
     report = {k: v for k, v in report.items() if v is not None}
     add_obj(report)

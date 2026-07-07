@@ -28,11 +28,6 @@
     "rule_type": "unique",
     "path": "malware_collector/scripts"
   },
-  "mastodon": {
-    "rule_type": "shared",
-    "path": "social/platform",
-    "value_regex": "^https?://[^/]+/@[^/]+(?:/.*)?$"
-  },
   "news": {
     "rule_type": "unique",
     "path": "news_collector"
@@ -42,24 +37,44 @@
     "path": "social/platform",
     "value_regex": "^https?://(?:[^/]+\\.)?pastebin\\.com(?:/.*)?$"
   },
-  "reddit": {
-    "rule_type": "shared",
-    "path": "social/platform",
-    "value_regex": "^https?://(?:[^/]+\\.)?reddittorjg6rue252oqsxryoxengawnmo46qy4kyii5wtqnwfj4ooad\\.onion(?:/.*)?$"
-  },
   "tracking": {
     "rule_type": "unique",
     "path": "leak_collector/tracking"
   },
-  "twitter": {
+  "blogger": {
     "rule_type": "shared",
     "path": "social/platform",
-    "value_regex": "^https?://(?:www\\.)?x\\.com(?:/.*)?$"
+    "value_regex": "^https?://(?:(?:[^/]+\\.)?blogspot\\.com|(?:[^/]+\\.)?blogger\\.com|blog\\.malwaremustdie\\.org)(?:/.*)?$"
+  },
+  "bluesky": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:bsky\\.app/(?:profile/[^/?#]+(?:/.*)?|search\\?q=[^&#]+(?:&.*)?)|(?:[^/]+\\.)?bsky\\.social(?:/.*)?)$"
+  },
+  "devto": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?dev\\.to(?:/.*)?$"
   },
   "facebook": {
     "rule_type": "shared",
     "path": "social/platform",
     "value_regex": "^https?://(?:[^/]+\\.)?(?:facebook\\.com|fb\\.com|fb\\.me)(?:/.*)?$"
+  },
+  "habr": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?habr\\.com(?:/.*)?$"
+  },
+  "hackernoon": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?hackernoon\\.com(?:/.*)?$"
+  },
+  "hashnode": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?hashnode\\.com(?:/.*)?$"
   },
   "instagram": {
     "rule_type": "shared",
@@ -71,10 +86,75 @@
     "path": "social/platform",
     "value_regex": "^https?://(?:[^/]+\\.)?(?:linkedin\\.com|lnkd\\.in)(?:/.*)?$"
   },
+  "mastodon": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://[^/]+/@[^/]+(?:/.*)?$"
+  },
+  "medium": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?medium\\.com(?:/.*)?$"
+  },
+  "microblog": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?micro\\.blog(?:/.*)?$"
+  },
+  "misskey": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?misskey\\.io(?:/.*)?$"
+  },
+  "nostr": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?snort\\.social(?:/.*)?$"
+  },
+  "pleroma": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?pleroma\\.envs\\.net(?:/.*)?$"
+  },
+  "primal": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?primal\\.net(?:/.*)?$"
+  },
+  "quora": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?quora\\.com(?:/.*)?$"
+  },
+  "reddit": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:old\\.reddit\\.com/(?:r/[A-Za-z0-9_]+/?|search/\\?q=[^&#]+&type=communities(?:&.*)?)|(?:[^/]+\\.)?reddittorjg6rue252oqsxryoxengawnmo46qy4kyii5wtqnwfj4ooad\\.onion(?:/.*)?)$"
+  },
+  "stackoverflow": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?stackoverflow\\.com(?:/.*)?$"
+  },
+  "substack": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?substack\\.com(?:/.*)?$"
+  },
+  "threads": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?(?:threads\\.com|threads\\.net)(?:/.*)?$"
+  },
   "tiktok": {
     "rule_type": "shared",
     "path": "social/platform",
     "value_regex": "^https?://(?:[^/]+\\.)?tiktok\\.com(?:/.*)?$"
+  },
+  "twitter": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:www\\.)?x\\.com(?:/.*)?$"
   },
   "youtube": {
     "rule_type": "shared",

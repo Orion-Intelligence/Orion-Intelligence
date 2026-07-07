@@ -114,7 +114,7 @@ class insight_job:
             {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Languages Tagged": insight_job.__count_documents_with_any_field("m_language")}, }, },
             {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Organizations Tagged": insight_job.__count_documents_with_any_field("m_organization")}, }, },
             {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Countries Tagged": insight_job.__count_documents_with_any_field("m_country")}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Common Type": insight_job.__top_term("m_content_type.keyword")}, }, },
+            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_GENERIC_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Common Type": insight_job.__top_term("m_content_type")}, }, },
             {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Document Count": insight_job.__count_documents_with_any_field()}}},
             {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Actor Coverage": insight_job.__count_documents_with_any_field("m_team", "m_attacker")}, }, },
             {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Victim Records": insight_job.__count_documents_with_any_field("m_title", "m_name", "m_company_name")}, }, },
@@ -125,8 +125,8 @@ class insight_job:
             {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_LEAK_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Oldest Update": {"min": {"field": "m_update_date"}}}, }, },
             {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Document Count": insight_job.__count_documents_with_any_field()}}},
             {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "query": {"range": {"m_date": {"gte": "now-5d/d"}}}, "aggs": {"Updated 5 Days ago": insight_job.__count_documents_with_any_field()}, }, },
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Top Team": insight_job.__top_term("m_team.keyword")}}},
-            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Top Actor": insight_job.__top_term("m_attacker.keyword")}}}]
+            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Top Team": insight_job.__top_term("m_team")}}},
+            {ELASTIC_KEYS.S_DOCUMENT: ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_KEYS.S_FILTER: {"size": 0, "aggs": {"Top Actor": insight_job.__top_term("m_attacker")}}}]
 
         return queries
 
