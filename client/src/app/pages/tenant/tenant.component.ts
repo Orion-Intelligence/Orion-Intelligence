@@ -81,22 +81,22 @@ export class TenantComponent implements OnInit {
     }
 
     this.isIocCsvUploading = true;
-     void readFileAsText(selectedFile.file)
+    void readFileAsText(selectedFile.file)
       .then((content) => {
         try {
           const parsedCsv = parseIocCsv(content);
-      const addedCount = mergeIocCsvValues(this.onboardingData.iocs, parsedCsv);
-       if (addedCount === 0) {
-        this.messageNotificationService.show('No new IOC values found in the uploaded file.');
-        this.isIocCsvUploading = false;
-        return;
-      }
+          const addedCount = mergeIocCsvValues(this.onboardingData.iocs, parsedCsv);
+          if (addedCount === 0) {
+            this.messageNotificationService.show('No new IOC values found in the uploaded file.');
+            this.isIocCsvUploading = false;
+            return;
+          }
 
-      if (!this.selectedCategoryId && this.onboardingData.iocs.length) {
-        this.selectedCategoryId = this.onboardingData.iocs[0].ioc_id;
-      }
+          if (!this.selectedCategoryId && this.onboardingData.iocs.length) {
+            this.selectedCategoryId = this.onboardingData.iocs[0].ioc_id;
+          }
 
-      this.messageNotificationService.show(`${addedCount} IOC value${addedCount === 1 ? '' : 's'} imported.`, 'success');
+          this.messageNotificationService.show(`${addedCount} IOC value${addedCount === 1 ? '' : 's'} imported.`, 'success');
         }
         catch(error) {
           this.messageNotificationService.show(error instanceof Error ? error.message : 'Failed to import IOC CSV file.');

@@ -98,20 +98,20 @@ export class SidebarUserIocComponent implements OnInit {
       .then((content) => {
         try {
           const parsedCsv = parseIocCsv(content);
-      const addedCount = mergeIocCsvValues(this.onboardingData?.iocs ?? [], parsedCsv);
+          const addedCount = mergeIocCsvValues(this.onboardingData?.iocs ?? [], parsedCsv);
 
-      if (addedCount === 0) {
-        this.isIocCsvUploading = false;
-        this.messageNotificationService.show('No new IOC values found in the uploaded file.');
-        return;
-      }
+          if (addedCount === 0) {
+            this.isIocCsvUploading = false;
+            this.messageNotificationService.show('No new IOC values found in the uploaded file.');
+            return;
+          }
 
-      if (!this.selectedCategoryId && this.onboardingData?.iocs?.length) {
-        this.selectedCategoryId = this.onboardingData.iocs[0].ioc_id;
-      }
+          if (!this.selectedCategoryId && this.onboardingData?.iocs?.length) {
+            this.selectedCategoryId = this.onboardingData.iocs[0].ioc_id;
+          }
 
-      this.messageNotificationService.show(`${addedCount} IOC value${addedCount === 1 ? '' : 's'} imported.`, 'success');
-      this.update();
+          this.messageNotificationService.show(`${addedCount} IOC value${addedCount === 1 ? '' : 's'} imported.`, 'success');
+          this.update();
         }
         catch(error) {
           this.isIocCsvUploading = false;

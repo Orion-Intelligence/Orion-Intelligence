@@ -149,9 +149,11 @@ function parseCsvRows(content: string): string[][] {
       if (char === '"' && nextChar === '"') {
         field += '"';
         index++;
-      } else if (char === '"') {
+      }
+      else if (char === '"') {
         inQuotes = false;
-      } else {
+      }
+      else {
         field += char;
       }
       continue;
@@ -162,15 +164,18 @@ function parseCsvRows(content: string): string[][] {
         throw new Error('CSV contains an invalid quote.');
       }
       inQuotes = true;
-    } else if (char === ',') {
+    }
+    else if (char === ',') {
       row.push(field);
       field = '';
-    } else if (char === '\n') {
+    }
+    else if (char === '\n') {
       row.push(field);
       rows.push(row);
       row = [];
       field = '';
-    } else if (char === '\r') {
+    }
+    else if (char === '\r') {
       row.push(field);
       rows.push(row);
       row = [];
@@ -178,7 +183,8 @@ function parseCsvRows(content: string): string[][] {
       if (nextChar === '\n') {
         index++;
       }
-    } else {
+    }
+    else {
       field += char;
     }
   }
