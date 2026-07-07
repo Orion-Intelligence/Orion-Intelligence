@@ -61,7 +61,8 @@ class search_query_generator:
 
         should = [{"term": {f: {"value": value, "case_insensitive": True}}} for f in fields]
         if tag in ("m_domain", "domain", "m_search_all", "all") and isinstance(value, str) and "." in value and "/" not in value and "@" not in value:
-            should.extend({"wildcard": {f: {"value": f"*.{value.lstrip('*.')}", "case_insensitive": True}}} for f in fields)
+            wildcard_value = value.strip().lower().lstrip("*.").strip(".")
+            should.extend({"wildcard": {f: {"value": f"*.{wildcard_value}", "case_insensitive": True, "rewrite": "constant_score"}}} for f in fields)
 
         if len(should) == 1:
             return should[0]
