@@ -74,7 +74,7 @@
               }
 
               @if (graphSearchAdvancedMode) {
-                <div class="mt-4 space-y-2.5">
+                <div class="mt-4 max-h-[138px] space-y-2.5 overflow-y-auto pr-1 [scrollbar-gutter:stable]">
                   @for (filter of graphAdvancedFilters; track filter.id; let i = $index) {
                     <div data-testid="cti-graph-adv-row" class="grid items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] md:grid-cols-[110px_1fr_2fr_auto]">
                       <app-ui-dropdown
