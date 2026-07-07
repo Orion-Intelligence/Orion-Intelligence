@@ -39,7 +39,7 @@ from orion.api.server.crawl_manager.class_model.social_scrape_request_model impo
 from orion.services.mongo_manager.shared_model.db_scan_job_model import ScanJobCreateRequest, ScanJobDetailResponse, ScanJobListResponse, ScanJobSeenRequest
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
-from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
+from orion.api.server.entity_manager.modal.EntityQueryModel import EntityGraphBatchQueryModel, EntityQueryModel
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, user_role
 from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
@@ -801,6 +801,16 @@ async def get_chat_stix_document(doc_id: str, lang: Optional[str] = Query(None, 
 async def get_entity_relations(query: EntityQueryModel = Depends()):
     manager = entity_manager.get_instance()
     return await manager.get_entity_relations(query)
+
+
+@api_routes.post(
+    "/api/graph",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(license_required("cti_graph", bypass_roles=[user_role.ADMIN], bypass_licenses=["maintainer"]))], )
+async def post_entity_relations(query: EntityGraphBatchQueryModel = Body(...)):
+    manager = entity_manager.get_instance()
+    return await manager.get_entity_relations_batch(query)
 
 
 @api_routes.get(
