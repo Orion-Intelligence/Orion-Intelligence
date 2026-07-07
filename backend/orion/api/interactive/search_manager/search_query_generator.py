@@ -101,7 +101,13 @@ class search_query_generator:
 
         if len(fields) == 1:
             return make_clause(fields[0])
-        return {"bool": {"should": [make_clause(f) for f in fields], "minimum_should_match": 1}}
+
+        return {
+            "bool": {
+                "should": [make_clause(f) for f in fields],
+                "minimum_should_match": 1
+            }
+        }
 
     @staticmethod
     def build_ioc_filter_clauses(pfilter):
@@ -380,7 +386,8 @@ class search_query_generator:
     @staticmethod
     def on_search_persona(p_query_model):
         q = (p_query_model.q or "").strip()
-        if not q: return None, None
+        if not q:
+            return None, None
 
         query = {
             "query": {
@@ -539,8 +546,10 @@ class search_query_generator:
             must_clauses.append(
                 {"bool": {"should": [
                     *([] if m_ctype == "swarm" else [{"bool": {"must_not": {"exists": {"field": "m_content_type"}}}}]),
-                    {"bool": {"filter": [{"exists": {"field": "m_content_type"}},
-                                          {"terms": {"m_content_type": [m_ctype]}}]}}
+                    {"bool": {"filter": [
+                        {"exists": {"field": "m_content_type"}},
+                        {"terms": {"m_content_type": [m_ctype]}}
+                    ]}}
                 ], "minimum_should_match": 1}})
 
         if blocked_categories:
@@ -572,9 +581,15 @@ class search_query_generator:
             must_not_clause.append({"term": {"m_content_type": "adult"}})
 
         if m_content_type == "phishing":
-            must_clauses.append({"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": ["phishing"]}}]}})
+            must_clauses.append({"bool": {"filter": [
+                {"exists": {"field": "m_ioc_type"}},
+                {"terms": {"m_ioc_type": ["phishing"]}}
+            ]}})
         elif m_content_type == "hacked":
-            must_clauses.append({"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": ["hacked"]}}]}})
+            must_clauses.append({"bool": {"filter": [
+                {"exists": {"field": "m_ioc_type"}},
+                {"terms": {"m_ioc_type": ["hacked"]}}
+            ]}})
         elif m_content_type == "databases":
             must_not_clause.append({"terms": {"m_ioc_type": ["phishing", "hacked"]}})
 
@@ -584,29 +599,52 @@ class search_query_generator:
                 must_clauses.append(
                     {"bool": {"should": [
                         {"term": {"m_content_type": "swarm"}},
-                        {"bool": {"filter": [{"exists": {"field": "content_type"}}, {"term": {"content_type": "swarm"}}]}},
-                        {"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": ["swarm"]}}]}}
+                        {"bool": {"filter": [
+                            {"exists": {"field": "content_type"}},
+                            {"term": {"content_type": "swarm"}}
+                        ]}},
+                        {"bool": {"filter": [
+                            {"exists": {"field": "m_ioc_type"}},
+                            {"terms": {"m_ioc_type": ["swarm"]}}
+                        ]}}
                     ], "minimum_should_match": 1}})
             else:
                 must_clauses.append(
                     {"bool": {"should": [
-                        {"bool": {"filter": [{"exists": {"field": "content_type"}}, {"term": {"content_type": m_content_type.lower()}}]}},
-                        {"bool": {"filter": [{"exists": {"field": "m_content_type"}}, {"term": {"m_content_type": m_content_type.lower()}}]}},
-                        {"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": [m_content_type.lower()]}}]}}
+                        {"bool": {"filter": [
+                            {"exists": {"field": "content_type"}},
+                            {"term": {"content_type": m_content_type.lower()}}
+                        ]}},
+                        {"bool": {"filter": [
+                            {"exists": {"field": "m_content_type"}},
+                            {"term": {"m_content_type": m_content_type.lower()}}
+                        ]}},
+                        {"bool": {"filter": [
+                            {"exists": {"field": "m_ioc_type"}},
+                            {"terms": {"m_ioc_type": [m_content_type.lower()]}}
+                        ]}}
                     ], "minimum_should_match": 1}})
 
         phrases = re.findall(r'"([^"]+)"', p_query_model.q or "")
         quoted_value = bool(phrases) and (p_query_model.q or "").strip().startswith('"') and (
                 p_query_model.q or "").strip().endswith('"')
         exact_phrases = phrases
+
         if search_type == "defacement":
             loose_terms = []
         else:
             loose_terms = [] if raw_query in ("*", "") else [t for t in re.findall(r'\w+', raw_query) if t and t.strip('"')]
-        phrase_fields = [("m_title", 5), ("m_content", 3), ("m_url", 2), ("m_source_url", 2), ("m_sender_name", 2), ("m_author", 2), ("m_username", 2), ("m_base_url", 1),
-            ("m_team", 1), ("m_attacker", 1), ("m_users", 1), ("m_network", 1), ("m_channel_name", 4),
-            ("m_name", 4), ("m_family", 3), ("m_aliases", 3), ("m_actor_names", 3), ("m_references", 1),
-            ("m_sha256_hash", 5), ("m_sha1_hash", 4), ("m_md5_hash", 4), ("m_signature", 4), ("m_tags", 3), ("m_file_name", 3)]
+
+        phrase_fields = [
+            ("m_title", 5), ("m_content", 3), ("m_url", 2), ("m_source_url", 2),
+            ("m_sender_name", 2), ("m_author", 2), ("m_username", 2), ("m_base_url", 1),
+            ("m_team", 1), ("m_attacker", 1), ("m_users", 1), ("m_network", 1),
+            ("m_channel_name", 4), ("m_name", 4), ("m_family", 3), ("m_aliases", 3),
+            ("m_actor_names", 3), ("m_references", 1), ("m_sha256_hash", 5),
+            ("m_sha1_hash", 4), ("m_md5_hash", 4), ("m_signature", 4), ("m_tags", 3),
+            ("m_file_name", 3)
+        ]
+
         unified_query = self._build_query_block(
             p_query_model=p_query_model,
             pfilter=pfilter,
@@ -618,22 +656,26 @@ class search_query_generator:
             must_clauses=must_clauses,
             must_not_clause=must_not_clause,
             m_page_number=m_page_number,
-            date_boost_fields=date_boost_fields)
+            date_boost_fields=date_boost_fields
+        )
 
         unified_query["size"] = result_size
         unified_query["from"] = max(0, (m_page_number - 1) * result_size)
 
         if channel_q:
             qb = unified_query["query"]["function_score"]["query"].setdefault("bool", {"must": []})
-            qb.setdefault("should", []).extend(
-                [{"term": {"m_channel_name.keyword": {"value": channel_q, "boost": 7.0}}},
-                    {"match_phrase": {"m_channel_name": {"query": channel_q, "slop": 1, "boost": 7.0}}}])
+            qb.setdefault("should", []).extend([
+                {"term": {"m_channel_name.keyword": {"value": channel_q, "boost": 7.0}}},
+                {"match_phrase": {"m_channel_name": {"query": channel_q, "slop": 1, "boost": 7.0}}}
+            ])
 
         query = base_index, unified_query, [b for b in
             [{ELASTIC_INDEX.S_LEAK_INDEX: 2}, {ELASTIC_INDEX.S_GENERIC_INDEX: 0.5},
-                {ELASTIC_INDEX.S_EXPLOIT_INDEX: 1.4}, {ELASTIC_INDEX.S_APT_INDEX: 1.4}, {ELASTIC_INDEX.S_MALWARE_INDEX: 1.4}, {ELASTIC_INDEX.S_CHATS_INDEX: 1.4},
-                {ELASTIC_INDEX.S_SOCIAL_INDEX: 1.4}, {ELASTIC_INDEX.S_DEFACEMENT_INDEX: 1.4}] if
-            next(iter(b)) in base_index]
+             {ELASTIC_INDEX.S_EXPLOIT_INDEX: 1.4}, {ELASTIC_INDEX.S_APT_INDEX: 1.4},
+             {ELASTIC_INDEX.S_MALWARE_INDEX: 1.4}, {ELASTIC_INDEX.S_CHATS_INDEX: 1.4},
+             {ELASTIC_INDEX.S_SOCIAL_INDEX: 1.4}, {ELASTIC_INDEX.S_DEFACEMENT_INDEX: 1.4}]
+            if next(iter(b)) in base_index
+        ]
 
         return query
 
