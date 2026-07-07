@@ -144,8 +144,25 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return arr[0] || '-';
   }
 
+  get sourceDomainValues(): string[] {
+    const explicitSourceDomains = this.getSourceDomainValues(this.item());
+    if (explicitSourceDomains.length) {
+      return explicitSourceDomains;
+    }
+    return this.getRawDomainValues(this.item());
+  }
+
+  get sourceDomainValueText(): string {
+    return this.sourceDomainValues.length ? this.sourceDomainValues.join(', ') : '-';
+  }
+
   get domainValues(): string[] {
-    return this.uniqueValues(this.rowHelper.normalizeToArray(this.item()?.['domain']));
+    const item = this.item();
+    const domains = this.getRawDomainValues(item);
+    if (domains.length) {
+      return domains;
+    }
+    return this.getSourceDomainValues(item);
   }
 
   get domainValueText(): string {
@@ -454,7 +471,11 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       return [];
     }
     const emails = this.rowHelper.normalizeToArray(item?.['email']);
-    const domains = this.uniqueValues(this.rowHelper.normalizeToArray(item?.['domain']));
+    const sourceDomains = this.getSourceDomainValues(item);
+    const domains = this.uniqueValues([
+      ...this.getRawDomainValues(item),
+      ...sourceDomains
+    ]);
     const ips = this.rowHelper.normalizeToArray(item?.['ip']);
     const passwords = this.rowHelper.normalizeToArray(item?.['password']);
     const exclude = new Set<string>([
@@ -475,14 +496,15 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       'index',
       'mapping',
       'delimiter',
-      'domain'
+      'domain',
+      'source_domain'
     ]);
     const core: TelemetryGroup[] = [];
     if (emails.length > 1) {
       core.push({ key: 'email', label: 'Email', values: emails });
     }
     if (domains.length > 0) {
-      core.push({ key: 'domain', label: 'Domain', values: domains });
+      core.push({ key: 'domain', label: sourceDomains.length ? 'Domain / Source Domain' : 'Domain', values: domains });
     }
     if (ips.length > 1) {
       core.push({ key: 'ip', label: 'IP', values: ips });
@@ -554,5 +576,13 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
 
   private uniqueValues(values: string[]): string[] {
     return Array.from(new Set(values.map(v => String(v).trim()).filter(Boolean)));
+  }
+
+  private getRawDomainValues(item: any): string[] {
+    return this.uniqueValues(this.rowHelper.normalizeToArray(item?.['domain']));
+  }
+
+  private getSourceDomainValues(item: any): string[] {
+    return this.uniqueValues(this.rowHelper.normalizeToArray(item?.['source_domain']));
   }
 }
