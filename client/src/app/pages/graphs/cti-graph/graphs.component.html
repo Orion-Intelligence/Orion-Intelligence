@@ -97,7 +97,21 @@
                         [size]="'large'"
                         (valueChange)="setGraphFilterOption(filter, $event)">
                       </app-ui-dropdown>
-                      <input data-testid="cti-graph-adv-value-input" [(ngModel)]="filter.value" [ngModelOptions]="{standalone: true}" type="text" [placeholder]="getGraphAdvancedOption(filter.optionKey).placeholder | translate" class="h-11 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[13px] font-medium text-[var(--color-text1)] placeholder:text-[var(--color-text4)] outline-none transition-colors focus:border-[var(--color-blue-640)]" />
+                      @if (isGraphClusterAdvancedOption(filter.optionKey)) {
+                        <app-ui-dropdown
+                          testId="cti-graph-adv-cluster-value-select"
+                          [options]="graphBuilderClusterValueOptions"
+                          [selected]="getGraphFilterClusterValue(filter)"
+                          [searchable]="true"
+                          [searchPlaceholder]="'Search clusters' | translate"
+                          [surface]="'default'"
+                          [size]="'large'"
+                          (valueChange)="setGraphFilterClusterValue(filter, $event)">
+                        </app-ui-dropdown>
+                      }
+                      @else {
+                        <input data-testid="cti-graph-adv-value-input" [(ngModel)]="filter.value" [ngModelOptions]="{standalone: true}" type="text" [placeholder]="getGraphAdvancedOption(filter.optionKey).placeholder | translate" class="h-11 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[13px] font-medium text-[var(--color-text1)] placeholder:text-[var(--color-text4)] outline-none transition-colors focus:border-[var(--color-blue-640)]" />
+                      }
                       <div class="flex items-center gap-2">
                         <button data-testid="cti-graph-adv-delete-filter" type="button" (click)="removeGraphAdvancedFilter(filter.id)" [disabled]="graphAdvancedFilters.length === 1" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-45">
                           <i class="bi bi-trash3 text-[14px]"></i>

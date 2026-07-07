@@ -947,46 +947,59 @@ class entity_manager:
         return min(max(document_limit * 200, 5000), 50000)
 
     @classmethod
-    def _conjunctive_property_groups(cls, request_items: list[dict[str, Any]], query: EntityGraphBatchQueryModel) -> dict[str, Any] | None:
+    def _conjunctive_graph_groups(cls, request_items: list[dict[str, Any]]) -> dict[str, Any] | None:
         if len(request_items) < 2:
             return None
 
-        try:
-            requested_depth = int(query.depth)
-        except (TypeError, ValueError):
-            requested_depth = 1
-        if requested_depth != 1:
-            return None
-
         scope_cluster = request_items[0]["scope_cluster"]
-        property_groups: list[list[str]] = []
+        match_groups: list[dict[str, Any]] = []
         for index, item in enumerate(request_items):
             if index > 0 and item["operator"] != "&&":
-                return None
-            if item["data_point_type"] != "property" or item["model_type"] in {"", "all"}:
                 return None
             if item["scope_cluster"] != scope_cluster:
                 return None
 
-            normalized_type = cls._sanitize(cls._normalize_key(item["model_type"]))
+            data_point_type = item["data_point_type"]
+            model_type = item["model_type"]
             group: list[str] = []
             seen_group_ids: set[str] = set()
-            for value in item["query_values"]:
-                normalized_value = cls._sanitize(cls._normalize_key(value))
-                if not normalized_type or not normalized_value:
-                    continue
-                property_id = f"cti_vertices/{normalized_type}:{normalized_value}"
-                if property_id in seen_group_ids:
-                    continue
-                seen_group_ids.add(property_id)
-                group.append(property_id)
+
+            if data_point_type == "cluster" and model_type == "cluster":
+                for value in item["query_values"]:
+                    normalized_value = cls._sanitize(cls._normalize_key(value))
+                    if normalized_value == "all":
+                        cluster_ids = [f"cti_vertices/{cluster_key}" for cluster_key in cls.CLUSTER_LABELS]
+                    else:
+                        cluster_key = cls._canonical_cluster_id(normalized_value)
+                        cluster_ids = [f"cti_vertices/{cluster_key}"] if cluster_key in cls.CLUSTER_LABELS else []
+                    for cluster_id in cluster_ids:
+                        if cluster_id in seen_group_ids:
+                            continue
+                        seen_group_ids.add(cluster_id)
+                        group.append(cluster_id)
+                group_kind = "cluster"
+            elif data_point_type == "property" and model_type not in {"", "all"}:
+                normalized_type = cls._sanitize(cls._normalize_key(model_type))
+                for value in item["query_values"]:
+                    normalized_value = cls._sanitize(cls._normalize_key(value))
+                    if not normalized_type or not normalized_value:
+                        continue
+                    property_id = f"cti_vertices/{normalized_type}:{normalized_value}"
+                    if property_id in seen_group_ids:
+                        continue
+                    seen_group_ids.add(property_id)
+                    group.append(property_id)
+                group_kind = "property"
+            else:
+                return None
+
             if not group:
                 return None
-            property_groups.append(group)
+            match_groups.append({"kind": group_kind, "ids": group})
 
         return {
-            "property_groups": property_groups,
-            "queried_ids": [property_id for group in property_groups for property_id in group],
+            "match_groups": match_groups,
+            "queried_ids": [match_id for group in match_groups for match_id in group["ids"]],
             "scope_cluster": scope_cluster,
         }
 
@@ -1148,8 +1161,8 @@ class entity_manager:
         ]
         return cls._dedupe_graph_results(limited_results)
 
-    async def _get_conjunctive_property_relations(self, request_items: list[dict[str, Any]], query: EntityGraphBatchQueryModel, document_limit: int):
-        conjunctive_groups = self._conjunctive_property_groups(request_items, query)
+    async def _get_conjunctive_graph_relations(self, request_items: list[dict[str, Any]], document_limit: int):
+        conjunctive_groups = self._conjunctive_graph_groups(request_items)
         if conjunctive_groups is None:
             return None
 
@@ -1161,48 +1174,78 @@ class entity_manager:
                 scope_cluster = f"cti_vertices/{candidate_scope_cluster}"
 
         query_str = """
-        LET ordered_property_groups = (
-          FOR group IN @property_groups
-            LET capped_count = SUM(
-              FOR property_id IN group
+        LET ordered_match_groups = (
+          FOR group IN @match_groups
+            LET cluster_count = group.kind == "cluster" ? SUM(
+              FOR match_id IN group.ids
                 RETURN LENGTH(
                   FOR seed_edge IN cti_edges
-                    FILTER seed_edge._to == property_id AND STARTS_WITH(seed_edge.type, "has_")
+                    FILTER seed_edge._from == match_id AND seed_edge.type == "cluster_to_doc"
                     LIMIT @seed_probe_limit
                     RETURN 1
                 )
-            )
+            ) : 0
+            LET property_count = group.kind == "property" ? SUM(
+              FOR match_id IN group.ids
+                RETURN LENGTH(
+                  FOR seed_edge IN cti_edges
+                    FILTER seed_edge._to == match_id AND STARTS_WITH(seed_edge.type, "has_")
+                    LIMIT @seed_probe_limit
+                    RETURN 1
+                )
+            ) : 0
+            LET capped_count = cluster_count + property_count
             SORT capped_count ASC
             RETURN group
         )
 
-        LET seed_property_ids = FIRST(ordered_property_groups)
+        LET seed_group = FIRST(ordered_match_groups)
 
-        LET seed_doc_ids = (
-          FOR property_id IN seed_property_ids
+        LET cluster_seed_doc_ids = seed_group.kind == "cluster" ? (
+          FOR match_id IN seed_group.ids
             FOR seed_edge IN cti_edges
-              FILTER seed_edge._to == property_id AND STARTS_WITH(seed_edge.type, "has_")
+              FILTER seed_edge._from == match_id AND seed_edge.type == "cluster_to_doc"
+              LIMIT @candidate_scan_limit
+              RETURN DISTINCT seed_edge._to
+        ) : []
+
+        LET property_seed_doc_ids = seed_group.kind == "property" ? (
+          FOR match_id IN seed_group.ids
+            FOR seed_edge IN cti_edges
+              FILTER seed_edge._to == match_id AND STARTS_WITH(seed_edge.type, "has_")
               LIMIT @candidate_scan_limit
               RETURN DISTINCT seed_edge._from
-        )
+        ) : []
+
+        LET seed_doc_ids = APPEND(cluster_seed_doc_ids, property_seed_doc_ids)
 
         LET matched_doc_ids = (
           FOR doc_id IN seed_doc_ids
             LET matched_group_count = LENGTH(
-              FOR group IN ordered_property_groups
-                LET group_matches = (
-                  FOR property_id IN group
+              FOR group IN ordered_match_groups
+                LET cluster_group_matches = group.kind == "cluster" ? (
+                  FOR match_id IN group.ids
+                    FOR candidate_edge IN cti_edges
+                      FILTER candidate_edge._from == match_id
+                        AND candidate_edge._to == doc_id
+                        AND candidate_edge.type == "cluster_to_doc"
+                      LIMIT 1
+                      RETURN 1
+                ) : []
+                LET property_group_matches = group.kind == "property" ? (
+                  FOR match_id IN group.ids
                     FOR candidate_edge IN cti_edges
                       FILTER candidate_edge._from == doc_id
-                        AND candidate_edge._to == property_id
+                        AND candidate_edge._to == match_id
                         AND STARTS_WITH(candidate_edge.type, "has_")
                       LIMIT 1
                       RETURN 1
-                )
+                ) : []
+                LET group_matches = APPEND(cluster_group_matches, property_group_matches)
                 FILTER LENGTH(group_matches) > 0
                 RETURN 1
             )
-            FILTER matched_group_count == LENGTH(ordered_property_groups)
+            FILTER matched_group_count == LENGTH(ordered_match_groups)
             LET in_scope = @scope_cluster_id == "" ? true : LENGTH(
               FOR scope_edge IN cti_edges
                 FILTER scope_edge._from == @scope_cluster_id
@@ -1220,8 +1263,9 @@ class entity_manager:
           FOR doc_id IN matched_doc_ids
             LET doc = DOCUMENT(doc_id)
             FILTER doc != null AND doc.type == "document"
-            FOR group IN ordered_property_groups
-              FOR property_id IN group
+            FOR group IN ordered_match_groups
+              FILTER group.kind == "property"
+              FOR property_id IN group.ids
                 FOR edge IN cti_edges
                   FILTER edge._from == doc_id
                     AND edge._to == property_id
@@ -1264,7 +1308,7 @@ class entity_manager:
             "candidate_scan_limit": self._graph_and_candidate_scan_limit(document_limit),
             "default_clusters": list(self.CLUSTER_LABELS.keys()),
             "document_limit": document_limit,
-            "property_groups": conjunctive_groups["property_groups"],
+            "match_groups": conjunctive_groups["match_groups"],
             "queried_ids": conjunctive_groups["queried_ids"],
             "scope_cluster_id": scope_cluster,
             "seed_probe_limit": min(document_limit * 20, 1000),
@@ -1290,7 +1334,7 @@ class entity_manager:
             request_items = self._graph_batch_items(query.requests or [query], query)
             document_limit = self._graph_document_limit(query.edge)
 
-            conjunctive_response = await self._get_conjunctive_property_relations(request_items, query, document_limit)
+            conjunctive_response = await self._get_conjunctive_graph_relations(request_items, document_limit)
             if conjunctive_response is not None:
                 return conjunctive_response
 

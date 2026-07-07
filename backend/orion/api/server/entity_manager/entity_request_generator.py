@@ -74,11 +74,13 @@ class EntityRequestGenerator:
 
             LET cluster_data = (
               FOR cluster_id IN clusters
+                LET start_cluster = DOCUMENT(cluster_id)
                 LET docs = (
-                  FOR v, e, p IN {depth_level}..{depth_level} ANY cluster_id GRAPH 'cti_graph'
-                    OPTIONS {{ bfs: true, uniqueVertices: "global" }}
-                    FILTER v.type == 'document'
+                  FOR e IN cti_edges
+                    FILTER e._from == cluster_id AND e.type == 'cluster_to_doc'
                     LIMIT {per_cluster_limit}
+                    LET v = DOCUMENT(e._to)
+                    FILTER v != null AND v.type == 'document'
                     LET current_label = FIRST(
                       FOR candidate IN [v.display_value, v.label, v.title, v.doc_id, v.m_document_id, v._key]
                         FILTER candidate != null AND TRIM(TO_STRING(candidate)) != ''
@@ -105,7 +107,10 @@ class EntityRequestGenerator:
                     RETURN {{
                       vertex: display_vertex,
                       edge: e,
-                      path: p
+                      path: {{
+                        vertices: [start_cluster, display_vertex],
+                        edges: [e]
+                      }}
                     }}
                 )
                 RETURN docs
@@ -122,10 +127,10 @@ class EntityRequestGenerator:
               FOR doc_id IN document_ids
                 FOR e IN cti_edges
                   FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
-                  FOR cluster IN cti_vertices
-                    FILTER cluster._id == e._from AND cluster.type == 'cluster'
+                  FOR cluster_vertex IN cti_vertices
+                    FILTER cluster_vertex._id == e._from AND cluster_vertex.type == 'cluster'
                     RETURN {{
-                      vertex: cluster,
+                      vertex: cluster_vertex,
                       edge: e,
                       path: null
                     }}
@@ -147,11 +152,14 @@ class EntityRequestGenerator:
         else:
             queried_id = f"cti_vertices/{normalized_value}"
             query_str = f"""
+            LET start_cluster = DOCUMENT(@cluster_id)
+
             LET doc_nodes = (
-              FOR v, e, p IN {depth_level}..{depth_level} ANY @cluster_id GRAPH 'cti_graph'
-                OPTIONS {{ bfs: true, uniqueVertices: "global" }}
-                FILTER v.type == 'document'
+              FOR e IN cti_edges
+                FILTER e._from == @cluster_id AND e.type == 'cluster_to_doc'
                 LIMIT {document_limit}
+                LET v = DOCUMENT(e._to)
+                FILTER v != null AND v.type == 'document'
                 LET current_label = FIRST(
                   FOR candidate IN [v.display_value, v.label, v.title, v.doc_id, v.m_document_id, v._key]
                     FILTER candidate != null AND TRIM(TO_STRING(candidate)) != ''
@@ -178,7 +186,10 @@ class EntityRequestGenerator:
                 RETURN {{
                   vertex: display_vertex,
                   edge: e,
-                  path: p
+                  path: {{
+                    vertices: [start_cluster, display_vertex],
+                    edges: [e]
+                  }}
                 }}
             )
 
@@ -191,10 +202,10 @@ class EntityRequestGenerator:
               FOR doc_id IN document_ids
                 FOR e IN cti_edges
                   FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
-                  FOR cluster IN cti_vertices
-                    FILTER cluster._id == e._from AND cluster.type == 'cluster'
+                  FOR cluster_vertex IN cti_vertices
+                    FILTER cluster_vertex._id == e._from AND cluster_vertex.type == 'cluster'
                     RETURN {{
-                      vertex: cluster,
+                      vertex: cluster_vertex,
                       edge: e,
                       path: null
                     }}
