@@ -191,9 +191,13 @@ export class GraphExportService {
           this.drawConnectionMatrixHeader(doc, 'Report Sections', 'Metadata, screenshot, and related reports');
         });
         this.drawInfoSectionMarker(doc, markerY, contentW, sectionTitle);
+        const sectionStartPage = doc.getCurrentPageInfo().pageNumber;
         const reportSectionDidDrawPage = (data: any) => {
           this.makeSectionHeaderCallback(sectionsByPage, 'Report Sections', 'Metadata, screenshot, and related reports')(data);
-          this.drawInfoSectionMarker(data.doc as jsPDF, 126, contentW, sectionTitle || 'Info');
+          const pageNo = data?.pageNumber ?? (data?.doc as jsPDF | undefined)?.getCurrentPageInfo?.().pageNumber ?? sectionStartPage;
+          if (pageNo !== sectionStartPage) {
+            this.drawInfoSectionMarker(data.doc as jsPDF, 126, contentW, sectionTitle || 'Info');
+          }
         };
         autoTable(doc, {
           startY: markerY + 12,

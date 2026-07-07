@@ -128,9 +128,13 @@ export class DocumentExportService extends GraphExportService {
         let markerY = ((doc as any).lastAutoTable.finalY ?? 160) + 18;
         markerY = this.resolveMarkerY(doc, markerY, 126);
         this.drawInfoSectionMarker(doc, markerY, contentW, sectionTitle, theme?.sectionHeaderRgb);
+        const sectionStartPage = doc.getCurrentPageInfo().pageNumber;
         const reportSectionDidDrawPage = (data: any) => {
           hooks.didDrawPage(data);
-          this.drawInfoSectionMarker(data.doc as jsPDF, 126, contentW, sectionTitle || 'Info', theme?.sectionHeaderRgb);
+          const pageNo = data?.pageNumber ?? (data?.doc as jsPDF | undefined)?.getCurrentPageInfo?.().pageNumber ?? sectionStartPage;
+          if (pageNo !== sectionStartPage) {
+            this.drawInfoSectionMarker(data.doc as jsPDF, 126, contentW, sectionTitle || 'Info', theme?.sectionHeaderRgb);
+          }
         };
         autoTable(doc, {
           startY: markerY + 12,
