@@ -890,7 +890,6 @@ class entity_manager:
     @classmethod
     def _graph_batch_items(cls, request_items: list[Any], query: EntityGraphBatchQueryModel) -> list[dict[str, Any]]:
         normalized_items: list[dict[str, Any]] = []
-        list_item_indexes: dict[tuple[str, str, str], int] = {}
 
         for item in request_items:
             data_point_type = getattr(item, "data_point_type", query.data_point_type)
@@ -903,23 +902,29 @@ class entity_manager:
             if not values:
                 continue
 
-            operator = getattr(item, "operator", "||")
+            raw_operator = getattr(item, "operator", "||")
+            operator = "&&" if raw_operator in {"&&", "AND", "and"} else "||"
             normalized_item = {
                 "data_point_type": data_point_type,
                 "model_type": model_type,
                 "query_values": values,
-                "operator": operator if operator in {"&&", "||"} else "||",
+                "operator": operator,
                 "scope_cluster": scope_cluster,
             }
 
             if data_point_type == "property" and model_type in cls.GRAPH_BATCH_LIST_KEYS:
-                list_key = (data_point_type, model_type, scope_cluster)
-                existing_index = list_item_indexes.get(list_key)
-                if existing_index is not None:
-                    existing = normalized_items[existing_index]
-                    existing["query_values"] = cls._merge_graph_query_values(existing["query_values"], values)
+                previous = normalized_items[-1] if normalized_items else None
+                can_merge_with_previous = (
+                    operator != "&&"
+                    and previous is not None
+                    and previous["data_point_type"] == data_point_type
+                    and previous["model_type"] == model_type
+                    and previous["scope_cluster"] == scope_cluster
+                    and previous["operator"] != "&&"
+                )
+                if can_merge_with_previous:
+                    previous["query_values"] = cls._merge_graph_query_values(previous["query_values"], values)
                     continue
-                list_item_indexes[list_key] = len(normalized_items)
 
             normalized_items.append(normalized_item)
 
@@ -1038,6 +1043,39 @@ class entity_manager:
         return cls._dedupe_graph_results(aggregate)
 
     @classmethod
+    def _group_graph_results_by_document(cls, results: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
+        grouped: dict[str, list[dict[str, Any]]] = {}
+        ordered_document_ids: list[str] = []
+        unscoped_results: list[list[dict[str, Any]]] = []
+
+        for item in results:
+            document_ids = cls._extract_document_ids_from_graph_result(item)
+            document_id = document_ids[0] if document_ids else ""
+            if not document_id:
+                unscoped_results.append([item])
+                continue
+            if document_id not in grouped:
+                grouped[document_id] = []
+                ordered_document_ids.append(document_id)
+            grouped[document_id].append(item)
+
+        return [grouped[document_id] for document_id in ordered_document_ids] + unscoped_results
+
+    @classmethod
+    def _interleave_graph_result_sets_by_document(cls, result_sets: list[list[dict[str, Any]]]) -> list[dict[str, Any]]:
+        grouped_sets = [cls._group_graph_results_by_document(results) for results in result_sets if results]
+        if not grouped_sets:
+            return []
+
+        interleaved: list[dict[str, Any]] = []
+        max_group_count = max(len(groups) for groups in grouped_sets)
+        for group_index in range(max_group_count):
+            for groups in grouped_sets:
+                if group_index < len(groups):
+                    interleaved.extend(groups[group_index])
+        return cls._dedupe_graph_results(interleaved)
+
+    @classmethod
     def _limit_graph_results_by_documents(cls, results: list[dict[str, Any]], document_limit: int) -> list[dict[str, Any]]:
         if document_limit < 1:
             return cls._dedupe_graph_results(results)
@@ -1071,7 +1109,7 @@ class entity_manager:
             request_items = self._graph_batch_items(query.requests or [query], query)
 
             for item in request_items:
-                group_results: list[dict[str, Any]] = []
+                group_result_sets: list[list[dict[str, Any]]] = []
                 for value in item["query_values"]:
                     relation_query = EntityQueryModel(
                         data_point_type=item["data_point_type"],
@@ -1082,7 +1120,7 @@ class entity_manager:
                         scope_cluster=item["scope_cluster"],
                     )
                     response = await self.get_entity_relations(relation_query)
-                    group_results.extend(response.get("results") or [])
+                    group_result_sets.append(response.get("results") or [])
                     limit_reached = limit_reached or bool(response.get("limit_reached"))
                     queried_id = response.get("queried_id")
                     if queried_id and queried_id not in queried_ids:
@@ -1093,7 +1131,7 @@ class entity_manager:
 
                 response_groups.append({
                     "operator": item["operator"],
-                    "results": self._dedupe_graph_results(group_results),
+                    "results": self._interleave_graph_result_sets_by_document(group_result_sets),
                 })
 
             merged_results = self._merge_graph_result_groups(response_groups)

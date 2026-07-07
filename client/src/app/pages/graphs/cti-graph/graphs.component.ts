@@ -519,7 +519,6 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   private groupGraphBuilderListRequests(requests: GraphSearchRequest[]): GraphSearchRequest[] {
     const groupedRequests: GraphSearchRequest[] = [];
-    const listRequestIndexes = new Map<string, number>();
 
     requests.forEach(request => {
       if (request.dataPointType !== 'property' || !this.isGraphBuilderListKey(request.modelType)) {
@@ -527,14 +526,17 @@ export class GraphComponent implements OnInit, OnDestroy {
         return;
       }
 
-      const existingIndex = listRequestIndexes.get(request.modelType);
-      if (existingIndex === undefined) {
-        listRequestIndexes.set(request.modelType, groupedRequests.length);
+      const previousRequest = groupedRequests[groupedRequests.length - 1];
+      const canMergeWithPrevious = request.operator !== '&&' &&
+        previousRequest?.dataPointType === request.dataPointType &&
+        previousRequest.modelType === request.modelType &&
+        previousRequest.operator !== '&&';
+      if (!canMergeWithPrevious) {
         groupedRequests.push({ ...request, queryValues: [...request.queryValues] });
         return;
       }
 
-      groupedRequests[existingIndex].queryValues = this.mergeGraphBuilderQueryValues(groupedRequests[existingIndex].queryValues, request.queryValues);
+      previousRequest.queryValues = this.mergeGraphBuilderQueryValues(previousRequest.queryValues, request.queryValues);
     });
 
     return groupedRequests;
