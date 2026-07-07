@@ -25,16 +25,17 @@ class search_query_generator:
         domain = domain.split("/", 1)[0].split("?", 1)[0].split("#", 1)[0].split(":", 1)[0].strip(".")
 
         if "." not in domain or "@" in domain:
-            return {"term": {"domain.keyword": domain}}
+            return {"term": {"domain.keyword": {"value": domain, "case_insensitive": True}}}
 
         return {
             "bool": {
                 "should": [
-                    {"term": {"domain.keyword": domain}},
+                    {"term": {"domain.keyword": {"value": domain, "case_insensitive": True}}},
                     {
                         "wildcard": {
                             "domain.keyword": {
                                 "value": f"*.{domain}",
+                                "case_insensitive": True,
                                 "rewrite": "constant_score"
                             }
                         }
