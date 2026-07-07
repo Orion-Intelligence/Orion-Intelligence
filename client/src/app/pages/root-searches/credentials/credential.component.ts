@@ -24,6 +24,7 @@ import { REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choic
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportPayload, GraphReportTableRow } from '../../../shared/model/report/report-export.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { DomainIndexSidebarComponent } from './domain-index-sidebar/domain-index-sidebar.component';
 
 @Component({
   selector: 'app-credential',
@@ -38,7 +39,9 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
     IocSearchComponent,
     PasswordSchemaComponent,
     ScanHelperMethods,
-    ExportChoiceModalComponent, TranslatePipe],
+    ExportChoiceModalComponent,
+    DomainIndexSidebarComponent,
+    TranslatePipe],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],
 })
