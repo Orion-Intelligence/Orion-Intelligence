@@ -59,9 +59,13 @@ class search_query_generator:
         if not fields:
             return {"match_none": {}}
 
-        if len(fields) == 1:
-            return {"term": {fields[0]: {"value": value, "case_insensitive": True}}}
-        return {"bool": {"should": [{"term": {f: {"value": value, "case_insensitive": True}}} for f in fields], "minimum_should_match": 1}}
+        should = [{"term": {f: {"value": value, "case_insensitive": True}}} for f in fields]
+        if tag in ("m_domain", "domain", "m_search_all", "all") and isinstance(value, str) and "." in value and "/" not in value and "@" not in value:
+            should.extend({"wildcard": {f: {"value": f"*.{value.lstrip('*.')}", "case_insensitive": True}}} for f in fields)
+
+        if len(should) == 1:
+            return should[0]
+        return {"bool": {"should": should, "minimum_should_match": 1}}
 
     @staticmethod
     def build_ioc_filter_clauses(pfilter):
