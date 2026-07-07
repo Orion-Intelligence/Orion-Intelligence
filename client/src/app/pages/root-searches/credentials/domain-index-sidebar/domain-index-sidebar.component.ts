@@ -18,15 +18,28 @@ const DOMAIN_UI_LIMIT = 10;
 })
 export class DomainIndexSidebarComponent {
   domainSidebarSearch = '';
+  domainIndexExpanded = false;
 
   @Input() stealerData: StealerLogCallbackModel | null = null;
+
+  get filteredSourceDomainCount(): number {
+    return this.filterDomainItems(this.collectDomainItems('source_domain')).length;
+  }
 
   get filteredSourceDomainItems(): DomainIndexItem[] {
     return this.filterDomainItems(this.collectDomainItems('source_domain')).slice(0, DOMAIN_UI_LIMIT);
   }
 
+  get filteredOtherDomainCount(): number {
+    return this.filterDomainItems(this.collectDomainItems('domain')).length;
+  }
+
   get filteredOtherDomainItems(): DomainIndexItem[] {
     return this.filterDomainItems(this.collectDomainItems('domain')).slice(0, DOMAIN_UI_LIMIT);
+  }
+
+  toggleDomainIndex(): void {
+    this.domainIndexExpanded = !this.domainIndexExpanded;
   }
 
   private get stealerRecords(): any[] {
