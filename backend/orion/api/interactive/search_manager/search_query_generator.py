@@ -42,7 +42,7 @@ class search_query_generator:
                 return should_clauses[0]
             return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
 
-        tag = parsed.get("tag")
+        tag = str(parsed.get("tag") or "").strip().lower()
         value = parsed.get("value")
         fields = mapping.get(tag, [])
 
@@ -60,8 +60,8 @@ class search_query_generator:
             return {"match_none": {}}
 
         if len(fields) == 1:
-            return {"term": {fields[0]: value}}
-        return {"bool": {"should": [{"term": {f: value}} for f in fields], "minimum_should_match": 1}}
+            return {"term": {fields[0]: {"value": value, "case_insensitive": True}}}
+        return {"bool": {"should": [{"term": {f: {"value": value, "case_insensitive": True}}} for f in fields], "minimum_should_match": 1}}
 
     @staticmethod
     def build_ioc_filter_clauses(pfilter):
