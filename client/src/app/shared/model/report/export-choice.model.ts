@@ -24,7 +24,7 @@ export const REPORT_EXPORT_OPTIONS: ExportChoiceOption[] = [
   {
     value: 'csv',
     title: '1. Export CSV',
-    description: 'Download STIX/CSV style export for this report.',
+    description: 'Download this report as a CSV file.',
     testId: 'graph-report-export-csv'
   },
   {

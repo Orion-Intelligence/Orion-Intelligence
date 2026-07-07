@@ -63,16 +63,17 @@ export class HelperService {
     }).filter((v): v is string => !!v);
   }
 
-  downloadAsCSV(data: any) {
+  downloadAsCSV(data: any, filename: string = 'search_results.csv') {
     const csvContent = this.convertToCSV(data);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', 'search_results.csv');
+    link.setAttribute('download', filename.toLowerCase().endsWith('.csv') ? filename : `${filename}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
   downloadstixJson(data: any) {
@@ -183,9 +184,45 @@ export class HelperService {
   }
 
   private convertToCSV(data: any): string {
-    const keys = Object.keys(data);
-    const values = keys.map(key => `"${data[key]}"`).join(',');
-    return `${keys.join(',')}\n${values}`;
+    const rows = this.toCsvRows(data);
+    if (!rows.length) {
+      return '';
+    }
+    const keys = Array.from(rows.reduce((acc, row) => {
+      Object.keys(row).forEach(key => acc.add(key));
+      return acc;
+    }, new Set<string>()));
+    return [
+      keys.map(key => this.escapeCsvValue(key)).join(','),
+      ...rows.map(row => keys.map(key => this.escapeCsvValue(row[key])).join(','))
+    ].join('\n');
+  }
+
+  private toCsvRows(data: any): Record<string, unknown>[] {
+    if (data === null || data === undefined) {
+      return [];
+    }
+    if (Array.isArray(data)) {
+      return data.map((item, index) => {
+        if (item && typeof item === 'object' && !Array.isArray(item)) {
+          return item as Record<string, unknown>;
+        }
+        return { index: index + 1, value: item };
+      });
+    }
+    if (typeof data === 'object') {
+      return [data as Record<string, unknown>];
+    }
+    return [{ value: data }];
+  }
+
+  private escapeCsvValue(value: unknown): string {
+    const text = value === null || value === undefined
+      ? ''
+      : typeof value === 'object'
+        ? JSON.stringify(value)
+        : String(value);
+    return `"${text.replace(/"/g, '""')}"`;
   }
 
   sortByKey<T>(list: T[], key: string, order: 'asc' | 'desc' = 'asc'): T[] {

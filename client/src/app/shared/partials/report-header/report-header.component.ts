@@ -43,18 +43,8 @@ export class ReportHeaderComponent {
   }
 
   downloadCSV() {
-    const tree = this.route.parseUrl(this.route.url);
-    const id = tree.root.children['primary'].segments.slice(-1)[0].path;
-    let ci = tree.queryParams['ci'];
-    if (ci === 'general') {
-      ci = 'strategic';
-    }
-    if (ci === 'leak' || ci === "feed") {
-      ci = 'breach';
-    }
-    this.api.get<any>(`search/${ci}/stix/${id}`).subscribe((res) => {
-      this.helperService.downloadstixJson(res);
-    });
+    const row = this.buildCsvExportRow();
+    this.helperService.downloadAsCSV(row, 'report_export.csv');
   }
 
   openExportChoice() {
@@ -73,6 +63,27 @@ export class ReportHeaderComponent {
       this.printPage();
     }
     this.closeExportChoice();
+  }
+
+  private buildCsvExportRow(): Record<string, unknown> {
+    const source = this.csv_object();
+    const row: Record<string, unknown> = {};
+    if (source && typeof source === 'object' && !Array.isArray(source)) {
+      Object.assign(row, source);
+    }
+    else if (source !== null && source !== undefined) {
+      row['value'] = source;
+    }
+    if (this.url()) {
+      row['url'] = this.url();
+    }
+    if (this.lang() || this.lang_detected()) {
+      row['language'] = this.lang() || this.lang_detected();
+    }
+    if (this.content()) {
+      row['content'] = this.content();
+    }
+    return row;
   }
 
   printPage() {
