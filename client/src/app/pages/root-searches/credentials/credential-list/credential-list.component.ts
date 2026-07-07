@@ -66,6 +66,26 @@ export class CredentialListComponent {
     }
   }
 
+  getStealerDomainValues(item: any): string[] {
+    if (!item || item['type'] === 'bin') {
+      return [];
+    }
+    const domains = this.normalizeValues(item['domain']);
+    if (domains.length) {
+      return domains;
+    }
+    const sourceDomains = this.normalizeValues(item['source_domain']);
+    if (sourceDomains.length) {
+      return sourceDomains;
+    }
+    return this.normalizeValues(item['ip']);
+  }
+
+  getStealerDomainTitle(item: any): string {
+    const values = this.getStealerDomainValues(item);
+    return values.length ? values.join(', ') : 'Not available';
+  }
+
   sliceText(text: string | null | undefined, maxLength: number = 30): string {
     if (!text) {
       return '';
@@ -84,5 +104,14 @@ export class CredentialListComponent {
 
   getThreatPrimaryUrlShort(result: any, maxLength: number = 25): string {
     return this.sliceText(this.getThreatPrimaryUrl(result), maxLength) || '-';
+  }
+
+  private normalizeValues(value: any): string[] {
+    const values = Array.isArray(value) ? value : [value];
+    return Array.from(new Set(
+      values
+        .map(v => v == null ? '' : String(v).trim())
+        .filter(Boolean)
+    ));
   }
 }

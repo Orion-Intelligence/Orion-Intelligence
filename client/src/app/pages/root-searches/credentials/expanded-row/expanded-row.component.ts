@@ -144,6 +144,14 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return arr[0] || '-';
   }
 
+  get domainValues(): string[] {
+    return this.uniqueValues(this.rowHelper.normalizeToArray(this.item()?.['domain']));
+  }
+
+  get domainValueText(): string {
+    return this.domainValues.length ? this.domainValues.join(', ') : '-';
+  }
+
   get identityPasswordKey(): string {
     return `${this.mode()}-identity-password`;
   }
@@ -379,6 +387,8 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     this.telemetryGroupsCache = this.mode() === 'stealer'
       ? this.buildStealerGroups(this.item())
       : this.buildThreatGroups(this.result());
+    const domainKey = this.mode() === 'stealer' ? 'domain' : 'm_domain';
+    this.activeTelemetryKey = this.telemetryGroupsCache.find(g => g.key === domainKey)?.key || null;
   }
 
   private getReportPayload(e?: MouseEvent): string | null {
@@ -401,7 +411,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     const result = this.result();
     if (mode === 'stealer') {
       const email = this.item()?.['email']?.[0] || '-';
-      const domain = this.item()?.['domain']?.[0] || '-';
+      const domain = this.domainValueText;
       const ip = this.item()?.['ip']?.[0] || '-';
       const password = this.passwordValue;
       lines.push('Identity Intelligence');
@@ -444,7 +454,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       return [];
     }
     const emails = this.rowHelper.normalizeToArray(item?.['email']);
-    const domains = this.rowHelper.normalizeToArray(item?.['domain']);
+    const domains = this.uniqueValues(this.rowHelper.normalizeToArray(item?.['domain']));
     const ips = this.rowHelper.normalizeToArray(item?.['ip']);
     const passwords = this.rowHelper.normalizeToArray(item?.['password']);
     const exclude = new Set<string>([
@@ -464,13 +474,14 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       'hash',
       'index',
       'mapping',
-      'delimiter'
+      'delimiter',
+      'domain'
     ]);
     const core: TelemetryGroup[] = [];
     if (emails.length > 1) {
       core.push({ key: 'email', label: 'Email', values: emails });
     }
-    if (domains.length > 1) {
+    if (domains.length > 0) {
       core.push({ key: 'domain', label: 'Domain', values: domains });
     }
     if (ips.length > 1) {
@@ -539,5 +550,9 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     const k = (key || '').toLowerCase();
     const l = (label || '').toLowerCase();
     return k.includes('hash') || k.includes('index') || l.includes('hash') || l.includes('index');
+  }
+
+  private uniqueValues(values: string[]): string[] {
+    return Array.from(new Set(values.map(v => String(v).trim()).filter(Boolean)));
   }
 }
