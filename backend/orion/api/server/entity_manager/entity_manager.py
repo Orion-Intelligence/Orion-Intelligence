@@ -990,12 +990,16 @@ class entity_manager:
                     seen_group_ids.add(property_id)
                     group.append(property_id)
                 group_kind = "property"
+                edge_type = f"has_{normalized_type}"
             else:
                 return None
 
             if not group:
                 return None
-            match_groups.append({"kind": group_kind, "ids": group})
+            match_group = {"kind": group_kind, "ids": group}
+            if group_kind == "property":
+                match_group["edge_type"] = edge_type
+            match_groups.append(match_group)
 
         return {
             "match_groups": match_groups,
@@ -1161,10 +1165,123 @@ class entity_manager:
         ]
         return cls._dedupe_graph_results(limited_results)
 
+    async def _get_conjunctive_property_only_relations(self, conjunctive_groups: dict[str, Any], document_limit: int):
+        scope_cluster = ""
+        raw_scope_cluster = self._clean_text(conjunctive_groups["scope_cluster"])
+        if raw_scope_cluster:
+            candidate_scope_cluster = self._canonical_cluster_id(raw_scope_cluster)
+            if candidate_scope_cluster in self.CLUSTER_LABELS:
+                scope_cluster = f"cti_vertices/{candidate_scope_cluster}"
+
+        query_str = """
+        LET group_doc_matches = (
+          FOR group_index IN 0..(LENGTH(@match_groups) - 1)
+            LET group = @match_groups[group_index]
+            LET group_doc_ids = UNIQUE(FLATTEN(
+              FOR property_id IN group.ids
+                RETURN (
+                  FOR edge IN cti_edges
+                    FILTER edge._to == property_id AND edge.type == group.edge_type
+                    LIMIT @candidate_scan_limit
+                    RETURN edge._from
+                )
+            ))
+            FOR doc_id IN group_doc_ids
+              RETURN {
+                doc_id: doc_id,
+                group_index: group_index
+              }
+        )
+
+        LET matched_doc_ids = (
+          FOR match IN group_doc_matches
+            COLLECT doc_id = match.doc_id INTO grouped
+            LET matched_group_indexes = UNIQUE(grouped[*].match.group_index)
+            FILTER LENGTH(matched_group_indexes) == LENGTH(@match_groups)
+            LET in_scope = @scope_cluster_id == "" ? true : LENGTH(
+              FOR scope_edge IN cti_edges
+                FILTER scope_edge._from == @scope_cluster_id
+                  AND scope_edge._to == doc_id
+                  AND scope_edge.type == "cluster_to_doc"
+                LIMIT 1
+                RETURN 1
+            ) > 0
+            FILTER in_scope
+            LIMIT @document_limit
+            RETURN doc_id
+        )
+
+        LET property_edges = (
+          FOR doc_id IN matched_doc_ids
+            LET doc = DOCUMENT(doc_id)
+            FILTER doc != null AND doc.type == "document"
+            FOR group IN @match_groups
+              FOR property_id IN group.ids
+                FOR edge IN cti_edges
+                  FILTER edge._from == doc_id
+                    AND edge._to == property_id
+                    AND edge.type == group.edge_type
+                  LET property = DOCUMENT(edge._to)
+                  FILTER property != null
+                  RETURN {
+                    vertex: KEEP(doc, "_id", "_key", "_rev", "type", "node_class", "doc_id", "m_document_id", "cluster_id", "module", "label", "display_value", "title", "summary", "published", "source", "source_reliability"),
+                    edge: edge,
+                    path: {
+                      vertices: [property, doc],
+                      edges: [edge]
+                    }
+                  }
+        )
+
+        LET cluster_edges = (
+          FOR doc_id IN matched_doc_ids
+            FOR edge IN cti_edges
+              FILTER edge._to == doc_id AND edge.type == "cluster_to_doc"
+              LET cluster_key = PARSE_IDENTIFIER(edge._from).key
+              FILTER cluster_key IN @default_clusters
+              LET cluster = DOCUMENT(edge._from)
+              FILTER cluster != null
+              RETURN {
+                vertex: cluster,
+                edge: edge,
+                path: null
+              }
+        )
+
+        RETURN {
+          depth1: APPEND(property_edges, cluster_edges),
+          limit_hit_depth1: LENGTH(matched_doc_ids) >= @document_limit,
+          matched_ids: @queried_ids
+        }
+        """
+
+        bind_vars = {
+            "candidate_scan_limit": self._graph_and_candidate_scan_limit(document_limit),
+            "default_clusters": list(self.CLUSTER_LABELS.keys()),
+            "document_limit": document_limit,
+            "match_groups": conjunctive_groups["match_groups"],
+            "queried_ids": conjunctive_groups["queried_ids"],
+            "scope_cluster_id": scope_cluster,
+        }
+        result_obj = await run_in_threadpool(lambda: list(self.__db.aql.execute(query_str, bind_vars=bind_vars)))
+        result_obj = result_obj[0] if result_obj else {}
+        results = self._dedupe_graph_results(result_obj.get("depth1", []) or [])
+        queried_ids = conjunctive_groups["queried_ids"]
+        return {
+            "results": results,
+            "limit_reached": bool(result_obj.get("limit_hit_depth1")),
+            "queried_id": queried_ids[0] if queried_ids else None,
+            "queried_ids": queried_ids,
+            "matched_vertex_ids": result_obj.get("matched_ids", []) or [],
+        }
+
     async def _get_conjunctive_graph_relations(self, request_items: list[dict[str, Any]], document_limit: int):
         conjunctive_groups = self._conjunctive_graph_groups(request_items)
         if conjunctive_groups is None:
             return None
+
+        if all(group["kind"] == "property" for group in conjunctive_groups["match_groups"]):
+            return await self._get_conjunctive_property_only_relations(conjunctive_groups, document_limit)
 
         scope_cluster = ""
         raw_scope_cluster = self._clean_text(conjunctive_groups["scope_cluster"])
@@ -1189,7 +1306,7 @@ class entity_manager:
               FOR match_id IN group.ids
                 RETURN LENGTH(
                   FOR seed_edge IN cti_edges
-                    FILTER seed_edge._to == match_id AND STARTS_WITH(seed_edge.type, "has_")
+                    FILTER seed_edge._to == match_id AND seed_edge.type == group.edge_type
                     LIMIT @seed_probe_limit
                     RETURN 1
                 )
@@ -1201,21 +1318,25 @@ class entity_manager:
 
         LET seed_group = FIRST(ordered_match_groups)
 
-        LET cluster_seed_doc_ids = seed_group.kind == "cluster" ? (
+        LET cluster_seed_doc_ids = seed_group.kind == "cluster" ? UNIQUE(FLATTEN(
           FOR match_id IN seed_group.ids
-            FOR seed_edge IN cti_edges
-              FILTER seed_edge._from == match_id AND seed_edge.type == "cluster_to_doc"
-              LIMIT @candidate_scan_limit
-              RETURN DISTINCT seed_edge._to
-        ) : []
+            RETURN (
+              FOR seed_edge IN cti_edges
+                FILTER seed_edge._from == match_id AND seed_edge.type == "cluster_to_doc"
+                LIMIT @candidate_scan_limit
+                RETURN seed_edge._to
+            )
+        )) : []
 
-        LET property_seed_doc_ids = seed_group.kind == "property" ? (
+        LET property_seed_doc_ids = seed_group.kind == "property" ? UNIQUE(FLATTEN(
           FOR match_id IN seed_group.ids
-            FOR seed_edge IN cti_edges
-              FILTER seed_edge._to == match_id AND STARTS_WITH(seed_edge.type, "has_")
-              LIMIT @candidate_scan_limit
-              RETURN DISTINCT seed_edge._from
-        ) : []
+            RETURN (
+              FOR seed_edge IN cti_edges
+                FILTER seed_edge._to == match_id AND seed_edge.type == seed_group.edge_type
+                LIMIT @candidate_scan_limit
+                RETURN seed_edge._from
+            )
+        )) : []
 
         LET seed_doc_ids = APPEND(cluster_seed_doc_ids, property_seed_doc_ids)
 
@@ -1237,7 +1358,7 @@ class entity_manager:
                     FOR candidate_edge IN cti_edges
                       FILTER candidate_edge._from == doc_id
                         AND candidate_edge._to == match_id
-                        AND STARTS_WITH(candidate_edge.type, "has_")
+                        AND candidate_edge.type == group.edge_type
                       LIMIT 1
                       RETURN 1
                 ) : []
@@ -1269,7 +1390,7 @@ class entity_manager:
                 FOR edge IN cti_edges
                   FILTER edge._from == doc_id
                     AND edge._to == property_id
-                    AND STARTS_WITH(edge.type, "has_")
+                    AND edge.type == group.edge_type
                   LET property = DOCUMENT(edge._to)
                   FILTER property != null
                   RETURN {
