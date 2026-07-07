@@ -10,7 +10,7 @@ from fastapi.concurrency import run_in_threadpool
 from orion.api.server.crawl_manager.class_model.entity_model import entity_model
 from orion.api.server.entity_manager.constants import enums as graph_enums
 from orion.api.server.entity_manager.entity_request_generator import EntityRequestGenerator
-from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
+from orion.api.server.entity_manager.modal.EntityQueryModel import EntityGraphBatchQueryModel, EntityQueryModel
 from orion.constants.constant import allowed_key_titles
 from orion.constants.cti_graph_schema import (
     CLUSTER_ALIASES as CTI_CLUSTER_ALIASES,
@@ -856,6 +856,216 @@ class entity_manager:
         except Exception as ex:
             log.g().e(f"ARANGO ENTITY RELATION FETCH ERROR: {ex}")
             return {"results": [], "limit_reached": False, "queried_id": None, "matched_vertex_ids": []}
+
+    @classmethod
+    def _graph_query_values(cls, query_values: list[Any] | None, query_value: Any) -> list[str]:
+        raw_values = query_values if query_values else [query_value]
+        values: list[str] = []
+        seen: set[str] = set()
+        for value in raw_values:
+            cleaned = cls._clean_text(value)
+            if not cleaned:
+                continue
+            normalized = cls._sanitize(cls._normalize_key(cleaned))
+            if normalized in seen:
+                continue
+            seen.add(normalized)
+            values.append(cleaned)
+        return values
+
+    @staticmethod
+    def _graph_document_limit(edge: Any) -> int:
+        try:
+            document_limit = int(edge)
+        except (TypeError, ValueError):
+            document_limit = 25
+        if document_limit < 20:
+            document_limit = 20
+        if document_limit > 800:
+            document_limit = 800
+        return document_limit
+
+    @classmethod
+    def _dedupe_graph_results(cls, results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        merged: dict[str, dict[str, Any]] = {}
+        for item in results:
+            edge = item.get("edge") or {}
+            vertex = item.get("vertex") or {}
+            key = f"{edge.get('_id', '')}:{vertex.get('_id', '')}:{vertex.get('_key', '')}"
+            if not key.strip(":"):
+                key = repr(item)
+            if key not in merged:
+                merged[key] = item
+        return list(merged.values())
+
+    @classmethod
+    def _extract_document_ids_from_graph_result(cls, item: dict[str, Any]) -> list[str]:
+        ids: set[str] = set()
+
+        def add_document_id(value: Any):
+            doc_id = cls._clean_text(value)
+            if not doc_id:
+                return
+            cluster_key = doc_id.replace("cti_vertices/", "", 1)
+            if cluster_key in cls.CLUSTER_LABELS:
+                return
+            ids.add(doc_id)
+
+        def inspect_edge(edge: Any):
+            if not isinstance(edge, dict):
+                return
+            edge_type = cls._clean_text(edge.get("type"))
+            if edge_type == "cluster_to_doc":
+                add_document_id(edge.get("_to"))
+            elif edge_type.startswith("has_"):
+                add_document_id(edge.get("_from"))
+
+        def inspect_vertex(vertex: Any):
+            if not isinstance(vertex, dict):
+                return
+            if cls._clean_text(vertex.get("type")).lower() == "document":
+                add_document_id(vertex.get("_id"))
+
+        inspect_vertex(item.get("vertex"))
+        inspect_edge(item.get("edge"))
+        path = item.get("path") or {}
+        if isinstance(path, dict):
+            for vertex in path.get("vertices") or []:
+                inspect_vertex(vertex)
+            for edge in path.get("edges") or []:
+                inspect_edge(edge)
+        return list(ids)
+
+    @classmethod
+    def _extract_document_ids_from_graph_results(cls, results: list[dict[str, Any]]) -> set[str]:
+        ids: set[str] = set()
+        for item in results:
+            ids.update(cls._extract_document_ids_from_graph_result(item))
+        return ids
+
+    @staticmethod
+    def _union_sets(first: set[str], second: set[str]) -> set[str]:
+        return first | second
+
+    @staticmethod
+    def _intersect_sets(first: set[str], second: set[str]) -> set[str]:
+        return first & second
+
+    @classmethod
+    def _merge_graph_result_groups(cls, response_groups: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        if not response_groups:
+            return []
+
+        aggregate = response_groups[0].get("results") or []
+        aggregate_document_ids = cls._extract_document_ids_from_graph_results(aggregate)
+        for group in response_groups[1:]:
+            current = group.get("results") or []
+            operator = group.get("operator") or "||"
+            if operator != "&&":
+                aggregate = cls._dedupe_graph_results([*aggregate, *current])
+                aggregate_document_ids = cls._union_sets(
+                    aggregate_document_ids,
+                    cls._extract_document_ids_from_graph_results(current),
+                )
+                continue
+
+            current_document_ids = cls._extract_document_ids_from_graph_results(current)
+            if not aggregate_document_ids or not current_document_ids:
+                aggregate = []
+                aggregate_document_ids = set()
+                break
+
+            shared_document_ids = cls._intersect_sets(aggregate_document_ids, current_document_ids)
+            aggregate = cls._dedupe_graph_results([
+                item
+                for item in [*aggregate, *current]
+                if any(document_id in shared_document_ids for document_id in cls._extract_document_ids_from_graph_result(item))
+            ])
+            aggregate_document_ids = shared_document_ids
+
+        return cls._dedupe_graph_results(aggregate)
+
+    @classmethod
+    def _limit_graph_results_by_documents(cls, results: list[dict[str, Any]], document_limit: int) -> list[dict[str, Any]]:
+        if document_limit < 1:
+            return cls._dedupe_graph_results(results)
+
+        ordered_document_ids: list[str] = []
+        seen_document_ids: set[str] = set()
+        for item in results:
+            for document_id in cls._extract_document_ids_from_graph_result(item):
+                if document_id in seen_document_ids:
+                    continue
+                seen_document_ids.add(document_id)
+                ordered_document_ids.append(document_id)
+
+        if len(ordered_document_ids) <= document_limit:
+            return cls._dedupe_graph_results(results)
+
+        allowed_document_ids = set(ordered_document_ids[:document_limit])
+        limited_results = [
+            item
+            for item in results
+            if any(document_id in allowed_document_ids for document_id in cls._extract_document_ids_from_graph_result(item))
+        ]
+        return cls._dedupe_graph_results(limited_results)
+
+    async def get_entity_relations_batch(self, query: EntityGraphBatchQueryModel):
+        try:
+            response_groups: list[dict[str, Any]] = []
+            queried_ids: list[str] = []
+            matched_vertex_ids: list[str] = []
+            limit_reached = False
+            request_items = query.requests or [query]
+
+            for item in request_items:
+                values = self._graph_query_values(
+                    getattr(item, "query_values", []),
+                    getattr(item, "query_value", ""),
+                )
+                if not values:
+                    continue
+
+                group_results: list[dict[str, Any]] = []
+                for value in values:
+                    relation_query = EntityQueryModel(
+                        data_point_type=getattr(item, "data_point_type", query.data_point_type),
+                        model_type=getattr(item, "model_type", query.model_type),
+                        query_value=value,
+                        edge=query.edge,
+                        depth=query.depth,
+                        scope_cluster=getattr(item, "scope_cluster", "") or query.scope_cluster,
+                    )
+                    response = await self.get_entity_relations(relation_query)
+                    group_results.extend(response.get("results") or [])
+                    limit_reached = limit_reached or bool(response.get("limit_reached"))
+                    queried_id = response.get("queried_id")
+                    if queried_id and queried_id not in queried_ids:
+                        queried_ids.append(queried_id)
+                    for matched_id in response.get("matched_vertex_ids") or []:
+                        if matched_id not in matched_vertex_ids:
+                            matched_vertex_ids.append(matched_id)
+
+                response_groups.append({
+                    "operator": getattr(item, "operator", "||") if getattr(item, "operator", "||") in {"&&", "||"} else "||",
+                    "results": self._dedupe_graph_results(group_results),
+                })
+
+            merged_results = self._merge_graph_result_groups(response_groups)
+            limited_results = self._limit_graph_results_by_documents(
+                merged_results,
+                self._graph_document_limit(query.edge),
+            )
+            return {
+                "results": limited_results,
+                "limit_reached": limit_reached,
+                "queried_id": queried_ids[0] if queried_ids else None,
+                "queried_ids": queried_ids,
+                "matched_vertex_ids": matched_vertex_ids,
+            }
+        except Exception as ex:
+            log.g().e(f"ARANGO ENTITY RELATION BATCH FETCH ERROR: {ex}")
+            return {"results": [], "limit_reached": False, "queried_id": None, "queried_ids": [], "matched_vertex_ids": []}
 
     async def create_or_update_entity_nodes(self, entity: entity_model):
         try:

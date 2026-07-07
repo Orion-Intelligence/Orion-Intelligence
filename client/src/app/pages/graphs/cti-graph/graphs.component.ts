@@ -1,7 +1,5 @@
 import { ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, inject } from '@angular/core';
-import { HttpParams } from '@angular/common/http';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { Edge, Network } from 'vis-network';
 import { DataSet } from 'vis-data';
@@ -22,6 +20,7 @@ import { ProxyController } from '../../../shared/services/proxy-controller';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 import { UiDropdownComponent, UiDropdownOption } from '../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { splitCountryValues } from '../../../shared/utils/country-normalization.util';
 
 type GraphNodeColor = NonNullable<ExtendedNode['color']>;
 type GraphSearchMode = 'all' | 'cluster' | 'property';
@@ -42,7 +41,7 @@ type GraphAdvancedFilter = {
 type GraphSearchRequest = {
   dataPointType: string;
   modelType: string;
-  queryValue: string;
+  queryValues: string[];
   operator?: '&&' | '||';
 };
 @Component({
@@ -498,12 +497,24 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   private buildGraphSearchRequest(option: GraphSearchOption, queryValue: string, operator?: '&&' | '||'): GraphSearchRequest | null {
     if (option.mode === 'cluster') {
-      return { dataPointType: 'cluster', modelType: 'cluster', queryValue: option.clusterValue || 'all', operator };
+      return { dataPointType: 'cluster', modelType: 'cluster', queryValues: [option.clusterValue || 'all'], operator };
     }
     if (option.mode === 'property') {
-      return queryValue ? { dataPointType: 'property', modelType: option.propertyType || 'all', queryValue, operator } : null;
+      const queryValues = this.parseGraphBuilderValues(option, queryValue);
+      return queryValues.length ? { dataPointType: 'property', modelType: option.propertyType || 'all', queryValues, operator } : null;
     }
     return null;
+  }
+
+  private parseGraphBuilderValues(option: GraphSearchOption, queryValue: string): string[] {
+    const trimmedValue = queryValue.trim();
+    if (!trimmedValue) {
+      return [];
+    }
+    if (option.propertyType === 'm_country' || option.propertyType === 'm_origin_country') {
+      return splitCountryValues(trimmedValue);
+    }
+    return [trimmedValue];
   }
 
   openReportExportModal(): void {
@@ -710,28 +721,13 @@ export class GraphComponent implements OnInit, OnDestroy {
     else {
       this.expandEnabled = false;
     }
-    let params = new HttpParams();
     this.loading = false;
     const requestId = this.nextGraphRequestId();
-    if (data_point_type) {
-      params = params.set('data_point_type', data_point_type);
-    }
-    if (type) {
-      params = params.set('model_type', type);
-    }
-    if (value) {
-      params = params.set('query_value', value);
-    }
-    if (maxEdge) {
-      params = params.set('edge', maxEdge);
-    }
-    if (maxDepth) {
-      params = params.set('depth', maxDepth);
-    }
+    const payload = this.buildGraphPayload(data_point_type, type, value, '', maxEdge, maxDepth);
     this.resetGraph();
-    this.api.get<{
+    this.api.post<{
       results: any[];
-  }>('graph', { params }).subscribe({
+  }>('graph', payload).subscribe({
     next: response => {
       if (!this.isCurrentGraphRequest(requestId)) {
         return;
@@ -769,9 +765,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.loading = false;
     const requestId = this.nextGraphRequestId();
     this.resetGraph();
-    this.api.get<{ results: GraphResultItem[]; }>('graph', {
-      params: this.buildGraphHttpParams('property', 'all', queryValue, clusterKey)
-    }).subscribe({
+    this.api.post<{ results: GraphResultItem[]; }>('graph', this.buildGraphPayload('property', 'all', queryValue, clusterKey)).subscribe({
       next: response => {
         if (!this.isCurrentGraphRequest(requestId)) {
           return;
@@ -791,23 +785,18 @@ export class GraphComponent implements OnInit, OnDestroy {
     });
   }
 
-  private buildGraphHttpParams(dataPointType: string, modelType: string, queryValue: string, scopeCluster = '', edgeOverride?: number): HttpParams {
-    let params = new HttpParams();
-    if (dataPointType) {
-      params = params.set('data_point_type', dataPointType);
-    }
-    if (modelType) {
-      params = params.set('model_type', modelType);
-    }
-    if (queryValue) {
-      params = params.set('query_value', queryValue);
-    }
+  private buildGraphPayload(dataPointType: string, modelType: string, queryValue: string, scopeCluster = '', edgeOverride?: string | number, depthOverride?: string | number): Record<string, string> {
+    const payload: Record<string, string> = {
+      data_point_type: dataPointType,
+      model_type: modelType,
+      query_value: queryValue,
+      edge: String(edgeOverride ?? this.maxEdge),
+      depth: String(depthOverride ?? this.maxDepth)
+    };
     if (scopeCluster && scopeCluster !== 'all') {
-      params = params.set('scope_cluster', scopeCluster);
+      payload['scope_cluster'] = scopeCluster;
     }
-    params = params.set('edge', String(edgeOverride ?? this.maxEdge));
-    params = params.set('depth', String(this.maxDepth));
-    return params;
+    return payload;
   }
 
   private loadGraphByRequests(requests: GraphSearchRequest[]): void {
@@ -822,17 +811,23 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.loading = false;
     const requestId = this.nextGraphRequestId();
     this.resetGraph();
-    const calls = requests.map(request => this.api.get<{ results: GraphResultItem[]; }>('graph', {
-      params: this.buildGraphHttpParams(request.dataPointType, request.modelType, request.queryValue)
-    }));
-    forkJoin(calls).subscribe({
-      next: responses => {
+    const payload = {
+      requests: requests.map(request => ({
+        data_point_type: request.dataPointType,
+        model_type: request.modelType,
+        query_value: request.queryValues[0] || '',
+        query_values: request.queryValues,
+        operator: request.operator
+      })),
+      edge: String(this.maxEdge),
+      depth: String(this.maxDepth)
+    };
+    this.api.post<{ results: GraphResultItem[]; }>('graph', payload).subscribe({
+      next: response => {
         if (!this.isCurrentGraphRequest(requestId)) {
           return;
         }
-        const responseResults = responses.map(response => response.results ?? []);
-        const mergedResults = this.mergeGraphBuilderResults(responseResults, requests);
-        this.result = this.limitGraphBuilderResultsByDocuments(mergedResults, Number(this.maxEdge));
+        this.result = response.results ?? [];
         this.renderGraph(this.result);
         this.loading = true;
       },
