@@ -36,7 +36,7 @@ export class DocumentExportService extends GraphExportService {
   private buildDocPdfBytes(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, autoTable: typeof import('jspdf-autotable').default): Uint8Array {
     const doc = new JsPdfCtor({ orientation: 'portrait', unit: 'pt', format: 'a4', compress: true });
     const meta = this.makeMeta(payload);
-    const theme = this.getDocumentTheme(payload);
+    const theme = this.getDocumentTheme();
     const tableTheme = this.getTableTheme(theme);
     const hooks = this.makeHeaderFooterHooks(payload, meta, theme);
     const firstSectionY = this.drawCover(doc, payload, meta, 'Document Report', theme);
@@ -266,11 +266,11 @@ export class DocumentExportService extends GraphExportService {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(24);
     doc.setTextColor(255, 255, 255);
-    doc.text(this.fitSingleLine(doc, payload.title || 'Credentials Export', contentW - 18), contentX, 72);
+    doc.text(this.fitSingleLine(doc, payload.title || 'Network Report', contentW - 18), contentX, 72);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.setTextColor(...theme.coverSubtitleRgb);
-    doc.text('Credential exposure intelligence dossier', contentX, 92);
+    doc.text(this.getCoverSubtitle(meta), contentX, 92);
 
     doc.setFillColor(...theme.coverPanelRgb);
     doc.roundedRect(contentX, 108, contentW, 50, 7, 7, 'F');
@@ -285,9 +285,10 @@ export class DocumentExportService extends GraphExportService {
     const cardGap = 10;
     const cardW = (contentW - (cardGap * 2)) / 3;
     const cardY = 174;
-    this.drawCoverMetric(doc, contentX, cardY, cardW, 'Total Records', payload.summary?.['total_records'] ?? '-');
-    this.drawCoverMetric(doc, contentX + cardW + cardGap, cardY, cardW, 'Stealer Records', payload.summary?.['stealer_records'] ?? '-');
-    this.drawCoverMetric(doc, contentX + ((cardW + cardGap) * 2), cardY, cardW, 'Ranked Records', payload.summary?.['ranked_records'] ?? '-');
+    const metrics = this.getCoverMetrics(payload, meta);
+    this.drawCoverMetric(doc, contentX, cardY, cardW, metrics[0].label, metrics[0].value);
+    this.drawCoverMetric(doc, contentX + cardW + cardGap, cardY, cardW, metrics[1].label, metrics[1].value);
+    this.drawCoverMetric(doc, contentX + ((cardW + cardGap) * 2), cardY, cardW, metrics[2].label, metrics[2].value);
 
     doc.setDrawColor(...theme.dividerRgb);
     doc.setLineWidth(0.6);
@@ -339,13 +340,48 @@ export class DocumentExportService extends GraphExportService {
     doc.text(this.fitSingleLine(doc, label.toUpperCase(), width - 18), x + 10, y + 27);
   }
 
+  private getCoverSubtitle(meta: GraphReportMeta): string {
+    if (meta.kindLabel === 'Brand Alerts') {
+      return 'Brand alert intelligence dossier';
+    }
+    if (meta.kindLabel === 'CTI Network') {
+      return 'CTI intelligence dossier';
+    }
+    if (meta.kindLabel === 'Social Network') {
+      return 'Social intelligence dossier';
+    }
+    return 'Credential exposure intelligence dossier';
+  }
+
+  private getCoverMetrics(payload: GraphReportPayload, meta: GraphReportMeta): { label: string; value: string | number }[] {
+    if (meta.kindLabel === 'Brand Alerts') {
+      return [
+        { label: 'Total Alerts', value: payload.summary?.['total_alerts'] ?? '-' },
+        { label: 'Categories', value: payload.summary?.['categories'] ?? '-' },
+        { label: 'Sections', value: payload.tables?.length ?? 0 }
+      ];
+    }
+    if (Object.prototype.hasOwnProperty.call(payload.summary ?? {}, 'total_records')) {
+      return [
+        { label: 'Total Records', value: payload.summary?.['total_records'] ?? '-' },
+        { label: 'Stealer Records', value: payload.summary?.['stealer_records'] ?? '-' },
+        { label: 'Ranked Records', value: payload.summary?.['ranked_records'] ?? '-' }
+      ];
+    }
+    return [
+      { label: 'Nodes', value: payload.nodes?.length ?? 0 },
+      { label: 'Edges', value: payload.edges?.length ?? 0 },
+      { label: 'Sections', value: payload.tables?.length ?? 0 }
+    ];
+  }
+
   private makeHeaderFooterHooks(payload: GraphReportPayload, meta: GraphReportMeta, theme: DocumentPdfTheme | null): {
     didDrawPage: (data: any) => void;
   } {
     const drawnPages = new Set<number>();
     const drawHeader = (doc: jsPDF, section: string) => {
       if (theme) {
-        this.drawCredentialPageHeader(doc, payload.title || 'Credentials Export', section, meta, theme);
+        this.drawCredentialPageHeader(doc, payload.title || 'Network Report', section, meta, theme);
         return;
       }
       this.drawStandardPageHeader(doc, payload.title || 'Network Report', section, 54);
@@ -400,10 +436,7 @@ export class DocumentExportService extends GraphExportService {
     doc.text(this.fitSingleLine(doc, meta.generatedAt, 190), W - 40, 39, { align: 'right' });
   }
 
-  private getDocumentTheme(payload: GraphReportPayload): DocumentPdfTheme | null {
-    if (String(payload.title || '').trim().toLowerCase() !== 'credentials export') {
-      return null;
-    }
+  private getDocumentTheme(): DocumentPdfTheme {
     return {
       coverBandRgb: [24, 24, 27],
       coverSubtitleRgb: [241, 245, 249],
