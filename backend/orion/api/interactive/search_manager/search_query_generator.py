@@ -19,6 +19,47 @@ DATE_END_UTC_FORMAT = "%Y-%m-%dT23:59:59+00:00"
 
 class search_query_generator:
     @staticmethod
+    def _domain_wildcard_clause(field, value):
+        domain = str(value or "").strip().lower()
+        domain = re.sub(r"^[a-z][a-z0-9+.-]*://", "", domain)
+        domain = domain.split("/", 1)[0].split("?", 1)[0].split("#", 1)[0].split(":", 1)[0].strip(".")
+
+        if "." not in domain or "@" in domain:
+            return {
+                "term": {
+                    field: {
+                        "value": domain,
+                        "case_insensitive": True
+                    }
+                }
+            }
+
+        return {
+            "bool": {
+                "should": [
+                    {
+                        "term": {
+                            field: {
+                                "value": domain,
+                                "case_insensitive": True
+                            }
+                        }
+                    },
+                    {
+                        "wildcard": {
+                            field: {
+                                "value": f"*.{domain}",
+                                "case_insensitive": True,
+                                "rewrite": "constant_score"
+                            }
+                        }
+                    }
+                ],
+                "minimum_should_match": 1
+            }
+        }
+
+    @staticmethod
     def build_es_from_tagged(parsed, mapping):
         if isinstance(parsed, dict):
             if "AND" in parsed:
@@ -27,46 +68,61 @@ class search_query_generator:
                 if len(must_clauses) == 1:
                     return must_clauses[0]
                 return {"bool": {"must": must_clauses}}
+
             if "OR" in parsed:
                 should_clauses = [search_query_generator.build_es_from_tagged(x, mapping)
                                   for x in parsed["OR"]]
                 if len(should_clauses) == 1:
                     return should_clauses[0]
                 return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
+
         if isinstance(parsed, list):
             should_clauses = [search_query_generator.build_es_from_tagged(x, mapping)
                               for x in parsed]
             if len(should_clauses) == 1:
                 return should_clauses[0]
             return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
+
         tag = str(parsed.get("tag") or "").strip().lower()
         value = parsed.get("value")
         fields = mapping.get(tag, [])
+
         if tag in ("m_domain", "domain", "m_search_all", "all"):
             merged = fields.copy()
             merged += mapping.get("source_domain", [])
             merged += mapping.get("m_source_domain", [])
-            merged += ["source_domain", "m_source_domain", "source_domain.keyword", "m_source_domain.keyword"]
+            merged += ["source_domain.keyword", "source_domain"]
             fields = list(dict.fromkeys([f for f in merged if f]))
+
             if tag in ("m_search_all", "all") and allowed_key_titles:
                 fields = list(dict.fromkeys(fields + list(allowed_key_titles.keys())))
+
         if not fields:
             return {"match_none": {}}
-        if tag in ("m_domain", "domain") and isinstance(value, str):
-            val = str(value).strip().lower()
-            should_clauses = []
-            for field in fields:
-                should_clauses.append({"term": {field: {"value": val, "case_insensitive": True}}})
-                if "." in val:
-                    should_clauses.append({"wildcard": {field: {"value": f"*.{val}", "case_insensitive": True}}})
-            if len(should_clauses) > 1:
-                return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
-            return should_clauses[0] if should_clauses else {"match_none": {}}
+
+        def make_clause(field):
+            if field in ("domain.keyword", "source_domain.keyword", "source_domain"):
+                return search_query_generator._domain_wildcard_clause(field, value)
+
+            return {
+                "term": {
+                    field: {
+                        "value": value,
+                        "case_insensitive": True
+                    }
+                }
+            }
+
         if len(fields) == 1:
-            return {"term": {fields[0]: {"value": value, "case_insensitive": True}}}
-        return {"bool": {"should": [{"term": {f: {"value": value, "case_insensitive": True}}} for f in fields],
-                         "minimum_should_match": 1}}
-    
+            return make_clause(fields[0])
+
+        return {
+            "bool": {
+                "should": [make_clause(f) for f in fields],
+                "minimum_should_match": 1
+            }
+        }
+
     @staticmethod
     def build_ioc_filter_clauses(pfilter):
         must_filters = []
@@ -377,6 +433,7 @@ class search_query_generator:
         }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
+
     @staticmethod
     def build_date_priority_filter(from_date, to_date, priority_field_names):
         formatted_ranges = {
@@ -413,7 +470,7 @@ class search_query_generator:
             }
         }
 
-    def on_search_consolidated_ranked_data(self, p_query_model: search_consolidated_param_model, pfilter, base_index, blocked_categories, allowed_categories,search_type=""):
+    def on_search_consolidated_ranked_data(self, p_query_model: search_consolidated_param_model, pfilter, base_index, blocked_categories, allowed_categories, search_type=""):
         if p_query_model.matchtype and p_query_model.q:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 
@@ -561,14 +618,16 @@ class search_query_generator:
         quoted_value = bool(phrases) and (p_query_model.q or "").strip().startswith('"') and (
                 p_query_model.q or "").strip().endswith('"')
         exact_phrases = phrases
-        if search_type=="defacement":
-            loose_terms=[]
+        if search_type == "defacement":
+            loose_terms = []
         else:
             loose_terms = [] if raw_query in ("*", "") else [t for t in re.findall(r'\w+', raw_query) if t and t.strip('"')]
+
         phrase_fields = [("m_title", 5), ("m_content", 3), ("m_url", 2), ("m_source_url", 2), ("m_sender_name", 2), ("m_author", 2), ("m_username", 2), ("m_base_url", 1),
             ("m_team", 1), ("m_attacker", 1), ("m_users", 1), ("m_network", 1), ("m_channel_name", 4),
             ("m_name", 4), ("m_family", 3), ("m_aliases", 3), ("m_actor_names", 3), ("m_references", 1),
             ("m_sha256_hash", 5), ("m_sha1_hash", 4), ("m_md5_hash", 4), ("m_signature", 4), ("m_tags", 3), ("m_file_name", 3)]
+
         unified_query = self._build_query_block(
             p_query_model=p_query_model,
             pfilter=pfilter,
@@ -584,7 +643,6 @@ class search_query_generator:
 
         unified_query["size"] = result_size
         unified_query["from"] = max(0, (m_page_number - 1) * result_size)
-
 
         if channel_q:
             qb = unified_query["query"]["function_score"]["query"].setdefault("bool", {"must": []})
