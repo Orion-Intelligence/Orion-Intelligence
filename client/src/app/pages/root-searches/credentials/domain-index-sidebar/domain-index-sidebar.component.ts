@@ -2,14 +2,6 @@ import { Component, Input } from '@angular/core';
 import { StealerLogCallbackModel } from '../../../../shared/model/results/credentials/credential.callback.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
-interface DomainIndexItem {
-  value: string;
-  count: number;
-  channel: string;
-}
-
-const DOMAIN_UI_LIMIT = 10;
-
 @Component({
   selector: 'app-domain-index-sidebar',
   standalone: true,
@@ -19,49 +11,35 @@ const DOMAIN_UI_LIMIT = 10;
 export class DomainIndexSidebarComponent {
   domainSidebarSearch = '';
   domainIndexExpanded = false;
+  private uniqueDomains: string[] = [];
 
-  @Input() stealerData: StealerLogCallbackModel | null = null;
-
-  get filteredSourceDomainCount(): number {
-    return this.filterDomainItems(this.collectDomainItems('source_domain')).length;
+  @Input() set stealerData(value: StealerLogCallbackModel | null) {
+    this.uniqueDomains = this.collectUniqueDomains(value?.Result ?? []);
   }
 
-  get filteredSourceDomainItems(): DomainIndexItem[] {
-    return this.filterDomainItems(this.collectDomainItems('source_domain')).slice(0, DOMAIN_UI_LIMIT);
+  get uniqueDomainCount(): number {
+    return this.uniqueDomains.length;
   }
 
-  get filteredOtherDomainCount(): number {
-    return this.filterDomainItems(this.collectDomainItems('domain')).length;
-  }
-
-  get filteredOtherDomainItems(): DomainIndexItem[] {
-    return this.filterDomainItems(this.collectDomainItems('domain')).slice(0, DOMAIN_UI_LIMIT);
+  get filteredUniqueDomains(): string[] {
+    const search = this.domainSidebarSearch.trim().toLowerCase();
+    if (!search) {
+      return this.uniqueDomains;
+    }
+    return this.uniqueDomains.filter(domain => domain.includes(search));
   }
 
   toggleDomainIndex(): void {
     this.domainIndexExpanded = !this.domainIndexExpanded;
   }
 
-  private get stealerRecords(): any[] {
-    return this.stealerData?.Result ?? [];
-  }
-
-  private collectDomainItems(field: 'source_domain' | 'domain'): DomainIndexItem[] {
-    const items = new Map<string, DomainIndexItem>();
-    this.stealerRecords.forEach(item => {
-      const recordDomains = new Set(this.normalizeDomainValues(item?.[field]));
-      const channel = this.getDomainItemChannel(item);
-      recordDomains.forEach(domain => {
-        const existing = items.get(domain);
-        if (existing) {
-          existing.count += 1;
-          existing.channel = existing.channel === '-' && channel !== '-' ? channel : existing.channel;
-          return;
-        }
-        items.set(domain, { value: domain, count: 1, channel });
-      });
+  private collectUniqueDomains(records: any[]): string[] {
+    const domains = new Set<string>();
+    records.forEach(item => {
+      this.normalizeDomainValues(item?.['source_domain']).forEach(domain => domains.add(domain));
+      this.normalizeDomainValues(item?.['domain']).forEach(domain => domains.add(domain));
     });
-    return Array.from(items.values()).sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
+    return Array.from(domains).sort((a, b) => a.localeCompare(b));
   }
 
   private normalizeDomainValues(value: unknown): string[] {
@@ -86,31 +64,5 @@ export class DomainIndexSidebarComponent {
       return '';
     }
     return domain;
-  }
-
-  private getDomainItemChannel(item: any): string {
-    return this.firstDisplayValue(item?.['channel'], item?.['filename'], item?.['file'], item?.['m_index']) || '-';
-  }
-
-  private firstDisplayValue(...values: unknown[]): string {
-    for (const value of values) {
-      const raw = Array.isArray(value) ? value.find(item => item !== null && item !== undefined && String(item).trim()) : value;
-      if (raw === null || raw === undefined) {
-        continue;
-      }
-      const text = String(raw).replace(/\s+/g, ' ').trim();
-      if (text && text !== '-') {
-        return text;
-      }
-    }
-    return '';
-  }
-
-  private filterDomainItems(items: DomainIndexItem[]): DomainIndexItem[] {
-    const search = this.domainSidebarSearch.trim().toLowerCase();
-    if (!search) {
-      return items;
-    }
-    return items.filter(item => [item.value, item.channel].some(value => value.toLowerCase().includes(search)));
   }
 }

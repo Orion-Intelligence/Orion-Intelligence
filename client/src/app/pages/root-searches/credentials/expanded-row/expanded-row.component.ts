@@ -1,19 +1,19 @@
 import { Component, OnChanges, OnDestroy, SimpleChanges, input } from '@angular/core';
-import { NgClass, TitleCasePipe } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { ResultRowHelperService } from '../../../../shared/services/result-row-helper.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 
 interface TelemetryGroup {
-    key: string;
-    label: string;
-    values: string[];
+  key: string;
+  label: string;
+  values: string[];
 }
 @Component({
   selector: 'app-expanded-row',
   standalone: true,
-  imports: [NgClass, TitleCasePipe, TooltipDirective, TranslatePipe, ConfirmationPopupComponent],
+  imports: [NgClass, TooltipDirective, TranslatePipe, ConfirmationPopupComponent],
   templateUrl: './expanded-row.component.html',
   styleUrls: ['./expanded-row.component.scss'],
 })
@@ -32,7 +32,6 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   readonly mode = input<'stealer' | 'threat'>('stealer');
   readonly item = input<any>(null);
   readonly result = input<any>(null);
-  readonly index = input<number>(0);
   readonly searchQuery = input<string>('');
 
   constructor(private rowHelper: ResultRowHelperService) {
@@ -48,23 +47,19 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['mode'] || changes['item'] || changes['result']) {
       this.activeTelemetryKey = null;
-    }
-    if (changes['mode'] || changes['item'] || changes['result'] || changes['index']) {
       this.copiedKey = null;
       if (this.copiedTimer) {
         clearTimeout(this.copiedTimer);
       }
       this.visiblePasswordKeys.clear();
-    }
-    if (changes['mode'] || changes['item'] || changes['result']) {
       this.rebuildTelemetryGroups();
     }
-    if (changes['mode'] || changes['item'] || changes['result'] || changes['index'] || changes['searchQuery']) {
+    if (changes['mode'] || changes['item'] || changes['result'] || changes['searchQuery']) {
       this.parseSearchQuery();
     }
   }
 
-  parseSearchQuery() {
+  parseSearchQuery(): void {
     this.matchedValues = [];
     const searchQuery = this.searchQuery();
     if (!searchQuery) {
@@ -87,18 +82,19 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   isTelemetryMatched(group: TelemetryGroup): boolean {
-    return group.values.some(groupValue => this.matchedValues.some(matched => groupValue.toLowerCase().includes(matched.toLowerCase())));
+    return this.isAnyValueMatched(group.values);
   }
 
-  isValueMatched(value: string): boolean {
-    const lowerValue = value.toLowerCase();
-    return this.matchedValues.some(v => lowerValue.includes(v.toLowerCase()));
+  isAnyValueMatched(values: any[]): boolean {
+    return values.some(value => this.isValueMatched(value));
   }
 
-  get indexValue(): string {
-    const index = this.index();
-    const n = Number.isFinite(index) ? index + 1 : 1;
-    return String(n);
+  isValueMatched(value: any): boolean {
+    const candidate = this.normalizeMatchValue(value);
+    if (!candidate || !this.matchedValues.length) {
+      return false;
+    }
+    return this.matchedValues.some(matched => this.valuesMatch(candidate, matched));
   }
 
   get channelValue(): string {
@@ -138,6 +134,63 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return arr[0] || '-';
   }
 
+  get threatSourceIndexValue(): string {
+    const result = this.result();
+    const value = result?.rank_index ??
+          result?.m_rank_index ??
+          result?.m_index ??
+          result?.index ??
+          result?.type ??
+          result?.file_type;
+    return this.formatIndexLabel(value);
+  }
+
+  get threatTitleValue(): string {
+    const result = this.result();
+    const candidates = [
+      ...this.rowHelper.normalizeToArray(result?.m_title),
+      ...this.rowHelper.normalizeToArray(result?.title),
+      ...this.rowHelper.normalizeToArray(result?.m_name),
+      ...this.rowHelper.normalizeToArray(result?.name),
+    ];
+    const title = candidates
+      .map(value => String(value || '').replace(/\s+/g, ' ').trim())
+      .find(Boolean);
+    return title || this.threatBaseDomainValue;
+  }
+
+  get threatBaseDomainValue(): string {
+    const result = this.result();
+    const candidates = [
+      ...this.rowHelper.normalizeToArray(result?.m_base_url),
+      ...this.rowHelper.normalizeToArray(result?.m_url),
+      ...this.rowHelper.normalizeToArray(result?.m_weblink),
+      ...this.rowHelper.normalizeToArray(result?.m_web_url),
+      ...this.rowHelper.normalizeToArray(result?.m_domain),
+      ...this.rowHelper.normalizeToArray(result?.m_root_domain),
+      ...this.rowHelper.normalizeToArray(result?.m_websites),
+    ];
+    return candidates.map(value => this.extractDomain(value)).find(Boolean) || '-';
+  }
+
+  get threatDescriptionValue(): string {
+    const result = this.result();
+    const candidates = [
+      ...this.rowHelper.normalizeToArray(result?.m_important_content),
+      ...this.rowHelper.normalizeToArray(result?.m_description),
+      ...this.rowHelper.normalizeToArray(result?.m_content),
+      ...this.rowHelper.normalizeToArray(result?.m_title),
+      ...this.rowHelper.normalizeToArray(result?.description),
+      ...this.rowHelper.normalizeToArray(result?.content),
+      ...this.rowHelper.normalizeToArray(result?.title),
+    ];
+    const description = candidates
+      .map(value => String(value || '').replace(/\s+/g, ' ').trim())
+      .map(value => value.replace(/^(description|m_description|content|m_content|title|m_title)\s*[:=-]\s*/i, '').trim())
+      .find(Boolean);
+    return description || 'Description not found';
+  }
+
   get passwordValue(): string {
     const arr = this.rowHelper.normalizeToArray(this.item()?.['password']);
     return arr[0] || '-';
@@ -162,10 +215,6 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       return domains;
     }
     return this.getSourceDomainValues(item);
-  }
-
-  get domainValueText(): string {
-    return this.domainValues.length ? this.domainValues.join(', ') : '-';
   }
 
   confidenceScore(): number {
@@ -551,6 +600,69 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
 
   private uniqueValues(values: string[]): string[] {
     return Array.from(new Set(values.map(v => String(v).trim()).filter(Boolean)));
+  }
+
+  private formatIndexLabel(value: any): string {
+    const raw = this.rowHelper.normalizeToArray(value)[0];
+    if (!raw) {
+      return '-';
+    }
+    const cleaned = String(raw)
+      .replace(/^m[_\s-]+/i, '')
+      .replace(/[_\s-]*model$/i, '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return cleaned ? cleaned.replace(/\b\w/g, c => c.toUpperCase()) : '-';
+  }
+
+  private extractDomain(value: any): string {
+    let text = String(value || '').trim().replace(/^['"]|['"]$/g, '');
+    if (!text || text === '-') {
+      return '';
+    }
+    if (text.includes('@') && !text.includes('/')) {
+      text = text.split('@').pop() || text;
+    }
+    const parseValue = /^[a-z][a-z0-9+.-]*:\/\//i.test(text) ? text : `https://${text}`;
+    try {
+      const host = new URL(parseValue).hostname;
+      return host.replace(/^www\./i, '');
+    }
+    catch {
+      return text
+        .replace(/^[a-z][a-z0-9+.-]*:\/\//i, '')
+        .split(/[/?#]/)[0]
+        .split(':')[0]
+        .replace(/^www\./i, '')
+        .replace(/^\.+|\.+$/g, '');
+    }
+  }
+
+  private normalizeMatchValue(value: any): string {
+    let text = String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    text = text.replace(/^['"]|['"]$/g, '').replace(/^\*+|\*+$/g, '');
+    const fieldMatch = text.match(/^[a-z_][a-z0-9_]*:(.+)$/i);
+    return (fieldMatch ? fieldMatch[1] : text).trim().replace(/^['"]|['"]$/g, '').replace(/^\*+|\*+$/g, '');
+  }
+
+  private valuesMatch(value: any, matched: any): boolean {
+    const candidate = this.normalizeMatchValue(value);
+    const search = this.normalizeMatchValue(matched);
+    if (!candidate || !search || candidate === '-' || search === '-') {
+      return false;
+    }
+    if (candidate.includes(search) || search.includes(candidate)) {
+      return true;
+    }
+    const candidateDomain = this.matchableDomain(candidate);
+    const searchDomain = this.matchableDomain(search);
+    return !!candidateDomain && !!searchDomain && (candidateDomain.includes(searchDomain) || searchDomain.includes(candidateDomain));
+  }
+
+  private matchableDomain(value: any): string {
+    const domain = this.extractDomain(value).toLowerCase();
+    return domain && domain.includes('.') && !/\s/.test(domain) ? domain : '';
   }
 
   private getRawDomainValues(item: any): string[] {

@@ -12,7 +12,6 @@ import { HelperService } from '../../../shared/services/helper.service';
 import { stealer_filters } from '../../../shared/constants/filters';
 import { FormsModule } from '@angular/forms';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
-import { PaginationComponent } from "../../../shared/partials/pagination/pagination.component";
 import { RankedCallbackModel } from '../../../shared/model/results/consolidated/ranked.callback.model';
 import { IocSearchComponent } from "../../../shared/partials/ioc-search/ioc-search.component";
 import { finalize } from 'rxjs/operators';
@@ -25,6 +24,9 @@ import { ReportExportService } from '../../../shared/services/report-export.serv
 import { GraphReportPayload, GraphReportRecordBlock, GraphReportTableRow } from '../../../shared/model/report/report-export.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { DomainIndexSidebarComponent } from './domain-index-sidebar/domain-index-sidebar.component';
+import { ScrollTopComponent } from '../../../shared/partials/scroll-top/scroll-top.component';
+
+type IocResultTab = 'stealers' | 'threats';
 
 @Component({
   selector: 'app-credential',
@@ -35,12 +37,12 @@ import { DomainIndexSidebarComponent } from './domain-index-sidebar/domain-index
     FormsModule,
     EmptyQueryComponent,
     NgClass,
-    PaginationComponent,
     IocSearchComponent,
     PasswordSchemaComponent,
     ScanHelperMethods,
     ExportChoiceModalComponent,
     DomainIndexSidebarComponent,
+    ScrollTopComponent,
     TranslatePipe],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],
@@ -49,13 +51,11 @@ export class CredentialComponent implements OnInit {
   private pendingRequests = 0;
   private isSearchLoading = false;
   private isRankedLoading = false;
-  private readonly iocPaginationThreshold = 420;
-  private iocBatchResultCount = 0;
+  private stealerIocPage = 1;
+  private threatIocPage = 1;
   private readonly exportCsvColumns = [ 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
 
-  protected readonly Math = Math;
   protected readonly filters = stealer_filters;
-  protected readonly length = length;
 
   readonly reportExportOptions = CREDENTIAL_REPORT_EXPORT_OPTIONS;
   searchQuery: string = '';
@@ -72,6 +72,10 @@ export class CredentialComponent implements OnInit {
   showPasswordscheme = false;
   showSubdomains = false;
   isExportChoiceOpen = false;
+  isLoadingMore = false;
+  hasMoreStealerResults = true;
+  hasMoreThreatResults = true;
+  activeIocResultTab: IocResultTab = 'stealers';
   subdomainList: string[] = [];
   isStandaloneStealerlogsRoute = false;
 
@@ -88,14 +92,60 @@ export class CredentialComponent implements OnInit {
   }
 
   get currentResultCount(): number {
-    return (this.stealerlogCallbackModel?.Result?.length ?? 0) + (this.rankedResult?.result?.length ?? 0);
+    return this.getTotalResultCount();
   }
 
-  get shouldShowPagination(): boolean {
-    return !this.firstTrigger && !this.isLoading && (
-      this.maxPages > 1 ||
-      this.iocBatchResultCount > this.iocPaginationThreshold
-    );
+  get stealerResultCount(): number {
+    return this.stealerlogCallbackModel?.Result?.length ?? 0;
+  }
+
+  get stealerTabCount(): number {
+    return this.resolveDisplayCount(this.stealerlogCallbackModel?.Total_Hits, this.stealerResultCount);
+  }
+
+  get threatLoadedResultCount(): number {
+    return this.rankedResult?.result?.length ?? 0;
+  }
+
+  get threatTabCount(): number {
+    return this.resolveDisplayCount(this.rankedResult?.totalHits, this.threatLoadedResultCount);
+  }
+
+  get showIocResultTabs(): boolean {
+    return !this.isStandaloneStealerlogsRoute && this.threatLoadedResultCount > 0;
+  }
+
+  get activeIocLoadedResultCount(): number {
+    return this.getEffectiveIocResultTab() === 'threats' ? this.threatLoadedResultCount : this.stealerResultCount;
+  }
+
+  get activeIocTotalResultCount(): number {
+    return this.getEffectiveIocResultTab() === 'threats' ? this.threatTabCount : this.stealerTabCount;
+  }
+
+  get activeIocLoadMoreLabel(): string {
+    return this.getEffectiveIocResultTab() === 'threats' ? 'Load More Threats' : 'Load More Stealers';
+  }
+
+  get activeIocLoadMoreButtonLabel(): string {
+    if (this.isLoadingMore) {
+      return 'Loading more...';
+    }
+    if (this.isLoading) {
+      return 'Loading...';
+    }
+    if (!this.getActiveHasMoreIocResults()) {
+      return 'No More Results';
+    }
+    return this.activeIocLoadMoreLabel;
+  }
+
+  get activeIocLoadMoreDisabled(): boolean {
+    return this.isLoading || this.isLoadingMore || !this.getActiveHasMoreIocResults() || this.activeIocLoadedResultCount === 0;
+  }
+
+  get shouldShowLoadMoreFooter(): boolean {
+    return !this.firstTrigger && this.activeIocLoadedResultCount > 0;
   }
 
   ngOnInit(): void {
@@ -140,6 +190,9 @@ export class CredentialComponent implements OnInit {
     if (this.isSearchLoading) {
       return;
     }
+    this.dashboardService.consolidatedParamModel.page = 1;
+    this.isLoadingMore = false;
+    this.resetIocPaginationState();
     const cleanedParams: any = {};
     Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
       cleanedParams[key] = value;
@@ -162,7 +215,6 @@ export class CredentialComponent implements OnInit {
         const endTime = performance.now();
         this.breachesApiTime = Math.round(endTime - startTime);
         if (response?.success && response?.data && Array.isArray(response.data.Result)) {
-          this.iocBatchResultCount = response.data.Result.length;
           const seen = new Set<string>();
           response.data.Result = response.data.Result.filter(item => {
             if (!item?.raw) {
@@ -178,7 +230,6 @@ export class CredentialComponent implements OnInit {
           this.dashboardService.stealerlogCallbackModel = response.data;
         }
         else if (response?.success && response?.data) {
-          this.iocBatchResultCount = 0;
           response.data.Result = [];
           this.stealerlogCallbackModel = response.data;
           this.dashboardService.stealerlogCallbackModel = response.data;
@@ -217,6 +268,7 @@ export class CredentialComponent implements OnInit {
 
   fetchRanked() {
     this.rankedResult = new RankedCallbackModel();
+    this.syncActiveIocResultTab();
     if (this.isStandaloneStealerlogsRoute) {
       return;
     }
@@ -240,32 +292,105 @@ export class CredentialComponent implements OnInit {
         if (response.success && response.data) {
           this.rankedResult = response.data;
         }
+        this.syncActiveIocResultTab();
       });
   }
 
   getTotalResultCount(): number {
-    const breachCount = this.stealerlogCallbackModel?.Result?.length ?? 0;
-    const allSearchCount = this.rankedResult.pageCount;
-    return breachCount + allSearchCount;
+    return this.stealerTabCount + this.threatTabCount;
   }
 
   getApiTime(): number {
     return (this.breachesApiTime || 0) + (this.allSearchApiTime || 0);
   }
 
-  getAssetSearched(): any {
-    const a = this.stealerlogCallbackModel.Total_Hits ?? 0;
-    const b = this.rankedResult.totalHits ?? 0;
-    return a + b;
+  getAssetSearched(): number {
+    return this.stealerTabCount + this.threatTabCount;
   }
 
-  onPageChange(step: number) {
-    this.dashboardService.consolidatedParamModel.page = step;
-    this.fetchSearchResults();
-    this.fetchRanked();
+  loadMoreResults(): void {
+    if (this.isLoading || this.isLoadingMore || !this.getActiveHasMoreIocResults() || this.activeIocLoadedResultCount === 0) {
+      return;
+    }
+
+    const activeTab = this.getEffectiveIocResultTab();
+    const nextPage = activeTab === 'threats' ? this.threatIocPage + 1 : this.stealerIocPage + 1;
+    this.dashboardService.consolidatedParamModel.page = nextPage;
+    this.dashboardService.consolidatedParamModel.ioc = this.searchQuery;
+    this.dashboardService.consolidatedParamModel.url ??= '';
+    this.isLoadingMore = true;
+
+    if (activeTab === 'threats') {
+      this.dashboardService.consolidatedParamModel.category = "";
+      this.dashboardService.fetchConsolidatedRankededResults('search/consolidated/ioc', this.dashboardService.consolidatedParamModel)
+        .pipe(finalize(() => {
+          this.isLoadingMore = false;
+          this.dashboardService.consolidatedParamModel.ioc = '';
+        })).subscribe(response => {
+          const addedCount = this.appendRankedLoadMoreResults(response);
+          this.hasMoreThreatResults = addedCount > 0;
+          if (addedCount > 0) {
+            this.threatIocPage = nextPage;
+          }
+          this.syncActiveIocResultTab();
+        });
+      return;
+    }
+
+    this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealer/ioc', this.dashboardService.consolidatedParamModel)
+      .pipe(finalize(() => {
+        this.isLoadingMore = false;
+        this.dashboardService.consolidatedParamModel.ioc = '';
+      })).subscribe(response => {
+        const addedCount = this.appendStealerLoadMoreResults(response);
+        this.hasMoreStealerResults = addedCount > 0;
+        if (addedCount > 0) {
+          this.stealerIocPage = nextPage;
+        }
+      });
   }
 
-  getAggregatedDataWells(): any {
+  selectIocResultTab(tab: IocResultTab): void {
+    if (tab === 'threats' && !this.showIocResultTabs) {
+      return;
+    }
+    this.activeIocResultTab = tab;
+  }
+
+  private resetIocPaginationState(): void {
+    this.stealerIocPage = 1;
+    this.threatIocPage = 1;
+    this.hasMoreStealerResults = true;
+    this.hasMoreThreatResults = true;
+  }
+
+  private syncActiveIocResultTab(): void {
+    if (!this.showIocResultTabs && this.activeIocResultTab === 'threats') {
+      this.activeIocResultTab = 'stealers';
+      return;
+    }
+    if (this.showIocResultTabs && this.stealerResultCount === 0 && this.threatLoadedResultCount > 0) {
+      this.activeIocResultTab = 'threats';
+    }
+  }
+
+  private getEffectiveIocResultTab(): IocResultTab {
+    if (this.activeIocResultTab === 'threats' && this.showIocResultTabs) {
+      return 'threats';
+    }
+    return 'stealers';
+  }
+
+  private getActiveHasMoreIocResults(): boolean {
+    return this.getEffectiveIocResultTab() === 'threats' ? this.hasMoreThreatResults : this.hasMoreStealerResults;
+  }
+
+  private resolveDisplayCount(total: unknown, loaded: number): number {
+    const parsedTotal = Number(total);
+    return Math.max(Number.isFinite(parsedTotal) && parsedTotal > 0 ? parsedTotal : 0, loaded);
+  }
+
+  getAggregatedDataWells(): number {
     const stealer = new Set((this.stealerlogCallbackModel?.Result ?? []).map(item => item['m_index'])).size;
     const ranked = new Set((this.rankedResult?.result ?? []).map(item => item.rank_index)).size;
     return stealer + ranked;
@@ -600,6 +725,48 @@ export class CredentialComponent implements OnInit {
     return `"${text.replace(/"/g, '""')}"`;
   }
 
+  private appendStealerLoadMoreResults(response: { success: boolean; data: StealerLogCallbackModel | null }): number {
+    if (!response?.success || !response.data || !Array.isArray(response.data.Result)) {
+      return 0;
+    }
+    const { merged, added } = this.appendUniqueResults(this.stealerlogCallbackModel?.Result ?? [], response.data.Result);
+    response.data.Result = merged;
+    this.stealerlogCallbackModel = response.data;
+    this.dashboardService.stealerlogCallbackModel = response.data;
+    return added;
+  }
+
+  private appendRankedLoadMoreResults(response: { success: boolean; data: RankedCallbackModel | null }): number {
+    if (!response?.success || !response.data || !Array.isArray(response.data.result)) {
+      return 0;
+    }
+    const { merged, added } = this.appendUniqueResults(this.rankedResult?.result ?? [], response.data.result);
+    this.rankedResult = new RankedCallbackModel({
+      ...response.data,
+      result: merged,
+      pageCount: response.data.pageCount || this.rankedResult.pageCount,
+      totalHits: response.data.totalHits || this.rankedResult.totalHits
+    });
+    return added;
+  }
+
+  private appendUniqueResults(existing: any[], incoming: any[]): { merged: any[]; added: number } {
+    const seen = new Set(existing.map((item, index) => this.getResultIdentity(item, `existing-${index}`)));
+    const additions = incoming.filter((item, index) => {
+      const key = this.getResultIdentity(item, `incoming-${index}`);
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+    return { merged: [...existing, ...additions], added: additions.length };
+  }
+
+  private getResultIdentity(item: any, fallback: string): string {
+    return String(item?.raw || item?._id || item?.id || item?.m_hash || item?.hash || item?.m_message_id || item?.m_url || fallback);
+  }
+
   openScheme() {
     this.showPasswordscheme = true;
   }
@@ -631,11 +798,4 @@ export class CredentialComponent implements OnInit {
     this.fetchSearchResults(true);
   }
 
-  get maxPages(): number {
-    const currentPage = Number(this.dashboardService.consolidatedParamModel.page || 1);
-    if (this.isStandaloneStealerlogsRoute) {
-      return Math.max(Number(this.stealerlogCallbackModel.Page_Count || 0), this.iocBatchResultCount > this.iocPaginationThreshold ? currentPage + 1 : currentPage, 1);
-    }
-    return Math.max(Number(this.stealerlogCallbackModel.Page_Count || 0), Number(this.rankedResult.pageCount || 0), this.iocBatchResultCount > this.iocPaginationThreshold ? currentPage + 1 : currentPage, 1);
-  }
 }

@@ -8,6 +8,8 @@ import { RankedCallbackModel } from '../../../../shared/model/results/consolidat
 import { ExpandedRowComponent } from '../expanded-row/expanded-row.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
+type IocResultTab = 'stealers' | 'threats';
+
 @Component({
   selector: 'app-credential-list',
   standalone: true,
@@ -17,15 +19,14 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 })
 export class CredentialListComponent {
   readonly rankedResultInput = input(new RankedCallbackModel(), { alias: 'rankedResult' });
-  pageSize: number = 500;
   thretsExpandedRows = new Set<number>();
   stealersExpandedRows = new Set<number>();
   readonly stealerData$ = input.required<StealerLogCallbackModel>();
-  readonly currentPage = input<number>(1);
   readonly type = input<string>('credential');
   readonly isLoading = input.required<boolean>();
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
   readonly searchQuery = input<string>('');
+  readonly activeTab = input<IocResultTab>('stealers');
 
   constructor(private router: Router) {
     effect(() => {
@@ -42,8 +43,7 @@ export class CredentialListComponent {
   }
 
   getDisplayIndex(index: number): number {
-    const currentPage = Number(this.currentPage() || 1);
-    return ((Math.max(currentPage, 1) - 1) * this.pageSize) + index + 1;
+    return index + 1;
   }
 
   toggleRow(index: number, expandedSet: Set<number>) {
@@ -102,6 +102,20 @@ export class CredentialListComponent {
 
   getThreatPrimaryUrlShort(result: any, maxLength: number = 25): string {
     return this.sliceText(this.getThreatPrimaryUrl(result), maxLength) || '-';
+  }
+
+  getThreatSourceIndex(result: any): string {
+    const raw = result?.rank_index ?? result?.m_rank_index ?? result?.m_index ?? result?.index ?? result?.type ?? result?.file_type;
+    if (!raw) {
+      return '-';
+    }
+    const cleaned = String(raw)
+      .replace(/^m[_\s-]+/i, '')
+      .replace(/[_\s-]*model$/i, '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return cleaned ? cleaned.replace(/\b\w/g, c => c.toUpperCase()) : '-';
   }
 
   private normalizeValues(value: any): string[] {
